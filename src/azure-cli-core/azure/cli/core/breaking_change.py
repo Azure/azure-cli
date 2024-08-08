@@ -232,63 +232,65 @@ class BreakingChange(abc.ABC):
         return UpcomingBreakingChangeTag(cli_ctx, **tag_kwargs)
 
     def register(self, cli_ctx):
-        def register_option_deprecate(option_name, arguments):
-            for _, argument in arguments.items():
-                if argument.options_list and len(argument.options_list) > 1:
-                    for idx, option in enumerate(argument.options_list):
-                        if isinstance(option, str) and option_name == option and isinstance(self, AzCLIDeprecate):
-                            argument.options_list[idx] = self.to_tag(cli_ctx, object_type='option')
-                            argument.options_list[idx].target = option
-                            argument.action = _argument_breaking_change_action(cli_ctx, argument.options_list[idx],
-                                                                               argument.options['action'])
-                            return True
-            return False
-
-        def appended_status_tag(old_status_tag, new_status_tag):
-            if isinstance(old_status_tag, (Deprecated, UpcomingBreakingChangeTag)):
-                return MergedStatusTag(cli_ctx, old_status_tag, new_status_tag)
-            if isinstance(old_status_tag, MergedStatusTag):
-                old_status_tag.merge(new_status_tag)
-                return old_status_tag
-            return new_status_tag
-
-        def register_to_direct_sub_cg_or_command(cg_name, status_tag):
-            for key, command_group in cli_ctx.invocation.commands_loader.command_group_table.items():
-                if key.rsplit(maxsplit=1)[0] == cg_name:
-                    from azure.cli.core.commands import AzCommandGroup
-                    if isinstance(command_group, AzCommandGroup):
-                        command_group.group_kwargs['deprecate_info'] = \
-                            appended_status_tag(command_group.group_kwargs.get('deprecate_info'), status_tag)
-                    else:
-                        register_to_direct_sub_cg_or_command(key, status_tag)
-            for key, command in cli_ctx.invocation.commands_loader.command_table.items():
-                if key.rsplit(maxsplit=1)[0] == cg_name:
-                    command.deprecate_info = appended_status_tag(command.deprecate_info, self.to_tag(cli_ctx))
-
         if self.args:
             command = cli_ctx.invocation.commands_loader.command_table.get(self.command_name)
             if not command:
                 return
             for arg_name in self.args:
-                if register_option_deprecate(arg_name, command.arguments):
+                if self._register_option_deprecate(cli_ctx, command.arguments, arg_name):
                     continue
                 arg_name, arg = _find_arg(arg_name, command.arguments)
                 if not arg:
                     continue
-                arg.deprecate_info = appended_status_tag(arg.deprecate_info, self.to_tag(cli_ctx))
+                arg.deprecate_info = self.appended_status_tag(cli_ctx, arg.deprecate_info, self.to_tag(cli_ctx))
                 arg.action = _argument_breaking_change_action(cli_ctx, arg.deprecate_info, arg.options['action'])
         elif self.is_command_group(cli_ctx):
             command_group = cli_ctx.invocation.commands_loader.command_group_table[self.command_name]
             if not command_group:
-                register_to_direct_sub_cg_or_command(self.command_name, self.to_tag(cli_ctx))
+                self._register_to_direct_sub_cg_or_command(cli_ctx, self.command_name, self.to_tag(cli_ctx))
             else:
                 command_group.group_kwargs['deprecate_info'] = \
-                    appended_status_tag(command_group.group_kwargs.get('deprecate_info'), self.to_tag(cli_ctx))
+                    self.appended_status_tag(cli_ctx, command_group.group_kwargs.get('deprecate_info'),
+                                             self.to_tag(cli_ctx))
         else:
             command = cli_ctx.invocation.commands_loader.command_table.get(self.cmd)
             if not command:
                 return
-            command.deprecate_info = appended_status_tag(command.deprecate_info, self.to_tag(cli_ctx))
+            command.deprecate_info = self.appended_status_tag(cli_ctx, command.deprecate_info, self.to_tag(cli_ctx))
+
+    @staticmethod
+    def appended_status_tag(cli_ctx, old_status_tag, new_status_tag):
+        if isinstance(old_status_tag, (Deprecated, UpcomingBreakingChangeTag)):
+            return MergedStatusTag(cli_ctx, old_status_tag, new_status_tag)
+        if isinstance(old_status_tag, MergedStatusTag):
+            old_status_tag.merge(new_status_tag)
+            return old_status_tag
+        return new_status_tag
+
+    def _register_to_direct_sub_cg_or_command(self, cli_ctx, cg_name, status_tag):
+        for key, command_group in cli_ctx.invocation.commands_loader.command_group_table.items():
+            if key.rsplit(maxsplit=1)[0] == cg_name:
+                from azure.cli.core.commands import AzCommandGroup
+                if isinstance(command_group, AzCommandGroup):
+                    command_group.group_kwargs['deprecate_info'] = \
+                        self.appended_status_tag(cli_ctx, command_group.group_kwargs.get('deprecate_info'), status_tag)
+                else:
+                    self._register_to_direct_sub_cg_or_command(cli_ctx, key, status_tag)
+        for key, command in cli_ctx.invocation.commands_loader.command_table.items():
+            if key.rsplit(maxsplit=1)[0] == cg_name:
+                command.deprecate_info = self.appended_status_tag(cli_ctx, command.deprecate_info, self.to_tag(cli_ctx))
+
+    def _register_option_deprecate(self, cli_ctx, arguments, option_name):
+        for _, argument in arguments.items():
+            if argument.options_list and len(argument.options_list) > 1:
+                for idx, option in enumerate(argument.options_list):
+                    if isinstance(option, str) and option_name == option and isinstance(self, AzCLIDeprecate):
+                        argument.options_list[idx] = self.to_tag(cli_ctx, object_type='option')
+                        argument.options_list[idx].target = option
+                        argument.action = _argument_breaking_change_action(cli_ctx, argument.options_list[idx],
+                                                                           argument.options['action'])
+                        return True
+        return False
 
 
 class AzCLIDeprecate(BreakingChange):
@@ -528,7 +530,10 @@ def register_upcoming_breaking_change_info(cli_ctx):
     from knack import events
 
     def update_breaking_change_info(cli_ctx, **kwargs):  # pylint: disable=unused-argument
-        for breaking_changes in upcoming_breaking_changes.values():
+        for key, breaking_changes in upcoming_breaking_changes.items():
+            # Conditional Breaking Changes are announced with key `CommandName.Tag`. They should not be registered.
+            if '.' in key:
+                continue
             for breaking_change in breaking_changes:
                 breaking_change.register(cli_ctx)
 
@@ -586,11 +591,11 @@ def announce_conditional_breaking_change(tag, breaking_change):
 
 
 def print_conditional_breaking_change(cli_ctx, tag, custom_logger=None):
-    command = cli_ctx.invocation.command_name
+    command = cli_ctx.invocation.commands_loader.command_name
     custom_logger = custom_logger or logger
 
     command_comps = command.split()
     while command_comps:
         for breaking_change in upcoming_breaking_changes.get(' '.join(command_comps) + '.' + tag, []):
-            custom_logger.warning(breaking_change)
+            custom_logger.warning(breaking_change.message)
         del command_comps[-1]
