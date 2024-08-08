@@ -959,6 +959,12 @@ parameters:
   - name: --disable-cost-analysis
     type: bool
     short-summary: Disable exporting Kubernetes Namespace and Deployment details to the Cost Analysis views in the Azure portal.
+  - name: --enable-fips-image
+    type: bool
+    short-summary: Switch to use FIPS-enabled OS on agent nodes.
+  - name: --disable-fips-image
+    type: bool
+    short-summary: Switch to use non-FIPS-enabled OS on agent nodes.
 
 examples:
   - name: Reconcile the cluster back to its current state.
