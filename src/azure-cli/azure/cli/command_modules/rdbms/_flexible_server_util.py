@@ -17,7 +17,7 @@ from knack.log import get_logger
 from knack.prompting import prompt_y_n, NoTTYException
 from msrestazure.tools import parse_resource_id
 from msrestazure.azure_exceptions import CloudError
-from azure.cli.core.util import CLIError
+from azure.cli.core.util import CLIError, cmd
 from azure.cli.core.azclierror import AuthenticationError
 from azure.core.exceptions import HttpResponseError
 from azure.core.paging import ItemPaged
@@ -318,18 +318,16 @@ def _resolve_api_version(client, provider_namespace, resource_type, parent_path)
 def run_subprocess(command, stdout_show=None):
     commands = shlex.split(command)
     if stdout_show:
-        process = subprocess.Popen(commands)
+        process = cmd(commands)
     else:
-        process = subprocess.Popen(commands, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    process.wait()
+        process = cmd(commands, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if process.returncode:
         logger.warning(process.stderr.read().strip().decode('UTF-8'))
 
 
 def run_subprocess_get_output(command):
-    commands = command.split()
-    process = subprocess.Popen(commands, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    process.wait()
+    command = shlex.split(command)
+    process = cmd(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     return process
 
 

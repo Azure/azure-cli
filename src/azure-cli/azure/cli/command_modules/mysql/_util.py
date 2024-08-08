@@ -13,6 +13,7 @@ import subprocess
 import secrets
 import string
 import yaml
+import shlex
 from time import sleep
 import datetime as dt
 from datetime import datetime
@@ -23,7 +24,7 @@ from msrestazure.tools import parse_resource_id
 from msrestazure.azure_exceptions import CloudError
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.commands.progress import IndeterminateProgressBar
-from azure.cli.core.util import CLIError
+from azure.cli.core.util import CLIError, cmd
 from azure.core.exceptions import HttpResponseError
 from azure.core.paging import ItemPaged
 from azure.core.rest import HttpRequest
@@ -374,19 +375,18 @@ def _resolve_api_version(client, provider_namespace, resource_type, parent_path)
 
 
 def run_subprocess(command, stdout_show=None):
+    command = shlex.split(command)
     if stdout_show:
-        process = subprocess.Popen(command, shell=True)
+        process = cmd(command)
     else:
-        process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    process.wait()
+        process = cmd(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if process.returncode:
         logger.warning(process.stderr.read().strip().decode('UTF-8'))
 
 
 def run_subprocess_get_output(command):
-    commands = command.split()
-    process = subprocess.Popen(commands, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    process.wait()
+    command = shlex.split(command)
+    process = cmd(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     return process
 
 
