@@ -190,7 +190,6 @@ AZURE_API_PROFILES = {
             'managed_hsms': '2023-07-01'
         }),
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2022-04-01', {
-            'classic_administrators': '2015-06-01',
             'role_definitions': '2022-05-01-preview',
             'provider_operations_metadata': '2018-01-01-preview'
         }),
@@ -291,7 +290,6 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_MANAGEDAPPLICATIONS: '2019-07-01',
         ResourceType.MGMT_NETWORK_DNS: '2016-04-01',
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2015-07-01', {
-            'classic_administrators': '2015-06-01',
             'policy_assignments': '2016-12-01',
             'policy_definitions': '2016-12-01'
         }),
@@ -338,7 +336,6 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_NETWORK_DNS: '2016-04-01',
         ResourceType.MGMT_KEYVAULT: '2016-10-01',
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2015-07-01', {
-            'classic_administrators': '2015-06-01',
             'policy_assignments': '2016-12-01',
             'policy_definitions': '2016-12-01'
         }),
@@ -378,9 +375,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_MANAGEDAPPLICATIONS: '2019-07-01',
         ResourceType.MGMT_NETWORK_DNS: '2016-04-01',
         ResourceType.MGMT_KEYVAULT: '2016-10-01',
-        ResourceType.MGMT_AUTHORIZATION: SDKProfile('2015-07-01', {
-            'classic_administrators': '2015-06-01'
-        }),
+        ResourceType.MGMT_AUTHORIZATION: '2015-07-01',
         # The order does make things different.
         # Please keep ResourceType.DATA_KEYVAULT_KEYS before ResourceType.DATA_KEYVAULT
         ResourceType.DATA_KEYVAULT_CERTIFICATES: None,
@@ -409,9 +404,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_MANAGEDAPPLICATIONS: '2019-07-01',
         ResourceType.MGMT_NETWORK_DNS: '2016-04-01',
         ResourceType.MGMT_KEYVAULT: '2016-10-01',
-        ResourceType.MGMT_AUTHORIZATION: SDKProfile('2015-07-01', {
-            'classic_administrators': '2015-06-01'
-        }),
+        ResourceType.MGMT_AUTHORIZATION: '2015-07-01',
         # The order does make things different.
         # Please keep ResourceType.DATA_KEYVAULT_KEYS before ResourceType.DATA_KEYVAULT
         ResourceType.DATA_KEYVAULT_CERTIFICATES: None,
