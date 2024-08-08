@@ -13,7 +13,7 @@ mod_list = [mod for mod in sorted(os.listdir(root_dir)) if os.path.isdir(os.path
 
 pytest_base_cmd = '/opt/az/bin/python3 -m pytest -v --forked -p no:warnings --log-level=WARN'
 pytest_parallel_cmd = '{} -n auto'.format(pytest_base_cmd)
-serial_test_modules = ['botservice', 'network', 'cloud', 'appservice', 'iot', 'resource']
+serial_test_modules = ['botservice', 'network', 'cloud', 'appservice', 'iot', 'resource', 'vm']
 
 for mod_name in mod_list:
     cmd = '{} --junit-xml /azure_cli_test_result/{}.xml --pyargs azure.cli.command_modules.{}'.format(
