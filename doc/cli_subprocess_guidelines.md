@@ -70,7 +70,8 @@ All various kinds of `subprocess` Popen calling use cases can be easily adjusted
 
 Besides that, users might need to know some parts of the accessibility in both `cli_subprocess` and `subprocess`
 1) when calling shell built-in cmds, like `dir` or `az`, using `shell=True` **in windows platform**, `subprocess` implicitly uses `cmd.exe`, while `cli_subprocess` asks developers to provide the `cmd.exe` as executable file specifically in the arg list's first item, like `["cmd.exe", "/c", "az", "--version"]`
-2) if developers want to find an easy way to split their current cmd string into list, **for unix-like platforms**, developers can apply [`shlex.split`](https://docs.python.org/3/library/shlex.html#shlex.split) for quick access. But a prepared cmd statement is more recommended (for more info about prepared cmd statement, please read below sections).
+2) if developers want to find an easy way to split their current cmd string into list, **for unix-like platforms**, developers can apply [`shlex.split`](https://docs.python.org/3/library/shlex.html#shlex.split) for quick access. But a prepared cmd statement is still more recommended (for more info about prepared cmd statement, please read below sections).
+3) it might be not that obvious to find target command's executable file **in windows platform**, a tool developer can use is `shutil.which` that gives the executable file path in windows system, like `shutil.which(git)`. The cmd `git --version` can be adjusted as `[shutil.which(git), "--version"]`. Please provide the corresponding executable path in target platforms.
 
 ### Best Practices In Subprocess Use Cases
 
