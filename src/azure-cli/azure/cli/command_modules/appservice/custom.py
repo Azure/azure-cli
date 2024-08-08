@@ -1845,9 +1845,6 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
             values[arg] = validate_and_convert_to_int(arg, values[arg])
         if arg != 'generic_configurations' and values.get(arg, None):
             setattr(configs, arg, values[arg] if arg not in bool_flags else values[arg] == 'true')
-            if arg == "min_tls_cipher_suite":
-                print("Updated min tls cipher suite")
-                print(configs)
 
     generic_configurations = generic_configurations or []
     # https://github.com/Azure/azure-cli/issues/14857
