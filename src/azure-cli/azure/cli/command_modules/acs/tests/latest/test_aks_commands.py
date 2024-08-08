@@ -562,8 +562,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             --resource-group={resource_group} \
             --vnet-name={name} \
             --name proxy-subnet \
-            --address-prefix 10.42.3.0/24 \
-            --default-outbound false'
+            --address-prefix 10.42.3.0/24'
+            # --default-outbound false  # disable outbound connection would fail cluster creation
 
         show_subnet_cmd = 'network vnet subnet show \
             --resource-group={resource_group} \
