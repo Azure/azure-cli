@@ -8,7 +8,6 @@ import datetime as dt
 from datetime import datetime
 import os
 import random
-import subprocess
 import secrets
 import shlex
 import string
