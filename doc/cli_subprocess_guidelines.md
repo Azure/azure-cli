@@ -18,7 +18,7 @@ subprocess.run(cmd, shell=True)
 ```
 
 ```commandline
-input a git command: --version;echo aa
+input a git command to run: --version;echo aa
 git version 2.34.1
 aa
 ```
