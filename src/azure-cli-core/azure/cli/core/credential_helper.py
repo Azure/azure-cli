@@ -8,6 +8,7 @@
 import re
 import json
 from enum import Enum
+from azure.cli.core import decorators
 
 sensitive_data_warning_message = '[Warning] This output may compromise security by showing secrets. Learn more at: https://go.microsoft.com/fwlink/?linkid=2258669'
 sensitive_data_detailed_warning_message = '[Warning] This output may compromise security by showing the following secrets: {}. Learn more at: https://go.microsoft.com/fwlink/?linkid=2258669'
@@ -52,6 +53,15 @@ class CredentialType(Enum):
         self.replacement = replacement
         self.level = level
         self.description = description
+
+
+@decorators.call_once
+def get_secret_masker():
+    # global secret_masker_instance
+    from microsoft_security_utilities_secret_masker import SecretMasker, load_regex_patterns_from_json_file
+    precisely_classified_regex_patterns = load_regex_patterns_from_json_file('PreciselyClassifiedSecurityKeys.json')
+    unclassified_regex_patterns = load_regex_patterns_from_json_file('UnclassifiedPotentialSecurityKeys.json')
+    return SecretMasker(precisely_classified_regex_patterns.union(unclassified_regex_patterns))
 
 
 def is_containing_credential(content, is_file=False, max_level=9):
@@ -112,7 +122,8 @@ def distinguish_credential(content, is_file=False, max_level=9):
                 secret_property_names.add(key)
         return containing_credential, secret_property_names
 
-    if is_containing_credential(content, max_level=max_level):
+    detections = get_secret_masker().detect_secrets(str(content))
+    if detections:
         containing_credential = True
     return containing_credential, secret_property_names
 
