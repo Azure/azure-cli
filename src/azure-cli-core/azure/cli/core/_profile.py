@@ -328,18 +328,14 @@ class Profile:
         identity.logout_all_users()
         identity.logout_all_service_principal()
 
-    def get_login_credentials(self, resource=None, client_id=None, subscription_id=None, aux_subscriptions=None,
-                              aux_tenants=None):
+    def get_login_credentials(self, client_id=None, subscription_id=None, aux_subscriptions=None, aux_tenants=None):
         """Get a CredentialAdaptor instance to be used with both Track 1 and Track 2 SDKs.
 
-        :param resource: The resource ID to acquire an access token. Only provide it for Track 1 SDKs.
         :param client_id:
         :param subscription_id:
         :param aux_subscriptions:
         :param aux_tenants:
         """
-        resource = resource or self.cli_ctx.cloud.endpoints.active_directory_resource_id
-
         if aux_tenants and aux_subscriptions:
             raise CLIError("Please specify only one of aux_subscriptions and aux_tenants, not both")
 
@@ -368,11 +364,10 @@ class Profile:
             for external_tenant in external_tenants:
                 external_credentials.append(self._create_credential(account, external_tenant, client_id=client_id))
             from azure.cli.core.auth.credential_adaptor import CredentialAdaptor
-            cred = CredentialAdaptor(credential,
-                                     auxiliary_credentials=external_credentials,
-                                     resource=resource)
+            cred = CredentialAdaptor(credential, auxiliary_credentials=external_credentials)
         else:
             # managed identity
+            # TODO: Migrate MSIAuthentication to MSAL
             cred = MsiAccountTypes.msi_auth_factory(managed_identity_type, managed_identity_id, resource)
         return (cred,
                 str(account[_SUBSCRIPTION_ID]),
