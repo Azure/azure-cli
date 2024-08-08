@@ -2709,7 +2709,7 @@ class AKSAgentPoolUpdateDecoratorCommonTestCase(unittest.TestCase):
         self.assertEqual(dec_agentpool_1, grond_truth_agentpool_1)
 
     def common_update_fips_image(self):
-        dec_1 = AKSPreviewAgentPoolUpdateDecorator(
+        dec_1 = AKSAgentPoolUpdateDecorator(
             self.cmd,
             self.client,
             {"enable_fips_image": True, "disable_fips_image": False},
@@ -2726,7 +2726,7 @@ class AKSAgentPoolUpdateDecoratorCommonTestCase(unittest.TestCase):
         ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(enable_fips=True)
         self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
 
-        dec_2 = AKSPreviewAgentPoolUpdateDecorator(
+        dec_2 = AKSAgentPoolUpdateDecorator(
             self.cmd,
             self.client,
             {"enable_fips_image": False, "disable_fips_image": True},
@@ -2744,7 +2744,7 @@ class AKSAgentPoolUpdateDecoratorCommonTestCase(unittest.TestCase):
         self.assertEqual(dec_agentpool_2, ground_truth_agentpool_2)
 
         # Should error if both set
-        dec_3 = AKSPreviewAgentPoolUpdateDecorator(
+        dec_3 = AKSAgentPoolUpdateDecorator(
             self.cmd,
             self.client,
             {"enable_fips_image": True, "disable_fips_image": True},
