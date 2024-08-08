@@ -18,6 +18,7 @@ from ._format import (
     instance_pool_table_format,
     ipv6_firewall_rule_table_format,
     outbound_firewall_rule_table_format,
+    retention_days_table_format,
     server_table_format,
     usage_table_format,
     LongRunningOperationResultTransform
