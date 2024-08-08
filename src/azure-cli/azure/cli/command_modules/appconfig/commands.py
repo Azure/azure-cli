@@ -81,7 +81,7 @@ def load_command_table(self, _):
     with self.command_group('appconfig replica', configstore_replica_util) as g:
         g.command('list', 'list_replica')
         g.command('create', 'create_replica')
-        g.command('delete', 'delete_replica', confirmation=True)
+        g.command('delete', 'delete_replica')
         g.show_command('show', 'show_replica')
 
     with self.command_group('appconfig credential', configstore_credential_util) as g:

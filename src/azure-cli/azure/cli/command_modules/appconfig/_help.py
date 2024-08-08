@@ -18,6 +18,8 @@ short-summary: Create an App Configuration.
 examples:
   - name: Create an App Configuration store with name, location, sku, tags and resource group.
     text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Standard --tags key1=value1 key2=value2
+  - name: Create an App Configuration store with name, location, premium sku and resource group
+    text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Premium
   - name: Create an App Configuration store with name, location, sku and resource group with system assigned identity.
     text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Standard --assign-identity
   - name: Create an App Configuration store with name, location, sku and resource group with user assigned identity.
@@ -357,6 +359,8 @@ examples:
     text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --tags key1=value1 key2=value2
   - name: Upgrade sku of an App Configuration store to standard
     text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --sku Standard
+  - name: Upgrade sku of an App Configuration store to premium
+    text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --sku Premium
   - name: Enable customer encryption key with system assigned identity
     text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --encryption-key-name myKey --encryption-key-version keyVersion --encryption-key-vault https://keyVaultName.vault.azure.net
   - name: Remove customer encryption key
