@@ -2375,7 +2375,8 @@ def _security_domain_restore_blob(sd_file, sd_exchange_key, sd_wrapping_keys, pa
         raise CLIError('Unsupported SharedKeys algorithm: {}. Supported: {}'.format(key_algorithm, 'shamir_share'))
 
     if passwords is None:
-        passwords = []
+        raise CLIError("--passwords can't be None. "
+                       "Please don't save key files without password protection on local disk.")
 
     restore_blob_value = _security_domain_make_restore_blob(
         sd_wrapping_keys=sd_wrapping_keys,
