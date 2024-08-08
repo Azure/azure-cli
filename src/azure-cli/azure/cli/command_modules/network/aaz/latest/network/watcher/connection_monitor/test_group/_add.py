@@ -10,22 +10,16 @@
 
 from azure.cli.core.aaz import *
 
-
 @register_command(
     "network watcher connection-monitor test-group add",
     is_preview=True,
 )
 class Add(AAZCommand):
-    """Add a test group along with new-added/existing endpoint and test configuration to a connection monitor.
+    """Create a test group object using endpoints and test configurations.
 
-    :example: Add a test group along with existing endpoint and test configuration via their names
-        az network watcher connection-monitor test-group add --connection-monitor MyConnectionMonitor --location westus --name MyHTTPTestGroup --endpoint-source-name MySourceEndpoint --endpoint-dest-name MyDestinationEndpoint --test-config-name MyTestConfiguration
+    :example: Create a test group along with existing endpoint and test configuration via their names
+        az network watcher connection-monitor test-group create --name MyTestGroup --sources [$src1 $src2] --destinations [$dst1] --test-configurations [$test1 $test2]
 
-    :example: Add a test group long with new-added source endpoint and existing test configuration via its name
-        az network watcher connection-monitor test-group add --connection-monitor MyConnectionMonitor --location westus --name MyAccessibilityTestGroup --endpoint-source-name MySourceEndpoint --endpoint-source-resource-id MyLogAnalysisWorkspaceID --endpoint-dest-name MyExistingDestinationEndpoint --test-config-name MyExistingTestConfiguration
-
-    :example: Add a test group along with new-added endpoints and test configuration
-        az network watcher connection-monitor test-group add --connection-monitor MyConnectionMonitor --location westus --name MyAccessibilityTestGroup --endpoint-source-name MySourceEndpoint --endpoint-source-resource-id MyVMResourceID --endpoint-dest-name bing --endpoint-dest-address bing.com --test-config-name MyNewTestConfiguration --protocol Tcp --tcp-port 4096
     """
 
     _aaz_info = {
@@ -39,8 +33,7 @@ class Add(AAZCommand):
 
     def _handler(self, command_args):
         super()._handler(command_args)
-        self.SubresourceSelector(ctx=self.ctx, name="subresource")
-        return self.build_lro_poller(self._execute_operations, self._output)
+        return self.InstanceCreateByJson(ctx=self.ctx)()
 
     _args_schema = None
 
@@ -53,21 +46,6 @@ class Add(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.connection_monitor = AAZStrArg(
-            options=["--connection-monitor"],
-            help="Connection monitor name.",
-            required=True,
-        )
-        _args_schema.watcher_name = AAZStrArg(
-            options=["--watcher-name"],
-            help="The name of the Network Watcher resource.",
-            required=True,
-        )
-        _args_schema.watcher_rg = AAZResourceGroupNameArg(
-            options=["-g", "--watcher-rg"],
-            help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
-            required=True,
-        )
         _args_schema.disable = AAZBoolArg(
             options=["--disable"],
             help="Value indicating whether test group is disabled. false is  default.  Allowed values: false, true.",
@@ -78,6 +56,7 @@ class Add(AAZCommand):
             required=True,
         )
 
+        # used to group together command line arguments
         # define Arg Group "V2 Endpoint"
 
         _args_schema = cls._args_schema
@@ -95,10 +74,94 @@ class Add(AAZCommand):
         )
 
         destinations = cls._args_schema.destinations
-        destinations.Element = AAZStrArg()
+        destinations.Element = AAZObjectArg()
+        destinations.Element.name = AAZStrArg(
+            options=["--name"],
+            help="Name of the destination endpoint.",
+        )
+        destinations.Element.address = AAZStrArg(
+            options=["--address"],
+            help="Address of the connection monitor destination (IP or domain name).",
+        )
+        destinations.Element.resource_id = AAZStrArg(
+            options=["--resource-id"],
+            help="The ID of the resource used as the destination by connection monitor.",
+        )
+        destinations.Element.type = AAZStrArg(
+            options=["--type"],
+            help="The endpoint type.  Allowed values: AzureArcVM, AzureSubnet, AzureVM, AzureVMSS, AzureVNet, ExternalAddress, MMAWorkspaceMachine, MMAWorkspaceNetwork.",
+            enum={"AzureArcVM": "AzureArcVM", "AzureSubnet": "AzureSubnet", "AzureVM": "AzureVM", "AzureVMSS": "AzureVMSS", "AzureVNet": "AzureVNet", "ExternalAddress": "ExternalAddress", "MMAWorkspaceMachine": "MMAWorkspaceMachine", "MMAWorkspaceNetwork": "MMAWorkspaceNetwork"},
+        )
+        destinations.Element.coverage_level = AAZStrArg(
+            options=["--coverage-level"],
+            help="Test coverage for the endpoint. Allowed values: AboveAverage, Average, BelowAverage, Default, Full, Low",
+            enum={"AboveAverage": "AboveAverage", "Average": "Average", "BelowAverage": "BelowAverage", "Default": "Default", "Full": "Full", "Low": "Low"},
+        )
+
+        destinations.Element.scope = AAZObjectArg()
+        destinations.Element.scope.exclude = AAZListArg(
+            options=["--scope-exclude"],
+            help="List of items which needs to be excluded from the endpoint scope.",
+        )
+        destinations.Element.scope.exclude.Element = AAZObjectArg()
+        destinations.Element.scope.exclude.Element.address = AAZStrArg(
+            options=["address"],
+            help="The address of the endpoint item. Supported types are IPv4/IPv6 subnet mask or IPv4/IPv6 IP address.",
+        )
+        destinations.Element.scope.include = AAZListArg(
+            options=["--scope-include"],
+            help="List of items which needs to be excluded from the endpoint scope.",
+        )
+        destinations.Element.scope.include.Element = AAZObjectArg()
+        destinations.Element.scope.include.Element.address = AAZStrArg(
+            options=["address"],
+            help="The address of the endpoint item. Supported types are IPv4/IPv6 subnet mask or IPv4/IPv6 IP address.",
+        )
 
         sources = cls._args_schema.sources
-        sources.Element = AAZStrArg()
+        sources.Element = AAZObjectArg()
+
+        sources.Element.name = AAZStrArg(
+            options=["--name"],
+            help="Name of the source endpoint.",
+        )
+        sources.Element.address = AAZStrArg(
+            options=["--address"],
+            help="Address of the connection monitor destination (IP or domain name).",
+        )
+        sources.Element.resource_id = AAZStrArg(
+            options=["--resource-id"],
+            help="The ID of the resource used as the destination by connection monitor.",
+        )
+        sources.Element.type = AAZStrArg(
+            options=["--type"],
+            help="The endpoint type.  Allowed values: AzureArcVM, AzureSubnet, AzureVM, AzureVMSS, AzureVNet, ExternalAddress, MMAWorkspaceMachine, MMAWorkspaceNetwork.",
+            enum={"AzureArcVM": "AzureArcVM", "AzureSubnet": "AzureSubnet", "AzureVM": "AzureVM", "AzureVMSS": "AzureVMSS", "AzureVNet": "AzureVNet", "ExternalAddress": "ExternalAddress", "MMAWorkspaceMachine": "MMAWorkspaceMachine", "MMAWorkspaceNetwork": "MMAWorkspaceNetwork"},
+        )
+        sources.Element.coverage_level = AAZStrArg(
+            options=["--coverage-level"],
+            help="Test coverage for the endpoint. Allowed values: AboveAverage, Average, BelowAverage, Default, Full, Low",
+            enum={"AboveAverage": "AboveAverage", "Average": "Average", "BelowAverage": "BelowAverage", "Default": "Default", "Full": "Full", "Low": "Low"},
+        )
+        sources.Element.scope = AAZObjectArg()
+        sources.Element.scope.exclude = AAZListArg(
+            options=["--scope-exclude"],
+            help="List of items which needs to be excluded from the endpoint scope.",
+        )
+        sources.Element.scope.exclude.Element = AAZObjectArg()
+        sources.Element.scope.exclude.Element.address = AAZStrArg(
+            options=["address"],
+            help="The address of the endpoint item. Supported types are IPv4/IPv6 subnet mask or IPv4/IPv6 IP address.",
+        )
+        sources.Element.scope.include = AAZListArg(
+            options=["--scope-include"],
+            help="List of items which needs to be excluded from the endpoint scope.",
+        )
+        sources.Element.scope.include.Element = AAZObjectArg()
+        sources.Element.scope.include.Element.address = AAZStrArg(
+            options=["address"],
+            help="The address of the endpoint item. Supported types are IPv4/IPv6 subnet mask or IPv4/IPv6 IP address.",
+        )
 
         # define Arg Group "V2 Test Configuration"
 
@@ -111,566 +174,198 @@ class Add(AAZCommand):
         )
 
         test_configurations = cls._args_schema.test_configurations
-        test_configurations.Element = AAZStrArg()
+        test_configurations.Element = AAZObjectArg()
+
+        _element = cls._args_schema.test_configurations.Element
+
+        _element.name = AAZStrArg(
+            options=["--name", "--test-configuration-name"],
+            help="Name of test configuration"
+        )
+        _element.protocol = AAZStrArg(
+            options=["--protocol"],
+            help="The protocol to use in test evaluation.  Allowed values: Http, Icmp, Tcp.",
+            enum={"Http": "Http", "Icmp": "Icmp", "Tcp": "Tcp"},
+        )
+        _element.frequency = AAZStrArg(
+            options=["--frequency"],
+            help="Frequency of test evaluation"
+        )
+        _element.location = AAZStrArg(
+            options=["--location"],
+            help="Location to create a test configuration"
+        )
+
+        _element.http_configuration = AAZObjectArg(
+            options=["http-configuration"],
+            help="The parameters used to perform test evaluation over HTTP.",
+        )
+        _element.icmp_configuration = AAZObjectArg(
+            options=["icmp-configuration"],
+            help="The parameters used to perform test evaluation over ICMP.",
+        )
+
+        _element.preferred_ip_version = AAZStrArg(
+            options=["preferred-ip-version"],
+            help="The preferred IP version to use in test evaluation. The connection monitor may choose to use a different version depending on other parameters.",
+            enum={"IPv4": "IPv4", "IPv6": "IPv6"},
+        )
+        _element.success_threshold = AAZObjectArg(
+            options=["success-threshold"],
+            help="The threshold for declaring a test successful.",
+        )
+        _element.tcp_configuration = AAZObjectArg(
+            options=["tcp-configuration"],
+            help="The parameters used to perform test evaluation over TCP.",
+        )
+
+        http_configuration = cls._args_schema.test_configurations.Element.http_configuration
+        http_configuration.method = AAZStrArg(
+            options=["method"],
+            help="The HTTP method to use.",
+            enum={"Get": "Get", "Post": "Post"},
+        )
+        http_configuration.path = AAZStrArg(
+            options=["path"],
+            help="The path component of the URI. For instance, \"/dir1/dir2\".",
+        )
+        http_configuration.port = AAZIntArg(
+            options=["port"],
+            help="The port to connect to.",
+            fmt=AAZIntArgFormat(
+                maximum=65535,
+                minimum=0,
+            ),
+        )
+        http_configuration.prefer_https = AAZBoolArg(
+            options=["prefer-https"],
+            help="Value indicating whether HTTPS is preferred over HTTP in cases where the choice is not explicit.",
+        )
+        http_configuration.request_headers = AAZListArg(
+            options=["request-headers"],
+            help="The HTTP headers to transmit with the request.",
+        )
+        http_configuration.valid_status_code_ranges = AAZListArg(
+            options=["valid-status-code-ranges"],
+            help="HTTP status codes to consider successful. For instance, \"2xx,301-304,418\".",
+        )
+
+        request_headers = cls._args_schema.test_configurations.Element.http_configuration.request_headers
+        request_headers.Element = AAZObjectArg()
+
+        _element = cls._args_schema.test_configurations.Element.http_configuration.request_headers.Element
+        _element.name = AAZStrArg(
+            options=["name"],
+            help="The name in HTTP header.",
+        )
+        _element.value = AAZStrArg(
+            options=["value"],
+            help="The value in HTTP header.",
+        )
+
+        valid_status_code_ranges = cls._args_schema.test_configurations.Element.http_configuration.valid_status_code_ranges
+        valid_status_code_ranges.Element = AAZStrArg()
+
+        icmp_configuration = cls._args_schema.test_configurations.Element.icmp_configuration
+        icmp_configuration.disable_trace_route = AAZBoolArg(
+            options=["disable-trace-route"],
+            help="Value indicating whether path evaluation with trace route should be disabled.",
+        )
+
+        success_threshold = cls._args_schema.test_configurations.Element.success_threshold
+        success_threshold.checks_failed_percent = AAZIntArg(
+            options=["checks-failed-percent"],
+            help="The maximum percentage of failed checks permitted for a test to evaluate as successful.",
+        )
+        success_threshold.round_trip_time_ms = AAZFloatArg(
+            options=["round-trip-time-ms"],
+            help="The maximum round-trip time in milliseconds permitted for a test to evaluate as successful.",
+        )
+
+        tcp_configuration = cls._args_schema.test_configurations.Element.tcp_configuration
+        tcp_configuration.destination_port_behavior = AAZStrArg(
+            options=["destination-port-behavior"],
+            help="Destination port behavior.",
+            enum={"ListenIfAvailable": "ListenIfAvailable", "None": "None"},
+        )
+        tcp_configuration.disable_trace_route = AAZBoolArg(
+            options=["disable-trace-route"],
+            help="Value indicating whether path evaluation with trace route should be disabled.",
+        )
+        tcp_configuration.port = AAZIntArg(
+            options=["port"],
+            help="The port to connect to.",
+            fmt=AAZIntArgFormat(
+                maximum=65535,
+                minimum=0,
+            ),
+        )
+
         return cls._args_schema
-
-    def _execute_operations(self):
-        self.pre_operations()
-        self.ConnectionMonitorsGet(ctx=self.ctx)()
-        self.pre_instance_create()
-        self.InstanceCreateByJson(ctx=self.ctx)()
-        self.post_instance_create(self.ctx.selectors.subresource.required())
-        yield self.ConnectionMonitorsCreateOrUpdate(ctx=self.ctx)()
-        self.post_operations()
-
-    @register_callback
-    def pre_operations(self):
-        pass
-
-    @register_callback
-    def post_operations(self):
-        pass
-
-    @register_callback
-    def pre_instance_create(self):
-        pass
-
-    @register_callback
-    def post_instance_create(self, instance):
-        pass
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.selectors.subresource.required(), client_flatten=True)
-        return result
-
-    class SubresourceSelector(AAZJsonSelector):
-
-        def _get(self):
-            result = self.ctx.vars.instance
-            result = result.properties.testGroups
-            filters = enumerate(result)
-            filters = filter(
-                lambda e: e[1].name == self.ctx.args.test_group_name,
-                filters
-            )
-            idx = next(filters)[0]
-            return result[idx]
-
-        def _set(self, value):
-            result = self.ctx.vars.instance
-            result = result.properties.testGroups
-            filters = enumerate(result)
-            filters = filter(
-                lambda e: e[1].name == self.ctx.args.test_group_name,
-                filters
-            )
-            idx = next(filters, [len(result)])[0]
-            result[idx] = value
-            return
-
-    class ConnectionMonitorsGet(AAZHttpOperation):
-        CLIENT_TYPE = "MgmtClient"
-
-        def __call__(self, *args, **kwargs):
-            request = self.make_request()
-            session = self.client.send_request(request=request, stream=False, **kwargs)
-            if session.http_response.status_code in [200]:
-                return self.on_200(session)
-
-            return self.on_error(session.http_response)
-
-        @property
-        def url(self):
-            return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkWatchers/{networkWatcherName}/connectionMonitors/{connectionMonitorName}",
-                **self.url_parameters
-            )
-
-        @property
-        def method(self):
-            return "GET"
-
-        @property
-        def error_format(self):
-            return "ODataV4Format"
-
-        @property
-        def url_parameters(self):
-            parameters = {
-                **self.serialize_url_param(
-                    "connectionMonitorName", self.ctx.args.connection_monitor,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "networkWatcherName", self.ctx.args.watcher_name,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.watcher_rg,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "subscriptionId", self.ctx.subscription_id,
-                    required=True,
-                ),
-            }
-            return parameters
-
-        @property
-        def query_parameters(self):
-            parameters = {
-                **self.serialize_query_param(
-                    "api-version", "2022-01-01",
-                    required=True,
-                ),
-            }
-            return parameters
-
-        @property
-        def header_parameters(self):
-            parameters = {
-                **self.serialize_header_param(
-                    "Accept", "application/json",
-                ),
-            }
-            return parameters
-
-        def on_200(self, session):
-            data = self.deserialize_http_content(session)
-            self.ctx.set_var(
-                "instance",
-                data,
-                schema_builder=self._build_schema_on_200
-            )
-
-        _schema_on_200 = None
-
-        @classmethod
-        def _build_schema_on_200(cls):
-            if cls._schema_on_200 is not None:
-                return cls._schema_on_200
-
-            cls._schema_on_200 = AAZObjectType()
-            _AddHelper._build_schema_connection_monitor_result_read(cls._schema_on_200)
-
-            return cls._schema_on_200
-
-    class ConnectionMonitorsCreateOrUpdate(AAZHttpOperation):
-        CLIENT_TYPE = "MgmtClient"
-
-        def __call__(self, *args, **kwargs):
-            request = self.make_request()
-            session = self.client.send_request(request=request, stream=False, **kwargs)
-            if session.http_response.status_code in [202]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_200_201,
-                    self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
-                    path_format_arguments=self.url_parameters,
-                )
-            if session.http_response.status_code in [200, 201]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_200_201,
-                    self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
-                    path_format_arguments=self.url_parameters,
-                )
-
-            return self.on_error(session.http_response)
-
-        @property
-        def url(self):
-            return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkWatchers/{networkWatcherName}/connectionMonitors/{connectionMonitorName}",
-                **self.url_parameters
-            )
-
-        @property
-        def method(self):
-            return "PUT"
-
-        @property
-        def error_format(self):
-            return "ODataV4Format"
-
-        @property
-        def url_parameters(self):
-            parameters = {
-                **self.serialize_url_param(
-                    "connectionMonitorName", self.ctx.args.connection_monitor,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "networkWatcherName", self.ctx.args.watcher_name,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.watcher_rg,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "subscriptionId", self.ctx.subscription_id,
-                    required=True,
-                ),
-            }
-            return parameters
-
-        @property
-        def query_parameters(self):
-            parameters = {
-                **self.serialize_query_param(
-                    "api-version", "2022-01-01",
-                    required=True,
-                ),
-            }
-            return parameters
-
-        @property
-        def header_parameters(self):
-            parameters = {
-                **self.serialize_header_param(
-                    "Content-Type", "application/json",
-                ),
-                **self.serialize_header_param(
-                    "Accept", "application/json",
-                ),
-            }
-            return parameters
-
-        @property
-        def content(self):
-            _content_value, _builder = self.new_content_builder(
-                self.ctx.args,
-                value=self.ctx.vars.instance,
-            )
-
-            return self.serialize_content(_content_value)
-
-        def on_200_201(self, session):
-            data = self.deserialize_http_content(session)
-            self.ctx.set_var(
-                "instance",
-                data,
-                schema_builder=self._build_schema_on_200_201
-            )
-
-        _schema_on_200_201 = None
-
-        @classmethod
-        def _build_schema_on_200_201(cls):
-            if cls._schema_on_200_201 is not None:
-                return cls._schema_on_200_201
-
-            cls._schema_on_200_201 = AAZObjectType()
-            _AddHelper._build_schema_connection_monitor_result_read(cls._schema_on_200_201)
-
-            return cls._schema_on_200_201
 
     class InstanceCreateByJson(AAZJsonInstanceCreateOperation):
 
         def __call__(self, *args, **kwargs):
-            self.ctx.selectors.subresource.set(self._create_instance())
+            return self._create_instance()
+
+        #we are required to parse these explicitly as they are not being parsed by the aaz framework becuase eariler we did not pass objects inside a command as we are doing now
+        def parse_arg(self, arg_index):
+            import sys
+            import json
+            if arg_index is not None:
+                # The next element in sys.argv is the value of the argument
+                arg = sys.argv[arg_index + 1]
+                print("arg=", arg)
+
+                # If arg is a list, convert each string in the list to a dictionary
+                if isinstance(arg, list):
+                    arg_list = []
+                    for s in arg:
+                        # Replace single quotes with double quotes to make it a valid JSON string
+                        s = s.replace("'", '"')
+                        # Parse the string into a dictionary
+                        try:
+                            arg_dict = json.loads(s)
+                            arg_list.append(arg_dict)
+                        except json.JSONDecodeError as e:
+                            print(f"Failed to parse argument: {e}")
+                else:
+                    #converting it to a list because in create command we have test groups that contain list of sources, destinations and test configurations
+                    # If arg is not a list, just replace single quotes with double quotes and parse it to convert it to a valid JSON string
+                    arg = arg.replace("'", '"')
+                    try:
+                        arg_list = json.loads(arg)
+                    except json.JSONDecodeError as e:
+                        print(f"Failed to parse argument: {e}")
+                        arg_list = []
+
+                return arg_list
+
+            return []
+
 
         def _create_instance(self):
-            _instance_value, _builder = self.new_content_builder(
-                self.ctx.args,
-                typ=AAZObjectType
-            )
-            _builder.set_prop("destinations", AAZListType, ".destinations", typ_kwargs={"flags": {"required": True}})
-            _builder.set_prop("disable", AAZBoolType, ".disable")
-            _builder.set_prop("name", AAZStrType, ".test_group_name", typ_kwargs={"flags": {"required": True}})
-            _builder.set_prop("sources", AAZListType, ".sources", typ_kwargs={"flags": {"required": True}})
-            _builder.set_prop("testConfigurations", AAZListType, ".test_configurations", typ_kwargs={"flags": {"required": True}})
+            #comment to debug
+            import sys
+            destinations_index = sys.argv.index('--destinations') if '--destinations' in sys.argv else None
+            sources_index = sys.argv.index('--sources') if '--sources' in sys.argv else None
+            test_configurations_index = sys.argv.index('--test-configurations') if '--test-configurations' in sys.argv else None
 
-            destinations = _builder.get(".destinations")
-            if destinations is not None:
-                destinations.set_elements(AAZStrType, ".")
-
-            sources = _builder.get(".sources")
-            if sources is not None:
-                sources.set_elements(AAZStrType, ".")
-
-            test_configurations = _builder.get(".testConfigurations")
-            if test_configurations is not None:
-                test_configurations.set_elements(AAZStrType, ".")
-
-            return _instance_value
+            destinations_list = self.parse_arg(destinations_index)
+            sources_list = self.parse_arg(sources_index)
+            test_configurations_list = self.parse_arg(test_configurations_index)
 
 
-class _AddHelper:
-    """Helper class for Add"""
+            data ={
+                "testGroupName" : str(self.ctx.args.test_group_name),
+                "sources" : sources_list,
+                "destinations" : destinations_list,
+                "testConfigurations" : test_configurations_list
+            }
 
-    _schema_connection_monitor_endpoint_scope_item_read = None
-
-    @classmethod
-    def _build_schema_connection_monitor_endpoint_scope_item_read(cls, _schema):
-        if cls._schema_connection_monitor_endpoint_scope_item_read is not None:
-            _schema.address = cls._schema_connection_monitor_endpoint_scope_item_read.address
-            return
-
-        cls._schema_connection_monitor_endpoint_scope_item_read = _schema_connection_monitor_endpoint_scope_item_read = AAZObjectType()
-
-        connection_monitor_endpoint_scope_item_read = _schema_connection_monitor_endpoint_scope_item_read
-        connection_monitor_endpoint_scope_item_read.address = AAZStrType()
-
-        _schema.address = cls._schema_connection_monitor_endpoint_scope_item_read.address
-
-    _schema_connection_monitor_result_read = None
-
-    @classmethod
-    def _build_schema_connection_monitor_result_read(cls, _schema):
-        if cls._schema_connection_monitor_result_read is not None:
-            _schema.etag = cls._schema_connection_monitor_result_read.etag
-            _schema.id = cls._schema_connection_monitor_result_read.id
-            _schema.location = cls._schema_connection_monitor_result_read.location
-            _schema.name = cls._schema_connection_monitor_result_read.name
-            _schema.properties = cls._schema_connection_monitor_result_read.properties
-            _schema.tags = cls._schema_connection_monitor_result_read.tags
-            _schema.type = cls._schema_connection_monitor_result_read.type
-            return
-
-        cls._schema_connection_monitor_result_read = _schema_connection_monitor_result_read = AAZObjectType()
-
-        connection_monitor_result_read = _schema_connection_monitor_result_read
-        connection_monitor_result_read.etag = AAZStrType(
-            flags={"read_only": True},
-        )
-        connection_monitor_result_read.id = AAZStrType(
-            flags={"read_only": True},
-        )
-        connection_monitor_result_read.location = AAZStrType()
-        connection_monitor_result_read.name = AAZStrType(
-            flags={"read_only": True},
-        )
-        connection_monitor_result_read.properties = AAZObjectType(
-            flags={"client_flatten": True},
-        )
-        connection_monitor_result_read.tags = AAZDictType()
-        connection_monitor_result_read.type = AAZStrType(
-            flags={"read_only": True},
-        )
-
-        properties = _schema_connection_monitor_result_read.properties
-        properties.auto_start = AAZBoolType(
-            serialized_name="autoStart",
-        )
-        properties.connection_monitor_type = AAZStrType(
-            serialized_name="connectionMonitorType",
-            flags={"read_only": True},
-        )
-        properties.destination = AAZObjectType()
-        properties.endpoints = AAZListType()
-        properties.monitoring_interval_in_seconds = AAZIntType(
-            serialized_name="monitoringIntervalInSeconds",
-        )
-        properties.monitoring_status = AAZStrType(
-            serialized_name="monitoringStatus",
-            flags={"read_only": True},
-        )
-        properties.notes = AAZStrType()
-        properties.outputs = AAZListType()
-        properties.provisioning_state = AAZStrType(
-            serialized_name="provisioningState",
-            flags={"read_only": True},
-        )
-        properties.source = AAZObjectType()
-        properties.start_time = AAZStrType(
-            serialized_name="startTime",
-            flags={"read_only": True},
-        )
-        properties.test_configurations = AAZListType(
-            serialized_name="testConfigurations",
-        )
-        properties.test_groups = AAZListType(
-            serialized_name="testGroups",
-        )
-
-        destination = _schema_connection_monitor_result_read.properties.destination
-        destination.address = AAZStrType()
-        destination.port = AAZIntType()
-        destination.resource_id = AAZStrType(
-            serialized_name="resourceId",
-        )
-
-        endpoints = _schema_connection_monitor_result_read.properties.endpoints
-        endpoints.Element = AAZObjectType()
-
-        _element = _schema_connection_monitor_result_read.properties.endpoints.Element
-        _element.address = AAZStrType()
-        _element.coverage_level = AAZStrType(
-            serialized_name="coverageLevel",
-        )
-        _element.filter = AAZObjectType()
-        _element.name = AAZStrType(
-            flags={"required": True},
-        )
-        _element.resource_id = AAZStrType(
-            serialized_name="resourceId",
-        )
-        _element.scope = AAZObjectType()
-        _element.type = AAZStrType()
-
-        filter = _schema_connection_monitor_result_read.properties.endpoints.Element.filter
-        filter.items = AAZListType()
-        filter.type = AAZStrType()
-
-        items = _schema_connection_monitor_result_read.properties.endpoints.Element.filter.items
-        items.Element = AAZObjectType()
-
-        _element = _schema_connection_monitor_result_read.properties.endpoints.Element.filter.items.Element
-        _element.address = AAZStrType()
-        _element.type = AAZStrType()
-
-        scope = _schema_connection_monitor_result_read.properties.endpoints.Element.scope
-        scope.exclude = AAZListType()
-        scope.include = AAZListType()
-
-        exclude = _schema_connection_monitor_result_read.properties.endpoints.Element.scope.exclude
-        exclude.Element = AAZObjectType()
-        cls._build_schema_connection_monitor_endpoint_scope_item_read(exclude.Element)
-
-        include = _schema_connection_monitor_result_read.properties.endpoints.Element.scope.include
-        include.Element = AAZObjectType()
-        cls._build_schema_connection_monitor_endpoint_scope_item_read(include.Element)
-
-        outputs = _schema_connection_monitor_result_read.properties.outputs
-        outputs.Element = AAZObjectType()
-
-        _element = _schema_connection_monitor_result_read.properties.outputs.Element
-        _element.type = AAZStrType()
-        _element.workspace_settings = AAZObjectType(
-            serialized_name="workspaceSettings",
-        )
-
-        workspace_settings = _schema_connection_monitor_result_read.properties.outputs.Element.workspace_settings
-        workspace_settings.workspace_resource_id = AAZStrType(
-            serialized_name="workspaceResourceId",
-        )
-
-        source = _schema_connection_monitor_result_read.properties.source
-        source.port = AAZIntType()
-        source.resource_id = AAZStrType(
-            serialized_name="resourceId",
-            flags={"required": True},
-        )
-
-        test_configurations = _schema_connection_monitor_result_read.properties.test_configurations
-        test_configurations.Element = AAZObjectType()
-
-        _element = _schema_connection_monitor_result_read.properties.test_configurations.Element
-        _element.http_configuration = AAZObjectType(
-            serialized_name="httpConfiguration",
-        )
-        _element.icmp_configuration = AAZObjectType(
-            serialized_name="icmpConfiguration",
-        )
-        _element.name = AAZStrType(
-            flags={"required": True},
-        )
-        _element.preferred_ip_version = AAZStrType(
-            serialized_name="preferredIPVersion",
-        )
-        _element.protocol = AAZStrType(
-            flags={"required": True},
-        )
-        _element.success_threshold = AAZObjectType(
-            serialized_name="successThreshold",
-        )
-        _element.tcp_configuration = AAZObjectType(
-            serialized_name="tcpConfiguration",
-        )
-        _element.test_frequency_sec = AAZIntType(
-            serialized_name="testFrequencySec",
-        )
-
-        http_configuration = _schema_connection_monitor_result_read.properties.test_configurations.Element.http_configuration
-        http_configuration.method = AAZStrType()
-        http_configuration.path = AAZStrType()
-        http_configuration.port = AAZIntType()
-        http_configuration.prefer_https = AAZBoolType(
-            serialized_name="preferHTTPS",
-        )
-        http_configuration.request_headers = AAZListType(
-            serialized_name="requestHeaders",
-        )
-        http_configuration.valid_status_code_ranges = AAZListType(
-            serialized_name="validStatusCodeRanges",
-        )
-
-        request_headers = _schema_connection_monitor_result_read.properties.test_configurations.Element.http_configuration.request_headers
-        request_headers.Element = AAZObjectType()
-
-        _element = _schema_connection_monitor_result_read.properties.test_configurations.Element.http_configuration.request_headers.Element
-        _element.name = AAZStrType()
-        _element.value = AAZStrType()
-
-        valid_status_code_ranges = _schema_connection_monitor_result_read.properties.test_configurations.Element.http_configuration.valid_status_code_ranges
-        valid_status_code_ranges.Element = AAZStrType()
-
-        icmp_configuration = _schema_connection_monitor_result_read.properties.test_configurations.Element.icmp_configuration
-        icmp_configuration.disable_trace_route = AAZBoolType(
-            serialized_name="disableTraceRoute",
-        )
-
-        success_threshold = _schema_connection_monitor_result_read.properties.test_configurations.Element.success_threshold
-        success_threshold.checks_failed_percent = AAZIntType(
-            serialized_name="checksFailedPercent",
-        )
-        success_threshold.round_trip_time_ms = AAZFloatType(
-            serialized_name="roundTripTimeMs",
-        )
-
-        tcp_configuration = _schema_connection_monitor_result_read.properties.test_configurations.Element.tcp_configuration
-        tcp_configuration.destination_port_behavior = AAZStrType(
-            serialized_name="destinationPortBehavior",
-        )
-        tcp_configuration.disable_trace_route = AAZBoolType(
-            serialized_name="disableTraceRoute",
-        )
-        tcp_configuration.port = AAZIntType()
-
-        test_groups = _schema_connection_monitor_result_read.properties.test_groups
-        test_groups.Element = AAZObjectType()
-
-        _element = _schema_connection_monitor_result_read.properties.test_groups.Element
-        _element.destinations = AAZListType(
-            flags={"required": True},
-        )
-        _element.disable = AAZBoolType()
-        _element.name = AAZStrType(
-            flags={"required": True},
-        )
-        _element.sources = AAZListType(
-            flags={"required": True},
-        )
-        _element.test_configurations = AAZListType(
-            serialized_name="testConfigurations",
-            flags={"required": True},
-        )
-
-        destinations = _schema_connection_monitor_result_read.properties.test_groups.Element.destinations
-        destinations.Element = AAZStrType()
-
-        sources = _schema_connection_monitor_result_read.properties.test_groups.Element.sources
-        sources.Element = AAZStrType()
-
-        test_configurations = _schema_connection_monitor_result_read.properties.test_groups.Element.test_configurations
-        test_configurations.Element = AAZStrType()
-
-        tags = _schema_connection_monitor_result_read.tags
-        tags.Element = AAZStrType()
-
-        _schema.etag = cls._schema_connection_monitor_result_read.etag
-        _schema.id = cls._schema_connection_monitor_result_read.id
-        _schema.location = cls._schema_connection_monitor_result_read.location
-        _schema.name = cls._schema_connection_monitor_result_read.name
-        _schema.properties = cls._schema_connection_monitor_result_read.properties
-        _schema.tags = cls._schema_connection_monitor_result_read.tags
-        _schema.type = cls._schema_connection_monitor_result_read.type
+            data_str = str(data)
+            data_str = data_str.replace(" ","")
+            return data_str
 
 
 __all__ = ["Add"]
