@@ -24,7 +24,7 @@ from msrestazure.tools import parse_resource_id
 from msrestazure.azure_exceptions import CloudError
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.commands.progress import IndeterminateProgressBar
-from azure.cli.core.util import CLIError, cmd
+from azure.cli.core.util import CLIError, run_cmd
 from azure.core.exceptions import HttpResponseError
 from azure.core.paging import ItemPaged
 from azure.core.rest import HttpRequest
@@ -377,16 +377,16 @@ def _resolve_api_version(client, provider_namespace, resource_type, parent_path)
 def run_subprocess(command, stdout_show=None):
     command = shlex.split(command)
     if stdout_show:
-        process = cmd(command)
+        process = run_cmd(command)
     else:
-        process = cmd(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        process = run_cmd(command, capture_output=True)
     if process.returncode:
         logger.warning(process.stderr.read().strip().decode('UTF-8'))
 
 
 def run_subprocess_get_output(command):
     command = shlex.split(command)
-    process = cmd(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    process = run_cmd(command, capture_output=True)
     return process
 
 
