@@ -26,7 +26,7 @@ aa
 This is a simple example for demonstrating the side effects in python's subsystem improper usage. And it's common for cli developers to build and execute commands dynamically from users' input in a more complicated way. When constructing and executing commands in subprocess through `shell=True`, it exposes a big security vulnerability to potential malicious users outside. 
 
 
-## Mitigating Security Vulnerability When Calling subsystem Commands
+## Mitigating Security Vulnerability When Calling Subsystem Commands
 
 There are several aspects of security practices that developers need to have in mindset to safeguard their cli modules from command injection attacks.
 
@@ -39,7 +39,7 @@ If users don't have the time or knowledge to figure out how to adapt necessary s
 What developers need to do is:
 1) `import cli_subprocess`
 2) replace `subprocess.run` (or Popen or check_call or check_output or call) with `cli_subprocess.run` or etc.
-3) construct cmd args as array like: [executeble, arg0, arg1, arg2, ...]
+3) construct cmd args as array like: [executable, arg0, arg1, arg2, ...]
 
 `cli_subporcess` will add necessary security checks and process the input and output the same way as `subprocess`, and block all potential risks from commands constructed from user input.
 Below is an example for `cli_subprocess` use case:
