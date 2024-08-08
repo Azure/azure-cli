@@ -675,11 +675,14 @@ class WebappConfigureTest(ScenarioTest):
             JMESPathCheck('webSocketsEnabled', True),
             JMESPathCheck('minTlsVersion', '1.0'),
             JMESPathCheck('http20Enabled', True),
-            JMESPathCheck('ftpsState', 'Disabled')]
+            JMESPathCheck('ftpsState', 'Disabled'),
+            JMESPathCheck('minTlsCipherSuite', 'TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384')]
+
+        print("updating MinTlsCipherSuite with TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384")
 
         self.cmd('webapp config set -g {} -n {} --always-on true --auto-heal-enabled true --php-version 7.4 '
                  '--net-framework-version v3.5 --python-version 3.4 --use-32bit-worker-process=false '
-                 '--web-sockets-enabled=true --http20-enabled true --min-tls-version 1.0 --ftps-state Disabled'.format(resource_group, webapp_name)).assert_with_checks(checks)
+                 '--web-sockets-enabled=true --http20-enabled true --min-tls-version 1.0 --min-tls-cipher-suite TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 --ftps-state Disabled'.format(resource_group, webapp_name)).assert_with_checks(checks)
         self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name)) \
             .assert_with_checks(checks)
 
@@ -864,6 +867,32 @@ class WebappConfigureTest(ScenarioTest):
         self.cmd('webapp config show -g {} -n {}'.format(resource_group, linux_webapp)).assert_with_checks([
             JMESPathCheck("linuxFxVersion", "NODE|16-lts"),  
         ])                                  
+
+    # @ResourceGroupPreparer(name_prefix='cli_test_webapp_config_tls_cipher_suite', location=WINDOWS_ASP_LOCATION_WEBAPP)
+    # def test_webapp_config_tls_cipher_suite(self, resource_group):
+    #     print("running http2 test")
+
+    #     webapp_name = self.create_random_name('webapp-config-tls-cipher-suite-test', 40)
+    #     plan_name = self.create_random_name('webapp-config-plan', 40)
+
+    #     self.cmd(
+    #         'appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
+    #     self.cmd(
+    #         'webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
+        
+    #     print("verify http2 baseline")
+    #     # verify the baseline
+    #     self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name)).assert_with_checks([
+    #         JMESPathCheck('http20Enabled', False)])
+
+    #     # update and verify
+    #     checks = [JMESPathCheck('http20Enabled', False)]
+
+    #     print("verify http2 enabled")
+    #     self.cmd('webapp config set -g {} -n {} --http20-enabled true'.format(resource_group, webapp_name)).assert_with_checks(checks)
+    #     self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name)) \
+    #         .assert_with_checks(checks)
+
 
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_update_site_configs_persists_ip_restrictions', location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_update_site_configs_persists_ip_restrictions(self, resource_group):
