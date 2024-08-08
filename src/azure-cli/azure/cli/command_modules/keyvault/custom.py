@@ -1187,10 +1187,11 @@ def decrypt_key(cmd, client, algorithm, value, iv=None, tag=None, aad=None,
 
 
 def sign_key(cmd, client, algorithm, digest, name=None, version=None):
+    import base64
     SignatureAlgorithm = cmd.loader.get_sdk('SignatureAlgorithm', mod='crypto._enums',
                                             resource_type=ResourceType.DATA_KEYVAULT_KEYS)
     crypto_client = client.get_cryptography_client(name, key_version=version)
-    return crypto_client.sign(SignatureAlgorithm(algorithm), digest.encode('utf-8'))
+    return crypto_client.sign(SignatureAlgorithm(algorithm), base64.b64decode(digest))
 
 
 def verify_key(cmd, client, algorithm, digest, signature, name=None, version=None):
@@ -1199,7 +1200,7 @@ def verify_key(cmd, client, algorithm, digest, signature, name=None, version=Non
                                             resource_type=ResourceType.DATA_KEYVAULT_KEYS)
     crypto_client = client.get_cryptography_client(name, key_version=version)
     return crypto_client.verify(SignatureAlgorithm(algorithm),
-                                digest.encode('utf-8'),
+                                base64.b64decode(digest),
                                 base64.b64decode(signature.encode('utf-8')))
 
 
