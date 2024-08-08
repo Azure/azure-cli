@@ -379,7 +379,7 @@ class TestAAZGenericUpdateOperation(unittest.TestCase):
                 }
             )
 
-        with self.assertRaisesRegex(InvalidArgumentValueError, "Couldn't find '\[1\]' in ''. Available options: \['d', 'd2', 'i', 'l', 'l2', 's'\]"):
+        with self.assertRaisesRegex(InvalidArgumentValueError, "Couldn't find '[1]' in ''. Available options: ['d', 'd2', 'i', 'l', 'l2', 's']"):
             AAZGenericInstanceUpdateOperation(ctx)._update_instance_by_generic(
                 instance,
                 {
@@ -389,7 +389,7 @@ class TestAAZGenericUpdateOperation(unittest.TestCase):
                 }
             )
 
-        with self.assertRaisesRegex(InvalidArgumentValueError, "Couldn't find 'props' in ''. Available options: \['d', 'd2', 'i', 'l', 'l2', 's'\]"):
+        with self.assertRaisesRegex(InvalidArgumentValueError, "Couldn't find 'props' in ''. Available options: ['d', 'd2', 'i', 'l', 'l2', 's']"):
             AAZGenericInstanceUpdateOperation(ctx)._update_instance_by_generic(
                 instance,
                 {
@@ -399,7 +399,7 @@ class TestAAZGenericUpdateOperation(unittest.TestCase):
                 }
             )
 
-        with self.assertRaisesRegex(InvalidArgumentValueError, "Couldn't find 'o' in 'l\[0\]'. Available options: \['p', 's'\]"):
+        with self.assertRaisesRegex(InvalidArgumentValueError, "Couldn't find 'o' in 'l[0]'. Available options: ['p', 's']"):
             AAZGenericInstanceUpdateOperation(ctx)._update_instance_by_generic(
                 instance,
                 {
@@ -441,7 +441,7 @@ class TestAAZGenericUpdateOperation(unittest.TestCase):
                 }
             )
 
-        with self.assertRaisesRegex(InvalidArgumentValueError, "Couldn't find 't' in 'l\[1\]'. Available options: \['p', 's'\]"):
+        with self.assertRaisesRegex(InvalidArgumentValueError, "Couldn't find 't' in 'l[1]'. Available options: ['p', 's']"):
             AAZGenericInstanceUpdateOperation(ctx)._update_instance_by_generic(
                 instance,
                 {
@@ -461,7 +461,7 @@ class TestAAZGenericUpdateOperation(unittest.TestCase):
                 }
             )
 
-        with self.assertRaisesRegex(InvalidArgumentValueError, "Expect <class 'str'>, got 3 \(<class 'int'>\)"):
+        with self.assertRaisesRegex(InvalidArgumentValueError, "Expect <class 'str'>, got 3 (<class 'int'>)"):
             AAZGenericInstanceUpdateOperation(ctx)._update_instance_by_generic(
                 instance,
                 {
@@ -481,7 +481,7 @@ class TestAAZGenericUpdateOperation(unittest.TestCase):
                 }
             )
 
-        with self.assertRaisesRegex(InvalidArgumentValueError, "Couldn't find '\[10\]' in 'd'. Available options: \['a', 'b', 'c'\]"):
+        with self.assertRaisesRegex(InvalidArgumentValueError, "Couldn't find '[10]' in 'd'. Available options: ['a', 'b', 'c']"):
             AAZGenericInstanceUpdateOperation(ctx)._update_instance_by_generic(
                 instance,
                 {
@@ -492,7 +492,7 @@ class TestAAZGenericUpdateOperation(unittest.TestCase):
             )
 
         # test add
-        with self.assertRaisesRegex(InvalidArgumentValueError, "Expect <class 'int'>, got a \(<class 'str'>\)"):
+        with self.assertRaisesRegex(InvalidArgumentValueError, "Expect <class 'int'>, got a (<class 'str'>)"):
             AAZGenericInstanceUpdateOperation(ctx)._update_instance_by_generic(
                 instance,
                 {
