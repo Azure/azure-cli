@@ -1285,7 +1285,10 @@ def _validate_ssh_key_helper(ssh_key_value, should_generate_ssh_keys):
                 private_key_filepath = public_key_filepath[:-4]
             else:
                 private_key_filepath = public_key_filepath + '.private'
-            content = keys.generate_ssh_keys(private_key_filepath, public_key_filepath)
+
+            from azure.cli.command_modules.vm._vm_utils import generate_ssh_keys as vm_generate_ssh_keys
+            # content = keys.generate_ssh_keys(private_key_filepath, public_key_filepath)
+            content = vm_generate_ssh_keys(private_key_filepath, public_key_filepath)
             logger.warning("SSH key files '%s' and '%s' have been generated under ~/.ssh to "
                            "allow SSH access to the VM. If using machines without "
                            "permanent storage, back up your keys to a safe location.",
