@@ -15,7 +15,8 @@ from azure.cli.command_modules.mysql._client_factory import (
     cf_mysql_flexible_log,
     cf_mysql_flexible_backups,
     cf_mysql_flexible_adadmin,
-    cf_mysql_flexible_export)
+    cf_mysql_flexible_export,
+    cf_mysql_flexible_maintenances)
 from ._transformers import (
     table_transform_output,
     table_transform_output_list_servers,
@@ -81,6 +82,11 @@ def load_command_table(self, _):
     mysql_flexible_adadmin_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.rdbms.mysql_flexibleservers.operations#AzureADAdministratorsOperations.{}',
         client_factory=cf_mysql_flexible_adadmin
+    )
+
+    mysql_flexible_maintenance_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.mysql_flexibleservers.operations#MaintenancesOperations.{}',
+        client_factory=cf_mysql_flexible_maintenances
     )
 
     # MERU COMMANDS
@@ -211,3 +217,10 @@ def load_command_table(self, _):
                             custom_command_type=mysql_custom,
                             client_factory=cf_mysql_flexible_servers) as g:
         g.custom_command('reset', 'flexible_gtid_reset', supports_no_wait=True)
+
+    with self.command_group('mysql flexible-server maintenance', mysql_flexible_maintenance_sdk,
+                            custom_command_type=mysql_custom,
+                            client_factory=cf_mysql_flexible_maintenances) as g:
+        g.custom_command('reschedule', 'flexible_server_maintenance_reschedule')
+        g.custom_command('list', 'flexible_server_maintenance_list')
+        g.custom_show_command('show', 'flexible_server_maintenance_show')
