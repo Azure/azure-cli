@@ -1079,7 +1079,7 @@ class AKSAgentPoolContext(BaseAKSContext):
         # read the original value passed by the command
         enable_fips_image = self.raw_param.get("enable_fips_image", False)
         # In create mode, try and read the property value corresponding to the parameter from the `agentpool` object
-        if self.decorator_mode == DecoratorMode.CREATE:
+        if self.decorator_mode != DecoratorMode.UPDATE:  # must be "not update mode" setup uses to set enable_fips
             if (
                 self.agentpool and
                 hasattr(self.agentpool, "enable_fips") and      # backward compatibility
@@ -1645,6 +1645,7 @@ class AKSAgentPoolAddDecorator:
         agentpool.proximity_placement_group_id = self.context.get_ppg()
         agentpool.enable_encryption_at_host = self.context.get_enable_encryption_at_host()
         agentpool.enable_ultra_ssd = self.context.get_enable_ultra_ssd()
+        agentpool.enable_fips = self.context.get_enable_fips_image()
         agentpool.availability_zones = self.context.get_zones()
 
         agentpool.max_pods = self.context.get_max_pods()
