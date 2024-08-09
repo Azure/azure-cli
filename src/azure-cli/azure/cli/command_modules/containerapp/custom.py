@@ -2444,13 +2444,15 @@ def enable_ingress(cmd, name, resource_group_name, type, target_port, transport=
             external_ingress = True
 
     ingress_def = None
-    if target_port is not None and type is not None:
+    if type is not None:
         ingress_def = IngressModel
         ingress_def["external"] = external_ingress
-        ingress_def["targetPort"] = target_port
         ingress_def["transport"] = transport
         ingress_def["allowInsecure"] = allow_insecure
         ingress_def["exposedPort"] = exposed_port if transport == "tcp" else None
+
+        if target_port is not None:
+            ingress_def["targetPort"] = target_port
 
     containerapp_def["properties"]["configuration"]["ingress"] = ingress_def
 
@@ -3680,11 +3682,6 @@ def containerapp_up(cmd,
     if image and HELLOWORLD in image.lower():
         ingress = "external" if not ingress else ingress
         target_port = 80 if not target_port else target_port
-
-    if image:
-        if ingress and not target_port:
-            target_port = 80
-            logger.warning("No ingress provided, defaulting to port 80. Try `az containerapp up --ingress %s --target-port <port>` to set a custom port.", ingress)
 
     if source and not _has_dockerfile(source, dockerfile):
         pass
