@@ -1079,7 +1079,7 @@ class AKSAgentPoolContext(BaseAKSContext):
         # read the original value passed by the command
         enable_fips_image = self.raw_param.get("enable_fips_image", False)
         # In create mode, try and read the property value corresponding to the parameter from the `agentpool` object
-        if self.decorator_mode != DecoratorMode.UPDATE:  # must be "not update mode" setup uses to set enable_fips
+        if self.decorator_mode == DecoratorMode.CREATE:
             if (
                 self.agentpool and
                 hasattr(self.agentpool, "enable_fips") and      # backward compatibility
