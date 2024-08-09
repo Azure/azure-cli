@@ -122,6 +122,8 @@ def normalize_sku_for_staticapp(sku):
         return 'Free'
     if sku.lower() == 'standard':
         return 'Standard'
+    if sku.lower() == 'dedicated':
+        return 'Dedicated'
     raise ValidationError("Invalid sku(pricing tier), please refer to command help for valid values")
 
 
