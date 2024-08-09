@@ -5030,7 +5030,7 @@ def add_workload_profile(cmd, resource_group_name, env_name, workload_profile_na
 
     if r and safe_get(r, "properties", "workloadProfiles") is None:
         raise ValidationError("Cannot add workload profile because the environment doesn't enable workload profile.\n"
-                              "If you want to use Consumption and Dedicated environment, please create a new one.")
+                              "If you want to use Consumption and Dedicated environment, please create a new one with 'az containerapp env create'.")
 
     workload_profiles = r["properties"]["workloadProfiles"]
 
@@ -5051,7 +5051,7 @@ def update_workload_profile(cmd, resource_group_name, env_name, workload_profile
 
     if r and safe_get(r, "properties", "workloadProfiles") is None:
         raise ValidationError("Cannot update workload profile because the environment doesn't enable workload profile.\n"
-                              "If you want to use Consumption and Dedicated environment, please create a new one.")
+                              "If you want to use Consumption and Dedicated environment, please create a new one with 'az containerapp env create'.")
 
     workload_profiles = r["properties"]["workloadProfiles"]
 
