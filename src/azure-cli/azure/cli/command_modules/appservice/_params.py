@@ -367,7 +367,7 @@ subscription than the app service environment, please use the resource ID for --
             c.argument('java_container', help="The java container, e.g., Tomcat, Jetty")
             c.argument('java_container_version', help="The version of the java container, e.g., '8.0.23' for Tomcat")
             c.argument('min_tls_version',
-                       help="The minimum version of TLS required for SSL requests, e.g., '1.0', '1.1', '1.2', '1.3'")
+                       help="The minimum version of TLS required for SSL requests, e.g., '1.0', '1.1', '1.2'")
             c.argument('min_tls_cipher_suite', options_list=['--min-tls-cipher-suite'],
                        help="The minimum TLS Cipher Suite required for requests, e.g., 'TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384'")
             c.argument('http20_enabled', help="configures a web site to allow clients to connect over http2.0.",
