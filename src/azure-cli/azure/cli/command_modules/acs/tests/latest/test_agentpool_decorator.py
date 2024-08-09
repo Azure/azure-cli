@@ -1574,7 +1574,7 @@ class AKSAgentPoolContextStandaloneModeTestCase(AKSAgentPoolContextCommonTestCas
 
     def test_get_enable_fips_image(self):
         self.common_get_enable_fips_image()
-    
+   
     def test_get_disable_fips_image(self):
         self.common_get_disable_fips_image()
 
