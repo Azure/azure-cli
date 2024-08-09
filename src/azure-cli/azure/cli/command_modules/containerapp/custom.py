@@ -5029,8 +5029,8 @@ def add_workload_profile(cmd, resource_group_name, env_name, workload_profile_na
         handle_raw_exception(e)
 
     if r and safe_get(r, "properties", "workloadProfiles") is None:
-        raise ValidationError(f"Cannot add workload profile because the environment doesn't enable workload profile.\n"
-                              f"If you want to use Consumption and Dedicated environment, please create a new one.")
+        raise ValidationError("Cannot add workload profile because the environment doesn't enable workload profile.\n"
+                              "If you want to use Consumption and Dedicated environment, please create a new one.")
 
     workload_profiles = r["properties"]["workloadProfiles"]
 
@@ -5050,8 +5050,8 @@ def update_workload_profile(cmd, resource_group_name, env_name, workload_profile
         handle_raw_exception(e)
 
     if r and safe_get(r, "properties", "workloadProfiles") is None:
-        raise ValidationError(f"Cannot update workload profile because the environment doesn't enable workload profile.\n"
-                              f"If you want to use Consumption and Dedicated environment, please create a new one.")
+        raise ValidationError("Cannot update workload profile because the environment doesn't enable workload profile.\n"
+                              "If you want to use Consumption and Dedicated environment, please create a new one.")
 
     workload_profiles = r["properties"]["workloadProfiles"]
 
