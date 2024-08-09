@@ -93,6 +93,9 @@ class UpcomingBreakingChangeTag(StatusTag):
 
 
 class MergedStatusTag(StatusTag):
+    # This class is used to merge multiple status tags into one.
+    # It is particularly useful when multiple breaking changes and deprecation information need to be recorded
+    # in a single deprecate_info field.
 
     def __init__(self, cli_ctx, *tags):
         assert len(tags) > 0

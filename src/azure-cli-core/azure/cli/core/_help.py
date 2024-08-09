@@ -259,6 +259,8 @@ class CliHelpFile(KnackHelpFile):
             direct_deprecate_info = deprecate_info
         elif isinstance(deprecate_info, UpcomingBreakingChangeTag):
             breaking_changes.append(deprecate_info)
+        # If there are more than two `deprecate_info` and/or upcoming breaking changes,
+        # extract them and store separately from the merged status tag.
         elif isinstance(deprecate_info, MergedStatusTag):
             depr, bcs = CliHelpFile.classify_merged_status_tag(deprecate_info)
             direct_deprecate_info = depr[0] if depr else None
@@ -273,6 +275,8 @@ class CliHelpFile(KnackHelpFile):
                 implicit_deprecate_info = deprecate_info
             elif isinstance(deprecate_info, UpcomingBreakingChangeTag):
                 breaking_changes.append(deprecate_info)
+            # If there are more than two `deprecate_info` and/or upcoming breaking changes,
+            # extract them and store separately from the merged status tag.
             elif isinstance(deprecate_info, MergedStatusTag):
                 depr, bcs = CliHelpFile.classify_merged_status_tag(deprecate_info)
                 if depr and implicit_deprecate_info is None:
@@ -293,6 +297,7 @@ class CliHelpFile(KnackHelpFile):
         all_deprecate_info = [self.deprecate_info] if self.deprecate_info else []
         all_deprecate_info.extend(breaking_changes)
         if len(all_deprecate_info) > 1:
+            # Merge multiple `deprecate_info` and/or breaking changes so their messages can be displayed together.
             self.deprecate_info = MergedStatusTag(help_ctx.cli_ctx, *all_deprecate_info)
         elif all_deprecate_info:
             self.deprecate_info = all_deprecate_info[0]

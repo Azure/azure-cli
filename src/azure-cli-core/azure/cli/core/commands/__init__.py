@@ -756,6 +756,8 @@ class AzCliCommandInvoker(CommandInvoker):
         deprecations = getattr(parsed_args, '_argument_deprecations', [])
         # Handle `always_display` argument breaking changes
         for _, argument in parsed_args.func.arguments.items():
+            # Some arguments have breaking changes that must always be displayed.
+            # Iterate through them and show the warnings.
             if isinstance(argument.deprecate_info, UpcomingBreakingChangeTag):
                 if argument.deprecate_info.always_display:
                     deprecations.append(argument.deprecate_info)
