@@ -1086,6 +1086,7 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         self.assertEqual(ctx_1.get_enable_ultra_ssd(), True)
 
     def common_get_enable_fips_image(self):
+        # Fips is now mutable
         # default
         ctx_1 = AKSAgentPoolContext(
             self.cmd,
@@ -1098,6 +1099,34 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         agentpool = self.create_initialized_agentpool_instance(enable_fips=True)
         ctx_1.attach_agentpool(agentpool)
         self.assertEqual(ctx_1.get_enable_fips_image(), True)
+
+        # default
+        ctx_2 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"enable_fips_image": False}),
+            self.models,
+            DecoratorMode.UPDATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_2.get_enable_fips_image(), False)
+        agentpool_2 = self.create_initialized_agentpool_instance(enable_fips=True)
+        ctx_2.attach_agentpool(agentpool_2)
+        # Update takes directly from flag value not from agentpool property
+        self.assertEqual(ctx_2.get_enable_fips_image(), False)
+
+    def common_get_disable_fips_image(self):
+        # default
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"disable_fips_image": True}),
+            self.models,
+            DecoratorMode.UPDATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_1.get_disable_fips_image(), True)
+        agentpool_1 = self.create_initialized_agentpool_instance(enable_fips=True)
+        ctx_1.attach_agentpool(agentpool_1)
+        self.assertEqual(ctx_1.get_disable_fips_image(), True)
 
     def common_get_zones(self):
         # default
@@ -1298,48 +1327,6 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         # fail on invalid file content
         with self.assertRaises(InvalidArgumentValueError):
             ctx_3.get_linux_os_config()
-
-    def common_get_enable_fips_image(self):
-        # default
-        ctx_1 = AKSPreviewAgentPoolContext(
-            self.cmd,
-            AKSAgentPoolParamDict({"enable_fips_image": False}),
-            self.models,
-            DecoratorMode.CREATE,
-            self.agentpool_decorator_mode,
-        )
-        self.assertEqual(ctx_1.get_enable_fips_image(), False)
-        agentpool = self.create_initialized_agentpool_instance(enable_fips=True)
-        ctx_1.attach_agentpool(agentpool)
-        self.assertEqual(ctx_1.get_enable_fips_image(), True)
-
-        # default
-        ctx_2 = AKSPreviewAgentPoolContext(
-            self.cmd,
-            AKSAgentPoolParamDict({"enable_fips_image": False}),
-            self.models,
-            DecoratorMode.UPDATE,
-            self.agentpool_decorator_mode,
-        )
-        self.assertEqual(ctx_2.get_enable_fips_image(), False)
-        agentpool_2 = self.create_initialized_agentpool_instance(enable_fips=True)
-        ctx_2.attach_agentpool(agentpool_2)
-        # Update takes directly from flag value not from agentpool property
-        self.assertEqual(ctx_2.get_enable_fips_image(), False)
-
-    def common_get_disable_fips_image(self):
-        # default
-        ctx_1 = AKSPreviewAgentPoolContext(
-            self.cmd,
-            AKSAgentPoolParamDict({"disable_fips_image": True}),
-            self.models,
-            DecoratorMode.UPDATE,
-            self.agentpool_decorator_mode,
-        )
-        self.assertEqual(ctx_1.get_disable_fips_image(), True)
-        agentpool_1 = self.create_initialized_agentpool_instance(enable_fips=True)
-        ctx_1.attach_agentpool(agentpool_1)
-        self.assertEqual(ctx_1.get_disable_fips_image(), True)
 
     def common_get_agentpool_windows_profile(self):
         # default
