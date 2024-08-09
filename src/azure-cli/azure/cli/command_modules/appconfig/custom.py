@@ -5,6 +5,7 @@
 
 # pylint: disable=line-too-long
 import time
+import azure.cli.core.azclierror as CLIErrors
 
 from azure.cli.command_modules.appconfig._client_factory import cf_configstore, cf_replicas
 from azure.cli.core.commands.progress import IndeterminateStandardOut
@@ -45,7 +46,7 @@ def create_configstore(cmd,
                        disable_local_auth=None,
                        retention_days=None,
                        enable_purge_protection=None,
-                       yes=False,
+                       no_replica=False,
                        replica_name=None,
                        replica_location=None):
     if assign_identity is not None and not assign_identity:
@@ -56,12 +57,11 @@ def create_configstore(cmd,
         public_network_access = 'Enabled' if enable_public_network else 'Disabled'
 
     if sku.lower() == 'free' and (enable_purge_protection or retention_days):
-        logger.warning("Options '--enable-purge-protection', '--replica-name', '--replica-location' and '--retention-days' will be ignored when creating a free store.")
+        logger.warning("Options '--enable-purge-protection', '--replica-name', '--replica-location' , 'no-replica' and '--retention-days' will be ignored when creating a free store.")
         retention_days = None
         enable_purge_protection = None
 
-    if not yes and sku.lower() == 'premium' and replica_name is None:
-        user_confirmation("When creating an App Configuration store in the premium tier, it is recommended to enable geo-replication to take advantage of an increased SLA of 99.99%.. Do you want to continue? \n")
+    __validate_replication(sku, replica_name, replica_location, no_replica)
 
     configstore_params = ConfigurationStore(location=location.lower(),
                                             identity=__get_resource_identity(assign_identity) if assign_identity else None,
@@ -75,26 +75,28 @@ def create_configstore(cmd,
 
     progress = IndeterminateStandardOut()
 
-    progress.write({"message": "Creating store"})
     config_store = client.begin_create(resource_group_name, name, configstore_params)
 
     # # Poll request and create replica after store is created
-    while config_store.status() != ProvisioningStatus.SUCCEEDED:
+    while config_store.status() == ProvisioningStatus.RUNNING:
+        progress.write({"message": "Creating store"})
         config_store.wait(3)
 
-    progress.write({"message": "Store created"})
-    time.sleep(1)
+    if (config_store.status() == ProvisioningStatus.SUCCEEDED): # how to show error messages
+        progress.write({"message": "Store created"})
+        time.sleep(1)
+    
     if config_store.done() and replica_name is not None:
         replica_client = cf_replicas(cmd.cli_ctx)
         store_replica = create_replica(cmd, replica_client, name, replica_name, replica_location, resource_group_name)
 
-        # Wait for the replica creation to finish
-        while store_replica.status() != ProvisioningStatus.SUCCEEDED:
+        while store_replica.status() == ProvisioningStatus.RUNNING:
             progress.spinner.step(label="Creating replica")
             store_replica.wait(3)
 
-        progress.write({"message": "Replica created"})
-        time.sleep(1)
+        if store_replica.status() == ProvisioningStatus.SUCCEEDED:
+            progress.write({"message": "Replica created"})
+            time.sleep(1)
 
     progress.clear()
     return config_store
@@ -319,7 +321,7 @@ def delete_replica(cmd, client, store_name, name, yes=False, resource_group_name
         )
         replicas = list_replica(cmd, client, store_name, resource_group_name)
 
-        if config_store.sku.name.lower() == "premium" and len(list(replicas)) == 1:
+        if config_store.sku.name.lower() == "standard" and len(list(replicas)) == 1:
             user_confirmation(
                 "Deleting the last replica will disable geo-replication. When using the premium tier, it is recommended to have geo-replication enabled to take advantage of an increased SLA of 99.99%. The first replica created for a premium tier store is free. Do you want to continue with this operation?"
             )
@@ -369,3 +371,21 @@ def __validate_cmk(encryption_key_name=None,
         else:
             if any(arg is not None for arg in [encryption_key_vault, encryption_key_version, identity_client_id]):
                 logger.warning("Removing the customer encryption key. Key vault related arguments are ignored.")
+
+def __validate_replication(sku=None,
+                           replica_name=None,
+                           replica_location=None,
+                           no_replica=False):
+    if sku.lower() == 'premium' and not no_replica:
+        if any(arg is None for arg in [replica_name, replica_location]):
+            raise RequiredArgumentMissingError("Options '--replica-name' and '--replica-location' are required when creating a premium tier store. If you don't want to create replica please provide explicit argument '--no-replica'")
+
+    if no_replica and replica_name and replica_location:
+            raise CLIErrors.MutuallyExclusiveArgumentError("Please provide only one of these arguments: '--no-replica' or '--replica-name and --replica-location'. See 'az appconfig create -h' for examples.")  
+    
+    if replica_name:
+        if replica_location is None:
+            raise RequiredArgumentMissingError("To add replica '--replica-location' is required")
+    else:
+        if replica_location is not None:
+            raise RequiredArgumentMissingError("To add replica '--replica-name' argument is required")
