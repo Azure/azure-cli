@@ -138,3 +138,27 @@ class ServicePrincipalCredential(ConfidentialClientApplication):
         result = self.acquire_token_for_client(scopes, **kwargs)
         check_result(result)
         return build_sdk_access_token(result)
+
+
+class CloudShellCredential:  # pylint: disable=too-few-public-methods
+
+    def __init__(self):
+        from .identity import AZURE_CLI_CLIENT_ID
+        self._msal_app = PublicClientApplication(
+            AZURE_CLI_CLIENT_ID,  # Use a real client_id, so that cache would work
+            # TODO: This PoC does not currently maintain a token cache;
+            #   Ideally we should reuse the real MSAL app object which has cache configured.
+            # token_cache=...,
+        )
+
+    def get_token(self, *scopes, **kwargs):  # pylint: disable=no-self-use
+        logger.debug("CloudShellCredential.get_token: scopes=%r, kwargs=%r", scopes, kwargs)
+        # kwargs should be selectively passed to MSAL to avoid SDK passing unrecognized arguments
+        if 'data' in kwargs:
+            # Get a VM SSH certificate
+            result = self._msal_app.acquire_token_interactive(list(scopes), prompt="none", data=kwargs["data"])
+        else:
+            # Get an access token
+            result = self._msal_app.acquire_token_interactive(list(scopes), prompt="none")
+        check_result(result, scopes=scopes)
+        return build_sdk_access_token(result)

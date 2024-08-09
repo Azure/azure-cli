@@ -280,17 +280,16 @@ class Profile:
 
     def login_in_cloud_shell(self):
         import jwt
-        from azure.cli.core.auth.adal_authentication import MSIAuthenticationWrapper
+        from .auth.msal_authentication import CloudShellCredential
 
-        msi_creds = MSIAuthenticationWrapper(resource=self.cli_ctx.cloud.endpoints.active_directory_resource_id)
-        token_entry = msi_creds.token
-        token = token_entry['access_token']
-        logger.info('MSI: token was retrieved. Now trying to initialize local accounts...')
+        cred = CloudShellCredential()
+        token = cred.get_token(*self._arm_scope).token
+        logger.info('Cloud Shell token was retrieved. Now trying to initialize local accounts...')
         decode = jwt.decode(token, algorithms=['RS256'], options={"verify_signature": False})
         tenant = decode['tid']
 
         subscription_finder = SubscriptionFinder(self.cli_ctx)
-        subscriptions = subscription_finder.find_using_specific_tenant(tenant, msi_creds)
+        subscriptions = subscription_finder.find_using_specific_tenant(tenant, cred)
         if not subscriptions:
             raise CLIError('No subscriptions were found in the cloud shell')
         user = decode.get('unique_name', 'N/A')
@@ -347,11 +346,16 @@ class Profile:
 
         managed_identity_type, managed_identity_id = Profile._try_parse_msi_account_name(account)
 
-        # Cloud Shell is just a system assignment managed identity
         if in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
-            managed_identity_type = MsiAccountTypes.system_assigned
+            # Cloud Shell
+            from .auth.msal_authentication import CloudShellCredential
+            cred = CloudShellCredential()
 
-        if managed_identity_type is None:
+        elif managed_identity_type:
+            # managed identity
+            cred = MsiAccountTypes.msi_auth_factory(managed_identity_type, managed_identity_id, resource)
+
+        else:
             # user and service principal
             external_tenants = []
             if aux_tenants:
@@ -371,9 +375,7 @@ class Profile:
             cred = CredentialAdaptor(credential,
                                      auxiliary_credentials=external_credentials,
                                      resource=resource)
-        else:
-            # managed identity
-            cred = MsiAccountTypes.msi_auth_factory(managed_identity_type, managed_identity_id, resource)
+
         return (cred,
                 str(account[_SUBSCRIPTION_ID]),
                 str(account[_TENANT_ID]))
@@ -393,27 +395,27 @@ class Profile:
 
         account = self.get_subscription(subscription)
 
-        identity_type, identity_id = Profile._try_parse_msi_account_name(account)
-        if identity_type:
+        managed_identity_type, managed_identity_id = Profile._try_parse_msi_account_name(account)
+
+        if in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
+            # Cloud Shell
+            if tenant:
+                raise CLIError("Tenant shouldn't be specified for Cloud Shell account")
+            from .auth.msal_authentication import CloudShellCredential
+            cred = CloudShellCredential()
+
+        elif managed_identity_type:
             # managed identity
             if tenant:
                 raise CLIError("Tenant shouldn't be specified for managed identity account")
             from .auth.util import scopes_to_resource
-            msi_creds = MsiAccountTypes.msi_auth_factory(identity_type, identity_id,
-                                                         scopes_to_resource(scopes))
-            sdk_token = msi_creds.get_token(*scopes)
-        elif in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
-            # Cloud Shell, which is just a system-assigned managed identity.
-            if tenant:
-                raise CLIError("Tenant shouldn't be specified for Cloud Shell account")
-            from .auth.util import scopes_to_resource
-            msi_creds = MsiAccountTypes.msi_auth_factory(MsiAccountTypes.system_assigned, identity_id,
-                                                         scopes_to_resource(scopes))
-            sdk_token = msi_creds.get_token(*scopes)
-        else:
-            credential = self._create_credential(account, tenant)
-            sdk_token = credential.get_token(*scopes)
+            cred = MsiAccountTypes.msi_auth_factory(managed_identity_type, managed_identity_id,
+                                                    scopes_to_resource(scopes))
 
+        else:
+            cred = self._create_credential(account, tenant)
+
+        sdk_token = cred.get_token(*scopes)
         # Convert epoch int 'expires_on' to datetime string 'expiresOn' for backward compatibility
         # WARNING: expiresOn is deprecated and will be removed in future release.
         import datetime
