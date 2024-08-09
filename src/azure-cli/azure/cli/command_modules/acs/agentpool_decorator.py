@@ -1645,7 +1645,6 @@ class AKSAgentPoolAddDecorator:
         agentpool.proximity_placement_group_id = self.context.get_ppg()
         agentpool.enable_encryption_at_host = self.context.get_enable_encryption_at_host()
         agentpool.enable_ultra_ssd = self.context.get_enable_ultra_ssd()
-        agentpool.enable_fips = self.context.get_enable_fips_image()
         agentpool.availability_zones = self.context.get_zones()
 
         agentpool.max_pods = self.context.get_max_pods()
