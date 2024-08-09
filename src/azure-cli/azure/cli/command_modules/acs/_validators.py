@@ -16,7 +16,6 @@ from azure.cli.command_modules.acs._consts import (
     CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD,
     CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM,
     CONST_OS_SKU_AZURELINUX,
-    CONST_OS_SKU_CBLMARINER,
     CONST_OS_SKU_MARINER,
 )
 from azure.cli.core import keys
@@ -703,14 +702,12 @@ def validate_grafanaresourceid(namespace):
 
 def validate_os_sku(namespace):
     os_sku = namespace.os_sku
-    if os_sku in [CONST_OS_SKU_MARINER, CONST_OS_SKU_CBLMARINER]:
+    if os_sku in [CONST_OS_SKU_MARINER]:
         logger.warning(
-            'The osSKU "%s" should be used going forward instead of "%s" or "%s". '
-            'The osSKUs "%s" and "%s" will eventually be deprecated.',
+            'The osSKU "%s" should be used going forward instead of "%s". '
+            'The osSKU "%s" will eventually be deprecated.',
             CONST_OS_SKU_AZURELINUX,
-            CONST_OS_SKU_CBLMARINER,
             CONST_OS_SKU_MARINER,
-            CONST_OS_SKU_CBLMARINER,
             CONST_OS_SKU_MARINER,
         )
 
