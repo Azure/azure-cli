@@ -91,7 +91,7 @@ There are several types of breaking changes defined in `breaking_change.py`. You
 
 **Deprecate**
 
-Declaring deprecation in `_breaking_change.py` is similar to deprecation when authoring commands. You can use the following method to declare deprecation: 
+Declaring deprecation in `_breaking_change.py` is similar to deprecation when authoring commands. It is recommended to use this method rather than declaring deprecate_info when defining a command or argument. You can use the following method to declare deprecation: 
 
 * `announce_command_group_deprecate`: Deprecating a command group. 
 * `announce_command_deprecate`: Deprecating a command.
@@ -246,10 +246,10 @@ announce_conditional_breaking_change(tag='SpecialBreakingChangeB', breaking_chan
 
 # src/azure-cli/azure/cli/command_modules/vm/custom.py
 def create_vm(cmd, vm_name, **):
-  from azure.cli.core.breaking_change import print_manual_breaking_change
+  from azure.cli.core.breaking_change import print_conditional_breaking_change
   if some_condition:
-    print_manual_breaking_change(cmd.cli_ctx, tag='SpecialBreakingChangeA', custom_logger=logger)
-    print_manual_breaking_change(cmd.cli_ctx, tag='SpecialBreakingChangeB', custom_logger=logger)
+    print_conditional_breaking_change(cmd.cli_ctx, tag='SpecialBreakingChangeA', custom_logger=logger)
+    print_conditional_breaking_change(cmd.cli_ctx, tag='SpecialBreakingChangeB', custom_logger=logger)
 ```
 
 This way, the pre-announcement wouldn't be display unless running into the branch, but still could be collected into the upcoming breaking change documentation.
