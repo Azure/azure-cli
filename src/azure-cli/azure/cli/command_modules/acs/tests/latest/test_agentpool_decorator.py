@@ -1574,6 +1574,9 @@ class AKSAgentPoolContextStandaloneModeTestCase(AKSAgentPoolContextCommonTestCas
 
     def test_get_enable_fips_image(self):
         self.common_get_enable_fips_image()
+    
+    def test_get_disable_fips_image(self):
+        self.common_get_disable_fips_image()
 
     def test_get_zones(self):
         self.common_get_zones()
@@ -1592,12 +1595,6 @@ class AKSAgentPoolContextStandaloneModeTestCase(AKSAgentPoolContextCommonTestCas
 
     def test_get_linux_os_config(self):
         self.common_get_linux_os_config()
-
-    def common_get_enable_fips_image(self):
-        self.common_get_enable_fips_image()
-
-    def common_get_disable_fips_image(self):
-        self.common_get_disable_fips_image()
 
     def test_get_agentpool_windows_profile(self):
         self.common_get_agentpool_windows_profile()
