@@ -28,7 +28,7 @@ from azure.cli.core.azclierror import (
     ClientRequestError,
     InvalidTemplateError,
 )
-from azure.cli.core.util import should_disable_connection_verify
+from azure.cli.core.util import should_disable_connection_verify, run_cmd
 
 # See: https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
 _semver_pattern = r"(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)(?:-(?P<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?"  # pylint: disable=line-too-long
@@ -324,10 +324,9 @@ def _extract_version(text):
 
 
 def _run_command(bicep_installation_path, args, custom_env=None):
-    process = subprocess.run(
+    process = run_cmd(
         [rf"{bicep_installation_path}"] + args,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        capture_output=True,
         env=custom_env)
 
     try:

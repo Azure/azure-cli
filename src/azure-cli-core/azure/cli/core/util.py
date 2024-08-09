@@ -1356,3 +1356,23 @@ def should_encrypt_token_cache(cli_ctx):
     encrypt = cli_ctx.config.getboolean('core', 'encrypt_token_cache', fallback=fallback)
 
     return encrypt
+
+
+def run_cmd(args, *, capture_output=False, check=False, env=None):
+    """Run command in a subprocess. It reduces (not eliminates) shell injection by forcing args to be a list
+    and shell=False.
+
+    Arguments other than args are keyword-only.
+
+    :param args: A sequence of program arguments. It must be a list to avoid quoting issues.
+    :param capture_output: If True, stdout and stderr will be captured.
+    :param check: If True, and the process exits with a non-zero exit code, a CalledProcessError exception
+      will be raised.
+    :param env: A mapping that defines the environment variables for the new process.
+    :return: CompletedProcess
+    """
+    if not isinstance(args, list):
+        raise CLIError("Invalid args. args must be a list.")
+
+    import subprocess
+    return subprocess.run(args, capture_output=capture_output, check=check, env=env)
