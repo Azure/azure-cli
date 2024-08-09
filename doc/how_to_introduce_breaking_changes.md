@@ -91,7 +91,7 @@ There are several types of breaking changes defined in `breaking_change.py`. You
 
 **Deprecate**
 
-Declaring deprecation in `_breaking_change.py` is similar to deprecation when authoring commands. It is recommended to use this method rather than declaring deprecate_info when defining a command or argument. You can use the following method to declare deprecation: 
+Declaring deprecation in `_breaking_change.py` is similar to deprecation when authoring commands. It is recommended to use this method rather than declaring `deprecate_info` when defining a command or argument. You can use the following method to declare deprecation: 
 
 * `announce_command_group_deprecate`: Deprecating a command group. 
 * `announce_command_deprecate`: Deprecating a command.
