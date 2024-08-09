@@ -269,7 +269,10 @@ class BreakingChange(abc.ABC):
 
     def _register_to_direct_sub_cg_or_command(self, cli_ctx, cg_name, status_tag):
         for key, command_group in cli_ctx.invocation.commands_loader.command_group_table.items():
-            if key.rsplit(maxsplit=1)[0] == cg_name:
+            split_key = key.rsplit(maxsplit=1)
+            # If inpass command group name is empty, all first level command group should be registered to.
+            # Otherwise, we need to find all direct sub command groups.
+            if (not cg_name and len(split_key) == 1) or (len(split_key) == 2 and split_key[0] == cg_name):
                 from azure.cli.core.commands import AzCommandGroup
                 if isinstance(command_group, AzCommandGroup):
                     command_group.group_kwargs['deprecate_info'] = \
@@ -277,7 +280,8 @@ class BreakingChange(abc.ABC):
                 else:
                     self._register_to_direct_sub_cg_or_command(cli_ctx, key, status_tag)
         for key, command in cli_ctx.invocation.commands_loader.command_table.items():
-            if key.rsplit(maxsplit=1)[0] == cg_name:
+            # If inpass command group name is empty, all first level command should be registered to.
+            if (not cg_name and ' ' not in key) or key.rsplit(maxsplit=1)[0] == cg_name:
                 command.deprecate_info = self.appended_status_tag(cli_ctx, command.deprecate_info, self.to_tag(cli_ctx))
 
     def _register_option_deprecate(self, cli_ctx, arguments, option_name):
@@ -285,6 +289,9 @@ class BreakingChange(abc.ABC):
             if argument.options_list and len(argument.options_list) > 1:
                 for idx, option in enumerate(argument.options_list):
                     if isinstance(option, str) and option_name == option and isinstance(self, AzCLIDeprecate):
+                        if isinstance(argument.options_list, tuple):
+                            # Some of the command would declare options_list as tuple
+                            argument.options_list = list(argument.options_list)
                         argument.options_list[idx] = self.to_tag(cli_ctx, object_type='option')
                         argument.options_list[idx].target = option
                         argument.action = _argument_breaking_change_action(cli_ctx, argument.options_list[idx],
@@ -407,11 +414,11 @@ class AzCLIOutputChange(BreakingChange):
         if self.guide:
             guide = self.guide.rstrip()
             if guide and guide[-1] not in ',.;?!':
-                guide = guide + '.'
+                guide = ' ' + guide + '.'
         else:
             guide = ''
         doc = self.format_doc_link(self.doc_link)
-        return f'The output will be changed {str(self.target_version)}. {desc} {guide}{doc}'
+        return f'The output will be changed {str(self.target_version)}. {desc}{guide}{doc}'
 
 
 class AzCLILogicChange(BreakingChange):

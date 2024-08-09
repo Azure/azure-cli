@@ -754,6 +754,7 @@ class AzCliCommandInvoker(CommandInvoker):
 
     def _resolve_preview_and_deprecation_warnings(self, cmd, parsed_args):
         deprecations = getattr(parsed_args, '_argument_deprecations', [])
+        # Handle `always_display` argument breaking changes
         for _, argument in parsed_args.func.arguments.items():
             if isinstance(argument.deprecate_info, UpcomingBreakingChangeTag):
                 if argument.deprecate_info.always_display:
