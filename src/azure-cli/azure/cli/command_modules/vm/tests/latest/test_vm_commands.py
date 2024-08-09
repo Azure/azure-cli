@@ -11420,7 +11420,7 @@ class DiskRPTestScenario(ScenarioTest):
         self.cmd('snapshot create -g {rg2} -n snapb --copy-start true --incremental true --source {source} -l eastus')
         # show snapshot B, check completionPercent
         self.cmd('snapshot show -g {rg2} -n snapb', checks=[
-            self.check_pattern('completionPercent', 'd?.d?')
+            self.check_pattern('completionPercent', r'\d?.\d?')
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_completion_percent1_', location='westus')
