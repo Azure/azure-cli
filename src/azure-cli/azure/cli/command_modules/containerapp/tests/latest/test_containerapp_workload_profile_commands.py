@@ -161,14 +161,14 @@ class ContainerAppWorkloadProfilesTest(ScenarioTest):
             JMESPathCheck("properties.workloadProfiles", None),
         ])
 
-        with self.assertRaisesRegexp(ValidationError,
+        with self.assertRaisesRegex(ValidationError,
                                      "Cannot add workload profile because the environment doesn't enable workload profile.\n"
                                      "If you want to use Consumption and Dedicated environment, please create a new one."):
             self.cmd(
                 'containerapp env workload-profile add -w wp -g {} -n {} --workload-profile-type D4 --min-nodes 1 --max-nodes 2'.format(
                     resource_group, env))
 
-        with self.assertRaisesRegexp(ValidationError,
+        with self.assertRaisesRegex(ValidationError,
                                      "Cannot update workload profile because the environment doesn't enable workload profile.\n"
                                      "If you want to use Consumption and Dedicated environment, please create a new one."):
             self.cmd(
