@@ -1097,15 +1097,15 @@ class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
         # Assert first reference is in the right format
         app_settings = self.cmd('webapp config appsettings list -g {rg} -n {appservice_account}').get_output_in_json()
         exported_keys = next(x for x in app_settings if x['name'] == entry_key)
-        self.assertEquals(exported_keys['name'], entry_key)
-        self.assertEquals(exported_keys['value'], expected_reference)
-        self.assertEquals(exported_keys['slotSetting'], False)
+        self.assertEqual(exported_keys['name'], entry_key)
+        self.assertEqual(exported_keys['value'], expected_reference)
+        self.assertEqual(exported_keys['slotSetting'], False)
 
         # Assert second reference is of right format
         exported_keys = next(x for x in app_settings if x['name'] == entry_key2)
-        self.assertEquals(exported_keys['name'], entry_key2)
-        self.assertEquals(exported_keys['value'], expected_reference2)
-        self.assertEquals(exported_keys['slotSetting'], False)
+        self.assertEqual(exported_keys['name'], entry_key2)
+        self.assertEqual(exported_keys['value'], expected_reference2)
+        self.assertEqual(exported_keys['slotSetting'], False)
 
 
         # Test to confirm the right app configuration reference

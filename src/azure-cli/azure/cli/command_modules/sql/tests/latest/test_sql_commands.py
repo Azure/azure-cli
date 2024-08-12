@@ -1501,11 +1501,11 @@ class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
 
         print('Arguments are updated with login and sid data')
 
-        with self.assertRaisesRegexp(SystemExit, "2"):
+        with self.assertRaisesRegex(SystemExit, "2"):
             self.cmd('sql server ad-admin create -s {sn} -g {rg}')
-        with self.assertRaisesRegexp(SystemExit, "2"):
+        with self.assertRaisesRegex(SystemExit, "2"):
             self.cmd('sql server ad-admin create -s {sn} -g {rg} -u {user}')
-        with self.assertRaisesRegexp(SystemExit, "2"):
+        with self.assertRaisesRegex(SystemExit, "2"):
             self.cmd('sql server ad-admin create -s {sn} -g {rg} -i {oid}')
 
         self.cmd('sql server ad-admin create -s {sn} -g {rg} -i {oid} -u {user}',
@@ -5201,6 +5201,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
     tag1 = "tagName1=tagValue1"
     tag2 = "tagName2=tagValue2"
     backup_storage_redundancy = "Local"
+    initial_authentication_metadata = "Windows"
 
     def _get_full_maintenance_id(self, name):
         return "/subscriptions/{}/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/{}".format(
@@ -5210,7 +5211,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
     @ManagedInstancePreparer(
         tags=f"{tag1} {tag2}",
         minimalTlsVersion="1.2",
-        otherParams=f"--bsr {backup_storage_redundancy}")
+        otherParams=f"--bsr {backup_storage_redundancy} --am {initial_authentication_metadata}")
     def test_sql_managed_instance_mgmt(self, mi, rg):
         managed_instance_name_1 = mi
         resource_group_1 = rg
@@ -5220,6 +5221,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         tls1_1 = "1.1"
         user = admin_login
         service_principal_type = "SystemAssigned"
+        authentication_metadata = "Paired"
 
         # test show sql managed instance 1
         subnet = ManagedInstancePreparer.subnet
@@ -5248,7 +5250,8 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                                           JMESPathCheck('tags', "{'tagName1': 'tagValue1', 'tagName2': 'tagValue2'}"),
                                           JMESPathCheck('currentBackupStorageRedundancy', self.backup_storage_redundancy),
                                           JMESPathCheck('maintenanceConfigurationId', self._get_full_maintenance_id(
-                                              self.DEFAULT_MC))]).get_output_in_json()
+                                              self.DEFAULT_MC)),
+                                          JMESPathCheck('authenticationMetadata', self.initial_authentication_metadata)]).get_output_in_json()
 
         # test show sql managed instance 1 using id
         self.cmd('sql mi show --ids {}'
@@ -5358,6 +5361,14 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('name', managed_instance_name_1),
                      JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('servicePrincipal.type', service_principal_type)])
+        
+        # test update authentication metadata mode
+        self.cmd('sql mi update -g {} -n {} --authentication-metadata {}'
+            .format(resource_group_1, managed_instance_name_1, authentication_metadata),
+                checks=[
+                     JMESPathCheck('name', managed_instance_name_1),
+                     JMESPathCheck('resourceGroup', resource_group_1),
+                     JMESPathCheck('authenticationMetadata', authentication_metadata)])
 
         # test list sql managed_instance in the subscription should be at least 1
         self.cmd('sql mi list', checks=[JMESPathCheckGreaterThan('length(@)', 0)])

@@ -59,9 +59,6 @@ def flexible_server_create(cmd, client,
                            active_directory_auth=None, password_auth=None, auto_grow=None, performance_tier=None,
                            storage_type=None, iops=None, throughput=None, create_default_db='Enabled', yes=False):
 
-    # Warning for upcoming breaking change to default value of pg version
-    logger.warning('In the next release, the default value for the PostgreSQL server major version will be updated to 16')
-
     # Generate missing parameters
     location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
                                                                              server_name, 'postgres')
@@ -203,8 +200,6 @@ def flexible_server_restore(cmd, client,
     else:
         source_server_id = source_server
 
-    instance = client.get(resource_group_name, source_server)
-
     restore_point_in_time = validate_and_format_restore_point_in_time(restore_point_in_time)
 
     try:
@@ -225,6 +220,7 @@ def flexible_server_restore(cmd, client,
 
         pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup)
 
+        instance = client.get(resource_group_name, id_parts['name'])
         storage = postgresql_flexibleservers.models.Storage(type=storage_type if instance.storage.type != "PremiumV2_LRS" else None)
 
         parameters = postgresql_flexibleservers.models.Server(
