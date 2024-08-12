@@ -16,8 +16,8 @@ WORKDIR /azure-cli
 
 COPY . .
 
-# Mariner 2.0 only has 'python3' package, which is currently (2022-12-09) Python 3.9.
-# It has no version-specific packages like 'python39'.
+# Mariner 2.0's default Python is 3.9, the rpm path is /usr/src/mariner/RPMS/x86_64/azure-cli-2.63.0-1.cm2.x86_64.rpm
+# Azure Linux 3's default Python is 3.12, the rpm path is /usr/src/azl/RPMS/x86_64/azure-cli-2.62.0-1.azl3.x86_64.rpm
 RUN dos2unix ./scripts/release/rpm/azure-cli.spec && \
     REPO_PATH=$(pwd) CLI_VERSION=$cli_version PYTHON_PACKAGE=python3 PYTHON_CMD=python3 \
     rpmbuild -v -bb --clean scripts/release/rpm/azure-cli.spec && \

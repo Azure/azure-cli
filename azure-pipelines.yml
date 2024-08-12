@@ -403,7 +403,7 @@ jobs:
 
 - job: BuildDockerImageAzureLinux
   displayName: Build Docker Image Azure Linux
-  dependsOn: BuildRpmPackageAzureLinux
+  dependsOn: BuildRpmPackagesAzureLinux
   strategy:
     matrix:
       ${{ each arch in parameters.architectures }}:
@@ -766,7 +766,7 @@ jobs:
     displayName: 'Test Homebrew Package'
 
 
-- job: BuildRpmPackageAzureLinux
+- job: BuildRpmPackagesAzureLinux
   displayName: Build Rpm Package
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   strategy:
@@ -787,10 +787,10 @@ jobs:
     displayName: Install Docker
 
   - task: Bash@3
-    displayName: 'Build Rpm Package: Mariner'
+    displayName: 'Build Rpm Package: Azure Linux'
     inputs:
       targetType: 'filePath'
-      filePath: scripts/release/rpm/pipeline_mariner.sh
+      filePath: scripts/release/rpm/pipeline_azurelinux.sh
 
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'SBOM'
@@ -803,11 +803,11 @@ jobs:
       TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: $(artifact)
 
-- job: TestRpmPackageAzureLinux
+- job: TestRpmPackagesAzureLinux
   displayName: Test Rpm Package
   timeoutInMinutes: 120
   dependsOn:
-  - BuildRpmPackageAzureLinux
+  - BuildRpmPackagesAzureLinux
   - ExtractMetadata
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
@@ -847,7 +847,7 @@ jobs:
 
       echo "== Test rpm package on ${IMAGE} =="
       docker pull $IMAGE
-      docker run --rm -e RPM_NAME=$RPM_NAME -v $SYSTEM_ARTIFACTSDIRECTORY/rpm:/mnt/rpm -v $(pwd):/azure-cli $IMAGE /bin/bash "/azure-cli/scripts/release/rpm/test_mariner_in_docker.sh"
+      docker run --rm -e RPM_NAME=$RPM_NAME -v $SYSTEM_ARTIFACTSDIRECTORY/rpm:/mnt/rpm -v $(pwd):/azure-cli $IMAGE /bin/bash "/azure-cli/scripts/release/rpm/test_azurelinux_in_docker.sh"
 
     displayName: 'Test Rpm Package Mariner'
 
@@ -1255,7 +1255,7 @@ jobs:
     - BuildHomebrewFormula
     - TestHomebrewFormula
     - TestHomebrewPackage
-    - BuildRpmPackageAzureLinux
+    - BuildRpmPackagesAzureLinux
     - BuildRpmPackages
     - TestRpmPackage
     - BuildDebPackages
