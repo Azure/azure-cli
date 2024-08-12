@@ -19,7 +19,9 @@ To mitigate the impact of breaking changes, Azure CLI delays breaking changes an
 
 The breaking change window is a designated sprint that **permits** the merging of service command breaking changes. Any Pull Request merged during this sprint will be included in the subsequent Breaking Change Release.
 
-The timing of the breaking change window in Azure CLI aligns with [Microsoft Build](https://build.microsoft.com/) and [Microsoft Ignite](https://ignite.microsoft.com/). You could find the next Breaking Change Release plan in our [milestones](https://github.com/Azure/azure-cli/milestones).
+The timing of the breaking change window in Azure CLI aligns with [Microsoft Build](https://build.microsoft.com/) and [Microsoft Ignite](https://ignite.microsoft.com/). It normally occurs in May for Build and November for Ignite. So please prepare beforehand to align command breaking changes with Azure CLI team accordingly. 
+
+You could find the next Breaking Change Release plan in our [milestones](https://github.com/Azure/azure-cli/milestones).
 
 > It's highlighted that the introduction of breaking changes is typically prohibited within non-breaking-change window, based on what we stated above for consistency and stable tooling experience.
 > 
@@ -29,10 +31,10 @@ The timing of the breaking change window in Azure CLI aligns with [Microsoft Bui
 
 ### Pre-announce Breaking Changes
 
-All breaking changes **must** be pre-announced two sprints ahead Release. There are two approaches to inform both interactive users and automatic users about the breaking changes.
+All breaking changes **must** be pre-announced two sprints ahead Release. It give users the buffer time ahead to mitigate for better command experience. There are two approaches to inform both interactive users and automatic users about the breaking changes.
 
 1. (**Mandatory**) Breaking Changes must be pre-announced through Warning Log while executing.
-2. (*Automatic*) Breaking Changes would be collected automatically and listed in [Upcoming Breaking Change](https://learn.microsoft.com/en-us/cli/azure/upcoming-breaking-changes).
+2. (*Automatic*) Breaking Changes would be collected automatically and listed in [Upcoming Breaking Change](https://learn.microsoft.com/en-us/cli/azure/upcoming-breaking-changes) Document.
 
 ## Workflow
 
