@@ -366,12 +366,14 @@ def load_command_table(self, _):
         msg += " Learn more about storing Helm charts at"
         msg += " https://aka.ms/acr/helm"
         return msg
-    
+
     helm_deprecate_info = self.deprecate(redirect="Helm v3 commands", message_func=_helm_deprecate_message)
 
     with self.command_group('acr helm', acr_helm_util, deprecate_info=helm_deprecate_info) as g:
-        g.command('list', 'acr_helm_list', table_transformer=helm_list_output_format, deprecate_info=helm_deprecate_info)
-        g.show_command('show', 'acr_helm_show', table_transformer=helm_show_output_format, deprecate_info=helm_deprecate_info)
+        g.command('list', 'acr_helm_list', table_transformer=helm_list_output_format,
+                  deprecate_info=helm_deprecate_info)
+        g.show_command('show', 'acr_helm_show', table_transformer=helm_show_output_format,
+                       deprecate_info=helm_deprecate_info)
         g.command('delete', 'acr_helm_delete', deprecate_info=helm_deprecate_info)
         g.command('push', 'acr_helm_push', deprecate_info=helm_deprecate_info)
         g.command('repo add', 'acr_helm_repo_add', deprecate_info=helm_deprecate_info)
