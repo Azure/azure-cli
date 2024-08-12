@@ -201,6 +201,45 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
         
         self.cmd('appconfig delete -n {config_store_name} -g {rg} -y')
 
+        # create store in premium tier without replica
+        config_store_name = self.create_random_name(prefix='MgmtTestPremiumSku', length=24)
+        
+        self.kwargs.update({
+            "premium_sku": premium_sku,
+            "config_store_name": config_store_name,
+        })
+
+        store = self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {premium_sku} --tags {tags} --assign-identity {identity} --retention-days {retention_days} --enable-purge-protection {enable_purge_protection} --no-replica',
+                         checks=[self.check('name', '{config_store_name}'),
+                                 self.check('location', '{rg_loc}'),
+                                 self.check('resourceGroup', resource_group),
+                                 self.check('provisioningState', 'Succeeded'),
+                                 self.check('sku.name', premium_sku),
+                                 self.check('tags', structured_tag),
+                                 self.check('identity.type', 'SystemAssigned'),
+                                 self.check('softDeleteRetentionInDays', '{retention_days}'),
+                                 self.check('enablePurgeProtection', '{enable_purge_protection}')]).get_output_in_json()
+        
+        self.cmd('appconfig list -g {rg}',
+                 checks=[self.check('[0].name', '{config_store_name}'),
+                         self.check('[0].location', '{rg_loc}'),
+                         self.check('[0].resourceGroup', resource_group),
+                         self.check('[0].provisioningState', 'Succeeded'),
+                         self.check('[0].sku.name', premium_sku),
+                         self.check('[0].tags', structured_tag),
+                         self.check('[0].identity.type', 'SystemAssigned')])
+
+        self.cmd('appconfig show -n {config_store_name} -g {rg}',
+                 checks=[self.check('name', '{config_store_name}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('resourceGroup', resource_group),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('sku.name', premium_sku),
+                         self.check('tags', structured_tag),
+                         self.check('identity.type', 'SystemAssigned')])
+        
+        self.cmd('appconfig delete -n {config_store_name} -g {rg} -y')
+
         config_store_name = self.create_random_name(prefix='MgmtTestdel', length=24)
 
         self.kwargs.update({

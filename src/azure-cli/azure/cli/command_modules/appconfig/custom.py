@@ -75,18 +75,17 @@ def create_configstore(cmd,
 
     progress = IndeterminateStandardOut()
 
+    progress.write({"message": "Starting"})
     config_store = client.begin_create(resource_group_name, name, configstore_params)
 
     # # Poll request and create replica after store is created
     while config_store.status() == ProvisioningStatus.RUNNING:
-        progress.write({"message": "Creating store"})
+        progress.spinner.step(label="Creating store")
         config_store.wait(3)
 
-    if (config_store.status() == ProvisioningStatus.SUCCEEDED): # how to show error messages
+    if config_store.status() == ProvisioningStatus.SUCCEEDED and replica_name is not None:
         progress.write({"message": "Store created"})
         time.sleep(1)
-    
-    if config_store.done() and replica_name is not None:
         replica_client = cf_replicas(cmd.cli_ctx)
         store_replica = create_replica(cmd, replica_client, name, replica_name, replica_location, resource_group_name)
 
@@ -97,8 +96,11 @@ def create_configstore(cmd,
         if store_replica.status() == ProvisioningStatus.SUCCEEDED:
             progress.write({"message": "Replica created"})
             time.sleep(1)
+        else:
+            progress.write({"message": "Replica creation failed"})
 
     progress.clear()
+
     return config_store
 
 
@@ -372,20 +374,22 @@ def __validate_cmk(encryption_key_name=None,
             if any(arg is not None for arg in [encryption_key_vault, encryption_key_version, identity_client_id]):
                 logger.warning("Removing the customer encryption key. Key vault related arguments are ignored.")
 
+
 def __validate_replication(sku=None,
                            replica_name=None,
                            replica_location=None,
                            no_replica=False):
+
     if sku.lower() == 'premium' and not no_replica:
         if any(arg is None for arg in [replica_name, replica_location]):
-            raise RequiredArgumentMissingError("Options '--replica-name' and '--replica-location' are required when creating a premium tier store. If you don't want to create replica please provide explicit argument '--no-replica'")
+            raise RequiredArgumentMissingError("Options '--replica-name' and '--replica-location' are required when creating a premium tier store. To avoid creating replica please provide explicit argument '--no-replica'")
 
-    if no_replica and replica_name and replica_location:
-            raise CLIErrors.MutuallyExclusiveArgumentError("Please provide only one of these arguments: '--no-replica' or '--replica-name and --replica-location'. See 'az appconfig create -h' for examples.")  
-    
+    if no_replica and (replica_name or replica_location):
+        raise CLIErrors.MutuallyExclusiveArgumentError("Please provide only one of these arguments: '--no-replica' or '--replica-name and --replica-location'. See 'az appconfig create -h' for examples.")
+
     if replica_name:
         if replica_location is None:
-            raise RequiredArgumentMissingError("To add replica '--replica-location' is required")
+            raise RequiredArgumentMissingError("To create replica '--replica-location' is required")
     else:
         if replica_location is not None:
-            raise RequiredArgumentMissingError("To add replica '--replica-name' argument is required")
+            raise RequiredArgumentMissingError("To create replica '--replica-name' is required")
