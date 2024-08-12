@@ -323,9 +323,9 @@ def delete_replica(cmd, client, store_name, name, yes=False, resource_group_name
         )
         replicas = list_replica(cmd, client, store_name, resource_group_name)
 
-        if config_store.sku.name.lower() == "standard" and len(list(replicas)) == 1:
+        if config_store.sku.name.lower() == "premium" and len(list(replicas)) == 1:
             user_confirmation(
-                "Deleting the last replica will disable geo-replication. When using the premium tier, it is recommended to have geo-replication enabled to take advantage of an increased SLA of 99.99%. The first replica created for a premium tier store is free. Do you want to continue with this operation?"
+                "Deleting the last replica will disable geo-replication. When using the premium tier, it is recommended to have geo-replication enabled to take advantage of an increased SLA of 99.99%. The first replica created for a premium tier store is included. Do you want to continue with this operation?"
             )
         else:
             user_confirmation("Are you sure you want to continue with this operation?")
@@ -382,14 +382,14 @@ def __validate_replication(sku=None,
 
     if sku.lower() == 'premium' and not no_replica:
         if any(arg is None for arg in [replica_name, replica_location]):
-            raise RequiredArgumentMissingError("Options '--replica-name' and '--replica-location' are required when creating a premium tier store. To avoid creating replica please provide explicit argument '--no-replica'")
+            raise RequiredArgumentMissingError("Options '--replica-name' and '--replica-location' are required when creating a premium tier store. To avoid creating replica please provide explicit argument '--no-replica'.")
 
     if no_replica and (replica_name or replica_location):
         raise CLIErrors.MutuallyExclusiveArgumentError("Please provide only one of these arguments: '--no-replica' or '--replica-name and --replica-location'. See 'az appconfig create -h' for examples.")
 
     if replica_name:
         if replica_location is None:
-            raise RequiredArgumentMissingError("To create replica '--replica-location' is required")
+            raise RequiredArgumentMissingError("To create replica '--replica-location' is required.")
     else:
         if replica_location is not None:
-            raise RequiredArgumentMissingError("To create replica '--replica-name' is required")
+            raise RequiredArgumentMissingError("To create replica '--replica-name' is required.")
