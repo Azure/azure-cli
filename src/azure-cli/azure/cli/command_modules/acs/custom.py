@@ -2387,6 +2387,8 @@ def aks_agentpool_update(
     allowed_host_ports=None,
     asg_ids=None,
     os_sku=None,
+    enable_fips_image=False,
+    disable_fips_image=False,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
