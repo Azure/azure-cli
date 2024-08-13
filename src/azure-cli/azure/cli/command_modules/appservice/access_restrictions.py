@@ -115,7 +115,7 @@ def remove_webapp_access_restriction(cmd, resource_group_name, name, rule_name=N
                     continue
                 rule_instance = rule
                 break
-        elif service_tag:            
+        elif service_tag:
             if rule.ip_address and rule.ip_address.lower() == service_tag.lower() and rule.action == action:
                 if rule_name and (not rule.name or (rule.name and rule.name.lower() != rule_name.lower())):
                     continue

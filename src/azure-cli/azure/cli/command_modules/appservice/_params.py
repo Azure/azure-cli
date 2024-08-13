@@ -1074,6 +1074,7 @@ subscription than the app service environment, please use the resource ID for --
             c.argument('vnet_resource_group', help='Resource group of virtual network (default is web app resource group)')
             c.argument('http_headers', nargs='+', help="space-separated http headers in a format of `<name>=<value>`")
             c.argument('skip_service_tag_validation',
+                       options_list=['--skip-service-tag-validation', '-s'],
                        help='Skip validating public service tags',
                        arg_type=get_three_state_flag())
         with self.argument_context(scope + ' config access-restriction remove') as c:
@@ -1091,6 +1092,7 @@ subscription than the app service environment, please use the resource ID for --
             c.argument('action', arg_type=get_enum_type(ACCESS_RESTRICTION_ACTION_TYPES),
                        help="Allow or deny access")
             c.argument('skip_service_tag_validation',
+                       options_list=['--skip-service-tag-validation', '-s'],
                        help='Skip validating public service tags',
                        arg_type=get_three_state_flag())
         with self.argument_context(scope + ' config access-restriction set') as c:
