@@ -18,17 +18,23 @@ def link_grafana_instance(cmd, raw_parameters, azure_monitor_workspace_resource_
     # GET grafana principal ID
     try:
         grafana_resource_id = raw_parameters.get("grafana_resource_id")
-        if grafana_resource_id is None or grafana_resource_id == "":
+        if not grafana_resource_id:
             return GrafanaLink.NOPARAMPROVIDED
         grafana_resource_id = sanitize_resource_id(grafana_resource_id)
-        grafanaURI = "{0}{1}?api-version={2}".format(
-            cmd.cli_ctx.cloud.endpoints.resource_manager,
-            grafana_resource_id,
-            GRAFANA_API
-        )
+        grafanaURI = f"{cmd.cli_ctx.cloud.endpoints.resource_manager}{grafana_resource_id}?api-version={GRAFANA_API}"
         headers = ['User-Agent=azuremonitormetrics.link_grafana_instance']
         grafanaArmResponse = send_raw_request(cmd.cli_ctx, "GET", grafanaURI, body={}, headers=headers)
-        servicePrincipalId = grafanaArmResponse.json()["identity"]["principalId"]
+        
+        identity_type = grafanaArmResponse.json()["identity"]["type"]
+        if identity_type == "SystemAssigned":
+            servicePrincipalId = grafanaArmResponse.json()["identity"]["principalId"]
+        elif identity_type == "UserAssigned":
+            user_assigned_identities = grafanaArmResponse.json()["identity"]["userAssignedIdentities"]
+            if not user_assigned_identities:
+                raise CLIError("No user-assigned identities found.")
+            servicePrincipalId = list(user_assigned_identities.values())[0]["principalId"]
+        else:
+            raise CLIError("Unsupported identity type.")
     except CLIError as e:
         raise CLIError(e)
     # Add Role Assignment
