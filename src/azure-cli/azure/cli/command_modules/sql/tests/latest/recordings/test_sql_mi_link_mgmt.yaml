@@ -7,476 +7,15 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
-        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
-      User-Agent:
-      - AZURECLI/2.48.1 azsdk-python-mgmt-sql/4.0.0b10 Python/3.10.7 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/capabilities?include=supportedManagedInstanceVersions&api-version=2020-11-01-preview
-  response:
-    body:
-      string: '{"name":"West Central US","supportedManagedInstanceVersions":[{"name":"12.0","supportedEditions":[{"name":"GeneralPurpose","supportedFamilies":[{"name":"Gen5","sku":"GP_Gen5","supportedLicenseTypes":[{"name":"LicenseIncluded","status":"Default"},{"name":"BasePrice","status":"Available"}],"supportedVcoresValues":[{"name":"2","value":2,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":640,"unit":"Gigabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":false,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"4","value":4,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":2,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"8","value":8,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":8,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Default"},{"name":"16","value":16,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"24","value":24,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"32","value":32,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"40","value":40,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"64","value":64,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"80","value":80,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"}],"status":"Default"},{"name":"Gen8IH","sku":"GP_G8IH","supportedLicenseTypes":[{"name":"LicenseIncluded","status":"Default"},{"name":"BasePrice","status":"Available"}],"supportedVcoresValues":[{"name":"4","value":4,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":2,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"8","value":8,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":8,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Default"},{"name":"16","value":16,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"24","value":24,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"32","value":32,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"40","value":40,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"}],"status":"Available"},{"name":"Gen8IM","sku":"GP_G8IM","supportedLicenseTypes":[{"name":"LicenseIncluded","status":"Default"},{"name":"BasePrice","status":"Available"}],"supportedVcoresValues":[{"name":"4","value":4,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":2,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"8","value":8,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":8,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Default"},{"name":"16","value":16,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"24","value":24,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"32","value":32,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"40","value":40,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"64","value":64,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"80","value":80,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"}],"status":"Available"}],"supportedStorageCapabilities":[{"storageAccountType":"GRS","status":"Default"},{"storageAccountType":"LRS","status":"Available"},{"storageAccountType":"ZRS","status":"Visible","reason":"ZRS
-        is available in multi-az regions"},{"storageAccountType":"GZRS","status":"Visible","reason":"GZRS
-        is available in multi-az regions"}],"zoneRedundant":false,"status":"Default"},{"name":"BusinessCritical","supportedFamilies":[{"name":"Gen5","sku":"BC_Gen5","supportedLicenseTypes":[{"name":"LicenseIncluded","status":"Default"},{"name":"BasePrice","status":"Available"}],"supportedVcoresValues":[{"name":"4","value":4,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":1,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"8","value":8,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":1,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Default"},{"name":"16","value":16,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":1,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"24","value":24,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":2,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"32","value":32,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"40","value":40,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"64","value":64,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"80","value":80,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"}],"status":"Default"},{"name":"Gen8IH","sku":"BC_G8IH","supportedLicenseTypes":[{"name":"LicenseIncluded","status":"Default"},{"name":"BasePrice","status":"Available"}],"supportedVcoresValues":[{"name":"4","value":4,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":1,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"8","value":8,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":1,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"},{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":2,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Disabled","reason":"Managed
-        Instance is not accepting creation of Premium Series - Memory Optimized 8VCore
-        instances with more than 1TB local storage for Business Critical edition."}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Default"},{"name":"16","value":16,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":2,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"},{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Disabled","reason":"Managed
-        Instance is not accepting creation of Premium Series - Memory Optimized 16VCore
-        instances with more than 2TB local storage for Business Critical edition."}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"24","value":24,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":2,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"},{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":5632,"unit":"Gigabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Disabled","reason":"Managed
-        Instance is not accepting creation of Premium Series - Memory Optimized 24VCore
-        instances with more than 2TB local storage for Business Critical edition."},{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":6,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Disabled","reason":"Managed
-        Instance is not accepting creation of Premium Series - Memory Optimized 24VCore
-        instances with more than 2TB local storage for Business Critical edition."}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"32","value":32,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"},{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":5632,"unit":"Gigabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Disabled","reason":"Managed
-        Instance is not accepting creation of Premium Series - Memory Optimized 32VCore
-        instances with more than 4TB local storage for Business Critical edition."},{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":8,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Disabled","reason":"Managed
-        Instance is not accepting creation of Premium Series - Memory Optimized 32VCore
-        instances with more than 4TB local storage for Business Critical edition."}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"40","value":40,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":5632,"unit":"Gigabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"},{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":8,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Disabled","reason":"Managed
-        Instance is not accepting creation of Premium Series - Memory Optimized 40VCore
-        instances with more than 5.5TB local storage for Business Critical edition."}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"}],"status":"Available"},{"name":"Gen8IM","sku":"BC_G8IM","supportedLicenseTypes":[{"name":"LicenseIncluded","status":"Default"},{"name":"BasePrice","status":"Available"}],"supportedVcoresValues":[{"name":"4","value":4,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":1,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"8","value":8,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":1,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"},{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":2,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Disabled","reason":"Managed
-        Instance is not accepting creation of Premium Series 8VCore instances with
-        more than 1TB local storage for Business Critical edition."}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Default"},{"name":"16","value":16,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":2,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"},{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Disabled","reason":"Managed
-        Instance is not accepting creation of Premium Series 16VCore instances with
-        more than 2TB local storage for Business Critical edition."}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"24","value":24,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":2,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"},{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":5632,"unit":"Gigabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Disabled","reason":"Managed
-        Instance is not accepting creation of Premium Series 24VCore instances with
-        more than 2TB local storage for Business Critical edition."}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"32","value":32,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"},{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":5632,"unit":"Gigabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Disabled","reason":"Managed
-        Instance is not accepting creation of Premium Series 32VCore instances with
-        more than 4TB local storage for Business Critical edition."}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"40","value":40,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":5632,"unit":"Gigabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"64","value":64,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":5632,"unit":"Gigabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"},{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Disabled","reason":"Managed
-        Instance is not accepting creation of Premiumseries instances with more than
-        5.5TB  local storage for Business Critical edition."}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"80","value":80,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":5632,"unit":"Gigabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"},{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Disabled","reason":"Managed
-        Instance is not accepting creation of Premiumseries instances with more than
-        5.5TB  local storage for Business Critical edition."}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"}],"status":"Available"}],"supportedStorageCapabilities":[{"storageAccountType":"GRS","status":"Default"},{"storageAccountType":"LRS","status":"Available"},{"storageAccountType":"ZRS","status":"Visible","reason":"ZRS
-        is available in multi-az regions"},{"storageAccountType":"GZRS","status":"Visible","reason":"GZRS
-        is available in multi-az regions"}],"zoneRedundant":true,"status":"Available"},{"name":"Hermes","supportedFamilies":[],"supportedStorageCapabilities":[{"storageAccountType":"GRS","status":"Default"},{"storageAccountType":"LRS","status":"Available"},{"storageAccountType":"ZRS","status":"Visible","reason":"ZRS
-        is available in multi-az regions"},{"storageAccountType":"GZRS","status":"Visible","reason":"GZRS
-        is available in multi-az regions"}],"zoneRedundant":false,"status":"Available"}],"supportedInstancePoolEditions":[{"name":"GeneralPurpose","supportedFamilies":[{"name":"Gen5","supportedLicenseTypes":[{"name":"LicenseIncluded","status":"Default"},{"name":"BasePrice","status":"Available"}],"supportedVcoresValues":[{"name":"GP_Gen5_8","value":8,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Default"},{"name":"GP_Gen5_16","value":16,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen5_24","value":24,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen5_32","value":32,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen5_40","value":40,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen5_64","value":64,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen5_80","value":80,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"}],"status":"Default"}],"status":"Default"}],"status":"Default"}],"status":"Available"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '31275'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 11 May 2023 15:39:27 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"location": "westcentralus", "tags": {}, "sku": {"name": "GP_Gen5"}, "properties":
-      {"administratorLogin": "admin123", "administratorLoginPassword": "SecretPassword123SecretPassword",
-      "subnetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance",
-      "licenseType": "LicenseIncluded", "vCores": 4, "storageSizeInGB": 32, "collation":
-      "Serbian_Cyrillic_100_CS_AS", "publicDataEndpointEnabled": true, "proxyOverride":
-      "Proxy", "requestedBackupStorageRedundancy": "Geo", "administrators": {}}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '615'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
-        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
-      User-Agent:
-      - AZURECLI/2.48.1 azsdk-python-mgmt-sql/4.0.0b10 Python/3.10.7 (Windows-10-10.0.17763-SP0)
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2023-05-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"SystemDefault","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo"},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '754'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 11 May 2023 15:39:33 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-    status:
-      code: 201
-      message: Created
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
-        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
-      User-Agent:
-      - AZURECLI/2.48.1 azsdk-python-mgmt-sql/4.0.0b10 Python/3.10.7 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2023-05-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"minimalTlsVersion":"None","currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1230'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 11 May 2023 15:40:34 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
-        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
-      User-Agent:
-      - AZURECLI/2.48.1 azsdk-python-mgmt-sql/4.0.0b10 Python/3.10.7 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2023-05-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"minimalTlsVersion":"None","currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1230'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 11 May 2023 15:41:04 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
-        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
-      User-Agent:
-      - AZURECLI/2.48.1 azsdk-python-mgmt-sql/4.0.0b10 Python/3.10.7 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2023-05-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"minimalTlsVersion":"None","currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1230'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 11 May 2023 15:41:33 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
-        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
-      User-Agent:
-      - AZURECLI/2.48.1 azsdk-python-mgmt-sql/4.0.0b10 Python/3.10.7 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2023-05-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"minimalTlsVersion":"None","currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1230'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 11 May 2023 15:42:04 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
-        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
-      User-Agent:
-      - AZURECLI/2.48.1 azsdk-python-mgmt-sql/4.0.0b10 Python/3.10.7 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2023-05-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"minimalTlsVersion":"None","currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1230'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 11 May 2023 15:42:34 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
-        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
-      User-Agent:
-      - AZURECLI/2.48.1 azsdk-python-mgmt-sql/4.0.0b10 Python/3.10.7 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2023-05-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Succeeded","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Ready","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"minimalTlsVersion":"None","currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1228'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 11 May 2023 15:43:05 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi show
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n
-      User-Agent:
-      - AZURECLI/2.48.1 azsdk-python-mgmt-sql/4.0.0b10 Python/3.10.7 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2023-05-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Succeeded","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Ready","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"minimalTlsVersion":"None","currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1228'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 11 May 2023 15:43:07 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
       - sql mi link list
       Connection:
       - keep-alive
       ParameterSetName:
       - -g --instance-name
       User-Agent:
-      - AZURECLI/2.48.1 (AAZ) azsdk-python-core/1.24.0 Python/3.10.7 (Windows-10-10.0.17763-SP0)
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.8.5 (Windows-10-10.0.20348-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001/distributedAvailabilityGroups?api-version=2022-08-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/DaniRG/providers/Microsoft.Sql/managedInstances/chimera-canary-gpv2-01/distributedAvailabilityGroups?api-version=2023-08-01-preview
   response:
     body:
       string: '{"value":[]}'
@@ -488,28 +27,27 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 11 May 2023 15:43:08 GMT
+      - Mon, 12 Aug 2024 14:09:40 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 0CEA46B00D434CB082961A3C661722D7 Ref B: AMS231032607027 Ref C: 2024-08-12T14:09:40Z'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"primaryAvailabilityGroupName": "ag_primary", "secondaryAvailabilityGroupName":
-      "ag_secondary", "sourceEndpoint": "TCP://localhost:7022", "targetDatabase":
-      "db"}}'
+    body: '{"properties": {"partnerAvailabilityGroupName": "AG_CLI1", "instanceAvailabilityGroupName":
+      "AG_CLI1_MI", "partnerEndpoint": "tcp://10.0.1.8:5022", "databases": [{"databaseName":
+      "CLI1"}], "instanceLinkRole": "Primary", "seedingMode": "Automatic", "failoverMode":
+      "Manual"}}'
     headers:
       Accept:
       - application/json
@@ -520,47 +58,229 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '178'
+      - '274'
       Content-Type:
       - application/json
       ParameterSetName:
-      - -g --instance-name --name --primary-availability-group-name --secondary-availability-group-name
-        --source-endpoint --target-database --no-wait
+      - -g --instance-name --name --databases --instance-availability-group-name --partner-availability-group-name
+        --partner-endpoint --instance-link-role --failover-mode --seeding-mode
       User-Agent:
-      - AZURECLI/2.48.1 (AAZ) azsdk-python-core/1.24.0 Python/3.10.7 (Windows-10-10.0.17763-SP0)
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.8.5 (Windows-10-10.0.20348-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001/distributedAvailabilityGroups/dag?api-version=2022-08-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/DaniRG/providers/Microsoft.Sql/managedInstances/chimera-canary-gpv2-01/distributedAvailabilityGroups/Link1?api-version=2023-08-01-preview
   response:
     body:
-      string: '{"operation":"DistributedAvailabilityGroupsLinkCreate","startTime":"2023-05-11T15:43:09.803Z"}'
+      string: '{"operation":"DistributedAvailabilityGroupsLinkCreateFromMI","startTime":"2024-08-12T14:09:41.343Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/distributedAvailabilityGroupsAzureAsyncOperation/210cb0a4-abfc-479c-a42a-03d5c49e7a16?api-version=2022-08-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/DaniRG/providers/Microsoft.Sql/locations/eastus2euap/distributedAvailabilityGroupsAzureAsyncOperation/f3a7e3f6-3ca4-4fd5-a026-d97b7247def7?api-version=2023-08-01-preview&t=638590685814312319&c=MIIHpTCCBo2gAwIBAgITfwN4zzUuivvTBCLCCQAEA3jPNTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDIwHhcNMjQwNjI0MTEyOTU2WhcNMjUwNjE5MTEyOTU2WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANvVWo1xOJRhTabFDg9tH83KxBFFsI-8hXpNc70gVGUo9vdR_GCto5GXht5Nk15RV9Eui7tLs-n7VOqRt4ZJ5VAjpwORPU0ibxKV9KxuriafJTjL7Qrk0JaSp7WGJqPW-J-Pd5L3tP1bFJur8kjM0bafBsjx64XEFWORLz5Fn2lp6TrN09Jd5b8K0HSCXKW2e3XMjLsNhXY8nqovBeHTMKNIUXpy2nH5fjVOimZk6Q4T6__1OhvvEVJZsCL05KUdxdO_hsLWYu-CjOT4AShuIDdibMapH2IdzaeWrawQNPVXKZ_KeKth7kpbOhSv1QWmfPOy3V9F2YLccUW5EGnQeZUCAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDAyKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3J0MB0GA1UdDgQWBBQo83UWtIVJoZyZu85mKVA3wYeN-TAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBSuecJrXSWIEwb2BwnDl3x7l48dVTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAAIjL4XB6DpRu-qyv5OqJYhIEmeI3Qe1UttC_KzpXoBWbVudKDV9CE0p6ofXSgAL0ecWXtRLq-_0Fc7jpgUBZrqam1Kegg-ApMr78hSiTUCMxHgWpUKN7_6b26skb5WN_0GWObM78VwcVTyKQ7K4Axw_Iik9WglVk9QKreZ9lSNPWhI6DX1bb-Pl2gRDXKY1bw3t_3-FiYyzROsU-9IAJozqZs_m-J3bfkcJ01J8Eg21vEdK-9_4uHA1qfGU7aJr9APH4fc5S9AonGi9UeSEiqG3Bas997LqgN_Wd49UeSnfabQl54UewiQjaFThlNO5qQ9xQ7IuuGjkqAH6M9R_uIo&s=Iq3L4K3nbfgc66Vx1Ia2P-aUVOIvNd6oFrIv8GsRP4SMJAhtcWH4BnBuPC-rWE7EvUBC_XS4EHf1z9fG8McGDdJlKvDBD-OFwghBb2eXhlh_39zS0jTK19kaYPcv4c3jRWxvikaXTnr8um6phDSPvg4gPX7mGiXlcJ-bsjDiE5z3SY0-t5cjJ8k1X_lai-GvHg5qM3jCPxJfGXNAfWmFspAaAxPAp2MUaq6unRUhcD4FS5h72uvJ4NFjGr-93mXdNbBndpTrcfz0r0Wfkb5lwTdLFZXCd16PscWzID9g8piokpMsG9D5e912e80s-D8KpKi0jFyER-DfA5eqLKnakw&h=zsE59Z3UX0Rtiq-XZZp_NsZGWxqNSnmpA5nWtCRzm1w
       cache-control:
       - no-cache
       content-length:
-      - '94'
+      - '100'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 11 May 2023 15:43:09 GMT
+      - Mon, 12 Aug 2024 14:09:40 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/distributedAvailabilityGroupsOperationResults/210cb0a4-abfc-479c-a42a-03d5c49e7a16?api-version=2022-08-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/DaniRG/providers/Microsoft.Sql/locations/eastus2euap/distributedAvailabilityGroupsOperationResults/f3a7e3f6-3ca4-4fd5-a026-d97b7247def7?api-version=2023-08-01-preview&t=638590685814468622&c=MIIHpTCCBo2gAwIBAgITfwN4zzUuivvTBCLCCQAEA3jPNTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDIwHhcNMjQwNjI0MTEyOTU2WhcNMjUwNjE5MTEyOTU2WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANvVWo1xOJRhTabFDg9tH83KxBFFsI-8hXpNc70gVGUo9vdR_GCto5GXht5Nk15RV9Eui7tLs-n7VOqRt4ZJ5VAjpwORPU0ibxKV9KxuriafJTjL7Qrk0JaSp7WGJqPW-J-Pd5L3tP1bFJur8kjM0bafBsjx64XEFWORLz5Fn2lp6TrN09Jd5b8K0HSCXKW2e3XMjLsNhXY8nqovBeHTMKNIUXpy2nH5fjVOimZk6Q4T6__1OhvvEVJZsCL05KUdxdO_hsLWYu-CjOT4AShuIDdibMapH2IdzaeWrawQNPVXKZ_KeKth7kpbOhSv1QWmfPOy3V9F2YLccUW5EGnQeZUCAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDAyKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3J0MB0GA1UdDgQWBBQo83UWtIVJoZyZu85mKVA3wYeN-TAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBSuecJrXSWIEwb2BwnDl3x7l48dVTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAAIjL4XB6DpRu-qyv5OqJYhIEmeI3Qe1UttC_KzpXoBWbVudKDV9CE0p6ofXSgAL0ecWXtRLq-_0Fc7jpgUBZrqam1Kegg-ApMr78hSiTUCMxHgWpUKN7_6b26skb5WN_0GWObM78VwcVTyKQ7K4Axw_Iik9WglVk9QKreZ9lSNPWhI6DX1bb-Pl2gRDXKY1bw3t_3-FiYyzROsU-9IAJozqZs_m-J3bfkcJ01J8Eg21vEdK-9_4uHA1qfGU7aJr9APH4fc5S9AonGi9UeSEiqG3Bas997LqgN_Wd49UeSnfabQl54UewiQjaFThlNO5qQ9xQ7IuuGjkqAH6M9R_uIo&s=H4I0syfNNygTWlMM7KM6nurDECDKBYb6W4RBny5SnFZ9mU3KG3ESfejTwbj6X-aohFRqh9AG8bmw8Y2xikw11A6YV-gEjcYvS3iFnTmtin03rNwxTgFVVNcj1W9WAVuqepBjimjuuNXwDRVjV-folegRuihzb49p-VYP00AtvHykCX4vd3f9iQbR0aRbPfrOmoLUlhi5L4h6xt2Bd_Fi9pgSXHwoZwlhC6b4p6egvENKgztECYr3Qu8wx5uPz1S7fRlpaHAaUOAfvsBoK_yfE9EehfnLJN8revOzWcnIIRqCFbmV1HDtnzywQp8vGEUnc3q-B_9AZTr_Rb_KGHgxIQ&h=nsRzAsRtOWGWNtPrUKK3IBu4hlrjngbNo33c3U-4qvE
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
+      x-msedge-ref:
+      - 'Ref A: 8193D0D6276D481DA2EB49DACE9FC700 Ref B: AMS231022012037 Ref C: 2024-08-12T14:09:40Z'
     status:
       code: 202
       message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi link create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --instance-name --name --databases --instance-availability-group-name --partner-availability-group-name
+        --partner-endpoint --instance-link-role --failover-mode --seeding-mode
+      User-Agent:
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.8.5 (Windows-10-10.0.20348-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/DaniRG/providers/Microsoft.Sql/locations/eastus2euap/distributedAvailabilityGroupsAzureAsyncOperation/f3a7e3f6-3ca4-4fd5-a026-d97b7247def7?api-version=2023-08-01-preview&t=638590685814312319&c=MIIHpTCCBo2gAwIBAgITfwN4zzUuivvTBCLCCQAEA3jPNTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDIwHhcNMjQwNjI0MTEyOTU2WhcNMjUwNjE5MTEyOTU2WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANvVWo1xOJRhTabFDg9tH83KxBFFsI-8hXpNc70gVGUo9vdR_GCto5GXht5Nk15RV9Eui7tLs-n7VOqRt4ZJ5VAjpwORPU0ibxKV9KxuriafJTjL7Qrk0JaSp7WGJqPW-J-Pd5L3tP1bFJur8kjM0bafBsjx64XEFWORLz5Fn2lp6TrN09Jd5b8K0HSCXKW2e3XMjLsNhXY8nqovBeHTMKNIUXpy2nH5fjVOimZk6Q4T6__1OhvvEVJZsCL05KUdxdO_hsLWYu-CjOT4AShuIDdibMapH2IdzaeWrawQNPVXKZ_KeKth7kpbOhSv1QWmfPOy3V9F2YLccUW5EGnQeZUCAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDAyKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3J0MB0GA1UdDgQWBBQo83UWtIVJoZyZu85mKVA3wYeN-TAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBSuecJrXSWIEwb2BwnDl3x7l48dVTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAAIjL4XB6DpRu-qyv5OqJYhIEmeI3Qe1UttC_KzpXoBWbVudKDV9CE0p6ofXSgAL0ecWXtRLq-_0Fc7jpgUBZrqam1Kegg-ApMr78hSiTUCMxHgWpUKN7_6b26skb5WN_0GWObM78VwcVTyKQ7K4Axw_Iik9WglVk9QKreZ9lSNPWhI6DX1bb-Pl2gRDXKY1bw3t_3-FiYyzROsU-9IAJozqZs_m-J3bfkcJ01J8Eg21vEdK-9_4uHA1qfGU7aJr9APH4fc5S9AonGi9UeSEiqG3Bas997LqgN_Wd49UeSnfabQl54UewiQjaFThlNO5qQ9xQ7IuuGjkqAH6M9R_uIo&s=Iq3L4K3nbfgc66Vx1Ia2P-aUVOIvNd6oFrIv8GsRP4SMJAhtcWH4BnBuPC-rWE7EvUBC_XS4EHf1z9fG8McGDdJlKvDBD-OFwghBb2eXhlh_39zS0jTK19kaYPcv4c3jRWxvikaXTnr8um6phDSPvg4gPX7mGiXlcJ-bsjDiE5z3SY0-t5cjJ8k1X_lai-GvHg5qM3jCPxJfGXNAfWmFspAaAxPAp2MUaq6unRUhcD4FS5h72uvJ4NFjGr-93mXdNbBndpTrcfz0r0Wfkb5lwTdLFZXCd16PscWzID9g8piokpMsG9D5e912e80s-D8KpKi0jFyER-DfA5eqLKnakw&h=zsE59Z3UX0Rtiq-XZZp_NsZGWxqNSnmpA5nWtCRzm1w
+  response:
+    body:
+      string: '{"name":"f3a7e3f6-3ca4-4fd5-a026-d97b7247def7","status":"InProgress","startTime":"2024-08-12T14:09:41.343Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Aug 2024 14:09:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-msedge-ref:
+      - 'Ref A: F9C559AE47A24AFCB5E00223AD6BDEB5 Ref B: AMS231022012037 Ref C: 2024-08-12T14:09:41Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi link create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --instance-name --name --databases --instance-availability-group-name --partner-availability-group-name
+        --partner-endpoint --instance-link-role --failover-mode --seeding-mode
+      User-Agent:
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.8.5 (Windows-10-10.0.20348-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/DaniRG/providers/Microsoft.Sql/locations/eastus2euap/distributedAvailabilityGroupsAzureAsyncOperation/f3a7e3f6-3ca4-4fd5-a026-d97b7247def7?api-version=2023-08-01-preview&t=638590685814312319&c=MIIHpTCCBo2gAwIBAgITfwN4zzUuivvTBCLCCQAEA3jPNTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDIwHhcNMjQwNjI0MTEyOTU2WhcNMjUwNjE5MTEyOTU2WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANvVWo1xOJRhTabFDg9tH83KxBFFsI-8hXpNc70gVGUo9vdR_GCto5GXht5Nk15RV9Eui7tLs-n7VOqRt4ZJ5VAjpwORPU0ibxKV9KxuriafJTjL7Qrk0JaSp7WGJqPW-J-Pd5L3tP1bFJur8kjM0bafBsjx64XEFWORLz5Fn2lp6TrN09Jd5b8K0HSCXKW2e3XMjLsNhXY8nqovBeHTMKNIUXpy2nH5fjVOimZk6Q4T6__1OhvvEVJZsCL05KUdxdO_hsLWYu-CjOT4AShuIDdibMapH2IdzaeWrawQNPVXKZ_KeKth7kpbOhSv1QWmfPOy3V9F2YLccUW5EGnQeZUCAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDAyKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3J0MB0GA1UdDgQWBBQo83UWtIVJoZyZu85mKVA3wYeN-TAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBSuecJrXSWIEwb2BwnDl3x7l48dVTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAAIjL4XB6DpRu-qyv5OqJYhIEmeI3Qe1UttC_KzpXoBWbVudKDV9CE0p6ofXSgAL0ecWXtRLq-_0Fc7jpgUBZrqam1Kegg-ApMr78hSiTUCMxHgWpUKN7_6b26skb5WN_0GWObM78VwcVTyKQ7K4Axw_Iik9WglVk9QKreZ9lSNPWhI6DX1bb-Pl2gRDXKY1bw3t_3-FiYyzROsU-9IAJozqZs_m-J3bfkcJ01J8Eg21vEdK-9_4uHA1qfGU7aJr9APH4fc5S9AonGi9UeSEiqG3Bas997LqgN_Wd49UeSnfabQl54UewiQjaFThlNO5qQ9xQ7IuuGjkqAH6M9R_uIo&s=Iq3L4K3nbfgc66Vx1Ia2P-aUVOIvNd6oFrIv8GsRP4SMJAhtcWH4BnBuPC-rWE7EvUBC_XS4EHf1z9fG8McGDdJlKvDBD-OFwghBb2eXhlh_39zS0jTK19kaYPcv4c3jRWxvikaXTnr8um6phDSPvg4gPX7mGiXlcJ-bsjDiE5z3SY0-t5cjJ8k1X_lai-GvHg5qM3jCPxJfGXNAfWmFspAaAxPAp2MUaq6unRUhcD4FS5h72uvJ4NFjGr-93mXdNbBndpTrcfz0r0Wfkb5lwTdLFZXCd16PscWzID9g8piokpMsG9D5e912e80s-D8KpKi0jFyER-DfA5eqLKnakw&h=zsE59Z3UX0Rtiq-XZZp_NsZGWxqNSnmpA5nWtCRzm1w
+  response:
+    body:
+      string: '{"name":"f3a7e3f6-3ca4-4fd5-a026-d97b7247def7","status":"InProgress","startTime":"2024-08-12T14:09:41.343Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Aug 2024 14:09:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-msedge-ref:
+      - 'Ref A: 2EC33BA2E2AD494BABE0E655C268A4BF Ref B: AMS231022012037 Ref C: 2024-08-12T14:09:57Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi link create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --instance-name --name --databases --instance-availability-group-name --partner-availability-group-name
+        --partner-endpoint --instance-link-role --failover-mode --seeding-mode
+      User-Agent:
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.8.5 (Windows-10-10.0.20348-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/DaniRG/providers/Microsoft.Sql/locations/eastus2euap/distributedAvailabilityGroupsAzureAsyncOperation/f3a7e3f6-3ca4-4fd5-a026-d97b7247def7?api-version=2023-08-01-preview&t=638590685814312319&c=MIIHpTCCBo2gAwIBAgITfwN4zzUuivvTBCLCCQAEA3jPNTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDIwHhcNMjQwNjI0MTEyOTU2WhcNMjUwNjE5MTEyOTU2WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANvVWo1xOJRhTabFDg9tH83KxBFFsI-8hXpNc70gVGUo9vdR_GCto5GXht5Nk15RV9Eui7tLs-n7VOqRt4ZJ5VAjpwORPU0ibxKV9KxuriafJTjL7Qrk0JaSp7WGJqPW-J-Pd5L3tP1bFJur8kjM0bafBsjx64XEFWORLz5Fn2lp6TrN09Jd5b8K0HSCXKW2e3XMjLsNhXY8nqovBeHTMKNIUXpy2nH5fjVOimZk6Q4T6__1OhvvEVJZsCL05KUdxdO_hsLWYu-CjOT4AShuIDdibMapH2IdzaeWrawQNPVXKZ_KeKth7kpbOhSv1QWmfPOy3V9F2YLccUW5EGnQeZUCAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDAyKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3J0MB0GA1UdDgQWBBQo83UWtIVJoZyZu85mKVA3wYeN-TAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBSuecJrXSWIEwb2BwnDl3x7l48dVTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAAIjL4XB6DpRu-qyv5OqJYhIEmeI3Qe1UttC_KzpXoBWbVudKDV9CE0p6ofXSgAL0ecWXtRLq-_0Fc7jpgUBZrqam1Kegg-ApMr78hSiTUCMxHgWpUKN7_6b26skb5WN_0GWObM78VwcVTyKQ7K4Axw_Iik9WglVk9QKreZ9lSNPWhI6DX1bb-Pl2gRDXKY1bw3t_3-FiYyzROsU-9IAJozqZs_m-J3bfkcJ01J8Eg21vEdK-9_4uHA1qfGU7aJr9APH4fc5S9AonGi9UeSEiqG3Bas997LqgN_Wd49UeSnfabQl54UewiQjaFThlNO5qQ9xQ7IuuGjkqAH6M9R_uIo&s=Iq3L4K3nbfgc66Vx1Ia2P-aUVOIvNd6oFrIv8GsRP4SMJAhtcWH4BnBuPC-rWE7EvUBC_XS4EHf1z9fG8McGDdJlKvDBD-OFwghBb2eXhlh_39zS0jTK19kaYPcv4c3jRWxvikaXTnr8um6phDSPvg4gPX7mGiXlcJ-bsjDiE5z3SY0-t5cjJ8k1X_lai-GvHg5qM3jCPxJfGXNAfWmFspAaAxPAp2MUaq6unRUhcD4FS5h72uvJ4NFjGr-93mXdNbBndpTrcfz0r0Wfkb5lwTdLFZXCd16PscWzID9g8piokpMsG9D5e912e80s-D8KpKi0jFyER-DfA5eqLKnakw&h=zsE59Z3UX0Rtiq-XZZp_NsZGWxqNSnmpA5nWtCRzm1w
+  response:
+    body:
+      string: '{"name":"f3a7e3f6-3ca4-4fd5-a026-d97b7247def7","status":"Succeeded","startTime":"2024-08-12T14:09:41.343Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Aug 2024 14:10:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-msedge-ref:
+      - 'Ref A: 819BF9F3D12847A19065B2FB3EEC3FA2 Ref B: AMS231022012037 Ref C: 2024-08-12T14:10:12Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql mi link create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --instance-name --name --databases --instance-availability-group-name --partner-availability-group-name
+        --partner-endpoint --instance-link-role --failover-mode --seeding-mode
+      User-Agent:
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.8.5 (Windows-10-10.0.20348-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/DaniRG/providers/Microsoft.Sql/managedInstances/chimera-canary-gpv2-01/distributedAvailabilityGroups/Link1?api-version=2023-08-01-preview
+  response:
+    body:
+      string: '{"properties":{"distributedAvailabilityGroupName":"Link1","distributedAvailabilityGroupId":"05842eee-3d86-94f2-427d-f541ed1ac939","replicationMode":"Async","partnerLinkRole":"Secondary","partnerAvailabilityGroupName":"AG_CLI1","partnerEndpoint":"tcp://10.0.1.8:5022","instanceLinkRole":"Primary","instanceAvailabilityGroupName":"AG_CLI1_MI","failoverMode":"Manual","seedingMode":"Automatic","databases":[{"databaseName":"CLI1","instanceReplicaId":"e3e0eb6e-0a7f-645d-4cd9-98e09d82a8ba","partnerReplicaId":"e40ad384-e89e-bda3-2516-4fb9d1519429","replicaState":"LinkSynchronizing","synchronizationHealth":"HEALTHY","connectedState":"CONNECTED","lastSentLsn":"42000000344000001","lastSentTime":"2024-08-12T14:10:04.72Z","lastCommitLsn":"0","lastHardenedLsn":"42000000344800001","lastHardenedTime":"2024-08-12T14:09:42.493Z","lastBackupLsn":"42000000334400001","lastBackupTime":"2024-08-12T14:00:31Z","partnerAuthCertValidity":{"certificateName":"wwi-2022-sql02","expiryDate":"2027-03-06T00:00:00Z"},"instanceSendReplicationLagSeconds":0,"instanceRedoReplicationLagSeconds":0}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/DaniRG/providers/Microsoft.Sql/managedInstances/chimera-canary-gpv2-01","name":"Link1","type":"Microsoft.Sql/managedInstances/distributedAvailabilityGroups"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1305'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Aug 2024 14:10:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-msedge-ref:
+      - 'Ref A: 9EA4EDAE63AF4F9AB9881389AE9637C8 Ref B: AMS231022012037 Ref C: 2024-08-12T14:10:12Z'
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
@@ -575,31 +295,33 @@ interactions:
       ParameterSetName:
       - -g --instance-name --name
       User-Agent:
-      - AZURECLI/2.48.1 (AAZ) azsdk-python-core/1.24.0 Python/3.10.7 (Windows-10-10.0.17763-SP0)
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.8.5 (Windows-10-10.0.20348-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001/distributedAvailabilityGroups/dag?api-version=2022-08-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/DaniRG/providers/Microsoft.Sql/managedInstances/chimera-canary-gpv2-01/distributedAvailabilityGroups/Link1?api-version=2023-08-01-preview
   response:
     body:
-      string: '{"properties":{"targetDatabase":"db","sourceEndpoint":"TCP://localhost:7022","replicationMode":"Async","distributedAvailabilityGroupId":"6bc05a51-aa36-a196-09bd-481d7a0973c0","sourceReplicaId":"e36a23b5-5cf7-e378-1e47-2f39aeebd066","targetReplicaId":"268a30a3-b37e-7485-8c25-4a961dc0b267","linkState":"WaitForHybridConnectionToEstablish"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001/distributedAvailabilityGroups/dag","name":"dag","type":"Microsoft.Sql/managedInstances/distributedAvailabilityGroups"}'
+      string: '{"properties":{"distributedAvailabilityGroupName":"Link1","distributedAvailabilityGroupId":"05842eee-3d86-94f2-427d-f541ed1ac939","replicationMode":"Async","partnerLinkRole":"Secondary","partnerAvailabilityGroupName":"AG_CLI1","partnerEndpoint":"tcp://10.0.1.8:5022","instanceLinkRole":"Primary","instanceAvailabilityGroupName":"AG_CLI1_MI","failoverMode":"Manual","seedingMode":"Automatic","databases":[{"databaseName":"CLI1","instanceReplicaId":"e3e0eb6e-0a7f-645d-4cd9-98e09d82a8ba","partnerReplicaId":"e40ad384-e89e-bda3-2516-4fb9d1519429","replicaState":"LinkSynchronizing","synchronizationHealth":"HEALTHY","connectedState":"CONNECTED","lastSentLsn":"42000000344000001","lastSentTime":"2024-08-12T14:10:04.72Z","lastCommitLsn":"0","lastHardenedLsn":"42000000344800001","lastHardenedTime":"2024-08-12T14:09:42.493Z","lastBackupLsn":"42000000334400001","lastBackupTime":"2024-08-12T14:00:31Z","partnerAuthCertValidity":{"certificateName":"wwi-2022-sql02","expiryDate":"2027-03-06T00:00:00Z"},"instanceSendReplicationLagSeconds":0,"instanceRedoReplicationLagSeconds":0}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/DaniRG/providers/Microsoft.Sql/managedInstances/chimera-canary-gpv2-01","name":"Link1","type":"Microsoft.Sql/managedInstances/distributedAvailabilityGroups"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '613'
+      - '1305'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 11 May 2023 15:44:11 GMT
+      - Mon, 12 Aug 2024 14:10:14 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 196477477D3242C0BBA39A69877C59E3 Ref B: AMS231032609021 Ref C: 2024-08-12T14:10:13Z'
     status:
       code: 200
       message: OK
@@ -617,228 +339,34 @@ interactions:
       ParameterSetName:
       - --ids
       User-Agent:
-      - AZURECLI/2.48.1 (AAZ) azsdk-python-core/1.24.0 Python/3.10.7 (Windows-10-10.0.17763-SP0)
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.8.5 (Windows-10-10.0.20348-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001/distributedAvailabilityGroups/dag?api-version=2022-08-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/DaniRG/providers/Microsoft.Sql/managedInstances/chimera-canary-gpv2-01/distributedAvailabilityGroups/Link1?api-version=2023-08-01-preview
   response:
     body:
-      string: '{"properties":{"targetDatabase":"db","sourceEndpoint":"TCP://localhost:7022","replicationMode":"Async","distributedAvailabilityGroupId":"6bc05a51-aa36-a196-09bd-481d7a0973c0","sourceReplicaId":"e36a23b5-5cf7-e378-1e47-2f39aeebd066","targetReplicaId":"268a30a3-b37e-7485-8c25-4a961dc0b267","linkState":"WaitForHybridConnectionToEstablish"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001/distributedAvailabilityGroups/dag","name":"dag","type":"Microsoft.Sql/managedInstances/distributedAvailabilityGroups"}'
+      string: '{"properties":{"distributedAvailabilityGroupName":"Link1","distributedAvailabilityGroupId":"05842eee-3d86-94f2-427d-f541ed1ac939","replicationMode":"Async","partnerLinkRole":"Secondary","partnerAvailabilityGroupName":"AG_CLI1","partnerEndpoint":"tcp://10.0.1.8:5022","instanceLinkRole":"Primary","instanceAvailabilityGroupName":"AG_CLI1_MI","failoverMode":"Manual","seedingMode":"Automatic","databases":[{"databaseName":"CLI1","instanceReplicaId":"e3e0eb6e-0a7f-645d-4cd9-98e09d82a8ba","partnerReplicaId":"e40ad384-e89e-bda3-2516-4fb9d1519429","replicaState":"LinkSynchronizing","synchronizationHealth":"HEALTHY","connectedState":"CONNECTED","lastSentLsn":"42000000344000001","lastSentTime":"2024-08-12T14:10:04.72Z","lastCommitLsn":"0","lastHardenedLsn":"42000000344800001","lastHardenedTime":"2024-08-12T14:09:42.493Z","lastBackupLsn":"42000000334400001","lastBackupTime":"2024-08-12T14:00:31Z","partnerAuthCertValidity":{"certificateName":"wwi-2022-sql02","expiryDate":"2027-03-06T00:00:00Z"},"instanceSendReplicationLagSeconds":0,"instanceRedoReplicationLagSeconds":0}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/DaniRG/providers/Microsoft.Sql/managedInstances/chimera-canary-gpv2-01","name":"Link1","type":"Microsoft.Sql/managedInstances/distributedAvailabilityGroups"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '613'
+      - '1305'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 11 May 2023 15:44:12 GMT
+      - Mon, 12 Aug 2024 14:10:14 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: DE84C6FB39B84E42AEDE3123C2723020 Ref B: AMS231032608009 Ref C: 2024-08-12T14:10:14Z'
     status:
       code: 200
       message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi link delete
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      ParameterSetName:
-      - -g --instance-name -n --yes
-      User-Agent:
-      - AZURECLI/2.48.1 (AAZ) azsdk-python-core/1.24.0 Python/3.10.7 (Windows-10-10.0.17763-SP0)
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001/distributedAvailabilityGroups/dag?api-version=2022-08-01-preview
-  response:
-    body:
-      string: '{"operation":"DistributedAvailabilityGroupsDropLink","startTime":"2023-05-11T15:44:15.257Z"}'
-    headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/distributedAvailabilityGroupsAzureAsyncOperation/aadbd039-6622-4e15-8280-c5d9981d2107?api-version=2022-08-01-preview
-      cache-control:
-      - no-cache
-      content-length:
-      - '92'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 11 May 2023 15:44:14 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/distributedAvailabilityGroupsOperationResults/aadbd039-6622-4e15-8280-c5d9981d2107?api-version=2022-08-01-preview
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi link delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g --instance-name -n --yes
-      User-Agent:
-      - AZURECLI/2.48.1 (AAZ) azsdk-python-core/1.24.0 Python/3.10.7 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/distributedAvailabilityGroupsAzureAsyncOperation/aadbd039-6622-4e15-8280-c5d9981d2107?api-version=2022-08-01-preview
-  response:
-    body:
-      string: '{"name":"aadbd039-6622-4e15-8280-c5d9981d2107","status":"Succeeded","startTime":"2023-05-11T15:44:15.257Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '107'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 11 May 2023 15:44:30 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi link list
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g --instance-name
-      User-Agent:
-      - AZURECLI/2.48.1 (AAZ) azsdk-python-core/1.24.0 Python/3.10.7 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001/distributedAvailabilityGroups?api-version=2022-08-01-preview
-  response:
-    body:
-      string: '{"value":[]}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '12'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 11 May 2023 15:44:31 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi delete
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      ParameterSetName:
-      - -g -n --yes --no-wait
-      User-Agent:
-      - AZURECLI/2.48.1 azsdk-python-mgmt-sql/4.0.0b10 Python/3.10.7 (Windows-10-10.0.17763-SP0)
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2023-05-01-preview
-  response:
-    body:
-      string: '{"operation":"DropManagedServer","startTime":"2023-05-11T15:44:33.897Z"}'
-    headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedInstanceAzureAsyncOperation/a515cb11-7082-4bca-bbed-3aacfa3401ab?api-version=2022-08-01-preview
-      cache-control:
-      - no-cache
-      content-length:
-      - '72'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 11 May 2023 15:44:33 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedInstanceOperationResults/a515cb11-7082-4bca-bbed-3aacfa3401ab?api-version=2022-08-01-preview
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
-    status:
-      code: 202
-      message: Accepted
 version: 1
