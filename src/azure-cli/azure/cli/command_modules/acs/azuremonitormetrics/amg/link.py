@@ -18,23 +18,33 @@ def link_grafana_instance(cmd, raw_parameters, azure_monitor_workspace_resource_
     # GET grafana principal ID
     try:
         grafana_resource_id = raw_parameters.get("grafana_resource_id")
-        if not grafana_resource_id:
+        if grafana_resource_id is None or grafana_resource_id == "":
             return GrafanaLink.NOPARAMPROVIDED
         grafana_resource_id = sanitize_resource_id(grafana_resource_id)
-        grafanaURI = f"{cmd.cli_ctx.cloud.endpoints.resource_manager}{grafana_resource_id}?api-version={GRAFANA_API}"
+        grafanaURI = "{0}{1}?api-version={2}".format(
+            cmd.cli_ctx.cloud.endpoints.resource_manager,
+            grafana_resource_id,
+            GRAFANA_API
+        )
         headers = ['User-Agent=azuremonitormetrics.link_grafana_instance']
         grafanaArmResponse = send_raw_request(cmd.cli_ctx, "GET", grafanaURI, body={}, headers=headers)
         
-        identity_type = grafanaArmResponse.json()["identity"]["type"]
-        if identity_type == "SystemAssigned":
-            servicePrincipalId = grafanaArmResponse.json()["identity"]["principalId"]
-        elif identity_type == "UserAssigned":
-            user_assigned_identities = grafanaArmResponse.json()["identity"]["userAssignedIdentities"]
+         # Check if 'identity' and 'type' exist in the response
+        identity_info = grafanaArmResponse.json().get("identity", {})
+        identity_type = identity_info.get("type", "").lower()
+
+        if identity_type == "systemassigned":
+            servicePrincipalId = identity_info.get("principalId")
+        elif identity_type == "userassigned":
+            user_assigned_identities = identity_info.get("userAssignedIdentities", {})
             if not user_assigned_identities:
                 raise CLIError("No user-assigned identities found.")
             servicePrincipalId = list(user_assigned_identities.values())[0]["principalId"]
         else:
-            raise CLIError("Unsupported identity type.")
+            raise CLIError("Unsupported or missing identity type.")
+
+        if not servicePrincipalId:
+            raise CLIError("No service principal ID found for the specified identity.")
     except CLIError as e:
         raise CLIError(e)
     # Add Role Assignment
