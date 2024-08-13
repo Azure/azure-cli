@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# This script should be run in a Mariner 2.0 docker container.
+# This script should be run in a Azure Linux docker container.
 set -exv
 
 export USERNAME=azureuser
