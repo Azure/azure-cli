@@ -1268,7 +1268,7 @@ def validate_ssh_key(namespace, cmd=None):
         namespace.ssh_key_value = [_validate_ssh_key_helper("", namespace.generate_ssh_keys)]
 
 
-def _validate_ssh_key_helper(ssh_key_value, should_generate_ssh_keys):
+def _validate_ssh_key_helper(ssh_key_value, should_generate_ssh_keys, generate_ssh_keys_type=None):
     string_or_file = (ssh_key_value or
                       os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub'))
     content = string_or_file
@@ -1286,9 +1286,12 @@ def _validate_ssh_key_helper(ssh_key_value, should_generate_ssh_keys):
             else:
                 private_key_filepath = public_key_filepath + '.private'
 
-            from azure.cli.command_modules.vm._vm_utils import generate_ssh_keys as vm_generate_ssh_keys
-            # content = keys.generate_ssh_keys(private_key_filepath, public_key_filepath)
-            content = vm_generate_ssh_keys(private_key_filepath, public_key_filepath)
+            if generate_ssh_keys_type == "Ed25519":
+                from azure.cli.command_modules.vm._vm_utils import generate_ssh_keys_ed25519
+                content = generate_ssh_keys_ed25519(private_key_filepath, public_key_filepath)
+            else:
+                content = keys.generate_ssh_keys(private_key_filepath, public_key_filepath)
+            # content = vm_generate_ssh_keys(private_key_filepath, public_key_filepath)
             logger.warning("SSH key files '%s' and '%s' have been generated under ~/.ssh to "
                            "allow SSH access to the VM. If using machines without "
                            "permanent storage, back up your keys to a safe location.",

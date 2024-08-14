@@ -730,8 +730,8 @@ def import_aaz_by_profile(profile, module_name):
 
 
 def generate_ssh_keys_ed25519(private_key_filepath, public_key_filepath):
-    from cryptography.hazmat.primitives.asymmetric import rsa
-    from cryptography.hazmat.primitives import hashes, serialization
+    from cryptography.hazmat.primitives import serialization
+    from cryptography.hazmat.primitives.asymmetric.x25519 import X25519PrivateKey
 
     if os.path.isfile(public_key_filepath):
         try:
@@ -751,32 +751,18 @@ def generate_ssh_keys_ed25519(private_key_filepath, public_key_filepath):
         os.makedirs(ssh_dir)
         os.chmod(ssh_dir, 0o700)
 
-    if os.path.isfile(private_key_filepath):
-        # try to use existing private key if it exists.
-        try:
-            key = paramiko.RSAKey(filename=private_key_filepath)
-            logger.warning("Private SSH key file '%s' was found in the directory: '%s'. "
-                           "A paired public key file '%s' will be generated.",
-                           private_key_filepath, ssh_dir, public_key_filepath)
-        except (PasswordRequiredException, SSHException, IOError) as e:
-            raise CLIError(e)
+    private_key = X25519PrivateKey.generate()
+    public_key = X25519PrivateKey.generate().public_key()
 
-    else:
-        # otherwise generate new private key.
-        # key = paramiko.RSAKey.generate(2048)
-        from cryptography.hazmat.backends.openssl.backend import backend
-        key = rsa.generate_private_key(
-            public_exponent=65537, key_size=2048, backend=backend
-        )
-        # key.write_private_key_file(private_key_filepath)
-        _write_private_key_file(filename=private_key_filepath,
-                                key=key,
-                                format=serialization.PrivateFormat.TraditionalOpenSSL)
-        os.chmod(private_key_filepath, 0o600)
+    _write_private_key_file(filename=private_key_filepath,
+                            key=private_key,
+                            format=serialization.PrivateFormat.TraditionalOpenSSL)
+    os.chmod(private_key_filepath, 0o600)
 
     with open(public_key_filepath, 'w') as public_key_file:
-        from base64 import encodebytes
-        s = encodebytes(bytes())
+        s = public_key.public_bytes(
+            encoding=serialization.Encoding.Raw,
+            format=serialization.PublicFormat.Raw)
         s = s.decode(encoding="utf8").replace("\n", "")
 
         public_key = '{} {}'.format("ssh-rsa", s)
@@ -845,36 +831,18 @@ def generate_ssh_keys(private_key_filepath, public_key_filepath):
     return public_key
 
 
-def _write_private_key_file(self, filename, key, format, password=None):
-    """
-    Write an SSH2-format private key file in a form that can be read by
-    paramiko or openssh.  If no password is given, the key is written in
-    a trivially-encoded format (base64) which is completely insecure.  If
-    a password is given, DES-EDE3-CBC is used.
-
-    :param str tag:
-        ``"RSA"`` or ``"DSA"``, the tag used to mark the data block.
-    :param filename: name of the file to write.
-    :param bytes data: data blob that makes up the private key.
-    :param str password: an optional password to use to encrypt the file.
-
-    :raises: ``IOError`` -- if there was an error writing the file.
-    """
-    # Ensure that we create new key files directly with a user-only mode,
-    # instead of opening, writing, then chmodding, which leaves us open to
-    # CVE-2022-24302.
+def _write_private_key_file(self, filename, key, format):
+    from cryptography.hazmat.primitives import serialization
     with os.fdopen(
         os.open(
             filename,
-            # NOTE: O_TRUNC is a noop on new files, and O_CREAT is a noop
-            # on existing files, so using all 3 in both cases is fine.
             flags=os.O_WRONLY | os.O_TRUNC | os.O_CREAT,
-            # Ditto the use of the 'mode' argument; it should be safe to
-            # give even for existing files (though it will not act like a
-            # chmod in that case).
-            mode=o600,
+            mode=384,
         ),
-        # Yea, you still gotta inform the FLO that it is in "write" mode.
         "w",
     ) as f:
-        self._write_private_key(f, key, format, password=password)
+        f.write(
+            key.private_bytes(
+                serialization.Encoding.PEM, format, serialization.NoEncryption()
+            ).decode()
+        )
