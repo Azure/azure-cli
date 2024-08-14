@@ -28,8 +28,8 @@ def link_grafana_instance(cmd, raw_parameters, azure_monitor_workspace_resource_
         )
         headers = ['User-Agent=azuremonitormetrics.link_grafana_instance']
         grafanaArmResponse = send_raw_request(cmd.cli_ctx, "GET", grafanaURI, body={}, headers=headers)
-        
-         # Check if 'identity' and 'type' exist in the response
+
+        # Check if 'identity' and 'type' exist in the response
         identity_info = grafanaArmResponse.json().get("identity", {})
         identity_type = identity_info.get("type", "").lower()
 
