@@ -49,6 +49,11 @@ from azure.cli.command_modules.acs._consts import (
     CONST_AZURE_SERVICE_MESH_INGRESS_MODE_INTERNAL)
 from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
     CONST_ACSTOR_ALL,
+    CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY,
+    CONST_DISK_TYPE_PV_WITH_ANNOTATION,
+    CONST_EPHEMERAL_NVME_PERF_TIER_BASIC,
+    CONST_EPHEMERAL_NVME_PERF_TIER_PREMIUM,
+    CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD,
     CONST_STORAGE_POOL_TYPE_AZURE_DISK,
     CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK,
     CONST_STORAGE_POOL_TYPE_ELASTIC_SAN,
@@ -243,6 +248,17 @@ disable_storage_pool_options = [
     CONST_ACSTOR_ALL,
 ]
 
+ephemeral_disk_volume_types = [
+    CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY,
+    CONST_DISK_TYPE_PV_WITH_ANNOTATION,
+]
+
+ephemeral_disk_nvme_perf_tiers = [
+    CONST_EPHEMERAL_NVME_PERF_TIER_BASIC,
+    CONST_EPHEMERAL_NVME_PERF_TIER_PREMIUM,
+    CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD,
+]
+
 
 def load_arguments(self, _):
 
@@ -349,8 +365,7 @@ def load_arguments(self, _):
         c.argument('enable_vpa', action='store_true', help='enable vertical pod autoscaler for cluster')
         c.argument('enable_azure_service_mesh',
                    options_list=["--enable-azure-service-mesh", "--enable-asm"],
-                   action='store_true',
-                   is_preview=True)
+                   action='store_true')
         c.argument("revision", validator=validate_azure_service_mesh_revision)
         # addons
         c.argument('enable_addons', options_list=['--enable-addons', '-a'])
@@ -438,6 +453,16 @@ def load_arguments(self, _):
             arg_type=get_enum_type(storage_pool_options),
             help="set ephemeral disk storage pool option for azure container storage",
         )
+        c.argument(
+            "ephemeral_disk_volume_type",
+            arg_type=get_enum_type(ephemeral_disk_volume_types),
+            help="set ephemeral disk volume type for azure container storage",
+        )
+        c.argument(
+            "ephemeral_disk_nvme_perf_tier",
+            arg_type=get_enum_type(ephemeral_disk_nvme_perf_tiers),
+            help="set ephemeral disk volume type for azure container storage",
+        )
         # misc
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
         c.argument('enable_cost_analysis', action='store_true')
@@ -457,7 +482,7 @@ def load_arguments(self, _):
         c.argument('nat_gateway_idle_timeout', type=int, validator=validate_nat_gateway_idle_timeout)
         c.argument('network_dataplane', arg_type=get_enum_type(network_dataplanes))
         c.argument('network_plugin', arg_type=get_enum_type(network_plugins))
-        c.argument('network_policy')
+        c.argument('network_policy', arg_type=get_enum_type(network_policies))
         c.argument('outbound_type', arg_type=get_enum_type(outbound_types))
         c.argument('auto_upgrade_channel', arg_type=get_enum_type(auto_upgrade_channels))
         c.argument('cluster_autoscaler_profile', nargs='+', options_list=["--cluster-autoscaler-profile", "--ca-profile"],
@@ -551,7 +576,7 @@ def load_arguments(self, _):
         c.argument(
             "disable_azure_container_storage",
             arg_type=get_enum_type(disable_storage_pool_types),
-            help="disable azure container storage or any one of the storagepool types",
+            help="disable azure container storage or any one of the storage pool types",
         )
         c.argument(
             "storage_pool_name",
@@ -574,6 +599,16 @@ def load_arguments(self, _):
         c.argument(
             "azure_container_storage_nodepools",
             help="define the comma separated nodepool list to install azure container storage",
+        )
+        c.argument(
+            "ephemeral_disk_volume_type",
+            arg_type=get_enum_type(ephemeral_disk_volume_types),
+            help="set ephemeral disk volume type for azure container storage",
+        )
+        c.argument(
+            "ephemeral_disk_nvme_perf_tier",
+            arg_type=get_enum_type(ephemeral_disk_nvme_perf_tiers),
+            help="set ephemeral disk volume type for azure container storage",
         )
         # misc
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
@@ -637,6 +672,8 @@ def load_arguments(self, _):
         c.argument('enable_force_upgrade', action='store_true')
         c.argument('disable_force_upgrade', action='store_true', validator=validate_force_upgrade_disable_and_enable_parameters)
         c.argument('upgrade_override_until')
+        c.argument("k8s_support_plan", arg_type=get_enum_type(k8s_support_plans))
+        c.argument("tier", arg_type=get_enum_type(sku_tiers), validator=validate_sku_tier)
 
     with self.argument_context('aks scale', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('nodepool_name', validator=validate_nodepool_name, help='Node pool name, up to 12 alphanumeric characters.')
@@ -749,6 +786,8 @@ def load_arguments(self, _):
         c.argument('allowed_host_ports', nargs='+', validator=validate_allowed_host_ports)
         c.argument('asg_ids', nargs='+', validator=validate_application_security_groups)
         c.argument('os_sku', arg_type=get_enum_type(node_os_skus_update), validator=validate_os_sku)
+        c.argument("enable_fips_image", action="store_true")
+        c.argument("disable_fips_image", action="store_true")
 
     with self.argument_context('aks nodepool upgrade') as c:
         c.argument('max_surge', validator=validate_max_surge)

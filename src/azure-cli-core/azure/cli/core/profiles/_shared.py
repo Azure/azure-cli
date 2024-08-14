@@ -101,7 +101,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_CONTAINERINSTANCE = ('azure.mgmt.containerinstance', None)
     MGMT_COSMOSDB = ('azure.mgmt.cosmosdb', None)
     MGMT_DATALAKE_ANALYTICS = ('azure.cli.command_modules.dla.vendored_sdks.azure_mgmt_datalake_analytics', None)
-    MGMT_DATALAKE_STORE = ('azure.mgmt.datalake.store', None)
+    MGMT_DATALAKE_STORE = ('azure.cli.command_modules.dls.vendored_sdks.azure_mgmt_datalake_store', None)
     MGMT_DATAMIGRATION = ('azure.mgmt.datamigration', None)
     MGMT_EVENTGRID = ('azure.mgmt.eventgrid', None)
     MGMT_DEVTESTLABS = ('azure.mgmt.devtestlabs', None)
@@ -154,7 +154,7 @@ class SDKProfile:  # pylint: disable=too-few-public-methods
 
 AZURE_API_PROFILES = {
     'latest': {
-        ResourceType.MGMT_STORAGE: '2023-01-01',
+        ResourceType.MGMT_STORAGE: '2023-05-01',
         ResourceType.MGMT_NETWORK: '2022-01-01',
         ResourceType.MGMT_COMPUTE: SDKProfile('2024-03-01', {
             'resource_skus': '2019-04-01',
@@ -261,7 +261,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_ARO: '2023-09-04',
         ResourceType.MGMT_DATABOXEDGE: '2021-02-01-preview',
         ResourceType.MGMT_CUSTOMLOCATION: '2021-03-15-preview',
-        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2024-02-01'),
+        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2024-05-01'),
         ResourceType.MGMT_APPCONTAINERS: '2022-10-01',
     },
     '2020-09-01-hybrid': {

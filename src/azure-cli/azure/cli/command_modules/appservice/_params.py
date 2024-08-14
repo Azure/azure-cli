@@ -78,7 +78,7 @@ def load_arguments(self, _):
 
     static_web_app_sku_arg_type = CLIArgumentType(
         help='The pricing tiers for Static Web App',
-        arg_type=get_enum_type(['Free', 'Standard'])
+        arg_type=get_enum_type(['Free', 'Standard', 'Dedicated'])
     )
 
     # use this hidden arg to give a command the right instance, that functionapp commands
@@ -166,6 +166,8 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('subnet', help="Name or resource ID of the pre-existing subnet to have the webapp join. The --vnet is argument also needed if specifying subnet by name.")
         c.argument('public_network_access', help="Enable or disable public access to the web app", arg_type=get_enum_type(PUBLIC_NETWORK_ACCESS_MODES))
         c.argument('acr_use_identity', action='store_true', help="Enable or disable pull image from acr use managed identity")
+        c.argument('acr_identity', help='Accept system or user assigned identity which will be set for acr image pull. '
+                                        'Use \'[system]\' to refer system assigned identity, or a resource id to refer user assigned identity.')
         c.argument('basic_auth', help='Enable or disable basic auth.', arg_type=get_enum_type(BASIC_AUTH_TYPES))
         c.ignore('language')
         c.ignore('using_webapp_up')
@@ -183,6 +185,7 @@ subscription than the app service environment, please use the resource ID for --
     with self.argument_context('webapp list-runtimes') as c:
         c.argument('linux', action='store_true', help='list runtime stacks for linux based web apps', deprecate_info=c.deprecate(redirect="--os-type"))
         c.argument('os_type', options_list=["--os", "--os-type"], help="limit the output to just windows or linux runtimes", arg_type=get_enum_type([LINUX_OS_NAME, WINDOWS_OS_NAME]))
+        c.argument('show_runtime_details', action='store_true', help="show detailed versions of runtime stacks")
 
     with self.argument_context('functionapp list-runtimes') as c:
         c.argument('os_type', options_list=["--os", "--os-type"], help="limit the output to just windows or linux runtimes", arg_type=get_enum_type([LINUX_OS_NAME, WINDOWS_OS_NAME]))
@@ -356,6 +359,9 @@ subscription than the app service environment, please use the resource ID for --
                 c.ignore('reserved_instance_count')
                 c.argument('runtime', help="Canonicalized web runtime in the format of Framework:Version, e.g. \"PHP:7.2\"."
                                            "Use `az webapp list-runtimes` for available list")
+                c.argument('acr_use_identity', arg_type=get_three_state_flag(return_label=True), help="Enable or disable pull image from acr use managed identity")
+                c.argument('acr_identity', help="Accept system or user assigned identity which will be set for acr image pull. "
+                                                "Use \'[system]\' to refer system assigned identity, or a resource id to refer user assigned identity.")
             c.argument('java_version',
                        help="The version used to run your web app if using Java, e.g., '1.7' for Java 7, '1.8' for Java 8")
             c.argument('java_container', help="The java container, e.g., Tomcat, Jetty")

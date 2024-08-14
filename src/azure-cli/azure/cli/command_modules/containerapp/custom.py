@@ -1624,7 +1624,14 @@ def stop_containerappsjob(cmd, resource_group_name, name, job_execution_name=Non
         if execution_name_list is not None:
             execution_name_list = execution_name_list.split(",")
             execution_name_list = json.dumps({'jobExecutionName': execution_name_list})
-        return ContainerAppsJobClient.stop_job(cmd=cmd, resource_group_name=resource_group_name, name=name, job_execution_name=job_execution_name, job_execution_names=execution_name_list)
+        r = ContainerAppsJobClient.stop_job(cmd=cmd, resource_group_name=resource_group_name, name=name, job_execution_name=job_execution_name, job_execution_names=execution_name_list)
+
+        # if stop is called for a single job execution, return generic response
+        if job_execution_name:
+            return "Job Execution: " + job_execution_name + ", stopped successfully."
+
+        # else return the response
+        return r
     except CLIError as e:
         handle_raw_exception(e)
 
@@ -5015,10 +5022,15 @@ def set_workload_profile(cmd, resource_group_name, env_name, workload_profile_na
 
 
 def add_workload_profile(cmd, resource_group_name, env_name, workload_profile_name, workload_profile_type=None, min_nodes=None, max_nodes=None):
+    r = None
     try:
         r = ManagedEnvironmentClient.show(cmd=cmd, resource_group_name=resource_group_name, name=env_name)
     except CLIError as e:
         handle_raw_exception(e)
+
+    if r and safe_get(r, "properties", "workloadProfiles") is None:
+        raise ValidationError("Cannot add workload profile because the environment doesn't enable workload profile.\n"
+                              "If you want to use Consumption and Dedicated environment, please create a new one with 'az containerapp env create'.")
 
     workload_profiles = r["properties"]["workloadProfiles"]
 
@@ -5031,10 +5043,15 @@ def add_workload_profile(cmd, resource_group_name, env_name, workload_profile_na
 
 
 def update_workload_profile(cmd, resource_group_name, env_name, workload_profile_name, min_nodes=None, max_nodes=None):
+    r = None
     try:
         r = ManagedEnvironmentClient.show(cmd=cmd, resource_group_name=resource_group_name, name=env_name)
     except CLIError as e:
         handle_raw_exception(e)
+
+    if r and safe_get(r, "properties", "workloadProfiles") is None:
+        raise ValidationError("Cannot update workload profile because the environment doesn't enable workload profile.\n"
+                              "If you want to use Consumption and Dedicated environment, please create a new one with 'az containerapp env create'.")
 
     workload_profiles = r["properties"]["workloadProfiles"]
 

@@ -1623,33 +1623,34 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
     SecurityProfile, UefiSettings = cmd.get_models('SecurityProfile', 'UefiSettings')
     vm = kwargs['parameters']
 
-    disk_resource_group, disk_name = None, None
+    disk_name = None
     if os_disk is not None:
         if is_valid_resource_id(os_disk):
             disk_id = os_disk
             os_disk_id_parsed = parse_resource_id(os_disk)
-            disk_resource_group, disk_name = os_disk_id_parsed['resource_group'], os_disk_id_parsed['name']
+            disk_name = os_disk_id_parsed['name']
         else:
             vm_id_parsed = parse_resource_id(vm.id)
             disk_id = resource_id(subscription=vm_id_parsed['subscription'],
                                   resource_group=vm_id_parsed['resource_group'],
                                   namespace='Microsoft.Compute', type='disks', name=os_disk)
-            disk_resource_group, disk_name = vm_id_parsed['resource_group'], os_disk
+            disk_name = os_disk
         vm.storage_profile.os_disk.managed_disk.id = disk_id
         vm.storage_profile.os_disk.name = disk_name
 
     if security_type == "TrustedLaunch":
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        if vm.security_profile is not None and vm.security_profile.security_type == "ConfidentialVM":
+            raise InvalidArgumentValueError("{} is already configured with ConfidentialVM. Security Configuration "
+                                            "cannot be updated from ConfidentialVM to TrustedLaunch.".format(vm.name))
+
         if disk_name is None and vm.storage_profile.os_disk.managed_disk is not None:
             os_disk_id_parsed = parse_resource_id(vm.storage_profile.os_disk.managed_disk.id)
-            disk_resource_group, disk_name = os_disk_id_parsed['resource_group'], os_disk_id_parsed['name']
+            disk_name = os_disk_id_parsed['name']
 
         if disk_name is not None:
-            from ._vm_utils import validate_update_vm_trusted_launch_supported
-
-            validate_update_vm_trusted_launch_supported(cmd=cmd, vm=vm, os_disk_resource_group=disk_resource_group,
-                                                        os_disk_name=disk_name)
-            # Set --enable-secure-boot False and --enable-vtpm True if not specified by end user.
-            enable_secure_boot = enable_secure_boot if enable_secure_boot is not None else False
+            # Set --enable-secure-boot True and --enable-vtpm True if not specified by end user.
+            enable_secure_boot = enable_secure_boot if enable_secure_boot is not None else True
             enable_vtpm = enable_vtpm if enable_vtpm is not None else True
 
             if vm.security_profile is None:
@@ -3932,7 +3933,8 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 security_posture_reference_id=None, security_posture_reference_exclude_extensions=None,
                 max_surge=None, enable_resilient_creation=None, enable_resilient_deletion=None,
                 ephemeral_os_disk=None, ephemeral_os_disk_option=None, zones=None, additional_scheduled_events=None,
-                enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None, **kwargs):
+                enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None,
+                upgrade_policy_mode=None, enable_auto_os_upgrade=None, **kwargs):
     vmss = kwargs['parameters']
     aux_subscriptions = None
     # pylint: disable=too-many-boolean-expressions
@@ -4152,6 +4154,15 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             vmss.upgrade_policy.rolling_upgrade_policy.enable_cross_zone_upgrade = enable_cross_zone_upgrade
             vmss.upgrade_policy.rolling_upgrade_policy.prioritize_unhealthy_instances = prioritize_unhealthy_instances
             vmss.upgrade_policy.rolling_upgrade_policy.max_surge = max_surge
+
+    if upgrade_policy_mode is not None:
+        vmss.upgrade_policy.mode = upgrade_policy_mode
+
+    if enable_auto_os_upgrade is not None:
+        if vmss.upgrade_policy.automatic_os_upgrade_policy is None:
+            vmss.upgrade_policy.automatic_os_upgrade_policy = {'enableAutomaticOSUpgrade': enable_auto_os_upgrade}
+        else:
+            vmss.upgrade_policy.automatic_os_upgrade_policy.enable_automatic_os_upgrade = enable_auto_os_upgrade
 
     if vm_sku is not None:
         if vmss.sku.name == vm_sku:
@@ -4787,9 +4798,9 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
                 feature_list.append(GalleryImageFeature(name=key, value=value))
             except ValueError:
                 raise CLIError('usage error: --features KEY=VALUE [KEY=VALUE ...]')
-        if security_type is None:
+        if security_type is None and hyper_v_generation == 'V2':
             feature_list.append(GalleryImageFeature(name='SecurityType', value='TrustedLaunchSupported'))
-    if features is None and cmd.cli_ctx.cloud.profile == 'latest':
+    if features is None and cmd.cli_ctx.cloud.profile == 'latest' and hyper_v_generation == 'V2':
         feature_list = []
         feature_list.append(GalleryImageFeature(name='SecurityType', value='TrustedLaunchSupported'))
 

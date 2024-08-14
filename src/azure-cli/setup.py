@@ -12,12 +12,12 @@ import sys
 try:
     from azure_cli_bdist_wheel import cmdclass
 except ImportError:
-    from distutils import log as logger
+    import logging
 
-    logger.warn("Wheel is not available, disabling bdist_wheel hook")
+    logging.warning("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.61.0"
+VERSION = "2.63.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -46,6 +46,7 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',
     'License :: OSI Approved :: MIT License',
 ]
 
@@ -56,7 +57,7 @@ DEPENDENCIES = [
     'azure-cli-core=={}'.format(VERSION),
     'azure-cosmos~=3.0,>=3.0.2',
     'azure-data-tables==12.4.0',
-    'azure-datalake-store~=0.0.49',
+    'azure-datalake-store~=0.0.53',
     'azure-graphrbac~=0.60.0',
     'azure-keyvault-administration==4.4.0b2',
     'azure-keyvault-certificates==4.7.0',
@@ -77,10 +78,9 @@ DEPENDENCIES = [
     'azure-mgmt-compute~=31.0.0',
     'azure-mgmt-containerinstance==10.1.0',
     'azure-mgmt-containerregistry==10.3.0',
-    'azure-mgmt-containerservice~=30.0.0',
-    'azure-mgmt-cosmosdb==9.4.0',
+    'azure-mgmt-containerservice~=31.0.0',
+    'azure-mgmt-cosmosdb==9.5.1',
     'azure-mgmt-databoxedge~=1.0.0',
-    'azure-mgmt-datalake-store~=0.5.0',
     'azure-mgmt-datamigration~=10.0.0',
     'azure-mgmt-devtestlabs~=4.0',
     'azure-mgmt-dns~=8.0.0',
@@ -108,7 +108,7 @@ DEPENDENCIES = [
     'azure-mgmt-rdbms~=10.2.0b16',
     'azure-mgmt-recoveryservicesbackup~=9.1.0',
     'azure-mgmt-recoveryservices~=3.0.0',
-    'azure-mgmt-redis~=14.3.0',
+    'azure-mgmt-redis~=14.4.0',
     'azure-mgmt-redhatopenshift~=1.4.0',
     'azure-mgmt-resource==23.1.1',
     'azure-mgmt-search~=9.0',
@@ -120,7 +120,7 @@ DEPENDENCIES = [
     'azure-mgmt-signalr==2.0.0b1',
     'azure-mgmt-sqlvirtualmachine==1.0.0b5',
     'azure-mgmt-sql==4.0.0b17',
-    'azure-mgmt-storage==21.1.0',
+    'azure-mgmt-storage==21.2.0',
     'azure-mgmt-synapse==2.1.0b5',
     'azure-mgmt-trafficmanager~=1.0.0',
     'azure-mgmt-web==7.2.0',
@@ -128,7 +128,7 @@ DEPENDENCIES = [
     'azure-multiapi-storage~=1.2.0',
     'azure-storage-common~=1.4',
     'azure-synapse-accesscontrol~=0.5.0',
-    'azure-synapse-artifacts~=0.18.0',
+    'azure-synapse-artifacts~=0.19.0',
     'azure-synapse-managedprivateendpoints~=0.4.0',
     'azure-synapse-spark~=0.2.0',
     'chardet~=5.2.0',

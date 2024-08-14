@@ -74,7 +74,6 @@ from ._validators import (
     validate_subnet
 )
 
-
 #####
 #        SizeWithUnitConverter - consider moving to common code (azure.cli.core.commands.parameters)
 #####
@@ -407,6 +406,11 @@ perform_cutover_param_type = CLIArgumentType(
     options_list=['--perform-cutover'],
     help='Whether to perform cutover when updating database to Hyperscale tier is in progress.',
     arg_type=get_three_state_flag())
+
+authentication_metadata_param_type = CLIArgumentType(
+    options_list=['--authentication-metadata', '--am'],
+    help='Preferred metadata to use for authentication of synced on-prem users. Default is AzureAD.',
+    arg_type=get_enum_type(['AzureAD', 'Windows', 'Paired']))
 
 db_service_objective_examples = 'Basic, S0, P1, GP_Gen4_1, GP_S_Gen5_8, BC_Gen5_2, HS_Gen5_32.'
 dw_service_objective_examples = 'DW100, DW1000c'
@@ -2333,9 +2337,17 @@ def load_arguments(self, _):
         c.argument('zone_redundant',
                    arg_type=zone_redundant_param_type)
 
+        c.argument('authentication_metadata',
+                   arg_type=authentication_metadata_param_type)
+
     with self.argument_context('sql mi create') as c:
         c.argument('location',
                    arg_type=get_location_type_with_default_from_resource_group(self.cli_ctx))
+
+        c.argument('dns_zone_partner',
+                   required=False,
+                   help='The resource id of the partner Managed Instance to inherit DnsZone property from for Managed '
+                        'Instance creation.')
 
         # Create args that will be used to build up the ManagedInstance object
         create_args_for_complex_type(
@@ -2360,7 +2372,8 @@ def load_arguments(self, _):
                 'zone_redundant',
                 'instance_pool_name',
                 'database_format',
-                'pricing_model'
+                'pricing_model',
+                'dns_zone_partner'
             ])
 
         # Create args that will be used to build up the Managed Instance's Sku object
@@ -2906,6 +2919,12 @@ def load_arguments(self, _):
     #           sql midb move/copy
     ######
     with self.argument_context('sql midb move') as c:
+        c.argument('dest_subscription_id',
+                   required=False,
+                   options_list=['--dest-subscription-id', '--dest-sub-id'],
+                   help='Id of the subscription to move the managed database to.'
+                   ' If unspecified, defaults to the origin subscription id.')
+
         c.argument('dest_resource_group_name',
                    required=False,
                    options_list=['--dest-resource-group', '--dest-rg'],
@@ -2918,6 +2937,12 @@ def load_arguments(self, _):
                    help='Name of the managed instance to move the managed database to.')
 
     with self.argument_context('sql midb copy') as c:
+        c.argument('dest_subscription_id',
+                   required=False,
+                   options_list=['--dest-subscription-id', '--dest-sub-id'],
+                   help='Id of the subscription to move the managed database to.'
+                   ' If unspecified, defaults to the origin subscription id.')
+
         c.argument('dest_resource_group_name',
                    required=False,
                    options_list=['--dest-resource-group', '--dest-rg'],
@@ -2939,6 +2964,12 @@ def load_arguments(self, _):
                    options_list=['--managed-instance', '--mi'],
                    required=True,
                    help='Name of the source managed instance.')
+
+        c.argument('dest_subscription_id',
+                   required=False,
+                   options_list=['--dest-subscription-id', '--dest-sub-id'],
+                   help='Id of the subscription to move the managed database to.'
+                   ' If unspecified, defaults to the origin subscription id.')
 
         c.argument('dest_instance_name',
                    required=False,
@@ -2965,6 +2996,12 @@ def load_arguments(self, _):
                    options_list=['--managed-instance', '--mi'],
                    required=True,
                    help='Name of the source managed instance.')
+
+        c.argument('dest_subscription_id',
+                   required=False,
+                   options_list=['--dest-subscription-id', '--dest-sub-id'],
+                   help='Id of the subscription to move the managed database to.'
+                   ' If unspecified, defaults to the origin subscription id.')
 
         c.argument('dest_instance_name',
                    required=False,
