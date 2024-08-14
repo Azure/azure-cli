@@ -47,10 +47,10 @@ class TestBreakingChange(unittest.TestCase):
     def test_register_and_execute(self):
         from contextlib import redirect_stderr, redirect_stdout
 
-        from azure.cli.core.breaking_change import announce_other_breaking_change
+        from azure.cli.core.breaking_change import register_other_breaking_change
 
         warning_message = 'Test Breaking Change in Test Group'
-        announce_other_breaking_change('test', warning_message)
+        register_other_breaking_change('test', warning_message)
         cli = DummyCli(commands_loader_cls=TestCommandsLoader)
 
         captured_err = io.StringIO()
@@ -68,15 +68,15 @@ class TestBreakingChange(unittest.TestCase):
         with redirect_stdout(captured_output):
             with self.assertRaises(SystemExit):
                 cli.invoke(['test', 'group', '--help'])
-            self.assertIn('[BrkChange]', captured_output.getvalue())
+            self.assertIn('[BreakingChange]', captured_output.getvalue())
             self.assertIn(warning_message, captured_output.getvalue())
 
     def test_command_group_deprecate(self):
         from contextlib import redirect_stderr, redirect_stdout
 
-        from azure.cli.core.breaking_change import announce_command_group_deprecate
+        from azure.cli.core.breaking_change import register_command_group_deprecate
 
-        announce_command_group_deprecate('test group', redirect='test group1', target_version='2.70.0')
+        register_command_group_deprecate('test group', redirect='test group1', target_version='2.70.0')
         implicit_warning = "This command is implicitly deprecated because command group 'test "\
                            "group' is deprecated and will be removed in a future release. Use 'test "\
                            "group1' instead."
@@ -109,9 +109,9 @@ class TestBreakingChange(unittest.TestCase):
     def test_command_deprecate(self):
         from contextlib import redirect_stderr, redirect_stdout
 
-        from azure.cli.core.breaking_change import announce_command_deprecate
+        from azure.cli.core.breaking_change import register_command_deprecate
 
-        announce_command_deprecate('test group cmd', redirect='test group cmd1', target_version='2.70.0')
+        register_command_deprecate('test group cmd', redirect='test group cmd1', target_version='2.70.0')
         warning = "This command has been deprecated and will be removed in 2.70.0. Use \'test group cmd1\' instead."
         cli = DummyCli(commands_loader_cls=TestCommandsLoader)
 
@@ -136,9 +136,9 @@ class TestBreakingChange(unittest.TestCase):
     def test_argument_deprecate(self):
         from contextlib import redirect_stderr, redirect_stdout
 
-        from azure.cli.core.breaking_change import announce_argument_deprecate
+        from azure.cli.core.breaking_change import register_argument_deprecate
 
-        announce_argument_deprecate('test group cmd', argument='arg1', redirect='arg2')
+        register_argument_deprecate('test group cmd', argument='arg1', redirect='arg2')
         warning = ("Argument 'arg1' has been deprecated and will be removed in next breaking change release(3.0.0). "
                    "Use 'arg2' instead.")
         cli = DummyCli(commands_loader_cls=TestCommandsLoader)
@@ -159,9 +159,9 @@ class TestBreakingChange(unittest.TestCase):
     def test_option_deprecate(self):
         from contextlib import redirect_stderr, redirect_stdout
 
-        from azure.cli.core.breaking_change import announce_argument_deprecate
+        from azure.cli.core.breaking_change import register_argument_deprecate
 
-        announce_argument_deprecate('test group cmd', argument='--arg1', redirect='--arg1-alias')
+        register_argument_deprecate('test group cmd', argument='--arg1', redirect='--arg1-alias')
         warning = ("Option '--arg1' has been deprecated and will be removed in next breaking change release(3.0.0). "
                    "Use '--arg1-alias' instead.")
         cli = DummyCli(commands_loader_cls=TestCommandsLoader)
@@ -183,9 +183,9 @@ class TestBreakingChange(unittest.TestCase):
     def test_be_required(self):
         from contextlib import redirect_stderr, redirect_stdout
 
-        from azure.cli.core.breaking_change import announce_required_flag_breaking_change
+        from azure.cli.core.breaking_change import register_required_flag_breaking_change
 
-        announce_required_flag_breaking_change('test group cmd', arg='--arg1')
+        register_required_flag_breaking_change('test group cmd', arg='--arg1')
         warning = "The argument '--arg1' will become required in next breaking change release(3.0.0)."
         cli = DummyCli(commands_loader_cls=TestCommandsLoader)
 
@@ -204,15 +204,15 @@ class TestBreakingChange(unittest.TestCase):
             with self.assertRaises(SystemExit):
                 cli.invoke(['test', 'group', 'cmd', '--help'])
             self.assertIn(warning, captured_output.getvalue().replace('\n        ', ' '))
-            self.assertIn('[BrkChange]', captured_output.getvalue())
+            self.assertIn('[BreakingChange]', captured_output.getvalue())
 
     @mock.patch('azure.cli.core.breaking_change.NEXT_BREAKING_CHANGE_RELEASE', '3.0.0')
     def test_default_change(self):
         from contextlib import redirect_stderr, redirect_stdout
 
-        from azure.cli.core.breaking_change import announce_default_value_breaking_change
+        from azure.cli.core.breaking_change import register_default_value_breaking_change
 
-        announce_default_value_breaking_change('test group cmd', arg='arg1', new_default='Default',
+        register_default_value_breaking_change('test group cmd', arg='arg1', new_default='Default',
                                                current_default='None')
         warning = ("The default value of 'arg1' will be changed to 'Default' from 'None' "
                    "in next breaking change release(3.0.0).")
@@ -233,15 +233,15 @@ class TestBreakingChange(unittest.TestCase):
             with self.assertRaises(SystemExit):
                 cli.invoke(['test', 'group', 'cmd', '--help'])
             self.assertIn(warning, captured_output.getvalue().replace('\n        ', ' '))
-            self.assertIn('[BrkChange]', captured_output.getvalue())
+            self.assertIn('[BreakingChange]', captured_output.getvalue())
 
     @mock.patch('azure.cli.core.breaking_change.NEXT_BREAKING_CHANGE_RELEASE', '3.0.0')
     def test_output_change(self):
         from contextlib import redirect_stderr, redirect_stdout
 
-        from azure.cli.core.breaking_change import announce_output_breaking_change
+        from azure.cli.core.breaking_change import register_output_breaking_change
 
-        announce_output_breaking_change('test group cmd', description="The output of 'test group cmd' "
+        register_output_breaking_change('test group cmd', description="The output of 'test group cmd' "
                                                                       "would be changed.")
         warning = ("The output will be changed in next breaking change release(3.0.0). The output of 'test group cmd' "
                    "would be changed.")
@@ -262,15 +262,15 @@ class TestBreakingChange(unittest.TestCase):
         with redirect_stdout(captured_output):
             with self.assertRaises(SystemExit):
                 cli.invoke(['test', 'group', '--help'])
-            self.assertIn('[BrkChange]', captured_output.getvalue())
+            self.assertIn('[BreakingChange]', captured_output.getvalue())
 
     @mock.patch('azure.cli.core.breaking_change.NEXT_BREAKING_CHANGE_RELEASE', '3.0.0')
     def test_logic_change(self):
         from contextlib import redirect_stderr, redirect_stdout
 
-        from azure.cli.core.breaking_change import announce_logic_breaking_change
+        from azure.cli.core.breaking_change import register_logic_breaking_change
 
-        announce_logic_breaking_change('test group cmd', summary="Logic Change Summary")
+        register_logic_breaking_change('test group cmd', summary="Logic Change Summary")
         warning = "Logic Change Summary in next breaking change release(3.0.0)."
         cli = DummyCli(commands_loader_cls=TestCommandsLoader)
 
@@ -289,21 +289,21 @@ class TestBreakingChange(unittest.TestCase):
         with redirect_stdout(captured_output):
             with self.assertRaises(SystemExit):
                 cli.invoke(['test', 'group', '--help'])
-            self.assertIn('[BrkChange]', captured_output.getvalue())
+            self.assertIn('[BreakingChange]', captured_output.getvalue())
 
     @mock.patch('azure.cli.core.breaking_change.NEXT_BREAKING_CHANGE_RELEASE', '3.0.0')
     def test_multi_breaking_change(self):
         from contextlib import redirect_stderr, redirect_stdout
 
-        from azure.cli.core.breaking_change import announce_logic_breaking_change, announce_argument_deprecate, \
-            announce_required_flag_breaking_change
+        from azure.cli.core.breaking_change import register_logic_breaking_change, register_argument_deprecate, \
+            register_required_flag_breaking_change
 
-        announce_argument_deprecate('test group cmd', argument='--arg1', redirect='--arg1-alias')
+        register_argument_deprecate('test group cmd', argument='--arg1', redirect='--arg1-alias')
         warning1 = ("Option '--arg1' has been deprecated and will be removed in next breaking change release(3.0.0). "
-                   "Use '--arg1-alias' instead.")
-        announce_required_flag_breaking_change('test group cmd', arg='--arg1')
+                    "Use '--arg1-alias' instead.")
+        register_required_flag_breaking_change('test group cmd', arg='--arg1')
         warning2 = "The argument '--arg1' will become required in next breaking change release(3.0.0)."
-        announce_logic_breaking_change('test group cmd', summary="Logic Change Summary")
+        register_logic_breaking_change('test group cmd', summary="Logic Change Summary")
         warning3 = "Logic Change Summary in next breaking change release(3.0.0)."
         cli = DummyCli(commands_loader_cls=TestCommandsLoader)
 
@@ -321,24 +321,24 @@ class TestBreakingChange(unittest.TestCase):
             self.assertIn(warning1, captured_output.getvalue().replace('\n        ', ' '))
             self.assertIn(warning2, captured_output.getvalue().replace('\n        ', ' '))
             self.assertIn(warning3, captured_output.getvalue().replace('\n        ', ' '))
-            self.assertIn('[BrkChange]', captured_output.getvalue())
+            self.assertIn('[BreakingChange]', captured_output.getvalue())
             self.assertIn('[Deprecated]', captured_output.getvalue())
 
         captured_output = io.StringIO()
         with redirect_stdout(captured_output):
             with self.assertRaises(SystemExit):
                 cli.invoke(['test', 'group', '--help'])
-            self.assertIn('[BrkChange]', captured_output.getvalue())
+            self.assertIn('[BreakingChange]', captured_output.getvalue())
 
     @mock.patch('azure.cli.core.breaking_change.NEXT_BREAKING_CHANGE_RELEASE', '3.0.0')
     def test_conditional_breaking_change(self):
         from contextlib import redirect_stderr, redirect_stdout
 
-        from azure.cli.core.breaking_change import announce_conditional_breaking_change, AzCLIOtherChange, \
+        from azure.cli.core.breaking_change import register_conditional_breaking_change, AzCLIOtherChange, \
             print_conditional_breaking_change
 
         warning_message = 'Test Breaking Change in Test Group'
-        announce_conditional_breaking_change('TestConditional', AzCLIOtherChange('test group cmd', warning_message))
+        register_conditional_breaking_change('TestConditional', AzCLIOtherChange('test group cmd', warning_message))
         cli = DummyCli(commands_loader_cls=TestCommandsLoader)
 
         captured_err = io.StringIO()
@@ -351,7 +351,7 @@ class TestBreakingChange(unittest.TestCase):
             with self.assertRaises(SystemExit):
                 cli.invoke(['test', 'group', 'cmd', '--help'])
             self.assertNotIn(warning_message, captured_err.getvalue().replace('\n        ', ' '))
-            self.assertNotIn('[BrkChange]', captured_output.getvalue())
+            self.assertNotIn('[BreakingChange]', captured_output.getvalue())
 
         cli_ctx = mock.MagicMock()
         cli_ctx.invocation.commands_loader.command_name = 'test group cmd'

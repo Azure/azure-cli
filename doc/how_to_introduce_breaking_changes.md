@@ -49,7 +49,7 @@ All breaking changes **must** be pre-announced two sprints ahead Release. It giv
   * The pre-announcement should be released ahead of Breaking Change Window.
 * After releasing the pre-announcement, a pipeline would be triggered, and the Upcoming Breaking Change Documentation would be updated.
 * At the start of Breaking Change window, the CLI team would notify Service Teams to adopt Breaking Changes.
-* Breaking Changes should be adopted within Breaking Change Window.
+* Breaking Changes should be adopted within Breaking Change Window. Any unfinished pre-announcements of breaking changes targeting this release will be deleted by the CLI team.
 
 ### Pre-announce Breaking Changes
 
@@ -69,12 +69,11 @@ To pre-announce breaking changes, such as modifications to default argument valu
 You can then pre-announce breaking changes for different command groups or commands. Multiple breaking changes on the same command are accepted.
 
 ```python
-from azure.cli.core.breaking_change import announce_required_flag_breaking_change, \
-  announce_default_value_breaking_change, announce_other_breaking_change
+from azure.cli.core.breaking_change import register_required_flag_breaking_change, register_default_value_breaking_change, register_other_breaking_change
 
-announce_required_flag_breaking_change('bar foo', '--name')
-announce_default_value_breaking_change('bar foo baz', '--foobar', 'A', 'B')
-announce_other_breaking_change('bar foo baz', 'During May 2024, another Breaking Change would happen in Build Event.')
+register_required_flag_breaking_change('bar foo', '--name')
+register_default_value_breaking_change('bar foo baz', '--foobar', 'A', 'B')
+register_other_breaking_change('bar foo baz', 'During May 2024, another Breaking Change would happen in Build Event.')
 ```
 
 All related breaking changes will be displayed while executing the command. For example, in the above declarations, the following warnings will be output when executing the command:
@@ -95,9 +94,11 @@ There are several types of breaking changes defined in `breaking_change.py`. You
 
 Declaring deprecation in `_breaking_change.py` is similar to deprecation when authoring commands. It is recommended to use this method rather than declaring `deprecate_info` when defining a command or argument. You can use the following method to declare deprecation: 
 
-* `announce_command_group_deprecate`: Deprecating a command group. 
-* `announce_command_deprecate`: Deprecating a command.
-* `announce_argument_deprecate`: Deprecating an argument or option.
+* `register_command_group_deprecate`: Deprecating a command group. 
+* `register_command_deprecate`: Deprecating a command.
+* `register_argument_deprecate`: Deprecating an argument or option.
+
+> **Note:** Avoid marking an item with both a deprecation and another breaking change. A command group, command, or argument cannot be deprecated while also undergoing other breaking changes.
 
 They share similar arguments:
 
@@ -108,15 +109,15 @@ They share similar arguments:
 * `target_version`: The version when the deprecated item should be removed. This version will be communicated in all warning messages. The `target_version` is the next breaking change window by default. The deprecated item will still function at the input version.
 
 ```python
-from azure.cli.core.breaking_change import announce_command_group_deprecate, announce_command_deprecate, announce_argument_deprecate
+from azure.cli.core.breaking_change import register_command_group_deprecate, register_command_deprecate, register_argument_deprecate
 
-announce_command_group_deprecate('bar', redirect='baz')
+register_command_group_deprecate('bar', redirect='baz')
 # Warning Message: This command group has been deprecated and will be removed in next breaking change release(2.67.0). Use `baz` instead.
 
-announce_command_deprecate('bar foo', redirect='baz foo', hide=True)
+register_command_deprecate('bar foo', redirect='baz foo', hide=True)
 # Warning Message: This command has been deprecated and will be removed in next breaking change release(2.67.0). Use `baz foo` instead.
 
-announce_argument_deprecate('bar foo', '--name', target_version='2.70.0')
+register_argument_deprecate('bar foo', '--name', target_version='2.70.0')
 # Warning Message: Option `--name` has been deprecated and will be removed in 2.70.0.
 ```
 
@@ -124,29 +125,29 @@ announce_argument_deprecate('bar foo', '--name', target_version='2.70.0')
 
 **Remove**
 
-To declare the removal of an item, use the deprecation method instead. 
+To declare the removal of an item, use the deprecation method instead.
 
 ```python
-from azure.cli.core.breaking_change import announce_argument_deprecate
+from azure.cli.core.breaking_change import register_argument_deprecate
 
-announce_argument_deprecate('bar foo', '--name', target_version='2.70.0')
+register_argument_deprecate('bar foo', '--name', target_version='2.70.0')
 # Warning Message: Option `--name` has been deprecated and will be removed in 2.70.0.
 ```
 
 **Rename**
 
-To declare the renaming of an item, use the deprecation method. 
+To declare the renaming of an item, use the deprecation method.
 
 ```python
-from azure.cli.core.breaking_change import announce_argument_deprecate
+from azure.cli.core.breaking_change import register_argument_deprecate
 
-announce_argument_deprecate('bar foo', '--name', '--new-name')
+register_argument_deprecate('bar foo', '--name', '--new-name')
 # Warning Message: Option `--name` has been deprecated and will be removed in next breaking change release(2.67.0). Use `--new-name` instead.
 ```
 
 **Output Change**
 
-Announce breaking changes that affect the output of a command. This ensures users are aware of modifications to the command’s output format or content.
+Declare breaking changes that affect the output of a command. This ensures users are aware of modifications to the command’s output format or content.
 
 * `command`: The name of the command group or command. If it is a command group, the warning would show in the execution of all commands in the group. 
 * `description`: The description of the breaking change. The description will display in warning messages.
@@ -155,15 +156,16 @@ Announce breaking changes that affect the output of a command. This ensures user
 * `doc_link`: A link to related documentation, which will be displayed in warning messages.
 
 ```python
-from azure.cli.core.breaking_change import announce_output_breaking_change
+from azure.cli.core.breaking_change import register_output_breaking_change
 
-announce_output_breaking_change('bar foo', description='Reduce the output field `baz`', guide='You could retrieve this field through `az another command`.')
+register_output_breaking_change('bar foo', description='Reduce the output field `baz`',
+                                guide='You could retrieve this field through `az another command`.')
 # The output will be changed in next breaking change release(2.61.0). Reduce the output field `baz`. You could retrieve this field through `az another command`.
 ```
 
 **Logic Change**
 
-Announce breaking changes in the logic of the command.
+Declare breaking changes in the logic of the command.
 
 * `command`: The name of the command.
 * `summary`: Summary of the breaking change, which will be displayed in warning messages.
@@ -172,15 +174,15 @@ Announce breaking changes in the logic of the command.
 * `doc_link`: A link to related documentation, which will be displayed in warning messages.
 
 ```python
-from azure.cli.core.breaking_change import announce_logic_breaking_change
+from azure.cli.core.breaking_change import register_logic_breaking_change
 
-announce_logic_breaking_change('bar foo', 'Update the validator', detail='The xxx will not be accepted.')
+register_logic_breaking_change('bar foo', 'Update the validator', detail='The xxx will not be accepted.')
 # Update the validator in next breaking change release(2.61.0). The xxx will not be accepted.
 ```
 
 **Default Change**
 
-Announce breaking changes caused by changes in default values. This ensures users are aware of modifications to default values.
+Declare breaking changes caused by changes in default values. This ensures users are aware of modifications to default values.
 
 * `command`: The name of the command.
 * `arg`: The name of the argument or one of its options. The default change warning will display whether the argument is used or not.
@@ -191,15 +193,15 @@ Announce breaking changes caused by changes in default values. This ensures user
 * `doc_link`: A link to related documentation, which will be displayed in warning messages.
 
 ```python
-from azure.cli.core.breaking_change import announce_default_value_breaking_change
+from azure.cli.core.breaking_change import register_default_value_breaking_change
 
-announce_default_value_breaking_change('bar foo', '--type', 'TypeA', 'TypeB')
+register_default_value_breaking_change('bar foo', '--type', 'TypeA', 'TypeB')
 # The default value of `--type` will be changed to `TypeB` from `TypeA` in next breaking change release(2.61.0).
 ```
 
 **Be Required**
 
-Announce breaking changes that will make an argument required in a future release. This ensures users are aware of upcoming mandatory parameters.
+Declare breaking changes that will make an argument required in a future release. This ensures users are aware of upcoming mandatory parameters.
 
 * `command`: The name of the command.
 * `arg`: The name of the argument that will become required.
@@ -208,15 +210,15 @@ Announce breaking changes that will make an argument required in a future releas
 * `doc_link`: A link to related documentation, which will be displayed in warning messages.
 
 ```python
-from azure.cli.core.breaking_change import announce_required_flag_breaking_change
+from azure.cli.core.breaking_change import register_required_flag_breaking_change
 
-announce_required_flag_breaking_change('bar foo', '--type')
+register_required_flag_breaking_change('bar foo', '--type')
 # The argument `--type` will become required in next breaking change release(2.61.0).
 ```
 
 **Other Changes**
 
-Announce other custom breaking changes that do not fall into the predefined categories. This allows for flexibility in communicating various types of breaking changes to users.
+Declare other custom breaking changes that do not fall into the predefined categories. This allows for flexibility in communicating various types of breaking changes to users.
 
 * `command`: The name of the command.
 * `message`: A description of the breaking change.
@@ -224,9 +226,9 @@ Announce other custom breaking changes that do not fall into the predefined cate
 * `target_version`: The version in which the breaking change will occur. By default, this is set to the next breaking change window. This value won't display in warning message but is used to generate upcoming breaking change document.
 
 ```python
-from azure.cli.core.breaking_change import announce_other_breaking_change
+from azure.cli.core.breaking_change import register_other_breaking_change
 
-announce_other_breaking_change('bar foo', 'During May 2024, another Breaking Change would happen in Build Event.')
+register_other_breaking_change('bar foo', 'During May 2024, another Breaking Change would happen in Build Event.')
 # During May 2024, another Breaking Change would happen in Build Event.
 ```
 
@@ -238,12 +240,12 @@ To enhance flexibility, the CLI supports using a designated tag to specify a Bre
 
 ```python
 # src/azure-cli/azure/cli/command_modules/vm/custom.py
-from azure.cli.core.breaking_change import announce_conditional_breaking_change, AzCLIOtherChange
+from azure.cli.core.breaking_change import register_conditional_breaking_change, AzCLIOtherChange
 
-announce_conditional_breaking_change(tag='SpecialBreakingChangeA', breaking_change=(
-'vm create', 'This is special Breaking Change Warning A. This breaking change is happend in "vm create" command.'))
-announce_conditional_breaking_change(tag='SpecialBreakingChangeB', breaking_change=(
-'vm', 'This is special Breaking Change Warning B. This breaking change is happend in "vm" command group.'))
+register_conditional_breaking_change(tag='SpecialBreakingChangeA', breaking_change=(
+  'vm create', 'This is special Breaking Change Warning A. This breaking change is happend in "vm create" command.'))
+register_conditional_breaking_change(tag='SpecialBreakingChangeB', breaking_change=(
+  'vm', 'This is special Breaking Change Warning B. This breaking change is happend in "vm" command group.'))
 
 
 # src/azure-cli/azure/cli/command_modules/vm/custom.py

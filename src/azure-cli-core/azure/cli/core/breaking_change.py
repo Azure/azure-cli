@@ -14,7 +14,7 @@ from knack.util import StatusTag, color_map
 logger = get_logger()
 
 NEXT_BREAKING_CHANGE_RELEASE = '2.67.0'
-DEFAULT_BREAKING_CHANGE_TAG = '[BrkChange]'
+DEFAULT_BREAKING_CHANGE_TAG = '[BreakingChange]'
 
 
 def _get_action_class(cli_ctx, action):
@@ -550,53 +550,53 @@ def register_upcoming_breaking_change_info(cli_ctx):
     cli_ctx.register_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, update_breaking_change_info)
 
 
-def announce_deprecate_info(command_name, arg=None, target_version=NextBreakingChangeWindow(), **kwargs):
+def register_deprecate_info(command_name, arg=None, target_version=NextBreakingChangeWindow(), **kwargs):
     upcoming_breaking_changes[command_name].append(AzCLIDeprecate(command_name, arg, target_version, **kwargs))
 
 
-def announce_output_breaking_change(command_name, description, target_version=NextBreakingChangeWindow(), guide=None,
+def register_output_breaking_change(command_name, description, target_version=NextBreakingChangeWindow(), guide=None,
                                     doc_link=None):
     upcoming_breaking_changes[command_name].append(
         AzCLIOutputChange(command_name, description, target_version, guide, doc_link))
 
 
-def announce_logic_breaking_change(command_name, summary, target_version=NextBreakingChangeWindow(), detail=None,
+def register_logic_breaking_change(command_name, summary, target_version=NextBreakingChangeWindow(), detail=None,
                                    doc_link=None):
     upcoming_breaking_changes[command_name].append(
         AzCLILogicChange(command_name, summary, target_version, detail, doc_link))
 
 
-def announce_default_value_breaking_change(command_name, arg, current_default, new_default,
+def register_default_value_breaking_change(command_name, arg, current_default, new_default,
                                            target_version=NextBreakingChangeWindow(), target=None, doc_link=None):
     upcoming_breaking_changes[command_name].append(
         AzCLIDefaultChange(command_name, arg, current_default, new_default, target_version, target, doc_link))
 
 
-def announce_required_flag_breaking_change(command_name, arg, target_version=NextBreakingChangeWindow(), target=None,
+def register_required_flag_breaking_change(command_name, arg, target_version=NextBreakingChangeWindow(), target=None,
                                            doc_link=None):
     upcoming_breaking_changes[command_name].append(AzCLIBeRequired(command_name, arg, target_version, target, doc_link))
 
 
-def announce_other_breaking_change(command_name, message, arg=None, target_version=NextBreakingChangeWindow()):
+def register_other_breaking_change(command_name, message, arg=None, target_version=NextBreakingChangeWindow()):
     upcoming_breaking_changes[command_name].append(AzCLIOtherChange(command_name, message, arg, target_version))
 
 
-def announce_command_group_deprecate(command_group, redirect=None, hide=None,
+def register_command_group_deprecate(command_group, redirect=None, hide=None,
                                      target_version=NextBreakingChangeWindow(), **kwargs):
-    announce_deprecate_info(command_group, redirect=redirect, hide=hide, target_version=target_version, **kwargs)
+    register_deprecate_info(command_group, redirect=redirect, hide=hide, target_version=target_version, **kwargs)
 
 
-def announce_command_deprecate(command, redirect=None, hide=None,
+def register_command_deprecate(command, redirect=None, hide=None,
                                target_version=NextBreakingChangeWindow(), **kwargs):
-    announce_deprecate_info(command, redirect=redirect, hide=hide, target_version=target_version, **kwargs)
+    register_deprecate_info(command, redirect=redirect, hide=hide, target_version=target_version, **kwargs)
 
 
-def announce_argument_deprecate(command, argument, redirect=None, hide=None,
+def register_argument_deprecate(command, argument, redirect=None, hide=None,
                                 target_version=NextBreakingChangeWindow(), **kwargs):
-    announce_deprecate_info(command, argument, redirect=redirect, hide=hide, target_version=target_version, **kwargs)
+    register_deprecate_info(command, argument, redirect=redirect, hide=hide, target_version=target_version, **kwargs)
 
 
-def announce_conditional_breaking_change(tag, breaking_change):
+def register_conditional_breaking_change(tag, breaking_change):
     upcoming_breaking_changes[breaking_change.command_name + '.' + tag].append(breaking_change)
 
 
