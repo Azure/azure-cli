@@ -15,13 +15,13 @@ __version__ = "1.1.0"
 DEFAULT_INSTRUMENTATION_KEY = 'c4395b75-49cc-422c-bc95-c7d51aef5d46'
 
 
-def _start(config_dir):
+def _start(config_dir, cache_dir):
     from azure.cli.telemetry.components.telemetry_logging import get_logger
 
     logger = get_logger('process')
 
-    args = [sys.executable, os.path.realpath(__file__), config_dir]
-    logger.info('Creating upload process: "%s %s %s"', *args)
+    args = [sys.executable, os.path.realpath(__file__), config_dir, cache_dir]
+    logger.info('Creating upload process: "%s %s %s %s"', *args)
 
     kwargs = {'args': args}
     if os.name == 'nt':
@@ -74,9 +74,10 @@ def save(config_dir, payload):
         logger.info("Split cli events and extra events failure: %s", str(ex))
         cli_payload = payload
 
-    if save_payload(config_dir, cli_payload):
+    cache_dir = save_payload(config_dir, cli_payload)
+    if cache_dir:
         logger.info('Begin creating telemetry upload process.')
-        _start(config_dir)
+        _start(config_dir, cache_dir)
         logger.info('Finish creating telemetry upload process.')
 
 
@@ -88,17 +89,18 @@ def main():
 
     try:
         config_dir = sys.argv[1]
+        cache_dir = sys.argv[2]
         config_logging_for_upload(config_dir)
 
         logger = get_logger('main')
-        logger.info('Attempt start. Configuration directory [%s].', sys.argv[1])
+        logger.info('Attempt start. Configuration directory [%s]. Cache directory [%s].', sys.argv[1], sys.argv[2])
 
         try:
             with TelemetryNote(config_dir) as telemetry_note:
                 telemetry_note.touch()
 
                 collection = RecordsCollection(telemetry_note.get_last_sent(), config_dir)
-                collection.snapshot_and_read()
+                collection.snapshot_and_read(cache_dir)
 
                 client = CliTelemetryClient()
                 for each in collection:
