@@ -4943,7 +4943,7 @@ class IngressPortMapping(_serialization.Model):
     :ivar external: Specifies whether the app port is accessible outside of the environment.
      Required.
     :vartype external: bool
-    :ivar target_port: Specifies the port user's container listens on. Required.
+    :ivar target_port: Specifies the port user's container listens on.
     :vartype target_port: int
     :ivar exposed_port: Specifies the exposed port for the target port. If not specified, it
      defaults to target port.
@@ -4952,7 +4952,6 @@ class IngressPortMapping(_serialization.Model):
 
     _validation = {
         "external": {"required": True},
-        "target_port": {"required": True},
     }
 
     _attribute_map = {
@@ -4961,12 +4960,12 @@ class IngressPortMapping(_serialization.Model):
         "exposed_port": {"key": "exposedPort", "type": "int"},
     }
 
-    def __init__(self, *, external: bool, target_port: int, exposed_port: Optional[int] = None, **kwargs: Any) -> None:
+    def __init__(self, *, external: bool, target_port: Optional[int] = None, exposed_port: Optional[int] = None, **kwargs: Any) -> None:
         """
         :keyword external: Specifies whether the app port is accessible outside of the environment.
          Required.
         :paramtype external: bool
-        :keyword target_port: Specifies the port user's container listens on. Required.
+        :keyword target_port: Specifies the port user's container listens on.
         :paramtype target_port: int
         :keyword exposed_port: Specifies the exposed port for the target port. If not specified, it
          defaults to target port.
