@@ -71,16 +71,19 @@ class Create(AAZCommand):
             options=["--partner-ag-name", "--partner-availability-group-name"],
             arg_group="Properties",
             help="Name of the partner availability group.",
+            required=True,
         )
         _args_schema.instance_availability_group_name = AAZStrArg(
             options=["--instance-ag-name", "--instance-availability-group-name"],
             arg_group="Properties",
             help="Name of the managed instance availability group.",
+            required=True,
         )
         _args_schema.partner_endpoint = AAZStrArg(
             options=["--partner-endpoint"],
             arg_group="Properties",
             help="SQL server side endpoint - IP or DNS resolvable name",
+            required=True,
         )
         _args_schema.databases = AAZListArg(
             options=["--databases"],
