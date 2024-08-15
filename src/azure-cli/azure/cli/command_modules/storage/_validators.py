@@ -2020,15 +2020,6 @@ def _add_sas_for_url(cmd, url, account_name, account_key, sas_token, service, re
         sas_token = sas_token.lstrip('?')
     else:
         try:
-            from .util import create_short_lived_container_sas_track2, create_short_lived_share_sas_track2
-            if source_container:
-                source_sas = create_short_lived_container_sas_track2(cmd, account_name=source_account,
-                                                                     account_key=source_key,
-                                                                     container=source_container)
-            if source_share:
-                source_sas = create_short_lived_share_sas_track2(cmd, account_name=source_account,
-                                                                 account_key=source_key,
-                                                                 share=source_share)
             sas_token = _generate_sas_token(cmd, account_name, account_key, service,
                                             resource_types=resource_types, permissions=permissions)
         except Exception as ex:  # pylint: disable=broad-except
