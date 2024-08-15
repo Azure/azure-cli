@@ -7,33 +7,26 @@ import datetime
 import os
 import shutil
 import stat
-import tempfile
 
 
 class RecordsCollection:
-    def __init__(self, last_sent, config_dir):
+    def __init__(self, cache_dir):
         from azure.cli.telemetry.components.telemetry_logging import get_logger
 
-        self._last_sent = last_sent
-        self._next_send = last_sent
         self._records = []
         self._logger = get_logger('records')
-        self._config_dir = config_dir
+        self._cache_dir = cache_dir
 
     def __iter__(self):
         return self._records.__iter__()
 
-    @property
-    def next_send(self):
-        return self._next_send
-
-    def snapshot_and_read(self, cache_dir):
+    def snapshot_and_read(self):
         """ Scan the telemetry cache files. """
-        if not os.path.isdir(cache_dir):
+        if not os.path.isdir(self._cache_dir):
             return
 
         # Collect all cache/cache.x files
-        candidates = [(fn, os.stat(os.path.join(cache_dir, fn))) for fn in os.listdir(cache_dir)]
+        candidates = [(fn, os.stat(os.path.join(self._cache_dir, fn))) for fn in os.listdir(self._cache_dir)]
 
         # sort the cache files base on their last modification time.
         candidates = [(fn, file_stat) for fn, file_stat in candidates if stat.S_ISREG(file_stat.st_mode)]
@@ -45,13 +38,13 @@ class RecordsCollection:
 
         self._logger.info('%d cache files to upload.', len(candidates))
 
-        for each in os.listdir(cache_dir):
-            self._read_file(os.path.join(cache_dir, each))
+        for each in os.listdir(self._cache_dir):
+            self._read_file(os.path.join(self._cache_dir, each))
 
-        shutil.rmtree(cache_dir,
+        shutil.rmtree(self._cache_dir,
                       ignore_errors=True,
                       onerror=lambda _, p, tr: self._logger.error('Fail to remove file %s', p))
-        self._logger.info('Remove directory %s', cache_dir)
+        self._logger.info('Remove directory %s', self._cache_dir)
 
     def _read_file(self, path):
         """ Read content of a telemetry cache file and parse them into records. """
@@ -68,9 +61,6 @@ class RecordsCollection:
         """ Parse a line in the recording file. """
         try:
             time, content = content_line.split(',', 1)
-            time = datetime.datetime.strptime(time, '%Y-%m-%dT%H:%M:%S')
-            if time > self._last_sent:
-                self._next_send = max(self._next_send, time)
-                self._records.append(content)
+            self._records.append(content)
         except ValueError as err:
             self._logger.warning("Fail to parse a line of the record %s. Error %s.", content_line, err)

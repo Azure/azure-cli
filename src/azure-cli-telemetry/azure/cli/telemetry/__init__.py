@@ -42,8 +42,8 @@ def _start(config_dir, cache_dir):
             kwargs['stdout'] = subprocess.DEVNULL
             kwargs['stderr'] = subprocess.STDOUT
 
-    subprocess.Popen(**kwargs)
-    logger.info('Return from creating process')
+    process = subprocess.Popen(**kwargs)
+    logger.info('Return from creating process %s', process.pid)
 
 
 def save(config_dir, payload):
@@ -96,18 +96,13 @@ def main():
         logger.info('Attempt start. Configuration directory [%s]. Cache directory [%s].', sys.argv[1], sys.argv[2])
 
         try:
-            with TelemetryNote(config_dir) as telemetry_note:
-                telemetry_note.touch()
+            collection = RecordsCollection(cache_dir)
+            collection.snapshot_and_read()
 
-                collection = RecordsCollection(telemetry_note.get_last_sent(), config_dir)
-                collection.snapshot_and_read(cache_dir)
-
-                client = CliTelemetryClient()
-                for each in collection:
-                    client.add(each, flush=True)
-                client.flush(force=True)
-
-                telemetry_note.update_telemetry_note(collection.next_send)
+            client = CliTelemetryClient()
+            for each in collection:
+                client.add(each, flush=True)
+            client.flush(force=True)
         except portalocker.AlreadyLocked:
             # another upload process is running.
             logger.info('Lock out from note file under %s which means another process is running. Exit 0.', config_dir)
