@@ -56,7 +56,7 @@ def create_configstore(cmd,
     if enable_public_network is not None:
         public_network_access = 'Enabled' if enable_public_network else 'Disabled'
 
-    if sku.lower() == 'free' and (enable_purge_protection or retention_days):
+    if sku.lower() == 'free' and (enable_purge_protection or retention_days or replica_name or replica_location or no_replica):
         logger.warning("Options '--enable-purge-protection', '--replica-name', '--replica-location' , 'no-replica' and '--retention-days' will be ignored when creating a free store.")
         retention_days = None
         enable_purge_protection = None
@@ -79,9 +79,9 @@ def create_configstore(cmd,
     config_store = client.begin_create(resource_group_name, name, configstore_params)
 
     # # Poll request and create replica after store is created
-    while config_store.status() == ProvisioningStatus.RUNNING:
+    while config_store.status() != ProvisioningStatus.SUCCEEDED:
         progress.spinner.step(label="Creating store")
-        config_store.wait(3)
+        config_store.wait(1)
 
     if config_store.status() == ProvisioningStatus.SUCCEEDED and replica_name is not None:
         progress.write({"message": "Store created"})
@@ -89,9 +89,9 @@ def create_configstore(cmd,
         replica_client = cf_replicas(cmd.cli_ctx)
         store_replica = create_replica(cmd, replica_client, name, replica_name, replica_location, resource_group_name)
 
-        while store_replica.status() == ProvisioningStatus.RUNNING:
+        while store_replica.status() != ProvisioningStatus.SUCCEEDED:
             progress.spinner.step(label="Creating replica")
-            store_replica.wait(3)
+            store_replica.wait(1)
 
         if store_replica.status() == ProvisioningStatus.SUCCEEDED:
             progress.write({"message": "Replica created"})
