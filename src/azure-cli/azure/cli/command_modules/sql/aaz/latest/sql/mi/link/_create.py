@@ -19,9 +19,9 @@ class Create(AAZCommand):
     This command creates an Azure SQL Managed Instance link by joining distributed availability group on SQL Server based on the parameters passed.
 
     :example: Creates an instance link.
-    az sql mi link create -g 'rg1' --instance-name 'mi1' --name 'link1' --databases 'db1'
+    az sql mi link create -g 'rg1' --instance-name 'mi1' --name 'link1' --databases "[{'databaseName': 'db1'}]"
     --partner-ag-name 'partnerag1' --instance-ag-name 'instanceag1'
-    --partner-endpoint '"tcp://server1:5022" --instance-link-role 'Secondary'
+    --partner-endpoint 'tcp://server1:5022" --instance-link-role 'Secondary'
     --failover-mode 'Manual' --seeding-mode 'Automatic' --no-wait')
     """
 
