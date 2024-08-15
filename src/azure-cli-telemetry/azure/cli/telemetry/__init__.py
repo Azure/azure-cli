@@ -82,7 +82,6 @@ def save(config_dir, payload):
 
 
 def main():
-    from azure.cli.telemetry.components.telemetry_note import TelemetryNote
     from azure.cli.telemetry.components.records_collection import RecordsCollection
     from azure.cli.telemetry.components.telemetry_client import CliTelemetryClient
     from azure.cli.telemetry.components.telemetry_logging import config_logging_for_upload, get_logger

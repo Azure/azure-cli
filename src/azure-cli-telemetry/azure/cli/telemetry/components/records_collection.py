@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import datetime
 import os
 import shutil
 import stat
@@ -60,7 +59,7 @@ class RecordsCollection:
     def _add_record(self, content_line):
         """ Parse a line in the recording file. """
         try:
-            time, content = content_line.split(',', 1)
+            _, content = content_line.split(',', 1)
             self._records.append(content)
         except ValueError as err:
             self._logger.warning("Fail to parse a line of the record %s. Error %s.", content_line, err)
