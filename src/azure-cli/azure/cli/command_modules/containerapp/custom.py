@@ -5022,10 +5022,15 @@ def set_workload_profile(cmd, resource_group_name, env_name, workload_profile_na
 
 
 def add_workload_profile(cmd, resource_group_name, env_name, workload_profile_name, workload_profile_type=None, min_nodes=None, max_nodes=None):
+    r = None
     try:
         r = ManagedEnvironmentClient.show(cmd=cmd, resource_group_name=resource_group_name, name=env_name)
     except CLIError as e:
         handle_raw_exception(e)
+
+    if r and safe_get(r, "properties", "workloadProfiles") is None:
+        raise ValidationError("Cannot add workload profile because the environment doesn't enable workload profile.\n"
+                              "If you want to use Consumption and Dedicated environment, please create a new one with 'az containerapp env create'.")
 
     workload_profiles = r["properties"]["workloadProfiles"]
 
@@ -5038,10 +5043,15 @@ def add_workload_profile(cmd, resource_group_name, env_name, workload_profile_na
 
 
 def update_workload_profile(cmd, resource_group_name, env_name, workload_profile_name, min_nodes=None, max_nodes=None):
+    r = None
     try:
         r = ManagedEnvironmentClient.show(cmd=cmd, resource_group_name=resource_group_name, name=env_name)
     except CLIError as e:
         handle_raw_exception(e)
+
+    if r and safe_get(r, "properties", "workloadProfiles") is None:
+        raise ValidationError("Cannot update workload profile because the environment doesn't enable workload profile.\n"
+                              "If you want to use Consumption and Dedicated environment, please create a new one with 'az containerapp env create'.")
 
     workload_profiles = r["properties"]["workloadProfiles"]
 
