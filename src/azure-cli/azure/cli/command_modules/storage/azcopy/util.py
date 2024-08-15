@@ -15,6 +15,7 @@ from urllib.parse import urlparse
 from urllib.request import urlopen
 from azure.cli.core._profile import Profile
 from azure.cli.core.api import get_config_dir
+from azure.cli.core.util import run_cmd
 from knack.log import get_logger
 from knack.util import CLIError
 from packaging.version import parse as parse_version
@@ -41,8 +42,7 @@ class AzCopy:
             try:
                 import re
                 args = ["azcopy", "--version"]
-                out_bytes = subprocess.check_output(args)
-                out_text = out_bytes.decode('utf-8')
+                out_text = run_cmd(args, capture_output=True, check=True, encoding='utf-8').stdout
                 version = re.findall(r"azcopy version (.+?)\n", out_text)[0]
                 if version and parse_version(version) >= parse_version(AZCOPY_VERSION):
                     self.executable = "azcopy"
@@ -84,8 +84,7 @@ class AzCopy:
         try:
             import re
             args = [self.executable] + ["--version"]
-            out_bytes = subprocess.check_output(args)
-            out_text = out_bytes.decode('utf-8')
+            out_text = run_cmd(args, capture_output=True, check=True, encoding='utf-8').stdout
             version = re.findall(r"azcopy version (.+?)\n", out_text)[0]
             return version
         except subprocess.CalledProcessError:
@@ -102,7 +101,7 @@ class AzCopy:
         if self.creds and self.creds.tenant_id:
             env_kwargs = {'AZCOPY_TENANT_ID': self.creds.tenant_id,
                           'AZCOPY_AUTO_LOGIN_TYPE': 'AzCLI'}
-        result = subprocess.call(args, env=dict(os.environ, **env_kwargs))
+        result = run_cmd(args, env=dict(os.environ, **env_kwargs)).returncode
         if result > 0:
             raise CLIError('Failed to perform {} operation.'.format(args[1]))
 
