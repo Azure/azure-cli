@@ -414,7 +414,7 @@ def get_desired_resource_value_args(
 # Returns -1 if there is a problem with parsing the vm_size.
 def get_cores_from_sku(vm_size):
     cpu_value = -1
-    pattern = r'standard_([a-z]+)(\d+)([a-z]*)_v(\d+)'
+    pattern = r'standard_([a-z]+)(\d+)([a-z]*)(?:_[^_]+)*_v(\d+)'
     match = re.search(pattern, vm_size.lower())
     if match:
         series_prefix = match.group(1)
