@@ -57,7 +57,7 @@ def create_configstore(cmd,
         public_network_access = 'Enabled' if enable_public_network else 'Disabled'
 
     if sku.lower() == 'free' and (enable_purge_protection or retention_days or replica_name or replica_location or no_replica):
-        logger.warning("Options '--enable-purge-protection', '--replica-name', '--replica-location' , 'no-replica' and '--retention-days' will be ignored when creating a free store.")
+        logger.warning("Options '--enable-purge-protection', '--replica-name', '--replica-location' , '--no-replica' and '--retention-days' will be ignored when creating a free store.")
         retention_days = None
         enable_purge_protection = None
 

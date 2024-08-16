@@ -161,7 +161,7 @@ def load_arguments(self, _):
         c.argument('enable_purge_protection', options_list=['--enable-purge-protection', '-p'], arg_type=get_three_state_flag(), help='Property specifying whether protection against purge is enabled for this App Configuration store. Setting this property to true activates protection against purge for this App Configuration store and its contents. Enabling this functionality is irreversible.')
         c.argument('replica_name', arg_type=store_creation_replica_name_arg_type, help='Name of the replica of the App Configuration store.')
         c.argument('replica_location', arg_type=replica_location_arg_type, help='Location of the replica of the App Configuration store.')
-        c.argument('no-replica', help='Proceed without replica creation for premium tier store.', arg_type=get_three_state_flag())
+        c.argument('no_replica', help='Proceed without replica creation for premium tier store.', arg_type=get_three_state_flag())
 
     with self.argument_context('appconfig update') as c:
         c.argument('tags', arg_type=tags_type)
