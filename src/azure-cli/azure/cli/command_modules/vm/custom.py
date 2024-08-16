@@ -3182,7 +3182,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 security_posture_reference_id=None, security_posture_reference_exclude_extensions=None,
                 enable_resilient_creation=None, enable_resilient_deletion=None,
                 additional_scheduled_events=None, enable_user_reboot_scheduled_events=None,
-                enable_user_redeploy_scheduled_events=None):
+                enable_user_redeploy_scheduled_events=None,
+                sku_profile_vmsizes=None, sku_profile_allocation_strategy=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -3495,7 +3496,9 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             enable_resilient_vm_deletion=enable_resilient_deletion,
             additional_scheduled_events=additional_scheduled_events,
             enable_user_reboot_scheduled_events=enable_user_reboot_scheduled_events,
-            enable_user_redeploy_scheduled_events=enable_user_redeploy_scheduled_events)
+            enable_user_redeploy_scheduled_events=enable_user_redeploy_scheduled_events,
+            sku_profile_vmsizes=sku_profile_vmsizes,
+            sku_profile_allocation_strategy=sku_profile_allocation_strategy)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 

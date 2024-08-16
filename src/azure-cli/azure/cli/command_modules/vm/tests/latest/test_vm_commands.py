@@ -9592,6 +9592,19 @@ class VMSSAutomaticRepairsScenarioTest(ScenarioTest):
                      self.check('automaticRepairsPolicy.gracePeriod', 'PT30M')
                  ])
 
+class SkuProfileTest(ScenarioTest):
+    
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_sku_profile__')
+    def test_vmss_create_sku_profile(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'vmss1'
+        })
+
+        # Create vmss
+        self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username azureuser ' + 
+                 '--orchestration-mode Flexible --vm-sku Mix --sku_profile_vmsizes Standard_DS1_v2 Standard_D2s_v4' +
+                 '--sku_profile_allocation_strategy CapacityOptimized')
+
 
 class VMCreateNSGRule(ScenarioTest):
 

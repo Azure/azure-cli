@@ -783,6 +783,8 @@ def load_arguments(self, _):
                    options_list=['--security-posture-reference-exclude-extensions', '--exclude-extensions'],
                    help='List of virtual machine extensions to exclude when applying the Security Posture. Either a Json string or a file path is acceptable. '
                         'Please refer to https://docs.microsoft.com/rest/api/compute/virtualmachinescalesets/get#virtualmachineextension for the data format.')
+        c.argument('sku_profile_vmsizes', nargs='+', options_list=['--sku-profile-vmsizes'], min_api='2024-07-01', help='A list of VM sizes in the scale set. Only works with Flexible orchestration_mode. See https://azure.microsoft.com/pricing/details/virtual-machines/ for size info.')
+        c.argument('sku_profile_allocation_strategy', options_list=['--sku-profile-allocation-strategy'], arg_type=get_enum_type(['LowestPrice', 'CapacityOptimized']), min_api='2024-07-01', help='Allocation strategy for sku_profile_vmsizes: LowestPrice or CapacityOptimized.')
 
     with self.argument_context('vmss create', arg_group='Network Balancer') as c:
         c.argument('application_gateway', help='Name to use when creating a new application gateway (default) or referencing an existing one. Can also reference an existing application gateway by ID or specify "" for none.', options_list=['--app-gateway'])
