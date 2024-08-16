@@ -10546,9 +10546,16 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_trusted_launch_on_v1_', location='northeurope')
     def test_enable_trusted_launch_on_v1(self, resource_group):
         self.kwargs.update({
-            'vm': self.create_random_name('vm1', 10)
+            'vm': self.create_random_name('vm1', 10),
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
         })
-        self.cmd('vm create -g {rg} -n {vm} --image MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk:latest --admin-password testPassword0 --authentication-type password --nsg-rule NONE')
+        self.cmd('vm create -g {rg} -n {vm} --image MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk:latest '
+                 '--admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('securityProfile', None)
         ])
@@ -10739,11 +10746,19 @@ class VMCreateCountScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_create_count_', location='eastus')
     def test_vm_create_count(self, resource_group):
+        self.kwargs.update({
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
+        })
         self.cmd('az network vnet create -g {rg} -n vnet --address-prefix 10.0.0.0/16')
         self.cmd('az network vnet subnet create -g {rg} --vnet-name vnet -n subnet1 --address-prefixes 10.0.0.0/24 --default-outbound false')
         self.cmd('az network vnet subnet create -g {rg} --vnet-name vnet -n subnet2 --address-prefixes 10.0.1.0/24 --default-outbound false')
-        self.cmd('vm create -g {rg} -n vma --image Canonical:UbuntuServer:18.04-LTS:latest --count 3 --vnet-name vnet --subnet subnet1 --nsg-rule None '
+        self.cmd('vm create -g {rg} -n vma --image Canonical:UbuntuServer:18.04-LTS:latest --count 3 --subnet {subnet} --vnet-name {vnet} --nsg-rule None '
                  '--generate-ssh-keys --nic-delete-option Delete --admin-username vmtest')
+
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+
         self.cmd('vm list -g {rg}', checks=[
             self.check('length(@)', 3),
             self.check('[0].networkProfile.networkInterfaces[0].deleteOption', 'Delete'),
@@ -10751,7 +10766,7 @@ class VMCreateCountScenarioTest(ScenarioTest):
             self.check('[2].networkProfile.networkInterfaces[0].deleteOption', 'Delete')
         ])
 
-        self.cmd('vm create -g {rg} -n vmb --image Canonical:UbuntuServer:18.04-LTS:latest --count 3 --vnet-name vnet --subnet subnet2 --nsg-rule None --generate-ssh-keys --admin-username vmtest')
+        self.cmd('vm create -g {rg} -n vmb --image Canonical:UbuntuServer:18.04-LTS:latest --count 3 --subnet {subnet} --vnet-name {vnet} --nsg-rule None --generate-ssh-keys --admin-username vmtest')
         self.cmd('vm list -g {rg}', checks=[
             self.check('length(@)', 6)
         ])
@@ -10853,6 +10868,10 @@ class DiskZRSScenarioTest(ScenarioTest):
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_disk_zrs_', location='westus2')
     def test_disk_zrs(self, resource_group):
+        self.kwargs.update({
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
+        })
         # az feature register --namespace Microsoft.Compute -n SharedDisksForStandardSSD
         # az provider register -n Microsoft.Compute
         self.cmd('disk create -g {rg} -n d1 --size-gb 1024 --sku StandardSSD_ZRS --max-shares 3', checks=[
@@ -10861,7 +10880,12 @@ class DiskZRSScenarioTest(ScenarioTest):
         self.cmd('disk update -g {rg} -n d1 --sku Premium_ZRS', checks=[
             self.check('sku.name', 'Premium_ZRS')
         ])
-        self.cmd('vm create -g {rg} -n d1 --image Canonical:UbuntuServer:18.04-LTS:latest --zone 1 --attach-data-disks d1 --generate-ssh-keys --nsg-rule None --admin-username vmtest')
+        self.cmd('vm create -g {rg} -n d1 --image Canonical:UbuntuServer:18.04-LTS:latest --zone 1 --attach-data-disks d1 '
+                 '--generate-ssh-keys --nsg-rule None --admin-username vmtest --subnet {subnet} --vnet-name {vnet}')
+
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+
         # ZRS disks cannot be pinned with a zone
         self.cmd('disk create -g {rg} -n d1 --size-gb 10 --sku StandardSSD_ZRS --zone 1', expect_failure=True)
 
@@ -11105,19 +11129,27 @@ class CapacityReservationScenarioTest(ScenarioTest):
 
 class VMVMSSAddApplicationTestScenario(ScenarioTest):
 
+    @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer()
     def test_vm_add_application_empty_version_ids(self, resource_group):
         self.kwargs.update({
-            'vm': 'vm1'
+            'vm': 'vm1',
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
         })
         # Prepare VM
-        self.cmd('vm create -l eastus -g {rg} -n {vm} --image Win2012R2Datacenter --admin-username clitest1234 --admin-password Test123456789# --license-type Windows_Server --nsg-rule NONE')
+        self.cmd('vm create -l eastus -g {rg} -n {vm} --image Win2022Datacenter --admin-username clitest1234 --admin-password Test123456789# '
+                 '--license-type Windows_Server --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
         self.cmd('vm application set -g {rg} -n {vm} --app-version-ids')
 
         self.cmd('vm application list -g {rg} -n {vm}')
 
     # Need prepare app versions
+    @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer()
     def test_vm_add_application(self, resource_group):
         self.kwargs.update({
@@ -11128,9 +11160,15 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
             'vid2': '/subscriptions/{sub}/resourceGroups/galleryappaccount/providers/Microsoft.Compute/galleries/MyGallery/applications/MySecondApp/versions/1.0.1'.format(
                 sub=self.get_subscription_id()
             ),
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
         })
         # Prepare VM
-        self.cmd('vm create -l eastus -g {rg} -n {vm} --image Win2012R2Datacenter --admin-username clitest1234 --admin-password Test123456789# --license-type Windows_Server --nsg-rule NONE')
+        self.cmd('vm create -l eastus -g {rg} -n {vm} --image Win2022Datacenter --admin-username clitest1234 '
+                 '--admin-password Test123456789# --license-type Windows_Server --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
         self.cmd('vm application set -g {rg} -n {vm} --app-version-ids {vid1} {vid2}')
 
