@@ -74,6 +74,22 @@ class StorageShareScenarioTests(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(JMESPathCheck('properties.quota', 3))
 
     @ResourceGroupPreparer(name_prefix='clitest')
+    @StorageAccountPreparer(name_prefix='share', kind='FileStorage', location='eastus2', sku='Premium_LRS')
+    def test_storage_file_share_premium_scenario(self, resource_group, storage_account):
+
+        account_info = self.get_account_info(resource_group, storage_account)
+        share_name = self.create_random_name('share', 24)
+
+        self.storage_cmd('storage share create -n {} --fail-on-exist --metadata foo=bar cat=hat '
+                         '--enable-snapshot-virtual-directory-access true --protocols nfs',
+                         account_info, share_name) \
+            .assert_with_checks(JMESPathCheck('created', True))
+
+        self.storage_cmd('storage share show -n {}', account_info, share_name) \
+            .assert_with_checks(JMESPathCheck('enableSnapshotVirtualDirectoryAccess', True),
+                                JMESPathCheck('protocols', ['NFS']))
+
+    @ResourceGroupPreparer(name_prefix='clitest')
     @StorageAccountPreparer(name_prefix='share', kind='StorageV2', location='eastus2', sku='Standard_RAGRS')
     def test_storage_share_metadata_scenario(self, resource_group, storage_account):
         account_info = self.get_account_info(resource_group, storage_account)

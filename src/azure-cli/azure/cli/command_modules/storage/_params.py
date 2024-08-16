@@ -1791,6 +1791,15 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                          'default.')
         c.argument('quota', type=int, help='Specifies the maximum size of the share, in gigabytes. Must be greater '
                                            'than 0, and less than or equal to 5TB (5120).')
+        c.argument('enable_snapshot_virtual_directory_access',
+                   options_list=('--enable-snapshot-virtual-directory-access', '--snapshot-virtual-dir-access'),
+                   arg_type=get_three_state_flag(),
+                   help='Specifies whether the snapshot virtual directory should be accessible at the root of the '
+                        'share mount point when NFS is enabled. If not specified, it will be accessible.')
+        t_share_protocols = self.get_sdk('_models#ShareProtocols', resource_type=ResourceType.DATA_STORAGE_FILESHARE)
+        c.argument('protocols', arg_type=get_enum_type(t_share_protocols),
+                   help='Enabled protocols on the share. NFS protocol will be only available for premium file shares '
+                        '(file shares in the FileStorage account type).')
 
     with self.argument_context('storage share url') as c:
         c.extra('unc', action='store_true', help='Output UNC network path.')
