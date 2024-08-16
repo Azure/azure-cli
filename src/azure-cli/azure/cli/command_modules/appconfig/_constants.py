@@ -20,6 +20,7 @@ class FeatureFlagConstants:
     CONDITIONS = "conditions"
     CLIENT_FILTERS = "client_filters"
     REQUIREMENT_TYPE = "requirement_type"
+    DISPLAY_NAME = "display_name"
     FILTER_NAME = "name"
     FILTER_PARAMETERS = "parameters"
 
