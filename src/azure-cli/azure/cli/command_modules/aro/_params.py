@@ -73,7 +73,7 @@ def load_arguments(self, _):
                    help='Outbound type of cluster. Must be "Loadbalancer" or "UserDefinedRouting".',
                    validator=validate_outbound_type)
         c.argument('enable_preconfigured_nsg', arg_type=get_three_state_flag(),
-                   help='Use Preconfigured NSGs. Allowed values: false, true.')
+                   help='Use Preconfigured NSGs.')
         c.argument('disk_encryption_set',
                    help='ResourceID of the DiskEncryptionSet to be used for master and worker VMs.',
                    validator=validate_disk_encryption_set)
