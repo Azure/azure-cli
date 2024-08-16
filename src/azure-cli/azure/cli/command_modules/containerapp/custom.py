@@ -2424,7 +2424,7 @@ def show_ingress(cmd, name, resource_group_name):
         raise ValidationError("The containerapp '{}' does not have ingress enabled.".format(name)) from e
 
 
-def enable_ingress(cmd, name, resource_group_name, type, target_port, transport="auto", exposed_port=None, allow_insecure=False, disable_warnings=False, no_wait=False):  # pylint: disable=redefined-builtin
+def enable_ingress(cmd, name, resource_group_name, type, target_port=None, transport="auto", exposed_port=None, allow_insecure=False, disable_warnings=False, no_wait=False):  # pylint: disable=redefined-builtin
     _validate_subscription_registered(cmd, CONTAINER_APPS_RP)
 
     containerapp_def = None
