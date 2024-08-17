@@ -8,7 +8,6 @@ import threading
 import sys
 import time
 from urllib.parse import urlparse
-import json
 import requests
 
 
@@ -1623,7 +1622,7 @@ def stop_containerappsjob(cmd, resource_group_name, name, job_execution_name=Non
     try:
         r = ContainerAppsJobClient.stop_job(cmd=cmd, resource_group_name=resource_group_name, name=name, job_execution_name=job_execution_name)
 
-        # if stop is called for a single job execution, return generic response
+        # if stop is called for a single job execution, return generic response else return the response
         if job_execution_name:
             return "Job Execution: " + job_execution_name + ", stopped successfully."
 
