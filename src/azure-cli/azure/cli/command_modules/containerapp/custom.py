@@ -1619,12 +1619,9 @@ def start_containerappjob_execution_yaml(cmd, name, resource_group_name, file_na
         handle_raw_exception(e)
 
 
-def stop_containerappsjob(cmd, resource_group_name, name, job_execution_name=None, execution_name_list=None):
+def stop_containerappsjob(cmd, resource_group_name, name, job_execution_name=None):
     try:
-        if execution_name_list is not None:
-            execution_name_list = execution_name_list.split(",")
-            execution_name_list = json.dumps({'jobExecutionName': execution_name_list})
-        r = ContainerAppsJobClient.stop_job(cmd=cmd, resource_group_name=resource_group_name, name=name, job_execution_name=job_execution_name, job_execution_names=execution_name_list)
+        r = ContainerAppsJobClient.stop_job(cmd=cmd, resource_group_name=resource_group_name, name=name, job_execution_name=job_execution_name)
 
         # if stop is called for a single job execution, return generic response
         if job_execution_name:
