@@ -519,7 +519,7 @@ class VMCustomImageTest(ScenarioTest):
             self.check('storageProfile.imageReference.resourceGroup', '{rg}'),
             self.check('storageProfile.osDisk.createOption', 'FromImage')
         ])
-        self.cmd('vmss create -g {rg} -n vmss1 --image {image1} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password', checks=[
+        self.cmd('vmss create -g {rg} -n vmss1 --image {image1} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password --orchestration-mode Flexible', checks=[
             self.check('vmss.virtualMachineProfile.storageProfile.imageReference.resourceGroup', '{rg}'),
             self.check('vmss.virtualMachineProfile.storageProfile.osDisk.createOption', 'FromImage')
         ])
@@ -549,7 +549,7 @@ class VMCustomImageTest(ScenarioTest):
             self.check('storageProfile.dataDisks[?lun == `3`] | [0].managedDisk.storageAccountType', 'Standard_LRS')
         ])
 
-        self.cmd('vmss create -g {rg} -n vmss2 --image {image2} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password', checks=[
+        self.cmd('vmss create -g {rg} -n vmss2 --image {image2} --admin-username sdk-test-admin --admin-password testPassword0 --authentication-type password --orchestration-mode Flexible', checks=[
             self.check('vmss.virtualMachineProfile.storageProfile.imageReference.resourceGroup', '{rg}'),
             self.check('vmss.virtualMachineProfile.storageProfile.osDisk.createOption', 'FromImage'),
             self.check("length(vmss.virtualMachineProfile.storageProfile.dataDisks)", 2),
@@ -2947,7 +2947,7 @@ class VMSSExtensionInstallTest(ScenarioTest):
             'config_file': config_file
         })
 
-        self.cmd('vmss create -n {vmss} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest --authentication-type password --admin-username admin123 --admin-password testPassword0 --instance-count 1 --orchestration-mode Uniform --no-wait')
+        self.cmd('vmss create -n {vmss} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest --authentication-type password --admin-username admin123 --admin-password testPassword0 --instance-count 1 --orchestration-mode Uniform --lb-sku Standard --no-wait')
         self.cmd('vmss wait --created -n {vmss} -g {rg}')
 
         self.cmd('vmss extension set -n {net-ext} --publisher {net-pub} --version 1.4  --vmss-name {vmss} --resource-group {rg} --protected-settings "{config_file}" --force-update --enable-auto-upgrade false')
@@ -3012,7 +3012,7 @@ class VMSSExtensionInstallTest(ScenarioTest):
             'config_file': config_file
         })
 
-        self.cmd('vmss create -n {vmss} -g {rg} --image Debian:debian-10:10:latest --authentication-type password --admin-username admin123 --admin-password testPassword0 --instance-count 1 --no-wait --orchestration-mode Uniform')
+        self.cmd('vmss create -n {vmss} -g {rg} --image Debian:debian-10:10:latest --authentication-type password --admin-username admin123 --admin-password testPassword0 --instance-count 1 --no-wait --orchestration-mode Uniform --lb-sku Standard')
         self.cmd('vmss wait --created -n {vmss} -g {rg}')
 
         self.cmd('vmss extension set -n {net-ext} --publisher {net-pub} --version 1.4  --vmss-name {vmss} --resource-group {rg} --protected-settings "{config_file}" --force-update --enable-auto-upgrade false')
@@ -3069,7 +3069,7 @@ class VMSSExtensionInstallTest(ScenarioTest):
             'ext_name': 'MyNetworkWatcher'
         })
 
-        self.cmd('vmss create -n {vmss} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest --authentication-type password --admin-username admin123 --admin-password testPassword0 --instance-count 1')
+        self.cmd('vmss create -n {vmss} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest --authentication-type password --admin-username admin123 --admin-password testPassword0 --instance-count 1 --orchestration-mode Flexible')
         self.cmd('vmss extension set -n {ext_type} --publisher {pub} --version 1.4  --vmss-name {vmss} --resource-group {rg} '
                  '--protected-settings "{config_file}" --extension-instance-name {ext_name}')
         self.cmd('vmss extension show --resource-group {rg} --vmss-name {vmss} --name {ext_name}', checks=[
@@ -3706,7 +3706,7 @@ class VMDiskAttachDetachTest(ScenarioTest):
         self.cmd('snapshot create -g {rg} -n {snapshot1} --source {disk1} --sku Standard_ZRS',
                  checks=self.check('sku.name', 'Standard_ZRS'))
 
-    @ResourceGroupPreparer(name_prefix='cli-test-ultrassd', location='eastus')
+    @ResourceGroupPreparer(name_prefix='cli-test-ultrassd', location='eastus2')
     def test_vmss_ultra_ssd_storage_sku(self, resource_group):
 
         self.kwargs.update({
@@ -3714,13 +3714,14 @@ class VMDiskAttachDetachTest(ScenarioTest):
             'vmss2': 'vm-ultrassd2'
         })
         self.cmd('vmss create -g {rg} -n {vmss} --admin-username admin123 --admin-password testPassword0 --image Debian:debian-10:10:latest --storage-sku UltraSSD_LRS '
-                 ' --data-disk-sizes-gb 4 --zone 2 --location eastus --vm-sku Standard_D2s_v3 --instance-count 1 --lb "" --orchestration-mode Uniform')
+                 '--data-disk-sizes-gb 4 --zone 2 --location eastus2 --vm-sku Standard_D2s_v3 --instance-count 1 --lb "" --orchestration-mode Uniform --lb-sku Standard')
 
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
             self.check('virtualMachineProfile.storageProfile.dataDisks[0].managedDisk.storageAccountType', 'UltraSSD_LRS'),
         ])
-        self.cmd('vmss create -g {rg} -n {vmss2} --admin-username admin123 --admin-password testPassword0 --image Debian:debian-10:10:latest --ultra-ssd-enabled --zone 2 --location eastus --vm-sku Standard_D2s_v3 --lb "" --orchestration-mode Uniform')
+        self.cmd('vmss create -g {rg} -n {vmss2} --admin-username admin123 --admin-password testPassword0 --image Debian:debian-10:10:latest --ultra-ssd-enabled --zone 2 '
+                 '--location eastus2 --vm-sku Standard_D2s_v3 --lb "" --orchestration-mode Uniform --lb-sku Standard')
         self.cmd('vmss disk attach -g {rg} --vmss-name {vmss2} --size-gb 5 --sku UltraSSD_LRS')
         self.cmd('vmss show -g {rg} -n {vmss2}', checks=[
             self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
@@ -4001,7 +4002,8 @@ class VMSSCreateAndModify(ScenarioTest):
             'vmss2': self.create_random_name('vmss', 10)
         })
 
-        self.cmd('vmss create --admin-password testPassword0 --name {vmss} -g {rg} --admin-username myadmin --image Win2012R2Datacenter --instance-count {count} --orchestration-mode Uniform')
+        self.cmd('vmss create --admin-password testPassword0 --name {vmss} -g {rg} --admin-username myadmin --image Win2022Datacenter '
+                 '--instance-count {count} --orchestration-mode Uniform --lb-sku Standard')
 
         self.cmd('vmss show --name {vmss} -g {rg}', checks=[
             self.check('virtualMachineProfile.priority', None),
@@ -4063,12 +4065,12 @@ class VMSSCreateAndModify(ScenarioTest):
             'vmss1': self.create_random_name('vmss1', 10),
             'vmss2': self.create_random_name('vmss2', 10),
         })
-        self.cmd('vmss create -g {rg} -n {vmss1} --image MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest --enable-hibernation true --admin-username vmtest --admin-password Test123456789#', checks=[
+        self.cmd('vmss create -g {rg} -n {vmss1} --image MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest --enable-hibernation true --admin-username vmtest --admin-password Test123456789# --orchestration-mode Flexible', checks=[
             self.check('vmss.additionalCapabilities.hibernationEnabled', True),
         ])
         self.cmd('vmss deallocate -g {rg} -n {vmss1} --hibernate true')
 
-        self.cmd('vmss create -g {rg} -n {vmss2} --image MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest --enable-hibernation true --admin-username vmtest --admin-password Test123456789#', checks=[
+        self.cmd('vmss create -g {rg} -n {vmss2} --image MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest --enable-hibernation true --admin-username vmtest --admin-password Test123456789# --orchestration-mode Flexible', checks=[
             self.check('vmss.additionalCapabilities.hibernationEnabled', True),
         ])
         result = self.cmd('vmss list-instances -g {rg} -n {vmss2}')
@@ -4107,7 +4109,8 @@ class VMSSCreateOptions(ScenarioTest):
 
         self.cmd('network public-ip create --name {ip} -g {rg}')
 
-        self.cmd('vmss create --image Debian:debian-10:10:latest --admin-password testPassword0 -l westus -g {rg} -n {vmss} --disable-overprovision --instance-count {count} --os-disk-caching {caching} --upgrade-policy-mode {update} --authentication-type password --admin-username myadmin --public-ip-address {ip} --os-disk-size-gb 40 --data-disk-sizes-gb 1 --vm-sku Standard_D2_v2 --computer-name-prefix vmss1 --orchestration-mode Uniform')
+        self.cmd('vmss create --image Debian:debian-10:10:latest --admin-password testPassword0 -l westus -g {rg} -n {vmss} --disable-overprovision --instance-count {count} '
+                 '--os-disk-caching {caching} --upgrade-policy-mode {update} --authentication-type password --admin-username myadmin --public-ip-address {ip} --os-disk-size-gb 40 --data-disk-sizes-gb 1 --vm-sku Standard_D2_v2 --computer-name-prefix vmss1 --orchestration-mode Uniform --lb-sku Standard')
         self.cmd('network lb show -g {rg} -n {vmss}lb ',
                  checks=self.check('frontendIPConfigurations[0].publicIPAddress.id.ends_with(@, \'{ip}\')', True))
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
@@ -4152,7 +4155,8 @@ class VMSSCreateOptions(ScenarioTest):
             'PTB': PTB
         })
 
-        self.cmd('vmss create --image Debian:debian-10:10:latest --admin-password testPassword0 -g {rg} -n {vmss} --instance-count 1 --generate-ssh-keys --admin-username myadmin --max-batch-instance-percent {maxBIP} --max-unhealthy-instance-percent {maxUIP} --max-unhealthy-upgraded-instance-percent {maxUUIP} --pause-time-between-batches {PTB} --prioritize-unhealthy-instances true --orchestration-mode Uniform')
+        self.cmd('vmss create --image Debian:debian-10:10:latest --admin-password testPassword0 -g {rg} -n {vmss} --instance-count 1 --generate-ssh-keys --lb-sku Standard '
+                 '--admin-username myadmin --max-batch-instance-percent {maxBIP} --max-unhealthy-instance-percent {maxUIP} --max-unhealthy-upgraded-instance-percent {maxUUIP} --pause-time-between-batches {PTB} --prioritize-unhealthy-instances true --orchestration-mode Uniform')
 
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('upgradePolicy.rollingUpgradePolicy.maxBatchInstancePercent', maxBIP),
@@ -4169,7 +4173,8 @@ class VMSSCreateOptions(ScenarioTest):
             'image': 'MicrosoftWindowsServer:WindowsServer:2016-Datacenter:latest',
             'sku': 'Standard_D1_v2',
         })
-        self.cmd('vmss create -g {rg} -n {vmss} --image {image} --vm-sku {sku} --admin-username vmtest --admin-password Test123456789# --enable-resilient-creation --disable-overprovision --upgrade-policy-mode Manual --orchestration-mode Uniform')
+        self.cmd('vmss create -g {rg} -n {vmss} --image {image} --vm-sku {sku} --admin-username vmtest --admin-password Test123456789# '
+                 '--enable-resilient-creation --disable-overprovision --upgrade-policy-mode Manual --orchestration-mode Uniform --lb-sku Standard')
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('resiliencyPolicy.resilientVmCreationPolicy.enabled', True),
         ])
@@ -4185,7 +4190,8 @@ class VMSSCreateOptions(ScenarioTest):
         self.kwargs.update({
             'vmss': self.create_random_name('vmss', 10)
         })
-        self.cmd('vmss create -n {vmss} -g {rg} --image OpenLogic:CentOS:7.5:latest --upgrade-policy-mode Manual --max-surge true --disable-overprovision --orchestration-mode Uniform', checks=[
+        self.cmd('vmss create -n {vmss} -g {rg} --image OpenLogic:CentOS:7.5:latest --upgrade-policy-mode Manual '
+                 '--max-surge true --disable-overprovision --orchestration-mode Uniform --lb-sku Standard', checks=[
             self.check('vmss.upgradePolicy.rollingUpgradePolicy.maxSurge', True),
         ])
         self.cmd('vmss update -n {vmss} -g {rg} --max-surge false', checks=[
@@ -4210,7 +4216,8 @@ class VMSSCreateOptions(ScenarioTest):
         self.cmd('network lb probe create -g {rg} --lb-name {lb} -n {probe} --protocol Tcp --port 80')
         self.cmd('network lb rule create -g {rg} --lb-name {lb} -n {lbrule} --probe-name {probe} --protocol Tcp --frontend-port 80 --backend-port 80')
 
-        self.cmd('vmss create --debug -n {vmss} -g {rg} --image {image} --upgrade-policy-mode Automatic --enable-auto-os-upgrade --orchestration-mode Uniform --load-balancer {lb} --admin-username {admin_username} --admin-password {admin_password} --vm-sku {sku} --health-probe {probe}',
+        self.cmd('vmss create --debug -n {vmss} -g {rg} --image {image} --upgrade-policy-mode Automatic --enable-auto-os-upgrade --orchestration-mode Uniform '
+                 '--load-balancer {lb} --admin-username {admin_username} --admin-password {admin_password} --vm-sku {sku} --health-probe {probe} --lb-sku Standard',
                  checks=[
                      self.check('vmss.upgradePolicy.automaticOSUpgradePolicy.enableAutomaticOSUpgrade', True),
                      self.check('vmss.upgradePolicy.mode', 'Automatic'),
@@ -4230,7 +4237,7 @@ class VMSSCreateOptions(ScenarioTest):
         })
 
         # check that we can create a vmss with local / ephemeral os disk.
-        self.cmd('vmss create --resource-group {rg} --name {vmss} --image {image} --ephemeral-os-disk --disable-overprovision '
+        self.cmd('vmss create --resource-group {rg} --name {vmss} --image {image} --ephemeral-os-disk --disable-overprovision --lb-sku Standard '
                  '--instance-count {count} --data-disk-sizes-gb 1 --storage-sku os=standard_lrs 0=premium_lrs --admin-username {user} --admin-password {password} --orchestration-mode Uniform')
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('virtualMachineProfile.storageProfile.osDisk.caching', '{caching}'),
@@ -4242,7 +4249,7 @@ class VMSSCreateOptions(ScenarioTest):
         ])
 
         # explicitly specify os-disk-caching
-        self.cmd('vmss create --resource-group {rg} --name {vmss_2} --image {image} --ephemeral-os-disk '
+        self.cmd('vmss create --resource-group {rg} --name {vmss_2} --image {image} --ephemeral-os-disk --lb-sku Standard '
                  '--os-disk-caching {caching} --disable-overprovision --instance-count {count} --admin-username {user} --admin-password {password} --orchestration-mode Uniform')
         self.cmd('vmss show -g {rg} -n {vmss_2}', checks=[
             self.check('virtualMachineProfile.storageProfile.osDisk.caching', '{caching}'),
