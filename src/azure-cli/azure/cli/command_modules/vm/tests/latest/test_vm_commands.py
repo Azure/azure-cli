@@ -11174,6 +11174,7 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
 
         self.cmd('vm application list -g {rg} -n {vm}')
 
+    @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer()
     def test_vm_add_application_with_order_application(self, resource_group):
         self.kwargs.update({
@@ -11184,9 +11185,15 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
             'vid2': '/subscriptions/{sub}/resourceGroups/galleryappaccount/providers/Microsoft.Compute/galleries/MyGallery/applications/MySecondApp/versions/1.0.1'.format(
                 sub=self.get_subscription_id()
             ),
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
         })
         # Prepare VM
-        self.cmd('vm create -l eastus -g {rg} -n {vm} --image Win2012R2Datacenter --admin-username clitest1234 --admin-password Test123456789# --license-type Windows_Server --nsg-rule NONE')
+        self.cmd('vm create -l eastus -g {rg} -n {vm} --image Win2022Datacenter --admin-username clitest1234 --admin-password Test123456789# '
+                 '--license-type Windows_Server --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
         self.cmd('vm application set -g {rg} -n {vm} --app-version-ids {vid1} {vid2} --order-applications', checks=[
             self.check('applicationProfile.galleryApplications[0].order', 1),
@@ -11195,6 +11202,7 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
 
         self.cmd('vm application list -g {rg} -n {vm}')
 
+    @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer()
     def test_vm_add_application_with_config_override(self, resource_group):
         self.kwargs.update({
@@ -11205,10 +11213,16 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
             'vid2': '/subscriptions/{sub}/resourceGroups/galleryappaccount/providers/Microsoft.Compute/galleries/MyGallery/applications/MySecondApp/versions/1.0.1'.format(
                 sub=self.get_subscription_id()
             ),
-            'config': 'https://galleryappaccount.blob.core.windows.net/gallerytest/MyAppConfig'
+            'config': 'https://galleryappaccount.blob.core.windows.net/gallerytest/MyAppConfig',
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
         })
         # Prepare VM
-        self.cmd('vm create -l eastus -g {rg} -n {vm} --image Win2012R2Datacenter --admin-username clitest1234 --admin-password Test123456789# --license-type Windows_Server --nsg-rule NONE')
+        self.cmd('vm create -l eastus -g {rg} -n {vm} --image Win2022Datacenter --admin-username clitest1234 --admin-password Test123456789# '
+                 '--license-type Windows_Server --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
         # wrong length of config-overrides
         message = 'usage error: --app-config-overrides should have the same number of items as --application-version-ids'
@@ -11245,7 +11259,8 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
         })
 
         # Prepare VMSS
-        self.cmd('vmss create -l eastus -g {rg} -n {vmss} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image Win2012R2Datacenter')
+        self.cmd('vmss create -l eastus -g {rg} -n {vmss} --authentication-type password --admin-username admin123 '
+                 '--admin-password PasswordPassword1! --image Win2022Datacenter --orchestration-mode Flexible')
 
         self.cmd('vmss application set -g {rg} -n {vmss} --app-version-ids')
 
@@ -11265,7 +11280,8 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
         })
 
         # Prepare VMSS
-        self.cmd('vmss create -l eastus -g {rg} -n {vmss} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image Win2012R2Datacenter')
+        self.cmd('vmss create -l eastus -g {rg} -n {vmss} --authentication-type password --admin-username admin123 '
+                 '--admin-password PasswordPassword1! --image Win2022Datacenter --orchestration-mode Flexible')
 
         self.cmd('vmss application set -g {rg} -n {vmss} --app-version-ids {vid1} {vid2}')
 
@@ -11285,7 +11301,7 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
         })
 
         # Prepare VMSS
-        self.cmd('vmss create -l eastus -g {rg} -n {vmss} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image Win2012R2Datacenter')
+        self.cmd('vmss create -l eastus -g {rg} -n {vmss} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1! --image Win2022Datacenter --orchestration-mode Flexible')
 
         self.cmd('vmss application set -g {rg} -n {vmss} --app-version-ids {vid1} {vid2} --order-applications', checks=[
             self.check('virtualMachineProfile.applicationProfile.galleryApplications[0].order', 1),
@@ -11309,7 +11325,8 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
         })
 
         # Prepare VMSS
-        self.cmd('vmss create -l eastus -g {rg} -n {vmss} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image Win2012R2Datacenter')
+        self.cmd('vmss create -l eastus -g {rg} -n {vmss} --authentication-type password --admin-username admin123 '
+                 '--admin-password PasswordPassword1! --image Win2022Datacenter --orchestration-mode Flexible')
 
         # wrong length of config-overrides
         message = 'usage error: --app-config-overrides should have the same number of items as --application-version-ids'
@@ -11530,16 +11547,24 @@ class DiskRPTestScenario(ScenarioTest):
 
 class RestorePointScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_restore_point', location='EASTUS2EUAP')
     def test_restore_point(self, resource_group):
         self.kwargs.update({
             'rg': resource_group,
             'collection_name': self.create_random_name('collection_', 20),
             'point_name': self.create_random_name('point_', 15),
-            'vm_name': self.create_random_name('vm_', 15)
+            'vm_name': self.create_random_name('vm_', 15),
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
         })
 
-        vm = self.cmd('vm create -n {vm_name} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username vmtest --admin-password testPassword0 --nsg-rule NONE --tag EnableCrashConsistentRestorePoint=True').get_output_in_json()
+        vm = self.cmd('vm create -n {vm_name} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username vmtest '
+                      '--admin-password testPassword0 --nsg-rule NONE --tag EnableCrashConsistentRestorePoint=True --subnet {subnet} --vnet-name {vnet}').get_output_in_json()
+
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+
         self.kwargs.update({
             'vm_id': vm['id']
         })
