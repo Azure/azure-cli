@@ -1792,7 +1792,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('quota', type=int, help='Specifies the maximum size of the share, in gigabytes. Must be greater '
                                            'than 0, and less than or equal to 5TB (5120).')
         c.argument('enable_snapshot_virtual_directory_access',
-                   options_list=('--enable-snapshot-virtual-directory-access', '--snap-virtual-dir-access'),
+                   options_list=('--enable-snapshot-virtual-directory-access', '--virtual-dir-access'),
                    arg_type=get_three_state_flag(),
                    help='Specifies whether the snapshot virtual directory should be accessible at the root of the '
                         'share mount point when NFS is enabled. If not specified, it will be accessible.')
