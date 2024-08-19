@@ -11603,16 +11603,23 @@ class RestorePointScenarioTest(ScenarioTest):
 
         self.cmd('restore-point delete -g {rg} -n {point_name} --collection-name {collection_name} -y')
 
-
+    @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_restore_point_collection', location='westus')
     def test_restore_point_collection(self, resource_group):
         self.kwargs.update({
             'rg': resource_group,
             'collection_name': self.create_random_name('point_', 15),
-            'vm_name': self.create_random_name('vm_', 15)
+            'vm_name': self.create_random_name('vm_', 15),
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
         })
 
-        vm = self.cmd('vm create -n {vm_name} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username vmtest').get_output_in_json()
+        vm = self.cmd('vm create -n {vm_name} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest '
+                      '--admin-username vmtest --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE').get_output_in_json()
+
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+
         self.kwargs.update({
             'vm_id': vm['id']
         })
@@ -11663,10 +11670,16 @@ class RestorePointScenarioTest(ScenarioTest):
             'collection_name1': self.create_random_name('collection_', 20),
             'point_name': self.create_random_name('point_', 15),
             'point_name1': self.create_random_name('point_', 15),
-            'vm_name': self.create_random_name('vm_', 15)
+            'vm_name': self.create_random_name('vm_', 15),
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
         })
 
-        vm = self.cmd('vm create -n {vm_name} -g {rg} --image ubuntu2204 --admin-username vmtest').get_output_in_json()
+        vm = self.cmd('vm create -n {vm_name} -g {rg} --image ubuntu2204 --admin-username vmtest --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE').get_output_in_json()
+
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+
         self.kwargs.update({
             'vm_id': vm['id']
         })
