@@ -13,21 +13,21 @@ interactions:
       ParameterSetName:
       - -g -n --address-prefix --subnet-name --subnet-prefix
       User-Agent:
-      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.12 (Linux-5.15.146.1-microsoft-standard-WSL2-x86_64-with-glibc2.35)
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000002?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002","name":"clitest.rg000002","type":"Microsoft.Resources/resourceGroups","location":"ukwest","tags":{"product":"azurecli","cause":"automation","test":"test_functionapp_create_with_vnet_wrong_location","date":"2024-05-07T16:28:36Z","module":"appservice","DateCreated":"2024-05-07T16:28:41Z","Creator":"jiasli@microsoft.com"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002","name":"clitest.rg000002","type":"Microsoft.Resources/resourceGroups","location":"ukwest","tags":{"product":"azurecli","cause":"automation","test":"test_functionapp_create_with_vnet_wrong_location","date":"2024-08-19T10:11:25Z","module":"appservice","Creator":"v-taoxuzeng@microsoft.com","DateCreated":"2024-08-19T10:11:32Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '460'
+      - '465'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 May 2024 16:29:08 GMT
+      - Mon, 19 Aug 2024 10:12:02 GMT
       expires:
       - '-1'
       pragma:
@@ -38,8 +38,10 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: D83D923C355D49E0B0E6B727BF8666E8 Ref B: MAA201060513029 Ref C: 2024-05-07T16:29:08Z'
+      - 'Ref A: 3C090B16A76D41B4B4E0CA7F709F53CB Ref B: TYO201100116009 Ref C: 2024-08-19T10:12:02Z'
     status:
       code: 200
       message: OK
@@ -63,38 +65,40 @@ interactions:
       ParameterSetName:
       - -g -n --address-prefix --subnet-name --subnet-prefix
       User-Agent:
-      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.12 (Linux-5.15.146.1-microsoft-standard-WSL2-x86_64-with-glibc2.35)
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000007?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000007?api-version=2024-03-01
   response:
     body:
       string: "{\r\n  \"name\": \"vnet000007\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000007\",\r\n
-        \ \"etag\": \"W/\\\"375992a2-52d9-4ba3-8ac2-f2ad8b9e4fdf\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"b1858e76-cd39-4300-a9ce-daa85de5da6f\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"ukwest\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
-        \"25b4bd39-5ada-48d8-b73a-34c2362cb8fb\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
-        [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"subnets\": [\r\n
-        \     {\r\n        \"name\": \"subnet000006\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000007/subnets/subnet000006\",\r\n
-        \       \"etag\": \"W/\\\"375992a2-52d9-4ba3-8ac2-f2ad8b9e4fdf\\\"\",\r\n
+        \"1ad501e9-8b87-4994-a118-45c678f651f6\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
+        [\r\n        \"10.0.0.0/16\"\r\n      ],\r\n      \"ipamPoolPrefixAllocations\":
+        []\r\n    },\r\n    \"privateEndpointVNetPolicies\": \"Disabled\",\r\n    \"subnets\":
+        [\r\n      {\r\n        \"name\": \"subnet000006\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000007/subnets/subnet000006\",\r\n
+        \       \"etag\": \"W/\\\"b1858e76-cd39-4300-a9ce-daa85de5da6f\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
-        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
-        [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
-        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"ipamPoolPrefixAllocations\":
+        [],\r\n          \"delegations\": [],\r\n          \"privateEndpointNetworkPolicies\":
+        \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n
+        \       },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
         false\r\n  }\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/ukwest/operations/c9b6770a-7f5f-4848-a37d-e11314be3a24?api-version=2022-01-01&t=638506961507684521&c=MIIHKjCCBhKgAwIBAgITHgR0uRvpB9QGBrVnGgAABHS5GzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjQwNTAxMjEzMzA1WhcNMjUwNDI2MjEzMzA1WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMWV9ZucXWP0iSfMxP4MXfBW3crpNAMbJ5-E8kXN0t7w4LRC6nOOI8I0odywcD_X0YmkL4mEhwbuH2cxIwRpYzzUOA34IcpF0oGND62KpmWw38aE9cy5MnJqdSq6VVel1YvEUoOzwkhZ4dVaBF-6Iw3Ag8Fm4H_08p6egnzXVTXdRGmUKX674Pp2kD5WHczMMupT_U-URdNnAkFIsOnYVdEDtNKg3x2oA8QtP4hd3y9iI0lIfiDhLsK3yLMNA28ctns_qsfxfxoE_pG7H6CipxysXebKe1VEd0OeZF2LJb9JY1KS9_oj5FbKN0VqDyz8jftZhMbgiVURaGssRxIbnxkCAwEAAaOCBBcwggQTMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBQBo4YYCssK_vQSnguwrNmfpJFeSDAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMEEGA1UdIAQ6MDgwDAYKKwYBBAGCN3sBATAMBgorBgEEAYI3ewIBMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAIzPQ234mECpNLGUjEc5gZV-w0T1Pl8Wtfv-TcKZNc002ZG5ODdy9juSL1d8704XNQVjBwLhXUsoXOc8pho30kdofBC59bM-UIHww8UvPfyYIefXNImHL94_inzOA7LSbnC6u4VRkzHpXeD2FmiTSikLUuLrRyDIAyH-BP_LVFIPjHtzb-4wP3Hg9n-xgHmfct6G7531aOPEIPWIe4OClRpiK7l-njX8JyoplWl7eEfnXKqkhVFiWKPEDcQdix49UAeQxykrMTjYaK23EOv0otYWm7bHbkBU084VSYlPbceAxcWbqwzuaQOl1CzYJQSEqFsAd0ATKyCuLw1PvPf1EW0&s=bhd9UARGo42kp-Kyl_e3YxVr0zgJ3yO3sTYrQfTBXR2YRAPrMnCa9ieL-RNRVdfGm2zxPbmyMLknA2nqLuFALeXFT9Lf9PmqYtfKaZmFLzyoWaUgkmW1hkQ_e4qkofDFDXi3htFfMcnYT_tjhRIP1X3EAm1pL7L8Tmb376dznk6Zq2yqqAXIiHotG_l6O5dyQen85pLngAMf_6HRbU9IA76Nzmg4XX-hmxxBIs3hUx2uPP11WokIOni-VPnxxNsxsKP17YGQoETM3uiKsDTQNEMe-XThxL5Bk6-a4DMHu14UTvkHdxbzUGbwcr8wjIb3bim8o04DVyJjiuxeBjaGlQ&h=cVq3Q1Ms7OgjepTOaIoQGq3VVTXRQ5YZyKLTYhvOyI8
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/ukwest/operations/2bf8f7bc-5841-438d-b059-2e0bd2dc7b3a?api-version=2024-03-01&t=638596591275874143&c=MIIHhzCCBm-gAwIBAgITHgTLf2Bo2ctQx42TXQAABMt_YDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjQwNjI0MTExMDUyWhcNMjUwNjE5MTExMDUyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAJlnrj2pdevN1SIOk4Ymmo6b0y9Je4RZXWejQSMTCH35NFEHss9bBD2CGcY3xU4F2W7onMR_2J9BMUNk3BAub3AoLlqVrcx5dzI0ay_5toyOhu-L1pN7aSQdp7J-LzA-UW_CLp2D_65mjx1ZER-HWOV5QedBCvUwhqtSal8AbzrK5Qth8tntkg5tzjChuGo9vkh1pnXKQyYHQMdulCipi-EK8sPOQpZyiVIRujiHxTJMjdxz4gCG4rAFAK8_jK4UC73mwHm7BAlfbfkkZtxW5sVSGLrYwFPkNIDtNGoINbTjOqTmJR02AYrzu-AeRS1DP-HxtHci9UFjOurKjaUYhTUCAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBTxZpd7aM59MC90B8etCBMRpcVJhTAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAHAEnYrjKwIEeZD6k6Jnduw9QE83ye3e6yI36Y6jc5gavwpltarWjUevLWA6bzqnIMEbxZot_oo7GgSjb9hcbtTWjf_cW7PWDbQSC5WExVS4rTM5XJOQlXIeguIDWoXNGCzJBnYfUfUEfW8ZdjPKbJ7_7OQo_y-DgeRynB9KRCkpH4wZ1X5EQR-13kZvzXCVNpw1yiAELFyVScpLMqfm5iM9nMEMU7Og9hgeUL4q7EwPPbvn6qRq4ehK7ctlmEItOmMlgtNqT3IRhFnMIIsqnZu7BTfLyXR_8geMDnVJlhUXkb73ZpHNIBaoXmHwLpUQLBwoqG0ME1rP1_9UfVhYmNs&s=jM3g_aUjsacnnEnYORP4Se86JoTcZy1Pjz74YDTuba9XQ6QrUTpUNgTYaXxXRb-MjvTvA5GMIZj1Rt8oMrK7tfxXZP2eejhfxlR8BkeTg1ELKFyNdrAdpQePbNnFQbWJf9WW8oI0Ct8QjD4f1vyk0oIOT_K2psLK7R2CLX4Zbf-55kStGYpEmpd2FLqVYUe8rhvSsWNUqJPUF1YYjpqDJpUQnvIsvXVAH4uQDE0lcE1PUl_bv9VY14Cl2SH7u4TZ88ZAzx8o41W8cEMn3Uie5i64iBNQPAxxnbe-G3of5YyrYJbDUZcC7QwO0Ou3puNdDAIMdu2bHXf3K1oGxAjJcQ&h=QU-7K8XGP8oKAoYlPMwL6hddXXCIPazUUTgjZarf-2s
       cache-control:
       - no-cache
       content-length:
-      - '1242'
+      - '1374'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 May 2024 16:29:10 GMT
+      - Mon, 19 Aug 2024 10:12:07 GMT
       expires:
       - '-1'
       pragma:
@@ -106,11 +110,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - bdecce30-9564-427c-a577-62b52370de91
+      - 5ca681d3-5b50-45ce-9448-65f220f6551d
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '199'
       x-msedge-ref:
-      - 'Ref A: 09D5ABB24477416990ADF08738392664 Ref B: MAA201060513037 Ref C: 2024-05-07T16:29:08Z'
+      - 'Ref A: 95C88B4B79874204917FA1D48251D1F0 Ref B: TYO201151006023 Ref C: 2024-08-19T10:12:03Z'
     status:
       code: 201
       message: Created
@@ -128,55 +134,9 @@ interactions:
       ParameterSetName:
       - -g -n --address-prefix --subnet-name --subnet-prefix
       User-Agent:
-      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.12 (Linux-5.15.146.1-microsoft-standard-WSL2-x86_64-with-glibc2.35)
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/ukwest/operations/c9b6770a-7f5f-4848-a37d-e11314be3a24?api-version=2022-01-01&t=638506961507684521&c=MIIHKjCCBhKgAwIBAgITHgR0uRvpB9QGBrVnGgAABHS5GzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjQwNTAxMjEzMzA1WhcNMjUwNDI2MjEzMzA1WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMWV9ZucXWP0iSfMxP4MXfBW3crpNAMbJ5-E8kXN0t7w4LRC6nOOI8I0odywcD_X0YmkL4mEhwbuH2cxIwRpYzzUOA34IcpF0oGND62KpmWw38aE9cy5MnJqdSq6VVel1YvEUoOzwkhZ4dVaBF-6Iw3Ag8Fm4H_08p6egnzXVTXdRGmUKX674Pp2kD5WHczMMupT_U-URdNnAkFIsOnYVdEDtNKg3x2oA8QtP4hd3y9iI0lIfiDhLsK3yLMNA28ctns_qsfxfxoE_pG7H6CipxysXebKe1VEd0OeZF2LJb9JY1KS9_oj5FbKN0VqDyz8jftZhMbgiVURaGssRxIbnxkCAwEAAaOCBBcwggQTMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBQBo4YYCssK_vQSnguwrNmfpJFeSDAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMEEGA1UdIAQ6MDgwDAYKKwYBBAGCN3sBATAMBgorBgEEAYI3ewIBMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAIzPQ234mECpNLGUjEc5gZV-w0T1Pl8Wtfv-TcKZNc002ZG5ODdy9juSL1d8704XNQVjBwLhXUsoXOc8pho30kdofBC59bM-UIHww8UvPfyYIefXNImHL94_inzOA7LSbnC6u4VRkzHpXeD2FmiTSikLUuLrRyDIAyH-BP_LVFIPjHtzb-4wP3Hg9n-xgHmfct6G7531aOPEIPWIe4OClRpiK7l-njX8JyoplWl7eEfnXKqkhVFiWKPEDcQdix49UAeQxykrMTjYaK23EOv0otYWm7bHbkBU084VSYlPbceAxcWbqwzuaQOl1CzYJQSEqFsAd0ATKyCuLw1PvPf1EW0&s=bhd9UARGo42kp-Kyl_e3YxVr0zgJ3yO3sTYrQfTBXR2YRAPrMnCa9ieL-RNRVdfGm2zxPbmyMLknA2nqLuFALeXFT9Lf9PmqYtfKaZmFLzyoWaUgkmW1hkQ_e4qkofDFDXi3htFfMcnYT_tjhRIP1X3EAm1pL7L8Tmb376dznk6Zq2yqqAXIiHotG_l6O5dyQen85pLngAMf_6HRbU9IA76Nzmg4XX-hmxxBIs3hUx2uPP11WokIOni-VPnxxNsxsKP17YGQoETM3uiKsDTQNEMe-XThxL5Bk6-a4DMHu14UTvkHdxbzUGbwcr8wjIb3bim8o04DVyJjiuxeBjaGlQ&h=cVq3Q1Ms7OgjepTOaIoQGq3VVTXRQ5YZyKLTYhvOyI8
-  response:
-    body:
-      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '30'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 07 May 2024 16:29:11 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - 602c6191-3db6-4d09-bdbf-345ed28a5511
-      x-msedge-ref:
-      - 'Ref A: EC672B659CF24C4689D10510DA8114EF Ref B: MAA201060513037 Ref C: 2024-05-07T16:29:10Z'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network vnet create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --address-prefix --subnet-name --subnet-prefix
-      User-Agent:
-      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.12 (Linux-5.15.146.1-microsoft-standard-WSL2-x86_64-with-glibc2.35)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/ukwest/operations/c9b6770a-7f5f-4848-a37d-e11314be3a24?api-version=2022-01-01&t=638506961507684521&c=MIIHKjCCBhKgAwIBAgITHgR0uRvpB9QGBrVnGgAABHS5GzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjQwNTAxMjEzMzA1WhcNMjUwNDI2MjEzMzA1WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMWV9ZucXWP0iSfMxP4MXfBW3crpNAMbJ5-E8kXN0t7w4LRC6nOOI8I0odywcD_X0YmkL4mEhwbuH2cxIwRpYzzUOA34IcpF0oGND62KpmWw38aE9cy5MnJqdSq6VVel1YvEUoOzwkhZ4dVaBF-6Iw3Ag8Fm4H_08p6egnzXVTXdRGmUKX674Pp2kD5WHczMMupT_U-URdNnAkFIsOnYVdEDtNKg3x2oA8QtP4hd3y9iI0lIfiDhLsK3yLMNA28ctns_qsfxfxoE_pG7H6CipxysXebKe1VEd0OeZF2LJb9JY1KS9_oj5FbKN0VqDyz8jftZhMbgiVURaGssRxIbnxkCAwEAAaOCBBcwggQTMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBQBo4YYCssK_vQSnguwrNmfpJFeSDAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMEEGA1UdIAQ6MDgwDAYKKwYBBAGCN3sBATAMBgorBgEEAYI3ewIBMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAIzPQ234mECpNLGUjEc5gZV-w0T1Pl8Wtfv-TcKZNc002ZG5ODdy9juSL1d8704XNQVjBwLhXUsoXOc8pho30kdofBC59bM-UIHww8UvPfyYIefXNImHL94_inzOA7LSbnC6u4VRkzHpXeD2FmiTSikLUuLrRyDIAyH-BP_LVFIPjHtzb-4wP3Hg9n-xgHmfct6G7531aOPEIPWIe4OClRpiK7l-njX8JyoplWl7eEfnXKqkhVFiWKPEDcQdix49UAeQxykrMTjYaK23EOv0otYWm7bHbkBU084VSYlPbceAxcWbqwzuaQOl1CzYJQSEqFsAd0ATKyCuLw1PvPf1EW0&s=bhd9UARGo42kp-Kyl_e3YxVr0zgJ3yO3sTYrQfTBXR2YRAPrMnCa9ieL-RNRVdfGm2zxPbmyMLknA2nqLuFALeXFT9Lf9PmqYtfKaZmFLzyoWaUgkmW1hkQ_e4qkofDFDXi3htFfMcnYT_tjhRIP1X3EAm1pL7L8Tmb376dznk6Zq2yqqAXIiHotG_l6O5dyQen85pLngAMf_6HRbU9IA76Nzmg4XX-hmxxBIs3hUx2uPP11WokIOni-VPnxxNsxsKP17YGQoETM3uiKsDTQNEMe-XThxL5Bk6-a4DMHu14UTvkHdxbzUGbwcr8wjIb3bim8o04DVyJjiuxeBjaGlQ&h=cVq3Q1Ms7OgjepTOaIoQGq3VVTXRQ5YZyKLTYhvOyI8
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/ukwest/operations/2bf8f7bc-5841-438d-b059-2e0bd2dc7b3a?api-version=2024-03-01&t=638596591275874143&c=MIIHhzCCBm-gAwIBAgITHgTLf2Bo2ctQx42TXQAABMt_YDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjQwNjI0MTExMDUyWhcNMjUwNjE5MTExMDUyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAJlnrj2pdevN1SIOk4Ymmo6b0y9Je4RZXWejQSMTCH35NFEHss9bBD2CGcY3xU4F2W7onMR_2J9BMUNk3BAub3AoLlqVrcx5dzI0ay_5toyOhu-L1pN7aSQdp7J-LzA-UW_CLp2D_65mjx1ZER-HWOV5QedBCvUwhqtSal8AbzrK5Qth8tntkg5tzjChuGo9vkh1pnXKQyYHQMdulCipi-EK8sPOQpZyiVIRujiHxTJMjdxz4gCG4rAFAK8_jK4UC73mwHm7BAlfbfkkZtxW5sVSGLrYwFPkNIDtNGoINbTjOqTmJR02AYrzu-AeRS1DP-HxtHci9UFjOurKjaUYhTUCAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBTxZpd7aM59MC90B8etCBMRpcVJhTAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAHAEnYrjKwIEeZD6k6Jnduw9QE83ye3e6yI36Y6jc5gavwpltarWjUevLWA6bzqnIMEbxZot_oo7GgSjb9hcbtTWjf_cW7PWDbQSC5WExVS4rTM5XJOQlXIeguIDWoXNGCzJBnYfUfUEfW8ZdjPKbJ7_7OQo_y-DgeRynB9KRCkpH4wZ1X5EQR-13kZvzXCVNpw1yiAELFyVScpLMqfm5iM9nMEMU7Og9hgeUL4q7EwPPbvn6qRq4ehK7ctlmEItOmMlgtNqT3IRhFnMIIsqnZu7BTfLyXR_8geMDnVJlhUXkb73ZpHNIBaoXmHwLpUQLBwoqG0ME1rP1_9UfVhYmNs&s=jM3g_aUjsacnnEnYORP4Se86JoTcZy1Pjz74YDTuba9XQ6QrUTpUNgTYaXxXRb-MjvTvA5GMIZj1Rt8oMrK7tfxXZP2eejhfxlR8BkeTg1ELKFyNdrAdpQePbNnFQbWJf9WW8oI0Ct8QjD4f1vyk0oIOT_K2psLK7R2CLX4Zbf-55kStGYpEmpd2FLqVYUe8rhvSsWNUqJPUF1YYjpqDJpUQnvIsvXVAH4uQDE0lcE1PUl_bv9VY14Cl2SH7u4TZ88ZAzx8o41W8cEMn3Uie5i64iBNQPAxxnbe-G3of5YyrYJbDUZcC7QwO0Ou3puNdDAIMdu2bHXf3K1oGxAjJcQ&h=QU-7K8XGP8oKAoYlPMwL6hddXXCIPazUUTgjZarf-2s
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -188,7 +148,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 May 2024 16:29:21 GMT
+      - Mon, 19 Aug 2024 10:12:08 GMT
       expires:
       - '-1'
       pragma:
@@ -200,9 +160,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - b364281c-0443-46bc-9dc7-42e0f3bb8e54
+      - 6502f86f-db4c-48b4-8103-b44316c5a347
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 94C27549CBE54446A283ED1B9A12C694 Ref B: MAA201060513037 Ref C: 2024-05-07T16:29:21Z'
+      - 'Ref A: DADA37492D9A4BAB88A2BBF5D3A7A5C1 Ref B: TYO201151006023 Ref C: 2024-08-19T10:12:09Z'
     status:
       code: 200
       message: OK
@@ -220,36 +182,38 @@ interactions:
       ParameterSetName:
       - -g -n --address-prefix --subnet-name --subnet-prefix
       User-Agent:
-      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.12 (Linux-5.15.146.1-microsoft-standard-WSL2-x86_64-with-glibc2.35)
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000007?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000007?api-version=2024-03-01
   response:
     body:
       string: "{\r\n  \"name\": \"vnet000007\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000007\",\r\n
-        \ \"etag\": \"W/\\\"d305b23f-3120-4663-a092-6a3171beae3a\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"953ef82f-88d8-4252-8700-234b5cb7dffb\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"ukwest\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
-        \"25b4bd39-5ada-48d8-b73a-34c2362cb8fb\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
-        [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"subnets\": [\r\n
-        \     {\r\n        \"name\": \"subnet000006\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000007/subnets/subnet000006\",\r\n
-        \       \"etag\": \"W/\\\"d305b23f-3120-4663-a092-6a3171beae3a\\\"\",\r\n
+        \"1ad501e9-8b87-4994-a118-45c678f651f6\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
+        [\r\n        \"10.0.0.0/16\"\r\n      ],\r\n      \"ipamPoolPrefixAllocations\":
+        []\r\n    },\r\n    \"privateEndpointVNetPolicies\": \"Disabled\",\r\n    \"subnets\":
+        [\r\n      {\r\n        \"name\": \"subnet000006\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000007/subnets/subnet000006\",\r\n
+        \       \"etag\": \"W/\\\"953ef82f-88d8-4252-8700-234b5cb7dffb\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
-        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
-        [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
-        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"ipamPoolPrefixAllocations\":
+        [],\r\n          \"delegations\": [],\r\n          \"privateEndpointNetworkPolicies\":
+        \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n
+        \       },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
         false\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1244'
+      - '1376'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 May 2024 16:29:22 GMT
+      - Mon, 19 Aug 2024 10:12:10 GMT
       etag:
-      - W/"d305b23f-3120-4663-a092-6a3171beae3a"
+      - W/"953ef82f-88d8-4252-8700-234b5cb7dffb"
       expires:
       - '-1'
       pragma:
@@ -261,9 +225,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - d5b274a9-67ed-43fb-83bb-60c0a1311a06
+      - aa58a106-f276-4090-a5e4-f3c310cdfe80
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 971E251E7D8E4383BC6DDF6603260646 Ref B: MAA201060513037 Ref C: 2024-05-07T16:29:22Z'
+      - 'Ref A: 3BC9FF23D4DF4730996BE5895D5A3A05 Ref B: TYO201151006023 Ref C: 2024-08-19T10:12:09Z'
     status:
       code: 200
       message: OK
@@ -281,21 +247,21 @@ interactions:
       ParameterSetName:
       - -g -n --sku
       User-Agent:
-      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.12 (Linux-5.15.146.1-microsoft-standard-WSL2-x86_64-with-glibc2.35)
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"francecentral","tags":{"product":"azurecli","cause":"automation","test":"test_functionapp_create_with_vnet_wrong_location","date":"2024-05-07T16:28:33Z","module":"appservice","DateCreated":"2024-05-07T16:28:38Z","Creator":"jiasli@microsoft.com"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"francecentral","tags":{"product":"azurecli","cause":"automation","test":"test_functionapp_create_with_vnet_wrong_location","date":"2024-08-19T10:11:20Z","module":"appservice","Creator":"v-taoxuzeng@microsoft.com","DateCreated":"2024-08-19T10:11:27Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '467'
+      - '472'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 May 2024 16:29:23 GMT
+      - Mon, 19 Aug 2024 10:12:12 GMT
       expires:
       - '-1'
       pragma:
@@ -306,8 +272,10 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: A7B57BF9A192498888A6B8A804F8820E Ref B: MAA201060515017 Ref C: 2024-05-07T16:29:24Z'
+      - 'Ref A: A01DDC17564042E7A62B376BE0C76CF7 Ref B: TYO201100116009 Ref C: 2024-08-19T10:12:12Z'
     status:
       code: 200
       message: OK
@@ -331,24 +299,24 @@ interactions:
       ParameterSetName:
       - -g -n --sku
       User-Agent:
-      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.12 (Linux-5.15.146.1-microsoft-standard-WSL2-x86_64-with-glibc2.35)
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/vnetplan000005?api-version=2023-01-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/vnetplan000005","name":"vnetplan000005","type":"Microsoft.Web/serverfarms","kind":"app","location":"francecentral","properties":{"serverFarmId":20941,"name":"vnetplan000005","sku":{"name":"P1v2","tier":"PremiumV2","size":"P1v2","family":"Pv2","capacity":1},"workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-FranceCentralwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":0,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"France
-        Central","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-par-033_20941","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"migrateToVMSS":null,"vnetConnectionsUsed":null,"vnetConnectionsMax":null,"createdTime":"2024-05-07T16:29:28.8"},"sku":{"name":"P1v2","tier":"PremiumV2","size":"P1v2","family":"Pv2","capacity":1}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/vnetplan000005","name":"vnetplan000005","type":"Microsoft.Web/serverfarms","kind":"app","location":"francecentral","properties":{"serverFarmId":33174,"name":"vnetplan000005","sku":{"name":"P1v2","tier":"PremiumV2","size":"P1v2","family":"Pv2","capacity":1},"workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-FranceCentralwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":0,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"France
+        Central","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-par-033_33174","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"migrateToVMSS":null,"vnetConnectionsUsed":null,"vnetConnectionsMax":null,"createdTime":"2024-08-19T10:12:18.5333333"},"sku":{"name":"P1v2","tier":"PremiumV2","size":"P1v2","family":"Pv2","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1612'
+      - '1618'
       content-type:
       - application/json
       date:
-      - Tue, 07 May 2024 16:29:33 GMT
+      - Mon, 19 Aug 2024 10:12:22 GMT
       etag:
-      - '"1DAA09BBC1A4EAB"'
+      - '"1DAF2204652EFCB"'
       expires:
       - '-1'
       pragma:
@@ -361,10 +329,12 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '199'
       x-msedge-ref:
-      - 'Ref A: 8A95908E4623417397DF27DDD54E1B4C Ref B: MAA201060514033 Ref C: 2024-05-07T16:29:24Z'
+      - 'Ref A: 9568255D3F59427A9C798D144EA32DCE Ref B: TYO201151005023 Ref C: 2024-08-19T10:12:13Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -384,23 +354,23 @@ interactions:
       ParameterSetName:
       - -g -n --plan --vnet --subnet -s
       User-Agent:
-      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.12 (Linux-5.15.146.1-microsoft-standard-WSL2-x86_64-with-glibc2.35)
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/vnetplan000005?api-version=2023-01-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/vnetplan000005","name":"vnetplan000005","type":"Microsoft.Web/serverfarms","kind":"app","location":"France
-        Central","properties":{"serverFarmId":20941,"name":"vnetplan000005","workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-FranceCentralwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"France
-        Central","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-par-033_20941","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2024-05-07T16:29:28.8"},"sku":{"name":"P1v2","tier":"PremiumV2","size":"P1v2","family":"Pv2","capacity":1}}'
+        Central","properties":{"serverFarmId":33174,"name":"vnetplan000005","workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-FranceCentralwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"France
+        Central","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-par-033_33174","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2024-08-19T10:12:18.5333333"},"sku":{"name":"P1v2","tier":"PremiumV2","size":"P1v2","family":"Pv2","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1525'
+      - '1531'
       content-type:
       - application/json
       date:
-      - Tue, 07 May 2024 16:29:35 GMT
+      - Mon, 19 Aug 2024 10:12:28 GMT
       expires:
       - '-1'
       pragma:
@@ -413,8 +383,10 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 4CC549BBBD764B87BBEA6D992F574D8C Ref B: MAA201060514023 Ref C: 2024-05-07T16:29:34Z'
+      - 'Ref A: 8D791692D62844DA8F9EAE9E393F83F5 Ref B: TYO201151003034 Ref C: 2024-08-19T10:12:27Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -434,23 +406,23 @@ interactions:
       ParameterSetName:
       - -g -n --plan --vnet --subnet -s
       User-Agent:
-      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.12 (Linux-5.15.146.1-microsoft-standard-WSL2-x86_64-with-glibc2.35)
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/vnetplan000005?api-version=2023-01-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/vnetplan000005","name":"vnetplan000005","type":"Microsoft.Web/serverfarms","kind":"app","location":"France
-        Central","properties":{"serverFarmId":20941,"name":"vnetplan000005","workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-FranceCentralwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"France
-        Central","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-par-033_20941","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2024-05-07T16:29:28.8"},"sku":{"name":"P1v2","tier":"PremiumV2","size":"P1v2","family":"Pv2","capacity":1}}'
+        Central","properties":{"serverFarmId":33174,"name":"vnetplan000005","workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-FranceCentralwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"France
+        Central","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-par-033_33174","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2024-08-19T10:12:18.5333333"},"sku":{"name":"P1v2","tier":"PremiumV2","size":"P1v2","family":"Pv2","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1525'
+      - '1531'
       content-type:
       - application/json
       date:
-      - Tue, 07 May 2024 16:29:37 GMT
+      - Mon, 19 Aug 2024 10:12:30 GMT
       expires:
       - '-1'
       pragma:
@@ -463,8 +435,10 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: A35E73ABBEB34A1E9B47EEB702CC966B Ref B: MAA201060513049 Ref C: 2024-05-07T16:29:36Z'
+      - 'Ref A: AB8532F862E24B77AA835C73016616BE Ref B: TYO201151002025 Ref C: 2024-08-19T10:12:28Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -484,19 +458,19 @@ interactions:
       ParameterSetName:
       - -g -n --plan --vnet --subnet -s
       User-Agent:
-      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.12 (Linux-5.15.146.1-microsoft-standard-WSL2-x86_64-with-glibc2.35)
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000007?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"vnet000007\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000007\",\r\n
-        \ \"etag\": \"W/\\\"d305b23f-3120-4663-a092-6a3171beae3a\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"953ef82f-88d8-4252-8700-234b5cb7dffb\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"ukwest\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
-        \"25b4bd39-5ada-48d8-b73a-34c2362cb8fb\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
+        \"1ad501e9-8b87-4994-a118-45c678f651f6\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
         [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"subnets\": [\r\n
         \     {\r\n        \"name\": \"subnet000006\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000007/subnets/subnet000006\",\r\n
-        \       \"etag\": \"W/\\\"d305b23f-3120-4663-a092-6a3171beae3a\\\"\",\r\n
+        \       \"etag\": \"W/\\\"953ef82f-88d8-4252-8700-234b5cb7dffb\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
@@ -511,9 +485,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 May 2024 16:29:38 GMT
+      - Mon, 19 Aug 2024 10:12:30 GMT
       etag:
-      - W/"d305b23f-3120-4663-a092-6a3171beae3a"
+      - W/"953ef82f-88d8-4252-8700-234b5cb7dffb"
       expires:
       - '-1'
       pragma:
@@ -525,12 +499,14 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 895779c7-f3b4-4224-b69e-4cabaa372475
+      - 5f1b9ad4-9fb3-41e8-8c74-ac6a5e07e46a
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: A63532AD8DA641D8949B5F9D1E540169 Ref B: MAA201060515035 Ref C: 2024-05-07T16:29:37Z'
+      - 'Ref A: DC466CF44E9D414A93E544AE4C235FB4 Ref B: TYO201100115023 Ref C: 2024-08-19T10:12:30Z'
     status:
       code: 200
-      message: OK
+      message: ''
 - request:
     body: null
     headers:
@@ -545,16 +521,14 @@ interactions:
       ParameterSetName:
       - -g -n --plan --vnet --subnet -s
       User-Agent:
-      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.12 (Linux-5.15.146.1-microsoft-standard-WSL2-x86_64-with-glibc2.35)
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/locations?api-version=2022-12-01
   response:
     body:
       string: "{\"value\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastus\",\"name\":\"eastus\",\"type\":\"Region\",\"displayName\":\"East
         US\",\"regionalDisplayName\":\"(US) East US\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geography\":\"United
-        States\",\"geographyGroup\":\"US\",\"longitude\":\"-79.8164\",\"latitude\":\"37.3719\",\"physicalLocation\":\"Virginia\",\"pairedRegion\":[{\"name\":\"westus\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westus\"}]},\"availabilityZoneMappings\":[{\"logicalZone\":\"1\",\"physicalZone\":\"eastus-az3\"},{\"logicalZone\":\"2\",\"physicalZone\":\"eastus-az1\"},{\"logicalZone\":\"3\",\"physicalZone\":\"eastus-az2\"}]},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastus2\",\"name\":\"eastus2\",\"type\":\"Region\",\"displayName\":\"East
-        US 2\",\"regionalDisplayName\":\"(US) East US 2\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geography\":\"United
-        States\",\"geographyGroup\":\"US\",\"longitude\":\"-78.3889\",\"latitude\":\"36.6681\",\"physicalLocation\":\"Virginia\",\"pairedRegion\":[{\"name\":\"centralus\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/centralus\"}]},\"availabilityZoneMappings\":[{\"logicalZone\":\"1\",\"physicalZone\":\"eastus2-az3\"},{\"logicalZone\":\"2\",\"physicalZone\":\"eastus2-az1\"},{\"logicalZone\":\"3\",\"physicalZone\":\"eastus2-az2\"}]},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southcentralus\",\"name\":\"southcentralus\",\"type\":\"Region\",\"displayName\":\"South
+        States\",\"geographyGroup\":\"US\",\"longitude\":\"-79.8164\",\"latitude\":\"37.3719\",\"physicalLocation\":\"Virginia\",\"pairedRegion\":[{\"name\":\"westus\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westus\"}]},\"availabilityZoneMappings\":[{\"logicalZone\":\"1\",\"physicalZone\":\"eastus-az3\"},{\"logicalZone\":\"2\",\"physicalZone\":\"eastus-az1\"},{\"logicalZone\":\"3\",\"physicalZone\":\"eastus-az2\"}]},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southcentralus\",\"name\":\"southcentralus\",\"type\":\"Region\",\"displayName\":\"South
         Central US\",\"regionalDisplayName\":\"(US) South Central US\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geography\":\"United
         States\",\"geographyGroup\":\"US\",\"longitude\":\"-98.5\",\"latitude\":\"29.4167\",\"physicalLocation\":\"Texas\",\"pairedRegion\":[{\"name\":\"northcentralus\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/northcentralus\"}]},\"availabilityZoneMappings\":[{\"logicalZone\":\"1\",\"physicalZone\":\"southcentralus-az3\"},{\"logicalZone\":\"2\",\"physicalZone\":\"southcentralus-az1\"},{\"logicalZone\":\"3\",\"physicalZone\":\"southcentralus-az2\"}]},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westus2\",\"name\":\"westus2\",\"type\":\"Region\",\"displayName\":\"West
         US 2\",\"regionalDisplayName\":\"(US) West US 2\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geography\":\"United
@@ -590,7 +564,8 @@ interactions:
         West Central\",\"regionalDisplayName\":\"(Europe) Germany West Central\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geography\":\"Germany\",\"geographyGroup\":\"Europe\",\"longitude\":\"8.682127\",\"latitude\":\"50.110924\",\"physicalLocation\":\"Frankfurt\",\"pairedRegion\":[{\"name\":\"germanynorth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/germanynorth\"}]},\"availabilityZoneMappings\":[{\"logicalZone\":\"1\",\"physicalZone\":\"germanywestcentral-az3\"},{\"logicalZone\":\"2\",\"physicalZone\":\"germanywestcentral-az1\"},{\"logicalZone\":\"3\",\"physicalZone\":\"germanywestcentral-az2\"}]},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/italynorth\",\"name\":\"italynorth\",\"type\":\"Region\",\"displayName\":\"Italy
         North\",\"regionalDisplayName\":\"(Europe) Italy North\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geography\":\"Italy\",\"geographyGroup\":\"Europe\",\"longitude\":\"9.18109\",\"latitude\":\"45.46888\",\"physicalLocation\":\"Milan\",\"pairedRegion\":[]},\"availabilityZoneMappings\":[{\"logicalZone\":\"1\",\"physicalZone\":\"italynorth-az3\"},{\"logicalZone\":\"2\",\"physicalZone\":\"italynorth-az1\"},{\"logicalZone\":\"3\",\"physicalZone\":\"italynorth-az2\"}]},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norwayeast\",\"name\":\"norwayeast\",\"type\":\"Region\",\"displayName\":\"Norway
         East\",\"regionalDisplayName\":\"(Europe) Norway East\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geography\":\"Norway\",\"geographyGroup\":\"Europe\",\"longitude\":\"10.752245\",\"latitude\":\"59.913868\",\"physicalLocation\":\"Norway\",\"pairedRegion\":[{\"name\":\"norwaywest\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norwaywest\"}]},\"availabilityZoneMappings\":[{\"logicalZone\":\"1\",\"physicalZone\":\"norwayeast-az3\"},{\"logicalZone\":\"2\",\"physicalZone\":\"norwayeast-az1\"},{\"logicalZone\":\"3\",\"physicalZone\":\"norwayeast-az2\"}]},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/polandcentral\",\"name\":\"polandcentral\",\"type\":\"Region\",\"displayName\":\"Poland
-        Central\",\"regionalDisplayName\":\"(Europe) Poland Central\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geography\":\"Poland\",\"geographyGroup\":\"Europe\",\"longitude\":\"21.01666\",\"latitude\":\"52.23334\",\"physicalLocation\":\"Warsaw\",\"pairedRegion\":[]},\"availabilityZoneMappings\":[{\"logicalZone\":\"1\",\"physicalZone\":\"polandcentral-az3\"},{\"logicalZone\":\"2\",\"physicalZone\":\"polandcentral-az1\"},{\"logicalZone\":\"3\",\"physicalZone\":\"polandcentral-az2\"}]},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/switzerlandnorth\",\"name\":\"switzerlandnorth\",\"type\":\"Region\",\"displayName\":\"Switzerland
+        Central\",\"regionalDisplayName\":\"(Europe) Poland Central\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geography\":\"Poland\",\"geographyGroup\":\"Europe\",\"longitude\":\"21.01666\",\"latitude\":\"52.23334\",\"physicalLocation\":\"Warsaw\",\"pairedRegion\":[]},\"availabilityZoneMappings\":[{\"logicalZone\":\"1\",\"physicalZone\":\"polandcentral-az3\"},{\"logicalZone\":\"2\",\"physicalZone\":\"polandcentral-az1\"},{\"logicalZone\":\"3\",\"physicalZone\":\"polandcentral-az2\"}]},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/spaincentral\",\"name\":\"spaincentral\",\"type\":\"Region\",\"displayName\":\"Spain
+        Central\",\"regionalDisplayName\":\"(Europe) Spain Central\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geography\":\"Spain\",\"geographyGroup\":\"Europe\",\"longitude\":\"3.4209\",\"latitude\":\"40.4259\",\"physicalLocation\":\"Madrid\",\"pairedRegion\":[]},\"availabilityZoneMappings\":[{\"logicalZone\":\"1\",\"physicalZone\":\"spaincentral-az3\"},{\"logicalZone\":\"2\",\"physicalZone\":\"spaincentral-az1\"},{\"logicalZone\":\"3\",\"physicalZone\":\"spaincentral-az2\"}]},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/switzerlandnorth\",\"name\":\"switzerlandnorth\",\"type\":\"Region\",\"displayName\":\"Switzerland
         North\",\"regionalDisplayName\":\"(Europe) Switzerland North\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geography\":\"Switzerland\",\"geographyGroup\":\"Europe\",\"longitude\":\"8.564572\",\"latitude\":\"47.451542\",\"physicalLocation\":\"Zurich\",\"pairedRegion\":[{\"name\":\"switzerlandwest\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/switzerlandwest\"}]},\"availabilityZoneMappings\":[{\"logicalZone\":\"1\",\"physicalZone\":\"switzerlandnorth-az3\"},{\"logicalZone\":\"2\",\"physicalZone\":\"switzerlandnorth-az1\"},{\"logicalZone\":\"3\",\"physicalZone\":\"switzerlandnorth-az2\"}]},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/mexicocentral\",\"name\":\"mexicocentral\",\"type\":\"Region\",\"displayName\":\"Mexico
         Central\",\"regionalDisplayName\":\"(Mexico) Mexico Central\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geography\":\"Mexico\",\"geographyGroup\":\"Mexico\",\"longitude\":\"-100.389888\",\"latitude\":\"20.588818\",\"physicalLocation\":\"Quer\xE9taro
         State\",\"pairedRegion\":[]},\"availabilityZoneMappings\":[{\"logicalZone\":\"1\",\"physicalZone\":\"mexicocentral-az3\"},{\"logicalZone\":\"2\",\"physicalZone\":\"mexicocentral-az1\"},{\"logicalZone\":\"3\",\"physicalZone\":\"mexicocentral-az2\"}]},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/uaenorth\",\"name\":\"uaenorth\",\"type\":\"Region\",\"displayName\":\"UAE
@@ -622,7 +597,9 @@ interactions:
         Asia (Stage)\",\"regionalDisplayName\":\"(Asia Pacific) Southeast Asia (Stage)\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\",\"geography\":\"asia\",\"geographyGroup\":\"Asia
         Pacific\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/brazilus\",\"name\":\"brazilus\",\"type\":\"Region\",\"displayName\":\"Brazil
         US\",\"regionalDisplayName\":\"(South America) Brazil US\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geography\":\"Brazil\",\"geographyGroup\":\"South
-        America\",\"longitude\":\"0\",\"latitude\":\"0\",\"physicalLocation\":\"\",\"pairedRegion\":[{\"name\":\"brazilsoutheast\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/brazilsoutheast\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastusstg\",\"name\":\"eastusstg\",\"type\":\"Region\",\"displayName\":\"East
+        America\",\"longitude\":\"0\",\"latitude\":\"0\",\"physicalLocation\":\"\",\"pairedRegion\":[{\"name\":\"brazilsoutheast\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/brazilsoutheast\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastus2\",\"name\":\"eastus2\",\"type\":\"Region\",\"displayName\":\"East
+        US 2\",\"regionalDisplayName\":\"(US) East US 2\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geography\":\"United
+        States\",\"geographyGroup\":\"US\",\"longitude\":\"-78.3889\",\"latitude\":\"36.6681\",\"physicalLocation\":\"Virginia\",\"pairedRegion\":[{\"name\":\"centralus\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/centralus\"}]},\"availabilityZoneMappings\":[{\"logicalZone\":\"1\",\"physicalZone\":\"eastus2-az3\"},{\"logicalZone\":\"2\",\"physicalZone\":\"eastus2-az1\"},{\"logicalZone\":\"3\",\"physicalZone\":\"eastus2-az2\"}]},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastusstg\",\"name\":\"eastusstg\",\"type\":\"Region\",\"displayName\":\"East
         US STG\",\"regionalDisplayName\":\"(US) East US STG\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geography\":\"Stage
         (US)\",\"geographyGroup\":\"US\",\"longitude\":\"-79.8164\",\"latitude\":\"37.3719\",\"physicalLocation\":\"Virginia\",\"pairedRegion\":[{\"name\":\"southcentralusstg\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southcentralusstg\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/northcentralus\",\"name\":\"northcentralus\",\"type\":\"Region\",\"displayName\":\"North
         Central US\",\"regionalDisplayName\":\"(US) North Central US\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geography\":\"United
@@ -674,11 +651,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '42231'
+      - '42817'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 May 2024 16:29:41 GMT
+      - Mon, 19 Aug 2024 10:12:34 GMT
       expires:
       - '-1'
       pragma:
@@ -689,8 +666,10 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 2F9922D4DB0F47D1ABFD1180F804D820 Ref B: MAA201060514029 Ref C: 2024-05-07T16:29:39Z'
+      - 'Ref A: A43C3E72064C47058EECF9F4D080E18D Ref B: TYO201151006034 Ref C: 2024-08-19T10:12:31Z'
     status:
       code: 200
       message: OK
@@ -708,16 +687,14 @@ interactions:
       ParameterSetName:
       - -g -n --plan --vnet --subnet -s
       User-Agent:
-      - AZURECLI/2.60.0 azsdk-python-core/1.28.0 Python/3.10.12 (Linux-5.15.146.1-microsoft-standard-WSL2-x86_64-with-glibc2.35)
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.9.5 (Windows-10-10.0.22631-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/locations?api-version=2022-12-01
   response:
     body:
       string: "{\"value\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastus\",\"name\":\"eastus\",\"type\":\"Region\",\"displayName\":\"East
         US\",\"regionalDisplayName\":\"(US) East US\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geography\":\"United
-        States\",\"geographyGroup\":\"US\",\"longitude\":\"-79.8164\",\"latitude\":\"37.3719\",\"physicalLocation\":\"Virginia\",\"pairedRegion\":[{\"name\":\"westus\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westus\"}]},\"availabilityZoneMappings\":[{\"logicalZone\":\"1\",\"physicalZone\":\"eastus-az3\"},{\"logicalZone\":\"2\",\"physicalZone\":\"eastus-az1\"},{\"logicalZone\":\"3\",\"physicalZone\":\"eastus-az2\"}]},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastus2\",\"name\":\"eastus2\",\"type\":\"Region\",\"displayName\":\"East
-        US 2\",\"regionalDisplayName\":\"(US) East US 2\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geography\":\"United
-        States\",\"geographyGroup\":\"US\",\"longitude\":\"-78.3889\",\"latitude\":\"36.6681\",\"physicalLocation\":\"Virginia\",\"pairedRegion\":[{\"name\":\"centralus\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/centralus\"}]},\"availabilityZoneMappings\":[{\"logicalZone\":\"1\",\"physicalZone\":\"eastus2-az3\"},{\"logicalZone\":\"2\",\"physicalZone\":\"eastus2-az1\"},{\"logicalZone\":\"3\",\"physicalZone\":\"eastus2-az2\"}]},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southcentralus\",\"name\":\"southcentralus\",\"type\":\"Region\",\"displayName\":\"South
+        States\",\"geographyGroup\":\"US\",\"longitude\":\"-79.8164\",\"latitude\":\"37.3719\",\"physicalLocation\":\"Virginia\",\"pairedRegion\":[{\"name\":\"westus\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westus\"}]},\"availabilityZoneMappings\":[{\"logicalZone\":\"1\",\"physicalZone\":\"eastus-az3\"},{\"logicalZone\":\"2\",\"physicalZone\":\"eastus-az1\"},{\"logicalZone\":\"3\",\"physicalZone\":\"eastus-az2\"}]},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southcentralus\",\"name\":\"southcentralus\",\"type\":\"Region\",\"displayName\":\"South
         Central US\",\"regionalDisplayName\":\"(US) South Central US\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geography\":\"United
         States\",\"geographyGroup\":\"US\",\"longitude\":\"-98.5\",\"latitude\":\"29.4167\",\"physicalLocation\":\"Texas\",\"pairedRegion\":[{\"name\":\"northcentralus\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/northcentralus\"}]},\"availabilityZoneMappings\":[{\"logicalZone\":\"1\",\"physicalZone\":\"southcentralus-az3\"},{\"logicalZone\":\"2\",\"physicalZone\":\"southcentralus-az1\"},{\"logicalZone\":\"3\",\"physicalZone\":\"southcentralus-az2\"}]},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westus2\",\"name\":\"westus2\",\"type\":\"Region\",\"displayName\":\"West
         US 2\",\"regionalDisplayName\":\"(US) West US 2\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geography\":\"United
@@ -753,7 +730,8 @@ interactions:
         West Central\",\"regionalDisplayName\":\"(Europe) Germany West Central\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geography\":\"Germany\",\"geographyGroup\":\"Europe\",\"longitude\":\"8.682127\",\"latitude\":\"50.110924\",\"physicalLocation\":\"Frankfurt\",\"pairedRegion\":[{\"name\":\"germanynorth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/germanynorth\"}]},\"availabilityZoneMappings\":[{\"logicalZone\":\"1\",\"physicalZone\":\"germanywestcentral-az3\"},{\"logicalZone\":\"2\",\"physicalZone\":\"germanywestcentral-az1\"},{\"logicalZone\":\"3\",\"physicalZone\":\"germanywestcentral-az2\"}]},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/italynorth\",\"name\":\"italynorth\",\"type\":\"Region\",\"displayName\":\"Italy
         North\",\"regionalDisplayName\":\"(Europe) Italy North\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geography\":\"Italy\",\"geographyGroup\":\"Europe\",\"longitude\":\"9.18109\",\"latitude\":\"45.46888\",\"physicalLocation\":\"Milan\",\"pairedRegion\":[]},\"availabilityZoneMappings\":[{\"logicalZone\":\"1\",\"physicalZone\":\"italynorth-az3\"},{\"logicalZone\":\"2\",\"physicalZone\":\"italynorth-az1\"},{\"logicalZone\":\"3\",\"physicalZone\":\"italynorth-az2\"}]},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norwayeast\",\"name\":\"norwayeast\",\"type\":\"Region\",\"displayName\":\"Norway
         East\",\"regionalDisplayName\":\"(Europe) Norway East\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geography\":\"Norway\",\"geographyGroup\":\"Europe\",\"longitude\":\"10.752245\",\"latitude\":\"59.913868\",\"physicalLocation\":\"Norway\",\"pairedRegion\":[{\"name\":\"norwaywest\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norwaywest\"}]},\"availabilityZoneMappings\":[{\"logicalZone\":\"1\",\"physicalZone\":\"norwayeast-az3\"},{\"logicalZone\":\"2\",\"physicalZone\":\"norwayeast-az1\"},{\"logicalZone\":\"3\",\"physicalZone\":\"norwayeast-az2\"}]},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/polandcentral\",\"name\":\"polandcentral\",\"type\":\"Region\",\"displayName\":\"Poland
-        Central\",\"regionalDisplayName\":\"(Europe) Poland Central\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geography\":\"Poland\",\"geographyGroup\":\"Europe\",\"longitude\":\"21.01666\",\"latitude\":\"52.23334\",\"physicalLocation\":\"Warsaw\",\"pairedRegion\":[]},\"availabilityZoneMappings\":[{\"logicalZone\":\"1\",\"physicalZone\":\"polandcentral-az3\"},{\"logicalZone\":\"2\",\"physicalZone\":\"polandcentral-az1\"},{\"logicalZone\":\"3\",\"physicalZone\":\"polandcentral-az2\"}]},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/switzerlandnorth\",\"name\":\"switzerlandnorth\",\"type\":\"Region\",\"displayName\":\"Switzerland
+        Central\",\"regionalDisplayName\":\"(Europe) Poland Central\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geography\":\"Poland\",\"geographyGroup\":\"Europe\",\"longitude\":\"21.01666\",\"latitude\":\"52.23334\",\"physicalLocation\":\"Warsaw\",\"pairedRegion\":[]},\"availabilityZoneMappings\":[{\"logicalZone\":\"1\",\"physicalZone\":\"polandcentral-az3\"},{\"logicalZone\":\"2\",\"physicalZone\":\"polandcentral-az1\"},{\"logicalZone\":\"3\",\"physicalZone\":\"polandcentral-az2\"}]},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/spaincentral\",\"name\":\"spaincentral\",\"type\":\"Region\",\"displayName\":\"Spain
+        Central\",\"regionalDisplayName\":\"(Europe) Spain Central\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geography\":\"Spain\",\"geographyGroup\":\"Europe\",\"longitude\":\"3.4209\",\"latitude\":\"40.4259\",\"physicalLocation\":\"Madrid\",\"pairedRegion\":[]},\"availabilityZoneMappings\":[{\"logicalZone\":\"1\",\"physicalZone\":\"spaincentral-az3\"},{\"logicalZone\":\"2\",\"physicalZone\":\"spaincentral-az1\"},{\"logicalZone\":\"3\",\"physicalZone\":\"spaincentral-az2\"}]},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/switzerlandnorth\",\"name\":\"switzerlandnorth\",\"type\":\"Region\",\"displayName\":\"Switzerland
         North\",\"regionalDisplayName\":\"(Europe) Switzerland North\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geography\":\"Switzerland\",\"geographyGroup\":\"Europe\",\"longitude\":\"8.564572\",\"latitude\":\"47.451542\",\"physicalLocation\":\"Zurich\",\"pairedRegion\":[{\"name\":\"switzerlandwest\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/switzerlandwest\"}]},\"availabilityZoneMappings\":[{\"logicalZone\":\"1\",\"physicalZone\":\"switzerlandnorth-az3\"},{\"logicalZone\":\"2\",\"physicalZone\":\"switzerlandnorth-az1\"},{\"logicalZone\":\"3\",\"physicalZone\":\"switzerlandnorth-az2\"}]},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/mexicocentral\",\"name\":\"mexicocentral\",\"type\":\"Region\",\"displayName\":\"Mexico
         Central\",\"regionalDisplayName\":\"(Mexico) Mexico Central\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geography\":\"Mexico\",\"geographyGroup\":\"Mexico\",\"longitude\":\"-100.389888\",\"latitude\":\"20.588818\",\"physicalLocation\":\"Quer\xE9taro
         State\",\"pairedRegion\":[]},\"availabilityZoneMappings\":[{\"logicalZone\":\"1\",\"physicalZone\":\"mexicocentral-az3\"},{\"logicalZone\":\"2\",\"physicalZone\":\"mexicocentral-az1\"},{\"logicalZone\":\"3\",\"physicalZone\":\"mexicocentral-az2\"}]},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/uaenorth\",\"name\":\"uaenorth\",\"type\":\"Region\",\"displayName\":\"UAE
@@ -785,7 +763,9 @@ interactions:
         Asia (Stage)\",\"regionalDisplayName\":\"(Asia Pacific) Southeast Asia (Stage)\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\",\"geography\":\"asia\",\"geographyGroup\":\"Asia
         Pacific\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/brazilus\",\"name\":\"brazilus\",\"type\":\"Region\",\"displayName\":\"Brazil
         US\",\"regionalDisplayName\":\"(South America) Brazil US\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geography\":\"Brazil\",\"geographyGroup\":\"South
-        America\",\"longitude\":\"0\",\"latitude\":\"0\",\"physicalLocation\":\"\",\"pairedRegion\":[{\"name\":\"brazilsoutheast\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/brazilsoutheast\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastusstg\",\"name\":\"eastusstg\",\"type\":\"Region\",\"displayName\":\"East
+        America\",\"longitude\":\"0\",\"latitude\":\"0\",\"physicalLocation\":\"\",\"pairedRegion\":[{\"name\":\"brazilsoutheast\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/brazilsoutheast\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastus2\",\"name\":\"eastus2\",\"type\":\"Region\",\"displayName\":\"East
+        US 2\",\"regionalDisplayName\":\"(US) East US 2\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geography\":\"United
+        States\",\"geographyGroup\":\"US\",\"longitude\":\"-78.3889\",\"latitude\":\"36.6681\",\"physicalLocation\":\"Virginia\",\"pairedRegion\":[{\"name\":\"centralus\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/centralus\"}]},\"availabilityZoneMappings\":[{\"logicalZone\":\"1\",\"physicalZone\":\"eastus2-az3\"},{\"logicalZone\":\"2\",\"physicalZone\":\"eastus2-az1\"},{\"logicalZone\":\"3\",\"physicalZone\":\"eastus2-az2\"}]},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastusstg\",\"name\":\"eastusstg\",\"type\":\"Region\",\"displayName\":\"East
         US STG\",\"regionalDisplayName\":\"(US) East US STG\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geography\":\"Stage
         (US)\",\"geographyGroup\":\"US\",\"longitude\":\"-79.8164\",\"latitude\":\"37.3719\",\"physicalLocation\":\"Virginia\",\"pairedRegion\":[{\"name\":\"southcentralusstg\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southcentralusstg\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/northcentralus\",\"name\":\"northcentralus\",\"type\":\"Region\",\"displayName\":\"North
         Central US\",\"regionalDisplayName\":\"(US) North Central US\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geography\":\"United
@@ -837,11 +817,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '42231'
+      - '42817'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 May 2024 16:29:43 GMT
+      - Mon, 19 Aug 2024 10:12:36 GMT
       expires:
       - '-1'
       pragma:
@@ -852,8 +832,10 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 2F63AE07270D4533BCFF593F77D7CA71 Ref B: MAA201060514031 Ref C: 2024-05-07T16:29:42Z'
+      - 'Ref A: F843D998B4424931899F3DD2FAF68A0C Ref B: TYO201100113009 Ref C: 2024-08-19T10:12:34Z'
     status:
       code: 200
       message: OK
