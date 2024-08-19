@@ -88,7 +88,7 @@ from ._constants import (MICROSOFT_SECRET_SETTING_NAME, FACEBOOK_SECRET_SETTING_
                          GOOGLE_SECRET_SETTING_NAME, TWITTER_SECRET_SETTING_NAME, APPLE_SECRET_SETTING_NAME, CONTAINER_APPS_RP,
                          NAME_INVALID, NAME_ALREADY_EXISTS, ACR_IMAGE_SUFFIX, HELLO_WORLD_IMAGE, LOG_TYPE_SYSTEM, LOG_TYPE_CONSOLE,
                          MANAGED_CERTIFICATE_RT, PRIVATE_CERTIFICATE_RT, PENDING_STATUS, SUCCEEDED_STATUS, CONTAINER_APPS_SDK_MODELS,
-                         BLOB_STORAGE_TOKEN_STORE_SECRET_SETTING_NAME)
+                         BLOB_STORAGE_TOKEN_STORE_SECRET_SETTING_NAME, DEFAULT_PORT)
 
 from .containerapp_job_registry_decorator import ContainerAppJobRegistryDecorator, ContainerAppJobRegistrySetDecorator, \
     ContainerAppJobRegistryRemoveDecorator
@@ -2453,6 +2453,8 @@ def enable_ingress(cmd, name, resource_group_name, type, target_port=None, trans
 
         if target_port is not None:
             ingress_def["targetPort"] = target_port
+        else:
+            ingress_def["targetPort"] = DEFAULT_PORT
 
     containerapp_def["properties"]["configuration"]["ingress"] = ingress_def
 

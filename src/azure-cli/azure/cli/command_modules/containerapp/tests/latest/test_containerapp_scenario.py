@@ -17,8 +17,8 @@ from azure.cli.command_modules.containerapp.tests.latest.utils import create_con
 
 from azure.cli.testsdk.reverse_dependency import get_dummy_cli
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathCheck, live_only,
-                               LogAnalyticsWorkspacePreparer)
+from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathCheck, StringCheck, live_only,
+                               JMESPathCheckNotExists, LogAnalyticsWorkspacePreparer)
 from knack.util import CLIError
 
 from azure.cli.command_modules.containerapp.tests.latest.common import TEST_LOCATION, write_test_file, \
@@ -215,6 +215,32 @@ class ContainerappScenarioTest(ScenarioTest):
         self.cmd('containerapp create -g {} -n {} --environment {} --ingress external'.format(resource_group, containerapp_name, env_id), checks=[
             JMESPathCheck('properties.configuration.ingress.external', True),
             JMESPathCheck('properties.configuration.ingress.targetPort', 0)
+        ])
+
+        self.cmd('containerapp ingress disable -g {} -n {}'.format(resource_group, containerapp_name), checks=[
+            StringCheck('')
+        ])
+
+        self.cmd('containerapp show -g {} -n {}'.format(resource_group, containerapp_name), checks=[
+            JMESPathCheckNotExists('properties.configuration.ingress'),
+        ])
+
+        self.cmd('containerapp ingress enable -g {} -n {} --type external --target-port 8080'.format(resource_group, containerapp_name), checks=[
+            JMESPathCheck('external', True),
+            JMESPathCheck('targetPort', 8080)
+        ])
+
+        self.cmd('containerapp ingress disable -g {} -n {}'.format(resource_group, containerapp_name), checks=[
+            StringCheck('')
+        ])
+
+        self.cmd('containerapp show -g {} -n {}'.format(resource_group, containerapp_name), checks=[
+            JMESPathCheckNotExists('properties.configuration.ingress'),
+        ])
+
+        self.cmd('containerapp ingress enable -g {} -n {} --type external'.format(resource_group, containerapp_name), checks=[
+            JMESPathCheck('external', True),
+            JMESPathCheck('targetPort', 0)
         ])
 
         # Create Container App with secrets and environment variables
