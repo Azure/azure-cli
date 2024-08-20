@@ -4729,7 +4729,7 @@ class VMSSUpdateTests(ScenarioTest):
             self.check('tags.foo', 'bar')
         ])
         from azure.core.exceptions import HttpResponseError
-        with self.assertRaisesRegex(HttpResponseError, 'Managed Images are not supported for virtual machines with security type TrustedLaunch\.'):
+        with self.assertRaisesRegex(HttpResponseError, 'Managed Images are not supported for virtual machines with security type TrustedLaunch.'):
             self.cmd('vmss update -g {rg} -n {vmss} --security-type TrustedLaunch')
 
     @AllowLargeResponse()
@@ -11482,7 +11482,7 @@ class DiskRPTestScenario(ScenarioTest):
         self.cmd('snapshot create -g {rg2} -n snapb --copy-start true --incremental true --source {source} -l eastus')
         # show snapshot B, check completionPercent
         self.cmd('snapshot show -g {rg2} -n snapb', checks=[
-            self.check_pattern('completionPercent', '\d?.\d?')
+            self.check_pattern('completionPercent', r'\d?.\d?')
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_completion_percent1_', location='westus')

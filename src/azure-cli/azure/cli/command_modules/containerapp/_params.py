@@ -12,7 +12,7 @@ from azure.cli.core.commands.parameters import (resource_group_name_type,
                                                 get_three_state_flag, get_enum_type, tags_type)
 
 from ._validators import (validate_memory, validate_cpu, validate_managed_env_name_or_id, validate_registry_server,
-                          validate_registry_user, validate_registry_pass, validate_target_port, validate_ingress,
+                          validate_registry_user, validate_registry_pass, validate_target_port,
                           validate_storage_name_or_id, validate_cors_max_age, validate_allow_insecure)
 from ._constants import UNAUTHENTICATED_CLIENT_ACTION, FORWARD_PROXY_CONVENTION, MAXIMUM_CONTAINER_APP_NAME_LENGTH, LOG_TYPE_CONSOLE, LOG_TYPE_SYSTEM
 
@@ -112,7 +112,7 @@ def load_arguments(self, _):
 
     # Ingress
     with self.argument_context('containerapp', arg_group='Ingress') as c:
-        c.argument('ingress', validator=validate_ingress, default=None, arg_type=get_enum_type(['internal', 'external']), help="The ingress type.")
+        c.argument('ingress', default=None, arg_type=get_enum_type(['internal', 'external']), help="The ingress type.")
         c.argument('target_port', type=int, validator=validate_target_port, help="The application port used for ingress traffic.")
         c.argument('transport', arg_type=get_enum_type(['auto', 'http', 'http2', 'tcp']), help="The transport protocol used for ingress traffic.")
         c.argument('exposed_port', type=int, help="Additional exposed port. Only supported by tcp transport protocol. Must be unique per environment if the app ingress is external.")
@@ -273,7 +273,7 @@ def load_arguments(self, _):
 
     with self.argument_context('containerapp ingress') as c:
         c.argument('allow_insecure', arg_type=get_three_state_flag(), help='Allow insecure connections for ingress traffic.')
-        c.argument('type', validator=validate_ingress, arg_type=get_enum_type(['internal', 'external']), help="The ingress type.")
+        c.argument('type', arg_type=get_enum_type(['internal', 'external']), help="The ingress type.")
         c.argument('transport', arg_type=get_enum_type(['auto', 'http', 'http2', 'tcp']), help="The transport protocol used for ingress traffic.")
         c.argument('target_port', type=int, validator=validate_target_port, help="The application port used for ingress traffic.")
         c.argument('exposed_port', type=int, help="Additional exposed port. Only supported by tcp transport protocol. Must be unique per environment if the app ingress is external.")
