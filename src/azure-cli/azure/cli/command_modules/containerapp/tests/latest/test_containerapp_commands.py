@@ -1193,6 +1193,18 @@ class ContainerappRegistryIdentityTests(ScenarioTest):
             JMESPathCheck("properties.template.containers[0].image", image_name),
         ])
 
+        self.cmd(f'containerapp create -g {resource_group} -n {app}  --image nginx --ingress external --target-port 80 --environment {env}', checks=[
+            JMESPathCheck("properties.provisioningState", "Succeeded"),
+            JMESPathCheck("properties.template.containers[0].image", "nginx"),
+            JMESPathCheck("properties.configuration.registries", None),
+        ])
+
+        self.cmd(f'containerapp registry set --server {acr}.azurecr.io -g {resource_group} -n {app} --identity {identity_rid}')
+
+        self.cmd(f'containerapp registry list -g {resource_group} -n {app}', checks=[
+            JMESPathCheck('length(@)', 1),
+        ])
+
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="westeurope")
     def test_containerapp_registry_acr_look_up_credentical(self, resource_group):

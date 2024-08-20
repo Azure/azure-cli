@@ -2916,6 +2916,8 @@ def set_registry(cmd, name, resource_group_name, server, username=None, password
     _validate_subscription_registered(cmd, CONTAINER_APPS_RP)
     if (username or password) and identity:
         raise MutuallyExclusiveArgumentError("Use either identity or username/password.")
+    if identity and identity.lower() != "system" and not is_valid_resource_id(identity):
+        raise ValidationError(f"The --identity {identity} is invalid. Please use 'system' for a system-defined identity or a resource id for a user-defined identity.")
 
     containerapp_def = None
     try:

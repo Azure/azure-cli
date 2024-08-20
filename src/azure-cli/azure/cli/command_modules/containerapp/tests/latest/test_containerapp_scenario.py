@@ -14,6 +14,7 @@ from msrestazure.tools import parse_resource_id
 from azure.cli.command_modules.containerapp.custom import containerapp_ssh
 from azure.cli.command_modules.containerapp.tests.latest.utils import create_containerapp_env, \
     prepare_containerapp_env_for_app_e2e_tests
+from azure.cli.core.azclierror import ValidationError
 
 from azure.cli.testsdk.reverse_dependency import get_dummy_cli
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
@@ -491,6 +492,8 @@ class ContainerappScenarioTest(ScenarioTest):
         self.assertEqual(app_data["properties"]["configuration"]["registries"][0].get("identity"), "system")
 
         self.cmd(f'containerapp registry remove -g {resource_group} -n {app} --server {registry_list[0]["server"]}',expect_failure=False)
+        with self.assertRaisesRegex(ValidationError, "The --identity invalid-identity is invalid. Please use 'system' for a system-defined identity or a resource id for a user-defined identity."):
+            self.cmd(f'containerapp registry set --server {acr}.azurecr.io -g {resource_group} -n {app} --identity invalid-identity')
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="westeurope")
