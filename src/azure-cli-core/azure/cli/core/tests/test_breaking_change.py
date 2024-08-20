@@ -68,7 +68,7 @@ class TestBreakingChange(unittest.TestCase):
         with redirect_stdout(captured_output):
             with self.assertRaises(SystemExit):
                 cli.invoke(['test', 'group', '--help'])
-            self.assertIn('[BreakingChange]', captured_output.getvalue())
+            self.assertIn('[Breaking Change]', captured_output.getvalue())
             self.assertIn(warning_message, captured_output.getvalue())
 
     def test_command_group_deprecate(self):
@@ -204,7 +204,7 @@ class TestBreakingChange(unittest.TestCase):
             with self.assertRaises(SystemExit):
                 cli.invoke(['test', 'group', 'cmd', '--help'])
             self.assertIn(warning, captured_output.getvalue().replace('\n        ', ' '))
-            self.assertIn('[BreakingChange]', captured_output.getvalue())
+            self.assertIn('[Breaking Change]', captured_output.getvalue())
 
     @mock.patch('azure.cli.core.breaking_change.NEXT_BREAKING_CHANGE_RELEASE', '3.0.0')
     def test_default_change(self):
@@ -233,7 +233,7 @@ class TestBreakingChange(unittest.TestCase):
             with self.assertRaises(SystemExit):
                 cli.invoke(['test', 'group', 'cmd', '--help'])
             self.assertIn(warning, captured_output.getvalue().replace('\n        ', ' '))
-            self.assertIn('[BreakingChange]', captured_output.getvalue())
+            self.assertIn('[Breaking Change]', captured_output.getvalue())
 
     @mock.patch('azure.cli.core.breaking_change.NEXT_BREAKING_CHANGE_RELEASE', '3.0.0')
     def test_output_change(self):
@@ -262,7 +262,7 @@ class TestBreakingChange(unittest.TestCase):
         with redirect_stdout(captured_output):
             with self.assertRaises(SystemExit):
                 cli.invoke(['test', 'group', '--help'])
-            self.assertIn('[BreakingChange]', captured_output.getvalue())
+            self.assertIn('[Breaking Change]', captured_output.getvalue())
 
     @mock.patch('azure.cli.core.breaking_change.NEXT_BREAKING_CHANGE_RELEASE', '3.0.0')
     def test_logic_change(self):
@@ -289,7 +289,7 @@ class TestBreakingChange(unittest.TestCase):
         with redirect_stdout(captured_output):
             with self.assertRaises(SystemExit):
                 cli.invoke(['test', 'group', '--help'])
-            self.assertIn('[BreakingChange]', captured_output.getvalue())
+            self.assertIn('[Breaking Change]', captured_output.getvalue())
 
     @mock.patch('azure.cli.core.breaking_change.NEXT_BREAKING_CHANGE_RELEASE', '3.0.0')
     def test_multi_breaking_change(self):
@@ -321,14 +321,14 @@ class TestBreakingChange(unittest.TestCase):
             self.assertIn(warning1, captured_output.getvalue().replace('\n        ', ' '))
             self.assertIn(warning2, captured_output.getvalue().replace('\n        ', ' '))
             self.assertIn(warning3, captured_output.getvalue().replace('\n        ', ' '))
-            self.assertIn('[BreakingChange]', captured_output.getvalue())
+            self.assertIn('[Breaking Change]', captured_output.getvalue())
             self.assertIn('[Deprecated]', captured_output.getvalue())
 
         captured_output = io.StringIO()
         with redirect_stdout(captured_output):
             with self.assertRaises(SystemExit):
                 cli.invoke(['test', 'group', '--help'])
-            self.assertIn('[BreakingChange]', captured_output.getvalue())
+            self.assertIn('[Breaking Change]', captured_output.getvalue())
 
     @mock.patch('azure.cli.core.breaking_change.NEXT_BREAKING_CHANGE_RELEASE', '3.0.0')
     def test_conditional_breaking_change(self):
@@ -351,7 +351,7 @@ class TestBreakingChange(unittest.TestCase):
             with self.assertRaises(SystemExit):
                 cli.invoke(['test', 'group', 'cmd', '--help'])
             self.assertNotIn(warning_message, captured_err.getvalue().replace('\n        ', ' '))
-            self.assertNotIn('[BreakingChange]', captured_output.getvalue())
+            self.assertNotIn('[Breaking Change]', captured_output.getvalue())
 
         cli_ctx = mock.MagicMock()
         cli_ctx.invocation.commands_loader.command_name = 'test group cmd'
