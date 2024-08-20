@@ -220,6 +220,26 @@ type: command
 short-summary: Get the status of Azure Monitor logs integration on an HDInsight cluster.
 """
 
+helps['hdinsight azure-monitor-agent'] = """
+type: group
+short-summary: Manage Azure Monitor Agent logs integration on an HDInsight cluster.
+"""
+
+helps['hdinsight azure-monitor-agent disable'] = """
+type: command
+short-summary: Disable the Azure Monitor Agent logs integration on an HDInsight cluster.
+"""
+
+helps['hdinsight azure-monitor-agent enable'] = """
+type: command
+short-summary: Enable the Azure Monitor Agent logs integration on an HDInsight cluster.
+"""
+
+helps['hdinsight azure-monitor-agent show'] = """
+type: command
+short-summary: Get the status of Azure Monitor Agent logs integration on an HDInsight cluster.
+"""
+
 helps['hdinsight rotate-disk-encryption-key'] = """
 type: command
 short-summary: Rotate the disk encryption key of the specified HDInsight cluster.
