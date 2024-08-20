@@ -92,8 +92,9 @@ def convert_acl_permissions(result):
     if 'signed_identifiers' in result:
         signed_identifiers = {}
         for identifier in result["signed_identifiers"]:
-            if getattr(identifier.access_policy, 'permission') is None:
-                setattr(identifier.access_policy, 'permission', '')
+            if identifier.access_policy is not None:
+                if getattr(identifier.access_policy, 'permission') is None:
+                    setattr(identifier.access_policy, 'permission', '')
             signed_identifiers[identifier.id] = identifier.access_policy
         result['signed_identifiers'] = signed_identifiers
     return result

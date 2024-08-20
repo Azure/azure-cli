@@ -11,7 +11,7 @@ import sys
 from azure.cli.core._environment import get_config_dir
 from knack.log import get_logger
 from knack.util import CLIError
-from msal import PublicClientApplication
+from msal import PublicClientApplication, ConfidentialClientApplication
 
 # Service principal entry properties
 from .msal_authentication import _CLIENT_ID, _TENANT, _CLIENT_SECRET, _CERTIFICATE, _CLIENT_ASSERTION, \
@@ -29,6 +29,9 @@ AZURE_TENANT_ID = "AZURE_TENANT_ID"
 AZURE_CLIENT_ID = "AZURE_CLIENT_ID"
 AZURE_CLIENT_SECRET = "AZURE_CLIENT_SECRET"
 
+WAM_PROMPT = (
+    "Select the account you want to log in with. "
+    "For more information on login with Azure CLI, see https://go.microsoft.com/fwlink/?linkid=2271136")
 
 logger = get_logger(__name__)
 
@@ -150,7 +153,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
                                "flow with `az login --use-device-code`.",
                                self._msal_app.authority.authorization_endpoint)
             elif ui == 'broker':
-                logger.warning("Please select the account you want to log in with.")
+                logger.warning(WAM_PROMPT)
 
         from .util import read_response_templates
         success_template, error_template = read_response_templates()
@@ -200,8 +203,9 @@ class Identity:  # pylint: disable=too-many-instance-attributes
     def login_in_cloud_shell(self, scopes):
         raise NotImplementedError
 
-    def logout_user(self, user):
-        accounts = self._msal_app.get_accounts(user)
+    def logout_user(self, username):
+        # If username is an SP client ID, it is ignored
+        accounts = self._msal_app.get_accounts(username)
         for account in accounts:
             self._msal_app.remove_account(account)
 
@@ -215,12 +219,21 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         for e in file_extensions.values():
             _try_remove(self._token_cache_file + e)
 
-    def logout_service_principal(self, sp):
-        # remove service principal secrets
-        self._service_principal_store.remove_entry(sp)
+    def logout_service_principal(self, client_id):
+        # If client_id is a username, it is ignored
+
+        # Step 1: Remove SP from MSAL token cache
+        # Note that removing SP access tokens shouldn't rely on SP store
+        cca = ConfidentialClientApplication(client_id, **self._msal_app_kwargs)
+        cca.remove_tokens_for_client()
+
+        # Step 2: Remove SP from SP store
+        self._service_principal_store.remove_entry(client_id)
 
     def logout_all_service_principal(self):
         # remove service principal secrets
+        # TODO: As MSAL provides no interface to get all service principals in its token cache, this method can't
+        #   clear all service principals' access tokens from MSAL token cache.
         for e in file_extensions.values():
             _try_remove(self._secret_file + e)
 

@@ -29,7 +29,8 @@ from azure.cli.testsdk import (
     KeyVaultPreparer,
     ScenarioTest,
     StringContainCheck,
-    live_only)
+    live_only,
+    record_only)
 
 from azure.mgmt.sql.models import AdvancedThreatProtectionState
 
@@ -37,9 +38,9 @@ from azure.mgmt.sql.models import AdvancedThreatProtectionState
 # Constants
 SERVER_NAME_PREFIX = 'azuredbclitest-'
 SERVER_NAME_MAX_LENGTH = 20
-DEFAULT_LOCATION = "eastus2euap"
-DEFAULT_PAIRED_LOCATION = "centraluseuap"
-DEFAULT_GENERAL_PURPOSE_SKU = "Standard_D2s_v3"
+DEFAULT_LOCATION = "northeurope"
+DEFAULT_PAIRED_LOCATION = "westeurope"
+DEFAULT_GENERAL_PURPOSE_SKU = "Standard_D2ds_v4"
 DEFAULT_MEMORY_OPTIMIZED_SKU = "Standard_E4ads_v5"
 RESOURCE_RANDOM_NAME = "clirecording"
 STORAGE_ACCOUNT_PREFIX = "storageaccount"
@@ -89,7 +90,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self._test_flexible_server_paid_iops_mgmt('mysql', resource_group)
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location='northeurope')
+    @ResourceGroupPreparer(location=DEFAULT_LOCATION)
     def test_mysql_flexible_server_mgmt(self, resource_group):
         self._test_flexible_server_mgmt('mysql', resource_group)
     
@@ -126,8 +127,8 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
-    @KeyVaultPreparer(name_prefix='rdbmsvault', parameter_name='vault_name', location=DEFAULT_PAIRED_LOCATION, additional_params='--enable-purge-protection true --retention-days 90')
-    @KeyVaultPreparer(name_prefix='rdbmsvault', parameter_name='backup_vault_name', location=DEFAULT_LOCATION, additional_params='--enable-purge-protection true --retention-days 90')
+    @KeyVaultPreparer(name_prefix='rdbmsvault', parameter_name='vault_name', location=DEFAULT_PAIRED_LOCATION, additional_params='--enable-purge-protection true --retention-days 90 --enable-rbac-authorization false')
+    @KeyVaultPreparer(name_prefix='rdbmsvault', parameter_name='backup_vault_name', location=DEFAULT_LOCATION, additional_params='--enable-purge-protection true --retention-days 90 --enable-rbac-authorization false')
     def test_mysql_flexible_server_byok_mgmt(self, resource_group, vault_name, backup_vault_name):
         self._test_flexible_server_byok_mgmt('mysql', resource_group, vault_name, backup_vault_name)
 
@@ -139,19 +140,17 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
         storage_size = 32
         version = '5.7'
-        location = 'northeurope'
-        sku_name = 'Standard_D2ds_v4'
+        location = DEFAULT_LOCATION
+        sku_name = DEFAULT_GENERAL_PURPOSE_SKU
         memory_optimized_sku = DEFAULT_MEMORY_OPTIMIZED_SKU
         tier = 'GeneralPurpose'
         backup_retention = 7
         database_name = 'testdb'
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        ha_value = 'ZoneRedundant'
 
         self.cmd('{} flexible-server create -g {} -n {} --backup-retention {} --sku-name {} --tier {} \
-                  --storage-size {} -u {} --version {} --tags keys=3 --database-name {} --high-availability {} \
-                  --public-access None'.format(database_engine, resource_group, server_name, backup_retention,
-                                               sku_name, tier, storage_size, 'dbadmin', version, database_name, ha_value))
+                  --storage-size {} -u {} --version {} --tags keys=3 --database-name {} --public-access None'
+                 .format(database_engine, resource_group, server_name, backup_retention, sku_name, tier, storage_size, 'dbadmin', version, database_name))
 
         basic_info = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name)).get_output_in_json()
         self.assertEqual(basic_info['name'], server_name)
@@ -669,7 +668,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         target_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
 
         self.cmd('{} flexible-server create -g {} -n {} -l {} --public-access none --tier {} --sku-name {}'
-                 .format(database_engine, resource_group, source_server, location, 'GeneralPurpose', 'Standard_D2ds_v4'))
+                 .format(database_engine, resource_group, source_server, location, 'GeneralPurpose', DEFAULT_GENERAL_PURPOSE_SKU))
 
         self.cmd('{} flexible-server show -g {} -n {}'
                  .format(database_engine, resource_group, source_server),
@@ -707,9 +706,13 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         backup_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         tier = 'GeneralPurpose'
         sku_name = DEFAULT_GENERAL_PURPOSE_SKU
-        location = DEFAULT_PAIRED_LOCATION
-        backup_location = DEFAULT_LOCATION
+        location = DEFAULT_LOCATION
+        backup_location = DEFAULT_PAIRED_LOCATION
         replication_role = 'Replica'
+
+        user = self.cmd('ad signed-in-user show').get_output_in_json()
+
+        self.cmd('keyvault set-policy --name {} --object-id {} --key-permissions all'.format(vault_name, user['id']))
 
         key = self.cmd('keyvault key create --name {} -p software --vault-name {}'
                        .format(key_name, vault_name)).get_output_in_json()
@@ -926,14 +929,12 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
             self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name))
 
         invalid_input_tests()
-        if backup_location != 'eastus2euap':
-            main_tests(True)
         main_tests(False)
 
 
     def _test_flexible_server_gtid_reset(self, database_engine, resource_group):
-        location = 'northeurope'
-        general_purpose_sku = "Standard_D2ds_v4"
+        location = DEFAULT_LOCATION
+        general_purpose_sku = DEFAULT_GENERAL_PURPOSE_SKU
 
         source_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
 
@@ -1259,8 +1260,8 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
     
     def _test_flexible_server_cross_region_replica_mgmt(self, database_engine, resource_group):
         # create a server
-        master_location = DEFAULT_PAIRED_LOCATION
-        replica_location = DEFAULT_LOCATION
+        master_location = DEFAULT_LOCATION
+        replica_location = 'eastus'
         primary_role = 'None'
         replica_role = 'Replica'
         private_dns_param = 'privateDnsZoneResourceId'
@@ -1455,7 +1456,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
         self._test_mysql_flexible_server_public_access_custom('mysql', resource_group)
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location='northeurope')
+    @ResourceGroupPreparer(location=DEFAULT_LOCATION)
     def test_mysql_flexible_server_public_access_restore(self, resource_group):
         self._test_mysql_flexible_server_public_access_restore('mysql', resource_group)
 
@@ -1465,8 +1466,8 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
         self._test_mysql_flexible_server_public_access_georestore('mysql', resource_group)
     
     def _test_mysql_flexible_server_public_access_georestore(self, database_engine, resource_group):
-        location = 'northeurope'
-        paired_location = 'westeurope'
+        location = DEFAULT_LOCATION
+        paired_location = DEFAULT_PAIRED_LOCATION
         server_name_soure_restore = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         server_name_target_restore = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         api_version = '2022-09-30-preview'
@@ -1489,7 +1490,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
                           checks=[JMESPathCheck('properties.network.publicNetworkAccess', 'Disabled')])
 
     def _test_mysql_flexible_server_public_access_restore(self, database_engine, resource_group):
-        location = 'northeurope'
+        location = DEFAULT_LOCATION
         server_name_soure_restore = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         server_name_target_restore = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         api_version = '2022-09-30-preview'
@@ -1622,6 +1623,15 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
         self.assertEqual(show_result_2['network']['delegatedSubnetResourceId'],
                          '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
                          self.get_subscription_id(), resource_group, vnet_name_2, 'Subnet' + servers[1]))
+
+        # Case 3 : Detach server vnet
+        self.cmd('{} flexible-server detach-vnet -g {} -n {} --public-network-access Disabled --yes'
+                 .format(database_engine, resource_group, servers[0], vnet_name, location, subnet_name, private_dns_zone_1))
+        
+        show_result_3 = self.cmd('{} flexible-server show -g {} -n {}'
+                            .format(database_engine, resource_group, servers[0])).get_output_in_json()
+        self.assertEqual(show_result_3['network']['delegatedSubnetResourceId'], None)
+
 
         # delete all servers
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, servers[0]),
@@ -1989,8 +1999,8 @@ class FlexibleServerUpgradeMgmtScenarioTest(ScenarioTest):
 class FlexibleServerBackupsMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location="northeurope")
-    @ServerPreparer(engine_type='mysql', location="northeurope")
+    @ResourceGroupPreparer(location=DEFAULT_LOCATION)
+    @ServerPreparer(engine_type='mysql', location=DEFAULT_LOCATION)
     def test_mysql_flexible_server_backups_mgmt(self, resource_group, server):
         self._test_backups_mgmt('mysql', resource_group, server)
 
@@ -2231,6 +2241,36 @@ class FlexibleServerAdvancedThreatProtectionScenarioTest(ScenarioTest):
                             checks=[
                                 JMESPathCheck('resourceGroup', resource_group),
                                 JMESPathCheck('state', new_defender_state)])
+
+
+class FlexibleServerMaintenanceMgmtScenarioTest(ScenarioTest):
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location='northeurope')
+    @record_only() # this test need a manually configured server.
+
+    def test_mysql_flexible_server_maintenance_mgmt(self, resource_group):
+        self._test_maintenance_mgmt('mysql', resource_group)
+    
+    def _test_maintenance_mgmt(self, database_engine, resource_group):
+        resource_group = "reschedule-cli-test"
+        server_name = "azuredbclitest-maintenance"
+        maintenance_list_response = self.cmd('{} flexible-server maintenance list --resource-group {} --server-name {}'
+                 .format(database_engine, resource_group, server_name)).get_output_in_json()
+        self.assertNotEqual(len(maintenance_list_response), 0)
+
+        maintenance_name = maintenance_list_response[0]['name']
+        maintenance_id = maintenance_list_response[0]['id']
+        maintenance_read_response = self.cmd('{} flexible-server maintenance show --resource-group {} --server-name {} --maintenance-name {}'
+                 .format(database_engine, resource_group, server_name, maintenance_name)).get_output_in_json()
+        self.assertEqual(maintenance_id, maintenance_read_response['id'])
+
+        reschedule_start_time = "2024-11-06T03:41Z"
+        maintenance_reschedule_response = self.cmd('{} flexible-server maintenance reschedule --resource-group {} --server-name {} --maintenance-name {} --start-time {}'
+                 .format(database_engine, resource_group, server_name, maintenance_name, reschedule_start_time)).get_output_in_json()
+        maintenance_rescheduled_time = parser.parse(maintenance_reschedule_response['maintenanceStartTime']).strftime('%Y-%m-%dT%H:%MZ')
+        self.assertEqual(reschedule_start_time, maintenance_rescheduled_time)
+
 
 class MySQLExportTest(ScenarioTest):
     profile = None

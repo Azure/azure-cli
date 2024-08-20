@@ -968,7 +968,9 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         enable_osimage_notification=None, max_surge=None, enable_hibernation=None,
                         enable_auto_os_upgrade=None, enable_proxy_agent=None, proxy_agent_mode=None,
                         security_posture_reference_id=None, security_posture_reference_exclude_extensions=None,
-                        enable_resilient_vm_creation=None, enable_resilient_vm_deletion=None):
+                        enable_resilient_vm_creation=None, enable_resilient_vm_deletion=None,
+                        additional_scheduled_events=None, enable_user_reboot_scheduled_events=None,
+                        enable_user_redeploy_scheduled_events=None):
 
     # Build IP configuration
     ip_configuration = {}
@@ -1283,9 +1285,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
         }
     if upgrade_policy_mode and cmd.supported_api_version(min_api='2020-12-01',
                                                          operation_group='virtual_machine_scale_sets'):
-        vmss_properties['upgradePolicy']['rollingUpgradePolicy'] = {}
-        rolling_upgrade_policy = vmss_properties['upgradePolicy']['rollingUpgradePolicy']
-
+        rolling_upgrade_policy = {}
         if max_batch_instance_percent is not None:
             rolling_upgrade_policy['maxBatchInstancePercent'] = max_batch_instance_percent
 
@@ -1307,20 +1307,19 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
         if max_surge is not None:
             rolling_upgrade_policy['maxSurge'] = max_surge
 
-        if not rolling_upgrade_policy:
-            del rolling_upgrade_policy
+        if rolling_upgrade_policy:
+            vmss_properties['upgradePolicy']['rollingUpgradePolicy'] = rolling_upgrade_policy
+
     if upgrade_policy_mode and cmd.supported_api_version(min_api='2018-10-01',
                                                          operation_group='virtual_machine_scale_sets'):
-        vmss_properties['upgradePolicy']['automaticOSUpgradePolicy'] = {}
-        automatic_os_upgrade_policy = vmss_properties['upgradePolicy']['automaticOSUpgradePolicy']
-
+        automatic_os_upgrade_policy = {}
         if enable_auto_os_upgrade is not None:
             automatic_os_upgrade_policy['enableAutomaticOSUpgrade'] = enable_auto_os_upgrade
 
-        if not automatic_os_upgrade_policy:
-            del automatic_os_upgrade_policy
+        if automatic_os_upgrade_policy:
+            vmss_properties['upgradePolicy']['automaticOSUpgradePolicy'] = automatic_os_upgrade_policy
 
-    if upgrade_policy_mode and upgrade_policy_mode.lower() == 'rolling' and orchestration_mode.lower() == 'uniform' and\
+    if upgrade_policy_mode and upgrade_policy_mode.lower() == 'rolling' and\
             cmd.supported_api_version(min_api='2020-12-01', operation_group='virtual_machine_scale_sets'):
         if os_type.lower() == 'linux':
             from azure.cli.command_modules.vm._vmss_application_health import application_health_setting_for_linux
@@ -1420,6 +1419,30 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
             }
         })
         virtual_machine_profile['scheduledEventsProfile'] = scheduled_events_profile
+
+    scheduled_events_policy = {}
+    if additional_scheduled_events is not None:
+        scheduled_events_policy.update({
+            "scheduledEventsAdditionalPublishingTargets": {
+                "eventGridAndResourceGraph": {
+                    "enable": additional_scheduled_events
+                }
+            }
+        })
+    if enable_user_redeploy_scheduled_events is not None:
+        scheduled_events_policy.update({
+            "userInitiatedRedeploy": {
+                "automaticallyApprove": enable_user_redeploy_scheduled_events
+            }
+        })
+    if enable_user_reboot_scheduled_events is not None:
+        scheduled_events_policy.update({
+            "userInitiatedReboot": {
+                "automaticallyApprove": enable_user_reboot_scheduled_events
+            }
+        })
+    if scheduled_events_policy:
+        vmss_properties['scheduledEventsPolicy'] = scheduled_events_policy
 
     if automatic_repairs_grace_period is not None or automatic_repairs_action is not None:
         automatic_repairs_policy = {

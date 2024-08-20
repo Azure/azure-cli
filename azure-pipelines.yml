@@ -14,6 +14,8 @@ pr:
 
 variables:
 - template: ${{ variables.Pipeline.Workspace }}/.azure-pipelines/templates/variables.yml
+- name: Codeql.Enabled
+  value: false
 
 parameters:
 - name: architectures
@@ -66,23 +68,18 @@ jobs:
   pool:
     name: ${{ variables.windows_pool }}
   steps:
-#  - task: ms-codeanalysis.vss-microsoft-security-code-analysis-devops.build-task-credscan.CredScan@2
-#    displayName: 'Run Credential Scanner'
-#    inputs:
-#      toolMajorVersion: V2
-#      suppressionsFile: './scripts/ci/credscan/CredScanSuppressions.json'
-#      toolVersionV2: '2.1.17'
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-credscan.CredScan@3
+    displayName: 'Run Credential Scanner'
+    inputs:
+      toolVersion: '2.1.17'
+      suppressionsFile: './scripts/ci/credscan/CredScanSuppressions.json'
 
-  - task: ms-codeanalysis.vss-microsoft-security-code-analysis-devops.build-task-postanalysis.PostAnalysis@1
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-postanalysis.PostAnalysis@2
     displayName: 'Post Analysis'
     inputs:
-      AllTools: false
-      BinSkim: false
-      CredScan: true
-      PoliCheck: false
-      RoslynAnalyzers: false
-      TSLint: false
-      ToolLogsNotFoundAction: 'Standard'
+      GdnBreakAllTools: false
+      GdnBreakGdnToolCredScan: true
+      GdnBreakGdnToolCredScanSeverity: Error
 
 - job: PolicyCheck
   displayName: "Policy Check"
@@ -328,6 +325,7 @@ jobs:
       filePath: build_scripts\windows\scripts\test_zip_installation.ps1
 
 - job: BuildDockerImageAlpine
+  continueOnError: true
   displayName: Build Docker Image Alpine
   strategy:
     matrix:
@@ -360,6 +358,7 @@ jobs:
       ArtifactName: $(artifactName)
 
 - job: TestDockerImageAlpine
+  continueOnError: true
   displayName: Test Docker Image Alpine
   dependsOn:
     - BuildDockerImageAlpine
@@ -404,7 +403,7 @@ jobs:
 
 - job: BuildDockerImageAzureLinux
   displayName: Build Docker Image Azure Linux
-  dependsOn: BuildRpmPackageMariner
+  dependsOn: BuildRpmPackagesAzureLinux
   strategy:
     matrix:
       ${{ each arch in parameters.architectures }}:
@@ -552,12 +551,12 @@ jobs:
       
       echo "== Testing pip install on Python 3.9 =="
       docker run \
-        --rm -v $PYPI_FILES:/mnt/pypi python:3.9 \
+        --rm -v $PYPI_FILES:/mnt/pypi mcr.microsoft.com/mirror/docker/library/python:3.9-slim \
         /bin/bash -c "cd /mnt/pypi && ls && pip install --find-links ./ azure_cli-$CLI_VERSION*whl && az self-test && az --version && sleep 5"
       
       echo "== Testing pip install on Python 3.11 =="
       docker run \
-        --rm -v $PYPI_FILES:/mnt/pypi python:3.11 \
+        --rm -v $PYPI_FILES:/mnt/pypi mcr.microsoft.com/mirror/docker/library/python:3.11-slim \
         /bin/bash -c "cd /mnt/pypi && ls && pip install --find-links ./ azure_cli-$CLI_VERSION*whl && az self-test && az --version && sleep 5"
 
     displayName: 'Test pip Install'
@@ -674,7 +673,7 @@ jobs:
                  -e CLI_VERSION=$CLI_VERSION \
                  -e HOMEBREW_UPSTREAM_URL=$HOMEBREW_UPSTREAM_URL \
                  --name azurecli \
-                 python:3.11 \
+                 mcr.microsoft.com/mirror/docker/library/python:3.11-slim \
                  /mnt/scripts/run.sh
       
       # clean up
@@ -719,6 +718,10 @@ jobs:
 
   - bash: |
       set -ev
+      # Force relink python@3.xx in Homebrew to resolve the conflict with pre-installed python 3.xx on macOS-12 image
+      # See: https://github.com/Azure/azure-cli/issues/29054
+      python_version=3.11
+      brew unlink python@$python_version && brew link --overwrite python@$python_version
       
       echo == Remove pre-installed azure-cli ==
       brew uninstall azure-cli
@@ -763,19 +766,20 @@ jobs:
     displayName: 'Test Homebrew Package'
 
 
-- job: BuildRpmPackageMariner
-  displayName: Build Rpm Package Mariner
+- job: BuildRpmPackagesAzureLinux
+  displayName: Build Rpm Package
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   strategy:
     matrix:
-      2.0 AMD64:
-        image: mcr.microsoft.com/cbl-mariner/base/core:2.0
-        artifact: rpm-mariner2.0-amd64
-        pool: ${{ variables.ubuntu_pool }}
-      2.0 ARM64:
-        image: mcr.microsoft.com/cbl-mariner/base/core:2.0
-        artifact: rpm-mariner2.0-arm64
-        pool: ${{ variables.ubuntu_arm64_pool }}
+      ${{ each arch in parameters.architectures }}:
+        Mariner 2.0 ${{ arch.name }}:
+          image: mcr.microsoft.com/cbl-mariner/base/core:2.0
+          artifact: rpm-mariner2.0-${{ arch.value }}
+          pool: ${{ arch.pool }}
+        Azure Linux 3.0 ${{ arch.name }}:
+          image: azurelinuxpreview.azurecr.io/public/azurelinux/base/core:3.0
+          artifact: rpm-azurelinux3.0-${{ arch.value }}
+          pool: ${{ arch.pool }}
   pool:
     name: $(pool)
   steps:
@@ -783,10 +787,10 @@ jobs:
     displayName: Install Docker
 
   - task: Bash@3
-    displayName: 'Build Rpm Package: Mariner'
+    displayName: 'Build Rpm Package: Azure Linux'
     inputs:
       targetType: 'filePath'
-      filePath: scripts/release/rpm/pipeline_mariner.sh
+      filePath: scripts/release/rpm/pipeline_azurelinux.sh
 
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'SBOM'
@@ -799,25 +803,26 @@ jobs:
       TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: $(artifact)
 
-- job: TestRpmPackageMariner
-  displayName: Test Rpm Package Mariner
+- job: TestRpmPackagesAzureLinux
+  displayName: Test Rpm Package
   timeoutInMinutes: 120
   dependsOn:
-  - BuildRpmPackageMariner
+  - BuildRpmPackagesAzureLinux
   - ExtractMetadata
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
     name: $(pool)
   strategy:
     matrix:
-      2.0 AMD64:
-        image: mcr.microsoft.com/cbl-mariner/base/core:2.0
-        artifact: rpm-mariner2.0-amd64
-        pool: ${{ variables.ubuntu_pool }}
-      2.0 ARM64:
-        image: mcr.microsoft.com/cbl-mariner/base/core:2.0
-        artifact: rpm-mariner2.0-arm64
-        pool: ${{ variables.ubuntu_arm64_pool }}
+      ${{ each arch in parameters.architectures }}:
+        Mariner 2.0 ${{ arch.name }}:
+          image: mcr.microsoft.com/cbl-mariner/base/core:2.0
+          artifact: rpm-mariner2.0-${{ arch.value }}
+          pool: ${{ arch.pool }}
+        Azure Linux 3.0 ${{ arch.name }}:
+          image: azurelinuxpreview.azurecr.io/public/azurelinux/base/core:3.0
+          artifact: rpm-azurelinux3.0-${{ arch.value }}
+          pool: ${{ arch.pool }}
   steps:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
@@ -838,11 +843,11 @@ jobs:
       set -ex
 
       CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
-      RPM_NAME=$(find $SYSTEM_ARTIFACTSDIRECTORY/rpm/ -type f -name "azure-cli-$CLI_VERSION-1.cm2.*.rpm" -printf '%f\n')
+      RPM_NAME=$(find $SYSTEM_ARTIFACTSDIRECTORY/rpm/ -type f -name "azure-cli-$CLI_VERSION-1.*.rpm" -printf '%f\n')
 
       echo "== Test rpm package on ${IMAGE} =="
       docker pull $IMAGE
-      docker run --rm -e RPM_NAME=$RPM_NAME -v $SYSTEM_ARTIFACTSDIRECTORY/rpm:/mnt/rpm -v $(pwd):/azure-cli $IMAGE /bin/bash "/azure-cli/scripts/release/rpm/test_mariner_in_docker.sh"
+      docker run --rm -e RPM_NAME=$RPM_NAME -v $SYSTEM_ARTIFACTSDIRECTORY/rpm:/mnt/rpm -v $(pwd):/azure-cli $IMAGE /bin/bash "/azure-cli/scripts/release/rpm/test_azurelinux_in_docker.sh"
 
     displayName: 'Test Rpm Package Mariner'
 
@@ -1000,7 +1005,7 @@ jobs:
       targetType: 'filePath'
       filePath: scripts/release/debian/pipeline.sh
     env:
-      DISTRO_BASE_IMAGE: $(deb_system):$(distro)
+      DISTRO_BASE_IMAGE: mcr.microsoft.com/mirror/docker/library/$(deb_system):$(distro)
 
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'SBOM'
@@ -1072,7 +1077,7 @@ jobs:
   - task: Bash@3
     displayName: 'Test $(deb_system) $(distro) $(arch) Package'
     env:
-      DISTRO_BASE_IMAGE: $(deb_system):$(distro)
+      DISTRO_BASE_IMAGE: mcr.microsoft.com/mirror/docker/library/$(deb_system):$(distro)
     inputs:
       targetType: 'inline'
       script: |
@@ -1206,6 +1211,7 @@ jobs:
       KUSTO_DATABASE: $(KUSTO_DATABASE)
       KUSTO_TABLE: $(KUSTO_TABLE)
       KUSTO_TENANT_ID: $(KUSTO_TENANT_ID)
+    enabled: false
 
 #- job: VerifySphinxDocumentGenerator
 #  displayName: "Verify Sphinx Document Generator"
@@ -1249,7 +1255,7 @@ jobs:
     - BuildHomebrewFormula
     - TestHomebrewFormula
     - TestHomebrewPackage
-    - BuildRpmPackageMariner
+    - BuildRpmPackagesAzureLinux
     - BuildRpmPackages
     - TestRpmPackage
     - BuildDebPackages
@@ -1286,3 +1292,4 @@ jobs:
       PROJECT_TYPE: $(System.TeamProject)
       BUILD_ID: $(Build.BuildId)
       JOB_ID: $(System.JobId)
+    enabled: false

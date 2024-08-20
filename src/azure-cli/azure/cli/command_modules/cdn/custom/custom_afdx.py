@@ -319,6 +319,8 @@ class AFDOriginCreate(_AFDOriginCreate):
         args_schema.enable_private_link = AAZBoolArg(
             options=['--enable-private-link'],
             help='Indicates whether private link is enanbled on that origin.',
+            blank=True,
+            default=True
         )
         args_schema.private_link_location = AAZStrArg(
             options=['--private-link-location'],
@@ -364,6 +366,7 @@ class AFDOriginUpdate(_AFDOriginUpdate):
         args_schema.enable_private_link = AAZBoolArg(
             options=['--enable-private-link'],
             help='Indicates whether private link is enanbled on that origin.',
+            blank=True
         )
         args_schema.private_link_location = AAZStrArg(
             options=['--private-link-location'],
@@ -1209,11 +1212,12 @@ class AFDSecretUpdate(_AFDSecretUpdate):
         })
 
         para = existing['parameters']
-        secret_source = args.secret_source if has_value(args.secret_source) else para['secretSource']['id']
-        if 'secretVersion' in para and para['secretVersion'] in args.secret_source.to_serialized_data():
+        secret_source = args.secret_source.to_serialized_data() if has_value(args.secret_source) \
+            else para['secretSource']['id']
+        if 'secretVersion' in para and para['secretVersion'] in secret_source:
             existing_secret_version = para['secretVersion']
-            version_start = args.secret_source.to_serialized_data().lower().rindex(f'/{existing_secret_version}')
-            secret_source = args.secret_source.to_serialized_data()[0:version_start]
+            version_start = secret_source.lower().rindex(f'/{existing_secret_version}')
+            secret_source = secret_source[0:version_start]
 
         secret_version = args.secret_version \
             if has_value(args.secret_version) and args.secret_version is not None \
@@ -1320,6 +1324,6 @@ class AFDSecurityPolicyUpdate(_AFDSecurityPolicyUpdate):
 
         args.web_application_firewall = {
             'waf_policy': args.waf_policy if has_value(args.waf_policy)
-            else existing_security_policy['parameters']['wafPolicy'],
+            else existing_security_policy['parameters']['wafPolicy']['id'],
             'associations': associations
         }

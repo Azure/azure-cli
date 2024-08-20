@@ -728,11 +728,12 @@ class LBProbeCreate(_LBProbeCreate):
 
     def pre_operations(self):
         args = self.ctx.args
-        if has_value(args.probe_threshold):
+        if has_value(args.number_of_probes):
             logger.warning(
-                "Please note that the parameter --probe-threshold is currently in preview and is not recommended "
-                "for production workloads. For most scenarios, we recommend maintaining the default value of 1 "
-                "by not specifying the value of the property."
+                "The property \"numberOfProbes\" is not respected. Load Balancer health probes will probe up or down "
+                "immediately after one probe regardless of the property's configured value. To control the number of "
+                "successful or failed consecutive probes necessary to mark backend instances as healthy or unhealthy, "
+                "please leverage the property \"probeThreshold\" instead."
             )
         if has_value(args.request_path) and args.request_path == "":
             args.request_path = None
@@ -750,11 +751,12 @@ class LBProbeUpdate(_LBProbeUpdate):
 
     def pre_operations(self):
         args = self.ctx.args
-        if has_value(args.probe_threshold):
+        if has_value(args.number_of_probes):
             logger.warning(
-                "Please note that the parameter --probe-threshold is currently in preview and is not recommended "
-                "for production workloads. For most scenarios, we recommend maintaining the default value of 1 "
-                "by not specifying the value of the property."
+                "The property \"numberOfProbes\" is not respected. Load Balancer health probes will probe up or down "
+                "immediately after one probe regardless of the property's configured value. To control the number of "
+                "successful or failed consecutive probes necessary to mark backend instances as healthy or unhealthy, "
+                "please leverage the property \"probeThreshold\" instead."
             )
         if has_value(args.request_path) and args.request_path == "":
             args.request_path = None
@@ -1058,6 +1060,12 @@ class CrossRegionLoadBalancerAddressPoolCreate(_LBAddressPoolCreate):
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
 
+        args_schema.admin_state = AAZStrArg(
+            options=["--admin-state"],
+            arg_group="Properties",
+            help="Default administrative state to backend addresses in `--backend-addresses`.",
+        )
+        args_schema.admin_state.enum = args_schema.backend_addresses.Element.admin_state.enum
         # not support name, the frontend id should belong to a regional load balance
         args_schema.backend_addresses.Element.frontend_ip_address._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{}/frontendIPConfigurations/{}"
@@ -1066,11 +1074,18 @@ class CrossRegionLoadBalancerAddressPoolCreate(_LBAddressPoolCreate):
         args_schema.backend_addresses.Element.frontend_ip_address._required = True
 
         args_schema.tunnel_interfaces._registered = False
-        args_schema.backend_addresses.Element.admin_state._registered = False
         args_schema.backend_addresses.Element.ip_address._registered = False
         args_schema.backend_addresses.Element.subnet._registered = False
         args_schema.backend_addresses.Element.virtual_network._registered = False
         return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.backend_addresses):
+            for backend_address in args.backend_addresses:
+                if not has_value(backend_address.admin_state) and has_value(args.admin_state):
+                    # use the command level argument --admin-state
+                    backend_address.admin_state = args.admin_state
 
 
 @register_command("network cross-region-lb address-pool update")
@@ -1091,19 +1106,33 @@ class CrossRegionLoadBalancerAddressPoolUpdate(_LBAddressPoolUpdate):
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
 
+        args_schema.admin_state = AAZStrArg(
+            options=["--admin-state"],
+            arg_group="Properties",
+            help="Default administrative state to backend addresses in `--backend-addresses`.",
+        )
+        args_schema.admin_state.enum = args_schema.backend_addresses.Element.admin_state.enum
         # not support name, the frontend id should belong to a regional load balance
         args_schema.backend_addresses.Element.frontend_ip_address._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{}/frontendIPConfigurations/{}"
         )
         args_schema.backend_addresses.Element.name._nullable = False
         args_schema.backend_addresses.Element.frontend_ip_address._nullable = False
+        args_schema.backend_addresses.Element.admin_state._nullable = False
 
         args_schema.tunnel_interfaces._registered = False
-        args_schema.backend_addresses.Element.admin_state._registered = False
         args_schema.backend_addresses.Element.ip_address._registered = False
         args_schema.backend_addresses.Element.subnet._registered = False
         args_schema.backend_addresses.Element.virtual_network._registered = False
         return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.backend_addresses):
+            for backend_address in args.backend_addresses:
+                if not has_value(backend_address.admin_state) and has_value(args.admin_state):
+                    # use the command level argument --admin-state
+                    backend_address.admin_state = args.admin_state
 
 
 @register_command("network cross-region-lb address-pool show")
@@ -1149,7 +1178,6 @@ class CrossRegionLoadBalancerAddressPoolAddressAdd(_LBAddressPoolAddressAdd):
         )
 
         args_schema.frontend_ip_address._required = True
-        args_schema.admin_state._registered = False
         args_schema.ip_address._registered = False
         args_schema.subnet._registered = False
         args_schema.virtual_network._registered = False
@@ -1184,7 +1212,6 @@ class CrossRegionLoadBalancerAddressPoolAddressUpdate(_LBAddressPoolAddressUpdat
         )
 
         args_schema.frontend_ip_address._nullable = False
-        args_schema.admin_state._registered = False
         args_schema.ip_address._registered = False
         args_schema.subnet._registered = False
         args_schema.virtual_network._registered = False

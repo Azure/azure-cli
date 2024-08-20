@@ -1601,6 +1601,12 @@ class ContainerappScaleTests(ScenarioTest):
                 ingress:
                   external: true
                   allowInsecure: false
+                  additionalPortMappings:
+                  - external: false
+                    targetPort: 12345
+                  - external: false
+                    targetPort: 9090
+                    exposedPort: 23456
                   targetPort: 80
                   traffic:
                     - latestRevision: true
@@ -1650,6 +1656,11 @@ class ContainerappScaleTests(ScenarioTest):
         self.cmd(f'containerapp show -g {resource_group} -n {app}', checks=[
             JMESPathCheck("properties.provisioningState", "Succeeded"),
             JMESPathCheck("properties.configuration.ingress.external", True),
+            JMESPathCheck("properties.configuration.ingress.additionalPortMappings[0].external", False),
+            JMESPathCheck("properties.configuration.ingress.additionalPortMappings[0].targetPort", 12345),
+            JMESPathCheck("properties.configuration.ingress.additionalPortMappings[1].external", False),
+            JMESPathCheck("properties.configuration.ingress.additionalPortMappings[1].targetPort", 9090),
+            JMESPathCheck("properties.configuration.ingress.additionalPortMappings[1].exposedPort", 23456),
             JMESPathCheck("properties.configuration.ingress.ipSecurityRestrictions[0].name", "name"),
             JMESPathCheck("properties.configuration.ingress.ipSecurityRestrictions[0].ipAddressRange", "1.1.1.1/10"),
             JMESPathCheck("properties.configuration.ingress.ipSecurityRestrictions[0].action", "Allow"),
@@ -1678,6 +1689,7 @@ class ContainerappScaleTests(ScenarioTest):
                         activeRevisionsMode: Multiple
                         ingress:
                           external: true
+                          additionalPortMappings: []
                           allowInsecure: false
                           targetPort: 80
                           traffic:
@@ -1710,6 +1722,7 @@ class ContainerappScaleTests(ScenarioTest):
         self.cmd(f'containerapp show -g {resource_group} -n {app}', checks=[
             JMESPathCheck("properties.provisioningState", "Succeeded"),
             JMESPathCheck("properties.configuration.ingress.external", True),
+            JMESPathCheck("properties.configuration.ingress.additionalPortMappings", None),
             JMESPathCheck("properties.configuration.ingress.ipSecurityRestrictions[0].name", "name"),
             JMESPathCheck("properties.configuration.ingress.ipSecurityRestrictions[0].ipAddressRange", "1.1.1.1/10"),
             JMESPathCheck("properties.configuration.ingress.ipSecurityRestrictions[0].action", "Allow"),
@@ -1723,13 +1736,31 @@ class ContainerappScaleTests(ScenarioTest):
 
         # test update without environmentId
         containerapp_yaml_text = f"""
+                            configuration:
+                                activeRevisionsMode: Multiple
+                                ingress:
+                                  external: false
+                                  additionalPortMappings:
+                                  - external: false
+                                    targetPort: 321
+                                  - external: false
+                                    targetPort: 8080
+                                    exposedPort: 1234
                             properties:
                               template:
                                 revisionSuffix: myrevision3
                             """
         write_test_file(containerapp_file_name, containerapp_yaml_text)
 
-        self.cmd(f'containerapp update -n {app} -g {resource_group} --yaml {containerapp_file_name}')
+        self.cmd(f'containerapp update -n {app} -g {resource_group} --yaml {containerapp_file_name}', checks=[
+            JMESPathCheck("properties.provisioningState", "Succeeded"),
+            JMESPathCheck("properties.configuration.ingress.external", False),
+            JMESPathCheck("properties.configuration.ingress.additionalPortMappings[0].external", False),
+            JMESPathCheck("properties.configuration.ingress.additionalPortMappings[0].targetPort", 321),
+            JMESPathCheck("properties.configuration.ingress.additionalPortMappings[1].external", False),
+            JMESPathCheck("properties.configuration.ingress.additionalPortMappings[1].targetPort", 8080),
+            JMESPathCheck("properties.configuration.ingress.additionalPortMappings[1].exposedPort", 1234),
+        ])
 
         self.cmd(f'containerapp show -g {resource_group} -n {app}', checks=[
             JMESPathCheck("properties.provisioningState", "Succeeded"),
@@ -1964,6 +1995,57 @@ class ContainerappScaleTests(ScenarioTest):
 class ContainerappOtherPropertyTests(ScenarioTest):
     def __init__(self, *arg, **kwargs):
         super().__init__(*arg, random_config_dir=True, **kwargs)
+
+    @AllowLargeResponse(8192)
+    @ResourceGroupPreparer(location="westus")
+    def test_containerapp_get_customdomainverificationid_e2e(self, resource_group):
+        self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
+
+        env_name = self.create_random_name(prefix='containerapp-env', length=24)
+        logs_workspace_name = self.create_random_name(prefix='containerapp-env', length=24)
+
+        logs_workspace_id = self.cmd(
+            'monitor log-analytics workspace create -g {} -n {} -l eastus'
+            .format(resource_group, logs_workspace_name)
+        ).get_output_in_json()["customerId"]
+        logs_workspace_key = self.cmd(
+            'monitor log-analytics workspace get-shared-keys -g {} -n {}'
+            .format(resource_group, logs_workspace_name)
+        ).get_output_in_json()["primarySharedKey"]
+
+        verification_id = self.cmd(f'containerapp show-custom-domain-verification-id').get_output_in_json()
+        self.assertEqual(len(verification_id), 64)
+
+        # create an App service domain and update its txt records
+        contacts = os.path.join(TEST_DIR, 'data', 'domain-contact.json')
+        zone_name = "{}.com".format(env_name)
+        subdomain_1 = "devtest"
+        txt_name_1 = "asuid.{}".format(subdomain_1)
+        hostname_1 = "{}.{}".format(subdomain_1, zone_name)
+
+        self.cmd(
+            "appservice domain create -g {} --hostname {} --contact-info=@'{}' --accept-terms"
+            .format(resource_group, zone_name, contacts)
+        ).get_output_in_json()
+        self.cmd(
+            'network dns record-set txt add-record -g {} -z {} -n {} -v {}'
+            .format(resource_group, zone_name, txt_name_1, verification_id)
+        ).get_output_in_json()
+
+        # upload cert, add hostname & binding
+        pfx_file = os.path.join(TEST_DIR, 'data', 'cert.pfx')
+        pfx_password = 'test12'
+
+        self.cmd(
+            'containerapp env create -g {} -n {} --logs-workspace-id {} --logs-workspace-key {} '
+            '--dns-suffix {} --certificate-file "{}" --certificate-password {}'
+            .format(resource_group, env_name, logs_workspace_id, logs_workspace_key,
+                    hostname_1, pfx_file, pfx_password))
+
+        self.cmd(f'containerapp env show -n {env_name} -g {resource_group}', checks=[
+            JMESPathCheck('name', env_name),
+            JMESPathCheck('properties.customDomainConfiguration.dnsSuffix', hostname_1),
+        ])
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="northeurope")

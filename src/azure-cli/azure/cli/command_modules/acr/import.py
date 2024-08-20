@@ -6,6 +6,7 @@
 from knack.util import CLIError
 from knack.log import get_logger
 from msrestazure.tools import is_valid_resource_id, parse_resource_id
+from azure.cli.command_modules.acr._docker_utils import get_login_server_suffix
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import sdk_no_wait
 
@@ -77,7 +78,10 @@ def acr_import(cmd,  # pylint: disable=too-many-locals
                                   credentials=ImportSourceCredentials(password=source_registry_password,
                                                                       username=source_registry_username))
         else:
-            registry = get_registry_from_name_or_login_server(cmd.cli_ctx, registry_uri)
+            # Try to get the pre-defined login server suffix.
+            login_server_suffix = get_login_server_suffix(cmd.cli_ctx)
+            if not login_server_suffix or registry_uri.endswith(login_server_suffix):
+                registry = get_registry_from_name_or_login_server(cmd.cli_ctx, registry_uri)
             if registry:
                 # For Azure container registry
                 source = ImportSource(resource_id=registry.id, source_image=source_image)

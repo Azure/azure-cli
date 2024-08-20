@@ -543,3 +543,21 @@ def validate_byok_identity(cmd, namespace):
 def validate_identities(cmd, namespace):
     if namespace.identities:
         namespace.identities = [_validate_identity(cmd, namespace, identity) for identity in namespace.identities]
+
+
+def validate_action_name(namespace):
+    if not re.search(r'^[-_a-zA-Z0-9]+$', namespace.action_name):
+        raise ValidationError("The action name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'.")
+
+
+def validate_branch(namespace):
+    if not re.search(r'^[-_a-zA-Z0-9]+$', namespace.branch):
+        raise ValidationError("The branch can only contain 0-9, a-z, A-Z, \'-\' and \'_\'.")
+
+
+def validate_and_format_maintenance_start_time(maintenance_start_time):
+    try:
+        return parser.parse(maintenance_start_time)
+    except:
+        raise ValidationError("The maintenance_start_time value has incorrect date format. "
+                              "Please use ISO format e.g., 2024-06-01T00:08:23+00:00")

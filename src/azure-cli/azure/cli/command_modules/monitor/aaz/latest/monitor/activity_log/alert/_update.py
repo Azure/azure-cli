@@ -18,7 +18,7 @@ class Update(AAZCommand):
     """Update a new activity log alert or update an existing one.
 
     :example: Update the condition
-        az monitor activity-log alert update -n AlertName -g ResourceGroup \ --condition category=ServiceHealth and level=Error
+        az monitor activity-log alert update -n AlertName -g ResourceGroup --condition category=ServiceHealth and level=Error
 
     :example: Disable an alert rule.
         az monitor activity-log alert update -n AlertName -g ResourceGroup --enable false
