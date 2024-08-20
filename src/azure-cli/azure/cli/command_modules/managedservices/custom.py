@@ -16,7 +16,7 @@ logger = get_logger(__name__)
 # region Definitions Custom Commands
 
 
-# pylint: disable=unused-argument
+# pylint: disable=unused-argument, protected-access
 class DefinitionCreate(_DefinitionCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
@@ -77,11 +77,13 @@ class DefinitionShow(_DefinitionShow):
         return args_schema
 
     def pre_operations(self):
-        from azure.cli.core.commands.client_factory import get_subscription_id
         args = self.ctx.args
-        subscription = get_subscription_id(self.cli_ctx)
-        scope = _get_scope(subscription)
+        subscription = _get_subscription_id_from_cmd(self.cli_ctx)
+        definition_id, sub_id, rg_name = _get_resource_id_parts(self.cli_ctx,
+                                                                args.definition.to_serialized_data(), subscription)
+        scope = _get_scope(sub_id, rg_name)
         args.scope = scope
+        args.definition = definition_id
 
 
 class DefinitionList(_DefinitionList):
@@ -116,6 +118,7 @@ class DefinitionDelete(_DefinitionDelete):
                                                                 args.definition.to_serialized_data(), subscription)
         scope = _get_scope(sub_id, rg_name)
         args.scope = scope
+        args.definition = definition_id
 
 
 # endregion
@@ -178,6 +181,7 @@ class AssignmentShow(_AssignmentShow):
                                                                 subscription, resource_group_name)
         scope = _get_scope(sub_id, rg_name)
         args.scope = scope
+        args.assignment = assignment_id
 
 
 class AssignmentDelete(_AssignmentDelete):
@@ -202,6 +206,7 @@ class AssignmentDelete(_AssignmentDelete):
                                                                 subscription, rg_name)
         scope = _get_scope(sub_id, rg_name)
         args.scope = scope
+        args.assignment = assignment_id
 
 
 class AssignmentList(_AssignmentList):

@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core import AzCommandsLoader
-from azure.cli.core.profiles import ResourceType
 from azure.cli.command_modules.managedservices._help import helps  # pylint: disable=unused-import
 
 
