@@ -2193,18 +2193,18 @@ class NetworkAppGatewayRewriteRuleset(ScenarioTest):
 
         # manage rewrite rules with response-header-configurations
         self.cmd('network application-gateway rewrite-rule create -g {rg} --gateway-name {gw} --rule-set-name {set} -n {rule4} '
-                 '--sequence 123 --response-header-configurations [{{"header-name":Set-Cookie,"header-value":hat1,"header-value-matcher":{{"ignore-case":true,"negate":true,"pattern":"(https?)\/\/.*azurewebsites\.net(.*)$"}}}}] --request-headers foo=bar '
+                 '--sequence 123 --response-header-configurations [{{"header-name":Set-Cookie,"header-value":hat1,"header-value-matcher":{{"ignore-case":true,"negate":true,"pattern":"(https?)//.*azurewebsites.net(.*)$"}}}}] --request-headers foo=bar '
                  '--modified-path "/def" --modified-query-string "a=b&c=d%20f"',
                  checks=[
                      self.check('actionSet.responseHeaderConfigurations[0].headerName', 'Set-Cookie'),
                      self.check('actionSet.responseHeaderConfigurations[0].headerValue', 'hat1'),
                      self.check('actionSet.responseHeaderConfigurations[0].headerValueMatcher.ignoreCase', True),
                      self.check('actionSet.responseHeaderConfigurations[0].headerValueMatcher.negate', True),
-                     self.check('actionSet.responseHeaderConfigurations[0].headerValueMatcher.pattern', "(https?)\/\/.*azurewebsites\.net(.*)$"),
+                     self.check('actionSet.responseHeaderConfigurations[0].headerValueMatcher.pattern', "(https?)//.*azurewebsites.net(.*)$"),
                  ])
         self.cmd(
             'network application-gateway rewrite-rule update -g {rg} --gateway-name {gw} --rule-set-name {set} -n {rule4} '
-            '--sequence 123 --response-header-configurations [{{"header-name":Set-Cookie,"header-value":hat2,"header-value-matcher":{{"ignore-case":true,"negate":false,"pattern":"(https?)\/\/.*azurewebsites\.net(.*)$"}}}}] --request-headers foo=bar '
+            '--sequence 123 --response-header-configurations [{{"header-name":Set-Cookie,"header-value":hat2,"header-value-matcher":{{"ignore-case":true,"negate":false,"pattern":"(https?)//.*azurewebsites.net(.*)$"}}}}] --request-headers foo=bar '
             '--modified-path "/def" --modified-query-string "a=b&c=d%20f"',
             checks=[
                 self.check('actionSet.responseHeaderConfigurations[0].headerName', 'Set-Cookie'),
@@ -2212,7 +2212,7 @@ class NetworkAppGatewayRewriteRuleset(ScenarioTest):
                 self.check('actionSet.responseHeaderConfigurations[0].headerValueMatcher.ignoreCase', True),
                 self.check('actionSet.responseHeaderConfigurations[0].headerValueMatcher.negate', False),
                 self.check('actionSet.responseHeaderConfigurations[0].headerValueMatcher.pattern',
-                           "(https?)\/\/.*azurewebsites\.net(.*)$"),
+                           "(https?)//.*azurewebsites.net(.*)$"),
             ])
 
         # manage rewrite rule conditions
