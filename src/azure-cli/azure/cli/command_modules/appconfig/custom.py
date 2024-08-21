@@ -75,7 +75,7 @@ def create_configstore(cmd,
         progress.spinner.step(label="Creating store")
         config_store.wait(1)
 
-    if config_store.status() == ProvisioningStatus.SUCCEEDED and replica_name is not None:
+    if replica_name is not None:
         progress.write({"message": "Store created"})
         time.sleep(1)
         replica_client = cf_replicas(cmd.cli_ctx)
