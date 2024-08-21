@@ -5,7 +5,6 @@
 
 # pylint: disable=line-too-long
 import time
-import azure.cli.core.azclierror as CLIErrors
 
 from azure.cli.command_modules.appconfig._client_factory import cf_configstore, cf_replicas
 from azure.cli.core.commands.progress import IndeterminateStandardOut
@@ -55,13 +54,6 @@ def create_configstore(cmd,
     public_network_access = None
     if enable_public_network is not None:
         public_network_access = 'Enabled' if enable_public_network else 'Disabled'
-
-    if sku.lower() == 'free' and (enable_purge_protection or retention_days or replica_name or replica_location or no_replica):
-        logger.warning("Options '--enable-purge-protection', '--replica-name', '--replica-location' , '--no-replica' and '--retention-days' will be ignored when creating a free store.")
-        retention_days = None
-        enable_purge_protection = None
-
-    __validate_replication(sku, replica_name, replica_location, no_replica)
 
     configstore_params = ConfigurationStore(location=location.lower(),
                                             identity=__get_resource_identity(assign_identity) if assign_identity else None,
@@ -325,7 +317,7 @@ def delete_replica(cmd, client, store_name, name, yes=False, resource_group_name
 
         if config_store.sku.name.lower() == "premium" and len(list(replicas)) == 1:
             user_confirmation(
-                "Deleting the last replica will disable geo-replication. When using the premium tier, it is recommended to have geo-replication enabled to take advantage of an increased SLA of 99.99%. The first replica created for a premium tier store is included. Do you want to continue with this operation?"
+                "Deleting the last replica will disable geo-replication. It is recommended that a premium tier store have geo-replication enabled to take advantage of the improved SLA. The first replica for a premium tier store comes at no additional cost. Do you want to continue?"
             )
         else:
             user_confirmation("Are you sure you want to continue with this operation?")
@@ -375,21 +367,3 @@ def __validate_cmk(encryption_key_name=None,
                 logger.warning("Removing the customer encryption key. Key vault related arguments are ignored.")
 
 
-def __validate_replication(sku=None,
-                           replica_name=None,
-                           replica_location=None,
-                           no_replica=False):
-
-    if sku.lower() == 'premium' and not no_replica:
-        if any(arg is None for arg in [replica_name, replica_location]):
-            raise RequiredArgumentMissingError("Options '--replica-name' and '--replica-location' are required when creating a premium tier store. To avoid creating replica please provide explicit argument '--no-replica'.")
-
-    if no_replica and (replica_name or replica_location):
-        raise CLIErrors.MutuallyExclusiveArgumentError("Please provide only one of these arguments: '--no-replica' or '--replica-name and --replica-location'. See 'az appconfig create -h' for examples.")
-
-    if replica_name:
-        if replica_location is None:
-            raise RequiredArgumentMissingError("To create replica '--replica-location' is required.")
-    else:
-        if replica_location is not None:
-            raise RequiredArgumentMissingError("To create replica '--replica-name' is required.")
