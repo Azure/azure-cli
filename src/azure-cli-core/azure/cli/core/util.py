@@ -1364,7 +1364,8 @@ def run_cmd(args, *, capture_output=False, timeout=None, check=False, encoding=N
     https://docs.python.org/3/library/subprocess.html#subprocess.run
     """
     if not isinstance(args, list):
-        raise CLIError("Invalid args. args must be a list.")
+        from azure.cli.core.azclierror import ArgumentUsageError
+        raise ArgumentUsageError("Invalid args. run_cmd args must be a list")
 
     import subprocess
     return subprocess.run(args, capture_output=capture_output, timeout=timeout, check=check,
