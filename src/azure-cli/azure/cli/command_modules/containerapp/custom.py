@@ -1618,8 +1618,12 @@ def start_containerappjob_execution_yaml(cmd, name, resource_group_name, file_na
         handle_raw_exception(e)
 
 
-def stop_containerappsjob(cmd, resource_group_name, name, job_execution_name=None):
+def stop_containerappsjob(cmd, resource_group_name, name, job_execution_name=None, execution_name_list=None):
     try:
+        # todo: remove execution_name_list in future and allow calling with or without job_execution_name
+        if execution_name_list is not None:
+            return "--execution-name-list is deprecated. Please use --job-execution-name instead."
+
         r = ContainerAppsJobClient.stop_job(cmd=cmd, resource_group_name=resource_group_name, name=name, job_execution_name=job_execution_name)
 
         # if stop is called for a single job execution, return generic response else return the response
