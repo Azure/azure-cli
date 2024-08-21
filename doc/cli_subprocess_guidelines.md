@@ -30,19 +30,17 @@ This is a simple example for demonstrating the side effects in python's subsyste
 
 There are several aspects of security practices that developers need to have in mindset to safeguard their cli modules from command injection attacks.
 
-TL;DR
+### Cli Centralized Subsystem Executing
 
-### Cli Subprocess
-
-If users don't have the time or knowledge to figure out how to adapt necessary secure practices, azure cli provides `cli_subprocess` which inherited all official subprocess functionalities, with necessary security checks and illegal input blocking and masking enforced. 
+Azure cli provides a centralized function `run_cmd` which adapted from official `subprocess.run`, with necessary argument covered and illegal input blocking enforced. 
 
 What developers need to do is:
-1) `import cli_subprocess`
-2) replace `subprocess.run` (or Popen or check_call or check_output or call) with `cli_subprocess.run` or etc.
+1) `from azure.cli.core.util import run_cmd`
+2) replace `subprocess.run` (or `Popen` or `check_call` or `check_output` or `call`) with `run_cmd`.
 3) construct cmd args as array like: [executable, arg0, arg1, arg2, ...]
 
-`cli_subporcess` will add necessary security checks and process the input and output the same way as `subprocess`, and block all potential risks from commands constructed from user input.
-Below is an example for `cli_subprocess` use case:
+`run_cmd` will add necessary argument type checks and process the input and output the same way as `subprocess.run`, and block potential risks from commands constructed from user input.
+Below is an example for `run_cmd` use case:
 
 ```commandline
 # code before:
@@ -54,24 +52,26 @@ if output.returncode != 0:
 return output.stdout
 ```
 
-If `cli_subporcess` is applied, it would be like:
+If `run_cmd` is applied, it would be like:
 ```commandline
 # code after:
 cmd = ["git","commit", "-m", user_message]
 import subprocess
-import cli_subprocess
-output = cli_subprocess.run(cmd, shell=True, check=False, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+from azure.cli.core.util import run_cmd
+output = run_cmd(cmd, check=False, capture_output=True)
 if output.returncode != 0:
       raise CLIInternalError('Command execution failed, command is: '{}', error message is: {}'.format(cmd, output.stderr))
 return output.stdout
 ```
 
-All various kinds of `subprocess` Popen calling use cases can be easily adjusted into `cli_subprocess` with security risks processed and eliminated in this centralized module.
+All various kinds of `subprocess` Popen calling use cases can be easily adjusted into `run_cmd` with security risks processed and eliminated in this centralized function.
 
-Besides that, users might need to know some parts of the accessibility in both `cli_subprocess` and `subprocess`
-1) when calling shell built-in cmds, like `dir` or `az`, using `shell=True` **in windows platform**, `subprocess` implicitly uses `cmd.exe`, while `cli_subprocess` asks developers to provide the `cmd.exe` as executable file specifically in the arg list's first item, like `["cmd.exe", "/c", "az", "--version"]`
+Besides that, users might need to know some parts of the accessibility in both `run_cmd` and `subprocess`
+1) when calling shell built-in cmds, like `dir` or `echo`, using `shell=True` **in windows platform**, `subprocess` implicitly uses `cmd.exe`, while `run_cmd` asks developers to provide the `cmd.exe` as executable file specifically in the arg list's first item, like `["cmd.exe", "/c", "echo", "abc"]`
 2) if developers want to find an easy way to split their current cmd string into list, **for unix-like platforms**, developers can apply [`shlex.split`](https://docs.python.org/3/library/shlex.html#shlex.split) for quick access. But a prepared cmd statement is still more recommended (for more info about prepared cmd statement, please read below sections).
 3) it might be not that obvious to find target command's executable file **in windows platform**, a tool developer can use is `shutil.which` that gives the executable file path in windows system, like `shutil.which(git)`. The cmd `git --version` can be adjusted as `[shutil.which(git), "--version"]`. Please provide the corresponding executable path in target platforms.
+4) if the target cmd is az-related, like `az group show --name xxxx`, please use internal corresponding func call to get the target information.
+
 
 ### Best Practices In Subprocess Use Cases
 
@@ -107,4 +107,4 @@ When using subprocess module, avoid `shell=True` argument when it comes with cmd
 
 
 ## Summary
-Ensuring the safety of cli from command injection under subprocess calling requires an in-depth understanding of these vulnerabilities and also proactive measures to counteract potential exploits. Cli developers can either apply the three security practices, if applicable, when using builtin `subprocess`, or use a more centralized module `cli_subprocess` cli provided, to safeguard cli modules from command injection attack and for future more accessible security enforcements.
+Ensuring the safety of cli from command injection under subprocess calling requires an in-depth understanding of these vulnerabilities and also proactive measures to counteract potential exploits. Cli developers can either apply the three security practices, if applicable, when using builtin `subprocess`, or use a more centralized func `run_cmd` cli provided, to safeguard cli modules from command injection attack and for future more accessible security enforcements.
