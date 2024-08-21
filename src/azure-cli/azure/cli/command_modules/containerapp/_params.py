@@ -5,6 +5,7 @@
 # pylint: disable=line-too-long, too-many-statements, consider-using-f-string
 
 from knack.arguments import CLIArgumentType
+from knack.deprecation import Deprecated
 
 from azure.cli.core.commands.parameters import (resource_group_name_type,
                                                 get_location_type,
@@ -467,6 +468,7 @@ def load_arguments(self, _):
 
     with self.argument_context('containerapp job stop') as c:
         c.argument('job_execution_name', help='name of the specific job execution which needs to be stopped.')
+        c.argument('execution_name_list', help='comma separated list of job execution names.', deprecate_info=Deprecated(self.cli_ctx, target='--execution_name_list', hide=True, message_func=lambda x: "Option 'execution_name_list' has been deprecated and will be removed in the next Cli version"))
 
     with self.argument_context('containerapp job execution') as c:
         c.argument('name', id_part=None)
