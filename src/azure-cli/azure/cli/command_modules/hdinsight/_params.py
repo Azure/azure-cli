@@ -227,7 +227,7 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(ResourceProviderConnection), help='The resource provider connection type')
         c.argument('enable_private_link', arg_group='Private Link', arg_type=get_three_state_flag(),
                    help='Indicate whether enable the private link or not.')
-        c.argument('outbound_dependencies_managed_type', arg_group='Private Link', 
+        c.argument('outbound_dependencies_managed_type', options_list=['--outbound-dependencies-managed-type', '--outbound-managed-type'], arg_group='Private Link', 
                    arg_type=get_enum_type(OutboundDependenciesManagedType),
                    help='The direction for the resource provider connection.')
 
