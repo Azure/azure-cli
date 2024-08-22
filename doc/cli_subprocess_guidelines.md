@@ -32,7 +32,7 @@ There are several aspects of security practices that developers need to have in 
 
 ### Cli Centralized Subsystem Executing
 
-Azure cli provides a centralized function `run_cmd` which adapted from official `subprocess.run`, with necessary argument covered and illegal input blocking enforced. 
+Azure cli provides a centralized function `run_cmd` adapted from official `subprocess.run`, with necessary argument covered and illegal input blocking enforced. 
 
 What developers need to do is:
 1) `from azure.cli.core.util import run_cmd`
