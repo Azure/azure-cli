@@ -6994,7 +6994,7 @@ class NetworkExtendedLocation(ScenarioTest):
             'rg': resource_group,
             'ip1': 'pubip1',
             'vnet': 'vnet',
-            'edge_name': 'microsoftrrdclab3'
+            'edge_name': 'microsoftrrdclab1'
         })
         self.cmd('network public-ip create -g {rg} -n {ip1}')
         self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name GatewaySubnet')
