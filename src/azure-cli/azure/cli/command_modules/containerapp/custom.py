@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long, consider-using-f-string, logging-format-interpolation, inconsistent-return-statements, broad-except, bare-except, too-many-statements, too-many-locals, too-many-boolean-expressions, too-many-branches, too-many-nested-blocks, pointless-statement, expression-not-assigned, unbalanced-tuple-unpacking, unsupported-assignment-operation
 # pylint: disable=unused-argument, no-else-raise
+import json
 import threading
 import sys
 import time
@@ -3588,9 +3589,10 @@ def stream_containerapp_logs(cmd, resource_group_name, name, container=None, rev
     for line in resp.iter_lines():
         if line:
             logger.info("received raw log line: %s", line)
-            # these .replaces are needed to display color/quotations properly
-            # for some reason the API returns garbled unicode special characters (may need to add more in the future)
-            print(line.decode("utf-8").replace("\\u0022", "\u0022").replace("\\u001B", "\u001B").replace("\\u002B", "\u002B").replace("\\u0027", "\u0027"))
+            if output_format == "json":
+                print(json.dumps(json.loads(line)))
+            else:
+                print(line.decode("utf-8"))
 
 
 def stream_environment_logs(cmd, resource_group_name, name, follow=False, tail=None):
