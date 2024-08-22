@@ -1,0 +1,38 @@
+trigger:
+  - bernard-teams-notification-on-fail
+
+jobs:
+- job: "FailedJob"
+  pool:
+    vmImage: ubuntu-latest
+  steps:
+  - task: Npm@1
+    displayName: "npm install"
+    inputs:
+      verbose: true
+
+  - script: npm run build
+    displayName: "build"
+
+  - script: node ./lib/exception.js
+    displayName: "Fail current job"
+
+- job: "FailJobNotification"
+  dependsOn:
+    - FailedJob
+  condition: failed()
+  steps:
+    - task: Bash@3
+      displayName: "teams notification on failed job"
+      inputs:
+        targetType: inline
+        script: |
+          set -ev 
+          echo $(pwd)
+          python --version
+          git clone -b bernard-build-send-teams-image https://$(System.AccessToken)@dev.azure.com/azclitools/internal/_git/azcli-resource-notification
+          cd ./azcli-resource-notification
+          pip install -r ./notification/requirements.txt
+          python ./notification/teams_failed_job_notifier.py "bernardpan"
+      env:
+        TEAMS_URL: $(TEAMS_URL)
