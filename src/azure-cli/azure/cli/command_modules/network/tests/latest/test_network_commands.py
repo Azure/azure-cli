@@ -6941,7 +6941,7 @@ class NetworkExtendedLocation(ScenarioTest):
             'vnet': 'clitestvnet',
             'nic': 'clitestnic',
             'rg': resource_group,
-            'edge_name': 'microsoftrrdclab1'
+            'edge_name': 'microsoftrrdclab3'
         })
         self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name subnet1 --edge-zone {edge_name}',
                  checks=self.check('newVNet.extendedLocation.name', '{edge_name}'))
@@ -6954,7 +6954,7 @@ class NetworkExtendedLocation(ScenarioTest):
         self.kwargs.update({
             'rg': resource_group,
             'ip1': 'pubip1',
-            'edge_name': 'microsoftrrdclab1'
+            'edge_name': 'microsoftrrdclab3'
         })
 
         self.cmd('network public-ip create -g {rg} -n {ip1} --edge-zone {edge_name} --sku Standard',
@@ -6992,7 +6992,7 @@ class NetworkExtendedLocation(ScenarioTest):
             'rg': resource_group,
             'ip1': 'pubip1',
             'vnet': 'vnet',
-            'edge_name': 'microsoftrrdclab1'
+            'edge_name': 'microsoftrrdclab3'
         })
         self.cmd('network public-ip create -g {rg} -n {ip1}')
         self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name GatewaySubnet')
