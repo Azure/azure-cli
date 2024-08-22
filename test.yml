@@ -30,7 +30,7 @@ jobs:
           set -ev 
           echo $(pwd)
           python --version
-          git clone -b bernard-build-send-teams-image https://$(System.AccessToken)@dev.azure.com/azclitools/internal/_git/azcli-resource-notification
+          git clone -b bernard-build-send-teams-image https://$(System.AccessToken)@$(NOTIFIER_UTL)
           cd ./azcli-resource-notification
           pip install -r ./notification/requirements.txt
           python ./notification/teams_failed_job_notifier.py "bernardpan"
