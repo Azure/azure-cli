@@ -15,8 +15,8 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 class HDInsightClusterTests(ScenarioTest):
     location = 'eastus'
-    vnet_id= '/subscriptions/964c10bb-8a6c-43bc-83d3-6b318c6c7305/resourceGroups/yuchen-ps-test/providers/Microsoft.Network/virtualNetworks/hdi-vn-0'
-    subnet= 'default'
+    vnet_id = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yuchen-ps-test/providers/Microsoft.Network/virtualNetworks/hdi-vn-0'
+    subnet = 'default'
 
     # Uses 'rg' kwarg
     @AllowLargeResponse()
@@ -224,8 +224,8 @@ class HDInsightClusterTests(ScenarioTest):
             self.check('length(zones)', 1),
         ])
 
-
     # Uses 'rg' kwarg
+
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
     @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
@@ -570,6 +570,23 @@ class HDInsightClusterTests(ScenarioTest):
             self.check('length(@)', 1)
         ])
 
+    def test_hdinsight_azure_monitor_agent(self):
+        self.kwargs.update({
+            'loc': self.location,
+            'cluster': 'spark51',
+            'rg': 'yuchen-ps-test',
+            'workspace_id': '/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/yuchen-ps-test/providers/microsoft.operationalinsights/workspaces/ps-la',
+            'workspace_key': self.cmd('az monitor log-analytics workspace get-shared-keys --resource-group yuchen-ps-test --workspace-name ps-la --query primarySharedKey -o tsv').output.strip(),
+        })
+
+        # enable azure monitor agent
+        self.cmd(
+            'az hdinsight azure-monitor-agent enable -n {cluster} --resource-group {rg} --workspace {workspace_id} --primary-key {workspace_key} ')
+        # show azure monitor agent
+        self.cmd('az hdinsight azure-monitor-agent show -n {cluster} --resource-group {rg}')
+        # disable azure monitor agent
+        self.cmd('az hdinsight azure-monitor-agent disable -n {cluster} --resource-group {rg}')
+
     def _create_hdinsight_cluster(self, *additional_create_arguments):
         self.kwargs.update({
             'loc': self.location,
@@ -613,11 +630,11 @@ class HDInsightClusterTests(ScenarioTest):
     @staticmethod
     def _kafka_arguments():
         return '-t {} --workernode-data-disks-per-node {}'.format('kafka', '4')
-    
+
     @staticmethod
     def _vnet_arguments():
         return '--vnet-name {} --subnet {} --version 5.1'.format(HDInsightClusterTests.vnet_id, HDInsightClusterTests.subnet)
-    
+
     @staticmethod
     def _rest_proxy_arguments():
         return '--kafka-management-node-size {} --kafka-client-group-id {} --kafka-client-group-name {} -v 4.0 ' \
@@ -671,10 +688,10 @@ class HDInsightClusterTests(ScenarioTest):
     @staticmethod
     def _with_private_link_configurations(private_link_configuration_file):
         return '--version 5.1 -l eastus ' \
-               '--subnet /subscriptions/964c10bb-8a6c-43bc-83d3-6b318c6c7305/resourceGroups/yuchen-ps-test/providers' \
+               '--subnet /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yuchen-ps-test/providers' \
                '/Microsoft.Network/virtualNetworks/hdi-vn/subnets/default '\
-               '--vnet-name /subscriptions/964c10bb-8a6c-43bc-83d3-6b318c6c7305/resourceGroups/yuchen-ps-test/providers/Microsoft.Network/virtualNetworks/hdi-vn --subnet default ' \
-               '--resource-provider-connection Outbound --public-ip-tag-type FirstPartyUsage --public-ip-tag-value HDInsight '\
+               '--vnet-name /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yuchen-ps-test/providers/Microsoft.Network/virtualNetworks/hdi-vn --subnet default ' \
+               '--resource-provider-connection Outbound --public-ip-tag-type FirstPartyUsage --public-ip-tag-value HDInsight --outbound-dependencies-managed-type External '\
                '--enable-private-link --private-link-configurations @"{}" '\
                .format(private_link_configuration_file)
 

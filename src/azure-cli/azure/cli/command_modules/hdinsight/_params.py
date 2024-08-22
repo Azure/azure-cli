@@ -227,12 +227,14 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(ResourceProviderConnection), help='The resource provider connection type')
         c.argument('enable_private_link', arg_group='Private Link', arg_type=get_three_state_flag(),
                    help='Indicate whether enable the private link or not.')
-        c.argument('outbound_dependencies_managed_type', options_list=['--outbound-dependencies-managed-type', '--outbound-managed-type'], arg_group='Private Link', 
+        c.argument('outbound_dependencies_managed_type', options_list=['--outbound-dependencies-managed-type', '--outbound-managed-type'], arg_group='Private Link',
                    arg_type=get_enum_type(OutboundDependenciesManagedType),
                    help='The direction for the resource provider connection.')
 
-        c.argument('public_ip_tag_type', arg_group='Private Link', help='Gets or sets the ipTag type: Example FirstPartyUsage.')
-        c.argument('public_ip_tag_value', arg_group='Private Link', help='Gets or sets value of the IpTag associated with the public IP. Example HDInsight, SQL, Storage etc')
+        c.argument('public_ip_tag_type', arg_group='Private Link',
+                   help='Gets or sets the ipTag type: Example FirstPartyUsage.')
+        c.argument('public_ip_tag_value', arg_group='Private Link',
+                   help='Gets or sets value of the IpTag associated with the public IP. Example HDInsight, SQL, Storage etc')
 
         c.argument('private_link_configurations',
                    options_list=['--private-link-config', '--private-link-configurations'],
@@ -257,6 +259,14 @@ def load_arguments(self, _):
         with self.argument_context('hdinsight resize') as c:
             c.argument('target_instance_count', options_list=['--workernode-count', '-c'],
                        help='The target worker node instance count for the operation.', required=True)
+
+        # update
+        with self.argument_context('hdinsight update') as c:
+            c.argument('tags', tags_type)
+            c.argument('assign_identity', arg_group='Managed Service Identity', validator=validate_msi,
+                       completer=get_resource_name_completion_list_under_subscription(
+                           'Microsoft.ManagedIdentity/userAssignedIdentities'),
+                       help="The name or ID of user assigned identity.")
 
         # application
         with self.argument_context('hdinsight application') as c:

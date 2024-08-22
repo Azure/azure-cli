@@ -362,9 +362,9 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
         private_link=PrivateLink.enabled if enable_private_link is True else PrivateLink.disabled
     ) if (resource_provider_connection is not None or enable_private_link is not None) else None
     if outbound_dependencies_managed_type:
-        network_properties.outbound_dependencies_managed_type=outbound_dependencies_managed_type
+        network_properties.outbound_dependencies_managed_type = outbound_dependencies_managed_type
     if public_ip_tag_type and public_ip_tag_value:
-        network_properties.public_ip_tag=IpTag(
+        network_properties.public_ip_tag = IpTag(
             ip_tag_type=public_ip_tag_type,
             tag=public_ip_tag_value
         )
@@ -416,10 +416,16 @@ def list_clusters(cmd, client, resource_group_name=None):  # pylint: disable=unu
     return list(clusters_list)
 
 
-def update_cluster(cmd, client, cluster_name, resource_group_name, tags=None, no_wait=False):
-    from azure.mgmt.hdinsight.models import ClusterPatchParameters
+def update_cluster(cmd, client, cluster_name, resource_group_name, tags=None, assign_identity=None, no_wait=False):
+    from azure.mgmt.hdinsight.models import ClusterPatchParameters, ClusterIdentity
+    from .util import build_identities_info
+    assign_identities = []
+    if assign_identity:
+        assign_identities.append(assign_identity)
+
     cluster_patch_parameters = ClusterPatchParameters(
-        tags=tags
+        tags=tags,
+        identity=build_identities_info(assign_identities)
     )
 
     return sdk_no_wait(no_wait, client.update, resource_group_name, cluster_name, cluster_patch_parameters)
@@ -620,8 +626,10 @@ def enable_hdi_azure_monitor(cmd, client, resource_group_name, cluster_name, wor
         azure_monitor_request_parameter)
 
 # pylint: disable=unused-argument
+
+
 def enable_hdi_azure_monitor_agent(cmd, client, resource_group_name, cluster_name, workspace, primary_key=None,
-                             workspace_type='resource_id', no_validation_timeout=False):
+                                   workspace_type='resource_id', no_validation_timeout=False):
     from azure.mgmt.hdinsight.models import AzureMonitorRequest
     from msrestazure.tools import parse_resource_id
     from ._client_factory import cf_log_analytics
