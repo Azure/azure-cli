@@ -36,7 +36,8 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
                    autoscale_type=None, autoscale_min_workernode_count=None, autoscale_max_workernode_count=None,
                    timezone=None, days=None, time=None, autoscale_workernode_count=None,
                    encryption_at_host=None, esp=False, idbroker=False,
-                   resource_provider_connection=None, enable_private_link=None, public_ip_tag_type=None, public_ip_tag_value=None,
+                   resource_provider_connection=None, enable_private_link=None, 
+                   public_ip_tag_type=None, public_ip_tag_value=None,
                    enable_compute_isolation=None, host_sku=None, zones=None, private_link_configurations=None,
                    no_validation_timeout=False, outbound_dependencies_managed_type=None):
     from .util import build_identities_info, build_virtual_network_profile, parse_domain_name, \
@@ -417,7 +418,7 @@ def list_clusters(cmd, client, resource_group_name=None):  # pylint: disable=unu
 
 
 def update_cluster(cmd, client, cluster_name, resource_group_name, tags=None, assign_identity=None, no_wait=False):
-    from azure.mgmt.hdinsight.models import ClusterPatchParameters, ClusterIdentity
+    from azure.mgmt.hdinsight.models import ClusterPatchParameters
     from .util import build_identities_info
     assign_identities = []
     if assign_identity:

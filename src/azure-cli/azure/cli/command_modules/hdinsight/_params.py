@@ -30,7 +30,8 @@ def load_arguments(self, _):
     from ._completers import subnet_completion_list, cluster_admin_account_completion_list, \
         cluster_user_group_completion_list, get_resource_name_completion_list_under_subscription
     from knack.arguments import CLIArgumentType
-    from azure.mgmt.hdinsight.models import Tier, JsonWebKeyEncryptionAlgorithm, ResourceProviderConnection, OutboundDependenciesManagedType
+    from azure.mgmt.hdinsight.models import Tier, JsonWebKeyEncryptionAlgorithm
+    from azure.mgmt.hdinsight.models import ResourceProviderConnection, OutboundDependenciesManagedType
     from argcomplete.completers import FilesCompleter
     node_size_type = CLIArgumentType(arg_group='Node',
                                      help='The size of the node. See also: https://docs.microsoft.com/azure/'
@@ -227,14 +228,17 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(ResourceProviderConnection), help='The resource provider connection type')
         c.argument('enable_private_link', arg_group='Private Link', arg_type=get_three_state_flag(),
                    help='Indicate whether enable the private link or not.')
-        c.argument('outbound_dependencies_managed_type', options_list=['--outbound-dependencies-managed-type', '--outbound-managed-type'], arg_group='Private Link',
+        c.argument('outbound_dependencies_managed_type', 
+                   options_list=['--outbound-dependencies-managed-type', '--outbound-managed-type'], 
+                   arg_group='Private Link',
                    arg_type=get_enum_type(OutboundDependenciesManagedType),
                    help='The direction for the resource provider connection.')
 
         c.argument('public_ip_tag_type', arg_group='Private Link',
                    help='Gets or sets the ipTag type: Example FirstPartyUsage.')
         c.argument('public_ip_tag_value', arg_group='Private Link',
-                   help='Gets or sets value of the IpTag associated with the public IP. Example HDInsight, SQL, Storage etc')
+                   help='Gets or sets value of the IpTag associated with the public IP.' 
+                   'Example HDInsight, SQL, Storage etc')
 
         c.argument('private_link_configurations',
                    options_list=['--private-link-config', '--private-link-configurations'],
