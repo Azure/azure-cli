@@ -1668,22 +1668,37 @@ def validate_azcopy_remove_arguments(cmd, namespace):
     if valid_blob and valid_file:
         raise ValueError(usage_string.format('Ambiguous parameters, both blob and file sources are '
                                              'specified'))
+
     if valid_blob:
-        client = blob_data_service_factory(cmd.cli_ctx, {
-            'account_name': namespace.account_name, 'connection_string': namespace.connection_string})
-        if not blob:
+        cmd.command_kwargs["resource_type"] = ResourceType.DATA_STORAGE_BLOB
+    elif valid_file:
+        cmd.command_kwargs["resource_type"] = ResourceType.DATA_STORAGE_FILESHARE
+    if hasattr(namespace, 'token_credential') and not hasattr(namespace, 'login'):
+        namespace.auth_mode = 'login'
+    validate_client_parameters(cmd, namespace)
+    kwargs = {'account_name': namespace.account_name,
+              'account_key': namespace.account_key,
+              'connection_string': namespace.connection_string,
+              'sas_token': namespace.sas_token}
+    if hasattr(namespace, 'token_credential'):
+        kwargs.update({'token_credential': namespace.token_credential})
+    if valid_blob:
+        client = cf_blob_service(cmd.cli_ctx, kwargs)
+        if blob is None:
             blob = ''
-        url = client.make_blob_url(container, blob)
+        from .operations.blob import create_blob_url
+        url = create_blob_url(client, container, blob, snapshot=None)
         namespace.service = 'blob'
         namespace.target = url
-
-    if valid_file:
-        client = file_data_service_factory(cmd.cli_ctx, {
-            'account_name': namespace.account_name,
-            'account_key': namespace.account_key})
+    elif valid_file:
+        if hasattr(namespace, 'token_credential'):
+            kwargs.update({'enable_file_backup_request_intent': True})
+        client = cf_share_service(cmd.cli_ctx, kwargs)
+        client = client.get_share_client(share)
         dir_name, file_name = os.path.split(path) if path else (None, '')
         dir_name = None if dir_name in ('', '.') else dir_name
-        url = client.make_file_url(share, dir_name, file_name)
+        from .operations.file import create_file_url
+        url = create_file_url(client, directory_name=dir_name, file_name=file_name)
         namespace.service = 'file'
         namespace.target = url
 
@@ -2026,6 +2041,8 @@ def _add_sas_for_url(cmd, url, account_name, account_key, sas_token, service, re
             logger.info("Cannot generate sas token. %s", ex)
             sas_token = None
     if sas_token:
+        if '?' in url:
+            return url
         return '{}?{}'.format(url, sas_token)
     return url
 

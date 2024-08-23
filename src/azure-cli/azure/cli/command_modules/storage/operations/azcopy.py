@@ -125,6 +125,8 @@ def storage_run_command(cmd, command_args):
 def _add_url_sas(url, sas):
     if not sas:
         return url
+    if '?' in url:
+        return url
     return '{}?{}'.format(url, sas)
 
 

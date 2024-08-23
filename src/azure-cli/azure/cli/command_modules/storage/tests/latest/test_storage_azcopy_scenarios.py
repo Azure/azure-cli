@@ -309,6 +309,101 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
             container, connection_string), checks=JMESPathCheck('length(@)', 40))
 
     @ResourceGroupPreparer()
+    @StorageAccountPreparer(allow_shared_key_access=False)
+    @StorageTestFilesPreparer()
+    def test_storage_blob_azcopy_remove_oauth(self, resource_group, storage_account_info, test_dir):
+        storage_account, account_key = storage_account_info
+        container = self.create_random_name(prefix='container', length=24)
+        self.oauth_cmd('storage container create -n {} --account-name {}', container, storage_account)
+
+        # sync directory
+        self.oauth_cmd('storage blob sync -s "{}" -c {} --account-name {}'.format(
+            test_dir, container, storage_account))
+        self.oauth_cmd('storage blob list -c {} --account-name {}'.format(
+            container, storage_account), checks=JMESPathCheck('length(@)', 41))
+
+        self.oauth_cmd('storage remove -c {} -n readme --account-name {}'.format(
+            container, storage_account))
+
+        self.oauth_cmd('storage remove -c {} -n readme --account-name {}'.format(
+            container, storage_account))
+
+        self.oauth_cmd('storage blob list -c {} --account-name {}'.format(
+            container, storage_account), checks=JMESPathCheck('length(@)', 40))
+
+        self.oauth_cmd('storage remove -c {} -n apple --account-name {}'.format(
+            container, storage_account))
+        self.oauth_cmd('storage blob list -c {} --account-name {}'.format(
+            container, storage_account), checks=JMESPathCheck('length(@)', 30))
+
+        self.oauth_cmd('storage remove -c {} -n butter --account-name {}'.format(
+            container, storage_account))
+        self.oauth_cmd('storage blob list -c {} --account-name {}'.format(
+            container, storage_account), checks=JMESPathCheck('length(@)', 20))
+
+        self.oauth_cmd('storage remove -c {} -n butter --account-name {} --recursive'.format(
+            container, storage_account))
+        self.oauth_cmd('storage blob list -c {} --account-name {}'.format(
+            container, storage_account), checks=JMESPathCheck('length(@)', 10))
+
+        # sync directory
+        self.oauth_cmd('storage blob sync -s "{}" -c {} --account-name {}'.format(
+            test_dir, container, storage_account))
+        self.oauth_cmd('storage blob list -c {} --account-name {}'.format(
+            container, storage_account), checks=JMESPathCheck('length(@)', 41))
+
+        self.oauth_cmd('storage remove -c {} -n butter --account-name {} --exclude-pattern "file_1*"'.format(
+            container, storage_account))
+        self.oauth_cmd('storage blob list -c {} --account-name {}'.format(
+            container, storage_account), checks=JMESPathCheck('length(@)', 32))
+
+        self.oauth_cmd('storage remove -c {} -n butter --account-name {} --recursive --exclude-pattern "file_1*"'.format(
+            container, storage_account))
+        self.oauth_cmd('storage blob list -c {} --account-name {}'.format(
+            container, storage_account), checks=JMESPathCheck('length(@)', 23))
+
+        # sync directory
+        self.oauth_cmd('storage blob sync -s "{}" -c {} --account-name {}'.format(
+            test_dir, container, storage_account))
+        self.oauth_cmd('storage blob list -c {} --account-name {}'.format(
+            container, storage_account), checks=JMESPathCheck('length(@)', 41))
+
+        self.oauth_cmd('storage remove -c {} -n butter --account-name {} --recursive --include-pattern "file_1*"'.format(
+            container, storage_account))
+        self.oauth_cmd('storage blob list -c {} --account-name {}'.format(
+            container, storage_account), checks=JMESPathCheck('length(@)', 39))
+
+        self.oauth_cmd('storage remove -c {} -n butter --account-name {} --include-pattern "file_*"'.format(
+            container, storage_account))
+        self.oauth_cmd('storage blob list -c {} --account-name {}'.format(
+            container, storage_account), checks=JMESPathCheck('length(@)', 30))
+
+        self.oauth_cmd('storage remove -c {} -n butter --account-name {} --recursive --include-pattern "file_*"'.format(
+            container, storage_account))
+        self.oauth_cmd('storage blob list -c {} --account-name {}'.format(
+            container, storage_account), checks=JMESPathCheck('length(@)', 21))
+
+        self.oauth_cmd('storage remove -c {} --include-path apple --account-name {} --include-pattern "file*" '
+                       '--exclude-pattern "file_1*" --recursive'.format(container, storage_account))
+        self.oauth_cmd('storage blob list -c {} --account-name {}'.format(
+            container, storage_account), checks=JMESPathCheck('length(@)', 12))
+
+        self.oauth_cmd('storage remove -c {} --account-name {} --recursive'.format(
+            container, storage_account))
+        self.oauth_cmd('storage blob list -c {} --account-name {}'.format(
+            container, storage_account), checks=JMESPathCheck('length(@)', 0))
+
+        # sync directory
+        self.oauth_cmd('storage blob sync -s "{}" -c {} --account-name {}'.format(
+            test_dir, container, storage_account))
+        self.oauth_cmd('storage blob list -c {} --account-name {}'.format(
+            container, storage_account), checks=JMESPathCheck('length(@)', 41))
+        self.oauth_cmd('storage remove -c {} -n readme --account-name {}'.format(
+            container, storage_account))
+        self.oauth_cmd('storage blob list -c {} --account-name {}'.format(
+            container, storage_account), checks=JMESPathCheck('length(@)', 40))
+
+    @ResourceGroupPreparer()
     @StorageAccountPreparer()
     def test_storage_file_azcopy_remove(self, resource_group, storage_account):
         account_info = self.get_account_info(resource_group, storage_account)
@@ -347,6 +442,44 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         self.storage_cmd('storage remove --share-name {} --recursive',
                          account_info, s2)
         self.storage_cmd('storage file list -s {}', account_info, s2) \
+            .assert_with_checks(JMESPathCheck('length(@)', 0))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    def test_storage_file_azcopy_remove_oauth(self, resource_group, storage_account):
+        account_info = self.get_account_info(resource_group, storage_account)
+        s1 = self.create_share(account_info)
+        s2 = self.create_share(account_info)
+        d1 = 'dir1'
+        d2 = 'dir2'
+
+        self.file_oauth_cmd('storage directory create --share-name {} -n {} --account-name {}', s1, d1, storage_account)
+        self.file_oauth_cmd('storage directory create --share-name {} -n {} --account-name {}', s2, d2, storage_account)
+
+        local_file = self.create_temp_file(512, full_random=False)
+        src1_file = os.path.join(d1, 'source_file1.txt')
+        src2_file = os.path.join(d2, 'source_file2.txt')
+
+        self.file_oauth_cmd('storage file upload -p "{}" --share-name {} --source "{}" --account-name {}',
+                            src1_file, s1, local_file, storage_account)
+        self.file_oauth_cmd('storage file exists -p "{}" -s {} --account-name {}', src1_file, s1, storage_account) \
+            .assert_with_checks(JMESPathCheck('exists', True))
+
+        self.oauth_cmd('storage remove --share-name {} -p "{}" --account-name {}', s1, src1_file, storage_account)
+        self.file_oauth_cmd('storage file exists -p "{}" -s {} --account-name {}', src1_file, s1, storage_account) \
+            .assert_with_checks(JMESPathCheck('exists', False))
+
+        self.file_oauth_cmd('storage file upload -p "{}" --share-name {} --source "{}" --account-name {}',
+                            src2_file, s2, local_file, storage_account)
+        self.file_oauth_cmd('storage file exists -p "{}" -s {} --account-name {}', src2_file, s2, storage_account) \
+            .assert_with_checks(JMESPathCheck('exists', True))
+
+        self.oauth_cmd('storage remove --share-name {} -p "{}" --account-name {}', s2, d2, storage_account)
+        self.file_oauth_cmd('storage file exists -p "{}" -s {} --account-name {}', src2_file, s2, storage_account) \
+            .assert_with_checks(JMESPathCheck('exists', False))
+
+        self.oauth_cmd('storage remove --share-name {} --recursive --account-name {}', s2, storage_account)
+        self.file_oauth_cmd('storage file list -s {} --account-name {}', s2, storage_account) \
             .assert_with_checks(JMESPathCheck('length(@)', 0))
 
     @ResourceGroupPreparer()
