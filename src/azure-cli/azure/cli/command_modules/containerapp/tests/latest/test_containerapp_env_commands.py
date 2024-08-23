@@ -804,3 +804,15 @@ class ContainerappEnvScenarioTest(ScenarioTest):
         self.assertEqual(len(usages), 3)
         self.assertGreater(usages[0]["limit"], 0)
         self.assertGreaterEqual(usages[0]["usage"], 0)
+
+    @ResourceGroupPreparer(location="northeurope")
+    def test_containerapp_env_deprecate_arguments(self, resource_group):
+        self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
+
+        env_name = self.create_random_name(prefix='containerapp-e2e-env', length=24)
+
+        self.cmd('containerapp env create -g {} -n {} --logs-destination none --docker-bridge-cidr a'.format(resource_group, env_name), expect_failure=False, checks=[
+            JMESPathCheck("properties.provisioningState", "Succeeded")
+        ])
+
+        self.cmd('containerapp env delete -g {} -n {} --yes --no-wait'.format(resource_group, env_name), expect_failure=False)

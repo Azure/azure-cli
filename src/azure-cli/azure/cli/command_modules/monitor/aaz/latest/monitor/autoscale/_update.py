@@ -23,7 +23,7 @@ class Update(AAZCommand):
         az monitor autoscale update -g myrg -n autoscale-name --count 3
 
     :example: Update autoscale settings to remove an email notification.
-        az monitor autoscale update -g myrg -n autoscale-name \ --remove-action email bob@contoso.com
+        az monitor autoscale update -g myrg -n autoscale-name --remove-action email bob@contoso.com
 
     :example: Update autoscale settings.
         az monitor autoscale update --count 3 --email-administrator true --enabled true --max-count 5 --min-count 2 --name MyAutoscaleSettings --resource-group MyResourceGroup --tags key[=value]

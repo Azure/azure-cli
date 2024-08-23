@@ -18,7 +18,7 @@ class Create(AAZCommand):
     """Create an action group test-notifications.
 
     :example: Create an action group test-notifications with action group
-        az monitor action-group test-notifications create --action-group MyActionGroup \ --resource-group MyResourceGroup -a email alice alice@example.com usecommonalertsChema --alert-type budget
+        az monitor action-group test-notifications create --action-group MyActionGroup --resource-group MyResourceGroup -a email alice alice@example.com usecommonalertsChema --alert-type budget
     """
 
     _aaz_info = {
@@ -51,7 +51,6 @@ class Create(AAZCommand):
             required=True,
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
-            help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
             required=True,
         )
         _args_schema.alert_type = AAZStrArg(

@@ -37,8 +37,8 @@ def process_template(template, preserve_order=True, file_path=None):
     # In order to solve the package conflict introduced by jsmin, the jsmin code is referenced into json_min
     minified = json_min(template)
 
-    # Remove extra spaces, compress multiline string(s)
-    result = re.sub(r'\s\s+', ' ', minified, flags=re.DOTALL)
+    # Compress multiline string(s) to adhere to the official JSON format
+    result = minified.replace('\r', '\\r').replace('\n', '\\n')
 
     try:
         return shell_safe_json_parse(result, preserve_order)

@@ -1,13 +1,12 @@
 interactions:
 - request:
-    body: '{"location": "global", "properties": {"description": "Test", "severity":
-      2, "enabled": true, "scopes": ["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_namespace_special_character000001/providers/Microsoft.Storage/storageAccounts/clitest000002"],
-      "evaluationFrequency": "PT1M", "windowSize": "PT5M", "targetResourceRegion":
-      "westus", "criteria": {"odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
-      "allOf": [{"criterionType": "StaticThresholdCriterion", "name": "cond0", "metricName":
-      "UnemittedMetric", "metricNamespace": "My-Ns", "timeAggregation": "Average",
-      "dimensions": [], "skipMetricValidation": true, "operator": "GreaterThanOrEqual",
-      "threshold": 10.0}]}}}'
+    body: '{"location": "global", "properties": {"criteria": {"odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
+      "allOf": [{"criterionType": "StaticThresholdCriterion", "dimensions": [], "metricName":
+      "UnemittedMetric", "metricNamespace": "My-Ns", "name": "cond0", "operator":
+      "GreaterThanOrEqual", "skipMetricValidation": true, "threshold": 10.0, "timeAggregation":
+      "Average"}]}, "description": "Test", "enabled": true, "evaluationFrequency":
+      "PT1M", "scopes": ["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_namespace_special_character000001/providers/Microsoft.Storage/storageAccounts/clitest000002"],
+      "severity": 2, "targetResourceRegion": "westus", "windowSize": "PT5M"}}'
     headers:
       Accept:
       - application/json
@@ -24,7 +23,7 @@ interactions:
       ParameterSetName:
       - -g -n --scopes --region --description --condition
       User-Agent:
-      - AZURECLI/2.49.0 azsdk-python-azure-mgmt-monitor/5.0.0 Python/3.10.6 (macOS-13.4-x86_64-i386-64bit)
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.11.9 (Windows-10-10.0.22631-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_namespace_special_character000001/providers/Microsoft.Insights/metricAlerts/alert1?api-version=2018-03-01
   response:
@@ -56,39 +55,38 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 07 Jun 2023 04:38:21 GMT
+      - Fri, 23 Aug 2024 03:02:41 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
       vary:
-      - Accept-Encoding,Accept-Encoding
+      - Accept-Encoding
       x-aspnet-version:
       - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
       - '299'
+      x-msedge-ref:
+      - 'Ref A: 8582C2AE2AF3497F96E84B2CA14D1378 Ref B: TYO201151002054 Ref C: 2024-08-23T03:02:34Z'
       x-powered-by:
       - ASP.NET
     status:
       code: 200
       message: OK
 - request:
-    body: '{"location": "global", "properties": {"description": "Test", "severity":
-      2, "enabled": true, "scopes": ["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_namespace_special_character000001/providers/Microsoft.Storage/storageAccounts/clitest000002"],
-      "evaluationFrequency": "PT1M", "windowSize": "PT5M", "targetResourceRegion":
-      "westus", "criteria": {"odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
-      "allOf": [{"criterionType": "StaticThresholdCriterion", "name": "cond0", "metricName":
-      "\\LogicalDisk(C:)\\% Free Space", "metricNamespace": "My-Ns", "timeAggregation":
-      "Average", "dimensions": [], "skipMetricValidation": true, "operator": "Equals",
-      "threshold": 1.0}]}}}'
+    body: '{"location": "global", "properties": {"criteria": {"odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
+      "allOf": [{"criterionType": "StaticThresholdCriterion", "dimensions": [], "metricName":
+      "\\LogicalDisk(C:)\\% Free Space", "metricNamespace": "My-Ns", "name": "cond0",
+      "operator": "Equals", "skipMetricValidation": true, "threshold": 1.0, "timeAggregation":
+      "Average"}]}, "description": "Test", "enabled": true, "evaluationFrequency":
+      "PT1M", "scopes": ["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_namespace_special_character000001/providers/Microsoft.Storage/storageAccounts/clitest000002"],
+      "severity": 2, "targetResourceRegion": "westus", "windowSize": "PT5M"}}'
     headers:
       Accept:
       - application/json
@@ -105,7 +103,7 @@ interactions:
       ParameterSetName:
       - -g -n --scopes --region --description --condition
       User-Agent:
-      - AZURECLI/2.49.0 azsdk-python-azure-mgmt-monitor/5.0.0 Python/3.10.6 (macOS-13.4-x86_64-i386-64bit)
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.11.9 (Windows-10-10.0.22631-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_namespace_special_character000001/providers/Microsoft.Insights/metricAlerts/alert2?api-version=2018-03-01
   response:
@@ -137,25 +135,25 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 07 Jun 2023 04:38:33 GMT
+      - Fri, 23 Aug 2024 03:02:50 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
       vary:
-      - Accept-Encoding,Accept-Encoding
+      - Accept-Encoding
       x-aspnet-version:
       - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
       - '299'
+      x-msedge-ref:
+      - 'Ref A: F67E81495C8E43C090580BFDA0684410 Ref B: TYO201151002023 Ref C: 2024-08-23T03:02:43Z'
       x-powered-by:
       - ASP.NET
     status:

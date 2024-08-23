@@ -202,6 +202,13 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
              'The default value is set to current time.'
     )
 
+    maintenance_reschedule_time_arg_type = CLIArgumentType(
+        options_list=['--start-time'],
+        default=get_current_time(),
+        help='The maintenance reschedule start time in UTC(ISO8601 format), e.g., 2017-04-26T02:10:00+00:00'
+             'The default value is set to current time.'
+    )
+
     source_server_arg_type = CLIArgumentType(
         options_list=['--source-server'],
         help='The name or resource ID of the source server to restore from.'
@@ -590,6 +597,21 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
     with self.argument_context('mysql flexible-server identity show') as c:
         c.argument('identity', options_list=['--identity', '-n'], help='Name or ID of identity to show.', validator=validate_identity)
+
+    with self.argument_context('mysql flexible-server maintenance reschedule') as c:
+        c.argument('resource_group_name', arg_type=resource_group_name_type, help='Resource Group Name of the server.')
+        c.argument('server_name', options_list=['--server-name', '-s'], help='The name of the server.')
+        c.argument('maintenance_name', options_list=['--maintenance-name', '-m'], help='The name of the maintenance.')
+        c.argument('maintenance_start_time', arg_type=maintenance_reschedule_time_arg_type, help='The new start time of the rescheduled maintenance.')
+
+    with self.argument_context('mysql flexible-server maintenance list') as c:
+        c.argument('resource_group_name', id_part=None, arg_type=resource_group_name_type, help='Resource Group Name of the server.')
+        c.argument('server_name', id_part=None, options_list=['--server-name', '-s'], help='The name of the server.')
+
+    with self.argument_context('mysql flexible-server maintenance show') as c:
+        c.argument('resource_group_name', arg_type=resource_group_name_type, help='Resource Group Name of the server.')
+        c.argument('server_name', options_list=['--server-name', '-s'], help='The name of the server.')
+        c.argument('maintenance_name', options_list=['--maintenance-name', '-m'], help='The name of the maintenance.')
 
     # ad-admin
     with self.argument_context('mysql flexible-server ad-admin') as c:

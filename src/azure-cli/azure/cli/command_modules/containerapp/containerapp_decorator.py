@@ -334,13 +334,15 @@ class ContainerAppCreateDecorator(BaseContainerAppDecorator):
                 external_ingress = True
 
         ingress_def = None
-        if self.get_argument_target_port() is not None and self.get_argument_ingress() is not None:
+        if self.get_argument_ingress() is not None:
             ingress_def = deepcopy(IngressModel)
             ingress_def["external"] = external_ingress
-            ingress_def["targetPort"] = self.get_argument_target_port()
             ingress_def["transport"] = self.get_argument_transport()
             ingress_def["exposedPort"] = self.get_argument_exposed_port() if self.get_argument_transport() == "tcp" else None
             ingress_def["allowInsecure"] = self.get_argument_allow_insecure()
+
+            if self.get_argument_target_port() is not None:
+                ingress_def["targetPort"] = self.get_argument_target_port()
 
         secrets_def = None
         if self.get_argument_secrets() is not None:

@@ -1,0 +1,15 @@
+name: Run issue sentinel
+on:
+  issues:
+    types: [opened, edited, closed]
+
+jobs:
+  Issue:
+    permissions:
+        issues: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run Issue Sentinel
+        uses: Azure/issue-sentinel@v1
+        with:
+          password: ${{secrets.ISSUE_SENTINEL_PASSWORD}}

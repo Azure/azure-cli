@@ -167,7 +167,7 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
                          test_dir, container).get_output_in_json()
         if result and result[0]:
             res = result[0]
-            self.assertRegex(res['Blob'], '^.*[^\/]+$')
+            self.assertRegex(res['Blob'], '^.*[^/]+$')
             base_url = res['Blob'].split('/')[:3]
             container = res['Blob'].split('/')[3]
             blob_name = '/'.join(res['Blob'].split('/')[4:])

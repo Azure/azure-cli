@@ -1845,14 +1845,13 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.cmd('az storage account update --access-tier Cool -n {sastoragev2} -g {rg} -y',
                  checks=[JMESPathCheck('accessTier', 'Cool')])
 
-        # need to uncomment when GA in September 2024 test Cold
-        # self.cmd('az storage account create -n {sastoragecold} -g {rg} --access-tier Cold',
-        #          checks=[JMESPathCheck('accessTier', 'Cold')])
-        # self.cmd('az storage account update --access-tier Cool -n {sastoragecold} -g {rg} -y',
-        #          checks=[JMESPathCheck('accessTier', 'Cool')])
-        # self.cmd('az storage account update --access-tier Cold -n {sastoragecold} -g {rg} -y',
-        #          checks=[JMESPathCheck('accessTier', 'Cold')])
-
+        # Cold tier
+        self.cmd('az storage account create -n {sastoragecold} -g {rg} --access-tier Cold',
+                 checks=[JMESPathCheck('accessTier', 'Cold')])
+        self.cmd('az storage account update --access-tier Cool -n {sastoragecold} -g {rg} -y',
+                 checks=[JMESPathCheck('accessTier', 'Cool')])
+        self.cmd('az storage account update --access-tier Cold -n {sastoragecold} -g {rg} -y',
+                 checks=[JMESPathCheck('accessTier', 'Cold')])
 
 
 class RoleScenarioTest(LiveScenarioTest):

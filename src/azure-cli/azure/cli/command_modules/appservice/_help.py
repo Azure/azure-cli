@@ -2805,7 +2805,7 @@ short-summary: Link or unlink a prexisting functionapp with a static webapp. Als
 
 helps['staticwebapp functions link'] = """
     type: command
-    short-summary: Link an Azure Function to a static webapp. Also known as "Bring your own Functions." Only one Azure Functions app is available to a single static web app. Static webapp SKU must be "Standard"
+    short-summary: Link an Azure Function to a static webapp. Also known as "Bring your own Functions." Only one Azure Functions app is available to a single static web app. Static webapp SKU must be "Standard" or "Dedicated"
     examples:
     - name: Link a function to a static webapp
       text: az staticwebapp functions link -n MyStaticAppName -g MyResourceGroup --function-resource-id "/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/Microsoft.Web/sites/<function-name>"
@@ -2838,7 +2838,7 @@ helps['staticwebapp backends validate'] = """
     long-summary: >
       Only one backend is available to a single static web app.
       If a backend was previously linked to another static Web App, the auth configuration must first be removed from the backend before linking to a different Static Web App.
-      Static web app SKU must be "Standard".
+      Static web app SKU must be "Standard" or "Dedicated".
       Supported backend types are Azure Functions, Azure API Management, Azure App Service, Azure Container Apps.
       Backend region must be provided for backends of type Azure Functions and Azure App Service.
       See https://learn.microsoft.com/azure/static-web-apps/apis-overview to learn more.
@@ -2855,7 +2855,7 @@ helps['staticwebapp backends link'] = """
     long-summary: >
       Only one backend is available to a single static web app.
       If a backend was previously linked to another static Web App, the auth configuration must first be removed from the backend before linking to a different Static Web App.
-      Static web app SKU must be "Standard".
+      Static web app SKU must be "Standard" or "Dedicated".
       Supported backend types are Azure Functions, Azure API Management, Azure App Service, Azure Container Apps.
       Backend region must be provided for backends of type Azure Functions and Azure App Service.
       See https://learn.microsoft.com/azure/static-web-apps/apis-overview to learn more.

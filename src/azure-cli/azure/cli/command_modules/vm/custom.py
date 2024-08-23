@@ -1623,33 +1623,34 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
     SecurityProfile, UefiSettings = cmd.get_models('SecurityProfile', 'UefiSettings')
     vm = kwargs['parameters']
 
-    disk_resource_group, disk_name = None, None
+    disk_name = None
     if os_disk is not None:
         if is_valid_resource_id(os_disk):
             disk_id = os_disk
             os_disk_id_parsed = parse_resource_id(os_disk)
-            disk_resource_group, disk_name = os_disk_id_parsed['resource_group'], os_disk_id_parsed['name']
+            disk_name = os_disk_id_parsed['name']
         else:
             vm_id_parsed = parse_resource_id(vm.id)
             disk_id = resource_id(subscription=vm_id_parsed['subscription'],
                                   resource_group=vm_id_parsed['resource_group'],
                                   namespace='Microsoft.Compute', type='disks', name=os_disk)
-            disk_resource_group, disk_name = vm_id_parsed['resource_group'], os_disk
+            disk_name = os_disk
         vm.storage_profile.os_disk.managed_disk.id = disk_id
         vm.storage_profile.os_disk.name = disk_name
 
     if security_type == "TrustedLaunch":
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        if vm.security_profile is not None and vm.security_profile.security_type == "ConfidentialVM":
+            raise InvalidArgumentValueError("{} is already configured with ConfidentialVM. Security Configuration "
+                                            "cannot be updated from ConfidentialVM to TrustedLaunch.".format(vm.name))
+
         if disk_name is None and vm.storage_profile.os_disk.managed_disk is not None:
             os_disk_id_parsed = parse_resource_id(vm.storage_profile.os_disk.managed_disk.id)
-            disk_resource_group, disk_name = os_disk_id_parsed['resource_group'], os_disk_id_parsed['name']
+            disk_name = os_disk_id_parsed['name']
 
         if disk_name is not None:
-            from ._vm_utils import validate_update_vm_trusted_launch_supported
-
-            validate_update_vm_trusted_launch_supported(cmd=cmd, vm=vm, os_disk_resource_group=disk_resource_group,
-                                                        os_disk_name=disk_name)
-            # Set --enable-secure-boot False and --enable-vtpm True if not specified by end user.
-            enable_secure_boot = enable_secure_boot if enable_secure_boot is not None else False
+            # Set --enable-secure-boot True and --enable-vtpm True if not specified by end user.
+            enable_secure_boot = enable_secure_boot if enable_secure_boot is not None else True
             enable_vtpm = enable_vtpm if enable_vtpm is not None else True
 
             if vm.security_profile is None:

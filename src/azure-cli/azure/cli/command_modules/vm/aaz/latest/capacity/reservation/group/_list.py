@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "capacity reservation group list",
-    is_preview=True,
 )
 class List(AAZCommand):
     """List the capacity reservation groups.

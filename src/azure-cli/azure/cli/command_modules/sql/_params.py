@@ -407,6 +407,11 @@ perform_cutover_param_type = CLIArgumentType(
     help='Whether to perform cutover when updating database to Hyperscale tier is in progress.',
     arg_type=get_three_state_flag())
 
+authentication_metadata_param_type = CLIArgumentType(
+    options_list=['--authentication-metadata', '--am'],
+    help='Preferred metadata to use for authentication of synced on-prem users. Default is AzureAD.',
+    arg_type=get_enum_type(['AzureAD', 'Windows', 'Paired']))
+
 db_service_objective_examples = 'Basic, S0, P1, GP_Gen4_1, GP_S_Gen5_8, BC_Gen5_2, HS_Gen5_32.'
 dw_service_objective_examples = 'DW100, DW1000c'
 
@@ -2331,6 +2336,9 @@ def load_arguments(self, _):
 
         c.argument('zone_redundant',
                    arg_type=zone_redundant_param_type)
+
+        c.argument('authentication_metadata',
+                   arg_type=authentication_metadata_param_type)
 
     with self.argument_context('sql mi create') as c:
         c.argument('location',

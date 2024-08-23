@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# This script should be run in a Mariner 2.0 docker container.
+# This script should be run in a Azure Linux docker container.
 set -exv
 
 export USERNAME=azureuser
@@ -14,7 +14,7 @@ time az self-test
 time az --version
 
 cd /azure-cli/
-pip install wheel
+python -m pip install --upgrade pip setuptools
 ./scripts/ci/build.sh
 
 # From Fedora36, when using `pip install --prefix` with root privileges, the package is installed into `{prefix}/local/lib`.

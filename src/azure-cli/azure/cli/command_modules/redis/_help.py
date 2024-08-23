@@ -74,8 +74,8 @@ examples:
   - name: Deploying a Premium Azure Cache for Redis inside an existing Azure Virtual Network
     text: az redis create --location westus2 --name MyRedisCache --resource-group MyResourceGroup --sku Premium --vm-size p1 --subnet-id "/subscriptions/{subid}/resourceGroups/{resourceGroupName}/providers/Microsoft.{Network|ClassicNetwork}/virtualNetworks/vnet1/subnets/subnet1"
     crafted: true
-  - name: Deploying a Premium Azure Cache for Redis with Microsoft Entra Authentication configured
-    text: az redis create --location westus2 --name MyRedisCache --resource-group MyResourceGroup --sku Premium --vm-size p1 --redis-configuration @"config_enable-aad.json"
+  - name: Deploying a Premium Azure Cache for Redis with Microsoft Entra Authentication configured and access keys disabled
+    text: az redis create --location westus2 --name MyRedisCache --resource-group MyResourceGroup --sku Premium --vm-size p1 --disable-access-keys true --redis-configuration @"config_enable-aad.json"
 """
 
 helps['redis export'] = """
@@ -177,6 +177,8 @@ examples:
   - name: Scale an Azure Cache for Redis Instance in/out using Redis Cluster.
     text: az redis update --name MyRedisCache --resource-group MyResourceGroup --set shardCount=2
     crafted: true
+  - name: Disable access keys authentication for Redis.
+    text: az redis update --name MyRedisCache --resource-group MyResourceGroup --set "disableAccessKeyAuthentication=true"
 """
 
 helps['redis force-reboot'] = """

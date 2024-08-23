@@ -17,8 +17,8 @@ from azure.cli.command_modules.containerapp.tests.latest.utils import create_con
 
 from azure.cli.testsdk.reverse_dependency import get_dummy_cli
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathCheck, live_only,
-                               LogAnalyticsWorkspacePreparer)
+from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathCheck, StringCheck, live_only,
+                               JMESPathCheckNotExists, LogAnalyticsWorkspacePreparer)
 from knack.util import CLIError
 
 from azure.cli.command_modules.containerapp.tests.latest.common import TEST_LOCATION, write_test_file, \
@@ -58,10 +58,10 @@ class ContainerappScenarioTest(ScenarioTest):
         ])
 
         # Create Container App with image, resource and replica limits
-        create_string = "containerapp create -g {} -n {} --environment {} --image nginx --cpu 0.5 --memory 1.0Gi --min-replicas 2 --max-replicas 4".format(resource_group, containerapp_name, env)
+        create_string = "containerapp create -g {} -n {} --environment {} --image mcr.microsoft.com/azuredocs/containerapps-helloworld:latest --cpu 0.5 --memory 1.0Gi --min-replicas 2 --max-replicas 4".format(resource_group, containerapp_name, env)
         self.cmd(create_string, checks=[
             JMESPathCheck('name', containerapp_name),
-            JMESPathCheck('properties.template.containers[0].image', 'nginx'),
+            JMESPathCheck('properties.template.containers[0].image', 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'),
             JMESPathCheck('properties.template.containers[0].resources.cpu', '0.5'),
             JMESPathCheck('properties.template.containers[0].resources.memory', '1Gi'),
             JMESPathCheck('properties.template.scale.minReplicas', '2'),
@@ -73,9 +73,11 @@ class ContainerappScenarioTest(ScenarioTest):
             JMESPathCheck('properties.configuration.ingress.targetPort', 8080)
         ])
 
-        # Container App with ingress should fail unless target port is specified
-        with self.assertRaises(CLIError):
-            self.cmd('containerapp create -g {} -n {} --environment {} --ingress external'.format(resource_group, containerapp_name, env))
+        # target port is optional
+        self.cmd('containerapp create -g {} -n {} --environment {} --ingress external'.format(resource_group, containerapp_name, env), checks=[
+            JMESPathCheck('properties.configuration.ingress.external', True),
+            JMESPathCheck('properties.configuration.ingress.targetPort', 0)
+        ])
 
         # Create Container App with secrets and environment variables
         containerapp_name = self.create_random_name(prefix='containerapp-e2e', length=24)
@@ -194,10 +196,10 @@ class ContainerappScenarioTest(ScenarioTest):
         ])
 
         # Create Container App with image, resource and replica limits
-        create_string = "containerapp create -g {} -n {} --environment {} --image nginx --cpu 0.5 --memory 1.0Gi --min-replicas 2 --max-replicas 4".format(resource_group, containerapp_name, env_id)
+        create_string = "containerapp create -g {} -n {} --environment {} --image mcr.microsoft.com/azuredocs/containerapps-helloworld:latest --cpu 0.5 --memory 1.0Gi --min-replicas 2 --max-replicas 4".format(resource_group, containerapp_name, env_id)
         self.cmd(create_string, checks=[
             JMESPathCheck('name', containerapp_name),
-            JMESPathCheck('properties.template.containers[0].image', 'nginx'),
+            JMESPathCheck('properties.template.containers[0].image', 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'),
             JMESPathCheck('properties.template.containers[0].resources.cpu', '0.5'),
             JMESPathCheck('properties.template.containers[0].resources.memory', '1Gi'),
             JMESPathCheck('properties.template.scale.minReplicas', '2'),
@@ -209,9 +211,37 @@ class ContainerappScenarioTest(ScenarioTest):
             JMESPathCheck('properties.configuration.ingress.targetPort', 8080)
         ])
 
-        # Container App with ingress should fail unless target port is specified
-        with self.assertRaises(CLIError):
-            self.cmd('containerapp create -g {} -n {} --environment {} --ingress external'.format(resource_group, containerapp_name, env_id))
+        # target port is optional
+        self.cmd('containerapp create -g {} -n {} --environment {} --ingress external'.format(resource_group, containerapp_name, env_id), checks=[
+            JMESPathCheck('properties.configuration.ingress.external', True),
+            JMESPathCheck('properties.configuration.ingress.targetPort', 0)
+        ])
+
+        self.cmd('containerapp ingress disable -g {} -n {}'.format(resource_group, containerapp_name), checks=[
+            StringCheck('')
+        ])
+
+        self.cmd('containerapp show -g {} -n {}'.format(resource_group, containerapp_name), checks=[
+            JMESPathCheckNotExists('properties.configuration.ingress'),
+        ])
+
+        self.cmd('containerapp ingress enable -g {} -n {} --type external --target-port 8080'.format(resource_group, containerapp_name), checks=[
+            JMESPathCheck('external', True),
+            JMESPathCheck('targetPort', 8080)
+        ])
+
+        self.cmd('containerapp ingress disable -g {} -n {}'.format(resource_group, containerapp_name), checks=[
+            StringCheck('')
+        ])
+
+        self.cmd('containerapp show -g {} -n {}'.format(resource_group, containerapp_name), checks=[
+            JMESPathCheckNotExists('properties.configuration.ingress'),
+        ])
+
+        self.cmd('containerapp ingress enable -g {} -n {} --type external'.format(resource_group, containerapp_name), checks=[
+            JMESPathCheck('external', True),
+            JMESPathCheck('targetPort', 0)
+        ])
 
         # Create Container App with secrets and environment variables
         containerapp_name = self.create_random_name(prefix='containerapp-e2e', length=24)

@@ -676,25 +676,6 @@ def validate_image_trusted_launch(namespace):
         logger.warning(UPGRADE_SECURITY_HINT)
 
 
-def validate_update_vm_trusted_launch_supported(cmd, vm, os_disk_resource_group, os_disk_name):
-    from azure.cli.command_modules.vm._client_factory import _compute_client_factory
-    from azure.cli.core.azclierror import InvalidArgumentValueError
-
-    client = _compute_client_factory(cmd.cli_ctx).disks
-    os_disk_info = client.get(os_disk_resource_group, os_disk_name)
-    generation_version = os_disk_info.hyper_v_generation if hasattr(os_disk_info, 'hyper_v_generation') else None
-
-    if generation_version != "V2":
-        raise InvalidArgumentValueError(
-            "Trusted Launch security configuration can be enabled only with Azure Gen2 VMs. Please visit "
-            "https://learn.microsoft.com/en-us/azure/virtual-machines/trusted-launch for more details.")
-
-    if vm.security_profile is not None and vm.security_profile.security_type == "ConfidentialVM":
-        raise InvalidArgumentValueError("{} is already configured with ConfidentialVM. "
-                                        "Security Configuration cannot be updated from ConfidentialVM to TrustedLaunch."
-                                        .format(vm.name))
-
-
 def display_region_recommendation(cmd, namespace):
 
     identified_region_maps = {

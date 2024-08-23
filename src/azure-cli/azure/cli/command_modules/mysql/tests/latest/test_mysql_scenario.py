@@ -29,7 +29,8 @@ from azure.cli.testsdk import (
     KeyVaultPreparer,
     ScenarioTest,
     StringContainCheck,
-    live_only)
+    live_only,
+    record_only)
 
 from azure.mgmt.sql.models import AdvancedThreatProtectionState
 
@@ -2240,6 +2241,36 @@ class FlexibleServerAdvancedThreatProtectionScenarioTest(ScenarioTest):
                             checks=[
                                 JMESPathCheck('resourceGroup', resource_group),
                                 JMESPathCheck('state', new_defender_state)])
+
+
+class FlexibleServerMaintenanceMgmtScenarioTest(ScenarioTest):
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location='northeurope')
+    @record_only() # this test need a manually configured server.
+
+    def test_mysql_flexible_server_maintenance_mgmt(self, resource_group):
+        self._test_maintenance_mgmt('mysql', resource_group)
+    
+    def _test_maintenance_mgmt(self, database_engine, resource_group):
+        resource_group = "reschedule-cli-test"
+        server_name = "azuredbclitest-maintenance"
+        maintenance_list_response = self.cmd('{} flexible-server maintenance list --resource-group {} --server-name {}'
+                 .format(database_engine, resource_group, server_name)).get_output_in_json()
+        self.assertNotEqual(len(maintenance_list_response), 0)
+
+        maintenance_name = maintenance_list_response[0]['name']
+        maintenance_id = maintenance_list_response[0]['id']
+        maintenance_read_response = self.cmd('{} flexible-server maintenance show --resource-group {} --server-name {} --maintenance-name {}'
+                 .format(database_engine, resource_group, server_name, maintenance_name)).get_output_in_json()
+        self.assertEqual(maintenance_id, maintenance_read_response['id'])
+
+        reschedule_start_time = "2024-11-06T03:41Z"
+        maintenance_reschedule_response = self.cmd('{} flexible-server maintenance reschedule --resource-group {} --server-name {} --maintenance-name {} --start-time {}'
+                 .format(database_engine, resource_group, server_name, maintenance_name, reschedule_start_time)).get_output_in_json()
+        maintenance_rescheduled_time = parser.parse(maintenance_reschedule_response['maintenanceStartTime']).strftime('%Y-%m-%dT%H:%MZ')
+        self.assertEqual(reschedule_start_time, maintenance_rescheduled_time)
+
 
 class MySQLExportTest(ScenarioTest):
     profile = None
