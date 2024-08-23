@@ -412,6 +412,12 @@ jobs:
           artifactName: docker-mariner2.0-${{ arch.value }}
           dockerfile: azure-linux.dockerfile
           packageArtifactName: rpm-mariner2.0-${{ arch.value }}
+          image: mcr.microsoft.com/cbl-mariner/base/core:2.0
+        Azure Linux 3.0 ${{ arch.name }}:
+          pool: ${{ arch.pool }}
+          artifactName: docker-azurelinux3.0-${{ arch.value }}
+          packageArtifactName: rpm-azurelinux3.0-${{ arch.value }}
+          image: mcr.microsoft.com/azurelinux/base/core:3.0
   pool:
     name: $(pool)
   steps:
@@ -452,6 +458,9 @@ jobs:
         Mariner 2.0 ${{ arch.name }}:
           pool: ${{ arch.pool }}
           artifactName: docker-mariner2.0-${{ arch.value }}
+        Azure Linux 3.0 ${{ arch.name }}:
+          pool: ${{ arch.pool }}
+          artifactName: docker-azurelinux3.0-${{ arch.value }}
   pool:
     name: $(pool)
   steps:
