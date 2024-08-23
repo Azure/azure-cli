@@ -383,6 +383,7 @@ def __validate_replication(sku=None,
                            replica_name=None,
                            replica_location=None,
                            no_replica=None):
+
     if sku.lower() == 'premium' and not no_replica:
         if any(arg is None for arg in [replica_name, replica_location]):
             raise RequiredArgumentMissingError("Options '--replica-name' and '--replica-location' are required when creating a premium tier store. To avoid creating replica please provide explicit argument '--no-replica'.")
