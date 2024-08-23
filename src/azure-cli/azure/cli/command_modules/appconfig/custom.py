@@ -45,7 +45,6 @@ def create_configstore(cmd,
                        disable_local_auth=None,
                        retention_days=None,
                        enable_purge_protection=None,
-                       no_replica=False,
                        replica_name=None,
                        replica_location=None):
     if assign_identity is not None and not assign_identity:
@@ -365,5 +364,3 @@ def __validate_cmk(encryption_key_name=None,
         else:
             if any(arg is not None for arg in [encryption_key_vault, encryption_key_version, identity_client_id]):
                 logger.warning("Removing the customer encryption key. Key vault related arguments are ignored.")
-
-
