@@ -17,7 +17,8 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
                             '--image Canonical:UbuntuServer:18.04-LTS:latest ' \
                             '--nsg {vm} ' \
                             '--generate-ssh-keys '\
-                            '--nsg-rule None '
+                            '--nsg-rule None '\
+                            '--public-ip-sku Standard '
         vm_info = self.cmd(vm_create_cmd_tpl.format(rg=resource_group, vm=vm)).get_output_in_json()
 
         vm_enable_ext_tpl = 'vm extension set -g {rg} ' \
