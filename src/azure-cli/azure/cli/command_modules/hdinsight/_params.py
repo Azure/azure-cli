@@ -228,8 +228,8 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(ResourceProviderConnection), help='The resource provider connection type')
         c.argument('enable_private_link', arg_group='Private Link', arg_type=get_three_state_flag(),
                    help='Indicate whether enable the private link or not.')
-        c.argument('outbound_dependencies_managed_type', 
-                   options_list=['--outbound-dependencies-managed-type', '--outbound-managed-type'], 
+        c.argument('outbound_dependencies_managed_type',
+                   options_list=['--outbound-dependencies-managed-type', '--outbound-managed-type'],
                    arg_group='Private Link',
                    arg_type=get_enum_type(OutboundDependenciesManagedType),
                    help='The direction for the resource provider connection.')
@@ -237,7 +237,7 @@ def load_arguments(self, _):
         c.argument('public_ip_tag_type', arg_group='Private Link',
                    help='Gets or sets the ipTag type: Example FirstPartyUsage.')
         c.argument('public_ip_tag_value', arg_group='Private Link',
-                   help='Gets or sets value of the IpTag associated with the public IP.' 
+                   help='Gets or sets value of the IpTag associated with the public IP.'
                    'Example HDInsight, SQL, Storage etc')
 
         c.argument('private_link_configurations',
