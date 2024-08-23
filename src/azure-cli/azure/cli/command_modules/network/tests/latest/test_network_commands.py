@@ -386,7 +386,8 @@ class NetworkPrivateLinkService(ScenarioTest):
             'ip': 'pubip1',
             'lks1': 'lks1',
             'lks2': 'lks2',
-            'sub1': '00000000-0000-0000-0000-000000000000'
+            'sub1': '00000000-0000-0000-0000-000000000000',
+            'destination_ip': '10.0.0.1'
         })
 
         self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet1} -l {location}')
@@ -394,11 +395,12 @@ class NetworkPrivateLinkService(ScenarioTest):
         self.cmd('network vnet subnet update -g {rg} -n {subnet1} --vnet-name {vnet} --disable-private-link-service-network-policies')
         self.cmd('network vnet subnet create -g {rg} -n {subnet2} --vnet-name {vnet} --address-prefixes 10.0.2.0/24 --default-outbound false')
         self.cmd('network vnet subnet update -g {rg} -n {subnet2} --vnet-name {vnet} --disable-private-endpoint-network-policies')
-        self.cmd('network private-link-service create -g {rg} -n {lks1} --vnet-name {vnet} --subnet {subnet1} --lb-name {lb} --lb-frontend-ip-configs LoadBalancerFrontEnd -l {location}  --enable-proxy-protocol', checks=[
+        self.cmd('network private-link-service create -g {rg} -n {lks1} --vnet-name {vnet} --subnet {subnet1} --lb-name {lb} --lb-frontend-ip-configs LoadBalancerFrontEnd -l {location}  --enable-proxy-protocol --destination-ip-address {destination_ip}', checks=[
             self.check('type', 'Microsoft.Network/privateLinkServices'),
             self.check('length(ipConfigurations)', 1),
             self.check('length(loadBalancerFrontendIpConfigurations)', 1),
-            self.check('enableProxyProtocol', True)
+            self.check('enableProxyProtocol', True),
+            self.check('destinationIPAddress', '{destination_ip}')
         ])
 
         self.cmd('network private-link-service update -g {rg} -n {lks1} --visibility {sub1} {sub1} --auto-approval {sub1} {sub1} --enable-proxy-protocol False --lb-name {lb} --lb-frontend-ip-configs LoadBalancerFrontEnd', checks=[
@@ -6964,7 +6966,7 @@ class NetworkExtendedLocation(ScenarioTest):
             'vnet': 'clitestvnet',
             'nic': 'clitestnic',
             'rg': resource_group,
-            'edge_name': 'microsoftrrdclab1'
+            'edge_name': 'microsoftrrdclab3'
         })
         self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name subnet1 --edge-zone {edge_name}',
                  checks=self.check('newVNet.extendedLocation.name', '{edge_name}'))
@@ -6977,7 +6979,7 @@ class NetworkExtendedLocation(ScenarioTest):
         self.kwargs.update({
             'rg': resource_group,
             'ip1': 'pubip1',
-            'edge_name': 'microsoftrrdclab1'
+            'edge_name': 'microsoftrrdclab3'
         })
 
         self.cmd('network public-ip create -g {rg} -n {ip1} --edge-zone {edge_name} --sku Standard',
