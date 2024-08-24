@@ -18,7 +18,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_NETWORK_CONTRIBUTOR_ROLE_ID,
 )
 from azure.cli.command_modules.acs._graph import resolve_object_id
-from azure.cli.command_modules.acs._helpers import get_property_from_dict_or_object
+from azure.cli.command_modules.acs._helpers import get_property_from_dict_or_object, use_shared_identity
 from azure.cli.core.azclierror import AzCLIError, UnauthorizedError
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.core.exceptions import HttpResponseError, ResourceExistsError
@@ -299,6 +299,8 @@ def ensure_cluster_identity_permission_on_kubelet_identity(cmd, cluster_identity
     if not add_role_assignment(
         cmd, CONST_MANAGED_IDENTITY_OPERATOR_ROLE, cluster_identity_object_id, is_service_principal=False, scope=scope
     ):
+        if use_shared_identity():
+            return
         raise UnauthorizedError(
             "Could not grant Managed Identity Operator " "permission to cluster identity at scope {}".format(scope)
         )

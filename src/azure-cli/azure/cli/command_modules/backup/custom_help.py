@@ -238,8 +238,7 @@ def calculate_weekly_rpo(schedule_run_days):
         if backup_scheduled:
             if last_active_index is not None:
                 gap = index - last_active_index
-                if gap > largest_gap:
-                    largest_gap = gap
+                largest_gap = max(largest_gap, gap)
             last_active_index = index
 
     return largest_gap * 24

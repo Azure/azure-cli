@@ -6,8 +6,8 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from knack.log import get_logger
 import time
 import unittest
-LOCATION = "westus2"
-VNET_LOCATION = "westus2"
+LOCATION = "eastus"
+VNET_LOCATION = "eastus"
 
 logger = get_logger(__name__)
 
