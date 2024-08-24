@@ -144,13 +144,18 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
 
         # create store in premium tier with replica
         config_store_name = self.create_random_name(prefix='MgmtTestPremiumSku', length=24)
-        replica_name = self.create_random_name(prefix='MgmtTestPremiumSkuReplica', length=24)
+        replica_name = self.create_random_name(prefix='MgmtTestReplica', length=24)
+        tag_key = "key"
+        tag_value = "value"
+        tag = tag_key + '=' + tag_value
+        structured_tag = {tag_key: tag_value}
         
         self.kwargs.update({
             "premium_sku": premium_sku,
             "config_store_name": config_store_name,
             "replica_name": replica_name,
-            "replica_location": "westus"
+            "replica_location": "westus",
+            "tags": tag
         })
 
         store = self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {premium_sku} --tags {tags} --assign-identity {identity} --retention-days {retention_days} --enable-purge-protection {enable_purge_protection} --replica-name {replica_name} --replica-location {replica_location}',
@@ -184,13 +189,13 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
         
         self.cmd('appconfig replica show -s {config_store_name} -g {rg} -n {replica_name}',
                  checks=[self.check('name', '{replica_name}'),
-                         self.check('location', '{replica_loc}'),
+                         self.check('location', '{replica_location}'),
                          self.check('resourceGroup', resource_group),
                          self.check('provisioningState', 'Succeeded')])
 
         self.cmd('appconfig replica list -s {config_store_name}',
                  checks=[self.check('[0].name', '{replica_name}'),
-                         self.check('[0].location', '{replica_loc}'),
+                         self.check('[0].location', '{replica_location}'),
                          self.check('[0].resourceGroup', resource_group),
                          self.check('[0].provisioningState', 'Succeeded')])
 
@@ -3262,7 +3267,7 @@ def _create_user_assigned_identity(test, kwargs):
 
 
 def _setup_key_vault(test, kwargs):
-    key_vault = test.cmd('keyvault create -n {keyvault_name} -g {rg} -l {rg_loc} --enable-purge-protection --retention-days 7').get_output_in_json()
+    key_vault = test.cmd('keyvault create -n {keyvault_name} -g {rg} -l {rg_loc} --enable-rbac-authorization false --enable-purge-protection --retention-days 7').get_output_in_json()
     test.cmd('keyvault key create --vault-name {keyvault_name} -n {encryption_key}')
     test.cmd('keyvault set-policy -n {keyvault_name} --key-permissions get wrapKey unwrapKey --object-id {identity_id}')
 
