@@ -79,6 +79,21 @@ def load_arguments(self, _):
         help='Name of the App Configuration store. You can configure the default name using `az configure --defaults app_configuration_store=<name>`.',
         configured_default='app_configuration_store'
     )
+
+    store_creation_replica_name_arg_type = CLIArgumentType(
+        options_list=['--replica-name'],
+        type=str,
+        help='Name of the replica of the App Configuration store.',
+        configured_default=None
+    )
+
+    replica_location_arg_type = CLIArgumentType(
+        options_list=['--replica-location'],
+        type=str,
+        help='The location of the replica of the App Configuration store.',
+        configured_default=None
+    )
+
     replica_name_arg_type = CLIArgumentType(
         options_list=['--name', '-n'],
         type=str,
@@ -125,7 +140,7 @@ def load_arguments(self, _):
         c.argument('top', arg_type=top_arg_type)
         c.argument('all_', options_list=['--all'], action='store_true', help="List all items.")
         c.argument('fields', arg_type=fields_arg_type)
-        c.argument('sku', help='The sku of the App Configuration store', arg_type=get_enum_type(['Free', 'Standard']))
+        c.argument('sku', help='The sku of the App Configuration store', arg_type=get_enum_type(['Free', 'Premium', 'Standard']))
         c.argument('endpoint', help='If auth mode is "login", provide endpoint URL of the App Configuration store. The endpoint can be retrieved using "az appconfig show" command. You can configure the default endpoint using `az configure --defaults appconfig_endpoint=<endpoint>`', configured_default='appconfig_endpoint')
         c.argument('auth_mode', arg_type=get_enum_type(['login', 'key']), configured_default='appconfig_auth_mode', validator=validate_auth_mode,
                    help='This parameter can be used for indicating how a data operation is to be authorized. ' +
@@ -144,6 +159,9 @@ def load_arguments(self, _):
         c.argument('disable_local_auth', arg_type=get_three_state_flag(), help='Disable all authentication methods other than AAD authentication.')
         c.argument('retention_days', arg_type=retention_days_arg_type)
         c.argument('enable_purge_protection', options_list=['--enable-purge-protection', '-p'], arg_type=get_three_state_flag(), help='Property specifying whether protection against purge is enabled for this App Configuration store. Setting this property to true activates protection against purge for this App Configuration store and its contents. Enabling this functionality is irreversible.')
+        c.argument('replica_name', arg_type=store_creation_replica_name_arg_type, help='Name of the replica of the App Configuration store.')
+        c.argument('replica_location', arg_type=replica_location_arg_type, help='Location of the replica of the App Configuration store.')
+        c.argument('no_replica', help='Proceed without replica creation for premium tier store.', arg_type=get_three_state_flag())
 
     with self.argument_context('appconfig update') as c:
         c.argument('tags', arg_type=tags_type)
@@ -382,7 +400,7 @@ def load_arguments(self, _):
     with self.argument_context('appconfig snapshot create') as c:
         c.argument('filters', arg_type=snapshot_filter_arg_type)
         c.argument('composition_type', arg_type=get_enum_type(["key", "key_label"]), help='Composition type used in building App Configuration snapshots. If not specified, defaults to key.')
-        c.argument('retention_period', type=int, help='Duration in seconds for which a snapshot can remain archived before expiry. A snapshot can be archived for a maximum of 7 days (604,800s) for free tier stores and 90 days (7,776,000s) for standard tier stores. If specified, retention period must be at least 1 hour (3600s)')
+        c.argument('retention_period', type=int, help='Duration in seconds for which a snapshot can remain archived before expiry. A snapshot can be archived for a maximum of 7 days (604,800s) for free tier stores and 90 days (7,776,000s) for standard and premium tier stores. If specified, retention period must be at least 1 hour (3600s)')
         c.argument('tags', arg_type=tags_type, help="Space-separated tags: key[=value] [key[=value] ...].")
 
     with self.argument_context('appconfig snapshot show') as c:

@@ -7,6 +7,7 @@
 
 import json
 import re
+
 from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.azclierror import (InvalidArgumentValueError,
