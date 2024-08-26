@@ -652,8 +652,7 @@ class AAZGenericInstanceUpdateOperation(AAZOperation):
         if disc_schema is not None:
             schemas.append(disc_schema)
         for schema in schemas:
-            for key in schema._fields:
-                yield key
+            yield from schema._fields
 
     def _throw_and_show_options(self, instance, part, path, flatten):
         parent = '.'.join(path[:-1]).replace('.[', '[')
