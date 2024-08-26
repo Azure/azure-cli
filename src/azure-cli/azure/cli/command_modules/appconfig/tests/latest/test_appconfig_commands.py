@@ -629,7 +629,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer()
-    @KeyVaultPreparer()
+    @KeyVaultPreparer(additional_params="--enable-rbac-authorization false")
     @live_only()
     def test_resolve_keyvault(self, key_vault, resource_group):
         config_store_name = self.create_random_name(prefix='KVTest', length=24)
