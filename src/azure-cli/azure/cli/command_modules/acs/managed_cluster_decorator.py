@@ -64,7 +64,7 @@ from azure.cli.command_modules.acs._roleassignments import (
     ensure_cluster_identity_permission_on_kubelet_identity,
     subnet_role_assignment_exists,
 )
-from azure.cli.command_modules.acs._validators import extract_comma_separated_string
+from azure.cli.command_modules.acs._validators import extract_comma_separated_string, extract_key_value_pair
 from azure.cli.command_modules.acs.addonconfiguration import (
     add_ingress_appgw_addon_role_assignment,
     add_monitoring_role_assignment,
@@ -396,9 +396,8 @@ class AKSManagedClusterContext(BaseAKSContext):
                 params_dict = {}
                 for item in cluster_autoscaler_profile:
                     params_dict.update(
-                        extract_comma_separated_string(
+                        extract_key_value_pair(
                             item,
-                            extract_kv=True,
                             allow_empty_value=True,
                             default_value={},
                         )
