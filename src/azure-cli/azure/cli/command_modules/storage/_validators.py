@@ -15,7 +15,6 @@ from azure.cli.core.azclierror import UnrecognizedArgumentError
 
 from azure.cli.command_modules.storage._client_factory import (get_storage_data_service_client,
                                                                blob_data_service_factory,
-                                                               file_data_service_factory,
                                                                storage_client_factory,
                                                                cf_adls_file_system)
 from azure.cli.command_modules.storage.util import glob_files_locally, guess_content_type
@@ -2061,9 +2060,10 @@ def validate_azcopy_credential(cmd, namespace):
             container=namespace.destination_container, blob=namespace.destination_blob,
             share=namespace.destination_share, file_path=namespace.destination_file_path)
         if not auth_mode_login:
-            namespace.destination = _add_sas_for_url(cmd, url=namespace.destination, account_name=namespace.account_name,
-                                                 account_key=namespace.account_key, sas_token=namespace.sas_token,
-                                                 service=service, resource_types='co', permissions='wac')
+            namespace.destination = _add_sas_for_url(cmd, url=namespace.destination,
+                                                     account_name=namespace.account_name,
+                                                     account_key=namespace.account_key, sas_token=namespace.sas_token,
+                                                     service=service, resource_types='co', permissions='wac')
 
     if not _is_valid_uri(namespace.source):
         # determine if source account is same with destination
