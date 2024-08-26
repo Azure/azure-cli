@@ -688,7 +688,7 @@ class HDInsightClusterTests(ScenarioTest):
     @staticmethod
     def _with_private_link_configurations(private_link_configuration_file):
         return '--version 5.1 -l eastus ' \
-               '--subnet /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yuchen-ps-test/providers' \
+               '--subnet /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ps-test/providers' \
                '/Microsoft.Network/virtualNetworks/hdi-vn/subnets/default '\
                '--vnet-name /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yuchen-ps-test/providers/Microsoft.Network/virtualNetworks/hdi-vn --subnet default ' \
                '--resource-provider-connection Outbound --public-ip-tag-type FirstPartyUsage --public-ip-tag-value HDInsight --outbound-dependencies-managed-type External '\
