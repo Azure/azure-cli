@@ -6,6 +6,7 @@
 from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.command_modules.redis._client_factory import cf_redis
+from azure.cli.core.util import sdk_no_wait
 
 logger = get_logger(__name__)
 
@@ -80,9 +81,9 @@ def cli_redis_update(cmd, instance, sku=None, vm_size=None):
     return update_params
 
 
-def custom_update_setter(client, resource_group_name, name, parameters):
+def custom_update_setter(client, resource_group_name, name, parameters, no_wait=True):
     # Custom update setter is used to match behavior from when update was not a LRO
-    return client.begin_update(resource_group_name, name, parameters).result(0)
+    return sdk_no_wait(no_wait, client.begin_update, resource_group_name, name, parameters)
 
 
 # pylint: disable=unused-argument
