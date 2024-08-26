@@ -2085,8 +2085,8 @@ def validate_azcopy_credential(cmd, namespace):
             share=namespace.source_share, file_path=namespace.source_file_path)
         if not auth_mode_login:
             namespace.source = _add_sas_for_url(cmd, url=namespace.source, account_name=namespace.account_name,
-                                            account_key=namespace.account_key, sas_token=namespace.sas_token,
-                                            service=service, resource_types='sco', permissions='rl')
+                                                account_key=namespace.account_key, sas_token=namespace.sas_token,
+                                                service=service, resource_types='sco', permissions='rl')
 
 
 def is_directory(props):
