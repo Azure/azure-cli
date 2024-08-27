@@ -61,6 +61,7 @@ def _configstore_format_group(item):
     except ValueError:
         logger.debug("No valid sku %s found", sku_value)
         sku = ""
+
     return OrderedDict([
         ('CREATION DATE', _format_datetime(_get_value(item, 'creationDate'))),
         ('ENDPOINT', _get_value(item, 'endpoint')),
