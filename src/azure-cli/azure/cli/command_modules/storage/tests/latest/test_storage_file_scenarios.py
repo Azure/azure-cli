@@ -245,6 +245,7 @@ class StorageFileShareFileScenarios(StorageScenarioMixin, ScenarioTest):
         # without --delete-snapshots, should fail because there is an existing snapshot
         with self.assertRaises(Exception):
             self.storage_cmd('storage share delete --name {}', account_info, s1)
+
         self.cmd('storage share delete --name {} --account-name {} '
                  '--delete-snapshots include-leased'.format(s1, storage_account),
                  checks=JMESPathCheck('deleted', True))
