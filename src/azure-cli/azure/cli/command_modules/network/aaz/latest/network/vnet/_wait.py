@@ -20,7 +20,7 @@ class Wait(AAZWaitCommand):
 
     _aaz_info = {
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworks/{}", "2024-03-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworks/{}", "2022-01-01"],
         ]
     }
 
@@ -123,7 +123,7 @@ class Wait(AAZWaitCommand):
                     "$expand", self.ctx.args.expand,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2024-03-01",
+                    "api-version", "2022-01-01",
                     required=True,
                 ),
             }
@@ -197,18 +197,11 @@ class Wait(AAZWaitCommand):
                 serialized_name="enableVmProtection",
             )
             properties.encryption = AAZObjectType()
-            properties.flow_logs = AAZListType(
-                serialized_name="flowLogs",
-                flags={"read_only": True},
-            )
             properties.flow_timeout_in_minutes = AAZIntType(
                 serialized_name="flowTimeoutInMinutes",
             )
             properties.ip_allocations = AAZListType(
                 serialized_name="ipAllocations",
-            )
-            properties.private_endpoint_v_net_policies = AAZStrType(
-                serialized_name="privateEndpointVNetPolicies",
             )
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
@@ -250,10 +243,6 @@ class Wait(AAZWaitCommand):
             )
             encryption.enforcement = AAZStrType()
 
-            flow_logs = cls._schema_on_200.properties.flow_logs
-            flow_logs.Element = AAZObjectType()
-            _WaitHelper._build_schema_flow_log_read(flow_logs.Element)
-
             ip_allocations = cls._schema_on_200.properties.ip_allocations
             ip_allocations.Element = AAZObjectType()
             _WaitHelper._build_schema_sub_resource_read(ip_allocations.Element)
@@ -289,23 +278,6 @@ class Wait(AAZWaitCommand):
             properties.do_not_verify_remote_gateways = AAZBoolType(
                 serialized_name="doNotVerifyRemoteGateways",
             )
-            properties.enable_only_i_pv6_peering = AAZBoolType(
-                serialized_name="enableOnlyIPv6Peering",
-            )
-            properties.local_address_space = AAZObjectType(
-                serialized_name="localAddressSpace",
-            )
-            _WaitHelper._build_schema_address_space_read(properties.local_address_space)
-            properties.local_subnet_names = AAZListType(
-                serialized_name="localSubnetNames",
-            )
-            properties.local_virtual_network_address_space = AAZObjectType(
-                serialized_name="localVirtualNetworkAddressSpace",
-            )
-            _WaitHelper._build_schema_address_space_read(properties.local_virtual_network_address_space)
-            properties.peer_complete_vnets = AAZBoolType(
-                serialized_name="peerCompleteVnets",
-            )
             properties.peering_state = AAZStrType(
                 serialized_name="peeringState",
             )
@@ -322,9 +294,6 @@ class Wait(AAZWaitCommand):
             _WaitHelper._build_schema_address_space_read(properties.remote_address_space)
             properties.remote_bgp_communities = AAZObjectType(
                 serialized_name="remoteBgpCommunities",
-            )
-            properties.remote_subnet_names = AAZListType(
-                serialized_name="remoteSubnetNames",
             )
             properties.remote_virtual_network = AAZObjectType(
                 serialized_name="remoteVirtualNetwork",
@@ -345,9 +314,6 @@ class Wait(AAZWaitCommand):
                 serialized_name="useRemoteGateways",
             )
 
-            local_subnet_names = cls._schema_on_200.properties.virtual_network_peerings.Element.properties.local_subnet_names
-            local_subnet_names.Element = AAZStrType()
-
             remote_bgp_communities = cls._schema_on_200.properties.virtual_network_peerings.Element.properties.remote_bgp_communities
             remote_bgp_communities.regional_community = AAZStrType(
                 serialized_name="regionalCommunity",
@@ -357,9 +323,6 @@ class Wait(AAZWaitCommand):
                 serialized_name="virtualNetworkCommunity",
                 flags={"required": True},
             )
-
-            remote_subnet_names = cls._schema_on_200.properties.virtual_network_peerings.Element.properties.remote_subnet_names
-            remote_subnet_names.Element = AAZStrType()
 
             remote_virtual_network_encryption = cls._schema_on_200.properties.virtual_network_peerings.Element.properties.remote_virtual_network_encryption
             remote_virtual_network_encryption.enabled = AAZBoolType(
@@ -467,137 +430,6 @@ class _WaitHelper:
 
         _schema.name = cls._schema_extended_location_read.name
         _schema.type = cls._schema_extended_location_read.type
-
-    _schema_flow_log_read = None
-
-    @classmethod
-    def _build_schema_flow_log_read(cls, _schema):
-        if cls._schema_flow_log_read is not None:
-            _schema.etag = cls._schema_flow_log_read.etag
-            _schema.id = cls._schema_flow_log_read.id
-            _schema.identity = cls._schema_flow_log_read.identity
-            _schema.location = cls._schema_flow_log_read.location
-            _schema.name = cls._schema_flow_log_read.name
-            _schema.properties = cls._schema_flow_log_read.properties
-            _schema.tags = cls._schema_flow_log_read.tags
-            _schema.type = cls._schema_flow_log_read.type
-            return
-
-        cls._schema_flow_log_read = _schema_flow_log_read = AAZObjectType()
-
-        flow_log_read = _schema_flow_log_read
-        flow_log_read.etag = AAZStrType(
-            flags={"read_only": True},
-        )
-        flow_log_read.id = AAZStrType()
-        flow_log_read.identity = AAZObjectType()
-        flow_log_read.location = AAZStrType()
-        flow_log_read.name = AAZStrType(
-            flags={"read_only": True},
-        )
-        flow_log_read.properties = AAZObjectType(
-            flags={"client_flatten": True},
-        )
-        flow_log_read.tags = AAZDictType()
-        flow_log_read.type = AAZStrType(
-            flags={"read_only": True},
-        )
-
-        identity = _schema_flow_log_read.identity
-        identity.principal_id = AAZStrType(
-            serialized_name="principalId",
-            flags={"read_only": True},
-        )
-        identity.tenant_id = AAZStrType(
-            serialized_name="tenantId",
-            flags={"read_only": True},
-        )
-        identity.type = AAZStrType()
-        identity.user_assigned_identities = AAZDictType(
-            serialized_name="userAssignedIdentities",
-        )
-
-        user_assigned_identities = _schema_flow_log_read.identity.user_assigned_identities
-        user_assigned_identities.Element = AAZObjectType()
-
-        _element = _schema_flow_log_read.identity.user_assigned_identities.Element
-        _element.client_id = AAZStrType(
-            serialized_name="clientId",
-            flags={"read_only": True},
-        )
-        _element.principal_id = AAZStrType(
-            serialized_name="principalId",
-            flags={"read_only": True},
-        )
-
-        properties = _schema_flow_log_read.properties
-        properties.enabled = AAZBoolType()
-        properties.enabled_filtering_criteria = AAZStrType(
-            serialized_name="enabledFilteringCriteria",
-        )
-        properties.flow_analytics_configuration = AAZObjectType(
-            serialized_name="flowAnalyticsConfiguration",
-        )
-        properties.format = AAZObjectType()
-        properties.provisioning_state = AAZStrType(
-            serialized_name="provisioningState",
-            flags={"read_only": True},
-        )
-        properties.retention_policy = AAZObjectType(
-            serialized_name="retentionPolicy",
-        )
-        properties.storage_id = AAZStrType(
-            serialized_name="storageId",
-            flags={"required": True},
-        )
-        properties.target_resource_guid = AAZStrType(
-            serialized_name="targetResourceGuid",
-            flags={"read_only": True},
-        )
-        properties.target_resource_id = AAZStrType(
-            serialized_name="targetResourceId",
-            flags={"required": True},
-        )
-
-        flow_analytics_configuration = _schema_flow_log_read.properties.flow_analytics_configuration
-        flow_analytics_configuration.network_watcher_flow_analytics_configuration = AAZObjectType(
-            serialized_name="networkWatcherFlowAnalyticsConfiguration",
-        )
-
-        network_watcher_flow_analytics_configuration = _schema_flow_log_read.properties.flow_analytics_configuration.network_watcher_flow_analytics_configuration
-        network_watcher_flow_analytics_configuration.enabled = AAZBoolType()
-        network_watcher_flow_analytics_configuration.traffic_analytics_interval = AAZIntType(
-            serialized_name="trafficAnalyticsInterval",
-        )
-        network_watcher_flow_analytics_configuration.workspace_id = AAZStrType(
-            serialized_name="workspaceId",
-        )
-        network_watcher_flow_analytics_configuration.workspace_region = AAZStrType(
-            serialized_name="workspaceRegion",
-        )
-        network_watcher_flow_analytics_configuration.workspace_resource_id = AAZStrType(
-            serialized_name="workspaceResourceId",
-        )
-
-        format = _schema_flow_log_read.properties.format
-        format.type = AAZStrType()
-        format.version = AAZIntType()
-
-        retention_policy = _schema_flow_log_read.properties.retention_policy
-        retention_policy.days = AAZIntType()
-        retention_policy.enabled = AAZBoolType()
-
-        tags = _schema_flow_log_read.tags
-        tags.Element = AAZStrType()
-
-        _schema.etag = cls._schema_flow_log_read.etag
-        _schema.id = cls._schema_flow_log_read.id
-        _schema.identity = cls._schema_flow_log_read.identity
-        _schema.location = cls._schema_flow_log_read.location
-        _schema.name = cls._schema_flow_log_read.name
-        _schema.properties = cls._schema_flow_log_read.properties
-        _schema.tags = cls._schema_flow_log_read.tags
-        _schema.type = cls._schema_flow_log_read.type
 
     _schema_frontend_ip_configuration_read = None
 
@@ -710,9 +542,7 @@ class _WaitHelper:
             _schema.properties = cls._schema_ip_configuration_read.properties
             return
 
-        cls._schema_ip_configuration_read = _schema_ip_configuration_read = AAZObjectType(
-            flags={"read_only": True}
-        )
+        cls._schema_ip_configuration_read = _schema_ip_configuration_read = AAZObjectType()
 
         ip_configuration_read = _schema_ip_configuration_read
         ip_configuration_read.etag = AAZStrType(
@@ -793,10 +623,6 @@ class _WaitHelper:
         properties.private_ip_address = AAZStrType(
             serialized_name="privateIPAddress",
         )
-        properties.private_ip_address_prefix_length = AAZIntType(
-            serialized_name="privateIPAddressPrefixLength",
-            nullable=True,
-        )
         properties.private_ip_address_version = AAZStrType(
             serialized_name="privateIPAddressVersion",
         )
@@ -805,7 +631,6 @@ class _WaitHelper:
         )
         properties.private_link_connection_properties = AAZObjectType(
             serialized_name="privateLinkConnectionProperties",
-            flags={"read_only": True},
         )
         properties.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
@@ -905,7 +730,6 @@ class _WaitHelper:
         properties.location = AAZStrType()
         properties.outbound_rule = AAZObjectType(
             serialized_name="outboundRule",
-            flags={"read_only": True},
         )
         cls._build_schema_sub_resource_read(properties.outbound_rule)
         properties.outbound_rules = AAZListType(
@@ -916,16 +740,9 @@ class _WaitHelper:
             serialized_name="provisioningState",
             flags={"read_only": True},
         )
-        properties.sync_mode = AAZStrType(
-            serialized_name="syncMode",
-        )
         properties.tunnel_interfaces = AAZListType(
             serialized_name="tunnelInterfaces",
         )
-        properties.virtual_network = AAZObjectType(
-            serialized_name="virtualNetwork",
-        )
-        cls._build_schema_sub_resource_read(properties.virtual_network)
 
         backend_ip_configurations = _schema_network_interface_ip_configuration_read.properties.load_balancer_backend_address_pools.Element.properties.backend_ip_configurations
         backend_ip_configurations.Element = AAZObjectType()
@@ -961,7 +778,6 @@ class _WaitHelper:
         cls._build_schema_sub_resource_read(properties.load_balancer_frontend_ip_configuration)
         properties.network_interface_ip_configuration = AAZObjectType(
             serialized_name="networkInterfaceIPConfiguration",
-            flags={"read_only": True},
         )
         cls._build_schema_sub_resource_read(properties.network_interface_ip_configuration)
         properties.subnet = AAZObjectType()
@@ -1025,7 +841,6 @@ class _WaitHelper:
         cls._build_schema_sub_resource_read(properties.backend_address_pool)
         properties.backend_ip_configuration = AAZObjectType(
             serialized_name="backendIPConfiguration",
-            flags={"read_only": True},
         )
         cls._build_schema_network_interface_ip_configuration_read(properties.backend_ip_configuration)
         properties.backend_port = AAZIntType(
@@ -1170,18 +985,11 @@ class _WaitHelper:
         properties.auxiliary_mode = AAZStrType(
             serialized_name="auxiliaryMode",
         )
-        properties.auxiliary_sku = AAZStrType(
-            serialized_name="auxiliarySku",
-        )
-        properties.disable_tcp_state_tracking = AAZBoolType(
-            serialized_name="disableTcpStateTracking",
-        )
         properties.dns_settings = AAZObjectType(
             serialized_name="dnsSettings",
         )
         properties.dscp_configuration = AAZObjectType(
             serialized_name="dscpConfiguration",
-            flags={"read_only": True},
         )
         cls._build_schema_sub_resource_read(properties.dscp_configuration)
         properties.enable_accelerated_networking = AAZBoolType(
@@ -1216,7 +1024,6 @@ class _WaitHelper:
         )
         properties.private_endpoint = AAZObjectType(
             serialized_name="privateEndpoint",
-            flags={"read_only": True},
         )
         cls._build_schema_private_endpoint_read(properties.private_endpoint)
         properties.private_link_service = AAZObjectType(
@@ -1236,7 +1043,6 @@ class _WaitHelper:
         )
         properties.virtual_machine = AAZObjectType(
             serialized_name="virtualMachine",
-            flags={"read_only": True},
         )
         cls._build_schema_sub_resource_read(properties.virtual_machine)
         properties.vnet_encryption_supported = AAZBoolType(
@@ -1307,9 +1113,6 @@ class _WaitHelper:
         )
         properties.auto_approval = AAZObjectType(
             serialized_name="autoApproval",
-        )
-        properties.destination_ip_address = AAZStrType(
-            serialized_name="destinationIPAddress",
         )
         properties.enable_proxy_protocol = AAZBoolType(
             serialized_name="enableProxyProtocol",
@@ -1409,13 +1212,8 @@ class _WaitHelper:
         )
         properties.private_endpoint = AAZObjectType(
             serialized_name="privateEndpoint",
-            flags={"read_only": True},
         )
         cls._build_schema_private_endpoint_read(properties.private_endpoint)
-        properties.private_endpoint_location = AAZStrType(
-            serialized_name="privateEndpointLocation",
-            flags={"read_only": True},
-        )
         properties.private_link_service_connection_state = AAZObjectType(
             serialized_name="privateLinkServiceConnectionState",
         )
@@ -1520,7 +1318,80 @@ class _WaitHelper:
 
         flow_logs = _schema_network_security_group_read.properties.flow_logs
         flow_logs.Element = AAZObjectType()
-        cls._build_schema_flow_log_read(flow_logs.Element)
+
+        _element = _schema_network_security_group_read.properties.flow_logs.Element
+        _element.etag = AAZStrType(
+            flags={"read_only": True},
+        )
+        _element.id = AAZStrType()
+        _element.location = AAZStrType()
+        _element.name = AAZStrType(
+            flags={"read_only": True},
+        )
+        _element.properties = AAZObjectType(
+            flags={"client_flatten": True},
+        )
+        _element.tags = AAZDictType()
+        _element.type = AAZStrType(
+            flags={"read_only": True},
+        )
+
+        properties = _schema_network_security_group_read.properties.flow_logs.Element.properties
+        properties.enabled = AAZBoolType()
+        properties.flow_analytics_configuration = AAZObjectType(
+            serialized_name="flowAnalyticsConfiguration",
+        )
+        properties.format = AAZObjectType()
+        properties.provisioning_state = AAZStrType(
+            serialized_name="provisioningState",
+            flags={"read_only": True},
+        )
+        properties.retention_policy = AAZObjectType(
+            serialized_name="retentionPolicy",
+        )
+        properties.storage_id = AAZStrType(
+            serialized_name="storageId",
+            flags={"required": True},
+        )
+        properties.target_resource_guid = AAZStrType(
+            serialized_name="targetResourceGuid",
+            flags={"read_only": True},
+        )
+        properties.target_resource_id = AAZStrType(
+            serialized_name="targetResourceId",
+            flags={"required": True},
+        )
+
+        flow_analytics_configuration = _schema_network_security_group_read.properties.flow_logs.Element.properties.flow_analytics_configuration
+        flow_analytics_configuration.network_watcher_flow_analytics_configuration = AAZObjectType(
+            serialized_name="networkWatcherFlowAnalyticsConfiguration",
+        )
+
+        network_watcher_flow_analytics_configuration = _schema_network_security_group_read.properties.flow_logs.Element.properties.flow_analytics_configuration.network_watcher_flow_analytics_configuration
+        network_watcher_flow_analytics_configuration.enabled = AAZBoolType()
+        network_watcher_flow_analytics_configuration.traffic_analytics_interval = AAZIntType(
+            serialized_name="trafficAnalyticsInterval",
+        )
+        network_watcher_flow_analytics_configuration.workspace_id = AAZStrType(
+            serialized_name="workspaceId",
+        )
+        network_watcher_flow_analytics_configuration.workspace_region = AAZStrType(
+            serialized_name="workspaceRegion",
+        )
+        network_watcher_flow_analytics_configuration.workspace_resource_id = AAZStrType(
+            serialized_name="workspaceResourceId",
+        )
+
+        format = _schema_network_security_group_read.properties.flow_logs.Element.properties.format
+        format.type = AAZStrType()
+        format.version = AAZIntType()
+
+        retention_policy = _schema_network_security_group_read.properties.flow_logs.Element.properties.retention_policy
+        retention_policy.days = AAZIntType()
+        retention_policy.enabled = AAZBoolType()
+
+        tags = _schema_network_security_group_read.properties.flow_logs.Element.tags
+        tags.Element = AAZStrType()
 
         network_interfaces = _schema_network_security_group_read.properties.network_interfaces
         network_interfaces.Element = AAZObjectType()
@@ -1560,9 +1431,7 @@ class _WaitHelper:
             _schema.type = cls._schema_private_endpoint_read.type
             return
 
-        cls._schema_private_endpoint_read = _schema_private_endpoint_read = AAZObjectType(
-            flags={"read_only": True}
-        )
+        cls._schema_private_endpoint_read = _schema_private_endpoint_read = AAZObjectType()
 
         private_endpoint_read = _schema_private_endpoint_read
         private_endpoint_read.etag = AAZStrType(
@@ -1819,7 +1688,6 @@ class _WaitHelper:
         )
         properties.ip_configuration = AAZObjectType(
             serialized_name="ipConfiguration",
-            flags={"read_only": True},
         )
         cls._build_schema_ip_configuration_read(properties.ip_configuration)
         properties.ip_tags = AAZListType(
@@ -1859,20 +1727,20 @@ class _WaitHelper:
         cls._build_schema_public_ip_address_read(properties.service_public_ip_address)
 
         ddos_settings = _schema_public_ip_address_read.properties.ddos_settings
-        ddos_settings.ddos_protection_plan = AAZObjectType(
-            serialized_name="ddosProtectionPlan",
+        ddos_settings.ddos_custom_policy = AAZObjectType(
+            serialized_name="ddosCustomPolicy",
         )
-        cls._build_schema_sub_resource_read(ddos_settings.ddos_protection_plan)
-        ddos_settings.protection_mode = AAZStrType(
-            serialized_name="protectionMode",
+        cls._build_schema_sub_resource_read(ddos_settings.ddos_custom_policy)
+        ddos_settings.protected_ip = AAZBoolType(
+            serialized_name="protectedIP",
+        )
+        ddos_settings.protection_coverage = AAZStrType(
+            serialized_name="protectionCoverage",
         )
 
         dns_settings = _schema_public_ip_address_read.properties.dns_settings
         dns_settings.domain_name_label = AAZStrType(
             serialized_name="domainNameLabel",
-        )
-        dns_settings.domain_name_label_scope = AAZStrType(
-            serialized_name="domainNameLabelScope",
         )
         dns_settings.fqdn = AAZStrType()
         dns_settings.reverse_fqdn = AAZStrType(
@@ -2019,9 +1887,7 @@ class _WaitHelper:
         properties.direction = AAZStrType(
             flags={"required": True},
         )
-        properties.priority = AAZIntType(
-            flags={"required": True},
-        )
+        properties.priority = AAZIntType()
         properties.protocol = AAZStrType(
             flags={"required": True},
         )
@@ -2079,9 +1945,7 @@ class _WaitHelper:
             _schema.id = cls._schema_sub_resource_read.id
             return
 
-        cls._schema_sub_resource_read = _schema_sub_resource_read = AAZObjectType(
-            flags={"read_only": True}
-        )
+        cls._schema_sub_resource_read = _schema_sub_resource_read = AAZObjectType()
 
         sub_resource_read = _schema_sub_resource_read
         sub_resource_read.id = AAZStrType()
@@ -2121,10 +1985,7 @@ class _WaitHelper:
             serialized_name="addressPrefixes",
         )
         properties.application_gateway_ip_configurations = AAZListType(
-            serialized_name="applicationGatewayIPConfigurations",
-        )
-        properties.default_outbound_access = AAZBoolType(
-            serialized_name="defaultOutboundAccess",
+            serialized_name="applicationGatewayIpConfigurations",
         )
         properties.delegations = AAZListType()
         properties.ip_allocations = AAZListType(
@@ -2179,9 +2040,6 @@ class _WaitHelper:
         )
         properties.service_endpoints = AAZListType(
             serialized_name="serviceEndpoints",
-        )
-        properties.sharing_scope = AAZStrType(
-            serialized_name="sharingScope",
         )
 
         address_prefixes = _schema_subnet_read.properties.address_prefixes
@@ -2358,7 +2216,6 @@ class _WaitHelper:
         )
         properties.has_bgp_override = AAZBoolType(
             serialized_name="hasBgpOverride",
-            flags={"read_only": True},
         )
         properties.next_hop_ip_address = AAZStrType(
             serialized_name="nextHopIpAddress",
@@ -2500,10 +2357,6 @@ class _WaitHelper:
 
         _element = _schema_subnet_read.properties.service_endpoints.Element
         _element.locations = AAZListType()
-        _element.network_identifier = AAZObjectType(
-            serialized_name="networkIdentifier",
-        )
-        cls._build_schema_sub_resource_read(_element.network_identifier)
         _element.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
             flags={"read_only": True},
