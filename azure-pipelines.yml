@@ -403,7 +403,7 @@ jobs:
 
 - job: BuildDockerImageAzureLinux
   displayName: Build Docker Image Azure Linux
-  dependsOn: BuildRpmPackageMariner
+  dependsOn: BuildRpmPackagesAzureLinux
   strategy:
     matrix:
       ${{ each arch in parameters.architectures }}:
@@ -766,19 +766,20 @@ jobs:
     displayName: 'Test Homebrew Package'
 
 
-- job: BuildRpmPackageMariner
-  displayName: Build Rpm Package Mariner
+- job: BuildRpmPackagesAzureLinux
+  displayName: Build Rpm Package
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   strategy:
     matrix:
-      2.0 AMD64:
-        image: mcr.microsoft.com/cbl-mariner/base/core:2.0
-        artifact: rpm-mariner2.0-amd64
-        pool: ${{ variables.ubuntu_pool }}
-      2.0 ARM64:
-        image: mcr.microsoft.com/cbl-mariner/base/core:2.0
-        artifact: rpm-mariner2.0-arm64
-        pool: ${{ variables.ubuntu_arm64_pool }}
+      ${{ each arch in parameters.architectures }}:
+        Mariner 2.0 ${{ arch.name }}:
+          image: mcr.microsoft.com/cbl-mariner/base/core:2.0
+          artifact: rpm-mariner2.0-${{ arch.value }}
+          pool: ${{ arch.pool }}
+        Azure Linux 3.0 ${{ arch.name }}:
+          image: mcr.microsoft.com/azurelinux/base/core:3.0
+          artifact: rpm-azurelinux3.0-${{ arch.value }}
+          pool: ${{ arch.pool }}
   pool:
     name: $(pool)
   steps:
@@ -786,10 +787,10 @@ jobs:
     displayName: Install Docker
 
   - task: Bash@3
-    displayName: 'Build Rpm Package: Mariner'
+    displayName: 'Build Rpm Package: Azure Linux'
     inputs:
       targetType: 'filePath'
-      filePath: scripts/release/rpm/pipeline_mariner.sh
+      filePath: scripts/release/rpm/pipeline_azurelinux.sh
 
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'SBOM'
@@ -802,25 +803,26 @@ jobs:
       TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: $(artifact)
 
-- job: TestRpmPackageMariner
-  displayName: Test Rpm Package Mariner
+- job: TestRpmPackagesAzureLinux
+  displayName: Test Rpm Package
   timeoutInMinutes: 120
   dependsOn:
-  - BuildRpmPackageMariner
+  - BuildRpmPackagesAzureLinux
   - ExtractMetadata
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
     name: $(pool)
   strategy:
     matrix:
-      2.0 AMD64:
-        image: mcr.microsoft.com/cbl-mariner/base/core:2.0
-        artifact: rpm-mariner2.0-amd64
-        pool: ${{ variables.ubuntu_pool }}
-      2.0 ARM64:
-        image: mcr.microsoft.com/cbl-mariner/base/core:2.0
-        artifact: rpm-mariner2.0-arm64
-        pool: ${{ variables.ubuntu_arm64_pool }}
+      ${{ each arch in parameters.architectures }}:
+        Mariner 2.0 ${{ arch.name }}:
+          image: mcr.microsoft.com/cbl-mariner/base/core:2.0
+          artifact: rpm-mariner2.0-${{ arch.value }}
+          pool: ${{ arch.pool }}
+        Azure Linux 3.0 ${{ arch.name }}:
+          image: mcr.microsoft.com/azurelinux/base/core:3.0
+          artifact: rpm-azurelinux3.0-${{ arch.value }}
+          pool: ${{ arch.pool }}
   steps:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
@@ -841,11 +843,11 @@ jobs:
       set -ex
 
       CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
-      RPM_NAME=$(find $SYSTEM_ARTIFACTSDIRECTORY/rpm/ -type f -name "azure-cli-$CLI_VERSION-1.cm2.*.rpm" -printf '%f\n')
+      RPM_NAME=$(find $SYSTEM_ARTIFACTSDIRECTORY/rpm/ -type f -name "azure-cli-$CLI_VERSION-1.*.rpm" -printf '%f\n')
 
       echo "== Test rpm package on ${IMAGE} =="
       docker pull $IMAGE
-      docker run --rm -e RPM_NAME=$RPM_NAME -v $SYSTEM_ARTIFACTSDIRECTORY/rpm:/mnt/rpm -v $(pwd):/azure-cli $IMAGE /bin/bash "/azure-cli/scripts/release/rpm/test_mariner_in_docker.sh"
+      docker run --rm -e RPM_NAME=$RPM_NAME -v $SYSTEM_ARTIFACTSDIRECTORY/rpm:/mnt/rpm -v $(pwd):/azure-cli $IMAGE /bin/bash "/azure-cli/scripts/release/rpm/test_azurelinux_in_docker.sh"
 
     displayName: 'Test Rpm Package Mariner'
 
@@ -1253,7 +1255,7 @@ jobs:
     - BuildHomebrewFormula
     - TestHomebrewFormula
     - TestHomebrewPackage
-    - BuildRpmPackageMariner
+    - BuildRpmPackagesAzureLinux
     - BuildRpmPackages
     - TestRpmPackage
     - BuildDebPackages

@@ -95,11 +95,11 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
     with self.command_group('storage', command_type=block_blob_sdk,
                             custom_command_type=get_custom_sdk('azcopy', blob_data_service_factory)) as g:
-        g.storage_custom_command('remove', 'storage_remove')
+        g.storage_custom_command_oauth('remove', 'storage_remove')
 
     with self.command_group('storage', custom_command_type=get_custom_sdk('azcopy', None)) as g:
         from ._validators import validate_azcopy_credential
-        g.storage_custom_command('copy', 'storage_copy', validator=validate_azcopy_credential)
+        g.storage_custom_command_oauth('copy', 'storage_copy', validator=validate_azcopy_credential)
 
     with self.command_group('storage account', storage_account_sdk, resource_type=ResourceType.MGMT_STORAGE,
                             custom_command_type=storage_account_custom_type) as g:

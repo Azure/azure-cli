@@ -19,6 +19,7 @@ from knack.log import get_logger
 logger = get_logger(__name__)
 
 WINDOWS_ASP_LOCATION_WEBAPP = 'northeurope'
+STAGE1_ASP_LOCATION_WEBAPP = 'eastasia'
 WINDOWS_ASP_LOCATION_FUNCTIONAPP = 'francecentral'
 LINUX_ASP_LOCATION_WEBAPP = 'eastus2'
 LINUX_ASP_LOCATION_FUNCTIONAPP = 'ukwest'
@@ -184,6 +185,33 @@ class WebAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('[1].name', 'europe'),
             JMESPathCheck('[1].action', 'Allow'),
             JMESPathCheck('[1].ipAddress', 'AzureCloud.WestEurope,AzureCloud.NorthEurope')
+        ])
+
+    @AllowLargeResponse(8192)
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_webapp_access_restriction_add_internal_service_tag_validation(self, resource_group):
+        self.kwargs.update({
+            'app_name': self.create_random_name(prefix='cli-webapp-nwr', length=24),
+            'plan_name': self.create_random_name(prefix='cli-plan-nwr', length=24)
+        })
+
+        self.cmd('appservice plan create -g {rg} -n {plan_name}')
+        self.cmd('webapp create -g {rg} -n {app_name} --plan {plan_name}', checks=[
+            JMESPathCheck('state', 'Running')
+        ])
+
+        # Expect validation errors when adding internal tags
+        with self.assertRaises(InvalidArgumentValueError) as ctx:
+            self.cmd('webapp config access-restriction add -g {rg} -n {app_name} --rule-name corpnetfail --action Allow --service-tag CorpNetPublic --priority 200')
+
+        self.cmd('webapp config access-restriction add -g {rg} -n {app_name} --rule-name corpnetpass --action Allow --service-tag "CorpNetPublic" --priority 200 --skip-service-tag-validation', checks=[
+            JMESPathCheck('length(@)', 2),
+            JMESPathCheck('[0].name', 'corpnetpass'),
+            JMESPathCheck('[0].action', 'Allow'),
+            JMESPathCheck('[0].ipAddress', 'CorpNetPublic'),
+            JMESPathCheck('[0].tag', 'ServiceTag'),
+            JMESPathCheck('[1].name', 'Deny all'),
+            JMESPathCheck('[1].action', 'Deny')
         ])
 
     @unittest.skip("Invalid test case that cannot pass in the live mode.")

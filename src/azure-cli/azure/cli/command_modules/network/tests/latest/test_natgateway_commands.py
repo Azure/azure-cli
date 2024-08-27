@@ -20,7 +20,8 @@ class NatGatewayScenarioTests(ScenarioTest):
             'idle_timeout_updated': 5,
             'zone': 2,
             'location': resource_group_location,
-            'resource_type': 'Microsoft.Network/NatGateways'
+            'resource_type': 'Microsoft.Network/NatGateways',
+            'tags': 'foo=bar'
         })
 
         # create public ip address
@@ -29,14 +30,15 @@ class NatGatewayScenarioTests(ScenarioTest):
         # create public ip prefix
         self.cmd('az network public-ip prefix create --length 29 --location {location} --name {ip_prefix} --resource-group {rg} --zone {zone}')
 
-        self.cmd('az network nat gateway create --resource-group {rg} --public-ip-prefixes {ip_prefix} --name {name} --location {location} --public-ip-addresses {ip_addr} --idle-timeout {idle_timeout} --zone {zone}', checks=[
+        self.cmd('az network nat gateway create --resource-group {rg} --public-ip-prefixes {ip_prefix} --name {name} --location {location} --public-ip-addresses {ip_addr} --idle-timeout {idle_timeout} --zone {zone} --tags {tags}', checks=[
             self.check('resourceGroup', '{rg}'),
             self.check('idleTimeoutInMinutes', '{idle_timeout}'),
             self.check("contains(publicIpAddresses[0].id, '{ip_addr}')", True),
             self.check("contains(publicIpPrefixes[0].id, '{ip_prefix}')", True),
             self.check('sku.name', 'Standard'),
             self.check('location', '{location}'),
-            self.check('zones[0]', '{zone}')
+            self.check('zones[0]', '{zone}'),
+            self.check('tags', {'foo': 'bar'})
         ])
         self.cmd('az network nat gateway update -g {rg} --name {name} --idle-timeout {idle_timeout_updated}',
                  checks=self.check('idleTimeoutInMinutes', 5))
@@ -61,14 +63,16 @@ class NatGatewayScenarioTests(ScenarioTest):
             'idle_timeout_updated': 5,
             'zone': 2,
             'location': resource_group_location,
-            'resource_type': 'Microsoft.Network/NatGateways'
+            'resource_type': 'Microsoft.Network/NatGateways',
+            'tags': 'foo=bar'
         })
         self.cmd(
-            'az network nat gateway create --resource-group {rg} --name {name} --location {location} --idle-timeout {idle_timeout} --zone {zone}',
+            'az network nat gateway create --resource-group {rg} --name {name} --location {location} --idle-timeout {idle_timeout} --zone {zone} --tags {tags}',
             checks=[
                 self.check('resourceGroup', '{rg}'),
                 self.check('idleTimeoutInMinutes', '{idle_timeout}'),
                 self.check('sku.name', 'Standard'),
                 self.check('location', '{location}'),
-                self.check('zones[0]', '{zone}')
+                self.check('zones[0]', '{zone}'),
+                self.check('tags', {'foo': 'bar'})
             ])
