@@ -683,9 +683,6 @@ def validate_postgres_replica(cmd, tier, location, instance, sku_name,
         raise ValidationError("Read replica is not supported for the Burstable pricing tier. "
                               "Scale up the source server to General Purpose or Memory Optimized. ")
 
-    if instance is not None and instance.storage.auto_grow.lower() == 'enabled':
-        raise ValidationError("Read replica is not supported for servers with Storage Auto-grow enabled")
-
     if not list_location_capability_info:
         list_location_capability_info = get_postgres_location_capability_info(cmd, location)
 
