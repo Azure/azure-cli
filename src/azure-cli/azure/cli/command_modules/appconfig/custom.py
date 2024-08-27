@@ -4,12 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
-import time
-import azure.cli.core.azclierror as CLIErrors
-
-from azure.cli.command_modules.appconfig._client_factory import cf_configstore, cf_replicas
-from azure.cli.core.commands.progress import IndeterminateStandardOut
-from azure.cli.core.util import user_confirmation
+from knack.log import get_logger
 from azure.core.exceptions import ResourceNotFoundError
 from azure.cli.core.azclierror import RequiredArgumentMissingError
 from azure.mgmt.appconfiguration.models import (ConfigurationStoreUpdateParameters,
@@ -22,9 +17,7 @@ from azure.mgmt.appconfiguration.models import (ConfigurationStoreUpdateParamete
                                                 RegenerateKeyParameters,
                                                 CreateMode,
                                                 Replica)
-from knack.log import get_logger
 from ._utils import resolve_store_metadata, resolve_deleted_store_metadata
-from ._constants import ProvisioningStatus
 
 logger = get_logger(__name__)
 
@@ -34,8 +27,7 @@ SYSTEM_USER_ASSIGNED = 'SystemAssigned, UserAssigned'
 SYSTEM_ASSIGNED_IDENTITY = '[system]'
 
 
-def create_configstore(cmd,
-                       client,
+def create_configstore(client,
                        resource_group_name,
                        name,
                        location,
@@ -45,27 +37,18 @@ def create_configstore(cmd,
                        enable_public_network=None,
                        disable_local_auth=None,
                        retention_days=None,
-                       enable_purge_protection=None,
-                       replica_name=None,
-                       replica_location=None,
-                       no_replica=None):
+                       enable_purge_protection=None):
     if assign_identity is not None and not assign_identity:
         assign_identity = [SYSTEM_ASSIGNED_IDENTITY]
-
-    if sku.lower() == 'free':
-        if (enable_purge_protection or retention_days or replica_name or replica_location or no_replica):
-            logger.warning("Options '--enable-purge-protection', '--replica-name', '--replica-location' , '--no-replica' and '--retention-days' will be ignored when creating a free store.")
-            retention_days = None
-            enable_purge_protection = None
-            replica_name = None
-            replica_location = None
-            no_replica = None
 
     public_network_access = None
     if enable_public_network is not None:
         public_network_access = 'Enabled' if enable_public_network else 'Disabled'
 
-    __validate_replication(sku, replica_name, replica_location, no_replica)
+    if sku.lower() == 'free' and (enable_purge_protection or retention_days):
+        logger.warning("Options '--enable-purge-protection' and '--retention-days' will be ignored when creating a free store.")
+        retention_days = None
+        enable_purge_protection = None
 
     configstore_params = ConfigurationStore(location=location.lower(),
                                             identity=__get_resource_identity(assign_identity) if assign_identity else None,
@@ -77,35 +60,7 @@ def create_configstore(cmd,
                                             enable_purge_protection=enable_purge_protection,
                                             create_mode=CreateMode.DEFAULT)
 
-    progress = IndeterminateStandardOut()
-
-    progress.write({"message": "Starting"})
-    config_store = client.begin_create(resource_group_name, name, configstore_params)
-
-    # # Poll request and create replica after store is created
-    while config_store.status() != ProvisioningStatus.SUCCEEDED:
-        progress.spinner.step(label="Creating store")
-        config_store.wait(1)
-
-    if replica_name is not None:
-        progress.write({"message": "Store created"})
-        time.sleep(1)
-        replica_client = cf_replicas(cmd.cli_ctx)
-        store_replica = create_replica(cmd, replica_client, name, replica_name, replica_location, resource_group_name)
-
-        while store_replica.status() != ProvisioningStatus.SUCCEEDED:
-            progress.spinner.step(label="Creating replica")
-            store_replica.wait(1)
-
-        if store_replica.status() == ProvisioningStatus.SUCCEEDED:
-            progress.write({"message": "Replica created"})
-            time.sleep(1)
-        else:
-            progress.write({"message": "Replica creation failed"})
-
-    progress.clear()
-
-    return config_store
+    return client.begin_create(resource_group_name, name, configstore_params)
 
 
 def recover_deleted_configstore(cmd, client, name, resource_group_name=None, location=None):
@@ -195,11 +150,9 @@ def update_configstore(cmd,
 
         update_params.encryption = EncryptionProperties(key_vault_properties=key_vault_properties)
 
-    return client.begin_update(
-        resource_group_name=resource_group_name,
-        config_store_name=name,
-        config_store_update_parameters=update_params,
-    )
+    return client.begin_update(resource_group_name=resource_group_name,
+                               config_store_name=name,
+                               config_store_update_parameters=update_params)
 
 
 def assign_managed_identity(cmd, client, name, resource_group_name=None, identities=None):
@@ -316,29 +269,13 @@ def create_replica(cmd, client, store_name, name, location, resource_group_name=
                                replica_creation_parameters=replica_creation_params)
 
 
-def delete_replica(cmd, client, store_name, name, yes=False, resource_group_name=None):
+def delete_replica(cmd, client, store_name, name, resource_group_name=None):
     if resource_group_name is None:
         resource_group_name, _ = resolve_store_metadata(cmd, store_name)
 
-    if not yes:
-        config_store_client = cf_configstore(cmd.cli_ctx)
-        config_store = show_configstore(
-            cmd, config_store_client, store_name, resource_group_name
-        )
-        replicas = list_replica(cmd, client, store_name, resource_group_name)
-
-        if config_store.sku.name.lower() == "premium" and len(list(replicas)) == 1:
-            user_confirmation(
-                "Deleting the last replica will disable geo-replication. It is recommended that a premium tier store have geo-replication enabled to take advantage of the improved SLA. The first replica for a premium tier store comes at no additional cost. Do you want to continue?"
-            )
-        else:
-            user_confirmation("Are you sure you want to continue with this operation?")
-
-    return client.begin_delete(
-        resource_group_name=resource_group_name,
-        config_store_name=store_name,
-        replica_name=name,
-    )
+    return client.begin_delete(resource_group_name=resource_group_name,
+                               config_store_name=store_name,
+                               replica_name=name)
 
 
 def __get_resource_identity(assign_identity):
@@ -377,23 +314,3 @@ def __validate_cmk(encryption_key_name=None,
         else:
             if any(arg is not None for arg in [encryption_key_vault, encryption_key_version, identity_client_id]):
                 logger.warning("Removing the customer encryption key. Key vault related arguments are ignored.")
-
-
-def __validate_replication(sku=None,
-                           replica_name=None,
-                           replica_location=None,
-                           no_replica=None):
-
-    if sku.lower() == 'premium' and not no_replica:
-        if any(arg is None for arg in [replica_name, replica_location]):
-            raise RequiredArgumentMissingError("Options '--replica-name' and '--replica-location' are required when creating a premium tier store. To avoid creating replica please provide explicit argument '--no-replica'.")
-
-    if no_replica and (replica_name or replica_location):
-        raise CLIErrors.MutuallyExclusiveArgumentError("Please provide only one of these arguments: '--no-replica' or '--replica-name and --replica-location'. See 'az appconfig create -h' for examples.")
-
-    if replica_name:
-        if replica_location is None:
-            raise RequiredArgumentMissingError("To create replica '--replica-location' is required.")
-    else:
-        if replica_location is not None:
-            raise RequiredArgumentMissingError("To create replica '--replica-name' is required.")

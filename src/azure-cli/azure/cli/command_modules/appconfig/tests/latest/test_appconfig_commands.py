@@ -33,8 +33,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
         config_store_name = self.create_random_name(prefix='MgmtTest', length=24)
 
         location = 'eastus'
-        standard_sku = 'standard'
-        premium_sku = 'premium'
+        sku = 'standard'
         tag_key = "key"
         tag_value = "value"
         tag = tag_key + '=' + tag_value
@@ -45,8 +44,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
             'config_store_name': config_store_name,
             'rg_loc': location,
             'rg': resource_group,
-            'sku': standard_sku,
-            'sku': standard_sku,
+            'sku': sku,
             'tags': tag,
             'identity': system_assigned_identity,
             'retention_days': 1,
@@ -58,8 +56,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                                  self.check('location', '{rg_loc}'),
                                  self.check('resourceGroup', resource_group),
                                  self.check('provisioningState', 'Succeeded'),
-                                 self.check('sku.name', standard_sku),
-                                 self.check('sku.name', standard_sku),
+                                 self.check('sku.name', sku),
                                  self.check('tags', structured_tag),
                                  self.check('identity.type', 'SystemAssigned'),
                                  self.check('softDeleteRetentionInDays', '{retention_days}'),
@@ -70,8 +67,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                          self.check('[0].location', '{rg_loc}'),
                          self.check('[0].resourceGroup', resource_group),
                          self.check('[0].provisioningState', 'Succeeded'),
-                         self.check('[0].sku.name', standard_sku),
-                         self.check('[0].sku.name', standard_sku),
+                         self.check('[0].sku.name', sku),
                          self.check('[0].tags', structured_tag),
                          self.check('[0].identity.type', 'SystemAssigned')])
 
@@ -80,8 +76,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                          self.check('location', '{rg_loc}'),
                          self.check('resourceGroup', resource_group),
                          self.check('provisioningState', 'Succeeded'),
-                         self.check('sku.name', standard_sku),
-                         self.check('sku.name', standard_sku),
+                         self.check('sku.name', sku),
                          self.check('tags', structured_tag),
                          self.check('identity.type', 'SystemAssigned')])
 
@@ -91,7 +86,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
         structured_tag = {tag_key: tag_value}
         self.kwargs.update({
             'updated_tag': updated_tag,
-            'update_sku': premium_sku   # update to premium sku
+            'update_sku': sku   # we currently only can test on standard sku
         })
 
         self.cmd('appconfig update -n {config_store_name} -g {rg} --tags {updated_tag} --sku {update_sku}',
@@ -100,7 +95,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                          self.check('resourceGroup', resource_group),
                          self.check('tags', structured_tag),
                          self.check('provisioningState', 'Succeeded'),
-                         self.check('sku.name', premium_sku)])
+                         self.check('sku.name', sku)])
 
         keyvault_name = self.create_random_name(prefix='cmk-test-keyvault', length=24)
         encryption_key = 'key'
@@ -123,8 +118,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                          self.check('resourceGroup', resource_group),
                          self.check('tags', structured_tag),
                          self.check('provisioningState', 'Succeeded'),
-                         self.check('sku.name', premium_sku),
-                         self.check('sku.name', premium_sku),
+                         self.check('sku.name', sku),
                          self.check('encryption.keyVaultProperties.keyIdentifier', keyvault_uri.strip('/') + "/keys/{}/".format(encryption_key))])
 
         self.kwargs.update({
@@ -137,112 +131,9 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                     self.check('resourceGroup', resource_group),
                     self.check('tags', {}),
                     self.check('provisioningState', 'Succeeded'),
-                    self.check('sku.name', premium_sku),
+                    self.check('sku.name', sku),
                     self.check('encryption.keyVaultProperties.keyIdentifier', keyvault_uri.strip('/') + "/keys/{}/".format(encryption_key))])
 
-        self.cmd('appconfig delete -n {config_store_name} -g {rg} -y')
-
-        # create store in premium tier with replica
-        config_store_name = self.create_random_name(prefix='MgmtTestPremiumSku', length=24)
-        replica_name = self.create_random_name(prefix='MgmtTestReplica', length=24)
-        tag_key = "key"
-        tag_value = "value"
-        tag = tag_key + '=' + tag_value
-        structured_tag = {tag_key: tag_value}
-        
-        self.kwargs.update({
-            "premium_sku": premium_sku,
-            "config_store_name": config_store_name,
-            "replica_name": replica_name,
-            "replica_location": "westus",
-            "tags": tag
-        })
-
-        store = self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {premium_sku} --tags {tags} --assign-identity {identity} --retention-days {retention_days} --enable-purge-protection {enable_purge_protection} --replica-name {replica_name} --replica-location {replica_location}',
-                         checks=[self.check('name', '{config_store_name}'),
-                                 self.check('location', '{rg_loc}'),
-                                 self.check('resourceGroup', resource_group),
-                                 self.check('provisioningState', 'Succeeded'),
-                                 self.check('sku.name', premium_sku),
-                                 self.check('tags', structured_tag),
-                                 self.check('identity.type', 'SystemAssigned'),
-                                 self.check('softDeleteRetentionInDays', '{retention_days}'),
-                                 self.check('enablePurgeProtection', '{enable_purge_protection}')]).get_output_in_json()
-        
-        self.cmd('appconfig list -g {rg}',
-                 checks=[self.check('[0].name', '{config_store_name}'),
-                         self.check('[0].location', '{rg_loc}'),
-                         self.check('[0].resourceGroup', resource_group),
-                         self.check('[0].provisioningState', 'Succeeded'),
-                         self.check('[0].sku.name', premium_sku),
-                         self.check('[0].tags', structured_tag),
-                         self.check('[0].identity.type', 'SystemAssigned')])
-
-        self.cmd('appconfig show -n {config_store_name} -g {rg}',
-                 checks=[self.check('name', '{config_store_name}'),
-                         self.check('location', '{rg_loc}'),
-                         self.check('resourceGroup', resource_group),
-                         self.check('provisioningState', 'Succeeded'),
-                         self.check('sku.name', premium_sku),
-                         self.check('tags', structured_tag),
-                         self.check('identity.type', 'SystemAssigned')])
-        
-        self.cmd('appconfig replica show -s {config_store_name} -g {rg} -n {replica_name}',
-                 checks=[self.check('name', '{replica_name}'),
-                         self.check('location', '{replica_location}'),
-                         self.check('resourceGroup', resource_group),
-                         self.check('provisioningState', 'Succeeded')])
-
-        self.cmd('appconfig replica list -s {config_store_name}',
-                 checks=[self.check('[0].name', '{replica_name}'),
-                         self.check('[0].location', '{replica_location}'),
-                         self.check('[0].resourceGroup', resource_group),
-                         self.check('[0].provisioningState', 'Succeeded')])
-
-        self.cmd('appconfig replica delete -s {config_store_name} -g {rg} -n {replica_name} -y')
-
-        with self.assertRaisesRegex(ResourceNotFoundError, f"The replica '{replica_name}' for App Configuration '{config_store_name}' not found."):
-            self.cmd('appconfig replica show -s {config_store_name} -g {rg} -n {replica_name}')
-        
-        self.cmd('appconfig delete -n {config_store_name} -g {rg} -y')
-
-        # create store in premium tier without replica
-        config_store_name = self.create_random_name(prefix='MgmtTestPremiumSku', length=24)
-        
-        self.kwargs.update({
-            "premium_sku": premium_sku,
-            "config_store_name": config_store_name,
-        })
-
-        store = self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {premium_sku} --tags {tags} --assign-identity {identity} --retention-days {retention_days} --enable-purge-protection {enable_purge_protection} --no-replica',
-                         checks=[self.check('name', '{config_store_name}'),
-                                 self.check('location', '{rg_loc}'),
-                                 self.check('resourceGroup', resource_group),
-                                 self.check('provisioningState', 'Succeeded'),
-                                 self.check('sku.name', premium_sku),
-                                 self.check('tags', structured_tag),
-                                 self.check('identity.type', 'SystemAssigned'),
-                                 self.check('softDeleteRetentionInDays', '{retention_days}'),
-                                 self.check('enablePurgeProtection', '{enable_purge_protection}')]).get_output_in_json()
-        
-        self.cmd('appconfig list -g {rg}',
-                 checks=[self.check('[0].name', '{config_store_name}'),
-                         self.check('[0].location', '{rg_loc}'),
-                         self.check('[0].resourceGroup', resource_group),
-                         self.check('[0].provisioningState', 'Succeeded'),
-                         self.check('[0].sku.name', premium_sku),
-                         self.check('[0].tags', structured_tag),
-                         self.check('[0].identity.type', 'SystemAssigned')])
-
-        self.cmd('appconfig show -n {config_store_name} -g {rg}',
-                 checks=[self.check('name', '{config_store_name}'),
-                         self.check('location', '{rg_loc}'),
-                         self.check('resourceGroup', resource_group),
-                         self.check('provisioningState', 'Succeeded'),
-                         self.check('sku.name', premium_sku),
-                         self.check('tags', structured_tag),
-                         self.check('identity.type', 'SystemAssigned')])
-        
         self.cmd('appconfig delete -n {config_store_name} -g {rg} -y')
 
         config_store_name = self.create_random_name(prefix='MgmtTestdel', length=24)
@@ -629,7 +520,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer()
-    @KeyVaultPreparer(additional_params="--enable-rbac-authorization false")
+    @KeyVaultPreparer()
     @live_only()
     def test_resolve_keyvault(self, key_vault, resource_group):
         config_store_name = self.create_random_name(prefix='KVTest', length=24)
@@ -3267,7 +3158,7 @@ def _create_user_assigned_identity(test, kwargs):
 
 
 def _setup_key_vault(test, kwargs):
-    key_vault = test.cmd('keyvault create -n {keyvault_name} -g {rg} -l {rg_loc} --enable-rbac-authorization false --enable-purge-protection --retention-days 7').get_output_in_json()
+    key_vault = test.cmd('keyvault create -n {keyvault_name} -g {rg} -l {rg_loc} --enable-purge-protection --retention-days 7').get_output_in_json()
     test.cmd('keyvault key create --vault-name {keyvault_name} -n {encryption_key}')
     test.cmd('keyvault set-policy -n {keyvault_name} --key-permissions get wrapKey unwrapKey --object-id {identity_id}')
 
