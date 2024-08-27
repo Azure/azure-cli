@@ -16,7 +16,7 @@ from azure.cli.core.util import \
     (get_file_json, truncate_text, shell_safe_json_parse, b64_to_hex, hash_string, random_string,
      open_page_in_browser, can_launch_browser, handle_exception, ConfiguredDefaultSetter, send_raw_request,
      should_disable_connection_verify, parse_proxy_resource_id, get_az_user_agent, get_az_rest_user_agent,
-     _get_parent_proc_name, is_wsl)
+     _get_parent_proc_name, is_wsl, is_guid, assert_guid)
 from azure.cli.core.mock import DummyCli
 
 
@@ -420,6 +420,18 @@ class TestUtils(unittest.TestCase):
         parent1.name.return_value = "pwsh"
         parent2.name.return_value = "bash"
         self.assertEqual(_get_parent_proc_name(), "pwsh")
+
+    def test_guid(self):
+        self.assertTrue(is_guid("201ea53e-07b9-4ebf-a85e-5482e48e835c"))
+        self.assertFalse(is_guid(""))
+        self.assertFalse(is_guid(None))
+        self.assertFalse(is_guid("foo"))
+
+        from knack.util import CLIError
+        assert_guid("201ea53e-07b9-4ebf-a85e-5482e48e835c")
+        assert_guid("201ea53e-07b9-4ebf-a85e-5482e48e835c", "named_guid")
+        self.assertRaisesRegex(CLIError, "named_guid must be a GUID.", assert_guid, "foo", "named_guid")
+        self.assertRaisesRegex(CLIError, "foo is not a GUID.", assert_guid, "foo")
 
 
 class TestBase64ToHex(unittest.TestCase):
