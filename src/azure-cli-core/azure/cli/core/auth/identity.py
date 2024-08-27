@@ -259,20 +259,26 @@ class ServicePrincipalAuth:
         self.__dict__.update(entry)
 
         if _CERTIFICATE in entry:
-            from OpenSSL.crypto import load_certificate, FILETYPE_PEM, Error
+            from cryptography.x509 import load_pem_x509_certificate
+            from cryptography.hazmat.primitives import hashes
+
             self.public_certificate = None
             try:
                 with open(self.certificate, 'r') as file_reader:
                     self.certificate_string = file_reader.read()
-                    cert = load_certificate(FILETYPE_PEM, self.certificate_string)
-                    self.thumbprint = cert.digest("sha1").decode().replace(':', '')
+
+                    # Calculate SHA1 thumbprint
+                    # load_pem_x509_certificate may raise ValueError
+                    x509_cert = load_pem_x509_certificate(self.certificate_string.encode('utf-8'))
+                    self.thumbprint = x509_cert.fingerprint(hashes.SHA1()).hex().upper()
+
                     if entry.get(_USE_CERT_SN_ISSUER):
                         # low-tech but safe parsing based on
                         # https://github.com/libressl-portable/openbsd/blob/master/src/lib/libcrypto/pem/pem.h
                         match = re.search(r'-----BEGIN CERTIFICATE-----(?P<cert_value>[^-]+)-----END CERTIFICATE-----',
                                           self.certificate_string, re.I)
                         self.public_certificate = match.group()
-            except (UnicodeDecodeError, Error) as ex:
+            except (UnicodeDecodeError, ValueError) as ex:
                 raise CLIError('Invalid certificate, please use a valid PEM file. Error detail: {}'.format(ex))
 
     @classmethod
