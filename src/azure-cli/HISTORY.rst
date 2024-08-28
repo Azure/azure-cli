@@ -8,7 +8,7 @@ Release History
 
 **ACR**
 
-* Improve deprecation message for `az acr helm` (#29700)
+* `az acr helm`: Improve deprecation message (#29700)
 
 **AKS**
 
@@ -18,7 +18,7 @@ Release History
 
 **App Service**
 
-* `az staticwebapp create` and `az staticwebapp update`: Add `Dedicated` as supported SKU (#29514)
+* `az staticwebapp create/update`: Add `Dedicated` as supported SKU (#29514)
 * `az webapp config set`: Add MinTlsCipherSuite support (#29694)
 * `az webapp config access-restriction add/remove`: Allow skipping service tag validation (#29710)
 
@@ -47,8 +47,8 @@ Release History
 **HDInsight**
 
 * `az hdinsight create`: Support setting IP tags when creating HDInsight cluster (#29752)
-* `az hdinsight update`: Support update the managed identity of the cluster (#29752)
-* `az hdinsight azure-monitor-agent show`: Get update the managed identity of the cluster (#29752)
+* `az hdinsight update`: Support updating the managed identity of the cluster (#29752)
+* `az hdinsight azure-monitor-agent show`: Support getting the managed identity of the cluster (#29752)
 * `az hdinsight azure-monitor-agent enable`: Enable the Azure Monitor Agent logs integration on an HDInsight cluster (#29752)
 * `az hdinsight azure-monitor-agent disable`: Disable the Azure Monitor Agent logs integration on an HDInsight cluster (#29752)
 
@@ -59,7 +59,7 @@ Release History
 
 **NetAppFiles**
 
-* Update max for usageThreshold (#29624)
+* `az netappfiles volume create/update`: Update max for `--usage-threshold` (#29624)
 
 **Network**
 
