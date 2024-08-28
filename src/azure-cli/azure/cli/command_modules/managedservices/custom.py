@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 import uuid
 from knack.log import get_logger
-from msrestazure.tools import parse_resource_id, is_valid_resource_id
+from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id
 from azure.cli.core.aaz import has_value
 from .aaz.latest.managedservices.definition import (
     Create as _DefinitionCreate, Delete as _DefinitionDelete, List as _DefinitionList, Show as _DefinitionShow)
