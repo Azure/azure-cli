@@ -42,12 +42,12 @@ logger = get_logger(__name__)
 AddonConfig = {
     RESOURCE.Postgres: {
         'create': [
-            'az postgres server create -g {target_resource_group} -n {server} -l {location} -u {user} -p {password}',
-            'az postgres db create -g {target_resource_group} -s {server} -n {database}'
+            'az postgres server create -g "{target_resource_group}" -n "{server}" -l "{location}" -u "{user}" -p "{password}"',
+            'az postgres db create -g "{target_resource_group}" -s "{server}" -n {database}'
         ],
         'delete': [
-            'az postgres server delete -g {target_resource_group} -n {server} --yes',
-            'az postgres db delete -g {target_resource_group} -s {server} -n {database} --yes'
+            'az postgres server delete -g "{target_resource_group}" -n "{server}" --yes',
+            'az postgres db delete -g "{target_resource_group}" -s "{server}" -n "{database}" --yes'
         ],
         'params': {
             'target_resource_group': '_retrive_source_rg',
@@ -59,8 +59,8 @@ AddonConfig = {
         }
     },
     RESOURCE.KeyVault: {
-        'create': ['az keyvault create -g {target_resource_group} -n {vault} -l {location}'],
-        'delete': ['az keyvault delete -g {target_resource_group} -n {vault} --yes'],
+        'create': ['az keyvault create -g "{target_resource_group}" -n "{vault}" -l "{location}"'],
+        'delete': ['az keyvault delete -g "{target_resource_group}" -n "{vault}" --yes'],
         'params': {
             'target_resource_group': '_retrive_source_rg',
             'location': '_retrive_source_loc',
@@ -68,8 +68,8 @@ AddonConfig = {
         }
     },
     RESOURCE.StorageBlob: {
-        'create': ['az storage account create -g {target_resource_group} -n {account} -l {location}'],
-        'delete': ['az storage account delete -g {target_resource_group} -n {account} --yes'],
+        'create': ['az storage account create -g "{target_resource_group}" -n "{account}" -l "{location}"'],
+        'delete': ['az storage account delete -g "{target_resource_group}" -n "{account}" --yes'],
         'params': {
             'target_resource_group': '_retrive_source_rg',
             'location': '_retrive_source_loc',
@@ -186,7 +186,7 @@ class AddonBase:
         '''Retrieve the location of source resource group
         '''
         rg = self._retrive_source_rg()
-        output = run_cli_cmd('az group show -n {} -o json'.format(rg))
+        output = run_cli_cmd('az group show -n "{}" -o json'.format(rg))
         return output.get('location')
 
     def _get_source_type(self):

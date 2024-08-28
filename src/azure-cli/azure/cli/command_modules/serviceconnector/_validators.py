@@ -148,7 +148,7 @@ def get_client_type(cmd, namespace):
 
         client_type = None
         try:
-            output = run_cli_cmd('az webapp show --id {} -o json'.format(source_id))
+            output = run_cli_cmd('az webapp show --id "{}" -o json'.format(source_id))
             prop = output.get('siteConfig').get('linuxFxVersion', None) or\
                 output.get('siteConfig').get('windowsFxVersion', None)
             # use 'linuxFxVersion' and 'windowsFxVersion' property to decide
@@ -170,7 +170,7 @@ def get_client_type(cmd, namespace):
         client_type = CLIENT_TYPE.SpringBoot
         try:
             segments = parse_resource_id(source_id)
-            output = run_cli_cmd('az spring app show -g {} -s {} -n {}'
+            output = run_cli_cmd('az spring app show -g "{}" -s "{}" -n "{}"'
                                  ' -o json'.format(segments.get('resource_group'), segments.get('name'),
                                                    segments.get('child_name_1')))
             prop_val = output.get('properties')\
@@ -770,7 +770,7 @@ def apply_auth_args(cmd, namespace, arg_values):
 
 
 def apply_workload_identity(namespace, arg_values):
-    output = run_cli_cmd('az identity show --ids {}'.format(
+    output = run_cli_cmd('az identity show --ids "{}"'.format(
         arg_values.get('workload_identity_auth_info')
     ))
     if output:
@@ -957,7 +957,7 @@ def validate_service_state(linker_parameters):
         if not rg or not name:
             return
 
-        output = run_cli_cmd('az appconfig show -g {} -n {}'.format(rg, name))
+        output = run_cli_cmd('az appconfig show -g "{}" -n "{}"'.format(rg, name))
         if output and output.get('disableLocalAuth') is True:
             raise ValidationError('Secret as auth type is not allowed when local auth is disabled for the '
                                   'specified appconfig, you may use service principal or managed identity.')

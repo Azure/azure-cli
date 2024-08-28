@@ -124,7 +124,7 @@ def provider_is_registered(subscription=None):
     # register the provider
     subs_arg = ''
     if subscription:
-        subs_arg = '--subscription {}'.format(subscription)
+        subs_arg = '--subscription "{}"'.format(subscription)
     output = run_cli_cmd(
         'az provider show -n Microsoft.ServiceLinker {}'.format(subs_arg))
     if output.get('registrationState') == 'NotRegistered':
@@ -138,7 +138,7 @@ def register_provider(subscription=None):
 
     subs_arg = ''
     if subscription:
-        subs_arg = '--subscription {}'.format(subscription)
+        subs_arg = '--subscription "{}"'.format(subscription)
 
     # register the provider
     run_cli_cmd(
@@ -281,7 +281,7 @@ def get_auth_if_no_valid_key_vault_connection_for_webapp(source_id, key_vault_co
 
     try:
         webapp = run_cli_cmd(
-            'az rest -u {}?api-version=2020-09-01 -o json'.format(source_id))
+            'az rest -u "{}?api-version=2020-09-01" -o json'.format(source_id))
         reference_identity = webapp.get(
             'properties').get('keyVaultReferenceIdentity')
     except Exception as e:
@@ -299,7 +299,7 @@ def get_auth_if_no_valid_key_vault_connection_for_webapp(source_id, key_vault_co
         except Exception:  # pylint: disable=broad-except
             try:
                 identity = run_cli_cmd(
-                    'az identity show --ids {} -o json'.format(reference_identity))
+                    'az identity show --ids "{}" -o json'.format(reference_identity))
                 client_id = identity.get('clientId')
             except Exception:  # pylint: disable=broad-except
                 pass
@@ -405,7 +405,7 @@ def get_object_id_of_current_user():
             return user_object_id
         if user_type == 'servicePrincipal':
             user_info = run_cli_cmd(
-                f'az ad sp show --id {signed_in_user.get("name")} -o json')
+                f'az ad sp show --id "{signed_in_user.get("name")}" -o json')
             user_object_id = user_info.get('id')
             return user_object_id
     except CLIInternalError as e:
