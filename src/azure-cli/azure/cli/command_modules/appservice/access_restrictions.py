@@ -41,12 +41,14 @@ def add_webapp_access_restriction(
         action='Allow', ip_address=None, subnet=None,
         vnet_name=None, description=None, scm_site=False,
         ignore_missing_vnet_service_endpoint=False, slot=None, vnet_resource_group=None,
-        service_tag=None, http_headers=None):
+        service_tag=None, http_headers=None, skip_service_tag_validation=None):
     configs = get_site_configs(cmd, resource_group_name, name, slot)
     if (int(service_tag is not None) + int(ip_address is not None) +
             int(subnet is not None) != 1):
         err_msg = 'Please specify either: --subnet or --ip-address or --service-tag'
         raise MutuallyExclusiveArgumentError(err_msg)
+    if (skip_service_tag_validation is not None):
+        logger.warning('Skipping service tag validation.')
 
     # get rules list
     access_rules = configs.scm_ip_security_restrictions if scm_site else configs.ip_security_restrictions
@@ -89,13 +91,16 @@ def add_webapp_access_restriction(
 
 def remove_webapp_access_restriction(cmd, resource_group_name, name, rule_name=None, action='Allow',
                                      ip_address=None, subnet=None, vnet_name=None, scm_site=False, slot=None,
-                                     service_tag=None):
+                                     service_tag=None, skip_service_tag_validation=None):
     configs = get_site_configs(cmd, resource_group_name, name, slot)
     input_rule_types = (int(service_tag is not None) + int(ip_address is not None) +
                         int(subnet is not None))
     if input_rule_types > 1:
         err_msg = 'Please specify either: --subnet or --ip-address or --service-tag'
         raise MutuallyExclusiveArgumentError(err_msg)
+    if (skip_service_tag_validation is not None):
+        logger.warning('Skipping service tag validation.')
+
     rule_instance = None
     # get rules list
     access_rules = configs.scm_ip_security_restrictions if scm_site else configs.ip_security_restrictions
