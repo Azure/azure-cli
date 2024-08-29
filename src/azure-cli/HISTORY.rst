@@ -48,7 +48,7 @@ Release History
 
 * `az hdinsight create`: Support setting IP tags when creating HDInsight cluster (#29752)
 * `az hdinsight update`: Support updating the managed identity of the cluster (#29752)
-* `az hdinsight azure-monitor-agent show`: Support getting the managed identity of the cluster (#29752)
+* `az hdinsight azure-monitor-agent show`: Get the Azure Monitor Agent logs integration on an HDInsight cluster (#29752)
 * `az hdinsight azure-monitor-agent enable`: Enable the Azure Monitor Agent logs integration on an HDInsight cluster (#29752)
 * `az hdinsight azure-monitor-agent disable`: Disable the Azure Monitor Agent logs integration on an HDInsight cluster (#29752)
 
