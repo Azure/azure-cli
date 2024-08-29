@@ -1860,9 +1860,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('expiry', type=get_datetime_type(True), help='expiration UTC datetime in (Y-m-d\'T\'H:M:S\'Z\')')
 
     with self.argument_context('storage share delete') as c:
-        from .sdkutil import get_delete_file_snapshot_type_names
+        t_delete_snapshot = self.get_sdk('_generated.models._azure_file_storage_enums#DeleteSnapshotsOptionType',
+                                         resource_type=ResourceType.DATA_STORAGE_FILESHARE)
         c.extra('share_name', share_name_type, options_list=('--name', '-n'), required=True)
-        c.argument('delete_snapshots', arg_type=get_enum_type(get_delete_file_snapshot_type_names()),
+        c.argument('delete_snapshots', arg_type=get_enum_type(t_delete_snapshot),
                    help='Specify the deletion strategy when the share has snapshots.')
         c.argument('fail_not_exist', help="Specify whether to throw an exception when the share doesn't exists. False "
                                           "by default.")

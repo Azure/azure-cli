@@ -248,6 +248,21 @@ def create_short_lived_share_sas_track2(cmd, account_name, account_key, share):
                                 protocol='https')
 
 
+def create_short_lived_blob_service_sas_track2(cmd, account_name, account_key, resource_types, permission='r'):
+    from datetime import timedelta
+    t_generate_blob_service_sas = cmd.get_models('#generate_account_sas', resource_type=ResourceType.DATA_STORAGE_BLOB)
+    expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
+    return t_generate_blob_service_sas(account_name, account_key, resource_types, permission=permission, expiry=expiry)
+
+
+def create_short_lived_file_service_sas_track2(cmd, account_name, account_key, resource_types, permission='r'):
+    from datetime import timedelta
+    t_generate_file_service_sas = cmd.get_models('#generate_account_sas',
+                                                 resource_type=ResourceType.DATA_STORAGE_FILESHARE)
+    expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
+    return t_generate_file_service_sas(account_name, account_key, resource_types, permission=permission, expiry=expiry)
+
+
 def mkdir_p(path):
     import errno
     try:

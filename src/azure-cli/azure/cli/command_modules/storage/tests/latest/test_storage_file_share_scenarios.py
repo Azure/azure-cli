@@ -51,8 +51,8 @@ class StorageShareScenarioTests(StorageScenarioMixin, ScenarioTest):
                                account_info, share_name, start, expiry).output
         self.assertIn('sig', sas, 'The sig segment is not in the sas {}'.format(sas))
         # Test generate-sas with ip and https-only
-        sas2 = self.cmd('storage share generate-sas -n {} --ip 172.20.34.0-172.20.34.255 --permissions r '
-                        '--https-only --connection-string {}'.format(share_name, connection_string)).output
+        sas2 = self.cmd('storage share generate-sas -n {} --ip 172.20.34.0-172.20.34.255 --permissions r --expiry {} '
+                        '--https-only --connection-string {}'.format(share_name, expiry, connection_string)).output
         self.assertIn('sig', sas2, 'The sig segment is not in the sas {}'.format(sas2))
 
         # Test delete

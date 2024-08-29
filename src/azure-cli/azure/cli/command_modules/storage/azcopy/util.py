@@ -189,22 +189,18 @@ def _unserialize_non_msi_token_payload(token_info):
 
 
 def _generate_sas_token(cmd, account_name, account_key, service, resource_types='sco', permissions='rwdlacup'):
-    from .._client_factory import cloud_storage_account_service_factory
-    from .._validators import resource_type_type, services_type
-
     kwargs = {
         'account_name': account_name,
-        'account_key': account_key
+        'account_key': account_key,
+        'resource_types': resource_types,
+        'permission': permissions
     }
-    cloud_storage_client = cloud_storage_account_service_factory(cmd.cli_ctx, kwargs)
-    t_account_permissions = cmd.loader.get_sdk('common.models#AccountPermissions')
-
-    return cloud_storage_client.generate_shared_access_signature(
-        services_type(cmd.loader)(service[0]),
-        resource_type_type(cmd.loader)(resource_types),
-        t_account_permissions(_str=permissions),
-        datetime.datetime.utcnow() + datetime.timedelta(days=1)
-    )
+    from ..util import create_short_lived_blob_service_sas_track2, create_short_lived_file_service_sas_track2
+    if service == 'blob':
+        sas_token = create_short_lived_blob_service_sas_track2(cmd, **kwargs)
+    elif service == 'file':
+        sas_token = create_short_lived_file_service_sas_track2(cmd, **kwargs)
+    return sas_token
 
 
 def _get_default_install_location():

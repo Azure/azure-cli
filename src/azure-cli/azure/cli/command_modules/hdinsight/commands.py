@@ -106,6 +106,13 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.custom_command('enable', 'enable_hdi_azure_monitor')
         g.command('disable', 'begin_disable_azure_monitor')
 
+    # New Azure Monitor Agent operations
+    with self.command_group('hdinsight azure-monitor-agent', hdinsight_extensions_sdk,
+                            client_factory=cf_hdinsight_extensions) as g:
+        g.show_command('show', 'get_azure_monitor_agent_status')
+        g.custom_command('enable', 'enable_hdi_azure_monitor_agent')
+        g.command('disable', 'begin_disable_azure_monitor_agent')
+
     # VirtualMachine operations
     with self.command_group('hdinsight host', hdinsight_virtual_machines_sdk,
                             client_factory=cf_hdinsight_virtual_machines) as g:

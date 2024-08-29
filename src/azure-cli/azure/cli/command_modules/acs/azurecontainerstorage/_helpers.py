@@ -414,12 +414,15 @@ def get_desired_resource_value_args(
 # Returns -1 if there is a problem with parsing the vm_size.
 def get_cores_from_sku(vm_size):
     cpu_value = -1
-    pattern = r'standard_([a-z]+)(\d+)([a-z]*)_v(\d+)'
+    pattern = r'([a-z])+(\d+)[a-z]*(?=_v(\d+)[^_]*$|$)'
     match = re.search(pattern, vm_size.lower())
     if match:
         series_prefix = match.group(1)
         size_val = int(match.group(2))
-        version = int(match.group(4))
+        version_val = match.group(3)
+        version = -1
+        if version_val is not None:
+            version = int(version_val)
 
         cpu_value = size_val
         # https://learn.microsoft.com/en-us/azure/virtual-machines/dv2-dsv2-series

@@ -233,8 +233,8 @@ class StorageFileShareFileScenarios(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage file exists -p "{}" -s {}', account_info, src_file, s1) \
             .assert_with_checks(JMESPathCheck('exists', False))
 
-        copy_id = self.storage_cmd('storage file copy start -s {} -p "{}" --source-share {} --source-path "{}" --file-snapshot {}',
-                                   account_info, s2, dst_file, s1, src_file, snapshot) \
+        copy_id = self.storage_cmd('storage file copy start -s {} -p "{}" --source-share {} --source-path "{}" '
+                                   '--file-snapshot {}', account_info, s2, dst_file, s1, src_file, snapshot) \
             .assert_with_checks(JMESPathCheck('status', 'success')) \
             .get_output_in_json()['id']
 
@@ -242,6 +242,13 @@ class StorageFileShareFileScenarios(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(JMESPathCheck('name', os.path.basename(dst_file)),
                                 JMESPathCheck('properties.copy.id', copy_id),
                                 JMESPathCheck('properties.copy.status', 'success'))
+        # without --delete-snapshots, should fail because there is an existing snapshot
+        with self.assertRaises(Exception):
+            self.storage_cmd('storage share delete --name {}', account_info, s1)
+
+        self.cmd('storage share delete --name {} --account-name {} '
+                 '--delete-snapshots include-leased'.format(s1, storage_account),
+                 checks=JMESPathCheck('deleted', True))
 
     def validate_directory_scenario(self, account_info, share):
         directory = self.create_random_name('dir', 16)

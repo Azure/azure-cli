@@ -11,12 +11,13 @@ import unittest
 from unittest import mock
 import tempfile
 import json
+import platform
 
 from azure.cli.core.util import \
     (get_file_json, truncate_text, shell_safe_json_parse, b64_to_hex, hash_string, random_string,
      open_page_in_browser, can_launch_browser, handle_exception, ConfiguredDefaultSetter, send_raw_request,
      should_disable_connection_verify, parse_proxy_resource_id, get_az_user_agent, get_az_rest_user_agent,
-     _get_parent_proc_name, is_wsl)
+     _get_parent_proc_name, is_wsl, run_cmd)
 from azure.cli.core.mock import DummyCli
 
 
@@ -420,6 +421,26 @@ class TestUtils(unittest.TestCase):
         parent1.name.return_value = "pwsh"
         parent2.name.return_value = "bash"
         self.assertEqual(_get_parent_proc_name(), "pwsh")
+
+    def test_cli_run_cmd(self):
+        cmd = ["echo", "abc"]
+        if platform.system().lower() == "windows":
+            cmd = ["cmd.exe", "/c"] + cmd
+        output = run_cmd(cmd, capture_output=True)
+        self.assertEqual(output.returncode, 0, "error when run cmd in shell")
+        self.assertEqual(output.stdout.decode("utf8").strip(), "abc", "unexpected output when run cmd")
+
+        output = run_cmd(cmd, capture_output=True, encoding="utf8")
+        self.assertEqual(output.returncode, 0, "error when run cmd in shell")
+        self.assertEqual(output.stdout.strip(), "abc", "unexpected output when run cmd")
+
+    def test_run_cmd_arg_error(self):
+        cmd = "echo abc"
+        if platform.system().lower() == "windows":
+            cmd = "cmd.exe /c " + cmd
+        from azure.cli.core.azclierror import ArgumentUsageError
+        with self.assertRaises(ArgumentUsageError):
+            run_cmd(cmd, check=True)
 
 
 class TestBase64ToHex(unittest.TestCase):

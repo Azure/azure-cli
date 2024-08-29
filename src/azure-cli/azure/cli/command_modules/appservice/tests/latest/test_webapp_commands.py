@@ -675,11 +675,12 @@ class WebappConfigureTest(ScenarioTest):
             JMESPathCheck('webSocketsEnabled', True),
             JMESPathCheck('minTlsVersion', '1.0'),
             JMESPathCheck('http20Enabled', True),
-            JMESPathCheck('ftpsState', 'Disabled')]
+            JMESPathCheck('ftpsState', 'Disabled'),
+            JMESPathCheck('minTlsCipherSuite', 'TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384')]
 
         self.cmd('webapp config set -g {} -n {} --always-on true --auto-heal-enabled true --php-version 7.4 '
                  '--net-framework-version v3.5 --python-version 3.4 --use-32bit-worker-process=false '
-                 '--web-sockets-enabled=true --http20-enabled true --min-tls-version 1.0 --ftps-state Disabled'.format(resource_group, webapp_name)).assert_with_checks(checks)
+                 '--web-sockets-enabled=true --http20-enabled true --min-tls-version 1.0 --min-tls-cipher-suite TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 --ftps-state Disabled'.format(resource_group, webapp_name)).assert_with_checks(checks)
         self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name)) \
             .assert_with_checks(checks)
 

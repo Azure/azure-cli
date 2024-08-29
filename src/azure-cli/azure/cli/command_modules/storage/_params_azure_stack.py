@@ -16,10 +16,10 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           storage_account_key_options, process_file_download_namespace, process_metric_update_namespace,
                           get_char_options_validator, validate_bypass, validate_encryption_source, validate_marker,
                           validate_storage_data_plane_list, validate_azcopy_upload_destination_url,
-                          validate_azcopy_remove_arguments, as_user_validator, parse_storage_account,
+                          as_user_validator, parse_storage_account,
                           validator_delete_retention_days, validate_delete_retention_days,
                           validate_fs_public_access)
-from ._validators_azure_stack import validate_entity, validate_container_public_access
+from ._validators_azure_stack import validate_entity, validate_container_public_access, validate_azcopy_remove_arguments
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines

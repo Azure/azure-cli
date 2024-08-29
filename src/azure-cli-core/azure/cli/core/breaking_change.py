@@ -162,13 +162,13 @@ class NextBreakingChangeWindow(TargetVersion):
 # pylint: disable=too-few-public-methods
 class ExactVersion(TargetVersion):
     def __init__(self, version):
-        self.version = version
+        self._version = version
 
     def __str__(self):
-        return f'in {self.version}'
+        return f'in {self._version}'
 
     def version(self):
-        return self.version()
+        return self._version
 
 
 # pylint: disable=too-few-public-methods
@@ -315,7 +315,7 @@ class AzCLIDeprecate(BreakingChange):
         elif object_type:
             msg = "This {} has been deprecated and will be removed ".format(object_type)
         else:
-            msg = "`{}` has been deprecated and will be removed ".format(target)
+            msg = "'{}' has been deprecated and will be removed ".format(target)
         msg += str(target_version) + '.'
         if redirect:
             msg += " Use '{}' instead.".format(redirect)
@@ -323,7 +323,7 @@ class AzCLIDeprecate(BreakingChange):
 
     @property
     def message(self):
-        return self._build_message(self.kwargs.get('object_type'), self.target, self.kwargs.get('expiration'),
+        return self._build_message(self.kwargs.get('object_type'), self.target, self.target_version,
                                    self.kwargs.get('redirect'))
 
     def to_tag(self, cli_ctx, **kwargs):
