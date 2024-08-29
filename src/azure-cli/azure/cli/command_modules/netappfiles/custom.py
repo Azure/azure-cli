@@ -311,7 +311,7 @@ class VolumeCreate(_VolumeCreate):
 
         args_schema.usage_threshold._default = 100
         args_schema.usage_threshold._fmt = AAZIntArgFormat(
-            maximum=2400,
+            maximum=2457600,
             minimum=50
         )
 
@@ -435,8 +435,8 @@ class VolumeUpdate(_VolumeUpdate):
             required=False,
         )
         args_schema.usage_threshold._fmt = AAZIntArgFormat(
-            maximum=2400,
-            minimum=50,
+            maximum=2457600,
+            minimum=50
         )
 
         return args_schema
