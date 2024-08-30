@@ -6,11 +6,10 @@ ls -la $share_folder/build
 
 ALL_MODULES=`find $share_folder/build/ -name "*.whl"`
 
-pip install -e ./tools
-[ -d privates ] && pip install -qqq privates/*.whl
 pip install $ALL_MODULES
 
 echo "Listing Available Extensions:"
+which az
 az extension list-available -otable
 
 # turn off telemetry as it crowds output
