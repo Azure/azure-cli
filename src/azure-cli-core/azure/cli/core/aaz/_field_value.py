@@ -448,3 +448,68 @@ class AAZList(AAZBaseValue):
         if processor:
             result = processor(self._schema, result)
         return result
+
+
+class AAZIdentityObject(AAZObject):
+    MI_SYSTEM_ASSIGNED_NAME = "miSystemAssigned"
+    MI_USER_ASSIGNED_NAME = "miUserAssigned"
+
+    IDENTITY_TYPE_USER_ASSIGNED = "UserAssigned"
+    IDENTITY_TYPE_SYSTEM_ASSIGNED = "SystemAssigned"
+    IDENTITY_TYPE_SYSTEM_USER_ASSIGNED = "SystemAssigned, UserAssigned"
+
+    TYPE = "type"
+    USER_ASSIGNED_IDENTITIES = "userAssignedIdentities"
+
+    def to_serialized_data(self, processor=None, **kwargs):
+        system_and_user_assigned = {}
+        if self._data == AAZUndefined:
+            result = AAZUndefined
+
+        elif self._data is None:
+            result = None
+
+        else:
+            result = {}
+            schema = self._schema
+
+            for name, field_schema in schema._fields.items():
+                if name in self._data:
+                    v = self[name].to_serialized_data(processor=processor, **kwargs)
+                    if v == AAZUndefined:
+                        continue
+
+                    if field_schema._serialized_name:  # pylint: disable=protected-access
+                        name = field_schema._serialized_name  # pylint: disable=protected-access
+
+                    if name in [self.MI_USER_ASSIGNED_NAME, self.MI_SYSTEM_ASSIGNED_NAME]:
+                        system_and_user_assigned[name] = v
+
+                    else:
+                        result[name] = v
+
+        if system_and_user_assigned:
+            mi_system_assigned = system_and_user_assigned.get(self.MI_SYSTEM_ASSIGNED_NAME, None)
+            mi_user_assigned = system_and_user_assigned.get(self.MI_USER_ASSIGNED_NAME, None)
+
+            if mi_user_assigned:
+                user_assigned_identities = {str(k): {} for k in mi_user_assigned}
+                if mi_system_assigned:
+                    identity_type = self.IDENTITY_TYPE_SYSTEM_USER_ASSIGNED
+
+                else:
+                    identity_type = self.IDENTITY_TYPE_USER_ASSIGNED
+
+                result[self.TYPE] = identity_type
+                result[self.USER_ASSIGNED_IDENTITIES] = user_assigned_identities
+
+            elif mi_system_assigned:
+                result[self.TYPE] = self.IDENTITY_TYPE_SYSTEM_ASSIGNED
+
+        if not result and self._is_patch:
+            result = AAZUndefined
+
+        if processor:
+            result = processor(self._schema, result)
+
+        return result
