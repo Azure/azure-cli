@@ -19,9 +19,9 @@ class Create(AAZCommand):
     This command creates an Azure SQL Managed Instance link by joining distributed availability group on SQL Server based on the parameters passed.
 
     :example: Creates an instance link.
-    az sql mi link create -g 'rg1' --instance-name 'mi1' --name 'link1' --databases "[{'databaseName': 'db1'}]"
+    az sql mi link create -g 'rg1' --instance-name 'mi1' --name 'link1' --databases "['db1']"
     --partner-ag-name 'partnerag1' --instance-ag-name 'instanceag1'
-    --partner-endpoint 'tcp://server1:5022" --instance-link-role 'Secondary'
+    --partner-endpoint 'tcp://server1:5022' --instance-link-role 'Secondary'
     --failover-mode 'Manual' --seeding-mode 'Automatic' --no-wait')
     """
 
@@ -111,8 +111,7 @@ class Create(AAZCommand):
         )
 
         databases = cls._args_schema.databases
-        databases.Element = AAZObjectArg()
-        databases.Element.databaseName = AAZStrArg()
+        databases.Element = AAZStrArg()
 
         return cls._args_schema
 
@@ -244,7 +243,7 @@ class Create(AAZCommand):
 
             _elements = _builder.get(".properties.databases[]")
             if _elements is not None:
-                _elements.set_prop("databaseName", AAZStrType, ".databaseName")
+                _elements.set_prop("databaseName", AAZStrType, ".")
 
             return self.serialize_content(_content_value)
 
@@ -383,6 +382,10 @@ class Create(AAZCommand):
             )
 
             _element.synhronizationHealth = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            _element.mostRecentLinkError = AAZStrType(
                 flags={"read_only": True},
             )
 
