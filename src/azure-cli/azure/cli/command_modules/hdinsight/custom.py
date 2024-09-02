@@ -417,16 +417,16 @@ def list_clusters(cmd, client, resource_group_name=None):  # pylint: disable=unu
     return list(clusters_list)
 
 
-def update_cluster(cmd, client, cluster_name, resource_group_name, tags=None, assign_identity=None, no_wait=False):
+def update_cluster(cmd, client, cluster_name, resource_group_name, tags=None, assign_identity_type=None, assign_identity=None, no_wait=False):
     from azure.mgmt.hdinsight.models import ClusterPatchParameters
-    from .util import build_identities_info
+    from .util import build_update_identities_info
     assign_identities = []
     if assign_identity:
         assign_identities.append(assign_identity)
 
     cluster_patch_parameters = ClusterPatchParameters(
         tags=tags,
-        identity=build_identities_info(assign_identities)
+        identity=build_update_identities_info(assign_identity_type, assign_identities)
     )
 
     return sdk_no_wait(no_wait, client.update, resource_group_name, cluster_name, cluster_patch_parameters)
