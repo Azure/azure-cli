@@ -670,16 +670,6 @@ TARGET_RESOURCES_PARAMS = {
         }
     },
     RESOURCE.FabricSql: {
-        'workspace_id': {
-            'options': ['--workspace-id'],
-            'help': 'The workspace id of the fabric sql',
-            'placeholder': 'WorkspaceId'
-        },
-        'sql_id': {
-            'options': ['--sql-id'],
-            'help': 'The sql id of the fabric sql',
-            'placeholder': 'SqlId'
-        }
     }
 }
 
