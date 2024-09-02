@@ -241,7 +241,7 @@ helps['hdinsight azure-monitor-agent disable'] = """
 type: command
 short-summary: Disable the Azure Monitor Agent logs integration on an HDInsight cluster.
 examples:
-  - name: Resize the cluster's workernode.
+  - name: Disable the Azure Monitor Agent logs integration on an HDInsight cluster.
     text: |-
         az hdinsight azure-monitor-agent disable --name MyCluster --resource-group rg
 """
@@ -250,7 +250,7 @@ helps['hdinsight azure-monitor-agent enable'] = """
 type: command
 short-summary: Enable the Azure Monitor Agent logs integration on an HDInsight cluster.
 examples:
-  - name: Resize the cluster's workernode.
+  - name: Enable the Azure Monitor Agent logs integration on an HDInsight cluster.
     text: |-
         az hdinsight azure-monitor-agent enable --name MyCluster --resource-group rg --workspace WorkspaceId --primary-key WorkspaceKey
 """
@@ -259,7 +259,7 @@ helps['hdinsight azure-monitor-agent show'] = """
 type: command
 short-summary: Get the status of Azure Monitor Agent logs integration on an HDInsight cluster.
 examples:
-  - name: Resize the cluster's workernode.
+  - name: Get the status of Azure Monitor Agent logs integration on an HDInsight cluster.
     text: |-
         az hdinsight azure-monitor-agent show --name MyCluster --resource-group rg
 """
