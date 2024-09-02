@@ -421,9 +421,9 @@ class VolumeCreate(_VolumeCreate):
 class VolumeUpdate(_VolumeUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg, AAZIntArgFormat
+        from azure.cli.core.aaz import AAZIntArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        
+
         args_schema.usage_threshold._fmt = AAZIntArgFormat(
             maximum=2457600,
             minimum=50
