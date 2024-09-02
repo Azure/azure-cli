@@ -37,7 +37,7 @@ from knack.arguments import CLIArgumentType
 from .action import AddCustomizedKeys
 
 
-def add_source_resource_block(context, source, enable_id=True, validate_source_id=False):
+def add_source_resource_block(context, source, enable_id=True, validate_source_id=True):
     source_args = SOURCE_RESOURCES_PARAMS.get(source)
     for resource, args in SOURCE_RESOURCES_PARAMS.items():
         if resource != source:
