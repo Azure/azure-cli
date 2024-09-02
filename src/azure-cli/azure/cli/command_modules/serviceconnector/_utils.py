@@ -18,10 +18,17 @@ from ._resource_config import (
     TARGET_RESOURCES_USERTOKEN,
     RESOURCE
 )
-
+from msrestazure.tools import (
+    is_valid_resource_id as is_valid_resource_id_sdk
+)
 
 logger = get_logger(__name__)
 
+
+def is_valid_resource_id(value):
+    if re.search('[\"\'|]', value):
+        return False
+    return is_valid_resource_id_sdk(value)
 
 def should_load_source(source):
     '''Check whether to load `az {source} connection`
@@ -275,9 +282,6 @@ def get_auth_if_no_valid_key_vault_connection(source_name, source_id, key_vault_
 
 # https://docs.microsoft.com/azure/app-service/app-service-key-vault-references
 def get_auth_if_no_valid_key_vault_connection_for_webapp(source_id, key_vault_connections):
-    from msrestazure.tools import (
-        is_valid_resource_id
-    )
 
     try:
         webapp = run_cli_cmd(

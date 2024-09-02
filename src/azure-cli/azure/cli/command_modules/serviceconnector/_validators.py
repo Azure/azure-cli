@@ -14,7 +14,6 @@ from knack.prompting import (
 )
 from msrestazure.tools import (
     parse_resource_id,
-    is_valid_resource_id
 )
 from azure.cli.core import telemetry
 from azure.cli.core.commands.client_factory import get_subscription_id
@@ -26,7 +25,8 @@ from azure.cli.core.azclierror import (
 
 from ._utils import (
     run_cli_cmd,
-    get_object_id_of_current_user
+    get_object_id_of_current_user,
+    is_valid_resource_id
 )
 from ._resource_config import (
     AUTH_TYPE,
