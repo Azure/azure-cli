@@ -7,7 +7,6 @@ import re
 from knack.log import get_logger
 from msrestazure.tools import (
     parse_resource_id,
-    is_valid_resource_id
 )
 from azure.cli.core import telemetry
 from azure.cli.core.commands.client_factory import get_subscription_id
@@ -17,7 +16,8 @@ from azure.cli.core.azclierror import (
 )
 from ._utils import (
     generate_random_string,
-    run_cli_cmd
+    run_cli_cmd,
+    is_valid_resource_id
 )
 from ._resource_config import (
     RESOURCE,
