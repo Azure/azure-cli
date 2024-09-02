@@ -512,7 +512,9 @@ def get_missing_auth_args(cmd, namespace):
             if getattr(namespace, arg, None):
                 auth_param_exist = True
                 break
-
+    
+    if target == RESOURCE.ConfluentKafka:
+        return missing_args
     # when keyvault csi is enabled, auth_type is userIdentity without subs_id and client_id
     if source == RESOURCE.KubernetesCluster and target == RESOURCE.KeyVault:
         if getattr(namespace, 'enable_csi', None):
@@ -663,7 +665,7 @@ def validate_update_params(cmd, namespace):
     '''Get missing args of update command
     '''
     missing_args = dict()
-    if not validate_connection_id(namespace):
+    if not validate_connection_id(namespace) and not validate_source_resource_id(cmd, namespace):
         missing_args.update(get_missing_source_args(cmd, namespace))
     # missing_args.update(get_missing_auth_args(cmd, namespace))
     missing_args.update(get_missing_connection_name(namespace))

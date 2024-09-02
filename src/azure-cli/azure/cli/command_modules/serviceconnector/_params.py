@@ -143,12 +143,12 @@ def add_target_resource_block(context, target):
     if target in TARGET_RESOURCES_PARAMS:
         for arg, content in TARGET_RESOURCES_PARAMS.get(target).items():
             context.argument(arg, options_list=content.get('options'), type=str,
-                            help='{}. Required if \'--target-id\' is not specified.'.format(content.get('help')))
+                             help='{}. Required if \'--target-id\' is not specified.'.format(content.get('help')))
             required_args.append(content.get('options')[0])
 
         context.argument('target_id', type=str,
-                        help='The resource id of target service. Required if {required_args} '
-                        'are not specified.'.format(required_args=str(required_args)))
+                         help='The resource id of target service. Required if {required_args} '
+                         'are not specified.'.format(required_args=str(required_args)))
 
     if target != RESOURCE.KeyVault:
         context.ignore('enable_csi')
@@ -317,7 +317,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         target = RESOURCE.ConfluentKafka
         with self.argument_context('{} connection create {}'.format(source.value, target.value)) as c:
             add_client_type_argument(c, source, target)
-            add_source_resource_block(c, source, enable_id=False, validate_source_id=False)
+            add_source_resource_block(c, source, enable_id=False)
             add_confluent_kafka_argument(c)
             add_configuration_store_argument(c)
             add_secret_store_argument(c, source)
@@ -325,7 +325,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
             add_opt_out_argument(c)
         with self.argument_context('{} connection update {}'.format(source.value, target.value)) as c:
             add_client_type_argument(c, source, target)
-            add_source_resource_block(c, source, enable_id=False, validate_source_id=False)
+            add_source_resource_block(c, source, enable_id=False)
             add_confluent_kafka_argument(c)
             add_configuration_store_argument(c)
             add_secret_store_argument(c, source)
