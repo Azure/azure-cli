@@ -491,8 +491,9 @@ def get_missing_target_args(cmd):
     target = get_target_resource_name(cmd)
     missing_args = dict()
 
-    for arg, content in TARGET_RESOURCES_PARAMS.get(target).items():
-        missing_args[arg] = content
+    if target in TARGET_RESOURCES_PARAMS:
+        for arg, content in TARGET_RESOURCES_PARAMS.get(target).items():
+            missing_args[arg] = content
 
     return missing_args
 
