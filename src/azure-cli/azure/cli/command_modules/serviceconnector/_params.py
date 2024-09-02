@@ -317,7 +317,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         target = RESOURCE.ConfluentKafka
         with self.argument_context('{} connection create {}'.format(source.value, target.value)) as c:
             add_client_type_argument(c, source, target)
-            add_source_resource_block(c, source, enable_id=False)
+            add_source_resource_block(c, source, enable_id=False, validate_source_id=False)
             add_confluent_kafka_argument(c)
             add_configuration_store_argument(c)
             add_secret_store_argument(c, source)
@@ -325,7 +325,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
             add_opt_out_argument(c)
         with self.argument_context('{} connection update {}'.format(source.value, target.value)) as c:
             add_client_type_argument(c, source, target)
-            add_source_resource_block(c, source, enable_id=False)
+            add_source_resource_block(c, source, enable_id=False, validate_source_id=False)
             add_confluent_kafka_argument(c)
             add_configuration_store_argument(c)
             add_secret_store_argument(c, source)
