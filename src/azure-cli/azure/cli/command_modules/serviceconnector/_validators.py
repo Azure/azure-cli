@@ -905,7 +905,7 @@ def validate_params(cmd, namespace):
             namespace.connection_name = generate_connection_name(cmd)
         else:
             validate_connection_name(namespace.connection_name)
-        if getattr(namespace, 'new_addon'):
+        if getattr(namespace, 'new_addon', None):
             _validate_and_apply(validate_addon_params, apply_addon_params)
         else:
             _validate_and_apply(validate_create_params, apply_create_params)
