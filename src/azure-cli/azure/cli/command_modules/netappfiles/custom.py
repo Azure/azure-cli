@@ -10,7 +10,7 @@ from enum import Enum
 from knack.log import get_logger
 from azure.cli.core.azclierror import ValidationError
 from azure.cli.core.aaz import has_value, AAZJsonSelector
-from msrestazure.tools import is_valid_resource_id, parse_resource_id
+from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
 from .aaz.latest.netappfiles import UpdateNetworkSiblingSet as _UpdateNetworkSiblingSet
 from .aaz.latest.netappfiles.account import Create as _AccountCreate, Update as _AccountUpdate
 from .aaz.latest.netappfiles.account.ad import Add as _ActiveDirectoryAdd, List as _ActiveDirectoryList, Update as _ActiveDirectoryUpdate
@@ -423,12 +423,7 @@ class VolumeUpdate(_VolumeUpdate):
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZStrArg, AAZIntArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.vnet = AAZStrArg(
-            options=["--vnet"],
-            arg_group="Properties",
-            help="Name or Resource ID of the vnet. If you want to use a vnet in other resource group or subscription, please provide the Resource ID instead of the name of the vnet.",
-            required=False,
-        )
+        
         args_schema.usage_threshold._fmt = AAZIntArgFormat(
             maximum=2457600,
             minimum=50
