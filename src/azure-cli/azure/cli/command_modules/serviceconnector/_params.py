@@ -37,7 +37,7 @@ from knack.arguments import CLIArgumentType
 from .action import AddCustomizedKeys
 
 
-def add_source_resource_block(context, source, enable_id=True, validate_source_id=True):
+def add_source_resource_block(context, source, enable_id=True):
     source_args = SOURCE_RESOURCES_PARAMS.get(source)
     for resource, args in SOURCE_RESOURCES_PARAMS.items():
         if resource != source:
@@ -57,7 +57,7 @@ def add_source_resource_block(context, source, enable_id=True, validate_source_i
         required_args.append(content.get('options')[0])
 
     validator_kwargs = {
-        'validator': validate_params} if validate_source_id else {}
+        'validator': validate_params}
     if not enable_id:
         context.argument('source_id', options_list=['--source-id'], type=str,
                          help="The resource id of a {source}. Required if {required_args} "
@@ -263,7 +263,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
         with self.argument_context('{} connection list'.format(source.value)) as c:
             add_source_resource_block(
-                c, source, enable_id=False, validate_source_id=True)
+                c, source, enable_id=False)
 
         with self.argument_context('{} connection show'.format(source.value)) as c:
             add_source_resource_block(c, source)
