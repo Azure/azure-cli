@@ -273,6 +273,14 @@ class List(AAZCommand):
                 flags={"read_only": True},
             )
 
+            _element.lastSentLsn = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            _element.lastSentTime = AAZStrType(
+                flags={"read_only": True},
+            )
+
             _element.partnerReplicaId = AAZStrType(
                 flags={"read_only": True},
             )
@@ -281,7 +289,11 @@ class List(AAZCommand):
                 flags={"read_only": True},
             )
 
-            _element.synhronizationHealth = AAZStrType(
+            _element.synchronizationHealth = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            _element.mostRecentLinkError = AAZStrType(
                 flags={"read_only": True},
             )
 

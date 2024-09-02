@@ -6,6 +6,7 @@
 # --------------------------------------------------------------------------------------------
 # pylint: skip-file
 # flake8: noqa
+from azure.core.exceptions import HttpResponseError
 
 from azure.cli.core.aaz import *
 
@@ -115,6 +116,11 @@ class Failover(AAZCommand):
                     path_format_arguments=self.url_parameters,
                 )
 
+            if session.http_response.status_code in [400]:
+                allowed_values = ["Planned", "ForcedAllowDataLoss"]
+                if self.content.get("failoverType") not in allowed_values:
+                    raise HttpResponseError(message="Allowed values for failover type are 'Planned' or 'ForcedAllowDataLoss'.")
+                
             return self.on_error(session.http_response)
 
         @property
@@ -390,6 +396,14 @@ class Failover(AAZCommand):
                 flags={"read_only": True},
             )
 
+            _element.lastSentLsn = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            _element.lastSentTime = AAZStrType(
+                flags={"read_only": True},
+            )
+
             _element.partnerReplicaId = AAZStrType(
                 flags={"read_only": True},
             )
@@ -398,7 +412,11 @@ class Failover(AAZCommand):
                 flags={"read_only": True},
             )
 
-            _element.synhronizationHealth = AAZStrType(
+            _element.synchronizationHealth = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            _element.mostRecentLinkError = AAZStrType(
                 flags={"read_only": True},
             )
 

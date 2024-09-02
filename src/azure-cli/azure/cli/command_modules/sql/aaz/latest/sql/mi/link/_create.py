@@ -22,7 +22,7 @@ class Create(AAZCommand):
     az sql mi link create -g 'rg1' --instance-name 'mi1' --name 'link1' --databases "['db1']"
     --partner-ag-name 'partnerag1' --instance-ag-name 'instanceag1'
     --partner-endpoint 'tcp://server1:5022' --instance-link-role 'Secondary'
-    --failover-mode 'Manual' --seeding-mode 'Automatic' --no-wait')
+    --failover-mode 'Manual' --seeding-mode 'Automatic' --no-wait)
     """
 
     _aaz_info = {
@@ -373,6 +373,14 @@ class Create(AAZCommand):
                 flags={"read_only": True},
             )
 
+            _element.lastSentLsn = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            _element.lastSentTime = AAZStrType(
+                flags={"read_only": True},
+            )
+
             _element.partnerReplicaId = AAZStrType(
                 flags={"read_only": True},
             )
@@ -381,7 +389,7 @@ class Create(AAZCommand):
                 flags={"read_only": True},
             )
 
-            _element.synhronizationHealth = AAZStrType(
+            _element.synchronizationHealth = AAZStrType(
                 flags={"read_only": True},
             )
 
