@@ -16,7 +16,7 @@ from azure.cli.core.commands.validators import \
     get_default_location_from_resource_group
 from ._constants import ImportExportProfiles, ImportMode, FeatureFlagConstants
 
-from ._validators import (validate_appservice_name_or_id, validate_snapshot_query_fields,
+from ._validators import (validate_appservice_name_or_id, validate_sku, validate_snapshot_query_fields,
                           validate_connection_string, validate_datetime,
                           validate_export, validate_import,
                           validate_import_depth, validate_query_fields,
@@ -140,7 +140,6 @@ def load_arguments(self, _):
         c.argument('top', arg_type=top_arg_type)
         c.argument('all_', options_list=['--all'], action='store_true', help="List all items.")
         c.argument('fields', arg_type=fields_arg_type)
-        c.argument('sku', help='The sku of the App Configuration store', arg_type=get_enum_type(['Free', 'Premium', 'Standard']))
         c.argument('endpoint', help='If auth mode is "login", provide endpoint URL of the App Configuration store. The endpoint can be retrieved using "az appconfig show" command. You can configure the default endpoint using `az configure --defaults appconfig_endpoint=<endpoint>`', configured_default='appconfig_endpoint')
         c.argument('auth_mode', arg_type=get_enum_type(['login', 'key']), configured_default='appconfig_auth_mode', validator=validate_auth_mode,
                    help='This parameter can be used for indicating how a data operation is to be authorized. ' +
@@ -150,6 +149,7 @@ def load_arguments(self, _):
                    'For more information, see https://docs.microsoft.com/azure/azure-app-configuration/concept-enable-rbac')
 
     with self.argument_context('appconfig create') as c:
+        c.argument('sku', help='The sku of the App Configuration store', arg_type=get_enum_type(['Free', 'Premium', 'Standard']), validator=validate_sku)
         c.argument('location', options_list=['--location', '-l'], arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
         c.argument('tags', arg_type=tags_type, help="Space-separated tags: key[=value] [key[=value] ...].")
         c.argument('assign_identity', arg_type=identities_arg_type,
@@ -164,6 +164,7 @@ def load_arguments(self, _):
         c.argument('no_replica', help='Proceed without replica creation for premium tier store.', arg_type=get_three_state_flag())
 
     with self.argument_context('appconfig update') as c:
+        c.argument('sku', help='The sku of the App Configuration store', arg_type=get_enum_type(['Free', 'Premium', 'Standard']))
         c.argument('tags', arg_type=tags_type)
         c.argument('enable_public_network', options_list=['--enable-public-network', '-e'], arg_type=get_three_state_flag(),
                    help='When true, requests coming from public networks have permission to access this store while private endpoint is enabled. When false, only requests made through Private Links can reach this store.')
