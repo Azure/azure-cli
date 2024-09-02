@@ -498,8 +498,9 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
 
     validate_service_state(parameters)
     if enable_mi_for_db_linker and auth_action != 'optOutAllAuth':
+        logger.warning('Start creating mi for db linker')
         new_auth_info = enable_mi_for_db_linker(
-            cmd, source_id, target_id, auth_info, client_type, connection_name)
+            cmd, source_id, target_id, auth_info, client_type, connection_name, customized_keys)
         parameters['auth_info'] = new_auth_info or parameters['auth_info']
 
     # migration warning for Spring Azure Cloud

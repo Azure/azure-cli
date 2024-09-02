@@ -422,12 +422,11 @@ def validate_target_resource_id(cmd, namespace):
     '''Validate resource id of a target resource
     '''
     if getattr(namespace, 'target_id', None):
-        if not is_valid_resource_id(namespace.target_id):
+        target = get_target_resource_name(cmd)
+        if not (target == RESOURCE.FabricSql) and not is_valid_resource_id(namespace.target_id):
             e = InvalidArgumentValueError('Resource id is invalid: {}'.format(namespace.target_id))
             telemetry.set_exception(e, 'target-id-invalid')
             raise e
-
-        target = get_target_resource_name(cmd)
         pattern = TARGET_RESOURCES.get(target)
         matched = re.match(get_resource_regex(pattern), namespace.target_id, re.IGNORECASE)
         if matched:
