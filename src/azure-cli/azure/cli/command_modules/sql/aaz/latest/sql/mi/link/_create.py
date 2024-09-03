@@ -9,6 +9,7 @@
 # flake8: noqa
 
 from azure.cli.core.aaz import *
+from azure.core.exceptions import HttpResponseError
 
 @register_command(
     "sql mi link create",
@@ -156,6 +157,20 @@ class Create(AAZCommand):
                     lro_options={"final-state-via": "azure-async-operation"},
                     path_format_arguments=self.url_parameters,
                 )
+
+            if session.http_response.status_code in [400]:
+                allowed_values_seeding_mode = ["Manual", "Automatic"]
+                allowed_values_failover_mode = ["Manual", "None"]
+                allowed_values_instance_link_role = ["Primary", "Secondary"]
+
+                if self.content.get("properties")["seedingMode"] not in allowed_values_seeding_mode:
+                    raise HttpResponseError(message="Allowed values for seeding mode are 'Manual' or 'Automatic'.")
+
+                if self.content.get("properties")["failoverMode"] not in allowed_values_failover_mode:
+                    raise HttpResponseError(message="Allowed values for failover mode are 'Manual' or 'None'.")
+
+                if self.content.get("properties")["instanceLinkRole"] not in allowed_values_instance_link_role:
+                    raise HttpResponseError(message="Allowed values for instance link role are 'Primary' or 'Secondary'.")
 
             return self.on_error(session.http_response)
 
@@ -397,7 +412,7 @@ class Create(AAZCommand):
                 flags={"read_only": True},
             )
 
-            _element.partnerAuthCertValidity = AAZDictType()
+            _element.partnerAuthCertValidity = AAZObjectType()
             partnerAuthCertValidity = _element.partnerAuthCertValidity
 
             partnerAuthCertValidity.certificateName = AAZStrType(

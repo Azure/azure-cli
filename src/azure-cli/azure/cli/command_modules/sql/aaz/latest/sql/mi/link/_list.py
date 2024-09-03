@@ -297,7 +297,7 @@ class List(AAZCommand):
                 flags={"read_only": True},
             )
 
-            _element.partnerAuthCertValidity = AAZDictType()
+            _element.partnerAuthCertValidity = AAZObjectType()
             partnerAuthCertValidity = _element.partnerAuthCertValidity
 
             partnerAuthCertValidity.certificateName = AAZStrType(
