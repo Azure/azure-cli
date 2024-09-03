@@ -1,14 +1,14 @@
 # Azure CLI Subprocess Guidelines
 
-In certain CLI modules, there are scenarios that need to call a subsystem to run commands outside CLI, like getting kubectl info in aks, or deployment setup in mysql using `git` and `gh`, through python built-in [subprocess](https://docs.python.org/3/library/subprocess.html) module. Despite its simplicity and versatility, ensuring the security of applying it can be challenging in different platforms under different circumstance, and it is error-prone for developers to neglect security best practices during development.
+In certain CLI modules, there are scenarios that need to call a subprocess to run commands outside CLI, like getting kubectl info in aks, or deployment setup in mysql using `git` and `gh`, through python built-in [subprocess](https://docs.python.org/3/library/subprocess.html) module. Despite its simplicity and versatility, ensuring the security of applying it can be challenging in different platforms under different circumstance, and it is error-prone for developers to neglect security best practices during development.
 
 
-## Insecure Use Of Subsystem Commands Under Subprocess Module
+## Insecure Use Of Commands Under Subprocess Module
 
 
 ### Dynamic command construction under risk
 
-Assume a script that needs to read in `user_input` from users to execute a `git` related command and runs it through subprocess using shell. In regular cases, users would add a valid git command, like `git --version` or something else, but if undesired input gets logged into this system, like `--version;echo aa`, the appended `;echo aa` would be executed by the subsystem too, like below: 
+Assume a script that needs to read in `user_input` from users to execute a `git` related command and runs it through subprocess using shell. In regular cases, users would add a valid git command, like `git --version` or something else, but if undesired input gets logged into this system, like `--version;echo aa`, the appended `;echo aa` would be executed by `subprocess` too, like below: 
 
 ```python
 import subprocess
@@ -23,14 +23,14 @@ git version 2.34.1
 aa
 ```
 
-This is a simple example for demonstrating the side effects in python's subsystem improper usage. And it's common for CLI developers to build and execute commands dynamically from users' input in a more complicated way. When constructing and executing commands in subprocess through `shell=True`, it exposes a big security vulnerability to potential malicious users outside. 
+This is a simple example for demonstrating the side effects in python's `subprocess` improper usage. And it's common for CLI developers to build and execute commands dynamically from users' input in a more complicated way. When constructing and executing commands in subprocess through `shell=True`, it exposes a big security vulnerability to potential malicious users outside. 
 
 
-## Mitigating Security Vulnerability When Calling Subsystem Commands
+## Mitigating Security Vulnerability When Calling Subprocess Commands
 
 There are several aspects of security practices that developers need to have in mindset to safeguard their CLI modules from command injection attacks.
 
-### CLI Centralized Subsystem Executing
+### CLI centralized subprocess executing
 
 Azure CLI provides a centralized function `run_cmd` adapted from official `subprocess.run`, with necessary argument covered and illegal input blocking enforced. 
 
@@ -73,14 +73,14 @@ Besides that, users might need to know some parts of the accessibility in both `
 4. if the target cmd is `az`-related, like `az group show --name xxxx`, please use internal corresponding function call `cli_ctx.invoke(["az", "group", "show", "--name", "xxx"])` to get the target information.
 
 
-### Best Practices In Subprocess Use Cases
+### Best practices in subprocess use cases
 
 
 The following sections discuss some secure coding conventions that, when implemented, can help protect CLI applications from command injection vulnerabilities when calling subsystems through `subprocess`.
 
 #### Proper input validation and sanitization
 
-Input from users or external sources should never be trusted when appending them into subsystem's cmd. Developers better provide expected patterns to validate and sanitize user input before adding that into subsystem's cmd. 
+Input from users or external sources should never be trusted when appending them into `subprocess` cmd. Developers better provide expected patterns to validate and sanitize user input before adding that into subprocess' cmd. 
 Below is an example input sanitizer that only allows alphanumeric characters from the input string.  
 
 ```python
