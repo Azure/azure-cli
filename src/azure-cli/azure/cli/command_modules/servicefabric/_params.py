@@ -374,6 +374,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('application_name', options_list=['--name', '--application-name'], help='Specify the application name.')
         c.argument('tags', arg_type=tags_type)
 
+
     with self.argument_context('sf managed-application update', validator=validate_update_managed_application) as c:
         c.argument('application_type_version', arg_type=application_type_version)
         c.argument('application_parameters', arg_type=application_parameters)
