@@ -17,7 +17,7 @@ from ._resource_config import (
     TARGET_RESOURCES_USERTOKEN,
     RESOURCE
 )
-from msrestazure.tools import (
+from azure.mgmt.core.tools import (
     parse_resource_id,
     is_valid_resource_id as is_valid_resource_id_sdk
 )
