@@ -166,6 +166,11 @@ class Profile:
                 logger.info('No web browser is available. Fall back to device code.')
                 use_device_code = True
 
+            # https://docs.github.com/en/codespaces/developing-in-a-codespace/default-environment-variables-for-your-codespace
+            if not use_device_code and os.environ.get('CODESPACES'):
+                logger.info('GitHub Codespaces is detected. Fall back to device code.')
+                use_device_code = True
+
             if use_device_code:
                 user_identity = identity.login_with_device_code(scopes=scopes, **kwargs)
             else:
