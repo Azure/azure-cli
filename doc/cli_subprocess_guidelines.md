@@ -42,7 +42,7 @@ What developers need to do is:
 `run_cmd` will add necessary argument type checks and process the input and output the same way as `subprocess.run`, and block potential risks from commands constructed from user input.
 Below is an example for `run_cmd` use case:
 
-```commandline
+```py
 # code before:
 cmd = f"git commit -m {user_message}"
 import subprocess
