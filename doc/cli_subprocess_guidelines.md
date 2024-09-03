@@ -35,9 +35,9 @@ There are several aspects of security practices that developers need to have in 
 Azure cli provides a centralized function `run_cmd` adapted from official `subprocess.run`, with necessary argument covered and illegal input blocking enforced. 
 
 What developers need to do is:
-1) `from azure.cli.core.util import run_cmd`
-2) replace `subprocess.run` (or `Popen` or `check_call` or `check_output` or `call`) with `run_cmd`.
-3) construct cmd args as array like: [executable, arg0, arg1, arg2, ...]
+1. `from azure.cli.core.util import run_cmd`
+2. replace `subprocess.run` (or `Popen` or `check_call` or `check_output` or `call`) with `run_cmd`.
+3. construct cmd `args` as array, like `[executable, arg0, arg1, arg2, ...]`
 
 `run_cmd` will add necessary argument type checks and process the input and output the same way as `subprocess.run`, and block potential risks from commands constructed from user input.
 Below is an example for `run_cmd` use case:
