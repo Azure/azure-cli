@@ -6,7 +6,7 @@ In certain cli modules, there are scenarios that need to call a subsystem to run
 ## Insecure Use Of Subsystem Commands Under Subprocess Module
 
 
-### Dynamic Command Construction Under Risk
+### Dynamic command construction under risk
 
 Assume a script that needs to read in `user_input` from users to execute a `git` related command and runs it through subprocess using shell. In regular cases, users would add a valid git command, like `git --version` or something else, but if undesired input gets logged into this system, like `--version;echo aa`, the appended `;echo aa` would be executed by the subsystem too, like below: 
 
