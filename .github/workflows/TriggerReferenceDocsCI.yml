@@ -33,7 +33,7 @@ jobs:
           $definitionId = $env:AdoPipelineId
           $checkInterval = $env:CheckInterval
           $thisRunLink = "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          $triggerBranch = "${{ github.ref_name }}"
+          $triggerBranch = 'main'
           $variables = @('commitAuthor=azcli', 'triggerFromRepo=https://github.com/Azure/azure-cli', "triggerBranch=$triggerBranch", "triggerByPipeline=$thisRunLink")
 
           $output = az pipelines build queue --definition-id $definitionId --project $project --organization $organization --variables @variables | ConvertFrom-Json -AsHashtable
