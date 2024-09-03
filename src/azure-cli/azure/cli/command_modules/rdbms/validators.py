@@ -313,14 +313,15 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
             resource_group=parse_resource_id(instance.id)["resource_group"],
             server_name=instance.name)
     sku_info = list_location_capability_info['sku_info']
+    sku_info = {k.lower(): v for k, v in sku_info.items()}
     single_az = list_location_capability_info['single_az']
     geo_backup_supported = list_location_capability_info['geo_backup_supported']
     _network_arg_validator(subnet, public_access)
     _pg_tier_validator(tier, sku_info)  # need to be validated first
     if tier is None and instance is not None:
-        tier = instance.sku.tier
-    if "supported_storageV2_size" in sku_info[tier]:
-        supported_storageV2_size = sku_info[tier]["supported_storageV2_size"]
+        tier = instance.sku.tier.lower()
+    if "supported_storageV2_size" in sku_info[tier.lower()]:
+        supported_storageV2_size = sku_info[tier.lower()]["supported_storageV2_size"]
     else:
         supported_storageV2_size = None
     _pg_storage_type_validator(storage_type, auto_grow, high_availability, geo_redundant_backup, performance_tier,
@@ -404,8 +405,8 @@ def _valid_ssdv2_range(storage_gb, sku_info, tier, iops, throughput, instance):
 
 def _pg_tier_validator(tier, sku_info):
     if tier:
-        tiers = get_postgres_tiers(sku_info)
-        if tier not in tiers:
+        tiers = [item.lower() for item in get_postgres_tiers(sku_info)]
+        if tier.lower() not in tiers:
             raise CLIError('Incorrect value for --tier. Allowed values : {}'.format(tiers))
 
 
@@ -413,8 +414,8 @@ def _pg_sku_name_validator(sku_name, sku_info, tier, instance):
     if instance is not None:
         tier = instance.sku.tier if tier is None else tier
     if sku_name:
-        skus = get_postgres_skus(sku_info, tier)
-        if sku_name not in skus:
+        skus = [item.lower() for item in get_postgres_skus(sku_info, tier.lower())]
+        if sku_name.lower() not in skus:
             raise CLIError('Incorrect value for --sku-name. The SKU name does not match {} tier. '
                            'Specify --tier if you did not. Or CLI will set GeneralPurpose as the default tier. '
                            'Allowed values : {}'.format(tier, skus))
@@ -423,13 +424,13 @@ def _pg_sku_name_validator(sku_name, sku_info, tier, instance):
 def _pg_storage_performance_tier_validator(performance_tier, sku_info, tier=None, storage_size=None):
     if performance_tier:
         tiers = get_postgres_tiers(sku_info)
-        if tier in tiers:
+        if tier.lower() in [item.lower() for item in tiers]:
             if storage_size is None:
-                performance_tiers = get_performance_tiers(sku_info[tier]["storage_edition"])
+                performance_tiers = [item.lower() for item in get_performance_tiers(sku_info[tier.lower()]["storage_edition"])]
             else:
-                performance_tiers = get_performance_tiers_for_storage(sku_info[tier]["storage_edition"],
-                                                                      storage_size=storage_size)
-            if performance_tier not in performance_tiers:
+                performance_tiers = [item.lower() for item in get_performance_tiers_for_storage(sku_info[tier.lower()]["storage_edition"],
+                                                                      storage_size=storage_size)]
+            if performance_tier.lower() not in performance_tiers:
                 raise CLIError('Incorrect value for --performance-tier for storage-size: {}.'
                                ' Allowed values : {}'.format(storage_size, performance_tiers))
 
@@ -500,13 +501,13 @@ def _network_arg_validator(subnet, public_access):
 
 
 def maintenance_window_validator(ns):
-    options = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Disabled", "disabled"]
+    options = ["sun", "mon", "tue", "wed", "thu", "fri", "sat", "disabled"]
     if ns.maintenance_window:
         parsed_input = ns.maintenance_window.split(':')
         if not parsed_input or len(parsed_input) > 3:
             raise CLIError('Incorrect value for --maintenance-window. '
                            'Enter <Day>:<Hour>:<Minute>. Example: "Mon:8:30" to schedule on Monday, 8:30 UTC')
-        if len(parsed_input) >= 1 and parsed_input[0] not in options:
+        if len(parsed_input) >= 1 and parsed_input[0].lower() not in options:
             raise CLIError('Incorrect value for --maintenance-window. '
                            'The first value means the scheduled day in a week or '
                            'can be "Disabled" to reset maintenance window. '
