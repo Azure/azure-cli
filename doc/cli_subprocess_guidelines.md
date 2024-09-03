@@ -66,6 +66,7 @@ return output.stdout
 
 All various kinds of `subprocess` Popen calling use cases can be easily adjusted into `run_cmd` with security risks processed and eliminated in this centralized function.
 
+#### Notes
 Besides that, users might need to know some parts of the accessibility in both `run_cmd` and `subprocess`
 1. when calling shell built-in cmds, like `dir` or `echo`, using `shell=True` **in windows platform**, `subprocess` implicitly uses `cmd.exe`, while `run_cmd` asks developers to provide the `cmd.exe` as executable file specifically in the arg list's first item, like `["cmd.exe", "/c", "echo", "abc"]`
 2. if developers want to find an easy way to split their current cmd string into list, **for unix-like platforms**, developers can apply [`shlex.split`](https://docs.python.org/3/library/shlex.html#shlex.split) for quick access. But a prepared cmd statement is still more recommended (for more info about prepared cmd statement, please read below sections). 
