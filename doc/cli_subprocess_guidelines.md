@@ -1,6 +1,6 @@
 # Azure CLI Subprocess Guidelines
 
-In certain cli modules, there are scenarios that need to call a subsystem to run commands outside cli, like getting kubectl info in aks, or deployment setup in mysql using `git` and `gh`, through python built-in [subprocess](https://docs.python.org/3/library/subprocess.html) module. Despite its simplicity and versatility, ensuring the security of applying it can be challenging in different platforms under different circumstance, and it is error-prone for developers to neglect security best practices during development.
+In certain CLI modules, there are scenarios that need to call a subsystem to run commands outside CLI, like getting kubectl info in aks, or deployment setup in mysql using `git` and `gh`, through python built-in [subprocess](https://docs.python.org/3/library/subprocess.html) module. Despite its simplicity and versatility, ensuring the security of applying it can be challenging in different platforms under different circumstance, and it is error-prone for developers to neglect security best practices during development.
 
 
 ## Insecure Use Of Subsystem Commands Under Subprocess Module
@@ -10,29 +10,29 @@ In certain cli modules, there are scenarios that need to call a subsystem to run
 
 Assume a script that needs to read in `user_input` from users to execute a `git` related command and runs it through subprocess using shell. In regular cases, users would add a valid git command, like `git --version` or something else, but if undesired input gets logged into this system, like `--version;echo aa`, the appended `;echo aa` would be executed by the subsystem too, like below: 
 
-```commandline
+```python
 import subprocess
 user_input = input("input a git command to run: ")
 cmd = f"git {user_input}"
 subprocess.run(cmd, shell=True)
 ```
 
-```commandline
+```python
 input a git command to run: --version;echo aa
 git version 2.34.1
 aa
 ```
 
-This is a simple example for demonstrating the side effects in python's subsystem improper usage. And it's common for cli developers to build and execute commands dynamically from users' input in a more complicated way. When constructing and executing commands in subprocess through `shell=True`, it exposes a big security vulnerability to potential malicious users outside. 
+This is a simple example for demonstrating the side effects in python's subsystem improper usage. And it's common for CLI developers to build and execute commands dynamically from users' input in a more complicated way. When constructing and executing commands in subprocess through `shell=True`, it exposes a big security vulnerability to potential malicious users outside. 
 
 
 ## Mitigating Security Vulnerability When Calling Subsystem Commands
 
-There are several aspects of security practices that developers need to have in mindset to safeguard their cli modules from command injection attacks.
+There are several aspects of security practices that developers need to have in mindset to safeguard their CLI modules from command injection attacks.
 
-### Cli Centralized Subsystem Executing
+### CLI Centralized Subsystem Executing
 
-Azure cli provides a centralized function `run_cmd` adapted from official `subprocess.run`, with necessary argument covered and illegal input blocking enforced. 
+Azure CLI provides a centralized function `run_cmd` adapted from official `subprocess.run`, with necessary argument covered and illegal input blocking enforced. 
 
 What developers need to do is:
 1. `from azure.cli.core.util import run_cmd`
@@ -42,7 +42,7 @@ What developers need to do is:
 `run_cmd` will add necessary argument type checks and process the input and output the same way as `subprocess.run`, and block potential risks from commands constructed from user input.
 Below is an example for `run_cmd` use case:
 
-```py
+```python
 # code before:
 cmd = f"git commit -m {user_message}"
 import subprocess
@@ -53,7 +53,7 @@ return output.stdout
 ```
 
 If `run_cmd` is applied, it would be like:
-```commandline
+```python
 # code after:
 cmd = ["git","commit", "-m", user_message]
 import subprocess
@@ -67,34 +67,35 @@ return output.stdout
 All various kinds of `subprocess` Popen calling use cases can be easily adjusted into `run_cmd` with security risks processed and eliminated in this centralized function.
 
 Besides that, users might need to know some parts of the accessibility in both `run_cmd` and `subprocess`
-1) When calling shell built-in cmds, like `dir` or `echo`, using `shell=True` **in windows platform**, `subprocess` implicitly uses `cmd.exe`, while `run_cmd` asks developers to provide the `cmd.exe` as executable file specifically in the arg list's first item, like `["cmd.exe", "/c", "echo", "abc"]`
-2) if developers want to find an easy way to split their current cmd string into list, **for unix-like platforms**, developers can apply [`shlex.split`](https://docs.python.org/3/library/shlex.html#shlex.split) for quick access. But a prepared cmd statement is still more recommended (for more info about prepared cmd statement, please read below sections).
-3) it might be not that obvious to find target command's executable file **in windows platform**, a tool developer can use is `shutil.which` that gives the executable file path in windows system, like `shutil.which(git)`. The cmd `git --version` can be adjusted as `[shutil.which(git), "--version"]`. Please provide the corresponding executable path in target platforms.
-4) if the target cmd is az-related, like `az group show --name xxxx`, please use internal corresponding func call to get the target information.
+1. when calling shell built-in cmds, like `dir` or `echo`, using `shell=True` **in windows platform**, `subprocess` implicitly uses `cmd.exe`, while `run_cmd` asks developers to provide the `cmd.exe` as executable file specifically in the arg list's first item, like `["cmd.exe", "/c", "echo", "abc"]`
+2. if developers want to find an easy way to split their current cmd string into list, **for unix-like platforms**, developers can apply [`shlex.split`](https://docs.python.org/3/library/shlex.html#shlex.split) for quick access. But a prepared cmd statement is still more recommended (for more info about prepared cmd statement, please read below sections). 
+3. if developers want to locate the target command's executable file, a tool developers can use is `shutil.which` that gives the full executable file path in system, like `shutil.which(git)` returns the full `git.exe` path in windows platform `C:\\Program Files\\Git\\cmd\\git.EXE`. 
+4. if the target cmd is `az`-related, like `az group show --name xxxx`, please use internal corresponding function call `cli_ctx.invoke(["az", "group", "show", "--name", "xxx"])` to get the target information.
 
 
 ### Best Practices In Subprocess Use Cases
 
 
-The following sections discuss some secure coding conventions that, when implemented, can help protect cli applications from command injection vulnerabilities when calling subsystems through `subprocess`.
+The following sections discuss some secure coding conventions that, when implemented, can help protect CLI applications from command injection vulnerabilities when calling subsystems through `subprocess`.
 
 #### Proper input validation and sanitization
 
 Input from users or external sources should never be trusted when appending them into subsystem's cmd. Developers better provide expected patterns to validate and sanitize user input before adding that into subsystem's cmd. 
 Below is an example input sanitizer that only allows alphanumeric characters from the input string.  
 
-```commandline
+```python
 import re
 def sanitize_input(user_input):
     return re.sub(r'[^a-zA-Z0-9]', '', user_input)
 ```
-In a real cli module scenario, developers better use their corresponding sanitization pattern for reducing the chaining commands risks.
+In a real CLI module scenario, developers better use their corresponding sanitization pattern for reducing the chaining commands risks.
 
 #### Use parameterized cmd statement
 
 A parameterized cmd statement is a way to structure a command starting from defining the command structure first and then provide the parameters that should be inserted into the command separately. 
 In this way, the system will treat the first item as the executable file and the left item as args of that executable application.
-```
+
+```python
 # instead of
 cmd = f"git {user_input}"
 # using 
@@ -107,4 +108,4 @@ When using subprocess module, avoid `shell=True` argument when it comes with cmd
 
 
 ## Summary
-Ensuring the safety of cli from command injection under subprocess calling requires an in-depth understanding of these vulnerabilities and also proactive measures to counteract potential exploits. Cli developers can either apply the three security practices, if applicable, when using builtin `subprocess`, or use a more centralized func `run_cmd` cli provided, to safeguard cli modules from command injection attack and for future more accessible security enforcements.
+Ensuring the safety of Azure CLI from command injection under subprocess calling requires an in-depth understanding of these vulnerabilities and also proactive measures to counteract potential exploits. CLI developers can apply the three security practices, if applicable, when using builtin `subprocess`, but it's recommended to use the centralized function `run_cmd` CLI provided, to safeguard CLI modules from command injection attack and for future more accessible security enforcements.
