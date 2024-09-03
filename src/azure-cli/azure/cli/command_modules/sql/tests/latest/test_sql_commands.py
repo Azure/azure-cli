@@ -7373,7 +7373,7 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
         partner_ag_name = 'AG_CLI1'
         replication_mode = 'Async'
         database_name = 'CLI1'
-        databases = "[{'databaseName': 'CLI1'}]"
+        databases = "['CLI1']"
         partner_endpoint = 'tcp://10.0.1.8:5022'
         instance_link_role = 'Primary'
         failover_mode = 'Manual'
@@ -7456,7 +7456,7 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
         instance_ag_name = 'AG_CLI1_MI'
         partner_ag_name = 'AG_CLI1'
         replication_mode = 'Async'
-        databases = "[{'databaseName': 'CLI1'}]"
+        databases = "['CLI1']"
         partner_endpoint = 'tcp://10.0.1.8:5022'
         instance_link_role = 'Primary'
         failover_mode = 'Manual'
@@ -7523,7 +7523,7 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
         instance_ag_name = 'AG_CLI1_MI'
         partner_ag_name = 'AG_CLI1'
         replication_mode = 'Async'
-        databases = "[{'databaseName': 'CLI1'}]"
+        databases = "['CLI1']"
         partner_endpoint = 'tcp://10.0.1.8:5022'
         instance_link_role = 'Primary'
         failover_mode = 'Manual'
@@ -7591,7 +7591,7 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
         instance_ag_name = 'AG_PS4_MI'
         partner_ag_name = 'AG_PS4'
         replication_mode = 'Async'
-        databases = "[{'databaseName': 'PS4'}]"
+        databases = "['PS4']"
         partner_endpoint = 'tcp://10.0.1.8:5022'
         instance_link_role = 'Secondary'
         failover_mode = 'Manual'
@@ -7658,7 +7658,6 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
                  checks=[JMESPathCheck('length(@)', 0)]).get_output_in_json
 
     @AllowLargeResponse()
-    @record_only()
     def test_sql_mi_link_error_handling(self):
         rg = 'DaniRG'
         mi_name = 'chimera-canary-gpv2-01'
@@ -7667,7 +7666,7 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
         instance_ag_name = 'AG_PS4_MI'
         partner_ag_name = 'AG_PS4'
         replication_mode = 'Async'
-        databases = "[{'databaseName': 'PS4'}]"
+        databases = "['PS4']"
         empty_databases = "[]"
         partner_endpoint = 'tcp://10.0.1.8:5022'
         instance_link_role = 'Secondary'
