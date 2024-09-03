@@ -42,7 +42,8 @@ logger = get_logger(__name__)
 AddonConfig = {
     RESOURCE.Postgres: {
         'create': [
-            'az postgres server create -g "{target_resource_group}" -n "{server}" -l "{location}" -u "{user}" -p "{password}"',
+            'az postgres server create -g "{target_resource_group}" -n "{server}" -l "{location}" -u "{user}" \
+                -p "{password}"',
             'az postgres db create -g "{target_resource_group}" -s "{server}" -n {database}'
         ],
         'delete': [

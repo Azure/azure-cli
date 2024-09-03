@@ -512,7 +512,7 @@ def get_missing_auth_args(cmd, namespace):
             if getattr(namespace, arg, None):
                 auth_param_exist = True
                 break
-    
+
     if target == RESOURCE.ConfluentKafka:
         return missing_args
     # when keyvault csi is enabled, auth_type is userIdentity without subs_id and client_id

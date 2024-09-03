@@ -7,7 +7,6 @@ import re
 import time
 from knack.log import get_logger
 from knack.util import todict, CLIError
-from msrestazure.tools import parse_resource_id
 from azure.cli.core.azclierror import (
     ValidationError,
     CLIInternalError
@@ -19,6 +18,7 @@ from ._resource_config import (
     RESOURCE
 )
 from msrestazure.tools import (
+    parse_resource_id,
     is_valid_resource_id as is_valid_resource_id_sdk
 )
 
@@ -29,6 +29,7 @@ def is_valid_resource_id(value):
     if re.search('[\"\'|]', value):
         return False
     return is_valid_resource_id_sdk(value)
+
 
 def should_load_source(source):
     '''Check whether to load `az {source} connection`
