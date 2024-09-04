@@ -314,6 +314,7 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                       signalr=None,                                          # Resource.SignalR
                       appinsights=None,                                      # Resource.AppInsights
                       target_app_name=None,                                  # Resource.ContainerApp
+                      connstr_props=None,                                    # Resource.FabricSql
                       ):
     auth_action = 'optOutAllAuth' if (opt_out_list is not None and
                                       OPT_OUT_OPTION.AUTHENTICATION.value in opt_out_list) else None
@@ -341,7 +342,8 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                                                       cluster, scope, enable_csi,
                                                       customized_keys=customized_keys,
                                                       opt_out_list=opt_out_list,
-                                                      app_config_id=app_config_id)
+                                                      app_config_id=app_config_id,
+                                                      connstr_props=connstr_props)
         raise CLIInternalError("Fail to install `serviceconnector-passwordless` extension. Please manually install it"
                                " with `az extension add --name serviceconnector-passwordless --upgrade`"
                                " and rerun the command")
@@ -360,8 +362,8 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                                   cluster, scope, enable_csi,
                                   customized_keys=customized_keys,
                                   opt_out_list=opt_out_list,
-                                  app_config_id=app_config_id
-                                  )
+                                  app_config_id=app_config_id,
+                                  connstr_props=connstr_props)
 
 
 # The function is used in extension, new feature must be added in the end for backward compatibility
@@ -394,6 +396,7 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
                            opt_out_list=None,
                            app_config_id=None,
                            target_app_name=None,                                  # Resource.ContainerApp
+                           connstr_props=None,                                    # Resource.FabricSql
                            **kwargs,
                            ):
     if not source_id:
@@ -436,6 +439,7 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
             'configurationStore': {
                 'appConfigurationId': app_config_id,
             },
+            'additionalConnectionStringProperties': connstr_props,
             'action': config_action
         },
         'publicNetworkSolution': {
@@ -500,7 +504,7 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
     if enable_mi_for_db_linker and auth_action != 'optOutAllAuth':
         logger.warning('Start creating mi for db linker')
         new_auth_info = enable_mi_for_db_linker(
-            cmd, source_id, target_id, auth_info, client_type, connection_name, customized_keys)
+            cmd, source_id, target_id, auth_info, client_type, connection_name, connstr_props)
         parameters['auth_info'] = new_auth_info or parameters['auth_info']
 
     # migration warning for Spring Azure Cloud
@@ -652,6 +656,7 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals, too-many-
                       site=None, slot=None,                                   # Resource.WebApp
                       spring=None, app=None, deployment=None,                 # Resource.SpringCloud
                       customized_keys=None,
+                      connstr_props=None,           # Resource.FabricSql
                       opt_out_list=None,
                       ):
 
@@ -705,6 +710,10 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals, too-many-
     if linker.get('configurationInfo') and linker.get('configurationInfo').get('customizedKeys'):
         customized_keys = customized_keys or linker.get('configurationInfo').get('customizedKeys')
 
+    if linker.get('configurationInfo') and linker.get('configurationInfo').get('additionalConnectionStringProperties'):
+        connstr_props = connstr_props or linker.get(
+            'configurationInfo').get('additionalConnectionStringProperties')
+
     config_action = 'optOut' if (opt_out_list is not None and
                                  OPT_OUT_OPTION.CONFIGURATION_INFO.value in opt_out_list) else None
     public_network_action = 'optOut' if (opt_out_list is not None and
@@ -724,6 +733,7 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals, too-many-
             'configurationStore': {
                 'appConfigurationId': app_config_id
             },
+            'additionalConnectionStringProperties': connstr_props,
             'action': config_action
         },
         'publicNetworkSolution': {
