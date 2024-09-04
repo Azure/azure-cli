@@ -1176,7 +1176,7 @@ SUPPORTED_CLIENT_TYPE = {
             CLIENT_TYPE.Java,
             CLIENT_TYPE.Python,
             CLIENT_TYPE.Go,
-            CLIENT_TYPE.SpringBoot,
+            CLIENT_TYPE.Php,
             CLIENT_TYPE.Blank
         ],
         RESOURCE.AppInsights: [
