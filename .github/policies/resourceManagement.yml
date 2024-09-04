@@ -1410,8 +1410,8 @@ configuration:
         then:
         - mentionUsers:
             mentionees:
-            - AnatoliB
-            - Francisco-Gamino
+            - kamperiadis
+            - khkh-ms
             - shreyabatra4
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
@@ -3219,10 +3219,16 @@ configuration:
       - payloadType: Issues
       - or:
         - titleContains:
-            pattern: '[Aa]z \b(account|group|resource|provider|feature|tag|policy|lock|managedapp|resourcemanagement)\b'
+            pattern: '[Aa]z \b(group|resource|provider|feature|tag|policy|lock|managedapp|resourcemanagement)\b'
             isRegex: True
         - bodyContains:
-            pattern: '[Aa]z \b(account|group|resource|provider|feature|tag|policy|lock|managedapp|resourcemanagement)\b'
+            pattern: '[Aa]z \b(group|resource|provider|feature|tag|policy|lock|managedapp|resourcemanagement)\b'
+            isRegex: True
+        - titleContains:
+            pattern: '[Aa]z account (lock|management-group)\b'
+            isRegex: True
+        - bodyContains:
+            pattern: '[Aa]z account (lock|management-group)\b'
             isRegex: True
       - or:
         - isAction:
@@ -3240,6 +3246,31 @@ configuration:
       - addLabel:
           label: question
       description: '[arm] auto assign labels and users based on issue description.'
+    - if:
+        - payloadType: Issues
+        - or:
+            - titleContains:
+                pattern: '[Aa]z account\b(?!\s+(lock|management-group)\b)'
+                isRegex: True
+            - bodyContains:
+                pattern: '[Aa]z account\b(?!\s+(lock|management-group)\b)'
+                isRegex: True
+        - or:
+            - isAction:
+                action: Opened
+      then:
+        - addLabel:
+            label: Auto-Assign
+        - addLabel:
+            label: ARM
+        - assignTo:
+            users:
+              - jiasli
+        - addLabel:
+            label: Azure CLI Team
+        - addLabel:
+            label: question
+      description: '[arm] auto assign labels and users based on issue description. '
     - if:
       - payloadType: Issues
       - or:

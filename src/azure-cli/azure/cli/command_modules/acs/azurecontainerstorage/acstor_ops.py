@@ -6,7 +6,11 @@
 from azure.cli.core.azclierror import UnknownError
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
+    CONST_ACSTOR_ALL,
     CONST_ACSTOR_K8S_EXTENSION_NAME,
+    CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY,
+    CONST_DISK_TYPE_PV_WITH_ANNOTATION,
+    CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD,
     CONST_EXT_INSTALLATION_NAME,
     CONST_K8S_EXTENSION_CLIENT_FACTORY_MOD_NAME,
     CONST_K8S_EXTENSION_CUSTOM_MOD_NAME,
@@ -15,12 +19,12 @@ from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
     CONST_STORAGE_POOL_OPTION_NVME,
     CONST_STORAGE_POOL_OPTION_SSD,
     CONST_STORAGE_POOL_SKU_PREMIUM_LRS,
-    CONST_ACSTOR_ALL,
     CONST_STORAGE_POOL_TYPE_AZURE_DISK,
     CONST_STORAGE_POOL_TYPE_ELASTIC_SAN,
     CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK,
 )
 from azure.cli.command_modules.acs.azurecontainerstorage._helpers import (
+    check_if_new_storagepool_creation_required,
     get_k8s_extension_module,
     get_current_resource_value_args,
     get_desired_resource_value_args,
@@ -46,7 +50,11 @@ def perform_enable_azure_container_storage(  # pylint: disable=too-many-statemen
     storage_pool_sku,
     storage_pool_option,
     acstor_nodepool_skus,
+    ephemeral_disk_volume_type,
+    ephemeral_disk_nvme_perf_tier,
     is_cluster_create,
+    existing_ephemeral_disk_volume_type=CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY,
+    existing_ephemeral_nvme_perf_tier=CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD,
     is_extension_installed=False,
     is_azureDisk_enabled=False,
     is_elasticSan_enabled=False,
@@ -69,51 +77,88 @@ def perform_enable_azure_container_storage(  # pylint: disable=too-many-statemen
         storage_pool_type,
     )
 
-    # Step 3: Configure the storagepool parameters
-    config_settings = []
-    if storage_pool_name is None:
-        storage_pool_name = storage_pool_type.lower()
-        if storage_pool_type == CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK:
-            storage_pool_name = storage_pool_type.lower() + "-" + storage_pool_option.lower()
-    if storage_pool_size is None:
-        storage_pool_size = CONST_STORAGE_POOL_DEFAULT_SIZE_ESAN if \
-            storage_pool_type == CONST_STORAGE_POOL_TYPE_ELASTIC_SAN else \
-            CONST_STORAGE_POOL_DEFAULT_SIZE
+    is_storagepool_create_op_required = check_if_new_storagepool_creation_required(
+        storage_pool_type,
+        ephemeral_disk_volume_type,
+        ephemeral_disk_nvme_perf_tier,
+        existing_ephemeral_disk_volume_type,
+        existing_ephemeral_nvme_perf_tier,
+        is_extension_installed,
+        is_ephemeralDisk_nvme_enabled,
+        is_ephemeralDisk_localssd_enabled,
+    )
 
+    config_settings = []
     azure_disk_enabled = is_azureDisk_enabled if is_extension_installed else False
     elastic_san_enabled = is_elasticSan_enabled if is_extension_installed else False
     ephemeral_disk_nvme_enabled = is_ephemeralDisk_nvme_enabled if is_extension_installed else False
     ephemeral_disk_localssd_enabled = is_ephemeralDisk_localssd_enabled if is_extension_installed else False
+    # Step 3: Configure the storagepool parameters
+    if is_storagepool_create_op_required:
+        if storage_pool_name is None:
+            storage_pool_name = storage_pool_type.lower()
+            if storage_pool_type == CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK:
+                storage_pool_name = storage_pool_type.lower() + "-" + storage_pool_option.lower()
+        if storage_pool_size is None:
+            storage_pool_size = CONST_STORAGE_POOL_DEFAULT_SIZE_ESAN if \
+                storage_pool_type == CONST_STORAGE_POOL_TYPE_ELASTIC_SAN else \
+                CONST_STORAGE_POOL_DEFAULT_SIZE
 
-    epheremaldisk_type = ""
-    if storage_pool_type == CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK:
-        if storage_pool_option == CONST_STORAGE_POOL_OPTION_NVME:
-            ephemeral_disk_nvme_enabled = True
-        elif storage_pool_option == CONST_STORAGE_POOL_OPTION_SSD:
-            ephemeral_disk_localssd_enabled = True
-        epheremaldisk_type = storage_pool_option.lower()
-    else:
-        if storage_pool_sku is None:
-            storage_pool_sku = CONST_STORAGE_POOL_SKU_PREMIUM_LRS
-        if storage_pool_type == CONST_STORAGE_POOL_TYPE_ELASTIC_SAN:
-            config_settings.append({"global.cli.storagePool.elasticSan.sku": storage_pool_sku})
-            elastic_san_enabled = True
-        elif storage_pool_type == CONST_STORAGE_POOL_TYPE_AZURE_DISK:
-            config_settings.append({"global.cli.storagePool.azureDisk.sku": storage_pool_sku})
-            azure_disk_enabled = True
+        epheremaldisk_type = ""
+        if storage_pool_type == CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK:
+            if storage_pool_option == CONST_STORAGE_POOL_OPTION_NVME:
+                ephemeral_disk_nvme_enabled = True
+            elif storage_pool_option == CONST_STORAGE_POOL_OPTION_SSD:
+                ephemeral_disk_localssd_enabled = True
+            epheremaldisk_type = storage_pool_option.lower()
+        else:
+            if storage_pool_sku is None:
+                storage_pool_sku = CONST_STORAGE_POOL_SKU_PREMIUM_LRS
+            if storage_pool_type == CONST_STORAGE_POOL_TYPE_ELASTIC_SAN:
+                config_settings.append({"global.cli.storagePool.elasticSan.sku": storage_pool_sku})
+                elastic_san_enabled = True
+            elif storage_pool_type == CONST_STORAGE_POOL_TYPE_AZURE_DISK:
+                config_settings.append({"global.cli.storagePool.azureDisk.sku": storage_pool_sku})
+                azure_disk_enabled = True
+
+        config_settings.extend(
+            [
+                {"global.cli.storagePool.install.name": storage_pool_name},
+                {"global.cli.storagePool.install.size": storage_pool_size},
+                {"global.cli.storagePool.install.type": storage_pool_type},
+                {"global.cli.storagePool.install.diskType": epheremaldisk_type},
+            ]
+        )
+
+    enable_ephemeral_bypass_annotation = (
+        (ephemeral_disk_volume_type is None and
+            existing_ephemeral_nvme_perf_tier.lower() == CONST_DISK_TYPE_PV_WITH_ANNOTATION.lower()) or
+        (ephemeral_disk_volume_type is not None and
+            ephemeral_disk_volume_type.lower() == CONST_DISK_TYPE_PV_WITH_ANNOTATION.lower())
+    )
+
+    if existing_ephemeral_nvme_perf_tier is None:
+        existing_ephemeral_nvme_perf_tier = CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
+    if ephemeral_disk_nvme_perf_tier is None:
+        ephemeral_disk_nvme_perf_tier = existing_ephemeral_nvme_perf_tier
+
+    perf_tier_updated = False
+    if existing_ephemeral_nvme_perf_tier.lower() != ephemeral_disk_nvme_perf_tier.lower():
+        perf_tier_updated = True
 
     config_settings.extend(
         [
             {"global.cli.activeControl": True},
-            {"global.cli.storagePool.install.create": True},
-            {"global.cli.storagePool.install.name": storage_pool_name},
-            {"global.cli.storagePool.install.size": storage_pool_size},
-            {"global.cli.storagePool.install.type": storage_pool_type},
-            {"global.cli.storagePool.install.diskType": epheremaldisk_type},
+            {"global.cli.storagePool.install.create": is_storagepool_create_op_required},
             {"global.cli.storagePool.azureDisk.enabled": azure_disk_enabled},
             {"global.cli.storagePool.elasticSan.enabled": elastic_san_enabled},
             {"global.cli.storagePool.ephemeralDisk.nvme.enabled": ephemeral_disk_nvme_enabled},
             {"global.cli.storagePool.ephemeralDisk.temp.enabled": ephemeral_disk_localssd_enabled},
+            {
+                "global.cli.storagePool.ephemeralDisk.enableEphemeralBypassAnnotation":
+                enable_ephemeral_bypass_annotation
+            },
+            {"global.cli.storagePool.ephemeralDisk.nvme.perfTier": ephemeral_disk_nvme_perf_tier},
             # Always set cli.storagePool.disable.type to empty
             # and cli.storagePool.disable.validation to False
             # during enable operation so that any older disable
@@ -131,11 +176,13 @@ def perform_enable_azure_container_storage(  # pylint: disable=too-many-statemen
         resource_args = get_desired_resource_value_args(
             storage_pool_type,
             storage_pool_option,
+            ephemeral_disk_nvme_perf_tier,
             current_core_value,
             is_azureDisk_enabled,
             is_elasticSan_enabled,
             is_ephemeralDisk_localssd_enabled,
             is_ephemeralDisk_nvme_enabled,
+            perf_tier_updated,
             acstor_nodepool_skus,
             True,
         )
@@ -145,6 +192,7 @@ def perform_enable_azure_container_storage(  # pylint: disable=too-many-statemen
             storage_pool_type,
             storage_pool_option,
             acstor_nodepool_skus,
+            ephemeral_disk_nvme_perf_tier,
         )
 
     config_settings.extend(resource_args)
@@ -162,6 +210,9 @@ def perform_enable_azure_container_storage(  # pylint: disable=too-many-statemen
         {"global.cli.storagePool.install.type": ""},
         {"global.cli.storagePool.install.diskType": ""},
     ]
+
+    update_after_exception = False
+    delete_extension = False
     try:
         if is_extension_installed:
             result = k8s_extension_custom_mod.update_k8s_extension(
@@ -204,8 +255,11 @@ def perform_enable_azure_container_storage(  # pylint: disable=too-many-statemen
                 "Please run `az aks update` along with `--enable-azure-container-storage` "
                 "to enable Azure Container Storage."
             )
+
+            delete_extension = True
         else:
             if is_extension_installed:
+                update_after_exception = True
                 logger.error(
                     "AKS update to enable Azure Container Storage pool type %s failed. \n"
                     " Error: %s. Resetting cluster state.", storage_pool_type, ex
@@ -219,6 +273,7 @@ def perform_enable_azure_container_storage(  # pylint: disable=too-many-statemen
                     is_elasticSan_enabled,
                     is_ephemeralDisk_localssd_enabled,
                     is_ephemeralDisk_nvme_enabled,
+                    existing_ephemeral_nvme_perf_tier,
                     current_core_value,
                 )
 
@@ -230,23 +285,53 @@ def perform_enable_azure_container_storage(  # pylint: disable=too-many-statemen
                     update_settings.append({"global.cli.storagePool.elasticSan.enabled": False})
                 elif storage_pool_type == CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK:
                     if storage_pool_option == CONST_STORAGE_POOL_OPTION_NVME:
-                        update_settings.append({"global.cli.storagePool.ephemeralDisk.nvme.enabled": False})
+                        update_settings.extend(
+                            [
+                                {"global.cli.storagePool.ephemeralDisk.nvme.enabled": False},
+                                {
+                                    "global.cli.storagePool.ephemeralDisk.nvme.perfTier":
+                                    existing_ephemeral_nvme_perf_tier
+                                },
+                            ]
+                        )
                     elif storage_pool_option == CONST_STORAGE_POOL_OPTION_SSD:
                         update_settings.append({"global.cli.storagePool.ephemeralDisk.temp.enabled": False})
+                    enable_ephemeral_bypass_annotation = (
+                        existing_ephemeral_disk_volume_type.lower() == CONST_DISK_TYPE_PV_WITH_ANNOTATION.lower()
+                    )
+                    update_settings.append(
+                        {
+                            "global.cli.storagePool.ephemeralDisk.enableEphemeralBypassAnnotation":
+                            enable_ephemeral_bypass_annotation
+                        }
+                    )
             else:
                 logger.error("AKS update to enable Azure Container Storage failed.\nError: %s", ex)
+                delete_extension = True
 
-    k8s_extension_custom_mod.update_k8s_extension(
-        cmd,
-        client,
-        resource_group,
-        cluster_name,
-        CONST_EXT_INSTALLATION_NAME,
-        "managedClusters",
-        configuration_settings=update_settings,
-        yes=True,
-        no_wait=True,
-    )
+    if delete_extension:
+        k8s_extension_custom_mod.delete_k8s_extension(
+            cmd,
+            client,
+            resource_group,
+            cluster_name,
+            CONST_EXT_INSTALLATION_NAME,
+            "managedClusters",
+            yes=True,
+            no_wait=True,
+        )
+    elif is_storagepool_create_op_required or update_after_exception:
+        k8s_extension_custom_mod.update_k8s_extension(
+            cmd,
+            client,
+            resource_group,
+            cluster_name,
+            CONST_EXT_INSTALLATION_NAME,
+            "managedClusters",
+            configuration_settings=update_settings,
+            yes=True,
+            no_wait=True,
+        )
 
 
 def perform_disable_azure_container_storage(  # pylint: disable=too-many-statements,too-many-locals,too-many-branches
@@ -264,6 +349,8 @@ def perform_disable_azure_container_storage(  # pylint: disable=too-many-stateme
     is_ephemeralDisk_localssd_enabled,
     is_ephemeralDisk_nvme_enabled,
     current_core_value,
+    existing_ephemeral_disk_volume_type=CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY,
+    existing_ephemeral_nvme_perf_tier=CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD,
 ):
     client_factory = get_k8s_extension_module(CONST_K8S_EXTENSION_CLIENT_FACTORY_MOD_NAME)
     client = client_factory.cf_k8s_extension_operation(cmd.cli_ctx)
@@ -292,14 +379,17 @@ def perform_disable_azure_container_storage(  # pylint: disable=too-many-stateme
         else:
             if is_ephemeralDisk_nvme_enabled:
                 pool_option = CONST_STORAGE_POOL_OPTION_NVME.lower()
+                storage_pool_option = CONST_STORAGE_POOL_OPTION_NVME
             elif is_ephemeralDisk_localssd_enabled:
                 pool_option = CONST_STORAGE_POOL_OPTION_SSD.lower()
+                storage_pool_option = CONST_STORAGE_POOL_OPTION_SSD
 
     # Step 1: Perform validation if accepted by user
     if perform_validation:
         config_settings = [
             {"global.cli.storagePool.disable.validation": True},
             {"global.cli.storagePool.disable.type": storage_pool_type},
+            {"global.cli.storagePool.disable.diskType": pool_option.lower()},
             # Set these values to ensure cluster state incase of
             # a cluster where cli operation has not yet run or older
             # version of charts were installed.
@@ -310,7 +400,6 @@ def perform_disable_azure_container_storage(  # pylint: disable=too-many-stateme
         ]
 
         config_settings.extend(reset_install_settings)
-        config_settings.append({"global.cli.storagePool.disable.diskType": pool_option.lower()})
 
         try:
             update_result = k8s_extension_custom_mod.update_k8s_extension(
@@ -424,6 +513,10 @@ def perform_disable_azure_container_storage(  # pylint: disable=too-many-stateme
             False
         )
     else:
+        updated_enable_ephemeral_bypass_annotation = (
+            existing_ephemeral_disk_volume_type.lower() == CONST_DISK_TYPE_PV_WITH_ANNOTATION.lower()
+        )
+        updated_ephemeral_nvme_perf_tier = existing_ephemeral_nvme_perf_tier
         # Disabling a particular type of storagepool.
         if storage_pool_type == CONST_STORAGE_POOL_TYPE_AZURE_DISK:
             azure_disk_enabled = False
@@ -438,6 +531,13 @@ def perform_disable_azure_container_storage(  # pylint: disable=too-many-stateme
                 ephemeral_disk_nvme_enabled = False
                 ephemeral_disk_localssd_enabled = False
 
+            # If we are disabling ephemeral nvme, reset the following params:
+            # 1. ephemeral_disk_volume_type
+            # 2. ephemeral_disk_nvme_per_tier
+            if not ephemeral_disk_nvme_enabled:
+                updated_enable_ephemeral_bypass_annotation = False
+                updated_ephemeral_nvme_perf_tier = CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
+
         config_settings = [
             {"global.cli.storagePool.disable.validation": False},
             {"global.cli.storagePool.disable.type": storage_pool_type},
@@ -450,6 +550,11 @@ def perform_disable_azure_container_storage(  # pylint: disable=too-many-stateme
             {"global.cli.storagePool.elasticSan.enabled": elastic_san_enabled},
             {"global.cli.storagePool.ephemeralDisk.nvme.enabled": ephemeral_disk_nvme_enabled},
             {"global.cli.storagePool.ephemeralDisk.temp.enabled": ephemeral_disk_localssd_enabled},
+            {
+                "global.cli.storagePool.ephemeralDisk.enableEphemeralBypassAnnotation":
+                updated_enable_ephemeral_bypass_annotation
+            },
+            {"global.cli.storagePool.ephemeralDisk.nvme.perfTier": updated_ephemeral_nvme_perf_tier},
         ]
 
         config_settings.extend(reset_install_settings)
@@ -458,11 +563,13 @@ def perform_disable_azure_container_storage(  # pylint: disable=too-many-stateme
         resource_args = get_desired_resource_value_args(
             storage_pool_type,
             storage_pool_option,
+            existing_ephemeral_nvme_perf_tier,
             current_core_value,
             is_azureDisk_enabled,
             is_elasticSan_enabled,
             is_ephemeralDisk_localssd_enabled,
             is_ephemeralDisk_nvme_enabled,
+            False,
             None,
             False,
         )
@@ -518,10 +625,25 @@ def perform_disable_azure_container_storage(  # pylint: disable=too-many-stateme
                 is_elasticSan_enabled,
                 is_ephemeralDisk_localssd_enabled,
                 is_ephemeralDisk_nvme_enabled,
+                existing_ephemeral_nvme_perf_tier,
                 current_core_value,
             )
 
             update_settings.extend(resource_args)
+
+            reset_enable_ephemeral_bypass_annotation = (
+                existing_ephemeral_disk_volume_type.lower() == CONST_DISK_TYPE_PV_WITH_ANNOTATION.lower()
+            )
+            update_settings.extend(
+                [
+                    {
+                        "global.cli.storagePool.ephemeralDisk.enableEphemeralBypassAnnotation":
+                        reset_enable_ephemeral_bypass_annotation
+                    },
+                    {"global.cli.storagePool.ephemeralDisk.nvme.perfTier": existing_ephemeral_nvme_perf_tier},
+                ]
+            )
+
             # Revert back to storagepool type states which was supposed to disabled.
             azure_disk_enabled = is_azureDisk_enabled
             elastic_san_enabled = is_elasticSan_enabled

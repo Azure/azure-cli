@@ -32,7 +32,7 @@ class TestApplication(unittest.TestCase):
 
         cli.refresh_request_id()
         self.assertIn('x-ms-client-request-id', cli.data['headers'])
-        self.assertNotEquals(old_id, cli.data['headers']['x-ms-client-request-id'])
+        self.assertNotEqual(old_id, cli.data['headers']['x-ms-client-request-id'])
 
     def test_client_request_id_is_refreshed_after_execution(self):
         def _handler(args):
@@ -53,7 +53,7 @@ class TestApplication(unittest.TestCase):
 
         cli.invoke(['test'])
         self.assertIn('x-ms-client-request-id', cli.data['headers'])
-        self.assertNotEquals(old_id, cli.data['headers']['x-ms-client-request-id'])
+        self.assertNotEqual(old_id, cli.data['headers']['x-ms-client-request-id'])
 
     def test_application_register_and_call_handlers(self):
         handler_called = [False]

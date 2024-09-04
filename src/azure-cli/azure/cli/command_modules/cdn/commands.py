@@ -106,6 +106,9 @@ def load_command_table(self, _):
     from .custom.custom_cdn import CDNEndpointRuleRemove
     self.command_table['cdn endpoint rule remove'] = CDNEndpointRuleRemove(loader=self)
 
+    from .custom.custom_cdn import CdnMigrateToAfd
+    self.command_table['cdn profile-migration migrate'] = CdnMigrateToAfd(loader=self)
+
     with self.command_group('cdn endpoint rule', cdn_endpoints_sdk, is_preview=True) as g:
         g.show_command('show', 'get')
         g.custom_command('add', 'add_rule', client_factory=cf_cdn,

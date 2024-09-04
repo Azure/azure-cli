@@ -994,7 +994,7 @@ class ContainerAppsJobClient():
         return r.json()
 
     @classmethod
-    def stop_job(cls, cmd, resource_group_name, name, job_execution_name, job_execution_names=None):
+    def stop_job(cls, cmd, resource_group_name, name, job_execution_name):
         management_hostname = cmd.cli_ctx.cloud.endpoints.resource_manager
         sub_id = get_subscription_id(cmd.cli_ctx)
 
@@ -1016,7 +1016,7 @@ class ContainerAppsJobClient():
                 job_execution_name,
                 cls.api_version)
 
-        r = send_raw_request(cmd.cli_ctx, "POST", request_url, body=json.dumps(job_execution_names))
+        r = send_raw_request(cmd.cli_ctx, "POST", request_url)
         return r.json()
 
     @classmethod

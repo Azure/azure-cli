@@ -94,7 +94,7 @@ def load_arguments(self, _):
             c.argument('allowed_aad_tenant_ids', options_list=['--allowed-tenant-ids'], nargs='+', help="The approved Azure AD tenants which outbound data traffic allowed to. The Azure AD tenant of the current user will be included by default. Use ""(\'""\' in PowerShell) to disable all allowed tenant ids.")
             c.argument('key_name', help='The workspace customer-managed key display name. All existing keys can be found using "az synapse workspace key list" cmdlet.')
             c.argument('repository_type', arg_group=repository_arg_group, arg_type=get_enum_type(['AzureDevOpsGit', 'GitHub']), validator=validate_repository_type, help='The repository configuration type.')
-            c.argument('host_name', arg_group=repository_arg_group, help='If using github Enterprise Server, provide sever URL like https://github.mydomain.com.Do not use this option with GitHub Enterprise Cloud.')
+            c.argument('host_name', arg_group=repository_arg_group, help='If using github Enterprise Server, provide sever URL. Do not use this option with GitHub Enterprise Cloud.')
             c.argument('account_name', arg_group=repository_arg_group, help='GitHub account name used for the repository or Azure devops organization name')
             c.argument('collaboration_branch', arg_group=repository_arg_group, help='The branch name where you will collaborate with others and from which you will publish.')
             c.argument('repository_name', arg_group=repository_arg_group, help='The name of the repository to which you are connecting.')
@@ -572,6 +572,8 @@ def load_arguments(self, _):
                    help='Optional arguments to the job (Note: please use storage URIs for file arguments).')
         c.argument('archives', nargs='+', help='The array of archives.')
         c.argument('job_name', arg_type=name_type, help='The Spark job name.')
+        c.argument('python_files', nargs='+',
+                   help='The array of files used for refenence in the main python definition file.  Examples include custom whl files and custom python files.  May pass multiple files such as "az synapse spark job sumbit <other_args> --python_files abfss://file1 abss://file2"')
         c.argument('reference_files', nargs='+',
                    help='Additional files used for reference in the main definition file.')
         c.argument('configuration', type=shell_safe_json_parse, help='The configuration of Spark job.')

@@ -1395,7 +1395,7 @@ def create_new_acr(cmd, registry_name, resource_group_name, location=None, sku="
 
 def set_field_in_auth_settings(auth_settings, set_string):
     if set_string is not None:
-        split1 = set_string.split("=")
+        split1 = set_string.split("=", 1)
         fieldName = split1[0]
         fieldValue = split1[1]
         split2 = fieldName.split(".")
