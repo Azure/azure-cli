@@ -46,7 +46,8 @@ def create_configstore(cmd,
                        retention_days=None,
                        enable_purge_protection=None,
                        replica_name=None,
-                       replica_location=None):
+                       replica_location=None,
+                       no_replica=None):  # pylint: disable=unused-argument
     if assign_identity is not None and not assign_identity:
         assign_identity = [SYSTEM_ASSIGNED_IDENTITY]
 
@@ -74,9 +75,10 @@ def create_configstore(cmd,
         progress.spinner.step(label="Creating store")
         config_store.wait(1)
 
+    progress.write({"message": "Store created"})
+    time.sleep(1)
+
     if replica_name is not None:
-        progress.write({"message": "Store created"})
-        time.sleep(1)
         replica_client = cf_replicas(cmd.cli_ctx)
         store_replica = create_replica(cmd, replica_client, name, replica_name, replica_location, resource_group_name)
 
