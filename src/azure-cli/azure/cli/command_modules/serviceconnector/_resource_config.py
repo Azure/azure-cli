@@ -1172,7 +1172,6 @@ SUPPORTED_CLIENT_TYPE = {
         ],
         RESOURCE.FabricSql: [
             CLIENT_TYPE.Dotnet,
-            CLIENT_TYPE.DotnetInternal,
             CLIENT_TYPE.Java,
             CLIENT_TYPE.Python,
             CLIENT_TYPE.Go,
