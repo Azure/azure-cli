@@ -384,17 +384,18 @@ def validate_sku(namespace):
             namespace.replica_name = None
             namespace.replica_location = None
             namespace.no_replica = None
+            return
 
     if namespace.sku.lower() == 'premium' and not namespace.no_replica:
         if any(arg is None for arg in [namespace.replica_name, namespace.replica_location]):
             raise RequiredArgumentMissingError("Options '--replica-name' and '--replica-location' are required when creating a premium tier store. To avoid creating replica please provide explicit argument '--no-replica'.")
 
     if namespace.no_replica and (namespace.replica_name or namespace.replica_location):
-        raise CLIErrors.MutuallyExclusiveArgumentError("Please provide only one of these arguments: '--no-replica' or '--replica-name and --replica-location'. See 'az appconfig create -h' for examples.")
+        raise CLIErrors.MutuallyExclusiveArgumentError("Please provide either '--no-replica' or both '--replica-name' and '--replica-location'. See 'az appconfig create -h' for examples.")
 
     if namespace.replica_name:
         if namespace.replica_location is None:
-            raise RequiredArgumentMissingError("To create replica '--replica-location' is required.")
+            raise RequiredArgumentMissingError("To create a replica, '--replica-location' is required.")
     else:
         if namespace.replica_location is not None:
-            raise RequiredArgumentMissingError("To create replica '--replica-name' is required.")
+            raise RequiredArgumentMissingError("To create a replica, '--replica-name' is required.")
