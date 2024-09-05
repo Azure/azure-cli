@@ -28,8 +28,6 @@ logger = get_logger(__name__)
 
 
 def is_valid_resource_id(value):
-    if re.search('[\"\'|]', value):
-        return False
     return is_valid_resource_id_sdk(value)
 
 
