@@ -423,7 +423,12 @@ class VolumeUpdate(_VolumeUpdate):
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZIntArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-
+        args_schema.vnet = AAZStrArg(
+            options=["--vnet"],
+            arg_group="Properties",
+            help="Name or Resource ID of the vnet. If you want to use a vnet in other resource group or subscription, please provide the Resource ID instead of the name of the vnet.",
+            required=False,
+        )
         args_schema.usage_threshold._fmt = AAZIntArgFormat(
             maximum=2457600,
             minimum=50
