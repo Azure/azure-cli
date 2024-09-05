@@ -52,7 +52,7 @@ PASSWORDLESS_EXTENSION_NAME = "serviceconnector-passwordless"
 PASSWORDLESS_EXTENSION_MODULE = "azext_serviceconnector_passwordless.custom"
 
 
-def connection_list(client,
+def connection_list(cmd, client,
                     source_resource_group=None,
                     source_id=None,
                     cluster=None,
@@ -60,13 +60,13 @@ def connection_list(client,
                     spring=None, app=None, deployment=None):
     if not source_id:
         raise RequiredArgumentMissingError(err_msg.format('--source-id'))
-    return auto_register(client.list, resource_uri=source_id)
+    return auto_register(cmd.cli_ctx, client.list, resource_uri=source_id)
 
 
 def local_connection_list(cmd, client,
                           resource_group_name,
                           location=None):
-    return auto_register(client.list,
+    return auto_register(cmd.cli_ctx, client.list,
                          subscription_id=get_subscription_id(cmd.cli_ctx),
                          resource_group_name=resource_group_name,
                          location=location)
@@ -104,7 +104,7 @@ def connection_list_support_types(cmd, client,
     return results
 
 
-def connection_show(client,
+def connection_show(cmd, client,
                     connection_name=None,
                     source_resource_group=None,
                     source_id=None,
@@ -115,7 +115,7 @@ def connection_show(client,
     if not source_id or not connection_name:
         raise RequiredArgumentMissingError(
             err_msg.format('--source-id, --connection'))
-    return auto_register(client.get, resource_uri=source_id, linker_name=connection_name)
+    return auto_register(cmd.cli_ctx, client.get, resource_uri=source_id, linker_name=connection_name)
 
 
 def local_connection_show(cmd, client,
@@ -127,14 +127,14 @@ def local_connection_show(cmd, client,
         raise RequiredArgumentMissingError(
             err_msg.format('--id, --connection'))
 
-    return auto_register(client.get,
+    return auto_register(cmd.cli_ctx, client.get,
                          subscription_id=get_subscription_id(cmd.cli_ctx),
                          resource_group_name=resource_group_name,
                          location=location,
                          connector_name=connection_name)
 
 
-def connection_delete(client,
+def connection_delete(cmd, client,
                       connection_name=None,
                       source_resource_group=None,
                       source_id=None,
@@ -146,7 +146,7 @@ def connection_delete(client,
     if not source_id or not connection_name:
         raise RequiredArgumentMissingError(err_msg.format('--source-id, --connection'))
 
-    return auto_register(sdk_no_wait, no_wait,
+    return auto_register(cmd.cli_ctx, sdk_no_wait, no_wait,
                          client.begin_delete,
                          resource_uri=source_id,
                          linker_name=connection_name)
@@ -162,7 +162,7 @@ def local_connection_delete(cmd, client,
         raise RequiredArgumentMissingError(
             err_msg.format('--id, --connection'))
 
-    return auto_register(sdk_no_wait, no_wait,
+    return auto_register(cmd.cli_ctx, sdk_no_wait, no_wait,
                          client.begin_delete,
                          subscription_id=get_subscription_id(cmd.cli_ctx),
                          resource_group_name=resource_group_name,
@@ -170,7 +170,7 @@ def local_connection_delete(cmd, client,
                          connector_name=connection_name)
 
 
-def connection_list_configuration(client,
+def connection_list_configuration(cmd, client,
                                   connection_name=None,
                                   source_resource_group=None,
                                   source_id=None,
@@ -180,7 +180,7 @@ def connection_list_configuration(client,
                                   spring=None, app=None, deployment=None):
     if not source_id or not connection_name:
         raise RequiredArgumentMissingError(err_msg.format('--source-id, --connection'))
-    configurations = auto_register(client.list_configurations,
+    configurations = auto_register(cmd.cli_ctx, client.list_configurations,
                                    resource_uri=source_id,
                                    linker_name=connection_name)
 
@@ -192,7 +192,7 @@ def local_connection_generate_configuration(cmd, client,
                                             location=None,
                                             resource_group_name=None,
                                             id=None):  # pylint: disable=redefined-builtin
-    return auto_register(client.generate_configurations,
+    return auto_register(cmd.cli_ctx, client.generate_configurations,
                          subscription_id=get_subscription_id(cmd.cli_ctx),
                          resource_group_name=resource_group_name,
                          location=location,
@@ -241,7 +241,7 @@ def connection_preview_configuration(cmd, client,
         filter_str += " and AuthType eq '{}'".format(param['auth_type'])
     if param['client_type']:
         filter_str += " and ClientType eq '{}'".format(param['client_type'])
-    return auto_register(client.list,
+    return auto_register(cmd.cli_ctx, client.list,
                          filter=filter_str,
                          )
 
@@ -265,7 +265,7 @@ def connection_validate(cmd, client,
     source_type = get_source_resource_name(cmd)
     client = set_user_token_by_source_and_target(client, cmd.cli_ctx, source_type, target_type)
 
-    return auto_register(client.begin_validate, resource_uri=source_id, linker_name=connection_name)
+    return auto_register(cmd.cli_ctx, client.begin_validate, resource_uri=source_id, linker_name=connection_name)
 
 
 def local_connection_validate(cmd, client,
@@ -278,7 +278,7 @@ def local_connection_validate(cmd, client,
             err_msg.format('--id, --connection'))
 
     # All use OBO token
-    return auto_register(client.begin_validate,
+    return auto_register(cmd.cli_ctx, client.begin_validate,
                          subscription_id=get_subscription_id(cmd.cli_ctx),
                          resource_group_name=resource_group_name,
                          location=location,
@@ -496,7 +496,7 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
             raise AzureResponseError('{}. Provision failed, please create the target resource '
                                      'manually and then create the connection.'.format(str(e)))
 
-    validate_service_state(parameters)
+    validate_service_state(cmd, parameters)
     if enable_mi_for_db_linker and auth_action != 'optOutAllAuth':
         new_auth_info = enable_mi_for_db_linker(
             cmd, source_id, target_id, auth_info, client_type, connection_name)
@@ -510,7 +510,7 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
                                                     check_version=(not isSecretType),
                                                     both_version=isSecretType))
 
-    return auto_register(sdk_no_wait, no_wait,
+    return auto_register(cmd.cli_ctx, sdk_no_wait, no_wait,
                          client.begin_create_or_update,
                          resource_uri=source_id,
                          linker_name=connection_name,
@@ -619,12 +619,12 @@ def local_connection_create_func(cmd, client,  # pylint: disable=too-many-locals
     client = set_user_token_by_source_and_target(
         client, cmd.cli_ctx, source_type, target_type)
 
-    validate_service_state(parameters)
+    validate_service_state(cmd, parameters)
     if enable_mi_for_db_linker:
         new_auth_info = enable_mi_for_db_linker(
             cmd, None, target_id, auth_info, client_type, connection_name)
         parameters['auth_info'] = new_auth_info or parameters['auth_info']
-    return auto_register(sdk_no_wait, no_wait,
+    return auto_register(cmd.cli_ctx, sdk_no_wait, no_wait,
                          client.begin_create_or_update,
                          subscription_id=get_subscription_id(cmd.cli_ctx),
                          resource_group_name=resource_group_name,
@@ -769,7 +769,7 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals, too-many-
                                                     check_version=(not isSecretType),
                                                     both_version=isSecretType))
 
-    return auto_register(sdk_no_wait, no_wait,
+    return auto_register(cmd.cli_ctx, sdk_no_wait, no_wait,
                          client.begin_create_or_update,
                          resource_uri=source_id,
                          linker_name=connection_name,
@@ -840,7 +840,7 @@ def local_connection_update(cmd, client,  # pylint: disable=too-many-locals
         }
     }
 
-    return auto_register(sdk_no_wait, no_wait,
+    return auto_register(cmd.cli_ctx, sdk_no_wait, no_wait,
                          client.begin_create_or_update,
                          subscription_id=get_subscription_id(cmd.cli_ctx),
                          resource_group_name=resource_group_name,
@@ -943,8 +943,8 @@ def local_connection_create_kafka(cmd, client,  # pylint: disable=too-many-local
     logger.warning('Created')
 
     return [
-        transform_linker_properties(server_linker),
-        transform_linker_properties(registry_linker)
+        (transform_linker_properties(cmd.cli_ctx))(server_linker),
+        (transform_linker_properties(cmd.cli_ctx))(registry_linker)
     ]
 
 
@@ -1160,8 +1160,8 @@ def connection_create_kafka(cmd, client,  # pylint: disable=too-many-locals
     logger.warning('Created')
 
     return [
-        transform_linker_properties(server_linker),
-        transform_linker_properties(registry_linker)
+        (transform_linker_properties(cmd.cli_ctx))(server_linker),
+        (transform_linker_properties(cmd.cli_ctx))(registry_linker)
     ]
 
 

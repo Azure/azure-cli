@@ -16,7 +16,7 @@ from azure.cli.core.azclierror import (
 )
 from ._utils import (
     generate_random_string,
-    run_cli_cmd,
+    run_cli_cmd_new,
     is_valid_resource_id
 )
 from ._resource_config import (
@@ -98,7 +98,7 @@ class AddonBase:
             # apply parmeters to format the command
             cmd = step.format(**self._params)
             try:
-                run_cli_cmd(cmd)
+                run_cli_cmd_new(self._cmd.cli_ctx, cmd)
             except CLIInternalError as err:
                 logger.warning('Creation failed, start rolling back')
                 self.rollback(cnt)
@@ -150,7 +150,7 @@ class AddonBase:
             # apply parameters to format the command
             cmd = deletion_steps[index].format(**self._params)
             try:
-                run_cli_cmd(cmd)
+                run_cli_cmd_new(self._cmd.cli_ctx, cmd)
             except CLIInternalError:
                 logger.warning('Rollback failed, please manually check and delete the unintended resources '
                                'in resource group: %s. You may use this command: %s',
@@ -187,7 +187,7 @@ class AddonBase:
         '''Retrieve the location of source resource group
         '''
         rg = self._retrive_source_rg()
-        output = run_cli_cmd('az group show -n "{}" -o json'.format(rg))
+        output = run_cli_cmd_new(self._cmd.cli_ctx, 'az group show -n "{}" -o json'.format(rg))
         return output.get('location')
 
     def _get_source_type(self):

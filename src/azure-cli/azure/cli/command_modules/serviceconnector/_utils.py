@@ -81,29 +81,66 @@ def generate_random_string(length=5, prefix='', lower_only=False, ensure_complex
 
 
 def run_cli_cmd(cmd, retry=0, interval=0, should_retry_func=None):
+    raise CLIInternalError('Please upgrade serviceconnector-passwordless extension')
+
+
+def run_cli_cmd_new(cli_ctx, cmd, retry=0, interval=0, should_retry_func=None):
     '''Run a CLI command
     :param cmd: The CLI command to be executed
     :param retry: The times to re-try
     :param interval: The seconds wait before retry
     '''
     import json
-    import subprocess
+    output = _in_process_execute(cli_ctx, cmd, expect_failure=False)
 
-    output = subprocess.run(cmd, shell=True, check=False,
-                            stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-    logger.debug(output)
-    if output.returncode != 0 or (should_retry_func and should_retry_func(output)):
+    if output['returncode'] != 0 or (should_retry_func and should_retry_func(output)):
         if retry:
             time.sleep(interval)
-            return run_cli_cmd(cmd, retry - 1, interval)
-        err = output.stderr.decode(encoding='UTF-8', errors='ignore')
+            return run_cli_cmd_new(cmd, retry - 1, interval)
         raise CLIInternalError('Command execution failed, command is: '
-                               '{}, error message is: \n {}'.format(cmd, err))
+                               '{}, error message is: \n {}'.format(cmd, output['stderr']))
+    stdout = output['stdout']
     try:
-        return json.loads(output.stdout.decode(encoding='UTF-8', errors='ignore')) if output.stdout else None
+        return json.loads(stdout) if stdout else None
     except ValueError as e:
         logger.debug(e)
-        return output.stdout or None
+        return stdout or None
+
+
+# pylint: disable=lost-exception, return-in-finally, logging-fstring-interpolation
+def _in_process_execute(cli_ctx, command, expect_failure=False):
+    from io import StringIO
+    import shlex
+
+    if command.startswith('az '):
+        command = command[3:]
+
+    stdout_buf = StringIO()
+    logging_buf = StringIO()
+    process_error = None
+    try:
+        exit_code = cli_ctx.invoke(shlex.split(command), out_file=stdout_buf) or 0
+        output = stdout_buf.getvalue()
+    except Exception as ex:  # pylint: disable=broad-except
+        exit_code = 1
+        output = stdout_buf.getvalue()
+        process_error = ex
+    except SystemExit as ex:
+        # SystemExit not caught by broad exception, check for sys.exit(3)
+        if ex.code == 3 and expect_failure:
+            exit_code = 1
+            output = stdout_buf.getvalue()
+        else:
+            process_error = ex
+    finally:
+        stdout_buf.close()
+        logging_buf.close()
+        # logger.debug(f'output: {output}')
+        return {
+            'returncode': exit_code,
+            'stderr': process_error,
+            'stdout': output
+        }
 
 
 def set_user_token_header(client, cli_ctx):
@@ -128,19 +165,20 @@ def set_user_token_by_source_and_target(client, cli_ctx, source, target):
     return client
 
 
-def provider_is_registered(subscription=None):
+def provider_is_registered(cli_ctx, subscription=None):
     # register the provider
     subs_arg = ''
     if subscription:
         subs_arg = '--subscription "{}"'.format(subscription)
-    output = run_cli_cmd(
+    output = run_cli_cmd_new(
+        cli_ctx,
         'az provider show -n Microsoft.ServiceLinker {}'.format(subs_arg))
     if output.get('registrationState') == 'NotRegistered':
         return False
     return True
 
 
-def register_provider(subscription=None):
+def register_provider(cli_ctx, subscription=None):
     logger.warning('Provider Microsoft.ServiceLinker is not registered, '
                    'trying to register. This usually takes 1-2 minutes.')
 
@@ -149,7 +187,8 @@ def register_provider(subscription=None):
         subs_arg = '--subscription "{}"'.format(subscription)
 
     # register the provider
-    run_cli_cmd(
+    run_cli_cmd_new(
+        cli_ctx,
         'az provider register -n Microsoft.ServiceLinker {}'.format(subs_arg))
 
     # verify the registration, 30 * 10s polling the result
@@ -159,7 +198,8 @@ def register_provider(subscription=None):
     count = 0
     while count < MAX_RETRY_TIMES:
         time.sleep(RETRY_INTERVAL)
-        output = run_cli_cmd(
+        output = run_cli_cmd_new(
+            cli_ctx,
             'az provider show -n Microsoft.ServiceLinker {}'.format(subs_arg))
         current_state = output.get('registrationState')
         if current_state == 'Registered':
@@ -171,7 +211,7 @@ def register_provider(subscription=None):
     return False
 
 
-def auto_register(func, *args, **kwargs):
+def auto_register(cli_ctx, func, *args, **kwargs):
     import copy
     from azure.core.polling._poller import LROPoller
     from azure.core.exceptions import HttpResponseError
@@ -199,8 +239,8 @@ def auto_register(func, *args, **kwargs):
                     kwargs_backup.get('parameters').get('target_id'))
                 target_subs = segments.get('subscription')
                 # double check whether target subscription is registered
-                if not provider_is_registered(target_subs):
-                    if register_provider(target_subs):
+                if not provider_is_registered(cli_ctx, target_subs):
+                    if register_provider(cli_ctx, target_subs):
                         return func(*args, **kwargs_backup)
                     raise CLIInternalError('Registration failed, please manually run command '
                                            '`az provider register -n Microsoft.ServiceLinker --subscription {}` '
@@ -221,7 +261,7 @@ def create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, k
 
     source_name = get_source_resource_name(cmd)
     auth_info = get_auth_if_no_valid_key_vault_connection(
-        source_name, source_id, key_vault_connections)
+        cmd.cli_ctx, source_name, source_id, key_vault_connections)
     if not auth_info:
         return
 
@@ -251,15 +291,15 @@ def create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, k
             'connect_as_kubernetes_csi_driver': True,
         }
 
-    return auto_register(client.begin_create_or_update,
+    return auto_register(cmd.cli_ctx, client.begin_create_or_update,
                          resource_uri=source_id,
                          linker_name=connection_name,
                          parameters=parameters)
 
 
-def get_auth_if_no_valid_key_vault_connection(source_name, source_id, key_vault_connections):
+def get_auth_if_no_valid_key_vault_connection(cli_ctx, source_name, source_id, key_vault_connections):
     if source_name == RESOURCE.WebApp:
-        return get_auth_if_no_valid_key_vault_connection_for_webapp(source_id, key_vault_connections)
+        return get_auth_if_no_valid_key_vault_connection_for_webapp(cli_ctx, source_id, key_vault_connections)
 
     if source_name == RESOURCE.ContainerApp:
         return get_auth_if_no_valid_key_vault_connection_for_containerapp(key_vault_connections)
@@ -282,10 +322,10 @@ def get_auth_if_no_valid_key_vault_connection(source_name, source_id, key_vault_
 
 
 # https://docs.microsoft.com/azure/app-service/app-service-key-vault-references
-def get_auth_if_no_valid_key_vault_connection_for_webapp(source_id, key_vault_connections):
-
+def get_auth_if_no_valid_key_vault_connection_for_webapp(cli_ctx, source_id, key_vault_connections):
     try:
-        webapp = run_cli_cmd(
+        webapp = run_cli_cmd_new(
+            cli_ctx,
             'az rest -u "{}?api-version=2020-09-01" -o json'.format(source_id))
         reference_identity = webapp.get(
             'properties').get('keyVaultReferenceIdentity')
@@ -303,7 +343,8 @@ def get_auth_if_no_valid_key_vault_connection_for_webapp(source_id, key_vault_co
             client_id = identity.get('clientId')
         except Exception:  # pylint: disable=broad-except
             try:
-                identity = run_cli_cmd(
+                identity = run_cli_cmd_new(
+                    cli_ctx,
                     'az identity show --ids "{}" -o json'.format(reference_identity))
                 client_id = identity.get('clientId')
             except Exception:  # pylint: disable=broad-except
@@ -377,7 +418,7 @@ def create_app_config_connection_if_not_exist(cmd, client, source_id, app_config
             'connect_as_kubernetes_csi_driver': True,
         }
 
-    return auto_register(client.begin_create_or_update,
+    return auto_register(cmd.cli_ctx, client.begin_create_or_update,
                          resource_uri=source_id,
                          linker_name=connection_name,
                          parameters=parameters)
@@ -393,7 +434,11 @@ def is_packaged_installed(package_name):
 
 
 def get_object_id_of_current_user():
-    signed_in_user_info = run_cli_cmd('az account show -o json')
+    raise CLIInternalError('Please upgrade serviceconnector-passwordless extension')
+
+
+def get_object_id_of_current_user_new(cli_ctx):
+    signed_in_user_info = run_cli_cmd_new(cli_ctx, 'az account show -o json')
     if not isinstance(signed_in_user_info, dict):
         raise CLIInternalError(
             f"Can't parse login user information {signed_in_user_info}")
@@ -404,12 +449,13 @@ def get_object_id_of_current_user():
             f"Can't get user type or name from signed-in user {signed_in_user}")
     try:
         if user_type == 'user':
-            user_info = run_cli_cmd('az ad signed-in-user show -o json')
+            user_info = run_cli_cmd_new(cli_ctx, 'az ad signed-in-user show -o json')
             user_object_id = user_info.get('objectId') if user_info.get(
                 'objectId') else user_info.get('id')
             return user_object_id
         if user_type == 'servicePrincipal':
-            user_info = run_cli_cmd(
+            user_info = run_cli_cmd_new(
+                cli_ctx,
                 f'az ad sp show --id "{signed_in_user.get("name")}" -o json')
             user_object_id = user_info.get('id')
             return user_object_id

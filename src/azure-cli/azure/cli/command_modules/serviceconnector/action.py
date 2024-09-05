@@ -223,17 +223,6 @@ class AddServicePrincipalAuthInfo(argparse.Action):
         if 'client_id' not in d or 'secret' not in d:
             raise ValidationError('Required keys missing for parameter --service-principal. '
                                   'Required keys are: client-id, secret')
-        if 'principal_id' not in d:
-            from ._utils import run_cli_cmd
-            output = run_cli_cmd('az ad sp show --id "{}"'.format(d['client_id']))
-            if output:
-                d['principal_id'] = output.get('id')
-            else:
-                raise ValidationError('Could not resolve object-id from the given client-id: {}. Please '
-                                      'confirm the client-id and provide the object-id (Enterprise Application) '
-                                      'of the service principal, by using --service-principal client-id=XX '
-                                      'object-id=XX secret=XX'.format(d['client_id']))
-
         d['auth_type'] = 'servicePrincipalSecret'
         return d
 
@@ -257,13 +246,14 @@ class AddWorkloadIdentityAuthInfo(argparse.Action):
 
         d = {}
         if 'user-identity-resource-id' in properties:
-            from ._utils import run_cli_cmd
-            output = run_cli_cmd('az identity show --ids "{}"'.format(properties['user-identity-resource-id']))
-            if output:
-                d['client_id'] = output.get('clientId')
-                d['subscription_id'] = properties['user-identity-resource-id'].split('/')[2]
-            else:
-                raise ValidationError('Invalid user identity resource ID.')
+            d['user-identity-resource-id'] = properties['user-identity-resource-id']
+            # from ._utils import run_cli_cmd_new
+            # output = run_cli_cmd_new('az identity show --ids "{}"'.format(properties['user-identity-resource-id']))
+            # if output:
+            #     d['client_id'] = output.get('clientId')
+            #     d['subscription_id'] = properties['user-identity-resource-id'].split('/')[2]
+            # else:
+            #     raise ValidationError('Invalid user identity resource ID.')
         else:
             raise ValidationError('Required values missing for parameter --workload-identity: \
                                   user-identity-resource-id')

@@ -47,7 +47,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
             with self.command_group('{} connection'.format(source.value), connection_type,
                                     client_factory=cf_linker, is_preview=is_preview_source) as og:
                 og.custom_command('list', 'connection_list', transform=transform_linkers_properties)
-                og.custom_show_command('show', 'connection_show', transform=transform_linker_properties)
+                og.custom_show_command('show', 'connection_show', transform=transform_linker_properties(self.cli_ctx))
                 og.custom_command('delete', 'connection_delete', confirmation=True, supports_no_wait=True)
                 og.custom_command('list-configuration', 'connection_list_configuration')
                 og.custom_command('validate', 'connection_validate', transform=transform_validation_result)
@@ -67,18 +67,18 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
                                         connection_type, client_factory=cf_linker) as ig:
                     if target in TARGET_RESOURCES_DEPRECATED:
                         ig.custom_command(target.value, 'connection_create', deprecate_info=self.deprecate(hide=False),
-                                          supports_no_wait=True, transform=transform_linker_properties)
+                                          supports_no_wait=True, transform=transform_linker_properties(self.cli_ctx))
                     else:
                         ig.custom_command(target.value, 'connection_create',
-                                          supports_no_wait=True, transform=transform_linker_properties)
+                                          supports_no_wait=True, transform=transform_linker_properties(self.cli_ctx))
                 with self.command_group('{} connection update'.format(source.value),
                                         connection_type, client_factory=cf_linker) as ig:
                     if target in TARGET_RESOURCES_DEPRECATED:
                         ig.custom_command(target.value, 'connection_update', deprecate_info=self.deprecate(hide=False),
-                                          supports_no_wait=True, transform=transform_linker_properties)
+                                          supports_no_wait=True, transform=transform_linker_properties(self.cli_ctx))
                     else:
                         ig.custom_command(target.value, 'connection_update',
-                                          supports_no_wait=True, transform=transform_linker_properties)
+                                          supports_no_wait=True, transform=transform_linker_properties(self.cli_ctx))
 
             # special target resource, independent implementation
             target = RESOURCE.ConfluentKafka

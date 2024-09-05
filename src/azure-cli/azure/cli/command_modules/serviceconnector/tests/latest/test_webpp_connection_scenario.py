@@ -1348,7 +1348,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
                 self.check('[0].clientType', 'python')
             ]
         ).get_output_in_json()
-        connection_id = connections[0].get('id')
+        connection_id = [x.get('id') for x in connections if x.get('id').endswith(name)][0]
+        # connection_id = connections[0].get('id')
 
         # update connection
         self.cmd('webapp connection update confluent-cloud --connection {} '

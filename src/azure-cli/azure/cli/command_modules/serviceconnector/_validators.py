@@ -24,8 +24,8 @@ from azure.cli.core.azclierror import (
 )
 
 from ._utils import (
-    run_cli_cmd,
-    get_object_id_of_current_user,
+    run_cli_cmd_new,
+    get_object_id_of_current_user_new,
     is_valid_resource_id
 )
 from ._resource_config import (
@@ -148,7 +148,7 @@ def get_client_type(cmd, namespace):
 
         client_type = None
         try:
-            output = run_cli_cmd('az webapp show --id "{}" -o json'.format(source_id))
+            output = run_cli_cmd_new(cmd.cli_ctx, 'az webapp show --id "{}" -o json'.format(source_id))
             prop = output.get('siteConfig').get('linuxFxVersion', None) or\
                 output.get('siteConfig').get('windowsFxVersion', None)
             # use 'linuxFxVersion' and 'windowsFxVersion' property to decide
@@ -170,9 +170,8 @@ def get_client_type(cmd, namespace):
         client_type = CLIENT_TYPE.SpringBoot
         try:
             segments = parse_resource_id(source_id)
-            output = run_cli_cmd('az spring app show -g "{}" -s "{}" -n "{}"'
-                                 ' -o json'.format(segments.get('resource_group'), segments.get('name'),
-                                                   segments.get('child_name_1')))
+            output = run_cli_cmd_new(cmd.cli_ctx, 'az spring app show -g "{}" -s "{}" -n "{}"  -o json'.format(
+                segments.get('resource_group'), segments.get('name'), segments.get('child_name_1')))
             prop_val = output.get('properties')\
                              .get('activeDeployment')\
                              .get('properties')\
@@ -769,11 +768,11 @@ def apply_auth_args(cmd, namespace, arg_values):
                 if arg in arg_values:
                     setattr(namespace, arg, arg_values.get(arg, None))
                     if arg == 'workload_identity_auth_info':
-                        apply_workload_identity(namespace, arg_values)
+                        apply_workload_identity(cmd, namespace, arg_values)
 
 
-def apply_workload_identity(namespace, arg_values):
-    output = run_cli_cmd('az identity show --ids "{}"'.format(
+def apply_workload_identity(cmd, namespace, arg_values):
+    output = run_cli_cmd_new(cmd.cli_ctx, 'az identity show --ids "{}"'.format(
         arg_values.get('workload_identity_auth_info')
     ))
     if output:
@@ -943,7 +942,7 @@ def validate_kafka_params(cmd, namespace):
             namespace.client_type = get_client_type(cmd, namespace)
 
 
-def validate_service_state(linker_parameters):
+def validate_service_state(cmd, linker_parameters):
     '''Validate whether user provided params are applicable to service state
     '''
     target_type = None
@@ -960,7 +959,7 @@ def validate_service_state(linker_parameters):
         if not rg or not name:
             return
 
-        output = run_cli_cmd('az appconfig show -g "{}" -n "{}"'.format(rg, name))
+        output = run_cli_cmd_new(cmd.cli_ctx, 'az appconfig show -g "{}" -n "{}"'.format(rg, name))
         if output and output.get('disableLocalAuth') is True:
             raise ValidationError('Secret as auth type is not allowed when local auth is disabled for the '
                                   'specified appconfig, you may use service principal or managed identity.')
@@ -969,6 +968,47 @@ def validate_service_state(linker_parameters):
 def get_default_object_id_of_current_user(cmd, namespace):  # pylint: disable=unused-argument
     user_account_auth_info = getattr(namespace, 'user_account_auth_info', None)
     if user_account_auth_info and not user_account_auth_info.get('principal_id', None):
-        user_object_id = get_object_id_of_current_user()
+        user_object_id = get_object_id_of_current_user_new(cmd.cli_ctx)
         user_account_auth_info['principal_id'] = user_object_id
         setattr(namespace, 'user_account_auth_info', user_account_auth_info)
+
+
+def get_sp_principal_id(cmd, namespace):
+    service_principal_auth_info_secret = getattr(namespace, 'service_principal_auth_info_secret', None)
+    if not service_principal_auth_info_secret:
+        return
+    principal_id = service_principal_auth_info_secret.get('principal_id', None)
+    client_id = service_principal_auth_info_secret.get('client_id', None)
+    if not client_id:
+        raise ValidationError('Required keys missing for parameter --service-principal. '
+                              'Required keys are: client-id, secret')
+    if not principal_id:
+        output = run_cli_cmd_new(cmd.cli_ctx, 'az ad sp show --id "{}"'.format(client_id))
+        if output:
+            service_principal_auth_info_secret['principal_id'] = output.get('id')
+        else:
+            raise ValidationError('Could not resolve object-id from the given client-id: {}. Please '
+                                  'confirm the client-id and provide the object-id (Enterprise Application) '
+                                  'of the service principal, by using --service-principal client-id=XX '
+                                  'object-id=XX secret=XX'.format(client_id))
+        setattr(namespace, 'service_principal_auth_info_secret', service_principal_auth_info_secret)
+
+
+def get_workload_identity(cmd, namespace):
+    user_identity_auth_info = getattr(namespace, 'user_identity_auth_info', None)
+    if not user_identity_auth_info:
+        return
+    if getattr(namespace, 'enable_csi', None):
+        return
+    resource_id = user_identity_auth_info.get('user-identity-resource-id', None)
+    if resource_id:
+        output = run_cli_cmd_new(cmd.cli_ctx, 'az identity show --ids "{}"'.format(resource_id))
+        if output:
+            user_identity_auth_info['client_id'] = output.get('clientId')
+            user_identity_auth_info['subscription_id'] = resource_id.split('/')[2]
+        else:
+            raise ValidationError('Invalid user identity resource ID.')
+        setattr(namespace, 'user_identity_auth_info', user_identity_auth_info)
+    else:
+        raise ValidationError('Required values missing for parameter --workload-identity: \
+                                user-identity-resource-id')

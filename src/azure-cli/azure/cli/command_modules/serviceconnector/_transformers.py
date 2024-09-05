@@ -40,48 +40,56 @@ def transform_linkers_properties(result):
     return linkers
 
 
-def transform_linker_properties(result):
-    from azure.core.polling import LROPoller
-    from ._utils import (
-        run_cli_cmd,
-        is_aks_linker_by_id,
-        get_aks_resource_name
-    )
+def transform_linker_properties(cli_ctx):
+    def transform_linker_properties_func(result):
+        from azure.core.polling import LROPoller
+        from ._utils import (
+            run_cli_cmd_new,
+            is_aks_linker_by_id,
+            get_aks_resource_name
+        )
 
-    # manually polling if result is a poller
-    if isinstance(result, LROPoller):
-        result = result.result()
+        # manually polling if result is a poller
+        if isinstance(result, LROPoller):
+            result = result.result()
 
-    result = todict(result)
-    resource_id = result.get('id')
-    if is_aks_linker_by_id(resource_id):
-        result['kubernetesResourceName'] = get_aks_resource_name(result)
-    try:
-        output = run_cli_cmd('az webapp connection list-configuration --id "{}" -o json'.format(resource_id))
-        result['configurations'] = output.get('configurations')
-    except CLIInternalError:
-        pass
-    return result
+        result = todict(result)
+        resource_id = result.get('id')
+        if is_aks_linker_by_id(resource_id):
+            result['kubernetesResourceName'] = get_aks_resource_name(result)
+        try:
+            output = run_cli_cmd_new(
+                cli_ctx,
+                'az webapp connection list-configuration --id "{}" -o json'.format(resource_id))
+            result['configurations'] = output.get('configurations')
+        except CLIInternalError:
+            pass
+        return result
+    return transform_linker_properties_func
 
 
-def transform_local_linker_properties(result):
-    from azure.core.polling import LROPoller
-    from ._utils import (
-        run_cli_cmd
-    )
+def transform_local_linker_properties(cli_ctx):
+    def transform_local_linker_properties_func(result):
+        from azure.core.polling import LROPoller
+        from ._utils import (
+            run_cli_cmd_new
+        )
 
-    # manually polling if result is a poller
-    if isinstance(result, LROPoller):
-        result = result.result()
+        # manually polling if result is a poller
+        if isinstance(result, LROPoller):
+            result = result.result()
 
-    result = todict(result)
-    resource_id = result.get('id')
-    try:
-        output = run_cli_cmd('az connection generate-configuration --id "{}" -o json'.format(resource_id))
-        result['configurations'] = output.get('configurations')
-    except CLIInternalError:
-        pass
-    return result
+        result = todict(result)
+        resource_id = result.get('id')
+        try:
+            output = run_cli_cmd_new(
+                cli_ctx,
+                'az connection generate-configuration --id "{}" -o json'.format(resource_id))
+            result['configurations'] = output.get('configurations')
+        except CLIInternalError:
+            pass
+        return result
+    return transform_local_linker_properties_func
 
 
 def transform_validation_result(result):

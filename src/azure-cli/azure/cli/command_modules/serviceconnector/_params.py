@@ -14,7 +14,9 @@ from ._validators import (
     validate_params,
     validate_kafka_params,
     validate_local_params,
-    get_default_object_id_of_current_user
+    get_default_object_id_of_current_user,
+    get_sp_principal_id,
+    get_workload_identity,
 )
 from ._resource_config import (
     AUTH_TYPE,
@@ -109,6 +111,10 @@ def add_auth_block(context, source, target):
             validator = None
             if auth_type == AUTH_TYPE.UserAccount:
                 validator = get_default_object_id_of_current_user
+            if auth_type == AUTH_TYPE.ServicePrincipalSecret:
+                validator = get_sp_principal_id
+            elif auth_type == AUTH_TYPE.WorkloadIdentity:
+                validator = get_workload_identity
             for arg, params in AUTH_TYPE_PARAMS.get(auth_type).items():
                 context.argument(arg, options_list=params.get('options'), action=params.get('action'), nargs='*',
                                  help=params.get('help'), arg_group='AuthType', validator=validator)
