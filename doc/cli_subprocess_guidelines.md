@@ -17,7 +17,7 @@ cmd = f"git {user_input}"
 subprocess.run(cmd, shell=True)
 ```
 
-```python
+```console
 input a git command to run: --version;echo aa
 git version 2.34.1
 aa
