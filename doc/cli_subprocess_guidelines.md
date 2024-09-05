@@ -77,7 +77,7 @@ Besides that, users might need to know some parts of the accessibility in both `
 ### Best practices in subprocess use cases
 
 
-The following sections discuss some secure coding conventions that, when implemented, can help protect CLI applications from command injection vulnerabilities when calling subsystems through `subprocess`.
+The following sections discuss some secure coding conventions that, when implemented, can help protect CLI applications from command injection vulnerabilities when using `subprocess` module.
 
 #### Proper input validation and sanitization
 
