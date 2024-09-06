@@ -82,14 +82,12 @@ def load_arguments(self, _):
 
     store_creation_replica_name_arg_type = CLIArgumentType(
         options_list=['--replica-name'],
-        type=str,
         help='Name of the replica of the App Configuration store.',
         configured_default=None
     )
 
     replica_location_arg_type = CLIArgumentType(
         options_list=['--replica-location'],
-        type=str,
         help='The location of the replica of the App Configuration store.',
         configured_default=None
     )
