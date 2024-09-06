@@ -1158,6 +1158,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
         primary_role = 'Primary'
         public_access_arg = ''
         master_server = self.create_random_name(SERVER_NAME_PREFIX, 32)
+        replica_role = 'AsyncReplica'
         replicas = [self.create_random_name(F'azuredbclirep{i+1}', SERVER_NAME_MAX_LENGTH) for i in range(2)]
 
         # create a server
@@ -1172,7 +1173,15 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
         # test replica create
         self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {} --zone 2 {}'
                  .format(database_engine, resource_group, replicas[0], result['id'], public_access_arg),
-                 expect_failure=True)
+                 checks=[
+                     JMESPathCheck('name', replicas[0]),
+                     JMESPathCheck('availabilityZone', 2),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('sku.tier', result['sku']['tier']),
+                     JMESPathCheck('sku.name', result['sku']['name']),
+                     JMESPathCheck('replica.role', replica_role),
+                     JMESPathCheck('sourceServerResourceId', result['id']),
+                     JMESPathCheck('replica.capacity', '0')])
         
     def _test_flexible_server_replica_mgmt(self, database_engine, resource_group, vnet_enabled):
         location = self.postgres_location
