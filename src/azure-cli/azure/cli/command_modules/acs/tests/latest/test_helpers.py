@@ -324,7 +324,7 @@ class GetUserAssignedIdentityTestCase(unittest.TestCase):
             )
             self.assertEqual(user_assigned_identity, mock_user_assigned_identity)
 
-        cloud_error_2 = HttpResponseError(Mock(status_code="xxx"), "mock user assigned identity was not found")
+        cloud_error_2 = HttpResponseError(response=Mock(status_code="xxx", reason="mock user assigned identity was not found"))
         mock_user_assigned_identity_operations_2 = Mock(
             user_assigned_identities=Mock(get=Mock(side_effect=cloud_error_2))
         )
@@ -334,7 +334,7 @@ class GetUserAssignedIdentityTestCase(unittest.TestCase):
         ), self.assertRaises(ResourceNotFoundError):
             get_user_assigned_identity("mock_cli_ctx", "mock_sub_id", "mock_rg", "mock_identity_name")
 
-        cloud_error_3 = HttpResponseError(Mock(status_code="xxx"), "test_error_msg")
+        cloud_error_3 = HttpResponseError(response=Mock(status_code="xxx", reason="test_error_msg"))
         mock_user_assigned_identity_operations_3 = Mock(
             user_assigned_identities=Mock(get=Mock(side_effect=cloud_error_3))
         )
