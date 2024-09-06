@@ -3301,7 +3301,7 @@ class VMCreateExistingIdsOptions(ScenarioTest):
     @StorageAccountPreparer()
     def test_vm_create_existing_ids_options(self, resource_group, storage_account):
         from azure.cli.core.commands.client_factory import get_subscription_id
-        from msrestazure.tools import resource_id, is_valid_resource_id
+        from azure.mgmt.core.tools import resource_id, is_valid_resource_id
 
         subscription_id = self.get_subscription_id()
 
@@ -5101,7 +5101,7 @@ class VMSSCreateExistingIdsOptions(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_existing_ids')
     def test_vmss_create_existing_ids_options(self, resource_group):
 
-        from msrestazure.tools import resource_id, is_valid_resource_id
+        from azure.mgmt.core.tools import resource_id, is_valid_resource_id
         subscription_id = self.get_subscription_id()
 
         self.kwargs.update({
@@ -6883,7 +6883,7 @@ class VMGalleryImage(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_image_version_create_os_vhd')
     def test_image_version_create_os_vhd(self, resource_group):
-        from msrestazure.tools import resource_id
+        from azure.mgmt.core.tools import resource_id
 
         self.kwargs.update({
             'vm': 'myvm',
@@ -7950,7 +7950,7 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
     #
     # however, the CLI does not replace resource group values in payloads in the recordings.
     def _assert_ids_equal(self, id_1, id_2, rg_prefix=None):
-        from msrestazure.tools import parse_resource_id
+        from azure.mgmt.core.tools import parse_resource_id
 
         id_1, id_2, rg_prefix = id_1.lower(), id_2.lower(), rg_prefix.lower() if rg_prefix else rg_prefix
 

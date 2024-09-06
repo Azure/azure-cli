@@ -80,7 +80,7 @@ def check_existence(cli_ctx, value, resource_group, provider_namespace, resource
     # check for name or ID and set the type flags
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.core.exceptions import HttpResponseError
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
     from azure.cli.core.profiles import ResourceType
     id_parts = parse_resource_id(value)
     resource_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
@@ -172,7 +172,7 @@ def normalize_disk_info(image_data_disks=None,
                         data_disk_delete_option=None, source_snapshots_or_disks=None,
                         source_snapshots_or_disks_size_gb=None, source_disk_restore_point=None,
                         source_disk_restore_point_size_gb=None):
-    from msrestazure.tools import is_valid_resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id
     from ._validators import validate_delete_options
     is_lv_size = re.search('_L[0-9]+s', size, re.I)
     # we should return a dictionary with info like below

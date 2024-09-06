@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
-from msrestazure.tools import resource_id
+from azure.mgmt.core.tools import resource_id
 
 class AmsAccountIdentityTests(ScenarioTest):
     @ResourceGroupPreparer()

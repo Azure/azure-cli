@@ -12,7 +12,7 @@ from azure.cli.core.aaz import has_value
 from azure.cli.core.azclierror import InvalidArgumentValueError
 from knack.log import get_logger
 from msrest.serialization import Serializer
-from msrestazure.tools import is_valid_resource_id, resource_id
+from azure.mgmt.core.tools import is_valid_resource_id, resource_id
 
 from ..aaz.latest.monitor.metrics.alert import Update as _MetricsAlertUpdate
 

@@ -19,7 +19,7 @@ import base64
 from urllib.request import urlopen
 from urllib.parse import urlparse, unquote
 
-from msrestazure.tools import is_valid_resource_id, parse_resource_id
+from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
 
 from azure.mgmt.resource.resources.models import GenericResource, DeploymentMode
 
@@ -66,7 +66,7 @@ RPAAS_APIS = {'microsoft.datadog': '/subscriptions/{subscriptionId}/providers/Mi
 
 
 def _build_resource_id(**kwargs):
-    from msrestazure.tools import resource_id as resource_id_from_dict
+    from azure.mgmt.core.tools import resource_id as resource_id_from_dict
     try:
         return resource_id_from_dict(**kwargs)
     except KeyError:
@@ -3257,7 +3257,7 @@ def create_policy_assignment(cmd, policy=None, policy_set_definition=None,
 
 
 def _get_resource_id(cli_ctx, val, resource_group, resource_type, resource_namespace):
-    from msrestazure.tools import resource_id
+    from azure.mgmt.core.tools import resource_id
     if is_valid_resource_id(val):
         return val
 

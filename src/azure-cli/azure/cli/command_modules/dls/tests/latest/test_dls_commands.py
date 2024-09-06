@@ -8,7 +8,7 @@ import datetime
 import os
 import time
 from shutil import rmtree
-from msrestazure.azure_exceptions import CloudError
+from azure.core.exceptions import HttpResponseError
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, LiveScenarioTest, VirtualNetworkPreparer
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
@@ -326,7 +326,7 @@ class DataLakeStoreAccountScenarioTest(ScenarioTest):
         ])
 
         # attempt to enable the key vault when it is already enabled, which should throw
-        with self.assertRaises(CloudError):
+        with self.assertRaises(HttpResponseError):
             self.cmd('dls account enable-key-vault -n {dls} -g {rg}')
 
         self.cmd('dls account list -g {rg}', checks=[

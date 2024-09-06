@@ -24,7 +24,7 @@ from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import send_raw_request
 from azure.core.exceptions import HttpResponseError
 from knack.log import get_logger
-from msrestazure.tools import parse_resource_id, resource_id
+from azure.mgmt.core.tools import parse_resource_id, resource_id
 
 logger = get_logger(__name__)
 # mapping for azure public cloud

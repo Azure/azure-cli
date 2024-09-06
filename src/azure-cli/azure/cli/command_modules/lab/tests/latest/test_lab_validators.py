@@ -5,7 +5,7 @@
 
 import unittest
 from knack.util import CLIError
-from msrestazure.tools import is_valid_resource_id
+from azure.mgmt.core.tools import is_valid_resource_id
 from azure.cli.command_modules.lab.validators import _update_artifacts
 
 

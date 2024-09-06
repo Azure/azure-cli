@@ -19,8 +19,8 @@ from azure.cli.core.azclierror import CLIInternalError, InvalidArgumentValueErro
     RequiredArgumentMissingError
 from azure.core.exceptions import ResourceNotFoundError
 from knack.log import get_logger
-from msrestazure.tools import is_valid_resource_id, parse_resource_id
-from msrestazure.azure_exceptions import CloudError
+from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
+from azure.core.exceptions import HttpResponseError
 import azure.cli.command_modules.aro.custom
 
 
@@ -314,7 +314,7 @@ def dyn_validate_resource_permissions(service_principle_ids, resources):
                                            f"Resource {parts['name']} is missing role assignment " +
                                            f"{role} for service principal {sp_id} " +
                                            "(These roles will be automatically added during cluster creation)"])
-                    except CloudError as e:
+                    except HttpResponseError as e:
                         logger.error(e.message)
                         raise
         return errors

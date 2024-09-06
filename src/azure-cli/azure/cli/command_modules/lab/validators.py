@@ -37,7 +37,7 @@ def validate_lab_vm_create(cmd, namespace):
 
 def validate_lab_vm_list(cmd, namespace):
     """ Validates parameters for lab vm list and updates namespace. """
-    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     collection = [namespace.filters, namespace.all, namespace.claimable]
     if _any(collection) and not _single(collection):
         raise CLIError("usage error: [--filters FILTER | [[--all | --claimable][--environment ENVIRONMENT]]")
@@ -85,7 +85,7 @@ def validate_user_name(namespace):
 
 
 def validate_template_id(cmd, namespace):
-    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
     if not is_valid_resource_id(namespace.arm_template):
         if not namespace.artifact_source_name:
@@ -291,7 +291,7 @@ def _use_gallery_image(cli_ctx, namespace):
 # pylint: disable=no-member
 def _use_custom_image(cli_ctx, namespace):
     """ Retrieve custom image from lab and update namespace """
-    from msrestazure.tools import is_valid_resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id
     if is_valid_resource_id(namespace.image):
         namespace.custom_image_id = namespace.image
     else:
@@ -351,7 +351,7 @@ def _validate_other_parameters(namespace, formula=None):
 
 
 def validate_artifacts(cmd, namespace):
-    from msrestazure.tools import resource_id
+    from azure.mgmt.core.tools import resource_id
     if namespace.artifacts:
         from azure.cli.core.commands.client_factory import get_subscription_id
         if hasattr(namespace, 'resource_group'):
@@ -395,7 +395,7 @@ def _update_artifacts(artifacts, lab_resource_id):
 
 
 def _update_artifact_id(artifact_id, lab_resource_id):
-    from msrestazure.tools import is_valid_resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id
     if not is_valid_resource_id(artifact_id):
         return "{}{}".format(lab_resource_id, artifact_id)
     return artifact_id

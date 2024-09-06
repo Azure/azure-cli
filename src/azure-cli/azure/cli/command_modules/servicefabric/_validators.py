@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from msrestazure.azure_exceptions import CloudError
+from azure.core.exceptions import HttpResponseError
 from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.azclierror import ValidationError
@@ -332,8 +332,8 @@ def validate_create_managed_application(cmd, namespace):
 def _safe_get_resource(getResourceAction, params):
     try:
         return getResourceAction(*params)
-    except CloudError as ex:
-        if ex.error.error == 'ResourceNotFound':
+    except HttpResponseError as ex:
+        if ex.status_code == '404':
             return None
         logger.warning("Unable to get resource, exception: %s", ex)
         raise

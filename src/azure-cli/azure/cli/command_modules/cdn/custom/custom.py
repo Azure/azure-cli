@@ -53,7 +53,7 @@ from knack.util import CLIError
 from knack.log import get_logger
 
 from msrest.polling import LROPoller, NoPolling
-from msrestazure.tools import is_valid_resource_id
+from azure.mgmt.core.tools import is_valid_resource_id
 
 logger = get_logger(__name__)
 

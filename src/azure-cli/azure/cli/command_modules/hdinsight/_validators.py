@@ -5,7 +5,7 @@
 
 import threading
 from knack.util import CLIError
-from msrestazure.tools import is_valid_resource_id
+from azure.mgmt.core.tools import is_valid_resource_id
 from azure.cli.core.commands.parameters import get_resources_in_subscription
 from .util import get_resource_id_by_name
 
