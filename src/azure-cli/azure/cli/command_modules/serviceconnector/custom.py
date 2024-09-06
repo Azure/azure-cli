@@ -422,12 +422,21 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
 
     public_network_action = 'optOut' if (opt_out_list is not None and
                                          OPT_OUT_OPTION.PUBLIC_NETWORK.value in opt_out_list) else None
-
-    parameters = {
-        'target_service': {
+    
+    # TODO: Fabric SQL use SelfHostedService for dev/test purpose, waiting for swagger update to use 'FabricResource'
+    if target_type == RESOURCE.FabricSql:
+        targetService = {
+            "type": "ConfluentBootstrapServer",
+            "endpoint": target_id
+        }
+    else:
+        targetService = {
             "type": "AzureResource",
             "id": target_id
-        },
+        }
+
+    parameters = {
+        'target_service': targetService,
         'auth_info': auth_info,
         'secret_store': {
             'key_vault_id': key_vault_id,
@@ -514,7 +523,7 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
         logger.warning(springboot_migration_warning(require_update=False,
                                                     check_version=(not isSecretType),
                                                     both_version=isSecretType))
-
+    logger.warning('request payload: %s', parameters)
     return auto_register(sdk_no_wait, no_wait,
                          client.begin_create_or_update,
                          resource_uri=source_id,

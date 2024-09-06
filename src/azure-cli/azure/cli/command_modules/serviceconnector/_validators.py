@@ -945,8 +945,14 @@ def validate_kafka_params(cmd, namespace):
 def validate_service_state(linker_parameters):
     '''Validate whether user provided params are applicable to service state
     '''
-    target_type = None
-    target_id = linker_parameters.get('target_service', dict()).get('id')
+    target_type = linker_parameters.get('target_service', dict()).get('type')
+
+    # AzureResource and other types (e.g., FabricResource, SelfHostedResource)
+    if target_type == "AzureResource":
+        target_id = linker_parameters.get('target_service', dict()).get('id')
+    else :
+        target_id = linker_parameters.get('target_service', dict()).get('endpoint')
+
     for target, resource_id in TARGET_RESOURCES.items():
         matched = re.match(get_resource_regex(resource_id), target_id, re.IGNORECASE)
         if matched:
