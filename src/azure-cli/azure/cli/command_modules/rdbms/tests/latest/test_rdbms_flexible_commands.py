@@ -221,9 +221,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
         version = '16'
         storage_size = 128
-        location = self.postgres_location
         sku_name = 'Standard_D2s_v3'
-        memory_optimized_sku = 'Standard_E2ds_v4'
         tier = 'GeneralPurpose'
         backup_retention = 7
         database_name = 'testdb'
@@ -238,7 +236,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         tier = 'MemoryOptimized'
         tier_lower = tier.lower()
 
-        sku_name = memory_optimized_sku
+        sku_name = 'Standard_E2ds_v4'
         sku_name_lower = sku_name.lower()
         
         self.cmd('{} flexible-server update -g {} -n {} --tier {} --sku-name {}'

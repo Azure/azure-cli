@@ -368,18 +368,19 @@ def _valid_ssdv2_range(storage_gb, sku_info, tier, iops, throughput, instance):
     storage_throughput = throughput if throughput is not None else instance.storage.throughput
 
     # find min and max values for storage
-    supported_storageV2_size = sku_info[tier.lower()]["supported_storageV2_size"]
+    sku_tier = tier.lower()
+    supported_storageV2_size = sku_info[sku_tier]["supported_storageV2_size"]
     min_storage = instance.storage.storage_size_gb if instance is not None else supported_storageV2_size
-    max_storage = sku_info[tier.lower()]["supported_storageV2_size_max"]
+    max_storage = sku_info[sku_tier]["supported_storageV2_size_max"]
     if not (min_storage <= storage_gib <= max_storage):
         raise CLIError('The requested value for storage size does not fall between {} and {} GiB.'
                        .format(min_storage, max_storage))
 
     storage = storage_gib * 1.07374182
     # find min and max values for IOPS
-    min_iops = sku_info[tier.lower()]["supported_storageV2_iops"]
-    if sku_info[tier.lower()]["supported_storageV2_iops"] < math.floor(max(0, storage - 6) * 500 + min_iops):
-        max_iops = sku_info[tier.lower()]["supported_storageV2_iops_max"]
+    min_iops = sku_info[sku_tier]["supported_storageV2_iops"]
+    if sku_info[sku_tier]["supported_storageV2_iops"] < math.floor(max(0, storage - 6) * 500 + min_iops):
+        max_iops = sku_info[sku_tier]["supported_storageV2_iops_max"]
     else:
         max_iops = math.floor(max(0, storage - 6) * 500 + min_iops)
 
@@ -388,13 +389,13 @@ def _valid_ssdv2_range(storage_gb, sku_info, tier, iops, throughput, instance):
                        .format(min_iops, max_iops))
 
     # find min and max values for throughout
-    min_throughout = sku_info[tier.lower()]["supported_storageV2_throughput"]
+    min_throughout = sku_info[sku_tier]["supported_storageV2_throughput"]
     if storage > 6:
         max_storage_throughout = math.floor(max(0.25 * storage_iops, min_throughout))
     else:
         max_storage_throughout = min_throughout
-    if sku_info[tier.lower()]["supported_storageV2_throughput_max"] < max_storage_throughout:
-        max_throughout = sku_info[tier.lower()]["supported_storageV2_throughput_max"]
+    if sku_info[sku_tier]["supported_storageV2_throughput_max"] < max_storage_throughout:
+        max_throughout = sku_info[sku_tier]["supported_storageV2_throughput_max"]
     else:
         max_throughout = max_storage_throughout
 
