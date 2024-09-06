@@ -39,7 +39,7 @@ What developers need to do is:
 2. replace `subprocess.run` (or `Popen` or `check_call` or `check_output` or `call`) with `run_cmd`.
 3. construct cmd `args` as array, like `[executable, arg0, arg1, arg2, ...]`
 
-`run_cmd` will add necessary argument type checks and process the input and output the same way as `subprocess.run`, and block potential risks from commands constructed from user input.
+`run_cmd` add necessary argument type checks and process the input and output the same way as `subprocess.run`, and block potential risks from commands constructed from user input.
 Below is an example for `run_cmd` use case:
 
 ```python
@@ -109,4 +109,4 @@ When using subprocess module, avoid `shell=True` argument when it comes with cmd
 
 
 ## Summary
-Ensuring the safety of Azure CLI from command injection under subprocess calling requires an in-depth understanding of these vulnerabilities and also proactive measures to counteract potential exploits. CLI developers can apply the three security practices, if applicable, when using builtin `subprocess`, but it's recommended to use the centralized function `run_cmd` CLI provided, to safeguard CLI modules from command injection attack and for future more accessible security enforcements.
+Ensuring the safety of Azure CLI from command injection under subprocess calling requires an in-depth understanding of these vulnerabilities and also proactive measures to counteract potential exploits. CLI developers should apply the security practices before using builtin `subprocess`, and it's recommended to use the centralized function `run_cmd` CLI provided, to safeguard CLI modules from command injection attack and for future more accessible security enforcements.
