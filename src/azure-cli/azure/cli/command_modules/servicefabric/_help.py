@@ -237,7 +237,7 @@ short-summary: Add a common name or certificate thumbprint to the cluster for cl
 examples:
   - name: Add client certificate by thumbprint
     text: >
-        az sf cluster client-certificate add -g group-name -c cluster1 --thumbprint '5F3660C715EBBDA31DB1FFDCF508302348DE8E7A'
+        "az sf cluster client-certificate add -g testRG -c testCluster --certificate-common-name testCommonName --certificate-issuer-thumbprint AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA --is-admin"
 
 """
 

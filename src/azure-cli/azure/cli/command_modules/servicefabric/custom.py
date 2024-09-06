@@ -200,7 +200,8 @@ def new_cluster(cmd,
                                      vault_resource_group_name,
                                      certificate_output_folder,
                                      certificate_subject_name,
-                                     secret_identifier)
+                                     secret_identifier,
+                                     location)
         vault_id = result[0]
         certificate_uri = result[1]
         cert_thumbprint = result[2]
@@ -279,6 +280,8 @@ def add_app_cert(cmd,
                  certificate_subject_name=None,
                  secret_identifier=None):
     cli_ctx = cmd.cli_ctx
+    cluster = client.get(resource_group_name, cluster_name)
+    location = cluster.location
     result = _create_certificate(cmd,
                                  cli_ctx,
                                  resource_group_name,
@@ -288,7 +291,8 @@ def add_app_cert(cmd,
                                  vault_resource_group_name,
                                  certificate_output_folder,
                                  certificate_subject_name,
-                                 secret_identifier)
+                                 secret_identifier,
+                                 location)
 
     _add_cert_to_all_vmss(cli_ctx, resource_group_name, None, result[0], result[1])
     return client.get(resource_group_name, cluster_name)
@@ -338,14 +342,26 @@ def add_client_cert(cmd,
         cluster.client_certificate_thumbprints.append(
             ClientCertificateThumbprint(is_admin, thumbprint))
 
-    def _add_common_name(cluster, is_admin, certificate_common_name, certificate_issuer_thumbprint):
+    def _add_common_name(
+        cluster, is_admin, certificate_common_name, certificate_issuer_thumbprint
+    ):
+        remove = False
         for t in cluster.client_certificate_common_names:
-            if t.certificate_common_name.lower() == certificate_common_name.lower() and t.certificate_issuer_thumbprint.lower() == certificate_issuer_thumbprint.lower():
+            if (
+                t.certificate_common_name.lower() == certificate_common_name.lower()
+                and t.certificate_issuer_thumbprint.lower()
+                == certificate_issuer_thumbprint.lower()
+            ):
                 remove = t
         if remove:
             cluster.client_certificate_common_names.remove(remove)
-        cluster.client_certificate_common_names.add(ClientCertificateCommonName(
-            is_admin, certificate_common_name, certificate_issuer_thumbprint))
+
+        client_certificate_common_names = ClientCertificateCommonName(
+            is_admin=is_admin,
+            certificate_common_name=certificate_common_name,
+            certificate_issuer_thumbprint=certificate_issuer_thumbprint,
+        )
+        cluster.client_certificate_common_names.append(client_certificate_common_names)
         return cluster.client_certificate_common_names
 
     if thumbprint:
@@ -1060,7 +1076,8 @@ def _create_certificate(cmd,
                         vault_resource_group_name=None,
                         certificate_output_folder=None,
                         certificate_subject_name=None,
-                        secret_identifier=None):
+                        secret_identifier=None,
+                        location=None):
     _verify_cert_function_parameter(certificate_file, certificate_password,
                                     vault_name, vault_resource_group_name,
                                     certificate_output_folder,
@@ -1068,8 +1085,6 @@ def _create_certificate(cmd,
                                     secret_identifier)
 
     output_file = None
-    rg = _get_resource_group_by_name(cli_ctx, resource_group_name)
-    location = rg.location
 
     vault_id = None
     secret_url = None
@@ -1772,6 +1787,9 @@ def _set_parameters_for_customize_template(cmd,
     parameters = get_file_json(parameter_file)['parameters']
     if parameters is None:
         raise CLIError('Invalid parameters file')
+    
+    location = parameters['clusterLocation']['value']
+    
     if SOURCE_VAULT_VALUE in parameters and CERTIFICATE_THUMBPRINT in parameters and CERTIFICATE_URL_VALUE in parameters:
         logger.info('Found primary certificate parameters in parameters file')
         result = _create_certificate(cmd,
@@ -1783,7 +1801,8 @@ def _set_parameters_for_customize_template(cmd,
                                      vault_resource_group_name,
                                      certificate_output_folder,
                                      certificate_subject_name,
-                                     secret_identifier)
+                                     secret_identifier,
+                                     location)
         parameters[SOURCE_VAULT_VALUE]['value'] = result[0]
         parameters[CERTIFICATE_URL_VALUE]['value'] = result[1]
         parameters[CERTIFICATE_THUMBPRINT]['value'] = result[2]
@@ -1804,7 +1823,8 @@ def _set_parameters_for_customize_template(cmd,
                                      vault_resource_group_name,
                                      certificate_output_folder,
                                      certificate_subject_name,
-                                     secret_identifier)
+                                     secret_identifier,
+                                     location)
         parameters[SOURCE_VAULT_VALUE]['value'] = result[0]
         parameters[CERTIFICATE_URL_VALUE]['value'] = result[1]
         parameters[CERTIFICATE_THUMBPRINT]['value'] = result[2]
