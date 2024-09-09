@@ -104,7 +104,6 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_DATALAKE_STORE = ('azure.cli.command_modules.dls.vendored_sdks.azure_mgmt_datalake_store', None)
     MGMT_DATAMIGRATION = ('azure.mgmt.datamigration', None)
     MGMT_EVENTGRID = ('azure.mgmt.eventgrid', None)
-    MGMT_DEVTESTLABS = ('azure.mgmt.devtestlabs', None)
     MGMT_MAPS = ('azure.mgmt.maps', None)
     MGMT_POLICYINSIGHTS = ('azure.mgmt.policyinsights', None)
     MGMT_RDBMS = ('azure.mgmt.rdbms', None)
