@@ -7,12 +7,16 @@ from ..azcopy.util import AzCopy, client_auth_for_azcopy, login_auth_for_azcopy,
 
 
 # pylint: disable=too-many-statements, too-many-locals, unused-argument
-def storage_copy(source, destination, put_md5=None, recursive=None, blob_type=None,
+def storage_copy(cmd, source, destination, put_md5=None, recursive=None, blob_type=None,
                  preserve_s2s_access_tier=None, content_type=None, follow_symlinks=None,
                  exclude_pattern=None, include_pattern=None, exclude_path=None, include_path=None,
                  cap_mbps=None, extra_options=None, **kwargs):
 
     azcopy = AzCopy()
+
+    if kwargs.get('token_credential'):
+        azcopy = _azcopy_login_client(cmd)
+
     flags = []
     if recursive is not None:
         flags.append('--recursive')
@@ -120,6 +124,8 @@ def storage_run_command(cmd, command_args):
 
 def _add_url_sas(url, sas):
     if not sas:
+        return url
+    if '?' in url:
         return url
     return '{}?{}'.format(url, sas)
 

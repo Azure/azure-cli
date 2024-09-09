@@ -1776,7 +1776,8 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
                         min_replicas=None,
                         max_replicas=None,
                         acr_use_identity=None,
-                        acr_identity=None):
+                        acr_identity=None,
+                        min_tls_cipher_suite=None):
     configs = get_site_configs(cmd, resource_group_name, name, slot)
     app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
                                            'list_application_settings', slot)
@@ -1830,6 +1831,7 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
     if pre_warmed_instance_count is not None:
         pre_warmed_instance_count = validate_range_of_int_flag('--prewarmed-instance-count', pre_warmed_instance_count,
                                                                min_val=0, max_val=20)
+
     import inspect
     frame = inspect.currentframe()
     bool_flags = ['remote_debugging_enabled', 'web_sockets_enabled', 'always_on',

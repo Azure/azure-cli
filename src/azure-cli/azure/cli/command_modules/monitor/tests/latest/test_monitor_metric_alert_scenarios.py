@@ -599,12 +599,12 @@ class MonitorTests(ScenarioTest):
             ])
         self.cmd(
             'monitor metrics alert create -g {rg} -n {alert2} --scopes {sa_id} --region westus --description "Test"'
-            ' --condition "avg My-Ns.\\LogicalDisk(C:)\% Free Space = 1 with skipMetricValidation"',
+            ' --condition "avg My-Ns.\\LogicalDisk(C:)\\% Free Space = 1 with skipMetricValidation"',
             checks=[
                 self.check('description', 'Test'),
                 self.check('length(criteria.allOf)', 1),
                 self.check('criteria.allOf[0].metricNamespace', 'My-Ns'),
-                self.check('criteria.allOf[0].metricName', '\\LogicalDisk(C:)\% Free Space'),
+                self.check('criteria.allOf[0].metricName', '\\LogicalDisk(C:)\\% Free Space'),
                 self.check('criteria.allOf[0].skipMetricValidation', True)
             ])
 

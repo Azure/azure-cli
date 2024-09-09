@@ -985,6 +985,91 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
             )
         self.assertEqual(str(cm.exception), err)
 
+    def test_enable_with_insufficient_cores_1(self):
+        storage_pool_name = "valid-name"
+        storage_pool_sku = acstor_consts.CONST_STORAGE_POOL_SKU_PREMIUM_LRS
+        storage_pool_type = acstor_consts.CONST_STORAGE_POOL_TYPE_AZURE_DISK
+        nodepool_list = "pool1"
+        agentpools = [{"name": "pool1", "vm_size": "Standard_D2s_v2", "count": 3, "zoned": False}]
+        err = (
+            "Cannot operate Azure Container Storage on a node pool consisting of "
+            "nodes with cores less than 4. Node pool: pool1 with node size: Standard_D2s_v2 "
+            "which is assigned for Azure Container Storage has nodes with 2 cores."
+        )
+        with self.assertRaises(InvalidArgumentValueError) as cm:
+            acstor_validator.validate_enable_azure_container_storage_params(
+                storage_pool_type, storage_pool_name, storage_pool_sku, None, None, nodepool_list, agentpools, False, False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
+            )
+        self.assertEqual(str(cm.exception), err)
+
+    def test_enable_with_insufficient_cores_2(self):
+        storage_pool_name = "valid-name"
+        storage_pool_sku = acstor_consts.CONST_STORAGE_POOL_SKU_PREMIUM_LRS
+        storage_pool_type = acstor_consts.CONST_STORAGE_POOL_TYPE_AZURE_DISK
+        nodepool_list = "pool1"
+        agentpools = [{"name": "pool1", "vm_size": "Standard_H100-D2s_v2", "count": 3, "zoned": False}]
+        err = (
+            "Cannot operate Azure Container Storage on a node pool consisting of "
+            "nodes with cores less than 4. Node pool: pool1 with node size: Standard_H100-D2s_v2 "
+            "which is assigned for Azure Container Storage has nodes with 2 cores."
+        )
+        with self.assertRaises(InvalidArgumentValueError) as cm:
+            acstor_validator.validate_enable_azure_container_storage_params(
+                storage_pool_type, storage_pool_name, storage_pool_sku, None, None, nodepool_list, agentpools, False, False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
+            )
+        self.assertEqual(str(cm.exception), err)
+
+    def test_enable_with_insufficient_cores_3(self):
+        storage_pool_name = "valid-name"
+        storage_pool_sku = acstor_consts.CONST_STORAGE_POOL_SKU_PREMIUM_LRS
+        storage_pool_type = acstor_consts.CONST_STORAGE_POOL_TYPE_AZURE_DISK
+        nodepool_list = "pool1"
+        agentpools = [{"name": "pool1", "vm_size": "Standard_H100-D2s", "count": 3, "zoned": False}]
+        err = (
+            "Cannot operate Azure Container Storage on a node pool consisting of "
+            "nodes with cores less than 4. Node pool: pool1 with node size: Standard_H100-D2s "
+            "which is assigned for Azure Container Storage has nodes with 2 cores."
+        )
+        with self.assertRaises(InvalidArgumentValueError) as cm:
+            acstor_validator.validate_enable_azure_container_storage_params(
+                storage_pool_type, storage_pool_name, storage_pool_sku, None, None, nodepool_list, agentpools, False, False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
+            )
+        self.assertEqual(str(cm.exception), err)
+
+    def test_enable_with_insufficient_cores_4(self):
+        storage_pool_name = "valid-name"
+        storage_pool_sku = acstor_consts.CONST_STORAGE_POOL_SKU_PREMIUM_LRS
+        storage_pool_type = acstor_consts.CONST_STORAGE_POOL_TYPE_AZURE_DISK
+        nodepool_list = "pool1"
+        agentpools = [{"name": "pool1", "vm_size": "Standard_H2", "count": 3, "zoned": False}]
+        err = (
+            "Cannot operate Azure Container Storage on a node pool consisting of "
+            "nodes with cores less than 4. Node pool: pool1 with node size: Standard_H2 "
+            "which is assigned for Azure Container Storage has nodes with 2 cores."
+        )
+        with self.assertRaises(InvalidArgumentValueError) as cm:
+            acstor_validator.validate_enable_azure_container_storage_params(
+                storage_pool_type, storage_pool_name, storage_pool_sku, None, None, nodepool_list, agentpools, False, False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
+            )
+        self.assertEqual(str(cm.exception), err)
+
+    def test_enable_with_insufficient_cores_5(self):
+        storage_pool_name = "valid-name"
+        storage_pool_sku = acstor_consts.CONST_STORAGE_POOL_SKU_PREMIUM_LRS
+        storage_pool_type = acstor_consts.CONST_STORAGE_POOL_TYPE_AZURE_DISK
+        nodepool_list = "pool1"
+        agentpools = [{"name": "pool1", "vm_size": "Standard_D2s", "count": 3, "zoned": False}]
+        err = (
+            "Cannot operate Azure Container Storage on a node pool consisting of "
+            "nodes with cores less than 4. Node pool: pool1 with node size: Standard_D2s "
+            "which is assigned for Azure Container Storage has nodes with 2 cores."
+        )
+        with self.assertRaises(InvalidArgumentValueError) as cm:
+            acstor_validator.validate_enable_azure_container_storage_params(
+                storage_pool_type, storage_pool_name, storage_pool_sku, None, None, nodepool_list, agentpools, False, False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
+            )
+        self.assertEqual(str(cm.exception), err)
+
     def test_enable_with_option_and_non_ephemeral_disk_pool(self):
         storage_pool_name = "valid-name"
         storage_pool_option = acstor_consts.CONST_STORAGE_POOL_OPTION_NVME

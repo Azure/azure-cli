@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.64.0
+++++++
+* Minor fixes
+
 2.63.0
 ++++++
 * Resolve CVE-2024-39689 (#29320)

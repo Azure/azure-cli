@@ -320,7 +320,7 @@ class AFDOriginCreate(_AFDOriginCreate):
             options=['--enable-private-link'],
             help='Indicates whether private link is enanbled on that origin.',
             blank=True,
-            default=True
+            default=False
         )
         args_schema.private_link_location = AAZStrArg(
             options=['--private-link-location'],
