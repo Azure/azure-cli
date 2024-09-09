@@ -514,6 +514,10 @@ jobs:
     inputs:
       versionSpec: 3.11
 
+  - task: PipAuthenticate@1
+    displayName: 'Pip Authenticate'
+    inputs:
+      artifactFeeds: 'public/PublicPackages'
 
   - script: |
       if [[ "$(Build.Reason)" == "PullRequest" ]]; then
