@@ -218,12 +218,12 @@ class Wait(AAZWaitCommand):
                 flags={"required": True},
             )
 
-            disc_cache_expiration = cls._schema_on_200.properties.actions.Element.discriminate_by("name", "CacheExpiration")
+            disc_cache_expiration = cls._schema_on_200.properties.actions.Element["discriminate_by(\"name\", \"CacheExpiration\")"]
             disc_cache_expiration.parameters = AAZObjectType(
                 flags={"required": True},
             )
 
-            parameters = cls._schema_on_200.properties.actions.Element.discriminate_by("name", "CacheExpiration").parameters
+            parameters = cls._schema_on_200.properties.actions.Element["discriminate_by(\"name\", \"CacheExpiration\")"].parameters
             parameters.cache_behavior = AAZStrType(
                 serialized_name="cacheBehavior",
                 flags={"required": True},
@@ -241,12 +241,12 @@ class Wait(AAZWaitCommand):
                 flags={"required": True},
             )
 
-            disc_cache_key_query_string = cls._schema_on_200.properties.actions.Element.discriminate_by("name", "CacheKeyQueryString")
+            disc_cache_key_query_string = cls._schema_on_200.properties.actions.Element["discriminate_by(\"name\", \"CacheKeyQueryString\")"]
             disc_cache_key_query_string.parameters = AAZObjectType(
                 flags={"required": True},
             )
 
-            parameters = cls._schema_on_200.properties.actions.Element.discriminate_by("name", "CacheKeyQueryString").parameters
+            parameters = cls._schema_on_200.properties.actions.Element["discriminate_by(\"name\", \"CacheKeyQueryString\")"].parameters
             parameters.query_parameters = AAZStrType(
                 serialized_name="queryParameters",
                 nullable=True,
@@ -260,24 +260,24 @@ class Wait(AAZWaitCommand):
                 flags={"required": True},
             )
 
-            disc_modify_request_header = cls._schema_on_200.properties.actions.Element.discriminate_by("name", "ModifyRequestHeader")
+            disc_modify_request_header = cls._schema_on_200.properties.actions.Element["discriminate_by(\"name\", \"ModifyRequestHeader\")"]
             disc_modify_request_header.parameters = AAZObjectType(
                 flags={"required": True},
             )
             _WaitHelper._build_schema_header_action_parameters_read(disc_modify_request_header.parameters)
 
-            disc_modify_response_header = cls._schema_on_200.properties.actions.Element.discriminate_by("name", "ModifyResponseHeader")
+            disc_modify_response_header = cls._schema_on_200.properties.actions.Element["discriminate_by(\"name\", \"ModifyResponseHeader\")"]
             disc_modify_response_header.parameters = AAZObjectType(
                 flags={"required": True},
             )
             _WaitHelper._build_schema_header_action_parameters_read(disc_modify_response_header.parameters)
 
-            disc_origin_group_override = cls._schema_on_200.properties.actions.Element.discriminate_by("name", "OriginGroupOverride")
+            disc_origin_group_override = cls._schema_on_200.properties.actions.Element["discriminate_by(\"name\", \"OriginGroupOverride\")"]
             disc_origin_group_override.parameters = AAZObjectType(
                 flags={"required": True},
             )
 
-            parameters = cls._schema_on_200.properties.actions.Element.discriminate_by("name", "OriginGroupOverride").parameters
+            parameters = cls._schema_on_200.properties.actions.Element["discriminate_by(\"name\", \"OriginGroupOverride\")"].parameters
             parameters.origin_group = AAZObjectType(
                 serialized_name="originGroup",
                 flags={"required": True},
@@ -288,12 +288,12 @@ class Wait(AAZWaitCommand):
                 flags={"required": True},
             )
 
-            disc_route_configuration_override = cls._schema_on_200.properties.actions.Element.discriminate_by("name", "RouteConfigurationOverride")
+            disc_route_configuration_override = cls._schema_on_200.properties.actions.Element["discriminate_by(\"name\", \"RouteConfigurationOverride\")"]
             disc_route_configuration_override.parameters = AAZObjectType(
                 flags={"required": True},
             )
 
-            parameters = cls._schema_on_200.properties.actions.Element.discriminate_by("name", "RouteConfigurationOverride").parameters
+            parameters = cls._schema_on_200.properties.actions.Element["discriminate_by(\"name\", \"RouteConfigurationOverride\")"].parameters
             parameters.cache_configuration = AAZObjectType(
                 serialized_name="cacheConfiguration",
             )
@@ -305,7 +305,7 @@ class Wait(AAZWaitCommand):
                 flags={"required": True},
             )
 
-            cache_configuration = cls._schema_on_200.properties.actions.Element.discriminate_by("name", "RouteConfigurationOverride").parameters.cache_configuration
+            cache_configuration = cls._schema_on_200.properties.actions.Element["discriminate_by(\"name\", \"RouteConfigurationOverride\")"].parameters.cache_configuration
             cache_configuration.cache_behavior = AAZStrType(
                 serialized_name="cacheBehavior",
             )
@@ -322,7 +322,7 @@ class Wait(AAZWaitCommand):
                 serialized_name="queryStringCachingBehavior",
             )
 
-            origin_group_override = cls._schema_on_200.properties.actions.Element.discriminate_by("name", "RouteConfigurationOverride").parameters.origin_group_override
+            origin_group_override = cls._schema_on_200.properties.actions.Element["discriminate_by(\"name\", \"RouteConfigurationOverride\")"].parameters.origin_group_override
             origin_group_override.forwarding_protocol = AAZStrType(
                 serialized_name="forwardingProtocol",
             )
@@ -331,12 +331,12 @@ class Wait(AAZWaitCommand):
             )
             _WaitHelper._build_schema_resource_reference_read(origin_group_override.origin_group)
 
-            disc_url_redirect = cls._schema_on_200.properties.actions.Element.discriminate_by("name", "UrlRedirect")
+            disc_url_redirect = cls._schema_on_200.properties.actions.Element["discriminate_by(\"name\", \"UrlRedirect\")"]
             disc_url_redirect.parameters = AAZObjectType(
                 flags={"required": True},
             )
 
-            parameters = cls._schema_on_200.properties.actions.Element.discriminate_by("name", "UrlRedirect").parameters
+            parameters = cls._schema_on_200.properties.actions.Element["discriminate_by(\"name\", \"UrlRedirect\")"].parameters
             parameters.custom_fragment = AAZStrType(
                 serialized_name="customFragment",
             )
@@ -361,12 +361,12 @@ class Wait(AAZWaitCommand):
                 flags={"required": True},
             )
 
-            disc_url_rewrite = cls._schema_on_200.properties.actions.Element.discriminate_by("name", "UrlRewrite")
+            disc_url_rewrite = cls._schema_on_200.properties.actions.Element["discriminate_by(\"name\", \"UrlRewrite\")"]
             disc_url_rewrite.parameters = AAZObjectType(
                 flags={"required": True},
             )
 
-            parameters = cls._schema_on_200.properties.actions.Element.discriminate_by("name", "UrlRewrite").parameters
+            parameters = cls._schema_on_200.properties.actions.Element["discriminate_by(\"name\", \"UrlRewrite\")"].parameters
             parameters.destination = AAZStrType(
                 flags={"required": True},
             )
@@ -382,12 +382,12 @@ class Wait(AAZWaitCommand):
                 flags={"required": True},
             )
 
-            disc_url_signing = cls._schema_on_200.properties.actions.Element.discriminate_by("name", "UrlSigning")
+            disc_url_signing = cls._schema_on_200.properties.actions.Element["discriminate_by(\"name\", \"UrlSigning\")"]
             disc_url_signing.parameters = AAZObjectType(
                 flags={"required": True},
             )
 
-            parameters = cls._schema_on_200.properties.actions.Element.discriminate_by("name", "UrlSigning").parameters
+            parameters = cls._schema_on_200.properties.actions.Element["discriminate_by(\"name\", \"UrlSigning\")"].parameters
             parameters.algorithm = AAZStrType()
             parameters.parameter_name_override = AAZListType(
                 serialized_name="parameterNameOverride",
@@ -397,10 +397,10 @@ class Wait(AAZWaitCommand):
                 flags={"required": True},
             )
 
-            parameter_name_override = cls._schema_on_200.properties.actions.Element.discriminate_by("name", "UrlSigning").parameters.parameter_name_override
+            parameter_name_override = cls._schema_on_200.properties.actions.Element["discriminate_by(\"name\", \"UrlSigning\")"].parameters.parameter_name_override
             parameter_name_override.Element = AAZObjectType()
 
-            _element = cls._schema_on_200.properties.actions.Element.discriminate_by("name", "UrlSigning").parameters.parameter_name_override.Element
+            _element = cls._schema_on_200.properties.actions.Element["discriminate_by(\"name\", \"UrlSigning\")"].parameters.parameter_name_override.Element
             _element.param_indicator = AAZStrType(
                 serialized_name="paramIndicator",
                 flags={"required": True},
@@ -418,12 +418,12 @@ class Wait(AAZWaitCommand):
                 flags={"required": True},
             )
 
-            disc_client_port = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "ClientPort")
+            disc_client_port = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"ClientPort\")"]
             disc_client_port.parameters = AAZObjectType(
                 flags={"required": True},
             )
 
-            parameters = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "ClientPort").parameters
+            parameters = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"ClientPort\")"].parameters
             parameters.match_values = AAZListType(
                 serialized_name="matchValues",
             )
@@ -439,18 +439,18 @@ class Wait(AAZWaitCommand):
                 flags={"required": True},
             )
 
-            match_values = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "ClientPort").parameters.match_values
+            match_values = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"ClientPort\")"].parameters.match_values
             match_values.Element = AAZStrType()
 
-            transforms = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "ClientPort").parameters.transforms
+            transforms = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"ClientPort\")"].parameters.transforms
             transforms.Element = AAZStrType()
 
-            disc_cookies = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "Cookies")
+            disc_cookies = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"Cookies\")"]
             disc_cookies.parameters = AAZObjectType(
                 flags={"required": True},
             )
 
-            parameters = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "Cookies").parameters
+            parameters = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"Cookies\")"].parameters
             parameters.match_values = AAZListType(
                 serialized_name="matchValues",
             )
@@ -467,18 +467,18 @@ class Wait(AAZWaitCommand):
                 flags={"required": True},
             )
 
-            match_values = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "Cookies").parameters.match_values
+            match_values = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"Cookies\")"].parameters.match_values
             match_values.Element = AAZStrType()
 
-            transforms = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "Cookies").parameters.transforms
+            transforms = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"Cookies\")"].parameters.transforms
             transforms.Element = AAZStrType()
 
-            disc_host_name = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "HostName")
+            disc_host_name = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"HostName\")"]
             disc_host_name.parameters = AAZObjectType(
                 flags={"required": True},
             )
 
-            parameters = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "HostName").parameters
+            parameters = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"HostName\")"].parameters
             parameters.match_values = AAZListType(
                 serialized_name="matchValues",
             )
@@ -494,18 +494,18 @@ class Wait(AAZWaitCommand):
                 flags={"required": True},
             )
 
-            match_values = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "HostName").parameters.match_values
+            match_values = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"HostName\")"].parameters.match_values
             match_values.Element = AAZStrType()
 
-            transforms = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "HostName").parameters.transforms
+            transforms = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"HostName\")"].parameters.transforms
             transforms.Element = AAZStrType()
 
-            disc_http_version = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "HttpVersion")
+            disc_http_version = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"HttpVersion\")"]
             disc_http_version.parameters = AAZObjectType(
                 flags={"required": True},
             )
 
-            parameters = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "HttpVersion").parameters
+            parameters = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"HttpVersion\")"].parameters
             parameters.match_values = AAZListType(
                 serialized_name="matchValues",
             )
@@ -521,18 +521,18 @@ class Wait(AAZWaitCommand):
                 flags={"required": True},
             )
 
-            match_values = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "HttpVersion").parameters.match_values
+            match_values = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"HttpVersion\")"].parameters.match_values
             match_values.Element = AAZStrType()
 
-            transforms = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "HttpVersion").parameters.transforms
+            transforms = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"HttpVersion\")"].parameters.transforms
             transforms.Element = AAZStrType()
 
-            disc_is_device = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "IsDevice")
+            disc_is_device = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"IsDevice\")"]
             disc_is_device.parameters = AAZObjectType(
                 flags={"required": True},
             )
 
-            parameters = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "IsDevice").parameters
+            parameters = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"IsDevice\")"].parameters
             parameters.match_values = AAZListType(
                 serialized_name="matchValues",
             )
@@ -548,18 +548,18 @@ class Wait(AAZWaitCommand):
                 flags={"required": True},
             )
 
-            match_values = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "IsDevice").parameters.match_values
+            match_values = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"IsDevice\")"].parameters.match_values
             match_values.Element = AAZStrType()
 
-            transforms = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "IsDevice").parameters.transforms
+            transforms = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"IsDevice\")"].parameters.transforms
             transforms.Element = AAZStrType()
 
-            disc_post_args = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "PostArgs")
+            disc_post_args = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"PostArgs\")"]
             disc_post_args.parameters = AAZObjectType(
                 flags={"required": True},
             )
 
-            parameters = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "PostArgs").parameters
+            parameters = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"PostArgs\")"].parameters
             parameters.match_values = AAZListType(
                 serialized_name="matchValues",
             )
@@ -576,18 +576,18 @@ class Wait(AAZWaitCommand):
                 flags={"required": True},
             )
 
-            match_values = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "PostArgs").parameters.match_values
+            match_values = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"PostArgs\")"].parameters.match_values
             match_values.Element = AAZStrType()
 
-            transforms = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "PostArgs").parameters.transforms
+            transforms = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"PostArgs\")"].parameters.transforms
             transforms.Element = AAZStrType()
 
-            disc_query_string = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "QueryString")
+            disc_query_string = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"QueryString\")"]
             disc_query_string.parameters = AAZObjectType(
                 flags={"required": True},
             )
 
-            parameters = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "QueryString").parameters
+            parameters = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"QueryString\")"].parameters
             parameters.match_values = AAZListType(
                 serialized_name="matchValues",
             )
@@ -603,18 +603,18 @@ class Wait(AAZWaitCommand):
                 flags={"required": True},
             )
 
-            match_values = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "QueryString").parameters.match_values
+            match_values = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"QueryString\")"].parameters.match_values
             match_values.Element = AAZStrType()
 
-            transforms = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "QueryString").parameters.transforms
+            transforms = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"QueryString\")"].parameters.transforms
             transforms.Element = AAZStrType()
 
-            disc_remote_address = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "RemoteAddress")
+            disc_remote_address = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"RemoteAddress\")"]
             disc_remote_address.parameters = AAZObjectType(
                 flags={"required": True},
             )
 
-            parameters = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "RemoteAddress").parameters
+            parameters = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"RemoteAddress\")"].parameters
             parameters.match_values = AAZListType(
                 serialized_name="matchValues",
             )
@@ -630,18 +630,18 @@ class Wait(AAZWaitCommand):
                 flags={"required": True},
             )
 
-            match_values = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "RemoteAddress").parameters.match_values
+            match_values = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"RemoteAddress\")"].parameters.match_values
             match_values.Element = AAZStrType()
 
-            transforms = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "RemoteAddress").parameters.transforms
+            transforms = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"RemoteAddress\")"].parameters.transforms
             transforms.Element = AAZStrType()
 
-            disc_request_body = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "RequestBody")
+            disc_request_body = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"RequestBody\")"]
             disc_request_body.parameters = AAZObjectType(
                 flags={"required": True},
             )
 
-            parameters = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "RequestBody").parameters
+            parameters = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"RequestBody\")"].parameters
             parameters.match_values = AAZListType(
                 serialized_name="matchValues",
             )
@@ -657,18 +657,18 @@ class Wait(AAZWaitCommand):
                 flags={"required": True},
             )
 
-            match_values = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "RequestBody").parameters.match_values
+            match_values = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"RequestBody\")"].parameters.match_values
             match_values.Element = AAZStrType()
 
-            transforms = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "RequestBody").parameters.transforms
+            transforms = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"RequestBody\")"].parameters.transforms
             transforms.Element = AAZStrType()
 
-            disc_request_header = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "RequestHeader")
+            disc_request_header = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"RequestHeader\")"]
             disc_request_header.parameters = AAZObjectType(
                 flags={"required": True},
             )
 
-            parameters = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "RequestHeader").parameters
+            parameters = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"RequestHeader\")"].parameters
             parameters.match_values = AAZListType(
                 serialized_name="matchValues",
             )
@@ -685,18 +685,18 @@ class Wait(AAZWaitCommand):
                 flags={"required": True},
             )
 
-            match_values = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "RequestHeader").parameters.match_values
+            match_values = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"RequestHeader\")"].parameters.match_values
             match_values.Element = AAZStrType()
 
-            transforms = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "RequestHeader").parameters.transforms
+            transforms = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"RequestHeader\")"].parameters.transforms
             transforms.Element = AAZStrType()
 
-            disc_request_method = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "RequestMethod")
+            disc_request_method = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"RequestMethod\")"]
             disc_request_method.parameters = AAZObjectType(
                 flags={"required": True},
             )
 
-            parameters = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "RequestMethod").parameters
+            parameters = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"RequestMethod\")"].parameters
             parameters.match_values = AAZListType(
                 serialized_name="matchValues",
             )
@@ -712,18 +712,18 @@ class Wait(AAZWaitCommand):
                 flags={"required": True},
             )
 
-            match_values = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "RequestMethod").parameters.match_values
+            match_values = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"RequestMethod\")"].parameters.match_values
             match_values.Element = AAZStrType()
 
-            transforms = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "RequestMethod").parameters.transforms
+            transforms = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"RequestMethod\")"].parameters.transforms
             transforms.Element = AAZStrType()
 
-            disc_request_scheme = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "RequestScheme")
+            disc_request_scheme = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"RequestScheme\")"]
             disc_request_scheme.parameters = AAZObjectType(
                 flags={"required": True},
             )
 
-            parameters = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "RequestScheme").parameters
+            parameters = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"RequestScheme\")"].parameters
             parameters.match_values = AAZListType(
                 serialized_name="matchValues",
             )
@@ -739,18 +739,18 @@ class Wait(AAZWaitCommand):
                 flags={"required": True},
             )
 
-            match_values = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "RequestScheme").parameters.match_values
+            match_values = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"RequestScheme\")"].parameters.match_values
             match_values.Element = AAZStrType()
 
-            transforms = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "RequestScheme").parameters.transforms
+            transforms = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"RequestScheme\")"].parameters.transforms
             transforms.Element = AAZStrType()
 
-            disc_request_uri = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "RequestUri")
+            disc_request_uri = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"RequestUri\")"]
             disc_request_uri.parameters = AAZObjectType(
                 flags={"required": True},
             )
 
-            parameters = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "RequestUri").parameters
+            parameters = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"RequestUri\")"].parameters
             parameters.match_values = AAZListType(
                 serialized_name="matchValues",
             )
@@ -766,18 +766,18 @@ class Wait(AAZWaitCommand):
                 flags={"required": True},
             )
 
-            match_values = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "RequestUri").parameters.match_values
+            match_values = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"RequestUri\")"].parameters.match_values
             match_values.Element = AAZStrType()
 
-            transforms = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "RequestUri").parameters.transforms
+            transforms = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"RequestUri\")"].parameters.transforms
             transforms.Element = AAZStrType()
 
-            disc_server_port = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "ServerPort")
+            disc_server_port = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"ServerPort\")"]
             disc_server_port.parameters = AAZObjectType(
                 flags={"required": True},
             )
 
-            parameters = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "ServerPort").parameters
+            parameters = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"ServerPort\")"].parameters
             parameters.match_values = AAZListType(
                 serialized_name="matchValues",
             )
@@ -793,18 +793,18 @@ class Wait(AAZWaitCommand):
                 flags={"required": True},
             )
 
-            match_values = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "ServerPort").parameters.match_values
+            match_values = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"ServerPort\")"].parameters.match_values
             match_values.Element = AAZStrType()
 
-            transforms = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "ServerPort").parameters.transforms
+            transforms = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"ServerPort\")"].parameters.transforms
             transforms.Element = AAZStrType()
 
-            disc_socket_addr = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "SocketAddr")
+            disc_socket_addr = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"SocketAddr\")"]
             disc_socket_addr.parameters = AAZObjectType(
                 flags={"required": True},
             )
 
-            parameters = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "SocketAddr").parameters
+            parameters = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"SocketAddr\")"].parameters
             parameters.match_values = AAZListType(
                 serialized_name="matchValues",
             )
@@ -820,18 +820,18 @@ class Wait(AAZWaitCommand):
                 flags={"required": True},
             )
 
-            match_values = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "SocketAddr").parameters.match_values
+            match_values = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"SocketAddr\")"].parameters.match_values
             match_values.Element = AAZStrType()
 
-            transforms = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "SocketAddr").parameters.transforms
+            transforms = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"SocketAddr\")"].parameters.transforms
             transforms.Element = AAZStrType()
 
-            disc_ssl_protocol = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "SslProtocol")
+            disc_ssl_protocol = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"SslProtocol\")"]
             disc_ssl_protocol.parameters = AAZObjectType(
                 flags={"required": True},
             )
 
-            parameters = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "SslProtocol").parameters
+            parameters = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"SslProtocol\")"].parameters
             parameters.match_values = AAZListType(
                 serialized_name="matchValues",
             )
@@ -847,18 +847,18 @@ class Wait(AAZWaitCommand):
                 flags={"required": True},
             )
 
-            match_values = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "SslProtocol").parameters.match_values
+            match_values = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"SslProtocol\")"].parameters.match_values
             match_values.Element = AAZStrType()
 
-            transforms = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "SslProtocol").parameters.transforms
+            transforms = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"SslProtocol\")"].parameters.transforms
             transforms.Element = AAZStrType()
 
-            disc_url_file_extension = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "UrlFileExtension")
+            disc_url_file_extension = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"UrlFileExtension\")"]
             disc_url_file_extension.parameters = AAZObjectType(
                 flags={"required": True},
             )
 
-            parameters = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "UrlFileExtension").parameters
+            parameters = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"UrlFileExtension\")"].parameters
             parameters.match_values = AAZListType(
                 serialized_name="matchValues",
             )
@@ -874,18 +874,18 @@ class Wait(AAZWaitCommand):
                 flags={"required": True},
             )
 
-            match_values = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "UrlFileExtension").parameters.match_values
+            match_values = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"UrlFileExtension\")"].parameters.match_values
             match_values.Element = AAZStrType()
 
-            transforms = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "UrlFileExtension").parameters.transforms
+            transforms = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"UrlFileExtension\")"].parameters.transforms
             transforms.Element = AAZStrType()
 
-            disc_url_file_name = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "UrlFileName")
+            disc_url_file_name = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"UrlFileName\")"]
             disc_url_file_name.parameters = AAZObjectType(
                 flags={"required": True},
             )
 
-            parameters = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "UrlFileName").parameters
+            parameters = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"UrlFileName\")"].parameters
             parameters.match_values = AAZListType(
                 serialized_name="matchValues",
             )
@@ -901,18 +901,18 @@ class Wait(AAZWaitCommand):
                 flags={"required": True},
             )
 
-            match_values = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "UrlFileName").parameters.match_values
+            match_values = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"UrlFileName\")"].parameters.match_values
             match_values.Element = AAZStrType()
 
-            transforms = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "UrlFileName").parameters.transforms
+            transforms = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"UrlFileName\")"].parameters.transforms
             transforms.Element = AAZStrType()
 
-            disc_url_path = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "UrlPath")
+            disc_url_path = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"UrlPath\")"]
             disc_url_path.parameters = AAZObjectType(
                 flags={"required": True},
             )
 
-            parameters = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "UrlPath").parameters
+            parameters = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"UrlPath\")"].parameters
             parameters.match_values = AAZListType(
                 serialized_name="matchValues",
             )
@@ -928,10 +928,10 @@ class Wait(AAZWaitCommand):
                 flags={"required": True},
             )
 
-            match_values = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "UrlPath").parameters.match_values
+            match_values = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"UrlPath\")"].parameters.match_values
             match_values.Element = AAZStrType()
 
-            transforms = cls._schema_on_200.properties.conditions.Element.discriminate_by("name", "UrlPath").parameters.transforms
+            transforms = cls._schema_on_200.properties.conditions.Element["discriminate_by(\"name\", \"UrlPath\")"].parameters.transforms
             transforms.Element = AAZStrType()
 
             system_data = cls._schema_on_200.system_data

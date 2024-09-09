@@ -501,7 +501,7 @@ class _UpdateHelper:
             flags={"required": True},
         )
 
-        disc_azure_first_party_managed_certificate = _schema_secret_read.properties.parameters.discriminate_by("type", "AzureFirstPartyManagedCertificate")
+        disc_azure_first_party_managed_certificate = _schema_secret_read.properties.parameters["discriminate_by(\"type\", \"AzureFirstPartyManagedCertificate\")"]
         disc_azure_first_party_managed_certificate.certificate_authority = AAZStrType(
             serialized_name="certificateAuthority",
             flags={"read_only": True},
@@ -512,6 +512,7 @@ class _UpdateHelper:
         )
         disc_azure_first_party_managed_certificate.secret_source = AAZObjectType(
             serialized_name="secretSource",
+            flags={"read_only": True},
         )
         cls._build_schema_resource_reference_read(disc_azure_first_party_managed_certificate.secret_source)
         disc_azure_first_party_managed_certificate.subject = AAZStrType(
@@ -524,12 +525,12 @@ class _UpdateHelper:
             flags={"read_only": True},
         )
 
-        subject_alternative_names = _schema_secret_read.properties.parameters.discriminate_by("type", "AzureFirstPartyManagedCertificate").subject_alternative_names
+        subject_alternative_names = _schema_secret_read.properties.parameters["discriminate_by(\"type\", \"AzureFirstPartyManagedCertificate\")"].subject_alternative_names
         subject_alternative_names.Element = AAZStrType(
             flags={"read_only": True},
         )
 
-        disc_customer_certificate = _schema_secret_read.properties.parameters.discriminate_by("type", "CustomerCertificate")
+        disc_customer_certificate = _schema_secret_read.properties.parameters["discriminate_by(\"type\", \"CustomerCertificate\")"]
         disc_customer_certificate.certificate_authority = AAZStrType(
             serialized_name="certificateAuthority",
             flags={"read_only": True},
@@ -559,12 +560,12 @@ class _UpdateHelper:
             serialized_name="useLatestVersion",
         )
 
-        subject_alternative_names = _schema_secret_read.properties.parameters.discriminate_by("type", "CustomerCertificate").subject_alternative_names
+        subject_alternative_names = _schema_secret_read.properties.parameters["discriminate_by(\"type\", \"CustomerCertificate\")"].subject_alternative_names
         subject_alternative_names.Element = AAZStrType(
             flags={"read_only": True},
         )
 
-        disc_managed_certificate = _schema_secret_read.properties.parameters.discriminate_by("type", "ManagedCertificate")
+        disc_managed_certificate = _schema_secret_read.properties.parameters["discriminate_by(\"type\", \"ManagedCertificate\")"]
         disc_managed_certificate.expiration_date = AAZStrType(
             serialized_name="expirationDate",
             flags={"read_only": True},
@@ -573,7 +574,7 @@ class _UpdateHelper:
             flags={"read_only": True},
         )
 
-        disc_url_signing_key = _schema_secret_read.properties.parameters.discriminate_by("type", "UrlSigningKey")
+        disc_url_signing_key = _schema_secret_read.properties.parameters["discriminate_by(\"type\", \"UrlSigningKey\")"]
         disc_url_signing_key.key_id = AAZStrType(
             serialized_name="keyId",
             flags={"required": True},
