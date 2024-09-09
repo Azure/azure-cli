@@ -184,7 +184,9 @@ def load_arguments(self, _):
 
         # Managed Service Identity
         c.argument('assign_identity_type', arg_group='Managed Service Identity',
-                   help="The type of identity used for the cluster.")
+                   help=("The type of identity used for the cluster. "
+                 "Allowed values: `None`, `SystemAssigned`, "
+                 "`SystemAssigned,UserAssigned`, `UserAssigned`."))
         c.argument('assign_identity', nargs='*', arg_group='Managed Service Identity',
                    help="The name or ID of user assigned identity.")
 

@@ -168,7 +168,7 @@ examples:
 
 helps['hdinsight update'] = """
 type: command
-short-summary: Update the tags or identity of the specified HDInsight cluster.
+short-summary: Update the tags or identity of the specified HDInsight cluster. Setting the identity property will override the existing identity configuration of the cluster.
 examples:
   - name: Update the tags.
     text: |-
