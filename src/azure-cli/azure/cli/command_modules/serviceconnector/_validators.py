@@ -12,9 +12,8 @@ from knack.prompting import (
     prompt,
     prompt_pass
 )
-from msrestazure.tools import (
+from azure.mgmt.core.tools import (
     parse_resource_id,
-    is_valid_resource_id
 )
 from azure.cli.core import telemetry
 from azure.cli.core.commands.client_factory import get_subscription_id
@@ -26,7 +25,8 @@ from azure.cli.core.azclierror import (
 
 from ._utils import (
     run_cli_cmd,
-    get_object_id_of_current_user
+    get_object_id_of_current_user,
+    is_valid_resource_id
 )
 from ._resource_config import (
     AUTH_TYPE,
@@ -148,7 +148,7 @@ def get_client_type(cmd, namespace):
 
         client_type = None
         try:
-            output = run_cli_cmd('az webapp show --id {} -o json'.format(source_id))
+            output = run_cli_cmd('az webapp show --id "{}" -o json'.format(source_id))
             prop = output.get('siteConfig').get('linuxFxVersion', None) or\
                 output.get('siteConfig').get('windowsFxVersion', None)
             # use 'linuxFxVersion' and 'windowsFxVersion' property to decide
@@ -170,7 +170,7 @@ def get_client_type(cmd, namespace):
         client_type = CLIENT_TYPE.SpringBoot
         try:
             segments = parse_resource_id(source_id)
-            output = run_cli_cmd('az spring app show -g {} -s {} -n {}'
+            output = run_cli_cmd('az spring app show -g "{}" -s "{}" -n "{}"'
                                  ' -o json'.format(segments.get('resource_group'), segments.get('name'),
                                                    segments.get('child_name_1')))
             prop_val = output.get('properties')\
@@ -491,8 +491,9 @@ def get_missing_target_args(cmd):
     target = get_target_resource_name(cmd)
     missing_args = dict()
 
-    for arg, content in TARGET_RESOURCES_PARAMS.get(target).items():
-        missing_args[arg] = content
+    if target in TARGET_RESOURCES_PARAMS:
+        for arg, content in TARGET_RESOURCES_PARAMS.get(target).items():
+            missing_args[arg] = content
 
     return missing_args
 
@@ -512,6 +513,8 @@ def get_missing_auth_args(cmd, namespace):
                 auth_param_exist = True
                 break
 
+    if target == RESOURCE.ConfluentKafka:
+        return missing_args
     # when keyvault csi is enabled, auth_type is userIdentity without subs_id and client_id
     if source == RESOURCE.KubernetesCluster and target == RESOURCE.KeyVault:
         if getattr(namespace, 'enable_csi', None):
@@ -662,7 +665,7 @@ def validate_update_params(cmd, namespace):
     '''Get missing args of update command
     '''
     missing_args = dict()
-    if not validate_connection_id(namespace):
+    if not validate_connection_id(namespace) and not validate_source_resource_id(cmd, namespace):
         missing_args.update(get_missing_source_args(cmd, namespace))
     # missing_args.update(get_missing_auth_args(cmd, namespace))
     missing_args.update(get_missing_connection_name(namespace))
@@ -770,7 +773,7 @@ def apply_auth_args(cmd, namespace, arg_values):
 
 
 def apply_workload_identity(namespace, arg_values):
-    output = run_cli_cmd('az identity show --ids {}'.format(
+    output = run_cli_cmd('az identity show --ids "{}"'.format(
         arg_values.get('workload_identity_auth_info')
     ))
     if output:
@@ -905,7 +908,7 @@ def validate_params(cmd, namespace):
             namespace.connection_name = generate_connection_name(cmd)
         else:
             validate_connection_name(namespace.connection_name)
-        if getattr(namespace, 'new_addon'):
+        if getattr(namespace, 'new_addon', None):
             _validate_and_apply(validate_addon_params, apply_addon_params)
         else:
             _validate_and_apply(validate_create_params, apply_create_params)
@@ -957,7 +960,7 @@ def validate_service_state(linker_parameters):
         if not rg or not name:
             return
 
-        output = run_cli_cmd('az appconfig show -g {} -n {}'.format(rg, name))
+        output = run_cli_cmd('az appconfig show -g "{}" -n "{}"'.format(rg, name))
         if output and output.get('disableLocalAuth') is True:
             raise ValidationError('Secret as auth type is not allowed when local auth is disabled for the '
                                   'specified appconfig, you may use service principal or managed identity.')

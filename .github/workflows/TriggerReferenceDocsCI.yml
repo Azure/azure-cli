@@ -1,0 +1,79 @@
+name: Trigger Microsoft Learn Docs Reference CI
+
+on:
+  release:
+    types:
+      - released
+
+permissions:
+  id-token: write
+
+jobs:
+  RunAzurePipeline:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Azure Login
+      uses: Azure/login@v2.1.0
+      with:
+        client-id: ${{ secrets.ADO_DocsReference_SP_ClientID }}
+        tenant-id: ${{ secrets.ADO_DocsReference_SP_TenantID }}
+        allow-no-subscriptions: true
+
+    - name: Run Azure Pipeline
+      shell: pwsh
+      env: 
+        AdoOrg: ${{secrets.ADO_DocsReference_Organization}}
+        AdoProject: ${{secrets.ADO_DocsReference_Project}}
+        AdoPipelineId: ${{secrets.ADO_DocsReference_JumpPipeline_ID}}
+        CheckInterval: 60
+      run: |
+          $organization = $env:AdoOrg
+          $project = $env:AdoProject
+          $definitionId = $env:AdoPipelineId
+          $checkInterval = $env:CheckInterval
+          $thisRunLink = "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          $triggerBranch = 'main'
+          $variables = @('commitAuthor=azcli', 'triggerFromRepo=https://github.com/Azure/azure-cli', "triggerBranch=$triggerBranch", "triggerByPipeline=$thisRunLink")
+
+          $output = az pipelines build queue --definition-id $definitionId --project $project --organization $organization --variables @variables | ConvertFrom-Json -AsHashtable
+          if ($? -eq $false)
+          {
+              $pipelineDefinitionLink = $organization + [uri]::EscapeDataString($project) + "/_build?definitionId=$definitionId"
+              Write-Error "Failed to queue the pipeline run for $pipelineDefinitionLink, please check above error message."
+          }
+          $runIdInJumpPipeline = $output.id
+          Write-Host "runIdInJumpPipeline: $runIdInJumpPipeline"
+          do
+          {
+              Start-Sleep -Seconds $checkInterval
+              $status = az pipelines runs show --query status --id $runIdInJumpPipeline --project $project --organization $organization --output tsv
+              $currentTime = (Get-Date -AsUTC).ToString('yyyy-MM-dd HH:mm:ss')
+              Write-Host "[UTC $currentTime] apidrop shared jump pipeline run status: $status"
+          } while ($status -ne 'completed')
+          $jumpOutput = az pipelines runs show --id $runIdInJumpPipeline --project $project --organization $organization | ConvertFrom-Json -AsHashtable
+
+          $targetPipelineResult = ($jumpOutput.tags -Match 'jump_return_result_(canceled|failed|partiallySucceeded|succeeded)')[0] -replace 'jump_return_result_', ''
+          $runId = ($jumpOutput.tags -Match 'jump_return_id_\d+')[0] -replace 'jump_return_id_', ''
+          $triggeredTargetPipeline = $runId ? $true : $false
+          if ($triggeredTargetPipeline)
+          {
+              # apidrop shared jump pipeline triggered target pipeline
+              $printMessage = 'Triggered reference pipeline run'
+              $printMessage += $targetPipelineResult ? " with its result $targetPipelineResult" : '' # waited for completion or not
+          }
+          else
+          {
+              # apidrop shared jump pipeline may fail to trigger target pipeline
+              $runId = $runIdInJumpPipeline
+              $printMessage = "Jump pipeline run with $($jumpOutput.result) state may fail to trigger reference pipeline"
+          }
+          $runLink = $organization + [uri]::EscapeDataString($project) + "/_build/results?buildId=$runId"
+          $printMessage += ", for details please check: $runLink"
+          if ($triggeredTargetPipeline)
+          {
+              Write-Host $printMessage
+          }
+          else
+          {
+              Write-Error $printMessage
+          }
