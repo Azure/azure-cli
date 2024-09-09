@@ -248,6 +248,10 @@ jobs:
         TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
         artifactName: metadata
 
+    - task: PipAuthenticate@1
+      displayName: 'Pip Authenticate'
+      inputs:
+        artifactFeeds: 'public/PublicPackages'
 
     - script: |
         set ARCH=$(Platform)
