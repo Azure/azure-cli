@@ -1657,7 +1657,7 @@ def _get_current_user_object_id(graph_client):
         current_user = graph_client.signed_in_user.get()
         if current_user and current_user.object_id:  # pylint:disable=no-member
             return current_user.object_id  # pylint:disable=no-member
-    except CloudError:
+    except HttpResponseError:
         pass
 
 

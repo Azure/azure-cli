@@ -17,10 +17,9 @@ from azure.cli.core.commands.validators import get_default_location_from_resourc
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.azclierror import CLIInternalError, InvalidArgumentValueError, \
     RequiredArgumentMissingError
-from azure.core.exceptions import ResourceNotFoundError
-from knack.log import get_logger
+from azure.core.exceptions import ResourceNotFoundError, HttpResponseError
 from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
-from azure.core.exceptions import HttpResponseError
+from knack.log import get_logger
 import azure.cli.command_modules.aro.custom
 
 

@@ -1529,7 +1529,6 @@ def get_private_endpoint_connection(client, resource_group_name=None, connection
 
 
 def _update_private_endpoint_connection_status(client, resource_group_name, account_name, connection_id, private_endpoint_connection_name, is_approved=True, description=None):  # pylint: disable=unused-argument
-    from azure.core.exceptions import HttpResponseError
     getInfoArr = get_private_endpoint_connection(client,
                                                  resource_group_name=resource_group_name,
                                                  connection_id=connection_id,

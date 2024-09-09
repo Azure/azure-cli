@@ -3,9 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.core.exceptions import HttpResponseError
 from knack.log import get_logger
 from knack.util import CLIError
+from azure.core.exceptions import HttpResponseError
 from azure.cli.core.azclierror import ValidationError
 from azure.cli.core.commands.validators import validate_tags
 from azure.cli.command_modules.servicefabric._sf_utils import _get_resource_group_by_name

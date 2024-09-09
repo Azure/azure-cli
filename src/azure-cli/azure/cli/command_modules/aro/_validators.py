@@ -15,8 +15,8 @@ from azure.cli.core.profiles import ResourceType
 from azure.cli.core.azclierror import CLIInternalError, InvalidArgumentValueError, \
     RequiredArgumentMissingError
 from azure.core.exceptions import ResourceNotFoundError, HttpResponseError
-from knack.log import get_logger
 from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id, resource_id
+from knack.log import get_logger
 
 logger = get_logger(__name__)
 
