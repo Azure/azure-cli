@@ -183,10 +183,6 @@ def load_arguments(self, _):
                    help='The client AAD security group name for Kafka Rest Proxy')
 
         # Managed Service Identity
-        c.argument('assign_identity_type', arg_group='Managed Service Identity',
-                   help=("The type of identity used for the cluster. "
-                 "Allowed values: `None`, `SystemAssigned`, "
-                 "`SystemAssigned,UserAssigned`, `UserAssigned`."))
         c.argument('assign_identity', nargs='*', arg_group='Managed Service Identity',
                    help="The name or ID of user assigned identity.")
 
@@ -268,6 +264,10 @@ def load_arguments(self, _):
         # update
         with self.argument_context('hdinsight update') as c:
             c.argument('tags', tags_type)
+            c.argument('assign_identity_type', arg_group='Managed Service Identity',
+                       help=("The type of identity used for the cluster. "
+                             "Allowed values: `None`, `SystemAssigned`, "
+                             "`SystemAssigned,UserAssigned`, `UserAssigned`."))
             c.argument('assign_identity', arg_group='Managed Service Identity',
                        completer=get_resource_name_completion_list_under_subscription(
                            'Microsoft.ManagedIdentity/userAssignedIdentities'),
