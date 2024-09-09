@@ -22,7 +22,7 @@ COPY . .
 # Azure Linux 3's python3 is 3.12, the rpm paths are
 #   /usr/src/azl/RPMS/x86_64/azure-cli-2.63.0-1.azl3.x86_64.rpm
 #   /usr/src/azl/RPMS/aarch64/azure-cli-2.63.0-1.azl3.aarch64.rpm
-RUN --mount=type=secret,id=PIP_INDEX_URL export PIP_INDEX_URL=$(cat /run/secrets/PIP_INDEX_URL) \
+RUN --mount=type=secret,id=PIP_INDEX_URL export PIP_INDEX_URL=$(cat /run/secrets/PIP_INDEX_URL) && \
     dos2unix ./scripts/release/rpm/azure-cli.spec && \
     REPO_PATH=$(pwd) CLI_VERSION=$cli_version PYTHON_PACKAGE=python3 PYTHON_CMD=python3 \
     rpmbuild -v -bb --clean scripts/release/rpm/azure-cli.spec && \
