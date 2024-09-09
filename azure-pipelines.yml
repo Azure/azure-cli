@@ -800,6 +800,11 @@ jobs:
   - bash: ./scripts/ci/install_docker.sh
     displayName: Install Docker
 
+  - task: PipAuthenticate@1
+    displayName: 'Pip Authenticate'
+    inputs:
+      artifactFeeds: 'public/PublicPackages'
+
   - task: Bash@3
     displayName: 'Build Rpm Package: Azure Linux'
     inputs:
@@ -890,6 +895,10 @@ jobs:
   steps:
   - bash: ./scripts/ci/install_docker.sh
     displayName: Install Docker
+  - task: PipAuthenticate@1
+    displayName: 'Pip Authenticate'
+    inputs:
+      artifactFeeds: 'public/PublicPackages'
   - task: Bash@3
     displayName: 'Build Rpm Package'
     inputs:
@@ -1013,6 +1022,10 @@ jobs:
   steps:
   - bash: ./scripts/ci/install_docker.sh
     displayName: Install Docker
+  - task: PipAuthenticate@1
+    displayName: 'Pip Authenticate'
+    inputs:
+      artifactFeeds: 'public/PublicPackages'
   - task: Bash@3
     displayName: 'Build $(deb_system) $(distro) $(arch) Package'
     inputs:
