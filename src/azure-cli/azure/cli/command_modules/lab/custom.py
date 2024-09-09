@@ -21,7 +21,13 @@ from .aaz.latest.lab.arm_template import Show as _ArmTemplateShow
 # pylint: disable=too-many-locals, unused-argument, too-many-statements, protected-access
 
 
+@register_command(
+    "lab vm create",
+    is_preview=True,
+)
 class LabVmCreate(_LabVmCreate):
+    """Create a VM in a lab.
+    """
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZStrArg, AAZBoolArg, AAZFileArg

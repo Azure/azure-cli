@@ -11,10 +11,6 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "lab create-environment",
-    is_preview=True,
-)
 class CreateEnvironment(AAZCommand):
     """Create virtual machines in a lab. This operation can take a while to complete.
 
