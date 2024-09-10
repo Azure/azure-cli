@@ -9,6 +9,7 @@ from azure.cli.core.util import shell_safe_json_parse
 from ._validators import (validate_component_version,
                           validate_storage_account,
                           validate_storage_msi,
+                          validate_msi,
                           validate_subnet,
                           validate_domain_service,
                           validate_workspace,
@@ -183,7 +184,9 @@ def load_arguments(self, _):
                    help='The client AAD security group name for Kafka Rest Proxy')
 
         # Managed Service Identity
-        c.argument('assign_identity', nargs='*', arg_group='Managed Service Identity',
+        c.argument('assign_identity', nargs='*', arg_group='Managed Service Identity', validator=validate_msi,
+                   completer=get_resource_name_completion_list_under_subscription(
+                       'Microsoft.ManagedIdentity/userAssignedIdentities'),
                    help="The name or ID of user assigned identity.")
 
         # Encryption In Transit
@@ -268,10 +271,6 @@ def load_arguments(self, _):
                        help=("The type of identity used for the cluster. "
                              "Allowed values: `None`, `SystemAssigned`, "
                              "`SystemAssigned,UserAssigned`, `UserAssigned`."))
-            c.argument('assign_identity', arg_group='Managed Service Identity',
-                       completer=get_resource_name_completion_list_under_subscription(
-                           'Microsoft.ManagedIdentity/userAssignedIdentities'),
-                       help="The name or ID of user assigned identity.")
 
         # application
         with self.argument_context('hdinsight application') as c:
