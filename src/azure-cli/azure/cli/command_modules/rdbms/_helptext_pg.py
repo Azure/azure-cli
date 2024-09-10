@@ -766,12 +766,11 @@ examples:
     text: az postgres flexible-server replica create --replica-name testreplicaserver -g testGroup --source-server testserver --location testLocation
   - name: Create a read replica 'testreplicaserver' for 'testserver' with custom --storage-size and --sku.
     text: az postgres flexible-server replica create --replica-name testreplicaserver -g testGroup --source-server testserver --sku-name Standard_D4ds_v5 --storage-size 256
-  - name: Create a read replica 'testreplicaserver' for 'testserver', where 'testreplicaserver' is in a different resource group 'newTestGroup'. \\
+  - name: Create a read replica 'testreplicaserver' for 'testserver', where 'testreplicaserver' is in a different resource group 'newTestGroup'. \
       Here --resource-group is for the read replica's resource group, and --source-server must be passed as resource ID.
     text: >
-      az postgres flexible-server replica create --replica-name testreplicaserver -g newTestGroup \\
-        --source-server /subscriptions/{sourceSubscriptionId}/resourceGroups/{sourceResourceGroup}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{sourceServerName} \\
-        --location testLocation
+      az postgres flexible-server replica create --replica-name testreplicaserver -g newTestGroup \
+        --source-server /subscriptions/{sourceSubscriptionId}/resourceGroups/{sourceResourceGroup}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{sourceServerName} --location testLocation
 """
 
 helps['postgres flexible-server replica list'] = """
