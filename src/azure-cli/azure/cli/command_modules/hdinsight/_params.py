@@ -187,7 +187,8 @@ def load_arguments(self, _):
         c.argument('assign_identity', nargs='*', arg_group='Managed Service Identity', validator=validate_msi,
                    completer=get_resource_name_completion_list_under_subscription(
                        'Microsoft.ManagedIdentity/userAssignedIdentities'),
-                   help="The name or ID of user assigned identity. Skip this field when assign_identity_type is SystemAssigned.")
+                   help=("The name or ID of user assigned identity. "
+                         "Skip this field when assign_identity_type is SystemAssigned."))
 
         # Encryption In Transit
         c.argument('encryption_in_transit', arg_group='Encryption In Transit', arg_type=get_three_state_flag(),
