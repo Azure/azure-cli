@@ -53,7 +53,7 @@ class ApplyArtifacts(AAZCommand):
             id_part="name",
         )
         _args_schema.name = AAZStrArg(
-            options=["--name"],
+            options=["-n", "--name"],
             help="The name of the virtual machine.",
             required=True,
             id_part="child_name_1",

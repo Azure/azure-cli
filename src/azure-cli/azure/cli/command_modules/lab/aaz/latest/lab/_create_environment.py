@@ -74,7 +74,7 @@ class CreateEnvironment(AAZCommand):
             help="The location of the new virtual machine or environment",
         )
         _args_schema.name = AAZStrArg(
-            options=["--name"],
+            options=["-n", "--name"],
             help="The name of the virtual machine or environment",
         )
         _args_schema.allow_claim = AAZBoolArg(

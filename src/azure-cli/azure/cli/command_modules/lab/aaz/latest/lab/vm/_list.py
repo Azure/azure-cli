@@ -62,8 +62,8 @@ class List(AAZCommand):
             options=["--filters"],
             help="The filter to apply to the operation. Example: '$filter=contains(name,'myName')",
         )
-        _args_schema.orderby = AAZStrArg(
-            options=["--orderby"],
+        _args_schema.order_by = AAZStrArg(
+            options=["--order-by"],
             help="The ordering expression for the results, using OData notation. Example: '$orderby=name desc'",
         )
         _args_schema.top = AAZIntArg(
@@ -144,7 +144,7 @@ class List(AAZCommand):
                     "$filter", self.ctx.args.filters,
                 ),
                 **self.serialize_query_param(
-                    "$orderby", self.ctx.args.orderby,
+                    "$orderby", self.ctx.args.order_by,
                 ),
                 **self.serialize_query_param(
                     "$top", self.ctx.args.top,
