@@ -8,8 +8,8 @@ from azure.cli.core.commands.parameters import get_enum_type, name_type, tags_ty
 from azure.cli.core.util import shell_safe_json_parse
 from ._validators import (validate_component_version,
                           validate_storage_account,
-                          validate_storage_msi,
                           validate_msi,
+                          validate_storage_msi,
                           validate_subnet,
                           validate_domain_service,
                           validate_workspace,
