@@ -1063,13 +1063,11 @@ class NwFlowLogCreate(_NwFlowLogCreate):
                 minimum=10,
             )
         )
-       
         args_schema.user_assigned_identity = AAZResourceIdArg(
             options=["--user-assigned-identity"],
             help="Name or ID of the ManagedIdentity Resource.",
             required=False,
         )
-
         args_schema.retention = AAZIntArg(
             options=['--retention'],
             help="Number of days to retain logs.",
@@ -1143,22 +1141,19 @@ class NwFlowLogCreate(_NwFlowLogCreate):
             args.target_resource_id = args.nsg
 
         if has_value(args.user_assigned_identity):
-                user_assigned_identity = args.user_assigned_identity.to_serialized_data()
-                
-                is_valid_resource_id = validate_managed_identity_resource_id(user_assigned_identity)
-
-                if not is_valid_resource_id: 
-                    raise CLIError('Managed Identity resource id is invalid')
-                   
-                if user_assigned_identity.lower() != 'none':
-                     args.identity = { 
-                         "type" : "UserAssigned",
-                         "user_assigned_identities" : {user_assigned_identity: {}}
-                     }
-                else:
-                     args.identity =   {
-                         "type": "None"
-                     }
+            user_assigned_identity = args.user_assigned_identity.to_serialized_data()
+            is_valid_miresource_id = validate_managed_identity_resource_id(user_assigned_identity)
+            if not is_valid_miresource_id: 
+                raise CLIError('Managed Identity resource id is invalid')
+            if user_assigned_identity.lower() != 'none':
+                args.identity = { 
+                    "type": "UserAssigned",
+                    "user_assigned_identities": {user_assigned_identity: {}}
+                }
+            else:
+                args.identity =   {
+                    "type": "None"
+            }
 
         if has_value(args.retention):
             if args.retention > 0:
@@ -1281,17 +1276,14 @@ class NwFlowLogUpdate(_NwFlowLogUpdate):
             args.retention_policy = {"days": args.retention, "enabled": True}
 
         if has_value(args.user_assigned_identity):
-            user_assigned_identity = args.user_assigned_identity.to_serialized_data()
-                
-            is_valid_resource_id = validate_managed_identity_resource_id(user_assigned_identity)
-
-            if not is_valid_resource_id: 
+            user_assigned_identity = args.user_assigned_identity.to_serialized_data()                
+            is_valid_miresource_id = validate_managed_identity_resource_id(user_assigned_identity)
+            if not is_valid_miresource_id: 
                 raise CLIError('Managed Identity resource id is invalid')
-                   
             if user_assigned_identity.lower() != 'none':
                 args.identity = { 
-                    "type" : "UserAssigned",
-                    "user_assigned_identities" : {user_assigned_identity: {}}
+                    "type": "UserAssigned",
+                    "user_assigned_identities": {user_assigned_identity: {}}
                 }
             else:
                 args.identity =  {

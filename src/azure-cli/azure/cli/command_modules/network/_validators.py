@@ -228,12 +228,11 @@ def validate_dns_record_type(namespace):
             else:
                 namespace.record_set_type = token
             return
-        
+
+
 def validate_managed_identity_resource_id(resource_id):
-  
     if resource_id.lower() == 'none':
         return True
-    
     parts = resource_id.split('/')
     if len(parts) != 9:
         raise ValueError("Invalid resource ID format for a managed identity. It should be in the format: "
@@ -242,9 +241,7 @@ def validate_managed_identity_resource_id(resource_id):
     if (parts[1] != 'subscriptions' or parts[3] != 'resourceGroups' or
         parts[5] != 'providers' or parts[6] != 'Microsoft.ManagedIdentity' or
         parts[7] != 'userAssignedIdentities'):
-        raise ValueError("Invalid resource ID format for a managed identity. It should contain 'subscriptions', 'resourceGroups', "
-                         "'providers/Microsoft.ManagedIdentity/userAssignedIdentities' in the correct order.")
-
+        raise ValueError("Invalid resource ID format for a managed identity. It should contain 'subscriptions', 'resourceGroups', 'providers/Microsoft.ManagedIdentity/userAssignedIdentities' in the correct order.")
     return True
 
 
