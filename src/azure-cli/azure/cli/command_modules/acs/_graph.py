@@ -5,7 +5,7 @@
 
 from azure.cli.command_modules.acs._client_factory import get_graph_client
 from azure.cli.command_modules.acs._helpers import _get_test_sp_object_id
-from azure.cli.core.azclierror import AzCLIError, RequiredArgumentMissingError
+from azure.cli.core.azclierror import AzCLIError
 from knack.log import get_logger
 
 logger = get_logger(__name__)
