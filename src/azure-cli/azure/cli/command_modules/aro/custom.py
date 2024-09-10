@@ -8,6 +8,8 @@ import random
 from base64 import b64decode
 import textwrap
 
+from azure.core.exceptions import HttpResponseError
+from azure.mgmt.core.tools import resource_id, parse_resource_id
 import azure.mgmt.redhatopenshift.models as openshiftcluster
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -27,8 +29,6 @@ from azure.cli.command_modules.role import GraphError
 
 from knack.log import get_logger
 
-from azure.core.exceptions import HttpResponseError
-from azure.mgmt.core.tools import resource_id, parse_resource_id
 from msrest.exceptions import HttpOperationError
 
 from tabulate import tabulate

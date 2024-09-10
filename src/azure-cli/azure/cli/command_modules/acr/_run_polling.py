@@ -6,8 +6,8 @@
 import time
 
 from azure.core.polling import PollingMethod, LROPoller
-from msrest import Deserializer
 from azure.core.exceptions import HttpResponseError
+from msrest import Deserializer
 
 from ._constants import get_acr_task_models, get_finished_run_status, get_succeeded_run_status
 
