@@ -173,13 +173,13 @@ examples:
   - name: Update the tags.
     text: |-
         az hdinsight update --name MyCluster --resource-group rg --tags key=value
-  - name: Update manage identity with a UserAssigned msi.
+  - name: Update manage identity with single UserAssigned msi.
     text: |-
         az hdinsight update --name MyCluster --resource-group rg --assign-identity-type UserAssigned --assign-identity MyMsi
   - name: Update manage identity with multiple UserAssigned msi.
     text: |-
         az hdinsight update --name MyCluster --resource-group rg --assign-identity-type UserAssigned --assign-identity MyMsi1 MyMsi2
-  - name: Update manage identity with a SystemAssigned msi.
+  - name: Update SystemAssigned manage identity.
     text: |-
         az hdinsight update --name MyCluster --resource-group rg --assign-identity-type SystemAssigned
   - name: Update manage identity with SystemAssigned,UserAssigned msi.
