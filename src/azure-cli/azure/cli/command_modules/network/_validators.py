@@ -235,11 +235,14 @@ def validate_managed_identity_resource_id(resource_id):
         return True
     parts = resource_id.split('/')
     if len(parts) != 9:
-        raise ValueError("Invalid resource ID format for a managed identity. It should be in the format: "
-                         "/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{identity_name}")
+        raise ValueError("Invalid resource ID format for a managed identity. It should be in the format:"
+                         "/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/"
+                         "Microsoft.ManagedIdentity/userAssignedIdentities/{identity_name}")
 
-    if (parts[1] != 'subscriptions' or parts[3] != 'resourceGroups' or parts[5] != 'providers' or parts[6] != 'Microsoft.ManagedIdentity' or parts[7] != 'userAssignedIdentities'):
-        raise ValueError("Invalid resource ID format for a managed identity. It should contain 'subscriptions', 'resourceGroups', 'providers/Microsoft.ManagedIdentity/userAssignedIdentities' in the correct order.")
+    if (parts[1] != 'subscriptions' or parts[3] != 'resourceGroups' or parts[5] != 'providers'
+        or parts[6] != 'Microsoft.ManagedIdentity' or parts[7] != 'userAssignedIdentities'):
+        raise ValueError("Invalid resource ID format for a managed identity. It should contain 'subscriptions', 'resourceGroups',"
+                         "'providers/Microsoft.ManagedIdentity/userAssignedIdentities' in the correct order.")
     return True
 
 

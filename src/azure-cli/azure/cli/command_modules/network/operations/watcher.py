@@ -1285,7 +1285,7 @@ class NwFlowLogUpdate(_NwFlowLogUpdate):
                     "user_assigned_identities": {user_assigned_identity: {}}
                 }
             else:
-                args.identity =  {
+                args.identity = {
                     "type": "None"
                 }
 
