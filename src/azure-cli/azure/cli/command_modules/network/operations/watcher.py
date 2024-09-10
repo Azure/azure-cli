@@ -1143,17 +1143,17 @@ class NwFlowLogCreate(_NwFlowLogCreate):
         if has_value(args.user_assigned_identity):
             user_assigned_identity = args.user_assigned_identity.to_serialized_data()
             is_valid_miresource_id = validate_managed_identity_resource_id(user_assigned_identity)
-            if not is_valid_miresource_id: 
+            if not is_valid_miresource_id:
                 raise CLIError('Managed Identity resource id is invalid')
             if user_assigned_identity.lower() != 'none':
-                args.identity = { 
+                args.identity = {
                     "type": "UserAssigned",
                     "user_assigned_identities": {user_assigned_identity: {}}
                 }
             else:
-                args.identity =   {
+                args.identity = {
                     "type": "None"
-            }
+                }
 
         if has_value(args.retention):
             if args.retention > 0:
@@ -1271,17 +1271,16 @@ class NwFlowLogUpdate(_NwFlowLogUpdate):
             args.target_resource_id = args.nic
         elif has_value(args.nsg):
             args.target_resource_id = args.nsg
-            
         if has_value(args.retention) and args.retention > 0:
             args.retention_policy = {"days": args.retention, "enabled": True}
 
         if has_value(args.user_assigned_identity):
-            user_assigned_identity = args.user_assigned_identity.to_serialized_data()                
+            user_assigned_identity = args.user_assigned_identity.to_serialized_data()
             is_valid_miresource_id = validate_managed_identity_resource_id(user_assigned_identity)
-            if not is_valid_miresource_id: 
+            if not is_valid_miresource_id:
                 raise CLIError('Managed Identity resource id is invalid')
             if user_assigned_identity.lower() != 'none':
-                args.identity = { 
+                args.identity = {
                     "type": "UserAssigned",
                     "user_assigned_identities": {user_assigned_identity: {}}
                 }
