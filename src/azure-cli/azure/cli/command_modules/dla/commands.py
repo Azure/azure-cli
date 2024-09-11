@@ -187,5 +187,5 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.command('delete', 'delete')
 
-    with self.command_group('dla', is_preview=True):
+    with self.command_group('dla', deprecate_info=self.deprecate(expiration='2.67.0')):
         pass
