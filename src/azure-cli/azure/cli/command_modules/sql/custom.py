@@ -3777,7 +3777,7 @@ def elastic_pool_create(
 
     # The min_capacity property is only applicable to serverless SKUs.
     #
-    if not _is_serverless_slo(kwargs['sku'].name):
+    if kwargs['sku'] is not None and not _is_serverless_slo(kwargs['sku'].name):
         kwargs['min_capacity'] = None
 
     # Expand maintenance configuration id if needed
