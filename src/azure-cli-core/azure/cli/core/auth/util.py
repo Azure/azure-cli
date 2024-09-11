@@ -97,6 +97,7 @@ def scopes_to_resource(scopes):
 
 
 def _normalize_scopes(scopes):
+    # TODO: Drop this function
     """Normalize scopes to workaround some SDK issues."""
 
     # Track 2 SDKs generated before https://github.com/Azure/autorest.python/pull/239 don't maintain
