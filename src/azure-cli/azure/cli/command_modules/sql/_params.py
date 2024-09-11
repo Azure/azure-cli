@@ -2283,7 +2283,7 @@ def load_arguments(self, _):
         c.argument('is_general_purpose_v2',
                    options_list=['--gpv2'],
                    arg_type=get_three_state_flag(),
-                   help='Whether or not this is a GPv2 variant of General Purpose edition.') 
+                   help='Whether or not this is a GPv2 variant of General Purpose edition.')
 
         c.argument('storage_size_in_gb',
                    options_list=['--storage'],
