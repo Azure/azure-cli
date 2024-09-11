@@ -3775,6 +3775,11 @@ def elastic_pool_create(
     # using capabilities.
     kwargs['sku'] = _find_elastic_pool_sku_from_capabilities(cmd.cli_ctx, kwargs['location'], sku)
 
+    # The min_capacity property is only applicable to serverless SKUs.
+    #
+    if kwargs['sku'] is not None and not _is_serverless_slo(kwargs['sku'].name):
+        kwargs['min_capacity'] = None
+
     # Expand maintenance configuration id if needed
     kwargs['maintenance_configuration_id'] = _complete_maintenance_configuration_id(
         cmd.cli_ctx,

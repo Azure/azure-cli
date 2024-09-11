@@ -555,7 +555,7 @@ examples:
       --migration-name testmigration --properties "migrationConfig.json" --migration-option Migrate
   - name: >
       To start a migration for other than PostgreSQLSingleServer, soureType and sslMode must be specified in properties file. These properties are defined as: \n
-      sourceType: Values can be - on-premises, AWS_RDS, AzureVM, PostgreSQLSingleServer \n
+      sourceType: Values can be - OnPremises, AWS_AURORA, AWS_RDS, AzureVM, PostgreSQLSingleServer \n
       sslMode:  SSL modes for migration. SSL mode for PostgreSQLSingleServer is VerifyFull and Prefer/Require for other source types. \n
       Sample migrationConfig.json shown below. \n
       {
