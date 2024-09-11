@@ -50,9 +50,9 @@ def load_arguments(self, _):
     # PARAMETER REGISTRATION
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
     sku_arg_type = CLIArgumentType(
-        help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1V2(Premium V2 Small), P2V2(Premium V2 Medium), P3V2(Premium V2 Large), P0V3(Premium V3 Extra Small), P1V3(Premium V3 Small), P2V3(Premium V3 Medium), P3V3(Premium V3 Large), P1MV3(Premium Memory Optimized V3 Small), P2MV3(Premium Memory Optimized V3 Medium), P3MV3(Premium Memory Optimized V3 Large), P4MV3(Premium Memory Optimized V3 Extra Large), P5MV3(Premium Memory Optimized V3 Extra Extra Large), I1 (Isolated Small), I2 (Isolated Medium), I3 (Isolated Large), I1v2 (Isolated V2 Small), I2v2 (Isolated V2 Medium), I3v2 (Isolated V2 Large), I4v2 (Isolated V2 I4v2), I5v2 (Isolated V2 I5v2), I6v2 (Isolated V2 I6v2), WS1 (Logic Apps Workflow Standard 1), WS2 (Logic Apps Workflow Standard 2), WS3 (Logic Apps Workflow Standard 3)',
+        help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1V2(Premium V2 Small), P2V2(Premium V2 Medium), P3V2(Premium V2 Large), P0V3(Premium V3 Extra Small), P1V3(Premium V3 Small), P2V3(Premium V3 Medium), P3V3(Premium V3 Large), P1MV3(Premium Memory Optimized V3 Small), P2MV3(Premium Memory Optimized V3 Medium), P3MV3(Premium Memory Optimized V3 Large), P4MV3(Premium Memory Optimized V3 Extra Large), P5MV3(Premium Memory Optimized V3 Extra Extra Large), I1 (Isolated Small), I2 (Isolated Medium), I3 (Isolated Large), I1V2 (Isolated V2 I1V2), I2V2 (Isolated V2 I2V2), I3V2 (Isolated V2 I3V2), I4V2 (Isolated V2 I4V2), I5V2 (Isolated V2 I5V2), I6V2 (Isolated V2 I6V2), I1MV2 (Isolated Memory Optimized V2 I1MV2), I2MV2 (Isolated Memory Optimized V2 I2MV2), I3MV2 (Isolated Memory Optimized V2 I3MV2), I4MV2 (Isolated Memory Optimized V2 I4MV2), I5MV2 (Isolated Memory Optimized V2 I5MV2), WS1 (Logic Apps Workflow Standard 1), WS2 (Logic Apps Workflow Standard 2), WS3 (Logic Apps Workflow Standard 3)',
         arg_type=get_enum_type(
-            ['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1V2', 'P2V2', 'P3V2', 'P0V3', 'P1V3', 'P2V3', 'P3V3', 'P1MV3', 'P2MV3', 'P3MV3', 'P4MV3', 'P5MV3', 'I1', 'I2', 'I3', 'I1v2', 'I2v2', 'I3v2', 'I4v2', 'I5v2', 'I6v2', 'WS1', 'WS2', 'WS3']))
+            ['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1V2', 'P2V2', 'P3V2', 'P0V3', 'P1V3', 'P2V3', 'P3V3', 'P1MV3', 'P2MV3', 'P3MV3', 'P4MV3', 'P5MV3', 'I1', 'I2', 'I3', 'I1V2', 'I2V2', 'I3V2', 'I4V2', 'I5V2', 'I6V2', 'I1MV2', 'I2MV2', 'I3MV2', 'I4MV2', 'I5MV2', 'WS1', 'WS2', 'WS3']))
     webapp_name_arg_type = CLIArgumentType(configured_default='web', options_list=['--name', '-n'], metavar='NAME',
                                            completer=get_resource_name_completion_list('Microsoft.Web/sites'),
                                            id_part='name',
@@ -78,7 +78,7 @@ def load_arguments(self, _):
 
     static_web_app_sku_arg_type = CLIArgumentType(
         help='The pricing tiers for Static Web App',
-        arg_type=get_enum_type(['Free', 'Standard'])
+        arg_type=get_enum_type(['Free', 'Standard', 'Dedicated'])
     )
 
     # use this hidden arg to give a command the right instance, that functionapp commands
@@ -166,6 +166,8 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('subnet', help="Name or resource ID of the pre-existing subnet to have the webapp join. The --vnet is argument also needed if specifying subnet by name.")
         c.argument('public_network_access', help="Enable or disable public access to the web app", arg_type=get_enum_type(PUBLIC_NETWORK_ACCESS_MODES))
         c.argument('acr_use_identity', action='store_true', help="Enable or disable pull image from acr use managed identity")
+        c.argument('acr_identity', help='Accept system or user assigned identity which will be set for acr image pull. '
+                                        'Use \'[system]\' to refer system assigned identity, or a resource id to refer user assigned identity.')
         c.argument('basic_auth', help='Enable or disable basic auth.', arg_type=get_enum_type(BASIC_AUTH_TYPES))
         c.ignore('language')
         c.ignore('using_webapp_up')
@@ -183,6 +185,7 @@ subscription than the app service environment, please use the resource ID for --
     with self.argument_context('webapp list-runtimes') as c:
         c.argument('linux', action='store_true', help='list runtime stacks for linux based web apps', deprecate_info=c.deprecate(redirect="--os-type"))
         c.argument('os_type', options_list=["--os", "--os-type"], help="limit the output to just windows or linux runtimes", arg_type=get_enum_type([LINUX_OS_NAME, WINDOWS_OS_NAME]))
+        c.argument('show_runtime_details', action='store_true', help="show detailed versions of runtime stacks")
 
     with self.argument_context('functionapp list-runtimes') as c:
         c.argument('os_type', options_list=["--os", "--os-type"], help="limit the output to just windows or linux runtimes", arg_type=get_enum_type([LINUX_OS_NAME, WINDOWS_OS_NAME]))
@@ -356,12 +359,17 @@ subscription than the app service environment, please use the resource ID for --
                 c.ignore('reserved_instance_count')
                 c.argument('runtime', help="Canonicalized web runtime in the format of Framework:Version, e.g. \"PHP:7.2\"."
                                            "Use `az webapp list-runtimes` for available list")
+                c.argument('acr_use_identity', arg_type=get_three_state_flag(return_label=True), help="Enable or disable pull image from acr use managed identity")
+                c.argument('acr_identity', help="Accept system or user assigned identity which will be set for acr image pull. "
+                                                "Use \'[system]\' to refer system assigned identity, or a resource id to refer user assigned identity.")
             c.argument('java_version',
                        help="The version used to run your web app if using Java, e.g., '1.7' for Java 7, '1.8' for Java 8")
             c.argument('java_container', help="The java container, e.g., Tomcat, Jetty")
             c.argument('java_container_version', help="The version of the java container, e.g., '8.0.23' for Tomcat")
             c.argument('min_tls_version',
                        help="The minimum version of TLS required for SSL requests, e.g., '1.0', '1.1', '1.2'")
+            c.argument('min_tls_cipher_suite', options_list=['--min-tls-cipher-suite'],
+                       help="The minimum TLS Cipher Suite required for requests, e.g., 'TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384'")
             c.argument('http20_enabled', help="configures a web site to allow clients to connect over http2.0.",
                        arg_type=get_three_state_flag(return_label=True))
             c.argument('app_command_line', options_list=['--startup-file'],
@@ -724,7 +732,7 @@ subscription than the app service environment, please use the resource ID for --
                    help="Configure default logging required to enable viewing log stream immediately after launching the webapp",
                    default=False, action='store_true')
         c.argument('html', help="Ignore app detection and deploy as an html app", default=False, action='store_true')
-        c.argument('app_service_environment', options_list=['--app-service-environment', '-e'], help='name or resource ID of the (pre-existing) App Service Environment to deploy to. Requires an Isolated V2 sku [I1v2, I2v2, I3v2]')
+        c.argument('app_service_environment', options_list=['--app-service-environment', '-e'], help='name or resource ID of the (pre-existing) App Service Environment to deploy to. Requires an Isolated V2 sku')
         c.argument('basic_auth', help='Enable or disable basic auth.', arg_type=get_enum_type(BASIC_AUTH_TYPES))
         c.argument('track_status', help="If true, web app startup status during deployment will be tracked for linux web apps.",
                    arg_type=get_three_state_flag())
@@ -1067,6 +1075,10 @@ subscription than the app service environment, please use the resource ID for --
                        arg_type=get_three_state_flag())
             c.argument('vnet_resource_group', help='Resource group of virtual network (default is web app resource group)')
             c.argument('http_headers', nargs='+', help="space-separated http headers in a format of `<name>=<value>`")
+            c.argument('skip_service_tag_validation',
+                       options_list=['--skip-service-tag-validation', '-k'],
+                       help='Skip validating public service tags',
+                       arg_type=get_three_state_flag())
         with self.argument_context(scope + ' config access-restriction remove') as c:
             c.argument('name', arg_type=(webapp_name_arg_type if scope == 'webapp' else functionapp_name_arg_type))
             c.argument('rule_name', options_list=['--rule-name', '-r'],
@@ -1081,6 +1093,10 @@ subscription than the app service environment, please use the resource ID for --
                        arg_type=get_three_state_flag())
             c.argument('action', arg_type=get_enum_type(ACCESS_RESTRICTION_ACTION_TYPES),
                        help="Allow or deny access")
+            c.argument('skip_service_tag_validation',
+                       options_list=['--skip-service-tag-validation', '-k'],
+                       help='Skip validating public service tags',
+                       arg_type=get_three_state_flag())
         with self.argument_context(scope + ' config access-restriction set') as c:
             c.argument('name', arg_type=(webapp_name_arg_type if scope == 'webapp' else functionapp_name_arg_type))
             c.argument('use_same_restrictions_for_scm_site',

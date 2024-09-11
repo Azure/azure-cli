@@ -386,10 +386,11 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                            sas_expiration_period=None, key_expiration_period_in_days=None,
                            allow_cross_tenant_replication=None, default_share_permission=None,
                            immutability_period_since_creation_in_days=None, immutability_policy_state=None,
-                           allow_protected_append_writes=None, public_network_access=None):
-    StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
+                           allow_protected_append_writes=None, public_network_access=None, upgrade_to_storagev2=None,
+                           yes=None):
+    StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet, Kind = \
         cmd.get_models('StorageAccountUpdateParameters', 'Sku', 'CustomDomain', 'AccessTier', 'Identity', 'Encryption',
-                       'NetworkRuleSet')
+                       'NetworkRuleSet', 'Kind')
 
     domain = instance.custom_domain
     if custom_domain is not None:
@@ -425,6 +426,36 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
     if encryption_key_version is not None:
         encryption.key_vault_properties.key_version = encryption_key_version
 
+    warning_message = None
+    if upgrade_to_storagev2:
+        if instance.kind == Kind.STORAGE:
+            warning_message = "Upgrading a General Purpose v1 storage account to a general-purpose v2 account is " \
+                              "free. You may specify the desired account tier during the upgrade process. " \
+                              "If an account tier is not specified on upgrade, the default account tier of the " \
+                              "upgraded account will be Hot. \nHowever, changing the storage access tier after the " \
+                              "upgrade may result in changes to your bill so it is recommended to specify the new " \
+                              "account tier during upgrade. \n" \
+                              "See (http://go.microsoft.com/fwlink/?LinkId=786482) to learn more."
+        elif instance.kind == Kind.BLOB_STORAGE:
+            warning_message = "Upgrading a BlobStorage account to a general-purpose v2 account is free as long as " \
+                              "the upgraded account's tier remains unchanged. If an account tier is not specified " \
+                              "on upgrade, the default account tier of the upgraded account will be Hot. \nIf there " \
+                              "are account access tier changes as part of the upgrade, there will be charges " \
+                              "associated with moving blobs as part of the account access tier change. \n" \
+                              "See (http://go.microsoft.com/fwlink/?LinkId=786482) to learn more."
+            if access_tier is None:
+                access_tier = AccessTier.HOT
+        elif access_tier is not None:
+            warning_message = "Changing the access tier may result in additional charges. \n" \
+                              "See (http://go.microsoft.com/fwlink/?LinkId=786482) to learn more."
+    else:
+        if access_tier is not None:
+            warning_message = "Changing the access tier may result in additional charges. \n" \
+                              "See (http://go.microsoft.com/fwlink/?LinkId=786482) to learn more."
+
+    if warning_message:
+        user_confirmation(warning_message, yes)
+
     params = StorageAccountUpdateParameters(
         sku=Sku(name=sku) if sku is not None else instance.sku,
         tags=tags if tags is not None else instance.tags,
@@ -433,6 +464,9 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
         access_tier=AccessTier(access_tier) if access_tier is not None else instance.access_tier,
         enable_https_traffic_only=https_only if https_only is not None else instance.enable_https_traffic_only
     )
+
+    if upgrade_to_storagev2:
+        params.kind = Kind.STORAGE_V2
 
     if identity_type and 'UserAssigned' in identity_type and user_identity_id:
         user_assigned_identities = {user_identity_id: {}}

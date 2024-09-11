@@ -9,13 +9,13 @@ from azure.cli.core.commands.parameters import (
     tags_type, get_resource_name_completion_list, resource_group_name_type, get_enum_type)
 
 from azure.cli.command_modules.dls._validators import validate_resource_group_name
-from azure.mgmt.datalake.store.models import (
+from .vendored_sdks.azure_mgmt_datalake_store.models import (
     FirewallState,
     TrustedIdProviderState,
     TierType,
     FirewallAllowAzureIpsState)
 
-from azure.mgmt.datalake.store.models import EncryptionConfigType
+from .vendored_sdks.azure_mgmt_datalake_store.models import EncryptionConfigType
 
 
 # pylint: disable=line-too-long, too-many-statements

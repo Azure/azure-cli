@@ -31,7 +31,7 @@ helps['storage account blob-inventory-policy create'] = """
 type: command
 short-summary: Create Blob Inventory Policy for storage account.
 examples:
-  - name: Create Blob Inventory Policy trough json file for storage account.
+  - name: Create Blob Inventory Policy through json file for storage account.
     text: az storage account blob-inventory-policy create -g myresourcegroup --account-name mystorageaccount --policy @policy.json
 """
 
@@ -434,7 +434,7 @@ short-summary: Create Object Replication Service Policy for storage account.
 examples:
   - name: Create Object Replication Service Policy for storage account.
     text: az storage account or-policy create -g ResourceGroupName -n storageAccountName -d destAccountName -s srcAccountName --destination-container dcont --source-container scont
-  - name: Create Object Replication Service Policy trough json file for storage account.
+  - name: Create Object Replication Service Policy through json file for storage account.
     text: az storage account or-policy create -g ResourceGroupName -n storageAccountName --policy @policy.json
   - name: Create Object Replication Service Policy to source storage account through policy associated with destination storage account.
     text: az storage account or-policy show -g ResourceGroupName -n destAccountName --policy-id "3496e652-4cea-4581-b2f7-c86b3971ba92" | az storage account or-policy create -g ResourceGroupName -n srcAccountName -p "@-"
@@ -2534,7 +2534,7 @@ examples:
   - name: Generate a sas token for directory and use it to upload files.
     text: |
         end=`date -u -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
-        az storage fs directory generate-sas --name dir/ --file-system myfilesystem --https-only --permissions dlrw --expiry $end -o tsv
+        az storage fs directory generate-sas --name dir --file-system myfilesystem --https-only --permissions dlrw --expiry $end -o tsv
 """
 
 helps['storage fs file'] = """

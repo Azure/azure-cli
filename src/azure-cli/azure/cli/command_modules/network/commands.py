@@ -762,6 +762,7 @@ def load_command_table(self, _):
     # endregion
 
     # region CustomIp
-    from .custom import CustomIpPrefixUpdate
+    from .custom import CustomIpPrefixCreate, CustomIpPrefixUpdate
+    self.command_table["network custom-ip prefix create"] = CustomIpPrefixCreate(loader=self)
     self.command_table["network custom-ip prefix update"] = CustomIpPrefixUpdate(loader=self)
     # endregion

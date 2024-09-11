@@ -384,7 +384,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    'public access setting for a container is required to enable anonymous access.')
         c.argument('min_tls_version', arg_type=get_enum_type(t_tls_version),
                    help='The minimum TLS version to be permitted on requests to storage. '
-                        'The default interpretation is TLS 1.0 for this property')
+                        'While the default setting is TLS 1.0 for this property, '
+                        'Microsoft recommends setting MinimumTlsVersion to 1.2 or above.')
         c.argument('allow_shared_key_access', allow_shared_key_access_type)
         c.argument('edge_zone', edge_zone_type, min_api='2020-08-01-preview')
         c.argument('identity_type', arg_type=get_enum_type(t_identity_type), arg_group='Identity',
@@ -488,7 +489,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    'public access setting for a container is required to enable anonymous access.')
         c.argument('min_tls_version', arg_type=get_enum_type(t_tls_version),
                    help='The minimum TLS version to be permitted on requests to storage. '
-                        'The default interpretation is TLS 1.0 for this property')
+                        'While the default setting is TLS 1.0 for this property, '
+                        'Microsoft recommends setting MinimumTlsVersion to 1.2 or above.')
         c.argument('allow_shared_key_access', allow_shared_key_access_type)
         c.argument('identity_type', arg_type=get_enum_type(t_identity_type), arg_group='Identity',
                    help='The identity type.')
@@ -515,6 +517,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('public_network_access', arg_type=get_enum_type(public_network_access_enum), min_api='2021-06-01',
                    help='Enable or disable public network access to the storage account. '
                         'Possible values include: `Enabled` or `Disabled`.')
+        c.argument('upgrade_to_storagev2', arg_type=get_three_state_flag(),
+                   help='Upgrade Storage Account Kind to StorageV2.')
+        c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
 
     for scope in ['storage account create', 'storage account update']:
         with self.argument_context(scope, arg_group='Customer managed key', min_api='2017-06-01',
@@ -1541,6 +1546,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage container set-permission') as c:
         c.ignore('signed_identifiers')
 
+    for item in ['set', 'show']:
+        with self.argument_context('storage container {}-permission'.format(item)) as c:
+            c.extra('auth_mode', arg_type=get_enum_type(['key']),
+                    help='The mode in which to run the command. The legacy "key" mode will attempt to query for '
+                         'an account key if no authentication parameters for the account are provided. '
+                         'Environment variable: AZURE_STORAGE_AUTH_MODE')
+            c.ignore('sas_token')
+
     with self.argument_context('storage container') as c:
         c.argument('account_name', completer=get_resource_name_completion_list('Microsoft.Storage/storageAccounts'))
         c.argument('resource_group_name', required=False, validator=process_resource_group)
@@ -1580,11 +1593,16 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('start', type=get_datetime_type(False),
                    help='start UTC datetime (Y-m-d\'T\'H:M:S\'Z\'). Defaults to time of request.')
         c.argument('expiry', type=get_datetime_type(False), help='expiration UTC datetime in (Y-m-d\'T\'H:M:S\'Z\')')
+        c.ignore('sas_token')
 
     for item in ['create', 'delete', 'list', 'show', 'update']:
         with self.argument_context('storage container policy {}'.format(item)) as c:
             c.extra('container_name', container_name_type, required=True)
             c.extra('lease', options_list='--lease-id', help='The container lease ID.')
+            c.extra('auth_mode', arg_type=get_enum_type(['key']),
+                    help='The mode in which to run the command. The legacy "key" mode will attempt to query for '
+                         'an account key if no authentication parameters for the account are provided. '
+                         'Environment variable: AZURE_STORAGE_AUTH_MODE')
 
     with self.argument_context('storage container generate-sas', resource_type=ResourceType.DATA_STORAGE_BLOB) as c:
         from .completers import get_storage_acl_name_completion_list
@@ -1842,9 +1860,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('expiry', type=get_datetime_type(True), help='expiration UTC datetime in (Y-m-d\'T\'H:M:S\'Z\')')
 
     with self.argument_context('storage share delete') as c:
-        from .sdkutil import get_delete_file_snapshot_type_names
+        t_delete_snapshot = self.get_sdk('_generated.models._azure_file_storage_enums#DeleteSnapshotsOptionType',
+                                         resource_type=ResourceType.DATA_STORAGE_FILESHARE)
         c.extra('share_name', share_name_type, options_list=('--name', '-n'), required=True)
-        c.argument('delete_snapshots', arg_type=get_enum_type(get_delete_file_snapshot_type_names()),
+        c.argument('delete_snapshots', arg_type=get_enum_type(t_delete_snapshot),
                    help='Specify the deletion strategy when the share has snapshots.')
         c.argument('fail_not_exist', help="Specify whether to throw an exception when the share doesn't exists. False "
                                           "by default.")

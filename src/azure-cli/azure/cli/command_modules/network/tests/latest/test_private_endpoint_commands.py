@@ -67,6 +67,7 @@ class NetworkPrivateLinkKeyVaultScenarioTest(ScenarioTest):
                  '--type microsoft.keyvault/managedHSMs',
                  checks=self.check('@[0].properties.groupId', 'managedhsm'))
 
+
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_pe')
     @KeyVaultPreparer(name_prefix='cli-test-kv-pe-', location='uksouth')
     def test_private_endpoint_connection_keyvault(self, resource_group):

@@ -6,6 +6,8 @@
 
 from knack.arguments import CLIArgumentType
 
+from azure.cli.core.commands.parameters import get_three_state_flag
+
 
 def load_arguments(self, _):  # pylint: disable=too-many-statements
     from azure.mgmt.redis.models import RebootType, RedisKeyType, SkuName, TlsVersion, ReplicationRole, UpdateChannel
@@ -51,6 +53,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('mi_user_assigned', arg_type=user_identity_type)
         c.argument('update_channel', arg_type=get_enum_type(UpdateChannel), help='Specifies the update channel for the monthly Redis updates your Redis Cache will receive. Caches using "Preview" update channel get latest Redis updates at least 4 weeks ahead of "Stable" channel caches. Default value is "Stable".')
         c.argument('storage_subscription_id', options_list=['--storage-subscription-id', '--storage-sub-id'], help='SubscriptionId of the storage account')
+        c.argument('disable_access_key_authentication', arg_type=get_three_state_flag(), options_list=['--disable-access-keys'], help='Authentication to Redis through access keys is disabled when set as true')
 
     with self.argument_context('redis firewall-rules list') as c:
         c.argument('cache_name', arg_type=cache_name, id_part=None)

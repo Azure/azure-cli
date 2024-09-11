@@ -36,9 +36,10 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
                    autoscale_type=None, autoscale_min_workernode_count=None, autoscale_max_workernode_count=None,
                    timezone=None, days=None, time=None, autoscale_workernode_count=None,
                    encryption_at_host=None, esp=False, idbroker=False,
-                   resource_provider_connection=None, enable_private_link=None, enable_compute_isolation=None,
-                   host_sku=None, zones=None, private_link_configurations=None,
-                   no_validation_timeout=False):
+                   resource_provider_connection=None, enable_private_link=None,
+                   public_ip_tag_type=None, public_ip_tag_value=None,
+                   enable_compute_isolation=None, host_sku=None, zones=None, private_link_configurations=None,
+                   no_validation_timeout=False, outbound_dependencies_managed_type=None):
     from .util import build_identities_info, build_virtual_network_profile, parse_domain_name, \
         get_storage_account_endpoint, validate_esp_cluster_create_params, set_vm_size
     from azure.mgmt.hdinsight.models import ClusterCreateParametersExtended, ClusterCreateProperties, OSType, \
@@ -47,7 +48,7 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
         DiskEncryptionProperties, Tier, SshProfile, SshPublicKey, \
         KafkaRestProperties, ClientGroupInfo, EncryptionInTransitProperties, \
         Autoscale, AutoscaleCapacity, AutoscaleRecurrence, AutoscaleSchedule, AutoscaleTimeAndCapacity, \
-        NetworkProperties, PrivateLink, ComputeIsolationProperties
+        NetworkProperties, IpTag, PrivateLink, ComputeIsolationProperties
 
     validate_esp_cluster_create_params(esp, cluster_name, resource_group_name, cluster_type,
                                        subnet, domain, cluster_admin_account, assign_identity,
@@ -361,6 +362,13 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
         resource_provider_connection=resource_provider_connection,
         private_link=PrivateLink.enabled if enable_private_link is True else PrivateLink.disabled
     ) if (resource_provider_connection is not None or enable_private_link is not None) else None
+    if outbound_dependencies_managed_type:
+        network_properties.outbound_dependencies_managed_type = outbound_dependencies_managed_type
+    if public_ip_tag_type and public_ip_tag_value:
+        network_properties.public_ip_tag = IpTag(
+            ip_tag_type=public_ip_tag_type,
+            tag=public_ip_tag_value
+        )
 
     # compute isolation
     compute_isolation_properties = ComputeIsolationProperties(
@@ -409,10 +417,16 @@ def list_clusters(cmd, client, resource_group_name=None):  # pylint: disable=unu
     return list(clusters_list)
 
 
-def update_cluster(cmd, client, cluster_name, resource_group_name, tags=None, no_wait=False):
+def update_cluster(cmd, client, cluster_name, resource_group_name, tags=None, assign_identity=None, no_wait=False):
     from azure.mgmt.hdinsight.models import ClusterPatchParameters
+    from .util import build_identities_info
+    assign_identities = []
+    if assign_identity:
+        assign_identities.append(assign_identity)
+
     cluster_patch_parameters = ClusterPatchParameters(
-        tags=tags
+        tags=tags,
+        identity=build_identities_info(assign_identities)
     )
 
     return sdk_no_wait(no_wait, client.update, resource_group_name, cluster_name, cluster_patch_parameters)
@@ -611,6 +625,49 @@ def enable_hdi_azure_monitor(cmd, client, resource_group_name, cluster_name, wor
         resource_group_name,
         cluster_name,
         azure_monitor_request_parameter)
+
+# pylint: disable=unused-argument
+
+
+def enable_hdi_azure_monitor_agent(cmd, client, resource_group_name, cluster_name, workspace, primary_key=None,
+                                   workspace_type='resource_id', no_validation_timeout=False):
+    from azure.mgmt.hdinsight.models import AzureMonitorRequest
+    from msrestazure.tools import parse_resource_id
+    from ._client_factory import cf_log_analytics
+
+    if workspace_type != 'resource_id' and not primary_key:
+        raise RequiredArgumentMissingError('primary key is required when workspace ID is provided.')
+
+    workspace_id = workspace
+    if workspace_type == 'resource_id':
+        parsed_workspace = parse_resource_id(workspace)
+        workspace_resource_group_name = parsed_workspace['resource_group']
+        workspace_name = parsed_workspace['resource_name']
+
+        log_analytics_client = cf_log_analytics(cmd.cli_ctx)
+        log_analytics_workspace = log_analytics_client.workspaces.get(workspace_resource_group_name, workspace_name)
+        if not log_analytics_workspace:
+            raise CLIError('Fails to retrieve workspace by {}'.format(workspace))
+
+        # Only retrieve primary key when not provided
+        if not primary_key:
+            shared_keys = log_analytics_client.shared_keys.get_shared_keys(workspace_resource_group_name,
+                                                                           workspace_name)
+            if not shared_keys:
+                raise CLIError('Fails to retrieve shared key for workspace {}'.format(log_analytics_workspace))
+
+            primary_key = shared_keys.primary_shared_key
+
+        workspace_id = log_analytics_workspace.customer_id
+
+    azure_monitor_agent_request_parameter = AzureMonitorRequest(
+        workspace_id=workspace_id,
+        primary_key=primary_key
+    )
+    return client.begin_enable_azure_monitor_agent(
+        resource_group_name,
+        cluster_name,
+        azure_monitor_agent_request_parameter)
 
 
 # pylint: disable=unused-argument

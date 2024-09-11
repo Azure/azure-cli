@@ -256,7 +256,7 @@ def acr_show_endpoints(cmd,
 
 def acr_login(cmd,
               registry_name,
-              resource_group_name=None,  # pylint: disable=unused-argument
+              resource_group_name=None,
               tenant_suffix=None,
               username=None,
               password=None,
@@ -270,7 +270,8 @@ def acr_login(cmd,
             registry_name=registry_name,
             tenant_suffix=tenant_suffix,
             username=username,
-            password=password)
+            password=password,
+            resource_group_name=resource_group_name)
 
         logger.warning("You can perform manual login using the provided access token below, "
                        "for example: 'docker login loginServer -u %s -p accessToken'", EMPTY_GUID)
@@ -301,7 +302,8 @@ def acr_login(cmd,
         registry_name=registry_name,
         tenant_suffix=tenant_suffix,
         username=username,
-        password=password)
+        password=password,
+        resource_group_name=resource_group_name)
 
     # warn casing difference caused by ACR normalizing to lower on login_server
     parts = login_server.split('.')

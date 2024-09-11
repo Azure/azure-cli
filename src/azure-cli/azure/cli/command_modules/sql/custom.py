@@ -1734,7 +1734,7 @@ def db_list(
     return client.list_by_server(resource_group_name=resource_group_name, server_name=server_name)
 
 
-def db_update(  # pylint: disable=too-many-locals
+def db_update(  # pylint: disable=too-many-locals, too-many-branches
         cmd,
         instance,
         server_name,
@@ -1762,7 +1762,9 @@ def db_update(  # pylint: disable=too-many-locals
         keys_to_remove=None,
         encryption_protector_auto_rotation=None,
         use_free_limit=None,
-        free_limit_exhaustion_behavior=None):
+        free_limit_exhaustion_behavior=None,
+        manual_cutover=None,
+        perform_cutover=None):
     '''
     Applies requested parameters to a db resource instance for a DB update.
     '''
@@ -1845,6 +1847,12 @@ def db_update(  # pylint: disable=too-many-locals
 
     if preferred_enclave_type is not None:
         instance.preferred_enclave_type = preferred_enclave_type
+
+    if manual_cutover is not None:
+        instance.manual_cutover = manual_cutover
+
+    if perform_cutover is not None:
+        instance.perform_cutover = perform_cutover
 
     # Set storage_account_type even if storage_acount_type is None
     # Otherwise, empty value defaults to current storage_account_type
@@ -4948,6 +4956,8 @@ def managed_instance_create(
         service_principal_type=None,
         zone_redundant=None,
         instance_pool_name=None,
+        dns_zone_partner=None,
+        authentication_metadata=None,
         **kwargs):
     '''
     Creates a managed instance.
@@ -4986,6 +4996,9 @@ def managed_instance_create(
     kwargs['primary_user_assigned_identity_id'] = primary_user_assigned_identity_id
 
     kwargs['zone_redundant'] = zone_redundant
+    kwargs['authentication_metadata'] = authentication_metadata
+
+    kwargs['dns_zone_partner'] = dns_zone_partner
 
     ad_only = None
     if enable_ad_only_auth:
@@ -5075,7 +5088,8 @@ def managed_instance_update(  # pylint: disable=too-many-locals
         zone_redundant=None,
         instance_pool_name=None,
         database_format=None,
-        pricing_model=None):
+        pricing_model=None,
+        authentication_metadata=None):
     '''
     Updates a managed instance. Custom update function to apply parameters to instance.
     '''
@@ -5153,6 +5167,9 @@ def managed_instance_update(  # pylint: disable=too-many-locals
 
     if pricing_model is not None:
         instance.pricing_model = pricing_model
+
+    if authentication_metadata is not None:
+        instance.authentication_metadata = authentication_metadata
 
     return instance
 
@@ -6150,6 +6167,7 @@ def managed_db_move_start(
         resource_group_name,
         managed_instance_name,
         database_name,
+        dest_subscription_id,
         dest_resource_group_name,
         dest_instance_name,
         **kwargs):
@@ -6163,6 +6181,7 @@ def managed_db_move_start(
         resource_group_name,
         managed_instance_name,
         database_name,
+        dest_subscription_id,
         dest_resource_group_name,
         dest_instance_name,
         'Move',
@@ -6175,6 +6194,7 @@ def managed_db_copy_start(
         resource_group_name,
         managed_instance_name,
         database_name,
+        dest_subscription_id,
         dest_resource_group_name,
         dest_instance_name,
         **kwargs):
@@ -6188,6 +6208,7 @@ def managed_db_copy_start(
         resource_group_name,
         managed_instance_name,
         database_name,
+        dest_subscription_id,
         dest_resource_group_name,
         dest_instance_name,
         'Copy',
@@ -6200,6 +6221,7 @@ def managed_db_move_copy_start(
         resource_group_name,
         managed_instance_name,
         database_name,
+        destination_subscription_id,
         dest_resource_group_name,
         dest_instance_name,
         operation_mode,
@@ -6213,7 +6235,8 @@ def managed_db_move_copy_start(
         cmd.cli_ctx,
         dest_resource_group_name or resource_group_name,
         dest_instance_name,
-        database_name)
+        database_name,
+        destination_subscription_id)
 
     return client.begin_start_move(
         resource_group_name=resource_group_name,
@@ -6230,6 +6253,7 @@ def managed_db_move_copy_complete(
         database_name,
         dest_resource_group_name,
         dest_instance_name,
+        dest_subscription_id,
         **kwargs):
     '''
     Completes managed database move/copy operation
@@ -6239,7 +6263,8 @@ def managed_db_move_copy_complete(
         cmd.cli_ctx,
         dest_resource_group_name or resource_group_name,
         dest_instance_name,
-        database_name)
+        database_name,
+        dest_subscription_id)
 
     return client.begin_complete_move(
         resource_group_name=resource_group_name,
@@ -6256,6 +6281,7 @@ def managed_db_move_copy_cancel(
         database_name,
         dest_resource_group_name,
         dest_instance_name,
+        dest_subscription_id,
         **kwargs):
     '''
     Cancels managed database move/copy operation
@@ -6265,7 +6291,8 @@ def managed_db_move_copy_cancel(
         cmd.cli_ctx,
         dest_resource_group_name or resource_group_name,
         dest_instance_name,
-        database_name)
+        database_name,
+        dest_subscription_id)
 
     return client.begin_cancel_move(
         resource_group_name=resource_group_name,

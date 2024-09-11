@@ -15,7 +15,8 @@ from azure.cli.command_modules.mysql._client_factory import (
     cf_mysql_flexible_log,
     cf_mysql_flexible_backups,
     cf_mysql_flexible_adadmin,
-    cf_mysql_flexible_export)
+    cf_mysql_flexible_export,
+    cf_mysql_flexible_maintenances)
 from ._transformers import (
     table_transform_output,
     table_transform_output_list_servers,
@@ -83,6 +84,11 @@ def load_command_table(self, _):
         client_factory=cf_mysql_flexible_adadmin
     )
 
+    mysql_flexible_maintenance_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.mysql_flexibleservers.operations#MaintenancesOperations.{}',
+        client_factory=cf_mysql_flexible_maintenances
+    )
+
     # MERU COMMANDS
     mysql_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.mysql.custom#{}')
 
@@ -113,11 +119,13 @@ def load_command_table(self, _):
         g.custom_command('upgrade', 'flexible_server_version_upgrade', custom_command_type=mysql_custom)
         g.custom_wait_command('wait', 'flexible_server_mysql_get')
         g.custom_command('restart', 'flexible_server_restart')
+        g.custom_command('detach-vnet', 'flexible_server_detach_vnet')
 
     with self.command_group('mysql flexible-server import', mysql_flexible_servers_sdk,
                             custom_command_type=mysql_custom,
                             client_factory=cf_mysql_flexible_servers) as g:
         g.custom_command('create', 'flexible_server_import_create', table_transformer=table_transform_output)
+        g.custom_command('stop-replication', 'flexible_server_import_replica_stop', confirmation=True)
 
     with self.command_group('mysql flexible-server firewall-rule', mysql_flexible_firewall_rule_sdk,
                             custom_command_type=mysql_custom,
@@ -209,3 +217,10 @@ def load_command_table(self, _):
                             custom_command_type=mysql_custom,
                             client_factory=cf_mysql_flexible_servers) as g:
         g.custom_command('reset', 'flexible_gtid_reset', supports_no_wait=True)
+
+    with self.command_group('mysql flexible-server maintenance', mysql_flexible_maintenance_sdk,
+                            custom_command_type=mysql_custom,
+                            client_factory=cf_mysql_flexible_maintenances) as g:
+        g.custom_command('reschedule', 'flexible_server_maintenance_reschedule')
+        g.custom_command('list', 'flexible_server_maintenance_list')
+        g.custom_show_command('show', 'flexible_server_maintenance_show')

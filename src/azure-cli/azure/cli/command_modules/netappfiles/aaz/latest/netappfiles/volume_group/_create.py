@@ -25,9 +25,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-07-01",
+        "version": "2024-03-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/volumegroups/{}", "2023-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/volumegroups/{}", "2024-03-01"],
         ]
     }
 
@@ -53,7 +53,7 @@ class Create(AAZCommand):
             help="The name of the NetApp account",
             required=True,
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,127}$",
+                pattern="^[a-zA-Z0-9][a-zA-Z0-9\\-_]{0,127}$",
             ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
@@ -64,7 +64,7 @@ class Create(AAZCommand):
             help="The name of the volumeGroup",
             required=True,
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,63}$",
+                pattern="^[a-zA-Z0-9][a-zA-Z0-9\\-_]{0,63}$",
                 max_length=64,
                 min_length=1,
             ),
@@ -167,7 +167,7 @@ class Create(AAZCommand):
             help="Specifies the number of days after which data that is not accessed by clients will be tiered.",
             fmt=AAZIntArgFormat(
                 maximum=183,
-                minimum=7,
+                minimum=2,
             ),
         )
         _element.creation_token = AAZStrArg(
@@ -175,7 +175,7 @@ class Create(AAZCommand):
             help="A unique file path for the volume. Used when creating mount targets",
             required=True,
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z][a-zA-Z0-9\-]{0,79}$",
+                pattern="^[a-zA-Z][a-zA-Z0-9\\-]{0,79}$",
                 max_length=80,
                 min_length=1,
             ),
@@ -329,7 +329,7 @@ class Create(AAZCommand):
             default=107374182400,
             fmt=AAZIntArgFormat(
                 maximum=2638827906662400,
-                minimum=107374182400,
+                minimum=53687091200,
             ),
         )
         _element.volume_spec_name = AAZStrArg(
@@ -350,6 +350,10 @@ class Create(AAZCommand):
         )
 
         data_protection = cls._args_schema.volumes.Element.data_protection
+        data_protection.backup = AAZObjectArg(
+            options=["backup"],
+            help="Backup Properties",
+        )
         data_protection.replication = AAZObjectArg(
             options=["replication"],
             help="Replication properties",
@@ -361,6 +365,20 @@ class Create(AAZCommand):
         data_protection.volume_relocation = AAZObjectArg(
             options=["volume-relocation"],
             help="VolumeRelocation properties",
+        )
+
+        backup = cls._args_schema.volumes.Element.data_protection.backup
+        backup.backup_policy_id = AAZStrArg(
+            options=["backup-policy-id"],
+            help="Backup Policy Resource ID",
+        )
+        backup.backup_vault_id = AAZStrArg(
+            options=["backup-vault-id"],
+            help="Backup Vault Resource ID",
+        )
+        backup.policy_enforced = AAZBoolArg(
+            options=["policy-enforced"],
+            help="Policy Enforced",
         )
 
         replication = cls._args_schema.volumes.Element.data_protection.replication
@@ -606,7 +624,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-07-01",
+                    "api-version", "2024-03-01",
                     required=True,
                 ),
             }
@@ -709,9 +727,16 @@ class Create(AAZCommand):
 
             data_protection = _builder.get(".properties.volumes[].properties.dataProtection")
             if data_protection is not None:
+                data_protection.set_prop("backup", AAZObjectType, ".backup")
                 data_protection.set_prop("replication", AAZObjectType, ".replication")
                 data_protection.set_prop("snapshot", AAZObjectType, ".snapshot")
                 data_protection.set_prop("volumeRelocation", AAZObjectType, ".volume_relocation")
+
+            backup = _builder.get(".properties.volumes[].properties.dataProtection.backup")
+            if backup is not None:
+                backup.set_prop("backupPolicyId", AAZStrType, ".backup_policy_id")
+                backup.set_prop("backupVaultId", AAZStrType, ".backup_vault_id")
+                backup.set_prop("policyEnforced", AAZBoolType, ".policy_enforced")
 
             replication = _builder.get(".properties.volumes[].properties.dataProtection.replication")
             if replication is not None:
@@ -1044,10 +1069,22 @@ class Create(AAZCommand):
             )
 
             data_protection = cls._schema_on_201.properties.volumes.Element.properties.data_protection
+            data_protection.backup = AAZObjectType()
             data_protection.replication = AAZObjectType()
             data_protection.snapshot = AAZObjectType()
             data_protection.volume_relocation = AAZObjectType(
                 serialized_name="volumeRelocation",
+            )
+
+            backup = cls._schema_on_201.properties.volumes.Element.properties.data_protection.backup
+            backup.backup_policy_id = AAZStrType(
+                serialized_name="backupPolicyId",
+            )
+            backup.backup_vault_id = AAZStrType(
+                serialized_name="backupVaultId",
+            )
+            backup.policy_enforced = AAZBoolType(
+                serialized_name="policyEnforced",
             )
 
             replication = cls._schema_on_201.properties.volumes.Element.properties.data_protection.replication

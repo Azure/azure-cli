@@ -132,18 +132,11 @@ def validate_target_port(namespace):
                 raise ValidationError("Usage error: must specify --ingress with --target-port")
 
 
-def validate_ingress(namespace):
-    if "create" in namespace.command.lower():
-        if namespace.ingress:
-            if not namespace.target_port:
-                raise ValidationError("Usage error: must specify --target-port with --ingress")
-
-
 def validate_allow_insecure(namespace):
     if "create" in namespace.command.lower():
         if namespace.allow_insecure:
-            if not namespace.ingress or not namespace.target_port:
-                raise ValidationError("Usage error: must specify --ingress and --target-port with --allow-insecure")
+            if not namespace.ingress:
+                raise ValidationError("Usage error: must specify --ingress with --allow-insecure")
             if namespace.transport == "tcp":
                 raise ValidationError("Usage error: --allow-insecure is not supported for TCP ingress")
 

@@ -28,7 +28,23 @@ def link_grafana_instance(cmd, raw_parameters, azure_monitor_workspace_resource_
         )
         headers = ['User-Agent=azuremonitormetrics.link_grafana_instance']
         grafanaArmResponse = send_raw_request(cmd.cli_ctx, "GET", grafanaURI, body={}, headers=headers)
-        servicePrincipalId = grafanaArmResponse.json()["identity"]["principalId"]
+
+        # Check if 'identity' and 'type' exist in the response
+        identity_info = grafanaArmResponse.json().get("identity", {})
+        identity_type = identity_info.get("type", "").lower()
+
+        if identity_type == "systemassigned":
+            servicePrincipalId = identity_info.get("principalId")
+        elif identity_type == "userassigned":
+            user_assigned_identities = identity_info.get("userAssignedIdentities", {})
+            if not user_assigned_identities:
+                raise CLIError("No user-assigned identities found.")
+            servicePrincipalId = list(user_assigned_identities.values())[0]["principalId"]
+        else:
+            raise CLIError("Unsupported or missing identity type.")
+
+        if not servicePrincipalId:
+            raise CLIError("No service principal ID found for the specified identity.")
     except CLIError as e:
         raise CLIError(e)
     # Add Role Assignment

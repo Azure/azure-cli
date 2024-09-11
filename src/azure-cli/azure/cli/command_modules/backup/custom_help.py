@@ -48,7 +48,11 @@ operation_name_map = {"deleteProtection": rsc_type + "/backupFabrics/protectionC
                       "disableSoftDelete": rsc_type + "/backupconfig/write",
                       "RecoveryServicesDisableImmutability": rsc_type + "/write#reduceImmutabilityState",
                       "RecoveryServicesStopProtection": rsc_type +
-                      "/backupFabrics/protectionContainers/protectedItems/write#stopProtectionWithRetainData"}
+                      "/backupFabrics/protectionContainers/protectedItems/write#stopProtectionWithRetainData",
+                      "RecoveryServicesRestore": rsc_type +
+                      "/backupFabrics/protectionContainers/protectedItems/recoveryPoints/restore/action",
+                      "RecoveryServicesModifyEncryptionSettings": rsc_type +
+                      "/write#modifyEncryptionSettings"}
 
 # Client Utilities
 
@@ -234,8 +238,7 @@ def calculate_weekly_rpo(schedule_run_days):
         if backup_scheduled:
             if last_active_index is not None:
                 gap = index - last_active_index
-                if gap > largest_gap:
-                    largest_gap = gap
+                largest_gap = max(largest_gap, gap)
             last_active_index = index
 
     return largest_gap * 24
