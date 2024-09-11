@@ -47,6 +47,9 @@ def load_arguments(self, _):
                    help="Specifies the fallback application type as public client, such as an installed application "
                         "running on a mobile device. The default value is false which means the fallback application "
                         "type is confidential client such as a web app.")
+        c.argument('service_management_reference',
+                   help='References application or service contact information from a Service or Asset Management '
+                        'database.')
         c.argument('sign_in_audience',
                    arg_type=get_enum_type(['AzureADMyOrg', 'AzureADMultipleOrgs', 'AzureADandPersonalMicrosoftAccount',
                                            'PersonalMicrosoftAccount']),
