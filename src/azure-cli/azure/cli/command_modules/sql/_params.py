@@ -301,6 +301,7 @@ storage_param_type = CLIArgumentType(
 
 iops_param_type = CLIArgumentType(
     options_list=['--iops'],
+    type=int,
     help='The storage iops.')
 
 backup_storage_redundancy_param_type = CLIArgumentType(
