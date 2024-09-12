@@ -413,7 +413,7 @@ jobs:
         echo "== Test docker image =="
         
         docker load < $TAR_FILE
-        docker run $IMAGE_NAME /bin/bash -c "time az self-test && time az --version && sleep 5"
+        docker run $IMAGE_NAME /bin/bash -c "time az self-test && time az --version && time az bicep version && sleep 5"
       displayName: 'Bash Script'
 
 - job: BuildPythonWheel
