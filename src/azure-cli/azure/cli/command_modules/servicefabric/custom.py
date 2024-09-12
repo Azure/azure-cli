@@ -7,6 +7,7 @@
 
 import os
 import time
+import json
 
 from OpenSSL import crypto
 from cryptography.hazmat.primitives.serialization import pkcs12

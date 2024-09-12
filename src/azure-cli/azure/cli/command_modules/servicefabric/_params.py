@@ -374,9 +374,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('application_name', options_list=['--name', '--application-name'], help='Specify the application name.')
         c.argument('tags', arg_type=tags_type)
 
-
     with self.argument_context('sf managed-application update', validator=validate_update_managed_application) as c:
-        c.argument('application_type_version', arg_type=application_type_version)
+        c.argument('application_type_version', options_list=['--version', '--application-type-version'], help='Specify the application type version.')
         c.argument('application_parameters', arg_type=application_parameters)
 
     with self.argument_context('sf managed-application update', arg_group='Upgrade description') as c:
@@ -384,34 +383,34 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='Indicates that the service host restarts even if the upgrade is a configuration-only change.')
         c.argument('recreate_application', arg_type=get_three_state_flag(),
                    help='Determines whether the application should be recreated on update. If value=true, the rest of the upgrade policy parameters are not allowed.')
-        c.argument('upgrade_replica_set_check_timeout', options_list=['--upgrade-replica-set-check-timeout', '--replica-check-timeout', '--rep-check-timeout'],
+        c.argument('upgrade_replica_set_check_timeout',
                    help='Specify the maximum time, in seconds, that Service Fabric waits for a service to reconfigure into a safe state, if not already in a safe state, before Service Fabric proceeds with the upgrade.')
-        c.argument('instance_close_delay_duration', options_list=['--instance-close-delay-duration', '--instance-close-duration', '--close-duration'],
+        c.argument('instance_close_delay_duration',
                    help='Specify the duration in seconds, to wait before a stateless instance is closed, to allow the active requests to drain gracefully. This would be effective when the instance is closing during the application/cluster upgrade, only for those instances which have a non-zero delay duration configured in the service description.')
         c.argument('failure_action', arg_type=get_enum_type(FailureAction),
                    help='Specify the action to take if the monitored upgrade fails. The acceptable values for this parameter are Rollback or Manual.')
         c.argument('upgrade_mode', arg_type=get_enum_type(RollingUpgradeMode),
                    help='Specify the mode used to monitor health during a rolling upgrade. The values are Monitored, and UnmonitoredAuto.')
-        c.argument('health_check_retry_timeout', options_list=['--hc-retry-timeout', '--health-check-retry-timeout'],
+        c.argument('health_check_retry_timeout', 
                    help='Specify the duration, in seconds, after which Service Fabric retries the health check if the previous health check fails.')
-        c.argument('health_check_wait_duration', options_list=['--hc-wait-duration', '--health-check-wait-duration'],
+        c.argument('health_check_wait_duration',
                    help='Specify the duration, in seconds, that Service Fabric waits before it performs the initial health check after it finishes the upgrade on the upgrade domain.')
-        c.argument('health_check_stable_duration', options_list=['--hc-stable-duration', '--health-check-stable-duration'],
+        c.argument('health_check_stable_duration',
                    help='Specify the duration, in seconds, that Service Fabric waits in order to verify that the application is stable before moving to the next upgrade domain or completing the upgrade. This wait duration prevents undetected changes of health right after the health check is performed.')
-        c.argument('upgrade_domain_timeout', options_list=['--ud-timeout', '--upgrade-domain-timeout'],
+        c.argument('upgrade_domain_timeout',
                    help='Specify the maximum time, in seconds, that Service Fabric takes to upgrade a single upgrade domain. After this period, the upgrade fails.')
         c.argument('upgrade_timeout',
                    help='Specify the maximum time, in seconds, that Service Fabric takes for the entire upgrade. After this period, the upgrade fails.')
-        c.argument('consider_warning_as_error', options_list=['--warning-as-error', '--consider-warning-as-error'], arg_type=get_three_state_flag(),
+        c.argument('consider_warning_as_error', arg_type=get_three_state_flag(),
                    help='Indicates whether to treat a warning health event as an error event during health evaluation.')
-        c.argument('default_service_type_max_percent_unhealthy_partitions_per_service', options_list=['--max-percent-unhealthy-partitions', '--max-unhealthy-parts'],
+        c.argument('default_service_type_max_percent_unhealthy_partitions_per_service',
                    help='Specify the maximum percent of unhelthy partitions per service allowed by the health policy for the default service type to use for the monitored upgrade. Allowed values are from 0 to 100.')
-        c.argument('default_service_type_max_percent_unhealthy_replicas_per_partition', options_list=['--max-percent-unhealthy-replicas', '--max-unhealthy-reps'],
+        c.argument('default_service_type_max_percent_unhealthy_replicas_per_partition', 
                    help='Specify the maximum percent of unhelthy replicas per service allowed by the health policy for the default service type to use for the monitored upgrade. Allowed values are from 0 to 100.')
-        c.argument('default_service_type_max_percent_unhealthy_services', options_list=['--max-percent-unhealthy-services', '--max-unhealthy-servs'],
+        c.argument('default_service_type_max_percent_unhealthy_services',
                    help='Specify the maximum percent of unhelthy services allowed by the health policy for the default service type to use for the monitored upgrade. Allowed values are from 0 to 100.')
         c.argument('service_type_health_policy_map', arg_type=service_type_health_policy_map)
-        c.argument('max_percent_unhealthy_deployed_applications', options_list=['--max-percent-unhealthy-deployed-applications', '--max-percent-unhealthy-apps', '--max-unhealthy-apps'],
+        c.argument('max_percent_unhealthy_deployed_applications',
                    help='Specify the maximum percentage of the application instances deployed on the nodes in the cluster that have a health state of error before the application health state for the cluster is error. Allowed values are form 0 to 100.')
 
     with self.argument_context('sf managed-application create', validator=validate_create_managed_application) as c:

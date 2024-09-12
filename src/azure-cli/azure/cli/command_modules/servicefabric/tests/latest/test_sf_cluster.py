@@ -123,6 +123,5 @@ class ServiceFabricClusterTests(ScenarioTest):
         self.cmd('sf cluster node remove -g {rg} -c {cluster_name} --node-type {primary_node_type} --number-of-nodes-to-remove 1',
                  checks=[self.check('nodeTypes[1].vmInstanceCount', 6)])
 
-
 if __name__ == '__main__':
     unittest.main()
