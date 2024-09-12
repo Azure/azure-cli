@@ -349,6 +349,7 @@ class _CreateHelper:
         properties.priority = AAZIntType()
         properties.private_endpoint_status = AAZStrType(
             serialized_name="privateEndpointStatus",
+            flags={"read_only": True},
         )
         properties.private_link_alias = AAZStrType(
             serialized_name="privateLinkAlias",
