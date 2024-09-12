@@ -16,7 +16,7 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 class ServiceFabricClusterTests(ScenarioTest):
     @ResourceGroupPreparer()
-    @KeyVaultPreparer(name_prefix='sfrp-cli-kv-', additional_params='--enabled-for-deployment --enabled-for-template-deployment')
+    @KeyVaultPreparer(name_prefix='sfrp-cli-kv-', additional_params='--enabled-for-deployment --enabled-for-template-deployment --enable-rbac-authorization false')
     def test_create_cluster_with_separate_kv(self, key_vault, resource_group):
         self.kwargs.update({
             'kv_name': key_vault,

@@ -71,10 +71,6 @@
             "type": "string",
             "defaultValue": "10.0.0.0/16"
         },
-        "dnsName": {
-            "type": "string",
-            "defaultValue": "testDnsName"
-        },
         "nicName": {
             "type": "string",
             "defaultValue": "NIC"
@@ -167,16 +163,14 @@
             "defaultValue": "[toLower(concat('sflogs', uniqueString(resourceGroup().id)))]"
         },
         "reliabilityLevel": {
-            "type": "string",
-            "defaultValue": "Silver"
+            "type": "string"
         },
         "nt0InstanceCount": {
             "type": "int",
             "defaultValue": 8
         },
         "durabilityLevel": {
-            "type": "string",
-            "defaultValue": "Silver"
+            "type": "string"
         },
         "vmNodeType0Name": {
             "type": "string",
@@ -326,7 +320,7 @@
             },
             "properties": {
                 "dnsSettings": {
-                    "domainNameLabel": "[parameters('dnsName')]"
+                    "domainNameLabel": "[parameters('clusterName')]"
                 },
                 "publicIPAllocationMethod": "Static"
             }
@@ -507,7 +501,7 @@
                 "upgradePolicy": {
                     "mode": "Automatic",
                     "automaticOSUpgradePolicy": {
-                        "enableAutomaticOSUpgrade": true
+                        "enableAutomaticOSUpgrade": false
                     }
                 },
                 "virtualMachineProfile": {
@@ -551,6 +545,9 @@
                         ]
                     },
                     "networkProfile": {
+                        "healthProbe": {
+                            "id": "[variables('lbProbeID0')]"
+                        },
                         "networkInterfaceConfigurations": [
                             {
                                 "name": "[concat(parameters('nicName'), '-0')]",
