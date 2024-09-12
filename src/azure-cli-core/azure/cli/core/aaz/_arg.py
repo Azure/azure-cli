@@ -626,7 +626,7 @@ class AAZGenericUpdateArg(AAZBaseArg, AAZListType):
 
 
 class AAZGenericUpdateSetArg(AAZGenericUpdateArg):
-    _example = '--set property1.property2=<value>'
+    _example = '`--set property1.property2=<value>`'
 
     def __init__(
             self, options=('--set',), arg_group='Generic Update',
@@ -653,7 +653,7 @@ class AAZGenericUpdateSetArg(AAZGenericUpdateArg):
 
 
 class AAZGenericUpdateAddArg(AAZGenericUpdateArg):
-    _example = '--add property.listProperty <key=value, string or JSON string>'
+    _example = '`--add property.listProperty <key=value, string or JSON string>`'
 
     def __init__(
             self, options=('--add',), arg_group='Generic Update',
@@ -680,7 +680,7 @@ class AAZGenericUpdateAddArg(AAZGenericUpdateArg):
 
 
 class AAZGenericUpdateRemoveArg(AAZGenericUpdateArg):
-    _example = '--remove property.list <indexToRemove> OR --remove propertyToRemove'
+    _example = '`--remove property.list <indexToRemove>` OR `--remove propertyToRemove`'
 
     def __init__(
             self, options=('--remove', ), arg_group='Generic Update',
