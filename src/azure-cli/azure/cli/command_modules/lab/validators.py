@@ -91,20 +91,8 @@ def validate_claim_vm(namespace):
 
 
 def _get_owner_object_id(cli_ctx):
-    from azure.cli.core._profile import Profile
-    from azure.graphrbac.models import GraphErrorException
-    from azure.graphrbac import GraphRbacManagementClient
-    profile = Profile(cli_ctx=cli_ctx)
-    cred, _, tenant_id = profile.get_login_credentials(
-        resource=cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
-    graph_client = GraphRbacManagementClient(cred,
-                                             tenant_id,
-                                             base_url=cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
-    subscription = profile.get_subscription()
-    try:
-        return _get_current_user_object_id(graph_client)
-    except GraphErrorException:
-        return _get_object_id(graph_client, subscription=subscription)
+    from azure.cli.command_modules.role.util import get_current_identity_object_id
+    return get_current_identity_object_id(cli_ctx)
 
 
 # pylint: disable=no-member
@@ -534,59 +522,3 @@ def _single(collection):
 
 def _any(collection):
     return len([x for x in collection if x]) > 0
-
-
-def _get_current_user_object_id(graph_client):
-    try:
-        current_user = graph_client.signed_in_user.get()
-        if current_user and current_user.object_id:  # pylint:disable=no-member
-            return current_user.object_id  # pylint:disable=no-member
-    except HttpResponseError:
-        pass
-    return None
-
-
-def _get_object_id(graph_client, subscription=None, spn=None, upn=None):
-    if spn:
-        return _get_object_id_by_spn(graph_client, spn)
-    if upn:
-        return _get_object_id_by_upn(graph_client, upn)
-    return _get_object_id_from_subscription(graph_client, subscription)
-
-
-def _get_object_id_from_subscription(graph_client, subscription):
-    if subscription['user']:
-        if subscription['user']['type'] == 'user':
-            return _get_object_id_by_upn(graph_client, subscription['user']['name'])
-        if subscription['user']['type'] == 'servicePrincipal':
-            return _get_object_id_by_spn(graph_client, subscription['user']['name'])
-        logger.warning("Unknown user type '%s'", subscription['user']['type'])
-    else:
-        logger.warning('Current credentials are not from a user or service principal. '
-                       'Azure DevTest Lab does not work with certificate credentials.')
-    return None
-
-
-def _get_object_id_by_spn(graph_client, spn):
-    accounts = list(graph_client.service_principals.list(
-        filter="servicePrincipalNames/any(c:c eq '{}')".format(spn)))
-    if not accounts:
-        logger.warning("Unable to find user with spn '%s'", spn)
-        return None
-    if len(accounts) > 1:
-        logger.warning("Multiple service principals found with spn '%s'. "
-                       "You can avoid this by specifying object id.", spn)
-        return None
-    return accounts[0].object_id
-
-
-def _get_object_id_by_upn(graph_client, upn):
-    accounts = list(graph_client.users.list(filter="userPrincipalName eq '{}'".format(upn)))
-    if not accounts:
-        logger.warning("Unable to find user with upn '%s'", upn)
-        return None
-    if len(accounts) > 1:
-        logger.warning("Multiple users principals found with upn '%s'. "
-                       "You can avoid this by specifying object id.", upn)
-        return None
-    return accounts[0].object_id
