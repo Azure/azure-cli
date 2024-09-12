@@ -1374,3 +1374,24 @@ def run_cmd(args, *, capture_output=False, timeout=None, check=False, encoding=N
     import subprocess
     return subprocess.run(args, capture_output=capture_output, timeout=timeout, check=check,
                           encoding=encoding, env=env)
+
+def run_az_cmd(args, out_file=None):
+    """
+    run az related during command execution
+    Args:
+        args: cmd to be executed, array of string, like `["az", "--version"]`
+        out_file: The file to send output to. file-like object
+    Returns:
+        result: cmd execution result object, containing `result`, `error`, `exit_code`
+    """
+    from azure.cli.core.azclierror import ArgumentUsageError
+    if not isinstance(args, list):
+        raise ArgumentUsageError("Invalid args. run_az_cmd args must be a list")
+    if args[0] != "az":
+        raise ArgumentUsageError('Invalid cmd. run_az_cmd must be used to run `az` related cmds, '
+                                 'like ["az", "--version"]')
+
+    from azure.cli.core import get_default_cli
+    cli = get_default_cli()
+    cli.invoke(args[1:], out_file=out_file)
+    return cli.result
