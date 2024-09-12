@@ -143,6 +143,7 @@ DEPENDENCIES = [
     'PyNaCl~=1.5.0',
     'scp~=0.13.2',
     'semver==2.13.0',
+    'setuptools',
     'six>=1.10.0',  # six is still used by countless extensions
     'sshtunnel~=0.1.4',
     # Even though knack already depends on tabulate, profile module directly uses it for interactive subscription
