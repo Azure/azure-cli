@@ -780,6 +780,11 @@ def can_launch_browser():
     return False
 
 
+def is_github_codespaces():
+    # https://docs.github.com/en/codespaces/developing-in-a-codespace/default-environment-variables-for-your-codespace
+    return os.environ.get('CODESPACES') == 'true'
+
+
 def get_command_type_kwarg(custom_command=False):
     return 'custom_command_type' if custom_command else 'command_type'
 

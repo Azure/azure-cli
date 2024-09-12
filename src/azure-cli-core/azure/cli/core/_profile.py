@@ -11,7 +11,7 @@ from enum import Enum
 from azure.cli.core._session import ACCOUNT
 from azure.cli.core.azclierror import AuthenticationError
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
-from azure.cli.core.util import in_cloud_console, can_launch_browser
+from azure.cli.core.util import in_cloud_console, can_launch_browser, is_github_codespaces
 from knack.log import get_logger
 from knack.util import CLIError
 
@@ -166,8 +166,7 @@ class Profile:
                 logger.info('No web browser is available. Fall back to device code.')
                 use_device_code = True
 
-            # https://docs.github.com/en/codespaces/developing-in-a-codespace/default-environment-variables-for-your-codespace
-            if not use_device_code and os.environ.get('CODESPACES'):
+            if not use_device_code and is_github_codespaces():
                 logger.info('GitHub Codespaces is detected. Fall back to device code.')
                 use_device_code = True
 
