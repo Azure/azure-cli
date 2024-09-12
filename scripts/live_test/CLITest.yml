@@ -466,96 +466,107 @@ stages:
           versionSpec: '$(PYTHON_VERSION)'
           addToPath: true
           architecture: 'x64'
-      - bash: |
-          cd ..
-          pwd
-          workDir=$(pwd)
-          echo "##vso[task.setvariable variable=workDir]$workDir"
-          ls
-          # ssh-keygen -f ~/.ssh/id_rsa -t rsa -N ''
-          git config --global user.email "AzurePipelines"
-          git config --global user.name "AzurePipelines"
-  
-          # print variables
-          echo "PLATFORM: $(PLATFORM)"
-          echo "USER_TARGET: $(USER_TARGET)"
-          echo "USER_REPO: $(USER_REPO)"
-          echo "USER_REPO_EXT: $(USER_REPO_EXT)"
-          echo "USER_BRANCH: $(USER_BRANCH)"
-          echo "USER_BRANCH_EXT: $(USER_BRANCH_EXT)"
-          # Whether commit changes
-          if [[ "$(USER_USERNAME)" != "" && "$(USER_TOKEN)" != "" ]]; then
-            REPO="$(USER_REPO)"
-            EXT_REPO="$(USER_REPO_EXT)"
-            # Pass username and token so that we can commit changes
-            git clone -b $(USER_BRANCH) ${REPO:0:8}$(USER_USERNAME):$(USER_TOKEN)@${REPO:8}
-            git clone -b $(USER_BRANCH_EXT) ${EXT_REPO:0:8}$(USER_USERNAME):$(USER_TOKEN)@${EXT_REPO:8}
-          else
-            git clone -b $(USER_BRANCH) $(USER_REPO)
-            git clone -b $(USER_BRANCH_EXT) $(USER_REPO_EXT)
-          fi
-  
-          python -m venv env
-          source env/bin/activate
-  
-          # TODO: support pytest-html >= 4.0.0
-          pip install azdev pytest-json-report pytest-html==3.2.0 pytest-rerunfailures
-  
-          azdev setup -c azure-cli -r azure-cli-extensions
-          
-          # Remove ext- prefix
-          FinalTarget="$(Target)"
-          if [[ "${FinalTarget}" =~ ^ext-.* ]]; then
-            echo "It is an extention"
-            echo $(Target)
-            FinalTarget=${FinalTarget:4}
-            azdev extension add ${FinalTarget}
-          fi
-          echo ${FinalTarget}
-  
-          # This helps detect issues in CI if a used SDK API version is deleted by the below script.
-          python $workDir/s/scripts/trim_sdk.py
-  
-          # Compact aaz folders of modules
-          python $workDir/s/scripts/compact_aaz.py
-  
-          az -v
-          az login --service-principal --username $(AZURECLITESTUSER) --password $(AZURECLITESTPASSWORD) --tenant $(AZURECLITESTTENANTID)
-          az account set -s $(AZURECLITESTSUBSCRIPTIONID)
-  
-          # Clean policy
-          python $workDir/s/scripts/live_test/clean_policy.py
-          
-          echo "Run tests"
-          # Whether commit changes
-          if [[ "$(USER_USERNAME)" != "" && "$(USER_TOKEN)" != "" ]]; then
-            echo "Commit mode"
-            azdev test ${FinalTarget} --no-exitfirst -a "-n $(USER_PARALLELISM)"
-            azdev test ${FinalTarget} --live --lf --xml-path test_results.parallel.xml --no-exitfirst -a "-n $(USER_PARALLELISM) --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.parallel.json --html=$(Target).$(platform).report.parallel.html --self-contained-html --capture=sys"
-          else
-            echo "Normal mode"
-            # Sequential
-            azdev test ${FinalTarget} $(USER_LIVE) --mark serial --xml-path test_results.sequential.xml --no-exitfirst -a "-n 1 --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.sequential.json --html=$(Target).$(platform).report.sequential.html --self-contained-html --capture=sys"
-            # Parallel
-            azdev test ${FinalTarget} $(USER_LIVE) --mark "not serial" --xml-path test_results.parallel.xml --no-exitfirst -a "-n $(USER_PARALLELISM) --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.parallel.json --html=$(Target).$(platform).report.parallel.html --self-contained-html --capture=sys"
-          fi
-  
-          pwd
-          ls
-          # Whether commit changes
-          if [[ "$(USER_USERNAME)" != "" && "$(USER_TOKEN)" != "" && ! "$(USER_TARGET)" =~ ^ext-.* && "$(USER_TARGET)" != "extensions" && "$(USER_TARGET)" != ""  && "$(USER_TARGET)" != "all" && "$(USER_TARGET)" != "ALL" ]]; then
-            cd azure-cli
-            git status
-            git add .
-            git commit -m "Upload recording files"
-            git push origin $(USER_BRANCH)
-          elif [[ "$(USER_USERNAME)" != "" && "$(USER_TOKEN)" != "" && "$(USER_TARGET)" =~ ^ext-.* ]]; then
-            cd azure-cli-extensions
-            git status
-            git add .
-            git commit -m "Upload recording files"
-            git push origin $(USER_BRANCH_EXT)
-          fi
+      - task: AzureCLI@2
+        displayName: 'Run live test'
+        inputs:
+          azureSubscription: $(AZURE_CLI_LIVE_TEST_CONNECTED_SERVICE)
+          scriptType: bash
+          scriptLocation: inlineScript
+          inlineScript: |
+            cd ..
+            pwd
+            workDir=$(pwd)
+            echo "##vso[task.setvariable variable=workDir]$workDir"
+            ls
+            # ssh-keygen -f ~/.ssh/id_rsa -t rsa -N ''
+            git config --global user.email "AzurePipelines"
+            git config --global user.name "AzurePipelines"
+    
+            # print variables
+            echo "PLATFORM: $(PLATFORM)"
+            echo "USER_TARGET: $(USER_TARGET)"
+            echo "USER_REPO: $(USER_REPO)"
+            echo "USER_REPO_EXT: $(USER_REPO_EXT)"
+            echo "USER_BRANCH: $(USER_BRANCH)"
+            echo "USER_BRANCH_EXT: $(USER_BRANCH_EXT)"
+            # Whether commit changes
+            if [[ "$(USER_USERNAME)" != "" && "$(USER_TOKEN)" != "" ]]; then
+              REPO="$(USER_REPO)"
+              EXT_REPO="$(USER_REPO_EXT)"
+              # Pass username and token so that we can commit changes
+              git clone -b $(USER_BRANCH) ${REPO:0:8}$(USER_USERNAME):$(USER_TOKEN)@${REPO:8}
+              git clone -b $(USER_BRANCH_EXT) ${EXT_REPO:0:8}$(USER_USERNAME):$(USER_TOKEN)@${EXT_REPO:8}
+            else
+              git clone -b $(USER_BRANCH) $(USER_REPO)
+              git clone -b $(USER_BRANCH_EXT) $(USER_REPO_EXT)
+            fi
+    
+            python -m venv env
+            source env/bin/activate
+    
+            # TODO: support pytest-html >= 4.0.0
+            pip install azdev pytest-json-report pytest-html==3.2.0 pytest-rerunfailures
+    
+            azdev setup -c azure-cli -r azure-cli-extensions
+            
+            # Remove ext- prefix
+            FinalTarget="$(Target)"
+            if [[ "${FinalTarget}" =~ ^ext-.* ]]; then
+              echo "It is an extention"
+              echo $(Target)
+              FinalTarget=${FinalTarget:4}
+              azdev extension add ${FinalTarget}
+            fi
+            echo ${FinalTarget}
+            
+            serial_modules="appservice botservice cloud network azure-cli-core azure-cli-telemetry"
+    
+            # This helps detect issues in CI if a used SDK API version is deleted by the below script.
+            python $workDir/s/scripts/trim_sdk.py
+    
+            # Compact aaz folders of modules
+            python $workDir/s/scripts/compact_aaz.py
+    
+            az -v
+            # az login --service-principal --username $(AZURECLITESTUSER) --password $(AZURECLITESTPASSWORD) --tenant $(AZURECLITESTTENANTID)
+            az account set -s $(AZURECLITESTSUBSCRIPTIONID)
+    
+            # Clean policy
+            python $workDir/s/scripts/live_test/clean_policy.py
+            
+            echo "Run tests"
+            # Whether commit changes
+            if [[ "$(USER_USERNAME)" != "" && "$(USER_TOKEN)" != "" ]]; then
+              echo "Commit mode"
+              azdev test ${FinalTarget} --no-exitfirst -a "-n $(USER_PARALLELISM)"
+              azdev test ${FinalTarget} --live --lf --xml-path test_results.parallel.xml --no-exitfirst -a "-n $(USER_PARALLELISM) --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.parallel.json --html=$(Target).$(platform).report.parallel.html --self-contained-html --capture=sys"
+            elif [[ "$serial_modules" =~ "$FinalTarget" ]]; then
+              echo "Series mode"
+              azdev test ${FinalTarget} $(USER_LIVE) --xml-path test_results.sequential.xml --no-exitfirst -a "-n 1 --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.sequential.json --html=$(Target).$(platform).report.sequential.html --self-contained-html --capture=sys"
+            else
+              echo "Normal mode"
+              # Sequential
+              azdev test ${FinalTarget} $(USER_LIVE) --mark serial --xml-path test_results.sequential.xml --no-exitfirst -a "-n 1 --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.sequential.json --html=$(Target).$(platform).report.sequential.html --self-contained-html --capture=sys"
+              # Parallel
+              azdev test ${FinalTarget} $(USER_LIVE) --mark "not serial" --xml-path test_results.parallel.xml --no-exitfirst -a "-n $(USER_PARALLELISM) --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.parallel.json --html=$(Target).$(platform).report.parallel.html --self-contained-html --capture=sys"
+            fi
+    
+            pwd
+            ls
+            # Whether commit changes
+            if [[ "$(USER_USERNAME)" != "" && "$(USER_TOKEN)" != "" && ! "$(USER_TARGET)" =~ ^ext-.* && "$(USER_TARGET)" != "extensions" && "$(USER_TARGET)" != ""  && "$(USER_TARGET)" != "all" && "$(USER_TARGET)" != "ALL" ]]; then
+              cd azure-cli
+              git status
+              git add .
+              git commit -m "Upload recording files"
+              git push origin $(USER_BRANCH)
+            elif [[ "$(USER_USERNAME)" != "" && "$(USER_TOKEN)" != "" && "$(USER_TARGET)" =~ ^ext-.* ]]; then
+              cd azure-cli-extensions
+              git status
+              git add .
+              git commit -m "Upload recording files"
+              git push origin $(USER_BRANCH_EXT)
+            fi
         condition: and(succeededOrFailed(), eq(variables.Match, '1'))
       - task: PublishTestResults@2
         condition: and(succeededOrFailed(), eq(variables.Match, '1'))
@@ -1031,97 +1042,108 @@ stages:
           versionSpec: '$(PYTHON_VERSION)'
           addToPath: true
           architecture: 'x64'
-      - bash: |
-          cd ..
-          pwd
-          workDir=$(pwd)
-          echo "##vso[task.setvariable variable=workDir]$workDir"
-          ls
-          # ssh-keygen -f ~/.ssh/id_rsa -t rsa -N ''
-          git config --global user.email "AzurePipelines"
-          git config --global user.name "AzurePipelines"
-  
-          # print variables
-          echo "PLATFORM: $(PLATFORM)"
-          echo "USER_TARGET: $(USER_TARGET)"
-          echo "USER_REPO: $(USER_REPO)"
-          echo "USER_REPO_EXT: $(USER_REPO_EXT)"
-          echo "USER_BRANCH: $(USER_BRANCH)"
-          echo "USER_BRANCH_EXT: $(USER_BRANCH_EXT)"
-          # Whether commit changes
-          if [[ "$(USER_USERNAME)" != "" && "$(USER_TOKEN)" != "" ]]; then
-            REPO="$(USER_REPO)"
-            EXT_REPO="$(USER_REPO_EXT)"
-            # Pass username and token so that we can commit changes
-            git clone -b $(USER_BRANCH) ${REPO:0:8}$(USER_USERNAME):$(USER_TOKEN)@${REPO:8}
-            git clone -b $(USER_BRANCH_EXT) ${EXT_REPO:0:8}$(USER_USERNAME):$(USER_TOKEN)@${EXT_REPO:8}
-          else
-            git clone -b $(USER_BRANCH) $(USER_REPO)
-            git clone -b $(USER_BRANCH_EXT) $(USER_REPO_EXT)
-          fi
-  
-          python -m venv env
-          source env/bin/activate
-          export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
-          
-          # TODO: support pytest-html >= 4.0.0
-          pip install azdev pytest-json-report pytest-html==3.2.0 pytest-rerunfailures
-  
-          azdev setup -c azure-cli -r azure-cli-extensions
-          
-          # Remove ext- prefix
-          FinalTarget="$(Target)"
-          if [[ "${FinalTarget}" =~ ^ext-.* ]]; then
-            echo "It is an extention"
-            echo $(Target)
-            FinalTarget=${FinalTarget:4}
-            azdev extension add ${FinalTarget}
-          fi
-          echo ${FinalTarget}
-  
-          # This helps detect issues in CI if a used SDK API version is deleted by the below script.
-          python $workDir/s/scripts/trim_sdk.py
-  
-          # Compact aaz folders of modules
-          python $workDir/s/scripts/compact_aaz.py
-  
-          az -v
-          az login --service-principal --username $(AZURECLITESTUSER) --password $(AZURECLITESTPASSWORD) --tenant $(AZURECLITESTTENANTID)
-          az account set -s $(AZURECLITESTSUBSCRIPTIONID)
-  
-          # Clean policy
-          python $workDir/s/scripts/live_test/clean_policy.py
-          
-          echo "Run tests"
-          # Whether commit changes
-          if [[ "$(USER_USERNAME)" != "" && "$(USER_TOKEN)" != "" ]]; then
-            echo "Commit mode"
-            azdev test ${FinalTarget} --no-exitfirst -a "-n $(USER_PARALLELISM)"
-            azdev test ${FinalTarget} --live --lf --xml-path test_results.parallel.xml --no-exitfirst -a "-n $(USER_PARALLELISM) --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.parallel.json --html=$(Target).$(platform).report.parallel.html --self-contained-html --capture=sys"
-          else
-            echo "Normal mode"
-            # Sequential
-            azdev test ${FinalTarget} $(USER_LIVE) --mark serial --xml-path test_results.sequential.xml --no-exitfirst -a "-n 1 --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.sequential.json --html=$(Target).$(platform).report.sequential.html --self-contained-html --capture=sys"
-            # Parallel
-            azdev test ${FinalTarget} $(USER_LIVE) --mark "not serial" --xml-path test_results.parallel.xml --no-exitfirst -a "-n $(USER_PARALLELISM) --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.parallel.json --html=$(Target).$(platform).report.parallel.html --self-contained-html --capture=sys"
-          fi
-  
-          pwd
-          ls
-          # Whether commit changes
-          if [[ "$(USER_USERNAME)" != "" && "$(USER_TOKEN)" != "" && ! "$(USER_TARGET)" =~ ^ext-.* && "$(USER_TARGET)" != "extensions" && "$(USER_TARGET)" != ""  && "$(USER_TARGET)" != "all" && "$(USER_TARGET)" != "ALL" ]]; then
-            cd azure-cli
-            git status
-            git add .
-            git commit -m "Upload recording files"
-            git push origin $(USER_BRANCH)
-          elif [[ "$(USER_USERNAME)" != "" && "$(USER_TOKEN)" != "" && "$(USER_TARGET)" =~ ^ext-.* ]]; then
-            cd azure-cli-extensions
-            git status
-            git add .
-            git commit -m "Upload recording files"
-            git push origin $(USER_BRANCH_EXT)
-          fi
+      - task: AzureCLI@2
+        displayName: 'Run live test on Macos'
+        inputs:
+          azureSubscription: $(AZURE_CLI_LIVE_TEST_CONNECTED_SERVICE)
+          scriptType: bash
+          scriptLocation: inlineScript
+          inlineScript: |
+            cd ..
+            pwd
+            workDir=$(pwd)
+            echo "##vso[task.setvariable variable=workDir]$workDir"
+            ls
+            # ssh-keygen -f ~/.ssh/id_rsa -t rsa -N ''
+            git config --global user.email "AzurePipelines"
+            git config --global user.name "AzurePipelines"
+    
+            # print variables
+            echo "PLATFORM: $(PLATFORM)"
+            echo "USER_TARGET: $(USER_TARGET)"
+            echo "USER_REPO: $(USER_REPO)"
+            echo "USER_REPO_EXT: $(USER_REPO_EXT)"
+            echo "USER_BRANCH: $(USER_BRANCH)"
+            echo "USER_BRANCH_EXT: $(USER_BRANCH_EXT)"
+            # Whether commit changes
+            if [[ "$(USER_USERNAME)" != "" && "$(USER_TOKEN)" != "" ]]; then
+              REPO="$(USER_REPO)"
+              EXT_REPO="$(USER_REPO_EXT)"
+              # Pass username and token so that we can commit changes
+              git clone -b $(USER_BRANCH) ${REPO:0:8}$(USER_USERNAME):$(USER_TOKEN)@${REPO:8}
+              git clone -b $(USER_BRANCH_EXT) ${EXT_REPO:0:8}$(USER_USERNAME):$(USER_TOKEN)@${EXT_REPO:8}
+            else
+              git clone -b $(USER_BRANCH) $(USER_REPO)
+              git clone -b $(USER_BRANCH_EXT) $(USER_REPO_EXT)
+            fi
+    
+            python -m venv env
+            source env/bin/activate
+            export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
+            
+            # TODO: support pytest-html >= 4.0.0
+            pip install azdev pytest-json-report pytest-html==3.2.0 pytest-rerunfailures
+    
+            azdev setup -c azure-cli -r azure-cli-extensions
+            
+            # Remove ext- prefix
+            FinalTarget="$(Target)"
+            if [[ "${FinalTarget}" =~ ^ext-.* ]]; then
+              echo "It is an extention"
+              echo $(Target)
+              FinalTarget=${FinalTarget:4}
+              azdev extension add ${FinalTarget}
+            fi
+            echo ${FinalTarget}
+            
+            serial_modules="appservice botservice cloud network azure-cli-core azure-cli-telemetry"
+    
+            # This helps detect issues in CI if a used SDK API version is deleted by the below script.
+            python $workDir/s/scripts/trim_sdk.py
+    
+            # Compact aaz folders of modules
+            python $workDir/s/scripts/compact_aaz.py
+    
+            az -v
+            # az login --service-principal --username $(AZURECLITESTUSER) --password $(AZURECLITESTPASSWORD) --tenant $(AZURECLITESTTENANTID)
+            az account set -s $(AZURECLITESTSUBSCRIPTIONID)
+    
+            # Clean policy
+            python $workDir/s/scripts/live_test/clean_policy.py
+            
+            echo "Run tests"
+            # Whether commit changes
+            if [[ "$(USER_USERNAME)" != "" && "$(USER_TOKEN)" != "" ]]; then
+              echo "Commit mode"
+              azdev test ${FinalTarget} --no-exitfirst -a "-n $(USER_PARALLELISM)"
+              azdev test ${FinalTarget} --live --lf --xml-path test_results.parallel.xml --no-exitfirst -a "-n $(USER_PARALLELISM) --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.parallel.json --html=$(Target).$(platform).report.parallel.html --self-contained-html --capture=sys"
+            elif [[ "$serial_modules" =~ "$FinalTarget" ]]; then
+              echo "Series mode"
+              azdev test ${FinalTarget} $(USER_LIVE) --xml-path test_results.sequential.xml --no-exitfirst -a "-n 1 --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.sequential.json --html=$(Target).$(platform).report.sequential.html --self-contained-html --capture=sys"
+            else
+              echo "Normal mode"
+              # Sequential
+              azdev test ${FinalTarget} $(USER_LIVE) --mark serial --xml-path test_results.sequential.xml --no-exitfirst -a "-n 1 --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.sequential.json --html=$(Target).$(platform).report.sequential.html --self-contained-html --capture=sys"
+              # Parallel
+              azdev test ${FinalTarget} $(USER_LIVE) --mark "not serial" --xml-path test_results.parallel.xml --no-exitfirst -a "-n $(USER_PARALLELISM) --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.parallel.json --html=$(Target).$(platform).report.parallel.html --self-contained-html --capture=sys"
+            fi
+    
+            pwd
+            ls
+            # Whether commit changes
+            if [[ "$(USER_USERNAME)" != "" && "$(USER_TOKEN)" != "" && ! "$(USER_TARGET)" =~ ^ext-.* && "$(USER_TARGET)" != "extensions" && "$(USER_TARGET)" != ""  && "$(USER_TARGET)" != "all" && "$(USER_TARGET)" != "ALL" ]]; then
+              cd azure-cli
+              git status
+              git add .
+              git commit -m "Upload recording files"
+              git push origin $(USER_BRANCH)
+            elif [[ "$(USER_USERNAME)" != "" && "$(USER_TOKEN)" != "" && "$(USER_TARGET)" =~ ^ext-.* ]]; then
+              cd azure-cli-extensions
+              git status
+              git add .
+              git commit -m "Upload recording files"
+              git push origin $(USER_BRANCH_EXT)
+            fi
         condition: and(succeededOrFailed(), eq(variables.Match, '1'))
       - task: PublishTestResults@2
         condition: and(succeededOrFailed(), eq(variables.Match, '1'))
@@ -1596,96 +1618,107 @@ stages:
           versionSpec: '$(PYTHON_VERSION)'
           addToPath: true
           architecture: 'x64'
-      - bash: |
-          cd ..
-          pwd
-          workDir=$(pwd)
-          echo "##vso[task.setvariable variable=workDir]$(Agent.BuildDirectory)"
-          ls
-          # ssh-keygen -f ~/.ssh/id_rsa -t rsa -N ''
-          git config --global user.email "AzurePipelines"
-          git config --global user.name "AzurePipelines"
-  
-          # print variables
-          echo "PLATFORM: $(PLATFORM)"
-          echo "USER_TARGET: $(USER_TARGET)"
-          echo "USER_REPO: $(USER_REPO)"
-          echo "USER_REPO_EXT: $(USER_REPO_EXT)"
-          echo "USER_BRANCH: $(USER_BRANCH)"
-          echo "USER_BRANCH_EXT: $(USER_BRANCH_EXT)"
-          # Whether commit changes
-          if [[ "$(USER_USERNAME)" != "" && "$(USER_TOKEN)" != "" ]]; then
-            REPO="$(USER_REPO)"
-            EXT_REPO="$(USER_REPO_EXT)"
-            # Pass username and token so that we can commit changes
-            git clone -b $(USER_BRANCH) ${REPO:0:8}$(USER_USERNAME):$(USER_TOKEN)@${REPO:8}
-            git clone -b $(USER_BRANCH_EXT) ${EXT_REPO:0:8}$(USER_USERNAME):$(USER_TOKEN)@${EXT_REPO:8}
-          else
-            git clone -b $(USER_BRANCH) $(USER_REPO)
-            git clone -b $(USER_BRANCH_EXT) $(USER_REPO_EXT)
-          fi
-  
-          python -m venv env
-          source env/Scripts/activate
-  
-          # TODO: support pytest-html >= 4.0.0
-          pip install azdev pytest-json-report pytest-html==3.2.0 pytest-rerunfailures
-  
-          azdev setup -c azure-cli -r azure-cli-extensions
-          
-          # Remove ext- prefix
-          FinalTarget="$(Target)"
-          if [[ "${FinalTarget}" =~ ^ext-.* ]]; then
-            echo "It is an extention"
-            echo $(Target)
-            FinalTarget=${FinalTarget:4}
-            azdev extension add ${FinalTarget}
-          fi
-          echo ${FinalTarget}
-          
-          # This helps detect issues in CI if a used SDK API version is deleted by the below script.
-          python $workDir/s/scripts/trim_sdk.py
-  
-          # Compact aaz folders of modules
-          python $workDir/s/scripts/compact_aaz.py
-  
-          az -v
-          az login --service-principal --username $(AZURECLITESTUSER) --password $(AZURECLITESTPASSWORD) --tenant $(AZURECLITESTTENANTID)
-          az account set -s $(AZURECLITESTSUBSCRIPTIONID)
-  
-          # Clean policy
-          python $workDir/s/scripts/live_test/clean_policy.py
-          
-          echo "Run tests"
-          # Whether commit changes
-          if [[ "$(USER_USERNAME)" != "" && "$(USER_TOKEN)" != "" ]]; then
-            echo "Commit mode"
-            azdev test ${FinalTarget} --no-exitfirst -a "-n $(USER_PARALLELISM)"
-            azdev test ${FinalTarget} --live --lf --xml-path test_results.parallel.xml --no-exitfirst -a "-n $(USER_PARALLELISM) --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.parallel.json --html=$(Target).$(platform).report.parallel.html --self-contained-html --capture=sys"
-          else
-            echo "Normal mode"
-            # Sequential
-            azdev test ${FinalTarget} $(USER_LIVE) --mark serial --xml-path test_results.sequential.xml --no-exitfirst -a "-n 1 --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.sequential.json --html=$(Target).$(platform).report.sequential.html --self-contained-html --capture=sys"
-            # Parallel
-            azdev test ${FinalTarget} $(USER_LIVE) --mark "not serial" --xml-path test_results.parallel.xml --no-exitfirst -a "-n $(USER_PARALLELISM) --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.parallel.json --html=$(Target).$(platform).report.parallel.html --self-contained-html --capture=sys"
-          fi
-  
-          pwd
-          ls
-          # Whether commit changes
-          if [[ "$(USER_USERNAME)" != "" && "$(USER_TOKEN)" != "" && ! "$(USER_TARGET)" =~ ^ext-.* && "$(USER_TARGET)" != "extensions" && "$(USER_TARGET)" != ""  && "$(USER_TARGET)" != "all" && "$(USER_TARGET)" != "ALL" ]]; then
-            cd azure-cli
-            git status
-            git add .
-            git commit -m "Upload recording files"
-            git push origin $(USER_BRANCH)
-          elif [[ "$(USER_USERNAME)" != "" && "$(USER_TOKEN)" != "" && "$(USER_TARGET)" =~ ^ext-.* ]]; then
-            cd azure-cli-extensions
-            git status
-            git add .
-            git commit -m "Upload recording files"
-            git push origin $(USER_BRANCH_EXT)
-          fi
+      - task: AzureCLI@2
+        displayName: 'Run live test on Windows'
+        inputs:
+          azureSubscription: $(AZURE_CLI_LIVE_TEST_CONNECTED_SERVICE)
+          scriptType: bash
+          scriptLocation: inlineScript
+          inlineScript: |
+            cd ..
+            pwd
+            workDir=$(pwd)
+            echo "##vso[task.setvariable variable=workDir]$(Agent.BuildDirectory)"
+            ls
+            # ssh-keygen -f ~/.ssh/id_rsa -t rsa -N ''
+            git config --global user.email "AzurePipelines"
+            git config --global user.name "AzurePipelines"
+    
+            # print variables
+            echo "PLATFORM: $(PLATFORM)"
+            echo "USER_TARGET: $(USER_TARGET)"
+            echo "USER_REPO: $(USER_REPO)"
+            echo "USER_REPO_EXT: $(USER_REPO_EXT)"
+            echo "USER_BRANCH: $(USER_BRANCH)"
+            echo "USER_BRANCH_EXT: $(USER_BRANCH_EXT)"
+            # Whether commit changes
+            if [[ "$(USER_USERNAME)" != "" && "$(USER_TOKEN)" != "" ]]; then
+              REPO="$(USER_REPO)"
+              EXT_REPO="$(USER_REPO_EXT)"
+              # Pass username and token so that we can commit changes
+              git clone -b $(USER_BRANCH) ${REPO:0:8}$(USER_USERNAME):$(USER_TOKEN)@${REPO:8}
+              git clone -b $(USER_BRANCH_EXT) ${EXT_REPO:0:8}$(USER_USERNAME):$(USER_TOKEN)@${EXT_REPO:8}
+            else
+              git clone -b $(USER_BRANCH) $(USER_REPO)
+              git clone -b $(USER_BRANCH_EXT) $(USER_REPO_EXT)
+            fi
+    
+            python -m venv env
+            source env/Scripts/activate
+    
+            # TODO: support pytest-html >= 4.0.0
+            pip install azdev pytest-json-report pytest-html==3.2.0 pytest-rerunfailures
+    
+            azdev setup -c azure-cli -r azure-cli-extensions
+            
+            # Remove ext- prefix
+            FinalTarget="$(Target)"
+            if [[ "${FinalTarget}" =~ ^ext-.* ]]; then
+              echo "It is an extention"
+              echo $(Target)
+              FinalTarget=${FinalTarget:4}
+              azdev extension add ${FinalTarget}
+            fi
+            echo ${FinalTarget}
+            
+            serial_modules="appservice botservice cloud network azure-cli-core azure-cli-telemetry"
+            
+            # This helps detect issues in CI if a used SDK API version is deleted by the below script.
+            python $workDir/s/scripts/trim_sdk.py
+    
+            # Compact aaz folders of modules
+            python $workDir/s/scripts/compact_aaz.py
+    
+            az -v
+            # az login --service-principal --username $(AZURECLITESTUSER) --password $(AZURECLITESTPASSWORD) --tenant $(AZURECLITESTTENANTID)
+            az account set -s $(AZURECLITESTSUBSCRIPTIONID)
+    
+            # Clean policy
+            python $workDir/s/scripts/live_test/clean_policy.py
+            
+            echo "Run tests"
+            # Whether commit changes
+            if [[ "$(USER_USERNAME)" != "" && "$(USER_TOKEN)" != "" ]]; then
+              echo "Commit mode"
+              azdev test ${FinalTarget} --no-exitfirst -a "-n $(USER_PARALLELISM)"
+              azdev test ${FinalTarget} --live --lf --xml-path test_results.parallel.xml --no-exitfirst -a "-n $(USER_PARALLELISM) --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.parallel.json --html=$(Target).$(platform).report.parallel.html --self-contained-html --capture=sys"
+            elif [[ "$serial_modules" =~ "$FinalTarget" ]]; then
+              echo "Series mode"
+              azdev test ${FinalTarget} $(USER_LIVE) --xml-path test_results.sequential.xml --no-exitfirst -a "-n 1 --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.sequential.json --html=$(Target).$(platform).report.sequential.html --self-contained-html --capture=sys"
+            else
+              echo "Normal mode"
+              # Sequential
+              azdev test ${FinalTarget} $(USER_LIVE) --mark serial --xml-path test_results.sequential.xml --no-exitfirst -a "-n 1 --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.sequential.json --html=$(Target).$(platform).report.sequential.html --self-contained-html --capture=sys"
+              # Parallel
+              azdev test ${FinalTarget} $(USER_LIVE) --mark "not serial" --xml-path test_results.parallel.xml --no-exitfirst -a "-n $(USER_PARALLELISM) --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.parallel.json --html=$(Target).$(platform).report.parallel.html --self-contained-html --capture=sys"
+            fi
+    
+            pwd
+            ls
+            # Whether commit changes
+            if [[ "$(USER_USERNAME)" != "" && "$(USER_TOKEN)" != "" && ! "$(USER_TARGET)" =~ ^ext-.* && "$(USER_TARGET)" != "extensions" && "$(USER_TARGET)" != ""  && "$(USER_TARGET)" != "all" && "$(USER_TARGET)" != "ALL" ]]; then
+              cd azure-cli
+              git status
+              git add .
+              git commit -m "Upload recording files"
+              git push origin $(USER_BRANCH)
+            elif [[ "$(USER_USERNAME)" != "" && "$(USER_TOKEN)" != "" && "$(USER_TARGET)" =~ ^ext-.* ]]; then
+              cd azure-cli-extensions
+              git status
+              git add .
+              git commit -m "Upload recording files"
+              git push origin $(USER_BRANCH_EXT)
+            fi
         condition: and(succeededOrFailed(), eq(variables.Match, '1'))
       - task: PublishTestResults@2
         condition: and(succeededOrFailed(), eq(variables.Match, '1'))
@@ -1739,26 +1772,32 @@ stages:
           buildType: 'current'
           downloadType: 'specific'
           downloadPath: '$(System.ArtifactsDirectory)'
-      - bash: |
-          set -o errexit
-          echo "ArtifastsDirectory: $(System.ArtifactsDirectory)"
-          ls $(System.ArtifactsDirectory)
-          pwd
-          workDir=$(pwd)
-          commit_id=`git ls-remote https://github.com/Azure/azure-cli.git HEAD`
-          pip install azure-communication-email
-          pip install mysql-connector-python
-          pip install requests
-          pip install tqdm
-          pip install azure-kusto-data azure-kusto-ingest bs4
-          # Send notification
-          az -v
-          echo "login to user azureclilivetest"
-          az login --service-principal --username $(AZURECLITESTUSER) --password $(AZURECLITESTPASSWORD) --tenant $(AZURECLITESTTENANTID)
-          az account set -s $(AZURECLITESTSUBSCRIPTIONID)
-          echo "set account"
-          echo "send email to grid"
-          python $workDir/scripts/live_test/sendemail.py "$commit_id"
+      - task: AzureCLI@2
+        displayName: 'Send live test email'
+        inputs:
+          azureSubscription: $(AZURE_CLI_LIVE_TEST_CONNECTED_SERVICE)
+          scriptType: bash
+          scriptLocation: inlineScript
+          inlineScript: |
+            set -o errexit
+            echo "ArtifastsDirectory: $(System.ArtifactsDirectory)"
+            ls $(System.ArtifactsDirectory)
+            pwd
+            workDir=$(pwd)
+            commit_id=`git ls-remote https://github.com/Azure/azure-cli.git HEAD`
+            pip install azure-communication-email
+            pip install mysql-connector-python
+            pip install requests
+            pip install tqdm
+            pip install azure-kusto-data azure-kusto-ingest bs4
+            # Send notification
+            az -v
+            echo "login to user azureclilivetest"
+            # az login --service-principal --username $(AZURECLITESTUSER) --password $(AZURECLITESTPASSWORD) --tenant $(AZURECLITESTTENANTID)
+            az account set -s $(AZURECLITESTSUBSCRIPTIONID)
+            echo "set account"
+            echo "send email to grid"
+            python $workDir/scripts/live_test/sendemail.py "$commit_id"
         env:
           ACCOUNT_KEY: $(ACCOUNT_KEY)
           ARTIFACTS_DIR: $(System.ArtifactsDirectory)
@@ -1792,14 +1831,20 @@ stages:
           versionSpec: '$(PYTHON_VERSION)'
           addToPath: true
           architecture: 'x64'
-      - bash: |
-          set -o errexit
-          workDir=$(pwd)
-          pip install tqdm
-          az -v
-          echo "login to user azureclilivetest"
-          az login --service-principal --username $(AZURECLITESTUSER) --password $(AZURECLITESTPASSWORD) --tenant $(AZURECLITESTTENANTID)
-          az account set -s $(AZURECLITESTSUBSCRIPTIONID)
-          echo "set account"
-          echo "clean resource"
-          python $workDir/scripts/live_test/clean.py
+      - task: AzureCLI@2
+        displayName: 'Clean resource'
+        inputs:
+          azureSubscription: $(AZURE_CLI_LIVE_TEST_CONNECTED_SERVICE)
+          scriptType: bash
+          scriptLocation: inlineScript
+          inlineScript: |
+            set -o errexit
+            workDir=$(pwd)
+            pip install tqdm
+            az -v
+            echo "login to user azureclilivetest"
+            # az login --service-principal --username $(AZURECLITESTUSER) --password $(AZURECLITESTPASSWORD) --tenant $(AZURECLITESTTENANTID)
+            az account set -s $(AZURECLITESTSUBSCRIPTIONID)
+            echo "set account"
+            echo "clean resource"
+            python $workDir/scripts/live_test/clean.py

@@ -31,7 +31,9 @@ from azure.mgmt.sql.models import (
     ServerConnectionType,
     ServerKeyType,
     StorageKeyType,
-    TransparentDataEncryptionState
+    TransparentDataEncryptionState,
+    FreemiumType,
+    ManagedInstanceDatabaseFormat
 )
 
 from azure.cli.core.commands.parameters import (
@@ -61,7 +63,8 @@ from .custom import (
     ServicePrincipalType,
     SqlServerMinimalTlsVersionType,
     SqlManagedInstanceMinimalTlsVersionType,
-    AuthenticationType
+    AuthenticationType,
+    FreeLimitExhaustionBehavior
 )
 
 from ._validators import (
@@ -70,7 +73,6 @@ from ._validators import (
     validate_backup_storage_redundancy,
     validate_subnet
 )
-
 
 #####
 #        SizeWithUnitConverter - consider moving to common code (azure.cli.core.commands.parameters)
@@ -260,6 +262,19 @@ database_availability_zone_param_type = CLIArgumentType(
     options_list=['--availability-zone'],
     help='Availability zone')
 
+database_use_free_limit = CLIArgumentType(
+    options_list=['--use-free-limit', '--free-limit'],
+    help='Whether or not the database uses free monthly limits. Allowed on one database in a subscription.',
+    arg_type=get_three_state_flag())
+
+database_free_limit_exhaustion_behavior = CLIArgumentType(
+    options_list=['--free-limit-exhaustion-behavior', '--exhaustion-behavior', '--fleb'],
+    help='Specifies the behavior when monthly free limits are exhausted for the free database.'
+    'AutoPause: The database will be auto paused upon exhaustion of free limits for remainder of the month.'
+    'BillForUsage: The database will continue to be online upon exhaustion of free limits'
+    'and any overage will be billed.',
+    arg_type=get_enum_type(FreeLimitExhaustionBehavior))
+
 managed_instance_param_type = CLIArgumentType(
     options_list=['--managed-instance', '--mi'],
     help='Name of the Azure SQL Managed Instance.')
@@ -382,7 +397,22 @@ event_hub_param_type = CLIArgumentType(
     help='The name of the event hub. If none is specified '
          'when providing event_hub_authorization_rule_id, the default event hub will be selected.')
 
-db_service_objective_examples = 'Basic, S0, P1, GP_Gen4_1, GP_Gen5_S_8, BC_Gen5_2, HS_Gen5_32.'
+manual_cutover_param_type = CLIArgumentType(
+    options_list=['--manual-cutover'],
+    help='Whether to do manual cutover during Update SLO. Allowed when updating database to Hyperscale tier.',
+    arg_type=get_three_state_flag())
+
+perform_cutover_param_type = CLIArgumentType(
+    options_list=['--perform-cutover'],
+    help='Whether to perform cutover when updating database to Hyperscale tier is in progress.',
+    arg_type=get_three_state_flag())
+
+authentication_metadata_param_type = CLIArgumentType(
+    options_list=['--authentication-metadata', '--am'],
+    help='Preferred metadata to use for authentication of synced on-prem users. Default is AzureAD.',
+    arg_type=get_enum_type(['AzureAD', 'Windows', 'Paired']))
+
+db_service_objective_examples = 'Basic, S0, P1, GP_Gen4_1, GP_S_Gen5_8, BC_Gen5_2, HS_Gen5_32.'
 dw_service_objective_examples = 'DW100, DW1000c'
 
 
@@ -486,8 +516,20 @@ def _configure_db_dw_params(arg_ctx):
     arg_ctx.argument('availability_zone',
                      arg_type=database_availability_zone_param_type)
 
+    arg_ctx.argument('use_free_limit',
+                     arg_type=database_use_free_limit)
+
+    arg_ctx.argument('free_limit_exhaustion_behavior',
+                     arg_type=database_free_limit_exhaustion_behavior)
+
     arg_ctx.argument('encryption_protector_auto_rotation',
                      arg_type=database_encryption_protector_auto_rotation_param_type)
+
+    arg_ctx.argument('manual-cutover',
+                     arg_type=manual_cutover_param_type)
+
+    arg_ctx.argument('perform-cutover',
+                     arg_type=perform_cutover_param_type)
 
 
 def _configure_db_dw_create_params(
@@ -589,7 +631,11 @@ def _configure_db_dw_create_params(
             'user_assigned_identity_id',
             'federated_client_id',
             'availability_zone',
-            'encryption_protector_auto_rotation'
+            'encryption_protector_auto_rotation',
+            'use_free_limit',
+            'free_limit_exhaustion_behavior',
+            'manual_cutover',
+            'perform_cutover'
         ])
 
     # Create args that will be used to build up the Database's Sku object
@@ -651,6 +697,8 @@ def _configure_db_dw_create_params(
         arg_ctx.ignore('catalog_collation')
         arg_ctx.ignore('maintenance_configuration_id')
         arg_ctx.ignore('is_ledger_on')
+        arg_ctx.ignore('use_free_limit')
+        arg_ctx.ignore('free_limit_exhaustion_behavior')
 
     # Only applicable to point in time restore or deleted restore create mode.
     if create_mode not in [CreateMode.restore, CreateMode.point_in_time_restore]:
@@ -669,6 +717,11 @@ def _configure_db_dw_create_params(
             CreateMode.RECOVERY,
             CreateMode.RESTORE_LONG_TERM_RETENTION_BACKUP]:
         arg_ctx.ignore('collation', 'max_size_bytes')
+
+    # 'manual_cutover' and 'perform_cutover' are ignored when creating a database,
+    # as they are only applicable during update
+    if create_mode in CreateMode:
+        arg_ctx.ignore('manual_cutover', 'perform_cutover')
 
     if engine == Engine.dw:
         # Elastic pool is only for SQL DB.
@@ -712,11 +765,16 @@ def _configure_db_dw_create_params(
         arg_ctx.ignore('min_capacity')
         arg_ctx.ignore('compute_model')
 
+        # Free limit parameters are not applicable to DataWarehouse
+        arg_ctx.ignore('use_free_limit')
+        arg_ctx.ignore('free_limit_exhaustion_behavior')
+
         # ReadScale properties are not valid for DataWarehouse
         # --read-replica-count was accidentally included in previous releases and
         # therefore is hidden using `deprecate_info` instead of `ignore`
         arg_ctx.ignore('read_scale')
         arg_ctx.ignore('high_availability_replica_count')
+
         arg_ctx.argument('read_replica_count',
                          options_list=['--read-replica-count'],
                          deprecate_info=arg_ctx.deprecate(hide=True))
@@ -726,6 +784,10 @@ def _configure_db_dw_create_params(
         arg_ctx.argument('zone_redundant',
                          options_list=['--zone-redundant'],
                          deprecate_info=arg_ctx.deprecate(hide=True))
+
+        # Manual-cutover and Perform-cutover are not valid for DataWarehouse
+        arg_ctx.ignore('manual_cutover')
+        arg_ctx.ignore('perform_cutover')
 
 
 # pylint: disable=too-many-statements
@@ -904,6 +966,18 @@ def load_arguments(self, _):
 
         c.argument('availability_zone',
                    arg_type=database_availability_zone_param_type)
+
+        c.argument('use_free_limit',
+                   arg_type=database_use_free_limit)
+
+        c.argument('free_limit_exhaustion_behavior',
+                   arg_type=database_free_limit_exhaustion_behavior)
+
+        c.argument('manual_cutover',
+                   arg_type=manual_cutover_param_type)
+
+        c.argument('perform_cutover',
+                   arg_type=perform_cutover_param_type)
 
     with self.argument_context('sql db export') as c:
         # Create args that will be used to build up the ExportDatabaseDefinition object
@@ -1226,7 +1300,9 @@ def load_arguments(self, _):
                 'weekly_retention',
                 'monthly_retention',
                 'yearly_retention',
-                'week_of_year'])
+                'week_of_year',
+                'make_backups_immutable',
+                'backup_storage_access_tier'])
 
         c.argument('weekly_retention',
                    help='Retention for the weekly backup. '
@@ -1245,6 +1321,16 @@ def load_arguments(self, _):
 
         c.argument('week_of_year',
                    help='The Week of Year, 1 to 52, in which to take the yearly LTR backup.')
+
+        c.argument('make_backups_immutable',
+                   help='Whether to make the LTR backups immutable.',
+                   arg_type=get_three_state_flag())
+
+        c.argument('backup_storage_access_tier',
+                   options_list=['--access-tier', '--backup-storage-access-tier'],
+                   arg_type=get_enum_type(["Hot", "Archive"]),
+                   help='The access tier of a LTR backup.'
+                   'Possible values = [Hot, Archive]')
 
     with self.argument_context('sql db ltr-backup') as c:
         c.argument('location_name',
@@ -1662,7 +1748,8 @@ def load_arguments(self, _):
                 'license_type',
                 'subnet_id',
                 'vcores',
-                'tags'
+                'tags',
+                'maintenance_configuration_id'
             ])
 
         c.argument('vcores',
@@ -1676,6 +1763,10 @@ def load_arguments(self, _):
             required=True,
             help='Name or ID of the subnet that allows access to an Instance Pool. '
                  'If subnet name is provided, --vnet-name must be provided.')
+
+        c.argument('maintenance_configuration_id',
+                   options_list=['--maint-config-id', '-m'],
+                   help='Assign maintenance configuration to this managed instance.')
 
         # Create args that will be used to build up the Instance Pool's Sku object
         create_args_for_complex_type(
@@ -1691,6 +1782,45 @@ def load_arguments(self, _):
                 options_list=['--vnet-name'],
                 help='The virtual network name',
                 validator=validate_subnet)
+
+    with self.argument_context('sql instance-pool update') as c:
+        # Create args that will be used to build up the InstancePool object
+        create_args_for_complex_type(
+            c, 'parameters', InstancePool, [
+                'license_type',
+                'vcores',
+                'tags',
+                'maintenance_configuration_id'
+            ])
+
+        c.argument('tier',
+                   arg_type=tier_param_type,
+                   required=False,
+                   help='The edition component of the sku. Allowed values include: '
+                   'GeneralPurpose, BusinessCritical.')
+
+        c.argument('family',
+                   arg_type=family_param_type,
+                   required=False,
+                   help='The compute generation component of the sku. '
+                   'Allowed values include: Gen4, Gen5.')
+
+        c.argument('vcores',
+                   arg_type=capacity_param_type,
+                   help='Capacity of the instance pool in vcores.')
+
+        c.argument('maintenance_configuration_id',
+                   options_list=['--maint-config-id', '-m'],
+                   help='Assign maintenance configuration to this managed instance.')
+
+        create_args_for_complex_type(
+            c, 'sku', Sku, [
+                'family',
+                'name',
+                'tier',
+            ])
+
+        c.ignore('name')  # Hide sku name
 
     ###############################################
     #                sql server                   #
@@ -2207,9 +2337,17 @@ def load_arguments(self, _):
         c.argument('zone_redundant',
                    arg_type=zone_redundant_param_type)
 
+        c.argument('authentication_metadata',
+                   arg_type=authentication_metadata_param_type)
+
     with self.argument_context('sql mi create') as c:
         c.argument('location',
                    arg_type=get_location_type_with_default_from_resource_group(self.cli_ctx))
+
+        c.argument('dns_zone_partner',
+                   required=False,
+                   help='The resource id of the partner Managed Instance to inherit DnsZone property from for Managed '
+                        'Instance creation.')
 
         # Create args that will be used to build up the ManagedInstance object
         create_args_for_complex_type(
@@ -2231,7 +2369,11 @@ def load_arguments(self, _):
                 'maintenance_configuration_id',
                 'primary_user_assigned_identity_id',
                 'key_id',
-                'zone_redundant'
+                'zone_redundant',
+                'instance_pool_name',
+                'database_format',
+                'pricing_model',
+                'dns_zone_partner'
             ])
 
         # Create args that will be used to build up the Managed Instance's Sku object
@@ -2305,6 +2447,25 @@ def load_arguments(self, _):
                    help='Service Principal type to be used for this Managed Instance. '
                    'Possible values are SystemAssigned and None')
 
+        c.argument('instance_pool_name',
+                   required=False,
+                   options_list=['--instance-pool-name'],
+                   help='Name of the Instance Pool where managed instance will be placed.')
+
+        c.argument('database_format',
+                   required=False,
+                   options_list=['--database-format'],
+                   arg_type=get_enum_type(ManagedInstanceDatabaseFormat),
+                   help='Managed Instance database format specific to the SQL. Allowed values include: '
+                   'AlwaysUpToDate, SQLServer2022.')
+
+        c.argument('pricing_model',
+                   required=False,
+                   options_list=['--pricing-model'],
+                   arg_type=get_enum_type(FreemiumType),
+                   help='Managed Instance pricing model. Allowed values include: '
+                   'Regular, Freemium.')
+
     with self.argument_context('sql mi update') as c:
         # Create args that will be used to build up the ManagedInstance object
         create_args_for_complex_type(
@@ -2313,6 +2474,7 @@ def load_arguments(self, _):
                 'requested_backup_storage_redundancy',
                 'tags',
                 'yes',
+                'instance_pool_name'
             ])
 
         c.argument('administrator_login_password',
@@ -2364,6 +2526,25 @@ def load_arguments(self, _):
                    required=False,
                    help='Service Principal type to be used for this Managed Instance. '
                    'Possible values are SystemAssigned and None')
+
+        c.argument('instance_pool_name',
+                   required=False,
+                   options_list=['--instance-pool-name'],
+                   help='Name of the Instance Pool where managed instance will be placed.')
+
+        c.argument('database_format',
+                   required=False,
+                   options_list=['--database-format'],
+                   arg_type=get_enum_type(ManagedInstanceDatabaseFormat),
+                   help='Managed Instance database format specific to the SQL. Allowed values include: '
+                   'AlwaysUpToDate, SQLServer2022.')
+
+        c.argument('pricing_model',
+                   required=False,
+                   options_list=['--pricing-model'],
+                   arg_type=get_enum_type(FreemiumType),
+                   help='Managed Instance pricing model. Allowed values include: '
+                   'Regular, Freemium.')
 
     with self.argument_context('sql mi show') as c:
         c.argument('expand_ad_admin',
@@ -2738,6 +2919,12 @@ def load_arguments(self, _):
     #           sql midb move/copy
     ######
     with self.argument_context('sql midb move') as c:
+        c.argument('dest_subscription_id',
+                   required=False,
+                   options_list=['--dest-subscription-id', '--dest-sub-id'],
+                   help='Id of the subscription to move the managed database to.'
+                   ' If unspecified, defaults to the origin subscription id.')
+
         c.argument('dest_resource_group_name',
                    required=False,
                    options_list=['--dest-resource-group', '--dest-rg'],
@@ -2750,6 +2937,12 @@ def load_arguments(self, _):
                    help='Name of the managed instance to move the managed database to.')
 
     with self.argument_context('sql midb copy') as c:
+        c.argument('dest_subscription_id',
+                   required=False,
+                   options_list=['--dest-subscription-id', '--dest-sub-id'],
+                   help='Id of the subscription to move the managed database to.'
+                   ' If unspecified, defaults to the origin subscription id.')
+
         c.argument('dest_resource_group_name',
                    required=False,
                    options_list=['--dest-resource-group', '--dest-rg'],
@@ -2771,6 +2964,12 @@ def load_arguments(self, _):
                    options_list=['--managed-instance', '--mi'],
                    required=True,
                    help='Name of the source managed instance.')
+
+        c.argument('dest_subscription_id',
+                   required=False,
+                   options_list=['--dest-subscription-id', '--dest-sub-id'],
+                   help='Id of the subscription to move the managed database to.'
+                   ' If unspecified, defaults to the origin subscription id.')
 
         c.argument('dest_instance_name',
                    required=False,
@@ -2797,6 +2996,12 @@ def load_arguments(self, _):
                    options_list=['--managed-instance', '--mi'],
                    required=True,
                    help='Name of the source managed instance.')
+
+        c.argument('dest_subscription_id',
+                   required=False,
+                   options_list=['--dest-subscription-id', '--dest-sub-id'],
+                   help='Id of the subscription to move the managed database to.'
+                   ' If unspecified, defaults to the origin subscription id.')
 
         c.argument('dest_instance_name',
                    required=False,

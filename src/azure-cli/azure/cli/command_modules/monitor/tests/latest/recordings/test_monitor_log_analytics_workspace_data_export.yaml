@@ -13,37 +13,41 @@ interactions:
       ParameterSetName:
       - -g -n --quota --level --sku
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.57.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.19045-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001","name":"cli_test_monitor_workspace_data_export000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2023-02-16T09:57:03Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001","name":"cli_test_monitor_workspace_data_export000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","test":"test_monitor_log_analytics_workspace_data_export","date":"2024-02-21T05:43:04Z","module":"monitor","DateCreated":"2024-02-21T05:43:10Z","Creator":"liwang3@microsoft.com"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '366'
+      - '514'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 16 Feb 2023 09:57:39 GMT
+      - Wed, 21 Feb 2024 05:43:35 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 2AA43881064E43D28B9CFD7492D605DB Ref B: MAA201060514019 Ref C: 2024-02-21T05:43:35Z'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"location": "eastus", "properties": {"retentionInDays": 30, "sku": {"capacityReservationLevel":
-      100, "name": "CapacityReservation"}, "workspaceCapping": {"dailyQuotaGb": 1.0}}}'
+    body: '{"location": "eastus", "properties": {"publicNetworkAccessForIngestion":
+      "Enabled", "publicNetworkAccessForQuery": "Enabled", "retentionInDays": 30,
+      "sku": {"capacityReservationLevel": 100, "name": "CapacityReservation"}, "workspaceCapping":
+      {"dailyQuotaGb": 1.0}}}'
     headers:
       Accept:
       - application/json
@@ -54,57 +58,50 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '177'
+      - '265'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n --quota --level --sku
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.57.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.19045-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003?api-version=2021-12-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003?api-version=2023-09-01
   response:
     body:
-      string: "{\r\n  \"properties\": {\r\n    \"source\": \"Azure\",\r\n    \"customerId\"\
-        : \"bc065bc9-9dff-4167-a91b-6a55a37adc4f\",\r\n    \"provisioningState\":\
-        \ \"Creating\",\r\n    \"sku\": {\r\n      \"name\": \"capacityreservation\"\
-        ,\r\n      \"capacityReservationLevel\": 100,\r\n      \"lastSkuUpdate\":\
-        \ \"Thu, 16 Feb 2023 09:57:47 GMT\"\r\n    },\r\n    \"retentionInDays\":\
-        \ 30,\r\n    \"features\": {\r\n      \"legacy\": 0,\r\n      \"searchVersion\"\
-        : 1,\r\n      \"enableLogAccessUsingOnlyResourcePermissions\": true\r\n  \
-        \  },\r\n    \"workspaceCapping\": {\r\n      \"dailyQuotaGb\": -1.0,\r\n\
-        \      \"quotaNextResetTime\": \"Thu, 16 Feb 2023 14:00:00 GMT\",\r\n    \
-        \  \"dataIngestionStatus\": \"RespectQuota\"\r\n    },\r\n    \"publicNetworkAccessForIngestion\"\
-        : \"Enabled\",\r\n    \"publicNetworkAccessForQuery\": \"Enabled\",\r\n  \
-        \  \"createdDate\": \"Thu, 16 Feb 2023 09:57:47 GMT\",\r\n    \"modifiedDate\"\
-        : \"Thu, 16 Feb 2023 09:57:47 GMT\"\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/microsoft.operationalinsights/workspaces/clitest000003\"\
-        ,\r\n  \"name\": \"clitest000003\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces\"\
-        ,\r\n  \"location\": \"eastus\"\r\n}"
+      string: '{"properties":{"customerId":"e1a0498c-b9c4-4d91-a5c6-a1691a680a98","provisioningState":"Creating","sku":{"name":"CapacityReservation","capacityReservationLevel":100,"lastSkuUpdate":"2024-02-21T05:43:38.2452816Z"},"retentionInDays":30,"features":{"legacy":0,"searchVersion":1,"enableLogAccessUsingOnlyResourcePermissions":true},"workspaceCapping":{"dailyQuotaGb":1.0,"quotaNextResetTime":"2024-02-21T16:00:00Z","dataIngestionStatus":"RespectQuota"},"publicNetworkAccessForIngestion":"Enabled","publicNetworkAccessForQuery":"Enabled","createdDate":"2024-02-21T05:43:38.2452816Z","modifiedDate":"2024-02-21T05:43:38.2452816Z"},"location":"eastus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003","name":"clitest000003","type":"Microsoft.OperationalInsights/workspaces","etag":"\"1900a728-0000-0100-0000-65d58d8a0000\""}'
     headers:
       access-control-allow-origin:
       - '*'
+      api-supported-versions:
+      - 2015-03-20, 2020-08-01, 2020-10-01, 2021-06-01, 2022-10-01, 2023-09-01
       cache-control:
       - no-cache
       content-length:
-      - '1138'
+      - '951'
       content-type:
-      - application/json
+      - application/json; charset=utf-8
       date:
-      - Thu, 16 Feb 2023 09:57:47 GMT
+      - Wed, 21 Feb 2024 05:43:38 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003?api-version=2023-09-01
       pragma:
       - no-cache
       request-context:
       - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1198'
+      x-msedge-ref:
+      - 'Ref A: 040374B2BDD94ADF9FF8667798575E92 Ref B: MAA201060513047 Ref C: 2024-02-21T05:43:36Z'
       x-powered-by:
-      - ASP.NET
       - ASP.NET
     status:
       code: 201
@@ -123,53 +120,40 @@ interactions:
       ParameterSetName:
       - -g -n --quota --level --sku
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.57.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003?api-version=2021-12-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003?api-version=2023-09-01
   response:
     body:
-      string: "{\r\n  \"properties\": {\r\n    \"source\": \"Azure\",\r\n    \"customerId\"\
-        : \"bc065bc9-9dff-4167-a91b-6a55a37adc4f\",\r\n    \"provisioningState\":\
-        \ \"Succeeded\",\r\n    \"sku\": {\r\n      \"name\": \"capacityreservation\"\
-        ,\r\n      \"capacityReservationLevel\": 100,\r\n      \"lastSkuUpdate\":\
-        \ \"Thu, 16 Feb 2023 09:57:47 GMT\"\r\n    },\r\n    \"retentionInDays\":\
-        \ 30,\r\n    \"features\": {\r\n      \"legacy\": 0,\r\n      \"searchVersion\"\
-        : 1,\r\n      \"enableLogAccessUsingOnlyResourcePermissions\": true\r\n  \
-        \  },\r\n    \"workspaceCapping\": {\r\n      \"dailyQuotaGb\": 1.0,\r\n \
-        \     \"quotaNextResetTime\": \"Thu, 16 Feb 2023 14:00:00 GMT\",\r\n     \
-        \ \"dataIngestionStatus\": \"RespectQuota\"\r\n    },\r\n    \"publicNetworkAccessForIngestion\"\
-        : \"Enabled\",\r\n    \"publicNetworkAccessForQuery\": \"Enabled\",\r\n  \
-        \  \"createdDate\": \"Thu, 16 Feb 2023 09:57:47 GMT\",\r\n    \"modifiedDate\"\
-        : \"Thu, 16 Feb 2023 09:57:48 GMT\"\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/microsoft.operationalinsights/workspaces/clitest000003\"\
-        ,\r\n  \"name\": \"clitest000003\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces\"\
-        ,\r\n  \"location\": \"eastus\"\r\n}"
+      string: '{"properties":{"customerId":"e1a0498c-b9c4-4d91-a5c6-a1691a680a98","provisioningState":"Succeeded","sku":{"name":"CapacityReservation","capacityReservationLevel":100,"lastSkuUpdate":"2024-02-21T05:43:38.2452816Z"},"retentionInDays":30,"features":{"legacy":0,"searchVersion":1,"enableLogAccessUsingOnlyResourcePermissions":true},"workspaceCapping":{"dailyQuotaGb":1.0,"quotaNextResetTime":"2024-02-21T16:00:00Z","dataIngestionStatus":"RespectQuota"},"publicNetworkAccessForIngestion":"Enabled","publicNetworkAccessForQuery":"Enabled","createdDate":"2024-02-21T05:43:38.2452816Z","modifiedDate":"2024-02-21T05:43:39.3357246Z"},"location":"eastus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003","name":"clitest000003","type":"Microsoft.OperationalInsights/workspaces","etag":"\"1900a928-0000-0100-0000-65d58d8b0000\""}'
     headers:
       access-control-allow-origin:
       - '*'
+      api-supported-versions:
+      - 2015-03-20, 2020-08-01, 2020-10-01, 2021-06-01, 2022-10-01, 2023-09-01
       cache-control:
       - no-cache
       content-length:
-      - '1138'
+      - '952'
       content-type:
-      - application/json
+      - application/json; charset=utf-8
       date:
-      - Thu, 16 Feb 2023 09:58:19 GMT
+      - Wed, 21 Feb 2024 05:43:39 GMT
+      expires:
+      - '-1'
       pragma:
       - no-cache
       request-context:
       - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: C92F18C62D88410B87E5CC79E9B988DD Ref B: MAA201060513047 Ref C: 2024-02-21T05:43:38Z'
       x-powered-by:
-      - ASP.NET
       - ASP.NET
     status:
       code: 200
@@ -193,55 +177,42 @@ interactions:
       ParameterSetName:
       - -g --workspace-name -n --destination --enable -t
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.57.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003/dataExports/clitest?api-version=2020-08-01
   response:
     body:
-      string: "{\r\n  \"properties\": {\r\n    \"dataExportId\": \"0e7be5f0-0c73-4343-7236-08db10045739\"\
-        ,\r\n    \"destination\": {\r\n      \"resourceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.Storage/storageAccounts/saws1000002\"\
-        ,\r\n      \"type\": \"StorageAccount\",\r\n      \"metaData\": {}\r\n   \
-        \ },\r\n    \"tableNames\": [\r\n      \"Syslog\"\r\n    ],\r\n    \"enable\"\
-        : true,\r\n    \"createdDate\": \"Thu, 16 Feb 2023 09:58:23 GMT\",\r\n   \
-        \ \"lastModifiedDate\": \"Thu, 16 Feb 2023 09:58:23 GMT\"\r\n  },\r\n  \"\
-        id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/microsoft.operationalinsights/workspaces/clitest000003/dataexports/clitest\"\
-        ,\r\n  \"name\": \"clitest\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces/dataexports\"\
-        \r\n}"
+      string: '{"properties":{"dataExportId":"65871427-bde7-4a27-ad0c-b2d238f9ba59","destination":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.Storage/storageAccounts/saws1000002","type":"StorageAccount","metaData":{}},"tableNames":["Syslog"],"enable":true,"createdDate":"2024-02-21T05:43:42.5493614Z","lastModifiedDate":"2024-02-21T05:43:42.5493614Z"},"location":"eastus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003/dataexports/clitest","name":"clitest","type":"Microsoft.OperationalInsights/workspaces/dataexports"}'
     headers:
       access-control-allow-origin:
       - '*'
+      api-supported-versions:
+      - '2020-08-01'
       cache-control:
       - no-cache
-      cachecontrol:
-      - no-cache
       content-length:
-      - '840'
+      - '743'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 16 Feb 2023 09:58:22 GMT
+      - Wed, 21 Feb 2024 05:43:42 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       request-context:
       - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-ams-apiversion:
-      - WebAPI1.0
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
+      x-msedge-ref:
+      - 'Ref A: 12BB253B8F874AD4B1B8577C35993D65 Ref B: MAA201060513027 Ref C: 2024-02-21T05:43:40Z'
       x-powered-by:
-      - ASP.NET
       - ASP.NET
     status:
       code: 200
@@ -265,50 +236,51 @@ interactions:
       ParameterSetName:
       - -g --workspace-name -n --destination --enable -t
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.57.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003/dataExports/clitest2?api-version=2020-08-01
   response:
     body:
-      string: '{"error":{"code":"InvalidOperationArgument","message":"You are adding
-        a destination that is already defined in rule: clitest. Destination must be
-        unique across export rules in your workspace . See http://aka.ms/LADataExport#limitations"}}'
+      string: '{"error":{"code":"InvalidParameter","message":"You are adding a destination
+        that is already defined in rule: clitest. Destination must be unique across
+        export rules in your workspace. See http://aka.ms/LADataExport#limitations.
+        Operation Id: ''58ff20e27c0a21c3088f419d093f41ed''"}}'
     headers:
       access-control-allow-origin:
       - '*'
+      api-supported-versions:
+      - '2020-08-01'
       cache-control:
-      - no-cache
-      cachecontrol:
-      - no-cache
+      - no-store, no-cache
       content-length:
-      - '238'
+      - '279'
       content-type:
-      - application/json; charset=utf-8
+      - application/json
       date:
-      - Thu, 16 Feb 2023 09:58:33 GMT
+      - Wed, 21 Feb 2024 05:43:51 GMT
+      diagnostic-context:
+      - 58ff20e27c0a21c3088f419d093f41ed
       expires:
       - '-1'
       pragma:
       - no-cache
       request-context:
       - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-ams-apiversion:
-      - WebAPI1.0
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1195'
+      - '1198'
+      x-msedge-ref:
+      - 'Ref A: 4219D8F63213415B811EF4D3DD81C843 Ref B: MAA201060516019 Ref C: 2024-02-21T05:43:43Z'
       x-powered-by:
-      - ASP.NET
       - ASP.NET
     status:
       code: 400
-      message: 'You are adding a destination that is already defined in rule: clitest.
-        Destination must be unique across export rules in your workspace . See http://aka.ms/LADataExport#limitations'
+      message: Bad Request
 - request:
     body: '{"properties": {"destination": {"resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.Storage/storageAccounts/saws1000002"},
       "enable": true, "tableNames": ["Syslog"]}}'
@@ -328,50 +300,51 @@ interactions:
       ParameterSetName:
       - -g --workspace-name -n --destination --enable -t
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.57.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003/dataExports/clitest2?api-version=2020-08-01
   response:
     body:
-      string: '{"error":{"code":"InvalidOperationArgument","message":"You are adding
-        a destination that is already defined in rule: clitest. Destination must be
-        unique across export rules in your workspace . See http://aka.ms/LADataExport#limitations"}}'
+      string: '{"error":{"code":"InvalidParameter","message":"You are adding a destination
+        that is already defined in rule: clitest. Destination must be unique across
+        export rules in your workspace. See http://aka.ms/LADataExport#limitations.
+        Operation Id: ''4fa77c316dc371b09db46d584b39124d''"}}'
     headers:
       access-control-allow-origin:
       - '*'
+      api-supported-versions:
+      - '2020-08-01'
       cache-control:
-      - no-cache
-      cachecontrol:
-      - no-cache
+      - no-store, no-cache
       content-length:
-      - '238'
+      - '279'
       content-type:
-      - application/json; charset=utf-8
+      - application/json
       date:
-      - Thu, 16 Feb 2023 09:58:43 GMT
+      - Wed, 21 Feb 2024 05:44:01 GMT
+      diagnostic-context:
+      - 4fa77c316dc371b09db46d584b39124d
       expires:
       - '-1'
       pragma:
       - no-cache
       request-context:
       - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-ams-apiversion:
-      - WebAPI1.0
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1195'
+      - '1199'
+      x-msedge-ref:
+      - 'Ref A: B9FDAF85120A435A946AC31FD000C540 Ref B: MAA201060514033 Ref C: 2024-02-21T05:43:52Z'
       x-powered-by:
-      - ASP.NET
       - ASP.NET
     status:
       code: 400
-      message: 'You are adding a destination that is already defined in rule: clitest.
-        Destination must be unique across export rules in your workspace . See http://aka.ms/LADataExport#limitations'
+      message: Bad Request
 - request:
     body: '{"properties": {"destination": {"resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.Storage/storageAccounts/saws1000002"},
       "enable": true, "tableNames": ["ABC"]}}'
@@ -391,50 +364,51 @@ interactions:
       ParameterSetName:
       - -g --workspace-name -n --destination --enable -t
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.57.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003/dataExports/clitest2?api-version=2020-08-01
   response:
     body:
-      string: '{"error":{"code":"InvalidOperationArgument","message":"You are adding
-        a destination that is already defined in rule: clitest. Destination must be
-        unique across export rules in your workspace . See http://aka.ms/LADataExport#limitations"}}'
+      string: '{"error":{"code":"InvalidParameter","message":"You are adding a destination
+        that is already defined in rule: clitest. Destination must be unique across
+        export rules in your workspace. See http://aka.ms/LADataExport#limitations.
+        Operation Id: ''0aaaf35708d62ad769f77709e8603f43''"}}'
     headers:
       access-control-allow-origin:
       - '*'
+      api-supported-versions:
+      - '2020-08-01'
       cache-control:
-      - no-cache
-      cachecontrol:
-      - no-cache
+      - no-store, no-cache
       content-length:
-      - '238'
+      - '279'
       content-type:
-      - application/json; charset=utf-8
+      - application/json
       date:
-      - Thu, 16 Feb 2023 09:58:53 GMT
+      - Wed, 21 Feb 2024 05:44:09 GMT
+      diagnostic-context:
+      - 0aaaf35708d62ad769f77709e8603f43
       expires:
       - '-1'
       pragma:
       - no-cache
       request-context:
       - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-ams-apiversion:
-      - WebAPI1.0
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
+      x-msedge-ref:
+      - 'Ref A: 67C0202EEF6A4C7FA7433DBDD9AB42AA Ref B: MAA201060514035 Ref C: 2024-02-21T05:44:01Z'
       x-powered-by:
-      - ASP.NET
       - ASP.NET
     status:
       code: 400
-      message: 'You are adding a destination that is already defined in rule: clitest.
-        Destination must be unique across export rules in your workspace . See http://aka.ms/LADataExport#limitations'
+      message: Bad Request
 - request:
     body: '{"properties": {"destination": {"resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.Storage/storageAccounts/saws1000002"},
       "enable": true, "tableNames": ["AppPerformanceCounters"]}}'
@@ -454,50 +428,51 @@ interactions:
       ParameterSetName:
       - -g --workspace-name -n --destination --enable -t
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.57.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003/dataExports/clitest2?api-version=2020-08-01
   response:
     body:
-      string: '{"error":{"code":"InvalidOperationArgument","message":"You are adding
-        a destination that is already defined in rule: clitest. Destination must be
-        unique across export rules in your workspace . See http://aka.ms/LADataExport#limitations"}}'
+      string: '{"error":{"code":"InvalidParameter","message":"You are adding a destination
+        that is already defined in rule: clitest. Destination must be unique across
+        export rules in your workspace. See http://aka.ms/LADataExport#limitations.
+        Operation Id: ''24019841ca396362b00cfe9a2a1726aa''"}}'
     headers:
       access-control-allow-origin:
       - '*'
+      api-supported-versions:
+      - '2020-08-01'
       cache-control:
-      - no-cache
-      cachecontrol:
-      - no-cache
+      - no-store, no-cache
       content-length:
-      - '238'
+      - '279'
       content-type:
-      - application/json; charset=utf-8
+      - application/json
       date:
-      - Thu, 16 Feb 2023 09:59:03 GMT
+      - Wed, 21 Feb 2024 05:44:18 GMT
+      diagnostic-context:
+      - 24019841ca396362b00cfe9a2a1726aa
       expires:
       - '-1'
       pragma:
       - no-cache
       request-context:
       - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-ams-apiversion:
-      - WebAPI1.0
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1194'
+      - '1199'
+      x-msedge-ref:
+      - 'Ref A: 7B69353DB48547A188A9613480DF740D Ref B: MAA201060514023 Ref C: 2024-02-21T05:44:10Z'
       x-powered-by:
-      - ASP.NET
       - ASP.NET
     status:
       code: 400
-      message: 'You are adding a destination that is already defined in rule: clitest.
-        Destination must be unique across export rules in your workspace . See http://aka.ms/LADataExport#limitations'
+      message: Bad Request
 - request:
     body: null
     headers:
@@ -512,53 +487,40 @@ interactions:
       ParameterSetName:
       - -g --workspace-name -n
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.57.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.19045-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003/dataExports/clitest?api-version=2020-08-01
   response:
     body:
-      string: "{\r\n  \"properties\": {\r\n    \"dataExportId\": \"0e7be5f0-0c73-4343-7236-08db10045739\"\
-        ,\r\n    \"destination\": {\r\n      \"resourceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.Storage/storageAccounts/saws1000002\"\
-        ,\r\n      \"type\": \"StorageAccount\",\r\n      \"metaData\": {}\r\n   \
-        \ },\r\n    \"tableNames\": [\r\n      \"Syslog\"\r\n    ],\r\n    \"enable\"\
-        : true,\r\n    \"createdDate\": \"Thu, 16 Feb 2023 09:58:23 GMT\",\r\n   \
-        \ \"lastModifiedDate\": \"Thu, 16 Feb 2023 09:58:23 GMT\"\r\n  },\r\n  \"\
-        id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/microsoft.operationalinsights/workspaces/clitest000003/dataexports/clitest\"\
-        ,\r\n  \"name\": \"clitest\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces/dataexports\"\
-        \r\n}"
+      string: '{"properties":{"dataExportId":"65871427-bde7-4a27-ad0c-b2d238f9ba59","destination":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.Storage/storageAccounts/saws1000002","type":"StorageAccount","metaData":{}},"tableNames":["Syslog"],"enable":true,"createdDate":"2024-02-21T05:43:42.5493614Z","lastModifiedDate":"2024-02-21T05:43:42.5493614Z"},"location":"eastus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003/dataexports/clitest","name":"clitest","type":"Microsoft.OperationalInsights/workspaces/dataexports"}'
     headers:
       access-control-allow-origin:
       - '*'
+      api-supported-versions:
+      - '2020-08-01'
       cache-control:
       - no-cache
-      cachecontrol:
-      - no-cache
       content-length:
-      - '840'
+      - '743'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 16 Feb 2023 09:59:06 GMT
+      - Wed, 21 Feb 2024 05:44:20 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       request-context:
       - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-ams-apiversion:
-      - WebAPI1.0
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 230FFA292C77402EA6F6B13C9493EFAE Ref B: MAA201060513017 Ref C: 2024-02-21T05:44:19Z'
       x-powered-by:
-      - ASP.NET
       - ASP.NET
     status:
       code: 200
@@ -577,54 +539,40 @@ interactions:
       ParameterSetName:
       - -g --workspace-name
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.57.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.19045-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003/dataExports?api-version=2020-08-01
   response:
     body:
-      string: "{\r\n  \"value\": [\r\n    {\r\n      \"properties\": {\r\n       \
-        \ \"dataExportId\": \"0e7be5f0-0c73-4343-7236-08db10045739\",\r\n        \"\
-        destination\": {\r\n          \"resourceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.Storage/storageAccounts/saws1000002\"\
-        ,\r\n          \"type\": \"StorageAccount\",\r\n          \"metaData\": {}\r\
-        \n        },\r\n        \"tableNames\": [\r\n          \"Syslog\"\r\n    \
-        \    ],\r\n        \"enable\": true,\r\n        \"createdDate\": \"Thu, 16\
-        \ Feb 2023 09:58:23 GMT\",\r\n        \"lastModifiedDate\": \"Thu, 16 Feb\
-        \ 2023 09:58:23 GMT\"\r\n      },\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/microsoft.operationalinsights/workspaces/clitest000003/dataexports/clitest\"\
-        ,\r\n      \"name\": \"clitest\",\r\n      \"type\": \"Microsoft.OperationalInsights/workspaces/dataexports\"\
-        \r\n    }\r\n  ]\r\n}"
+      string: '{"value":[{"properties":{"dataExportId":"65871427-bde7-4a27-ad0c-b2d238f9ba59","destination":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.Storage/storageAccounts/saws1000002","type":"StorageAccount","metaData":{}},"tableNames":["Syslog"],"enable":true,"createdDate":"2024-02-21T05:43:42.5493614Z","lastModifiedDate":"2024-02-21T05:43:42.5493614Z"},"location":"eastus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003/dataexports/clitest","name":"clitest","type":"Microsoft.OperationalInsights/workspaces/dataexports"}]}'
     headers:
       access-control-allow-origin:
       - '*'
+      api-supported-versions:
+      - '2020-08-01'
       cache-control:
       - no-cache
-      cachecontrol:
-      - no-cache
       content-length:
-      - '941'
+      - '755'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 16 Feb 2023 09:59:07 GMT
+      - Wed, 21 Feb 2024 05:44:21 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       request-context:
       - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-ams-apiversion:
-      - WebAPI1.0
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: C8A8357F22FB4E22B0459903EB10AB58 Ref B: MAA201060516031 Ref C: 2024-02-21T05:44:21Z'
       x-powered-by:
-      - ASP.NET
       - ASP.NET
     status:
       code: 200
@@ -643,37 +591,39 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.57.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.19045-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001","name":"cli_test_monitor_workspace_data_export000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2023-02-16T09:57:03Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001","name":"cli_test_monitor_workspace_data_export000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","test":"test_monitor_log_analytics_workspace_data_export","date":"2024-02-21T05:43:04Z","module":"monitor","DateCreated":"2024-02-21T05:43:10Z","Creator":"liwang3@microsoft.com"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '366'
+      - '514'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 16 Feb 2023 09:59:08 GMT
+      - Wed, 21 Feb 2024 05:44:23 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: D7089672D9FB4E4EA3D56C5BC3778683 Ref B: MAA201060515031 Ref C: 2024-02-21T05:44:23Z'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"location": "eastus", "sku": {"name": "Standard", "tier": "Standard"},
-      "properties": {"publicNetworkAccess": "Enabled"}}'
+    body: '{"identity": {"type": "None"}, "location": "eastus", "sku": {"name": "Standard",
+      "tier": "Standard"}}'
     headers:
       Accept:
       - application/json
@@ -684,47 +634,93 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '121'
+      - '101'
       Content-Type:
       - application/json
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.57.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004?api-version=2023-01-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004","name":"eventhubs-nscli000004","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Created","metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:eventhubs-nscli000004","createdAt":"2023-02-16T09:59:13.663Z","updatedAt":"2023-02-16T09:59:13.663Z","serviceBusEndpoint":"https://eventhubs-nscli000004.servicebus.windows.net:443/","status":"Activating"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004","name":"eventhubs-nscli000004","type":"Microsoft.EventHub/Namespaces","location":"eastus","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:eventhubs-nscli000004","updatedAt":"2024-02-21T05:44:27.3321656Z","serviceBusEndpoint":"https://eventhubs-nscli000004.servicebus.windows.net:443/","isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Creating","status":"Creating","createdAt":"2024-02-21T05:44:27.3321656Z"},"sku":{"name":"Standard","tier":"Standard","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '819'
+      - '825'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 16 Feb 2023 09:59:15 GMT
+      - Wed, 21 Feb 2024 05:44:27 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Service-Bus-Resource-Provider/CH3
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/CH3
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - 611b92d4-76bd-436b-9d6b-2d3c4b790200
+      x-ms-messaging-routing-id:
+      - EASTUS|EASTUS|G8|2024-02-21T05:44:27
       x-ms-ratelimit-remaining-subscription-resource-requests:
       - '49'
+      x-msedge-ref:
+      - 'Ref A: 17B8A09C254D48EC9869A0FC26893F92 Ref B: MAA201060515051 Ref C: 2024-02-21T05:44:23Z'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name
+      User-Agent:
+      - AZURECLI/2.57.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004?api-version=2023-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004","name":"eventhubs-nscli000004","type":"Microsoft.EventHub/Namespaces","location":"eastus","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"privateEndpointConnections":[],"zoneRedundant":false,"metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:eventhubs-nscli000004","updatedAt":"2024-02-21T05:44:27.3321656Z","serviceBusEndpoint":"https://eventhubs-nscli000004.servicebus.windows.net:443/","isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Creating","status":"Creating","createdAt":"2024-02-21T05:44:27.3321656Z"},"sku":{"name":"Standard","tier":"Standard","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '857'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 21 Feb 2024 05:44:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-messaging-activity-id:
+      - f45101ae-8d88-4973-a85b-afce3676d850
+      x-ms-messaging-routing-id:
+      - EASTUS|EASTUS|G8|2024-02-21T05:44:28
+      x-msedge-ref:
+      - 'Ref A: CA2083135F9E40B183E765118B2EEE0B Ref B: MAA201060515051 Ref C: 2024-02-21T05:44:27Z'
     status:
       code: 200
       message: OK
@@ -742,139 +738,37 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.57.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.19045-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004?api-version=2023-01-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004","name":"eventhubs-nscli000004","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Created","metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:eventhubs-nscli000004","createdAt":"2023-02-16T09:59:13.663Z","updatedAt":"2023-02-16T09:59:13.663Z","serviceBusEndpoint":"https://eventhubs-nscli000004.servicebus.windows.net:443/","status":"Activating"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004","name":"eventhubs-nscli000004","type":"Microsoft.EventHub/Namespaces","location":"eastus","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"privateEndpointConnections":[],"zoneRedundant":false,"metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:eventhubs-nscli000004","updatedAt":"2024-02-21T05:44:51.2700013Z","serviceBusEndpoint":"https://eventhubs-nscli000004.servicebus.windows.net:443/","isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Succeeded","status":"Active","createdAt":"2024-02-21T05:44:27.3321656Z"},"sku":{"name":"Standard","tier":"Standard","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '819'
+      - '856'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 16 Feb 2023 09:59:44 GMT
+      - Wed, 21 Feb 2024 05:45:00 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Service-Bus-Resource-Provider/CH3
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/CH3
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - eventhubs namespace create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --resource-group --name
-      User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004?api-version=2023-01-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004","name":"eventhubs-nscli000004","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:eventhubs-nscli000004","createdAt":"2023-02-16T09:59:13.663Z","updatedAt":"2023-02-16T10:00:01.96Z","serviceBusEndpoint":"https://eventhubs-nscli000004.servicebus.windows.net:443/","status":"Active"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '816'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 16 Feb 2023 10:00:16 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Service-Bus-Resource-Provider/CH3
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/CH3
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - eventhubs namespace create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --resource-group --name
-      User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004?api-version=2023-01-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004","name":"eventhubs-nscli000004","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:eventhubs-nscli000004","createdAt":"2023-02-16T09:59:13.663Z","updatedAt":"2023-02-16T10:00:01.96Z","serviceBusEndpoint":"https://eventhubs-nscli000004.servicebus.windows.net:443/","status":"Active"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '816'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 16 Feb 2023 10:00:17 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Service-Bus-Resource-Provider/CH3
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/CH3
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
+      x-ms-messaging-activity-id:
+      - 231ba756-1b8f-4004-89cb-47101e431668
+      x-ms-messaging-routing-id:
+      - EASTUS|EASTUS|G7|2024-02-21T05:45:00
+      x-msedge-ref:
+      - 'Ref A: 369178F8384240879352BDD56505233A Ref B: MAA201060515051 Ref C: 2024-02-21T05:44:58Z'
     status:
       code: 200
       message: OK
@@ -896,37 +790,39 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.57.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004/eventhubs/hub_name?api-version=2023-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004/eventhubs/hub_name","name":"hub_name","type":"Microsoft.EventHub/namespaces/eventhubs","location":"eastus","properties":{"messageRetentionInDays":7,"partitionCount":4,"status":"Active","createdAt":"2023-02-16T10:00:21.137Z","updatedAt":"2023-02-16T10:00:21.46Z","partitionIds":["0","1","2","3"]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004/eventhubs/hub_name","name":"hub_name","type":"Microsoft.EventHub/namespaces/eventhubs","location":"eastus","properties":{"retentionDescription":{"cleanupPolicy":"Delete","retentionTimeInHours":168},"messageRetentionInDays":7,"partitionCount":4,"status":"Active","createdAt":"2024-02-21T05:45:04.41Z","updatedAt":"2024-02-21T05:45:04.697Z","partitionIds":["0","1","2","3"]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '477'
+      - '554'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 16 Feb 2023 10:00:21 GMT
+      - Wed, 21 Feb 2024 05:45:04 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - 9dc58430-abc1-48da-a772-d5a5c6a843e8
+      x-ms-messaging-routing-id:
+      - EASTUS|EASTUS|G2|2024-02-21T05:45:05
       x-ms-ratelimit-remaining-subscription-writes:
       - '1198'
+      x-msedge-ref:
+      - 'Ref A: 3ED5D553F083417683EA1A2E9499C352 Ref B: MAA201060513047 Ref C: 2024-02-21T05:45:01Z'
     status:
       code: 200
       message: OK
@@ -944,62 +840,49 @@ interactions:
       ParameterSetName:
       - -g --workspace-name -n --destination --enable -t
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.57.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.19045-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003/dataExports/clitest?api-version=2020-08-01
   response:
     body:
-      string: "{\r\n  \"properties\": {\r\n    \"dataExportId\": \"0e7be5f0-0c73-4343-7236-08db10045739\"\
-        ,\r\n    \"destination\": {\r\n      \"resourceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.Storage/storageAccounts/saws1000002\"\
-        ,\r\n      \"type\": \"StorageAccount\",\r\n      \"metaData\": {}\r\n   \
-        \ },\r\n    \"tableNames\": [\r\n      \"Syslog\"\r\n    ],\r\n    \"enable\"\
-        : true,\r\n    \"createdDate\": \"Thu, 16 Feb 2023 09:58:23 GMT\",\r\n   \
-        \ \"lastModifiedDate\": \"Thu, 16 Feb 2023 09:58:23 GMT\"\r\n  },\r\n  \"\
-        id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/microsoft.operationalinsights/workspaces/clitest000003/dataexports/clitest\"\
-        ,\r\n  \"name\": \"clitest\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces/dataexports\"\
-        \r\n}"
+      string: '{"properties":{"dataExportId":"65871427-bde7-4a27-ad0c-b2d238f9ba59","destination":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.Storage/storageAccounts/saws1000002","type":"StorageAccount","metaData":{}},"tableNames":["Syslog"],"enable":true,"createdDate":"2024-02-21T05:43:42.5493614Z","lastModifiedDate":"2024-02-21T05:43:42.5493614Z"},"location":"eastus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003/dataexports/clitest","name":"clitest","type":"Microsoft.OperationalInsights/workspaces/dataexports"}'
     headers:
       access-control-allow-origin:
       - '*'
+      api-supported-versions:
+      - '2020-08-01'
       cache-control:
       - no-cache
-      cachecontrol:
-      - no-cache
       content-length:
-      - '840'
+      - '743'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 16 Feb 2023 10:00:22 GMT
+      - Wed, 21 Feb 2024 05:45:05 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       request-context:
       - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-ams-apiversion:
-      - WebAPI1.0
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 201833079C3A47B0A3F7E22FFA61408F Ref B: MAA201060515019 Ref C: 2024-02-21T05:45:05Z'
       x-powered-by:
-      - ASP.NET
       - ASP.NET
     status:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"createdDate": "Thu, 16 Feb 2023 09:58:23 GMT", "dataExportId":
-      "0e7be5f0-0c73-4343-7236-08db10045739", "destination": {"metaData": {}, "resourceId":
+    body: '{"properties": {"createdDate": "2024-02-21T05:43:42.5493614Z", "dataExportId":
+      "65871427-bde7-4a27-ad0c-b2d238f9ba59", "destination": {"metaData": {}, "resourceId":
       "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004"},
-      "enable": true, "lastModifiedDate": "Thu, 16 Feb 2023 09:58:23 GMT", "tableNames":
+      "enable": true, "lastModifiedDate": "2024-02-21T05:43:42.5493614Z", "tableNames":
       ["Usage", "Alert"]}}'
     headers:
       Accept:
@@ -1011,61 +894,48 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '447'
+      - '445'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g --workspace-name -n --destination --enable -t
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.57.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003/dataExports/clitest?api-version=2020-08-01
   response:
     body:
-      string: "{\r\n  \"properties\": {\r\n    \"dataExportId\": \"0e7be5f0-0c73-4343-7236-08db10045739\"\
-        ,\r\n    \"destination\": {\r\n      \"resourceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004\"\
-        ,\r\n      \"type\": \"EventHub\",\r\n      \"metaData\": {}\r\n    },\r\n\
-        \    \"tableNames\": [\r\n      \"Usage\",\r\n      \"Alert\"\r\n    ],\r\n\
-        \    \"enable\": true,\r\n    \"createdDate\": \"Thu, 16 Feb 2023 09:58:23\
-        \ GMT\",\r\n    \"lastModifiedDate\": \"Thu, 16 Feb 2023 10:00:25 GMT\"\r\n\
-        \  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/microsoft.operationalinsights/workspaces/clitest000003/dataexports/clitest\"\
-        ,\r\n  \"name\": \"clitest\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces/dataexports\"\
-        \r\n}"
+      string: '{"properties":{"dataExportId":"65871427-bde7-4a27-ad0c-b2d238f9ba59","destination":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004","type":"EventHub","metaData":{}},"tableNames":["Usage","Alert"],"enable":true,"createdDate":"2024-02-21T05:43:42.5493614Z","lastModifiedDate":"2024-02-21T05:45:09.320519Z"},"location":"eastus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003/dataexports/clitest","name":"clitest","type":"Microsoft.OperationalInsights/workspaces/dataexports"}'
     headers:
       access-control-allow-origin:
       - '*'
+      api-supported-versions:
+      - '2020-08-01'
       cache-control:
       - no-cache
-      cachecontrol:
-      - no-cache
       content-length:
-      - '855'
+      - '749'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 16 Feb 2023 10:00:26 GMT
+      - Wed, 21 Feb 2024 05:45:08 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       request-context:
       - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-ams-apiversion:
-      - WebAPI1.0
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
+      - '1198'
+      x-msedge-ref:
+      - 'Ref A: D42F6639B1514FCFA07895AFD3574ACB Ref B: MAA201060515019 Ref C: 2024-02-21T05:45:06Z'
       x-powered-by:
-      - ASP.NET
       - ASP.NET
     status:
       code: 200
@@ -1084,37 +954,39 @@ interactions:
       ParameterSetName:
       - -g --namespace-name
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.57.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.19045-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004/eventhubs?api-version=2023-01-01-preview
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004/eventhubs/hub_name","name":"hub_name","type":"Microsoft.EventHub/namespaces/eventhubs","location":"eastus","properties":{"messageRetentionInDays":7,"partitionCount":4,"status":"Active","createdAt":"2023-02-16T10:00:21.137","updatedAt":"2023-02-16T10:00:21.46","partitionIds":["0","1","2","3"]}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004/eventhubs/hub_name","name":"hub_name","type":"Microsoft.EventHub/namespaces/eventhubs","location":"eastus","properties":{"retentionDescription":{"cleanupPolicy":"Delete","retentionTimeInHours":168},"messageRetentionInDays":7,"partitionCount":4,"status":"Active","createdAt":"2024-02-21T05:45:04.41","updatedAt":"2024-02-21T05:45:04.697","partitionIds":["0","1","2","3"]}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '487'
+      - '564'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 16 Feb 2023 10:00:28 GMT
+      - Wed, 21 Feb 2024 05:45:10 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-inline-count:
       - ''
+      x-ms-messaging-activity-id:
+      - fd878691-bc72-4e31-b1d7-1f61367ee8ea
+      x-ms-messaging-routing-id:
+      - EASTUS|EASTUS|G11|2024-02-21T05:45:10
+      x-msedge-ref:
+      - 'Ref A: F1AA6EE7CA574EF0962E3789E6B3B907 Ref B: MAA201060514011 Ref C: 2024-02-21T05:45:10Z'
     status:
       code: 200
       message: OK
@@ -1134,7 +1006,7 @@ interactions:
       ParameterSetName:
       - -g --workspace-name -n -y
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.57.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.19045-SP0)
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003/dataExports/clitest?api-version=2020-08-01
   response:
@@ -1143,32 +1015,31 @@ interactions:
     headers:
       access-control-allow-origin:
       - '*'
+      api-supported-versions:
+      - '2020-08-01'
       cache-control:
-      - no-cache
-      cachecontrol:
       - no-cache
       content-length:
       - '0'
       date:
-      - Thu, 16 Feb 2023 10:00:30 GMT
+      - Wed, 21 Feb 2024 05:45:12 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       request-context:
       - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-ams-apiversion:
-      - WebAPI1.0
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
       - '14998'
+      x-msedge-ref:
+      - 'Ref A: 850CEA4F3EE647CB87CF349A126E25E2 Ref B: MAA201060516053 Ref C: 2024-02-21T05:45:11Z'
       x-powered-by:
-      - ASP.NET
       - ASP.NET
     status:
       code: 200
@@ -1193,55 +1064,42 @@ interactions:
       ParameterSetName:
       - -g --workspace-name -n --destination --enable -t
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.57.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003/dataExports/clitest?api-version=2020-08-01
   response:
     body:
-      string: "{\r\n  \"properties\": {\r\n    \"dataExportId\": \"e39531c7-7425-4b80-cd9d-08db0f6aef3c\"\
-        ,\r\n    \"destination\": {\r\n      \"resourceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004\"\
-        ,\r\n      \"type\": \"EventHub\",\r\n      \"metaData\": {\r\n        \"\
-        eventHubName\": \"hub_name\"\r\n      }\r\n    },\r\n    \"tableNames\": [\r\
-        \n      \"Syslog\"\r\n    ],\r\n    \"enable\": false,\r\n    \"createdDate\"\
-        : \"Thu, 16 Feb 2023 10:00:34 GMT\",\r\n    \"lastModifiedDate\": \"Thu, 16\
-        \ Feb 2023 10:00:34 GMT\"\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/microsoft.operationalinsights/workspaces/clitest000003/dataexports/clitest\"\
-        ,\r\n  \"name\": \"clitest\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces/dataexports\"\
-        \r\n}"
+      string: '{"properties":{"dataExportId":"c888faba-6ee7-4ee9-b717-651d2f8b2795","destination":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000004","type":"EventHub","metaData":{"eventHubName":"hub_name"}},"tableNames":["Syslog"],"enable":false,"createdDate":"2024-02-21T05:45:16.1196557Z","lastModifiedDate":"2024-02-21T05:45:16.1196557Z"},"location":"eastus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003/dataexports/clitest","name":"clitest","type":"Microsoft.OperationalInsights/workspaces/dataexports"}'
     headers:
       access-control-allow-origin:
       - '*'
+      api-supported-versions:
+      - '2020-08-01'
       cache-control:
       - no-cache
-      cachecontrol:
-      - no-cache
       content-length:
-      - '885'
+      - '769'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 16 Feb 2023 10:00:34 GMT
+      - Wed, 21 Feb 2024 05:45:15 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       request-context:
       - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-ams-apiversion:
-      - WebAPI1.0
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
+      - '1199'
+      x-msedge-ref:
+      - 'Ref A: 7055E0D6CE374897A6BB0E107CE3472E Ref B: MAA201060513023 Ref C: 2024-02-21T05:45:13Z'
       x-powered-by:
-      - ASP.NET
       - ASP.NET
     status:
       code: 200
@@ -1262,7 +1120,7 @@ interactions:
       ParameterSetName:
       - -g --workspace-name -n -y
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.57.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.19045-SP0)
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003/dataExports/clitest?api-version=2020-08-01
   response:
@@ -1271,32 +1129,31 @@ interactions:
     headers:
       access-control-allow-origin:
       - '*'
+      api-supported-versions:
+      - '2020-08-01'
       cache-control:
-      - no-cache
-      cachecontrol:
       - no-cache
       content-length:
       - '0'
       date:
-      - Thu, 16 Feb 2023 10:00:37 GMT
+      - Wed, 21 Feb 2024 05:45:18 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       request-context:
       - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-ams-apiversion:
-      - WebAPI1.0
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
       - '14999'
+      x-msedge-ref:
+      - 'Ref A: 95DA2720073B44779C683AC07A0A5E75 Ref B: MAA201060513051 Ref C: 2024-02-21T05:45:17Z'
       x-powered-by:
-      - ASP.NET
       - ASP.NET
     status:
       code: 200
@@ -1315,45 +1172,40 @@ interactions:
       ParameterSetName:
       - -g --workspace-name
       User-Agent:
-      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.57.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.19045-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_data_export000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003/dataExports?api-version=2020-08-01
   response:
     body:
-      string: "{\r\n  \"value\": []\r\n}"
+      string: '{"value":[]}'
     headers:
       access-control-allow-origin:
       - '*'
+      api-supported-versions:
+      - '2020-08-01'
       cache-control:
       - no-cache
-      cachecontrol:
-      - no-cache
       content-length:
-      - '19'
+      - '12'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 16 Feb 2023 10:00:39 GMT
+      - Wed, 21 Feb 2024 05:45:19 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       request-context:
       - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-ams-apiversion:
-      - WebAPI1.0
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: ED17D6BB15A34BF89DF31040F6148E41 Ref B: MAA201060515029 Ref C: 2024-02-21T05:45:18Z'
       x-powered-by:
-      - ASP.NET
       - ASP.NET
     status:
       code: 200

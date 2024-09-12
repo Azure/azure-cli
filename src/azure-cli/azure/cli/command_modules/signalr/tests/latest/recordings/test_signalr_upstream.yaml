@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: '{"location": "eastus", "tags": {"key": "value"}, "sku": {"name": "Standard_S1",
+    body: '{"tags": {"key": "value"}, "location": "eastus", "sku": {"name": "Standard_S1",
       "capacity": 1}, "properties": {"features": [{"flag": "ServiceMode", "value":
       "Classic"}, {"flag": "EnableMessagingLogs", "value": "False"}], "cors": {"allowedOrigins":
       ["http://example1.com", "http://example2.com"]}, "networkACLs": {"defaultAction":
@@ -22,39 +22,41 @@ interactions:
       ParameterSetName:
       - -n -g --sku --unit-count -l --tags --service-mode --allowed-origins --default-action
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-mgmt-signalr/1.1.0 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.61.0 azsdk-python-core/1.28.0 Python/3.12.3 (macOS-14.5-arm64-arm-64bit)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002?api-version=2022-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002?api-version=2023-06-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Standard_S1","tier":"Standard","size":"S1","capacity":1},"properties":{"provisioningState":"Creating","externalIP":null,"hostName":"signalr000002.service.signalr.net","publicPort":443,"serverPort":443,"version":"1.0-preview","privateEndpointConnections":[],"sharedPrivateLinkResources":[],"tls":{"clientCertEnabled":false},"hostNamePrefix":"signalr000002","features":[{"flag":"ServiceMode","value":"Classic","properties":{}},{"flag":"EnableMessagingLogs","value":"False","properties":{}}],"liveTraceConfiguration":null,"resourceLogConfiguration":null,"cors":{"allowedOrigins":["http://example1.com","http://example2.com"]},"upstream":{"templates":null},"networkACLs":{"defaultAction":"Deny","publicNetwork":{"allow":["ServerConnection","ClientConnection","RESTAPI","Trace"],"deny":null},"privateEndpoints":[]},"publicNetworkAccess":"Enabled","disableLocalAuth":false,"disableAadAuth":false},"kind":"SignalR","systemData":{"createdBy":"chenyl@microsoft.com","createdByType":"User","createdAt":"2022-08-02T06:21:44.4701914Z","lastModifiedBy":"chenyl@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-08-02T06:21:44.4701914Z"},"location":"eastus","tags":{"key":"value"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002","name":"signalr000002","type":"Microsoft.SignalRService/SignalR"}'
+      string: '{"sku":{"name":"Standard_S1","tier":"Standard","size":"S1","capacity":1},"properties":{"provisioningState":"Creating","externalIP":null,"hostName":"signalr000002.service.signalr.net","publicPort":443,"serverPort":443,"version":"1.0-preview","privateEndpointConnections":[],"sharedPrivateLinkResources":[],"tls":{"clientCertEnabled":false},"hostNamePrefix":"signalr000002","features":[{"flag":"ServiceMode","value":"Classic","properties":{}},{"flag":"EnableConnectivityLogs","value":"False","properties":{}},{"flag":"EnableMessagingLogs","value":"False","properties":{}},{"flag":"EnableLiveTrace","value":"False","properties":{}}],"liveTraceConfiguration":null,"resourceLogConfiguration":null,"cors":{"allowedOrigins":["http://example1.com","http://example2.com"]},"serverless":{"connectionTimeoutInSeconds":30},"upstream":{"templates":null},"networkACLs":{"defaultAction":"Deny","publicNetwork":{"allow":["ServerConnection","ClientConnection","RESTAPI","Trace"],"deny":null},"privateEndpoints":[]},"publicNetworkAccess":"Enabled","disableLocalAuth":false,"disableAadAuth":false},"kind":"SignalR","location":"eastus","tags":{"key":"value"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002","name":"signalr000002","type":"Microsoft.SignalRService/SignalR","systemData":{"createdBy":"biqian@microsoft.com","createdByType":"User","createdAt":"2024-06-25T06:47:55.5084744Z","lastModifiedBy":"biqian@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2024-06-25T06:47:55.5084744Z"}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/83aee3c7-29ca-4114-8800-3695e80f01d9?api-version=2022-02-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/c34de4c9-c061-46a3-a36f-6ac0761bb1ed?api-version=2023-06-01-preview&t=638548948785397233&c=MIIHpTCCBo2gAwIBAgITOgMPIyvO-SSNo3JCxQAEAw8jKzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjQwNTE3MDc0MzI1WhcNMjUwNTEyMDc0MzI1WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMm-rUyPQv0z_LgvMVxRmSGe7k2sSDcjhZtJtacrGF0aA0mXhldjASVDsIKbducmYozS8YVn2yXvxW_2yo82m2q934keEf1UEKaSADUrozDPX5msTyt18UcXAPp7vPi8MXbYjFOyyuc1uzgXltAbdS5P2ki32RUjUplv8OZZSK5OvCrsyCwkmsg2yKxfHaRObmPqpu65x8lFk2jKBDK30LBTk2StP96kJI1VnIe3fxGXE6_1XKZTCJH9o_4vYvmA3wTHxlu8KWljLk10ttEqy736mEq9ex8TqnJVHebwRZ33UQTFZClqhQrIcLUrar5PXwlFMtvhgI1-Du5tVtKr1KECAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBTVszhW7MMKoXa9-QpBHa5cQlUN9TAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAD-urQp96AuB916E-Te8RmgK90YXOfxpQ9UFVrx1h5G83WkRUIlKdESHrUjduIESxCRdkRY2ntf__S09h5_4l7f3rT0jpHXw-_8dUrAbn43jMiQmB2LXzLoyIWaLagT18F_wbUAmRMU1m1WEJE66ngt8mx407-SRKz6rKaPUCD2z-wIeSOcaXXY7KbRVUtbPS4GhSTo3fCRHPGpXS9ftpm-v7z3JFkXFsN7jcHBQDn2YqE7eFoPVqmoQtJZXXzAsWMeqSilE2wmsqn8Ty0ykZnqcfjuRNXoTC9CpuEhZYirAwmdBN87Cb7ZrhR2s8flm-uIqdEhk4mWeNMEyWsm5RLA&s=pwC_rlk2YljKDAR9ZgjkxEPEr_mGnVGoZFCxU0JlBo7cVtpi3rtiQysnNZSoaqY3OkNMEWHaC-BDHKJmTbAcLWTSD_xNrLFzUk1CYtYZni2EkZvgWtQNIAWAO7PJhKONbqe8gtxw9bHgs4Z-XLYK1LA0WwYFcjCQIe6rG0cwdfsqlL2ilfNXtRVWGUtbAw7DKeRZWZETn29ZMXeK-8Hanzt2dfwlOCt-FXfoSWTqduSSIMvzfymkb_8HQcE_2BhWynuBaJrNiIVDxI03riOY6czpPrHl2k6uMMrcH8efn-s06M6WOvK09ghm7NVePl_ihyQw_xgL0vdexln22F_m0g&h=APlvgfcr1I4eeMb1c2H7WgFe_6wJ_OY3DkwOvFwDx0o
       cache-control:
       - no-cache
       content-length:
-      - '1412'
+      - '1584'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 02 Aug 2022 06:21:48 GMT
+      - Tue, 25 Jun 2024 06:47:57 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationResults/83aee3c7-29ca-4114-8800-3695e80f01d9?api-version=2022-02-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationResults/c34de4c9-c061-46a3-a36f-6ac0761bb1ed?api-version=2023-06-01-preview&t=638548948785554129&c=MIIHpTCCBo2gAwIBAgITOgMPIyvO-SSNo3JCxQAEAw8jKzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjQwNTE3MDc0MzI1WhcNMjUwNTEyMDc0MzI1WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMm-rUyPQv0z_LgvMVxRmSGe7k2sSDcjhZtJtacrGF0aA0mXhldjASVDsIKbducmYozS8YVn2yXvxW_2yo82m2q934keEf1UEKaSADUrozDPX5msTyt18UcXAPp7vPi8MXbYjFOyyuc1uzgXltAbdS5P2ki32RUjUplv8OZZSK5OvCrsyCwkmsg2yKxfHaRObmPqpu65x8lFk2jKBDK30LBTk2StP96kJI1VnIe3fxGXE6_1XKZTCJH9o_4vYvmA3wTHxlu8KWljLk10ttEqy736mEq9ex8TqnJVHebwRZ33UQTFZClqhQrIcLUrar5PXwlFMtvhgI1-Du5tVtKr1KECAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBTVszhW7MMKoXa9-QpBHa5cQlUN9TAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAD-urQp96AuB916E-Te8RmgK90YXOfxpQ9UFVrx1h5G83WkRUIlKdESHrUjduIESxCRdkRY2ntf__S09h5_4l7f3rT0jpHXw-_8dUrAbn43jMiQmB2LXzLoyIWaLagT18F_wbUAmRMU1m1WEJE66ngt8mx407-SRKz6rKaPUCD2z-wIeSOcaXXY7KbRVUtbPS4GhSTo3fCRHPGpXS9ftpm-v7z3JFkXFsN7jcHBQDn2YqE7eFoPVqmoQtJZXXzAsWMeqSilE2wmsqn8Ty0ykZnqcfjuRNXoTC9CpuEhZYirAwmdBN87Cb7ZrhR2s8flm-uIqdEhk4mWeNMEyWsm5RLA&s=LD2v5JnmRFlO9YkVdIXgNpVib1RJ9EQe4IyYWUhCaiotBhWl_g2o4QBl5IShTAHJZtzZerXzs6izkdCukYa6MVX66-t1z6DOT3DIXnXNM2ozt5yHpmPq1Ka8Ve8QYzP23o6wkeA--xuRaCNv1g4kYKYkwz2RZm2taVneSW_ghu0MRPt0T53QW625u_obNXu4mm0DjYW_vkW98V834jzaY5J-jJPp88xn3halRAhb1iudMI1jzoirFGQe32eTn-_HKds4OqHP4r_7bN-Txi7Zsf5yKYt-jgSdetBci_PCjyXb20LX9EEOuNxQoeBwOAkpJ9Ba887vsU37HgLg3Iy5EA&h=kFD7wjI9PYEEJWMQsUhzOHAd36VX_zzWMIMf0U9kcrk
       pragma:
       - no-cache
-      server:
-      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
+      x-msedge-ref:
+      - 'Ref A: B011A4811577428281EDCB13E5B479E2 Ref B: MAA201060516049 Ref C: 2024-06-25T06:47:53Z'
       x-rp-server-mvid:
-      - a240317d-2594-4b08-9f0c-5f370ea616d7
+      - 3fefedf9-8741-40b4-b45f-3b7e097c8b00
     status:
       code: 201
       message: Created
@@ -72,12 +74,12 @@ interactions:
       ParameterSetName:
       - -n -g --sku --unit-count -l --tags --service-mode --allowed-origins --default-action
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-mgmt-signalr/1.1.0 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.61.0 azsdk-python-core/1.28.0 Python/3.12.3 (macOS-14.5-arm64-arm-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/83aee3c7-29ca-4114-8800-3695e80f01d9?api-version=2022-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/c34de4c9-c061-46a3-a36f-6ac0761bb1ed?api-version=2023-06-01-preview&t=638548948785397233&c=MIIHpTCCBo2gAwIBAgITOgMPIyvO-SSNo3JCxQAEAw8jKzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjQwNTE3MDc0MzI1WhcNMjUwNTEyMDc0MzI1WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMm-rUyPQv0z_LgvMVxRmSGe7k2sSDcjhZtJtacrGF0aA0mXhldjASVDsIKbducmYozS8YVn2yXvxW_2yo82m2q934keEf1UEKaSADUrozDPX5msTyt18UcXAPp7vPi8MXbYjFOyyuc1uzgXltAbdS5P2ki32RUjUplv8OZZSK5OvCrsyCwkmsg2yKxfHaRObmPqpu65x8lFk2jKBDK30LBTk2StP96kJI1VnIe3fxGXE6_1XKZTCJH9o_4vYvmA3wTHxlu8KWljLk10ttEqy736mEq9ex8TqnJVHebwRZ33UQTFZClqhQrIcLUrar5PXwlFMtvhgI1-Du5tVtKr1KECAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBTVszhW7MMKoXa9-QpBHa5cQlUN9TAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAD-urQp96AuB916E-Te8RmgK90YXOfxpQ9UFVrx1h5G83WkRUIlKdESHrUjduIESxCRdkRY2ntf__S09h5_4l7f3rT0jpHXw-_8dUrAbn43jMiQmB2LXzLoyIWaLagT18F_wbUAmRMU1m1WEJE66ngt8mx407-SRKz6rKaPUCD2z-wIeSOcaXXY7KbRVUtbPS4GhSTo3fCRHPGpXS9ftpm-v7z3JFkXFsN7jcHBQDn2YqE7eFoPVqmoQtJZXXzAsWMeqSilE2wmsqn8Ty0ykZnqcfjuRNXoTC9CpuEhZYirAwmdBN87Cb7ZrhR2s8flm-uIqdEhk4mWeNMEyWsm5RLA&s=pwC_rlk2YljKDAR9ZgjkxEPEr_mGnVGoZFCxU0JlBo7cVtpi3rtiQysnNZSoaqY3OkNMEWHaC-BDHKJmTbAcLWTSD_xNrLFzUk1CYtYZni2EkZvgWtQNIAWAO7PJhKONbqe8gtxw9bHgs4Z-XLYK1LA0WwYFcjCQIe6rG0cwdfsqlL2ilfNXtRVWGUtbAw7DKeRZWZETn29ZMXeK-8Hanzt2dfwlOCt-FXfoSWTqduSSIMvzfymkb_8HQcE_2BhWynuBaJrNiIVDxI03riOY6czpPrHl2k6uMMrcH8efn-s06M6WOvK09ghm7NVePl_ihyQw_xgL0vdexln22F_m0g&h=APlvgfcr1I4eeMb1c2H7WgFe_6wJ_OY3DkwOvFwDx0o
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/83aee3c7-29ca-4114-8800-3695e80f01d9","name":"83aee3c7-29ca-4114-8800-3695e80f01d9","status":"Running","startTime":"2022-08-02T06:21:46.8066573Z"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/c34de4c9-c061-46a3-a36f-6ac0761bb1ed","name":"c34de4c9-c061-46a3-a36f-6ac0761bb1ed","status":"Running","startTime":"2024-06-25T06:47:57.1017727Z"}'
     headers:
       cache-control:
       - no-cache
@@ -86,23 +88,21 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 02 Aug 2022 06:22:18 GMT
+      - Tue, 25 Jun 2024 06:47:58 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: D474658A0F4041AEAC693E9DE93171F1 Ref B: MAA201060516049 Ref C: 2024-06-25T06:47:58Z'
       x-rp-server-mvid:
-      - a240317d-2594-4b08-9f0c-5f370ea616d7
+      - 3fefedf9-8741-40b4-b45f-3b7e097c8b00
     status:
       code: 200
       message: OK
@@ -120,12 +120,12 @@ interactions:
       ParameterSetName:
       - -n -g --sku --unit-count -l --tags --service-mode --allowed-origins --default-action
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-mgmt-signalr/1.1.0 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.61.0 azsdk-python-core/1.28.0 Python/3.12.3 (macOS-14.5-arm64-arm-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/83aee3c7-29ca-4114-8800-3695e80f01d9?api-version=2022-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/c34de4c9-c061-46a3-a36f-6ac0761bb1ed?api-version=2023-06-01-preview&t=638548948785397233&c=MIIHpTCCBo2gAwIBAgITOgMPIyvO-SSNo3JCxQAEAw8jKzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjQwNTE3MDc0MzI1WhcNMjUwNTEyMDc0MzI1WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMm-rUyPQv0z_LgvMVxRmSGe7k2sSDcjhZtJtacrGF0aA0mXhldjASVDsIKbducmYozS8YVn2yXvxW_2yo82m2q934keEf1UEKaSADUrozDPX5msTyt18UcXAPp7vPi8MXbYjFOyyuc1uzgXltAbdS5P2ki32RUjUplv8OZZSK5OvCrsyCwkmsg2yKxfHaRObmPqpu65x8lFk2jKBDK30LBTk2StP96kJI1VnIe3fxGXE6_1XKZTCJH9o_4vYvmA3wTHxlu8KWljLk10ttEqy736mEq9ex8TqnJVHebwRZ33UQTFZClqhQrIcLUrar5PXwlFMtvhgI1-Du5tVtKr1KECAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBTVszhW7MMKoXa9-QpBHa5cQlUN9TAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAD-urQp96AuB916E-Te8RmgK90YXOfxpQ9UFVrx1h5G83WkRUIlKdESHrUjduIESxCRdkRY2ntf__S09h5_4l7f3rT0jpHXw-_8dUrAbn43jMiQmB2LXzLoyIWaLagT18F_wbUAmRMU1m1WEJE66ngt8mx407-SRKz6rKaPUCD2z-wIeSOcaXXY7KbRVUtbPS4GhSTo3fCRHPGpXS9ftpm-v7z3JFkXFsN7jcHBQDn2YqE7eFoPVqmoQtJZXXzAsWMeqSilE2wmsqn8Ty0ykZnqcfjuRNXoTC9CpuEhZYirAwmdBN87Cb7ZrhR2s8flm-uIqdEhk4mWeNMEyWsm5RLA&s=pwC_rlk2YljKDAR9ZgjkxEPEr_mGnVGoZFCxU0JlBo7cVtpi3rtiQysnNZSoaqY3OkNMEWHaC-BDHKJmTbAcLWTSD_xNrLFzUk1CYtYZni2EkZvgWtQNIAWAO7PJhKONbqe8gtxw9bHgs4Z-XLYK1LA0WwYFcjCQIe6rG0cwdfsqlL2ilfNXtRVWGUtbAw7DKeRZWZETn29ZMXeK-8Hanzt2dfwlOCt-FXfoSWTqduSSIMvzfymkb_8HQcE_2BhWynuBaJrNiIVDxI03riOY6czpPrHl2k6uMMrcH8efn-s06M6WOvK09ghm7NVePl_ihyQw_xgL0vdexln22F_m0g&h=APlvgfcr1I4eeMb1c2H7WgFe_6wJ_OY3DkwOvFwDx0o
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/83aee3c7-29ca-4114-8800-3695e80f01d9","name":"83aee3c7-29ca-4114-8800-3695e80f01d9","status":"Running","startTime":"2022-08-02T06:21:46.8066573Z"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/c34de4c9-c061-46a3-a36f-6ac0761bb1ed","name":"c34de4c9-c061-46a3-a36f-6ac0761bb1ed","status":"Running","startTime":"2024-06-25T06:47:57.1017727Z"}'
     headers:
       cache-control:
       - no-cache
@@ -134,23 +134,21 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 02 Aug 2022 06:22:49 GMT
+      - Tue, 25 Jun 2024 06:48:30 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: CC90112EB96D465D86A0CDCBB419B69D Ref B: MAA201060516049 Ref C: 2024-06-25T06:48:29Z'
       x-rp-server-mvid:
-      - a240317d-2594-4b08-9f0c-5f370ea616d7
+      - 3fefedf9-8741-40b4-b45f-3b7e097c8b00
     status:
       code: 200
       message: OK
@@ -168,12 +166,12 @@ interactions:
       ParameterSetName:
       - -n -g --sku --unit-count -l --tags --service-mode --allowed-origins --default-action
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-mgmt-signalr/1.1.0 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.61.0 azsdk-python-core/1.28.0 Python/3.12.3 (macOS-14.5-arm64-arm-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/83aee3c7-29ca-4114-8800-3695e80f01d9?api-version=2022-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/c34de4c9-c061-46a3-a36f-6ac0761bb1ed?api-version=2023-06-01-preview&t=638548948785397233&c=MIIHpTCCBo2gAwIBAgITOgMPIyvO-SSNo3JCxQAEAw8jKzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjQwNTE3MDc0MzI1WhcNMjUwNTEyMDc0MzI1WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMm-rUyPQv0z_LgvMVxRmSGe7k2sSDcjhZtJtacrGF0aA0mXhldjASVDsIKbducmYozS8YVn2yXvxW_2yo82m2q934keEf1UEKaSADUrozDPX5msTyt18UcXAPp7vPi8MXbYjFOyyuc1uzgXltAbdS5P2ki32RUjUplv8OZZSK5OvCrsyCwkmsg2yKxfHaRObmPqpu65x8lFk2jKBDK30LBTk2StP96kJI1VnIe3fxGXE6_1XKZTCJH9o_4vYvmA3wTHxlu8KWljLk10ttEqy736mEq9ex8TqnJVHebwRZ33UQTFZClqhQrIcLUrar5PXwlFMtvhgI1-Du5tVtKr1KECAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBTVszhW7MMKoXa9-QpBHa5cQlUN9TAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAD-urQp96AuB916E-Te8RmgK90YXOfxpQ9UFVrx1h5G83WkRUIlKdESHrUjduIESxCRdkRY2ntf__S09h5_4l7f3rT0jpHXw-_8dUrAbn43jMiQmB2LXzLoyIWaLagT18F_wbUAmRMU1m1WEJE66ngt8mx407-SRKz6rKaPUCD2z-wIeSOcaXXY7KbRVUtbPS4GhSTo3fCRHPGpXS9ftpm-v7z3JFkXFsN7jcHBQDn2YqE7eFoPVqmoQtJZXXzAsWMeqSilE2wmsqn8Ty0ykZnqcfjuRNXoTC9CpuEhZYirAwmdBN87Cb7ZrhR2s8flm-uIqdEhk4mWeNMEyWsm5RLA&s=pwC_rlk2YljKDAR9ZgjkxEPEr_mGnVGoZFCxU0JlBo7cVtpi3rtiQysnNZSoaqY3OkNMEWHaC-BDHKJmTbAcLWTSD_xNrLFzUk1CYtYZni2EkZvgWtQNIAWAO7PJhKONbqe8gtxw9bHgs4Z-XLYK1LA0WwYFcjCQIe6rG0cwdfsqlL2ilfNXtRVWGUtbAw7DKeRZWZETn29ZMXeK-8Hanzt2dfwlOCt-FXfoSWTqduSSIMvzfymkb_8HQcE_2BhWynuBaJrNiIVDxI03riOY6czpPrHl2k6uMMrcH8efn-s06M6WOvK09ghm7NVePl_ihyQw_xgL0vdexln22F_m0g&h=APlvgfcr1I4eeMb1c2H7WgFe_6wJ_OY3DkwOvFwDx0o
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/83aee3c7-29ca-4114-8800-3695e80f01d9","name":"83aee3c7-29ca-4114-8800-3695e80f01d9","status":"Running","startTime":"2022-08-02T06:21:46.8066573Z"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/c34de4c9-c061-46a3-a36f-6ac0761bb1ed","name":"c34de4c9-c061-46a3-a36f-6ac0761bb1ed","status":"Running","startTime":"2024-06-25T06:47:57.1017727Z"}'
     headers:
       cache-control:
       - no-cache
@@ -182,23 +180,21 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 02 Aug 2022 06:23:19 GMT
+      - Tue, 25 Jun 2024 06:49:01 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 469C4C9DCEC443C88796D6D16DA32312 Ref B: MAA201060516049 Ref C: 2024-06-25T06:49:01Z'
       x-rp-server-mvid:
-      - a240317d-2594-4b08-9f0c-5f370ea616d7
+      - 3fefedf9-8741-40b4-b45f-3b7e097c8b00
     status:
       code: 200
       message: OK
@@ -216,12 +212,12 @@ interactions:
       ParameterSetName:
       - -n -g --sku --unit-count -l --tags --service-mode --allowed-origins --default-action
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-mgmt-signalr/1.1.0 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.61.0 azsdk-python-core/1.28.0 Python/3.12.3 (macOS-14.5-arm64-arm-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/83aee3c7-29ca-4114-8800-3695e80f01d9?api-version=2022-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/c34de4c9-c061-46a3-a36f-6ac0761bb1ed?api-version=2023-06-01-preview&t=638548948785397233&c=MIIHpTCCBo2gAwIBAgITOgMPIyvO-SSNo3JCxQAEAw8jKzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjQwNTE3MDc0MzI1WhcNMjUwNTEyMDc0MzI1WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMm-rUyPQv0z_LgvMVxRmSGe7k2sSDcjhZtJtacrGF0aA0mXhldjASVDsIKbducmYozS8YVn2yXvxW_2yo82m2q934keEf1UEKaSADUrozDPX5msTyt18UcXAPp7vPi8MXbYjFOyyuc1uzgXltAbdS5P2ki32RUjUplv8OZZSK5OvCrsyCwkmsg2yKxfHaRObmPqpu65x8lFk2jKBDK30LBTk2StP96kJI1VnIe3fxGXE6_1XKZTCJH9o_4vYvmA3wTHxlu8KWljLk10ttEqy736mEq9ex8TqnJVHebwRZ33UQTFZClqhQrIcLUrar5PXwlFMtvhgI1-Du5tVtKr1KECAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBTVszhW7MMKoXa9-QpBHa5cQlUN9TAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAD-urQp96AuB916E-Te8RmgK90YXOfxpQ9UFVrx1h5G83WkRUIlKdESHrUjduIESxCRdkRY2ntf__S09h5_4l7f3rT0jpHXw-_8dUrAbn43jMiQmB2LXzLoyIWaLagT18F_wbUAmRMU1m1WEJE66ngt8mx407-SRKz6rKaPUCD2z-wIeSOcaXXY7KbRVUtbPS4GhSTo3fCRHPGpXS9ftpm-v7z3JFkXFsN7jcHBQDn2YqE7eFoPVqmoQtJZXXzAsWMeqSilE2wmsqn8Ty0ykZnqcfjuRNXoTC9CpuEhZYirAwmdBN87Cb7ZrhR2s8flm-uIqdEhk4mWeNMEyWsm5RLA&s=pwC_rlk2YljKDAR9ZgjkxEPEr_mGnVGoZFCxU0JlBo7cVtpi3rtiQysnNZSoaqY3OkNMEWHaC-BDHKJmTbAcLWTSD_xNrLFzUk1CYtYZni2EkZvgWtQNIAWAO7PJhKONbqe8gtxw9bHgs4Z-XLYK1LA0WwYFcjCQIe6rG0cwdfsqlL2ilfNXtRVWGUtbAw7DKeRZWZETn29ZMXeK-8Hanzt2dfwlOCt-FXfoSWTqduSSIMvzfymkb_8HQcE_2BhWynuBaJrNiIVDxI03riOY6czpPrHl2k6uMMrcH8efn-s06M6WOvK09ghm7NVePl_ihyQw_xgL0vdexln22F_m0g&h=APlvgfcr1I4eeMb1c2H7WgFe_6wJ_OY3DkwOvFwDx0o
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/83aee3c7-29ca-4114-8800-3695e80f01d9","name":"83aee3c7-29ca-4114-8800-3695e80f01d9","status":"Succeeded","startTime":"2022-08-02T06:21:46.8066573Z","endTime":"2022-08-02T06:23:20.4045793Z"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/c34de4c9-c061-46a3-a36f-6ac0761bb1ed","name":"c34de4c9-c061-46a3-a36f-6ac0761bb1ed","status":"Succeeded","startTime":"2024-06-25T06:47:57.1017727Z","endTime":"2024-06-25T06:49:02.2036538Z"}'
     headers:
       cache-control:
       - no-cache
@@ -230,23 +226,21 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 02 Aug 2022 06:23:50 GMT
+      - Tue, 25 Jun 2024 06:49:32 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: E03DF8E2C17C4CD199233884BE628E74 Ref B: MAA201060516049 Ref C: 2024-06-25T06:49:32Z'
       x-rp-server-mvid:
-      - a240317d-2594-4b08-9f0c-5f370ea616d7
+      - 3fefedf9-8741-40b4-b45f-3b7e097c8b00
     status:
       code: 200
       message: OK
@@ -264,37 +258,35 @@ interactions:
       ParameterSetName:
       - -n -g --sku --unit-count -l --tags --service-mode --allowed-origins --default-action
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-mgmt-signalr/1.1.0 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.61.0 azsdk-python-core/1.28.0 Python/3.12.3 (macOS-14.5-arm64-arm-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002?api-version=2022-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002?api-version=2023-06-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Standard_S1","tier":"Standard","size":"S1","capacity":1},"properties":{"provisioningState":"Succeeded","externalIP":"20.88.155.11","hostName":"signalr000002.service.signalr.net","publicPort":443,"serverPort":443,"version":"1.0","privateEndpointConnections":[],"sharedPrivateLinkResources":[],"tls":{"clientCertEnabled":false},"hostNamePrefix":"signalr000002","features":[{"flag":"ServiceMode","value":"Classic","properties":{}},{"flag":"EnableMessagingLogs","value":"False","properties":{}}],"liveTraceConfiguration":null,"resourceLogConfiguration":null,"cors":{"allowedOrigins":["http://example1.com","http://example2.com"]},"upstream":{"templates":null},"networkACLs":{"defaultAction":"Deny","publicNetwork":{"allow":["ServerConnection","ClientConnection","RESTAPI","Trace"],"deny":null},"privateEndpoints":[]},"publicNetworkAccess":"Enabled","disableLocalAuth":false,"disableAadAuth":false},"kind":"SignalR","systemData":{"createdBy":"chenyl@microsoft.com","createdByType":"User","createdAt":"2022-08-02T06:21:44.4701914Z","lastModifiedBy":"chenyl@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-08-02T06:21:44.4701914Z"},"location":"eastus","tags":{"key":"value"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002","name":"signalr000002","type":"Microsoft.SignalRService/SignalR"}'
+      string: '{"sku":{"name":"Standard_S1","tier":"Standard","size":"S1","capacity":1},"properties":{"provisioningState":"Succeeded","externalIP":"20.88.155.51","hostName":"signalr000002.service.signalr.net","publicPort":443,"serverPort":443,"version":"1.0","privateEndpointConnections":[],"sharedPrivateLinkResources":[],"tls":{"clientCertEnabled":false},"hostNamePrefix":"signalr000002","features":[{"flag":"ServiceMode","value":"Classic","properties":{}},{"flag":"EnableConnectivityLogs","value":"False","properties":{}},{"flag":"EnableMessagingLogs","value":"False","properties":{}},{"flag":"EnableLiveTrace","value":"False","properties":{}}],"liveTraceConfiguration":null,"resourceLogConfiguration":null,"cors":{"allowedOrigins":["http://example1.com","http://example2.com"]},"serverless":{"connectionTimeoutInSeconds":30},"upstream":{"templates":null},"networkACLs":{"defaultAction":"Deny","publicNetwork":{"allow":["ServerConnection","ClientConnection","RESTAPI","Trace"],"deny":null},"privateEndpoints":[]},"publicNetworkAccess":"Enabled","disableLocalAuth":false,"disableAadAuth":false},"kind":"SignalR","location":"eastus","tags":{"key":"value"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002","name":"signalr000002","type":"Microsoft.SignalRService/SignalR","systemData":{"createdBy":"biqian@microsoft.com","createdByType":"User","createdAt":"2024-06-25T06:47:55.5084744Z","lastModifiedBy":"biqian@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2024-06-25T06:47:55.5084744Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1415'
+      - '1587'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 02 Aug 2022 06:23:51 GMT
+      - Tue, 25 Jun 2024 06:49:33 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 49D666A4290F49178377525E8696C764 Ref B: MAA201060516049 Ref C: 2024-06-25T06:49:33Z'
       x-rp-server-mvid:
-      - a240317d-2594-4b08-9f0c-5f370ea616d7
+      - 3fefedf9-8741-40b4-b45f-3b7e097c8b00
     status:
       code: 200
       message: OK
@@ -319,37 +311,39 @@ interactions:
       ParameterSetName:
       - -n -g --template --template
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-mgmt-signalr/1.1.0 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.61.0 azsdk-python-core/1.28.0 Python/3.12.3 (macOS-14.5-arm64-arm-64bit)
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002?api-version=2022-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002?api-version=2023-06-01-preview
   response:
     body:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/65209860-369d-43e8-9332-28c61114fc40?api-version=2022-02-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/5fc0b15d-5393-4af5-b803-b721ad86baa1?api-version=2023-06-01-preview&t=638548949769189006&c=MIIHpTCCBo2gAwIBAgITOgMPIyvO-SSNo3JCxQAEAw8jKzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjQwNTE3MDc0MzI1WhcNMjUwNTEyMDc0MzI1WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMm-rUyPQv0z_LgvMVxRmSGe7k2sSDcjhZtJtacrGF0aA0mXhldjASVDsIKbducmYozS8YVn2yXvxW_2yo82m2q934keEf1UEKaSADUrozDPX5msTyt18UcXAPp7vPi8MXbYjFOyyuc1uzgXltAbdS5P2ki32RUjUplv8OZZSK5OvCrsyCwkmsg2yKxfHaRObmPqpu65x8lFk2jKBDK30LBTk2StP96kJI1VnIe3fxGXE6_1XKZTCJH9o_4vYvmA3wTHxlu8KWljLk10ttEqy736mEq9ex8TqnJVHebwRZ33UQTFZClqhQrIcLUrar5PXwlFMtvhgI1-Du5tVtKr1KECAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBTVszhW7MMKoXa9-QpBHa5cQlUN9TAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAD-urQp96AuB916E-Te8RmgK90YXOfxpQ9UFVrx1h5G83WkRUIlKdESHrUjduIESxCRdkRY2ntf__S09h5_4l7f3rT0jpHXw-_8dUrAbn43jMiQmB2LXzLoyIWaLagT18F_wbUAmRMU1m1WEJE66ngt8mx407-SRKz6rKaPUCD2z-wIeSOcaXXY7KbRVUtbPS4GhSTo3fCRHPGpXS9ftpm-v7z3JFkXFsN7jcHBQDn2YqE7eFoPVqmoQtJZXXzAsWMeqSilE2wmsqn8Ty0ykZnqcfjuRNXoTC9CpuEhZYirAwmdBN87Cb7ZrhR2s8flm-uIqdEhk4mWeNMEyWsm5RLA&s=rSjlDjdxN095TCJa-z2pNgoE0iQ1P8CvBbWScvWS12719Z17Ud484hgon-lPfF0-uOv2t9jB_f770ucDMN5HSZ6mLYbNAD7XzbBUg9cbytCCYzVXbv-1OeLoD-PfrIeEElLU51Ke9rwRt1vENc8UabWsKD-vGUqQMW79d7nYUVm5hdGhvPW4qiVaXrb4hlIGNinjzM6RnBVumzblcS_2vy9j7E6WEo2cAcFr_uIa-hVBDuCTwtLbjYeRl7wSuYo_y6ZTEqoAqoSz-SJDLAVdPFJWoH6e5yu2V1Bt6JWPMdBoXjmgPEGWG8QLufb1T5CDC4pHfT64R-A2t35m-P1U8w&h=-vlMe8QIy87ZzKEHQ36RVSyMmu8zqa9NjRLkjvvVgk4
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Tue, 02 Aug 2022 06:23:53 GMT
+      - Tue, 25 Jun 2024 06:49:36 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationResults/65209860-369d-43e8-9332-28c61114fc40?api-version=2022-02-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationResults/5fc0b15d-5393-4af5-b803-b721ad86baa1?api-version=2023-06-01-preview&t=638548949769189006&c=MIIHpTCCBo2gAwIBAgITOgMPIyvO-SSNo3JCxQAEAw8jKzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjQwNTE3MDc0MzI1WhcNMjUwNTEyMDc0MzI1WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMm-rUyPQv0z_LgvMVxRmSGe7k2sSDcjhZtJtacrGF0aA0mXhldjASVDsIKbducmYozS8YVn2yXvxW_2yo82m2q934keEf1UEKaSADUrozDPX5msTyt18UcXAPp7vPi8MXbYjFOyyuc1uzgXltAbdS5P2ki32RUjUplv8OZZSK5OvCrsyCwkmsg2yKxfHaRObmPqpu65x8lFk2jKBDK30LBTk2StP96kJI1VnIe3fxGXE6_1XKZTCJH9o_4vYvmA3wTHxlu8KWljLk10ttEqy736mEq9ex8TqnJVHebwRZ33UQTFZClqhQrIcLUrar5PXwlFMtvhgI1-Du5tVtKr1KECAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBTVszhW7MMKoXa9-QpBHa5cQlUN9TAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAD-urQp96AuB916E-Te8RmgK90YXOfxpQ9UFVrx1h5G83WkRUIlKdESHrUjduIESxCRdkRY2ntf__S09h5_4l7f3rT0jpHXw-_8dUrAbn43jMiQmB2LXzLoyIWaLagT18F_wbUAmRMU1m1WEJE66ngt8mx407-SRKz6rKaPUCD2z-wIeSOcaXXY7KbRVUtbPS4GhSTo3fCRHPGpXS9ftpm-v7z3JFkXFsN7jcHBQDn2YqE7eFoPVqmoQtJZXXzAsWMeqSilE2wmsqn8Ty0ykZnqcfjuRNXoTC9CpuEhZYirAwmdBN87Cb7ZrhR2s8flm-uIqdEhk4mWeNMEyWsm5RLA&s=S6lS8jupw3af1wryRIlb2C7caVhlWj8hycH2tdbrEpv1Q7O8G7OsJWYSBDgm1f666Ceis7uuwPghpa9EMrYEgfKPbuEAnN6wWbRg6gyFqw9Zzhv8HY7OYIl9HxwGCoE9BnUF3u6n4-ONxohdmU1iajGmWde10Kk2CXCpxYTWk7vCmrqzibjxYuXn1Cp1wDnYepKEsjMfytuOiIaqGFbKafUTqzSpRMLt3Nh2mXBifNFbbX4gMzPBjUfXgIlu0OYzD6l7PL12qwlOvQrnpXMZOyJrG04uvKjWHUJnPiK0VGEWMLa0VjUpIeKR5rsx2sa_67iLIXGNGKqQ_lolB52P7g&h=MnpwjDdtbuZfk5fpbfHs_sb8x_YGCns5xLOHv8NKpvE
       pragma:
       - no-cache
-      server:
-      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
+      x-msedge-ref:
+      - 'Ref A: 4C503A21CD204747AE731C27796AB7FB Ref B: MAA201060516023 Ref C: 2024-06-25T06:49:35Z'
       x-rp-server-mvid:
-      - a240317d-2594-4b08-9f0c-5f370ea616d7
+      - 3fefedf9-8741-40b4-b45f-3b7e097c8b00
     status:
       code: 202
       message: Accepted
@@ -367,12 +361,12 @@ interactions:
       ParameterSetName:
       - -n -g --template --template
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-mgmt-signalr/1.1.0 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.61.0 azsdk-python-core/1.28.0 Python/3.12.3 (macOS-14.5-arm64-arm-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/65209860-369d-43e8-9332-28c61114fc40?api-version=2022-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/5fc0b15d-5393-4af5-b803-b721ad86baa1?api-version=2023-06-01-preview&t=638548949769189006&c=MIIHpTCCBo2gAwIBAgITOgMPIyvO-SSNo3JCxQAEAw8jKzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjQwNTE3MDc0MzI1WhcNMjUwNTEyMDc0MzI1WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMm-rUyPQv0z_LgvMVxRmSGe7k2sSDcjhZtJtacrGF0aA0mXhldjASVDsIKbducmYozS8YVn2yXvxW_2yo82m2q934keEf1UEKaSADUrozDPX5msTyt18UcXAPp7vPi8MXbYjFOyyuc1uzgXltAbdS5P2ki32RUjUplv8OZZSK5OvCrsyCwkmsg2yKxfHaRObmPqpu65x8lFk2jKBDK30LBTk2StP96kJI1VnIe3fxGXE6_1XKZTCJH9o_4vYvmA3wTHxlu8KWljLk10ttEqy736mEq9ex8TqnJVHebwRZ33UQTFZClqhQrIcLUrar5PXwlFMtvhgI1-Du5tVtKr1KECAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBTVszhW7MMKoXa9-QpBHa5cQlUN9TAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAD-urQp96AuB916E-Te8RmgK90YXOfxpQ9UFVrx1h5G83WkRUIlKdESHrUjduIESxCRdkRY2ntf__S09h5_4l7f3rT0jpHXw-_8dUrAbn43jMiQmB2LXzLoyIWaLagT18F_wbUAmRMU1m1WEJE66ngt8mx407-SRKz6rKaPUCD2z-wIeSOcaXXY7KbRVUtbPS4GhSTo3fCRHPGpXS9ftpm-v7z3JFkXFsN7jcHBQDn2YqE7eFoPVqmoQtJZXXzAsWMeqSilE2wmsqn8Ty0ykZnqcfjuRNXoTC9CpuEhZYirAwmdBN87Cb7ZrhR2s8flm-uIqdEhk4mWeNMEyWsm5RLA&s=rSjlDjdxN095TCJa-z2pNgoE0iQ1P8CvBbWScvWS12719Z17Ud484hgon-lPfF0-uOv2t9jB_f770ucDMN5HSZ6mLYbNAD7XzbBUg9cbytCCYzVXbv-1OeLoD-PfrIeEElLU51Ke9rwRt1vENc8UabWsKD-vGUqQMW79d7nYUVm5hdGhvPW4qiVaXrb4hlIGNinjzM6RnBVumzblcS_2vy9j7E6WEo2cAcFr_uIa-hVBDuCTwtLbjYeRl7wSuYo_y6ZTEqoAqoSz-SJDLAVdPFJWoH6e5yu2V1Bt6JWPMdBoXjmgPEGWG8QLufb1T5CDC4pHfT64R-A2t35m-P1U8w&h=-vlMe8QIy87ZzKEHQ36RVSyMmu8zqa9NjRLkjvvVgk4
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/65209860-369d-43e8-9332-28c61114fc40","name":"65209860-369d-43e8-9332-28c61114fc40","status":"Running","startTime":"2022-08-02T06:23:53.8697737Z"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/5fc0b15d-5393-4af5-b803-b721ad86baa1","name":"5fc0b15d-5393-4af5-b803-b721ad86baa1","status":"Running","startTime":"2024-06-25T06:49:36.7804935Z"}'
     headers:
       cache-control:
       - no-cache
@@ -381,19 +375,21 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 02 Aug 2022 06:24:24 GMT
+      - Tue, 25 Jun 2024 06:49:37 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 27A22AFF4C5E4AF5941F8F066729EEC0 Ref B: MAA201060516023 Ref C: 2024-06-25T06:49:37Z'
       x-rp-server-mvid:
-      - a240317d-2594-4b08-9f0c-5f370ea616d7
+      - 3fefedf9-8741-40b4-b45f-3b7e097c8b00
     status:
       code: 200
       message: OK
@@ -411,56 +407,12 @@ interactions:
       ParameterSetName:
       - -n -g --template --template
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-mgmt-signalr/1.1.0 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.61.0 azsdk-python-core/1.28.0 Python/3.12.3 (macOS-14.5-arm64-arm-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/65209860-369d-43e8-9332-28c61114fc40?api-version=2022-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/5fc0b15d-5393-4af5-b803-b721ad86baa1?api-version=2023-06-01-preview&t=638548949769189006&c=MIIHpTCCBo2gAwIBAgITOgMPIyvO-SSNo3JCxQAEAw8jKzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjQwNTE3MDc0MzI1WhcNMjUwNTEyMDc0MzI1WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMm-rUyPQv0z_LgvMVxRmSGe7k2sSDcjhZtJtacrGF0aA0mXhldjASVDsIKbducmYozS8YVn2yXvxW_2yo82m2q934keEf1UEKaSADUrozDPX5msTyt18UcXAPp7vPi8MXbYjFOyyuc1uzgXltAbdS5P2ki32RUjUplv8OZZSK5OvCrsyCwkmsg2yKxfHaRObmPqpu65x8lFk2jKBDK30LBTk2StP96kJI1VnIe3fxGXE6_1XKZTCJH9o_4vYvmA3wTHxlu8KWljLk10ttEqy736mEq9ex8TqnJVHebwRZ33UQTFZClqhQrIcLUrar5PXwlFMtvhgI1-Du5tVtKr1KECAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBTVszhW7MMKoXa9-QpBHa5cQlUN9TAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAD-urQp96AuB916E-Te8RmgK90YXOfxpQ9UFVrx1h5G83WkRUIlKdESHrUjduIESxCRdkRY2ntf__S09h5_4l7f3rT0jpHXw-_8dUrAbn43jMiQmB2LXzLoyIWaLagT18F_wbUAmRMU1m1WEJE66ngt8mx407-SRKz6rKaPUCD2z-wIeSOcaXXY7KbRVUtbPS4GhSTo3fCRHPGpXS9ftpm-v7z3JFkXFsN7jcHBQDn2YqE7eFoPVqmoQtJZXXzAsWMeqSilE2wmsqn8Ty0ykZnqcfjuRNXoTC9CpuEhZYirAwmdBN87Cb7ZrhR2s8flm-uIqdEhk4mWeNMEyWsm5RLA&s=rSjlDjdxN095TCJa-z2pNgoE0iQ1P8CvBbWScvWS12719Z17Ud484hgon-lPfF0-uOv2t9jB_f770ucDMN5HSZ6mLYbNAD7XzbBUg9cbytCCYzVXbv-1OeLoD-PfrIeEElLU51Ke9rwRt1vENc8UabWsKD-vGUqQMW79d7nYUVm5hdGhvPW4qiVaXrb4hlIGNinjzM6RnBVumzblcS_2vy9j7E6WEo2cAcFr_uIa-hVBDuCTwtLbjYeRl7wSuYo_y6ZTEqoAqoSz-SJDLAVdPFJWoH6e5yu2V1Bt6JWPMdBoXjmgPEGWG8QLufb1T5CDC4pHfT64R-A2t35m-P1U8w&h=-vlMe8QIy87ZzKEHQ36RVSyMmu8zqa9NjRLkjvvVgk4
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/65209860-369d-43e8-9332-28c61114fc40","name":"65209860-369d-43e8-9332-28c61114fc40","status":"Running","startTime":"2022-08-02T06:23:53.8697737Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '312'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 02 Aug 2022 06:24:54 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Kestrel
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-rp-server-mvid:
-      - a240317d-2594-4b08-9f0c-5f370ea616d7
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - signalr upstream update
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --template --template
-      User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-mgmt-signalr/1.1.0 Python/3.10.5 (Windows-10-10.0.22621-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/65209860-369d-43e8-9332-28c61114fc40?api-version=2022-02-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/65209860-369d-43e8-9332-28c61114fc40","name":"65209860-369d-43e8-9332-28c61114fc40","status":"Succeeded","startTime":"2022-08-02T06:23:53.8697737Z","endTime":"2022-08-02T06:25:06.9073293Z"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/5fc0b15d-5393-4af5-b803-b721ad86baa1","name":"5fc0b15d-5393-4af5-b803-b721ad86baa1","status":"Succeeded","startTime":"2024-06-25T06:49:36.7804935Z","endTime":"2024-06-25T06:49:55.7397579Z"}'
     headers:
       cache-control:
       - no-cache
@@ -469,19 +421,21 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 02 Aug 2022 06:25:25 GMT
+      - Tue, 25 Jun 2024 06:50:07 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: F660B42EB336461B948B12480EB98F60 Ref B: MAA201060516023 Ref C: 2024-06-25T06:50:07Z'
       x-rp-server-mvid:
-      - a240317d-2594-4b08-9f0c-5f370ea616d7
+      - 3fefedf9-8741-40b4-b45f-3b7e097c8b00
     status:
       code: 200
       message: OK
@@ -499,33 +453,35 @@ interactions:
       ParameterSetName:
       - -n -g --template --template
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-mgmt-signalr/1.1.0 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.61.0 azsdk-python-core/1.28.0 Python/3.12.3 (macOS-14.5-arm64-arm-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002?api-version=2022-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationResults/5fc0b15d-5393-4af5-b803-b721ad86baa1?api-version=2023-06-01-preview&t=638548949769189006&c=MIIHpTCCBo2gAwIBAgITOgMPIyvO-SSNo3JCxQAEAw8jKzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjQwNTE3MDc0MzI1WhcNMjUwNTEyMDc0MzI1WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMm-rUyPQv0z_LgvMVxRmSGe7k2sSDcjhZtJtacrGF0aA0mXhldjASVDsIKbducmYozS8YVn2yXvxW_2yo82m2q934keEf1UEKaSADUrozDPX5msTyt18UcXAPp7vPi8MXbYjFOyyuc1uzgXltAbdS5P2ki32RUjUplv8OZZSK5OvCrsyCwkmsg2yKxfHaRObmPqpu65x8lFk2jKBDK30LBTk2StP96kJI1VnIe3fxGXE6_1XKZTCJH9o_4vYvmA3wTHxlu8KWljLk10ttEqy736mEq9ex8TqnJVHebwRZ33UQTFZClqhQrIcLUrar5PXwlFMtvhgI1-Du5tVtKr1KECAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBTVszhW7MMKoXa9-QpBHa5cQlUN9TAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAD-urQp96AuB916E-Te8RmgK90YXOfxpQ9UFVrx1h5G83WkRUIlKdESHrUjduIESxCRdkRY2ntf__S09h5_4l7f3rT0jpHXw-_8dUrAbn43jMiQmB2LXzLoyIWaLagT18F_wbUAmRMU1m1WEJE66ngt8mx407-SRKz6rKaPUCD2z-wIeSOcaXXY7KbRVUtbPS4GhSTo3fCRHPGpXS9ftpm-v7z3JFkXFsN7jcHBQDn2YqE7eFoPVqmoQtJZXXzAsWMeqSilE2wmsqn8Ty0ykZnqcfjuRNXoTC9CpuEhZYirAwmdBN87Cb7ZrhR2s8flm-uIqdEhk4mWeNMEyWsm5RLA&s=S6lS8jupw3af1wryRIlb2C7caVhlWj8hycH2tdbrEpv1Q7O8G7OsJWYSBDgm1f666Ceis7uuwPghpa9EMrYEgfKPbuEAnN6wWbRg6gyFqw9Zzhv8HY7OYIl9HxwGCoE9BnUF3u6n4-ONxohdmU1iajGmWde10Kk2CXCpxYTWk7vCmrqzibjxYuXn1Cp1wDnYepKEsjMfytuOiIaqGFbKafUTqzSpRMLt3Nh2mXBifNFbbX4gMzPBjUfXgIlu0OYzD6l7PL12qwlOvQrnpXMZOyJrG04uvKjWHUJnPiK0VGEWMLa0VjUpIeKR5rsx2sa_67iLIXGNGKqQ_lolB52P7g&h=MnpwjDdtbuZfk5fpbfHs_sb8x_YGCns5xLOHv8NKpvE
   response:
     body:
-      string: '{"sku":{"name":"Standard_S1","tier":"Standard","size":"S1","capacity":1},"properties":{"provisioningState":"Succeeded","externalIP":"20.88.155.11","hostName":"signalr000002.service.signalr.net","publicPort":443,"serverPort":443,"version":"1.0","privateEndpointConnections":[],"sharedPrivateLinkResources":[],"tls":{"clientCertEnabled":false},"hostNamePrefix":"signalr000002","features":[{"flag":"ServiceMode","value":"Classic","properties":{}},{"flag":"EnableMessagingLogs","value":"False","properties":{}}],"liveTraceConfiguration":null,"resourceLogConfiguration":null,"cors":{"allowedOrigins":["http://example1.com","http://example2.com"]},"upstream":{"templates":[{"hubPattern":"chat","eventPattern":"connected","categoryPattern":"connections","urlTemplate":"http://host1.com","auth":null},{"hubPattern":"*","eventPattern":"*","categoryPattern":"messages","urlTemplate":"http://host2.com","auth":null}]},"networkACLs":{"defaultAction":"Deny","publicNetwork":{"allow":["ServerConnection","ClientConnection","RESTAPI","Trace"],"deny":null},"privateEndpoints":[]},"publicNetworkAccess":"Enabled","disableLocalAuth":false,"disableAadAuth":false},"kind":"SignalR","systemData":{"createdBy":"chenyl@microsoft.com","createdByType":"User","createdAt":"2022-08-02T06:21:44.4701914Z","lastModifiedBy":"chenyl@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-08-02T06:23:52.9829536Z"},"location":"eastus","tags":{"key":"value"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002","name":"signalr000002","type":"Microsoft.SignalRService/SignalR"}'
+      string: '{"sku":{"name":"Standard_S1","tier":"Standard","size":"S1","capacity":1},"properties":{"provisioningState":"Succeeded","externalIP":"20.88.155.51","hostName":"signalr000002.service.signalr.net","publicPort":443,"serverPort":443,"version":"1.0","privateEndpointConnections":[],"sharedPrivateLinkResources":[],"tls":{"clientCertEnabled":false},"hostNamePrefix":"signalr000002","features":[{"flag":"ServiceMode","value":"Classic","properties":{}},{"flag":"EnableConnectivityLogs","value":"False","properties":{}},{"flag":"EnableMessagingLogs","value":"False","properties":{}},{"flag":"EnableLiveTrace","value":"False","properties":{}}],"liveTraceConfiguration":null,"resourceLogConfiguration":null,"cors":{"allowedOrigins":["http://example1.com","http://example2.com"]},"serverless":{"connectionTimeoutInSeconds":30},"upstream":{"templates":[{"hubPattern":"chat","eventPattern":"connected","categoryPattern":"connections","urlTemplate":"http://host1.com","auth":null},{"hubPattern":"*","eventPattern":"*","categoryPattern":"messages","urlTemplate":"http://host2.com","auth":null}]},"networkACLs":{"defaultAction":"Deny","publicNetwork":{"allow":["ServerConnection","ClientConnection","RESTAPI","Trace"],"deny":null},"privateEndpoints":[]},"publicNetworkAccess":"Enabled","disableLocalAuth":false,"disableAadAuth":false},"kind":"SignalR","location":"eastus","tags":{"key":"value"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002","name":"signalr000002","type":"Microsoft.SignalRService/SignalR","systemData":{"createdBy":"biqian@microsoft.com","createdByType":"User","createdAt":"2024-06-25T06:47:55.5084744Z","lastModifiedBy":"biqian@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2024-06-25T06:49:36.0907582Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1650'
+      - '1822'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 02 Aug 2022 06:25:25 GMT
+      - Tue, 25 Jun 2024 06:50:08 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: EE5251E0409143E3A5B768668064A6D5 Ref B: MAA201060516023 Ref C: 2024-06-25T06:50:08Z'
       x-rp-server-mvid:
-      - a240317d-2594-4b08-9f0c-5f370ea616d7
+      - 3fefedf9-8741-40b4-b45f-3b7e097c8b00
     status:
       code: 200
       message: OK
@@ -543,37 +499,35 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-mgmt-signalr/1.1.0 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.61.0 azsdk-python-core/1.28.0 Python/3.12.3 (macOS-14.5-arm64-arm-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002?api-version=2022-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002?api-version=2023-06-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Standard_S1","tier":"Standard","size":"S1","capacity":1},"properties":{"provisioningState":"Succeeded","externalIP":"20.88.155.11","hostName":"signalr000002.service.signalr.net","publicPort":443,"serverPort":443,"version":"1.0","privateEndpointConnections":[],"sharedPrivateLinkResources":[],"tls":{"clientCertEnabled":false},"hostNamePrefix":"signalr000002","features":[{"flag":"ServiceMode","value":"Classic","properties":{}},{"flag":"EnableMessagingLogs","value":"False","properties":{}}],"liveTraceConfiguration":null,"resourceLogConfiguration":null,"cors":{"allowedOrigins":["http://example1.com","http://example2.com"]},"upstream":{"templates":[{"hubPattern":"chat","eventPattern":"connected","categoryPattern":"connections","urlTemplate":"http://host1.com","auth":null},{"hubPattern":"*","eventPattern":"*","categoryPattern":"messages","urlTemplate":"http://host2.com","auth":null}]},"networkACLs":{"defaultAction":"Deny","publicNetwork":{"allow":["ServerConnection","ClientConnection","RESTAPI","Trace"],"deny":null},"privateEndpoints":[]},"publicNetworkAccess":"Enabled","disableLocalAuth":false,"disableAadAuth":false},"kind":"SignalR","systemData":{"createdBy":"chenyl@microsoft.com","createdByType":"User","createdAt":"2022-08-02T06:21:44.4701914Z","lastModifiedBy":"chenyl@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-08-02T06:23:52.9829536Z"},"location":"eastus","tags":{"key":"value"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002","name":"signalr000002","type":"Microsoft.SignalRService/SignalR"}'
+      string: '{"sku":{"name":"Standard_S1","tier":"Standard","size":"S1","capacity":1},"properties":{"provisioningState":"Succeeded","externalIP":"20.88.155.51","hostName":"signalr000002.service.signalr.net","publicPort":443,"serverPort":443,"version":"1.0","privateEndpointConnections":[],"sharedPrivateLinkResources":[],"tls":{"clientCertEnabled":false},"hostNamePrefix":"signalr000002","features":[{"flag":"ServiceMode","value":"Classic","properties":{}},{"flag":"EnableConnectivityLogs","value":"False","properties":{}},{"flag":"EnableMessagingLogs","value":"False","properties":{}},{"flag":"EnableLiveTrace","value":"False","properties":{}}],"liveTraceConfiguration":null,"resourceLogConfiguration":null,"cors":{"allowedOrigins":["http://example1.com","http://example2.com"]},"serverless":{"connectionTimeoutInSeconds":30},"upstream":{"templates":[{"hubPattern":"chat","eventPattern":"connected","categoryPattern":"connections","urlTemplate":"http://host1.com","auth":null},{"hubPattern":"*","eventPattern":"*","categoryPattern":"messages","urlTemplate":"http://host2.com","auth":null}]},"networkACLs":{"defaultAction":"Deny","publicNetwork":{"allow":["ServerConnection","ClientConnection","RESTAPI","Trace"],"deny":null},"privateEndpoints":[]},"publicNetworkAccess":"Enabled","disableLocalAuth":false,"disableAadAuth":false},"kind":"SignalR","location":"eastus","tags":{"key":"value"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002","name":"signalr000002","type":"Microsoft.SignalRService/SignalR","systemData":{"createdBy":"biqian@microsoft.com","createdByType":"User","createdAt":"2024-06-25T06:47:55.5084744Z","lastModifiedBy":"biqian@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2024-06-25T06:49:36.0907582Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1650'
+      - '1822'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 02 Aug 2022 06:25:27 GMT
+      - Tue, 25 Jun 2024 06:50:10 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 61290343FE544389ADCA1B63AB1CDE58 Ref B: MAA201060516047 Ref C: 2024-06-25T06:50:10Z'
       x-rp-server-mvid:
-      - a240317d-2594-4b08-9f0c-5f370ea616d7
+      - 3fefedf9-8741-40b4-b45f-3b7e097c8b00
     status:
       code: 200
       message: OK
@@ -596,37 +550,39 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-mgmt-signalr/1.1.0 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.61.0 azsdk-python-core/1.28.0 Python/3.12.3 (macOS-14.5-arm64-arm-64bit)
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002?api-version=2022-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002?api-version=2023-06-01-preview
   response:
     body:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/824f5d48-dc41-4fcc-b02c-95e43464aab9?api-version=2022-02-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/02e73722-0c9e-4de0-ac1e-d22937441c94?api-version=2023-06-01-preview&t=638548950131844474&c=MIIHpTCCBo2gAwIBAgITOgMPIyvO-SSNo3JCxQAEAw8jKzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjQwNTE3MDc0MzI1WhcNMjUwNTEyMDc0MzI1WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMm-rUyPQv0z_LgvMVxRmSGe7k2sSDcjhZtJtacrGF0aA0mXhldjASVDsIKbducmYozS8YVn2yXvxW_2yo82m2q934keEf1UEKaSADUrozDPX5msTyt18UcXAPp7vPi8MXbYjFOyyuc1uzgXltAbdS5P2ki32RUjUplv8OZZSK5OvCrsyCwkmsg2yKxfHaRObmPqpu65x8lFk2jKBDK30LBTk2StP96kJI1VnIe3fxGXE6_1XKZTCJH9o_4vYvmA3wTHxlu8KWljLk10ttEqy736mEq9ex8TqnJVHebwRZ33UQTFZClqhQrIcLUrar5PXwlFMtvhgI1-Du5tVtKr1KECAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBTVszhW7MMKoXa9-QpBHa5cQlUN9TAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAD-urQp96AuB916E-Te8RmgK90YXOfxpQ9UFVrx1h5G83WkRUIlKdESHrUjduIESxCRdkRY2ntf__S09h5_4l7f3rT0jpHXw-_8dUrAbn43jMiQmB2LXzLoyIWaLagT18F_wbUAmRMU1m1WEJE66ngt8mx407-SRKz6rKaPUCD2z-wIeSOcaXXY7KbRVUtbPS4GhSTo3fCRHPGpXS9ftpm-v7z3JFkXFsN7jcHBQDn2YqE7eFoPVqmoQtJZXXzAsWMeqSilE2wmsqn8Ty0ykZnqcfjuRNXoTC9CpuEhZYirAwmdBN87Cb7ZrhR2s8flm-uIqdEhk4mWeNMEyWsm5RLA&s=hAWxTakEH_V27CVp0FXcPaAkYPr7riTAUuJc0jEDtXwYP8YZFPE6FPUClHKV5NSFHybLZdBDaSIRVOedmNusv48IwkLWLLhTUnTGrx4SX6F5UCuPVozy4In9nLEE9nHMR35KWf71wb0sOdZjnLZxgv0BEcy-PUcfGn_n1V8ow3rypiBHKoXrOkv3ObNKyqvYQ1J8_9uKREYvfXx4HvWAIwYsgF_zOs0q4gdOFvj9GAH3R7QOJKMXdB50ccSzjdMLanglBtR7gucCQA9ryoCTeJ58HxCSqBTt2R6KDLSUkC3ac8C1a7tQhOvHTNT4l7Ig5XrY7_s1qUJOwfmjlIfacg&h=bYXALTWp9KpBqekTf1doMjd1KlMRBj_6__Xun2Woh7k
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Tue, 02 Aug 2022 06:25:29 GMT
+      - Tue, 25 Jun 2024 06:50:13 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationResults/824f5d48-dc41-4fcc-b02c-95e43464aab9?api-version=2022-02-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationResults/02e73722-0c9e-4de0-ac1e-d22937441c94?api-version=2023-06-01-preview&t=638548950131844474&c=MIIHpTCCBo2gAwIBAgITOgMPIyvO-SSNo3JCxQAEAw8jKzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjQwNTE3MDc0MzI1WhcNMjUwNTEyMDc0MzI1WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMm-rUyPQv0z_LgvMVxRmSGe7k2sSDcjhZtJtacrGF0aA0mXhldjASVDsIKbducmYozS8YVn2yXvxW_2yo82m2q934keEf1UEKaSADUrozDPX5msTyt18UcXAPp7vPi8MXbYjFOyyuc1uzgXltAbdS5P2ki32RUjUplv8OZZSK5OvCrsyCwkmsg2yKxfHaRObmPqpu65x8lFk2jKBDK30LBTk2StP96kJI1VnIe3fxGXE6_1XKZTCJH9o_4vYvmA3wTHxlu8KWljLk10ttEqy736mEq9ex8TqnJVHebwRZ33UQTFZClqhQrIcLUrar5PXwlFMtvhgI1-Du5tVtKr1KECAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBTVszhW7MMKoXa9-QpBHa5cQlUN9TAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAD-urQp96AuB916E-Te8RmgK90YXOfxpQ9UFVrx1h5G83WkRUIlKdESHrUjduIESxCRdkRY2ntf__S09h5_4l7f3rT0jpHXw-_8dUrAbn43jMiQmB2LXzLoyIWaLagT18F_wbUAmRMU1m1WEJE66ngt8mx407-SRKz6rKaPUCD2z-wIeSOcaXXY7KbRVUtbPS4GhSTo3fCRHPGpXS9ftpm-v7z3JFkXFsN7jcHBQDn2YqE7eFoPVqmoQtJZXXzAsWMeqSilE2wmsqn8Ty0ykZnqcfjuRNXoTC9CpuEhZYirAwmdBN87Cb7ZrhR2s8flm-uIqdEhk4mWeNMEyWsm5RLA&s=KH4mQd2fTcZxYW-hIlxyJfmcqHTDbZg2VHDAzDZOnxQUJb-o3gc_2lEKrPTjGSlKs6HMLmK67gmVfaYaAnzz3n3Gkh1mVg_WtN6LGV_Wrf91INyU6rMPPi4JJb7lsG6FeW_E6oS_wF8bG4JymR9j0bxXFiadyU2xv5NMPsIKV4hiw0imsQx-sWnqb_hzpP3W8y-JnJEFhR-wXBSt-k3NpaFzjaIC0Oe61uC_txse34Yyj5KlGpmWxLULXcmql54w6U9uDBA_9XaHH960h7eLvOux38oOmxsPrSI-o06hGQ62denmd1vWhR8Si19fdGwkPr_qLK-m4oPfUN1Hkvd4qw&h=2WrPXvjpnJa-K0RGH2JSiMF3VsRabnuB9FD_Ne1Pf1A
       pragma:
       - no-cache
-      server:
-      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
+      x-msedge-ref:
+      - 'Ref A: F99294E0F98146DBA469315AC60C1F27 Ref B: MAA201060516051 Ref C: 2024-06-25T06:50:11Z'
       x-rp-server-mvid:
-      - a240317d-2594-4b08-9f0c-5f370ea616d7
+      - 3fefedf9-8741-40b4-b45f-3b7e097c8b00
     status:
       code: 202
       message: Accepted
@@ -644,12 +600,12 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-mgmt-signalr/1.1.0 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.61.0 azsdk-python-core/1.28.0 Python/3.12.3 (macOS-14.5-arm64-arm-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/824f5d48-dc41-4fcc-b02c-95e43464aab9?api-version=2022-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/02e73722-0c9e-4de0-ac1e-d22937441c94?api-version=2023-06-01-preview&t=638548950131844474&c=MIIHpTCCBo2gAwIBAgITOgMPIyvO-SSNo3JCxQAEAw8jKzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjQwNTE3MDc0MzI1WhcNMjUwNTEyMDc0MzI1WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMm-rUyPQv0z_LgvMVxRmSGe7k2sSDcjhZtJtacrGF0aA0mXhldjASVDsIKbducmYozS8YVn2yXvxW_2yo82m2q934keEf1UEKaSADUrozDPX5msTyt18UcXAPp7vPi8MXbYjFOyyuc1uzgXltAbdS5P2ki32RUjUplv8OZZSK5OvCrsyCwkmsg2yKxfHaRObmPqpu65x8lFk2jKBDK30LBTk2StP96kJI1VnIe3fxGXE6_1XKZTCJH9o_4vYvmA3wTHxlu8KWljLk10ttEqy736mEq9ex8TqnJVHebwRZ33UQTFZClqhQrIcLUrar5PXwlFMtvhgI1-Du5tVtKr1KECAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBTVszhW7MMKoXa9-QpBHa5cQlUN9TAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAD-urQp96AuB916E-Te8RmgK90YXOfxpQ9UFVrx1h5G83WkRUIlKdESHrUjduIESxCRdkRY2ntf__S09h5_4l7f3rT0jpHXw-_8dUrAbn43jMiQmB2LXzLoyIWaLagT18F_wbUAmRMU1m1WEJE66ngt8mx407-SRKz6rKaPUCD2z-wIeSOcaXXY7KbRVUtbPS4GhSTo3fCRHPGpXS9ftpm-v7z3JFkXFsN7jcHBQDn2YqE7eFoPVqmoQtJZXXzAsWMeqSilE2wmsqn8Ty0ykZnqcfjuRNXoTC9CpuEhZYirAwmdBN87Cb7ZrhR2s8flm-uIqdEhk4mWeNMEyWsm5RLA&s=hAWxTakEH_V27CVp0FXcPaAkYPr7riTAUuJc0jEDtXwYP8YZFPE6FPUClHKV5NSFHybLZdBDaSIRVOedmNusv48IwkLWLLhTUnTGrx4SX6F5UCuPVozy4In9nLEE9nHMR35KWf71wb0sOdZjnLZxgv0BEcy-PUcfGn_n1V8ow3rypiBHKoXrOkv3ObNKyqvYQ1J8_9uKREYvfXx4HvWAIwYsgF_zOs0q4gdOFvj9GAH3R7QOJKMXdB50ccSzjdMLanglBtR7gucCQA9ryoCTeJ58HxCSqBTt2R6KDLSUkC3ac8C1a7tQhOvHTNT4l7Ig5XrY7_s1qUJOwfmjlIfacg&h=bYXALTWp9KpBqekTf1doMjd1KlMRBj_6__Xun2Woh7k
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/824f5d48-dc41-4fcc-b02c-95e43464aab9","name":"824f5d48-dc41-4fcc-b02c-95e43464aab9","status":"Running","startTime":"2022-08-02T06:25:30.1315388Z"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/02e73722-0c9e-4de0-ac1e-d22937441c94","name":"02e73722-0c9e-4de0-ac1e-d22937441c94","status":"Running","startTime":"2024-06-25T06:50:13.0501648Z"}'
     headers:
       cache-control:
       - no-cache
@@ -658,23 +614,21 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 02 Aug 2022 06:26:00 GMT
+      - Tue, 25 Jun 2024 06:50:14 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 38857716C7F04A1F94491CB8F852275A Ref B: MAA201060516051 Ref C: 2024-06-25T06:50:13Z'
       x-rp-server-mvid:
-      - a240317d-2594-4b08-9f0c-5f370ea616d7
+      - 3fefedf9-8741-40b4-b45f-3b7e097c8b00
     status:
       code: 200
       message: OK
@@ -692,60 +646,12 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-mgmt-signalr/1.1.0 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.61.0 azsdk-python-core/1.28.0 Python/3.12.3 (macOS-14.5-arm64-arm-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/824f5d48-dc41-4fcc-b02c-95e43464aab9?api-version=2022-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/02e73722-0c9e-4de0-ac1e-d22937441c94?api-version=2023-06-01-preview&t=638548950131844474&c=MIIHpTCCBo2gAwIBAgITOgMPIyvO-SSNo3JCxQAEAw8jKzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjQwNTE3MDc0MzI1WhcNMjUwNTEyMDc0MzI1WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMm-rUyPQv0z_LgvMVxRmSGe7k2sSDcjhZtJtacrGF0aA0mXhldjASVDsIKbducmYozS8YVn2yXvxW_2yo82m2q934keEf1UEKaSADUrozDPX5msTyt18UcXAPp7vPi8MXbYjFOyyuc1uzgXltAbdS5P2ki32RUjUplv8OZZSK5OvCrsyCwkmsg2yKxfHaRObmPqpu65x8lFk2jKBDK30LBTk2StP96kJI1VnIe3fxGXE6_1XKZTCJH9o_4vYvmA3wTHxlu8KWljLk10ttEqy736mEq9ex8TqnJVHebwRZ33UQTFZClqhQrIcLUrar5PXwlFMtvhgI1-Du5tVtKr1KECAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBTVszhW7MMKoXa9-QpBHa5cQlUN9TAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAD-urQp96AuB916E-Te8RmgK90YXOfxpQ9UFVrx1h5G83WkRUIlKdESHrUjduIESxCRdkRY2ntf__S09h5_4l7f3rT0jpHXw-_8dUrAbn43jMiQmB2LXzLoyIWaLagT18F_wbUAmRMU1m1WEJE66ngt8mx407-SRKz6rKaPUCD2z-wIeSOcaXXY7KbRVUtbPS4GhSTo3fCRHPGpXS9ftpm-v7z3JFkXFsN7jcHBQDn2YqE7eFoPVqmoQtJZXXzAsWMeqSilE2wmsqn8Ty0ykZnqcfjuRNXoTC9CpuEhZYirAwmdBN87Cb7ZrhR2s8flm-uIqdEhk4mWeNMEyWsm5RLA&s=hAWxTakEH_V27CVp0FXcPaAkYPr7riTAUuJc0jEDtXwYP8YZFPE6FPUClHKV5NSFHybLZdBDaSIRVOedmNusv48IwkLWLLhTUnTGrx4SX6F5UCuPVozy4In9nLEE9nHMR35KWf71wb0sOdZjnLZxgv0BEcy-PUcfGn_n1V8ow3rypiBHKoXrOkv3ObNKyqvYQ1J8_9uKREYvfXx4HvWAIwYsgF_zOs0q4gdOFvj9GAH3R7QOJKMXdB50ccSzjdMLanglBtR7gucCQA9ryoCTeJ58HxCSqBTt2R6KDLSUkC3ac8C1a7tQhOvHTNT4l7Ig5XrY7_s1qUJOwfmjlIfacg&h=bYXALTWp9KpBqekTf1doMjd1KlMRBj_6__Xun2Woh7k
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/824f5d48-dc41-4fcc-b02c-95e43464aab9","name":"824f5d48-dc41-4fcc-b02c-95e43464aab9","status":"Running","startTime":"2022-08-02T06:25:30.1315388Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '312'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 02 Aug 2022 06:26:31 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Kestrel
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-rp-server-mvid:
-      - a240317d-2594-4b08-9f0c-5f370ea616d7
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - signalr upstream clear
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g
-      User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-mgmt-signalr/1.1.0 Python/3.10.5 (Windows-10-10.0.22621-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/824f5d48-dc41-4fcc-b02c-95e43464aab9?api-version=2022-02-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/824f5d48-dc41-4fcc-b02c-95e43464aab9","name":"824f5d48-dc41-4fcc-b02c-95e43464aab9","status":"Succeeded","startTime":"2022-08-02T06:25:30.1315388Z","endTime":"2022-08-02T06:26:43.5102236Z"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/02e73722-0c9e-4de0-ac1e-d22937441c94","name":"02e73722-0c9e-4de0-ac1e-d22937441c94","status":"Succeeded","startTime":"2024-06-25T06:50:13.0501648Z","endTime":"2024-06-25T06:50:33.4185511Z"}'
     headers:
       cache-control:
       - no-cache
@@ -754,23 +660,21 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 02 Aug 2022 06:27:01 GMT
+      - Tue, 25 Jun 2024 06:50:45 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 207DD4CDD18846309B17146430D3AF60 Ref B: MAA201060516051 Ref C: 2024-06-25T06:50:44Z'
       x-rp-server-mvid:
-      - a240317d-2594-4b08-9f0c-5f370ea616d7
+      - 3fefedf9-8741-40b4-b45f-3b7e097c8b00
     status:
       code: 200
       message: OK
@@ -788,37 +692,35 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.38.0 azsdk-python-mgmt-signalr/1.1.0 Python/3.10.5 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.61.0 azsdk-python-core/1.28.0 Python/3.12.3 (macOS-14.5-arm64-arm-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002?api-version=2022-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationResults/02e73722-0c9e-4de0-ac1e-d22937441c94?api-version=2023-06-01-preview&t=638548950131844474&c=MIIHpTCCBo2gAwIBAgITOgMPIyvO-SSNo3JCxQAEAw8jKzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjQwNTE3MDc0MzI1WhcNMjUwNTEyMDc0MzI1WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMm-rUyPQv0z_LgvMVxRmSGe7k2sSDcjhZtJtacrGF0aA0mXhldjASVDsIKbducmYozS8YVn2yXvxW_2yo82m2q934keEf1UEKaSADUrozDPX5msTyt18UcXAPp7vPi8MXbYjFOyyuc1uzgXltAbdS5P2ki32RUjUplv8OZZSK5OvCrsyCwkmsg2yKxfHaRObmPqpu65x8lFk2jKBDK30LBTk2StP96kJI1VnIe3fxGXE6_1XKZTCJH9o_4vYvmA3wTHxlu8KWljLk10ttEqy736mEq9ex8TqnJVHebwRZ33UQTFZClqhQrIcLUrar5PXwlFMtvhgI1-Du5tVtKr1KECAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBTVszhW7MMKoXa9-QpBHa5cQlUN9TAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAD-urQp96AuB916E-Te8RmgK90YXOfxpQ9UFVrx1h5G83WkRUIlKdESHrUjduIESxCRdkRY2ntf__S09h5_4l7f3rT0jpHXw-_8dUrAbn43jMiQmB2LXzLoyIWaLagT18F_wbUAmRMU1m1WEJE66ngt8mx407-SRKz6rKaPUCD2z-wIeSOcaXXY7KbRVUtbPS4GhSTo3fCRHPGpXS9ftpm-v7z3JFkXFsN7jcHBQDn2YqE7eFoPVqmoQtJZXXzAsWMeqSilE2wmsqn8Ty0ykZnqcfjuRNXoTC9CpuEhZYirAwmdBN87Cb7ZrhR2s8flm-uIqdEhk4mWeNMEyWsm5RLA&s=KH4mQd2fTcZxYW-hIlxyJfmcqHTDbZg2VHDAzDZOnxQUJb-o3gc_2lEKrPTjGSlKs6HMLmK67gmVfaYaAnzz3n3Gkh1mVg_WtN6LGV_Wrf91INyU6rMPPi4JJb7lsG6FeW_E6oS_wF8bG4JymR9j0bxXFiadyU2xv5NMPsIKV4hiw0imsQx-sWnqb_hzpP3W8y-JnJEFhR-wXBSt-k3NpaFzjaIC0Oe61uC_txse34Yyj5KlGpmWxLULXcmql54w6U9uDBA_9XaHH960h7eLvOux38oOmxsPrSI-o06hGQ62denmd1vWhR8Si19fdGwkPr_qLK-m4oPfUN1Hkvd4qw&h=2WrPXvjpnJa-K0RGH2JSiMF3VsRabnuB9FD_Ne1Pf1A
   response:
     body:
-      string: '{"sku":{"name":"Standard_S1","tier":"Standard","size":"S1","capacity":1},"properties":{"provisioningState":"Succeeded","externalIP":"20.88.155.11","hostName":"signalr000002.service.signalr.net","publicPort":443,"serverPort":443,"version":"1.0","privateEndpointConnections":[],"sharedPrivateLinkResources":[],"tls":{"clientCertEnabled":false},"hostNamePrefix":"signalr000002","features":[{"flag":"ServiceMode","value":"Classic","properties":{}},{"flag":"EnableMessagingLogs","value":"False","properties":{}}],"liveTraceConfiguration":null,"resourceLogConfiguration":null,"cors":{"allowedOrigins":["http://example1.com","http://example2.com"]},"upstream":{"templates":[]},"networkACLs":{"defaultAction":"Deny","publicNetwork":{"allow":["ServerConnection","ClientConnection","RESTAPI","Trace"],"deny":null},"privateEndpoints":[]},"publicNetworkAccess":"Enabled","disableLocalAuth":false,"disableAadAuth":false},"kind":"SignalR","systemData":{"createdBy":"chenyl@microsoft.com","createdByType":"User","createdAt":"2022-08-02T06:21:44.4701914Z","lastModifiedBy":"chenyl@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-08-02T06:25:29.2769665Z"},"location":"eastus","tags":{"key":"value"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002","name":"signalr000002","type":"Microsoft.SignalRService/SignalR"}'
+      string: '{"sku":{"name":"Standard_S1","tier":"Standard","size":"S1","capacity":1},"properties":{"provisioningState":"Succeeded","externalIP":"20.88.155.51","hostName":"signalr000002.service.signalr.net","publicPort":443,"serverPort":443,"version":"1.0","privateEndpointConnections":[],"sharedPrivateLinkResources":[],"tls":{"clientCertEnabled":false},"hostNamePrefix":"signalr000002","features":[{"flag":"ServiceMode","value":"Classic","properties":{}},{"flag":"EnableConnectivityLogs","value":"False","properties":{}},{"flag":"EnableMessagingLogs","value":"False","properties":{}},{"flag":"EnableLiveTrace","value":"False","properties":{}}],"liveTraceConfiguration":null,"resourceLogConfiguration":null,"cors":{"allowedOrigins":["http://example1.com","http://example2.com"]},"serverless":{"connectionTimeoutInSeconds":30},"upstream":{"templates":[]},"networkACLs":{"defaultAction":"Deny","publicNetwork":{"allow":["ServerConnection","ClientConnection","RESTAPI","Trace"],"deny":null},"privateEndpoints":[]},"publicNetworkAccess":"Enabled","disableLocalAuth":false,"disableAadAuth":false},"kind":"SignalR","location":"eastus","tags":{"key":"value"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002","name":"signalr000002","type":"Microsoft.SignalRService/SignalR","systemData":{"createdBy":"biqian@microsoft.com","createdByType":"User","createdAt":"2024-06-25T06:47:55.5084744Z","lastModifiedBy":"biqian@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2024-06-25T06:50:12.3875652Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1413'
+      - '1585'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 02 Aug 2022 06:27:01 GMT
+      - Tue, 25 Jun 2024 06:50:46 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: EE042A5917234EABB1A3F61CBEC9648B Ref B: MAA201060516051 Ref C: 2024-06-25T06:50:45Z'
       x-rp-server-mvid:
-      - a240317d-2594-4b08-9f0c-5f370ea616d7
+      - 3fefedf9-8741-40b4-b45f-3b7e097c8b00
     status:
       code: 200
       message: OK

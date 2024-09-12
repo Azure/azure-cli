@@ -10,9 +10,10 @@ from ._utils import get_resource_group_name_by_registry_name
 def acr_cred_set_show(cmd,
                       client,
                       registry_name,
-                      name):
+                      name,
+                      resource_group_name=None):
 
-    rg = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, None)
+    rg = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
 
     return client.get(resource_group_name=rg,
                       registry_name=registry_name,
@@ -21,9 +22,10 @@ def acr_cred_set_show(cmd,
 
 def acr_cred_set_list(cmd,
                       client,
-                      registry_name):
+                      registry_name,
+                      resource_group_name=None):
 
-    rg = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, None)
+    rg = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
 
     return client.list(resource_group_name=rg,
                        registry_name=registry_name)
@@ -32,9 +34,10 @@ def acr_cred_set_list(cmd,
 def acr_cred_set_delete(cmd,
                         client,
                         registry_name,
-                        name):
+                        name,
+                        resource_group_name=None):
 
-    rg = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, None)
+    rg = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
 
     return client.begin_delete(resource_group_name=rg,
                                registry_name=registry_name,
@@ -47,9 +50,10 @@ def acr_cred_set_create(cmd,
                         name,
                         password_id,
                         username_id,
-                        login_server):
+                        login_server,
+                        resource_group_name=None):
 
-    rg = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, None)
+    rg = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
 
     CredSet = cmd.get_models('CredentialSet', operation_group='credential_sets')
     AuthCred = cmd.get_models('AuthCredential', operation_group='credential_sets')
@@ -78,13 +82,14 @@ def acr_cred_set_update_custom(cmd,
                                instance,
                                registry_name,
                                name,
+                               resource_group_name=None,
                                password_id=None,
                                username_id=None):
 
     if password_id is None and username_id is None:
         raise InvalidArgumentValueError("You must update either the username secret ID, password secret ID, or both.")
 
-    rg = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, None)
+    rg = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
 
     cred_set = client.get(resource_group_name=rg,
                           registry_name=registry_name,
@@ -114,9 +119,10 @@ def acr_cred_set_update_set(cmd,
                             client,
                             registry_name,
                             name,
+                            resource_group_name=None,
                             parameters=None):
 
-    rg = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name)
+    rg = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
     return client.begin_update(resource_group_name=rg,
                                registry_name=registry_name,
                                credential_set_name=name,

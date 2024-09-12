@@ -25,6 +25,7 @@ from urllib.parse import urlparse
 
 from azure.cli.command_modules.apim._params import ImportFormat
 from azure.cli.core.util import sdk_no_wait
+from azure.cli.core.util import get_logger
 from azure.cli.core.azclierror import (RequiredArgumentMissingError, MutuallyExclusiveArgumentError,
                                        InvalidArgumentValueError)
 from azure.mgmt.apimanagement.models import (ApiManagementServiceResource, ApiManagementServiceIdentity,
@@ -39,6 +40,7 @@ from azure.mgmt.apimanagement.models import (ApiManagementServiceResource, ApiMa
                                              OperationContract, ApiManagementServiceCheckNameAvailabilityParameters,
                                              ApiReleaseContract, SchemaContract, ResolverContract, PolicyContract)
 
+logger = get_logger(__name__)
 
 # Helpers
 
@@ -285,7 +287,7 @@ def apim_api_create(client, resource_group_name, service_name, api_id, descripti
                     api_type=None, subscription_required=False, no_wait=False):
     """Creates a new API. """
 
-    if authorization_server_id is not None and authorization_scope is not None:
+    if authorization_server_id is not None:
         o_auth2 = OAuth2AuthenticationSettingsContract(
             authorization_server_id=authorization_server_id,
             scope=authorization_scope
@@ -514,8 +516,119 @@ def apim_api_import(
         parameters=parameters)
 
 
-# Product API Operations
+def apim_api_export(client, resource_group_name, service_name, api_id, export_format, file_path=None):
+    """Gets the details of the API specified by its identifier in the format specified """
 
+    import json
+    import yaml
+    import xml.etree.ElementTree as ET
+    import os
+    import requests
+
+    # Define the mapping from old format values to new ones
+    format_mapping = {
+        "WadlFile": "wadl-link",
+        "SwaggerFile": "swagger-link",
+        "OpenApiYamlFile": "openapi-link",
+        "OpenApiJsonFile": "openapi+json-link",
+        "WsdlFile": "wsdl-link",
+        "WadlUrl": "wadl-link",
+        "SwaggerUrl": "swagger-link",
+        "OpenApiYamlUrl": "openapi-link",
+        "OpenApiJsonUrl": "openapi+json-link",
+        "WsdlUrl": "wsdl-link"
+    }
+    mappedFormat = format_mapping.get(export_format)
+
+    # Export the API from APIManagement
+    response = client.api_export.get(resource_group_name, service_name, api_id, mappedFormat, True)
+
+    # If url is requested
+    if export_format in ['WadlUrl', 'SwaggerUrl', 'OpenApiYamlUrl', 'OpenApiJsonUrl', 'WsdlUrl']:
+        return response
+
+    # If file is requested
+    if file_path is None:
+        raise RequiredArgumentMissingError(
+            "Please specify file path using '--file-path' argument.")
+
+    # Obtain link from the response
+    response_dict = api_export_result_to_dict(response)
+    try:
+        # Extract the link from the response where results are stored
+        link = response_dict['additional_properties']['properties']['value']['link']
+    except KeyError:
+        logger.warning("Error exporting api from APIManagement. The expected link is not present in the response.")
+
+    # Determine the file extension based on the mappedFormat
+    if mappedFormat in ['swagger-link', 'openapi+json-link']:
+        file_extension = '.json'
+    elif mappedFormat in ['wsdl-link', 'wadl-link']:
+        file_extension = '.xml'
+    elif mappedFormat in ['openapi-link']:
+        file_extension = '.yaml'
+    else:
+        file_extension = '.txt'
+
+    # Remove '-link' from the mappedFormat and create the file name with full path
+    exportType = mappedFormat.replace('-link', '')
+    file_name = f"{api_id}_{exportType}{file_extension}"
+    full_path = os.path.join(file_path, file_name)
+
+    # Get the results from the link where the API Export Results are stored
+    try:
+        exportedResults = requests.get(link, timeout=30)
+        if not exportedResults.ok:
+            logger.warning("Got bad status from APIManagement during API Export:%s, {exportedResults.status_code}")
+    except requests.exceptions.ReadTimeout:
+        logger.warning("Timed out while exporting api from APIManagement.")
+
+    try:
+        # Try to parse as JSON
+        exportedResultContent = json.loads(exportedResults.text)
+    except json.JSONDecodeError:
+        try:
+            # Try to parse as YAML
+            exportedResultContent = yaml.safe_load(exportedResults.text)
+        except yaml.YAMLError:
+            try:
+                # Try to parse as XML
+                exportedResultContent = ET.fromstring(exportedResults.text)
+            except ET.ParseError:
+                logger.warning("Content is not in JSON, YAML, or XML format.")
+
+    # Write results to a file
+    logger.warning("Writing results to file: %s", full_path)
+    try:
+        with open(full_path, 'w') as f:
+            if file_extension == '.json':
+                json.dump(exportedResultContent, f, indent=4)
+            elif file_extension == '.yaml':
+                yaml.dump(exportedResultContent, f)
+            elif file_extension == '.xml':
+                ET.register_namespace('', 'http://wadl.dev.java.net/2009/02')
+                xml_string = ET.tostring(exportedResultContent, encoding='unicode')
+                f.write(xml_string)
+            else:
+                f.write(str(exportedResultContent))
+    except IOError as e:
+        logger.warning("Error writing exported API to file.: %s", e)
+
+    # Write the response to a file
+    return logger.warning("APIMExport results written to file: %s", full_path)
+
+
+def api_export_result_to_dict(api_export_result):
+    # This function returns a dictionary representation of the ApiExportResult object
+    return {
+        'additional_properties': api_export_result.additional_properties,
+        'id': api_export_result.id,
+        'export_result_format': api_export_result.export_result_format,
+        'value': api_export_result.value
+    }
+
+
+# Product API Operations
 def apim_product_api_list(client, resource_group_name, service_name, product_id):
 
     return client.product_api.list_by_product(resource_group_name, service_name, product_id)

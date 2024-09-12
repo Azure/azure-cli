@@ -19,9 +19,9 @@ class ListAssociatedResources(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-03-02",
+        "version": "2023-04-02",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/diskencryptionsets/{}/associatedresources", "2022-03-02"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/diskencryptionsets/{}/associatedresources", "2023-04-02"],
         ]
     }
 
@@ -118,7 +118,7 @@ class ListAssociatedResources(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-03-02",
+                    "api-version", "2023-04-02",
                     required=True,
                 ),
             }

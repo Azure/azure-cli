@@ -11,23 +11,36 @@ helps['login'] = """
 type: command
 short-summary: Log in to Azure.
 long-summary: >-
-    By default, this command logs in with a user account. CLI will try to launch a web browser to log in interactively.
-    If a web browser is not available, CLI will fall back to device code login.
+    By default, this command logs in with a user account.
+    Azure CLI uses Web Account Manager (WAM) on Windows, and browser-based login on Linux and macOS by default.
+    If WAM or a web browser is not available, Azure CLI will fall back to device code login.
 
-    To login with a service principal, specify --service-principal.
+
+    [WARNING] Authentication with username and password in the command line is strongly discouraged.
+    Use one of the recommended authentication methods based on your requirements.
+    For more details, see https://go.microsoft.com/fwlink/?linkid=2276314
+
+
+    To log in with a service principal, specify --service-principal.
+
+
+    To log in with a managed identity, specify --identity.
+
+
+    For more details, see https://learn.microsoft.com/cli/azure/authenticate-azure-cli
 examples:
     - name: Log in interactively.
       text: az login
-    - name: Log in with user name and password. This doesn't work with Microsoft accounts or accounts that have two-factor authentication enabled. Use -p=secret if the first character of the password is '-'.
+    - name: Log in with username and password. This doesn't work with Microsoft accounts or accounts that have two-factor authentication enabled. Use -p=secret if the first character of the password is '-'.
       text: az login -u johndoe@contoso.com -p VerySecret
     - name: Log in with a service principal using client secret. Use -p=secret if the first character of the password is '-'.
       text: az login --service-principal -u http://azure-cli-2016-08-05-14-31-15 -p VerySecret --tenant contoso.onmicrosoft.com
     - name: Log in with a service principal using client certificate.
       text: az login --service-principal -u http://azure-cli-2016-08-05-14-31-15 -p ~/mycertfile.pem --tenant contoso.onmicrosoft.com
-    - name: Log in using a VM's system-assigned managed identity.
+    - name: Log in with a system-assigned managed identity.
       text: az login --identity
-    - name: Log in using a VM's user-assigned managed identity. Client or object ids of the service identity also work.
-      text: az login --identity -u /subscriptions/<subscriptionId>/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
+    - name: Log in with a user-assigned managed identity. You must specify the client ID, object ID or resource ID of the user-assigned managed identity with --username.
+      text: az login --identity --username 00000000-0000-0000-0000-000000000000
 """
 
 helps['account'] = """
@@ -71,6 +84,10 @@ short-summary: Get a token for utilities to access Azure.
 long-summary: >
     The token will be valid for at least 5 minutes with the maximum at 60 minutes.
     If the subscription argument isn't specified, the current account is used.
+
+
+    In the output, `expires_on` represents a POSIX timestamp and `expiresOn` represents a local datetime.
+    It is recommended for downstream applications to use `expires_on` because it is in UTC.
 examples:
     - name: Get an access token for the current account
       text: >

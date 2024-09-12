@@ -57,7 +57,7 @@ def validate_bicep_target_scope(template_schema, deployment_scope):
         )
 
 
-def run_bicep_command(cli_ctx, args, auto_install=True):
+def run_bicep_command(cli_ctx, args, auto_install=True, custom_env=None):
     if _use_binary_from_path(cli_ctx):
         from shutil import which
 
@@ -70,7 +70,7 @@ def run_bicep_command(cli_ctx, args, auto_install=True):
 
         _logger.debug("Using Bicep CLI from PATH. %s", bicep_version_message)
 
-        return _run_command("bicep", args)
+        return _run_command("bicep", args, custom_env)
 
     installation_path = _get_bicep_installation_path(platform.system())
     _logger.debug("Bicep CLI installation path: %s", installation_path)
@@ -104,11 +104,12 @@ def run_bicep_command(cli_ctx, args, auto_install=True):
             if cache_expired:
                 _refresh_bicep_version_check_cache(latest_release_tag)
 
-    return _run_command(installation_path, args)
+    return _run_command(installation_path, args, custom_env)
 
 
 def ensure_bicep_installation(cli_ctx, release_tag=None, target_platform=None, stdout=True):
     system = platform.system()
+    machine = platform.machine()
     installation_path = _get_bicep_installation_path(system)
 
     if os.path.isfile(installation_path):
@@ -132,7 +133,14 @@ def ensure_bicep_installation(cli_ctx, release_tag=None, target_platform=None, s
             else:
                 print("Installing Bicep CLI...")
         os.environ.setdefault("CURL_CA_BUNDLE", certifi.where())
-        request = urlopen(_get_bicep_download_url(system, release_tag, target_platform=target_platform))
+
+        download_url = _get_bicep_download_url(system, machine, release_tag, target_platform=target_platform)
+        _logger.debug(
+            "Generated download URL %s. from system %s, machine %s, release tag %s and target platform %s.",
+            download_url, system, machine, release_tag, target_platform,
+        )
+
+        request = urlopen(download_url)
         with open(installation_path, "wb") as f:
             f.write(request.read())
 
@@ -170,11 +178,11 @@ def remove_bicep_installation(cli_ctx):
 
 
 def is_bicep_file(file_path):
-    return file_path.lower().endswith(".bicep")
+    return file_path.lower().endswith(".bicep") if file_path else False
 
 
 def is_bicepparam_file(file_path):
-    return file_path.lower().endswith(".bicepparam")
+    return file_path.lower().endswith(".bicepparam") if file_path else False
 
 
 def get_bicep_available_release_tags():
@@ -268,23 +276,37 @@ def _get_bicep_installed_version(bicep_executable_path):
     return _extract_version(installed_version_output)
 
 
-def _get_bicep_download_url(system, release_tag, target_platform=None):
-    download_url = f"https://downloads.bicep.azure.com/{release_tag}/{{}}"
+def _has_musl_library_only():
+    return os.path.exists("/lib/ld-musl-x86_64.so.1") and not os.path.exists("/lib/x86_64-linux-gnu/libc.so.6")
 
-    if target_platform:
-        executable_name = "bicep-win-x64.exe" if target_platform == "win-x64" else f"bicep-{target_platform}"
-        return download_url.format(executable_name)
 
-    if system == "Windows":
-        return download_url.format("bicep-win-x64.exe")
-    if system == "Linux":
-        if os.path.exists("/lib/ld-musl-x86_64.so.1") and not os.path.exists("/lib/x86_64-linux-gnu/libc.so.6"):
-            return download_url.format("bicep-linux-musl-x64")
-        return download_url.format("bicep-linux-x64")
-    if system == "Darwin":
-        return download_url.format("bicep-osx-x64")
+def _get_bicep_download_url(system, machine, release_tag, target_platform=None):
+    if not target_platform:
+        if system == "Windows" and machine == "arm64":
+            target_platform = "win-arm64"
+        elif system == "Windows":
+            # default to x64
+            target_platform = "win-x64"
+        elif system == "Linux" and machine == "arm64":
+            target_platform = "linux-arm64"
+        elif system == "Linux" and _has_musl_library_only():
+            # check for alpine linux
+            target_platform = "linux-musl-x64"
+        elif system == "Linux":
+            # default to x64
+            target_platform = "linux-x64"
+        elif system == "Darwin" and machine == "arm64":
+            target_platform = "osx-arm64"
+        elif system == "Darwin":
+            # default to x64
+            target_platform = "osx-x64"
+        else:
+            raise ValidationError(f'The platform "{system}" is not supported.')
 
-    raise ValidationError(f'The platform "{system}" is not supported.')
+    extension = ".exe" if target_platform.startswith("win-") else ""
+    asset_name = f"bicep-{target_platform}{extension}"
+
+    return f"https://downloads.bicep.azure.com/{release_tag}/{asset_name}"
 
 
 def _get_bicep_installation_path(system):
@@ -301,8 +323,12 @@ def _extract_version(text):
     return semver.VersionInfo.parse(semver_match.group(0)) if semver_match else None
 
 
-def _run_command(bicep_installation_path, args):
-    process = subprocess.run([rf"{bicep_installation_path}"] + args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+def _run_command(bicep_installation_path, args, custom_env=None):
+    process = subprocess.run(
+        [rf"{bicep_installation_path}"] + args,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        env=custom_env)
 
     try:
         process.check_returncode()

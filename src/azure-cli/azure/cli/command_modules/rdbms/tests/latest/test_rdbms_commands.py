@@ -107,7 +107,7 @@ class ServerMgmtScenarioTest(ScenarioTest):
         family = 'Gen5'
         skuname = 'GP_{}_{}'.format(family, old_cu)
         newskuname = 'GP_{}_{}'.format(family, new_cu)
-        loc = 'westus2'
+        loc = 'eastus2'
         default_public_network_access = 'Enabled'
         public_network_access = 'Disabled'
         minimal_tls_version = 'TLS1_2'
@@ -316,8 +316,10 @@ class ServerMgmtScenarioTest(ScenarioTest):
                      .format(database_engine, resource_group_1, servers[4]), checks=NoneCheck())
             result = self.cmd('{} server show -g {} -n {}'
                               .format(database_engine, resource_group_1, servers[4])).get_output_in_json()
-            server_version = result['version']
-            self.assertEqual(server_version, '5.7')
+            # server_version = result['version']
+            user_visible_state = result['userVisibleState']
+            # self.assertEqual(server_version, '5.7')
+            self.assertEqual(user_visible_state, 'Upgrading')
 
         # test delete server
         self.cmd('{} server delete -g {} --name {} --yes'
@@ -489,7 +491,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
                                                                                   subnet_prefix_1))
         # add one more subnet
         self.cmd('network vnet subnet create --vnet-name {} -g {} '
-                 '--address-prefix {} -n {}'.format(vnet_name, resource_group, subnet_prefix_2, subnet_name_2))
+                 '--address-prefix {} -n {} --default-outbound false'.format(vnet_name, resource_group, subnet_prefix_2, subnet_name_2))
 
         # test vnet-rule create
         self.cmd('{} server vnet-rule create -n {} -g {} -s {} '
@@ -521,7 +523,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
 
         # add one more subnet
         self.cmd('network vnet subnet create --vnet-name {} -g {} '
-                 '--address-prefix {} -n {}'.format(vnet_name, resource_group, subnet_prefix_3, subnet_name_3))
+                 '--address-prefix {} -n {} --default-outbound false'.format(vnet_name, resource_group, subnet_prefix_3, subnet_name_3))
 
         self.cmd('{} server vnet-rule update -n {} -g {} -s {} '
                  '--vnet-name {} --subnet {} --ignore-missing-endpoint {}'

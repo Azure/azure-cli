@@ -6,12 +6,14 @@
 import os
 import time
 
+from msrestazure.tools import parse_resource_id
+
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathCheck, LogAnalyticsWorkspacePreparer)
 from azure.cli.command_modules.containerapp.tests.latest.common import (write_test_file, clean_up_test_file)
 
 from azure.cli.command_modules.containerapp.tests.latest.common import TEST_LOCATION
-from .utils import create_containerapp_env
+from .utils import create_containerapp_env, prepare_containerapp_env_for_app_e2e_tests
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 # flake8: noqa
@@ -25,24 +27,23 @@ class ContainerAppJobsExecutionsTest(ScenarioTest):
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="northcentralus")
-    @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
-    def test_containerapp_job_executionstest_e2e(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
+    def test_containerapp_job_executionstest_e2e(self, resource_group):
         import requests
         
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
-
-        env = self.create_random_name(prefix='env', length=24)
         job = self.create_random_name(prefix='job2', length=24)
 
-        create_containerapp_env(self, env, resource_group, logs_workspace=laworkspace_customer_id, logs_workspace_shared_key=laworkspace_shared_key)
+        env_id = prepare_containerapp_env_for_app_e2e_tests(self)
+        env_rg = parse_resource_id(env_id).get('resource_group')
+        env_name = parse_resource_id(env_id).get('name')
 
         # create a container app environment for a Container App Job resource
-        self.cmd('containerapp env show -n {} -g {}'.format(env, resource_group), checks=[
-            JMESPathCheck('name', env)            
+        self.cmd('containerapp env show -n {} -g {}'.format(env_name, env_rg), checks=[
+            JMESPathCheck('name', env_name)
         ])
 
         # create a Container App Job resource
-        self.cmd("az containerapp job create --resource-group {} --name {} --environment {} --replica-timeout 200 --replica-retry-limit 1 --trigger-type manual --replica-completion-count 1 --parallelism 1 --image mcr.microsoft.com/k8se/quickstart:latest --cpu '0.25' --memory '0.5Gi'".format(resource_group, job, env))
+        self.cmd("az containerapp job create --resource-group {} --name {} --environment {} --replica-timeout 200 --replica-retry-limit 1 --trigger-type manual --replica-completion-count 1 --parallelism 1 --image mcr.microsoft.com/k8se/quickstart:latest --cpu '0.25' --memory '0.5Gi'".format(resource_group, job, env_id))
 
         # wait for 60s for the job to be provisioned
         jobProvisioning = True
@@ -81,32 +82,80 @@ class ContainerAppJobsExecutionsTest(ScenarioTest):
         # stop the most recently started execution
         self.cmd("az containerapp job stop --resource-group {} --name {} --job-execution-name {}".format(resource_group, job, execution['name'])).get_output_in_json()
         
-        # get stopped execution for the job and check status
+        # get stopped execution for the job and check status after waiting for 5 seconds to ensure job has stopped
+        time.sleep(5)
         singleExecution = self.cmd("az containerapp job execution show --resource-group {} --name {} --job-execution-name {}".format(resource_group, job, execution['name'])).get_output_in_json()
         self.assertEqual(job in singleExecution['name'], True)
         self.assertEqual(singleExecution['properties']['status'], "Stopped")
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="northcentralus")
-    @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
-    def test_containerapp_job_custom_executionstest_e2e(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
+    def test_containerapp_stop_job_deprecate_arguments(self, resource_group):
         import requests
 
         TEST_LOCATION = "northcentralusstage"
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
-        env = self.create_random_name(prefix='env', length=24)
-        job = self.create_random_name(prefix='job3', length=24)
+        job = self.create_random_name(prefix='job4', length=24)
 
-        create_containerapp_env(self, env, resource_group, logs_workspace=laworkspace_customer_id, logs_workspace_shared_key=laworkspace_shared_key)
+        env_id = prepare_containerapp_env_for_app_e2e_tests(self)
+        env_rg = parse_resource_id(env_id).get('resource_group')
+        env_name = parse_resource_id(env_id).get('name')
 
         # create a container app environment for a Container App Job resource
-        self.cmd('containerapp env show -n {} -g {}'.format(env, resource_group), checks=[
-            JMESPathCheck('name', env)            
+        self.cmd('containerapp env show -n {} -g {}'.format(env_name, env_rg), checks=[
+            JMESPathCheck('name', env_name)
         ])
 
         # create a Container App Job resource
-        self.cmd("az containerapp job create --resource-group {} --name {} --environment {} --replica-timeout 200 --replica-retry-limit 1 --trigger-type manual --replica-completion-count 1 --parallelism 1 --image mcr.microsoft.com/k8se/quickstart:latest --cpu '0.25' --memory '0.5Gi'".format(resource_group, job, env))
+        self.cmd("az containerapp job create --resource-group {} --name {} --environment {} --replica-timeout 200 --replica-retry-limit 1 --trigger-type manual --replica-completion-count 1 --parallelism 1 --image mcr.microsoft.com/k8se/quickstart:latest --cpu '0.25' --memory '0.5Gi'".format(resource_group, job, env_id))
+
+        # wait for 60s for the job to be provisioned
+        jobProvisioning = True
+        timeout = time.time() + 60*1   # 1 minutes from now
+        while(jobProvisioning):
+            jobProvisioning = self.cmd("az containerapp job show --resource-group {} --name {}".format(resource_group, job)).get_output_in_json()['properties']['provisioningState'] != "Succeeded"
+            if(time.time() > timeout):
+                break
+
+        # start an execution with custom container information
+        customContainerImage = "mcr.microsoft.com/k8se/quickstart:latest"
+        customContainerName = "job3-custom-exec"
+        execution = self.cmd("az containerapp job start --resource-group {} --name {} --image {} --container-name {} --cpu '0.5' --memory '1Gi'".format(resource_group, job, customContainerImage, customContainerName)).get_output_in_json()
+        if "id" in execution:
+            # check if the job execution id is in the response
+            self.assertEqual(job in execution['id'], True)
+        if "name" in execution:
+            # check if the job execution name is in the response
+            self.assertEqual(job in execution['name'], True)
+
+        # create a string list with job execution name
+        execution_name_list = execution['name']
+
+        # stop the execution with deprecated param --execution_name_list
+        self.cmd("az containerapp job stop --resource-group {} --name {} --execution-name-list {}".format(resource_group, job, execution['name']), expect_failure=False).get_output_in_json()
+
+    @AllowLargeResponse(8192)
+    @ResourceGroupPreparer(location="northcentralus")
+    def test_containerapp_job_custom_executionstest_e2e(self, resource_group):
+        import requests
+
+        TEST_LOCATION = "northcentralusstage"
+        self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
+
+        job = self.create_random_name(prefix='job3', length=24)
+
+        env_id = prepare_containerapp_env_for_app_e2e_tests(self)
+        env_rg = parse_resource_id(env_id).get('resource_group')
+        env_name = parse_resource_id(env_id).get('name')
+
+        # create a container app environment for a Container App Job resource
+        self.cmd('containerapp env show -n {} -g {}'.format(env_name, env_rg), checks=[
+            JMESPathCheck('name', env_name)
+        ])
+
+        # create a Container App Job resource
+        self.cmd("az containerapp job create --resource-group {} --name {} --environment {} --replica-timeout 200 --replica-retry-limit 1 --trigger-type manual --replica-completion-count 1 --parallelism 1 --image mcr.microsoft.com/k8se/quickstart:latest --cpu '0.25' --memory '0.5Gi'".format(resource_group, job, env_id))
 
         # wait for 60s for the job to be provisioned
         jobProvisioning = True
@@ -380,7 +429,22 @@ class ContainerAppJobsExecutionsTest(ScenarioTest):
                 """
         write_test_file(containerappjob_file_name, containerappjob_yaml_text)
 
-        self.cmd(f'containerapp job update -n {job} -g {resource_group} --yaml {containerappjob_file_name}')
+        self.cmd(f'containerapp job update -n {job} -g {resource_group} --yaml {containerappjob_file_name}', checks=[
+            JMESPathCheck('properties.provisioningState', "Succeeded"),
+            JMESPathCheck("properties.configuration.triggerType", "Manual", case_sensitive=False),
+            JMESPathCheck('properties.configuration.replicaTimeout', 200),
+            JMESPathCheck('properties.configuration.replicaRetryLimit', 1),
+            JMESPathCheck('properties.template.containers[0].image', "mcr.microsoft.com/k8se/quickstart-jobs:latest"),
+            JMESPathCheck('properties.template.containers[0].resources.cpu', "0.75"),
+            JMESPathCheck('properties.template.containers[0].resources.memory', "1.5Gi"),
+            JMESPathCheck('properties.template.volumes[0].storageType', 'AzureFile'),
+            JMESPathCheck('properties.template.volumes[0].storageName', share),
+            JMESPathCheck('properties.template.volumes[0].name', 'azure-files-volume'),
+            JMESPathCheck('properties.template.volumes[0].mountOptions', 'uid=1000,gid=1000'),
+            JMESPathCheck('properties.template.containers[0].volumeMounts[0].subPath', 'sub2'),
+            JMESPathCheck('properties.template.containers[0].volumeMounts[0].mountPath', '/mnt/data'),
+            JMESPathCheck('properties.template.containers[0].volumeMounts[0].volumeName', 'azure-files-volume'),
+        ])
 
         self.cmd(f'containerapp job show -g {resource_group} -n {job}', checks=[
             JMESPathCheck("properties.configuration.triggerType", "Manual", case_sensitive=False),
@@ -416,7 +480,7 @@ class ContainerAppJobsExecutionsTest(ScenarioTest):
                                 """
         write_test_file(containerappjob_file_name, containerappjob_yaml_text)
 
-        self.cmd(f'containerapp job update -n {job} -g {resource_group} --yaml {containerappjob_file_name}')
+        self.cmd(f'containerapp job update -n {job} -g {resource_group} --yaml {containerappjob_file_name} --no-wait')
 
         self.cmd(f'containerapp job show -g {resource_group} -n {job}', checks=[
             JMESPathCheck("properties.environmentId", containerapp_env["id"]),
@@ -452,8 +516,8 @@ class ContainerAppJobsExecutionsTest(ScenarioTest):
                             replicaCompletionCount: 1
                             parallelism: 1
                             scale:
-                                minExecutions: 0
-                                maxExecutions: 10
+                                minExecutions: 1
+                                maxExecutions: 11
                                 rules:
                                 - name: github-runner-test
                                   type: github-runner
@@ -526,8 +590,8 @@ class ContainerAppJobsExecutionsTest(ScenarioTest):
             JMESPathCheck('properties.template.containers[0].resources.memory', "1Gi"),
             JMESPathCheck('properties.configuration.eventTriggerConfig.replicaCompletionCount', 1),
             JMESPathCheck('properties.configuration.eventTriggerConfig.parallelism', 1),
-            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.minExecutions', 0),
-            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.maxExecutions', 10),
+            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.minExecutions', 1),
+            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.maxExecutions', 11),
             JMESPathCheck('properties.configuration.eventTriggerConfig.scale.rules[0].type', "github-runner"),
             JMESPathCheck('properties.configuration.eventTriggerConfig.scale.rules[0].metadata.runnerScope', "repo"),
             JMESPathCheck('properties.configuration.eventTriggerConfig.scale.rules[0].auth[0].secretRef',
@@ -555,8 +619,8 @@ class ContainerAppJobsExecutionsTest(ScenarioTest):
                             replicaCompletionCount: 2
                             parallelism: 2
                             scale:
-                                minExecutions: 1
-                                maxExecutions: 9
+                                minExecutions: 0
+                                maxExecutions: 95
                                 rules:
                                 - name: github-runner-testv2
                                   type: github-runner
@@ -578,7 +642,7 @@ class ContainerAppJobsExecutionsTest(ScenarioTest):
                 """
         write_test_file(containerappjob_file_name, containerappjob_yaml_text)
 
-        self.cmd(f'containerapp job update -n {job} -g {resource_group} --yaml {containerappjob_file_name}')
+        self.cmd(f'containerapp job update -n {job} -g {resource_group} --yaml {containerappjob_file_name} --no-wait')
 
         self.cmd(f'containerapp job show -g {resource_group} -n {job}', checks=[
             JMESPathCheck("properties.configuration.triggerType", "Event", case_sensitive=False),
@@ -587,8 +651,8 @@ class ContainerAppJobsExecutionsTest(ScenarioTest):
             JMESPathCheck('properties.template.containers[0].image', "mcr.microsoft.com/k8se/quickstart-jobs:latest"),
             JMESPathCheck('properties.configuration.eventTriggerConfig.replicaCompletionCount', 2),
             JMESPathCheck('properties.configuration.eventTriggerConfig.parallelism', 2),
-            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.minExecutions', 1),
-            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.maxExecutions', 9),
+            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.minExecutions', 0),
+            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.maxExecutions', 95),
             JMESPathCheck('properties.configuration.eventTriggerConfig.scale.rules[0].name', "github-runner-testv2"),
             JMESPathCheck('properties.configuration.eventTriggerConfig.scale.rules[0].metadata.runnerScope', "repo"),
             JMESPathCheck('properties.configuration.eventTriggerConfig.scale.rules[0].metadata.owner', "test_org_1"),

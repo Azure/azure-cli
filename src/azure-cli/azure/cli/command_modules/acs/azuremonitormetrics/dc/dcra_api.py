@@ -17,7 +17,7 @@ def create_dcra(cmd, cluster_region, cluster_subscription, cluster_resource_grou
             cluster_resource_group_name,
             cluster_name
         )
-    dcra_name = get_default_dcra_name(cmd, cluster_region, cluster_name)
+    dcra_name = get_default_dcra_name()
     dcra_resource_id = \
         "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Insights/dataCollectionRuleAssociations/{2}"\
         .format(

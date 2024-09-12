@@ -105,9 +105,14 @@ def check_existence(cli_ctx, value, resource_group, provider_namespace, resource
         return False
 
 
-def create_keyvault_data_plane_client(cli_ctx, vault_base_url):
+def create_data_plane_keyvault_certificate_client(cli_ctx, vault_base_url):
     from azure.cli.command_modules.keyvault._client_factory import data_plane_azure_keyvault_certificate_client
     return data_plane_azure_keyvault_certificate_client(cli_ctx, {"vault_base_url": vault_base_url})
+
+
+def create_data_plane_keyvault_key_client(cli_ctx, vault_base_url):
+    from azure.cli.command_modules.keyvault._client_factory import data_plane_azure_keyvault_key_client
+    return data_plane_azure_keyvault_key_client(cli_ctx, {"vault_base_url": vault_base_url})
 
 
 def get_key_vault_base_url(cli_ctx, vault_name):
@@ -159,12 +164,14 @@ def is_sku_available(cmd, sku_info, zone):
     return is_available
 
 
-# pylint: disable=too-many-statements, too-many-branches
+# pylint: disable=too-many-statements, too-many-branches, too-many-locals
 def normalize_disk_info(image_data_disks=None,
                         data_disk_sizes_gb=None, attach_data_disks=None, storage_sku=None,
                         os_disk_caching=None, data_disk_cachings=None, size='',
                         ephemeral_os_disk=False, ephemeral_os_disk_placement=None,
-                        data_disk_delete_option=None):
+                        data_disk_delete_option=None, source_snapshots_or_disks=None,
+                        source_snapshots_or_disks_size_gb=None, source_disk_restore_point=None,
+                        source_disk_restore_point_size_gb=None):
     from msrestazure.tools import is_valid_resource_id
     from ._validators import validate_delete_options
     is_lv_size = re.search('_L[0-9]+s', size, re.I)
@@ -180,6 +187,10 @@ def normalize_disk_info(image_data_disks=None,
     attach_data_disks = attach_data_disks or []
     data_disk_sizes_gb = data_disk_sizes_gb or []
     image_data_disks = image_data_disks or []
+    source_snapshots_or_disks = source_snapshots_or_disks or []
+    source_snapshots_or_disks_size_gb = source_snapshots_or_disks_size_gb or []
+    source_disk_restore_point = source_disk_restore_point or []
+    source_disk_restore_point_size_gb = source_disk_restore_point_size_gb or []
 
     if data_disk_delete_option:
         if attach_data_disks:
@@ -226,6 +237,46 @@ def normalize_disk_info(image_data_disks=None,
         }
         if isinstance(data_disk_delete_option, str):
             info[i]['deleteOption'] = data_disk_delete_option
+
+    # add copy data disks
+    i = 0
+    source_resource_copy = list(source_snapshots_or_disks)
+    source_resource_copy_size = list(source_snapshots_or_disks_size_gb)
+    while source_resource_copy:
+        while i in used_luns:
+            i += 1
+
+        used_luns.add(i)
+
+        info[i] = {
+            'lun': i,
+            'createOption': 'copy',
+            'managedDisk': {'storageAccountType': None},
+            'diskSizeGB': source_resource_copy_size.pop(0),
+            'sourceResource': {
+                'id': source_resource_copy.pop(0)
+            }
+        }
+
+    # add restore data disks
+    i = 0
+    source_resource_restore = list(source_disk_restore_point)
+    source_resource_restore_size = list(source_disk_restore_point_size_gb)
+    while source_resource_restore:
+        while i in used_luns:
+            i += 1
+
+        used_luns.add(i)
+
+        info[i] = {
+            'lun': i,
+            'createOption': 'restore',
+            'managedDisk': {'storageAccountType': None},
+            'diskSizeGB': source_resource_restore_size.pop(0),
+            'sourceResource': {
+                'id': source_resource_restore.pop(0)
+            }
+        }
 
     # update storage skus for managed data disks
     if storage_sku is not None:
@@ -597,23 +648,32 @@ def trusted_launch_warning_log(namespace, generation_version, features):
             logger.warning(UPGRADE_SECURITY_HINT)
 
 
-def validate_update_vm_trusted_launch_supported(cmd, vm, os_disk_resource_group, os_disk_name):
-    from azure.cli.command_modules.vm._client_factory import _compute_client_factory
-    from azure.cli.core.azclierror import InvalidArgumentValueError
+def validate_vm_disk_trusted_launch(namespace, disk_security_profile):
+    from ._constants import UPGRADE_SECURITY_HINT
 
-    client = _compute_client_factory(cmd.cli_ctx).disks
-    os_disk_info = client.get(os_disk_resource_group, os_disk_name)
-    generation_version = os_disk_info.hyper_v_generation if hasattr(os_disk_info, 'hyper_v_generation') else None
+    if disk_security_profile is None:
+        logger.warning(UPGRADE_SECURITY_HINT)
+        return
 
-    if generation_version != "V2":
-        raise InvalidArgumentValueError(
-            "Trusted Launch security configuration can be enabled only with Azure Gen2 VMs. Please visit "
-            "https://learn.microsoft.com/en-us/azure/virtual-machines/trusted-launch for more details.")
+    security_type = disk_security_profile.security_type if hasattr(disk_security_profile, 'security_type') else None
+    if security_type.lower() == 'trustedlaunch':
+        if namespace.enable_secure_boot is None:
+            namespace.enable_secure_boot = True
+        if namespace.enable_vtpm is None:
+            namespace.enable_vtpm = True
+        namespace.security_type = 'TrustedLaunch'
+    elif security_type.lower() == 'standard':
+        logger.warning(UPGRADE_SECURITY_HINT)
 
-    if vm.security_profile is not None and vm.security_profile.security_type == "ConfidentialVM":
-        raise InvalidArgumentValueError("{} is already configured with ConfidentialVM. "
-                                        "Security Configuration cannot be updated from ConfidentialVM to TrustedLaunch."
-                                        .format(vm.name))
+
+def validate_image_trusted_launch(namespace):
+    from ._constants import UPGRADE_SECURITY_HINT
+
+    # set securityType to Standard by default if no inputs by end user
+    if namespace.security_type is None:
+        namespace.security_type = 'Standard'
+    if namespace.security_type.lower() != 'trustedlaunch':
+        logger.warning(UPGRADE_SECURITY_HINT)
 
 
 def display_region_recommendation(cmd, namespace):
@@ -629,12 +689,19 @@ def display_region_recommendation(cmd, namespace):
     telemetry.set_region_identified(namespace.location, identified_region)
 
     if identified_region and cmd.cli_ctx.config.getboolean('core', 'display_region_identified', True):
-        logger.warning('Selecting "%s" may reduce your costs. '
-                       'The region you\'ve selected may cost more for the same services. '
-                       'You can disable this message in the future with the command'
-                       ' "az config set core.display_region_identified=false". '
-                       'Learn more at https://go.microsoft.com/fwlink/?linkid=222571 ',
-                       identified_region)
+        from azure.cli.core.style import Style, print_styled_text
+        import sys
+        recommend_region = 'Selecting "' + identified_region + '" may reduce your costs. ' \
+                           'The region you\'ve selected may cost more for the same services. ' \
+                           'You can disable this message in the future with the command '
+        disable_config = '"az config set core.display_region_identified=false". '
+        learn_more_msg = 'Learn more at https://go.microsoft.com/fwlink/?linkid=222571 '
+        # Since the output of the "az vm create" command is a JSON object
+        # which can be used for automated script parsing
+        # So we output the notification message to sys.stderr
+        print_styled_text([(Style.WARNING, recommend_region), (Style.ACTION, disable_config),
+                           (Style.WARNING, learn_more_msg)], file=sys.stderr)
+        print_styled_text(file=sys.stderr)
 
 
 def import_aaz_by_profile(profile, module_name):

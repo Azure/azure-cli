@@ -73,6 +73,7 @@ class Create(AAZCommand):
         )
         _args_schema.partner_namespace = AAZStrArg(
             options=["--partner-namespace"],
+            required=True,
             arg_group="Properties",
             help="ARM Id of the Primary/Secondary eventhub namespace name, which is part of GEO DR pairing",
         )

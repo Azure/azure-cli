@@ -54,6 +54,10 @@ from ._client_factory import (
 # pylint: disable=too-many-statements
 def load_command_table(self, _):
 
+    acr_artifact_streaming_util = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.acr.artifact_streaming#{}'
+    )
+
     acr_custom_util = CliCommandType(
         operations_tmpl='azure.cli.command_modules.acr.custom#{}',
         table_transformer=registry_output_format,
@@ -209,6 +213,13 @@ def load_command_table(self, _):
     with self.command_group('acr', acr_import_util) as g:
         g.command('import', 'acr_import', supports_no_wait=True)
 
+    with self.command_group('acr artifact-streaming', acr_artifact_streaming_util, is_preview=True) as g:
+        g.show_command('operation show', 'acr_artifact_streaming_operation_show')
+        g.command('operation cancel', 'acr_artifact_streaming_operation_cancel')
+        g.command('create', 'acr_artifact_streaming_create', supports_no_wait=True)
+        g.show_command('show', 'acr_artifact_streaming_show')
+        g.command('update', 'acr_artifact_streaming_update')
+
     with self.command_group('acr credential', acr_cred_util) as g:
         g.show_command('show', 'acr_credential_show')
         g.command('renew', 'acr_credential_renew')
@@ -352,19 +363,21 @@ def load_command_table(self, _):
     def _helm_deprecate_message(self):
         msg = "This {} has been deprecated and will be removed in future release.".format(self.object_type)
         msg += " Use '{}' instead.".format(self.redirect)
-        msg += " For more information go to"
+        msg += " Learn more about storing Helm charts at"
         msg += " https://aka.ms/acr/helm"
         return msg
 
-    with self.command_group('acr helm', acr_helm_util,
-                            deprecate_info=self.deprecate(redirect="helm v3",
-                                                          message_func=_helm_deprecate_message)) as g:
-        g.command('list', 'acr_helm_list', table_transformer=helm_list_output_format)
-        g.show_command('show', 'acr_helm_show', table_transformer=helm_show_output_format)
-        g.command('delete', 'acr_helm_delete')
-        g.command('push', 'acr_helm_push')
-        g.command('repo add', 'acr_helm_repo_add')
-        g.command('install-cli', 'acr_helm_install_cli', is_preview=True)
+    helm_deprecate_info = self.deprecate(redirect="Helm v3 commands", message_func=_helm_deprecate_message)
+
+    with self.command_group('acr helm', acr_helm_util, deprecate_info=helm_deprecate_info) as g:
+        g.command('list', 'acr_helm_list', table_transformer=helm_list_output_format,
+                  deprecate_info=helm_deprecate_info)
+        g.show_command('show', 'acr_helm_show', table_transformer=helm_show_output_format,
+                       deprecate_info=helm_deprecate_info)
+        g.command('delete', 'acr_helm_delete', deprecate_info=helm_deprecate_info)
+        g.command('push', 'acr_helm_push', deprecate_info=helm_deprecate_info)
+        g.command('repo add', 'acr_helm_repo_add', deprecate_info=helm_deprecate_info)
+        g.command('install-cli', 'acr_helm_install_cli', is_preview=True, deprecate_info=helm_deprecate_info)
 
     with self.command_group('acr network-rule', acr_network_rule_util) as g:
         g.command('list', 'acr_network_rule_list')

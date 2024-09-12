@@ -18,9 +18,12 @@ export AZURE_CLI_DIAGNOSTICS_TELEMETRY=
 output=$(az extension list-available --query [].name -otsv)
 exit_code=0
 
-# azure-cli-ml: https://github.com/Azure/azure-cli-extensions/issues/826
+# Disable azure-cli-ml: https://github.com/Azure/azure-cli-extensions/issues/826
+# Disable fzf: https://github.com/Azure/azure-cli/pull/17979
+# Disable arcappliance arcdata connectedk8s: https://github.com/Azure/azure-cli/pull/20436
 # Disable k8s-extension temporarily: https://github.com/Azure/azure-cli-extensions/pull/6702
-ignore_list='azure-cli-ml fzf arcappliance arcdata connectedk8s k8s-extension'
+# Disable alias temporarily: https://github.com/Azure/azure-cli/pull/27717
+ignore_list='azure-cli-ml fzf arcappliance arcdata connectedk8s k8s-extension alias'
 
 for ext in $output; do
     echo

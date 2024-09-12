@@ -12,98 +12,108 @@ from azure.cli.core.auth.identity import (Identity, ServicePrincipalAuth, Servic
                                           _get_authority_url)
 from knack.util import CLIError
 
+# CERTIFICATE section in sp_cert.pem
+PUBLIC_CERTIFICATE = """-----BEGIN CERTIFICATE-----
+MIIDtTCCAp2gAwIBAgIJAPMNsT0qjg1ZMA0GCSqGSIb3DQEBBQUAMEUxCzAJBgNV
+BAYTAkFVMRMwEQYDVQQIEwpTb21lLVN0YXRlMSEwHwYDVQQKExhJbnRlcm5ldCBX
+aWRnaXRzIFB0eSBMdGQwHhcNMTcwMzEwMDQ0NjEyWhcNMTgwMzEwMDQ0NjEyWjBF
+MQswCQYDVQQGEwJBVTETMBEGA1UECBMKU29tZS1TdGF0ZTEhMB8GA1UEChMYSW50
+ZXJuZXQgV2lkZ2l0cyBQdHkgTHRkMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIB
+CgKCAQEAxec32tnXNiPz2WBTpv7ccZvYqBR2Gr8vimQbiNgT3aHY/dzV26pYv/88
+X5PbkibAr3YXJP64nGI/0MGvFWYi6c6C0Ar6QL/MgRLIGIO8JePTxKu9ZDx+5Crw
+beJRQgz7nEtCWsIx5WiIx5/yjUR5AqrNwSxNWo6Ct3E1YWzGyI03gEEr82tEG9Vd
+ObIRq05v1hHKTm27xln41JZI1aUMzd/K/pckb6nQLtV6OpOmzZQILMOV95SKJ8+k
+1gnxfOX2t9JPgTuiVmwvgYLb1k7Hfqs1/KZt4IyIRkBaXPy2j5Guz09uR1Dg4tOc
+oSPwDeN0aQQSucRsk0iaof3DXMfVLQIDAQABo4GnMIGkMB0GA1UdDgQWBBRpCyBM
+VgNXHqX5MrBdAQ1Hzf8l7jB1BgNVHSMEbjBsgBRpCyBMVgNXHqX5MrBdAQ1Hzf8l
+7qFJpEcwRTELMAkGA1UEBhMCQVUxEzARBgNVBAgTClNvbWUtU3RhdGUxITAfBgNV
+BAoTGEludGVybmV0IFdpZGdpdHMgUHR5IEx0ZIIJAPMNsT0qjg1ZMAwGA1UdEwQF
+MAMBAf8wDQYJKoZIhvcNAQEFBQADggEBAEH/nmErQLSxsMDk3LgTpBY6ibl6xU0k
+Lt1wbC+Z3sgpt82oA4BiulcJtTf3IrvBXJNRaB++ChjqRnK8O6uWbBQxvz/V8l+9
+g3s49VSaX3QB74Rh1NIfKhUyYlG3yi8qBJA6tlCNNXGQoYvND9Y3gorj+LzH3Eqf
+9g2oBm2jWaiPBHjuuUbd+SBS2hQn/i2huWnz1yewrtfVpRwWrQQHa1Qv3ivKDK2H
+2LOdn2Xs3/ZGsi1ySfjzxjTbuPhUaEUy+ZfV2dgmqiS//BAWI5opo7TgeplrGk2P
+h5Fwbt0FxaqFCNZdrPI7FRnbKZwvGx0A+Zj8ZpNjft3QjuUg+xqMKMs=
+-----END CERTIFICATE-----"""
+
+
+TEST_CERT = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'sp_cert.pem')
+
+with open(TEST_CERT) as f:
+    CERTIFICATE_STRING = f.read()
+
 
 class TestIdentity(unittest.TestCase):
 
     @mock.patch("azure.cli.core.auth.identity.ServicePrincipalStore.save_entry")
     @mock.patch("msal.application.ConfidentialClientApplication.acquire_token_for_client")
-    @mock.patch("msal.application.ConfidentialClientApplication.__init__")
+    @mock.patch("msal.application.ConfidentialClientApplication.__init__", return_value=None)
     def test_login_with_service_principal_secret(self, init_mock, acquire_token_for_client_mock,
                                                  save_entry_mock):
         acquire_token_for_client_mock.return_value = {'access_token': "test_token"}
 
-        identity = Identity('https://login.microsoftonline.com', tenant_id='my-tenant')
+        identity = Identity('https://login.microsoftonline.com', tenant_id='tenant1')
+        identity.login_with_service_principal("sp_id1", {"client_secret": "test_secret"}, "openid")
 
-        identity.login_with_service_principal("00000000-0000-0000-0000-000000000000",
-                                              {"client_secret": "test_secret"}, "openid")
+        assert init_mock.call_args.args == ('sp_id1',)
+        assert init_mock.call_args.kwargs['client_credential'] == 'test_secret'
+        assert init_mock.call_args.kwargs['authority'] == 'https://login.microsoftonline.com/tenant1'
 
-        assert init_mock.call_args[0][0] == '00000000-0000-0000-0000-000000000000'
-        assert init_mock.call_args[1]['client_credential'] == 'test_secret'
-        assert init_mock.call_args[1]['authority'] == 'https://login.microsoftonline.com/my-tenant'
-
-        assert save_entry_mock.call_args[0][0] == {
-            'tenant': 'my-tenant',
-            'client_id': '00000000-0000-0000-0000-000000000000',
+        assert save_entry_mock.call_args.args[0] == {
+            'client_id': 'sp_id1',
+            'tenant': 'tenant1',
             'client_secret': 'test_secret'
         }
 
     @mock.patch("azure.cli.core.auth.identity.ServicePrincipalStore.save_entry")
     @mock.patch("msal.application.ConfidentialClientApplication.acquire_token_for_client")
-    @mock.patch("msal.application.ConfidentialClientApplication.__init__")
+    @mock.patch("msal.application.ConfidentialClientApplication.__init__", return_value=None)
     def test_login_with_service_principal_certificate(self, init_mock, acquire_token_for_client_mock,
                                                       save_entry_mock):
         acquire_token_for_client_mock.return_value = {'access_token': "test_token"}
 
-        identity = Identity('https://login.microsoftonline.com', tenant_id='my-tenant')
+        identity = Identity('https://login.microsoftonline.com', tenant_id='tenant1')
+        identity.login_with_service_principal("sp_id1", {'certificate': TEST_CERT}, 'openid')
 
-        curr_dir = os.path.dirname(os.path.realpath(__file__))
-        test_cert_file = os.path.join(curr_dir, 'sp_cert.pem')
-
-        with open(test_cert_file) as cert_file:
-            cert_file_string = cert_file.read()
-
-        identity.login_with_service_principal("00000000-0000-0000-0000-000000000000",
-                                              {'certificate': test_cert_file}, 'openid')
-
-        assert init_mock.call_args[0][0] == '00000000-0000-0000-0000-000000000000'
-        assert init_mock.call_args[1]['client_credential'] == {
-                'private_key': cert_file_string,
+        assert init_mock.call_args.args == ('sp_id1',)
+        assert init_mock.call_args.kwargs['client_credential'] == {
+                'private_key': CERTIFICATE_STRING,
                 'thumbprint': 'F06A53848BBE714A4290D69D335279C1D01073FD'
             }
-        assert init_mock.call_args[1]['authority'] == 'https://login.microsoftonline.com/my-tenant'
+        assert init_mock.call_args.kwargs['authority'] == 'https://login.microsoftonline.com/tenant1'
 
         assert save_entry_mock.call_args[0][0] == {
-            'tenant': 'my-tenant',
-            'client_id': '00000000-0000-0000-0000-000000000000',
-            'certificate': test_cert_file
+            'client_id': 'sp_id1',
+            'tenant': 'tenant1',
+            'certificate': TEST_CERT
         }
 
     @mock.patch("azure.cli.core.auth.identity.ServicePrincipalStore.save_entry")
     @mock.patch("msal.application.ConfidentialClientApplication.acquire_token_for_client")
-    @mock.patch("msal.application.ConfidentialClientApplication.__init__")
+    @mock.patch("msal.application.ConfidentialClientApplication.__init__", return_value=None)
     def test_login_with_service_principal_certificate_sn_issuer(self, init_mock, acquire_token_for_client_mock,
                                                                 save_entry_mock):
         acquire_token_for_client_mock.return_value = {'access_token': "test_token"}
 
-        identity = Identity('https://login.microsoftonline.com', tenant_id='my-tenant')
-
-        curr_dir = os.path.dirname(os.path.realpath(__file__))
-        test_cert_file = os.path.join(curr_dir, 'sp_cert.pem')
-
-        with open(test_cert_file) as cert_file:
-            cert_file_string = cert_file.read()
-
-        match = re.search(r'-+BEGIN CERTIFICATE-+(?P<public>[^-]+)-+END CERTIFICATE-+', cert_file_string, re.I)
-        public_certificate = match.group().strip()
-
-        identity.login_with_service_principal("00000000-0000-0000-0000-000000000000",
+        identity = Identity('https://login.microsoftonline.com', tenant_id='tenant1')
+        identity.login_with_service_principal("sp_id1",
                                               {
-                                                  'certificate': test_cert_file,
+                                                  'certificate': TEST_CERT,
                                                   'use_cert_sn_issuer': True,
                                               }, "openid")
 
-        assert init_mock.call_args[0][0] == '00000000-0000-0000-0000-000000000000'
-        assert init_mock.call_args[1]['client_credential'] == {
-            "private_key": cert_file_string,
+        assert init_mock.call_args.args == ('sp_id1',)
+        assert init_mock.call_args.kwargs['client_credential'] == {
+            "private_key": CERTIFICATE_STRING,
             "thumbprint": 'F06A53848BBE714A4290D69D335279C1D01073FD',
-            "public_certificate": public_certificate
+            "public_certificate": PUBLIC_CERTIFICATE
         }
-        assert init_mock.call_args[1]['authority'] == 'https://login.microsoftonline.com/my-tenant'
+        assert init_mock.call_args.kwargs['authority'] == 'https://login.microsoftonline.com/tenant1'
 
-        assert save_entry_mock.call_args[0][0] == {
-            'tenant': 'my-tenant',
-            'client_id': '00000000-0000-0000-0000-000000000000',
-            'certificate': test_cert_file,
+        assert save_entry_mock.call_args.args[0] == {
+            'client_id': 'sp_id1',
+            'tenant': 'tenant1',
+            'certificate': TEST_CERT,
             'use_cert_sn_issuer': True
         }
 
@@ -114,64 +124,144 @@ class TestIdentity(unittest.TestCase):
         test_cert_file = os.path.join(current_dir, 'err_sp_cert.pem')
 
         with self.assertRaisesRegex(CLIError, "Invalid certificate"):
-            identity.login_with_service_principal("00000000-0000-0000-0000-000000000000",
-                                                  {"certificate": test_cert_file}, "openid")
+            identity.login_with_service_principal("sp_id1", {"certificate": test_cert_file}, "openid")
+
+    @mock.patch("azure.cli.core.auth.identity.ServicePrincipalStore.save_entry")
+    @mock.patch("msal.application.ConfidentialClientApplication.acquire_token_for_client")
+    @mock.patch("msal.application.ConfidentialClientApplication.__init__", return_value=None)
+    def test_login_with_service_principal_client_assertion(self, init_mock, acquire_token_for_client_mock,
+                                                           save_entry_mock):
+        acquire_token_for_client_mock.return_value = {'access_token': "test_token"}
+
+        identity = Identity('https://login.microsoftonline.com', tenant_id='tenant1')
+        identity.login_with_service_principal("sp_id1", {'client_assertion': 'test_jwt'}, "openid")
+
+        assert init_mock.call_args.args == ('sp_id1',)
+        assert init_mock.call_args.kwargs['client_credential'] == {"client_assertion": 'test_jwt'}
+        assert init_mock.call_args.kwargs['authority'] == 'https://login.microsoftonline.com/tenant1'
+
+        assert save_entry_mock.call_args.args[0] == {
+            'client_id': 'sp_id1',
+            'tenant': 'tenant1',
+            'client_assertion': 'test_jwt',
+        }
+
+    @mock.patch("msal.application.PublicClientApplication.remove_account")
+    @mock.patch("msal.application.PublicClientApplication.get_accounts")
+    def test_logout_user(self, get_accounts_mock, remove_account_mock):
+        accounts = [
+            {
+                'home_account_id': '00000000-0000-0000-0000-000000000000.00000000-0000-0000-0000-000000000000',
+                'environment': 'login.microsoftonline.com',
+                'username': 'test@test.com',
+                'account_source': 'broker',
+                'authority_type': 'MSSTS',
+                'local_account_id': '00000000-0000-0000-0000-000000000000',
+                'realm': '00000000-0000-0000-0000-000000000000'
+            }
+        ]
+        get_accounts_mock.return_value = accounts
+
+        identity = Identity('https://login.microsoftonline.com')
+        identity.logout_user('test@test.com')
+        remove_account_mock.assert_called_with(accounts[0])
+
+    @mock.patch("azure.cli.core.auth.identity.ServicePrincipalStore.remove_entry")
+    @mock.patch("msal.application.ConfidentialClientApplication.remove_tokens_for_client")
+    @mock.patch("msal.application.ConfidentialClientApplication.__init__", return_value=None)
+    def test_logout_service_principal(self, init_mock, remove_tokens_for_client_mock, remove_entry_mock):
+        identity = Identity('https://login.microsoftonline.com')
+        client_id = 'sp_id1'
+        identity.logout_service_principal(client_id)
+        assert init_mock.call_args.args[0] == client_id
+        remove_tokens_for_client_mock.assert_called_once()
+        remove_entry_mock.assert_called_with(client_id)
 
 
 class TestServicePrincipalAuth(unittest.TestCase):
 
     def test_service_principal_auth_client_secret(self):
         sp_auth = ServicePrincipalAuth.build_from_credential('tenant1', 'sp_id1', {'client_secret': "test_secret"})
-        result = sp_auth.get_entry_to_persist()
 
-        assert result == {
+        # Verify persist entry
+        entry = sp_auth.get_entry_to_persist()
+        assert entry == {
             'client_id': 'sp_id1',
             'tenant': 'tenant1',
             'client_secret': 'test_secret'
         }
 
-    def test_service_principal_auth_certificate(self):
-        curr_dir = os.path.dirname(os.path.realpath(__file__))
-        test_cert_file = os.path.join(curr_dir, 'sp_cert.pem')
-        sp_auth = ServicePrincipalAuth.build_from_credential('tenant1', 'sp_id1', {'certificate': test_cert_file})
+        # Verify msal client_credential
+        client_credential = sp_auth.get_msal_client_credential()
+        assert client_credential == 'test_secret'
 
-        result = sp_auth.get_entry_to_persist()
-        # To compute the thumb print:
+    def test_service_principal_auth_certificate(self):
+        sp_auth = ServicePrincipalAuth.build_from_credential('tenant1', 'sp_id1', {'certificate': TEST_CERT})
+
+        # To compute the thumbprint:
         #   openssl x509 -in sp_cert.pem -noout -fingerprint
-        assert sp_auth.thumbprint == 'F06A53848BBE714A4290D69D335279C1D01073FD'
-        assert result == {
+        assert sp_auth._thumbprint == 'F06A53848BBE714A4290D69D335279C1D01073FD'
+
+        # Verify persist entry
+        entry = sp_auth.get_entry_to_persist()
+        assert entry == {
             'client_id': 'sp_id1',
             'tenant': 'tenant1',
-            'certificate': test_cert_file
+            'certificate': TEST_CERT
+        }
+
+        # Verify msal client_credential
+        client_credential = sp_auth.get_msal_client_credential()
+        assert client_credential == {
+            'private_key': CERTIFICATE_STRING,
+            'thumbprint': 'F06A53848BBE714A4290D69D335279C1D01073FD'
         }
 
     def test_service_principal_auth_certificate_sn_issuer(self):
-        curr_dir = os.path.dirname(os.path.realpath(__file__))
-        test_cert_file = os.path.join(curr_dir, 'sp_cert.pem')
-
-        with open(test_cert_file) as cert_file:
-            cert_file_string = cert_file.read()
-        match = re.search(r'-+BEGIN CERTIFICATE-+(?P<public>[^-]+)-+END CERTIFICATE-+', cert_file_string, re.I)
-        public_certificate = match.group().strip()
-
         sp_auth = ServicePrincipalAuth.build_from_credential('tenant1', 'sp_id1',
                                                              {
-                                                                 'certificate': test_cert_file,
+                                                                 'certificate': TEST_CERT,
                                                                  'use_cert_sn_issuer': True,
                                                              })
 
-        result = sp_auth.get_entry_to_persist()
-        # To compute the thumb print:
+        # To compute the thumbprint:
         #   openssl x509 -in sp_cert.pem -noout -fingerprint
-        assert sp_auth.thumbprint == 'F06A53848BBE714A4290D69D335279C1D01073FD'
-        assert sp_auth.public_certificate == public_certificate
+        assert sp_auth._thumbprint == 'F06A53848BBE714A4290D69D335279C1D01073FD'
+        assert sp_auth._public_certificate == PUBLIC_CERTIFICATE
 
-        assert result == {
+        # Verify persist entry
+        entry = sp_auth.get_entry_to_persist()
+        assert entry == {
             'client_id': 'sp_id1',
             'tenant': 'tenant1',
-            'certificate': test_cert_file,
+            'certificate': TEST_CERT,
             'use_cert_sn_issuer': True,
         }
+
+        # Verify msal client_credential
+        client_credential = sp_auth.get_msal_client_credential()
+        assert client_credential == {
+            'private_key': CERTIFICATE_STRING,
+            'thumbprint': 'F06A53848BBE714A4290D69D335279C1D01073FD',
+            'public_certificate': PUBLIC_CERTIFICATE
+        }
+
+    def test_service_principal_auth_client_assertion(self):
+        sp_auth = ServicePrincipalAuth.build_from_credential('tenant1', 'sp_id1',
+                                                             {'client_assertion': 'test_jwt'})
+        assert sp_auth.client_assertion == 'test_jwt'
+
+        # Verify persist entry
+        entry = sp_auth.get_entry_to_persist()
+        assert entry == {
+            'client_id': 'sp_id1',
+            'tenant': 'tenant1',
+            'client_assertion': 'test_jwt'
+        }
+
+        # Verify msal client_credential
+        client_credential = sp_auth.get_msal_client_credential()
+        assert client_credential == {'client_assertion': 'test_jwt'}
 
     def test_build_credential(self):
         # secret

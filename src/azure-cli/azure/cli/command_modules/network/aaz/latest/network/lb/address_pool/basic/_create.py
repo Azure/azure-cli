@@ -19,9 +19,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-05-01",
+        "version": "2023-04-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/loadbalancers/{}", "2022-05-01", "properties.backendAddressPools[]"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/loadbalancers/{}", "2023-04-01", "properties.backendAddressPools[]"],
         ]
     }
 
@@ -78,6 +78,13 @@ class Create(AAZCommand):
             arg_group="Properties",
             help="The location of the backend address pool.",
         )
+        _args_schema.sync_mode = AAZStrArg(
+            options=["--sync-mode"],
+            arg_group="Properties",
+            help="Backend address synchronous mode for the backend pool",
+            is_preview=True,
+            enum={"Automatic": "Automatic", "Manual": "Manual"},
+        )
         _args_schema.tunnel_interfaces = AAZListArg(
             options=["--tunnel-interfaces"],
             arg_group="Properties",
@@ -95,7 +102,7 @@ class Create(AAZCommand):
         _element.admin_state = AAZStrArg(
             options=["admin-state"],
             help="A list of administrative states which once set can override health probe so that Load Balancer will always forward new connections to backend, or deny new connections and reset existing connections.",
-            enum={"Down": "Down", "Drain": "Drain", "None": "None", "Up": "Up"},
+            enum={"Down": "Down", "None": "None", "Up": "Up"},
         )
         _element.ip_address = AAZStrArg(
             options=["ip-address"],
@@ -135,6 +142,15 @@ class Create(AAZCommand):
             options=["type"],
             help="Traffic type of gateway load balancer tunnel interface.",
             enum={"External": "External", "Internal": "Internal", "None": "None"},
+        )
+
+        # define Arg Group "VirtualNetwork"
+
+        _args_schema = cls._args_schema
+        _args_schema.vnet_id = AAZStrArg(
+            options=["--vnet-id"],
+            arg_group="VirtualNetwork",
+            help="A reference to a virtual network.",
         )
         return cls._args_schema
 
@@ -240,7 +256,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-05-01",
+                    "api-version", "2023-04-01",
                     required=True,
                 ),
             }
@@ -339,7 +355,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-05-01",
+                    "api-version", "2023-04-01",
                     required=True,
                 ),
             }
@@ -404,7 +420,9 @@ class Create(AAZCommand):
                 properties.set_prop("drainPeriodInSeconds", AAZIntType, ".drain_period_in_seconds")
                 properties.set_prop("loadBalancerBackendAddresses", AAZListType, ".backend_addresses")
                 properties.set_prop("location", AAZStrType, ".location")
+                properties.set_prop("syncMode", AAZStrType, ".sync_mode")
                 properties.set_prop("tunnelInterfaces", AAZListType, ".tunnel_interfaces")
+                properties.set_prop("virtualNetwork", AAZObjectType)
 
             load_balancer_backend_addresses = _builder.get(".properties.loadBalancerBackendAddresses")
             if load_balancer_backend_addresses is not None:
@@ -445,6 +463,10 @@ class Create(AAZCommand):
                 _elements.set_prop("port", AAZIntType, ".port")
                 _elements.set_prop("protocol", AAZStrType, ".protocol")
                 _elements.set_prop("type", AAZStrType, ".type")
+
+            virtual_network = _builder.get(".properties.virtualNetwork")
+            if virtual_network is not None:
+                virtual_network.set_prop("id", AAZStrType, ".vnet_id")
 
             return _instance_value
 
@@ -565,9 +587,16 @@ class _CreateHelper:
             serialized_name="provisioningState",
             flags={"read_only": True},
         )
+        properties.sync_mode = AAZStrType(
+            serialized_name="syncMode",
+        )
         properties.tunnel_interfaces = AAZListType(
             serialized_name="tunnelInterfaces",
         )
+        properties.virtual_network = AAZObjectType(
+            serialized_name="virtualNetwork",
+        )
+        cls._build_schema_sub_resource_read(properties.virtual_network)
 
         backend_ip_configurations = _schema_backend_address_pool_read.properties.backend_ip_configurations
         backend_ip_configurations.Element = AAZObjectType()
@@ -973,7 +1002,7 @@ class _CreateHelper:
         _element.id = AAZStrType()
         _element.name = AAZStrType()
         _element.properties = AAZObjectType(
-            flags={"required": True, "client_flatten": True},
+            flags={"client_flatten": True},
         )
         _element.type = AAZStrType(
             flags={"read_only": True},
@@ -1427,6 +1456,9 @@ class _CreateHelper:
         properties.auxiliary_mode = AAZStrType(
             serialized_name="auxiliaryMode",
         )
+        properties.auxiliary_sku = AAZStrType(
+            serialized_name="auxiliarySku",
+        )
         properties.disable_tcp_state_tracking = AAZBoolType(
             serialized_name="disableTcpStateTracking",
         )
@@ -1659,6 +1691,10 @@ class _CreateHelper:
             serialized_name="privateEndpoint",
         )
         cls._build_schema_private_endpoint_read(properties.private_endpoint)
+        properties.private_endpoint_location = AAZStrType(
+            serialized_name="privateEndpointLocation",
+            flags={"read_only": True},
+        )
         properties.private_link_service_connection_state = AAZObjectType(
             serialized_name="privateLinkServiceConnectionState",
         )
@@ -2184,6 +2220,9 @@ class _CreateHelper:
         dns_settings.domain_name_label = AAZStrType(
             serialized_name="domainNameLabel",
         )
+        dns_settings.domain_name_label_scope = AAZStrType(
+            serialized_name="domainNameLabelScope",
+        )
         dns_settings.fqdn = AAZStrType()
         dns_settings.reverse_fqdn = AAZStrType(
             serialized_name="reverseFqdn",
@@ -2329,7 +2368,9 @@ class _CreateHelper:
         properties.direction = AAZStrType(
             flags={"required": True},
         )
-        properties.priority = AAZIntType()
+        properties.priority = AAZIntType(
+            flags={"required": True},
+        )
         properties.protocol = AAZStrType(
             flags={"required": True},
         )
@@ -2427,7 +2468,7 @@ class _CreateHelper:
             serialized_name="addressPrefixes",
         )
         properties.application_gateway_ip_configurations = AAZListType(
-            serialized_name="applicationGatewayIpConfigurations",
+            serialized_name="applicationGatewayIPConfigurations",
         )
         properties.delegations = AAZListType()
         properties.ip_allocations = AAZListType(

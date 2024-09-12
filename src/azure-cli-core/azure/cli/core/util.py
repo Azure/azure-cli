@@ -655,14 +655,8 @@ def in_cloud_console():
 
 def get_arg_list(op):
     import inspect
-
-    try:
-        # only supported in python3 - falling back to argspec if not available
-        sig = inspect.signature(op)
-        return sig.parameters
-    except AttributeError:
-        sig = inspect.getargspec(op)  # pylint: disable=deprecated-method
-        return sig.args
+    sig = inspect.signature(op)
+    return sig.parameters
 
 
 def is_track2(client_class):
@@ -907,6 +901,9 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
     if 'User-Agent' in headers:
         agents.append(headers['User-Agent'])
     headers['User-Agent'] = ' '.join(agents)
+
+    from azure.cli.core.telemetry import set_user_agent
+    set_user_agent(headers['User-Agent'])
 
     if generated_client_request_id_name:
         headers[generated_client_request_id_name] = str(uuid.uuid4())
@@ -1363,3 +1360,17 @@ def should_encrypt_token_cache(cli_ctx):
     encrypt = cli_ctx.config.getboolean('core', 'encrypt_token_cache', fallback=fallback)
 
     return encrypt
+
+
+def run_cmd(args, *, capture_output=False, timeout=None, check=False, encoding=None, env=None):
+    """Run command in a subprocess. It reduces (not eliminates) shell injection by forcing args to be a list
+    and shell=False. Other arguments are keyword-only. For their documentation, see
+    https://docs.python.org/3/library/subprocess.html#subprocess.run
+    """
+    if not isinstance(args, list):
+        from azure.cli.core.azclierror import ArgumentUsageError
+        raise ArgumentUsageError("Invalid args. run_cmd args must be a list")
+
+    import subprocess
+    return subprocess.run(args, capture_output=capture_output, timeout=timeout, check=check,
+                          encoding=encoding, env=env)

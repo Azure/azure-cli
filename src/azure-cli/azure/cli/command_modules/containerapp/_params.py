@@ -5,6 +5,7 @@
 # pylint: disable=line-too-long, too-many-statements, consider-using-f-string
 
 from knack.arguments import CLIArgumentType
+from knack.deprecation import Deprecated
 
 from azure.cli.core.commands.parameters import (resource_group_name_type,
                                                 get_location_type,
@@ -12,7 +13,7 @@ from azure.cli.core.commands.parameters import (resource_group_name_type,
                                                 get_three_state_flag, get_enum_type, tags_type)
 
 from ._validators import (validate_memory, validate_cpu, validate_managed_env_name_or_id, validate_registry_server,
-                          validate_registry_user, validate_registry_pass, validate_target_port, validate_ingress,
+                          validate_registry_user, validate_registry_pass, validate_target_port,
                           validate_storage_name_or_id, validate_cors_max_age, validate_allow_insecure)
 from ._constants import UNAUTHENTICATED_CLIENT_ACTION, FORWARD_PROXY_CONVENTION, MAXIMUM_CONTAINER_APP_NAME_LENGTH, LOG_TYPE_CONSOLE, LOG_TYPE_SYSTEM
 
@@ -112,7 +113,7 @@ def load_arguments(self, _):
 
     # Ingress
     with self.argument_context('containerapp', arg_group='Ingress') as c:
-        c.argument('ingress', validator=validate_ingress, default=None, arg_type=get_enum_type(['internal', 'external']), help="The ingress type.")
+        c.argument('ingress', default=None, arg_type=get_enum_type(['internal', 'external']), help="The ingress type.")
         c.argument('target_port', type=int, validator=validate_target_port, help="The application port used for ingress traffic.")
         c.argument('transport', arg_type=get_enum_type(['auto', 'http', 'http2', 'tcp']), help="The transport protocol used for ingress traffic.")
         c.argument('exposed_port', type=int, help="Additional exposed port. Only supported by tcp transport protocol. Must be unique per environment if the app ingress is external.")
@@ -157,10 +158,11 @@ def load_arguments(self, _):
 
     with self.argument_context('containerapp env', arg_group='Dapr') as c:
         c.argument('instrumentation_key', options_list=['--dapr-instrumentation-key'], help='Application Insights instrumentation key used by Dapr to export Service to Service communication telemetry')
+        c.argument('dapr_connection_string', options_list=['--dapr-connection-string', '-d'], help='Application Insights connection string used by Dapr to export service to service communication telemetry.')
 
     with self.argument_context('containerapp env', arg_group='Virtual Network') as c:
         c.argument('infrastructure_subnet_resource_id', options_list=['--infrastructure-subnet-resource-id', '-s'], help='Resource ID of a subnet for infrastructure components and user app containers.')
-        c.argument('docker_bridge_cidr', options_list=['--docker-bridge-cidr'], help='CIDR notation IP range assigned to the Docker bridge. It must not overlap with any Subnet IP ranges or the IP range defined in Platform Reserved CIDR, if defined')
+        c.argument('docker_bridge_cidr', options_list=['--docker-bridge-cidr'], help='CIDR notation IP range assigned to the Docker bridge. It must not overlap with any Subnet IP ranges or the IP range defined in Platform Reserved CIDR, if defined', deprecate_info=Deprecated(self.cli_ctx, target='--docker-bridge-cidr', hide=True, message_func=lambda x: "Option '--docker-bridge-cidr' has been deprecated and will be removed in the Ignite 2024"))
         c.argument('platform_reserved_cidr', options_list=['--platform-reserved-cidr'], help='IP range in CIDR notation that can be reserved for environment infrastructure IP addresses. It must not overlap with any other Subnet IP ranges')
         c.argument('platform_reserved_dns_ip', options_list=['--platform-reserved-dns-ip'], help='An IP address from the IP range defined by Platform Reserved CIDR that will be reserved for the internal DNS server.')
         c.argument('internal_only', arg_type=get_three_state_flag(), options_list=['--internal-only'], help='Boolean indicating the environment only has an internal load balancer. These environments do not have a public static IP resource, therefore must provide infrastructureSubnetResourceId if enabling this property')
@@ -173,9 +175,12 @@ def load_arguments(self, _):
     with self.argument_context('containerapp env', arg_group='Peer Authentication') as c:
         c.argument('mtls_enabled', arg_type=get_three_state_flag(), options_list=['--enable-mtls'], help='Boolean indicating if mTLS peer authentication is enabled for the environment.')
 
+    with self.argument_context('containerapp env', arg_group='Peer Traffic Configuration') as c:
+        c.argument('p2p_encryption_enabled', arg_type=get_three_state_flag(), options_list=['--enable-peer-to-peer-encryption'], help='Boolean indicating whether the peer-to-peer traffic encryption is enabled for the environment.')
+
     with self.argument_context('containerapp env create') as c:
         c.argument('zone_redundant', options_list=["--zone-redundant", "-z"], help="Enable zone redundancy on the environment. Cannot be used without --infrastructure-subnet-resource-id. If used with --location, the subnet's location must match")
-        c.argument('enable_workload_profiles', arg_type=get_three_state_flag(), options_list=["--enable-workload-profiles", "-w"], help="Boolean indicating if the environment is enabled to have workload profiles", default=False)
+        c.argument('enable_workload_profiles', arg_type=get_three_state_flag(), options_list=["--enable-workload-profiles", "-w"], help="Boolean indicating if the environment is enabled to have workload profiles")
 
     with self.argument_context('containerapp env update') as c:
         c.argument('name', name_type, help='Name of the Container Apps environment.')
@@ -198,10 +203,17 @@ def load_arguments(self, _):
         c.argument('certificate_password', options_list=['--password', '-p'], help='The certificate file password')
         c.argument('prompt', options_list=['--show-prompt'], action='store_true', help='Show prompt to upload an existing certificate.')
 
+    with self.argument_context('containerapp env certificate create') as c:
+        c.argument('hostname', options_list=['--hostname'], help='The custom domain name.')
+        c.argument('certificate_name', options_list=['--certificate-name', '-c'], help='Name of the managed certificate which should be unique within the Container Apps environment.')
+        c.argument('validation_method', arg_type=get_enum_type(['HTTP', 'CNAME', 'TXT']), options_list=['--validation-method', '-v'], help='Validation method of custom domain ownership.')
+
     with self.argument_context('containerapp env certificate list') as c:
         c.argument('name', id_part=None)
         c.argument('certificate', options_list=['--certificate', '-c'], help='Name or resource id of the certificate.')
         c.argument('thumbprint', options_list=['--thumbprint', '-t'], help='Thumbprint of the certificate.')
+        c.argument('managed_certificates_only', options_list=['--managed-certificates-only', '-m'], help='List managed certificates only.', action='store_true', is_preview=True)
+        c.argument('private_key_certificates_only', options_list=['--private-key-certificates-only', '-p'], help='List private-key certificates only.', action='store_true', is_preview=True)
 
     with self.argument_context('containerapp env certificate delete') as c:
         c.argument('certificate', options_list=['--certificate', '-c'], help='Name or resource id of the certificate.')
@@ -262,7 +274,7 @@ def load_arguments(self, _):
 
     with self.argument_context('containerapp ingress') as c:
         c.argument('allow_insecure', arg_type=get_three_state_flag(), help='Allow insecure connections for ingress traffic.')
-        c.argument('type', validator=validate_ingress, arg_type=get_enum_type(['internal', 'external']), help="The ingress type.")
+        c.argument('type', arg_type=get_enum_type(['internal', 'external']), help="The ingress type.")
         c.argument('transport', arg_type=get_enum_type(['auto', 'http', 'http2', 'tcp']), help="The transport protocol used for ingress traffic.")
         c.argument('target_port', type=int, validator=validate_target_port, help="The application port used for ingress traffic.")
         c.argument('exposed_port', type=int, help="Additional exposed port. Only supported by tcp transport protocol. Must be unique per environment if the app ingress is external.")
@@ -368,6 +380,10 @@ def load_arguments(self, _):
         c.argument('consumer_secret_setting_name', options_list=['--consumer-secret-name', '--secret-name'], help='The consumer secret name that contains the app secret.')
         c.argument('provider_name', required=True, help='The name of the custom OpenID Connect provider.')
         c.argument('openid_configuration', help='The endpoint that contains all the configuration endpoints for the provider.')
+        c.argument('token_store', arg_type=get_three_state_flag(), help='Boolean indicating if token store is enabled for the app.')
+        c.argument('sas_url_secret', help='The blob storage SAS URL to be used for token store.')
+        c.argument('sas_url_secret_name', help='The secret name that contains blob storage SAS URL to be used for token store.')
+
         # auth update
         c.argument('set_string', options_list=['--set'], help='Value of a specific field within the configuration settings for the Azure App Service Authentication / Authorization feature.')
         c.argument('config_file_path', help='The path of the config file containing auth settings if they come from a file.')
@@ -422,7 +438,6 @@ def load_arguments(self, _):
         c.argument('max_nodes', help="The maximum node count for the workload profile")
 
     with self.argument_context('containerapp env workload-profile update') as c:
-        c.argument('workload_profile_type', help="The type of workload profile to update. Run 'az containerapp env workload-profile list-supported -l <region>' to check the options for your region.")
         c.argument('min_nodes', help="The minimum node count for the workload profile")
         c.argument('max_nodes', help="The maximum node count for the workload profile")
 
@@ -453,7 +468,7 @@ def load_arguments(self, _):
 
     with self.argument_context('containerapp job stop') as c:
         c.argument('job_execution_name', help='name of the specific job execution which needs to be stopped.')
-        c.argument('execution_name_list', help='comma separated list of job execution names.')
+        c.argument('execution_name_list', help='comma separated list of job execution names.', deprecate_info=Deprecated(self.cli_ctx, target='--execution_name_list', hide=True, message_func=lambda x: "Option 'execution-name-list' has been deprecated and will be removed in the next Cli version"))
 
     with self.argument_context('containerapp job execution') as c:
         c.argument('name', id_part=None)
@@ -473,3 +488,12 @@ def load_arguments(self, _):
 
     with self.argument_context('containerapp job identity remove') as c:
         c.argument('user_assigned', nargs='*', help="Space-separated user identities. If no user identities are specified, all user identities will be removed.")
+
+    with self.argument_context('containerapp job registry') as c:
+        c.argument('server', help="The container registry server, e.g. myregistry.azurecr.io")
+        c.argument('username', help='The username of the registry. If using Azure Container Registry, we will try to infer the credentials if not supplied')
+        c.argument('password', help='The password of the registry. If using Azure Container Registry, we will try to infer the credentials if not supplied')
+        c.argument('identity', help="The managed identity with which to authenticate to the Azure Container Registry (instead of username/password). Use 'system' for a system-defined identity or a resource id for a user-defined identity. The managed identity should have been assigned acrpull permissions on the ACR before deployment (use 'az role assignment create --role acrpull ...').")
+
+    with self.argument_context('containerapp job registry list') as c:
+        c.argument('name', id_part=None)

@@ -20,7 +20,7 @@ class Wait(AAZWaitCommand):
 
     _aaz_info = {
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/serviceendpointpolicies/{}/serviceendpointpolicydefinitions/{}", "2021-08-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/serviceendpointpolicies/{}/serviceendpointpolicydefinitions/{}", "2023-09-01"],
         ]
     }
 
@@ -126,7 +126,7 @@ class Wait(AAZWaitCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2021-08-01",
+                    "api-version", "2023-09-01",
                     required=True,
                 ),
             }

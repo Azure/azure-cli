@@ -42,6 +42,11 @@ type: group
 short-summary: Manage custom certificate settings.
 """
 
+helps['signalr replica'] = """
+type: group
+short-summary: Manage replica settings.
+"""
+
 helps['signalr cors add'] = """
 type: command
 short-summary: Add allowed origins to a SignalR Service
@@ -275,4 +280,40 @@ short-summary: List custom certificate of SignalR Service.
 helps['signalr custom-certificate show'] = """
 type: command
 short-summary: Show the detail of a custom certificate of SignalR Service.
+"""
+
+helps['signalr replica show'] = """
+type: command
+short-summary: Show the details of a replica
+examples:
+  - name: Get the detail of a replica
+    text: >
+        az signalr replica show --replica-name MyReplica --signalr-name MySignalR -g MyResourceGroup
+"""
+
+helps['signalr replica delete'] = """
+type: command
+short-summary: Delete a replica of SignalR Service.
+examples:
+  - name: Delete a replica
+    text: >
+        az signalr replica delete --replica-name MyReplica --signalr-name MySignalR -g MyResourceGroup
+"""
+
+helps['signalr replica list'] = """
+type: command
+short-summary: List replicas of SignalR Service.
+examples:
+  - name: Get the detail of a replica
+    text: >
+        az signalr replica list --signalr-name MySignalR -g MyResourceGroup -o table
+"""
+
+helps['signalr replica create'] = """
+type: command
+short-summary: Create a replica of SignalR Service.
+examples:
+  - name: Get the detail of a replica
+    text: >
+        az signalr replica create --sku Premium_P1 -l eastus --replica-name MyReplica --signalr-name MySignalR -g MyResourceGroup
 """

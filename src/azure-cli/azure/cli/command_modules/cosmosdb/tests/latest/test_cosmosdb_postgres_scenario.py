@@ -15,7 +15,7 @@ class CosmosDBPostgresScenarioTest(ScenarioTest):
         self.kwargs.update({
             'cluster_name': self.create_random_name(prefix='cli', length=10),
             'loc': 'westus',
-            'storage': 131072,
+            'storage': 524288,
             'pass': 'aBcD1234!@#$',
             'config_name': 'array_nulls'
         })
@@ -74,7 +74,7 @@ class CosmosDBPostgresScenarioTest(ScenarioTest):
         self.kwargs.update({
             'cluster_name': self.create_random_name(prefix='cli', length=10),
             'loc': 'westus',
-            'storage': 131072,
+            'storage': 524288,
             'pass': 'aBcD1234!@#$',
             'new_pass': 'aBcD1234!@#$',
             'role_name': 'azrole'
@@ -120,7 +120,7 @@ class CosmosDBPostgresScenarioTest(ScenarioTest):
         self.kwargs.update({
             'cluster_name': self.create_random_name(prefix='cli', length=10),
             'loc': 'westus',
-            'storage': 131072,
+            'storage': 524288,
             'pass': 'aBcD1234!@#$',
             'fw_name': 'fw_rule'
         })
@@ -164,7 +164,7 @@ class CosmosDBPostgresScenarioTest(ScenarioTest):
         self.kwargs.update({
             'cluster_name': self.create_random_name(prefix='cli', length=10),
             'loc': 'westus',
-            'storage': 131072,
+            'storage': 524288,
             'pass': 'aBcD1234!@#$',
             'new_pass': 'aBcD1234!@#$'
         })

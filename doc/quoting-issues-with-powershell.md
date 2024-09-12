@@ -6,7 +6,7 @@ These issues are being tracked at [#15529](https://github.com/Azure/azure-cli/is
 
 On Windows, there is a known issue of PowerShell when calling native `.exe` executables or `.bat`, `.cmd` Command Prompt scripts: https://github.com/PowerShell/PowerShell/issues/1995.
 
-In short, **Windows native command invoked from PowerShell will be parsed by Command Prompt again**. This behavior contradicts the doc [About Quoting Rules](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_quoting_rules).
+In short, **Windows native command invoked from PowerShell will be parsed by Command Prompt again**. This behavior contradicts the doc [About Quoting Rules](https://learn.microsoft.com/powershell/module/microsoft.powershell.core/about/about_quoting_rules).
 
 As `az` is a Command Prompt script (at `C:\Program Files (x86)\Microsoft SDKs\Azure\CLI2\wbin\az.cmd`), it will have issues when invoked from PowerShell. These issues don't happen when invoking a PowerShell cmdlet:
 
@@ -23,7 +23,7 @@ some quoted text
 In order for a symbol to be received by Azure CLI, you will have to take both PowerShell and Command Prompt's parsing into consideration. If a symbol still exists after 2 rounds of parsing, Azure CLI will receive it.
 
 ## Workaround: the stop-parsing symbol
-To prevent this, you may use [stop-parsing symbol](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_parsing) `--%` between `az` and arguments.
+To prevent this, you may use [stop-parsing symbol](https://learn.microsoft.com/powershell/module/microsoft.powershell.core/about/about_parsing) `--%` between `az` and arguments.
 
 > The stop-parsing symbol (--%), introduced in PowerShell 3.0, directs PowerShell to refrain from interpreting input as PowerShell commands or expressions.
 > When it encounters a stop-parsing symbol, PowerShell treats the remaining characters in the line as a literal.
@@ -59,7 +59,7 @@ operable program or batch file.
 In general, when running `az "a&b"` in PowerShell,
 
 1. Since there is no whitespace in the argument, PowerShell will strip the quotes and pass the argument to Command Prompt
-2. The ampersand `&` is parsed again by Command Prompt as a [command separator](https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-xp/bb490954(v=technet.10)#using-multiple-commands-and-conditional-processing-symbols)
+2. The ampersand `&` is parsed again by Command Prompt as a [command separator](https://learn.microsoft.com/previous-versions/windows/it-pro/windows-xp/bb490954(v=technet.10)#using-multiple-commands-and-conditional-processing-symbols)
 3. `b` is treated as a separate command by Command Prompt, instead of part of the argument
 
 ```powershell
@@ -173,7 +173,7 @@ Command arguments: ['{"key": "value"}', '--debug']
 
 For complex arguments like JSON string, the best practice is to use Azure CLI's `@<file>` convention to load from a file to bypass the shell's interpretation.
 
-Note that At symbol (`@`) is [splatting operator](https://docs.microsoft.com/powershell/module/microsoft.powershell.core/about/about_splatting) in PowerShell, so it should be quoted.
+Note that At symbol (`@`) is [splatting operator](https://learn.microsoft.com/powershell/module/microsoft.powershell.core/about/about_splatting) in PowerShell, so it should be quoted.
 
 ```powershell
 az ad app create ... --required-resource-accesses "@manifest.json"

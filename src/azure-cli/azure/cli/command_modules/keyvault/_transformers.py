@@ -84,12 +84,36 @@ def transform_key_decryption_output(result, **command_args):
     return output
 
 
+def transform_key_list_output(result, **command_args):  # pylint: disable=unused-argument
+    if not result:
+        return result
+    output = []
+    from azure.keyvault.keys import KeyProperties, DeletedKey
+    for key in result:
+        if not isinstance(key, KeyProperties) and not isinstance(key, DeletedKey):
+            return result
+        k = {}
+        if isinstance(key, DeletedKey):
+            k['deletedDate'] = key.deleted_date
+            k['scheduledPurgeDate'] = key.scheduled_purge_date
+            k['recoveryId'] = key.recovery_id
+            key = key.properties
+        k['attributes'] = key._attributes    # pylint: disable=protected-access
+        k['kid'] = key.id
+        k['name'] = key.name
+        k['managed'] = key.managed
+        k['tags'] = key.tags
+        k['releasePolicy'] = key.release_policy
+        output.append(k)
+    return output
+
+
 # pylint: disable=unused-argument, protected-access
 def transform_key_output(result, **command_args):
-    from azure.keyvault.keys import KeyVaultKey, JsonWebKey
+    from azure.keyvault.keys import KeyVaultKey, DeletedKey, JsonWebKey
     import base64
 
-    if not isinstance(result, KeyVaultKey):
+    if not isinstance(result, KeyVaultKey) and not isinstance(result, DeletedKey):
         return result
 
     if result.key and isinstance(result.key, JsonWebKey):
@@ -105,6 +129,10 @@ def transform_key_output(result, **command_args):
         'tags': result.properties.tags,
         'releasePolicy': result.properties.release_policy
     }
+    if isinstance(result, DeletedKey):
+        output['deletedDate'] = result.deleted_date
+        output['scheduledPurgeDate'] = result.scheduled_purge_date
+        output['recoveryId'] = result.recovery_id
     return output
 
 

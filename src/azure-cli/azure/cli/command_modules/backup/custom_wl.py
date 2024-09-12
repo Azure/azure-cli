@@ -135,8 +135,8 @@ def register_wl_container(cmd, client, vault_name, resource_group_name, workload
     param = ProtectionContainerResource(properties=properties)
 
     # Trigger register and wait for completion
-    result = client.register(vault_name, resource_group_name, fabric_name, container_name, param,
-                             cls=cust_help.get_pipeline_response)
+    result = client.begin_register(vault_name, resource_group_name, fabric_name, container_name, param,
+                                   cls=cust_help.get_pipeline_response, polling=False).result()
     return cust_help.track_register_operation(cmd.cli_ctx, result, vault_name, resource_group_name, container_name)
 
 
@@ -171,8 +171,8 @@ def re_register_wl_container(cmd, client, vault_name, resource_group_name, workl
                                                         source_resource_id=source_resource_id)
     param = ProtectionContainerResource(properties=properties)
     # Trigger register and wait for completion
-    result = client.register(vault_name, resource_group_name, fabric_name, container_name, param,
-                             cls=cust_help.get_pipeline_response)
+    result = client.begin_register(vault_name, resource_group_name, fabric_name, container_name, param,
+                                   cls=cust_help.get_pipeline_response, polling=False).result()
     return cust_help.track_register_operation(cmd.cli_ctx, result, vault_name, resource_group_name, container_name)
 
 
@@ -505,7 +505,7 @@ def backup_now(cmd, client, resource_group_name, vault_name, item, retain_until,
 
 
 def disable_protection(cmd, client, resource_group_name, vault_name, item,
-                       retain_recovery_points_as_per_policy=False):
+                       retain_recovery_points_as_per_policy=False, tenant_id=None):
 
     container_uri = cust_help.get_protection_container_uri_from_id(item.id)
     item_uri = cust_help.get_protected_item_uri_from_id(item.id)
@@ -524,6 +524,18 @@ def disable_protection(cmd, client, resource_group_name, vault_name, item,
         properties.protection_state = ProtectionState.protection_stopped
     properties.policy_id = ''
     param = ProtectedItemResource(properties=properties)
+
+    # ResourceGuard scenario: if we are stopping backup and there is MUA setup for the scenario,
+    # we want to set the appropriate parameters.
+    if param.properties.protection_state == ProtectionState.protection_stopped:
+        if cust_help.has_resource_guard_mapping(cmd.cli_ctx, resource_group_name,
+                                                vault_name, "RecoveryServicesStopProtection"):
+            # Cross Tenant scenario
+            if tenant_id is not None:
+                client = get_mgmt_service_client(cmd.cli_ctx, RecoveryServicesBackupClient,
+                                                 aux_tenants=[tenant_id]).protected_item
+            param.properties.resource_guard_operation_requests = [cust_help.get_resource_guard_operation_request(
+                cmd.cli_ctx, resource_group_name, vault_name, "RecoveryServicesStopProtection")]
 
     # Trigger disable protection and wait for completion
     result = client.create_or_update(vault_name, resource_group_name, fabric_name,
@@ -622,7 +634,7 @@ def list_workload_items(cmd, vault_name, resource_group_name, target_subscriptio
 
 
 def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_config, rehydration_duration=15,
-                     rehydration_priority=None, use_secondary_region=None):
+                     rehydration_priority=None, use_secondary_region=None, tenant_id=None):
 
     recovery_config_object = cust_help.get_or_read_json(recovery_config)
     restore_mode = recovery_config_object['restore_mode']
@@ -734,6 +746,15 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
         result = crr_client.begin_trigger(azure_region, trigger_crr_request, cls=cust_help.get_pipeline_response,
                                           polling=False).result()
         return cust_help.track_backup_crr_job(cmd.cli_ctx, result, azure_region, vault.id)
+
+    if cust_help.has_resource_guard_mapping(cmd.cli_ctx, resource_group_name, vault_name, "RecoveryServicesRestore"):
+        # Cross Tenant scenario
+        if tenant_id is not None:
+            client = get_mgmt_service_client(cmd.cli_ctx, RecoveryServicesBackupClient,
+                                             aux_tenants=[tenant_id]).restores
+        trigger_restore_request.properties.resource_guard_operation_requests = [
+            cust_help.get_resource_guard_operation_request(
+                cmd.cli_ctx, resource_group_name, vault_name, "RecoveryServicesRestore")]
 
     # Trigger restore and wait for completion
     result = client.begin_trigger(vault_name, resource_group_name, fabric_name, container_uri, item_uri,

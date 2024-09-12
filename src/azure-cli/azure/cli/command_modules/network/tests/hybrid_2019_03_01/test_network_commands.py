@@ -957,7 +957,7 @@ class NetworkNicConvenienceCommandsScenarioTest(ScenarioTest):
     def test_network_nic_convenience_commands(self, resource_group):
 
         self.kwargs['vm'] = 'conveniencevm1'
-        self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --admin-username myusername --admin-password aBcD1234!@#$ --authentication-type password')
+        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username myusername --admin-password aBcD1234!@#$ --authentication-type password')
         self.kwargs['nic_id'] = self.cmd('vm show -g {rg} -n {vm} --query "networkProfile.networkInterfaces[0].id"').get_output_in_json()
         self.cmd('network nic list-effective-nsg --ids {nic_id}',
                  checks=self.greater_than('length(@)', 0))

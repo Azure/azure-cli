@@ -5,10 +5,11 @@
 
 
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathCheck, LogAnalyticsWorkspacePreparer)
+from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathCheck)
 
 from .common import TEST_LOCATION
-from .utils import create_containerapp_env
+from .utils import prepare_containerapp_env_for_app_e2e_tests
+
 
 # flake8: noqa
 # noqa
@@ -21,15 +22,13 @@ class ContainerAppAuthTest(ScenarioTest):
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location=TEST_LOCATION)
-    @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
-    def test_containerapp_auth_e2e(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
+    def test_containerapp_auth_e2e(self, resource_group):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
-        env = self.create_random_name(prefix='containerapp-env', length=24)
         app = self.create_random_name(prefix='containerapp-auth', length=24)
 
-        create_containerapp_env(self, env, resource_group, logs_workspace=laworkspace_customer_id, logs_workspace_shared_key=laworkspace_shared_key)
+        env_id = prepare_containerapp_env_for_app_e2e_tests(self)
 
-        self.cmd('containerapp create -g {} -n {} --environment {} --image mcr.microsoft.com/k8se/quickstart:latest --ingress external --target-port 80'.format(resource_group, app, env))
+        self.cmd('containerapp create -g {} -n {} --environment {} --image mcr.microsoft.com/k8se/quickstart:latest --ingress external --target-port 80'.format(resource_group, app, env_id))
 
         client_id = 'abc123'
         test_secret = 'abc123'
@@ -63,13 +62,21 @@ class ContainerAppAuthTest(ScenarioTest):
             JMESPathCheck('identityProviders.azureActiveDirectory.registration.openIdIssuer', issuer),
         ])
 
-        self.cmd('containerapp auth update -g {} -n {} --unauthenticated-client-action AllowAnonymous'.format(resource_group, app), checks=[
+        sas_url = "sasurl"
+        self.cmd('containerapp auth update  -g {} -n {} --unauthenticated-client-action AllowAnonymous --token-store true --sas-url-secret {} --yes'.format(resource_group, app, sas_url), checks=[
             JMESPathCheck('name', "current"),
             JMESPathCheck('properties.globalValidation.unauthenticatedClientAction', "AllowAnonymous"),
             JMESPathCheck('properties.identityProviders.azureActiveDirectory.registration.clientId', client_id),
             JMESPathCheck('properties.identityProviders.azureActiveDirectory.registration.clientSecretSettingName',
                           "microsoft-provider-authentication-secret"),
             JMESPathCheck('properties.identityProviders.azureActiveDirectory.registration.openIdIssuer', issuer),
+            JMESPathCheck('properties.login.tokenStore.enabled', True),
+            JMESPathCheck('properties.login.tokenStore.azureBlobStorage.sasUrlSettingName',
+                          "blob-storage-token-store-sasurl-secret"),
+        ])
+
+        self.cmd("az containerapp secret list --resource-group {} --name {}".format(resource_group, app), checks=[
+            JMESPathCheck('length(@)', 2),
         ])
 
         self.cmd('containerapp auth show -g {} -n {}'.format(resource_group, app), checks=[
@@ -78,10 +85,13 @@ class ContainerAppAuthTest(ScenarioTest):
             JMESPathCheck('identityProviders.azureActiveDirectory.registration.clientSecretSettingName',
                           "microsoft-provider-authentication-secret"),
             JMESPathCheck('identityProviders.azureActiveDirectory.registration.openIdIssuer', issuer),
+            JMESPathCheck('login.tokenStore.enabled', True),
+            JMESPathCheck('login.tokenStore.azureBlobStorage.sasUrlSettingName',
+                          "blob-storage-token-store-sasurl-secret"),
         ])
-
-        self.cmd('containerapp auth update -g {} -n {} --proxy-convention Standard --redirect-provider Facebook --unauthenticated-client-action AllowAnonymous'.format(
-                resource_group, app), checks=[
+        login_paramters = 'identityProviders.azureActiveDirectory.login.loginParameters=[a,scope=openid offline_access api://<back-end-client-id>/user_impersonation]'
+        self.cmd("containerapp auth update -g {} -n {} --proxy-convention Standard --redirect-provider Facebook --unauthenticated-client-action AllowAnonymous --set '{}'".format(
+                resource_group, app, login_paramters), checks=[
                 JMESPathCheck('name', 'current'),
                 JMESPathCheck('properties.httpSettings.forwardProxy.convention', 'Standard'),
                 JMESPathCheck('properties.globalValidation.redirectToProvider', 'Facebook'),
@@ -89,7 +99,10 @@ class ContainerAppAuthTest(ScenarioTest):
                 JMESPathCheck('properties.identityProviders.azureActiveDirectory.registration.clientId', client_id),
                 JMESPathCheck('properties.identityProviders.azureActiveDirectory.registration.clientSecretSettingName', "microsoft-provider-authentication-secret"),
                 JMESPathCheck('properties.identityProviders.azureActiveDirectory.registration.openIdIssuer', issuer),
-            ])
+                JMESPathCheck('length(properties.identityProviders.azureActiveDirectory.login.loginParameters)', 2),
+                JMESPathCheck('properties.identityProviders.azureActiveDirectory.login.loginParameters[0]', "a"),
+                JMESPathCheck('properties.identityProviders.azureActiveDirectory.login.loginParameters[1]', "scope=openid offline_access api://<back-end-client-id>/user_impersonation"),
+        ])
 
         self.cmd('containerapp show  -g {} -n {}'.format(resource_group, app), checks=[
             JMESPathCheck('properties.provisioningState', "Succeeded")
@@ -102,17 +115,15 @@ class ContainerAppAuthTest(ScenarioTest):
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location=TEST_LOCATION)
-    @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
-    def test_containerapp_auth_facebook_e2e(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
+    def test_containerapp_auth_facebook_e2e(self, resource_group):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
-        env = self.create_random_name(prefix='containerapp-env', length=24)
         app = self.create_random_name(prefix='containerapp-auth', length=24)
 
-        create_containerapp_env(self, env, resource_group, logs_workspace=laworkspace_customer_id, logs_workspace_shared_key=laworkspace_shared_key)
+        env_id = prepare_containerapp_env_for_app_e2e_tests(self)
 
         self.cmd(
             'containerapp create -g {} -n {} --environment {} --image mcr.microsoft.com/k8se/quickstart:latest --ingress external --target-port 80'.format(
-                resource_group, app, env))
+                resource_group, app, env_id))
 
         app_id = 'abc123'
         test_secret = 'abc123'
@@ -141,17 +152,15 @@ class ContainerAppAuthTest(ScenarioTest):
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location=TEST_LOCATION)
-    @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
-    def test_containerapp_auth_github_e2e(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
+    def test_containerapp_auth_github_e2e(self, resource_group):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
-        env = self.create_random_name(prefix='containerapp-env', length=24)
         app = self.create_random_name(prefix='containerapp-auth', length=24)
 
-        create_containerapp_env(self, env, resource_group, logs_workspace=laworkspace_customer_id, logs_workspace_shared_key=laworkspace_shared_key)
+        env_id = prepare_containerapp_env_for_app_e2e_tests(self)
 
         self.cmd(
             'containerapp create -g {} -n {} --environment {} --image mcr.microsoft.com/k8se/quickstart:latest --ingress external --target-port 80'.format(
-                resource_group, app, env))
+                resource_group, app, env_id))
 
         client_id = 'abc123'
         test_secret = 'abc123'
@@ -175,7 +184,7 @@ class ContainerAppAuthTest(ScenarioTest):
 
         self.cmd(
             'containerapp create -g {} -n {} --environment {} --image mcr.microsoft.com/k8se/quickstart:latest --ingress external --target-port 80'.format(
-                resource_group, app, env))
+                resource_group, app, env_id))
 
         self.cmd(
             'containerapp auth google update -g {} --name {} --client-id {} --client-secret {} --yes'
@@ -195,7 +204,7 @@ class ContainerAppAuthTest(ScenarioTest):
 
         self.cmd(
             'containerapp create -g {} -n {} --environment {} --image mcr.microsoft.com/k8se/quickstart:latest --ingress external --target-port 80'.format(
-                resource_group, app, env))
+                resource_group, app, env_id))
 
         self.cmd(
             'containerapp auth apple update -g {} --name {} --client-id {} --client-secret {} --yes'
@@ -215,7 +224,7 @@ class ContainerAppAuthTest(ScenarioTest):
 
         self.cmd(
             'containerapp create -g {} -n {} --environment {} --image mcr.microsoft.com/k8se/quickstart:latest --ingress external --target-port 80'.format(
-                resource_group, app, env))
+                resource_group, app, env_id))
 
         self.cmd(
             'containerapp auth twitter update -g {} --name {} --consumer-key {} --consumer-secret {} --yes'
@@ -238,17 +247,15 @@ class ContainerAppAuthTest(ScenarioTest):
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location=TEST_LOCATION)
-    @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
     def test_containerapp_auth_openid_connect_e2e(self, resource_group):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
-        env = self.create_random_name(prefix='containerapp-env', length=24)
         app = self.create_random_name(prefix='containerapp-auth', length=24)
 
-        create_containerapp_env(self, env, resource_group)
+        env_id = prepare_containerapp_env_for_app_e2e_tests(self)
 
         self.cmd(
             'containerapp create -g {} -n {} --environment {} --image mcr.microsoft.com/k8se/quickstart:latest --ingress external --target-port 80'.format(
-                resource_group, app, env))
+                resource_group, app, env_id))
 
         client_id = 'abc123'
         test_secret = 'abc123'
@@ -257,7 +264,7 @@ class ContainerAppAuthTest(ScenarioTest):
         app = self.create_random_name(prefix='containerapp-auth', length=24)
         self.cmd(
             'containerapp create -g {} -n {} --environment {} --image mcr.microsoft.com/k8se/quickstart:latest --ingress external --target-port 80'.format(
-                resource_group, app, env))
+                resource_group, app, env_id))
 
         provider_name = "customopenid"
         configuration = "test-openid-configuration"

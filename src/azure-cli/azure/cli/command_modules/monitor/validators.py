@@ -344,13 +344,13 @@ def get_action_group_validator(dest):
         subscription = get_subscription_id(cmd.cli_ctx)
         resource_group = namespace.resource_group_name
         for group in action_groups:
-            if not is_valid_resource_id(group.action_group_id):
-                group.action_group_id = resource_id(
+            if not is_valid_resource_id(group["action_group_id"]):
+                group["action_group_id"] = resource_id(
                     subscription=subscription,
                     resource_group=resource_group,
                     namespace='microsoft.insights',
                     type='actionGroups',
-                    name=group.action_group_id
+                    name=group["action_group_id"]
                 )
     return validate_action_groups
 
@@ -395,6 +395,16 @@ def validate_storage_accounts_name_or_id(cmd, namespace):
                     type='storageAccounts',
                     name=storage_account_id
                 )
+
+
+def validate_loganalytics_workspace_search_table_name(namespace):
+    if namespace.table_name and not namespace.table_name.endswith("_SRCH"):
+        raise CLIError('usage: The table name needs to end with _SRCH')
+
+
+def validate_loganalytics_workspace_restore_table_name(namespace):
+    if namespace.table_name and not namespace.table_name.endswith("_RST"):
+        raise CLIError('usage: The table name needs to end with _RST')
 
 
 def process_subscription_id(cmd, namespace):

@@ -9,7 +9,12 @@ import unittest
 
 class AzureSearchServicesTests(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='azure_search_cli_test')
+    # https://vcrpy.readthedocs.io/en/latest/configuration.html#request-matching
+    def setUp(self):
+        self.vcr.match_on = ['scheme', 'method', 'path', 'query'] # not 'host', 'port'
+        super(AzureSearchServicesTests, self).setUp()
+
+    @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='westcentralus')
     def test_service_create_skus(self, resource_group):
         self.kwargs.update({
             'sku_name': 'standard',
@@ -56,7 +61,7 @@ class AzureSearchServicesTests(ScenarioTest):
                     self.check('partitionCount', '{partition_count}'),
                     self.check('hostingMode', '{hosting_mode}')])
 
-    @ResourceGroupPreparer(name_prefix='azure_search_cli_test')
+    @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='eastus2euap')
     def test_service_create_multi_partition(self, resource_group):
         self.kwargs.update({
             'sku_name': 'standard',
@@ -73,7 +78,7 @@ class AzureSearchServicesTests(ScenarioTest):
                     self.check('replicaCount', '{replica_count}'),
                     self.check('partitionCount', '{partition_count}')])
 
-    @ResourceGroupPreparer(name_prefix='azure_search_cli_test')
+    @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='eastus2euap')
     def test_service_create_multi_replica(self, resource_group):
         self.kwargs.update({
             'sku_name': 'standard',
@@ -90,7 +95,7 @@ class AzureSearchServicesTests(ScenarioTest):
                     self.check('replicaCount', '{replica_count}'),
                     self.check('partitionCount', '{partition_count}')])
 
-    @ResourceGroupPreparer(name_prefix='azure_search_cli_test')
+    @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='eastus2euap')
     def test_service_create_ip_rules(self, resource_group):
         self.kwargs.update({
             'sku_name': 'standard',
@@ -106,7 +111,7 @@ class AzureSearchServicesTests(ScenarioTest):
 
         self.assertTrue(len(_search_service['networkRuleSet']['ipRules']) == 3)
 
-    @ResourceGroupPreparer(name_prefix='azure_search_cli_test')
+    @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='eastus2euap')
     def test_service_create_private_endpoint(self, resource_group):
         self.kwargs.update({
             'sku_name': 'basic',
@@ -120,7 +125,7 @@ class AzureSearchServicesTests(ScenarioTest):
                     self.check('sku.name', '{sku_name}'),
                     self.check('publicNetworkAccess', '{public_network_access}')])
 
-    @ResourceGroupPreparer(name_prefix='azure_search_cli_test')
+    @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='eastus2euap')
     def test_service_create_msi(self, resource_group):
         self.kwargs.update({
             'sku_name': 'basic',
@@ -134,7 +139,7 @@ class AzureSearchServicesTests(ScenarioTest):
                     self.check('sku.name', '{sku_name}'),
                     self.check('identity.type', '{identity_type}')])
 
-    @ResourceGroupPreparer(name_prefix='azure_search_cli_test')
+    @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='eastus2euap')
     def test_service_update(self, resource_group):
         self.kwargs.update({
             'sku_name': 'standard',
@@ -187,7 +192,7 @@ class AzureSearchServicesTests(ScenarioTest):
                     self.check('replicaCount', '{replica_count}'),
                     self.check('partitionCount', '{partition_count}')])
 
-    @ResourceGroupPreparer(name_prefix='azure_search_cli_test')
+    @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='eastus2euap')
     def test_service_update_ip_rules(self, resource_group):
         self.kwargs.update({
             'sku_name': 'standard',
@@ -222,7 +227,7 @@ class AzureSearchServicesTests(ScenarioTest):
                     self.check('publicNetworkAccess', '{public_network_access}')]).get_output_in_json()
         self.assertTrue(len(_search_service['networkRuleSet']['ipRules']) == 0)
 
-    @ResourceGroupPreparer(name_prefix='azure_search_cli_test')
+    @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='eastus2euap')
     def test_service_update_private_endpoint(self, resource_group):
         self.kwargs.update({
             'sku_name': 'basic',
@@ -254,7 +259,7 @@ class AzureSearchServicesTests(ScenarioTest):
             checks=[self.check('name', '{name}'),
                     self.check('publicNetworkAccess', '{public_network_access}')])
 
-    @ResourceGroupPreparer(name_prefix='azure_search_cli_test')
+    @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='eastus2euap')
     def test_service_update_msi(self, resource_group):
         self.kwargs.update({
             'sku_name': 'basic',
@@ -286,7 +291,7 @@ class AzureSearchServicesTests(ScenarioTest):
             checks=[self.check('name', '{name}'),
                     self.check('identity.type', '{identity_type}')])
 
-    @ResourceGroupPreparer(name_prefix='azure_search_cli_test')
+    @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='eastus2euap')
     def test_service_create_delete_show(self, resource_group):
         self.kwargs.update({
             'sku_name': 'standard',
@@ -307,7 +312,7 @@ class AzureSearchServicesTests(ScenarioTest):
 
         self.cmd('az search service show -n {name} -g {rg}', expect_failure=True)
 
-    @ResourceGroupPreparer(name_prefix='azure_search_cli_test')
+    @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='eastus2euap')
     def test_service_create_delete_list(self, resource_group):
         _services = self.cmd('az search service list -g {rg}').get_output_in_json()
         self.assertTrue(len(_services) == 0)
@@ -351,7 +356,7 @@ class AzureSearchServicesTests(ScenarioTest):
         _services = self.cmd('az search service list -g {rg}').get_output_in_json()
         self.assertTrue(len(_services) == 0)
 
-    @ResourceGroupPreparer(name_prefix='azure_search_cli_test')
+    @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='eastus2euap')
     def test_service_create_auth(self, resource_group):
         self.kwargs.update({
             'sku_name': 'basic',
@@ -380,7 +385,7 @@ class AzureSearchServicesTests(ScenarioTest):
             ' --auth-options {auth_options}',
             checks=[self.check('name', '{name}'),
                     self.check('disableLocalAuth', '{disable_local_auth}'),
-                    self.check('authOptions', {'apiKeyOnly': {}, 'aadOrApiKey': None })])
+                    self.check('authOptions', {'apiKeyOnly': {} })])
 
         self.kwargs.update({
             'disable_local_auth': False,
@@ -395,7 +400,7 @@ class AzureSearchServicesTests(ScenarioTest):
             ' --aad-auth-failure-mode {aad_auth_failure_mode}',
             checks=[self.check('name', '{name}'),
                     self.check('disableLocalAuth', '{disable_local_auth}'),
-                    self.check('authOptions', { 'aadOrApiKey': { 'aadAuthFailureMode': 'http401WithBearerChallenge' }, 'apiKeyOnly': None } )])
+                    self.check('authOptions', { 'aadOrApiKey': { 'aadAuthFailureMode': 'http401WithBearerChallenge' } } )])
 
         self.kwargs.update({
             'disable_local_auth': False,
@@ -410,7 +415,49 @@ class AzureSearchServicesTests(ScenarioTest):
             ' --aad-auth-failure-mode {aad_auth_failure_mode}',
             checks=[self.check('name', '{name}'),
                     self.check('disableLocalAuth', '{disable_local_auth}'),
-                    self.check('authOptions', { 'aadOrApiKey': { 'aadAuthFailureMode': 'http403' }, 'apiKeyOnly': None } )])
+                    self.check('authOptions', { 'aadOrApiKey': { 'aadAuthFailureMode': 'http403' } } )])
+
+    @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='eastus2euap')
+    def test_service_create_semantic_search(self, resource_group):
+        self.kwargs.update({
+            'sku_name': 'standard',
+            'name': self.create_random_name(prefix='test', length=24),
+            'replica_count': 1,
+            'partition_count': 1,
+            'semantic_search': 'disabled'
+        })
+
+        self.cmd('az search service create -n {name} -g {rg} --sku {sku_name} '
+                 '--semantic-search {semantic_search}',
+                 checks=[self.check('name', '{name}'),
+                         self.check('sku.name', '{sku_name}'),
+                         self.check('replicaCount', '{replica_count}'),
+                         self.check('partitionCount', '{partition_count}'),
+                         self.check('semanticSearch', '{semantic_search}')])
+
+        self.kwargs.update({
+            'semantic_search': 'free'
+        })
+
+        self.cmd('az search service create -n {name} -g {rg} --sku {sku_name} '
+                 '--semantic-search {semantic_search}',
+                 checks=[self.check('name', '{name}'),
+                         self.check('sku.name', '{sku_name}'),
+                         self.check('replicaCount', '{replica_count}'),
+                         self.check('partitionCount', '{partition_count}'),
+                         self.check('semanticSearch', '{semantic_search}')])
+
+        self.kwargs.update({
+            'semantic_search': 'standard'
+        })
+
+        self.cmd('az search service create -n {name} -g {rg} --sku {sku_name} '
+                 '--semantic-search {semantic_search}',
+                 checks=[self.check('name', '{name}'),
+                         self.check('sku.name', '{sku_name}'),
+                         self.check('replicaCount', '{replica_count}'),
+                         self.check('partitionCount', '{partition_count}'),
+                         self.check('semanticSearch', '{semantic_search}')])
 
 if __name__ == '__main__':
     unittest.main()

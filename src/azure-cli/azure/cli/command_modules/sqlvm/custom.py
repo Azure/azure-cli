@@ -126,7 +126,6 @@ def sqlvm_group_create(
         sql_image_sku=sql_image_sku,
         wsfc_domain_profile=wsfc_domain_profile_object,
         location=location,
-        cluster_subnet_type=cluster_subnet_type,
         tags=tags)
 
     # Since it's a running operation, we will do the put and then the get to

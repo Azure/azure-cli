@@ -354,7 +354,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
     #@record_only()
     @ResourceGroupPreparer(location="eastus2euap", random_name_length=20)
-    @VaultPreparer()
+    @VaultPreparer(soft_delete=False)
     @StorageAccountPreparer(location="eastus2euap")
     @FileSharePreparer()
     @AFSPolicyPreparer()

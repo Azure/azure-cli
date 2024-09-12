@@ -3,7 +3,7 @@
 ## Prerequisite
 
 * Visual Studio Code [Link](http://code.visualstudio.com/)
-* Visual Studio Code Python Extension [Link](https://marketplace.visualstudio.com/items?itemName=donjayamanne.python)
+* Visual Studio Code Python Extension [Link](https://marketplace.visualstudio.com/items?itemName=ms-python.python)
 * Python 3.8+
 * Set up development environment [Link](https://github.com/Azure/azure-cli/blob/master/doc/configuring_your_machine.md)
 

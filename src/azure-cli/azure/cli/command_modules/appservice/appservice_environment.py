@@ -50,7 +50,7 @@ def show_appserviceenvironment(cmd, name, resource_group_name=None):
     return ase_client.get(resource_group_name, name)
 
 
-def create_appserviceenvironment_arm(cmd, resource_group_name, name, subnet, kind='ASEv2',
+def create_appserviceenvironment_arm(cmd, resource_group_name, name, subnet, kind='ASEv3',
                                      vnet_name=None, ignore_route_table=False,
                                      ignore_network_security_group=False, virtual_ip_type='Internal',
                                      front_end_scale_factor=None, front_end_sku=None, force_route_table=False,

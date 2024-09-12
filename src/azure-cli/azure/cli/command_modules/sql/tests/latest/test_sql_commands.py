@@ -942,8 +942,8 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
         database_name_one = "cliautomationdb01"
         database_name_two = "cliautomationdb02"
         database_name_three = "cliautomationdb03"
-        preferred_enclave_type_default = AlwaysEncryptedEnclaveType.default
-        preferred_enclave_type_vbs = AlwaysEncryptedEnclaveType.vbs
+        preferred_enclave_type_default = AlwaysEncryptedEnclaveType.default.value
+        preferred_enclave_type_vbs = AlwaysEncryptedEnclaveType.vbs.value
 
 
         # test sql db is created with default enclave type
@@ -1020,8 +1020,8 @@ class SqlServerServerlessDbMgmtScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     def test_sql_db_serverless_mgmt(self, resource_group, resource_group_location, server):
         database_name = "cliautomationdb01"
-        compute_model_serverless = ComputeModelType.serverless
-        compute_model_provisioned = ComputeModelType.provisioned
+        compute_model_serverless = ComputeModelType.serverless.value
+        compute_model_provisioned = ComputeModelType.provisioned.value
 
         # Create database with vcore edition
         vcore_edition = 'GeneralPurpose'
@@ -1101,6 +1101,42 @@ class SqlServerServerlessDbMgmtScenarioTest(ScenarioTest):
                 JMESPathCheck('autoPauseDelay', auto_pause_delay),
                 JMESPathCheck('minCapacity', min_capacity)])
 
+class SqlServerFreeDbMgmtScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(location='eastus2euap')
+    @SqlServerPreparer(location='eastus2euap')
+    @AllowLargeResponse()
+    def test_sql_db_free_params(self, resource_group, resource_group_location, server):
+        database_name = "freeDb1"
+        compute_model_serverless = "Serverless"
+
+        # Create database with vcore edition
+        vcore_edition = 'GeneralPurpose'
+        family = 'Gen5'
+        capacity = 2
+        free_limit_exhaustion_behavior = 'AutoPause'
+        self.cmd('sql db create -g {} --server {} --name {} --edition {} --family {} --capacity {} --compute-model {} --use-free-limit --free-limit-exhaustion-behavior {}'
+                 .format(resource_group, server, database_name, vcore_edition, family, capacity, compute_model_serverless, free_limit_exhaustion_behavior),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('edition', vcore_edition),
+                     JMESPathCheck('sku.tier', vcore_edition),
+                     JMESPathCheck('useFreeLimit', True),
+                     JMESPathCheck('freeLimitExhaustionBehavior', free_limit_exhaustion_behavior)])
+
+        new_free_limit_exhaustion_behavior = 'BillOverUsage'
+        # Update database to serverless offering
+        self.cmd('sql db update -g {} --server {} --name {} --free-limit-exhaustion-behavior {}'
+                 .format(resource_group, server, database_name, new_free_limit_exhaustion_behavior),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('edition', vcore_edition),
+                     JMESPathCheck('sku.tier', vcore_edition),
+                     JMESPathCheck('sku.name', 'GP_S_Gen5'),
+                     JMESPathCheck('freeLimitExhaustionBehavior', new_free_limit_exhaustion_behavior),
+                     JMESPathCheck('useFreeLimit', True)])
+
 
 class SqlServerDbOperationMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='westeurope')
@@ -1136,6 +1172,52 @@ class SqlServerDbOperationMgmtScenarioTest(ScenarioTest):
         self.cmd('sql db op cancel -g {} -s {} -d {} -n {}'
                  .format(resource_group, server, database_name, ops[0]['name']))
 
+class SqlServerDbForwardMigrationScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(location='eastasia')
+    @SqlServerPreparer(location='eastasia')
+    def test_sql_db_forward_migration_manual_cutover(self, resource_group, resource_group_location, server):
+        database_name = "cliautomationdb01"
+        current_service_objective = 'GP_Gen5_2'
+        update_service_objective = 'HS_Gen5_2'
+
+        # Create db
+        self.cmd('sql db create -g {} -s {} -n {} --service-objective {} --yes'
+                 .format(resource_group, server, database_name, current_service_objective),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('status', 'Online')])
+
+        # Update DB with --manual-cutover --no-wait
+        self.cmd('sql db update -g {} -s {} -n {} --service-objective {} --manual-cutover --no-wait'
+                 .format(resource_group, server, database_name, update_service_objective))
+
+        operationPhaseDetailsObject = None
+        operationPhaseDetailsPhase = None
+
+        # Wait until UpdateSlo from GeneralPurpose to Hyperscale is in WaitingForCutover
+        # When run live, this may take like 10 minutes. Unforunately there's no way to speed this up
+        while operationPhaseDetailsObject is None or operationPhaseDetailsPhase != 'WaitingForCutover':
+            time.sleep(60)
+            # List operations
+            ops = list(
+                self.cmd('sql db op list -g {} -s {} -d {}'
+                        .format(resource_group, server, database_name),
+                        checks=[
+                            JMESPathCheck('length(@)', 1),
+                            JMESPathCheck('[0].resourceGroup', resource_group),
+                            JMESPathCheck('[0].databaseName', database_name)
+                        ])
+                        .get_output_in_json())
+
+            operationPhaseDetailsObject = ops[0]['operationPhaseDetails']
+
+            if operationPhaseDetailsObject is not None:
+                operationPhaseDetailsPhase = operationPhaseDetailsObject['phase']
+
+        # Perform cutover to complete UpdateSlo with --perform-cutover --no-wait
+        self.cmd('sql db update -g {} -s {} -n {} --perform-cutover --no-wait'
+                 .format(resource_group, server, database_name))
 
 class SqlServerDbShortTermRetentionScenarioTest(ScenarioTest):
     def test_sql_db_short_term_retention(self):
@@ -1197,6 +1279,8 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
             'monthly_retention': 'P1M',
             'yearly_retention': 'P2M',
             'week_of_year': 12,
+            'make_backups_immutable': 'False',
+            'backup_storage_access_tier': 'Archive',
             'encryption_protector' : 'https://test123343strehan.vault.azure.net/keys/testk1/604b0e26e2a24eeaab30b80c8d7bb1c1',
             'keys' : '"https://test123343strehan.vault.azure.net/keys/k2/66f51a6e70f04067af8eaf77805e88b1" "https://test123343strehan.vault.azure.net/keys/testk1/604b0e26e2a24eeaab30b80c8d7bb1c1" "https://test123343strehan.vault.azure.net/keys/testk1/96151496df864e32aa62a3c1857b2931"',
             'umi' : '/subscriptions/e1775f9f-a286-474d-b6f0-29c42ac74554/resourcegroups/ArmTemplate/providers/Microsoft.ManagedIdentity/userAssignedIdentities/shobhittest'
@@ -1206,12 +1290,16 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
         self.cmd(
             'sql db ltr-policy set -g {rg} -s {server_name} -n {database_name}'
             ' --weekly-retention {weekly_retention} --monthly-retention {monthly_retention}'
-            ' --yearly-retention {yearly_retention} --week-of-year {week_of_year}',
+            ' --yearly-retention {yearly_retention} --week-of-year {week_of_year}'
+            ' --make-backups-immutable {make_backups_immutable}',
+            ' --access-tier {backup_storage_access_tier}',
             checks=[
                 self.check('resourceGroup', '{rg}'),
                 self.check('weeklyRetention', '{weekly_retention}'),
                 self.check('monthlyRetention', '{monthly_retention}'),
-                self.check('yearlyRetention', '{yearly_retention}')])
+                self.check('yearlyRetention', '{yearly_retention}'),
+                self.check('makeBackupsImmutable', '{make_backups_immutable}'),
+                self.check('backupStorageAccessTier', '{backup_storage_access_tier}')])
 
         # test get long term retention policy on live database
         self.cmd(
@@ -1220,7 +1308,9 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
                 self.check('resourceGroup', '{rg}'),
                 self.check('weeklyRetention', '{weekly_retention}'),
                 self.check('monthlyRetention', '{monthly_retention}'),
-                self.check('yearlyRetention', '{yearly_retention}')])
+                self.check('yearlyRetention', '{yearly_retention}'),
+                self.check('makeBackupsImmutable', '{make_backups_immutable}'),
+                self.check('backupStorageAccessTier', '{backup_storage_access_tier}')])
 
         # test list long term retention backups for location
         # with resource group
@@ -1411,11 +1501,11 @@ class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
 
         print('Arguments are updated with login and sid data')
 
-        with self.assertRaisesRegexp(SystemExit, "2"):
+        with self.assertRaisesRegex(SystemExit, "2"):
             self.cmd('sql server ad-admin create -s {sn} -g {rg}')
-        with self.assertRaisesRegexp(SystemExit, "2"):
+        with self.assertRaisesRegex(SystemExit, "2"):
             self.cmd('sql server ad-admin create -s {sn} -g {rg} -u {user}')
-        with self.assertRaisesRegexp(SystemExit, "2"):
+        with self.assertRaisesRegex(SystemExit, "2"):
             self.cmd('sql server ad-admin create -s {sn} -g {rg} -i {oid}')
 
         self.cmd('sql server ad-admin create -s {sn} -g {rg} -i {oid} -u {user}',
@@ -3543,8 +3633,8 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
         database_name_one = "cliautomationdb01"
         database_name_two = "cliautomationdb02"
         edition = 'GeneralPurpose'
-        preferred_enclave_type_default = AlwaysEncryptedEnclaveType.default
-        preferred_enclave_type_vbs = AlwaysEncryptedEnclaveType.vbs
+        preferred_enclave_type_default = AlwaysEncryptedEnclaveType.default.value
+        preferred_enclave_type_vbs = AlwaysEncryptedEnclaveType.vbs.value
 
         # Create general purpose pool with default enclave type
         self.cmd('sql elastic-pool create -g {} --server {} --name {} --edition {} --preferred-enclave-type {}'
@@ -4280,7 +4370,7 @@ class SqlServerVnetMgmtScenarioTest(ScenarioTest):
 
         # Vnet 1 without service endpoints to test ignore-missing-vnet-service-endpoint feature
         self.cmd('network vnet create -g {} -n {}'.format(resource_group, vnetName1))
-        self.cmd('network vnet subnet create -g {} --vnet-name {} -n {} --address-prefix {}'
+        self.cmd('network vnet subnet create -g {} --vnet-name {} -n {} --address-prefix {} --default-outbound false'
                  .format(resource_group, vnetName1, subnetName, addressPrefix))
 
         vnet1 = self.cmd('network vnet subnet show -n {} --vnet-name {} -g {}'
@@ -4289,7 +4379,7 @@ class SqlServerVnetMgmtScenarioTest(ScenarioTest):
 
         # Vnet 2
         self.cmd('network vnet create -g {} -n {}'.format(resource_group, vnetName2))
-        self.cmd('network vnet subnet create -g {} --vnet-name {} -n {} --address-prefix {} --service-endpoints {}'
+        self.cmd('network vnet subnet create -g {} --vnet-name {} -n {} --address-prefix {} --service-endpoints {} --default-outbound false'
                  .format(resource_group, vnetName2, subnetName, addressPrefix, endpoint),
                  checks=JMESPathCheck('serviceEndpoints[0].service', 'Microsoft.Sql'))
 
@@ -5044,6 +5134,10 @@ class SqlManagedInstanceCustomMaintenanceWindow(ScenarioTest):
     def _get_full_maintenance_id(self, name):
         return "/subscriptions/{}/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/{}".format(
             self.get_subscription_id(), name)
+    
+    def _get_full_instance_pool_id(self, rg_name, pool_name):
+        return "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/instancePools/{}".format(
+            self.get_subscription_id(), rg_name, pool_name)
 
     def test_sql_managed_instance_cmw(self):
         # Values of existing resources in order to test this feature
@@ -5068,14 +5162,18 @@ class SqlManagedInstanceCustomMaintenanceWindow(ScenarioTest):
             'family': 'Gen5',
             'collation': ManagedInstancePreparer.collation,
             'proxy_override': "Proxy",
-            'maintenance_id': self._get_full_maintenance_id(self.MMI1)
+            'maintenance_id': self._get_full_maintenance_id(self.MMI1),
+            'intance_pool_name': '',
+            'database_format': 'AlwaysUpToDate',
+            'pricing_model': 'Regular'
         })
 
         # test create sql managed_instance with FMW
         managed_instance = self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
                                     '-u {username} -p {admin_password} --subnet {subnet} --license-type {license_type} --capacity {v_cores} '
                                     '--storage {storage_size_in_gb} --edition {edition} --family {family} --collation {collation} '
-                                    '--proxy-override {proxy_override} --public-data-endpoint-enabled --timezone-id "{timezone_id}" --maint-config-id "{maintenance_id}"',
+                                    '--proxy-override {proxy_override} --public-data-endpoint-enabled --timezone-id "{timezone_id}" --maint-config-id "{maintenance_id}" '
+                                    '--instance-pool-name "{intance_pool_name}" --database-format "{database_format}" --pricing-model "{pricing_model}"',
                                     checks=[
                                         self.check('name', '{managed_instance_name}'),
                                         self.check('resourceGroup', '{rg}'),
@@ -5090,13 +5188,12 @@ class SqlManagedInstanceCustomMaintenanceWindow(ScenarioTest):
                                         self.check('collation', '{collation}'),
                                         self.check('proxyOverride', '{proxy_override}'),
                                         self.check('publicDataEndpointEnabled', 'True'),
-                                        self.check('maintenanceConfigurationId',
-                                                   self._get_full_maintenance_id(self.MMI1))]).get_output_in_json()
+                                        self.check('maintenanceConfigurationId', self._get_full_maintenance_id(self.MMI1)),
+                                        self.check('instancePoolId', None)]).get_output_in_json()
 
         # test delete sql managed instance 2
         self.cmd('sql mi delete --ids {} --yes'
                  .format(managed_instance['id']), checks=NoneCheck())
-
 
 class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
     DEFAULT_MC = "SQL_Default"
@@ -5104,6 +5201,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
     tag1 = "tagName1=tagValue1"
     tag2 = "tagName2=tagValue2"
     backup_storage_redundancy = "Local"
+    initial_authentication_metadata = "Windows"
 
     def _get_full_maintenance_id(self, name):
         return "/subscriptions/{}/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/{}".format(
@@ -5113,7 +5211,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
     @ManagedInstancePreparer(
         tags=f"{tag1} {tag2}",
         minimalTlsVersion="1.2",
-        otherParams=f"--bsr {backup_storage_redundancy}")
+        otherParams=f"--bsr {backup_storage_redundancy} --am {initial_authentication_metadata}")
     def test_sql_managed_instance_mgmt(self, mi, rg):
         managed_instance_name_1 = mi
         resource_group_1 = rg
@@ -5123,6 +5221,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         tls1_1 = "1.1"
         user = admin_login
         service_principal_type = "SystemAssigned"
+        authentication_metadata = "Paired"
 
         # test show sql managed instance 1
         subnet = ManagedInstancePreparer.subnet
@@ -5151,7 +5250,8 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                                           JMESPathCheck('tags', "{'tagName1': 'tagValue1', 'tagName2': 'tagValue2'}"),
                                           JMESPathCheck('currentBackupStorageRedundancy', self.backup_storage_redundancy),
                                           JMESPathCheck('maintenanceConfigurationId', self._get_full_maintenance_id(
-                                              self.DEFAULT_MC))]).get_output_in_json()
+                                              self.DEFAULT_MC)),
+                                          JMESPathCheck('authenticationMetadata', self.initial_authentication_metadata)]).get_output_in_json()
 
         # test show sql managed instance 1 using id
         self.cmd('sql mi show --ids {}'
@@ -5261,9 +5361,53 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('name', managed_instance_name_1),
                      JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('servicePrincipal.type', service_principal_type)])
+        
+        # test update authentication metadata mode
+        self.cmd('sql mi update -g {} -n {} --authentication-metadata {}'
+            .format(resource_group_1, managed_instance_name_1, authentication_metadata),
+                checks=[
+                     JMESPathCheck('name', managed_instance_name_1),
+                     JMESPathCheck('resourceGroup', resource_group_1),
+                     JMESPathCheck('authenticationMetadata', authentication_metadata)])
 
         # test list sql managed_instance in the subscription should be at least 1
         self.cmd('sql mi list', checks=[JMESPathCheckGreaterThan('length(@)', 0)])
+
+    @AllowLargeResponse()
+    @record_only()
+    def test_sql_managed_instance_create(self):
+        # Values of existing resources in order to test this feature
+        location = 'eastus2euap'
+        resource_group = 'sqlmigeodr'
+        subnet = ('/subscriptions/self.get_subscription_id()/resourceGroups/sqlmigeodr/providers/'
+                  'Microsoft.Network/virtualNetworks/cl_geodr_eus2_euap_vnet/subnets/subnet_1')
+
+        instance_name = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
+        self.kwargs.update({
+            'loc': location,
+            'rg': resource_group,
+            'subnet': subnet,
+            'managed_instance_name': instance_name,
+            'username': 'admin123',
+            'admin_password': 'SecretPassword123',
+            'dns_zone_partner': '/subscriptions/self.get_subscription_id()/resourceGroups/kmatijevic-ha-testenv-canary/providers/Microsoft.Sql/managedInstances/ha-testenv-canary-gp-1'
+        })
+
+        expected_dns_zone = '7773cdecf1ff'
+        # test create sql managed_instance with dns-zone-partner property
+        managed_instance = self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
+                                    '-u {username} -p {admin_password} --subnet {subnet} --dns-zone-partner {'
+                                    'dns_zone_partner}',
+                                    checks=[
+                                        self.check('name', '{managed_instance_name}'),
+                                        self.check('resourceGroup', '{rg}'),
+                                        self.check('administratorLogin', '{username}'),
+                                        self.check('dnsZone', expected_dns_zone),
+                                        self.check('location', '{loc}')]).get_output_in_json()
+
+        # test delete sql managed instance
+        self.cmd('sql mi delete --ids {} --yes'
+                 .format(managed_instance['id']), checks=NoneCheck())
 
 class SqlManagedInstanceStartStopMgmtScenarioTest(ScenarioTest):
     @AllowLargeResponse()
@@ -5430,6 +5574,11 @@ class SqlManagedInstanceMgmtScenarioIdentityTest(ScenarioTest):
 
 class SqlManagedInstancePoolScenarioTest(ScenarioTest):
     # Instance pool test should be deprecated and also it takes more then 5 hours to record.
+
+    def _get_full_maintenance_id(self, name):
+        return "/subscriptions/{}/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/{}".format(
+            self.get_subscription_id(), name)
+
     @live_only()
     @ManagedInstancePreparer()
     def test_sql_instance_pool(self, mi, rg):
@@ -5442,6 +5591,7 @@ class SqlManagedInstancePoolScenarioTest(ScenarioTest):
         edition = ManagedInstancePreparer.edition
         family = ManagedInstancePreparer.family
         resource_group = rg
+        maintenance_configuration_id = self._get_full_maintenance_id("SQL_WestCentralUS_MI_1")
 
         subnet = ManagedInstancePreparer.subnet
         num_pools = len(self.cmd('sql instance-pool list -g {}'.format(resource_group)).get_output_in_json())
@@ -5449,15 +5599,16 @@ class SqlManagedInstancePoolScenarioTest(ScenarioTest):
         # test create sql managed_instance
         self.cmd(
             'sql instance-pool create -g {} -n {} -l {} '
-            '--subnet {} --license-type {} --capacity {} -e {} -f {}'.format(
-                resource_group, instance_pool_name_1, location, subnet, license_type, v_cores, edition, family),
+            '--subnet {} --license-type {} --capacity {} -e {} -f {} --maintenance-configuration-id {}'.format(
+                resource_group, instance_pool_name_1, location, subnet, license_type, v_cores, edition, family, maintenance_configuration_id),
             checks=[
                 JMESPathCheck('name', instance_pool_name_1),
                 JMESPathCheck('resourceGroup', resource_group),
                 JMESPathCheck('vCores', v_cores),
                 JMESPathCheck('licenseType', license_type),
                 JMESPathCheck('sku.tier', edition),
-                JMESPathCheck('sku.family', family)])
+                JMESPathCheck('sku.family', family),
+                JMESPathCheck('sku.maintenanceConfigurationId', maintenance_configuration_id)])
 
         # test show sql instance pool
         self.cmd('sql instance-pool show -g {} -n {}'
@@ -5483,6 +5634,16 @@ class SqlManagedInstancePoolScenarioTest(ScenarioTest):
                      JMESPathCheck('name', instance_pool_name_1),
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('tags', {})])
+
+        # test updating vcore/edition/family of an instance pool
+        self.cmd('sql instance-pool update -g {} -n {} --capacity {} -e {} -f {}'
+                 .format(resource_group, instance_pool_name_1, 8, edition, family),
+                 checks=[
+                     JMESPathCheck('name', instance_pool_name_1),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('vCores', 8),
+                     JMESPathCheck('sku.tier', edition),
+                     JMESPathCheck('sku.family', family)])
 
         # Instance Pool 2
         self.cmd(
@@ -5521,6 +5682,14 @@ class SqlManagedInstancePoolScenarioTest(ScenarioTest):
                      JMESPathCheck('name', instance_pool_name_2),
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('tags', {})])
+
+        # test updating maintanace conf id of an instance pool
+        self.cmd('sql instance-pool update -g {} -n {} -maintenance-configuration-id {}'
+                 .format(resource_group, instance_pool_name_2, maintenance_configuration_id),
+                 checks=[
+                     JMESPathCheck('name', instance_pool_name_2),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('sku.maintenanceConfigurationId', maintenance_configuration_id)])
 
         self.cmd('sql instance-pool list -g {}'
                  .format(resource_group),
@@ -6087,6 +6256,75 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
                                     self.check('[0].targetManagedInstanceName', '{source_mi_name}'),
                                     self.check('[0].resourceGroup', '{rg}'),
                                     self.check('[0].operationMode', 'Copy')])
+
+    @record_only()
+    def test_sql_midb_cross_subscription_move_copy(self):
+
+        source_rg_name = "sqlmigeodr"
+        target_rg_name = "kmatijevic-ha-testenv-canary"
+        source_instance_name = "sqlmigeodr-eus2euap-gp-dbmovetest-mi1"
+        target_instance_name = "ha-testenv-canary-gp-1"
+        target_subscription_id = "00000000-0000-0000-0000-000000000000"
+        managed_db_name = "CLITest"
+
+        self.kwargs.update({
+            'rg': source_rg_name,
+            'database_name': managed_db_name,
+            'source_rg_name': source_rg_name,
+            'target_rg_name': target_rg_name,
+            'source_mi_name': source_instance_name,
+            'target_mi_name': target_instance_name,
+            'target_subscription_id': target_subscription_id
+        })
+
+        # Show source and target instance
+        source_mi = self.cmd('sql mi show -g {source_rg_name} -n {source_mi_name}').get_output_in_json()
+
+        self.kwargs.update({
+            'loc': source_mi['location'],
+        })
+
+        # Create managed database to be moved and copied
+        mdb = self.cmd('sql midb create -g {source_rg_name} --mi {source_mi_name} -n {database_name}',
+                       checks=[
+                           self.check('resourceGroup', '{source_rg_name}'),
+                           self.check('name', '{database_name}'),
+                           self.check('location', '{loc}'),
+                           self.check('status', 'Online')]).get_output_in_json()
+
+        self.kwargs.update({
+            'database_id': mdb['id']
+        })
+
+        # Start the copy operation from source to target instance
+        self.cmd('sql midb copy start -g {source_rg_name} --mi {source_mi_name} -n {database_name} --dest-sub-id {target_subscription_id} --dest-mi {target_mi_name} --dest-rg {target_rg_name}')
+
+        # Cancel the move operation from source to target instance
+        self.cmd('sql midb copy cancel -g {source_rg_name} --mi {source_mi_name} -n {database_name} --dest-sub-id {target_subscription_id} --dest-mi {target_mi_name} --dest-rg {target_rg_name}')
+
+        # List the copy operation
+        self.cmd('sql midb copy list -g {rg} --mi {source_mi_name} -n {database_name}',
+                 checks=[
+                     self.check('[0].state', 'Cancelled'),
+                     self.check('[0].sourceManagedInstanceName', '{source_mi_name}'),
+                     self.check('[0].targetManagedInstanceName', '{target_mi_name}'),
+                     self.check('[0].resourceGroup', '{rg}'),
+                     self.check('[0].operationMode', 'Copy')])
+
+        # Start the move operation from source to target instance
+        self.cmd('sql midb move start -g {source_rg_name} --mi {source_mi_name} -n {database_name} --dest-sub-id {target_subscription_id} --dest-mi {target_mi_name} --dest-rg {target_rg_name}')
+
+        # Complete the move operation from source to target instance
+        self.cmd('sql midb move complete -g {source_rg_name} --mi {source_mi_name} -n {database_name} --dest-sub-id {target_subscription_id} --dest-mi {target_mi_name} --dest-rg {target_rg_name}')
+
+        # List the move operation
+        self.cmd('sql midb move list -g {rg} --mi {source_mi_name} -n {database_name}',
+                 checks=[
+                     self.check('[0].state', 'Succeeded'),
+                     self.check('[0].sourceManagedInstanceName', '{source_mi_name}'),
+                     self.check('[0].targetManagedInstanceName', '{target_mi_name}'),
+                     self.check('[0].resourceGroup', '{rg}'),
+                     self.check('[0].operationMode', 'Move')])
 
 
 class SqlManagedInstanceAzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
@@ -6755,11 +6993,13 @@ class SqlServerMinimalTlsVersionScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='eastus')
     def test_sql_server_minimal_tls_version(self, resource_group):
         server_name_1 = self.create_random_name(server_name_prefix, server_name_max_length)
+        server_name_2 = self.create_random_name(server_name_prefix, server_name_max_length)
         admin_login = 'admin123'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
         resource_group_location = "eastus"
         tls1_2 = "1.2"
         tls1_1 = "1.1"
+        tls1_3 = "1.3"
 
         # test create sql server with minimal required parameters
         self.cmd('sql server create -g {} --name {} '
@@ -6778,7 +7018,24 @@ class SqlServerMinimalTlsVersionScenarioTest(ScenarioTest):
                      JMESPathCheck('name', server_name_1),
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('minimalTlsVersion', tls1_1)])
+                     
+        # test update sql server with tls version as 1.3
+        self.cmd('sql server update -g {} --name {} --minimal-tls-version {} -i'
+                 .format(resource_group, server_name_1, tls1_3),
+                 checks=[
+                     JMESPathCheck('name', server_name_1),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('minimalTlsVersion', tls1_3)])
 
+        # test create sql server is created with default tls 1.2 when minimalTlsVersion is not passed explicitly
+        self.cmd('sql server create -g {} --name {} '
+                 '--admin-user {} --admin-password {}'
+                 .format(resource_group, server_name_2, admin_login, admin_passwords[0]),
+                 checks=[
+                     JMESPathCheck('name', server_name_2),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('minimalTlsVersion', tls1_2)]).get_output_in_json()
 
 class SqlManagedInstanceFailoverScenarionTest(ScenarioTest):
     @ManagedInstancePreparer()
@@ -7394,3 +7651,26 @@ class SqlManagedInstanceServerConfigurationOptionTest(ScenarioTest):
         # list 0 config options
         self.cmd('sql mi server-configuration-option list -g {rg} --instance-name {mi}',
                     checks=[JMESPathCheck('length(@)', 0)]).get_output_in_json
+
+
+class SqlManagedInstanceExternalGovernanceTest(ScenarioTest):
+    @AllowLargeResponse()
+    @ManagedInstancePreparer(parameter_name='mi')
+    def test_sql_mi_refresh_external_governance_status(self, mi, rg):
+        self.kwargs.update({
+            'rg': rg,
+            'mi': mi
+        })
+        # check if test MI got created
+        self.cmd('sql mi show -g {rg} -n {mi}',
+                 checks=[
+                     JMESPathCheck('name', mi),
+                     JMESPathCheck('resourceGroup', rg)])
+
+        self.cmd('sql mi refresh-external-governance-status --mi {mi} -g {rg}',
+                 checks=[
+                     self.check('type', 'Microsoft.Sql/locations/refreshExternalGovernanceStatusOperationResults'),
+                     self.check('managedInstanceName', '{mi}'),
+                     self.check('status', 'Succeeded'),
+                     self.check('requestType', 'UpdatePurviewMetadata')
+                 ])

@@ -3,10 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 from azure.cli.command_modules.acs.azuremonitormetrics.constants import (
-    DC_TYPE,
-    MapToClosestMACRegion
+    DC_TYPE
 )
-from azure.cli.command_modules.acs.azuremonitormetrics.deaults import get_default_region
 
 
 # DCR = 64, DCE = 44, DCRA = 64
@@ -24,17 +22,15 @@ def sanitize_name(name, objtype, length):
     return name[0:lastIndexAlphaNumeric + 1]
 
 
-def get_default_dce_name(cmd, mac_region, cluster_name):
-    region = get_default_region(cmd)
-    if dict.get(MapToClosestMACRegion, mac_region):
-        region = MapToClosestMACRegion[mac_region]
-    default_dce_name = "MSProm-" + region + "-" + cluster_name
+def get_default_dcr_name(mac_region, cluster_name):
+    default_dcr_name = "MSProm-" + mac_region + "-" + cluster_name
+    return sanitize_name(default_dcr_name, DC_TYPE.DCR, 64)
+
+
+def get_default_dce_name(mac_region, cluster_name):
+    default_dce_name = "MSProm-" + mac_region + "-" + cluster_name
     return sanitize_name(default_dce_name, DC_TYPE.DCE, 44)
 
 
-def get_default_dcra_name(cmd, cluster_region, cluster_name):
-    region = get_default_region(cmd)
-    if dict.get(MapToClosestMACRegion, cluster_region):
-        region = MapToClosestMACRegion[cluster_region]
-    default_dcra_name = "ContainerInsightsMetricsExtension-" + region + "-" + cluster_name
-    return sanitize_name(default_dcra_name, DC_TYPE.DCRA, 64)
+def get_default_dcra_name():
+    return "ContainerInsightsMetricsExtension"

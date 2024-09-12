@@ -3,10 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.util import CLIError
 from knack.log import get_logger
-
-from azure.cli.command_modules.lab._client_factory import get_devtestlabs_management_client
+from azure.core.exceptions import HttpResponseError
+from azure.cli.core.aaz import has_value
+from azure.cli.core.azclierror import ArgumentUsageError
 
 logger = get_logger(__name__)
 
@@ -14,99 +14,80 @@ logger = get_logger(__name__)
 ODATA_NAME_FILTER = "name eq '{}'"
 
 
-def validate_lab_vm_create(cmd, namespace):
-    """ Validates parameters for lab vm create and updates namespace. """
+def validate_lab_vm_create(cmd, args):
+    """ Validates parameters for lab vm create and updates args. """
     formula = None
-    collection = [namespace.image, namespace.formula]
+    collection = [args.image, args.formula]
     if not _single(collection):
-        raise CLIError("usage error: [--image name --image-type type | --formula name]")
-    if namespace.formula and (namespace.image or namespace.image_type):
-        raise CLIError("usage error: [--image name --image-type type | --formula name]")
+        raise ArgumentUsageError("usage error: [--image name --image-type type | --formula name]")
+    if args.formula and (args.image or args.image_type):
+        raise ArgumentUsageError("usage error: [--image name --image-type type | --formula name]")
 
-    if namespace.formula:
-        formula = _get_formula(cmd.cli_ctx, namespace)
+    if args.formula:
+        formula = _get_formula(cmd.cli_ctx, args)
+    _validate_location(cmd.cli_ctx, args)
+    _validate_expiration_date(args)
+    _validate_other_parameters(args, formula)
+    validate_artifacts(cmd, args)
+    _validate_image_argument(cmd.cli_ctx, args, formula)
+    _validate_network_parameters(cmd.cli_ctx, args, formula)
+    validate_authentication_type(args, formula)
 
-    _validate_location(cmd.cli_ctx, namespace)
-    _validate_expiration_date(namespace)
-    _validate_other_parameters(namespace, formula)
-    validate_artifacts(cmd, namespace)
-    _validate_image_argument(cmd.cli_ctx, namespace, formula)
-    _validate_network_parameters(cmd.cli_ctx, namespace, formula)
-    validate_authentication_type(namespace, formula)
 
+def validate_lab_vm_list(cmd, args):
+    """ Validates parameters for lab vm list and updates args. """
+    from azure.mgmt.core.tools import resource_id, is_valid_resource_id
+    filters = has_value(args.filters) or False
+    environment = has_value(args.environment) or False
+    args_all = has_value(args.all) or False
+    claimable = has_value(args.claimable) or False
 
-def validate_lab_vm_list(cmd, namespace):
-    """ Validates parameters for lab vm list and updates namespace. """
-    from msrestazure.tools import resource_id, is_valid_resource_id
-    collection = [namespace.filters, namespace.all, namespace.claimable]
+    collection = [filters, args_all, claimable]
     if _any(collection) and not _single(collection):
-        raise CLIError("usage error: [--filters FILTER | [[--all | --claimable][--environment ENVIRONMENT]]")
+        raise ArgumentUsageError("usage error: [--filters FILTER | [[--all | --claimable][--environment ENVIRONMENT]]")
 
-    collection = [namespace.filters, namespace.environment]
+    collection = [filters, environment]
     if _any(collection) and not _single(collection):
-        raise CLIError("usage error: [--filters FILTER | [[--all | --claimable][--environment ENVIRONMENT]]")
+        raise ArgumentUsageError("usage error: [--filters FILTER | [[--all | --claimable][--environment ENVIRONMENT]]")
 
-    if namespace.filters:
+    if has_value(args.filters):
         return
 
     # Retrieve all the vms of the lab
-    if namespace.all:
-        namespace.filters = None
+    if args_all and args.all.to_serialized_data() is True:
+        args.filters = None
     # Retrieve all the vms claimable by user
-    elif namespace.claimable:
-        namespace.filters = 'properties/allowClaim'
+    elif claimable and args.claimable.to_serialized_data() is True:
+        args.filters = 'properties/allowClaim'
     # Default to retrieving users vms only
     else:
         # Find out owner object id
-        if not namespace.object_id:
-            namespace.filters = "Properties/ownerObjectId eq '{}'".format(_get_owner_object_id(cmd.cli_ctx))
+        if not has_value(args.object_id):
+            args.filters = "Properties/ownerObjectId eq '{}'".format(_get_owner_object_id(cmd.cli_ctx))
 
-    if namespace.environment:
-        if not is_valid_resource_id(namespace.environment):
+    if environment:
+        if not is_valid_resource_id(args.environment.to_serialized_data()):
             from azure.cli.core.commands.client_factory import get_subscription_id
-            namespace.environment = resource_id(subscription=get_subscription_id(cmd.cli_ctx),
-                                                resource_group=namespace.resource_group_name,
-                                                namespace='Microsoft.DevTestLab',
-                                                type='labs',
-                                                name=namespace.lab_name,
-                                                child_type_1='users',
-                                                child_name_1=_get_owner_object_id(cmd.cli_ctx),
-                                                child_type_2='environments',
-                                                child_name_2=namespace.environment)
-        if namespace.filters is None:
-            namespace.filters = "Properties/environmentId eq '{}'".format(namespace.environment)
+            args.environment = resource_id(subscription=get_subscription_id(cmd.cli_ctx),
+                                           resource_group=args.resource_group.to_serialized_data(),
+                                           args='Microsoft.DevTestLab',
+                                           type='labs',
+                                           name=args.lab_name.to_serialized_data(),
+                                           child_type_1='users',
+                                           child_name_1=_get_owner_object_id(cmd.cli_ctx),
+                                           child_type_2='environments',
+                                           child_name_2=args.environment.to_serialized_data())
+        if not filters:
+            args.filters = "Properties/environmentId eq '{}'".format(args.environment.to_serialized_data())
         else:
-            namespace.filters = "{} and Properties/environmentId eq '{}'".format(namespace.filters,
-                                                                                 namespace.environment)
-
-
-def validate_user_name(namespace):
-    namespace.user_name = "@me"
-
-
-def validate_template_id(cmd, namespace):
-    from msrestazure.tools import resource_id, is_valid_resource_id
-    from azure.cli.core.commands.client_factory import get_subscription_id
-    if not is_valid_resource_id(namespace.arm_template):
-        if not namespace.artifact_source_name:
-            raise CLIError("--artifact-source-name is required when name is "
-                           "provided for --arm-template")
-
-        namespace.arm_template = resource_id(subscription=get_subscription_id(cmd.cli_ctx),
-                                             resource_group=namespace.resource_group_name,
-                                             namespace='Microsoft.DevTestLab',
-                                             type='labs',
-                                             name=namespace.lab_name,
-                                             child_type_1='artifactSources',
-                                             child_name_1=namespace.artifact_source_name,
-                                             child_type_2='armTemplates',
-                                             child_name_2=namespace.arm_template)
+            args.filters = "{} and Properties/environmentId eq '{}'".format(args.filters.to_serialized_data(),
+                                                                            args.environment.to_serialized_data())
 
 
 def validate_claim_vm(namespace):
     if namespace.name is None and namespace.lab_name is None or namespace.resource_group_name is None:
-        raise CLIError("usage error: --ids IDs | --lab-name LabName --resource-group ResourceGroup --name VMName"
-                       " | --lab-name LabName --resource-group ResourceGroup")
+        raise ArgumentUsageError("usage error: --ids IDs | --lab-name LabName --resource-group ResourceGroup "
+                                 "--name VMName | --lab-name LabName --resource-group ResourceGroup")
 
 
 def _get_owner_object_id(cli_ctx):
@@ -127,257 +108,277 @@ def _get_owner_object_id(cli_ctx):
 
 
 # pylint: disable=no-member
-def _validate_location(cli_ctx, namespace):
+def _validate_location(cli_ctx, args):
     """
     Selects the default location of the lab when location is not provided.
     """
-    if namespace.location is None:
-        lab_operation = get_devtestlabs_management_client(cli_ctx, None).labs
-        lab = lab_operation.get(namespace.resource_group_name, namespace.lab_name)
-        namespace.location = lab.location
+    if not has_value(args.location):
+        from .custom import LabGet
+        result = LabGet(cli_ctx=cli_ctx)(command_args={
+            "name": args.lab_name.to_serialized_data(),
+            "resource_group": args.resource_group.to_serialized_data()
+        })
+        args.location = result['location']
 
 
-def _validate_expiration_date(namespace):
+def _validate_expiration_date(args):
     """ Validates expiration date if provided. """
 
-    if namespace.expiration_date:
+    if has_value(args.expiration_date):
         import datetime
         import dateutil.parser
-        if datetime.datetime.utcnow() >= dateutil.parser.parse(namespace.expiration_date):
-            raise CLIError("Expiration date '{}' must be in future.".format(namespace.expiration_date))
+        if datetime.datetime.utcnow() >= dateutil.parser.parse(args.expiration_date.to_serialized_data()):
+            raise ArgumentUsageError(
+                "Expiration date '{}' must be in future.".format(args.expiration_date.to_serialized_data()))
 
 
 # pylint: disable=no-member
-def _validate_network_parameters(cli_ctx, namespace, formula=None):
-    """ Updates namespace for virtual network and subnet parameters """
-    vnet_operation = get_devtestlabs_management_client(cli_ctx, None).virtual_networks
+def _validate_network_parameters(cli_ctx, args, formula=None):
+    """ Updates args for virtual network and subnet parameters """
+    from .aaz.latest.lab.vnet import List as LabVnetList, Get as LabVnetGet
     lab_vnet = None
 
-    if formula and formula.formula_content:
-        if formula.formula_content.lab_virtual_network_id:
-            namespace.vnet_name = \
-                namespace.vnet_name or \
-                formula.formula_content.lab_virtual_network_id.split('/')[-1]
-        if formula.formula_content.lab_subnet_name:
-            namespace.subnet = \
-                namespace.subnet or \
-                formula.formula_content.lab_subnet_name
-            namespace.disallow_public_ip_address = formula.formula_content.disallow_public_ip_address
+    if formula and formula.get('formulaContent'):
+        if formula['formulaContent'].get('labVirtualNetworkId'):
+            args.vnet_name = \
+                args.vnet_name or \
+                formula['formulaContent']['labVirtualNetworkId'].split('/')[-1]
+        if formula['formulaContent'].get('labSubnetName'):
+            args.lab_subnet_name = args.lab_subnet_name or formula['formulaContent']['labSubnetName']
+            args.disallow_public_ip_address = formula['formulaContent']['disallowPublicIpAddress']
 
     # User did not provide vnet and not selected from formula
-    if not namespace.vnet_name:
-        lab_vnets = list(vnet_operation.list(namespace.resource_group_name, namespace.lab_name, top=1))
+    if not has_value(args.vnet_name):
+        lab_vnets = LabVnetList(cli_ctx=cli_ctx)(command_args={
+            "lab_name": args.lab_name.to_serialized_data(),
+            "resource_group": args.resource_group.to_serialized_data(),
+            "top": 1
+        })
+        lab_vnets = list(lab_vnets)
         if not lab_vnets:
-            err = "Unable to find any virtual network in the '{}' lab.".format(namespace.lab_name)
-            raise CLIError(err)
+            err = "Unable to find any virtual network in the '{}' lab.".format(args.lab_name)
+            raise HttpResponseError(err)
         lab_vnet = lab_vnets[0]
-        namespace.vnet_name = lab_vnet.name
-        namespace.lab_virtual_network_id = lab_vnet.id
+        args.vnet_name = lab_vnet['name']
+        args.lab_virtual_network_id = lab_vnet['id']
     # User did provide vnet or has been selected from formula
     else:
-        lab_vnet = vnet_operation.get(namespace.resource_group_name, namespace.lab_name, namespace.vnet_name)
-        namespace.lab_virtual_network_id = lab_vnet.id
+        lab_vnet = LabVnetGet(cli_ctx=cli_ctx)(command_args={
+            "lab_name": args.lab_name.to_serialized_data(),
+            "name": args.vnet_name.to_serialized_data(),
+            "resource_group": args.resource_group.to_serialized_data(),
+            "top": 1
+        })
+        args.lab_virtual_network_id = lab_vnet['id']
 
     # User did not provide subnet and not selected from formula
-    if not namespace.subnet:
-        namespace.subnet = lab_vnet.subnet_overrides[0].lab_subnet_name
+    if not has_value(args.subnet):
+        args.lab_subnet_name = lab_vnet['subnetOverrides'][0]['labSubnetName']
 
-    _validate_ip_configuration(namespace, lab_vnet)
+    _validate_ip_configuration(args, lab_vnet)
 
 
 # pylint: disable=no-member
-def _validate_ip_configuration(namespace, lab_vnet=None):
-    """ Updates namespace with network_interface & disallow_public_ip_address """
-    from azure.mgmt.devtestlabs.models import NetworkInterfaceProperties, SharedPublicIpAddressConfiguration
-
+def _validate_ip_configuration(args, lab_vnet=None):
+    """ Updates args with network_interface & disallow_public_ip_address """
     # case 1: User selecting "shared" ip configuration
-    if namespace.ip_configuration == 'shared':
-        rule = _inbound_rule_from_os(namespace)
-        public_ip_config = SharedPublicIpAddressConfiguration(inbound_nat_rules=[rule])
-        nic_properties = NetworkInterfaceProperties(shared_public_ip_address_configuration=public_ip_config)
-        namespace.network_interface = nic_properties
-        namespace.disallow_public_ip_address = True
+    if args.ip_configuration.to_serialized_data() == 'shared':
+        rule = _inbound_rule_from_os(args)
+        public_ip_config = {'inboundNatRules': [rule]}
+        nic_properties = {'sharedPublicIpAddressConfiguration': public_ip_config}
+        args.network_interface = nic_properties
+        args.disallow_public_ip_address = True
     # case 2: User selecting "public" ip configuration
-    elif namespace.ip_configuration == 'public':
-        namespace.disallow_public_ip_address = False
+    elif args.ip_configuration.to_serialized_data() == 'public':
+        args.disallow_public_ip_address = False
     # case 3: User selecting "private" ip configuration
-    elif namespace.ip_configuration == 'private':
-        namespace.disallow_public_ip_address = True
+    elif args.ip_configuration.to_serialized_data() == 'private':
+        args.disallow_public_ip_address = True
     # case 4: User did not select any ip configuration preference
-    elif namespace.ip_configuration is None:
+    elif not has_value(args.ip_configuration):
         # case 5: lab virtual network was selected from user's option / formula default then use it for look-up
         if lab_vnet:
             # Default to shared ip configuration based on os type only if inbound nat rules exist on the
             # shared configuration of the selected lab's virtual network
-            if lab_vnet.subnet_overrides and lab_vnet.subnet_overrides[0].shared_public_ip_address_configuration and \
-                    lab_vnet.subnet_overrides[0].shared_public_ip_address_configuration.allowed_ports:
-                rule = _inbound_rule_from_os(namespace)
-                public_ip_config = SharedPublicIpAddressConfiguration(inbound_nat_rules=[rule])
-                nic_properties = NetworkInterfaceProperties(shared_public_ip_address_configuration=public_ip_config)
-                namespace.network_interface = nic_properties
-                namespace.disallow_public_ip_address = True
-            elif lab_vnet.subnet_overrides and lab_vnet.subnet_overrides[0].use_public_ip_address_permission == 'Allow':
-                namespace.disallow_public_ip_address = False
+            if lab_vnet.get('subnetOverrides') and \
+                    lab_vnet['subnetOverrides'][0].get('sharedPublicIpAddressConfiguration') and \
+                    lab_vnet['subnetOverrides'][0]['sharedPublicIpAddressConfiguration'].get('allowedPorts'):
+                rule = _inbound_rule_from_os(args)
+                public_ip_config = {'inboundNatRules': [rule]}
+                nic_properties = {'sharedPublicIpAddressConfiguration': public_ip_config}
+                args.network_interface = nic_properties
+                args.disallow_public_ip_address = True
+            elif lab_vnet.get('subnetOverrides') and lab_vnet['subnetOverrides'][0].get(
+                    'usePublicIpAddressPermission') == 'Allow':
+                args.disallow_public_ip_address = False
             else:
-                namespace.disallow_public_ip_address = True
+                args.disallow_public_ip_address = True
     # case 6: User selecting invalid value for ip configuration
     else:
-        raise CLIError("incorrect value for ip-configuration: {}".format(namespace.ip_configuration))
+        raise ArgumentUsageError("incorrect value for ip-configuration: {}".format(
+            args.ip_configuration.to_serialized_data()))
 
 
-def _inbound_rule_from_os(namespace):
-    from azure.mgmt.devtestlabs.models import InboundNatRule
-    if namespace.os_type == 'Linux':
-        return InboundNatRule(transport_protocol='Tcp', backend_port=22)
+def _inbound_rule_from_os(args):
+    if args.os_type.to_serialized_data().lower() == 'linux':
+        return {'transportProtocol': 'Tcp', 'backendPort': 22}
 
-    return InboundNatRule(transport_protocol='Tcp', backend_port=3389)
+    return {'transportProtocol': 'Tcp', 'backendPort': 3389}
 
 
 # pylint: disable=no-member
-def _validate_image_argument(cli_ctx, namespace, formula=None):
-    """ Update namespace for image based on image or formula """
-    from azure.mgmt.devtestlabs.models import GalleryImageReference
-    if formula and formula.formula_content:
-        if formula.formula_content.gallery_image_reference:
-            gallery_image_reference = formula.formula_content.gallery_image_reference
-            namespace.gallery_image_reference = \
-                GalleryImageReference(offer=gallery_image_reference.offer,
-                                      publisher=gallery_image_reference.publisher,
-                                      os_type=gallery_image_reference.os_type,
-                                      sku=gallery_image_reference.sku,
-                                      version=gallery_image_reference.version)
-            namespace.os_type = gallery_image_reference.os_type
+def _validate_image_argument(cli_ctx, args, formula=None):
+    """ Update args for image based on image or formula """
+    if formula and formula.get('formulaContent'):
+        if formula['formulaContent'].get('galleryImageReference'):
+            gallery_image_reference = formula['formulaContent']['galleryImageReference']
+            args.gallery_image_reference = {
+                'offer': gallery_image_reference['offer'],
+                'publisher': gallery_image_reference['publisher'],
+                'os_type': gallery_image_reference['osType'],
+                'sku': gallery_image_reference['sku'],
+                'version': gallery_image_reference['version']
+            }
+            args.os_type = gallery_image_reference['osType']
             return
-        if formula.formula_content.custom_image_id:
+        if formula['formulaContent'].get('customImageId'):
             # Custom image id from the formula is in the form of "customimages/{name}"
-            namespace.image = formula.formula_content.custom_image_id.split('/')[-1]
-            namespace.image_type = 'custom'
+            args.image = formula['formulaContent']['customImageId'].split('/')[-1]
+            args.image_type = 'custom'
 
-    if namespace.image_type == 'gallery':
-        _use_gallery_image(cli_ctx, namespace)
-    elif namespace.image_type == 'custom':
-        _use_custom_image(cli_ctx, namespace)
+    if args.image_type == 'gallery':
+        _use_gallery_image(cli_ctx, args)
+    elif args.image_type == 'custom':
+        _use_custom_image(cli_ctx, args)
     else:
-        raise CLIError("incorrect value for image-type: '{}'. Allowed values: gallery or custom"
-                       .format(namespace.image_type))
+        raise ArgumentUsageError("incorrect value for image-type: '{}'. Allowed values: gallery or custom".format(
+            args.image_type.to_serialized_data()))
 
 
 # pylint: disable=no-member
-def _use_gallery_image(cli_ctx, namespace):
-    """ Retrieve gallery image from lab and update namespace """
-    from azure.mgmt.devtestlabs.models import GalleryImageReference
-    gallery_image_operation = get_devtestlabs_management_client(cli_ctx, None).gallery_images
-    odata_filter = ODATA_NAME_FILTER.format(namespace.image)
-    gallery_images = list(gallery_image_operation.list(namespace.resource_group_name,
-                                                       namespace.lab_name,
-                                                       filter=odata_filter))
-
+def _use_gallery_image(cli_ctx, args):
+    """ Retrieve gallery image from lab and update args """
+    from .aaz.latest.lab.gallery_image import List as GalleryImageList
+    odata_filter = ODATA_NAME_FILTER.format(args.image.to_serialized_data())
+    gallery_images = GalleryImageList(cli_ctx=cli_ctx)(command_args={
+        "lab_name": args.lab_name.to_serialized_data(),
+        "resource_group": args.resource_group.to_serialized_data(),
+        "filter": odata_filter
+    })
+    gallery_images = list(gallery_images)
     if not gallery_images:
-        err = "Unable to find image name '{}' in the '{}' lab Gallery.".format(namespace.image,
-                                                                               namespace.lab_name)
-        raise CLIError(err)
+        err = "Unable to find image name '{}' in the '{}' lab Gallery.".format(args.image.to_serialized_data(),
+                                                                               args.lab_name.to_serialized_data())
+        raise HttpResponseError(err)
     if len(gallery_images) > 1:
         err = "Found more than 1 image with name '{}'. Please pick one from {}"
-        raise CLIError(err.format(namespace.image, [x.name for x in gallery_images]))
-    namespace.gallery_image_reference = \
-        GalleryImageReference(offer=gallery_images[0].image_reference.offer,
-                              publisher=gallery_images[0].image_reference.publisher,
-                              os_type=gallery_images[0].image_reference.os_type,
-                              sku=gallery_images[0].image_reference.sku,
-                              version=gallery_images[0].image_reference.version)
-    namespace.os_type = gallery_images[0].image_reference.os_type
+        raise HttpResponseError(err.format(args.image.to_serialized_data(), [x['name'] for x in gallery_images]))
+    image_reference = gallery_images[0]['imageReference']
+    args.gallery_image_reference = {
+        'offer': image_reference['offer'],
+        'publisher': image_reference['publisher'],
+        'os_type': image_reference['osType'],
+        'sku': image_reference['sku'],
+        'version': image_reference['version']
+    }
+    args.os_type = image_reference['osType']
 
 
 # pylint: disable=no-member
-def _use_custom_image(cli_ctx, namespace):
-    """ Retrieve custom image from lab and update namespace """
-    from msrestazure.tools import is_valid_resource_id
-    if is_valid_resource_id(namespace.image):
-        namespace.custom_image_id = namespace.image
+def _use_custom_image(cli_ctx, args):
+    """ Retrieve custom image from lab and update args """
+    from azure.mgmt.core.tools import is_valid_resource_id
+    if is_valid_resource_id(args.image.to_serialized_data()):
+        args.custom_image_id = args.image
     else:
-        custom_image_operation = get_devtestlabs_management_client(cli_ctx, None).custom_images
-        odata_filter = ODATA_NAME_FILTER.format(namespace.image)
-        custom_images = list(custom_image_operation.list(namespace.resource_group_name,
-                                                         namespace.lab_name,
-                                                         filter=odata_filter))
+        from .aaz.latest.lab.custom_image import List as CustomImageList
+        odata_filter = ODATA_NAME_FILTER.format(args.image.to_serialized_data())
+        custom_images = CustomImageList(cli_ctx=cli_ctx)(command_args={
+            "lab_name": args.lab_name.to_serialized_data(),
+            "resource_group": args.resource_group.to_serialized_data(),
+            "filter": odata_filter
+        })
+        custom_images = list(custom_images)
         if not custom_images:
-            err = "Unable to find custom image name '{}' in the '{}' lab.".format(namespace.image, namespace.lab_name)
-            raise CLIError(err)
+            err = "Unable to find custom image name '{}' in the '{}' lab.".format(args.image.to_serialized_data(),
+                                                                                  args.lab_name.to_serialized_data())
+            raise HttpResponseError(err)
         if len(custom_images) > 1:
             err = "Found more than 1 image with name '{}'. Please pick one from {}"
-            raise CLIError(err.format(namespace.image, [x.name for x in custom_images]))
-        namespace.custom_image_id = custom_images[0].id
+            raise HttpResponseError(err.format(args.image.to_serialized_data(), [x['name'] for x in custom_images]))
+        args.custom_image_id = custom_images[0]['id']
 
-        if custom_images[0].vm is not None:
-            if custom_images[0].vm.windows_os_info is not None:
+        if custom_images[0].get('vm'):
+            if custom_images[0]['vm'].get('windowsOsInfo'):
                 os_type = "Windows"
             else:
                 os_type = "Linux"
-        elif custom_images[0].vhd is not None:
-            os_type = custom_images[0].vhd.os_type
+        elif custom_images[0].get('vhd'):
+            os_type = custom_images[0]['vhd']['os_type']
         else:
-            raise CLIError("OS type cannot be inferred from the custom image {}".format(custom_images[0].id))
+            raise HttpResponseError("OS type cannot be inferred from the custom image {}".format(custom_images[0].id))
 
-        namespace.os_type = os_type
+        args.os_type = os_type
 
 
-def _get_formula(cli_ctx, namespace):
+def _get_formula(cli_ctx, args):
     """ Retrieve formula image from lab """
-    formula_operation = get_devtestlabs_management_client(cli_ctx, None).formulas
-    odata_filter = ODATA_NAME_FILTER.format(namespace.formula)
-    formula_images = list(formula_operation.list(namespace.resource_group_name,
-                                                 namespace.lab_name,
-                                                 filter=odata_filter))
+    from .aaz.latest.lab.formula import List as FormulaList
+    odata_filter = ODATA_NAME_FILTER.format(args.formula)
+    formula_images = FormulaList(cli_ctx=cli_ctx)(command_args={
+        "lab_name": args.lab_name.to_serialized_data(),
+        "resource_group": args.resource_group.to_serialized_data(),
+        "filter": odata_filter
+    })
+    formula_images = list(formula_images)
     if not formula_images:
-        err = "Unable to find formula name '{}' in the '{}' lab.".format(namespace.formula, namespace.lab_name)
-        raise CLIError(err)
+        err = "Unable to find formula name '{}' in the '{}' lab.".format(args.formula, args.lab_name)
+        raise HttpResponseError(err)
     if len(formula_images) > 1:
         err = "Found more than 1 formula with name '{}'. Please pick one from {}"
-        raise CLIError(err.format(namespace.formula, [x.name for x in formula_images]))
+        raise HttpResponseError(err.format(args.formula, [x.name for x in formula_images]))
     return formula_images[0]
 
 
 # pylint: disable=no-member
-def _validate_other_parameters(namespace, formula=None):
+def _validate_other_parameters(args, formula=None):
     if formula:
-        namespace.tags = namespace.tags or formula.tags
-        if formula.formula_content:
-            namespace.allow_claim = namespace.allow_claim or formula.formula_content.allow_claim
-            namespace.artifacts = namespace.artifacts or formula.formula_content.artifacts
-            namespace.notes = namespace.notes or formula.formula_content.notes
-            namespace.size = namespace.size or formula.formula_content.size
-            namespace.disk_type = namespace.disk_type or formula.formula_content.storage_type
-            namespace.os_type = formula.os_type
+        args.tags = args.tags or formula['tags']
+        if formula['formulaContent']:
+            if has_value(args.allow_claim):
+                args.allow_claim = args.allow_claim
+            else:
+                args.allow_claim = formula['formulaContent']['allowClaim']
+            args.artifacts_org = args.artifacts_org or formula['formulaContent']['artifacts']
+            args.notes = args.notes or formula['formulaContent']['notes']
+            args.size = args.size or formula['formulaContent']['size']
+            args.storage_type = args.storage_type or formula['formulaContent']['storageType']
+            args.os_type = formula['osType']
 
 
-def validate_artifacts(cmd, namespace):
-    from msrestazure.tools import resource_id
-    if namespace.artifacts:
+def validate_artifacts(cmd, args):
+    from azure.mgmt.core.tools import resource_id
+    if has_value(args.artifacts_org):
         from azure.cli.core.commands.client_factory import get_subscription_id
-        if hasattr(namespace, 'resource_group'):
-            resource_group = namespace.resource_group
-        else:
-            # some SDK methods have parameter name as 'resource_group_name'
-            resource_group = namespace.resource_group_name
-
+        resource_group = args.resource_group.to_serialized_data()
         lab_resource_id = resource_id(subscription=get_subscription_id(cmd.cli_ctx),
                                       resource_group=resource_group,
                                       namespace='Microsoft.DevTestLab',
                                       type='labs',
-                                      name=namespace.lab_name)
-        namespace.artifacts = _update_artifacts(namespace.artifacts, lab_resource_id)
+                                      name=args.lab_name.to_serialized_data())
+        args.artifacts_org = _update_artifacts(args.artifacts_org.to_serialized_data(), lab_resource_id)
 
 
 def _update_artifacts(artifacts, lab_resource_id):
     if not isinstance(artifacts, list):
-        raise CLIError("Artifacts must be of type list. Given artifacts: '{}'".format(artifacts))
+        raise ArgumentUsageError("Artifacts must be of type list. Given artifacts: '{}'".format(artifacts))
 
     result_artifacts = []
     for artifact in artifacts:
         if artifact.__class__.__name__ == "ArtifactInstallProperties":
             if artifact.parameters:
-                raise CLIError("Formulas with parameterized artifacts are not supported. Use --artifacts to supply"
-                               "artifacts to the virtual machine.")
+                raise ArgumentUsageError("Formulas with parameterized artifacts are not supported."
+                                         " Use --artifacts to supply artifacts to the virtual machine.")
             artifact_id = _update_artifact_id(artifact.artifact_id, lab_resource_id)
             parameters = []
         else:
@@ -390,74 +391,77 @@ def _update_artifacts(artifacts, lab_resource_id):
             result_artifact['parameters'] = parameters
             result_artifacts.append(result_artifact)
         else:
-            raise CLIError("Missing 'artifactId' for artifact: '{}'".format(artifact))
+            raise ArgumentUsageError("Missing 'artifactId' for artifact: '{}'".format(artifact))
     return result_artifacts
 
 
 def _update_artifact_id(artifact_id, lab_resource_id):
-    from msrestazure.tools import is_valid_resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id
     if not is_valid_resource_id(artifact_id):
         return "{}{}".format(lab_resource_id, artifact_id)
     return artifact_id
 
 
 # TODO: Following methods are carried over from other command modules
-def validate_authentication_type(namespace, formula=None):
-    if formula and formula.formula_content:
-        if formula.formula_content.is_authentication_with_ssh_key is True:
-            namespace.authentication_type = 'ssh'
-            namespace.ssh_key = formula.formula_content.ssh_key
-        elif formula.formula_content.is_authentication_with_ssh_key is False:
-            namespace.admin_username = formula.formula_content.user_name
-            namespace.admin_password = formula.formula_content.password
-            namespace.authentication_type = 'password'
+def validate_authentication_type(args, formula=None):
+    if formula and formula.get('formulaContent'):
+        if formula['formulaContent']['isAuthenticationWithSshKey'] is True:
+            args.authentication_type = 'ssh'
+            args.ssh_key = formula['formulaContent']['sshKey']
+        elif formula['formulaContent']['isAuthenticationWithSshKey'] is False:
+            args.user_name = formula['formulaContent']['userName']
+            args.password = formula['formulaContent']['password']
+            args.authentication_type = 'password'
 
     # validate proper arguments supplied based on the authentication type
-    if namespace.authentication_type == 'password':
+    if args.authentication_type.to_serialized_data() == 'password':
         password_usage_error = "incorrect usage for authentication-type 'password': " \
                                "[--admin-username USERNAME] --admin-password PASSWORD | " \
                                "[--admin-username USERNAME] --saved-secret SECRETNAME"
-        if namespace.ssh_key or namespace.generate_ssh_keys or (namespace.saved_secret and namespace.admin_password):
-            raise ValueError(password_usage_error)
+        if has_value(args.ssh_key) or args.generate_ssh_keys or \
+                (has_value(args.saved_secret) and has_value(args.password)):
+            raise ArgumentUsageError(password_usage_error)
 
         # Respect user's provided saved secret name for password authentication
-        if namespace.saved_secret:
-            namespace.admin_password = "[[{}]]".format(namespace.saved_secret)
+        if has_value(args.saved_secret):
+            args.password = "[[{}]]".format(args.saved_secret.to_serialized_data())
 
-        if not namespace.admin_password:
+        if not args.password:
             # prompt for admin password if not supplied
             from knack.prompting import prompt_pass, NoTTYException
             try:
-                namespace.admin_password = prompt_pass('Admin Password: ', confirm=True)
+                args.password = prompt_pass('Admin Password: ', confirm=True)
             except NoTTYException:
-                raise CLIError('Please specify both username and password in non-interactive mode.')
+                raise ArgumentUsageError('Please specify both username and password in non-interactive mode.')
 
-    elif namespace.authentication_type == 'ssh':
-        if namespace.os_type != 'Linux':
-            raise CLIError("incorrect authentication-type '{}' for os type '{}'".format(
-                namespace.authentication_type, namespace.os_type))
+    elif args.authentication_type.to_serialized_data() == 'ssh':
+        if args.os_type.to_serialized_data().lower() != 'linux':
+            raise ArgumentUsageError("incorrect authentication-type '{}' for os type '{}'".format(
+                args.authentication_type.to_serialized_data(), args.os_type.to_serialized_data()))
 
         ssh_usage_error = "incorrect usage for authentication-type 'ssh': " \
                           "[--admin-username USERNAME] | " \
                           "[--admin-username USERNAME] --ssh-key KEY | " \
                           "[--admin-username USERNAME] --generate-ssh-keys | " \
                           "[--admin-username USERNAME] --saved-secret SECRETNAME"
-        if namespace.admin_password or (namespace.saved_secret and (namespace.ssh_key or namespace.generate_ssh_keys)):
-            raise ValueError(ssh_usage_error)
+        if has_value(args.password) or (has_value(args.saved_secret) and
+                                        (has_value(args.ssh_key) or args.generate_ssh_keys)):
+            raise ArgumentUsageError(ssh_usage_error)
 
         # Respect user's provided saved secret name for ssh authentication
-        if namespace.saved_secret:
-            namespace.ssh_key = "[[{}]]".format(namespace.saved_secret)
+        if has_value(args.saved_secret):
+            args.ssh_key = "[[{}]]".format(args.saved_secret.to_serialized_data())
         else:
-            validate_ssh_key(namespace)
+            validate_ssh_key(args)
     else:
-        raise CLIError("incorrect value for authentication-type: {}".format(namespace.authentication_type))
+        raise ArgumentUsageError("incorrect value for authentication-type: {}".format(
+            args.authentication_type.to_serialized_data()))
 
 
-def validate_ssh_key(namespace):
+def validate_ssh_key(args):
     import os
 
-    string_or_file = (namespace.ssh_key or
+    string_or_file = (args.ssh_key.to_serialized_data() or
                       os.path.join(os.path.expanduser('~'), '.ssh/id_rsa.pub'))
     content = string_or_file
     if os.path.exists(string_or_file):
@@ -465,7 +469,7 @@ def validate_ssh_key(namespace):
         with open(string_or_file, 'r') as f:
             content = f.read()
     elif not _is_valid_ssh_rsa_public_key(content):
-        if namespace.generate_ssh_keys:
+        if args.generate_ssh_keys:
             # figure out appropriate file names:
             # 'base_name'(with private keys), and 'base_name.pub'(with public keys)
             public_key_filepath = string_or_file
@@ -477,9 +481,9 @@ def validate_ssh_key(namespace):
             logger.warning('Created SSH key files: %s,%s',
                            private_key_filepath, public_key_filepath)
         else:
-            raise CLIError('An RSA key file or key value must be supplied to SSH Key Value. '
-                           'You can use --generate-ssh-keys to let CLI generate one for you')
-    namespace.ssh_key = content
+            raise ArgumentUsageError('An RSA key file or key value must be supplied to SSH Key Value. '
+                                     'You can use --generate-ssh-keys to let CLI generate one for you')
+    args.ssh_key = content
 
 
 def _generate_ssh_keys(private_key_filepath, public_key_filepath):
@@ -533,12 +537,11 @@ def _any(collection):
 
 
 def _get_current_user_object_id(graph_client):
-    from msrestazure.azure_exceptions import CloudError
     try:
         current_user = graph_client.signed_in_user.get()
         if current_user and current_user.object_id:  # pylint:disable=no-member
             return current_user.object_id  # pylint:disable=no-member
-    except CloudError:
+    except HttpResponseError:
         pass
     return None
 

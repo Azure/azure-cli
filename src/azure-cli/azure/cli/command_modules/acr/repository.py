@@ -15,6 +15,7 @@ from azure.cli.core.util import user_confirmation
 from ._docker_utils import (
     request_data_from_registry,
     get_access_credentials,
+    parse_image_name,
     RegistryException,
     RepoAccessTokenPermission,
     RegistryAccessTokenPermission
@@ -92,7 +93,7 @@ def _obtain_data_from_registry(login_server,
             params['n'] = DEFAULT_PAGINATION if top > DEFAULT_PAGINATION else top
             top -= params['n']
 
-        result, next_link = request_data_from_registry(
+        result, next_link, _ = request_data_from_registry(
             http_method='get',
             login_server=login_server,
             path=path,
@@ -339,10 +340,10 @@ def _acr_repository_attributes_helper(cmd,
 
     if image:
         # If --image is specified, repository must be empty.
-        repository, tag, manifest = _parse_image_name(image, allow_digest=True)
+        repository, tag, digest = parse_image_name(image, allow_digest=True)
     else:
         # This is a request on repository
-        tag, manifest = None, None
+        tag, digest = None, None
 
     login_server, username, password = get_access_credentials(
         cmd=cmd,
@@ -356,8 +357,8 @@ def _acr_repository_attributes_helper(cmd,
     if tag:
         path = _get_tag_path(repository, tag)
         result_index = 'tag'
-    elif manifest:
-        path = _get_manifest_path(repository, manifest)
+    elif digest:
+        path = _get_manifest_path(repository, digest)
         result_index = 'manifest'
     else:
         path = _get_repository_path(repository)
@@ -380,7 +381,7 @@ def acr_repository_untag(cmd,
                          tenant_suffix=None,
                          username=None,
                          password=None):
-    repository, tag, _ = _parse_image_name(image)
+    repository, tag, _ = parse_image_name(image)
 
     login_server, username, password = get_access_credentials(
         cmd=cmd,
@@ -412,10 +413,10 @@ def acr_repository_delete(cmd,
 
     if image:
         # If --image is specified, repository must be empty.
-        repository, tag, manifest = _parse_image_name(image, allow_digest=True)
+        repository, tag, digest = parse_image_name(image, allow_digest=True)
     else:
         # This is a request on repository
-        tag, manifest = None, None
+        tag, digest = None, None
 
     login_server, username, password = get_access_credentials(
         cmd=cmd,
@@ -426,16 +427,16 @@ def acr_repository_delete(cmd,
         repository=repository,
         permission=RepoAccessTokenPermission.DELETE_META_READ.value)
 
-    if tag or manifest:
-        manifest = _delete_manifest_confirmation(
+    if tag or digest:
+        digest = _delete_manifest_confirmation(
             login_server=login_server,
             username=username,
             password=password,
             repository=repository,
             tag=tag,
-            manifest=manifest,
+            manifest=digest,
             yes=yes)
-        path = '/v2/{}/manifests/{}'.format(repository, manifest)
+        path = '/v2/{}/manifests/{}'.format(repository, digest)
     else:
         user_confirmation("Are you sure you want to delete the repository '{}' "
                           "and all images under it?".format(repository), yes)
@@ -451,33 +452,7 @@ def acr_repository_delete(cmd,
 
 def _validate_parameters(repository, image):
     if bool(repository) == bool(image):
-        raise CLIError('Usage error: --image IMAGE | --repository REPOSITORY')
-
-
-def _parse_image_name(image, allow_digest=False, default_latest=True):
-    if allow_digest and '@' in image:
-        # This is probably an image name by manifest digest
-        tokens = image.split('@')
-        if len(tokens) == 2:
-            return tokens[0], None, tokens[1]
-
-    if ':' in image and '@' not in image:
-        # This is probably an image name by tag
-        tokens = image.split(':')
-        if len(tokens) == 2:
-            return tokens[0], tokens[1], None
-
-    if ':' not in image and '@' not in image:
-        # This is probably an image with implicit latest tag
-        if default_latest:
-            return image, 'latest', None
-
-        return image, None, None
-
-    if allow_digest:
-        raise CLIError("The name of the image to delete may include a tag in the"
-                       " format 'name:tag' or digest in the format 'name@digest'.")
-    raise CLIError("The name of the image may include a tag in the format 'name:tag'.")
+        raise CLIError('Usage error: You need to provide either --image IMAGE | --repository REPOSITORY, but not both')
 
 
 def _delete_manifest_confirmation(login_server,
@@ -518,10 +493,10 @@ def _delete_manifest_confirmation(login_server,
 
 
 def get_image_digest(cmd, registry_name, image, tenant_suffix=None, username=None, password=None):
-    repository, tag, manifest = _parse_image_name(image, allow_digest=True)
+    repository, tag, digest = parse_image_name(image, allow_digest=True)
 
-    if manifest:
-        return repository, tag, manifest
+    if digest:
+        return repository, digest
 
     # If we don't have manifest yet, try to get it from tag.
     login_server, username, password = get_access_credentials(
@@ -533,11 +508,11 @@ def get_image_digest(cmd, registry_name, image, tenant_suffix=None, username=Non
         repository=repository,
         permission=RepoAccessTokenPermission.METADATA_READ.value)
 
-    manifest = _get_manifest_digest(
+    digest = _get_manifest_digest(
         login_server=login_server,
         repository=repository,
         tag=tag,
         username=username,
         password=password)
 
-    return repository, tag, manifest
+    return repository, digest

@@ -967,4 +967,50 @@ def show_template_optimizer(cmd, client, resource_group_name, image_template_nam
                                          resource_group_name=resource_group_name,
                                          image_template_name=image_template_name)
     return existing_image_template.optimize
+
+
+def add_template_error_handler(cmd, client, resource_group_name, image_template_name,
+                               on_customizer_error=None, on_validation_error=None):
+    _require_defer(cmd)
+    from azure.mgmt.imagebuilder.models import ImageTemplatePropertiesErrorHandling
+
+    existing_image_template = cached_get(cmd, client.virtual_machine_image_templates.get,
+                                         resource_group_name=resource_group_name,
+                                         image_template_name=image_template_name)
+    if not existing_image_template.error_handling:
+        existing_image_template.error_handling = ImageTemplatePropertiesErrorHandling(
+            on_customizer_error=on_customizer_error, on_validation_error=on_validation_error
+        )
+    else:
+        existing_image_template.error_handling.on_customizer_error = on_customizer_error
+        existing_image_template.error_handling.on_validation_error = on_validation_error
+
+    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update,
+                      parameters=existing_image_template, resource_group_name=resource_group_name,
+                      image_template_name=image_template_name)
+
+
+def remove_template_error_handler(cmd, client, resource_group_name, image_template_name):
+    _require_defer(cmd)
+    existing_image_template = cached_get(cmd, client.virtual_machine_image_templates.get,
+                                         resource_group_name=resource_group_name,
+                                         image_template_name=image_template_name)
+
+    if not existing_image_template.error_handling:
+        raise ResourceNotFoundError("No error handler existing in this image template, no need to clear.")
+
+    existing_image_template.error_handling = None
+
+    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update,
+                      parameters=existing_image_template, resource_group_name=resource_group_name,
+                      image_template_name=image_template_name)
+
+
+def show_template_error_handler(cmd, client, resource_group_name, image_template_name):
+    _require_defer(cmd)
+
+    existing_image_template = cached_get(cmd, client.virtual_machine_image_templates.get,
+                                         resource_group_name=resource_group_name,
+                                         image_template_name=image_template_name)
+    return existing_image_template.error_handling
 # endregion

@@ -16,27 +16,47 @@ from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id
 from azure.core.exceptions import ResourceNotFoundError
 from azure.cli.core.commands.client_factory import get_subscription_id
+from azure.cli.command_modules.mysql.random.generate import generate_username
 from azure.cli.core.util import CLIError, sdk_no_wait, user_confirmation
 from azure.cli.core.local_context import ALL
 from azure.mgmt.rdbms import mysql_flexibleservers
 from azure.cli.core.azclierror import ClientRequestError, RequiredArgumentMissingError, ArgumentUsageError, InvalidArgumentValueError, ValidationError
 from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flexible_firewall_rules, cf_mysql_flexible_db, \
     cf_mysql_check_resource_availability, cf_mysql_check_resource_availability_without_location, cf_mysql_flexible_config, \
-    cf_mysql_flexible_servers, cf_mysql_flexible_replica, cf_mysql_flexible_adadmin, cf_mysql_flexible_private_dns_zone_suffix_operations, cf_mysql_servers
+    cf_mysql_flexible_servers, cf_mysql_flexible_replica, cf_mysql_flexible_adadmin, cf_mysql_flexible_private_dns_zone_suffix_operations, cf_mysql_servers, \
+    cf_mysql_firewall_rules
 from ._util import resolve_poller, generate_missing_parameters, get_mysql_list_skus_info, generate_password, parse_maintenance_window, \
     replace_memory_optimized_tier, build_identity_and_data_encryption, get_identity_and_data_encryption, get_tenant_id, run_subprocess, \
-    run_subprocess_get_output, fill_action_template, get_git_root_dir, get_single_to_flex_sku_mapping, GITHUB_ACTION_PATH
+    run_subprocess_get_output, fill_action_template, get_git_root_dir, get_single_to_flex_sku_mapping, get_firewall_rules_from_paged_response, \
+    ImportFromStorageProgressHook, OperationProgressBar, GITHUB_ACTION_PATH
 from ._network import prepare_mysql_exist_private_dns_zone, prepare_mysql_exist_private_network, prepare_private_network, prepare_private_dns_zone, prepare_public_network
 from ._validators import mysql_arguments_validator, mysql_auto_grow_validator, mysql_georedundant_backup_validator, mysql_restore_tier_validator, \
     mysql_retention_validator, mysql_sku_name_validator, mysql_storage_validator, validate_mysql_replica, validate_server_name, \
     validate_mysql_tier_update, validate_and_format_restore_point_in_time, validate_public_access_server, mysql_import_single_server_ready_validator, \
-    mysql_import_version_validator, mysql_import_storage_validator
+    mysql_import_version_validator, mysql_import_storage_validator, validate_and_format_maintenance_start_time
 
 logger = get_logger(__name__)
 DELEGATION_SERVICE_NAME = "Microsoft.DBforMySQL/flexibleServers"
 RESOURCE_PROVIDER = 'Microsoft.DBforMySQL'
 DEFAULT_DB_NAME = 'flexibleserverdb'
 MINIMUM_IOPS = 300
+
+
+def flexible_server_advanced_threat_protection_update(cmd, client, resource_group_name, server_name, state):
+    '''
+    Updates an advanced threat protection setting. Custom update function to apply parameters to instance.
+    '''
+    parameters = {
+        'state': state
+    }
+    return client.begin_update(resource_group_name, server_name, mysql_flexibleservers.models.AdvancedThreatProtectionName.DEFAULT.value, parameters)
+
+
+def flexible_server_advanced_threat_protection_show(cmd, client, resource_group_name, server_name):
+    '''
+    Gets an advanced threat protection setting.
+    '''
+    return client.get(resource_group_name, server_name, mysql_flexibleservers.models.AdvancedThreatProtectionName.DEFAULT.value)
 
 
 def flexible_server_update_get(client, resource_group_name, server_name):
@@ -166,7 +186,7 @@ def database_delete_func(client, resource_group_name=None, server_name=None, dat
     return result
 
 
-def create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip):
+def create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip, firewall_rule_name=None):
     # allow access to azure ip addresses
     cf_firewall = db_context.cf_firewall  # NOQA pylint: disable=unused-variable
     firewall_client = cf_firewall(cmd.cli_ctx, None)
@@ -174,7 +194,8 @@ def create_firewall_rule(db_context, cmd, resource_group_name, server_name, star
                                          client=firewall_client,
                                          resource_group_name=resource_group_name,
                                          server_name=server_name,
-                                         start_ip_address=start_ip, end_ip_address=end_ip)
+                                         start_ip_address=start_ip, end_ip_address=end_ip,
+                                         firewall_rule_name=firewall_rule_name)
     return firewall.result().name
 
 
@@ -266,7 +287,7 @@ def flexible_server_log_list(client, resource_group_name, server_name, filename_
 def flexible_server_version_upgrade(cmd, client, resource_group_name, server_name, version, yes=None):
     if not yes:
         user_confirmation(
-            "Updating major version in server {} is irreversible. The action you're about to take can't be undone. "
+            "Upgrading major version in server {} is irreversible. The action you're about to take can't be undone. "
             "Going further will initiate major version upgrade to the selected version on this server."
             .format(server_name), yes=yes)
 
@@ -301,7 +322,7 @@ def flexible_server_version_upgrade(cmd, client, resource_group_name, server_nam
             resource_group_name=resource_group_name,
             server_name=server_name,
             parameters=parameters),
-        cmd.cli_ctx, 'Updating server {} to major version {}'.format(server_name, version)
+        cmd.cli_ctx, 'Upgrading server {} to major version {}'.format(server_name, version)
     )
 
 
@@ -389,7 +410,7 @@ def flexible_server_create(cmd, client,
     backup = mysql_flexibleservers.models.Backup(backup_retention_days=backup_retention,
                                                  geo_redundant_backup=geo_redundant_backup)
 
-    sku = mysql_flexibleservers.models.Sku(name=sku_name, tier=tier)
+    sku = mysql_flexibleservers.models.MySQLServerSku(name=sku_name, tier=tier)
 
     high_availability = mysql_flexibleservers.models.HighAvailability(mode=high_availability,
                                                                       standby_availability_zone=standby_availability_zone)
@@ -452,6 +473,7 @@ def flexible_server_create(cmd, client,
 def flexible_server_import_create(cmd, client,
                                   resource_group_name, server_name,
                                   data_source_type, data_source, mode=None,
+                                  data_source_sas_token=None, data_source_backup_dir=None,
                                   location=None, backup_retention=None,
                                   sku_name=None, tier=None,
                                   storage_gb=None, administrator_login=None,
@@ -464,41 +486,63 @@ def flexible_server_import_create(cmd, client,
                                   byok_identity=None, backup_byok_identity=None, byok_key=None, backup_byok_key=None,
                                   yes=False):
     provider = 'Microsoft.DBforMySQL'
+    source_server_id = None
+    import_source_properties = None
+    create_mode = 'Create'
     if data_source_type.lower() == 'mysql_single':
         if mode.lower() == 'offline':
-            # Generating source_server_id from data_source depending on whether it is a server_name or resource_id
-            if not is_valid_resource_id(data_source):
-                if len(data_source.split('/')) == 1:
-                    source_server_id = resource_id(
-                        subscription=get_subscription_id(cmd.cli_ctx),
-                        resource_group=resource_group_name,
-                        namespace=provider,
-                        type='servers',
-                        name=data_source)
-                else:
-                    raise ValidationError('The provided data-source {} is invalid.'.format(data_source))
-            else:
-                source_server_id = data_source
-
-            single_server_client = cf_mysql_servers(cli_ctx=cmd.cli_ctx, _=None)
             create_mode = 'Migrate'
-            # Mapping the single server configuration to flexible server configuration
-            (tier, sku_name, location, storage_gb, auto_grow, backup_retention,
-             geo_redundant_backup, version, tags, public_access, administrator_login) = map_single_server_configuration(single_server_client=single_server_client,
-                                                                                                                        source_server_id=source_server_id,
-                                                                                                                        tier=tier,
-                                                                                                                        sku_name=sku_name,
-                                                                                                                        location=location,
-                                                                                                                        storage_gb=storage_gb,
-                                                                                                                        auto_grow=auto_grow,
-                                                                                                                        backup_retention=backup_retention,
-                                                                                                                        geo_redundant_backup=geo_redundant_backup,
-                                                                                                                        version=version,
-                                                                                                                        tags=tags,
-                                                                                                                        public_access=public_access,
-                                                                                                                        subnet=subnet,
-                                                                                                                        administrator_login=administrator_login,
-                                                                                                                        administrator_login_password=administrator_login_password)
+        elif mode.lower() == 'online':
+            create_mode = 'OnlineMigrate'
+        # Generating source_server_id from data_source depending on whether it is a server_name or resource_id
+        if not is_valid_resource_id(data_source):
+            if len(data_source.split('/')) == 1:
+                source_server_id = resource_id(
+                    subscription=get_subscription_id(cmd.cli_ctx),
+                    resource_group=resource_group_name,
+                    namespace=provider,
+                    type='servers',
+                    name=data_source)
+            else:
+                raise ValidationError('The provided data-source {} is invalid.'.format(data_source))
+        else:
+            source_server_id = data_source
+
+        single_server_client = cf_mysql_servers(cli_ctx=cmd.cli_ctx, _=None)
+        # Mapping the single server configuration to flexible server configuration
+        (tier, sku_name, location, storage_gb, auto_grow, backup_retention,
+            geo_redundant_backup, version, tags, public_access, administrator_login) = map_single_server_configuration(single_server_client=single_server_client,
+                                                                                                                       source_server_id=source_server_id,
+                                                                                                                       tier=tier,
+                                                                                                                       sku_name=sku_name,
+                                                                                                                       location=location,
+                                                                                                                       storage_gb=storage_gb,
+                                                                                                                       auto_grow=auto_grow,
+                                                                                                                       backup_retention=backup_retention,
+                                                                                                                       geo_redundant_backup=geo_redundant_backup,
+                                                                                                                       version=version,
+                                                                                                                       tags=tags,
+                                                                                                                       public_access=public_access,
+                                                                                                                       subnet=subnet,
+                                                                                                                       administrator_login=administrator_login,
+                                                                                                                       administrator_login_password=administrator_login_password)
+    elif data_source_type.lower() == 'azure_blob':
+        (tier, sku_name, storage_gb, auto_grow, backup_retention,
+         geo_redundant_backup, version, administrator_login) = get_default_flex_configuration(tier=tier,
+                                                                                              sku_name=sku_name,
+                                                                                              storage_gb=storage_gb,
+                                                                                              auto_grow=auto_grow,
+                                                                                              backup_retention=backup_retention,
+                                                                                              geo_redundant_backup=geo_redundant_backup,
+                                                                                              version=version,
+                                                                                              administrator_login=administrator_login)
+        import_source_properties = mysql_flexibleservers.models.ImportSourceProperties(storage_type=mysql_flexibleservers.models.ImportSourceStorageType.AZURE_BLOB,
+                                                                                       sas_token=data_source_sas_token,
+                                                                                       storage_url=data_source,
+                                                                                       data_dir_path=data_source_backup_dir)
+    # Generate missing parameters
+    location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name, server_name)
+
     db_context = DbContext(
         cmd=cmd, cf_firewall=cf_mysql_flexible_firewall_rules, cf_db=cf_mysql_flexible_db,
         cf_availability=cf_mysql_check_resource_availability,
@@ -534,7 +578,9 @@ def flexible_server_import_create(cmd, client,
                               byok_key=byok_key,
                               backup_byok_key=backup_byok_key,
                               auto_io_scaling=auto_scale_iops,
-                              iops=iops)
+                              iops=iops,
+                              data_source_backup_dir=data_source_backup_dir,
+                              data_source_sas_token=data_source_sas_token)
     list_skus_info = get_mysql_list_skus_info(db_context.cmd, location)
     iops_info = list_skus_info['iops_info']
 
@@ -568,7 +614,7 @@ def flexible_server_import_create(cmd, client,
     backup = mysql_flexibleservers.models.Backup(backup_retention_days=backup_retention,
                                                  geo_redundant_backup=geo_redundant_backup)
 
-    sku = mysql_flexibleservers.models.Sku(name=sku_name, tier=tier)
+    sku = mysql_flexibleservers.models.MySQLServerSku(name=sku_name, tier=tier)
 
     high_availability = mysql_flexibleservers.models.HighAvailability(mode=high_availability,
                                                                       standby_availability_zone=standby_availability_zone)
@@ -599,11 +645,20 @@ def flexible_server_import_create(cmd, client,
                                           high_availability=high_availability,
                                           availability_zone=zone,
                                           data_encryption=data_encryption,
-                                          source_server_id=source_server_id)
+                                          source_server_id=source_server_id,
+                                          import_source_properties=import_source_properties,
+                                          data_source_type=data_source_type)
 
     # Adding firewall rule
     if start_ip != -1 and end_ip != -1:
         firewall_name = create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip)
+
+    # Migrating firewall rules from single server to flexible server
+    if data_source_type.lower() == 'mysql_single' and create_mode.lower() == 'migrate':
+        if network.public_network_access.lower() == 'disabled':
+            logger.warning('Firewall rules cannot be migrated for private access enabled server.')
+        else:
+            migrate_firewall_rules_from_single_to_flex(db_context=db_context, cmd=cmd, source_server_id=source_server_id, target_server_name=server_name)
 
     user = server_result.administrator_login
     server_id = server_result.id
@@ -613,6 +668,9 @@ def flexible_server_import_create(cmd, client,
     host = server_result.fully_qualified_domain_name
     subnet_id = network.delegated_subnet_resource_id
 
+    logger.warning('Make a note of your password. If you forget, you would have to reset your password with'
+                   '\'az mysql flexible-server update -n %s -g %s -p <new-password>\'.',
+                   server_name, resource_group_name)
     logger.warning('Try using az \'mysql flexible-server connect\' command to test out connection.')
 
     _update_local_contexts(cmd, server_name, resource_group_name, location, user)
@@ -621,6 +679,21 @@ def flexible_server_import_create(cmd, client,
                           administrator_login_password if administrator_login_password is not None else '*****',
                           _create_mysql_connection_string(host, None, user, administrator_login_password),
                           None, firewall_name, subnet_id)
+
+
+def flexible_server_import_replica_stop(client, resource_group_name, server_name):
+    try:
+        server_object = client.get(resource_group_name, server_name)
+    except Exception as e:
+        raise ResourceNotFoundError(e)
+
+    server_module_path = server_object.__module__
+    module = import_module(server_module_path)  # replacement not needed for update in flex servers
+    ServerForUpdate = getattr(module, 'ServerForUpdate')
+
+    params = ServerForUpdate(replication_role='None')
+
+    return client.begin_update(resource_group_name, server_name, params)
 
 
 # pylint: disable=too-many-locals, too-many-statements, raise-missing-from
@@ -702,7 +775,7 @@ def flexible_server_restore(cmd, client, resource_group_name, server_name, sourc
         backup = mysql_flexibleservers.models.Backup(backup_retention_days=backup_retention,
                                                      geo_redundant_backup=geo_redundant_backup)
 
-        sku = mysql_flexibleservers.models.Sku(name=sku_name, tier=tier)
+        sku = mysql_flexibleservers.models.MySQLServerSku(name=sku_name, tier=tier)
 
         parameters = mysql_flexibleservers.models.Server(
             tags=tags,
@@ -832,7 +905,7 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
         backup = mysql_flexibleservers.models.Backup(backup_retention_days=backup_retention,
                                                      geo_redundant_backup=geo_redundant_backup)
 
-        sku = mysql_flexibleservers.models.Sku(name=sku_name, tier=tier)
+        sku = mysql_flexibleservers.models.MySQLServerSku(name=sku_name, tier=tier)
 
         parameters = mysql_flexibleservers.models.Server(
             tags=tags,
@@ -974,6 +1047,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
 
     if high_availability:
         if high_availability.lower() != "disabled":
+            logger.warning("Enabling High-availability may result in a short downtime for the server based on your server configuration.")
             instance.high_availability.mode = high_availability
             if standby_availability_zone:
                 instance.high_availability.standby_availability_zone = standby_availability_zone
@@ -997,9 +1071,10 @@ def flexible_server_update_custom_func(cmd, client, instance,
 
         replicas = replica_operations_client.list_by_server(resource_group_name, instance.name)
         for replica in replicas:
+            replica_resource_group = re.search("(?<=/resourceGroups/).*?(?=/)", replica.id).group()
             resolve_poller(
                 server_operations_client.begin_update(
-                    resource_group_name=resource_group_name,
+                    resource_group_name=replica_resource_group,
                     server_name=replica.name,
                     parameters=ServerForUpdate(identity=identity, data_encryption=data_encryption)),
                 cmd.cli_ctx, 'Updating data encryption to replica {}'.format(replica.name)
@@ -1075,6 +1150,13 @@ def flexible_server_restart(cmd, client, resource_group_name, server_name, fail_
         client.begin_restart(resource_group_name, server_name, parameters), cmd.cli_ctx, 'MySQL Server Restart')
 
 
+def flexible_server_detach_vnet(cmd, client, resource_group_name, server_name, public_network_access, yes=False):
+    user_confirmation("The operation is irreversible once completed. Note that the server will experience downtime, so it's advisable to schedule your tasks accordingly. "
+                      "Do you want to continue?", yes=yes)
+    parameters = mysql_flexibleservers.models.ServerDetachVNetParameter(public_network_access=public_network_access)
+    return resolve_poller(client.begin_detach_v_net(resource_group_name, server_name, parameters), cmd.cli_ctx, 'MySQL Server Detach VNet')
+
+
 def flexible_server_provision_network_resource(cmd, resource_group_name, server_name,
                                                location, db_context, private_dns_zone_arguments=None, public_access=None,
                                                vnet=None, subnet=None, vnet_address_prefix=None, subnet_address_prefix=None, yes=False):
@@ -1113,6 +1195,23 @@ def flexible_server_provision_network_resource(cmd, resource_group_name, server_
         else:
             network.public_network_access = 'Enabled'
     return network, start_ip, end_ip
+
+
+def flexible_server_maintenance_reschedule(client, resource_group_name, server_name, maintenance_name, maintenance_start_time):
+    validate_and_format_maintenance_start_time(maintenance_start_time)
+    parameters = mysql_flexibleservers.models.MaintenanceUpdate(maintenance_start_time=maintenance_start_time)
+    return client.begin_update(resource_group_name=resource_group_name,
+                               server_name=server_name,
+                               maintenance_name=maintenance_name,
+                               parameters=parameters)
+
+
+def flexible_server_maintenance_list(client, resource_group_name, server_name):
+    return client.list(resource_group_name=resource_group_name, server_name=server_name)
+
+
+def flexible_server_maintenance_show(client, resource_group_name, server_name, maintenance_name):
+    return client.read(resource_group_name=resource_group_name, server_name=server_name, maintenance_name=maintenance_name)
 
 
 def flexible_server_exist_network_resource(cmd, resource_group_name, server_name, location, private_dns_zone_arguments=None, vnet=None, subnet=None):
@@ -1244,7 +1343,7 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
                                                  geo_redundant_backup=geo_redundant_backup)
 
     parameters = mysql_flexibleservers.models.Server(
-        sku=mysql_flexibleservers.models.Sku(name=sku_name, tier=tier),
+        sku=mysql_flexibleservers.models.MySQLServerSku(name=sku_name, tier=tier),
         source_server_resource_id=source_server_id,
         storage=storage,
         backup=backup,
@@ -1338,7 +1437,7 @@ def _create_server(db_context, cmd, resource_group_name, server_name, tags, loca
 
 
 def _import_create_server(db_context, cmd, resource_group_name, server_name, create_mode, source_server_id, tags, location, sku, administrator_login, administrator_login_password,
-                          storage, backup, network, version, high_availability, availability_zone, identity, data_encryption):
+                          storage, backup, network, version, high_availability, availability_zone, identity, data_encryption, import_source_properties, data_source_type):
     logging_name, server_client = db_context.logging_name, db_context.server_client
     logger.warning('Creating %s Server \'%s\' in group \'%s\'...', logging_name, server_name, resource_group_name)
 
@@ -1361,11 +1460,17 @@ def _import_create_server(db_context, cmd, resource_group_name, server_name, cre
         availability_zone=availability_zone,
         data_encryption=data_encryption,
         source_server_resource_id=source_server_id,
-        create_mode=create_mode)
+        create_mode=create_mode,
+        import_source_properties=import_source_properties)
+    import_poller = server_client.begin_create(resource_group_name, server_name, parameters)
+    import_progress_bar = None
+    if data_source_type.lower() == "azure_blob":
+        import_progress_bar = OperationProgressBar(cmd.cli_ctx, import_poller, ImportFromStorageProgressHook())
 
     return resolve_poller(
-        server_client.begin_create(resource_group_name, server_name, parameters), cmd.cli_ctx,
-        '{} Server Import Create'.format(logging_name))
+        import_poller, cmd.cli_ctx,
+        '{} Server Import Create'.format(logging_name),
+        progress_bar=import_progress_bar)
 
 
 def flexible_server_connection_string(
@@ -1524,20 +1629,18 @@ def flexible_server_identity_assign(cmd, client, resource_group_name, server_nam
     for identity in identities:
         identities_map[identity] = {}
 
-    parameters = {
-        'identity': mysql_flexibleservers.models.Identity(
-            user_assigned_identities=identities_map,
-            type="UserAssigned")}
+    id_param = mysql_flexibleservers.models.MySQLServerIdentity(user_assigned_identities=identities_map, type="UserAssigned")
 
     replica_operations_client = cf_mysql_flexible_replica(cmd.cli_ctx, '_')
 
     replicas = replica_operations_client.list_by_server(resource_group_name, server_name)
     for replica in replicas:
+        replica_resource_group = re.search("(?<=/resourceGroups/).*?(?=/)", replica.id).group()
         resolve_poller(
             client.begin_update(
-                resource_group_name=resource_group_name,
+                resource_group_name=replica_resource_group,
                 server_name=replica.name,
-                parameters=parameters),
+                parameters={'identity': id_param}),
             cmd.cli_ctx, 'Adding identities to replica {}'.format(replica.name)
         )
 
@@ -1545,7 +1648,7 @@ def flexible_server_identity_assign(cmd, client, resource_group_name, server_nam
         client.begin_update(
             resource_group_name=resource_group_name,
             server_name=server_name,
-            parameters=parameters),
+            parameters={'identity': id_param}),
         cmd.cli_ctx, 'Adding identities to server {}'.format(server_name)
     )
 
@@ -1581,24 +1684,20 @@ def flexible_server_identity_remove(cmd, client, resource_group_name, server_nam
 
     if not (instance.identity and instance.identity.user_assigned_identities) or \
        all(key.lower() in [identity.lower() for identity in identities] for key in instance.identity.user_assigned_identities.keys()):
-        parameters = {
-            'identity': mysql_flexibleservers.models.Identity(
-                type="None")}
+        id_param = mysql_flexibleservers.models.MySQLServerIdentity(type="None")
     else:
-        parameters = {
-            'identity': mysql_flexibleservers.models.Identity(
-                user_assigned_identities=identities_map,
-                type="UserAssigned")}
+        id_param = mysql_flexibleservers.models.MySQLServerIdentity(user_assigned_identities=identities_map, type="UserAssigned")
 
     replica_operations_client = cf_mysql_flexible_replica(cmd.cli_ctx, '_')
 
     replicas = replica_operations_client.list_by_server(resource_group_name, server_name)
     for replica in replicas:
+        replica_resource_group = re.search("(?<=/resourceGroups/).*?(?=/)", replica.id).group()
         resolve_poller(
             client.begin_update(
-                resource_group_name=resource_group_name,
+                resource_group_name=replica_resource_group,
                 server_name=replica.name,
-                parameters=parameters),
+                parameters={'identity': id_param}),
             cmd.cli_ctx, 'Removing identities from replica {}'.format(replica.name)
         )
 
@@ -1606,16 +1705,16 @@ def flexible_server_identity_remove(cmd, client, resource_group_name, server_nam
         client.begin_update(
             resource_group_name=resource_group_name,
             server_name=server_name,
-            parameters=parameters),
+            parameters={'identity': id_param}),
         cmd.cli_ctx, 'Removing identities from server {}'.format(server_name)
     )
 
-    return result.identity or mysql_flexibleservers.models.Identity()
+    return result.identity or mysql_flexibleservers.models.MySQLServerIdentity()
 
 
 def flexible_server_identity_list(client, resource_group_name, server_name):
     server = client.get(resource_group_name, server_name)
-    return server.identity or mysql_flexibleservers.models.Identity()
+    return server.identity or mysql_flexibleservers.models.MySQLServerIdentity()
 
 
 def flexible_server_identity_show(client, resource_group_name, server_name, identity):
@@ -1638,20 +1737,18 @@ def flexible_server_ad_admin_set(cmd, client, resource_group_name, server_name, 
     if instance.replication_role == 'Replica':
         raise CLIError("Cannot create an AD admin on a server with replication role. Use the primary server instead.")
 
-    parameters = {
-        'identity': mysql_flexibleservers.models.Identity(
-            user_assigned_identities={identity: {}},
-            type="UserAssigned")}
+    id_param = mysql_flexibleservers.models.MySQLServerIdentity(user_assigned_identities={identity: {}}, type="UserAssigned")
 
     replicas = list(replica_operations_client.list_by_server(resource_group_name, server_name))
     for replica in replicas:
         if not (replica.identity and replica.identity.user_assigned_identities and
            identity.lower() in [key.lower() for key in replica.identity.user_assigned_identities.keys()]):
+            replica_resource_group = re.search("(?<=/resourceGroups/).*?(?=/)", replica.id).group()
             resolve_poller(
                 server_operations_client.begin_update(
-                    resource_group_name=resource_group_name,
+                    resource_group_name=replica_resource_group,
                     server_name=replica.name,
-                    parameters=parameters),
+                    parameters={'identity': id_param}),
                 cmd.cli_ctx, 'Adding identity {} to replica {}'.format(identity, replica.name)
             )
 
@@ -1661,7 +1758,7 @@ def flexible_server_ad_admin_set(cmd, client, resource_group_name, server_name, 
             server_operations_client.begin_update(
                 resource_group_name=resource_group_name,
                 server_name=server_name,
-                parameters=parameters),
+                parameters={'identity': id_param}),
             cmd.cli_ctx, 'Adding identity {} to server {}'.format(identity, server_name))
 
     parameters = {
@@ -1714,8 +1811,9 @@ def flexible_server_ad_admin_delete(cmd, client, resource_group_name, server_nam
     replicas = replica_operations_client.list_by_server(resource_group_name, server_name)
     for replica in replicas:
         if config_operations_client.get(resource_group_name, replica.name, configuration_name).value == "ON":
+            replica_resource_group = re.search("(?<=/resourceGroups/).*?(?=/)", replica.id).group()
             resolve_poller(
-                config_operations_client.begin_update(resource_group_name, replica.name, configuration_name, parameters),
+                config_operations_client.begin_update(replica_resource_group, replica.name, configuration_name, parameters),
                 cmd.cli_ctx, 'Disabling aad_auth_only in replica {}'.format(replica.name))
 
     if config_operations_client.get(resource_group_name, server_name, configuration_name).value == "ON":
@@ -1738,19 +1836,10 @@ def flexible_server_ad_admin_show(client, resource_group_name, server_name):
 
 
 def flexible_gtid_reset(client, resource_group_name, server_name, gtid_set, no_wait=False, yes=False):
-    try:
-        server_object = client.get(resource_group_name, server_name)
-    except Exception as e:
-        raise ResourceNotFoundError(e)
-
-    if server_object.backup.geo_redundant_backup.lower() == "enabled":
-        raise CLIError("GTID reset can't be performed on a Geo-redundancy backup enabled server. Please disable Geo-redundancy to perform GTID reset on the server. "
-                       "You can enable Geo-redundancy option again after GTID reset. GTID reset action invalidates all the available backups and therefore, "
-                       "once Geo-redundancy is enabled again, it may take a day before geo-restore can be performed on the server.")
-
-    user_confirmation("Resetting GTID will invalidate all the automated/on-demand backups that were taken before the reset action and you will not be able "
-                      "to perform PITR (point-in-time-restore) using fastest restore point or by custom restore point if the selected restore time is before"
-                      " the GTID reset time. Do you want to continue?", yes=yes)
+    user_confirmation("Resetting GTID will invalidate all the automated, on-demand backups and geo-backups that were taken before the reset "
+                      "action. After GTID reset, you will not be able to perform PITR (point-in-time-restore) using fastest restore point "
+                      "or by custom restore point if the selected restore time is before the GTID reset time. And successful geo-restore will "
+                      "be possible only after 5 days. Do you want to continue?", yes=yes)
 
     parameters = mysql_flexibleservers.models.ServerGtidSetParameter(
         gtid_set=gtid_set
@@ -1773,9 +1862,6 @@ def map_single_server_configuration(single_server_client, source_server_id, tier
             administrator_login_password = None
             logger.warning("Changing administrator login name and password is currently not supported for single to flex migrations. "
                            "Please use source single server administrator login name and password to connect after migration.")
-
-        if not administrator_login:
-            administrator_login = source_single_server.administrator_login
 
         if not location:
             location = ''.join(source_single_server.location.lower().split())
@@ -1812,6 +1898,27 @@ def map_single_server_configuration(single_server_client, source_server_id, tier
     return tier, sku_name, location, storage_gb, auto_grow, backup_retention, geo_redundant_backup, version, tags, public_access, administrator_login
 
 
+def get_default_flex_configuration(tier, sku_name, storage_gb, auto_grow, backup_retention, geo_redundant_backup, version, administrator_login):
+    if not tier:
+        tier = 'Burstable'
+    if not sku_name:
+        sku_name = 'Standard_B1ms'
+    if not storage_gb:
+        storage_gb = 32
+    if not version:
+        allowed_versions = ['5.7', '8.0.21']
+        raise CLIError('--version is a required parameter for external migrations. Allowed values: {}'.format(allowed_versions))
+    if not auto_grow:
+        auto_grow = 'Enabled'
+    if not backup_retention:
+        backup_retention = 7
+    if not geo_redundant_backup:
+        geo_redundant_backup = 'Disabled'
+    if not administrator_login:
+        administrator_login = generate_username()
+    return tier, sku_name, storage_gb, auto_grow, backup_retention, geo_redundant_backup, version, administrator_login
+
+
 def flexible_server_export_create(cmd, client, resource_group_name, server_name, backup_name, sas_uri):
     target_details = {
         'objectType': "FullBackupStoreDetails",
@@ -1826,6 +1933,25 @@ def flexible_server_export_create(cmd, client, resource_group_name, server_name,
         backup_settings=backup_settings
     )
     return resolve_poller(client.begin_create(resource_group_name, server_name, parameters), cmd.cli_ctx, 'Create backup')
+
+
+def migrate_firewall_rules_from_single_to_flex(db_context, cmd, source_server_id, target_server_name):
+    id_parts = parse_resource_id(source_server_id)
+    firewall_client = cf_mysql_firewall_rules(cmd.cli_ctx, _=None)
+    firewall_rules = get_firewall_rules_from_paged_response(firewall_client.list_by_server(id_parts['resource_group'], id_parts['name']))
+    for rule in firewall_rules:
+        if not re.search(r'^[a-zA-Z0-9][-_a-zA-Z0-9]{0,79}(?<!-)$', rule.name):
+            logger.warning("Could not migrate firewall rule \'%s\' since firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'. "
+                           "Additionally, the name of the firewall rule must be at least 1 character "
+                           "and no more than 80 characters in length. ", rule.name)
+            continue
+        create_firewall_rule(db_context=db_context,
+                             cmd=cmd,
+                             resource_group_name=id_parts['resource_group'],
+                             server_name=target_server_name,
+                             start_ip=rule.start_ip_address,
+                             end_ip=rule.end_ip_address,
+                             firewall_rule_name=rule.name)
 
 
 # pylint: disable=too-many-instance-attributes, too-few-public-methods, useless-object-inheritance

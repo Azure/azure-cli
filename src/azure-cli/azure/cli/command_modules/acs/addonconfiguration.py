@@ -19,7 +19,7 @@ from azure.cli.command_modules.acs._consts import (
 )
 from azure.cli.command_modules.acs._resourcegroup import get_rg_location
 from azure.cli.command_modules.acs._roleassignments import add_role_assignment
-from azure.cli.core.azclierror import AzCLIError, ClientRequestError, CLIError, InvalidArgumentValueError
+from azure.cli.core.azclierror import AzCLIError, CLIError, InvalidArgumentValueError, ArgumentUsageError
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import send_raw_request
 from azure.core.exceptions import HttpResponseError
@@ -163,12 +163,51 @@ AzureFairfaxRegionToOmsRegionMap = {
 }
 
 
+# mapping for azure us nat cloud
+AzureUSNatLocationToOmsRegionCodeMap = {
+    "usnatwest": "USNW",
+    "usnateast": "USNE",
+}
+
+AzureUSNatRegionToOmsRegionMap = {
+    "usnatwest": "usnatwest",
+    "usnateast": "usnateast",
+}
+
+# mapping for azure us sec cloud
+AzureUSSecLocationToOmsRegionCodeMap = {
+    "usseceast": "USSE",
+    "ussecwest": "USSW",
+}
+
+AzureUSSecRegionToOmsRegionMap = {
+    "usseceast": "usseceast",
+    "ussecwest": "ussecwest",
+}
+
+ContainerInsightsStreams = [
+    "Microsoft-ContainerLog",
+    "Microsoft-ContainerLogV2-HighScale",
+    "Microsoft-KubeEvents",
+    "Microsoft-KubePodInventory",
+    "Microsoft-KubeNodeInventory",
+    "Microsoft-KubePVInventory",
+    "Microsoft-KubeServices",
+    "Microsoft-KubeMonAgentEvents",
+    "Microsoft-InsightsMetrics",
+    "Microsoft-ContainerInventory",
+    "Microsoft-ContainerNodeInventory",
+    "Microsoft-Perf",
+]
+
+
 # pylint: disable=too-many-locals
 def ensure_default_log_analytics_workspace_for_monitoring(
     cmd, subscription_id, resource_group_name
 ):
     rg_location = get_rg_location(cmd.cli_ctx, resource_group_name)
     cloud_name = cmd.cli_ctx.cloud.name
+    workspace_region_code = "EUS"
 
     if cloud_name.lower() == "azurecloud":
         workspace_region = AzureCloudRegionToOmsRegionMap.get(
@@ -191,6 +230,21 @@ def ensure_default_log_analytics_workspace_for_monitoring(
         workspace_region_code = AzureFairfaxLocationToOmsRegionCodeMap.get(
             workspace_region, "USGV"
         )
+    elif cloud_name.lower() == "usnat":
+        workspace_region = AzureUSNatRegionToOmsRegionMap.get(
+            rg_location, "usnatwest"
+        )
+        workspace_region_code = AzureUSNatLocationToOmsRegionCodeMap.get(
+            workspace_region, "USNW"
+        )
+    elif cloud_name.lower() == "ussec":
+        workspace_region = AzureUSSecRegionToOmsRegionMap.get(
+            rg_location, "ussecwest"
+        )
+        workspace_region_code = AzureUSSecLocationToOmsRegionCodeMap.get(
+            workspace_region, "USSW"
+        )
+
     else:
         logger.error(
             "AKS Monitoring addon not supported in cloud : %s", cloud_name
@@ -291,7 +345,10 @@ def ensure_container_insights_for_monitoring(
     create_dcr=False,
     create_dcra=False,
     enable_syslog=False,
-    data_collection_settings=None
+    data_collection_settings=None,
+    is_private_cluster=False,
+    ampls_resource_id=None,
+    enable_high_log_scale_mode=False,
 ):
     """
     Either adds the ContainerInsights solution to a LA Workspace OR sets up a DCR (Data Collection Rule) and DCRA
@@ -307,6 +364,13 @@ def ensure_container_insights_for_monitoring(
     """
     if not addon.enabled:
         return None
+
+    if (not is_private_cluster or not aad_route) and ampls_resource_id is not None:
+        raise ArgumentUsageError("--ampls-resource-id can only be used with private cluster in MSI mode.")
+
+    is_use_ampls = False
+    if ampls_resource_id is not None:
+        is_use_ampls = True
 
     # workaround for this addon key which has been seen lowercased in the wild
     for key in list(addon.config):
@@ -325,12 +389,19 @@ def ensure_container_insights_for_monitoring(
         workspace_resource_id
     )
 
-    # extract subscription ID and resource group from workspace_resource_id URL
+    # extract subscription ID and workspace name from workspace_resource_id
     try:
         subscription_id = workspace_resource_id.split("/")[2]
     except IndexError:
         raise AzCLIError(
-            "Could not locate resource group in workspace-resource-id URL."
+            "Could not locate resource group in workspace-resource-id."
+        )
+
+    try:
+        workspace_name = workspace_resource_id.split("/")[8]
+    except IndexError:
+        raise AzCLIError(
+            "Could not locate workspace name in --workspace-resource-id."
         )
 
     location = ""
@@ -347,18 +418,39 @@ def ensure_container_insights_for_monitoring(
         except HttpResponseError as ex:
             raise ex
 
-    if aad_route:
+    if aad_route:  # pylint: disable=too-many-nested-blocks
         cluster_resource_id = (
             f"/subscriptions/{cluster_subscription}/resourceGroups/{cluster_resource_group_name}/"
             f"providers/Microsoft.ContainerService/managedClusters/{cluster_name}"
         )
         dataCollectionRuleName = f"MSCI-{location}-{cluster_name}"
         # Max length of the DCR name is 64 chars
-        dataCollectionRuleName = dataCollectionRuleName[0:64]
+        dataCollectionRuleName = _trim_suffix_if_needed(dataCollectionRuleName[0:64])
         dcr_resource_id = (
             f"/subscriptions/{cluster_subscription}/resourceGroups/{cluster_resource_group_name}/"
             f"providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
         )
+
+        # ingestion DCE MUST be in workspace region
+        ingestionDataCollectionEndpointName = f"MSCI-ingest-{location}-{cluster_name}"
+        # Max length of the DCE name is 44 chars
+        ingestionDataCollectionEndpointName = _trim_suffix_if_needed(ingestionDataCollectionEndpointName[0:43])
+        ingestion_dce_resource_id = None
+
+        # config DCE MUST be in cluster region
+        configDataCollectionEndpointName = f"MSCI-config-{cluster_region}-{cluster_name}"
+        # Max length of the DCE name is 44 chars
+        configDataCollectionEndpointName = _trim_suffix_if_needed(configDataCollectionEndpointName[0:43])
+        config_dce_resource_id = None
+
+        # create ingestion DCE if high log scale mode enabled
+        if enable_high_log_scale_mode:
+            ingestion_dce_resource_id = create_data_collection_endpoint(cmd, cluster_subscription, cluster_resource_group_name, location, ingestionDataCollectionEndpointName, is_use_ampls)
+
+        # create config DCE if AMPLS resource specified
+        if is_use_ampls:
+            config_dce_resource_id = create_data_collection_endpoint(cmd, cluster_subscription, cluster_resource_group_name, cluster_region, configDataCollectionEndpointName, is_use_ampls)
+
         if create_dcr:
             # first get the association between region display names and region IDs (because for some reason
             # the "which RPs are available in which regions" check returns region display names)
@@ -384,32 +476,6 @@ def ensure_container_insights_for_monitoring(
                     "name"
                 ]
 
-            # check if region supports DCRs and DCR-A
-            for _ in range(3):
-                try:
-                    feature_check_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
-                        f"/subscriptions/{cluster_subscription}/providers/Microsoft.Insights?api-version=2020-10-01"
-                    r = send_raw_request(cmd.cli_ctx, "GET", feature_check_url)
-                    error = None
-                    break
-                except AzCLIError as e:
-                    error = e
-            else:
-                raise error
-            json_response = json.loads(r.text)
-            for resource in json_response["resourceTypes"]:
-                if resource["resourceType"].lower() == "datacollectionrules":
-                    region_ids = map(
-                        lambda x: region_names_to_id[x], resource["locations"])
-                    if location not in region_ids:
-                        raise ClientRequestError(
-                            f"Data Collection Rules are not supported for LA workspace region {location}")
-                if resource["resourceType"].lower() == "datacollectionruleassociations":
-                    region_ids = map(
-                        lambda x: region_names_to_id[x], resource["locations"])
-                    if cluster_region not in region_ids:
-                        raise ClientRequestError(
-                            f"Data Collection Rule Associations are not supported for cluster region {cluster_region}")
             dcr_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
                 f"{dcr_resource_id}?api-version=2022-06-01"
             # get existing tags on the container insights extension DCR if the customer added any
@@ -418,11 +484,25 @@ def ensure_container_insights_for_monitoring(
             # get data collection settings
             extensionSettings = {}
             cistreams = ["Microsoft-ContainerInsights-Group-Default"]
+            if enable_high_log_scale_mode:
+                cistreams = ContainerInsightsStreams
             if data_collection_settings is not None:
                 dataCollectionSettings = _get_data_collection_settings(data_collection_settings)
                 validate_data_collection_settings(dataCollectionSettings)
+                dataCollectionSettings.setdefault("enableContainerLogV2", True)
                 extensionSettings["dataCollectionSettings"] = dataCollectionSettings
                 cistreams = dataCollectionSettings["streams"]
+            else:
+                # If data_collection_settings is None, set default dataCollectionSettings
+                dataCollectionSettings = {
+                    "enableContainerLogV2": True
+                }
+                extensionSettings["dataCollectionSettings"] = dataCollectionSettings
+
+            if enable_high_log_scale_mode:
+                for i in range(len(cistreams)):
+                    if cistreams[i] == "Microsoft-ContainerLogV2":
+                        cistreams[i] = "Microsoft-ContainerLogV2-HighScale"
             # create the DCR
             dcr_creation_body_without_syslog = json.dumps(
                 {
@@ -454,6 +534,7 @@ def ensure_container_insights_for_monitoring(
                                 }
                             ]
                         },
+                        "dataCollectionEndpointId": ingestion_dce_resource_id
                     },
                 }
             )
@@ -534,6 +615,7 @@ def ensure_container_insights_for_monitoring(
                                 }
                             ]
                         },
+                        "dataCollectionEndpointId": ingestion_dce_resource_id
                     },
                 }
             )
@@ -557,31 +639,132 @@ def ensure_container_insights_for_monitoring(
 
         if create_dcra:
             # only create or delete the association between the DCR and cluster
-            association_body = json.dumps(
-                {
-                    "location": cluster_region,
-                    "properties": {
-                        "dataCollectionRuleId": dcr_resource_id,
-                        "description": "routes monitoring data to a Log Analytics workspace",
-                    },
-                }
+            create_or_delete_dcr_association(cmd, cluster_region, remove_monitoring, cluster_resource_id, dcr_resource_id)
+            if is_use_ampls:
+                # associate config DCE to the cluster
+                create_dce_association(cmd, cluster_region, cluster_resource_id, config_dce_resource_id)
+                # link config DCE to AMPLS
+                create_ampls_scope(cmd, ampls_resource_id, configDataCollectionEndpointName, config_dce_resource_id)
+                # link workspace to AMPLS
+                create_ampls_scope(cmd, ampls_resource_id, workspace_name, workspace_resource_id)
+                # link ingest DCE to AMPLS
+                if enable_high_log_scale_mode:
+                    create_ampls_scope(cmd, ampls_resource_id, ingestionDataCollectionEndpointName, ingestion_dce_resource_id)
+
+
+def create_dce_association(cmd, cluster_region, cluster_resource_id, config_dce_resource_id):
+    association_body = json.dumps(
+        {
+            "location": cluster_region,
+            "properties": {
+                "dataCollectionEndpointId": config_dce_resource_id,
+                "description": "associates config dataCollectionEndpoint to AKS cluster resource",
+            },
+        }
+    )
+    association_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
+        f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/configurationAccessEndpoint?api-version=2022-06-01"
+    for _ in range(3):
+        try:
+            send_raw_request(
+                cmd.cli_ctx,
+                "PUT",
+                association_url,
+                body=association_body,
             )
-            association_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
-                f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/ContainerInsightsExtension?api-version=2022-06-01"
-            for _ in range(3):
-                try:
-                    send_raw_request(
-                        cmd.cli_ctx,
-                        "PUT" if not remove_monitoring else "DELETE",
-                        association_url,
-                        body=association_body,
-                    )
-                    error = None
-                    break
-                except AzCLIError as e:
-                    error = e
-            else:
-                raise error
+            error = None
+            break
+        except AzCLIError as e:
+            error = e
+    else:
+        raise error
+
+
+def create_or_delete_dcr_association(cmd, cluster_region, remove_monitoring, cluster_resource_id, dcr_resource_id):
+    association_body = json.dumps(
+        {
+            "location": cluster_region,
+            "properties": {
+                "dataCollectionRuleId": dcr_resource_id,
+                "description": "associates dataCollectionRule to the AKS",
+            },
+        }
+    )
+    association_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
+        f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/ContainerInsightsExtension?api-version=2022-06-01"
+    for _ in range(3):
+        try:
+            send_raw_request(
+                cmd.cli_ctx,
+                "PUT" if not remove_monitoring else "DELETE",
+                association_url,
+                body=association_body,
+            )
+            error = None
+            break
+        except AzCLIError as e:
+            error = e
+    else:
+        raise error
+
+
+def create_ampls_scope(cmd, ampls_resource_id, dce_endpoint_name, dce_resource_id):
+    link_dce_ampls_body = json.dumps(
+        {
+            "properties": {
+                "linkedResourceId": dce_resource_id,
+            },
+        }
+    )
+    link_dce_ampls_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
+        f"{ampls_resource_id}/scopedresources/{dce_endpoint_name}-connection?api-version=2021-07-01-preview"
+
+    for _ in range(3):
+        try:
+            send_raw_request(
+                cmd.cli_ctx,
+                "PUT",
+                link_dce_ampls_url,
+                body=link_dce_ampls_body,
+            )
+            error = None
+            break
+        except AzCLIError as e:
+            error = e
+    else:
+        raise error
+
+
+def create_data_collection_endpoint(cmd, subscription, resource_group, region, endpoint_name, is_ampls):
+    dce_resource_id = (
+        f"/subscriptions/{subscription}/resourceGroups/{resource_group}/"
+        f"providers/Microsoft.Insights/dataCollectionEndpoints/{endpoint_name}"
+    )
+    dce_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
+        f"{dce_resource_id}?api-version=2022-06-01"
+    # create the DCE
+    dce_creation_body_common = {
+        "location": region,
+        "kind": "Linux",
+        "properties": {
+            "networkAcls": {
+                "publicNetworkAccess": "Enabled"
+            }
+        }
+    }
+    if is_ampls:
+        dce_creation_body_common["properties"]["networkAcls"]["publicNetworkAccess"] = "Disabled"
+    dce_creation_body_ = json.dumps(dce_creation_body_common)
+    for _ in range(3):
+        try:
+            send_raw_request(cmd.cli_ctx, "PUT", dce_url, body=dce_creation_body_)
+            error = None
+            break
+        except AzCLIError as e:
+            error = e
+    else:
+        raise error
+    return dce_resource_id
 
 
 def validate_data_collection_settings(dataCollectionSettings):
@@ -832,3 +1015,9 @@ def _get_data_collection_settings(file_path):
         msg = "Error reading data_collection_settings."
         raise InvalidArgumentValueError(msg.format(file_path))
     return data_collection_settings
+
+
+def _trim_suffix_if_needed(s, suffix="-"):
+    if s.endswith(suffix):
+        s = s[:-len(suffix)]
+    return s

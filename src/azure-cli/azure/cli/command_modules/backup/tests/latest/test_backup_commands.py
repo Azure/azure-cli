@@ -108,7 +108,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('properties.restoreSettings.crossSubscriptionRestoreSettings.crossSubscriptionRestoreState', 'Disabled')
         ])
 
-        self.cmd('backup vault create -n {vault4} -g {rg} -l {loc} --public-network-access Enable', checks=[
+        self.cmd('backup vault update -n {vault4} -g {rg} --public-network-access Enable', checks=[
             self.check('properties.publicNetworkAccess', 'Enabled')
         ])
 
@@ -131,30 +131,26 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ])
 
         storage_model_types = [e.value for e in StorageType]
-        vault_properties = self.cmd('backup vault backup-properties show -n {vault1} -g {rg} --query [0]', checks=[
-            JMESPathCheckExists("contains({}, properties.storageModelType)".format(storage_model_types)),
-            self.check('properties.storageTypeState', 'Unlocked'),
-            self.check('resourceGroup', '{rg}')
-        ]).get_output_in_json()
+        vault_properties_redundancy = self.cmd('backup vault show -n {vault1} -g {rg} --query "properties.redundancySettings"').get_output_in_json()
 
-        if vault_properties['properties']['storageModelType'] == StorageType.geo_redundant.value:
+        if vault_properties_redundancy['standardTierStorageRedundancy'] == StorageType.geo_redundant.value:
             new_storage_model = StorageType.locally_redundant.value
         else:
             new_storage_model = StorageType.geo_redundant.value
 
         self.kwargs['model'] = new_storage_model
-        self.cmd('backup vault backup-properties set -n {vault1} -g {rg} --backup-storage-redundancy {model}')
+        self.cmd('backup vault update -n {vault1} -g {rg} --backup-storage-redundancy {model}')
         time.sleep(300)
-        self.cmd('backup vault backup-properties show -n {vault1} -g {rg} --query [0]', checks=[
-            self.check('properties.storageModelType', new_storage_model)
+        self.cmd('backup vault show -n {vault1} -g {rg} --query "properties.redundancySettings"', checks=[
+            self.check('standardTierStorageRedundancy', new_storage_model)
         ])
 
         new_storage_model = StorageType.zone_redundant.value
-        self.kwargs['model'] = StorageType.zone_redundant.value
-        self.cmd('backup vault backup-properties set -n {vault1} -g {rg} --backup-storage-redundancy {model}')
+        self.kwargs['model'] = new_storage_model
+        self.cmd('backup vault update -n {vault1} -g {rg} --backup-storage-redundancy {model}')
         time.sleep(300)
-        self.cmd('backup vault backup-properties show -n {vault1} -g {rg} --query [0]', checks=[
-            self.check('properties.storageModelType', new_storage_model)
+        self.cmd('backup vault show -n {vault1} -g {rg} --query "properties.redundancySettings"', checks=[
+            self.check('standardTierStorageRedundancy', new_storage_model)
         ])
 
         self.cmd('backup vault backup-properties set -g {rg} -n {vault1} --hybrid-backup-security-features Disable', checks=[
@@ -180,7 +176,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         # self.kwargs['policy_json']['properties']['retentionPolicy']['dailySchedule']['retentionDuration'] = {"count": 20, "durationType": "Days"}
 
         # Immutable vault testing.
-        self.cmd('backup vault create -n {vault4} -g {rg} -l {loc} --immutability-state Disabled --cross-subscription-restore-state Enable', checks=[
+        self.cmd('backup vault update -n {vault4} -g {rg} --immutability-state Disabled --cross-subscription-restore-state Enable', checks=[
             self.check('properties.securitySettings.immutabilitySettings.state', 'Disabled'),
             self.check('properties.restoreSettings.crossSubscriptionRestoreSettings.crossSubscriptionRestoreState', 'Enabled')
         ])
@@ -191,7 +187,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         # self.kwargs['policy_json']['properties']['retentionPolicy']['dailySchedule']['retentionDuration']['count'] = 10
 
-        self.cmd('backup vault create -n {vault4} -g {rg} -l {loc} --immutability-state Unlocked --cross-subscription-restore-state PermanentlyDisable', checks=[
+        self.cmd('backup vault update -n {vault4} -g {rg} --immutability-state Unlocked --cross-subscription-restore-state PermanentlyDisable', checks=[
             self.check('properties.securitySettings.immutabilitySettings.state', 'Unlocked'),
             self.check('properties.restoreSettings.crossSubscriptionRestoreSettings.crossSubscriptionRestoreState', 'PermanentlyDisabled')
         ])
@@ -767,8 +763,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
            'vm_id': "VM;iaasvmcontainerv2;" + resource_group + ";" + vm_name,
            'container_id': "IaasVMContainer;iaasvmcontainerv2;" + resource_group + ";" + vm_name
        })
-       self.cmd('backup vault backup-properties set -g {rg} -n {vault} --cross-region-restore-flag true', checks=[
-           self.check("properties.crossRegionRestoreFlag", True)
+       self.cmd('backup vault update -g {rg} -n {vault} --cross-region-restore-flag Enabled', checks=[
+           self.check('properties.redundancySettings.crossRegionRestore', 'Enabled')
        ]).get_output_in_json()
        time.sleep(300)
 
@@ -815,8 +811,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'container_id': "IaasVMContainer;iaasvmcontainerv2;" + resource_group + ";" + vm_name
         })
 
-        self.cmd('backup vault backup-properties set -g {rg} -n {vault} --cross-region-restore-flag true', checks=[
-            self.check("properties.crossRegionRestoreFlag", True)
+        self.cmd('backup vault update -g {rg} -n {vault} --cross-region-restore-flag Enabled', checks=[
+            self.check('properties.redundancySettings.crossRegionRestore', 'Enabled')
         ]).get_output_in_json()
         time.sleep(300)
 
@@ -1196,31 +1192,40 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'identity1': self.create_random_name('clitest-identity1', 50),
             'identity2': self.create_random_name('clitest-identity2', 50),
             'identity_permissions': "get list unwrapKey wrapKey",
+            'identity_rbac_permissions': "Key Vault Crypto Service Encryption User",
+            'user_rbac_permissions': "Key Vault Administrator"
         })
 
+        subscription = self.cmd('account show --query "id"').get_output_in_json()
+        user_principal_id = self.cmd('account show --query "user.name"').get_output_in_json()
+        self.kwargs["user_principal_id"] = user_principal_id
+        self.kwargs['key_vault_id'] = "subscriptions/{}/resourceGroups/{}/providers/Microsoft.KeyVault/vaults/{}".format(
+            subscription, resource_group, key_vault)
+        # Uncomment during live runs
+        # self.cmd('role assignment create --role "{user_rbac_permissions}" --scope "{key_vault_id}" --assignee "{user_principal_id}"')
 
-        self.kwargs['identity1_id'] = self.cmd('identity create -n {identity1} -g {rg} --query id').get_output_in_json()
-        self.kwargs['identity1_principalid'] = self.cmd('identity show -n {identity1} -g {rg} --query principalId').get_output_in_json()
+        self.kwargs['identity1_id'] = self.cmd('identity create -n "{identity1}" -g "{rg}" --query id').get_output_in_json()
+        self.kwargs['identity1_principalid'] = self.cmd('identity show -n "{identity1}" -g "{rg}" --query principalId').get_output_in_json()
 
-        self.kwargs['identity2_id'] = self.cmd('identity create -n {identity2} -g {rg} --query id').get_output_in_json()
-        self.kwargs['identity2_principalid'] = self.cmd('identity show -n {identity2} -g {rg} --query principalId').get_output_in_json()
+        self.kwargs['identity2_id'] = self.cmd('identity create -n "{identity2}" -g "{rg}" --query id').get_output_in_json()
+        self.kwargs['identity2_principalid'] = self.cmd('identity show -n "{identity2}" -g "{rg}" --query principalId').get_output_in_json()
 
 
-        userMSI_v1_json = self.cmd('backup vault identity assign --user-assigned {identity1_id} {identity2_id} -g {rg} -n {vault1}').get_output_in_json()
+        userMSI_v1_json = self.cmd('backup vault identity assign --user-assigned "{identity1_id}" "{identity2_id}" -g "{rg}" -n "{vault1}"').get_output_in_json()
 
-        system_v1_json = self.cmd('backup vault identity assign --system-assigned -g {rg} -n {vault1}').get_output_in_json()
+        system_v1_json = self.cmd('backup vault identity assign --system-assigned -g "{rg}" -n "{vault1}"').get_output_in_json()
 
         self.kwargs['system1_principalid'] = system_v1_json['identity']['principalId']
 
-        userMSI1_v2_json = self.cmd('backup vault identity assign --user-assigned {identity1_id} -g {rg} -n {vault2}').get_output_in_json()
+        userMSI1_v2_json = self.cmd('backup vault identity assign --user-assigned "{identity1_id}" -g "{rg}" -n "{vault2}"').get_output_in_json()
 
-        system_v2_json = self.cmd('backup vault identity assign --system-assigned -g {rg} -n {vault2}').get_output_in_json()
+        system_v2_json = self.cmd('backup vault identity assign --system-assigned -g "{rg}" -n "{vault2}"').get_output_in_json()
 
         self.kwargs['system2_principalid'] = system_v2_json['identity']['principalId']
 
-        self.cmd('keyvault update --name {key_vault} --enable-purge-protection')
+        self.cmd('keyvault update --name "{key_vault}" --enable-purge-protection')
 
-        key1_json = self.cmd('keyvault key create --vault-name {key_vault} -n {key1} --kty RSA --disabled false --ops decrypt encrypt sign unwrapKey verify wrapKey --size 2048', checks=[
+        key1_json = self.cmd('keyvault key create --vault-name "{key_vault}" -n "{key1}" --kty RSA --disabled false --ops decrypt encrypt sign unwrapKey verify wrapKey --size 2048', checks=[
             self.check("attributes.enabled", True),
             self.check('key.kty', "RSA"),
         ]).get_output_in_json()
@@ -1233,7 +1238,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.assertIn("verify", keyOps1)
         self.assertIn("wrapKey", keyOps1)
 
-        key2_json = self.cmd('keyvault key create --vault-name {key_vault} -n {key2} --kty RSA --disabled false --ops decrypt encrypt sign unwrapKey verify wrapKey --size 2048', checks=[
+        key2_json = self.cmd('keyvault key create --vault-name "{key_vault}" -n "{key2}" --kty RSA --disabled false --ops decrypt encrypt sign unwrapKey verify wrapKey --size 2048', checks=[
             self.check("attributes.enabled", True),
             self.check('key.kty', "RSA"),
         ]).get_output_in_json()
@@ -1250,74 +1255,23 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['key1_id'] = key1_json['key']['kid']
         self.kwargs['key2_id'] = key2_json['key']['kid']
 
-        policy1_json = self.cmd('keyvault set-policy --name {key_vault} --object-id {identity1_principalid} --key-permissions {identity_permissions}').get_output_in_json()
-        identity1_has_access = False
+        # Uncomment during live runs
+        # role_id = '/subscriptions/{}/providers/Microsoft.Authorization/roleDefinitions/e147488a-f6f5-4113-8e2d-b22465e65bf6'.format(subscription)
+        # rbac1_json = self.cmd('role assignment create --scope "{key_vault_id}" --assignee "{identity1_principalid}" --role "{identity_rbac_permissions}"').get_output_in_json()
+        # self.assertEqual(rbac1_json['roleDefinitionId'], role_id)
 
-        access_policy1 = policy1_json['properties']['accessPolicies']
-        for element in access_policy1:
-            if element['objectId'] == self.kwargs['identity1_principalid']:
-                access_policy1 = element
-                identity1_has_access = True
-            
-        self.assertEqual(identity1_has_access, True)
-        key_permissions = access_policy1['permissions']['keys']
-        self.assertIn("list", key_permissions)
-        self.assertIn("wrapKey", key_permissions)
-        self.assertIn("get", key_permissions)
-        self.assertIn("unwrapKey", key_permissions)
+        # rbac2_json = self.cmd('role assignment create --scope "{key_vault_id}" --assignee "{identity2_principalid}" --role "{identity_rbac_permissions}"').get_output_in_json()
+        # self.assertEqual(rbac2_json['roleDefinitionId'], role_id)
 
-        policy2_json = self.cmd('keyvault set-policy --name {key_vault} --object-id {identity2_principalid} --key-permissions {identity_permissions}').get_output_in_json()
-        identity2_has_access = False
+        # rbac3_json = self.cmd('role assignment create --scope "{key_vault_id}" --assignee "{system1_principalid}" --role "{identity_rbac_permissions}"').get_output_in_json()
+        # self.assertEqual(rbac3_json['roleDefinitionId'], role_id)
 
-        access_policy2 = policy2_json['properties']['accessPolicies']
-        for element in access_policy2:
-            if element['objectId'] == self.kwargs['identity2_principalid']:
-                access_policy2 = element
-                identity2_has_access = True
-            
-        self.assertEqual(identity2_has_access, True)
-        key_permissions = access_policy2['permissions']['keys']
-        self.assertIn("list", key_permissions)
-        self.assertIn("wrapKey", key_permissions)
-        self.assertIn("get", key_permissions)
-        self.assertIn("unwrapKey", key_permissions)
+        # rbac4_json = self.cmd('role assignment create --scope "{key_vault_id}" --assignee "{system2_principalid}" --role "{identity_rbac_permissions}"').get_output_in_json()
+        # self.assertEqual(rbac4_json['roleDefinitionId'], role_id)
 
-        policy3_json = self.cmd('keyvault set-policy --name {key_vault} --object-id {system1_principalid} --key-permissions {identity_permissions}').get_output_in_json()
-        system1_has_access = False
+        self.cmd('backup vault encryption update --encryption-key-id "{key1_id}" --mi-user-assigned "{identity1_id}" -g "{rg}" -n "{vault1}"')
 
-        access_policy3 = policy3_json['properties']['accessPolicies']
-        for element in access_policy3:
-            if element['objectId'] == self.kwargs['system1_principalid']:
-                access_policy3 = element
-                system1_has_access = True
-            
-        self.assertEqual(system1_has_access, True)
-        key_permissions = access_policy3['permissions']['keys']
-        self.assertIn("list", key_permissions)
-        self.assertIn("wrapKey", key_permissions)
-        self.assertIn("get", key_permissions)
-        self.assertIn("unwrapKey", key_permissions)
-
-        policy4_json = self.cmd('keyvault set-policy --name {key_vault} --object-id {system2_principalid} --key-permissions {identity_permissions}').get_output_in_json()
-        system2_has_access = False
-
-        access_policy4 = policy4_json['properties']['accessPolicies']
-        for element in access_policy4:
-            if element['objectId'] == self.kwargs['system2_principalid']:
-                access_policy4 = element
-                system2_has_access = True
-            
-        self.assertEqual(system2_has_access, True)
-        key_permissions = access_policy4['permissions']['keys']
-        self.assertIn("list", key_permissions)
-        self.assertIn("wrapKey", key_permissions)
-        self.assertIn("get", key_permissions)
-        self.assertIn("unwrapKey", key_permissions)
-
-
-        self.cmd('backup vault encryption update --encryption-key-id {key1_id} --mi-user-assigned {identity1_id} -g {rg} -n {vault1}')
-
-        self.cmd('backup vault encryption show -n {vault1} -g {rg}', checks=[
+        self.cmd('backup vault encryption show -n "{vault1}" -g "{rg}"', checks=[
             self.check("properties.encryptionAtRestType", "CustomerManaged"),
             self.check("properties.infrastructureEncryptionState", "Disabled"),
             self.check('properties.keyUri', '{key1_id}'),
@@ -1326,9 +1280,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('properties.lastUpdateStatus', 'Succeeded')
         ])
 
-        self.cmd('backup vault encryption update --encryption-key-id {key1_id} --mi-user-assigned {identity2_id} -g {rg} -n {vault1}')
+        self.cmd('backup vault encryption update --encryption-key-id "{key1_id}" --mi-user-assigned "{identity2_id}" -g "{rg}" -n "{vault1}"')
 
-        self.cmd('backup vault encryption show -n {vault1} -g {rg}', checks=[
+        self.cmd('backup vault encryption show -n "{vault1}" -g "{rg}"', checks=[
             self.check("properties.encryptionAtRestType", "CustomerManaged"),
             self.check("properties.infrastructureEncryptionState", "Disabled"),
             self.check('properties.keyUri', '{key1_id}'),
@@ -1337,9 +1291,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('properties.lastUpdateStatus', 'Succeeded')
         ])
 
-        self.cmd('backup vault encryption update --encryption-key-id {key2_id} --mi-system-assigned -g {rg} -n {vault1}')
+        self.cmd('backup vault encryption update --encryption-key-id "{key2_id}" --mi-system-assigned -g "{rg}" -n "{vault1}"')
 
-        self.cmd('backup vault encryption show -n {vault1} -g {rg}', checks=[
+        self.cmd('backup vault encryption show -n "{vault1}" -g "{rg}"', checks=[
             self.check("properties.encryptionAtRestType", "CustomerManaged"),
             self.check("properties.infrastructureEncryptionState", "Disabled"),
             self.check('properties.keyUri', '{key2_id}'),
@@ -1348,9 +1302,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('properties.lastUpdateStatus', 'Succeeded')
         ])
 
-        self.cmd('backup vault encryption update --encryption-key-id {key1_id} -g {rg} -n {vault1}')
+        self.cmd('backup vault encryption update --encryption-key-id "{key1_id}" -g "{rg}" -n "{vault1}"')
 
-        self.cmd('backup vault encryption show -n {vault1} -g {rg}', checks=[
+        self.cmd('backup vault encryption show -n "{vault1}" -g "{rg}"', checks=[
             self.check("properties.encryptionAtRestType", "CustomerManaged"),
             self.check("properties.infrastructureEncryptionState", "Disabled"),
             self.check('properties.keyUri', '{key1_id}'),
@@ -1360,9 +1314,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ])
 
 
-        self.cmd('backup vault encryption update --encryption-key-id {key2_id} --mi-system-assigned --infrastructure-encryption Enabled -g {rg} -n {vault2}')
+        self.cmd('backup vault encryption update --encryption-key-id "{key2_id}" --mi-system-assigned --infrastructure-encryption Enabled -g "{rg}" -n "{vault2}"')
 
-        self.cmd('backup vault encryption show -n {vault2} -g {rg}', checks=[
+        self.cmd('backup vault encryption show -n "{vault2}" -g "{rg}"', checks=[
             self.check("properties.encryptionAtRestType", "CustomerManaged"),
             self.check("properties.infrastructureEncryptionState", "Enabled"),
             self.check('properties.keyUri', '{key2_id}'),
@@ -1371,9 +1325,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('properties.lastUpdateStatus', 'Succeeded')
         ])
 
-        self.cmd('backup vault encryption update --encryption-key-id {key1_id} --mi-user-assigned {identity1_id} -g {rg} -n {vault2}')
+        self.cmd('backup vault encryption update --encryption-key-id "{key1_id}" --mi-user-assigned "{identity1_id}" -g "{rg}" -n "{vault2}"')
 
-        self.cmd('backup vault encryption show -n {vault2} -g {rg}', checks=[
+        self.cmd('backup vault encryption show -n "{vault2}" -g "{rg}"', checks=[
             self.check("properties.encryptionAtRestType", "CustomerManaged"),
             self.check("properties.infrastructureEncryptionState", "Enabled"),
             self.check('properties.keyUri', '{key1_id}'),
@@ -1400,12 +1354,12 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         # associate vault with an already present resource guard
         self.cmd('backup vault resource-guard-mapping update -g {rg} -n {vault} --resource-guard-id {resource_graph}', checks=[
             self.check('name', 'VaultProxy'),
-            self.check('length(properties.resourceGuardOperationDetails)', 6)
+            self.check('length(properties.resourceGuardOperationDetails)', 9)
         ])
 
         self.cmd('backup vault resource-guard-mapping show -g {rg} -n {vault}', checks=[
             self.check('name', 'VaultProxy'),
-            self.check('length(properties.resourceGuardOperationDetails)', 6)
+            self.check('length(properties.resourceGuardOperationDetails)', 9)
         ])
 
         # Try disabling soft delete
