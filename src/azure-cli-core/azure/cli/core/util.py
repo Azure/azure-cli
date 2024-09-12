@@ -755,8 +755,8 @@ def is_windows():
 
 
 def is_github_codespaces():
-    return os.environ.get('CODESPACES', None) == 'true'
-
+    # https://docs.github.com/en/codespaces/developing-in-a-codespace/default-environment-variables-for-your-codespace
+    return os.environ.get('CODESPACES') == 'true'
 
 def can_launch_browser():
     import webbrowser

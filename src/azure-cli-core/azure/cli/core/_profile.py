@@ -165,7 +165,9 @@ class Profile:
             if not use_device_code and not can_launch_browser():
                 logger.info('No web browser is available. Fall back to device code.')
                 use_device_code = True
+
             if not use_device_code and is_github_codespaces():
+                logger.info('GitHub Codespaces is detected. Fall back to device code.')
                 use_device_code = True
 
             if use_device_code:
