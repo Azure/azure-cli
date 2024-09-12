@@ -208,7 +208,7 @@ jobs:
   - task: PipAuthenticate@1
     displayName: 'Pip Authenticate'
     inputs:
-      artifactFeeds: 'public/PublicPackages'
+      artifactFeeds: 'public/azure-cli-feed'
 
   - script: |
       set ARCH=$(Platform)
@@ -251,7 +251,7 @@ jobs:
     - task: PipAuthenticate@1
       displayName: 'Pip Authenticate'
       inputs:
-        artifactFeeds: 'public/PublicPackages'
+        artifactFeeds: 'public/azure-cli-feed'
 
     - script: |
         set ARCH=$(Platform)
@@ -517,7 +517,7 @@ jobs:
   - task: PipAuthenticate@1
     displayName: 'Pip Authenticate'
     inputs:
-      artifactFeeds: 'public/PublicPackages'
+      artifactFeeds: 'public/azure-cli-feed'
 
   - script: |
       if [[ "$(Build.Reason)" == "PullRequest" ]]; then
@@ -811,7 +811,7 @@ jobs:
   - task: PipAuthenticate@1
     displayName: 'Pip Authenticate'
     inputs:
-      artifactFeeds: 'public/PublicPackages'
+      artifactFeeds: 'public/azure-cli-feed'
 
   - task: Bash@3
     displayName: 'Build Rpm Package: Azure Linux'
@@ -906,7 +906,7 @@ jobs:
   - task: PipAuthenticate@1
     displayName: 'Pip Authenticate'
     inputs:
-      artifactFeeds: 'public/PublicPackages'
+      artifactFeeds: 'public/azure-cli-feed'
   - task: Bash@3
     displayName: 'Build Rpm Package'
     inputs:
@@ -1033,7 +1033,7 @@ jobs:
   - task: PipAuthenticate@1
     displayName: 'Pip Authenticate'
     inputs:
-      artifactFeeds: 'public/PublicPackages'
+      artifactFeeds: 'public/azure-cli-feed'
   - task: Bash@3
     displayName: 'Build $(deb_system) $(distro) $(arch) Package'
     inputs:
