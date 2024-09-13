@@ -11,6 +11,7 @@ from azure.cli.command_modules.acr._archive_utils import IgnoreRule
 class AcrArchiveUtilsTests(unittest.TestCase):
     def test_ignore_rule(self):
         test_data = (
+            ("**/bin", "folder1/folder2/folder3/bin", True),
             ("**/bin", "user/roundrobin", False),
             ("**/bin", "user/bin/hello", False),
             ("**/bin", "bin", False),
@@ -18,7 +19,8 @@ class AcrArchiveUtilsTests(unittest.TestCase):
             ("**//bin", "user/roundrobin", False),
             ("**/bin/**", "bin", False),
             ("**/bin/**", "user/bin", False),
-            ("**/bin/**", "user/bin/hello", True),
+            ("**/bin/**", "user/bin/hello", True),            
+            ("**/bin/**", "user1/user2/bin/user3/user4", True),
             ("**/bin/**", "user/bin/roundroubin", True),
             ("**/bin/**", "user/roundroubin/bin", False),
             ("**/bin/**/bin", "bin", False),
