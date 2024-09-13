@@ -265,19 +265,30 @@ examples:
 
 """
 
-helps['sf cluster durability'] = """
-type: group
-short-summary: Manage the durability of a cluster.
-"""
-
-helps['sf cluster durability update'] = """
+helps['sf cluster update'] = """
 type: command
-short-summary: Update the durability tier or VM SKU of a node type in the cluster.
+short-summary: Manage cluster updates.
 examples:
   - name: Change the cluster durability level to 'Silver'.
     text: >
-        az sf cluster durability update -g group-name -c cluster1 --durability-level Silver --node-type nt1
+        az sf cluster update -g group-name -c cluster1 --durability-level Silver --node-type nt1
 
+  - name: Change the cluster reliability level to 'Silver'.
+    text: >
+        az sf cluster update -g group-name -c cluster1 --reliability-level Silver --auto-add-node
+        
+  - name: Set the `MaxFileOperationTimeout` setting for a cluster to 5 seconds.
+    text: >
+        az sf cluster update -g group-name -c cluster1 --settings-section-set --section 'NamingService' --parameter 'MaxFileOperationTimeout' --value 5000
+
+  - name: Remove the `MaxFileOperationTimeout` setting from a cluster.
+    text: >
+        az sf cluster update -g group-name -c cluster1 --settings-section-remove --section 'NamingService' --parameter 'MaxFileOperationTimeout'
+
+  - name: Set a cluster to use the 'Automatic' upgrade mode.
+    text: >
+        az sf cluster update -g group-name -c cluster1 -upgrade-mode Automatic
+          
 """
 
 helps['sf cluster list'] = """
@@ -323,60 +334,6 @@ examples:
     text: >
         az sf cluster node-type add -g group-name -c cluster1 --node-type 'n2' --capacity 5 --vm-user-name 'adminName' --vm-password testPassword0
 
-"""
-
-helps['sf cluster reliability'] = """
-type: group
-short-summary: Manage the reliability of a cluster.
-"""
-
-helps['sf cluster reliability update'] = """
-type: command
-short-summary: Update the reliability tier for the primary node in a cluster.
-examples:
-  - name: Change the cluster reliability level to 'Silver'.
-    text: >
-        az sf cluster reliability update -g group-name -c cluster1 --reliability-level Silver
-
-"""
-
-helps['sf cluster setting'] = """
-type: group
-short-summary: Manage a cluster's settings.
-"""
-
-helps['sf cluster setting remove'] = """
-type: command
-short-summary: Remove settings from a cluster.
-examples:
-  - name: Remove the `MaxFileOperationTimeout` setting from a cluster.
-    text: >
-        az sf cluster setting remove -g group-name -c cluster1 --section 'NamingService' --parameter 'MaxFileOperationTimeout'
-
-"""
-
-helps['sf cluster setting set'] = """
-type: command
-short-summary: Update the settings of a cluster.
-examples:
-  - name: Set the `MaxFileOperationTimeout` setting for a cluster to 5 seconds.
-    text: >
-        az sf cluster setting set -g group-name -c cluster1 --section 'NamingService' --parameter 'MaxFileOperationTimeout' --value 5000
-
-"""
-
-helps['sf cluster upgrade-type'] = """
-type: group
-short-summary: Manage the upgrade type of a cluster.
-"""
-
-helps['sf cluster upgrade-type set'] = """
-type: command
-short-summary: Change the  upgrade type for a cluster.
-examples:
-  - name: Set a cluster to use the 'Automatic' upgrade mode.
-    text: >
-        az sf cluster upgrade-type set -g group-name -c cluster1 --upgrade-mode Automatic
 """
 
 helps['sf managed-cluster'] = """

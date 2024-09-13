@@ -120,32 +120,20 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('capacity', help='The capacity tag applied to nodes in the node type. The cluster resource manager uses these tags to understand how much capacity a node has.')
         c.argument('vm_tier', help='VM tier.')
 
-    with self.argument_context('sf cluster') as c:
+    with self.argument_context('sf cluster update') as c:
         c.argument('durability_level', arg_type=get_enum_type(['Bronze', 'Silver', 'Gold']), help='durability level.')
-
-    with self.argument_context('sf cluster setting') as c:
+        c.argument('node_type', help='Nodetype name')
         c.argument('parameter', help='parameter name')
         c.argument('section', help='section name')
         c.argument('value', help='Specify the value')
-        c.argument('settings_section_description', options_list=['--settings-section-description', '--settings-section'], help='Specify the value')
-
-    with self.argument_context('sf cluster upgrade-type set') as c:
         c.argument('version', help='cluster code version')
         c.argument('upgrade_mode', arg_type=get_enum_type(['manual', 'automatic']), help='cluster upgrade mode')
-
-    with self.argument_context('sf cluster reliability') as c:
         c.argument('reliability_level', arg_type=get_enum_type(['Bronze', 'Silver', 'Gold', 'Platinum']), help='durability level.')
-        c.argument('auto_add_node', help='Add node count automatically when changing reliability.')
-
-    with self.argument_context('sf cluster setting set') as c:
-        c.argument('settings_section_description', options_list=['--settings-section-description', '--settings-section'], type=get_json_object,
-                   help='JSON encoded parameters configuration. Use @{file} to load from a file. '
-                        'For example: [{"section": "NamingService","parameter": "MaxOperationTimeout","value": 1000},{"section": "MaxFileOperationTimeout","parameter": "Max2","value": 1000]')
-
-    with self.argument_context('sf cluster setting remove') as c:
-        c.argument('settings_section_description', options_list=['--settings-section-description', '--settings-section'], type=get_json_object,
-                   help='JSON encoded parameters configuration. Use @{file} to load from a file. '
-                        'For example: [{"section": "NamingService","parameter": "MaxOperationTimeout"}]')
+        c.argument('auto_add_node', arg_type=get_three_state_flag(), help='Add node count automatically when changing reliability.')
+        c.argument('settings_section_set', arg_type=get_three_state_flag(),
+                   help='Flag to set setting')
+        c.argument('settings_section_set', arg_type=get_three_state_flag(),
+                   help='Flag to remove setting')
 
     with self.argument_context('sf cluster client-certificate remove') as c:
         c.argument('client_certificate_common_names', options_list=['--client-certificate-common-names', '--client-cert-cn'], type=get_json_object,

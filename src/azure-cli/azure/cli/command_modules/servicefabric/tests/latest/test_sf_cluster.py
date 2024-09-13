@@ -30,7 +30,7 @@ class ServiceFabricClusterTests(ScenarioTest):
         _wait_for_cluster_state_ready(self, self.kwargs)
 
     @ResourceGroupPreparer()
-    def test_update_settings_and_reliability(self):
+    def test_cluster_settings_and_upgrade_mode(self):
         self.kwargs.update({
             'kv_name': self.create_random_name('sfrp-cli-kv-', 24),
             'loc': 'westus',
@@ -39,26 +39,59 @@ class ServiceFabricClusterTests(ScenarioTest):
             'vm_password': "Pass123!@#",
             'primary_node_type': 'nt1vm',
             'new_node_type': 'nt2',
-            'cluster_size': '5'
+            'cluster_size': '5',
+            'version': '10.1.2338.9590'
         })
         _create_cluster(self, self.kwargs)
         _wait_for_cluster_state_ready(self, self.kwargs)
 
         # add setting
-        self.cmd('sf cluster setting set --resource-group {rg} -c {cluster_name} --section NamingService --parameter MaxOperationTimeout --value 10001',
+        self.cmd('sf cluster update --resource-group {rg} -c {cluster_name} --settings-section-set --section NamingService --parameter MaxOperationTimeout --value 10001',
                  checks=[self.check('length(fabricSettings)', 2),
                          self.check('fabricSettings[1].name', 'NamingService'),
                          self.check('fabricSettings[1].parameters[0].name', 'MaxOperationTimeout'),
                          self.check('fabricSettings[1].parameters[0].value', '10001')])
 
         # remove setting
-        self.cmd('sf cluster setting remove --resource-group {rg} -c {cluster_name} --section NamingService --parameter MaxOperationTimeout',
+        self.cmd('sf cluster update --resource-group {rg} -c {cluster_name} --settings-section-remove --section NamingService --parameter MaxOperationTimeout',
                  checks=[self.check('length(fabricSettings)', 1),
                          self.check('fabricSettings[0].name', 'Security')])
+        
+        # update upgrade mode
+        self.cmd('sf cluster update --resource-group {rg} -c {cluster_name} --upgrade-mode manual --version {version}',
+                 checks=[self.check('upgradeMode', 'Manual')])
+        
+    @ResourceGroupPreparer()
+    def test_reliability_and_durability(self):
+        self.kwargs.update({
+            'kv_name': self.create_random_name('sfrp-cli-kv-', 24),
+            'loc': 'westus',
+            'cert_name': self.create_random_name('sfrp-cli-', 24),
+            'cluster_name': self.create_random_name('sfrp-cli-', 24),
+            'vm_password': "Pass123!@#",
+            'primary_node_type': 'nt1vm',
+            'new_node_type': 'nt2',
+            'cluster_size': '5',
+        })
+        _create_cluster(self, self.kwargs)
+        _wait_for_cluster_state_ready(self, self.kwargs)
 
-        # update reliability to Silver
-        self.cmd('sf cluster reliability update --resource-group {rg} -c {cluster_name} --reliability-level Silver',
+        self.cmd('az sf cluster node-type add -g {rg} -c {cluster_name} --node-type {new_node_type} --capacity 5 --vm-user-name admintest '
+                '--vm-password {vm_password} --durability-level Bronze --vm-sku Standard_D15_v2',
+                checks=[self.check('provisioningState', 'Succeeded'),
+                        self.check('length(nodeTypes)', 2),
+                        self.check('nodeTypes[1].name', 'nt2'),
+                        self.check('nodeTypes[1].vmInstanceCount', 5),
+                        self.check('nodeTypes[1].durabilityLevel', 'Bronze')])
+
+        # update reliability to Gold
+        self.cmd('sf cluster update --resource-group {rg} -c {cluster_name} --reliability-level Silver --auto-add-node',
                  checks=[self.check('reliabilityLevel', 'Silver')])
+        
+        # update durability level
+        self.cmd('sf cluster update --resource-group {rg} -c {cluster_name} --durability-level Silver --node-type {new_node_type}',
+                 checks=[self.check('nodeTypes[1].durabilityLevel', 'Silver')])
+
 
     @live_only()
     @ResourceGroupPreparer(location='southcentralus')
