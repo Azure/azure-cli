@@ -240,10 +240,10 @@ def validate_managed_identity_resource_id(resource_id):
             '/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/'
             'Microsoft.ManagedIdentity/userAssignedIdentities/{identity_name}')
 
-    if (parts[1] != 'subscriptions' or parts[3] != 'resourceGroups' or parts[5] != 'providers' or 
-        parts[6] != 'Microsoft.ManagedIdentity' or parts[7] != 'userAssignedIdentities'):
+    if (parts[1] != 'subscriptions' or parts[3] != 'resourceGroups' or parts[5] != 'providers' or
+            parts[6] != 'Microsoft.ManagedIdentity' or parts[7] != 'userAssignedIdentities'):
         raise ValueError(
-            'Invalid resource ID format for a managed identity. It should contain subscriptions,' 
+            'Invalid resource ID format for a managed identity. It should contain subscriptions,'
             'resourceGroups, providers/Microsoft.ManagedIdentity/userAssignedIdentities'
             'in the correct order.')
     return True
