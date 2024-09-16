@@ -825,3 +825,14 @@ def _pg_storage_type_validator(storage_type, auto_grow, high_availability, geo_r
             raise CLIError('Updating throughput is only capable for server created with Premium SSD v2.')
         if iops is not None:
             raise CLIError('Updating storage iops is only capable for server created with Premium SSD v2.')
+
+def check_resource_group(resource_group_name):
+    resource_group_name = resource_group_name.replace("'", '')
+    resource_group_name = resource_group_name.replace('"', '')
+    if (not resource_group_name):
+        return False
+    return True
+
+def validate_resource_group(resource_group_name):
+    if (not check_resource_group(resource_group_name)):
+        raise CLIError('Resource group name cannot be empty.')
