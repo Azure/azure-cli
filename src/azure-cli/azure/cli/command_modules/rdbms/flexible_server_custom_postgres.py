@@ -730,7 +730,7 @@ def flexible_server_revivedropped(cmd, client, resource_group_name, server_name,
 
 def flexible_replica_stop(client, resource_group_name, server_name):
     validate_resource_group(resource_group_name)
-    
+
     try:
         server_object = client.get(resource_group_name, server_name)
     except Exception as e:
@@ -1051,7 +1051,6 @@ def flexible_server_threat_protection_get(
 
     validate_resource_group(resource_group_name)
 
-
     return client.get(
         resource_group_name=resource_group_name,
         server_name=server_name,
@@ -1291,7 +1290,7 @@ def virtual_endpoint_delete_func(client, resource_group_name, server_name, virtu
 
 def virtual_endpoint_update_func(client, resource_group_name, server_name, virtual_endpoint_name, endpoint_type, members):
     validate_resource_group(resource_group_name)
-    
+
     parameters = {
         'name': virtual_endpoint_name,
         'endpoint_type': endpoint_type,
@@ -1343,7 +1342,7 @@ def flexible_server_private_link_resource_get(
 def _update_private_endpoint_connection_status(cmd, client, resource_group_name, server_name,
                                                private_endpoint_connection_name, is_approved=True, description=None):  # pylint: disable=unused-argument
     validate_resource_group(resource_group_name)
-    
+
     private_endpoint_connections_client = cf_postgres_flexible_private_endpoint_connections(cmd.cli_ctx, None)
     private_endpoint_connection = private_endpoint_connections_client.get(resource_group_name=resource_group_name,
                                                                           server_name=server_name,
@@ -1477,7 +1476,7 @@ def _get_pg_replica_zone(availabilityZones, sourceServerZone, replicaZone):
 def _create_migration(cmd, logging_name, client, subscription_id, resource_group_name, target_db_server_name,
                       migration_name, migration_mode, migration_option, parameters, tags, location):
     validate_resource_group(resource_group_name)
-    
+
     parameter_keys = list(parameters.keys())
     migrationInstanceResourceId = get_case_insensitive_key_value("MigrationRuntimeResourceId", parameter_keys, parameters)
     if migrationInstanceResourceId is not None:
