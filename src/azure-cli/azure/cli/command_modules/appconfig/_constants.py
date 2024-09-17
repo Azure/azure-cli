@@ -120,3 +120,9 @@ CompareFieldsMap = {
 class ImportMode:
     ALL = "all"
     IGNORE_MATCH = "ignore-match"
+
+
+class ProvisioningStatus:
+    RUNNING = "Running"
+    SUCCEEDED = "Succeeded"
+    FAILED = "Failed"
