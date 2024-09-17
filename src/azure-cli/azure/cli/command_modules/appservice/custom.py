@@ -4600,7 +4600,8 @@ def update_plan_info (cmd, resource_group_name, name, zone_redundant):
     parsed_plan_id = parse_resource_id(functionapp.server_farm_id)
     plan_info = get_raw_plan(cmd.cli_ctx, parsed_plan_id['resource_group'], parsed_plan_id['name'])
     _set_flex_zone_redundant(zone_redundant, plan_info)
-    return update_flex_plan(cmd, resource_group_name, "ASP-flexapps-e675", plan_info)
+    update_flex_plan(cmd, resource_group_name, "ASP-flexapps-e675", plan_info)
+    return get_plan_info(cmd, resource_group_name, name)
 
 
 def create_flex_app_service_plan(cmd, resource_group_name, name, location, zone_redundant):
