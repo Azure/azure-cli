@@ -72,7 +72,7 @@ from .utils import (_normalize_sku,
                     get_resource_if_exists, repo_url_to_name, get_token,
                     app_service_plan_exists, is_centauri_functionapp, is_flex_functionapp,
                     _remove_list_duplicates, get_raw_functionapp,
-                    register_app_provider)
+                    register_app_provider, get_raw_plan)
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            check_resource_group_exists, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
@@ -1449,6 +1449,7 @@ def list_function_app_runtimes(cmd, os_type=None):
 
 
 def list_flex_function_app_runtimes(cmd, location, runtime):
+    logger.warning("Getting flex runtimes for location {} and runtime {}".format(location, runtime))
     runtime_helper = _FlexFunctionAppStackRuntimeHelper(cmd, location, runtime)
     runtimes = [r for r in runtime_helper.stacks if runtime == r.name]
     if not runtimes:
@@ -1937,6 +1938,17 @@ def update_flex_functionapp(cmd, resource_group_name, name, functionapp):
     url = url_base.format(subscription_id, resource_group_name, name, '2023-12-01')
     request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + url
     body = json.dumps(functionapp)
+    response = send_raw_request(cmd.cli_ctx, "PUT", request_url, body=body)
+    return response.json()
+
+
+def update_flex_plan(cmd, resource_group_name, name, plan_def):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/serverFarms/{}?api-version={}'
+    url = url_base.format(subscription_id, resource_group_name, name, '2023-12-01')
+    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + url
+    body = json.dumps(plan_def)
     response = send_raw_request(cmd.cli_ctx, "PUT", request_url, body=body)
     return response.json()
 
@@ -4575,8 +4587,23 @@ def get_app_insights_connection_string(cli_ctx, resource_group, name):
                                                                                                     resource_group))
     return appinsights.connection_string
 
+def get_plan_info (cmd, resource_group_name, name):
+    client = web_client_factory(cmd.cli_ctx)
+    functionapp = get_functionapp(cmd, resource_group_name, name)
+    parsed_plan_id = parse_resource_id(functionapp.server_farm_id)
+    return client.app_service_plans.get(parsed_plan_id['resource_group'], parsed_plan_id['name'])
 
-def create_flex_app_service_plan(cmd, resource_group_name, name, location):
+
+def update_plan_info (cmd, resource_group_name, name, zone_redundant):
+    client = web_client_factory(cmd.cli_ctx)
+    functionapp = get_functionapp(cmd, resource_group_name, name)
+    parsed_plan_id = parse_resource_id(functionapp.server_farm_id)
+    plan_info = get_raw_plan(cmd.cli_ctx, parsed_plan_id['resource_group'], parsed_plan_id['name'])
+    _set_flex_zone_redundant(zone_redundant, plan_info)
+    return update_flex_plan(cmd, resource_group_name, "ASP-flexapps-e675", plan_info)
+
+
+def create_flex_app_service_plan(cmd, resource_group_name, name, location, zone_redundant):
     SkuDescription, AppServicePlan = cmd.get_models('SkuDescription', 'AppServicePlan')
     client = web_client_factory(cmd.cli_ctx)
     sku_def = SkuDescription(tier="FlexConsumption", name="FC1", size="FC", family="FC")
@@ -4587,9 +4614,18 @@ def create_flex_app_service_plan(cmd, resource_group_name, name, location):
         kind="functionapp",
         name=name
     )
+
+    logger.warning("zone_redundant: '%s'", zone_redundant)
+
+    if zone_redundant:
+        _set_flex_zone_redundant(True, plan_def)
+
     poller = client.app_service_plans.begin_create_or_update(resource_group_name, name, plan_def)
     return LongRunningOperation(cmd.cli_ctx)(poller)
 
+def _set_flex_zone_redundant(enabled, plan_def):
+    logger.warning("_set_flex_zone_redundant: Enabled: '%s'", enabled)
+    plan_def["properties"]["zoneRedundant"] = enabled
 
 def create_functionapp_app_service_plan(cmd, resource_group_name, name, is_linux, sku, number_of_workers=None,
                                         max_burst=None, location=None, tags=None, zone_redundant=False):
@@ -4767,8 +4803,10 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        always_ready_instances=None, maximum_instance_count=None, instance_memory=None,
                        flexconsumption_location=None, deployment_storage_name=None,
                        deployment_storage_container_name=None, deployment_storage_auth_type=None,
-                       deployment_storage_auth_value=None):
+                       deployment_storage_auth_value=None, zone_redundant=False):
     # pylint: disable=too-many-statements, too-many-branches
+    logger.warning("zone_redundant: '%s'", zone_redundant)
+    
     if functions_version is None and flexconsumption_location is None:
         logger.warning("No functions version specified so defaulting to 4.")
         functions_version = '4'
@@ -4807,6 +4845,12 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     SiteConfig, NameValuePair, DaprConfig, ResourceConfig = cmd.get_models('SiteConfig', 'NameValuePair',
                                                                            'DaprConfig', 'ResourceConfig')
 
+    if flexconsumption_location is None:
+        if zone_redundant:
+            raise ArgumentUsageError(
+                '--zone-redundant is only valid input for Azure Functions on the Flex Consumption plan. '
+                'Please try again without the --zone-redundant parameter.')
+    
     if flexconsumption_location is not None:
         if image is not None:
             raise ArgumentUsageError(
@@ -5139,8 +5183,10 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
 
         try:
             plan_name = generatePlanName(resource_group_name)
+            logger.warning("plan_name: '%s'", plan_name)
+            logger.warning("zone_redundant: '%s'", zone_redundant)
             plan_info = create_flex_app_service_plan(
-                cmd, resource_group_name, plan_name, flexconsumption_location)
+                cmd, resource_group_name, plan_name, flexconsumption_location, zone_redundant)
             functionapp_def.server_farm_id = plan_info.id
             functionapp_def.location = flexconsumption_location
 
@@ -5686,12 +5732,50 @@ def list_consumption_locations(cmd):
 
 
 def list_flexconsumption_locations(cmd):
-    from azure.cli.core.commands.client_factory import get_subscription_id
-    sub_id = get_subscription_id(cmd.cli_ctx)
-    geo_regions_api = 'subscriptions/{}/providers/Microsoft.Web/geoRegions?sku=FlexConsumption&api-version=2023-01-01'
-    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + geo_regions_api.format(sub_id)
-    regions = send_raw_request(cmd.cli_ctx, "GET", request_url).json()['value']
-    return [{'name': x['name'].lower().replace(' ', '')} for x in regions]
+    return [
+        {
+            "name": "eastus",
+        },
+        {
+            "name": "northeurope"
+        },
+        {
+            "name": "eastasia"
+        },
+        {
+            "name": "centralus"
+        },
+        {
+            "name": "uksouth"
+        },
+        {
+            "name": "eastus2"
+        },
+        {
+            "name": "eastus2euap"
+        },
+        {
+            "name": "australiaeast"
+        },
+        {
+            "name": "westus2"
+        },
+        {
+            "name": "westus3"
+        },
+        {
+            "name": "southcentralus"
+        },
+        {
+            "name": "swedencentral"
+        },
+        {
+            "name": "southeastasia"
+        },
+        {
+            "name": "northcentralus(stage)"
+        }
+    ]
 
 
 def list_locations(cmd, sku, linux_workers_enabled=None, hyperv_workers_enabled=None):
