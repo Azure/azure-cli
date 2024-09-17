@@ -238,6 +238,7 @@ def get_raw_functionapp(cli_ctx, resource_group_name, name):
     response = send_raw_request(cli_ctx, "GET", request_url)
     return response.json()
 
+
 def get_raw_plan(cli_ctx, resource_group_name, name):
     site_url_base = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/serverFarms/{}?api-version={}'
     subscription_id = get_subscription_id(cli_ctx)

@@ -1449,7 +1449,6 @@ def list_function_app_runtimes(cmd, os_type=None):
 
 
 def list_flex_function_app_runtimes(cmd, location, runtime):
-    logger.warning("Getting flex runtimes for location {} and runtime {}".format(location, runtime))
     runtime_helper = _FlexFunctionAppStackRuntimeHelper(cmd, location, runtime)
     runtimes = [r for r in runtime_helper.stacks if runtime == r.name]
     if not runtimes:
@@ -4587,15 +4586,15 @@ def get_app_insights_connection_string(cli_ctx, resource_group, name):
                                                                                                     resource_group))
     return appinsights.connection_string
 
-def get_plan_info (cmd, resource_group_name, name):
+
+def get_plan_info(cmd, resource_group_name, name):
     client = web_client_factory(cmd.cli_ctx)
     functionapp = get_functionapp(cmd, resource_group_name, name)
     parsed_plan_id = parse_resource_id(functionapp.server_farm_id)
     return client.app_service_plans.get(parsed_plan_id['resource_group'], parsed_plan_id['name'])
 
 
-def update_plan_info (cmd, resource_group_name, name, zone_redundant):
-    client = web_client_factory(cmd.cli_ctx)
+def update_plan_info(cmd, resource_group_name, name, zone_redundant):
     functionapp = get_functionapp(cmd, resource_group_name, name)
     parsed_plan_id = parse_resource_id(functionapp.server_farm_id)
     plan_info = get_raw_plan(cmd.cli_ctx, parsed_plan_id['resource_group'], parsed_plan_id['name'])
@@ -4624,9 +4623,11 @@ def create_flex_app_service_plan(cmd, resource_group_name, name, location, zone_
     poller = client.app_service_plans.begin_create_or_update(resource_group_name, name, plan_def)
     return LongRunningOperation(cmd.cli_ctx)(poller)
 
+
 def _set_flex_zone_redundant(enabled, plan_def):
     logger.warning("_set_flex_zone_redundant: Enabled: '%s'", enabled)
     plan_def["properties"]["zoneRedundant"] = enabled
+
 
 def create_functionapp_app_service_plan(cmd, resource_group_name, name, is_linux, sku, number_of_workers=None,
                                         max_burst=None, location=None, tags=None, zone_redundant=False):
@@ -4807,7 +4808,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        deployment_storage_auth_value=None, zone_redundant=False):
     # pylint: disable=too-many-statements, too-many-branches
     logger.warning("zone_redundant: '%s'", zone_redundant)
-    
+
     if functions_version is None and flexconsumption_location is None:
         logger.warning("No functions version specified so defaulting to 4.")
         functions_version = '4'
@@ -4851,7 +4852,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
             raise ArgumentUsageError(
                 '--zone-redundant is only valid input for Azure Functions on the Flex Consumption plan. '
                 'Please try again without the --zone-redundant parameter.')
-    
+
     if flexconsumption_location is not None:
         if image is not None:
             raise ArgumentUsageError(
