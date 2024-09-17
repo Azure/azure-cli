@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from azure.cli.command_modules.acs._helpers import get_vm_sizes
 from azure.cli.core.commands.parameters import get_one_of_subscription_locations
 from azure.cli.core.decorators import Completer
 
@@ -47,12 +48,6 @@ def get_vm_size_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: di
     location = _get_location(cmd.cli_ctx, namespace)
     result = get_vm_sizes(cmd.cli_ctx, location)
     return set(r.name for r in result) & set(c.value for c in ContainerServiceVMSizeTypes)
-
-
-def get_vm_sizes(cli_ctx, location):
-    from azure.cli.command_modules.acs._client_factory import get_compute_client
-
-    return get_compute_client(cli_ctx).virtual_machine_sizes.list(location)
 
 
 def _get_location(cli_ctx, namespace):
