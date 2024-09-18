@@ -489,7 +489,7 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
                             subnet_address_prefix=None, private_dns_zone_arguments=None, no_wait=False,
                             byok_identity=None, byok_key=None,
                             sku_name=None, tier=None,
-                            storage_gb=None, performance_tier=None, yes=False):
+                            storage_gb=None, performance_tier=None, yes=False, tags=None):
     replica_name = replica_name.lower()
 
     if not is_valid_resource_id(source_server):
@@ -544,6 +544,7 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
     pg_byok_validator(byok_identity, byok_key)
 
     parameters = postgresql_flexibleservers.models.Server(
+        tags=tags,
         source_server_resource_id=source_server_id,
         location=location,
         availability_zone=zone,
