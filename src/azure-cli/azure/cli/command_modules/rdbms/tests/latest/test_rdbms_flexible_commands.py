@@ -77,6 +77,11 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location=postgres_location)
     def test_postgres_flexible_server_mgmt(self, resource_group):
         self._test_flexible_server_mgmt('postgres', resource_group)
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    def test_postgres_flexible_server_empty_rg_name(self):
+        self._test_flexible_server_mgmt_empty_rg_name_return_error('postgres')
     
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -213,6 +218,39 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name), checks=NoneCheck())
 
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, restore_server_name), checks=NoneCheck())
+
+
+    def _test_flexible_server_mgmt_empty_rg_name_return_error(self, database_engine):
+
+        if self.cli_ctx.local_context.is_on:
+            self.cmd('config param-persist off')
+
+        version = '16'
+        storage_size = 128
+        location = self.postgres_location
+        sku_name = 'Standard_D2s_v3'
+        memory_optimized_sku = 'Standard_E2ds_v4'
+        tier = 'GeneralPurpose'
+        backup_retention = 7
+        database_name = 'testdb'
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        ha_value = 'ZoneRedundant'
+
+        self.cmd('{} flexible-server create -g "" -n {} --backup-retention {} --sku-name {} --tier {} \
+                  --storage-size {} -u {} --version {} --tags keys=3 --database-name {} --high-availability {} \
+                  --public-access None'.format(database_engine, server_name, backup_retention,
+                                               sku_name, tier, storage_size, 'dbadmin', version, database_name, ha_value),
+                                               expect_failure=True)
+        self.cmd('{} flexible-server create -g \'\' -n {} --backup-retention {} --sku-name {} --tier {} \
+                  --storage-size {} -u {} --version {} --tags keys=3 --database-name {} --high-availability {} \
+                  --public-access None'.format(database_engine, server_name, backup_retention,
+                                               sku_name, tier, storage_size, 'dbadmin', version, database_name, ha_value),
+                                               expect_failure=True)
+        self.cmd('{} flexible-server update -g "" -n {} -p randompw321##@!'
+                 .format(database_engine, server_name), expect_failure=True)
+        self.cmd('{} flexible-server update -g \'\' -n {} -p randompw321##@!'
+                 .format(database_engine, server_name), expect_failure=True)
+
 
     def _test_flexible_server_mgmt_case_insensitive(self, database_engine, resource_group):
 
