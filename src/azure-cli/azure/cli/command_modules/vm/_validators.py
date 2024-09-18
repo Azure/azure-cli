@@ -1232,6 +1232,7 @@ def _validate_admin_password(password, os_type):
 
 def validate_ssh_key(namespace, cmd=None):
     from azure.core.exceptions import HttpResponseError
+    ssh_key_type = namespace.ssh_key_type if hasattr(namespace, 'ssh_key_type') else 'RSA'
     if hasattr(namespace, 'ssh_key_name') and namespace.ssh_key_name:
         client = _compute_client_factory(cmd.cli_ctx)
         # --ssh-key-name
@@ -1248,7 +1249,7 @@ def validate_ssh_key(namespace, cmd=None):
         elif namespace.generate_ssh_keys:
             parameters = {}
             parameters['location'] = namespace.location
-            public_key = _validate_ssh_key_helper("", namespace.generate_ssh_keys, namespace.ssh_key_type)
+            public_key = _validate_ssh_key_helper("", namespace.generate_ssh_keys, ssh_key_type)
             parameters['public_key'] = public_key
             client.ssh_public_keys.create(resource_group_name=namespace.resource_group_name,
                                           ssh_public_key_name=namespace.ssh_key_name,
@@ -1263,13 +1264,13 @@ def validate_ssh_key(namespace, cmd=None):
         for ssh_key_value in namespace.ssh_key_value:
             processed_ssh_key_values.append(_validate_ssh_key_helper(ssh_key_value,
                                                                      namespace.generate_ssh_keys,
-                                                                     namespace.ssh_key_type))
+                                                                     ssh_key_type))
         namespace.ssh_key_value = processed_ssh_key_values
     # if no ssh keys processed, try to generate new key / use existing at root.
     else:
         namespace.ssh_key_value = [_validate_ssh_key_helper("",
                                                             namespace.generate_ssh_keys,
-                                                            namespace.ssh_key_type)]
+                                                            ssh_key_type)]
 
 
 def _validate_ssh_key_helper(ssh_key_value, should_generate_ssh_keys, ssh_key_type=None):
