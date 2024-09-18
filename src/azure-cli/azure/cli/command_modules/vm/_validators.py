@@ -1248,7 +1248,7 @@ def validate_ssh_key(namespace, cmd=None):
         elif namespace.generate_ssh_keys:
             parameters = {}
             parameters['location'] = namespace.location
-            public_key = _validate_ssh_key_helper("", namespace.generate_ssh_keys)
+            public_key = _validate_ssh_key_helper("", namespace.generate_ssh_keys, namespace.ssh_key_type)
             parameters['public_key'] = public_key
             client.ssh_public_keys.create(resource_group_name=namespace.resource_group_name,
                                           ssh_public_key_name=namespace.ssh_key_name,
@@ -1261,16 +1261,24 @@ def validate_ssh_key(namespace, cmd=None):
 
         processed_ssh_key_values = []
         for ssh_key_value in namespace.ssh_key_value:
-            processed_ssh_key_values.append(_validate_ssh_key_helper(ssh_key_value, namespace.generate_ssh_keys))
+            processed_ssh_key_values.append(_validate_ssh_key_helper(ssh_key_value,
+                                                                     namespace.generate_ssh_keys,
+                                                                     namespace.ssh_key_type))
         namespace.ssh_key_value = processed_ssh_key_values
     # if no ssh keys processed, try to generate new key / use existing at root.
     else:
-        namespace.ssh_key_value = [_validate_ssh_key_helper("", namespace.generate_ssh_keys)]
+        namespace.ssh_key_value = [_validate_ssh_key_helper("",
+                                                            namespace.generate_ssh_keys,
+                                                            namespace.ssh_key_type)]
 
 
-def _validate_ssh_key_helper(ssh_key_value, should_generate_ssh_keys, ssh_key_type=None):
-    string_or_file = (ssh_key_value or
-                      os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub'))
+def _validate_ssh_key_helper(ssh_key_value, should_generate_ssh_keys, ssh_key_type='RSA'):
+    if ssh_key_type != 'RSA':
+        string_or_file = (ssh_key_value or
+                          os.path.join(os.path.expanduser('~'), '.ssh', 'id_ed25519_2.pub'))
+    else:
+        string_or_file = (ssh_key_value or
+                          os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub'))
     content = string_or_file
     if os.path.exists(string_or_file):
         logger.info('Use existing SSH public key file: %s', string_or_file)
