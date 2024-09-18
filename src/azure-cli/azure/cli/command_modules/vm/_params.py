@@ -605,6 +605,7 @@ def load_arguments(self, _):
         c.argument('image_location', get_location_type(self.cli_ctx))
         c.argument('edge_zone', edge_zone_type)
         c.argument('architecture', help='The name of architecture. ', arg_type=get_enum_type(["x64", "Arm64"]))
+        c.argument('deprecation_status', action='store_true', help='Specify it to show deprecation status, need to be used together with "--all" or "--edge-zone". ')
 
     with self.argument_context('vm image list-offers') as c:
         c.argument('edge_zone', edge_zone_type)
