@@ -9,7 +9,6 @@ import timeit
 start_time = timeit.default_timer()
 
 import sys
-import uuid
 
 from azure.cli.core import telemetry
 from azure.cli.core import get_default_cli
@@ -19,14 +18,6 @@ from knack.log import get_logger
 
 __author__ = "Microsoft Corporation <python@microsoft.com>"
 __version__ = "2.64.0"
-
-
-# A workaround for https://bugs.python.org/issue32502 (https://github.com/Azure/azure-cli/issues/5184)
-# If uuid1 raises ValueError, use uuid4 instead.
-try:
-    uuid.uuid1()
-except ValueError:
-    uuid.uuid1 = uuid.uuid4
 
 
 logger = get_logger(__name__)
