@@ -1268,7 +1268,7 @@ def validate_ssh_key(namespace, cmd=None):
         namespace.ssh_key_value = [_validate_ssh_key_helper("", namespace.generate_ssh_keys)]
 
 
-def _validate_ssh_key_helper(ssh_key_value, should_generate_ssh_keys, generate_ssh_keys_type=None):
+def _validate_ssh_key_helper(ssh_key_value, should_generate_ssh_keys, ssh_key_type=None):
     string_or_file = (ssh_key_value or
                       os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub'))
     content = string_or_file
@@ -1286,7 +1286,7 @@ def _validate_ssh_key_helper(ssh_key_value, should_generate_ssh_keys, generate_s
             else:
                 private_key_filepath = public_key_filepath + '.private'
 
-            if generate_ssh_keys_type == "Ed25519":
+            if ssh_key_type == "Ed25519":
                 from azure.cli.command_modules.vm._vm_utils import generate_ssh_keys_ed25519
                 content = generate_ssh_keys_ed25519(private_key_filepath, public_key_filepath)
             else:

@@ -900,7 +900,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               os_disk_security_encryption_type=None, os_disk_secure_vm_disk_encryption_set=None,
               disk_controller_type=None, disable_integrity_monitoring_autoupgrade=False, enable_proxy_agent=None,
               proxy_agent_mode=None, source_snapshots_or_disks=None, source_snapshots_or_disks_size_gb=None,
-              source_disk_restore_point=None, source_disk_restore_point_size_gb=None, generate_ssh_keys_type=None):
+              source_disk_restore_point=None, source_disk_restore_point_size_gb=None, ssh_key_type=None):
 
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
