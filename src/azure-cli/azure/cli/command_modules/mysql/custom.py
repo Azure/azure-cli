@@ -33,7 +33,7 @@ from ._network import prepare_mysql_exist_private_dns_zone, prepare_mysql_exist_
 from ._validators import mysql_arguments_validator, mysql_auto_grow_validator, mysql_georedundant_backup_validator, mysql_restore_tier_validator, \
     mysql_retention_validator, mysql_sku_name_validator, mysql_storage_validator, validate_mysql_replica, validate_server_name, \
     validate_mysql_tier_update, validate_and_format_restore_point_in_time, validate_public_access_server, mysql_import_single_server_ready_validator, \
-    mysql_import_version_validator, mysql_import_storage_validator
+    mysql_import_version_validator, mysql_import_storage_validator, validate_and_format_maintenance_start_time
 
 logger = get_logger(__name__)
 DELEGATION_SERVICE_NAME = "Microsoft.DBforMySQL/flexibleServers"
@@ -824,7 +824,7 @@ def flexible_server_restore(cmd, client, resource_group_name, server_name, sourc
     restore_server_object = client.get(resource_group_name, server_name)
     restore_server_network = restore_server_object.network
     restore_server_network.public_network_access = public_access if public_access else source_server_object.network.public_network_access
-    update_parameter = mysql_flexibleservers.models.ServerForUpdate(network=restore_server_network, storage=restore_server_object.storage)
+    update_parameter = mysql_flexibleservers.models.ServerForUpdate(network=restore_server_network)
 
     return sdk_no_wait(no_wait, client.begin_update, resource_group_name, server_name, update_parameter)
 
@@ -950,7 +950,7 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
     if public_access is not None:
         restore_server_network.public_network_access = public_access
 
-    update_parameter = mysql_flexibleservers.models.ServerForUpdate(network=restore_server_network, storage=restore_server_object.storage)
+    update_parameter = mysql_flexibleservers.models.ServerForUpdate(network=restore_server_network)
 
     return sdk_no_wait(no_wait, client.begin_update, resource_group_name, server_name, update_parameter)
 
@@ -1041,7 +1041,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
         instance.maintenance_window.start_minute = start_minute
         instance.maintenance_window.custom_window = custom_window
 
-        params = ServerForUpdate(maintenance_window=instance.maintenance_window, storage=instance.storage)
+        params = ServerForUpdate(maintenance_window=instance.maintenance_window)
         logger.warning("You can update maintenance window only when updating maintenance window. Please update other properties separately if you are updating them as well.")
         return params
 
@@ -1076,7 +1076,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
                 server_operations_client.begin_update(
                     resource_group_name=replica_resource_group,
                     server_name=replica.name,
-                    parameters=ServerForUpdate(identity=identity, data_encryption=data_encryption, storage=replica.storage)),
+                    parameters=ServerForUpdate(identity=identity, data_encryption=data_encryption)),
                 cmd.cli_ctx, 'Updating data encryption to replica {}'.format(replica.name)
             )
 
@@ -1195,6 +1195,23 @@ def flexible_server_provision_network_resource(cmd, resource_group_name, server_
         else:
             network.public_network_access = 'Enabled'
     return network, start_ip, end_ip
+
+
+def flexible_server_maintenance_reschedule(client, resource_group_name, server_name, maintenance_name, maintenance_start_time):
+    validate_and_format_maintenance_start_time(maintenance_start_time)
+    parameters = mysql_flexibleservers.models.MaintenanceUpdate(maintenance_start_time=maintenance_start_time)
+    return client.begin_update(resource_group_name=resource_group_name,
+                               server_name=server_name,
+                               maintenance_name=maintenance_name,
+                               parameters=parameters)
+
+
+def flexible_server_maintenance_list(client, resource_group_name, server_name):
+    return client.list(resource_group_name=resource_group_name, server_name=server_name)
+
+
+def flexible_server_maintenance_show(client, resource_group_name, server_name, maintenance_name):
+    return client.read(resource_group_name=resource_group_name, server_name=server_name, maintenance_name=maintenance_name)
 
 
 def flexible_server_exist_network_resource(cmd, resource_group_name, server_name, location, private_dns_zone_arguments=None, vnet=None, subnet=None):
@@ -1354,7 +1371,7 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
     if public_access is not None:
         replica_server_network.public_network_access = public_access
 
-    update_parameter = mysql_flexibleservers.models.ServerForUpdate(network=replica_server_network, storage=replica_server_object.storage)
+    update_parameter = mysql_flexibleservers.models.ServerForUpdate(network=replica_server_network)
 
     return sdk_no_wait(no_wait, client.begin_update, resource_group_name, replica_name, update_parameter)
 
@@ -1623,7 +1640,7 @@ def flexible_server_identity_assign(cmd, client, resource_group_name, server_nam
             client.begin_update(
                 resource_group_name=replica_resource_group,
                 server_name=replica.name,
-                parameters={'identity': id_param, 'storage': replica.storage}),
+                parameters={'identity': id_param}),
             cmd.cli_ctx, 'Adding identities to replica {}'.format(replica.name)
         )
 
@@ -1631,7 +1648,7 @@ def flexible_server_identity_assign(cmd, client, resource_group_name, server_nam
         client.begin_update(
             resource_group_name=resource_group_name,
             server_name=server_name,
-            parameters={'identity': id_param, 'storage': instance.storage}),
+            parameters={'identity': id_param}),
         cmd.cli_ctx, 'Adding identities to server {}'.format(server_name)
     )
 
@@ -1680,7 +1697,7 @@ def flexible_server_identity_remove(cmd, client, resource_group_name, server_nam
             client.begin_update(
                 resource_group_name=replica_resource_group,
                 server_name=replica.name,
-                parameters={'identity': id_param, 'storage': replica.storage}),
+                parameters={'identity': id_param}),
             cmd.cli_ctx, 'Removing identities from replica {}'.format(replica.name)
         )
 
@@ -1688,7 +1705,7 @@ def flexible_server_identity_remove(cmd, client, resource_group_name, server_nam
         client.begin_update(
             resource_group_name=resource_group_name,
             server_name=server_name,
-            parameters={'identity': id_param, 'storage': instance.storage}),
+            parameters={'identity': id_param}),
         cmd.cli_ctx, 'Removing identities from server {}'.format(server_name)
     )
 
@@ -1731,7 +1748,7 @@ def flexible_server_ad_admin_set(cmd, client, resource_group_name, server_name, 
                 server_operations_client.begin_update(
                     resource_group_name=replica_resource_group,
                     server_name=replica.name,
-                    parameters={'identity': id_param, 'storage': replica.storage}),
+                    parameters={'identity': id_param}),
                 cmd.cli_ctx, 'Adding identity {} to replica {}'.format(identity, replica.name)
             )
 
@@ -1741,7 +1758,7 @@ def flexible_server_ad_admin_set(cmd, client, resource_group_name, server_name, 
             server_operations_client.begin_update(
                 resource_group_name=resource_group_name,
                 server_name=server_name,
-                parameters={'identity': id_param, 'storage': instance.storage}),
+                parameters={'identity': id_param}),
             cmd.cli_ctx, 'Adding identity {} to server {}'.format(identity, server_name))
 
     parameters = {

@@ -348,17 +348,18 @@ def _validate_service_tag_format(cmd, namespace):
         service_tag_full_list = ListServiceTags(cli_ctx=cmd.cli_ctx)(command_args={
             "location": webapp.location
         })
-        if service_tag_full_list is None or "values" not in service_tag_full_list:
-            logger.warning('Not able to get full Service Tag list. Cannot validate Service Tag.')
-            return
-        for tag in input_tags:
-            valid_tag = False
-            for tag_full_list in service_tag_full_list["values"]:
-                if tag.lower() == tag_full_list["name"].lower():
-                    valid_tag = True
-                    continue
-            if not valid_tag:
-                raise InvalidArgumentValueError('Unknown Service Tag: ' + tag)
+        if namespace.skip_service_tag_validation is None:
+            if service_tag_full_list is None or "values" not in service_tag_full_list:
+                logger.warning('Not able to get full Service Tag list. Cannot validate Service Tag.')
+                return
+            for tag in input_tags:
+                valid_tag = False
+                for tag_full_list in service_tag_full_list["values"]:
+                    if tag.lower() == tag_full_list["name"].lower():
+                        valid_tag = True
+                        continue
+                if not valid_tag:
+                    raise InvalidArgumentValueError('Unknown Service Tag: ' + tag)
 
 
 def _validate_service_tag_existence(cmd, namespace):

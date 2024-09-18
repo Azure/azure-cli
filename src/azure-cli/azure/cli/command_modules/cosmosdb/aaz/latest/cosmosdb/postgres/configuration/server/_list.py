@@ -61,7 +61,7 @@ class List(AAZCommand):
             help="The name of the server.",
             required=True,
             fmt=AAZStrArgFormat(
-                pattern="^[-\w\._]+$",
+                pattern=r"^[-\w\._]+$",
                 max_length=90,
                 min_length=1,
             ),

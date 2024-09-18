@@ -168,7 +168,7 @@ examples:
 
 helps['hdinsight update'] = """
 type: command
-short-summary: Update the tags of the specified HDInsight cluster.
+short-summary: Update the tags or identity of the specified HDInsight cluster.
 examples:
   - name: Update the tags.
     text: |-
@@ -218,6 +218,26 @@ short-summary: Enable the Azure Monitor logs integration on an HDInsight cluster
 helps['hdinsight azure-monitor show'] = """
 type: command
 short-summary: Get the status of Azure Monitor logs integration on an HDInsight cluster.
+"""
+
+helps['hdinsight azure-monitor-agent'] = """
+type: group
+short-summary: Manage Azure Monitor Agent logs integration on an HDInsight cluster.
+"""
+
+helps['hdinsight azure-monitor-agent disable'] = """
+type: command
+short-summary: Disable the Azure Monitor Agent logs integration on an HDInsight cluster.
+"""
+
+helps['hdinsight azure-monitor-agent enable'] = """
+type: command
+short-summary: Enable the Azure Monitor Agent logs integration on an HDInsight cluster.
+"""
+
+helps['hdinsight azure-monitor-agent show'] = """
+type: command
+short-summary: Get the status of Azure Monitor Agent logs integration on an HDInsight cluster.
 """
 
 helps['hdinsight rotate-disk-encryption-key'] = """

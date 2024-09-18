@@ -78,7 +78,7 @@ def load_arguments(self, _):
 
     static_web_app_sku_arg_type = CLIArgumentType(
         help='The pricing tiers for Static Web App',
-        arg_type=get_enum_type(['Free', 'Standard'])
+        arg_type=get_enum_type(['Free', 'Standard', 'Dedicated'])
     )
 
     # use this hidden arg to give a command the right instance, that functionapp commands
@@ -368,6 +368,8 @@ subscription than the app service environment, please use the resource ID for --
             c.argument('java_container_version', help="The version of the java container, e.g., '8.0.23' for Tomcat")
             c.argument('min_tls_version',
                        help="The minimum version of TLS required for SSL requests, e.g., '1.0', '1.1', '1.2'")
+            c.argument('min_tls_cipher_suite', options_list=['--min-tls-cipher-suite'],
+                       help="The minimum TLS Cipher Suite required for requests, e.g., 'TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384'")
             c.argument('http20_enabled', help="configures a web site to allow clients to connect over http2.0.",
                        arg_type=get_three_state_flag(return_label=True))
             c.argument('app_command_line', options_list=['--startup-file'],
@@ -1073,6 +1075,10 @@ subscription than the app service environment, please use the resource ID for --
                        arg_type=get_three_state_flag())
             c.argument('vnet_resource_group', help='Resource group of virtual network (default is web app resource group)')
             c.argument('http_headers', nargs='+', help="space-separated http headers in a format of `<name>=<value>`")
+            c.argument('skip_service_tag_validation',
+                       options_list=['--skip-service-tag-validation', '-k'],
+                       help='Skip validating public service tags',
+                       arg_type=get_three_state_flag())
         with self.argument_context(scope + ' config access-restriction remove') as c:
             c.argument('name', arg_type=(webapp_name_arg_type if scope == 'webapp' else functionapp_name_arg_type))
             c.argument('rule_name', options_list=['--rule-name', '-r'],
@@ -1087,6 +1093,10 @@ subscription than the app service environment, please use the resource ID for --
                        arg_type=get_three_state_flag())
             c.argument('action', arg_type=get_enum_type(ACCESS_RESTRICTION_ACTION_TYPES),
                        help="Allow or deny access")
+            c.argument('skip_service_tag_validation',
+                       options_list=['--skip-service-tag-validation', '-k'],
+                       help='Skip validating public service tags',
+                       arg_type=get_three_state_flag())
         with self.argument_context(scope + ' config access-restriction set') as c:
             c.argument('name', arg_type=(webapp_name_arg_type if scope == 'webapp' else functionapp_name_arg_type))
             c.argument('use_same_restrictions_for_scm_site',

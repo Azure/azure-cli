@@ -7,6 +7,7 @@ import os
 import time
 import yaml
 
+from azure.cli.core.azclierror import ValidationError
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathCheck, live_only, JMESPathCheckNotExists,
                                JMESPathCheckExists)
@@ -159,6 +160,21 @@ class ContainerAppWorkloadProfilesTest(ScenarioTest):
             JMESPathCheck("properties.provisioningState", "Succeeded"),
             JMESPathCheck("properties.workloadProfiles", None),
         ])
+
+        with self.assertRaisesRegex(ValidationError,
+                                     "Cannot add workload profile because the environment doesn't enable workload profile.\n"
+                                     "If you want to use Consumption and Dedicated environment, please create a new one with 'az containerapp env create'."):
+            self.cmd(
+                'containerapp env workload-profile add -w wp -g {} -n {} --workload-profile-type D4 --min-nodes 1 --max-nodes 2'.format(
+                    resource_group, env))
+
+        with self.assertRaisesRegex(ValidationError,
+                                     "Cannot update workload profile because the environment doesn't enable workload profile.\n"
+                                     "If you want to use Consumption and Dedicated environment, please create a new one with 'az containerapp env create'."):
+            self.cmd(
+                'containerapp env workload-profile update -w wp -g {} -n {} --min-nodes 1 --max-nodes 2'.format(
+                    resource_group, env))
+
         self.cmd('containerapp env delete -g {} -n {} --yes --no-wait'.format(resource_group, env), expect_failure=False)
 
         env1 = self.create_random_name(prefix='env1', length=24)
