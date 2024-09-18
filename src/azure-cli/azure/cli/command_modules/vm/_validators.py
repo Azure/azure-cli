@@ -1272,13 +1272,14 @@ def validate_ssh_key(namespace, cmd=None):
                                                             namespace.ssh_key_type)]
 
 
-def _validate_ssh_key_helper(ssh_key_value, should_generate_ssh_keys, ssh_key_type='RSA'):
-    if ssh_key_type != 'RSA':
-        string_or_file = (ssh_key_value or
-                          os.path.join(os.path.expanduser('~'), '.ssh', 'id_ed25519_2.pub'))
-    else:
+def _validate_ssh_key_helper(ssh_key_value, should_generate_ssh_keys, ssh_key_type=None):
+    if ssh_key_type is None or ssh_key_type == 'RSA':
         string_or_file = (ssh_key_value or
                           os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub'))
+    else:
+        string_or_file = (ssh_key_value or
+                          os.path.join(os.path.expanduser('~'), '.ssh', 'id_ed25519.pub'))
+
     content = string_or_file
     if os.path.exists(string_or_file):
         logger.info('Use existing SSH public key file: %s', string_or_file)
