@@ -628,7 +628,9 @@ def _resolve_role_id(role, scope, definitions_client):
 
 
 def create_application(cmd, client, display_name, identifier_uris=None,
-                       is_fallback_public_client=None, sign_in_audience=None,
+                       is_fallback_public_client=None,
+                       service_management_reference=None,
+                       sign_in_audience=None,
                        # keyCredentials
                        key_value=None, key_type=None, key_usage=None, start_date=None, end_date=None,
                        key_display_name=None,
@@ -655,7 +657,9 @@ def create_application(cmd, client, display_name, identifier_uris=None,
                            existing_apps[0][ID])
             body = update_application(
                 existing_apps[0], display_name=display_name, identifier_uris=identifier_uris,
-                is_fallback_public_client=is_fallback_public_client, sign_in_audience=sign_in_audience,
+                is_fallback_public_client=is_fallback_public_client,
+                service_management_reference=service_management_reference,
+                sign_in_audience=sign_in_audience,
                 # keyCredentials
                 key_value=key_value, key_type=key_type, key_usage=key_usage,
                 start_date=start_date, end_date=end_date,
@@ -670,9 +674,9 @@ def create_application(cmd, client, display_name, identifier_uris=None,
                 app_roles=app_roles,
                 optional_claims=optional_claims,
                 required_resource_accesses=required_resource_accesses)
-            patch_application(cmd, existing_apps[0][ID], body)
 
-            # no need to resolve identifierUris or appId. Just use id.
+            # No need to resolve identifierUris or appId. Just use object id.
+            client.application_update(existing_apps[0][ID], body)
             return client.application_get(existing_apps[0][ID])
 
     # identifierUris is no longer required, compared to AD Graph
@@ -684,7 +688,9 @@ def create_application(cmd, client, display_name, identifier_uris=None,
 
     _set_application_properties(
         body, display_name=display_name, identifier_uris=identifier_uris,
-        is_fallback_public_client=is_fallback_public_client, sign_in_audience=sign_in_audience,
+        is_fallback_public_client=is_fallback_public_client,
+        service_management_reference=service_management_reference,
+        sign_in_audience=sign_in_audience,
         # keyCredentials
         key_credentials=key_credentials,
         # web
@@ -709,7 +715,9 @@ def create_application(cmd, client, display_name, identifier_uris=None,
 
 
 def update_application(instance, display_name=None, identifier_uris=None,  # pylint: disable=unused-argument
-                       is_fallback_public_client=None, sign_in_audience=None,
+                       is_fallback_public_client=None,
+                       service_management_reference=None,
+                       sign_in_audience=None,
                        # keyCredentials
                        key_value=None, key_type=None, key_usage=None, start_date=None, end_date=None,
                        key_display_name=None,
@@ -730,7 +738,9 @@ def update_application(instance, display_name=None, identifier_uris=None,  # pyl
 
     _set_application_properties(
         body, display_name=display_name, identifier_uris=identifier_uris,
-        is_fallback_public_client=is_fallback_public_client, sign_in_audience=sign_in_audience,
+        is_fallback_public_client=is_fallback_public_client,
+        service_management_reference=service_management_reference,
+        sign_in_audience=sign_in_audience,
         # keyCredentials
         key_credentials=key_credentials,
         # web

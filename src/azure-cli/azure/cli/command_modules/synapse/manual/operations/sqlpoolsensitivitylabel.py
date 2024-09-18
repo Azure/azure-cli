@@ -70,7 +70,7 @@ def sqlpool_sensitivity_label_update(
         sensitivity_label.information_type_id = current_label.information_type_id
 
     except HttpResponseError as ex:
-        if not (ex.status_code and ex.status_code == '404'):
+        if not (ex and 'SensitivityLabelsLabelNotFound' in str(ex)):
             raise ex
 
     # Find the label id and information type id in the policy by the label name provided

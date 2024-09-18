@@ -7,6 +7,8 @@
 
 import json
 import re
+import azure.cli.core.azclierror as CLIErrors
+
 from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.azclierror import (InvalidArgumentValueError,
@@ -371,3 +373,29 @@ def validate_snapshot_import(namespace):
             raise InvalidArgumentValueError("--src-snapshot is only applicable when importing from a configuration store.")
         if any([namespace.src_key, namespace.src_label, namespace.skip_features]):
             raise MutuallyExclusiveArgumentError("'--src-snapshot' cannot be specified with '--src-key', '--src-label', or '--skip-features' arguments.")
+
+
+def validate_sku(namespace):
+    if namespace.sku.lower() == 'free':
+        if (namespace.enable_purge_protection or namespace.retention_days or namespace.replica_name or namespace.replica_location or namespace.no_replica):
+            logger.warning("Options '--enable-purge-protection', '--replica-name', '--replica-location' , '--no-replica' and '--retention-days' will be ignored when creating a free store.")
+            namespace.retention_days = None
+            namespace.enable_purge_protection = None
+            namespace.replica_name = None
+            namespace.replica_location = None
+            namespace.no_replica = None
+            return
+
+    if namespace.sku.lower() == 'premium' and not namespace.no_replica:
+        if any(arg is None for arg in [namespace.replica_name, namespace.replica_location]):
+            raise RequiredArgumentMissingError("Options '--replica-name' and '--replica-location' are required when creating a premium tier store. To avoid creating replica please provide explicit argument '--no-replica'.")
+
+    if namespace.no_replica and (namespace.replica_name or namespace.replica_location):
+        raise CLIErrors.MutuallyExclusiveArgumentError("Please provide either '--no-replica' or both '--replica-name' and '--replica-location'. See 'az appconfig create -h' for examples.")
+
+    if namespace.replica_name:
+        if namespace.replica_location is None:
+            raise RequiredArgumentMissingError("To create a replica, '--replica-location' is required.")
+    else:
+        if namespace.replica_location is not None:
+            raise RequiredArgumentMissingError("To create a replica, '--replica-name' is required.")

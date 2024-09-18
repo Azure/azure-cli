@@ -73,7 +73,7 @@ class Purge(AAZCommand):
         _args_schema.domains = AAZListArg(
             options=["--domains"],
             arg_group="Contents",
-            help="List of domains.",
+            help="List of domains. Example: \"www.contoso.com, www.contoso1.com\"",
         )
 
         content_paths = cls._args_schema.content_paths
