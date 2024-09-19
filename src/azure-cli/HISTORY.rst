@@ -3,8 +3,12 @@
 Release History
 ===============
 
-2.64.0
+2.65.0
 ++++++
+
+**MACHINE API**
+* Add `az aks machine list` command to fetch list of machines in an agentpool.
+* Add `az aks machine show` command to fetch information about a specific machine in an agentpool.
 
 **ACR**
 
