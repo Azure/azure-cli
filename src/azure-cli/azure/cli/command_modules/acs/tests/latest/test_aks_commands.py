@@ -7982,23 +7982,21 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             )
             machine_names = k_get_node_output.split("\n")
 
-            machine_name1 = machine_names[0].strip().strip("node/").strip()
-            machine_name2 = machine_names[2].strip().strip("node/").strip()
+            machine_name = machine_names[0].strip().strip("node/").strip()
             self.kwargs.update(
                 {
-                "machine_name1": machine_name1,
-                "machine_name2": machine_name2,
+                    "machine_name": machine_name,
                 }
             )
 
             # delete machines
             self.cmd(
-                "aks nodepool delete-machines --resource-group={resource_group} --cluster-name={name} --nodepool-name={nodepool_name} --machine-names {machine_name1} {machine_name2}"
+                "aks nodepool delete-machines --resource-group={resource_group} --cluster-name={name} --nodepool-name={nodepool_name} --machine-names {machine_name}"
             )
 
             # check count
             self.cmd('aks show -g {resource_group} -n {name}', checks=[
-                self.check('agentPoolProfiles[1].count', 2)
+                self.check('agentPoolProfiles[1].count', 3)
             ])
 
         finally:
