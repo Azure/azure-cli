@@ -12,7 +12,8 @@ from ._up_utils import (ContainerApp,
                         ContainerAppEnvironment,
                         ResourceGroup,
                         _get_registry_from_app,
-                        _get_registry_details, _get_acr_from_image,
+                        _get_registry_details,
+                        _get_acr_from_image,
                         )  # pylint: disable=unused-import
 
 logger = get_logger(__name__)
