@@ -15,6 +15,7 @@ from ._up_utils import (ContainerApp,
                         _get_registry_details,
                         _get_acr_from_image,
                         )  # pylint: disable=unused-import
+from azure.cli.core.azclierror import InvalidArgumentValueError
 
 logger = get_logger(__name__)
 
@@ -75,6 +76,12 @@ def build_containerapp_from_compose_service(cmd,
 
     if not registry_server:
         _get_registry_from_app(app, True)  # if the app exists, get the registry
+
+    if app.registry_server is not None and app.image is not None:
+        if "azurecr.io" in app.image and "azurecr.io" in app.registry_server:
+            acr_from_image = app.image.split("/")[0]
+            if acr_from_image.lower() != app.registry_server:
+                raise InvalidArgumentValueError(f"The container registry parsed from the image does not match the --registry-server.")
 
     if app.registry_server is None and app.image is not None:
         _get_acr_from_image(cmd, app)

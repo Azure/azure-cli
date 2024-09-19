@@ -596,7 +596,6 @@ class ContainerApp(Resource):  # pylint: disable=too-many-instance-attributes
         # Creating a tag for the image using the current time to avoid overwriting customer's existing images
         now = datetime.now()
         tag_now_suffix = str(now).replace(" ", "").replace("-", "").replace(".", "").replace(":", "")
-        image_name_with_tag = image_name + ":{}".format(tag_now_suffix)
 
         if ":" in image_name.split("/")[-1]:
             image_name_with_tag = image_name
