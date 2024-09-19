@@ -11,7 +11,6 @@ import time
 import unittest
 
 from azure.cli.command_modules.acs._format import version_to_tuple
-from azure.cli.command_modules.acs._format import aks_machine_list_table_format
 from azure.cli.command_modules.acs._helpers import (
     _get_test_sp_object_id,
     get_shared_control_plane_identity,
@@ -7925,9 +7924,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
     @AllowLargeResponse()
-    @AKSCustomResourceGroupPreparer(
-        random_name_length=17, name_prefix="clitest", location="westus2"
-    )
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix="clitest", location="westus2")
     def test_aks_nodepool_delete_machines(self, resource_group, resource_group_location):
         aks_name = self.create_random_name("cliakstest", 16)
         nodepool_name = self.create_random_name("c", 6)
@@ -7954,38 +7951,60 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             "aks nodepool add --resource-group={resource_group} --cluster-name={name} --name={nodepool_name} --node-count=4",
             checks=[self.check("provisioningState", "Succeeded")],
         )
-        # list machines
-        list_cmd = 'aks machine list ' \
-                   ' --resource-group={resource_group} ' \
-                   ' --cluster-name={name} --nodepool-name={nodepool_name} -o json'
-        machine_list = self.cmd(list_cmd).get_output_in_json()
-        assert len(machine_list) == 4
-        aks_machine_list_table_format(machine_list)
-        # delete machines
-        machine_name1 = machine_list[0]["name"]
-        machine_name2 = machine_list[2]["name"]
-        self.kwargs.update(
-            {
-                "resource_group": resource_group,
-                "location": resource_group_location,
-                "name": aks_name,
-                "nodepool_name": nodepool_name,
-                "ssh_key_value": self.generate_ssh_keys(),
+
+        # install kubectl
+        try:
+            subprocess.call(["az", "aks", "install-cli"])
+        except subprocess.CalledProcessError as err:
+            raise CLIInternalError("Failed to install kubectl with error: '{}'!".format(err))
+
+        try:
+            # get credential
+            fd, browse_path = tempfile.mkstemp()
+            self.kwargs.update(
+                {
+                    "browse_path": browse_path,
+                }
+            )
+            try:
+                get_credential_cmd = "aks get-credentials -n {name} -g {resource_group} -f {browse_path}"
+                self.cmd(get_credential_cmd)
+            finally:
+                os.close(fd)
+
+            # get machine name
+            label = "kubernetes.azure.com/agentpool=" + nodepool_name
+            k_get_node_cmd = ["kubectl", "get", "node", "-l", label, "-o", "name", "--kubeconfig", browse_path]
+            k_get_node_output = subprocess.check_output(
+                k_get_node_cmd,
+                universal_newlines=True,
+                stderr=subprocess.STDOUT,
+            )
+            machine_names = k_get_node_output.split("\n")
+
+            machine_name1 = machine_names[0].strip().strip("node/").strip()
+            machine_name2 = machine_names[2].strip().strip("node/").strip()
+            self.kwargs.update(
+                {
                 "machine_name1": machine_name1,
                 "machine_name2": machine_name2,
-            }
-        )
-        self.cmd(
-            "aks nodepool delete-machines --resource-group={resource_group} --cluster-name={name} --nodepool-name={nodepool_name} --machine-names {machine_name1} {machine_name2}"
-        )
-        # list machines after deletion
-        machine_list_after = self.cmd(list_cmd).get_output_in_json()
-        assert len(machine_list_after) == 2
-        # delete AKS cluster
-        self.cmd(
-            "aks delete -g {resource_group} -n {name} --yes --no-wait",
-            checks=[self.is_empty()],
-        )
+                }
+            )
+
+            # delete machines
+            self.cmd(
+                "aks nodepool delete-machines --resource-group={resource_group} --cluster-name={name} --nodepool-name={nodepool_name} --machine-names {machine_name1} {machine_name2}"
+            )
+
+            # check count
+            self.cmd('aks show -g {resource_group} -n {name}', checks=[
+                self.check('agentPoolProfiles[1].count', 2)
+            ])
+
+        finally:
+            # delete cluster
+            self.cmd(
+                'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='centraluseuap')

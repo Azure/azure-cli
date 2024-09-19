@@ -74,28 +74,6 @@ def _aks_table_format(result):
     # use ordered dicts so headers are predictable
     return parsed.search(result, Options(dict_cls=OrderedDict))
 
-def aks_machine_list_table_format(results):
-    return [aks_machine_show_table_format(r) for r in results]
-
-def aks_machine_show_table_format(result):
-    def parser(entry):
-        ipv4_addresses = ""
-        ipv6_addresses = ""
-        for k in entry["properties"]["network"]["ipAddresses"]:
-            if k["family"].lower() == "ipv4":
-                ipv4_addresses += k["ip"] + ";"
-            elif k["family"].lower() == "ipv6":
-                ipv6_addresses += k["ip"] + ";"
-        entry["ipv4"] = ipv4_addresses
-        entry["ipv6"] = ipv6_addresses
-        parsed = compile_jmes("""{
-                name: name,
-                ipv4: ipv4,
-                ipv6: ipv6
-            }""")
-        return parsed.search(entry, Options(dict_cls=OrderedDict))
-    return parser(result)
-
 
 def aks_upgrades_table_format(result):
     """Format get-upgrades results as a summary for display with "-o table"."""
