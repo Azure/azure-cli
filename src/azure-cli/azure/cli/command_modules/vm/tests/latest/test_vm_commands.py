@@ -119,7 +119,7 @@ class VMImageListThruServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     def test_vm_images_list_thru_services_edge_zone(self):
-        result = self.cmd('vm image list --edge-zone microsoftlosangeles1 --offer CentOs --publisher OpenLogic --sku 7.7 -o tsv --all').output
+        result = self.cmd('vm image list --edge-zone losangeles --offer CentOs --publisher OpenLogic --sku 7.7 -o tsv --all').output
         assert result.index('7.7') >= 0
 
     @AllowLargeResponse()
@@ -129,22 +129,18 @@ class VMImageListThruServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     def test_vm_image_list_thru_services_edge_zone_by_arch(self):
-        result = self.cmd('vm image list --edge-zone microsoftlosangeles1 --offer CentOs --publisher OpenLogic --sku 7.7 --architecture x64 -o tsv --all').output
+        result = self.cmd('vm image list --edge-zone losangeles --offer CentOs --publisher OpenLogic --sku 7.7 --architecture x64 -o tsv --all').output
         assert result.index('x64') >= 0
 
     @AllowLargeResponse()
     def test_vm_image_list_thru_services_deprecation_status(self):
-        self.cmd('vm image list --offer CentOs --publisher OpenLogic --sku 7.7 --architecture x64 --deprecation-status --all ', checks=[
+        self.cmd('vm image list --offer CentOs --publisher OpenLogic --sku 7.7 --architecture x64 --all ', checks=[
             self.check('[0].imageDeprecationStatus.imageState', 'Active'),
             self.check('[0].imageDeprecationStatus.scheduledDeprecationTime', None),
             self.check('[5].imageDeprecationStatus.imageState', 'ScheduledForDeprecation'),
             self.check('[5].imageDeprecationStatus.scheduledDeprecationTime', '2024-10-09T00:00:00+00:00'),
         ])
-        self.cmd('vm image list --offer CentOs --publisher OpenLogic --sku 7.7 --architecture x64 --deprecation-status --edge-zone microsoftlosangeles1', checks=[
-            self.check('[0].imageDeprecationStatus.imageState', 'Active'),
-            self.check('[0].imageDeprecationStatus.scheduledDeprecationTime', None)
-        ])
-        self.cmd('vm image list --offer CentOs --publisher OpenLogic --sku 7.7 --architecture x64 --deprecation-status --all --edge-zone microsoftlosangeles1', checks=[
+        self.cmd('vm image list --offer CentOs --publisher OpenLogic --sku 7.7 --architecture x64 --edge-zone losangeles', checks=[
             self.check('[0].imageDeprecationStatus.imageState', 'Active'),
             self.check('[0].imageDeprecationStatus.scheduledDeprecationTime', None)
         ])

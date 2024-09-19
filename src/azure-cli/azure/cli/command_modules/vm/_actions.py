@@ -46,7 +46,7 @@ def _get_thread_count():
     return 5  # don't increase too much till https://github.com/Azure/msrestazure-for-python/issues/6 is fixed
 
 
-def load_images_thru_services(cli_ctx, publisher, offer, sku, location, edge_zone, architecture, deprecation_status):
+def load_images_thru_services(cli_ctx, publisher, offer, sku, location, edge_zone, architecture):
     from concurrent.futures import ThreadPoolExecutor, as_completed
 
     all_images = []
@@ -81,7 +81,7 @@ def load_images_thru_services(cli_ctx, publisher, offer, sku, location, edge_zon
                 skus = [s for s in skus if _matched(sku, s.name)]
             for s in skus:
                 try:
-                    expand = "properties/imageDeprecationStatus" if deprecation_status else "properties"
+                    expand = "properties/imageDeprecationStatus"
                     if edge_zone is not None:
                         images = edge_zone_client.list(location=location, edge_zone=edge_zone, publisher_name=publisher,
                                                        offer=o.name, skus=s.name, expand=expand)
@@ -97,15 +97,12 @@ def load_images_thru_services(cli_ctx, publisher, offer, sku, location, edge_zon
                         'offer': o.name,
                         'sku': s.name,
                         'version': i.name,
-                        'architecture': i.additional_properties.get("properties", {}).get("architecture", None) or ""
+                        'architecture': i.additional_properties.get("properties", {}).get("architecture", None) or "",
+                        'imageDeprecationStatus': i.additional_properties.get(
+                            "properties", {}).get("imageDeprecationStatus", {}) or ""
                     }
                     if edge_zone is not None:
                         image_info['edge_zone'] = edge_zone
-                    if deprecation_status:
-                        image_info.update({
-                            'imageDeprecationStatus': i.additional_properties.get(
-                                "properties", {}).get("imageDeprecationStatus", {}) or ""
-                        })
                     if architecture and architecture != image_info['architecture']:
                         continue
                     all_images.append(image_info)
