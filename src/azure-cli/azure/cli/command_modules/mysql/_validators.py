@@ -104,9 +104,9 @@ def mysql_restore_tier_validator(target_tier, source_tier, sku_info):
 # pylint: disable=too-many-locals
 def mysql_arguments_validator(db_context, location, tier, sku_name, storage_gb, backup_retention=None, server_name=None,
                               zone=None, standby_availability_zone=None, high_availability=None, backup_byok_key=None,
-                              public_access=None, version=None, auto_grow=None, replication_role=None, subnet=None,
+                              public_access=None, version=None, auto_grow=None,  replication_role=None, subnet=None,
                               byok_identity=None, backup_byok_identity=None, byok_key=None, geo_redundant_backup=None,
-                              disable_data_encryption=None, iops=None, auto_io_scaling=None, instance=None,
+                              disable_data_encryption=None, iops=None, auto_io_scaling=None, accelerated_logs=None, instance=None,
                               data_source_type=None, mode=None,
                               data_source_backup_dir=None, data_source_sas_token=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforMySQL/flexibleServers')
@@ -133,6 +133,7 @@ def mysql_arguments_validator(db_context, location, tier, sku_name, storage_gb, 
     _mysql_byok_validator(byok_identity, backup_byok_identity, byok_key, backup_byok_key,
                           disable_data_encryption, geo_redundant_backup, instance)
     _mysql_iops_validator(iops, auto_io_scaling, instance)
+    mysql_accelerated_logs_validator(accelerated_logs, tier)
     _mysql_import_data_source_type_validator(data_source_type, data_source_backup_dir, data_source_sas_token)
     _mysql_import_mode_validator(mode)
 
