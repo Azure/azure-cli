@@ -3171,7 +3171,7 @@ def cli_cosmosdb_mongodb_collection_restore(cmd,
     )
 
     if disable_ttl is not None:
-        restore_parameters.restore_with_ttl_disabled=disable_ttl
+        restore_parameters.restore_with_ttl_disabled = disable_ttl
 
     mongodb_collection_resource = MongoDBCollectionResource(id=collection_name,
                                                             create_mode=create_mode,
@@ -3259,7 +3259,7 @@ def cli_cosmosdb_gremlin_database_restore(cmd,
     )
 
     if disable_ttl is not None:
-        restore_parameters.restore_with_ttl_disabled=disable_ttl
+        restore_parameters.restore_with_ttl_disabled = disable_ttl
 
     gremlin_database_resource = GremlinDatabaseCreateUpdateParameters(
         resource=SqlDatabaseResource(
@@ -3362,7 +3362,7 @@ def cli_cosmosdb_gremlin_graph_restore(cmd,
     )
 
     if disable_ttl is not None:
-        restore_parameters.restore_with_ttl_disabled=disable_ttl
+        restore_parameters.restore_with_ttl_disabled = disable_ttl
 
     gremlin_graph_resource = GremlinGraphResource(
         id=graph_name,
@@ -3451,7 +3451,7 @@ def cli_cosmosdb_table_restore(cmd,
     )
 
     if disable_ttl is not None:
-        restore_parameters.restore_with_ttl_disabled=disable_ttl
+        restore_parameters.restore_with_ttl_disabled = disable_ttl
 
     table_resource = TableCreateUpdateParameters(
         resource=TableResource(id=table_name,
