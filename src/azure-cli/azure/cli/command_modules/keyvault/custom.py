@@ -305,60 +305,6 @@ def list_vault(client, resource_group_name=None):
     return list(vault_list)
 
 
-def _get_current_user_object_id(graph_client):
-    current_user = graph_client.signed_in_user_get()
-    return current_user['id']
-
-
-def _get_object_id_by_spn(graph_client, spn):
-    accounts = list(graph_client.service_principal_list(
-        filter="servicePrincipalNames/any(c:c eq '{}')".format(spn)))
-    if not accounts:
-        logger.warning("Unable to find user with spn '%s'", spn)
-        return None
-    if len(accounts) > 1:
-        logger.warning("Multiple service principals found with spn '%s'. "
-                       "You can avoid this by specifying object id.", spn)
-        return None
-    return accounts[0]['id']
-
-
-def _get_object_id_by_upn(graph_client, upn):
-    accounts = list(graph_client.user_list(filter="userPrincipalName eq '{}'".format(upn)))
-    if not accounts:
-        logger.warning("Unable to find user with upn '%s'", upn)
-        return None
-    if len(accounts) > 1:
-        logger.warning("Multiple users principals found with upn '%s'. "
-                       "You can avoid this by specifying object id.", upn)
-        return None
-    return accounts[0]['id']
-
-
-def _get_object_id_from_subscription(graph_client, subscription):
-    if not subscription:
-        return None
-
-    if subscription['user']:
-        if subscription['user']['type'] == 'user':
-            return _get_object_id_by_upn(graph_client, subscription['user']['name'])
-        if subscription['user']['type'] == 'servicePrincipal':
-            return _get_object_id_by_spn(graph_client, subscription['user']['name'])
-        logger.warning("Unknown user type '%s'", subscription['user']['type'])
-    else:
-        logger.warning('Current credentials are not from a user or service principal. '
-                       'Azure Key Vault does not work with certificate credentials.')
-    return None
-
-
-def _get_object_id(graph_client, subscription=None, spn=None, upn=None):
-    if spn:
-        return _get_object_id_by_spn(graph_client, spn)
-    if upn:
-        return _get_object_id_by_upn(graph_client, upn)
-    return _get_object_id_from_subscription(graph_client, subscription)
-
-
 def _create_network_rule_set(cmd, bypass=None, default_action=None):
     NetworkRuleSet = cmd.get_models('NetworkRuleSet', resource_type=ResourceType.MGMT_KEYVAULT)
     NetworkRuleBypassOptions = cmd.get_models('NetworkRuleBypassOptions', resource_type=ResourceType.MGMT_KEYVAULT)
@@ -671,8 +617,6 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
         # if client.get raise exception, we can take it as no existing vault found
         # just continue the normal creation process
         pass
-    from azure.cli.core._profile import Profile, _TENANT_ID
-    from azure.cli.command_modules.role import graph_client_factory, GraphError
 
     VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
                                                    resource_type=ResourceType.MGMT_KEYVAULT)
@@ -685,8 +629,8 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
     Sku = cmd.get_models('Sku', resource_type=ResourceType.MGMT_KEYVAULT)
     VaultProperties = cmd.get_models('VaultProperties', resource_type=ResourceType.MGMT_KEYVAULT)
 
+    from azure.cli.core._profile import Profile, _TENANT_ID
     profile = Profile(cli_ctx=cmd.cli_ctx)
-    graph_client = graph_client_factory(cmd.cli_ctx)
     subscription = profile.get_subscription(subscription=cmd.cli_ctx.data.get('subscription_id', None))
     tenant_id = subscription[_TENANT_ID]
 
@@ -751,10 +695,8 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
                                           StoragePermissions.getsas,
                                           StoragePermissions.deletesas])
 
-        try:
-            object_id = _get_current_user_object_id(graph_client)
-        except GraphError:
-            object_id = _get_object_id(graph_client, subscription=subscription)
+        from azure.cli.command_modules.role.util import get_current_identity_object_id
+        object_id = get_current_identity_object_id(cmd.cli_ctx)
         if not object_id:
             raise CLIError('Cannot create vault.\nUnable to query active directory for information '
                            'about the current user.\nYou may try the --no-self-perms flag to '
@@ -901,10 +843,8 @@ def update_hsm(cmd, instance,
 
 def _object_id_args_helper(cli_ctx, object_id, spn, upn):
     if not object_id:
-        from azure.cli.command_modules.role import graph_client_factory
-
-        graph_client = graph_client_factory(cli_ctx)
-        object_id = _get_object_id(graph_client, spn=spn, upn=upn)
+        from azure.cli.command_modules.role.util import get_object_id
+        object_id = get_object_id(cli_ctx, spn=spn, upn=upn)
         if not object_id:
             raise CLIError('Unable to get object id from principal name.')
     return object_id

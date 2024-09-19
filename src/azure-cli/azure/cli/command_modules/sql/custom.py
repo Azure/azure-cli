@@ -3775,6 +3775,11 @@ def elastic_pool_create(
     # using capabilities.
     kwargs['sku'] = _find_elastic_pool_sku_from_capabilities(cmd.cli_ctx, kwargs['location'], sku)
 
+    # The min_capacity property is only applicable to serverless SKUs.
+    #
+    if kwargs['sku'] is not None and not _is_serverless_slo(kwargs['sku'].name):
+        kwargs['min_capacity'] = None
+
     # Expand maintenance configuration id if needed
     kwargs['maintenance_configuration_id'] = _complete_maintenance_configuration_id(
         cmd.cli_ctx,
@@ -5065,10 +5070,12 @@ def managed_instance_update(  # pylint: disable=too-many-locals
         cmd,
         instance,
         resource_group_name,
+        is_general_purpose_v2=None,
         administrator_login_password=None,
         license_type=None,
         vcores=None,
         storage_size_in_gb=None,
+        storage_iops=None,
         assign_identity=False,
         proxy_override=None,
         public_data_endpoint_enabled=None,
@@ -5105,6 +5112,18 @@ def managed_instance_update(  # pylint: disable=too-many-locals
     instance.service_principal = _get_service_principal_object_from_type(service_principal_type)
 
     # Apply params to instance
+    #   Note on is_general_purpose_v2
+    #     If this parameter was not set by the user, we do not want to pick up its current value.
+    #     This is due to the fact that this update might have a target edition that does not use this parameter.
+    #   Note on storage_iops
+    #     If this parameter was not set by the user, we do not want to pick up its current value.
+    #     This is due to the fact that this update might have a target edition that does not use this parameter.
+    #     If the target edition uses the parameter, the current value will get picked up later in the update process.
+    #   Note on storage_throughput_mbps
+    #     If this parameter was not set by the user, we do not want to pick up its current value.
+    #     This is due to the fact that this update might have a target edition that does not use this parameter.
+    #     If the target edition uses the parameter, the current value will get picked up later in the update process.
+    instance.is_general_purpose_v2 = is_general_purpose_v2
     instance.administrator_login_password = (
         administrator_login_password or instance.administrator_login_password)
     instance.license_type = (
@@ -5113,6 +5132,8 @@ def managed_instance_update(  # pylint: disable=too-many-locals
         vcores or instance.v_cores)
     instance.storage_size_in_gb = (
         storage_size_in_gb or instance.storage_size_in_gb)
+    instance.storage_iops = storage_iops
+    instance.storage_throughput_mbps = None
     instance.proxy_override = (
         proxy_override or instance.proxy_override)
     instance.minimal_tls_version = (
