@@ -308,6 +308,13 @@ def _mysql_iops_validator(iops, auto_io_scaling, instance):
     if auto_io_scaling.lower() == 'enabled':
         logger.warning("The server has enabled the auto scale iops. So the iops will be ignored.")
 
+def mysql_accelerated_logs_validator(accelerated_logs, tier):
+    if accelerated_logs is None:
+        if tier == "MemoryOptimized":
+            accelerated_logs = "Enabled"
+    if tier != "MemoryOptimized" and accelerated_logs.lower() == "enabled":
+        accelerated_logs = "Disabled"
+        logger.warning("Accelerated logs are only supported for Memory Optimized tier. So the accelerated logs will be disabled.")
 
 def _network_arg_validator(subnet, public_access):
     if subnet is not None and public_access is not None:
