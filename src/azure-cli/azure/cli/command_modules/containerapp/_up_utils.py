@@ -597,7 +597,16 @@ class ContainerApp(Resource):  # pylint: disable=too-many-instance-attributes
         now = datetime.now()
         tag_now_suffix = str(now).replace(" ", "").replace("-", "").replace(".", "").replace(":", "")
         image_name_with_tag = image_name + ":{}".format(tag_now_suffix)
-        self.image = self.registry_server + "/" + image_name_with_tag
+
+        if ":" in image_name.split("/")[-1]:
+            image_name_with_tag = image_name
+        else:
+            image_name_with_tag = image_name + ":{}".format(tag_now_suffix)
+
+        if not image_name_with_tag.startswith(self.registry_server):
+            self.image = self.registry_server + "/" + image_name_with_tag
+        else:
+            self.image = image_name_with_tag
 
         if build_from_source:
             logger.warning(
