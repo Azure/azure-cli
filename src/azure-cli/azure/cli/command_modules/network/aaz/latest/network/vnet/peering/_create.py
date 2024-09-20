@@ -91,6 +91,7 @@ class Create(AAZCommand):
         _args_schema.peer_complete_vnets = AAZBoolArg(
             options=["--peer-complete-vnets"],
             help="Whether complete virtual network address space is peered.",
+            default=True,
         )
         _args_schema.remote_subnet_names = AAZListArg(
             options=["--remote-subnet-names"],
