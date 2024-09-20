@@ -13,7 +13,6 @@ register_command_group_deprecate('sf cluster upgrade-type', redirect='sf cluster
 register_command_deprecate('sf cluster durability', redirect='sf cluster update')
 # Warning Message: This command has been deprecated and will be removed in next breaking change release. Use `sf cluster update` instead.
 
-
 register_command_deprecate('sf cluster reliability update', redirect='sf cluster update')
 # Warning Message: This command has been deprecated and will be removed in next breaking change release. Use `sf cluster update` instead.
 
