@@ -921,6 +921,7 @@ def load_arguments(self, _):
             help="Space-separated machine names to delete.",
         )
 
+
 def _get_default_install_location(exe_name):
     system = platform.system()
     if system == 'Windows':

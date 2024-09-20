@@ -2648,6 +2648,7 @@ def aks_operation_abort(cmd,   # pylint: disable=unused-argument
     instance.power_state = power_state
     return sdk_no_wait(no_wait, client.begin_abort_latest_operation, resource_group_name, name)
 
+
 def aks_agentpool_delete_machines(cmd,   # pylint: disable=unused-argument
                                   client,
                                   resource_group_name,
