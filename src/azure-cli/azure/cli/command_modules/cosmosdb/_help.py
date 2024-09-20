@@ -220,6 +220,11 @@ parameters:
     short-summary: Add table names to restore
     long-summary: |
         Usage:          --tables-to-restore table1 [table2 ...]
+  - name: --disable-ttl
+  short-summary: Flag to restore with TTL disabled
+  long-summary: |
+      Usage:          --disable-ttl True
+      Default: false
 examples:
   - name: Create a new Azure Cosmos DB database account by restoring from an existing database account.
     text: az cosmosdb restore --target-database-account-name MyRestoredCosmosDBDatabaseAccount --account-name MySourceAccount --restore-timestamp 2020-07-13T16:03:41+0000 -g MyResourceGroup --location westus
@@ -229,6 +234,8 @@ examples:
     text: az cosmosdb restore -g MyResourceGroup --target-database-account-name MyRestoredCosmosDBDatabaseAccount --account-name MySourceAccount --restore-timestamp 2020-07-13T16:03:41+0000 --location westus --gremlin-databases-to-restore name=graphdb1 graphs=graph1 graph2
   - name: Create a new Azure Cosmos DB Table database account by restoring only the selected tables from an existing database account.
     text: az cosmosdb restore -g MyResourceGroup --target-database-account-name MyRestoredCosmosDBDatabaseAccount --account-name MySourceAccount --restore-timestamp 2020-07-13T16:03:41+0000 --location westus --tables-to-restore table1,table2
+  - name: Create a new Azure Cosmos DB Table database account by restoring with Time-To-Live disabled.
+    text: az cosmosdb restore -g MyResourceGroup --target-database-account-name MyRestoredCosmosDBDatabaseAccount --account-name MySourceAccount --restore-timestamp 2020-07-13T16:03:41+0000 --location westus --disable-ttl True
 """
 
 helps['cosmosdb database'] = """
