@@ -810,10 +810,10 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
         _check_none_and_many(target_item, "Target Item")
 
         protectable_item_type = target_item.properties.protectable_item_type
-        if protectable_item_type.lower() not in ["sqlinstance", "saphanasystem"]:
+        if protectable_item_type.lower() not in ["sqlinstance", "saphanasystem",  "saphanadbinstance"]:
             raise CLIError(
                 """
-                Target Item must be either of type HANAInstance or SQLInstance.
+                Target Item must be of type HANAInstance, SQLInstance, or SAPHanaDBInstance.
                 """)
 
     if restore_mode == 'RestoreAsFiles' and target_container is None:
