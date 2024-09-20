@@ -1435,6 +1435,20 @@ class TestAAZArg(unittest.TestCase):
         arg = schema.count.to_cmd_arg("count")
         self.assertEqual(arg.type.settings['configured_default'], 'specialcount')
 
+    def test_aaz_generic_update_arg(self):
+        from azure.cli.core.aaz._arg import (AAZGenericUpdateAddArg, AAZGenericUpdateSetArg, AAZGenericUpdateRemoveArg,
+                                             AAZArgumentsSchema)
+        schema = AAZArgumentsSchema()
+        schema.generic_update_add = AAZGenericUpdateAddArg()
+        schema.generic_update_set = AAZGenericUpdateSetArg()
+        schema.generic_update_remove = AAZGenericUpdateRemoveArg()
+        arg = schema.generic_update_add.to_cmd_arg("add")
+        self.assertEqual(arg.type.settings['help'], 'Add an object to a list of objects by specifying a path and key value pairs.  Example: `--add property.listProperty <key=value, string or JSON string>`')
+        arg = schema.generic_update_set.to_cmd_arg("set")
+        self.assertEqual(arg.type.settings['help'], 'Update an object by specifying a property path and value to set.  Example: `--set property1.property2=<value>`')
+        arg = schema.generic_update_remove.to_cmd_arg("remove")
+        self.assertEqual(arg.type.settings['help'], 'Remove a property or an element from a list.  Example: `--remove property.list <indexToRemove>` OR `--remove propertyToRemove`')
+
 
 class TestAAZArgUtils(unittest.TestCase):
 
