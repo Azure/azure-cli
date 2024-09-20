@@ -356,10 +356,14 @@ def which(binary):
 
     return None
 
+
 def aks_machine_list(cmd, client, resource_group_name, cluster_name, nodepool_name):
     return client.list(resource_group_name, cluster_name, nodepool_name)
+
+
 def aks_machine_show(cmd, client, resource_group_name, cluster_name, nodepool_name, machine_name):
     return client.get(resource_group_name, cluster_name, nodepool_name, machine_name)
+
 
 def aks_maintenanceconfiguration_list(
     cmd,
