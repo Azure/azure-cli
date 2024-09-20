@@ -8,16 +8,7 @@
 # pylint: skip-file
 # flake8: noqa
 
-from azure.cli.core.aaz import *
-
-
-@register_command_group(
-    "account",
-)
-class __CMDGroup(AAZCommandGroup):
-    """Manage Azure subscription information.
-    """
-    pass
-
-
-__all__ = ["__CMDGroup"]
+from .__cmd_group import *
+from ._create import *
+from ._show import *
+from ._show_tenant import *

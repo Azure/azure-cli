@@ -8,3 +8,16 @@
 # pylint: skip-file
 # flake8: noqa
 
+from azure.cli.core.aaz import *
+
+
+@register_command_group(
+    "resources",
+)
+class __CMDGroup(AAZCommandGroup):
+    """Microsoft.Resources RP
+    """
+    pass
+
+
+__all__ = ["__CMDGroup"]

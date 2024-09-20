@@ -8,5 +8,16 @@
 # pylint: skip-file
 # flake8: noqa
 
-from .__cmd_group import *
-from ._list_locations import *
+from azure.cli.core.aaz import *
+
+
+@register_command_group(
+    "resources data-boundary",
+)
+class __CMDGroup(AAZCommandGroup):
+    """data boundary operations
+    """
+    pass
+
+
+__all__ = ["__CMDGroup"]
