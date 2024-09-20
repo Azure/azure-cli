@@ -667,13 +667,15 @@ def validate_arguments(*args):
     for arg in args:
         if arg == None or arg == False:
             raise CLIError(
-                'Invalid arguments. Please run command: `az sf cluster update -h` for help message and examples of how to use the command')
+                'Invalid argument {}, Please run command: `az sf cluster update -h` for help message and examples of how to use the command'.
+                format(arg))
 
 def validate_none_arguments(*args):
     for arg in args:
         if arg is not None and arg != False:
             raise CLIError(
-                'Invalid arguments. Please run command: `az sf cluster update -h` for help message and examples of how to use the command')
+                'Invalid argument {}, Please run command: `az sf cluster update -h` for help message and examples of how to use the command'.
+                format(arg))
 
 def update_cluster(cmd,
                    client,
