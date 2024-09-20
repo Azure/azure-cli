@@ -749,7 +749,7 @@ def flexible_server_restore(cmd, client, resource_group_name, server_name, sourc
             auto_grow = source_server_object.storage.auto_grow
         else:
             mysql_auto_grow_validator(auto_grow, None, None, source_server_object)
-        
+
         if not accelerated_logs:
             accelerated_logs = source_server_object.storage.log_on_disk
         else:

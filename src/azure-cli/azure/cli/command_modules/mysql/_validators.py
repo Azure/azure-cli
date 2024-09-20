@@ -104,10 +104,10 @@ def mysql_restore_tier_validator(target_tier, source_tier, sku_info):
 # pylint: disable=too-many-locals
 def mysql_arguments_validator(db_context, location, tier, sku_name, storage_gb, backup_retention=None, server_name=None,
                               zone=None, standby_availability_zone=None, high_availability=None, backup_byok_key=None,
-                              public_access=None, version=None, auto_grow=None,  replication_role=None, subnet=None,
+                              public_access=None, version=None, auto_grow=None, replication_role=None, subnet=None,
                               byok_identity=None, backup_byok_identity=None, byok_key=None, geo_redundant_backup=None,
-                              disable_data_encryption=None, iops=None, auto_io_scaling=None, accelerated_logs=None, instance=None,
-                              data_source_type=None, mode=None,
+                              disable_data_encryption=None, iops=None, auto_io_scaling=None, accelerated_logs=None,
+                              instance=None, data_source_type=None, mode=None,
                               data_source_backup_dir=None, data_source_sas_token=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforMySQL/flexibleServers')
 
@@ -309,13 +309,18 @@ def _mysql_iops_validator(iops, auto_io_scaling, instance):
     if auto_io_scaling.lower() == 'enabled':
         logger.warning("The server has enabled the auto scale iops. So the iops will be ignored.")
 
+
 def mysql_accelerated_logs_validator(accelerated_logs, tier):
     if accelerated_logs is None:
         if tier == "MemoryOptimized":
             accelerated_logs = "Enabled"
+        else:
+            accelerated_logs = "Disabled"
     if tier != "MemoryOptimized" and accelerated_logs.lower() == "enabled":
         accelerated_logs = "Disabled"
-        logger.warning("Accelerated logs are only supported for Memory Optimized tier. So the accelerated logs will be disabled.")
+        logger.warning("Accelerated logs are only supported for Memory Optimized tier. "
+                       "So the accelerated logs will be disabled.")
+
 
 def _network_arg_validator(subnet, public_access):
     if subnet is not None and public_access is not None:

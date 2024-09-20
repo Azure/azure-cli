@@ -439,7 +439,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         c.argument('byok_identity', arg_type=identity_arg_type)
         c.argument('auto_grow', arg_type=auto_grow_arg_type)
         c.argument('auto_scale_iops', arg_type=auto_scale_iops_arg_type)
-        c.argument('accelerated_logs', default='Disabled', arg_type=accelerated_logs_arg_type)
+        c.argument('accelerated_logs', arg_type=accelerated_logs_arg_type)
         c.argument('replication_role', options_list=['--replication-role'], help='The replication role of the server.')
         c.argument('iops', arg_type=iops_arg_type)
         c.argument('backup_retention', arg_type=mysql_backup_retention_arg_type)
