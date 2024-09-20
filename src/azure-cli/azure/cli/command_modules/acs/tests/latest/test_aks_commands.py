@@ -7923,6 +7923,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.is_empty()
         ])
 
+    # live only, otherwise the current recording mechanism will also record the binary files of
+    # kubectl and kubelogin resulting in the cassette file
+    @live_only()
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix="clitest", location="westus2")
     def test_aks_nodepool_delete_machines(self, resource_group, resource_group_location):
