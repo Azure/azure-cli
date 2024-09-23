@@ -164,9 +164,6 @@ class Show(AAZCommand):
             _schema_on_200.properties = AAZObjectType(
                 flags={"client_flatten": True},
             )
-            _schema_on_200.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-            )
             _schema_on_200.sku = AAZObjectType()
             _schema_on_200.system_data = AAZObjectType(
                 serialized_name="systemData",
@@ -185,6 +182,9 @@ class Show(AAZCommand):
             properties.metric_id = AAZStrType(
                 serialized_name="metricId",
                 flags={"read_only": True},
+            )
+            properties.provisioning_state = AAZStrType(
+                serialized_name="provisioningState",
             )
             properties.status = AAZStrType(
                 flags={"read_only": True},

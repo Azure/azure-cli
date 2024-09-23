@@ -61,12 +61,6 @@ class Update(AAZCommand):
         # define Arg Group "Parameters"
 
         _args_schema = cls._args_schema
-        _args_schema.provisioning_state = AAZStrArg(
-            options=["--provisioning-state"],
-            arg_group="Parameters",
-            help="Provisioning state of the Cluster.",
-            nullable=True,
-        )
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
             arg_group="Parameters",
@@ -82,6 +76,12 @@ class Update(AAZCommand):
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
+        _args_schema.provisioning_state = AAZStrArg(
+            options=["--provisioning-state"],
+            arg_group="Properties",
+            help="Provisioning state of the Cluster.",
+            nullable=True,
+        )
         _args_schema.supports_scaling = AAZBoolArg(
             options=["--supports-scaling"],
             arg_group="Properties",
@@ -345,12 +345,12 @@ class Update(AAZCommand):
                 typ=AAZObjectType
             )
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
-            _builder.set_prop("provisioningState", AAZStrType, ".provisioning_state")
             _builder.set_prop("sku", AAZObjectType)
             _builder.set_prop("tags", AAZDictType, ".tags")
 
             properties = _builder.get(".properties")
             if properties is not None:
+                properties.set_prop("provisioningState", AAZStrType, ".provisioning_state")
                 properties.set_prop("supportsScaling", AAZBoolType, ".supports_scaling")
 
             sku = _builder.get(".sku")
@@ -385,7 +385,6 @@ class _UpdateHelper:
             _schema.location = cls._schema_cluster_read.location
             _schema.name = cls._schema_cluster_read.name
             _schema.properties = cls._schema_cluster_read.properties
-            _schema.provisioning_state = cls._schema_cluster_read.provisioning_state
             _schema.sku = cls._schema_cluster_read.sku
             _schema.system_data = cls._schema_cluster_read.system_data
             _schema.tags = cls._schema_cluster_read.tags
@@ -405,9 +404,6 @@ class _UpdateHelper:
         cluster_read.properties = AAZObjectType(
             flags={"client_flatten": True},
         )
-        cluster_read.provisioning_state = AAZStrType(
-            serialized_name="provisioningState",
-        )
         cluster_read.sku = AAZObjectType()
         cluster_read.system_data = AAZObjectType(
             serialized_name="systemData",
@@ -426,6 +422,9 @@ class _UpdateHelper:
         properties.metric_id = AAZStrType(
             serialized_name="metricId",
             flags={"read_only": True},
+        )
+        properties.provisioning_state = AAZStrType(
+            serialized_name="provisioningState",
         )
         properties.status = AAZStrType(
             flags={"read_only": True},
@@ -471,7 +470,6 @@ class _UpdateHelper:
         _schema.location = cls._schema_cluster_read.location
         _schema.name = cls._schema_cluster_read.name
         _schema.properties = cls._schema_cluster_read.properties
-        _schema.provisioning_state = cls._schema_cluster_read.provisioning_state
         _schema.sku = cls._schema_cluster_read.sku
         _schema.system_data = cls._schema_cluster_read.system_data
         _schema.tags = cls._schema_cluster_read.tags
