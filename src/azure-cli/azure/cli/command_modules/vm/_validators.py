@@ -1274,12 +1274,9 @@ def validate_ssh_key(namespace, cmd=None):
 
 
 def _validate_ssh_key_helper(ssh_key_value, should_generate_ssh_keys, ssh_key_type=None):
-    if ssh_key_type is None or ssh_key_type == 'RSA':
-        string_or_file = (ssh_key_value or
-                          os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub'))
-    else:
-        string_or_file = (ssh_key_value or
-                          os.path.join(os.path.expanduser('~'), '.ssh', 'id_ed25519.pub'))
+    file_name = 'id_rsa.pub' if ssh_key_type is None or ssh_key_type == 'RSA' else 'id_ed25519.pub'
+    string_or_file = (ssh_key_value or
+                      os.path.join(os.path.expanduser('~'), '.ssh', file_name))
 
     content = string_or_file
     if os.path.exists(string_or_file):
@@ -1301,7 +1298,6 @@ def _validate_ssh_key_helper(ssh_key_value, should_generate_ssh_keys, ssh_key_ty
                 content = generate_ssh_keys_ed25519(private_key_filepath, public_key_filepath)
             else:
                 content = keys.generate_ssh_keys(private_key_filepath, public_key_filepath)
-            # content = vm_generate_ssh_keys(private_key_filepath, public_key_filepath)
             logger.warning("SSH key files '%s' and '%s' have been generated under ~/.ssh to "
                            "allow SSH access to the VM. If using machines without "
                            "permanent storage, back up your keys to a safe location.",
