@@ -391,7 +391,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='Specify the action to take if the monitored upgrade fails. The acceptable values for this parameter are Rollback or Manual.')
         c.argument('upgrade_mode', arg_type=get_enum_type(RollingUpgradeMode),
                    help='Specify the mode used to monitor health during a rolling upgrade. The values are Monitored, and UnmonitoredAuto.')
-        c.argument('health_check_retry_timeout', 
+        c.argument('health_check_retry_timeout',
                    help='Specify the duration, in seconds, after which Service Fabric retries the health check if the previous health check fails.')
         c.argument('health_check_wait_duration',
                    help='Specify the duration, in seconds, that Service Fabric waits before it performs the initial health check after it finishes the upgrade on the upgrade domain.')
@@ -405,7 +405,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='Indicates whether to treat a warning health event as an error event during health evaluation.')
         c.argument('default_service_type_max_percent_unhealthy_partitions_per_service',
                    help='Specify the maximum percent of unhelthy partitions per service allowed by the health policy for the default service type to use for the monitored upgrade. Allowed values are from 0 to 100.')
-        c.argument('default_service_type_max_percent_unhealthy_replicas_per_partition', 
+        c.argument('default_service_type_max_percent_unhealthy_replicas_per_partition',
                    help='Specify the maximum percent of unhelthy replicas per service allowed by the health policy for the default service type to use for the monitored upgrade. Allowed values are from 0 to 100.')
         c.argument('default_service_type_max_percent_unhealthy_services',
                    help='Specify the maximum percent of unhelthy services allowed by the health policy for the default service type to use for the monitored upgrade. Allowed values are from 0 to 100.')

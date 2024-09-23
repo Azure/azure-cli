@@ -349,8 +349,7 @@ def add_client_cert(cmd,
         for t in cluster.client_certificate_common_names:
             if (
                 t.certificate_common_name.lower() == certificate_common_name.lower()
-                and t.certificate_issuer_thumbprint.lower()
-                == certificate_issuer_thumbprint.lower()
+                and t.certificate_issuer_thumbprint.lower() == certificate_issuer_thumbprint.lower()
             ):
                 remove = t
         if remove:
@@ -1781,9 +1780,9 @@ def _set_parameters_for_customize_template(cmd,
     parameters = get_file_json(parameter_file)['parameters']
     if parameters is None:
         raise CLIError('Invalid parameters file')
-    
+
     location = parameters['clusterLocation']['value']
-    
+
     if SOURCE_VAULT_VALUE in parameters and CERTIFICATE_THUMBPRINT in parameters and CERTIFICATE_URL_VALUE in parameters:
         logger.info('Found primary certificate parameters in parameters file')
         result = _create_certificate(cmd,
