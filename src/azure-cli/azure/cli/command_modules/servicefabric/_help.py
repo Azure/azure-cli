@@ -287,7 +287,7 @@ examples:
 
   - name: Set a cluster to use the 'Automatic' upgrade mode.
     text: >
-        az sf cluster update -g group-name -c cluster1 -upgrade-mode Automatic
+        az sf cluster update -g group-name -c cluster1 --upgrade-mode Automatic
           
 """
 

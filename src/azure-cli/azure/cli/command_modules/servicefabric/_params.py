@@ -132,7 +132,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('auto_add_node', arg_type=get_three_state_flag(), help='Add node count automatically when changing reliability.')
         c.argument('settings_section_set', arg_type=get_three_state_flag(),
                    help='Flag to set setting')
-        c.argument('settings_section_set', arg_type=get_three_state_flag(),
+        c.argument('settings_section_remove', arg_type=get_three_state_flag(),
                    help='Flag to remove setting')
 
     with self.argument_context('sf cluster client-certificate remove') as c:
