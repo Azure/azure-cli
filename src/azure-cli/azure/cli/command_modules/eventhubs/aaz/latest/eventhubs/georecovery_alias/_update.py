@@ -12,26 +12,25 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "eventhubs cluster update",
+    "eventhubs georecovery-alias update",
 )
 class Update(AAZCommand):
-    """Update an instance of an Event Hubs Cluster.
+    """Update a new Alias(Disaster Recovery configuration)
     """
 
     _aaz_info = {
         "version": "2023-01-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/clusters/{}", "2023-01-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/disasterrecoveryconfigs/{}", "2023-01-01-preview"],
         ]
     }
-
-    AZ_SUPPORT_NO_WAIT = True
 
     AZ_SUPPORT_GENERIC_UPDATE = True
 
     def _handler(self, command_args):
         super()._handler(command_args)
-        return self.build_lro_poller(self._execute_operations, self._output)
+        self._execute_operations()
+        return self._output()
 
     _args_schema = None
 
@@ -44,9 +43,19 @@ class Update(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.cluster_name = AAZStrArg(
-            options=["-n", "--name", "--cluster-name"],
-            help="The name of the Event Hubs Cluster.",
+        _args_schema.alias = AAZStrArg(
+            options=["-a", "--name", "--alias"],
+            help="The Disaster Recovery configuration name",
+            required=True,
+            id_part="child_name_1",
+            fmt=AAZStrArgFormat(
+                max_length=50,
+                min_length=1,
+            ),
+        )
+        _args_schema.namespace_name = AAZStrArg(
+            options=["--namespace-name"],
+            help="The Namespace name",
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(
@@ -58,65 +67,31 @@ class Update(AAZCommand):
             required=True,
         )
 
-        # define Arg Group "Parameters"
-
-        _args_schema = cls._args_schema
-        _args_schema.provisioning_state = AAZStrArg(
-            options=["--provisioning-state"],
-            arg_group="Parameters",
-            help="Provisioning state of the Cluster.",
-            nullable=True,
-        )
-        _args_schema.tags = AAZDictArg(
-            options=["--tags"],
-            arg_group="Parameters",
-            help="Resource tags.",
-            nullable=True,
-        )
-
-        tags = cls._args_schema.tags
-        tags.Element = AAZStrArg(
-            nullable=True,
-        )
-
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
-        _args_schema.supports_scaling = AAZBoolArg(
-            options=["--supports-scaling"],
+        _args_schema.alternate_name = AAZStrArg(
+            options=["--alternate-name"],
             arg_group="Properties",
-            help="A value that indicates whether Scaling is Supported.",
+            help="Alternate name specified when alias and namespace names are same.",
             nullable=True,
         )
-
-        # define Arg Group "Sku"
-
-        _args_schema = cls._args_schema
-        _args_schema.capacity = AAZIntArg(
-            options=["--capacity"],
-            arg_group="Sku",
-            help="The quantity of Event Hubs Cluster Capacity Units contained in this cluster.",
+        _args_schema.partner_namespace = AAZStrArg(
+            options=["--partner-namespace"],
+            arg_group="Properties",
+            help="ARM Id of the Primary/Secondary eventhub namespace name, which is part of GEO DR pairing",
             nullable=True,
-            fmt=AAZIntArgFormat(
-                minimum=1,
-            ),
-        )
-        _args_schema.sku = AAZStrArg(
-            options=["--sku"],
-            arg_group="Sku",
-            help="Name of this SKU.",
-            enum={"Dedicated": "Dedicated"},
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.ClustersGet(ctx=self.ctx)()
+        self.DisasterRecoveryConfigsGet(ctx=self.ctx)()
         self.pre_instance_update(self.ctx.vars.instance)
         self.InstanceUpdateByJson(ctx=self.ctx)()
         self.InstanceUpdateByGeneric(ctx=self.ctx)()
         self.post_instance_update(self.ctx.vars.instance)
-        yield self.ClustersCreateOrUpdate(ctx=self.ctx)()
+        self.DisasterRecoveryConfigsCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -139,7 +114,7 @@ class Update(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class ClustersGet(AAZHttpOperation):
+    class DisasterRecoveryConfigsGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -153,7 +128,7 @@ class Update(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventHub/clusters/{clusterName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventHub/namespaces/{namespaceName}/disasterRecoveryConfigs/{alias}",
                 **self.url_parameters
             )
 
@@ -169,7 +144,11 @@ class Update(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "clusterName", self.ctx.args.cluster_name,
+                    "alias", self.ctx.args.alias,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "namespaceName", self.ctx.args.namespace_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -218,41 +197,25 @@ class Update(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _UpdateHelper._build_schema_cluster_read(cls._schema_on_200)
+            _UpdateHelper._build_schema_arm_disaster_recovery_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
-    class ClustersCreateOrUpdate(AAZHttpOperation):
+    class DisasterRecoveryConfigsCreateOrUpdate(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
             request = self.make_request()
             session = self.client.send_request(request=request, stream=False, **kwargs)
-            if session.http_response.status_code in [202]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_200_201,
-                    self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
-                    path_format_arguments=self.url_parameters,
-                )
             if session.http_response.status_code in [200, 201]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_200_201,
-                    self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
-                    path_format_arguments=self.url_parameters,
-                )
+                return self.on_200_201(session)
 
             return self.on_error(session.http_response)
 
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventHub/clusters/{clusterName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventHub/namespaces/{namespaceName}/disasterRecoveryConfigs/{alias}",
                 **self.url_parameters
             )
 
@@ -268,7 +231,11 @@ class Update(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "clusterName", self.ctx.args.cluster_name,
+                    "alias", self.ctx.args.alias,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "namespaceName", self.ctx.args.namespace_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -329,7 +296,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200_201
 
             cls._schema_on_200_201 = AAZObjectType()
-            _UpdateHelper._build_schema_cluster_read(cls._schema_on_200_201)
+            _UpdateHelper._build_schema_arm_disaster_recovery_read(cls._schema_on_200_201)
 
             return cls._schema_on_200_201
 
@@ -345,22 +312,11 @@ class Update(AAZCommand):
                 typ=AAZObjectType
             )
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
-            _builder.set_prop("provisioningState", AAZStrType, ".provisioning_state")
-            _builder.set_prop("sku", AAZObjectType)
-            _builder.set_prop("tags", AAZDictType, ".tags")
 
             properties = _builder.get(".properties")
             if properties is not None:
-                properties.set_prop("supportsScaling", AAZBoolType, ".supports_scaling")
-
-            sku = _builder.get(".sku")
-            if sku is not None:
-                sku.set_prop("capacity", AAZIntType, ".capacity")
-                sku.set_prop("name", AAZStrType, ".sku", typ_kwargs={"flags": {"required": True}})
-
-            tags = _builder.get(".tags")
-            if tags is not None:
-                tags.set_elements(AAZStrType, ".")
+                properties.set_prop("alternateName", AAZStrType, ".alternate_name")
+                properties.set_prop("partnerNamespace", AAZStrType, ".partner_namespace")
 
             return _instance_value
 
@@ -376,75 +332,62 @@ class Update(AAZCommand):
 class _UpdateHelper:
     """Helper class for Update"""
 
-    _schema_cluster_read = None
+    _schema_arm_disaster_recovery_read = None
 
     @classmethod
-    def _build_schema_cluster_read(cls, _schema):
-        if cls._schema_cluster_read is not None:
-            _schema.id = cls._schema_cluster_read.id
-            _schema.location = cls._schema_cluster_read.location
-            _schema.name = cls._schema_cluster_read.name
-            _schema.properties = cls._schema_cluster_read.properties
-            _schema.provisioning_state = cls._schema_cluster_read.provisioning_state
-            _schema.sku = cls._schema_cluster_read.sku
-            _schema.system_data = cls._schema_cluster_read.system_data
-            _schema.tags = cls._schema_cluster_read.tags
-            _schema.type = cls._schema_cluster_read.type
+    def _build_schema_arm_disaster_recovery_read(cls, _schema):
+        if cls._schema_arm_disaster_recovery_read is not None:
+            _schema.id = cls._schema_arm_disaster_recovery_read.id
+            _schema.location = cls._schema_arm_disaster_recovery_read.location
+            _schema.name = cls._schema_arm_disaster_recovery_read.name
+            _schema.properties = cls._schema_arm_disaster_recovery_read.properties
+            _schema.system_data = cls._schema_arm_disaster_recovery_read.system_data
+            _schema.type = cls._schema_arm_disaster_recovery_read.type
             return
 
-        cls._schema_cluster_read = _schema_cluster_read = AAZObjectType()
+        cls._schema_arm_disaster_recovery_read = _schema_arm_disaster_recovery_read = AAZObjectType()
 
-        cluster_read = _schema_cluster_read
-        cluster_read.id = AAZStrType(
+        arm_disaster_recovery_read = _schema_arm_disaster_recovery_read
+        arm_disaster_recovery_read.id = AAZStrType(
             flags={"read_only": True},
         )
-        cluster_read.location = AAZStrType()
-        cluster_read.name = AAZStrType(
+        arm_disaster_recovery_read.location = AAZStrType(
             flags={"read_only": True},
         )
-        cluster_read.properties = AAZObjectType(
+        arm_disaster_recovery_read.name = AAZStrType(
+            flags={"read_only": True},
+        )
+        arm_disaster_recovery_read.properties = AAZObjectType(
             flags={"client_flatten": True},
         )
-        cluster_read.provisioning_state = AAZStrType(
-            serialized_name="provisioningState",
-        )
-        cluster_read.sku = AAZObjectType()
-        cluster_read.system_data = AAZObjectType(
+        arm_disaster_recovery_read.system_data = AAZObjectType(
             serialized_name="systemData",
             flags={"read_only": True},
         )
-        cluster_read.tags = AAZDictType()
-        cluster_read.type = AAZStrType(
+        arm_disaster_recovery_read.type = AAZStrType(
             flags={"read_only": True},
         )
 
-        properties = _schema_cluster_read.properties
-        properties.created_at = AAZStrType(
-            serialized_name="createdAt",
+        properties = _schema_arm_disaster_recovery_read.properties
+        properties.alternate_name = AAZStrType(
+            serialized_name="alternateName",
+        )
+        properties.partner_namespace = AAZStrType(
+            serialized_name="partnerNamespace",
+        )
+        properties.pending_replication_operations_count = AAZIntType(
+            serialized_name="pendingReplicationOperationsCount",
             flags={"read_only": True},
         )
-        properties.metric_id = AAZStrType(
-            serialized_name="metricId",
+        properties.provisioning_state = AAZStrType(
+            serialized_name="provisioningState",
             flags={"read_only": True},
         )
-        properties.status = AAZStrType(
-            flags={"read_only": True},
-        )
-        properties.supports_scaling = AAZBoolType(
-            serialized_name="supportsScaling",
-        )
-        properties.updated_at = AAZStrType(
-            serialized_name="updatedAt",
+        properties.role = AAZStrType(
             flags={"read_only": True},
         )
 
-        sku = _schema_cluster_read.sku
-        sku.capacity = AAZIntType()
-        sku.name = AAZStrType(
-            flags={"required": True},
-        )
-
-        system_data = _schema_cluster_read.system_data
+        system_data = _schema_arm_disaster_recovery_read.system_data
         system_data.created_at = AAZStrType(
             serialized_name="createdAt",
         )
@@ -464,18 +407,12 @@ class _UpdateHelper:
             serialized_name="lastModifiedByType",
         )
 
-        tags = _schema_cluster_read.tags
-        tags.Element = AAZStrType()
-
-        _schema.id = cls._schema_cluster_read.id
-        _schema.location = cls._schema_cluster_read.location
-        _schema.name = cls._schema_cluster_read.name
-        _schema.properties = cls._schema_cluster_read.properties
-        _schema.provisioning_state = cls._schema_cluster_read.provisioning_state
-        _schema.sku = cls._schema_cluster_read.sku
-        _schema.system_data = cls._schema_cluster_read.system_data
-        _schema.tags = cls._schema_cluster_read.tags
-        _schema.type = cls._schema_cluster_read.type
+        _schema.id = cls._schema_arm_disaster_recovery_read.id
+        _schema.location = cls._schema_arm_disaster_recovery_read.location
+        _schema.name = cls._schema_arm_disaster_recovery_read.name
+        _schema.properties = cls._schema_arm_disaster_recovery_read.properties
+        _schema.system_data = cls._schema_arm_disaster_recovery_read.system_data
+        _schema.type = cls._schema_arm_disaster_recovery_read.type
 
 
 __all__ = ["Update"]

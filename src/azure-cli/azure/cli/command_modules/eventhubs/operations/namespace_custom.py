@@ -20,12 +20,23 @@ def create_keyvault_object(col):
     return vault_object
 
 
+def create_replica_location_object(col):
+    replica_location_object = {}
+    replica_location_object.update({
+        "location_name": col['locationName'],
+        "role_type": col['roleType'],
+        "cluster_arm_id": col['clusterArmId']
+    })
+    return replica_location_object
+
+
 def create_eventhub_namespace(cmd, resource_group_name, namespace_name, location=None, tags=None, sku='Standard',
                               capacity=None, mi_user_assigned=None, mi_system_assigned=False, zone_redundant=None,
                               encryption_config=None, minimum_tls_version=None, disable_local_auth=None,
                               maximum_throughput_units=None, require_infrastructure_encryption=None,
                               is_kafka_enabled=None, is_auto_inflate_enabled=None, alternate_name=None,
-                              public_network_access=None, cluster_arm_id=None):
+                              public_network_access=None, cluster_arm_id=None, max_replication_lag_duration_in_seconds=None,
+                              geo_data_replication_config=None):
     from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace import Create
 
     user_assigned_identity = {}
@@ -68,13 +79,6 @@ def create_eventhub_namespace(cmd, resource_group_name, namespace_name, location
                 "type": identity_type,
                 "user_assigned_identities": user_assigned_identity
             }})
-    else:
-        command_args_dict.update({
-            "identity": {
-                "type": identity_type,
-                "user_assigned_identities": None
-            }
-        })
 
     if encryption_config:
         command_args_dict.update({
@@ -83,6 +87,13 @@ def create_eventhub_namespace(cmd, resource_group_name, namespace_name, location
                 "key_source": "Microsoft.KeyVault",
                 "require_infrastructure_encryption": require_infrastructure_encryption
             }})
+    if geo_data_replication_config:
+        command_args_dict.update({
+            "geo_data_replication": {
+                "locations": geo_data_replication_config,
+                "max_replication_lag_duration_in_seconds": max_replication_lag_duration_in_seconds
+            }
+        })
 
     return Create(cli_ctx=cmd.cli_ctx)(command_args=command_args_dict)
 
@@ -305,3 +316,58 @@ def set_georecovery_alias(cmd, resource_group_name, namespace_name, alias,
         "alias": alias
     }
     return Create(cli_ctx=cmd.cli_ctx)(command_args=command_arg_dict)
+
+
+def cli_add_location(cmd, resource_group_name, namespace_name, geo_data_replication_config):
+    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace import Update
+    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace import Show
+
+    eventhubsnm = Show(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "namespace_name": namespace_name
+    })
+    location_object = []
+    for col in geo_data_replication_config:
+        location_object.append(col)
+
+    if 'geoDataReplication' in eventhubsnm:
+        for col in eventhubsnm['geoDataReplication']['locations']:
+            replica_object = create_replica_location_object(col)
+            if replica_object not in location_object:
+                location_object.append(replica_object)
+
+    return Update(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "namespace_name": namespace_name,
+        "geo_data_replication": {
+            "locations": location_object,
+        }
+    })
+
+
+def cli_remove_location(cmd, resource_group_name, namespace_name, geo_data_replication_config):
+    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace import Update
+    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace import Show
+
+    eventhubsnm = Show(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "namespace_name": namespace_name
+    })
+
+    replica_location_object = []
+
+    for col in eventhubsnm['geoDataReplication']['locations']:
+        replica_object = create_replica_location_object(col)
+        replica_location_object.append(replica_object)
+    for col in geo_data_replication_config:
+        print(col)
+        if col in replica_location_object:
+            replica_location_object.remove(col)
+    print(replica_location_object)
+    return Update(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "namespace_name": namespace_name,
+        "geo_data_replication": {
+            "locations": replica_location_object,
+        }
+    })

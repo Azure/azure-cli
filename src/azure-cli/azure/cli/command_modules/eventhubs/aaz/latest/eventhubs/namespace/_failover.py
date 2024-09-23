@@ -12,19 +12,16 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "eventhubs namespace delete",
+    "eventhubs namespace failover",
 )
-class Delete(AAZCommand):
-    """Delete an existing namespace. This operation also removes all associated resources under the namespace.
-
-    :example: Delete the Namespace
-        az eventhubs namespace delete --resource-group myresourcegroup --name mynamespace
+class Failover(AAZCommand):
+    """GeoDR Failover
     """
 
     _aaz_info = {
         "version": "2024-05-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}", "2024-05-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/failover", "2024-05-01-preview"],
         ]
     }
 
@@ -32,7 +29,7 @@ class Delete(AAZCommand):
 
     def _handler(self, command_args):
         super()._handler(command_args)
-        return self.build_lro_poller(self._execute_operations, None)
+        return self.build_lro_poller(self._execute_operations, self._output)
 
     _args_schema = None
 
@@ -46,7 +43,7 @@ class Delete(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.namespace_name = AAZStrArg(
-            options=["-n", "--name", "--namespace-name"],
+            options=["--namespace-name"],
             help="The Namespace name",
             required=True,
             id_part="name",
@@ -59,11 +56,25 @@ class Delete(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
+
+        # define Arg Group "Properties"
+
+        _args_schema = cls._args_schema
+        _args_schema.force = AAZBoolArg(
+            options=["--force"],
+            arg_group="Properties",
+            help="If Force is false then graceful failover is attempted after ensuring no data loss. If Force flag is set to true, Forced failover is attempted with possible data loss.",
+        )
+        _args_schema.primary_location = AAZStrArg(
+            options=["--primary-location"],
+            arg_group="Properties",
+            help="Query parameter for the new primary location after failover.",
+        )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.NamespacesDelete(ctx=self.ctx)()
+        yield self.NamespacesFailover(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -74,7 +85,11 @@ class Delete(AAZCommand):
     def post_operations(self):
         pass
 
-    class NamespacesDelete(AAZHttpOperation):
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
+
+    class NamespacesFailover(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -98,28 +113,19 @@ class Delete(AAZCommand):
                     lro_options={"final-state-via": "azure-async-operation"},
                     path_format_arguments=self.url_parameters,
                 )
-            if session.http_response.status_code in [204]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_204,
-                    self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
-                    path_format_arguments=self.url_parameters,
-                )
 
             return self.on_error(session.http_response)
 
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventHub/namespaces/{namespaceName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventHub/namespaces/{namespaceName}/failover",
                 **self.url_parameters
             )
 
         @property
         def method(self):
-            return "DELETE"
+            return "POST"
 
         @property
         def error_format(self):
@@ -153,15 +159,77 @@ class Delete(AAZCommand):
             }
             return parameters
 
+        @property
+        def header_parameters(self):
+            parameters = {
+                **self.serialize_header_param(
+                    "Content-Type", "application/json",
+                ),
+                **self.serialize_header_param(
+                    "Accept", "application/json",
+                ),
+            }
+            return parameters
+
+        @property
+        def content(self):
+            _content_value, _builder = self.new_content_builder(
+                self.ctx.args,
+                typ=AAZObjectType,
+                typ_kwargs={"flags": {"required": True, "client_flatten": True}}
+            )
+            _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+
+            properties = _builder.get(".properties")
+            if properties is not None:
+                properties.set_prop("force", AAZBoolType, ".force")
+                properties.set_prop("primaryLocation", AAZStrType, ".primary_location")
+
+            return self.serialize_content(_content_value)
+
         def on_200(self, session):
-            pass
+            data = self.deserialize_http_content(session)
+            self.ctx.set_var(
+                "instance",
+                data,
+                schema_builder=self._build_schema_on_200
+            )
 
-        def on_204(self, session):
-            pass
+        _schema_on_200 = None
+
+        @classmethod
+        def _build_schema_on_200(cls):
+            if cls._schema_on_200 is not None:
+                return cls._schema_on_200
+
+            cls._schema_on_200 = AAZObjectType()
+            _FailoverHelper._build_schema_fail_over_properties_read(cls._schema_on_200)
+
+            return cls._schema_on_200
 
 
-class _DeleteHelper:
-    """Helper class for Delete"""
+class _FailoverHelper:
+    """Helper class for Failover"""
+
+    _schema_fail_over_properties_read = None
+
+    @classmethod
+    def _build_schema_fail_over_properties_read(cls, _schema):
+        if cls._schema_fail_over_properties_read is not None:
+            _schema.force = cls._schema_fail_over_properties_read.force
+            _schema.primary_location = cls._schema_fail_over_properties_read.primary_location
+            return
+
+        cls._schema_fail_over_properties_read = _schema_fail_over_properties_read = AAZObjectType()
+
+        fail_over_properties_read = _schema_fail_over_properties_read
+        fail_over_properties_read.force = AAZBoolType()
+        fail_over_properties_read.primary_location = AAZStrType(
+            serialized_name="primaryLocation",
+        )
+
+        _schema.force = cls._schema_fail_over_properties_read.force
+        _schema.primary_location = cls._schema_fail_over_properties_read.primary_location
 
 
-__all__ = ["Delete"]
+__all__ = ["Failover"]

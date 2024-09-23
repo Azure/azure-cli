@@ -26,6 +26,8 @@ class List(AAZCommand):
         ]
     }
 
+    AZ_SUPPORT_PAGINATION = True
+
     def _handler(self, command_args):
         super()._handler(command_args)
         return self.build_paging(self._execute_operations, self._output)
@@ -163,6 +165,9 @@ class List(AAZCommand):
             _element.properties = AAZObjectType(
                 flags={"client_flatten": True},
             )
+            _element.provisioning_state = AAZStrType(
+                serialized_name="provisioningState",
+            )
             _element.sku = AAZObjectType()
             _element.system_data = AAZObjectType(
                 serialized_name="systemData",
@@ -181,9 +186,6 @@ class List(AAZCommand):
             properties.metric_id = AAZStrType(
                 serialized_name="metricId",
                 flags={"read_only": True},
-            )
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
             )
             properties.status = AAZStrType(
                 flags={"read_only": True},
@@ -319,6 +321,9 @@ class List(AAZCommand):
             _element.properties = AAZObjectType(
                 flags={"client_flatten": True},
             )
+            _element.provisioning_state = AAZStrType(
+                serialized_name="provisioningState",
+            )
             _element.sku = AAZObjectType()
             _element.system_data = AAZObjectType(
                 serialized_name="systemData",
@@ -337,9 +342,6 @@ class List(AAZCommand):
             properties.metric_id = AAZStrType(
                 serialized_name="metricId",
                 flags={"read_only": True},
-            )
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
             )
             properties.status = AAZStrType(
                 flags={"read_only": True},
