@@ -16,7 +16,7 @@ from ._arg_action import AAZSimpleTypeArgAction, AAZObjectArgAction, AAZDictArgA
     AAZListArgAction, AAZGenericUpdateAction, AAZGenericUpdateForceStringAction
 from ._base import AAZBaseType, AAZUndefined
 from ._field_type import AAZObjectType, AAZStrType, AAZIntType, AAZBoolType, AAZFloatType, AAZListType, AAZDictType, \
-    AAZSimpleType, AAZFreeFormDictType, AAZIdentityObjectType
+    AAZSimpleType, AAZFreeFormDictType
 from ._field_value import AAZObject
 from ._arg_fmt import AAZObjectArgFormat, AAZListArgFormat, AAZDictArgFormat, AAZFreeFormDictArgFormat, \
     AAZSubscriptionIdArgFormat, AAZResourceLocationArgFormat, AAZResourceIdArgFormat, AAZUuidFormat, AAZDateFormat, \

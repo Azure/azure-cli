@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+# pylint: disable=protected-access
 import copy
 
 from ._base import AAZBaseValue, AAZValuePatch, AAZUndefined
@@ -474,8 +475,8 @@ class AAZIdentityObject(AAZObject):
                     if v == AAZUndefined:
                         continue
 
-                    if field_schema._serialized_name:  # pylint: disable=protected-access
-                        name = field_schema._serialized_name  # pylint: disable=protected-access
+                    if field_schema._serialized_name:
+                        name = field_schema._serialized_name
 
                     if name in {
                         self.M_SYSTEM_ASSIGNED, self.M_USER_ASSIGNED,
@@ -515,7 +516,7 @@ class AAZIdentityObject(AAZObject):
             if action == "remove":
                 if user_assigned is not None:
                     if len(user_assigned) > 1:  # remove each
-                        identities -= {i for i in user_assigned}
+                        identities -= set(user_assigned)
 
                     else:  # remove all
                         identities = {}
@@ -533,7 +534,7 @@ class AAZIdentityObject(AAZObject):
 
             elif action == "assign":
                 if user_assigned:
-                    identities |= {i for i in user_assigned}
+                    identities |= set(user_assigned)
 
                 if identities:
                     result["userAssignedIdentities"] = {k: {} for k in identities}
