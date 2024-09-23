@@ -5222,6 +5222,15 @@ class NetworkVNetPeeringScenarioTest(ScenarioTest):
             self.check('remoteSubnetNames[0]', 'Subnet1'),
             self.check('localSubnetNames[0]', 'Subnet2'),
         ])
+        self.cmd(
+            "network vnet peering update -n peering2 -g {rg} --vnet-name vnet2 --remote-vnet {vnet1_id} "
+            "--allow-vnet-access false --allow-forwarded-traffic false --allow-gateway-transit true",
+            checks=[
+                self.check("allowForwardedTraffic", False),
+                self.check("allowGatewayTransit", True),
+                self.check("allowVirtualNetworkAccess", False),
+            ]
+        )
 
 
 class NetworkVpnConnectionIpSecPolicy(ScenarioTest):

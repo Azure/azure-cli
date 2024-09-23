@@ -587,6 +587,63 @@ class HDInsightClusterTests(ScenarioTest):
         # disable azure monitor agent
         self.cmd('az hdinsight azure-monitor-agent disable -n {cluster} --resource-group {rg}')
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
+    @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
+    def test_hdinsight_update_user_assigned(self, storage_account_info):
+        self.kwargs.update({
+            'msi1': '/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/yuchen-ps-test/providers/microsoft.managedidentity/userassignedidentities/hdi-msi',
+        })
+
+        self._create_hdinsight_cluster(
+            HDInsightClusterTests._wasb_arguments(storage_account_info),
+            HDInsightClusterTests._vnet_arguments()
+        )
+        # Update manage identity with a UserAssigned msi.
+        self.cmd(
+            'az hdinsight update --name {cluster} --resource-group {rg} --assign-identity-type UserAssigned --assign-identity {msi1}',
+            checks=[
+                self.check('identity.type', 'UserAssigned'),
+            ])
+
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
+    @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
+    def test_hdinsight_update_system_assigned(self, storage_account_info):
+        self._create_hdinsight_cluster(
+            HDInsightClusterTests._wasb_arguments(storage_account_info),
+            HDInsightClusterTests._vnet_arguments()
+        )
+        # Update manage identity with a SystemAssigned msi.
+        self.cmd(
+            'az hdinsight update --name {cluster} --resource-group {rg} --assign-identity-type SystemAssigned',
+            checks=[
+                self.check('identity.type', 'SystemAssigned'),
+            ])
+
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
+    @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
+    def test_hdinsight_update_system_and_user_assigned(self, storage_account_info):
+        self.kwargs.update({
+            'msi1': '/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/yuchen-ps-test/providers/microsoft.managedidentity/userassignedidentities/hdi-msi',
+            'msi2': '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yuchen-devrp/providers/Microsoft.ManagedIdentity/userAssignedIdentities/hdiwasbmsi'
+        })
+        self._create_hdinsight_cluster(
+            HDInsightClusterTests._wasb_arguments(storage_account_info),
+            HDInsightClusterTests._vnet_arguments()
+        )
+
+        # Update manage identity with SystemAssigned,UserAssigned msi.
+        self.cmd(
+            'az hdinsight update --name {cluster} --resource-group {rg} --assign-identity-type "SystemAssigned,UserAssigned" --assign-identity {msi1} {msi2}',
+            checks=[
+                self.check('identity.type', 'SystemAssigned,UserAssigned'),
+            ])
+
+
     def _create_hdinsight_cluster(self, *additional_create_arguments):
         self.kwargs.update({
             'loc': self.location,
