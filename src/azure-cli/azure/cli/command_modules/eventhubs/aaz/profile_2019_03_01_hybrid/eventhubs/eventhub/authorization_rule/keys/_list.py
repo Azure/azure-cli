@@ -12,7 +12,7 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "eventhubs eventhub authorization-rule keys list.",
+    "eventhubs eventhub authorization-rule keys list",
 )
 class List(AAZCommand):
     """Gets the ACS and SAS connection strings for the Event Hub.
