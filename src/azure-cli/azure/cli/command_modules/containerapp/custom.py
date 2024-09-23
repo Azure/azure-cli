@@ -4,11 +4,11 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long, consider-using-f-string, logging-format-interpolation, inconsistent-return-statements, broad-except, bare-except, too-many-statements, too-many-locals, too-many-boolean-expressions, too-many-branches, too-many-nested-blocks, pointless-statement, expression-not-assigned, unbalanced-tuple-unpacking, unsupported-assignment-operation
 # pylint: disable=unused-argument, no-else-raise
+import json
 import threading
 import sys
 import time
 from urllib.parse import urlparse
-import json
 import requests
 
 
@@ -88,7 +88,7 @@ from ._constants import (MICROSOFT_SECRET_SETTING_NAME, FACEBOOK_SECRET_SETTING_
                          GOOGLE_SECRET_SETTING_NAME, TWITTER_SECRET_SETTING_NAME, APPLE_SECRET_SETTING_NAME, CONTAINER_APPS_RP,
                          NAME_INVALID, NAME_ALREADY_EXISTS, ACR_IMAGE_SUFFIX, HELLO_WORLD_IMAGE, LOG_TYPE_SYSTEM, LOG_TYPE_CONSOLE,
                          MANAGED_CERTIFICATE_RT, PRIVATE_CERTIFICATE_RT, PENDING_STATUS, SUCCEEDED_STATUS, CONTAINER_APPS_SDK_MODELS,
-                         BLOB_STORAGE_TOKEN_STORE_SECRET_SETTING_NAME)
+                         BLOB_STORAGE_TOKEN_STORE_SECRET_SETTING_NAME, DEFAULT_PORT)
 
 from .containerapp_job_registry_decorator import ContainerAppJobRegistryDecorator, ContainerAppJobRegistrySetDecorator, \
     ContainerAppJobRegistryRemoveDecorator
@@ -1621,10 +1621,18 @@ def start_containerappjob_execution_yaml(cmd, name, resource_group_name, file_na
 
 def stop_containerappsjob(cmd, resource_group_name, name, job_execution_name=None, execution_name_list=None):
     try:
+        # todo: remove execution_name_list in future and allow calling with or without job_execution_name
         if execution_name_list is not None:
-            execution_name_list = execution_name_list.split(",")
-            execution_name_list = json.dumps({'jobExecutionName': execution_name_list})
-        return ContainerAppsJobClient.stop_job(cmd=cmd, resource_group_name=resource_group_name, name=name, job_execution_name=job_execution_name, job_execution_names=execution_name_list)
+            return "--execution-name-list is deprecated. Please use --job-execution-name instead."
+
+        r = ContainerAppsJobClient.stop_job(cmd=cmd, resource_group_name=resource_group_name, name=name, job_execution_name=job_execution_name)
+
+        # if stop is called for a single job execution, return generic response else return the response
+        if job_execution_name:
+            return "Job Execution: " + job_execution_name + ", stopped successfully."
+
+        # else return the response
+        return r
     except CLIError as e:
         handle_raw_exception(e)
 
@@ -2417,7 +2425,7 @@ def show_ingress(cmd, name, resource_group_name):
         raise ValidationError("The containerapp '{}' does not have ingress enabled.".format(name)) from e
 
 
-def enable_ingress(cmd, name, resource_group_name, type, target_port, transport="auto", exposed_port=None, allow_insecure=False, disable_warnings=False, no_wait=False):  # pylint: disable=redefined-builtin
+def enable_ingress(cmd, name, resource_group_name, type, target_port=None, transport="auto", exposed_port=None, allow_insecure=False, disable_warnings=False, no_wait=False):  # pylint: disable=redefined-builtin
     _validate_subscription_registered(cmd, CONTAINER_APPS_RP)
 
     containerapp_def = None
@@ -2437,13 +2445,17 @@ def enable_ingress(cmd, name, resource_group_name, type, target_port, transport=
             external_ingress = True
 
     ingress_def = None
-    if target_port is not None and type is not None:
+    if type is not None:
         ingress_def = IngressModel
         ingress_def["external"] = external_ingress
-        ingress_def["targetPort"] = target_port
         ingress_def["transport"] = transport
         ingress_def["allowInsecure"] = allow_insecure
         ingress_def["exposedPort"] = exposed_port if transport == "tcp" else None
+
+        if target_port is not None:
+            ingress_def["targetPort"] = target_port
+        else:
+            ingress_def["targetPort"] = DEFAULT_PORT
 
     containerapp_def["properties"]["configuration"]["ingress"] = ingress_def
 
@@ -3577,9 +3589,10 @@ def stream_containerapp_logs(cmd, resource_group_name, name, container=None, rev
     for line in resp.iter_lines():
         if line:
             logger.info("received raw log line: %s", line)
-            # these .replaces are needed to display color/quotations properly
-            # for some reason the API returns garbled unicode special characters (may need to add more in the future)
-            print(line.decode("utf-8").replace("\\u0022", "\u0022").replace("\\u001B", "\u001B").replace("\\u002B", "\u002B").replace("\\u0027", "\u0027"))
+            if output_format == "json":
+                print(json.dumps(json.loads(line)))
+            else:
+                print(line.decode("utf-8"))
 
 
 def stream_environment_logs(cmd, resource_group_name, name, follow=False, tail=None):
@@ -3673,11 +3686,6 @@ def containerapp_up(cmd,
     if image and HELLOWORLD in image.lower():
         ingress = "external" if not ingress else ingress
         target_port = 80 if not target_port else target_port
-
-    if image:
-        if ingress and not target_port:
-            target_port = 80
-            logger.warning("No ingress provided, defaulting to port 80. Try `az containerapp up --ingress %s --target-port <port>` to set a custom port.", ingress)
 
     if source and not _has_dockerfile(source, dockerfile):
         pass
@@ -5015,10 +5023,15 @@ def set_workload_profile(cmd, resource_group_name, env_name, workload_profile_na
 
 
 def add_workload_profile(cmd, resource_group_name, env_name, workload_profile_name, workload_profile_type=None, min_nodes=None, max_nodes=None):
+    r = None
     try:
         r = ManagedEnvironmentClient.show(cmd=cmd, resource_group_name=resource_group_name, name=env_name)
     except CLIError as e:
         handle_raw_exception(e)
+
+    if r and safe_get(r, "properties", "workloadProfiles") is None:
+        raise ValidationError("Cannot add workload profile because the environment doesn't enable workload profile.\n"
+                              "If you want to use Consumption and Dedicated environment, please create a new one with 'az containerapp env create'.")
 
     workload_profiles = r["properties"]["workloadProfiles"]
 
@@ -5031,10 +5044,15 @@ def add_workload_profile(cmd, resource_group_name, env_name, workload_profile_na
 
 
 def update_workload_profile(cmd, resource_group_name, env_name, workload_profile_name, min_nodes=None, max_nodes=None):
+    r = None
     try:
         r = ManagedEnvironmentClient.show(cmd=cmd, resource_group_name=resource_group_name, name=env_name)
     except CLIError as e:
         handle_raw_exception(e)
+
+    if r and safe_get(r, "properties", "workloadProfiles") is None:
+        raise ValidationError("Cannot update workload profile because the environment doesn't enable workload profile.\n"
+                              "If you want to use Consumption and Dedicated environment, please create a new one with 'az containerapp env create'.")
 
     workload_profiles = r["properties"]["workloadProfiles"]
 

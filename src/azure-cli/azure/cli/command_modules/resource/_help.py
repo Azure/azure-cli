@@ -2845,9 +2845,9 @@ helps['bicep restore'] = """
 type: command
 short-summary: Restore external modules for a bicep file.
 examples:
-  - name: Retore external modules.
+  - name: Restore external modules.
     text: az bicep restore --file {bicep_file}
-  - name: Retore external modules and overwrite cached external modules.
+  - name: Restore external modules and overwrite cached external modules.
     text: az bicep restore --file {bicep_file} --force
 """
 

@@ -89,9 +89,9 @@ class ContainerAppAuthTest(ScenarioTest):
             JMESPathCheck('login.tokenStore.azureBlobStorage.sasUrlSettingName',
                           "blob-storage-token-store-sasurl-secret"),
         ])
-
-        self.cmd('containerapp auth update -g {} -n {} --proxy-convention Standard --redirect-provider Facebook --unauthenticated-client-action AllowAnonymous'.format(
-                resource_group, app), checks=[
+        login_paramters = 'identityProviders.azureActiveDirectory.login.loginParameters=[a,scope=openid offline_access api://<back-end-client-id>/user_impersonation]'
+        self.cmd("containerapp auth update -g {} -n {} --proxy-convention Standard --redirect-provider Facebook --unauthenticated-client-action AllowAnonymous --set '{}'".format(
+                resource_group, app, login_paramters), checks=[
                 JMESPathCheck('name', 'current'),
                 JMESPathCheck('properties.httpSettings.forwardProxy.convention', 'Standard'),
                 JMESPathCheck('properties.globalValidation.redirectToProvider', 'Facebook'),
@@ -99,7 +99,10 @@ class ContainerAppAuthTest(ScenarioTest):
                 JMESPathCheck('properties.identityProviders.azureActiveDirectory.registration.clientId', client_id),
                 JMESPathCheck('properties.identityProviders.azureActiveDirectory.registration.clientSecretSettingName', "microsoft-provider-authentication-secret"),
                 JMESPathCheck('properties.identityProviders.azureActiveDirectory.registration.openIdIssuer', issuer),
-            ])
+                JMESPathCheck('length(properties.identityProviders.azureActiveDirectory.login.loginParameters)', 2),
+                JMESPathCheck('properties.identityProviders.azureActiveDirectory.login.loginParameters[0]', "a"),
+                JMESPathCheck('properties.identityProviders.azureActiveDirectory.login.loginParameters[1]', "scope=openid offline_access api://<back-end-client-id>/user_impersonation"),
+        ])
 
         self.cmd('containerapp show  -g {} -n {}'.format(resource_group, app), checks=[
             JMESPathCheck('properties.provisioningState', "Succeeded")

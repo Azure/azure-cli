@@ -11,17 +11,22 @@ import sys
 from azure.cli.core._environment import get_config_dir
 from knack.log import get_logger
 from knack.util import CLIError
-from msal import PublicClientApplication
+from msal import PublicClientApplication, ConfidentialClientApplication
 
-# Service principal entry properties
-from .msal_authentication import _CLIENT_ID, _TENANT, _CLIENT_SECRET, _CERTIFICATE, _CLIENT_ASSERTION, \
-    _USE_CERT_SN_ISSUER
-from .msal_authentication import UserCredential, ServicePrincipalCredential
+from .msal_credentials import UserCredential, ServicePrincipalCredential
 from .persistence import load_persisted_token_cache, file_extensions, load_secret_store
 from .util import check_result
 
 AZURE_CLI_CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
 
+# Service principal entry properties. Names are taken from OAuth 2.0 client credentials flow parameters:
+# https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-client-creds-grant-flow
+_TENANT = 'tenant'
+_CLIENT_ID = 'client_id'
+_CLIENT_SECRET = 'client_secret'
+_CERTIFICATE = 'certificate'
+_USE_CERT_SN_ISSUER = 'use_cert_sn_issuer'
+_CLIENT_ASSERTION = 'client_assertion'
 
 # For environment credential
 AZURE_AUTHORITY_HOST = "AZURE_AUTHORITY_HOST"
@@ -29,6 +34,9 @@ AZURE_TENANT_ID = "AZURE_TENANT_ID"
 AZURE_CLIENT_ID = "AZURE_CLIENT_ID"
 AZURE_CLIENT_SECRET = "AZURE_CLIENT_SECRET"
 
+WAM_PROMPT = (
+    "Select the account you want to log in with. "
+    "For more information on login with Azure CLI, see https://go.microsoft.com/fwlink/?linkid=2271136")
 
 logger = get_logger(__name__)
 
@@ -150,7 +158,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
                                "flow with `az login --use-device-code`.",
                                self._msal_app.authority.authorization_endpoint)
             elif ui == 'broker':
-                logger.warning("Please select the account you want to log in with.")
+                logger.warning(WAM_PROMPT)
 
         from .util import read_response_templates
         success_template, error_template = read_response_templates()
@@ -184,10 +192,9 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         `credential` is a dict returned by ServicePrincipalAuth.build_credential
         """
         sp_auth = ServicePrincipalAuth.build_from_credential(self.tenant_id, client_id, credential)
-
-        # This cred means SDK credential object
-        cred = ServicePrincipalCredential(sp_auth, **self._msal_app_kwargs)
-        result = cred.acquire_token_for_client(scopes)
+        client_credential = sp_auth.get_msal_client_credential()
+        cca = ConfidentialClientApplication(client_id, client_credential, **self._msal_app_kwargs)
+        result = cca.acquire_token_for_client(scopes)
         check_result(result)
 
         # Only persist the service principal after a successful login
@@ -200,8 +207,9 @@ class Identity:  # pylint: disable=too-many-instance-attributes
     def login_in_cloud_shell(self, scopes):
         raise NotImplementedError
 
-    def logout_user(self, user):
-        accounts = self._msal_app.get_accounts(user)
+    def logout_user(self, username):
+        # If username is an SP client ID, it is ignored
+        accounts = self._msal_app.get_accounts(username)
         for account in accounts:
             self._msal_app.remove_account(account)
 
@@ -215,12 +223,21 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         for e in file_extensions.values():
             _try_remove(self._token_cache_file + e)
 
-    def logout_service_principal(self, sp):
-        # remove service principal secrets
-        self._service_principal_store.remove_entry(sp)
+    def logout_service_principal(self, client_id):
+        # If client_id is a username, it is ignored
+
+        # Step 1: Remove SP from MSAL token cache
+        # Note that removing SP access tokens shouldn't rely on SP store
+        cca = ConfidentialClientApplication(client_id, **self._msal_app_kwargs)
+        cca.remove_tokens_for_client()
+
+        # Step 2: Remove SP from SP store
+        self._service_principal_store.remove_entry(client_id)
 
     def logout_all_service_principal(self):
         # remove service principal secrets
+        # TODO: As MSAL provides no interface to get all service principals in its token cache, this method can't
+        #   clear all service principals' access tokens from MSAL token cache.
         for e in file_extensions.values():
             _try_remove(self._secret_file + e)
 
@@ -233,32 +250,47 @@ class Identity:  # pylint: disable=too-many-instance-attributes
 
     def get_service_principal_credential(self, client_id):
         entry = self._service_principal_store.load_entry(client_id, self.tenant_id)
-        sp_auth = ServicePrincipalAuth(entry)
-        return ServicePrincipalCredential(sp_auth, **self._msal_app_kwargs)
+        client_credential = ServicePrincipalAuth(entry).get_msal_client_credential()
+        return ServicePrincipalCredential(client_id, client_credential, **self._msal_app_kwargs)
 
     def get_managed_identity_credential(self, client_id=None):
         raise NotImplementedError
 
 
-class ServicePrincipalAuth:
-
+class ServicePrincipalAuth:  # pylint: disable=too-many-instance-attributes
     def __init__(self, entry):
+        # Initialize all attributes first, so that we don't need to call getattr to check their existence
+        self.client_id = None
+        self.tenant = None
+        # secret
+        self.client_secret = None
+        # certificate
+        self.certificate = None
+        self.use_cert_sn_issuer = None
+        # federated identity credential
+        self.client_assertion = None
+
+        # Internal attributes for certificate
+        # They are computed at runtime and not persisted in the service principal entry.
+        self._certificate_string = None
+        self._thumbprint = None
+        self._public_certificate = None
+
         self.__dict__.update(entry)
 
-        if _CERTIFICATE in entry:
+        if self.certificate:
             from OpenSSL.crypto import load_certificate, FILETYPE_PEM, Error
-            self.public_certificate = None
             try:
                 with open(self.certificate, 'r') as file_reader:
-                    self.certificate_string = file_reader.read()
-                    cert = load_certificate(FILETYPE_PEM, self.certificate_string)
-                    self.thumbprint = cert.digest("sha1").decode().replace(':', '')
+                    self._certificate_string = file_reader.read()
+                    cert = load_certificate(FILETYPE_PEM, self._certificate_string)
+                    self._thumbprint = cert.digest("sha1").decode().replace(':', '')
                     if entry.get(_USE_CERT_SN_ISSUER):
                         # low-tech but safe parsing based on
                         # https://github.com/libressl-portable/openbsd/blob/master/src/lib/libcrypto/pem/pem.h
                         match = re.search(r'-----BEGIN CERTIFICATE-----(?P<cert_value>[^-]+)-----END CERTIFICATE-----',
-                                          self.certificate_string, re.I)
-                        self.public_certificate = match.group()
+                                          self._certificate_string, re.I)
+                        self._public_certificate = match.group()
             except (UnicodeDecodeError, Error) as ex:
                 raise CLIError('Invalid certificate, please use a valid PEM file. Error detail: {}'.format(ex))
 
@@ -294,8 +326,42 @@ class ServicePrincipalAuth:
         return entry
 
     def get_entry_to_persist(self):
+        """Get a service principal entry that can be persisted by ServicePrincipalStore."""
         persisted_keys = [_CLIENT_ID, _TENANT, _CLIENT_SECRET, _CERTIFICATE, _USE_CERT_SN_ISSUER, _CLIENT_ASSERTION]
-        return {k: v for k, v in self.__dict__.items() if k in persisted_keys}
+        # Only persist certain attributes whose values are not None
+        return {k: v for k, v in self.__dict__.items() if k in persisted_keys and v}
+
+    def get_msal_client_credential(self):
+        """Get a client_credential that can be consumed by msal.ConfidentialClientApplication."""
+        client_credential = None
+
+        # client_secret
+        # "your client secret"
+        if self.client_secret:
+            client_credential = self.client_secret
+
+        # certificate
+        # {
+        #     "private_key": "...-----BEGIN PRIVATE KEY-----... in PEM format",
+        #     "thumbprint": "A1B2C3D4E5F6...",
+        #     "public_certificate": "...-----BEGIN CERTIFICATE-----...",
+        # }
+        if self.certificate:
+            client_credential = {
+                "private_key": self._certificate_string,
+                "thumbprint": self._thumbprint
+            }
+            if self._public_certificate:
+                client_credential['public_certificate'] = self._public_certificate
+
+        # client_assertion
+        # {
+        #     "client_assertion": "...a JWT with claims aud, exp, iss, jti, nbf, and sub..."
+        # }
+        if self.client_assertion:
+            client_credential = {'client_assertion': self.client_assertion}
+
+        return client_credential
 
 
 class ServicePrincipalStore:
