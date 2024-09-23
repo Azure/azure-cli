@@ -872,8 +872,7 @@ class AzCliCommandInvoker(CommandInvoker):
             set_secrets_detected(True, secret_property_names, secret_names)
         except Exception as ex:  # pylint: disable=broad-except
             # ignore all exceptions, as this is just a warning
-            logger.debug(f'Scan credentials failed with {str(ex)}')
-            pass
+            logger.debug('Scan credentials failed with %s', str(ex))
 
     def resolve_confirmation(self, cmd, parsed_args):
         confirm = cmd.confirmation and not parsed_args.__dict__.pop('yes', None) \
