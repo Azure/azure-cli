@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.breaking_change import register_required_flag_breaking_change, register_default_value_breaking_change, register_other_breaking_change
+from azure.cli.core.breaking_change import register_command_group_deprecate, register_command_deprecated
 register_command_group_deprecate('sf cluster setting', redirect='sf cluster update')
 # Warning Message: This command group has been deprecated and will be removed in next breaking change release. Use `sf cluster update` instead.
 
