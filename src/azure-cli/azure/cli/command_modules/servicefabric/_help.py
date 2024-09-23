@@ -307,7 +307,7 @@ short-summary: Add nodes to a node type in a cluster.
 examples:
   - name: Add 2 'nt1' nodes to a cluster.
     text: >
-        az sf cluster node add -g group-name -c cluster1 --number-of-nodes-to-add 2 --node-type 'nt1 --durability-level Bronze'
+        az sf cluster node add -g group-name -c cluster1 --number-of-nodes-to-add 2 --node-type 'nt1'
 
 """
 

@@ -114,7 +114,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('sf cluster node') as c:
         c.argument('number_of_nodes_to_add', options_list=['--number-of-nodes-to-add', '--nodes-to-add'], help='number of nodes to add.')
-        c.argument('number_of_nodes_to_remove', options_list=['--number-of-nodes-to-remove', '--nodes-to-remove'], help='number of nodes to remove.')
+        c.argument('number_of_nodes_to_remove', options_list=['--number-of-nodes-to-rem', '--nodes-to-remove'], help='number of nodes to remove.')
 
     with self.argument_context('sf cluster node-type') as c:
         c.argument('capacity', help='The capacity tag applied to nodes in the node type. The cluster resource manager uses these tags to understand how much capacity a node has.')
@@ -128,7 +128,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('value', help='Specify the value')
         c.argument('version', help='cluster code version')
         c.argument('upgrade_mode', arg_type=get_enum_type(['manual', 'automatic']), help='cluster upgrade mode')
-        c.argument('reliability_level', arg_type=get_enum_type(['Bronze', 'Silver', 'Gold', 'Platinum']), help='durability level.')
+        c.argument('reliability_level', arg_type=get_enum_type(['Bronze', 'Silver', 'Gold', 'Platinum']), help='Reliability level.')
         c.argument('auto_add_node', arg_type=get_three_state_flag(), help='Add node count automatically when changing reliability.')
         c.argument('settings_section_set', arg_type=get_three_state_flag(),
                    help='Flag to set setting')
