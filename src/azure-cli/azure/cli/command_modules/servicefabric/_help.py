@@ -283,7 +283,7 @@ examples:
 
   - name: Remove the `MaxFileOperationTimeout` setting from a cluster.
     text: >
-        az sf cluster update -g group-name -c cluster1 --settings-section-remove --section 'NamingService' --parameter 'MaxFileOperationTimeout'
+        az sf cluster update -g group-name -c cluster1 --settings-section-rem --section 'NamingService' --parameter 'MaxFileOperationTimeout'
 
   - name: Set a cluster to use the 'Automatic' upgrade mode.
     text: >
@@ -307,7 +307,7 @@ short-summary: Add nodes to a node type in a cluster.
 examples:
   - name: Add 2 'nt1' nodes to a cluster.
     text: >
-        az sf cluster node add -g group-name -c cluster1 --number-of-nodes-to-add 2 --node-type 'nt1'
+        az sf cluster node add -g group-name -c cluster1 --number-of-nodes-to-add 2 --node-type 'nt1 --durability-level Bronze'
 
 """
 
