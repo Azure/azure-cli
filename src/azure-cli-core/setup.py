@@ -63,7 +63,7 @@ DEPENDENCIES = [
     'PyJWT>=2.1.0',
     'pyopenssl>=17.1.0',  # https://github.com/pyca/pyopenssl/pull/612
     'requests[socks]',
-    'microsoft-security-utilities-secret-masker~=1.0.0b1',
+    'microsoft-security-utilities-secret-masker~=1.0.0b2',
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
