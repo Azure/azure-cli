@@ -3,6 +3,17 @@
 Release History
 ===============
 
+2.64.0
+++++++
+* Minor fixes
+
+2.63.0
+++++++
+* Resolve CVE-2024-39689 (#29320)
+* Support `az config set extension.dynamic_install_allow_preview` for extension dynamic installation configuration (#29413)
+* Resolve CVE-2024-6345 (#29433)
+* `az logout`: Remove service principal access tokens from token cache (#29441)
+
 2.62.0
 ++++++
 * Fix #28997: Fix error "User cancelled the Accounts Control Operation" when logging in with WAM as Administrator (#29088)

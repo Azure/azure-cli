@@ -182,8 +182,7 @@ class AAZBaseDictValue(AAZBaseValue):
         return len(self._data)
 
     def __iter__(self):
-        for key in self._data:
-            yield key
+        yield from self._data
 
     def __eq__(self, other):
         if isinstance(other, AAZBaseValue):
@@ -326,8 +325,7 @@ class AAZList(AAZBaseValue):
         self._len = 0
         if self._data is not None and self._data != AAZUndefined:
             for idx in self._data:
-                if idx + 1 > self._len:
-                    self._len = idx + 1
+                self._len = max(self._len, idx + 1)
 
     def __getitem__(self, idx) -> AAZBaseValue:
         if not isinstance(idx, int):
@@ -341,8 +339,7 @@ class AAZList(AAZBaseValue):
         if idx not in self._data:
             self._data[idx] = AAZValuePatch.build(item_schema)
 
-            if idx + 1 > self._len:
-                self._len = idx + 1
+            self._len = max(self._len, idx + 1)
 
         return item_schema._ValueCls(item_schema, self._data[idx])
 
@@ -362,8 +359,7 @@ class AAZList(AAZBaseValue):
 
         self._data[idx] = item_schema.process_data(data, key=idx)
 
-        if idx + 1 > self._len:
-            self._len = idx + 1
+        self._len = max(self._len, idx + 1)
 
     def __delitem__(self, idx):
         if not isinstance(idx, int):

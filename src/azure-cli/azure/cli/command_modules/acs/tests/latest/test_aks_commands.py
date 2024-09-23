@@ -100,6 +100,23 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         create_version = next(x for x in sorted_supported_versions if not x.startswith(prefix))
         return create_version, upgrade_version
 
+    def _get_lts_versions(self, location):
+        """Return the AKS versions that are marked as LTS in ascending order."""
+        lts_versions = self.cmd(
+            '''az aks get-versions -l {} --query "values[?contains(capabilities.supportPlan, 'AKSLongTermSupport')].patchVersions.keys(@)[]"'''.format(location)
+        ).get_output_in_json()
+        sorted_lts_versions = sorted(lts_versions, key=version_to_tuple, reverse=False)
+        return sorted_lts_versions
+    
+    def _get_newer_non_lts_version(self, location, version):
+        """Return the nearest newer non-lts version of the specified version."""
+        supported_versions = self.cmd(
+            '''az aks get-versions -l {} --query "values[?!(contains(capabilities.supportPlan, 'AKSLongTermSupport'))].patchVersions.keys(@)[]"'''.format(location)
+        ).get_output_in_json()
+        newer_versions = [x for x in supported_versions if version_to_tuple(x) > version_to_tuple(version)]
+        sorted_newer_versions = sorted(newer_versions, key=version_to_tuple, reverse=False)
+        return sorted_newer_versions[0] if newer_versions else None
+
     def _get_user_assigned_identity(
         self,
         resource_group,
@@ -545,8 +562,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             --resource-group={resource_group} \
             --vnet-name={name} \
             --name proxy-subnet \
-            --address-prefix 10.42.3.0/24 \
-            --default-outbound false'
+            --address-prefix 10.42.3.0/24'
+            # --default-outbound false  # disable outbound connection would fail cluster creation
 
         show_subnet_cmd = 'network vnet subnet show \
             --resource-group={resource_group} \
@@ -2528,6 +2545,129 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
     @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(
+        random_name_length=17, name_prefix="clitest", location="westcentralus"
+    )
+    def test_aks_create_update_fips_flow(self, resource_group, resource_group_location):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        aks_name = self.create_random_name("cliakstest", 16)
+        node_pool_name = self.create_random_name("c", 6)
+        node_pool_name_second = self.create_random_name("c", 6)
+        self.kwargs.update(
+            {
+                "resource_group": resource_group,
+                "name": aks_name,
+                "dns_name_prefix": self.create_random_name("cliaksdns", 16),
+                "location": resource_group_location,
+                "resource_type": "Microsoft.ContainerService/ManagedClusters",
+                "node_pool_name": node_pool_name,
+                "node_pool_name_second": node_pool_name_second,
+                "ssh_key_value": self.generate_ssh_keys(),
+            }
+        )
+
+        # 1. create
+        create_cmd = (
+            "aks create --resource-group={resource_group} --name={name} --location={location} "
+            "--nodepool-name {node_pool_name} -c 1 --enable-managed-identity "
+            "--ssh-key-value={ssh_key_value} "
+            '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/MutableFipsPreview '
+            "--enable-fips-image"
+        )
+        self.cmd(
+            create_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("agentPoolProfiles[0].enableFips", True),
+            ],
+        )
+
+        # verify no flag no change
+        self.cmd(
+            "aks nodepool update --resource-group={resource_group} --cluster-name={name} --name={node_pool_name} "
+            '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/MutableFipsPreview',
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("enableFips", True),
+            ],
+        )
+
+        # verify same update no change
+        self.cmd(
+            "aks nodepool update --resource-group={resource_group} --cluster-name={name} --name={node_pool_name} "
+            '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/MutableFipsPreview '
+            "--enable-fips-image",
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("enableFips", True),
+            ],
+        )
+
+        # update nodepool1 to disable
+        self.cmd(
+            "aks nodepool update --resource-group={resource_group} --cluster-name={name} --name={node_pool_name} "
+            '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/MutableFipsPreview '
+            "--disable-fips-image",
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("enableFips", False),
+            ],
+        )
+
+        # 2. add nodepool2
+        self.cmd(
+            "aks nodepool add "
+            "--resource-group={resource_group} "
+            "--cluster-name={name} "
+            "--name={node_pool_name_second} "
+            "--os-type Linux "
+            '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/MutableFipsPreview ',
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("enableFips", False),
+            ],
+        )
+
+        # verify no flag no change
+        self.cmd(
+            "aks nodepool update --resource-group={resource_group} --cluster-name={name} --name={node_pool_name_second} "
+            '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/MutableFipsPreview',
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("enableFips", False),
+            ],
+        )
+
+        # verify same update no change
+        self.cmd(
+            "aks nodepool update --resource-group={resource_group} --cluster-name={name} --name={node_pool_name_second} "
+            '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/MutableFipsPreview '
+            "--disable-fips-image",
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("enableFips", False),
+            ],
+        )
+
+        # update nodepool2 to enable
+        self.cmd(
+            "aks nodepool update --resource-group={resource_group} --cluster-name={name} --name={node_pool_name_second} "
+            '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/MutableFipsPreview '
+            "--enable-fips-image",
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("enableFips", True),
+            ],
+        )
+
+        # delete
+        self.cmd(
+            "aks delete -g {resource_group} -n {name} --yes --no-wait",
+            checks=[self.is_empty()],
+        )
+
+    @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     @AKSCustomRoleBasedServicePrincipalPreparer()
     def test_aks_create_with_ahub(self, resource_group, resource_group_location, sp_name, sp_password):
@@ -3128,10 +3268,10 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                  '--resource-group={resource_group} '
                  '--cluster-name={name} '
                  '--name={node_pool_name_second} '
-                 '--os-sku CBLMariner',
+                 '--os-sku AzureLinux',
                  checks=[
                     self.check('provisioningState', 'Succeeded'),
-                    self.check('osSku', 'CBLMariner'),
+                    self.check('osSku', 'AzureLinux'),
                  ])
 
         # delete
@@ -8480,6 +8620,242 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
     @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(
+        random_name_length=17,
+        name_prefix="clitest",
+        location="eastus",
+    )
+    def test_aks_uninstall_azure_npm(
+        self, resource_group, resource_group_location
+    ):
+        _, create_version = self._get_versions(resource_group_location)
+        aks_name = self.create_random_name("cliakstest", 16)
+        self.kwargs.update(
+            {
+                "resource_group": resource_group,
+                "name": aks_name,
+                "location": resource_group_location,
+                "k8s_version": create_version,
+                "ssh_key_value": self.generate_ssh_keys(),
+            }
+        )
+
+        # create with Azure CNI overlay
+        create_cmd = (
+            "aks create --resource-group={resource_group} --name={name} --location={location} "
+            "--network-plugin azure --ssh-key-value={ssh_key_value} --kubernetes-version {k8s_version} "
+            "--network-plugin-mode=overlay "
+            "--network-policy=azure"
+        )
+
+        self.cmd(
+            create_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("networkProfile.networkPlugin", "azure"),
+                self.check("networkProfile.networkPluginMode", "overlay"),
+                self.check("networkProfile.networkDataplane", "azure"),
+                self.check("networkProfile.networkPolicy", "azure"),
+            ],
+        )
+
+        # update to uninstall Azure NPM
+        update_cmd = "aks update -g {resource_group} -n {name} --network-policy=none"
+
+        self.cmd(
+            update_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("networkProfile.networkPlugin", "azure"),
+                self.check("networkProfile.networkPluginMode", "overlay"),
+                self.check("networkProfile.networkPolicy", "none"),
+            ],
+        )
+
+        # delete
+        self.cmd(
+            "aks delete -g {resource_group} -n {name} --yes --no-wait",
+            checks=[self.is_empty()],
+        )
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(
+        random_name_length=17,
+        name_prefix="clitest",
+        location="eastus",
+    )
+    def test_aks_install_azure_npm(
+        self, resource_group, resource_group_location
+    ):
+        _, create_version = self._get_versions(resource_group_location)
+        aks_name = self.create_random_name("cliakstest", 16)
+        self.kwargs.update(
+            {
+                "resource_group": resource_group,
+                "name": aks_name,
+                "location": resource_group_location,
+                "k8s_version": create_version,
+                "ssh_key_value": self.generate_ssh_keys(),
+            }
+        )
+
+        # create with Azure CNI overlay
+        create_cmd = (
+            "aks create --resource-group={resource_group} --name={name} --location={location} "
+            "--network-plugin azure --ssh-key-value={ssh_key_value} --kubernetes-version {k8s_version} "
+            "--network-plugin-mode=overlay "
+            "--network-policy=none"
+        )
+
+        self.cmd(
+            create_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("networkProfile.networkPlugin", "azure"),
+                self.check("networkProfile.networkPluginMode", "overlay"),
+                self.check("networkProfile.networkDataplane", "azure"),
+                self.check("networkProfile.networkPolicy", "none"),
+            ],
+        )
+
+        # update to install Azure NPM
+        update_cmd = "aks update -g {resource_group} -n {name} --network-policy=azure"
+
+        self.cmd(
+            update_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("networkProfile.networkPlugin", "azure"),
+                self.check("networkProfile.networkPluginMode", "overlay"),
+                self.check("networkProfile.networkPolicy", "azure"),
+            ],
+        )
+
+        # delete
+        self.cmd(
+            "aks delete -g {resource_group} -n {name} --yes --no-wait",
+            checks=[self.is_empty()],
+        )
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(
+        random_name_length=17,
+        name_prefix="clitest",
+        location="eastus",
+    )
+    def test_aks_uninstall_calico_npm(
+        self, resource_group, resource_group_location
+    ):
+        _, create_version = self._get_versions(resource_group_location)
+        aks_name = self.create_random_name("cliakstest", 16)
+        self.kwargs.update(
+            {
+                "resource_group": resource_group,
+                "name": aks_name,
+                "location": resource_group_location,
+                "k8s_version": create_version,
+                "ssh_key_value": self.generate_ssh_keys(),
+            }
+        )
+
+        # create with Azure CNI overlay
+        create_cmd = (
+            "aks create --resource-group={resource_group} --name={name} --location={location} "
+            "--network-plugin azure --ssh-key-value={ssh_key_value} --kubernetes-version {k8s_version} "
+            "--network-plugin-mode=overlay "
+            "--network-policy=calico"
+        )
+
+        self.cmd(
+            create_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("networkProfile.networkPlugin", "azure"),
+                self.check("networkProfile.networkPluginMode", "overlay"),
+                self.check("networkProfile.networkDataplane", "azure"),
+                self.check("networkProfile.networkPolicy", "calico"),
+            ],
+        )
+
+        # update to uninstall Calico NPM
+        update_cmd = "aks update -g {resource_group} -n {name} --network-policy=none"
+
+        self.cmd(
+            update_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("networkProfile.networkPlugin", "azure"),
+                self.check("networkProfile.networkPluginMode", "overlay"),
+                self.check("networkProfile.networkPolicy", "none"),
+            ],
+        )
+
+        # delete
+        self.cmd(
+            "aks delete -g {resource_group} -n {name} --yes --no-wait",
+            checks=[self.is_empty()],
+        )
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(
+        random_name_length=17,
+        name_prefix="clitest",
+        location="eastus",
+    )
+    def test_aks_install_calico_npm(
+        self, resource_group, resource_group_location
+    ):
+        _, create_version = self._get_versions(resource_group_location)
+        aks_name = self.create_random_name("cliakstest", 16)
+        self.kwargs.update(
+            {
+                "resource_group": resource_group,
+                "name": aks_name,
+                "location": resource_group_location,
+                "k8s_version": create_version,
+                "ssh_key_value": self.generate_ssh_keys(),
+            }
+        )
+
+        # create with Azure CNI overlay
+        create_cmd = (
+            "aks create --resource-group={resource_group} --name={name} --location={location} "
+            "--network-plugin azure --ssh-key-value={ssh_key_value} --kubernetes-version {k8s_version} "
+            "--network-plugin-mode=overlay "
+            "--network-policy=none"
+        )
+
+        self.cmd(
+            create_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("networkProfile.networkPlugin", "azure"),
+                self.check("networkProfile.networkPluginMode", "overlay"),
+                self.check("networkProfile.networkDataplane", "azure"),
+                self.check("networkProfile.networkPolicy", "none"),
+            ],
+        )
+
+        # update to install Calico NPM
+        update_cmd = "aks update -g {resource_group} -n {name} --network-policy=calico"
+
+        self.cmd(
+            update_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("networkProfile.networkPlugin", "azure"),
+                self.check("networkProfile.networkPluginMode", "overlay"),
+                self.check("networkProfile.networkPolicy", "calico"),
+            ],
+        )
+
+        # delete
+        self.cmd(
+            "aks delete -g {resource_group} -n {name} --yes --no-wait",
+            checks=[self.is_empty()],
+        )
+
+    @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_create_node_resource_group(self, resource_group, resource_group_location):
         # kwargs for string formatting
@@ -10423,6 +10799,67 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded'),
             self.check('upgradeSettings.overrideSettings.forceUpgrade', False),
             self.check('upgradeSettings.overrideSettings.until', '2020-02-22T22:30:17+00:00')
+        ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_upgrade_with_tier_switch(self, resource_group, resource_group_location):
+        """ This test case exercises enabling LTS tier with upgrade command.
+        """
+
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        lts_versions = self._get_lts_versions(resource_group_location)
+        if len(lts_versions) == 0:
+            self.skipTest('No LTS versions found in the location')
+        create_version = lts_versions[0]
+        upgrade_version = self._get_newer_non_lts_version(resource_group_location, create_version)
+        if upgrade_version is None:
+            self.skipTest('No newer non-LTS versions found in the location')
+            
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'k8s_version': create_version,
+            'upgrade_k8s_version': upgrade_version,
+            'ssh_key_value': self.generate_ssh_keys(),
+        })
+
+        # create with LTS premium tier
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '-k {k8s_version} --enable-managed-identity ' \
+                     '--ssh-key-value={ssh_key_value} --tier premium --k8s-support-plan AKSLongTermSupport'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check("sku.tier", "Premium"),
+            self.check("supportPlan", "AKSLongTermSupport"),
+        ])
+
+        # AKSLongTermSupport support plan does not work with standard tier
+        fail_upgrade_cmd = (
+            "aks upgrade --resource-group={resource_group} --name={name} "
+            "--tier standard -k {upgrade_k8s_version} --yes"
+        )
+
+        self.cmd(fail_upgrade_cmd, expect_failure=True)
+
+        upgrade_cmd = (
+            "aks upgrade --resource-group={resource_group} --name={name} "
+            "--tier standard --k8s-support-plan KubernetesOfficial -k {upgrade_k8s_version} --yes"
+        )
+
+        # upgrade upgrade settings
+        self.cmd(upgrade_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check("sku.tier", "Standard"),
+            self.check("supportPlan", "KubernetesOfficial"),
         ])
 
         # delete

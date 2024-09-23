@@ -705,8 +705,8 @@ helps['containerapp job stop'] = """
       text: az containerapp job stop -n my-containerapp-job -g MyResourceGroup
     - name: Stop a job execution giving a specific job execution name.
       text: az containerapp job stop -n my-containerapp-job -g MyResourceGroup --job-execution-name MyContainerAppJob-66v9xh0
-    - name: Stop multiple job executions giving a list of execution names.
-      text: az containerapp job stop -n my-containerapp-job -g MyResourceGroup --execution-name-list MyContainerAppJob-66v9xh0,MyContainerAppJob-66v9xh1
+    - name: Stop all running job executions.
+      text: az containerapp job stop -n my-containerapp-job -g MyResourceGroup
 """
 
 # Container App Job Secret Commands

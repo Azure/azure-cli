@@ -14,15 +14,9 @@ from azure.core.exceptions import ClientAuthenticationError, ResourceExistsError
 from msrest import Serializer
 import json
 
-from ._constants import SnapshotConstants
+from ._constants import SnapshotConstants, ProvisioningStatus
 from ._snapshotmodels import Snapshot, SnapshotListResult, OperationStatusResponse
 from ._snapshot_exceptions import BadSnapshotRequestException
-
-
-class ProvisioningStatus:
-    RUNNING = "Running"
-    SUCCEEDED = "Succeeded"
-    FAILED = "Failed"
 
 
 class RequestMethod:

@@ -2193,18 +2193,18 @@ class NetworkAppGatewayRewriteRuleset(ScenarioTest):
 
         # manage rewrite rules with response-header-configurations
         self.cmd('network application-gateway rewrite-rule create -g {rg} --gateway-name {gw} --rule-set-name {set} -n {rule4} '
-                 '--sequence 123 --response-header-configurations [{{"header-name":Set-Cookie,"header-value":hat1,"header-value-matcher":{{"ignore-case":true,"negate":true,"pattern":"(https?)\/\/.*azurewebsites\.net(.*)$"}}}}] --request-headers foo=bar '
+                 '--sequence 123 --response-header-configurations [{{"header-name":Set-Cookie,"header-value":hat1,"header-value-matcher":{{"ignore-case":true,"negate":true,"pattern":"(https?)//.*azurewebsites.net(.*)$"}}}}] --request-headers foo=bar '
                  '--modified-path "/def" --modified-query-string "a=b&c=d%20f"',
                  checks=[
                      self.check('actionSet.responseHeaderConfigurations[0].headerName', 'Set-Cookie'),
                      self.check('actionSet.responseHeaderConfigurations[0].headerValue', 'hat1'),
                      self.check('actionSet.responseHeaderConfigurations[0].headerValueMatcher.ignoreCase', True),
                      self.check('actionSet.responseHeaderConfigurations[0].headerValueMatcher.negate', True),
-                     self.check('actionSet.responseHeaderConfigurations[0].headerValueMatcher.pattern', "(https?)\/\/.*azurewebsites\.net(.*)$"),
+                     self.check('actionSet.responseHeaderConfigurations[0].headerValueMatcher.pattern', "(https?)//.*azurewebsites.net(.*)$"),
                  ])
         self.cmd(
             'network application-gateway rewrite-rule update -g {rg} --gateway-name {gw} --rule-set-name {set} -n {rule4} '
-            '--sequence 123 --response-header-configurations [{{"header-name":Set-Cookie,"header-value":hat2,"header-value-matcher":{{"ignore-case":true,"negate":false,"pattern":"(https?)\/\/.*azurewebsites\.net(.*)$"}}}}] --request-headers foo=bar '
+            '--sequence 123 --response-header-configurations [{{"header-name":Set-Cookie,"header-value":hat2,"header-value-matcher":{{"ignore-case":true,"negate":false,"pattern":"(https?)//.*azurewebsites.net(.*)$"}}}}] --request-headers foo=bar '
             '--modified-path "/def" --modified-query-string "a=b&c=d%20f"',
             checks=[
                 self.check('actionSet.responseHeaderConfigurations[0].headerName', 'Set-Cookie'),
@@ -2212,7 +2212,7 @@ class NetworkAppGatewayRewriteRuleset(ScenarioTest):
                 self.check('actionSet.responseHeaderConfigurations[0].headerValueMatcher.ignoreCase', True),
                 self.check('actionSet.responseHeaderConfigurations[0].headerValueMatcher.negate', False),
                 self.check('actionSet.responseHeaderConfigurations[0].headerValueMatcher.pattern',
-                           "(https?)\/\/.*azurewebsites\.net(.*)$"),
+                           "(https?)//.*azurewebsites.net(.*)$"),
             ])
 
         # manage rewrite rule conditions
@@ -4646,11 +4646,20 @@ class NetworkNicSubresourceScenarioTest(ScenarioTest):
 
 class NetworkNicConvenienceCommandsScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_nic_convenience_test')
     def test_network_nic_convenience_commands(self, resource_group):
+        self.kwargs.update({
+            'vm': 'conveniencevm1',
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
+        })
 
-        self.kwargs['vm'] = 'conveniencevm1'
-        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username myusername --admin-password aBcD1234!@#$ --authentication-type password --nsg-rule None')
+        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username myusername --admin-password aBcD1234!@#$ --authentication-type password --subnet {subnet} --vnet-name {vnet} --nsg-rule None')
+
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+
         self.kwargs['nic_id'] = self.cmd('vm show -g {rg} -n {vm} --query "networkProfile.networkInterfaces[0].id"').get_output_in_json()
         self.cmd('network nic list-effective-nsg --ids {nic_id}',
                  checks=self.greater_than('length(@)', 0))
@@ -5110,7 +5119,7 @@ class NetworkVNetPeeringScenarioTest(ScenarioTest):
             'vnet_id': vnet_id
         })
         # create the gateway on vnet2
-        self.cmd('network vnet-gateway create -g {rg} -n gateway1 --public-ip-address {ip_id} --vnet {vnet_id} --tags foo=doo')
+        self.cmd('network vnet-gateway create -g {rg} -n gateway1 --public-ip-address {ip_id} --vnet {vnet_id} --tags foo=doo --sku VpnGw1')
 
         vnet1_id = self.cmd('network vnet show -g {rg} -n vnet1 --query id').get_output_in_json()
         vnet2_id = self.cmd('network vnet show -g {rg} -n vnet2 --query id').get_output_in_json()
@@ -5164,7 +5173,7 @@ class NetworkVNetPeeringScenarioTest(ScenarioTest):
             'vnet_id': vnet_id
         })
         # create the gateway on vnet2
-        self.cmd('network vnet-gateway create -g {rg} -n gateway1 --public-ip-address {ip_id} --vnet {vnet_id} --tags foo=doo')
+        self.cmd('network vnet-gateway create -g {rg} -n gateway1 --public-ip-address {ip_id} --vnet {vnet_id} --tags foo=doo --sku VpnGw1')
 
         vnet1_id = self.cmd('network vnet show -g {rg} -n vnet1 --query id').get_output_in_json()
         vnet2_id = self.cmd('network vnet show -g {rg} -n vnet2 --query id').get_output_in_json()
@@ -5187,6 +5196,41 @@ class NetworkVNetPeeringScenarioTest(ScenarioTest):
         ])
 
         self.cmd('network vnet peering sync -g {rg} -n peering1 --vnet-name vnet1')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vnet_peering_with_params')
+    def test_network_vnet_peering_with_params(self, resource_group):
+
+        # create two vnets with non-overlapping prefixes
+        self.cmd('network vnet create -g {rg} -n vnet1 --subnet-name Subnet1 --address-prefixes 10.0.0.0/27 10.0.1.0/27 --subnet-prefixes 10.0.0.0/27')
+        self.cmd('network vnet create -g {rg} -n vnet2 --subnet-name Subnet2 --address-prefixes 20.0.0.0/27 --subnet-prefixes 20.0.0.0/27')
+
+        vnet1_id = self.cmd('network vnet show -g {rg} -n vnet1 --query id').get_output_in_json()
+        vnet2_id = self.cmd('network vnet show -g {rg} -n vnet2 --query id').get_output_in_json()
+
+        self.kwargs.update({
+            'vnet1_id': vnet1_id,
+            'vnet2_id': vnet2_id
+        })
+        self.cmd('network vnet peering create -g {rg} -n peering2 --vnet-name vnet2 --remote-vnet {vnet1_id} --peer-complete-vnets false --local-subnet-names Subnet2 --remote-subnet-names Subnet1 --allow-vnet-access --allow-forwarded-traffic --allow-gateway-transit false --use-remote-gateways false --enable-only-ipv6 false', checks=[
+            self.check('allowForwardedTraffic', True),
+            self.check('allowGatewayTransit', False),
+            self.check('allowVirtualNetworkAccess', True),
+            self.check('useRemoteGateways', False),
+            self.check('peerCompleteVnets', False),
+            self.check('enableOnlyIPv6Peering', False),
+            self.check('remoteVirtualNetwork.id', '{vnet1_id}'),
+            self.check('remoteSubnetNames[0]', 'Subnet1'),
+            self.check('localSubnetNames[0]', 'Subnet2'),
+        ])
+        self.cmd(
+            "network vnet peering update -n peering2 -g {rg} --vnet-name vnet2 --remote-vnet {vnet1_id} "
+            "--allow-vnet-access false --allow-forwarded-traffic false --allow-gateway-transit true",
+            checks=[
+                self.check("allowForwardedTraffic", False),
+                self.check("allowGatewayTransit", True),
+                self.check("allowVirtualNetworkAccess", False),
+            ]
+        )
 
 
 class NetworkVpnConnectionIpSecPolicy(ScenarioTest):
@@ -6332,10 +6376,17 @@ class NetworkWatcherScenarioTest(ScenarioTest):
             'vm': 'vm1',
             'nsg': 'nsg1',
             'capture': 'capture1',
-            'private-ip': '10.0.0.9'
+            'private-ip': '10.0.0.9',
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
         })
 
-        vm = self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --authentication-type password --admin-username deploy --admin-password PassPass10!) --nsg {nsg} --nsg-rule None --private-ip-address {private-ip}').get_output_in_json()
+        vm = self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --authentication-type password --admin-username deploy '
+                      '--admin-password PassPass10!) --nsg {nsg} --nsg-rule None --private-ip-address {private-ip} --subnet {subnet} --vnet-name {vnet}').get_output_in_json()
+
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+
         self.kwargs['vm_id'] = vm['id']
         self.cmd('vm extension set -g {rg} --vm-name {vm} -n NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher')
 
@@ -6356,10 +6407,17 @@ class NetworkWatcherScenarioTest(ScenarioTest):
             'loc': resource_group_location,
             'vm': 'vm1',
             'capture1': 'capture1',
-            'capture2': 'capture2'
+            'capture2': 'capture2',
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
         })
 
-        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --authentication-type password --admin-username deploy --admin-password PassPass10!) --nsg {vm} --nsg-rule None')
+        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --authentication-type password --admin-username deploy '
+                 '--admin-password PassPass10!) --nsg {vm} --subnet {subnet} --vnet-name {vnet} --nsg-rule None')
+
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+
         self.cmd('vm extension set -g {rg} --vm-name {vm} -n NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher')
 
         self.cmd('network watcher packet-capture create -g {rg} --vm {vm} -n {capture1} --file-path capture/capture.cap')

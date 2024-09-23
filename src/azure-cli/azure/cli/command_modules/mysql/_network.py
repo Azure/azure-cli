@@ -223,7 +223,10 @@ def _create_subnet_delegation(cmd, nw_subscription, resource_client, delegation_
             "subscription": nw_subscription,
             "resource_group": resource_group
         })
-        vnet_subnet_prefixes = [subnet["addressPrefix"] for subnet in vnet.get("subnets", [])]
+
+        vnet_subnet_prefixes = []
+        for subnet in vnet.get("subnets", []):
+            vnet_subnet_prefixes += (subnet.get("addressPrefixes") if not subnet.get("addressPrefix") else [subnet.get("addressPrefix")])
         if subnet_address_pref in vnet_subnet_prefixes:
             raise ValidationError(f"The Subnet (default) prefix {subnet_address_pref} is already taken by another Subnet in the Vnet. Please provide a different prefix for --subnet-prefix parameter")
 
@@ -246,9 +249,10 @@ def _create_subnet_delegation(cmd, nw_subscription, resource_client, delegation_
             "subscription": nw_subscription,
             "resource_group": resource_group
         })
+        subnet_address_prefixes = [DEFAULT_SUBNET_ADDRESS_PREFIX] + subnet.get("addressPrefixes") if not subnet.get("addressPrefix") else [subnet.get("addressPrefix")]
         logger.warning('Using existing Subnet "%s" in resource group "%s"', subnet_name, resource_group)
-        if subnet_address_pref not in (DEFAULT_SUBNET_ADDRESS_PREFIX, subnet["addressPrefix"]):
-            logger.warning("The prefix of the subnet you provided does not match the --subnet-prefix value %s. Using current prefix %s", subnet_address_pref, subnet["addressPrefix"])
+        if subnet_address_pref not in subnet_address_prefixes:
+            logger.warning("The prefix of the subnet you provided does not match the --subnet-prefix value %s. Using current prefix %s", subnet_address_pref, subnet_address_prefixes)
 
         # Add Delegation if not delegated already
         if not subnet.get("delegations", None):
