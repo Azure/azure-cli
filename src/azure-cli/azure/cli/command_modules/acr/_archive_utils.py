@@ -142,8 +142,8 @@ class IgnoreRule:  # pylint: disable=too-few-public-methods
                 # . matches dot character
                 self.pattern += token.replace(
                     "*", "[^/]*").replace("?", "[^/]").replace(".", "\\.")
-                if index < token_length:
-                    self.pattern += "/"  # add back / if it's not the last
+            if index < token_length:
+                self.pattern += "/"  # add back / if it's not the last
         self.pattern += "$"
 
 

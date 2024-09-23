@@ -708,3 +708,37 @@ def import_aaz_by_profile(profile, module_name):
     from azure.cli.core.aaz.utils import get_aaz_profile_module_name
     profile_module_name = get_aaz_profile_module_name(profile_name=profile)
     return importlib.import_module(f"azure.cli.command_modules.vm.aaz.{profile_module_name}.{module_name}")
+
+
+def generate_ssh_keys_ed25519(private_key_filepath, public_key_filepath):
+    from cryptography.hazmat.primitives import serialization
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+
+    ssh_dir = os.path.dirname(private_key_filepath)
+    if not os.path.exists(ssh_dir):
+        os.makedirs(ssh_dir)
+        os.chmod(ssh_dir, 0o700)
+
+    private_key = Ed25519PrivateKey.generate()
+    public_key = private_key.public_key()
+    private_bytes = private_key.private_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PrivateFormat.OpenSSH,
+        encryption_algorithm=serialization.NoEncryption()
+    )
+
+    with os.fdopen(os.open(private_key_filepath, flags=os.O_WRONLY | os.O_TRUNC | os.O_CREAT, mode=384, ), "w", ) as f:
+        f.write(
+            private_bytes.decode()
+        )
+    os.chmod(private_key_filepath, 0o600)
+
+    with open(public_key_filepath, 'w') as public_key_file:
+        s = public_key.public_bytes(
+            encoding=serialization.Encoding.OpenSSH,
+            format=serialization.PublicFormat.OpenSSH)
+        public_key = s.decode(encoding="utf8").replace("\n", "")
+        public_key_file.write(public_key)
+    os.chmod(public_key_filepath, 0o644)
+
+    return public_key
