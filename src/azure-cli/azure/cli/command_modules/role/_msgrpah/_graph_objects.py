@@ -13,6 +13,7 @@ _application_property_map = {
     'identifier_uris': 'identifierUris',
     'is_fallback_public_client': 'isFallbackPublicClient',
     'sign_in_audience': 'signInAudience',
+    'service_management_reference': 'serviceManagementReference',
     'key_credentials': 'keyCredentials',
     # web
     'web_home_page_url': ['web', 'homePageUrl'],

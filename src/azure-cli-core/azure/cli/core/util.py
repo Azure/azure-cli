@@ -754,6 +754,11 @@ def is_windows():
     return platform_name == 'windows'
 
 
+def is_github_codespaces():
+    # https://docs.github.com/en/codespaces/developing-in-a-codespace/default-environment-variables-for-your-codespace
+    return os.environ.get('CODESPACES') == 'true'
+
+
 def can_launch_browser():
     import webbrowser
     platform_name, _ = _get_platform_info()

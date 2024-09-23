@@ -1017,7 +1017,7 @@ class ContainerAppsJobClient():
                 cls.api_version)
 
         r = send_raw_request(cmd.cli_ctx, "POST", request_url)
-        return r.json()
+        return r
 
     @classmethod
     def get_executions(cls, cmd, resource_group_name, name):
