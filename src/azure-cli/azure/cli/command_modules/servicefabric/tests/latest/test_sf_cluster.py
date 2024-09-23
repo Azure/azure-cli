@@ -53,7 +53,7 @@ class ServiceFabricClusterTests(ScenarioTest):
                          self.check('fabricSettings[1].parameters[0].value', '10001')])
 
         # remove setting
-        self.cmd('sf cluster update --resource-group {rg} -c {cluster_name} --settings-section-remove --section NamingService --parameter MaxOperationTimeout',
+        self.cmd('sf cluster update --resource-group {rg} -c {cluster_name} --settings-section-rem --section NamingService --parameter MaxOperationTimeout',
                  checks=[self.check('length(fabricSettings)', 1),
                          self.check('fabricSettings[0].name', 'Security')])
         
