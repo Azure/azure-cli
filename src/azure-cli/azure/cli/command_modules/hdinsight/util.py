@@ -180,6 +180,14 @@ def build_identities_info(identities):
     return identity
 
 
+def build_update_identities_info(assign_identity_type, identities):
+    from azure.mgmt.hdinsight.models import ClusterIdentity
+    identity = ClusterIdentity(type=assign_identity_type)
+    if identities:
+        identity.user_assigned_identities = {str(e): {} for sublist in identities for e in sublist}
+    return identity
+
+
 def build_virtual_network_profile(subnet):
     from msrestazure.tools import resource_id, parse_resource_id, is_valid_resource_id
     from azure.mgmt.hdinsight.models import VirtualNetworkProfile

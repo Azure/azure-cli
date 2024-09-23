@@ -146,7 +146,7 @@ class AmsLiveEventTests(ScenarioTest):
 
         self.assertNotEqual('Stopping', live_event['resourceState'])
         self.assertNotEqual('Stopped', live_event['resourceState'])
-        self.assertEquals('StandBy', live_event['resourceState'])
+        self.assertEqual('StandBy', live_event['resourceState'])
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')

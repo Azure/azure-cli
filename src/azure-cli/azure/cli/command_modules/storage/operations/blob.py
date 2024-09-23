@@ -899,7 +899,7 @@ def create_blob_url(client, container_name, blob_name, snapshot, protocol='https
         url = blob_client.url
     else:
         container_client = client.get_container_client(container=container_name)
-        url = container_client.url + '/'
+        url = container_client.url if '?' in container_client.url else container_client.url + '/'
     if protocol == 'http':
         return url.replace('https', 'http', 1)
     return url

@@ -289,13 +289,13 @@ examples:
     text: az postgres flexible-server restore --resource-group testGroup --name testserverNew --source-server testserver
   - name: >
       Restore 'testserver' to current point-in-time as a new server 'testserverNew' in a different resource group. \\
-      Here --restore-group is for the target server's resource group, and --source-server must be passed as resource ID.
+      Here --resource-group is for the target server's resource group, and --source-server must be passed as resource ID.
     text: >
       az postgres flexible-server restore --resource-group testGroup --name testserverNew \\
         --source-server /subscriptions/{testSubscription}/resourceGroups/{sourceResourceGroup}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{sourceServerName}
   - name: >
       Restore 'testserver' to current point-in-time as a new server 'testserverNew' in a different subscription. \\
-      Here --restore-group is for the target server's resource group, and --source-server must be passed as resource ID. \\
+      Here --resource-group is for the target server's resource group, and --source-server must be passed as resource ID. \\
       This resource ID can be in a subscription different than the subscription used for az account set.
     text: >
       az postgres flexible-server restore --resource-group testGroup --name testserverNew \\
@@ -508,105 +508,98 @@ type: command
 short-summary: Create a new migration workflow for a flexible server.
 examples:
   - name: >
-      Start a migration workflow on the target server identified by the parameters. The configurations of the migration should be specified in the migrationConfig.json file. \
-      Use --migration-mode offline for Offline migration. Sample migrationConfig.json will look like this:
+      Start a migration workflow on the target server identified by the parameters. The configurations of the migration should be specified in the properties file. The different properties are defined as: \n
+      sourceDbServerResourceId: Source server details. \n
+      adminCredentials: This parameter lists passwords for admin users for both the source server and the target PostgreSQL flexible server. \n
+      targetServerUserName: The default value is the admin user created during the creation of the PostgreSQL target flexible server, and the password provided is used for authentication against this user. \n
+      dbsToMigrate: Specify the list of databases that you want to migrate to Flexible Server. \n
+      overwriteDBsInTarget: When set to true (default), if the target server happens to have an existing database with the same name as the one you're trying to migrate, the migration service automatically overwrites the database. \n
+      Sample migrationConfig.json for PostgreSQLSingleServer shown below. \n
       {
         "properties": {
-          "SourceDBServerResourceId": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/test-single-rg/providers/Microsoft.DBforPostgreSQL/servers/pg-single-1",
-          "SecretParameters": {
-            "AdminCredentials": {
-              "SourceServerPassword": "password",
-              "TargetServerPassword": "password"
+          "sourceDBServerResourceId": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/test-single-rg/providers/Microsoft.DBforPostgreSQL/servers/pg-single-1",
+          "secretParameters": {
+            "adminCredentials": {
+              "sourceServerPassword": "password",
+              "targetServerPassword": "password"
             },
-            "SourceServerUserName": "testuser@pg-single-1",
-            "TargetServerUserName": "fspguser"
+            "sourceServerUserName": "testuser@pg-single-1",
+            "targetServerUserName": "fspguser"
           },
           "dBsToMigrate": [
             "postgres"
           ],
-          "OverwriteDbsInTarget": "true",
-          "SourceType": "PostgreSQLSingleServer",
-          "SslMode": "VerifyFull"
+          "overwriteDbsInTarget": "true"
         }
       }
     text: >
       az postgres flexible-server migration create --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testserver \
-        --migration-name testmigration --properties "migrationConfig.json" --migration-mode offline
+      --migration-name testmigration --properties "migrationConfig.json"
   - name: >
       Start a migration workflow on the target server identified by the parameters. The configurations of the migration should be specified in the migrationConfig.json file. \
-      Use --migration-mode online for Online(with CDC) migration, with this sample migrationConfig.json. Use migration-option Validate for validate only request
-      {
-        "properties": {
-          "SourceDBServerResourceId": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/test-single-rg/providers/Microsoft.DBforPostgreSQL/servers/pg-single-1",
-          "SecretParameters": {
-            "AdminCredentials": {
-              "SourceServerPassword": "password",
-              "TargetServerPassword": "password"
-            },
-            "SourceServerUserName": "testuser@pg-single-1",
-            "TargetServerUserName": "fspguser"
-          },
-          "dBsToMigrate": [
-            "postgres"
-          ],
-          "OverwriteDbsInTarget": "true"
-        }
-      }
-      The sourceType and sslmode parameters are automatically set to 'PostgreSQL Single server' and 'VerifyFull' respectively, if the source resource id \
-        follows the /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/{rg-name}/providers/Microsoft.DBforPostgreSQL/servers/{single-server-name} server pattern. Any values passed in the CLI/SDK for these parameters will be ignored.
+      Use --migration-mode offline for Offline migration.
     text: >
       az postgres flexible-server migration create --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testserver \
-       --migration-name testmigration --properties "migrationConfig.json" --migration-mode online --migration-option Validate
+      --migration-name testmigration --properties "migrationConfig.json" --migration-mode offline
+  - name: >
+      Start a migration workflow on the target server identified by the parameters. The configurations of the migration should be specified in the migrationConfig.json file. \
+      Use --migration-mode online for Online(with CDC) migration. Use migration-option Validate for validate only request.
+    text: >
+      az postgres flexible-server migration create --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testserver \
+      --migration-name testmigration --properties "migrationConfig.json" --migration-mode online --migration-option Validate
   - name: >
       Start a migration workflow on the target server identified by the parameters. The configurations of the migration should be specified in the migrationConfig.json file. \
       Use --migration-option Migrate for Migrate Only request.
     text: >
       az postgres flexible-server migration create --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testserver \
-        --migration-name testmigration --properties "migrationConfig.json" --migration-option Migrate
+      --migration-name testmigration --properties "migrationConfig.json" --migration-option Migrate
   - name: >
-      Default migration-option is ValidateAndMigrate. SoureType and SslMode must be passed for migrations other than PostgreSQLSingleServer. \
-      Migration parameters in json file should look like below:
+      To start a migration for other than PostgreSQLSingleServer, soureType and sslMode must be specified in properties file. These properties are defined as: \n
+      sourceType: Values can be - OnPremises, AWS_AURORA, AWS_RDS, AzureVM, PostgreSQLSingleServer \n
+      sslMode:  SSL modes for migration. SSL mode for PostgreSQLSingleServer is VerifyFull and Prefer/Require for other source types. \n
+      Sample migrationConfig.json shown below. \n
       {
         "properties": {
-          "SourceDBServerResourceId": "20.66.25.58:5432@postgres",
-          "SecretParameters": {
-            "AdminCredentials": {
-              "SourceServerPassword": "password",
-              "TargetServerPassword": "password"
+          "sourceDBServerResourceId": "<<hostname or IP address>>:<<port>>@<<username>>",
+          "secretParameters": {
+            "adminCredentials": {
+              "sourceServerPassword": "password",
+              "targetServerPassword": "password"
             },
-            "SourceServerUserName": "postgres",
-            "TargetServerUserName": "fspguser"
+            "sourceServerUserName": "postgres",
+            "targetServerUserName": "fspguser"
           },
           "dBsToMigrate": [
             "ticketdb","timedb","inventorydb"
           ],
-          "OverwriteDbsInTarget": "true",
-          "SourceType": "OnPremises",
-          "SslMode": "Prefer"
+          "overwriteDbsInTarget": "true",
+          "sourceType": "OnPremises",
+          "sslMode": "Prefer"
         }
       }
     text: >
       az postgres flexible-server migration create --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testserver \
         --migration-name testmigration --properties "migrationConfig.json"
   - name: >
-      Start a private endpoint enabled migration workflow on the target server identified by the parameters. The configurations of the migration should be specified in the migrationConfig.json file.
-      Pass in MigrationRuntimeResourceId to define the migration runtime server that is responsible for migrating data between source and target server. Sample migrationConfig.json will look like this: \n
+      Start a private endpoint enabled migration workflow on the target server by specifying migrationRuntimeResourceId in properties file. This property is defined as: \n
+      migrationRuntimeResourceId: The resource ID of the migration runtime server that is responsible for migrating data between source and target server. \n
+      Sample migrationConfig.json shown below. \n
       {
         "properties": {
-          "SourceDBServerResourceId": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/test-single-rg/providers/Microsoft.DBforPostgreSQL/servers/pg-single-1",
-          "MigrationRuntimeResourceId": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/testGroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/testsourcemigration",
-          "SecretParameters": {
-            "AdminCredentials": {
-              "SourceServerPassword": "password",
-              "TargetServerPassword": "password"
+          "sourceDBServerResourceId": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/test-single-rg/providers/Microsoft.DBforPostgreSQL/servers/pg-single-1",
+          "migrationRuntimeResourceId": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/testGroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/testsourcemigration",
+          "secretParameters": {
+            "adminCredentials": {
+              "sourceServerPassword": "password",
+              "targetServerPassword": "password"
             },
-            "SourceServerUserName": "testuser@pg-single-1",
-            "TargetServerUserName": "fspguser"
+            "sourceServerUserName": "testuser@pg-single-1",
+            "targetServerUserName": "fspguser"
           },
           "dBsToMigrate": [
             "postgres"
           ],
-          "OverwriteDbsInTarget": "true"
+          "overwriteDbsInTarget": "true"
         }
       }
     text: >
@@ -756,23 +749,28 @@ helps['postgres flexible-server replica create'] = """
 type: command
 short-summary: Create a read replica for a server.
 examples:
-  - name: Create a read replica 'testReplicaServer' for 'testserver' with public or private access in the specified zone and location if available.
-    text: az postgres flexible-server replica create --replica-name testReplicaServer -g testGroup --source-server testserver --zone 3 --location testLocation
-  - name: Create a read replica 'testReplicaServer' with new subnet for 'testserver' with private access.
+  - name: Create a read replica 'testreplicaserver' for 'testserver' with public or private access in the specified zone and location if available.
+    text: az postgres flexible-server replica create --replica-name testreplicaserver -g testGroup --source-server testserver --zone 3 --location testLocation
+  - name: Create a read replica 'testreplicaserver' with new subnet for 'testserver' with private access.
     text: >
-      az postgres flexible-server replica create --replica-name testReplicaServer -g testGroup \\
+      az postgres flexible-server replica create --replica-name testreplicaserver -g testGroup \\
         --source-server testserver --zone 3 --location testLocation \\
         --vnet newVnet --subnet newSubnet \\
         --address-prefixes 172.0.0.0/16 --subnet-prefixes 172.0.0.0/24 \\
         --private-dns-zone testDNS.postgres.database.azure.com
   - name: >
-      Create a read replica 'testReplicaServer' for 'testserver' with public or private access \
+      Create a read replica 'testreplicaserver' for 'testserver' with public or private access \
       in the specified location if available. Since zone is not passed, it will automatically pick up zone in the \
       replica location which is different from source server, if available, else will pick up zone same as source server \
       in the replica location if available, else will set the zone as None, i.e. No preference
-    text: az postgres flexible-server replica create --replica-name testReplicaServer -g testGroup --source-server testserver --location testLocation
-  - name: Create a read replica 'testReplicaServer' for 'testserver' with custom --storage-size and --sku.
-    text: az postgres flexible-server replica create --replica-name testReplicaServer -g testGroup --source-server testserver --sku-name Standard_D4ds_v5 --storage-size 256
+    text: az postgres flexible-server replica create --replica-name testreplicaserver -g testGroup --source-server testserver --location testLocation
+  - name: Create a read replica 'testreplicaserver' for 'testserver' with custom --storage-size and --sku.
+    text: az postgres flexible-server replica create --replica-name testreplicaserver -g testGroup --source-server testserver --sku-name Standard_D4ds_v5 --storage-size 256
+  - name: Create a read replica 'testreplicaserver' for 'testserver', where 'testreplicaserver' is in a different resource group 'newTestGroup'. \
+      Here --resource-group is for the read replica's resource group, and --source-server must be passed as resource ID.
+    text: >
+      az postgres flexible-server replica create --replica-name testreplicaserver -g newTestGroup \
+        --source-server /subscriptions/{sourceSubscriptionId}/resourceGroups/{sourceResourceGroup}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{sourceServerName} --location testLocation
 """
 
 helps['postgres flexible-server replica list'] = """
@@ -787,22 +785,22 @@ helps['postgres flexible-server replica stop-replication'] = """
 type: command
 short-summary: Stop replication to a read replica and make it a read/write server.
 examples:
-  - name: Stop replication to 'testReplicaServer' and make it a read/write server.
-    text: az postgres flexible-server replica stop-replication -g testGroup -n testReplicaServer
+  - name: Stop replication to 'testreplicaserver' and make it a read/write server.
+    text: az postgres flexible-server replica stop-replication -g testGroup -n testreplicaserver
 """
 
 helps['postgres flexible-server replica promote'] = """
 type: command
 short-summary: Stop replication of a read replica and promote it to an independent server or as a primary server.
 examples:
-  - name: Stop replication to 'testReplicaServer' and promote it a standalone read/write server.
-    text: az postgres flexible-server replica promote -g testGroup -n testReplicaServer
-  - name: Stop replication to 'testReplicaServer' and promote it a standalone read/write server with forced data sync.
-    text: az postgres flexible-server replica promote -g testGroup -n testReplicaServer --promote-mode standalone --promote-option forced
+  - name: Stop replication to 'testreplicaserver' and promote it a standalone read/write server.
+    text: az postgres flexible-server replica promote -g testGroup -n testreplicaserver
+  - name: Stop replication to 'testreplicaserver' and promote it a standalone read/write server with forced data sync.
+    text: az postgres flexible-server replica promote -g testGroup -n testreplicaserver --promote-mode standalone --promote-option forced
   - name: >
-      Stop replication to 'testReplicaServer' and promote it to primary server with planned data sync. \
+      Stop replication to 'testreplicaserver' and promote it to primary server with planned data sync. \
       The replica you are promoting must have the reader virtual endpoint assigned, or you will receive an error on promotion.
-    text: az postgres flexible-server replica promote -g testGroup -n testReplicaServer --promote-mode switchover --promote-option planned
+    text: az postgres flexible-server replica promote -g testGroup -n testreplicaserver --promote-mode switchover --promote-option planned
 """
 
 helps['postgres flexible-server geo-restore'] = """
@@ -822,7 +820,7 @@ examples:
         --private-dns-zone testDNS.postgres.database.azure.com --location newLocation
   - name: >
       Geo-restore 'testserver' to current point-in-time as a new server 'testserverNew' in a different subscription / resource group. \\
-      Here --restore-group is for the target server's resource group, and --source-server must be passed as resource ID. \\
+      Here --resource-group is for the target server's resource group, and --source-server must be passed as resource ID. \\
       This resource ID can be in a subscription different than the subscription used for az account set.
     text: >
       az postgres flexible-server geo-restore --resource-group testGroup --name testserverNew --location newLocation \\

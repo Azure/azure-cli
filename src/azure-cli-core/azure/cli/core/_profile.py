@@ -11,7 +11,7 @@ from enum import Enum
 from azure.cli.core._session import ACCOUNT
 from azure.cli.core.azclierror import AuthenticationError
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
-from azure.cli.core.util import in_cloud_console, can_launch_browser
+from azure.cli.core.util import in_cloud_console, can_launch_browser, is_github_codespaces
 from knack.log import get_logger
 from knack.util import CLIError
 
@@ -166,6 +166,10 @@ class Profile:
                 logger.info('No web browser is available. Fall back to device code.')
                 use_device_code = True
 
+            if not use_device_code and is_github_codespaces():
+                logger.info('GitHub Codespaces is detected. Fall back to device code.')
+                use_device_code = True
+
             if use_device_code:
                 user_identity = identity.login_with_device_code(scopes=scopes, **kwargs)
             else:
@@ -302,15 +306,24 @@ class Profile:
         return deepcopy(consolidated)
 
     def logout(self, user_or_sp):
+        # The order of below steps matter! We must
+        #   1. Remove the account from MSAL token cache and SP store
+        #   2. Remove the account from CLI profile
+        # This way, if step 1 fails, CLI still keeps track of the account. Otherwise, if we do the
+        # reverse and step 1 fails, CLI will lose track of the account.
+
+        # Step 1: Remove the account from MSAL token cache and SP store (SP only)
+        # We can't distinguish whether user_or_sp is a user or SP, so try both
+        identity = _create_identity_instance(self.cli_ctx, self._authority)
+        identity.logout_user(user_or_sp)
+        identity.logout_service_principal(user_or_sp)
+
+        # Step 2: Remove the account from CLI profile
         subscriptions = self.load_cached_subscriptions(all_clouds=True)
         result = [x for x in subscriptions
                   if user_or_sp.lower() == x[_USER_ENTITY][_USER_NAME].lower()]
         subscriptions = [x for x in subscriptions if x not in result]
         self._storage[_SUBSCRIPTIONS] = subscriptions
-
-        identity = _create_identity_instance(self.cli_ctx, self._authority)
-        identity.logout_user(user_or_sp)
-        identity.logout_service_principal(user_or_sp)
 
     def logout_all(self):
         self._storage[_SUBSCRIPTIONS] = []

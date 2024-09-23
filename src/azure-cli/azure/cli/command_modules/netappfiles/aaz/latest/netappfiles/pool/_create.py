@@ -124,7 +124,7 @@ class Create(AAZCommand):
         _args_schema.size = AAZIntArg(
             options=["--size"],
             arg_group="Properties",
-            help="Provisioned size of the pool (in bytes). Allowed values are in 1TiB chunks (value must be multiply of 4398046511104).",
+            help="Provisioned size of the pool. Must be an integer number of tebibytes in multiples of 4",
             required=True,
             default=4398046511104,
         )

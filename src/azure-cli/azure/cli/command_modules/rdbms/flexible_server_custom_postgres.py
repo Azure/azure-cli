@@ -59,9 +59,6 @@ def flexible_server_create(cmd, client,
                            active_directory_auth=None, password_auth=None, auto_grow=None, performance_tier=None,
                            storage_type=None, iops=None, throughput=None, create_default_db='Enabled', yes=False):
 
-    # Warning for upcoming breaking change to default value of pg version
-    logger.warning('In the next release, the default value for the PostgreSQL server major version will be updated to 16')
-
     # Generate missing parameters
     location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
                                                                              server_name, 'postgres')
@@ -203,8 +200,6 @@ def flexible_server_restore(cmd, client,
     else:
         source_server_id = source_server
 
-    instance = client.get(resource_group_name, source_server)
-
     restore_point_in_time = validate_and_format_restore_point_in_time(restore_point_in_time)
 
     try:
@@ -225,6 +220,7 @@ def flexible_server_restore(cmd, client,
 
         pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup)
 
+        instance = client.get(id_parts['resource_group'], id_parts['name'])
         storage = postgresql_flexibleservers.models.Storage(type=storage_type if instance.storage.type != "PremiumV2_LRS" else None)
 
         parameters = postgresql_flexibleservers.models.Server(
@@ -1436,6 +1432,8 @@ def _create_migration(cmd, logging_name, client, subscription_id, resource_group
         migration_mode=migration_mode,
         source_db_server_resource_id=get_case_insensitive_key_value("SourceDbServerResourceId", parameter_keys, parameters),
         secret_parameters=secret_parameters,
+        source_db_server_fully_qualified_domain_name=get_case_insensitive_key_value("SourceDbServerFullyQualifiedDomainName", parameter_keys, parameters),
+        target_db_server_fully_qualified_domain_name=get_case_insensitive_key_value("TargetDbServerFullyQualifiedDomainName", parameter_keys, parameters),
         dbs_to_migrate=get_case_insensitive_key_value("DbsToMigrate", parameter_keys, parameters),
         setup_logical_replication_on_source_db_if_needed=get_enum_value_true_false(get_case_insensitive_key_value("SetupLogicalReplicationOnSourceDbIfNeeded", parameter_keys, parameters), "SetupLogicalReplicationOnSourceDbIfNeeded"),
         overwrite_dbs_in_target=get_enum_value_true_false(get_case_insensitive_key_value("OverwriteDbsInTarget", parameter_keys, parameters), "OverwriteDbsInTarget"),

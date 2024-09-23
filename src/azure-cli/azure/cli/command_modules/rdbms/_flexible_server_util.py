@@ -216,8 +216,8 @@ def _mysql_parse_list_skus(result):
 
 
 def _get_available_values(sku_info, argument, tier=None):
-    result = {key: val[argument] for key, val in sku_info.items()}
-    return result[tier]
+    result = {key.lower(): val[argument] for key, val in sku_info.items()}
+    return result[tier.lower()]
 
 
 def _get_list_from_paged_response(obj_list):
@@ -253,15 +253,15 @@ def _check_resource_group_existence(cmd, resource_group_name, resource_client=No
 # Map day_of_week string to integer to day of week
 # Possible values can be 0 - 6
 def _map_maintenance_window(day_of_week):
-    options = {"Mon": 1,
-               "Tue": 2,
-               "Wed": 3,
-               "Thu": 4,
-               "Fri": 5,
-               "Sat": 6,
-               "Sun": 0,
+    options = {"mon": 1,
+               "tue": 2,
+               "wed": 3,
+               "thu": 4,
+               "fri": 5,
+               "sat": 6,
+               "sun": 0,
                }
-    return options[day_of_week]
+    return options[day_of_week.lower()]
 
 
 def get_current_time():
