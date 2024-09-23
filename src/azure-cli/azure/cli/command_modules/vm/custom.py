@@ -900,7 +900,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               os_disk_security_encryption_type=None, os_disk_secure_vm_disk_encryption_set=None,
               disk_controller_type=None, disable_integrity_monitoring_autoupgrade=False, enable_proxy_agent=None,
               proxy_agent_mode=None, source_snapshots_or_disks=None, source_snapshots_or_disks_size_gb=None,
-              source_disk_restore_point=None, source_disk_restore_point_size_gb=None):
+              source_disk_restore_point=None, source_disk_restore_point_size_gb=None, ssh_key_type=None):
 
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
@@ -3138,7 +3138,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 location=None, tags=None, upgrade_policy_mode='manual', validate=False,
                 admin_username=None, admin_password=None, authentication_type=None,
                 vm_sku=None, no_wait=False,
-                ssh_dest_key_path=None, ssh_key_value=None, generate_ssh_keys=False,
+                ssh_dest_key_path=None, ssh_key_value=None, generate_ssh_keys=False, ssh_key_type=None,
                 load_balancer=None, load_balancer_sku=None, application_gateway=None,
                 app_gateway_subnet_address_prefix=None,
                 app_gateway_sku='Standard_Large', app_gateway_capacity=10,

@@ -4,11 +4,11 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long, consider-using-f-string, logging-format-interpolation, inconsistent-return-statements, broad-except, bare-except, too-many-statements, too-many-locals, too-many-boolean-expressions, too-many-branches, too-many-nested-blocks, pointless-statement, expression-not-assigned, unbalanced-tuple-unpacking, unsupported-assignment-operation
 # pylint: disable=unused-argument, no-else-raise
+import json
 import threading
 import sys
 import time
 from urllib.parse import urlparse
-import json
 import requests
 
 
@@ -1621,12 +1621,13 @@ def start_containerappjob_execution_yaml(cmd, name, resource_group_name, file_na
 
 def stop_containerappsjob(cmd, resource_group_name, name, job_execution_name=None, execution_name_list=None):
     try:
+        # todo: remove execution_name_list in future and allow calling with or without job_execution_name
         if execution_name_list is not None:
-            execution_name_list = execution_name_list.split(",")
-            execution_name_list = json.dumps({'jobExecutionName': execution_name_list})
-        r = ContainerAppsJobClient.stop_job(cmd=cmd, resource_group_name=resource_group_name, name=name, job_execution_name=job_execution_name, job_execution_names=execution_name_list)
+            return "--execution-name-list is deprecated. Please use --job-execution-name instead."
 
-        # if stop is called for a single job execution, return generic response
+        r = ContainerAppsJobClient.stop_job(cmd=cmd, resource_group_name=resource_group_name, name=name, job_execution_name=job_execution_name)
+
+        # if stop is called for a single job execution, return generic response else return the response
         if job_execution_name:
             return "Job Execution: " + job_execution_name + ", stopped successfully."
 
@@ -3588,9 +3589,10 @@ def stream_containerapp_logs(cmd, resource_group_name, name, container=None, rev
     for line in resp.iter_lines():
         if line:
             logger.info("received raw log line: %s", line)
-            # these .replaces are needed to display color/quotations properly
-            # for some reason the API returns garbled unicode special characters (may need to add more in the future)
-            print(line.decode("utf-8").replace("\\u0022", "\u0022").replace("\\u001B", "\u001B").replace("\\u002B", "\u002B").replace("\\u0027", "\u0027"))
+            if output_format == "json":
+                print(json.dumps(json.loads(line)))
+            else:
+                print(line.decode("utf-8"))
 
 
 def stream_environment_logs(cmd, resource_group_name, name, follow=False, tail=None):

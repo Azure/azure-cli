@@ -4646,11 +4646,20 @@ class NetworkNicSubresourceScenarioTest(ScenarioTest):
 
 class NetworkNicConvenienceCommandsScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_nic_convenience_test')
     def test_network_nic_convenience_commands(self, resource_group):
+        self.kwargs.update({
+            'vm': 'conveniencevm1',
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
+        })
 
-        self.kwargs['vm'] = 'conveniencevm1'
-        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username myusername --admin-password aBcD1234!@#$ --authentication-type password --nsg-rule None')
+        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username myusername --admin-password aBcD1234!@#$ --authentication-type password --subnet {subnet} --vnet-name {vnet} --nsg-rule None')
+
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+
         self.kwargs['nic_id'] = self.cmd('vm show -g {rg} -n {vm} --query "networkProfile.networkInterfaces[0].id"').get_output_in_json()
         self.cmd('network nic list-effective-nsg --ids {nic_id}',
                  checks=self.greater_than('length(@)', 0))
@@ -5213,6 +5222,15 @@ class NetworkVNetPeeringScenarioTest(ScenarioTest):
             self.check('remoteSubnetNames[0]', 'Subnet1'),
             self.check('localSubnetNames[0]', 'Subnet2'),
         ])
+        self.cmd(
+            "network vnet peering update -n peering2 -g {rg} --vnet-name vnet2 --remote-vnet {vnet1_id} "
+            "--allow-vnet-access false --allow-forwarded-traffic false --allow-gateway-transit true",
+            checks=[
+                self.check("allowForwardedTraffic", False),
+                self.check("allowGatewayTransit", True),
+                self.check("allowVirtualNetworkAccess", False),
+            ]
+        )
 
 
 class NetworkVpnConnectionIpSecPolicy(ScenarioTest):
@@ -6358,10 +6376,17 @@ class NetworkWatcherScenarioTest(ScenarioTest):
             'vm': 'vm1',
             'nsg': 'nsg1',
             'capture': 'capture1',
-            'private-ip': '10.0.0.9'
+            'private-ip': '10.0.0.9',
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
         })
 
-        vm = self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --authentication-type password --admin-username deploy --admin-password PassPass10!) --nsg {nsg} --nsg-rule None --private-ip-address {private-ip}').get_output_in_json()
+        vm = self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --authentication-type password --admin-username deploy '
+                      '--admin-password PassPass10!) --nsg {nsg} --nsg-rule None --private-ip-address {private-ip} --subnet {subnet} --vnet-name {vnet}').get_output_in_json()
+
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+
         self.kwargs['vm_id'] = vm['id']
         self.cmd('vm extension set -g {rg} --vm-name {vm} -n NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher')
 
@@ -6382,10 +6407,17 @@ class NetworkWatcherScenarioTest(ScenarioTest):
             'loc': resource_group_location,
             'vm': 'vm1',
             'capture1': 'capture1',
-            'capture2': 'capture2'
+            'capture2': 'capture2',
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
         })
 
-        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --authentication-type password --admin-username deploy --admin-password PassPass10!) --nsg {vm} --nsg-rule None')
+        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --authentication-type password --admin-username deploy '
+                 '--admin-password PassPass10!) --nsg {vm} --subnet {subnet} --vnet-name {vnet} --nsg-rule None')
+
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+
         self.cmd('vm extension set -g {rg} --vm-name {vm} -n NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher')
 
         self.cmd('network watcher packet-capture create -g {rg} --vm {vm} -n {capture1} --file-path capture/capture.cap')
