@@ -109,13 +109,16 @@ class AutoScaleUpdate(_AutoScaleUpdate):
         args_schema.add_actions = AAZCustomListArg(
             options=["--add-actions"],
             singular_options=['--add-action', '-a'],
-            help="Add an action to fire when a scaling event occurs." + '''
-        Usage:   --add-action TYPE KEY [ARG ...]
-        Email:   --add-action email bob@contoso.com ann@contoso.com
-        Webhook: --add-action webhook https://www.contoso.com/alert apiKey=value
-        Webhook: --add-action webhook https://www.contoso.com/alert?apiKey=value
-        Multiple actions can be specified by using more than one `--add-action` argument.
-        ''',
+            help={
+                "short-summary": "Add an action to fire when a scaling event occurs.",
+                "long-summary": '''
+                Usage:   --add-action TYPE KEY [ARG ...]
+                Email:   --add-action email bob@contoso.com ann@contoso.com
+                Webhook: --add-action webhook https://www.contoso.com/alert apiKey=value
+                Webhook: --add-action webhook https://www.contoso.com/alert?apiKey=value
+                Multiple actions can be specified by using more than one `--add-action` argument.
+                '''
+            },
             arg_group="Notification",
         )
         args_schema.add_actions.Element = AAZCustomListArg()
@@ -124,11 +127,14 @@ class AutoScaleUpdate(_AutoScaleUpdate):
         args_schema.remove_actions = AAZCustomListArg(
             options=["--remove-actions"],
             singular_options=['--remove-action', '-r'],
-            help="Remove one or more actions." + '''
-        Usage:   --remove-action TYPE KEY [KEY ...]
-        Email:   --remove-action email bob@contoso.com ann@contoso.com
-        Webhook: --remove-action webhook https://contoso.com/alert https://alerts.contoso.com.
-        ''',
+            help={
+                "short-summary": "Remove one or more actions.",
+                "long-summary": '''
+                Usage:   --remove-action TYPE KEY [KEY ...]
+                Email:   --remove-action email bob@contoso.com ann@contoso.com
+                Webhook: --remove-action webhook https://contoso.com/alert https://alerts.contoso.com.
+                '''
+            },
             arg_group="Notification",
         )
         args_schema.remove_actions.Element = AAZCustomListArg()
