@@ -698,7 +698,7 @@ def flexible_server_import_replica_stop(client, resource_group_name, server_name
     return client.begin_update(resource_group_name, server_name, params)
 
 
-# pylint: disable=too-many-locals, too-many-branches, too-many-statements, raise-missing-from
+# pylint: disable=too-many-branches, too-many-locals, too-many-statements, raise-missing-from
 def flexible_server_restore(cmd, client, resource_group_name, server_name, source_server, restore_point_in_time=None, zone=None,
                             no_wait=False, subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
                             private_dns_zone_arguments=None, public_access=None, yes=False, sku_name=None, tier=None,
