@@ -57,7 +57,11 @@ class GraphClient:
                 r = send_raw_request(self._cli_ctx, method, url, resource=self._resource, uri_parameters=param,
                                      body=body)
             except HTTPError as ex:
-                raise GraphError(ex.response.json()['error']['message'], ex.response) from ex
+                # https://learn.microsoft.com/en-us/graph/errors#error-resource-type
+                error = ex.response.json()['error']
+                code = error['code']
+                message = error['message']
+                raise GraphError(f"({code}) {message}", ex.response) from ex
             # Other exceptions like AuthenticationError should not be handled here, so we don't catch CLIError
 
             if r.text:
