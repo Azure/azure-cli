@@ -36,8 +36,7 @@ import colorama
 import requests
 import yaml
 from azure.cli.command_modules.acs._client_factory import (
-    cf_agent_pools,
-    cf_machines
+    cf_agent_pools
 )
 from azure.cli.command_modules.acs._consts import (
     ADDONS,
