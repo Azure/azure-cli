@@ -12,7 +12,7 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "eventhubs eventhub authorization-rule list",
+    "Manage Azure EventHubs Authorizationrule connection strings for Namespace.",
 )
 class List(AAZCommand):
     """List the authorization rules for an Event Hub.
