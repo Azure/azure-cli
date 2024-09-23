@@ -86,8 +86,8 @@ class Update(AAZCommand):
         _args_schema.schema_type = AAZStrArg(
             options=["--schema-type"],
             arg_group="Properties",
-            nullable=True,
             help="Type of Schema.",
+            nullable=True,
             enum={"Avro": "Avro", "Unknown": "Unknown"},
         )
 

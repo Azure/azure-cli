@@ -12,10 +12,10 @@ from azure.cli.core.aaz import *
 
 
 @register_command_group(
-    "Manage Azure Service Bus Authorizationrule for Eventhub.",
+    "eventhubs eventhub authorization-rule",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Eventhub authorization rule.
+    """Manage Azure Service Bus Authorizationrule for Eventhub..
     """
     pass
 
