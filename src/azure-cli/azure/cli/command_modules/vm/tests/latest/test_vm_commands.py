@@ -10169,12 +10169,15 @@ class VMSSSecurityPostureScenarioTest(ScenarioTest):
             'vmss1': self.create_random_name('clitestvmss1', 20),
             'security_posture_reference_id': '/internal/Providers/Microsoft.Compute/galleries/SecurityPostureGallery-uiualhwjibht/securityPostures/VMSSUniformLinux/versions/1.0.0'
         })
-
-        self.cmd('vmss create -g {rg} -n {vmss1} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username sdk-test-admin --orchestration-mode Uniform '
-                 '--security-posture-reference-id {security_posture_reference_id}')
+        self.cmd('vmss create -g {rg} -n {vmss1} --image ubuntu2204 --admin-username sdk-test-admin --admin-password testPassword01! --orchestration-mode Uniform '
+                 '--security-posture-reference-id {security_posture_reference_id} --exclude-extensions SecurityPostureSecurityAgent --is-overridable True')
 
         self.cmd('vmss show -g {rg} -n {vmss1}', checks=[
-            self.check('virtualMachineProfile.securityPostureReference.id', '{security_posture_reference_id}')
+            self.check('virtualMachineProfile.securityPostureReference.id', '{security_posture_reference_id}'),
+            self.check('virtualMachineProfile.securityPostureReference.isOverridable', True)
+        ])
+        self.cmd('vmss update -g {rg} -n {vmss1} --is-overridable False', checks=[
+            self.check('virtualMachineProfile.securityPostureReference.isOverridable', False)
         ])
 
 
