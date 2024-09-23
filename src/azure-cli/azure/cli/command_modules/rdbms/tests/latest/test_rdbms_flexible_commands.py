@@ -227,25 +227,25 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
         version = '16'
         storage_size = 128
+        location = self.postgres_location
         sku_name = 'Standard_D2s_v3'
+        memory_optimized_sku = 'Standard_E2ds_v4'
         tier = 'GeneralPurpose'
         backup_retention = 7
         database_name = 'testdb'
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        replica_1_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         ha_value = 'ZoneRedundant'
 
-
-        self.cmd('postgres flexible-server replica create -g "" --replica-name {} --source-server {}'.format(
-                        replica_1_name,
-                        server_name
-            ), expect_failure=True)
-        
-        self.cmd('postgres flexible-server replica create -g \'\' --replica-name {} --source-server {}'.format(
-                        replica_1_name,
-                        server_name
-            ), expect_failure=True)
-
+        self.cmd('{} flexible-server create -g "" -n {} --backup-retention {} --sku-name {} --tier {} \
+                  --storage-size {} -u {} --version {} --tags keys=3 --database-name {} --high-availability {} \
+                  --public-access None'.format(database_engine, server_name, backup_retention,
+                                               sku_name, tier, storage_size, 'dbadmin', version, database_name, ha_value),
+                                               expect_failure=True)
+        self.cmd('{} flexible-server create -g \'\' -n {} --backup-retention {} --sku-name {} --tier {} \
+                  --storage-size {} -u {} --version {} --tags keys=3 --database-name {} --high-availability {} \
+                  --public-access None'.format(database_engine, server_name, backup_retention,
+                                               sku_name, tier, storage_size, 'dbadmin', version, database_name, ha_value),
+                                               expect_failure=True)
         self.cmd('{} flexible-server update -g "" -n {} -p randompw321##@!'
                  .format(database_engine, server_name), expect_failure=True)
         self.cmd('{} flexible-server update -g \'\' -n {} -p randompw321##@!'
