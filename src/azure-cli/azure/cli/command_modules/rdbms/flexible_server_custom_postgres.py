@@ -405,7 +405,6 @@ def flexible_server_update_custom_func(cmd, client, instance,
 
         params.high_availability = high_availability_param
 
-    print(params)
     return params
 
 
