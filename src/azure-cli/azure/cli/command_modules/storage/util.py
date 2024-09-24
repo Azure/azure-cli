@@ -164,7 +164,7 @@ def create_short_lived_blob_sas(cmd, account_name, account_key, container, blob)
     return sas.generate_blob(container, blob, permission=t_blob_permissions(read=True), expiry=expiry, protocol='https')
 
 
-def create_short_lived_blob_sas_v2(cmd, account_name, account_key, container, blob):
+def create_short_lived_blob_sas_v2(cmd, account_name, container, blob, account_key=None, user_delegation_key=None):
     from datetime import timedelta
 
     t_sas = cmd.get_models('_shared_access_signature#BlobSharedAccessSignature',
@@ -172,7 +172,12 @@ def create_short_lived_blob_sas_v2(cmd, account_name, account_key, container, bl
 
     t_blob_permissions = cmd.get_models('_models#BlobSasPermissions', resource_type=ResourceType.DATA_STORAGE_BLOB)
     expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
-    sas = t_sas(account_name, account_key)
+    if account_key:
+        sas = t_sas(account_name, account_key=account_key)
+    elif user_delegation_key:
+        sas = t_sas(account_name, user_delegation_key=user_delegation_key)
+    else:
+        raise ValueError("Either account key or user delegation key need to be provided.")
     return sas.generate_blob(container, blob, permission=t_blob_permissions(read=True), expiry=expiry, protocol='https')
 
 
@@ -192,7 +197,8 @@ def create_short_lived_file_sas(cmd, account_name, account_key, share, directory
                              permission=t_file_permissions(read=True), expiry=expiry, protocol='https')
 
 
-def create_short_lived_file_sas_v2(cmd, account_name, account_key, share, directory_name, file_name):
+def create_short_lived_file_sas_v2(cmd, account_name, share, directory_name, file_name, account_key=None,
+                                   user_delegation_key=None):
     from datetime import timedelta
 
     t_sas = cmd.get_models('_shared_access_signature#FileSharedAccessSignature',
@@ -200,7 +206,12 @@ def create_short_lived_file_sas_v2(cmd, account_name, account_key, share, direct
 
     t_file_permissions = cmd.get_models('_models#FileSasPermissions', resource_type=ResourceType.DATA_STORAGE_FILESHARE)
     expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
-    sas = t_sas(account_name, account_key)
+    if account_key:
+        sas = t_sas(account_name, account_key=account_key)
+    elif user_delegation_key:
+        sas = t_sas(account_name, user_delegation_key=user_delegation_key)
+    else:
+        raise ValueError("Either account key or user delegation key need to be provided.")
     return sas.generate_file(share, directory_name=directory_name, file_name=file_name,
                              permission=t_file_permissions(read=True), expiry=expiry, protocol='https')
 

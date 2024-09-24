@@ -298,8 +298,8 @@ def process_blob_source_uri(cmd, namespace):
     if not sas:
         prefix = cmd.command_kwargs['resource_type'].value[0]
         if is_storagev2(prefix):
-            sas = create_short_lived_blob_sas_v2(cmd, source_account_name, source_account_key, container,
-                                                 blob)
+            sas = create_short_lived_blob_sas_v2(cmd, source_account_name, container,
+                                                 blob, account_key=source_account_key)
         else:
             sas = create_short_lived_blob_sas(cmd, source_account_name, source_account_key, container, blob)
     query_params = []
@@ -402,15 +402,15 @@ def validate_source_uri(cmd, namespace):  # pylint: disable=too-many-statements
             if dir_name == '':
                 dir_name = None
             if is_storagev2(prefix):
-                source_sas = create_short_lived_file_sas_v2(cmd, source_account_name, source_account_key, share,
-                                                            dir_name, file_name)
+                source_sas = create_short_lived_file_sas_v2(cmd, source_account_name, share,
+                                                            dir_name, file_name, account_key=source_account_key)
             else:
                 source_sas = create_short_lived_file_sas(cmd, source_account_name, source_account_key, share,
                                                          dir_name, file_name)
         elif valid_blob_source and (ns.get('share_name', None) or not same_account):
             if is_storagev2(prefix):
-                source_sas = create_short_lived_blob_sas_v2(cmd, source_account_name, source_account_key, container,
-                                                            blob)
+                source_sas = create_short_lived_blob_sas_v2(cmd, source_account_name,container,
+                                                            blob, account_key=source_account_key)
             else:
                 source_sas = create_short_lived_blob_sas(cmd, source_account_name, source_account_key, container, blob)
 
@@ -435,7 +435,8 @@ def validate_source_uri(cmd, namespace):  # pylint: disable=too-many-statements
 
 
 def validate_source_url(cmd, namespace):  # pylint: disable=too-many-statements, too-many-locals
-    from .util import create_short_lived_blob_sas, create_short_lived_blob_sas_v2, create_short_lived_file_sas
+    from .util import create_short_lived_blob_sas, create_short_lived_blob_sas_v2, create_short_lived_file_sas, \
+        create_short_lived_file_sas_v2
     from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, \
         MutuallyExclusiveArgumentError
     usage_string = \
@@ -463,6 +464,8 @@ def validate_source_url(cmd, namespace):  # pylint: disable=too-many-statements,
     source_account_name = ns.pop('source_account_name', None)
     source_account_key = ns.pop('source_account_key', None)
     source_sas = ns.pop('source_sas', None)
+    token_credential = ns.get('token_credential')
+    is_oauth = True if token_credential is not None else False
 
     # source in the form of an uri
     uri = ns.get('source_url', None)
@@ -499,7 +502,7 @@ def validate_source_url(cmd, namespace):  # pylint: disable=too-many-statements,
     # determine if the copy will happen in the same storage account
     same_account = False
 
-    if not source_account_key and not source_sas:
+    if not source_account_key and not source_sas and not is_oauth:
         if source_account_name == ns.get('account_name', None):
             same_account = True
             source_account_key = ns.get('account_key', None)
@@ -511,20 +514,43 @@ def validate_source_url(cmd, namespace):  # pylint: disable=too-many-statements,
             except ValueError:
                 raise RequiredArgumentMissingError('Source storage account {} not found.'.format(source_account_name))
 
+    # if oauth, use user delegation key to generate sas
+    source_user_delegation_key = None
+    if is_oauth:
+        client_kwargs = {'account_name': source_account_name,
+                         'token_credential': token_credential}
+        if valid_blob_source:
+            client = cf_blob_service(cmd.cli_ctx, client_kwargs)
+        elif valid_file_source:
+            client = cf_share_service(cmd.cli_ctx, client_kwargs)
+
+        from datetime import datetime, timedelta
+        start = datetime.utcnow()
+        expiry = datetime.utcnow() + timedelta(days=1)
+        source_user_delegation_key = client.get_user_delegation_key(start, expiry)
+
     # Both source account name and either key or sas (or both) are now available
     if not source_sas:
         # generate a sas token even in the same account when the source and destination are not the same kind.
         if valid_file_source and (ns.get('container_name', None) or not same_account):
             dir_name, file_name = os.path.split(path) if path else (None, '')
-            source_sas = create_short_lived_file_sas(cmd, source_account_name, source_account_key, share,
-                                                     dir_name, file_name)
+            if dir_name == '':
+                dir_name = None
+            if is_storagev2(prefix):
+                source_sas = create_short_lived_file_sas_v2(cmd, source_account_name, share,
+                                                            dir_name, file_name, account_key=source_account_key,
+                                                            user_delegation_key=source_user_delegation_key)
+            else:
+                source_sas = create_short_lived_file_sas(cmd, source_account_name, source_account_key, share,
+                                                         dir_name, file_name)
         elif valid_blob_source and (ns.get('share_name', None) or not same_account):
             prefix = cmd.command_kwargs['resource_type'].value[0]
             # is_storagev2() is used to distinguish if the command is in track2 SDK
             # If yes, we will use get_login_credentials() as token credential
             if is_storagev2(prefix):
-                source_sas = create_short_lived_blob_sas_v2(cmd, source_account_name, source_account_key, container,
-                                                            blob)
+                source_sas = create_short_lived_blob_sas_v2(cmd, source_account_name, container, blob,
+                                                            account_key=source_account_key,
+                                                            user_delegation_key=source_user_delegation_key)
             else:
                 source_sas = create_short_lived_blob_sas(cmd, source_account_name, source_account_key, container, blob)
 
