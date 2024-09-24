@@ -39,7 +39,7 @@ def aks_agentpool_list_table_format(results):
 def aks_list_table_format(results):
     """"Format a list of managed clusters as summary results for display with "-o table"."""
     return [_aks_table_format(r) for r in results]
-  
+
 
 def aks_machine_list_table_format(results):
     return [aks_machine_show_table_format(r) for r in results]
