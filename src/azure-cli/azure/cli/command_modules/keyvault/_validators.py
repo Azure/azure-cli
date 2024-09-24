@@ -705,7 +705,7 @@ def process_certificate_policy(cmd, ns):
     if policy is None:
         return
     if not isinstance(policy, dict):
-        raise CLIError('incorrect usage: policy should be an JSON encoded string '
+        raise CLIError('incorrect usage: policy should be a JSON encoded string '
                        'or can use @{file} to load from a file(e.g.@my_policy.json).')
 
     secret_properties = policy.get('secret_properties')

@@ -2302,15 +2302,20 @@ def update_site_configs_functionapp(cmd, resource_group_name, name, slot=None, n
                                     vnet_route_all_enabled=None, generic_configurations=None, min_replicas=None,
                                     max_replicas=None):
     check_language_runtime(cmd, resource_group_name, name)
-    return update_site_configs(cmd, resource_group_name, name, slot, number_of_workers, linux_fx_version,
-                               windows_fx_version, pre_warmed_instance_count, php_version,
-                               python_version, net_framework_version, power_shell_version,
-                               java_version, java_container, java_container_version,
-                               remote_debugging_enabled, web_sockets_enabled,
-                               always_on, auto_heal_enabled,
-                               use32_bit_worker_process, min_tls_version, http20_enabled, app_command_line,
-                               ftps_state, vnet_route_all_enabled, generic_configurations, min_replicas,
-                               max_replicas)
+    return update_site_configs(cmd, resource_group_name, name, slot, number_of_workers=number_of_workers,
+                               linux_fx_version=linux_fx_version, windows_fx_version=windows_fx_version,
+                               pre_warmed_instance_count=pre_warmed_instance_count, php_version=php_version,
+                               python_version=python_version, net_framework_version=net_framework_version,
+                               power_shell_version=power_shell_version, java_version=java_version,
+                               java_container=java_container, java_container_version=java_container_version,
+                               remote_debugging_enabled=remote_debugging_enabled,
+                               web_sockets_enabled=web_sockets_enabled, always_on=always_on,
+                               auto_heal_enabled=auto_heal_enabled, use32_bit_worker_process=use32_bit_worker_process,
+                               min_tls_version=min_tls_version, http20_enabled=http20_enabled,
+                               app_command_line=app_command_line, ftps_state=ftps_state,
+                               vnet_route_all_enabled=vnet_route_all_enabled,
+                               generic_configurations=generic_configurations, min_replicas=min_replicas,
+                               max_replicas=max_replicas)
 
 
 def update_container_settings_functionapp(cmd, resource_group_name, name, registry_server=None,
