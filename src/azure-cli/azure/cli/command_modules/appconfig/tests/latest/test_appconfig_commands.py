@@ -567,7 +567,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
         # KeyVault reference tests
         keyvault_key = "HostSecrets"
         keyvault_id = "https://fake.vault.azure.net/secrets/fakesecret"
-        keyvault_value = "{{\"uri\":\"https://fake.vault.azure.net/secrets/fakesecret\"}}"
+        keyvault_value = f"{{{json.dumps({'uri': keyvault_id})}}}"
 
         self.kwargs.update({
             'key': keyvault_key,
@@ -1252,7 +1252,7 @@ class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
         # KeyVault reference tests
         keyvault_key = "HostSecrets"
         keyvault_id = "https://fake.vault.azure.net/secrets/fakesecret"
-        appconfig_keyvault_value = "{{\"uri\":\"https://fake.vault.azure.net/secrets/fakesecret\"}}"
+        appconfig_keyvault_value = f"{{{json.dumps({'uri': keyvault_id})}}}"
         appsvc_keyvault_value = "@Microsoft.KeyVault(SecretUri=https://fake.vault.azure.net/secrets/fakesecret)"
         label = 'ForExportToAppService'
         self.kwargs.update({
@@ -1304,7 +1304,7 @@ class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
 
         # Update keyvault reference for slot export / import testing
         slot_keyvault_id = "https://fake.vault.azure.net/secrets/slotsecret"
-        appconfigslot_keyvault_value = "{{\"uri\":\"https://fake.vault.azure.net/secrets/slotsecret\"}}"
+        appconfigslot_keyvault_value = f"{{{json.dumps({'uri': slot_keyvault_id})}}}"
         appsvcslot_keyvault_value = "@Microsoft.KeyVault(SecretUri=https://fake.vault.azure.net/secrets/slotsecret)"
         label = 'ForExportToAppServiceSlot'
         self.kwargs.update({
@@ -1354,7 +1354,7 @@ class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
         alt_label = 'ImportedAltSyntaxFromAppService'
         alt_keyvault_key = "AltKeyVault"
         alt_keyvault_value = "@Microsoft.KeyVault(VaultName=myvault;SecretName=mysecret;SecretVersion=ec96f02080254f109c51a1f14cdb1931)"
-        appconfig_keyvault_value = "{{\"uri\":\"https://myvault.vault.azure.net/secrets/mysecret/ec96f02080254f109c51a1f14cdb1931\"}}"
+        appconfig_keyvault_value = f"{{{json.dumps({'uri': 'https://myvault.vault.azure.net/secrets/mysecret/ec96f02080254f109c51a1f14cdb1931'})}}}"
         keyvault_ref = "{0}={1}".format(alt_keyvault_key, alt_keyvault_value)
         slotsetting_tag = {"AppService:SlotSetting": "true"}
         self.kwargs.update({
@@ -1959,7 +1959,7 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
         # Add new KeyVault reference
         keyvault_key = "HostSecrets"
         keyvault_id = "https://fake.vault.azure.net/secrets/fakesecret"
-        keyvault_value = "{{\"uri\":\"https://fake.vault.azure.net/secrets/fakesecret\"}}"
+        keyvault_value = f"{{{json.dumps({'uri': keyvault_id})}}}"
         self.kwargs.update({
             'key': keyvault_key,
             'secret_identifier': keyvault_id
@@ -2982,7 +2982,7 @@ class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
         # Add a KeyVault reference
         keyvault_key = "HostSecrets"
         keyvault_id = "https://fake.vault.azure.net/secrets/fakesecret"
-        appconfig_keyvault_value = "{{\"uri\":\"https://fake.vault.azure.net/secrets/fakesecret\"}}"
+        appconfig_keyvault_value = f"{{{json.dumps({'uri': keyvault_id})}}}"
         self.kwargs.update({
             'key': keyvault_key,
             'secret_identifier': keyvault_id
