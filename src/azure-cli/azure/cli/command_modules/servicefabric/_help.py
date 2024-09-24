@@ -265,6 +265,23 @@ examples:
 
 """
 
+helps['sf cluster durability'] = """
+type: group
+short-summary: Manage the durability of a cluster.
+"""
+
+helps['sf cluster durability update'] = """
+type: command
+short-summary: Update the durability tier or VM SKU of a node type in the cluster.
+examples:
+  - name: Change the cluster durability level to 'Silver'.
+    text: >
+        az sf cluster durability update -g group-name -c cluster1 --durability-level Silver --node-type nt1
+
+"""
+
+
+
 helps['sf cluster update'] = """
 type: command
 short-summary: Manage cluster updates.
@@ -334,6 +351,11 @@ examples:
     text: >
         az sf cluster node-type add -g group-name -c cluster1 --node-type 'n2' --capacity 5 --vm-user-name 'adminName' --vm-password testPassword0 --durability-level Bronze
 
+"""
+
+helps['sf cluster reliability'] = """
+type: group
+short-summary: Manage the reliability of a cluster.
 """
 
 helps['sf cluster reliability update'] = """
