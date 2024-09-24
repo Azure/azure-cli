@@ -578,7 +578,9 @@ def set_cluster_setting(cmd,
                         cluster_name,
                         section=None,
                         parameter=None,
-                        value=None):
+                        value=None,
+                        settings_section_description=None):
+
     cli_ctx = cmd.cli_ctx
 
     def _set(setting_dict, section, parameter, value):
@@ -586,6 +588,10 @@ def set_cluster_setting(cmd,
             setting_dict[section] = {}
         setting_dict[section][parameter] = value
         return setting_dict
+    
+    if settings_section_description and (section or parameter or value):
+        raise CLIError(
+            'Only can use either \'--settings-section-description\' or \'--section\', \'--parameter\' and \'--value\' to set the settings')
 
     if section or parameter or value:
         if section is None or parameter is None or value is None:
@@ -594,7 +600,17 @@ def set_cluster_setting(cmd,
 
     cluster = client.get(resource_group_name, cluster_name)
     setting_dict = _fabric_settings_to_dict(cluster.fabric_settings)
-    setting_dict = _set(setting_dict, section, parameter, value)
+    
+    if settings_section_description:
+        for setting in settings_section_description:
+            if 'section' in setting and 'parameter' in setting and 'value' in setting:
+                setting_dict = _set(setting_dict, setting['section'],
+                                    setting['parameter'], setting['value'])
+            else:
+                raise CLIError('settings_section_description is invalid')
+    else:
+        setting_dict = _set(setting_dict, section, parameter, value)
+        
     settings = _dict_to_fabric_settings(setting_dict)
     patch_request = ClusterUpdateParameters(fabric_settings=settings)
     update_cluster_poll = client.begin_update(resource_group_name, cluster_name, patch_request)
@@ -606,7 +622,8 @@ def remove_cluster_setting(cmd,
                            resource_group_name,
                            cluster_name,
                            section=None,
-                           parameter=None):
+                           parameter=None,
+                           settings_section_description=None):
     cli_ctx = cmd.cli_ctx
 
     def _remove(setting_dict, section, parameter):
@@ -619,9 +636,22 @@ def remove_cluster_setting(cmd,
         del setting_dict[section][parameter]
         return setting_dict
 
+    if settings_section_description and (section or parameter):
+        raise CLIError(
+            'Only can use either \'--settings-section-description\' or \'--section\' and \'--parameter \' to set the settings')
+        
     cluster = client.get(resource_group_name, cluster_name)
     setting_dict = _fabric_settings_to_dict(cluster.fabric_settings)
-    setting_dict = _remove(setting_dict, section, parameter)
+    
+    if settings_section_description:
+        for setting in settings_section_description:
+            if 'section' in setting and 'parameter' in setting:
+                setting_dict = _remove(setting_dict, setting['section'], setting['parameter'])
+            else:
+                raise CLIError('settings_section_description is invalid')
+    else:
+        setting_dict = _remove(setting_dict, section, parameter)
+    
     settings = _dict_to_fabric_settings(setting_dict)
     patch_request = ClusterUpdateParameters(fabric_settings=settings)
     update_cluster_poll = client.begin_update(resource_group_name, cluster_name, patch_request)

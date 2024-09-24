@@ -112,7 +112,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('sf cluster client-certificate remove') as c:
         c.argument('thumbprints', nargs='+', help='A single or Space-separated list of client certificate thumbprint(s) to be remove.')
 
-     with self.argument_context('sf cluster') as c:
+    with self.argument_context('sf cluster') as c:
         c.argument('durability_level', arg_type=get_enum_type(['Bronze', 'Silver', 'Gold']), help='durability level.')
 
     with self.argument_context('sf cluster setting') as c:
