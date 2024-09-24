@@ -112,6 +112,33 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('sf cluster client-certificate remove') as c:
         c.argument('thumbprints', nargs='+', help='A single or Space-separated list of client certificate thumbprint(s) to be remove.')
 
+     with self.argument_context('sf cluster') as c:
+        c.argument('durability_level', arg_type=get_enum_type(['Bronze', 'Silver', 'Gold']), help='durability level.')
+
+    with self.argument_context('sf cluster setting') as c:
+        c.argument('parameter', help='parameter name')
+        c.argument('section', help='section name')
+        c.argument('value', help='Specify the value')
+        c.argument('settings_section_description', options_list=['--settings-section-description', '--settings-section'], help='Specify the value')
+
+    with self.argument_context('sf cluster upgrade-type set') as c:
+        c.argument('version', help='cluster code version')
+        c.argument('upgrade_mode', arg_type=get_enum_type(['manual', 'automatic']), help='cluster upgrade mode')
+
+    with self.argument_context('sf cluster reliability') as c:
+        c.argument('reliability_level', arg_type=get_enum_type(['Bronze', 'Silver', 'Gold', 'Platinum']), help='durability level.')
+        c.argument('auto_add_node', help='Add node count automatically when changing reliability.')
+
+    with self.argument_context('sf cluster setting set') as c:
+        c.argument('settings_section_description', options_list=['--settings-section-description', '--settings-section'], type=get_json_object,
+                   help='JSON encoded parameters configuration. Use @{file} to load from a file. '
+                        'For example: [{"section": "NamingService","parameter": "MaxOperationTimeout","value": 1000},{"section": "MaxFileOperationTimeout","parameter": "Max2","value": 1000]')
+
+    with self.argument_context('sf cluster setting remove') as c:
+        c.argument('settings_section_description', options_list=['--settings-section-description', '--settings-section'], type=get_json_object,
+                   help='JSON encoded parameters configuration. Use @{file} to load from a file. '
+                        'For example: [{"section": "NamingService","parameter": "MaxOperationTimeout"}]')
+
     with self.argument_context('sf cluster node') as c:
         c.argument('number_of_nodes_to_add', options_list=['--number-of-nodes-to-add', '--nodes-to-add'], help='number of nodes to add.')
         c.argument('number_of_nodes_to_remove', options_list=['--number-of-nodes-to-rem', '--nodes-to-remove'], help='number of nodes to remove.')
