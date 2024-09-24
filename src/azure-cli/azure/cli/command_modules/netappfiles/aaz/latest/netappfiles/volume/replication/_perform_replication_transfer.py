@@ -12,20 +12,16 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "netappfiles snapshot delete",
-    confirmation="Are you sure you want to perform this operation?",
+    "netappfiles volume replication perform-replication-transfer",
 )
-class Delete(AAZCommand):
-    """Delete snapshot
-
-    :example: Delete an ANF snapshot
-        az netappfiles snapshot delete -g mygroup --account-name myaccname --pool-name mypoolname --volume-name myvolname --name mysnapname
+class PerformReplicationTransfer(AAZCommand):
+    """Performs an adhoc replication transfer on a volume with volumeType Migration
     """
 
     _aaz_info = {
         "version": "2024-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/snapshots/{}", "2024-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/performreplicationtransfer", "2024-07-01"],
         ]
     }
 
@@ -69,14 +65,8 @@ class Delete(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
-        _args_schema.snapshot_name = AAZStrArg(
-            options=["-n", "-s", "--name", "--snapshot-name"],
-            help="The name of the snapshot",
-            required=True,
-            id_part="child_name_3",
-        )
         _args_schema.volume_name = AAZStrArg(
-            options=["-v", "--volume-name"],
+            options=["-n", "-v", "--volume-name"],
             help="The name of the volume",
             required=True,
             id_part="child_name_2",
@@ -90,7 +80,7 @@ class Delete(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.SnapshotsDelete(ctx=self.ctx)()
+        yield self.VolumesPerformReplicationTransfer(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -101,7 +91,7 @@ class Delete(AAZCommand):
     def post_operations(self):
         pass
 
-    class SnapshotsDelete(AAZHttpOperation):
+    class VolumesPerformReplicationTransfer(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -111,25 +101,7 @@ class Delete(AAZCommand):
                 return self.client.build_lro_polling(
                     self.ctx.args.no_wait,
                     session,
-                    self.on_200,
-                    self.on_error,
-                    lro_options={"final-state-via": "location"},
-                    path_format_arguments=self.url_parameters,
-                )
-            if session.http_response.status_code in [200]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_200,
-                    self.on_error,
-                    lro_options={"final-state-via": "location"},
-                    path_format_arguments=self.url_parameters,
-                )
-            if session.http_response.status_code in [204]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_204,
+                    None,
                     self.on_error,
                     lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
@@ -140,13 +112,13 @@ class Delete(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/snapshots/{snapshotName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/performReplicationTransfer",
                 **self.url_parameters
             )
 
         @property
         def method(self):
-            return "DELETE"
+            return "POST"
 
         @property
         def error_format(self):
@@ -165,10 +137,6 @@ class Delete(AAZCommand):
                 ),
                 **self.serialize_url_param(
                     "resourceGroupName", self.ctx.args.resource_group,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "snapshotName", self.ctx.args.snapshot_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -192,15 +160,9 @@ class Delete(AAZCommand):
             }
             return parameters
 
-        def on_200(self, session):
-            pass
 
-        def on_204(self, session):
-            pass
+class _PerformReplicationTransferHelper:
+    """Helper class for PerformReplicationTransfer"""
 
 
-class _DeleteHelper:
-    """Helper class for Delete"""
-
-
-__all__ = ["Delete"]
+__all__ = ["PerformReplicationTransfer"]

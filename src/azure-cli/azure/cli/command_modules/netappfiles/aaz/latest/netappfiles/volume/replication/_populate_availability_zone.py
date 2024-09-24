@@ -12,22 +12,27 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "netappfiles volume-group wait",
+    "netappfiles volume replication populate-availability-zone",
 )
-class Wait(AAZWaitCommand):
-    """Place the CLI in a waiting state until a condition is met.
+class PopulateAvailabilityZone(AAZCommand):
+    """This operation will populate availability zone information for a volume
+
+    :example: This operation will populate availability zone information for volume myvolname
+        az netappfiles volume populate-availability-zone -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname
     """
 
     _aaz_info = {
+        "version": "2024-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/volumegroups/{}", "2024-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/populateavailabilityzone", "2024-07-01"],
         ]
     }
 
+    AZ_SUPPORT_NO_WAIT = True
+
     def _handler(self, command_args):
         super()._handler(command_args)
-        self._execute_operations()
-        return self._output()
+        return self.build_lro_poller(self._execute_operations, self._output)
 
     _args_schema = None
 
@@ -49,12 +54,9 @@ class Wait(AAZWaitCommand):
                 pattern="^[a-zA-Z0-9][a-zA-Z0-9\\-_]{0,127}$",
             ),
         )
-        _args_schema.resource_group = AAZResourceGroupNameArg(
-            required=True,
-        )
-        _args_schema.volume_group_name = AAZStrArg(
-            options=["-n", "--name", "--group-name", "--volume-group-name"],
-            help="The name of the volumeGroup",
+        _args_schema.pool_name = AAZStrArg(
+            options=["-p", "--pool-name"],
+            help="The name of the capacity pool",
             required=True,
             id_part="child_name_1",
             fmt=AAZStrArgFormat(
@@ -63,11 +65,25 @@ class Wait(AAZWaitCommand):
                 min_length=1,
             ),
         )
+        _args_schema.resource_group = AAZResourceGroupNameArg(
+            required=True,
+        )
+        _args_schema.volume_name = AAZStrArg(
+            options=["-n", "-v", "--name", "--volume-name"],
+            help="The name of the volume",
+            required=True,
+            id_part="child_name_2",
+            fmt=AAZStrArgFormat(
+                pattern="^[a-zA-Z][a-zA-Z0-9\\-_]{0,63}$",
+                max_length=64,
+                min_length=1,
+            ),
+        )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.VolumeGroupsGet(ctx=self.ctx)()
+        yield self.VolumesPopulateAvailabilityZone(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -79,30 +95,46 @@ class Wait(AAZWaitCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=False)
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class VolumeGroupsGet(AAZHttpOperation):
+    class VolumesPopulateAvailabilityZone(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
             request = self.make_request()
             session = self.client.send_request(request=request, stream=False, **kwargs)
+            if session.http_response.status_code in [202]:
+                return self.client.build_lro_polling(
+                    self.ctx.args.no_wait,
+                    session,
+                    self.on_200,
+                    self.on_error,
+                    lro_options={"final-state-via": "location"},
+                    path_format_arguments=self.url_parameters,
+                )
             if session.http_response.status_code in [200]:
-                return self.on_200(session)
+                return self.client.build_lro_polling(
+                    self.ctx.args.no_wait,
+                    session,
+                    self.on_200,
+                    self.on_error,
+                    lro_options={"final-state-via": "location"},
+                    path_format_arguments=self.url_parameters,
+                )
 
             return self.on_error(session.http_response)
 
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/volumeGroups/{volumeGroupName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/populateAvailabilityZone",
                 **self.url_parameters
             )
 
         @property
         def method(self):
-            return "GET"
+            return "POST"
 
         @property
         def error_format(self):
@@ -116,6 +148,10 @@ class Wait(AAZWaitCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
+                    "poolName", self.ctx.args.pool_name,
+                    required=True,
+                ),
+                **self.serialize_url_param(
                     "resourceGroupName", self.ctx.args.resource_group,
                     required=True,
                 ),
@@ -124,7 +160,7 @@ class Wait(AAZWaitCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "volumeGroupName", self.ctx.args.volume_group_name,
+                    "volumeName", self.ctx.args.volume_name,
                     required=True,
                 ),
             }
@@ -167,70 +203,32 @@ class Wait(AAZWaitCommand):
             cls._schema_on_200 = AAZObjectType()
 
             _schema_on_200 = cls._schema_on_200
+            _schema_on_200.etag = AAZStrType(
+                flags={"read_only": True},
+            )
             _schema_on_200.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200.location = AAZStrType()
+            _schema_on_200.location = AAZStrType(
+                flags={"required": True},
+            )
             _schema_on_200.name = AAZStrType(
                 flags={"read_only": True},
             )
             _schema_on_200.properties = AAZObjectType(
-                flags={"client_flatten": True},
+                flags={"required": True, "client_flatten": True},
             )
+            _schema_on_200.system_data = AAZObjectType(
+                serialized_name="systemData",
+                flags={"read_only": True},
+            )
+            _schema_on_200.tags = AAZDictType()
             _schema_on_200.type = AAZStrType(
                 flags={"read_only": True},
             )
+            _schema_on_200.zones = AAZListType()
 
             properties = cls._schema_on_200.properties
-            properties.group_meta_data = AAZObjectType(
-                serialized_name="groupMetaData",
-            )
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-                flags={"read_only": True},
-            )
-            properties.volumes = AAZListType()
-
-            group_meta_data = cls._schema_on_200.properties.group_meta_data
-            group_meta_data.application_identifier = AAZStrType(
-                serialized_name="applicationIdentifier",
-            )
-            group_meta_data.application_type = AAZStrType(
-                serialized_name="applicationType",
-            )
-            group_meta_data.global_placement_rules = AAZListType(
-                serialized_name="globalPlacementRules",
-            )
-            group_meta_data.group_description = AAZStrType(
-                serialized_name="groupDescription",
-            )
-            group_meta_data.volumes_count = AAZIntType(
-                serialized_name="volumesCount",
-                flags={"read_only": True},
-            )
-
-            global_placement_rules = cls._schema_on_200.properties.group_meta_data.global_placement_rules
-            global_placement_rules.Element = AAZObjectType()
-            _WaitHelper._build_schema_placement_key_value_pairs_read(global_placement_rules.Element)
-
-            volumes = cls._schema_on_200.properties.volumes
-            volumes.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.properties.volumes.Element
-            _element.id = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.name = AAZStrType()
-            _element.properties = AAZObjectType(
-                flags={"required": True, "client_flatten": True},
-            )
-            _element.tags = AAZDictType()
-            _element.type = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.zones = AAZListType()
-
-            properties = cls._schema_on_200.properties.volumes.Element.properties
             properties.actual_throughput_mibps = AAZFloatType(
                 serialized_name="actualThroughputMibps",
                 flags={"read_only": True},
@@ -423,7 +421,7 @@ class Wait(AAZWaitCommand):
                 serialized_name="volumeType",
             )
 
-            data_protection = cls._schema_on_200.properties.volumes.Element.properties.data_protection
+            data_protection = cls._schema_on_200.properties.data_protection
             data_protection.backup = AAZObjectType()
             data_protection.replication = AAZObjectType()
             data_protection.snapshot = AAZObjectType()
@@ -431,7 +429,7 @@ class Wait(AAZWaitCommand):
                 serialized_name="volumeRelocation",
             )
 
-            backup = cls._schema_on_200.properties.volumes.Element.properties.data_protection.backup
+            backup = cls._schema_on_200.properties.data_protection.backup
             backup.backup_policy_id = AAZStrType(
                 serialized_name="backupPolicyId",
             )
@@ -442,7 +440,7 @@ class Wait(AAZWaitCommand):
                 serialized_name="policyEnforced",
             )
 
-            replication = cls._schema_on_200.properties.volumes.Element.properties.data_protection.replication
+            replication = cls._schema_on_200.properties.data_protection.replication
             replication.endpoint_type = AAZStrType(
                 serialized_name="endpointType",
             )
@@ -464,7 +462,7 @@ class Wait(AAZWaitCommand):
                 serialized_name="replicationSchedule",
             )
 
-            remote_path = cls._schema_on_200.properties.volumes.Element.properties.data_protection.replication.remote_path
+            remote_path = cls._schema_on_200.properties.data_protection.replication.remote_path
             remote_path.external_host_name = AAZStrType(
                 serialized_name="externalHostName",
                 flags={"required": True},
@@ -478,12 +476,12 @@ class Wait(AAZWaitCommand):
                 flags={"required": True},
             )
 
-            snapshot = cls._schema_on_200.properties.volumes.Element.properties.data_protection.snapshot
+            snapshot = cls._schema_on_200.properties.data_protection.snapshot
             snapshot.snapshot_policy_id = AAZStrType(
                 serialized_name="snapshotPolicyId",
             )
 
-            volume_relocation = cls._schema_on_200.properties.volumes.Element.properties.data_protection.volume_relocation
+            volume_relocation = cls._schema_on_200.properties.data_protection.volume_relocation
             volume_relocation.ready_to_be_finalized = AAZBoolType(
                 serialized_name="readyToBeFinalized",
                 flags={"read_only": True},
@@ -492,16 +490,16 @@ class Wait(AAZWaitCommand):
                 serialized_name="relocationRequested",
             )
 
-            data_store_resource_id = cls._schema_on_200.properties.volumes.Element.properties.data_store_resource_id
+            data_store_resource_id = cls._schema_on_200.properties.data_store_resource_id
             data_store_resource_id.Element = AAZStrType()
 
-            export_policy = cls._schema_on_200.properties.volumes.Element.properties.export_policy
+            export_policy = cls._schema_on_200.properties.export_policy
             export_policy.rules = AAZListType()
 
-            rules = cls._schema_on_200.properties.volumes.Element.properties.export_policy.rules
+            rules = cls._schema_on_200.properties.export_policy.rules
             rules.Element = AAZObjectType()
 
-            _element = cls._schema_on_200.properties.volumes.Element.properties.export_policy.rules.Element
+            _element = cls._schema_on_200.properties.export_policy.rules.Element
             _element.allowed_clients = AAZStrType(
                 serialized_name="allowedClients",
             )
@@ -542,10 +540,10 @@ class Wait(AAZWaitCommand):
                 serialized_name="unixReadWrite",
             )
 
-            mount_targets = cls._schema_on_200.properties.volumes.Element.properties.mount_targets
+            mount_targets = cls._schema_on_200.properties.mount_targets
             mount_targets.Element = AAZObjectType()
 
-            _element = cls._schema_on_200.properties.volumes.Element.properties.mount_targets.Element
+            _element = cls._schema_on_200.properties.mount_targets.Element
             _element.file_system_id = AAZStrType(
                 serialized_name="fileSystemId",
                 flags={"required": True},
@@ -562,46 +560,51 @@ class Wait(AAZWaitCommand):
                 serialized_name="smbServerFqdn",
             )
 
-            placement_rules = cls._schema_on_200.properties.volumes.Element.properties.placement_rules
+            placement_rules = cls._schema_on_200.properties.placement_rules
             placement_rules.Element = AAZObjectType()
-            _WaitHelper._build_schema_placement_key_value_pairs_read(placement_rules.Element)
 
-            protocol_types = cls._schema_on_200.properties.volumes.Element.properties.protocol_types
+            _element = cls._schema_on_200.properties.placement_rules.Element
+            _element.key = AAZStrType(
+                flags={"required": True},
+            )
+            _element.value = AAZStrType(
+                flags={"required": True},
+            )
+
+            protocol_types = cls._schema_on_200.properties.protocol_types
             protocol_types.Element = AAZStrType()
 
-            tags = cls._schema_on_200.properties.volumes.Element.tags
+            system_data = cls._schema_on_200.system_data
+            system_data.created_at = AAZStrType(
+                serialized_name="createdAt",
+            )
+            system_data.created_by = AAZStrType(
+                serialized_name="createdBy",
+            )
+            system_data.created_by_type = AAZStrType(
+                serialized_name="createdByType",
+            )
+            system_data.last_modified_at = AAZStrType(
+                serialized_name="lastModifiedAt",
+            )
+            system_data.last_modified_by = AAZStrType(
+                serialized_name="lastModifiedBy",
+            )
+            system_data.last_modified_by_type = AAZStrType(
+                serialized_name="lastModifiedByType",
+            )
+
+            tags = cls._schema_on_200.tags
             tags.Element = AAZStrType()
 
-            zones = cls._schema_on_200.properties.volumes.Element.zones
+            zones = cls._schema_on_200.zones
             zones.Element = AAZStrType()
 
             return cls._schema_on_200
 
 
-class _WaitHelper:
-    """Helper class for Wait"""
-
-    _schema_placement_key_value_pairs_read = None
-
-    @classmethod
-    def _build_schema_placement_key_value_pairs_read(cls, _schema):
-        if cls._schema_placement_key_value_pairs_read is not None:
-            _schema.key = cls._schema_placement_key_value_pairs_read.key
-            _schema.value = cls._schema_placement_key_value_pairs_read.value
-            return
-
-        cls._schema_placement_key_value_pairs_read = _schema_placement_key_value_pairs_read = AAZObjectType()
-
-        placement_key_value_pairs_read = _schema_placement_key_value_pairs_read
-        placement_key_value_pairs_read.key = AAZStrType(
-            flags={"required": True},
-        )
-        placement_key_value_pairs_read.value = AAZStrType(
-            flags={"required": True},
-        )
-
-        _schema.key = cls._schema_placement_key_value_pairs_read.key
-        _schema.value = cls._schema_placement_key_value_pairs_read.value
+class _PopulateAvailabilityZoneHelper:
+    """Helper class for PopulateAvailabilityZone"""
 
 
-__all__ = ["Wait"]
+__all__ = ["PopulateAvailabilityZone"]
