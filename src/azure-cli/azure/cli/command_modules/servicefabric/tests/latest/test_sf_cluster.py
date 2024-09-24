@@ -61,6 +61,7 @@ class ServiceFabricClusterTests(ScenarioTest):
         self.cmd('sf cluster update --resource-group {rg} -c {cluster_name} --upgrade-mode manual --version {version}',
                  checks=[self.check('upgradeMode', 'Manual')])
         
+    @live_only()    
     @ResourceGroupPreparer()
     def test_reliability_and_durability(self):
         self.kwargs.update({
