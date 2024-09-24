@@ -402,14 +402,14 @@ def validate_source_uri(cmd, namespace):  # pylint: disable=too-many-statements
             if dir_name == '':
                 dir_name = None
             if is_storagev2(prefix):
-                source_sas = create_short_lived_file_sas_v2(cmd, source_account_name, share,
-                                                            dir_name, file_name, account_key=source_account_key)
+                source_sas = create_short_lived_file_sas_v2(cmd, source_account_name, source_account_key, share,
+                                                            dir_name, file_name)
             else:
                 source_sas = create_short_lived_file_sas(cmd, source_account_name, source_account_key, share,
                                                          dir_name, file_name)
         elif valid_blob_source and (ns.get('share_name', None) or not same_account):
             if is_storagev2(prefix):
-                source_sas = create_short_lived_blob_sas_v2(cmd, source_account_name,container,
+                source_sas = create_short_lived_blob_sas_v2(cmd, source_account_name, container,
                                                             blob, account_key=source_account_key)
             else:
                 source_sas = create_short_lived_blob_sas(cmd, source_account_name, source_account_key, container, blob)
@@ -521,8 +521,6 @@ def validate_source_url(cmd, namespace):  # pylint: disable=too-many-statements,
                          'token_credential': token_credential}
         if valid_blob_source:
             client = cf_blob_service(cmd.cli_ctx, client_kwargs)
-        elif valid_file_source:
-            client = cf_share_service(cmd.cli_ctx, client_kwargs)
 
         from datetime import datetime, timedelta
         start = datetime.utcnow()
@@ -531,15 +529,15 @@ def validate_source_url(cmd, namespace):  # pylint: disable=too-many-statements,
 
     # Both source account name and either key or sas (or both) are now available
     if not source_sas:
+        prefix = cmd.command_kwargs['resource_type'].value[0]
         # generate a sas token even in the same account when the source and destination are not the same kind.
         if valid_file_source and (ns.get('container_name', None) or not same_account):
             dir_name, file_name = os.path.split(path) if path else (None, '')
             if dir_name == '':
                 dir_name = None
             if is_storagev2(prefix):
-                source_sas = create_short_lived_file_sas_v2(cmd, source_account_name, share,
-                                                            dir_name, file_name, account_key=source_account_key,
-                                                            user_delegation_key=source_user_delegation_key)
+                source_sas = create_short_lived_file_sas_v2(cmd, source_account_name, source_account_key, share,
+                                                            dir_name, file_name)
             else:
                 source_sas = create_short_lived_file_sas(cmd, source_account_name, source_account_key, share,
                                                          dir_name, file_name)

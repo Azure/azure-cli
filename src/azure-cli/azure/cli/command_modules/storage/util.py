@@ -197,8 +197,7 @@ def create_short_lived_file_sas(cmd, account_name, account_key, share, directory
                              permission=t_file_permissions(read=True), expiry=expiry, protocol='https')
 
 
-def create_short_lived_file_sas_v2(cmd, account_name, share, directory_name, file_name, account_key=None,
-                                   user_delegation_key=None):
+def create_short_lived_file_sas_v2(cmd, account_name, account_key, share, directory_name, file_name):
     from datetime import timedelta
 
     t_sas = cmd.get_models('_shared_access_signature#FileSharedAccessSignature',
@@ -206,12 +205,7 @@ def create_short_lived_file_sas_v2(cmd, account_name, share, directory_name, fil
 
     t_file_permissions = cmd.get_models('_models#FileSasPermissions', resource_type=ResourceType.DATA_STORAGE_FILESHARE)
     expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
-    if account_key:
-        sas = t_sas(account_name, account_key=account_key)
-    elif user_delegation_key:
-        sas = t_sas(account_name, user_delegation_key=user_delegation_key)
-    else:
-        raise ValueError("Either account key or user delegation key need to be provided.")
+    sas = t_sas(account_name, account_key=account_key)
     return sas.generate_file(share, directory_name=directory_name, file_name=file_name,
                              permission=t_file_permissions(read=True), expiry=expiry, protocol='https')
 
