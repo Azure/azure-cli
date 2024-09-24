@@ -612,7 +612,7 @@ type: command
 short-summary: Create a credential set.
 examples:
   - name: Create a credential set.
-    text: az acr credential-set create -r myregistry -n MyRule -l docker.io -u https://MyKeyvault.vault.azure.net/secrets/usernamesecret -p https://MyKeyvault.vault.azure.net/secrets/passwordsecret
+    text: az acr credential-set create -r myregistry -n MyDockerHubCredSet -l docker.io -u https://MyKeyvault.vault.azure.net/secrets/usernamesecret -p https://MyKeyvault.vault.azure.net/secrets/passwordsecret
 """
 
 helps['acr credential-set update'] = """
@@ -620,7 +620,7 @@ type: command
 short-summary: Update the username or password Azure Key Vault secret ID on a credential set.
 examples:
   - name: Update the password Azure Key Vault secret ID.
-    text: az acr credential-set update -r myregistry -n MyRule -p https://MyKeyvault.vault.azure.net/secrets/newsecretname
+    text: az acr credential-set update -r myregistry -n MyDockerHubCredSet -p https://MyKeyvault.vault.azure.net/secrets/newsecretname
 """
 
 helps['acr credential-set delete'] = """
