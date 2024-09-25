@@ -125,7 +125,7 @@ class NodeRoleType:  # pylint: disable=too-few-public-methods
 
 def get_key_for_storage_account(cmd, storage_account):  # pylint: disable=unused-argument
     from ._client_factory import cf_storage
-    from msrestazure.tools import parse_resource_id, is_valid_resource_id
+    from azure.cli.core.arm_tools import parse_resource_id, is_valid_resource_id
     from knack.util import CLIError
 
     storage_account_key = None
@@ -144,7 +144,7 @@ def get_key_for_storage_account(cmd, storage_account):  # pylint: disable=unused
 
 def get_storage_account_endpoint(cmd, storage_account, is_wasb):
     from ._client_factory import cf_storage
-    from msrestazure.tools import parse_resource_id, is_valid_resource_id
+    from azure.cli.core.arm_tools import parse_resource_id, is_valid_resource_id
     host = None
     if is_valid_resource_id(storage_account):
         parsed_storage_account = parse_resource_id(storage_account)
@@ -189,7 +189,7 @@ def build_update_identities_info(assign_identity_type, identities):
 
 
 def build_virtual_network_profile(subnet):
-    from msrestazure.tools import resource_id, parse_resource_id, is_valid_resource_id
+    from azure.cli.core.arm_tools import resource_id, parse_resource_id, is_valid_resource_id
     from azure.mgmt.hdinsight.models import VirtualNetworkProfile
     from knack.util import CLIError
 
@@ -214,7 +214,7 @@ def build_virtual_network_profile(subnet):
 
 
 def parse_domain_name(domain):
-    from msrestazure.tools import parse_resource_id, is_valid_resource_id
+    from azure.cli.core.arm_tools import parse_resource_id, is_valid_resource_id
     domain_name = None
     if is_valid_resource_id(domain):
         parsed_domain_id = parse_resource_id(domain)

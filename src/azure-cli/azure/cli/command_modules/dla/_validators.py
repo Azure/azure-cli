@@ -16,7 +16,7 @@ def _get_resource_group_from_account_name(client, account_name):
     :return: resource group name or None
     :rtype: str
     """
-    from msrestazure.tools import parse_resource_id
+    from azure.cli.core.arm_tools import parse_resource_id
     for acct in client.list():
         id_comps = parse_resource_id(acct.id)
         if id_comps['name'] == account_name:

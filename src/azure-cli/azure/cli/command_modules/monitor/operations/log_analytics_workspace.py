@@ -112,7 +112,7 @@ class WorkspaceDataExportCreate(_WorkspaceDataExportCreate):
     def pre_operations(self):
         args = self.ctx.args
         destination = str(args.destination)
-        from azure.mgmt.core.tools import is_valid_resource_id, resource_id, parse_resource_id
+        from azure.cli.core.arm_tools import is_valid_resource_id, resource_id, parse_resource_id
         if not is_valid_resource_id(destination):
             raise InvalidArgumentValueError('usage error: --destination should be a storage account,'
                                             ' an evenhug namespace or an event hub resource id.')
@@ -140,7 +140,7 @@ class WorkspaceDataExportUpdate(_WorkspaceDataExportUpdate):
         args = self.ctx.args
         if args.destination:
             destination = str(args.destination)
-            from azure.mgmt.core.tools import is_valid_resource_id, resource_id, parse_resource_id
+            from azure.cli.core.arm_tools import is_valid_resource_id, resource_id, parse_resource_id
             if not is_valid_resource_id(destination):
                 raise InvalidArgumentValueError('usage error: --destination should be a storage account,'
                                                 ' an evenhug namespace or an event hub resource id.')

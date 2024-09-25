@@ -26,7 +26,7 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.mgmt.containerregistry import ContainerRegistryManagementClient
 from knack.log import get_logger
 
-from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
+from azure.cli.core.arm_tools import parse_resource_id, is_valid_resource_id, resource_id
 
 from ._clients import ManagedEnvironmentClient, ContainerAppClient, GitHubActionClient, ContainerAppsJobClient
 

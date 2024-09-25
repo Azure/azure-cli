@@ -32,7 +32,7 @@ from knack.util import CLIError
 from knack.log import get_logger
 
 from msrestazure.azure_exceptions import CloudError
-from msrestazure.tools import is_valid_resource_id, parse_resource_id, resource_id
+from azure.cli.core.arm_tools import is_valid_resource_id, parse_resource_id, resource_id
 
 from azure.mgmt.storage import StorageManagementClient
 from azure.mgmt.applicationinsights import ApplicationInsightsManagementClient

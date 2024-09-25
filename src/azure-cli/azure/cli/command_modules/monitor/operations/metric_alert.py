@@ -12,7 +12,7 @@ from azure.cli.core.aaz import has_value
 from azure.cli.core.azclierror import InvalidArgumentValueError
 from knack.log import get_logger
 from msrest.serialization import Serializer
-from msrestazure.tools import is_valid_resource_id, resource_id
+from azure.cli.core.arm_tools import is_valid_resource_id, resource_id
 
 from ..aaz.latest.monitor.metrics.alert import Update as _MetricsAlertUpdate
 
@@ -353,7 +353,7 @@ def _parse_action_removals(actions):
 
 
 def _parse_resource_and_scope_type(scopes):
-    from azure.mgmt.core.tools import parse_resource_id
+    from azure.cli.core.arm_tools import parse_resource_id
 
     if not scopes:
         raise InvalidArgumentValueError('scopes cannot be null.')

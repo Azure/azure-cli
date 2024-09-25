@@ -31,7 +31,7 @@ from azure.mgmt.security.v2020_07_01_preview.models import (RuleResultsInput, Ru
 from azure.mgmt.security.v2023_01_01.models import (Extension)
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.azclierror import (MutuallyExclusiveArgumentError)
-from msrestazure.tools import resource_id
+from azure.cli.core.arm_tools import resource_id
 from msrestazure.azure_exceptions import CloudError
 from knack.log import get_logger
 from ._utils import (

@@ -39,7 +39,7 @@ from azure.mgmt.resource import ResourceManagementClient
 from azure.mgmt.servicelinker import ServiceLinkerManagementClient
 
 from knack.log import get_logger
-from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
+from azure.cli.core.arm_tools import parse_resource_id, is_valid_resource_id, resource_id
 
 from ._clients import ContainerAppClient, ManagedEnvironmentClient, WorkloadProfileClient, ContainerAppsJobClient
 from ._client_factory import handle_raw_exception, providers_client_factory, cf_resource_groups, log_analytics_client_factory, log_analytics_shared_key_client_factory

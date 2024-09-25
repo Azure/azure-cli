@@ -9,7 +9,7 @@ from importlib import import_module
 import re
 from dateutil.tz import tzutc   # pylint: disable=import-error
 from msrestazure.azure_exceptions import CloudError
-from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id  # pylint: disable=import-error
+from azure.cli.core.arm_tools import resource_id, is_valid_resource_id, parse_resource_id  # pylint: disable=import-error
 from knack.log import get_logger
 from knack.util import todict
 from urllib.request import urlretrieve

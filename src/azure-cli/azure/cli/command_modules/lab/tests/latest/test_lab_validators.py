@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
-from azure.mgmt.core.tools import is_valid_resource_id
+from azure.cli.core.arm_tools import is_valid_resource_id
 from azure.cli.core.azclierror import ArgumentUsageError
 from azure.cli.command_modules.lab.validators import _update_artifacts
 

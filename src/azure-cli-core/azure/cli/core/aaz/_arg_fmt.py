@@ -669,7 +669,7 @@ class AAZResourceIdArgFormat(AAZBaseArgFormat):
             self._template = self._Template(template)
 
     def __call__(self, ctx, value):
-        from azure.mgmt.core.tools import parse_resource_id
+        from azure.cli.core.arm_tools import parse_resource_id
 
         assert isinstance(value, AAZSimpleValue)
 

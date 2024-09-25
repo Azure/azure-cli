@@ -5,7 +5,7 @@
 
 import re
 from knack.log import get_logger
-from azure.mgmt.core.tools import (
+from azure.cli.core.arm_tools import (
     parse_resource_id,
 )
 from azure.cli.core import telemetry

@@ -344,7 +344,7 @@ def _check_registry_health(cmd, registry_name, ignore_errors):
 
 def _check_private_endpoint(cmd, registry_name, vnet_of_private_endpoint):  # pylint: disable=too-many-locals, too-many-statements
     import socket
-    from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
+    from azure.cli.core.arm_tools import parse_resource_id, is_valid_resource_id, resource_id
 
     if registry_name is None:
         raise CLIError("Registry name must be provided to verify DNS routings of its private endpoints")

@@ -36,7 +36,7 @@ def validate_lab_vm_create(cmd, args):
 
 def validate_lab_vm_list(cmd, args):
     """ Validates parameters for lab vm list and updates args. """
-    from azure.mgmt.core.tools import resource_id, is_valid_resource_id
+    from azure.cli.core.arm_tools import resource_id, is_valid_resource_id
     filters = has_value(args.filters) or False
     environment = has_value(args.environment) or False
     args_all = has_value(args.all) or False
@@ -275,7 +275,7 @@ def _use_gallery_image(cli_ctx, args):
 # pylint: disable=no-member
 def _use_custom_image(cli_ctx, args):
     """ Retrieve custom image from lab and update args """
-    from azure.mgmt.core.tools import is_valid_resource_id
+    from azure.cli.core.arm_tools import is_valid_resource_id
     if is_valid_resource_id(args.image.to_serialized_data()):
         args.custom_image_id = args.image
     else:
@@ -345,7 +345,7 @@ def _validate_other_parameters(args, formula=None):
 
 
 def validate_artifacts(cmd, args):
-    from azure.mgmt.core.tools import resource_id
+    from azure.cli.core.arm_tools import resource_id
     if has_value(args.artifacts_org):
         from azure.cli.core.commands.client_factory import get_subscription_id
         resource_group = args.resource_group.to_serialized_data()
@@ -384,7 +384,7 @@ def _update_artifacts(artifacts, lab_resource_id):
 
 
 def _update_artifact_id(artifact_id, lab_resource_id):
-    from azure.mgmt.core.tools import is_valid_resource_id
+    from azure.cli.core.arm_tools import is_valid_resource_id
     if not is_valid_resource_id(artifact_id):
         return "{}{}".format(lab_resource_id, artifact_id)
     return artifact_id

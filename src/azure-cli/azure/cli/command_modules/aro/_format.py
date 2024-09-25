@@ -5,7 +5,7 @@
 
 import collections
 
-from msrestazure.tools import parse_resource_id
+from azure.cli.core.arm_tools import parse_resource_id
 
 
 def aro_list_table_format(results):

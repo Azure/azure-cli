@@ -19,7 +19,7 @@ from ._resource_config import (
     RESOURCE
 )
 from azure.cli.core import get_default_cli
-from azure.mgmt.core.tools import (
+from azure.cli.core.arm_tools import (
     parse_resource_id,
     is_valid_resource_id as is_valid_resource_id_sdk
 )

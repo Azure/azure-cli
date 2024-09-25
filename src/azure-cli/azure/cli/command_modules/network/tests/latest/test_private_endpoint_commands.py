@@ -2151,7 +2151,7 @@ class NetworkPrivateLinkDiskAccessScenarioTest(ScenarioTest):
 
 class NetworkARMTemplateBasedScenarioTest(ScenarioTest):
     def _test_private_endpoint_connection_scenario(self, resource_group, target_resource_name, resource_type):
-        from azure.mgmt.core.tools import resource_id
+        from azure.cli.core.arm_tools import resource_id
         self.kwargs.update({
             'target_resource_name': target_resource_name,
             'target_resource_id': resource_id(subscription=self.get_subscription_id(),
@@ -2243,7 +2243,7 @@ class NetworkPrivateLinkDigitalTwinsScenarioTest(ScenarioTest):
     def test_private_endpoint_connection_digitaltwins(
         self, resource_group, resource_group_location
     ):
-        from azure.mgmt.core.tools import resource_id
+        from azure.cli.core.arm_tools import resource_id
 
         resource_name = self.create_random_name("cli-test-dt-", 24)
         templateFile = os.path.join(
@@ -2375,7 +2375,7 @@ class NetworkPrivateLinkSearchScenarioTest(ScenarioTest):
     def test_private_endpoint_connection_search(
         self, resource_group, resource_group_location
     ):
-        from azure.mgmt.core.tools import resource_id
+        from azure.cli.core.arm_tools import resource_id
 
         resource_name = self.create_random_name("cli-test-azs-", 24)
         templateFile = os.path.join(
@@ -2753,7 +2753,7 @@ class NetworkPrivateLinkScenarioTest(ScenarioTest):
 
 class PowerBINetworkARMTemplateBasedScenarioTest(ScenarioTest):
     def _test_private_endpoint_connection_scenario_powerbi(self, resource_group, powerBIResourceName, resource_type, reject):
-        from azure.mgmt.core.tools import resource_id
+        from azure.cli.core.arm_tools import resource_id
 
         tenant_id = self.cmd('account list --query "[?isDefault].tenantId" -o tsv').output.strip()
 
@@ -4396,7 +4396,7 @@ class NetworkPrivateLinkCosmosDBPostgresScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_pg', random_name_length=30)
     def test_private_endpoint_connection_cosmosdb_postgres(self, resource_group):
-        from azure.mgmt.core.tools import resource_id
+        from azure.cli.core.arm_tools import resource_id
         namespace = 'Microsoft.DBforPostgreSQL'
         instance_type = 'serverGroupsv2'
         resource_name = self.create_random_name(prefix='cli', length=10)
@@ -4513,7 +4513,7 @@ class NetworkPrivateLinkElasticSANScenarioTest(ScenarioTest):
     @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_elastic_san', random_name_length=30, location='eastus2euap')
     def test_private_endpoint_connection_elasticsan(self, resource_group):
-        from azure.mgmt.core.tools import resource_id
+        from azure.cli.core.arm_tools import resource_id
         namespace = 'Microsoft.ElasticSan'
         instance_type = 'elasticSans'
         resource_name = self.create_random_name(prefix='cli', length=10)
@@ -4638,7 +4638,7 @@ class NetworkPrivateLinkMongoClustersTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_mongo_cl', random_name_length=30, location='eastus')
     def test_private_endpoint_connection_cosmosdb_mongo_clusters(self, resource_group):
-        from azure.mgmt.core.tools import resource_id
+        from azure.cli.core.arm_tools import resource_id
         namespace = 'Microsoft.DocumentDB'
         resource_type = 'mongoClusters'
         secret1 = "mongo"
@@ -4782,7 +4782,7 @@ class NetworkPrivateLinkPostgreSQLFlexibleServerScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_fspg', random_name_length=18, location='eastus2euap')
     def test_private_endpoint_connection_postgres_flexible_server(self, resource_group):
-        from azure.mgmt.core.tools import resource_id
+        from azure.cli.core.arm_tools import resource_id
         namespace = 'Microsoft.DBforPostgreSQL'
         instance_type = 'flexibleServers'
         resource_name = self.create_random_name(prefix='clitest', length=15)

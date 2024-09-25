@@ -12,7 +12,7 @@ from knack.prompting import (
     prompt,
     prompt_pass
 )
-from azure.mgmt.core.tools import (
+from azure.cli.core.arm_tools import (
     parse_resource_id,
 )
 from azure.cli.core import telemetry

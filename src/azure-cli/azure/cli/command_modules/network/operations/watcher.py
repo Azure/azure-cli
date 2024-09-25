@@ -5,7 +5,7 @@
 # pylint: disable=line-too-long, protected-access, too-few-public-methods
 from knack.log import get_logger
 from knack.util import CLIError
-from msrestazure.tools import is_valid_resource_id, parse_resource_id, resource_id
+from azure.cli.core.arm_tools import is_valid_resource_id, parse_resource_id, resource_id
 
 from azure.cli.core.azclierror import ValidationError, RequiredArgumentMissingError, MutuallyExclusiveArgumentError
 from azure.cli.core.commands.arm import get_arm_resource_by_id

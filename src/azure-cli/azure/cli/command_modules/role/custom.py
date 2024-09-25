@@ -102,7 +102,7 @@ def _create_update_role_definition(cmd, role_definition, for_update):
         scopes = (scopes_in_definition if scopes_in_definition else
                   ['/subscriptions/' + definitions_client._config.subscription_id])
         if role_resource_id:
-            from msrestazure.tools import parse_resource_id
+            from azure.cli.core.arm_tools import parse_resource_id
             role_id = parse_resource_id(role_resource_id)['name']
             role_name = role_definition['roleName']
         else:
@@ -596,7 +596,7 @@ def _build_role_scope(resource_group_name, scope, subscription_id):
         if resource_group_name:
             err = 'Resource group "{}" is redundant because scope is supplied'
             raise CLIError(err.format(resource_group_name))
-        from azure.mgmt.core.tools import is_valid_resource_id
+        from azure.cli.core.arm_tools import is_valid_resource_id
         if scope.startswith('/subscriptions/') and not is_valid_resource_id(scope):
             raise CLIError('Invalid scope. Please use --help to view the valid format.')
     elif resource_group_name:

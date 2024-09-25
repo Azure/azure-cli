@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from msrestazure.tools import is_valid_resource_id, resource_id
+from azure.cli.core.arm_tools import is_valid_resource_id, resource_id
 from knack.prompting import prompt_pass
 from azure.cli.core.azclierror import (
     RequiredArgumentMissingError,
