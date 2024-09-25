@@ -840,6 +840,8 @@ def load_arguments(self, _):
         c.argument('ephemeral_os_disk', arg_type=get_three_state_flag(), min_api='2024-03-01', help='Allow you to specify the ephemeral disk settings for the operating system disk. Specify it to false to set ephemeral disk setting as empty and migrate it to non ephemeral')
         c.argument('ephemeral_os_disk_option', options_list=['--ephemeral-os-disk-option', '--ephemeral-option'], arg_type=get_enum_type(self.get_models('DiffDiskOptions')), min_api='2024-03-01', help='Specify the ephemeral disk settings for operating system disk.')
         c.argument('zones', zones_type, min_api='2023-03-01')
+        c.argument('sku_profile_vmsizes', nargs='+', options_list=['--sku-profile-vmsizes'], min_api='2024-07-01', help='A list of VM sizes in the scale set. Only works with Flexible orchestration_mode. See https://azure.microsoft.com/pricing/details/virtual-machines/ for size info.')
+        c.argument('sku_profile_allocation_strategy', options_list=['--sku-profile-allocation-strategy'], arg_type=get_enum_type(['LowestPrice', 'CapacityOptimized']), min_api='2024-07-01', help='Allocation strategy for sku_profile_vmsizes: LowestPrice or CapacityOptimized.')
 
     with self.argument_context('vmss update', min_api='2018-10-01', arg_group='Automatic Repairs') as c:
 

@@ -3937,7 +3937,8 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 max_surge=None, enable_resilient_creation=None, enable_resilient_deletion=None,
                 ephemeral_os_disk=None, ephemeral_os_disk_option=None, zones=None, additional_scheduled_events=None,
                 enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None,
-                upgrade_policy_mode=None, enable_auto_os_upgrade=None, **kwargs):
+                upgrade_policy_mode=None, enable_auto_os_upgrade=None, 
+                sku_profile_vmsizes=None, sku_profile_allocation_strategy=None, **kwargs):
     vmss = kwargs['parameters']
     aux_subscriptions = None
     # pylint: disable=too-many-boolean-expressions
@@ -4172,6 +4173,20 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             logger.warning("VMSS sku is already %s", vm_sku)
         else:
             vmss.sku.name = vm_sku
+
+    sku_profile = dict()
+    if sku_profile_vmsizes is not None or sku_profile_allocation_strategy is not None:
+        if sku_profile_vmsizes is not None:
+            sku_profile_vmsizes_list = []
+            for vm_size in sku_profile_vmsizes:
+                vmsize_obj = {
+                    'name': vm_size
+                }
+                sku_profile_vmsizes_list.append(vmsize_obj)
+            sku_profile['vmSizes'] = sku_profile_vmsizes_list
+        if sku_profile_allocation_strategy is not None:
+            sku_profile['allocationStrategy'] = sku_profile_allocation_strategy
+        vmss.skuProfile = sku_profile
 
     if ephemeral_os_disk_placement is not None or ephemeral_os_disk_option is not None:
         if vmss.virtual_machine_profile.storage_profile.os_disk.diff_disk_settings is not None:

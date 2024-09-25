@@ -1541,7 +1541,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
         sku_profile = {
             'vmSizes': sku_profile_vmsizes_list,
             'allocationStrategy': sku_profile_allocation_strategy
-        }
+        }        
         vmss_properties['skuProfile'] = sku_profile
 
     vmss = {

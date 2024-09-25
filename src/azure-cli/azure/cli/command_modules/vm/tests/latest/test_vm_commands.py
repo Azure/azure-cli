@@ -9593,17 +9593,38 @@ class VMSSAutomaticRepairsScenarioTest(ScenarioTest):
                  ])
 
 class SkuProfileTest(ScenarioTest):
-    
-    @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_sku_profile__')
+        
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_sku_profile', location='eastus')
     def test_vmss_create_sku_profile(self, resource_group):
         self.kwargs.update({
-            'vmss': 'vmss1'
+            'vmss': self.create_random_name('vmss', 10),
         })
-
-        # Create vmss
-        self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username azureuser ' + 
-                 '--orchestration-mode Flexible --vm-sku Mix --sku_profile_vmsizes Standard_DS1_v2 Standard_D2s_v4' +
-                 '--sku_profile_allocation_strategy CapacityOptimized')
+        self.cmd('vmss create -n {vmss} -g {rg} --image ubuntu2204 --vm-sku Mix ' + 
+                ' --sku-profile-vmsizes Standard_DS1_v2 Standard_D2s_v4', checks=[
+            self.check('vmss.orchestrationMode', 'Flexible'),
+            self.check('vmss.skuProfile.allocationStrategy', 'LowestPrice'),
+            self.check('vmss.skuProfile.vmSizes[0].name', 'Standard_DS1_v2'),
+            self.check('vmss.skuProfile.vmSizes[1].name', 'Standard_D2s_v4')
+        ])
+    
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_sku_profile_update', location='eastus')
+    def test_vmss_create_sku_profile_update(self, resource_group):
+        self.kwargs.update({
+            'vmss': self.create_random_name('vmss', 10),
+        })
+        self.cmd('vmss create -n {vmss} -g {rg} --image ubuntu2204 --vm-sku Mix ' + 
+                ' --sku-profile-vmsizes Standard_DS1_v2 Standard_D2s_v4 --sku-profile-allocation-strategy CapacityOptimized', checks=[
+            self.check('vmss.orchestrationMode', 'Flexible'),
+            self.check('vmss.skuProfile.allocationStrategy', 'CapacityOptimized'),
+            self.check('vmss.skuProfile.vmSizes[0].name', 'Standard_DS1_v2'),
+            self.check('vmss.skuProfile.vmSizes[1].name', 'Standard_D2s_v4')
+        ])
+        self.cmd('vmss update -n {vmss} -g {rg} ' + 
+                ' --sku-profile-vmsizes Standard_DS1_v2 Standard_D2s_v4 --sku-profile-allocation-strategy CapacityOptimized', checks=[
+            self.check('skuProfile.allocationStrategy', 'CapacityOptimized'),
+            self.check('skuProfile.vmSizes[0].name', 'Standard_DS1_v2'),
+            self.check('skuProfile.vmSizes[1].name', 'Standard_D2s_v4')
+        ])
 
 
 class VMCreateNSGRule(ScenarioTest):
@@ -9934,7 +9955,6 @@ class VMSSOrchestrationModeScenarioTest(ScenarioTest):
             self.check('length(@)', 1),
             self.check('[0].type', 'Microsoft.Network/loadBalancers/inboundNatRules')
         ])
-
 
 class VMCrossTenantUpdateScenarioTest(LiveScenarioTest):
 
