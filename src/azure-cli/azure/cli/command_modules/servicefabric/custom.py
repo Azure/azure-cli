@@ -741,7 +741,7 @@ def update_cluster(cmd,
                                 settings_section_rem, value, upgrade_mode, version, durability_level)
         return update_cluster_reliability_level(cmd, client, resource_group_name,
                                                 cluster_name, reliability_level, auto_add_node)
-  
+
     if durability_level is not None:
         validate_none_arguments(auto_add_node, reliability_level, section, parameter,
                                 settings_section_set, settings_section_rem, value, upgrade_mode, version)
