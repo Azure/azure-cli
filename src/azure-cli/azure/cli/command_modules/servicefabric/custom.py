@@ -729,28 +729,32 @@ def update_cluster(cmd,
                                 settings_section_rem, upgrade_mode, version, durability_level)
         validate_arguments(section, parameter, value)
         return set_cluster_setting(cmd, client, resource_group_name, cluster_name, section, parameter, value)
-    elif settings_section_rem is True:
+
+    if settings_section_rem is True:
         validate_none_arguments(node_type, reliability_level, auto_add_node, value,
                                 settings_section_set, upgrade_mode, version, durability_level)
         validate_arguments(section, parameter)
         return remove_cluster_setting(cmd, client, resource_group_name, cluster_name, section, parameter)
-    elif reliability_level is not None:
+
+    if reliability_level is not None:
         validate_none_arguments(node_type, section, parameter, settings_section_set,
                                 settings_section_rem, value, upgrade_mode, version, durability_level)
         return update_cluster_reliability_level(cmd, client, resource_group_name,
                                                 cluster_name, reliability_level, auto_add_node)
-    elif durability_level is not None:
+  
+    if durability_level is not None:
         validate_none_arguments(auto_add_node, reliability_level, section, parameter,
                                 settings_section_set, settings_section_rem, value, upgrade_mode, version)
         validate_arguments(node_type)
         return update_cluster_durability(cmd, client, resource_group_name, cluster_name, node_type, durability_level)
-    elif upgrade_mode is not None:
+
+    if upgrade_mode is not None:
         validate_none_arguments(node_type, reliability_level, auto_add_node, section, parameter,
                                 settings_section_set, settings_section_rem, value, durability_level)
         return update_cluster_upgrade_type(cmd, client, resource_group_name, cluster_name, upgrade_mode, version)
-    else:
-        raise CLIError(
-            'Invalid arguments. Please run command: `az sf cluster update -h` for help message and examples of how to use the command')
+
+    raise CLIError(
+        'Invalid arguments. Please run command: `az sf cluster update -h` for help message and examples of how to use the command')
 
 
 def add_cluster_node_type(cmd,
