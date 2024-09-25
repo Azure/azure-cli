@@ -41,9 +41,9 @@ Release History
 
 * `az cosmosdb restore`: Add `--disable-ttl` to support for Restore with Time-To-Live Disabled (#29875)
 
-**dla**
+**DataLake**
 
-* `az dla`: Deprecate azure datalake analytics from CLI (#29879)
+* `az dla`: Deprecate datalake analytics (#29879)
 
 **HDInsight**
 
@@ -80,7 +80,7 @@ Release History
 **RDBMS**
 
 * `az postgres flexible-server update`: Support Case-Insensitive Input for `--tier`, `--performance-tier`, `--sku`, and `--maintenance-window` (#29840)
-* `az postgres flexible-server migration create` Add AWS_AURORA as a migration source type for PostgreSql (#29863)
+* `az postgres flexible-server migration create`: Add AWS_AURORA as a migration source type for PostgreSql (#29863)
 
 **SQL**
 
