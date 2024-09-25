@@ -334,7 +334,7 @@ short-summary: Remove nodes from a node type in a cluster.
 examples:
   - name: Remove 2 'nt1' nodes from a cluster.
     text: >
-        az sf cluster node remove -g group-name -c cluster1 --number-of-nodes-to-remove 2 --node-type 'nt1'
+        az sf cluster node remove -g group-name -c cluster1 --number-of-nodes-to-rem 2 --node-type 'nt1'
 
 """
 
