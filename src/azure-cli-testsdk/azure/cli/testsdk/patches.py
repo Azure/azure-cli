@@ -85,9 +85,6 @@ def patch_long_run_operation_delay(unit_test):
         return
 
     mock_in_unit_test(unit_test,
-                      'azure.core.polling.LROPoller._delay',
-                      _shortcut_long_run_operation)
-    mock_in_unit_test(unit_test,
                       'azure.core.polling.arm_polling.ARMPolling._delay',
                       _shortcut_long_run_operation)
     mock_in_unit_test(unit_test,
