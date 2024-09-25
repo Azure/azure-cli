@@ -724,12 +724,12 @@ def update_cluster(cmd,
                    version=None,
                    durability_level=None):
 
-    if settings_section_set == True:
+    if settings_section_set is True:
         validate_none_arguments(node_type, reliability_level, auto_add_node,
                                 settings_section_rem, upgrade_mode, version, durability_level)
         validate_arguments(section, parameter, value)
         return set_cluster_setting(cmd, client, resource_group_name, cluster_name, section, parameter, value)
-    elif settings_section_rem == True:
+    elif settings_section_rem is True:
         validate_none_arguments(node_type, reliability_level, auto_add_node, value,
                                 settings_section_set, upgrade_mode, version, durability_level)
         validate_arguments(section, parameter)
