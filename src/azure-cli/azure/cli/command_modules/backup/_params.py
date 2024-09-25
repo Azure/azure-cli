@@ -400,8 +400,8 @@ def load_arguments(self, _):
         c.argument('storage_account_resource_group', help='Name of the resource group which contains the storage account. Default value will be same as --resource-group if not specified.')
         c.argument('restore_to_edge_zone', arg_type=get_three_state_flag(), help='Switch parameter to indicate edge zone VM restore. This parameter can\'t be used in cross region and cross subscription restore scenarios.')
         c.argument('tenant_id', help='ID of the tenant if the Resource Guard protecting the vault exists in a different tenant.')
-        c.argument('disk_access_option', arg_type=get_enum_type(allowed_disk_access_options), help='Specifies the disk access option for target disks.')
-        c.argument('target_disk_access_id', help='Specifies the target disk access ID when --disk-access-option is set to EnablePrivateAccessForAllDisks')
+        c.argument('disk_access_option', arg_type=get_enum_type(allowed_disk_access_options), help='Specify the disk access option for target disks.')
+        c.argument('target_disk_access_id', help='Specify the target disk access ID when --disk-access-option is set to EnablePrivateAccessForAllDisks')
 
     with self.argument_context('backup restore restore-azurefileshare') as c:
         c.argument('resolve_conflict', resolve_conflict_type)
