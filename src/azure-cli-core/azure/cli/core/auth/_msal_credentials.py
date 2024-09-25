@@ -4,23 +4,14 @@
 # --------------------------------------------------------------------------------------------
 
 """
-Credentials defined in this module are alternative implementations of credentials provided by Azure Identity.
-
-These credentials implement azure.core.credentials.TokenCredential by exposing `get_token` method for Track 2
-SDK invocation.
-
-If you want to implement your own credential, the credential must also expose `get_token` method.
-
-`get_token` method takes `scopes` as positional arguments and other optional `kwargs`, such as `claims`, `data`.
-The return value should be a named tuple containing two elements: token (str), expires_on (int). You may simply use
-azure.cli.core.auth.util.AccessToken to build the return value. See below credentials as examples.
+Credentials to acquire tokens from MSAL.
 """
 
 from knack.log import get_logger
 from knack.util import CLIError
 from msal import PublicClientApplication, ConfidentialClientApplication
 
-from .util import check_result, build_sdk_access_token
+from .util import check_result
 
 logger = get_logger(__name__)
 
@@ -50,14 +41,15 @@ class UserCredential:  # pylint: disable=too-few-public-methods
 
         self._account = accounts[0]
 
-    def get_token(self, *scopes, claims=None, **kwargs):
-        # scopes = ['https://pas.windows.net/CheckMyAccess/Linux/.default']
-        logger.debug("UserCredential.get_token: scopes=%r, claims=%r, kwargs=%r", scopes, claims, kwargs)
+    def acquire_token(self, scopes, claims=None, **kwargs):
+        # scopes must be a list.
+        # For acquiring SSH certificate, scopes is ['https://pas.windows.net/CheckMyAccess/Linux/.default']
+        logger.debug("UserCredential.acquire_token: scopes=%r, claims=%r, kwargs=%r", scopes, claims, kwargs)
 
         if claims:
             logger.warning('Acquiring new access token silently for tenant %s with claims challenge: %s',
                            self._msal_app.authority.tenant, claims)
-        result = self._msal_app.acquire_token_silent_with_error(list(scopes), self._account, claims_challenge=claims,
+        result = self._msal_app.acquire_token_silent_with_error(scopes, self._account, claims_challenge=claims,
                                                                 **kwargs)
 
         from azure.cli.core.azclierror import AuthenticationError
@@ -80,7 +72,7 @@ class UserCredential:  # pylint: disable=too-few-public-methods
                 success_template, error_template = read_response_templates()
 
                 result = self._msal_app.acquire_token_interactive(
-                    list(scopes), login_hint=self._account['username'],
+                    scopes, login_hint=self._account['username'],
                     port=8400 if self._msal_app.authority.is_adfs else None,
                     success_template=success_template, error_template=error_template, **kwargs)
                 check_result(result)
@@ -89,7 +81,7 @@ class UserCredential:  # pylint: disable=too-few-public-methods
             # launch browser, but show the error message and `az login` command instead.
             else:
                 raise
-        return build_sdk_access_token(result)
+        return result
 
 
 class ServicePrincipalCredential:  # pylint: disable=too-few-public-methods
@@ -102,9 +94,9 @@ class ServicePrincipalCredential:  # pylint: disable=too-few-public-methods
         """
         self._msal_app = ConfidentialClientApplication(client_id, client_credential, **kwargs)
 
-    def get_token(self, *scopes, **kwargs):
-        logger.debug("ServicePrincipalCredential.get_token: scopes=%r, kwargs=%r", scopes, kwargs)
-
-        result = self._msal_app.acquire_token_for_client(list(scopes), **kwargs)
+    def acquire_token(self, scopes, **kwargs):
+        # scopes must be a list
+        logger.debug("ServicePrincipalCredential.acquire_token: scopes=%r, kwargs=%r", scopes, kwargs)
+        result = self._msal_app.acquire_token_for_client(scopes, **kwargs)
         check_result(result)
-        return build_sdk_access_token(result)
+        return result

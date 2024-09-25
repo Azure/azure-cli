@@ -11,6 +11,7 @@ from enum import Enum
 from azure.cli.core._session import ACCOUNT
 from azure.cli.core.azclierror import AuthenticationError
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
+from azure.cli.core.auth.credential_adaptor import CredentialAdaptor
 from azure.cli.core.util import in_cloud_console, can_launch_browser, is_github_codespaces
 from knack.log import get_logger
 from knack.util import CLIError
@@ -192,15 +193,12 @@ class Profile:
         subscription_finder = SubscriptionFinder(self.cli_ctx)
 
         # Create credentials
-        if user_identity:
-            credential = identity.get_user_credential(username)
-        else:
-            credential = identity.get_service_principal_credential(username)
-
+        sdk_credential = CredentialAdaptor(identity.get_user_credential(username) if user_identity else
+                                           identity.get_service_principal_credential(username))
         if tenant:
-            subscriptions = subscription_finder.find_using_specific_tenant(tenant, credential)
+            subscriptions = subscription_finder.find_using_specific_tenant(tenant, sdk_credential)
         else:
-            subscriptions = subscription_finder.find_using_common_tenant(username, credential)
+            subscriptions = subscription_finder.find_using_common_tenant(username, sdk_credential)
 
         if not subscriptions and not allow_no_subscriptions:
             raise CLIError("No subscriptions found for {}.".format(username))
@@ -371,14 +369,12 @@ class Profile:
             external_credentials = []
             for external_tenant in external_tenants:
                 external_credentials.append(self._create_credential(account, external_tenant, client_id=client_id))
-            from azure.cli.core.auth.credential_adaptor import CredentialAdaptor
-            cred = CredentialAdaptor(credential,
-                                     auxiliary_credentials=external_credentials,
-                                     resource=resource)
+            sdk_credential = CredentialAdaptor(
+                credential, auxiliary_credentials=external_credentials, resource=resource)
         else:
             # managed identity
-            cred = MsiAccountTypes.msi_auth_factory(managed_identity_type, managed_identity_id, resource)
-        return (cred,
+            sdk_credential = MsiAccountTypes.msi_auth_factory(managed_identity_type, managed_identity_id, resource)
+        return (sdk_credential,
                 str(account[_SUBSCRIPTION_ID]),
                 str(account[_TENANT_ID]))
 
@@ -400,37 +396,46 @@ class Profile:
         identity_type, identity_id = Profile._try_parse_msi_account_name(account)
         if identity_type:
             # managed identity
+            # TODO: Migrate to MSAL
             if tenant:
                 raise CLIError("Tenant shouldn't be specified for managed identity account")
             from .auth.util import scopes_to_resource
             msi_creds = MsiAccountTypes.msi_auth_factory(identity_type, identity_id,
                                                          scopes_to_resource(scopes))
             sdk_token = msi_creds.get_token(*scopes)
+            access_token = sdk_token.token
+            expires_on = sdk_token.expires_on
         elif in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
             # Cloud Shell, which is just a system-assigned managed identity.
+            # TODO: Migrate to MSAL
             if tenant:
                 raise CLIError("Tenant shouldn't be specified for Cloud Shell account")
             from .auth.util import scopes_to_resource
             msi_creds = MsiAccountTypes.msi_auth_factory(MsiAccountTypes.system_assigned, identity_id,
                                                          scopes_to_resource(scopes))
             sdk_token = msi_creds.get_token(*scopes)
+            access_token = sdk_token.token
+            expires_on = sdk_token.expires_on
         else:
             credential = self._create_credential(account, tenant)
-            sdk_token = credential.get_token(*scopes)
+            msal_token = credential.acquire_token(scopes)
+            access_token = msal_token['access_token']
+            import time
+            expires_on = int(time.time()) + msal_token["expires_in"]
 
         # Convert epoch int 'expires_on' to datetime string 'expiresOn' for backward compatibility
         # WARNING: expiresOn is deprecated and will be removed in future release.
         import datetime
-        expiresOn = datetime.datetime.fromtimestamp(sdk_token.expires_on).strftime("%Y-%m-%d %H:%M:%S.%f")
+        expiresOn = datetime.datetime.fromtimestamp(expires_on).strftime("%Y-%m-%d %H:%M:%S.%f")
 
         token_entry = {
-            'accessToken': sdk_token.token,
-            'expires_on': sdk_token.expires_on,  # epoch int, like 1605238724
+            'accessToken': access_token,
+            'expires_on': expires_on,  # epoch int, like 1605238724
             'expiresOn': expiresOn  # datetime string, like "2020-11-12 13:50:47.114324"
         }
 
         # (tokenType, accessToken, tokenEntry)
-        creds = 'Bearer', sdk_token.token, token_entry
+        creds = 'Bearer', access_token, token_entry
 
         # (cred, subscription, tenant)
         return (creds,
