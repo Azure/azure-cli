@@ -13,4 +13,10 @@ In the future, we many consider vendoring them or providing our own implementati
 
 # ATTENTION: Importing from azure.mgmt.core is time-consuming. Only import this file when necessary.
 
-from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id, resource_id
+# pylint: disable=unused-import
+from azure.mgmt.core.tools import (
+    is_valid_resource_id,
+    is_valid_resource_name,
+    parse_resource_id,
+    resource_id
+)
