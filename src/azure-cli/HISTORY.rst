@@ -47,7 +47,7 @@ Release History
 
 **HDInsight**
 
-* `az hdinsight update`: Add parameter `--assign_identity_type` to allow to update to `SystemAssigned` identity. (#29816)
+* `az hdinsight update`: Add parameter `--assign-identity-type` to allow to update to `SystemAssigned` identity. (#29816)
 
 **Monitor**
 
@@ -79,7 +79,7 @@ Release History
 
 **RDBMS**
 
-* `az postgres flexible-server update`: Support Case-Insensitive Input for `--tier`, `--performance-tier`, `--sku`, and `--maintenance-window` (#29840)
+* `az postgres flexible-server update`: Support case-insensitive input for `--tier`, `--performance-tier`, `--sku`, and `--maintenance-window` (#29840)
 * `az postgres flexible-server migration create`: Add AWS_AURORA as a migration source type for PostgreSql (#29863)
 
 **SQL**
