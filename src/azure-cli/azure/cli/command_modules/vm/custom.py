@@ -3183,7 +3183,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 enable_resilient_creation=None, enable_resilient_deletion=None,
                 additional_scheduled_events=None, enable_user_reboot_scheduled_events=None,
                 enable_user_redeploy_scheduled_events=None,
-                sku_profile_vmsizes=None, sku_profile_allocation_strategy=None):
+                skuprofile_vmsizes=None, skuprofile_allocat_strat=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -3497,8 +3497,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             additional_scheduled_events=additional_scheduled_events,
             enable_user_reboot_scheduled_events=enable_user_reboot_scheduled_events,
             enable_user_redeploy_scheduled_events=enable_user_redeploy_scheduled_events,
-            sku_profile_vmsizes=sku_profile_vmsizes,
-            sku_profile_allocation_strategy=sku_profile_allocation_strategy)
+            skuprofile_vmsizes=skuprofile_vmsizes,
+            skuprofile_allocat_strat=skuprofile_allocat_strat)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -3937,8 +3937,8 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 max_surge=None, enable_resilient_creation=None, enable_resilient_deletion=None,
                 ephemeral_os_disk=None, ephemeral_os_disk_option=None, zones=None, additional_scheduled_events=None,
                 enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None,
-                upgrade_policy_mode=None, enable_auto_os_upgrade=None, 
-                sku_profile_vmsizes=None, sku_profile_allocation_strategy=None, **kwargs):
+                upgrade_policy_mode=None, enable_auto_os_upgrade=None,
+                skuprofile_vmsizes=None, skuprofile_allocat_strat=None, **kwargs):
     vmss = kwargs['parameters']
     aux_subscriptions = None
     # pylint: disable=too-many-boolean-expressions
@@ -4175,17 +4175,17 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             vmss.sku.name = vm_sku
 
     sku_profile = dict()
-    if sku_profile_vmsizes is not None or sku_profile_allocation_strategy is not None:
-        if sku_profile_vmsizes is not None:
+    if skuprofile_vmsizes is not None or skuprofile_allocat_strat is not None:
+        if skuprofile_vmsizes is not None:
             sku_profile_vmsizes_list = []
-            for vm_size in sku_profile_vmsizes:
+            for vm_size in skuprofile_vmsizes:
                 vmsize_obj = {
                     'name': vm_size
                 }
                 sku_profile_vmsizes_list.append(vmsize_obj)
             sku_profile['vmSizes'] = sku_profile_vmsizes_list
-        if sku_profile_allocation_strategy is not None:
-            sku_profile['allocationStrategy'] = sku_profile_allocation_strategy
+        if skuprofile_allocat_strat is not None:
+            sku_profile['allocationStrategy'] = skuprofile_allocat_strat
         vmss.skuProfile = sku_profile
 
     if ephemeral_os_disk_placement is not None or ephemeral_os_disk_option is not None:

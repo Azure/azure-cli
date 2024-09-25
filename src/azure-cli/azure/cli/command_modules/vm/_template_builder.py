@@ -971,7 +971,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         enable_resilient_vm_creation=None, enable_resilient_vm_deletion=None,
                         additional_scheduled_events=None, enable_user_reboot_scheduled_events=None,
                         enable_user_redeploy_scheduled_events=None,
-                        sku_profile_vmsizes=None, sku_profile_allocation_strategy=None):
+                        skuprofile_vmsizes=None, skuprofile_allocat_strat=None):
 
     # Build IP configuration
     ip_configuration = {}
@@ -1531,17 +1531,17 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
             vmss_properties['additionalCapabilities'] = {}
         vmss_properties['additionalCapabilities']['hibernationEnabled'] = enable_hibernation
 
-    if sku_profile_vmsizes:
+    if skuprofile_vmsizes:
         sku_profile_vmsizes_list = []
-        for vm_size in sku_profile_vmsizes:
+        for vm_size in skuprofile_vmsizes:
             vmsize_obj = {
                 'name': vm_size
             }
             sku_profile_vmsizes_list.append(vmsize_obj)
         sku_profile = {
             'vmSizes': sku_profile_vmsizes_list,
-            'allocationStrategy': sku_profile_allocation_strategy
-        }        
+            'allocationStrategy': skuprofile_allocat_strat
+        }
         vmss_properties['skuProfile'] = sku_profile
 
     vmss = {
