@@ -587,7 +587,7 @@ def set_cluster_setting(cmd,
             setting_dict[section] = {}
         setting_dict[section][parameter] = value
         return setting_dict
-    
+
     if settings_section_description and (section or parameter or value):
         raise CLIError(
             'Only can use either \'--settings-section-description\' or \'--section\', \'--parameter\' and \'--value\' to set the settings')
@@ -599,7 +599,7 @@ def set_cluster_setting(cmd,
 
     cluster = client.get(resource_group_name, cluster_name)
     setting_dict = _fabric_settings_to_dict(cluster.fabric_settings)
-    
+
     if settings_section_description:
         for setting in settings_section_description:
             if 'section' in setting and 'parameter' in setting and 'value' in setting:
@@ -609,7 +609,7 @@ def set_cluster_setting(cmd,
                 raise CLIError('settings_section_description is invalid')
     else:
         setting_dict = _set(setting_dict, section, parameter, value)
-        
+
     settings = _dict_to_fabric_settings(setting_dict)
     patch_request = ClusterUpdateParameters(fabric_settings=settings)
     update_cluster_poll = client.begin_update(resource_group_name, cluster_name, patch_request)
@@ -638,10 +638,10 @@ def remove_cluster_setting(cmd,
     if settings_section_description and (section or parameter):
         raise CLIError(
             'Only can use either \'--settings-section-description\' or \'--section\' and \'--parameter \' to set the settings')
-        
+
     cluster = client.get(resource_group_name, cluster_name)
     setting_dict = _fabric_settings_to_dict(cluster.fabric_settings)
-    
+
     if settings_section_description:
         for setting in settings_section_description:
             if 'section' in setting and 'parameter' in setting:
@@ -650,7 +650,7 @@ def remove_cluster_setting(cmd,
                 raise CLIError('settings_section_description is invalid')
     else:
         setting_dict = _remove(setting_dict, section, parameter)
-    
+
     settings = _dict_to_fabric_settings(setting_dict)
     patch_request = ClusterUpdateParameters(fabric_settings=settings)
     update_cluster_poll = client.begin_update(resource_group_name, cluster_name, patch_request)
@@ -694,17 +694,19 @@ def update_cluster_reliability_level(cmd,
 
 def validate_arguments(*args):
     for arg in args:
-        if arg == None or arg == False:
+        if arg is None or arg is False:
             raise CLIError(
                 'Invalid argument {}, Please run command: `az sf cluster update -h` for help message and examples of how to use the command'.
                 format(arg))
 
+
 def validate_none_arguments(*args):
     for arg in args:
-        if arg is not None and arg != False:
+        if arg is not None and arg is True:
             raise CLIError(
                 'Invalid argument {}, Please run command: `az sf cluster update -h` for help message and examples of how to use the command'.
                 format(arg))
+
 
 def update_cluster(cmd,
                    client,

@@ -280,8 +280,6 @@ examples:
 
 """
 
-
-
 helps['sf cluster update'] = """
 type: command
 short-summary: Manage cluster updates.
@@ -293,7 +291,7 @@ examples:
   - name: Change the cluster reliability level to 'Silver'.
     text: >
         az sf cluster update -g group-name -c cluster1 --reliability-level Silver --auto-add-node
-        
+
   - name: Set the `MaxFileOperationTimeout` setting for a cluster to 5 seconds.
     text: >
         az sf cluster update -g group-name -c cluster1 --settings-section-set --section 'NamingService' --parameter 'MaxFileOperationTimeout' --value 5000
@@ -305,7 +303,7 @@ examples:
   - name: Set a cluster to use the 'Automatic' upgrade mode.
     text: >
         az sf cluster update -g group-name -c cluster1 --upgrade-mode Automatic
-          
+   
 """
 
 helps['sf cluster list'] = """
@@ -406,8 +404,6 @@ examples:
     text: >
         az sf cluster upgrade-type set -g group-name -c cluster1 --upgrade-mode Automatic
 """
-
-
 
 helps['sf managed-cluster'] = """
 type: group
