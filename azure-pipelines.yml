@@ -706,7 +706,6 @@ jobs:
 
 - job: BuildRpmPackagesAzureLinux
   displayName: Build Rpm Package
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   strategy:
     matrix:
       ${{ each arch in parameters.architectures }}:
