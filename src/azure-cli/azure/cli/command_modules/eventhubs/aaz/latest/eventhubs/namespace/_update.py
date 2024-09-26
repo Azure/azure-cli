@@ -62,6 +62,45 @@ class Update(AAZCommand):
             required=True,
         )
 
+        # define Arg Group "GeoDataReplication"
+
+        _args_schema = cls._args_schema
+        _args_schema.locations = AAZListArg(
+            options=["--locations"],
+            arg_group="GeoDataReplication",
+            help="A list of regions where replicas of the namespace are maintained.",
+            nullable=True,
+        )
+        _args_schema.max_replication_lag_duration_in_seconds = AAZIntArg(
+            options=["--max-lag", "--max-replication-lag-duration-in-seconds"],
+            arg_group="GeoDataReplication",
+            help="The maximum acceptable lag for data replication operations from the primary replica to a quorum of secondary replicas.  When the lag exceeds the configured amount, operations on the primary replica will be failed.",
+            nullable=True,
+        )
+
+        locations = cls._args_schema.locations
+        locations.Element = AAZObjectArg(
+            nullable=True,
+        )
+
+        _element = cls._args_schema.locations.Element
+        _element.cluster_arm_id = AAZStrArg(
+            options=["cluster-arm-id"],
+            help="Optional property that denotes the ARM ID of the Cluster. This is required, if a namespace replica should be placed in a Dedicated Event Hub Cluster",
+            nullable=True,
+        )
+        _element.location_name = AAZStrArg(
+            options=["location-name"],
+            help="Azure regions where a replica of the namespace is maintained",
+            nullable=True,
+        )
+        _element.role_type = AAZStrArg(
+            options=["role-type"],
+            help="GeoDR Role Types",
+            nullable=True,
+            enum={"Primary": "Primary", "Secondary": "Secondary"},
+        )
+
         # define Arg Group "Parameters"
 
         _args_schema = cls._args_schema
@@ -127,12 +166,6 @@ class Update(AAZCommand):
             options=["--encryption"],
             arg_group="Properties",
             help="Properties of BYOK Encryption description",
-            nullable=True,
-        )
-        _args_schema.geo_data_replication = AAZObjectArg(
-            options=["--geo-data-replication"],
-            arg_group="Properties",
-            help="Geo Data Replication settings for the namespace",
             nullable=True,
         )
         _args_schema.enable_auto_inflate = AAZBoolArg(
@@ -226,41 +259,6 @@ class Update(AAZCommand):
             options=["key-version"],
             help="Key Version",
             nullable=True,
-        )
-
-        geo_data_replication = cls._args_schema.geo_data_replication
-        geo_data_replication.locations = AAZListArg(
-            options=["locations"],
-            help="A list of regions where replicas of the namespace are maintained.",
-            nullable=True,
-        )
-        geo_data_replication.max_replication_lag_duration_in_seconds = AAZIntArg(
-            options=["max-lag", "max-replication-lag-duration-in-seconds"],
-            help="The maximum acceptable lag for data replication operations from the primary replica to a quorum of secondary replicas.  When the lag exceeds the configured amount, operations on the primary replica will be failed.",
-            nullable=True,
-        )
-
-        locations = cls._args_schema.geo_data_replication.locations
-        locations.Element = AAZObjectArg(
-            nullable=True,
-        )
-
-        _element = cls._args_schema.geo_data_replication.locations.Element
-        _element.cluster_arm_id = AAZStrArg(
-            options=["cluster-arm-id"],
-            help="Optional property that denotes the ARM ID of the Cluster. This is required, if a namespace replica should be placed in a Dedicated Event Hub Cluster",
-            nullable=True,
-        )
-        _element.location_name = AAZStrArg(
-            options=["location-name"],
-            help="Azure regions where a replica of the namespace is maintained",
-            nullable=True,
-        )
-        _element.role_type = AAZStrArg(
-            options=["role-type"],
-            help="GeoDR Role Types",
-            nullable=True,
-            enum={"Primary": "Primary", "Secondary": "Secondary"},
         )
 
         private_endpoint_connections = cls._args_schema.private_endpoint_connections
@@ -588,7 +586,7 @@ class Update(AAZCommand):
                 properties.set_prop("clusterArmId", AAZStrType, ".cluster_arm_id")
                 properties.set_prop("disableLocalAuth", AAZBoolType, ".disable_local_auth")
                 properties.set_prop("encryption", AAZObjectType, ".encryption")
-                properties.set_prop("geoDataReplication", AAZObjectType, ".geo_data_replication")
+                properties.set_prop("geoDataReplication", AAZObjectType)
                 properties.set_prop("isAutoInflateEnabled", AAZBoolType, ".enable_auto_inflate")
                 properties.set_prop("kafkaEnabled", AAZBoolType, ".kafka_enabled")
                 properties.set_prop("maximumThroughputUnits", AAZIntType, ".maximum_throughput_units")

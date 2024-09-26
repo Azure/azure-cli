@@ -99,16 +99,16 @@ class Failover(AAZCommand):
                 return self.client.build_lro_polling(
                     self.ctx.args.no_wait,
                     session,
-                    self.on_200,
+                    self.on_200_201,
                     self.on_error,
                     lro_options={"final-state-via": "azure-async-operation"},
                     path_format_arguments=self.url_parameters,
                 )
-            if session.http_response.status_code in [200]:
+            if session.http_response.status_code in [200, 201]:
                 return self.client.build_lro_polling(
                     self.ctx.args.no_wait,
                     session,
-                    self.on_200,
+                    self.on_200_201,
                     self.on_error,
                     lro_options={"final-state-via": "azure-async-operation"},
                     path_format_arguments=self.url_parameters,
@@ -187,49 +187,39 @@ class Failover(AAZCommand):
 
             return self.serialize_content(_content_value)
 
-        def on_200(self, session):
+        def on_200_201(self, session):
             data = self.deserialize_http_content(session)
             self.ctx.set_var(
                 "instance",
                 data,
-                schema_builder=self._build_schema_on_200
+                schema_builder=self._build_schema_on_200_201
             )
 
-        _schema_on_200 = None
+        _schema_on_200_201 = None
 
         @classmethod
-        def _build_schema_on_200(cls):
-            if cls._schema_on_200 is not None:
-                return cls._schema_on_200
+        def _build_schema_on_200_201(cls):
+            if cls._schema_on_200_201 is not None:
+                return cls._schema_on_200_201
 
-            cls._schema_on_200 = AAZObjectType()
-            _FailoverHelper._build_schema_fail_over_properties_read(cls._schema_on_200)
+            cls._schema_on_200_201 = AAZObjectType()
 
-            return cls._schema_on_200
+            _schema_on_200_201 = cls._schema_on_200_201
+            _schema_on_200_201.properties = AAZObjectType(
+                flags={"client_flatten": True},
+            )
+
+            properties = cls._schema_on_200_201.properties
+            properties.force = AAZBoolType()
+            properties.primary_location = AAZStrType(
+                serialized_name="primaryLocation",
+            )
+
+            return cls._schema_on_200_201
 
 
 class _FailoverHelper:
     """Helper class for Failover"""
-
-    _schema_fail_over_properties_read = None
-
-    @classmethod
-    def _build_schema_fail_over_properties_read(cls, _schema):
-        if cls._schema_fail_over_properties_read is not None:
-            _schema.force = cls._schema_fail_over_properties_read.force
-            _schema.primary_location = cls._schema_fail_over_properties_read.primary_location
-            return
-
-        cls._schema_fail_over_properties_read = _schema_fail_over_properties_read = AAZObjectType()
-
-        fail_over_properties_read = _schema_fail_over_properties_read
-        fail_over_properties_read.force = AAZBoolType()
-        fail_over_properties_read.primary_location = AAZStrType(
-            serialized_name="primaryLocation",
-        )
-
-        _schema.force = cls._schema_fail_over_properties_read.force
-        _schema.primary_location = cls._schema_fail_over_properties_read.primary_location
 
 
 __all__ = ["Failover"]

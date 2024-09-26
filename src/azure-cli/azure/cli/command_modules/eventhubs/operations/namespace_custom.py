@@ -2,6 +2,10 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+# pylint: disable=line-too-long
+# pylint: disable=too-many-statements
+# pylint: disable=too-many-locals
+
 from azure.cli.command_modules.eventhubs.constants import SYSTEM
 from azure.cli.command_modules.eventhubs.constants import SYSTEMUSER
 from azure.cli.command_modules.eventhubs.constants import USER
@@ -24,9 +28,12 @@ def create_replica_location_object(col):
     replica_location_object = {}
     replica_location_object.update({
         "location_name": col['locationName'],
-        "role_type": col['roleType'],
-        "cluster_arm_id": col['clusterArmId']
+        "role_type": col['roleType']
     })
+    if 'clusterArmId' in col:
+        replica_location_object.update({
+            "cluster_arm_id": col['clusterArmId']
+        })
     return replica_location_object
 
 
@@ -87,10 +94,14 @@ def create_eventhub_namespace(cmd, resource_group_name, namespace_name, location
                 "key_source": "Microsoft.KeyVault",
                 "require_infrastructure_encryption": require_infrastructure_encryption
             }})
+
+    list_replication_object = []
     if geo_data_replication_config:
+        for val in geo_data_replication_config:
+            list_replication_object.append(val)
         command_args_dict.update({
             "geo_data_replication": {
-                "locations": geo_data_replication_config,
+                "locations": list_replication_object,
                 "max_replication_lag_duration_in_seconds": max_replication_lag_duration_in_seconds
             }
         })
@@ -339,9 +350,7 @@ def cli_add_location(cmd, resource_group_name, namespace_name, geo_data_replicat
     return Update(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "namespace_name": namespace_name,
-        "geo_data_replication": {
-            "locations": location_object,
-        }
+        "locations": location_object
     })
 
 
@@ -367,7 +376,5 @@ def cli_remove_location(cmd, resource_group_name, namespace_name, geo_data_repli
     return Update(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "namespace_name": namespace_name,
-        "geo_data_replication": {
-            "locations": replica_location_object,
-        }
+        "locations": replica_location_object
     })

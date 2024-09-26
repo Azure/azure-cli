@@ -85,7 +85,7 @@ def load_arguments_eh(self, _):
             c.argument('mi_user_assigned', arg_group='Capture-Destination', help='List of User Assigned Identity ids.')
             c.argument('user_metadata', help="Gets and Sets Metadata of User.")
             c.argument('timestamp_type', arg_type=get_enum_type(['Create', 'LogAppend']), help='Denotes the type of timestamp the message will hold.')
-            c.argument('min_compaction_lag_in_mins', type=int, arg_group='Retention-Description', options_list=['--min-lag','--min-compaction-lag-in-mins'], help="The minimum time a message will remain ineligible for compaction in the log. This value is used when cleanupPolicy is Compact or DeleteOrCompact.")
+            c.argument('min_compaction_lag_in_mins', type=int, arg_group='Retention-Description', options_list=['--min-lag', '--min-compaction-lag-in-mins'], help="The minimum time a message will remain ineligible for compaction in the log. This value is used when cleanupPolicy is Compact or DeleteOrCompact.")
     with self.argument_context('eventhubs eventhub list') as c:
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
 
