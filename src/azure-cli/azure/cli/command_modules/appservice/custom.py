@@ -4602,15 +4602,10 @@ def create_flex_app_service_plan(cmd, resource_group_name, name, location, zone_
     logger.warning("zone_redundant: '%s'", zone_redundant)
 
     if zone_redundant:
-        _set_flex_zone_redundant(True, plan_def)
+        _enable_zone_redundant(plan_def, sku_def, 2)
 
     poller = client.app_service_plans.begin_create_or_update(resource_group_name, name, plan_def)
     return LongRunningOperation(cmd.cli_ctx)(poller)
-
-
-def _set_flex_zone_redundant(enabled, plan_def):
-    logger.warning("_set_flex_zone_redundant: Enabled: '%s'", enabled)
-    plan_def["properties"]["zoneRedundant"] = enabled
 
 
 def create_functionapp_app_service_plan(cmd, resource_group_name, name, is_linux, sku, number_of_workers=None,
