@@ -910,9 +910,7 @@ def _copy_blob_to_blob_container(cmd, blob_service, source_blob_service, destina
     t_blob_client = cmd.get_models('_blob_client#BlobClient')
     # generate sas for oauth copy source
     if not source_sas:
-        prefix = cmd.command_kwargs['resource_type'].value[0]
-        from ..util import create_short_lived_blob_sas, create_short_lived_blob_sas_v2
-        from datetime import datetime, timedelta
+        from ..util import create_short_lived_blob_sas_v2
         start = datetime.utcnow()
         expiry = datetime.utcnow() + timedelta(hours=1)
         source_user_delegation_key = source_blob_service.get_user_delegation_key(start, expiry)
