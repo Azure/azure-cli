@@ -202,6 +202,7 @@ def acr_manifest_list(cmd,
                       repo_id=None,
                       top=None,
                       orderby=None,
+                      verbose=None,
                       tenant_suffix=None,
                       username=None,
                       password=None):
@@ -220,7 +221,7 @@ def acr_manifest_list(cmd,
         repository=repository,
         permission=RepoAccessTokenPermission.PULL_META_READ.value)
 
-    raw_result = _obtain_data_from_registry(
+    list_metadata_result = _obtain_data_from_registry(
         login_server=login_server,
         path=_get_manifest_path(repository),
         top=top,
@@ -229,15 +230,27 @@ def acr_manifest_list(cmd,
         result_index='manifests',
         orderby=orderby)
 
-    digest_list = [x['digest'] for x in raw_result]
     manifest_list = []
 
-    for digest in digest_list:
+    if verbose:
+        for manifest_metadata in list_metadata_result:
+            entry = dict()
+            entry['ref'] = manifest_metadata['digest']
+            entry['descriptor'] = manifest_metadata
+            entry['manifest'] = _obtain_manifest_from_registry(
+                login_server=login_server,
+                path=_get_v2_manifest_path(repository, manifest_metadata['digest']),
+                username=username,
+                password=password)
+            manifest_list.append(entry)
+        return manifest_list
+
+    for manifest_metadata in list_metadata_result:
         manifest_list.append(_obtain_manifest_from_registry(
-            login_server=login_server,
-            path=_get_v2_manifest_path(repository, digest),
-            username=username,
-            password=password))
+        login_server=login_server,
+        path=_get_v2_manifest_path(repository, manifest_metadata['digest']),
+        username=username,
+        password=password))
 
     return manifest_list
 
@@ -486,6 +499,7 @@ def acr_manifest_show(cmd,
                       manifest_spec=None,
                       manifest_id=None,
                       raw_output=None,
+                      verbose=None,
                       tenant_suffix=None,
                       username=None,
                       password=None):
@@ -494,6 +508,7 @@ def acr_manifest_show(cmd,
 
     if manifest_id:
         registry_name, repository, tag, digest = _parse_fqdn(cmd, manifest_id[0])
+        manifest_spec = repository + ':' + tag if tag else repository + '@' + digest
     else:
         repository, tag, digest = parse_image_name(manifest_spec, allow_digest=True)
 
@@ -506,30 +521,43 @@ def acr_manifest_show(cmd,
         repository=repository,
         permission=RepoAccessTokenPermission.PULL.value)
 
-    if tag:
-        raw_result = _obtain_manifest_from_registry(
-            login_server=login_server,
-            path=_get_v2_manifest_path(repository, tag),
-            raw=raw_output,
-            username=username,
-            password=password)
+    manifest_metadata = _acr_repository_attributes_helper(
+        cmd=cmd,
+        registry_name=registry_name,
+        http_method='get',
+        json_payload=None,
+        permission=RepoAccessTokenPermission.METADATA_READ.value,
+        repository=None,
+        image=manifest_spec,
+        tenant_suffix=tenant_suffix,
+        username=username,
+        password=password)
 
-    else:
-        raw_result = _obtain_manifest_from_registry(
-            login_server=login_server,
-            path=_get_v2_manifest_path(repository, digest),
-            raw=raw_output,
-            username=username,
-            password=password)
+    if not digest:
+        digest = manifest_metadata['digest']
+
+    manifest = _obtain_manifest_from_registry(
+        login_server=login_server,
+        path=_get_v2_manifest_path(repository, digest),
+        raw=raw_output,
+        username=username,
+        password=password)
 
     # We are forced to print directly here in order to preserve bit for bit integrity and
     # avoid any formatting so that the output can successfully be hashed. Customer will expect that
     # 'az acr manifest show myreg.azurecr.io/myrepo@sha256:abc123 --raw | shasum -a 256' will result in 'abc123'
     if raw_output:
-        print(raw_result, end='')
+        print(manifest, end='')
         return
 
-    return raw_result
+    if verbose:
+        entry = dict()
+        entry['ref'] = digest
+        entry['descriptor'] = manifest_metadata
+        entry['manifest'] = manifest
+        return entry
+
+    return manifest
 
 
 def acr_manifest_metadata_show(cmd,
