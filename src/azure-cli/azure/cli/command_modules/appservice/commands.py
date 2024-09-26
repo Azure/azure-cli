@@ -348,10 +348,6 @@ def load_command_table(self, _):
         g.custom_command('set', 'update_app_settings_functionapp', exception_handler=ex_handler_factory())
         g.custom_command('delete', 'delete_app_settings', exception_handler=ex_handler_factory())
 
-    with self.command_group('functionapp plan config') as g:
-        g.custom_show_command('show', 'get_plan_info', exception_handler=ex_handler_factory(), validator=validate_is_flex_functionapp)
-        g.custom_command('set', 'update_plan_info', exception_handler=ex_handler_factory(), validator=validate_is_flex_functionapp)
-
     with self.command_group('functionapp runtime config') as g:
         g.custom_show_command('show', 'get_runtime_config', exception_handler=ex_handler_factory(), validator=validate_is_flex_functionapp)
         g.custom_command('set', 'update_runtime_config', exception_handler=ex_handler_factory(), validator=validate_is_flex_functionapp)

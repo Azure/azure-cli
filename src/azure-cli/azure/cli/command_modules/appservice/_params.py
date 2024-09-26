@@ -833,9 +833,6 @@ subscription than the app service environment, please use the resource ID for --
                    "this should be the user assigned identity resource id. For the storage account connection string authentication type, this should be the name of the app setting that will contain the storage account connection "
                    "string. For the system assigned managed-identity authentication type, this parameter is not applicable and should be left empty.", is_preview=True)
 
-    with self.argument_context('functionapp plan config set') as c:
-        c.argument('zone_redundant', help='Set zone redundancy for high availability. Applies to Flex Consumption only.', is_preview=True)
-
     with self.argument_context('functionapp cors credentials') as c:
         c.argument('enable', help='enable/disable access-control-allow-credentials', arg_type=get_three_state_flag())
 

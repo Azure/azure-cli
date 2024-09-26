@@ -72,7 +72,7 @@ from .utils import (_normalize_sku,
                     get_resource_if_exists, repo_url_to_name, get_token,
                     app_service_plan_exists, is_centauri_functionapp, is_flex_functionapp,
                     _remove_list_duplicates, get_raw_functionapp,
-                    register_app_provider, get_raw_plan)
+                    register_app_provider)
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            check_resource_group_exists, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
@@ -4585,22 +4585,6 @@ def get_app_insights_connection_string(cli_ctx, resource_group, name):
         raise ResourceNotFoundError("App Insights {} under resource group {} was not found.".format(name,
                                                                                                     resource_group))
     return appinsights.connection_string
-
-
-def get_plan_info(cmd, resource_group_name, name):
-    client = web_client_factory(cmd.cli_ctx)
-    functionapp = get_functionapp(cmd, resource_group_name, name)
-    parsed_plan_id = parse_resource_id(functionapp.server_farm_id)
-    return client.app_service_plans.get(parsed_plan_id['resource_group'], parsed_plan_id['name'])
-
-
-def update_plan_info(cmd, resource_group_name, name, zone_redundant):
-    functionapp = get_functionapp(cmd, resource_group_name, name)
-    parsed_plan_id = parse_resource_id(functionapp.server_farm_id)
-    plan_info = get_raw_plan(cmd.cli_ctx, parsed_plan_id['resource_group'], parsed_plan_id['name'])
-    _set_flex_zone_redundant(zone_redundant, plan_info)
-    update_flex_plan(cmd, resource_group_name, "ASP-flexapps-e675", plan_info)
-    return get_plan_info(cmd, resource_group_name, name)
 
 
 def create_flex_app_service_plan(cmd, resource_group_name, name, location, zone_redundant):
