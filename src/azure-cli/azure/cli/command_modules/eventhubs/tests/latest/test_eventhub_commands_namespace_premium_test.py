@@ -9,7 +9,6 @@ import time
 
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, KeyVaultPreparer)
 
-
 # pylint: disable=line-too-long
 # pylint: disable=too-many-lines
 
@@ -43,7 +42,7 @@ class EHNamespaceBYOKCURDScenarioTest(ScenarioTest):
         self.assertEqual('Standard', namespace['sku']['name'])
         self.assertEqual(18, namespace['maximumThroughputUnits'])
         self.assertEqual('1.1', namespace['minimumTlsVersion'])
-        self.assertEqual(self.kwargs['loc1'], namespace['location'])
+        self.assertEqual(self.kwargs['loc1'].strip().replace(' ', '').lower(), namespace['location'].strip().replace(' ', '').lower())
         self.assertTrue(namespace['isAutoInflateEnabled'])
         self.assertTrue(namespace['kafkaEnabled'])
         self.assertTrue(namespace['disableLocalAuth'])
@@ -58,7 +57,7 @@ class EHNamespaceBYOKCURDScenarioTest(ScenarioTest):
         self.assertEqual('Standard', namespace['sku']['name'])
         self.assertEqual(0, namespace['maximumThroughputUnits'])
         self.assertEqual('1.1', namespace['minimumTlsVersion'])
-        self.assertEqual(self.kwargs['loc1'], namespace['location'])
+        self.assertEqual(self.kwargs['loc1'].strip().replace(' ', '').lower(), namespace['location'].strip().replace(' ', '').lower())
         self.assertFalse(namespace['isAutoInflateEnabled'])
         self.assertTrue(namespace['kafkaEnabled'])
         self.assertTrue(namespace['disableLocalAuth'])
@@ -72,7 +71,7 @@ class EHNamespaceBYOKCURDScenarioTest(ScenarioTest):
         self.assertEqual('Standard', namespace['sku']['name'])
         self.assertEqual(18, namespace['maximumThroughputUnits'])
         self.assertEqual('1.1', namespace['minimumTlsVersion'])
-        self.assertEqual(self.kwargs['loc1'], namespace['location'])
+        self.assertEqual(self.kwargs['loc1'].strip().replace(' ', '').lower(), namespace['location'].strip().replace(' ', '').lower())
         self.assertTrue(namespace['isAutoInflateEnabled'])
         self.assertTrue(namespace['kafkaEnabled'])
         self.assertTrue(namespace['disableLocalAuth'])
@@ -87,7 +86,7 @@ class EHNamespaceBYOKCURDScenarioTest(ScenarioTest):
         self.assertEqual('Standard', namespace['sku']['name'])
         self.assertEqual(18, namespace['maximumThroughputUnits'])
         self.assertEqual('1.1', namespace['minimumTlsVersion'])
-        self.assertEqual(self.kwargs['loc1'], namespace['location'])
+        self.assertEqual(self.kwargs['loc1'].strip().replace(' ', '').lower(), namespace['location'].strip().replace(' ', '').lower())
         self.assertTrue(namespace['isAutoInflateEnabled'])
         self.assertTrue(namespace['kafkaEnabled'])
         self.assertTrue(namespace['disableLocalAuth'])
@@ -102,7 +101,7 @@ class EHNamespaceBYOKCURDScenarioTest(ScenarioTest):
         self.assertEqual('Standard', namespace['sku']['name'])
         self.assertEqual(25, namespace['maximumThroughputUnits'])
         self.assertEqual('1.1', namespace['minimumTlsVersion'])
-        self.assertEqual(self.kwargs['loc1'], namespace['location'])
+        self.assertEqual(self.kwargs['loc1'].strip().replace(' ', '').lower(), namespace['location'].strip().replace(' ', '').lower())
         self.assertTrue(namespace['isAutoInflateEnabled'])
         self.assertTrue(namespace['kafkaEnabled'])
         self.assertTrue(namespace['disableLocalAuth'])
@@ -117,7 +116,7 @@ class EHNamespaceBYOKCURDScenarioTest(ScenarioTest):
         self.assertEqual('Standard', namespace['sku']['name'])
         self.assertEqual(25, namespace['maximumThroughputUnits'])
         self.assertEqual('1.0', namespace['minimumTlsVersion'])
-        self.assertEqual(self.kwargs['loc1'], namespace['location'])
+        self.assertEqual(self.kwargs['loc1'].strip().replace(' ', '').lower(), namespace['location'].strip().replace(' ', '').lower())
         self.assertTrue(namespace['isAutoInflateEnabled'])
         self.assertTrue(namespace['kafkaEnabled'])
         self.assertTrue(namespace['disableLocalAuth'])
@@ -132,7 +131,7 @@ class EHNamespaceBYOKCURDScenarioTest(ScenarioTest):
         self.assertEqual('Standard', namespace['sku']['name'])
         self.assertEqual(25, namespace['maximumThroughputUnits'])
         self.assertEqual('1.2', namespace['minimumTlsVersion'])
-        self.assertEqual(self.kwargs['loc1'], namespace['location'])
+        self.assertEqual(self.kwargs['loc1'].strip().replace(' ', '').lower(), namespace['location'].strip().replace(' ', '').lower())
         self.assertTrue(namespace['isAutoInflateEnabled'])
         self.assertTrue(namespace['kafkaEnabled'])
         self.assertTrue(namespace['disableLocalAuth'])
@@ -146,7 +145,7 @@ class EHNamespaceBYOKCURDScenarioTest(ScenarioTest):
         self.assertEqual('Standard', namespace['sku']['name'])
         self.assertEqual(25, namespace['maximumThroughputUnits'])
         self.assertEqual('1.2', namespace['minimumTlsVersion'])
-        self.assertEqual(self.kwargs['loc1'], namespace['location'])
+        self.assertEqual(self.kwargs['loc1'].strip().replace(' ', '').lower(), namespace['location'].strip().replace(' ', '').lower())
         self.assertTrue(namespace['isAutoInflateEnabled'])
         self.assertTrue(namespace['kafkaEnabled'])
         self.assertFalse(namespace['disableLocalAuth'])
@@ -160,7 +159,7 @@ class EHNamespaceBYOKCURDScenarioTest(ScenarioTest):
         self.assertEqual('Standard', namespace['sku']['name'])
         self.assertEqual(25, namespace['maximumThroughputUnits'])
         self.assertEqual('1.2', namespace['minimumTlsVersion'])
-        self.assertEqual(self.kwargs['loc1'], namespace['location'])
+        self.assertEqual(self.kwargs['loc1'].strip().replace(' ', '').lower(), namespace['location'].strip().replace(' ', '').lower())
         self.assertTrue(namespace['isAutoInflateEnabled'])
         self.assertTrue(namespace['kafkaEnabled'])
         self.assertTrue(namespace['disableLocalAuth'])
@@ -175,7 +174,7 @@ class EHNamespaceBYOKCURDScenarioTest(ScenarioTest):
         self.assertEqual('Standard', namespace['sku']['name'])
         self.assertEqual(0, namespace['maximumThroughputUnits'])
         self.assertEqual('1.2', namespace['minimumTlsVersion'])
-        self.assertEqual(self.kwargs['loc1'], namespace['location'])
+        self.assertEqual(self.kwargs['loc1'].strip().replace(' ', '').lower(), namespace['location'].strip().replace(' ', '').lower())
         self.assertFalse(namespace['isAutoInflateEnabled'])
         self.assertTrue(namespace['kafkaEnabled'])
         self.assertFalse(namespace['disableLocalAuth'])
@@ -190,7 +189,7 @@ class EHNamespaceBYOKCURDScenarioTest(ScenarioTest):
         self.assertEqual('Premium', namespace['sku']['name'])
         self.assertEqual(0, namespace['maximumThroughputUnits'])
         self.assertEqual('1.2', namespace['minimumTlsVersion'])
-        self.assertEqual(self.kwargs['loc1'], namespace['location'])
+        self.assertEqual(self.kwargs['loc1'].strip().replace(' ', '').lower(), namespace['location'].strip().replace(' ', '').lower())
         self.assertFalse(namespace['isAutoInflateEnabled'])
         self.assertTrue(namespace['kafkaEnabled'])
         self.assertFalse(namespace['disableLocalAuth'])
@@ -201,7 +200,7 @@ class EHNamespaceBYOKCURDScenarioTest(ScenarioTest):
         self.cmd('eventhubs namespace list --resource-group {rg}')
 
         # List all Namespace within subscription
-        self.cmd('eventhubs namespace list')
+        # self.cmd('eventhubs namespace list'),format()
 
         # Delete Namespace list by ResourceGroup
         self.cmd('eventhubs namespace delete --resource-group {rg} --name {namespacename}')

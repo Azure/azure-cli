@@ -155,7 +155,6 @@ class Create(AAZCommand):
             options=["--geo-data-replication"],
             arg_group="Properties",
             help="Geo Data Replication settings for the namespace",
-            is_preview=True,
         )
         _args_schema.enable_auto_inflate = AAZBoolArg(
             options=["--enable-auto-inflate"],
@@ -242,7 +241,7 @@ class Create(AAZCommand):
             help="A list of regions where replicas of the namespace are maintained.",
         )
         geo_data_replication.max_replication_lag_duration_in_seconds = AAZIntArg(
-            options=["max-replication-lag-duration-in-seconds"],
+            options=["max-lag", "max-replication-lag-duration-in-seconds"],
             help="The maximum acceptable lag for data replication operations from the primary replica to a quorum of secondary replicas.  When the lag exceeds the configured amount, operations on the primary replica will be failed.",
         )
 
@@ -406,7 +405,7 @@ class Create(AAZCommand):
                 typ=AAZObjectType,
                 typ_kwargs={"flags": {"required": True, "client_flatten": True}}
             )
-            _builder.set_prop("identity", AAZObjectType, ".identity", typ_kwargs={"flags": {"client_flatten": True}})
+            _builder.set_prop("identity", AAZObjectType, ".identity")
             _builder.set_prop("location", AAZStrType, ".location", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
             _builder.set_prop("sku", AAZObjectType, ".sku")
@@ -426,7 +425,7 @@ class Create(AAZCommand):
                 properties.set_prop("alternateName", AAZStrType, ".alternate_name")
                 properties.set_prop("clusterArmId", AAZStrType, ".cluster_arm_id")
                 properties.set_prop("disableLocalAuth", AAZBoolType, ".disable_local_auth")
-                properties.set_prop("encryption", AAZObjectType, ".encryption", typ_kwargs={"flags": {"client_flatten": True}})
+                properties.set_prop("encryption", AAZObjectType, ".encryption")
                 properties.set_prop("geoDataReplication", AAZObjectType, ".geo_data_replication")
                 properties.set_prop("isAutoInflateEnabled", AAZBoolType, ".enable_auto_inflate")
                 properties.set_prop("kafkaEnabled", AAZBoolType, ".kafka_enabled")
@@ -448,7 +447,7 @@ class Create(AAZCommand):
 
             _elements = _builder.get(".properties.encryption.keyVaultProperties[]")
             if _elements is not None:
-                _elements.set_prop("identity", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+                _elements.set_prop("identity", AAZObjectType)
                 _elements.set_prop("keyName", AAZStrType, ".key_name")
                 _elements.set_prop("keyVaultUri", AAZStrType, ".key_vault_uri")
                 _elements.set_prop("keyVersion", AAZStrType, ".key_version")
@@ -528,9 +527,7 @@ class Create(AAZCommand):
             _schema_on_200_201.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200_201.identity = AAZObjectType(
-                flags={"client_flatten": True},
-            )
+            _schema_on_200_201.identity = AAZObjectType()
             _schema_on_200_201.location = AAZStrType()
             _schema_on_200_201.name = AAZStrType(
                 flags={"read_only": True},
@@ -590,9 +587,7 @@ class Create(AAZCommand):
             properties.disable_local_auth = AAZBoolType(
                 serialized_name="disableLocalAuth",
             )
-            properties.encryption = AAZObjectType(
-                flags={"client_flatten": True},
-            )
+            properties.encryption = AAZObjectType()
             properties.geo_data_replication = AAZObjectType(
                 serialized_name="geoDataReplication",
             )
@@ -652,9 +647,7 @@ class Create(AAZCommand):
             key_vault_properties.Element = AAZObjectType()
 
             _element = cls._schema_on_200_201.properties.encryption.key_vault_properties.Element
-            _element.identity = AAZObjectType(
-                flags={"client_flatten": True},
-            )
+            _element.identity = AAZObjectType()
             _element.key_name = AAZStrType(
                 serialized_name="keyName",
             )

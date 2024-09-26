@@ -191,6 +191,3 @@ def load_arguments_eh(self, _):
 
     with self.argument_context('eventhubs namespace application-group policy remove') as c:
         c.argument('policy', action=ConstructPolicyName, nargs='+', help='List of Throttling Policy Objects')
-
-    with self.argument_context('eventhubs namespace geo-replication locations add') as c:
-        c.argument('policy', action=ConstructPolicyName, nargs='+', help='List of Throttling Policy Objects')

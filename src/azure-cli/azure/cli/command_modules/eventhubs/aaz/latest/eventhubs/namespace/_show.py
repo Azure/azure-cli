@@ -161,9 +161,7 @@ class Show(AAZCommand):
             _schema_on_200.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200.identity = AAZObjectType(
-                flags={"client_flatten": True},
-            )
+            _schema_on_200.identity = AAZObjectType()
             _schema_on_200.location = AAZStrType()
             _schema_on_200.name = AAZStrType(
                 flags={"read_only": True},
@@ -223,9 +221,7 @@ class Show(AAZCommand):
             properties.disable_local_auth = AAZBoolType(
                 serialized_name="disableLocalAuth",
             )
-            properties.encryption = AAZObjectType(
-                flags={"client_flatten": True},
-            )
+            properties.encryption = AAZObjectType()
             properties.geo_data_replication = AAZObjectType(
                 serialized_name="geoDataReplication",
             )
@@ -285,9 +281,7 @@ class Show(AAZCommand):
             key_vault_properties.Element = AAZObjectType()
 
             _element = cls._schema_on_200.properties.encryption.key_vault_properties.Element
-            _element.identity = AAZObjectType(
-                flags={"client_flatten": True},
-            )
+            _element.identity = AAZObjectType()
             _element.key_name = AAZStrType(
                 serialized_name="keyName",
             )
