@@ -1941,17 +1941,6 @@ def update_flex_functionapp(cmd, resource_group_name, name, functionapp):
     return response.json()
 
 
-def update_flex_plan(cmd, resource_group_name, name, plan_def):
-    from azure.cli.core.commands.client_factory import get_subscription_id
-    subscription_id = get_subscription_id(cmd.cli_ctx)
-    url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/serverFarms/{}?api-version={}'
-    url = url_base.format(subscription_id, resource_group_name, name, '2023-12-01')
-    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + url
-    body = json.dumps(plan_def)
-    response = send_raw_request(cmd.cli_ctx, "PUT", request_url, body=body)
-    return response.json()
-
-
 def delete_always_ready_settings(cmd, resource_group_name, name, setting_names):
     functionapp = get_raw_functionapp(cmd.cli_ctx, resource_group_name, name)
 
@@ -4786,7 +4775,6 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        deployment_storage_container_name=None, deployment_storage_auth_type=None,
                        deployment_storage_auth_value=None, zone_redundant=False):
     # pylint: disable=too-many-statements, too-many-branches
-    logger.warning("zone_redundant: '%s'", zone_redundant)
 
     if functions_version is None and flexconsumption_location is None:
         logger.warning("No functions version specified so defaulting to 4.")
@@ -5164,8 +5152,6 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
 
         try:
             plan_name = generatePlanName(resource_group_name)
-            logger.warning("plan_name: '%s'", plan_name)
-            logger.warning("zone_redundant: '%s'", zone_redundant)
             plan_info = create_flex_app_service_plan(
                 cmd, resource_group_name, plan_name, flexconsumption_location, zone_redundant)
             functionapp_def.server_farm_id = plan_info.id
@@ -5713,50 +5699,12 @@ def list_consumption_locations(cmd):
 
 
 def list_flexconsumption_locations(cmd):
-    return [
-        {
-            "name": "eastus",
-        },
-        {
-            "name": "northeurope"
-        },
-        {
-            "name": "eastasia"
-        },
-        {
-            "name": "centralus"
-        },
-        {
-            "name": "uksouth"
-        },
-        {
-            "name": "eastus2"
-        },
-        {
-            "name": "eastus2euap"
-        },
-        {
-            "name": "australiaeast"
-        },
-        {
-            "name": "westus2"
-        },
-        {
-            "name": "westus3"
-        },
-        {
-            "name": "southcentralus"
-        },
-        {
-            "name": "swedencentral"
-        },
-        {
-            "name": "southeastasia"
-        },
-        {
-            "name": "northcentralus(stage)"
-        }
-    ]
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    sub_id = get_subscription_id(cmd.cli_ctx)
+    geo_regions_api = 'subscriptions/{}/providers/Microsoft.Web/geoRegions?sku=FlexConsumption&api-version=2023-01-01'
+    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + geo_regions_api.format(sub_id)
+    regions = send_raw_request(cmd.cli_ctx, "GET", request_url).json()['value']
+    return [{'name': x['name'].lower().replace(' ', '')} for x in regions]
 
 
 def list_locations(cmd, sku, linux_workers_enabled=None, hyperv_workers_enabled=None):
