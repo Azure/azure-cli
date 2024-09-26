@@ -9613,14 +9613,14 @@ class SkuProfileTest(ScenarioTest):
             'vmss': self.create_random_name('vmss', 10),
         })
         self.cmd('vmss create -n {vmss} -g {rg} --image ubuntu2204 --vm-sku Mix ' + 
-                ' --skuprofile-vmsizes Standard_DS1_v2 Standard_D2s_v4 --skuprofile-allostrat CapacityOptimized', checks=[
+                ' --skuprofile-vmsizes Standard_DS1_v2 Standard_D2s_v4 --skuprofile-allocation-strategy CapacityOptimized', checks=[
             self.check('vmss.orchestrationMode', 'Flexible'),
             self.check('vmss.skuProfile.allocationStrategy', 'CapacityOptimized'),
             self.check('vmss.skuProfile.vmSizes[0].name', 'Standard_DS1_v2'),
             self.check('vmss.skuProfile.vmSizes[1].name', 'Standard_D2s_v4')
         ])
         self.cmd('vmss update -n {vmss} -g {rg} ' + 
-                ' --skuprofile-vmsizes Standard_DS1_v2 Standard_D2s_v4 --skuprofile-allostrat CapacityOptimized', checks=[
+                ' --skuprofile-vmsizes Standard_DS1_v2 Standard_D2s_v4 --skuprofile-allocation-strategy CapacityOptimized', checks=[
             self.check('skuProfile.allocationStrategy', 'CapacityOptimized'),
             self.check('skuProfile.vmSizes[0].name', 'Standard_DS1_v2'),
             self.check('skuProfile.vmSizes[1].name', 'Standard_D2s_v4')
