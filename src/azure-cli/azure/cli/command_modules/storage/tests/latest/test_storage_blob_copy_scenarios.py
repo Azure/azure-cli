@@ -582,3 +582,34 @@ class StorageBlobCopyTests(StorageScenarioMixin, LiveScenarioTest):
             actual_content = f.read()
 
         self.assertEqual(expect_content, actual_content)
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='account1', kind='StorageV2', allow_shared_key_access=False, hns=True)
+    @StorageAccountPreparer(parameter_name='account2', kind='StorageV2', allow_shared_key_access=False)
+    def test_storage_blob_copy_batch_oauth(self, resource_group, account1, account2):
+        source_file = self.create_temp_file(16, full_random=False)
+        for src_account, dst_account in [(account1, account1), (account2, account2), (account1, account2),
+                                         (account2, account1)]:
+            src_account_info = self.get_account_info(resource_group, src_account)
+            dst_account_info = self.get_account_info(resource_group, dst_account)
+            src_container = self.create_container(src_account_info, oauth=True)
+            dst_container = self.create_container(dst_account_info, oauth=True)
+            dst_container_2 = self.create_container(dst_account_info, oauth=True)
+
+            blobs = ['blobğşŞ', 'blogÉ®']
+            for blob_name in blobs:
+                self.oauth_cmd('storage blob upload -c {} -f "{}" -n {} --account-name {}',
+                               src_container, source_file, blob_name, src_account)
+
+            self.oauth_cmd('storage fs directory create -f {} -n newdir --account-name {}', src_container, src_account)
+
+            # empty dir will be skipped when copy from hns to hns
+            copied_file = 2 if (src_account, dst_account) == (account1, account1) else 3
+            self.oauth_cmd('storage blob copy start-batch --destination-container {} --source-container {} '
+                           '--source-account-name {} --account-name {}', dst_container, src_container,
+                           src_account, dst_account).assert_with_checks(
+                JMESPathCheck('length(@)', copied_file))
+            self.oauth_cmd('storage blob copy start-batch --destination-container {} --pattern "blob*" '
+                           '--source-container {} --source-account-name {} --account-name {}',
+                           dst_container_2, src_container, src_account, dst_account).assert_with_checks(
+                JMESPathCheck('length(@)', 1))

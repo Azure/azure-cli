@@ -205,7 +205,7 @@ def create_short_lived_file_sas_v2(cmd, account_name, account_key, share, direct
 
     t_file_permissions = cmd.get_models('_models#FileSasPermissions', resource_type=ResourceType.DATA_STORAGE_FILESHARE)
     expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
-    sas = t_sas(account_name, account_key=account_key)
+    sas = t_sas(account_name, account_key)
     return sas.generate_file(share, directory_name=directory_name, file_name=file_name,
                              permission=t_file_permissions(read=True), expiry=expiry, protocol='https')
 

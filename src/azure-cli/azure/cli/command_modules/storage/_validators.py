@@ -465,7 +465,7 @@ def validate_source_url(cmd, namespace):  # pylint: disable=too-many-statements,
     source_account_key = ns.pop('source_account_key', None)
     source_sas = ns.pop('source_sas', None)
     token_credential = ns.get('token_credential')
-    is_oauth = True if token_credential is not None else False
+    is_oauth = token_credential is not None
 
     # source in the form of an uri
     uri = ns.get('source_url', None)
@@ -1093,6 +1093,8 @@ def get_source_file_or_blob_service_client_track2(cmd, namespace):
     source_sas = ns.get('source_sas', None)
     source_container = ns.get('source_container', None)
     source_share = ns.get('source_share', None)
+    token_credential = ns.get('token_credential')
+    is_oauth = token_credential is not None
 
     if source_uri and source_account:
         raise ValueError(usage_string)
@@ -1114,13 +1116,13 @@ def get_source_file_or_blob_service_client_track2(cmd, namespace):
 
         source_account, source_key, source_sas = ns['account_name'], ns['account_key'], ns['sas_token']
 
-    if source_account:
+    if source_account and not is_oauth:
         if not (source_key or source_sas):
             # when neither storage account key nor SAS is given, try to fetch the key in the current
             # subscription
             source_key = _query_account_key(cmd.cli_ctx, source_account)
 
-    elif source_uri:
+    elif source_uri and not is_oauth:
         if source_key or source_container or source_share:
             raise ValueError(usage_string)
 
@@ -1149,7 +1151,7 @@ def get_source_file_or_blob_service_client_track2(cmd, namespace):
     ns['source_container'] = source_container
     ns['source_share'] = source_share
     # get sas token for source
-    if not source_sas:
+    if not source_sas and not is_oauth:
         from .util import create_short_lived_container_sas_track2, create_short_lived_share_sas_track2
         if source_container:
             source_sas = create_short_lived_container_sas_track2(cmd, account_name=source_account,
@@ -1163,6 +1165,8 @@ def get_source_file_or_blob_service_client_track2(cmd, namespace):
     client_kwargs = {'account_name': ns['source_account_name'],
                      'account_key': ns['source_account_key'],
                      'sas_token': ns['source_sas']}
+    if is_oauth:
+        client_kwargs.update({'token_credential': token_credential})
     if source_container:
         ns['source_client'] = cf_blob_service(cmd.cli_ctx, client_kwargs)
     if source_share:
