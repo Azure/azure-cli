@@ -237,7 +237,7 @@ def github_actions_run(action_name, branch):
 
     gitcli_check_and_login()
     logger.warning("Created an event for %s.yml in branch %s", action_name, branch)
-    run_subprocess(["gh", "workflow", "run", action_name + ".yml", "--ref",  branch])
+    run_subprocess(["gh", "workflow", "run", action_name + ".yml", "--ref", branch])
 
 
 def gitcli_check_and_login():
