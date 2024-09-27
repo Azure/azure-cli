@@ -17,7 +17,7 @@ from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_
 from azure.core.exceptions import ResourceNotFoundError
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.command_modules.mysql.random.generate import generate_username
-from azure.cli.core.util import CLIError, sdk_no_wait, user_confirmation
+from azure.cli.core.util import CLIError, sdk_no_wait, user_confirmation, run_cmd
 from azure.cli.core.local_context import ALL
 from azure.mgmt.rdbms import mysql_flexibleservers
 from azure.cli.core.azclierror import ClientRequestError, RequiredArgumentMissingError, ArgumentUsageError, InvalidArgumentValueError, ValidationError
@@ -27,7 +27,7 @@ from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flex
     cf_mysql_firewall_rules
 from ._util import resolve_poller, generate_missing_parameters, get_mysql_list_skus_info, generate_password, parse_maintenance_window, \
     replace_memory_optimized_tier, build_identity_and_data_encryption, get_identity_and_data_encryption, get_tenant_id, run_subprocess, \
-    run_subprocess_get_output, fill_action_template, get_git_root_dir, get_single_to_flex_sku_mapping, get_firewall_rules_from_paged_response, \
+    fill_action_template, get_git_root_dir, get_single_to_flex_sku_mapping, get_firewall_rules_from_paged_response, \
     ImportFromStorageProgressHook, OperationProgressBar, GITHUB_ACTION_PATH
 from ._network import prepare_mysql_exist_private_dns_zone, prepare_mysql_exist_private_network, prepare_private_network, prepare_private_dns_zone, prepare_public_network
 from ._validators import mysql_arguments_validator, mysql_auto_grow_validator, mysql_georedundant_backup_validator, mysql_restore_tier_validator, mysql_accelerated_logs_validator, \
@@ -223,12 +223,12 @@ def github_actions_setup(cmd, client, resource_group_name, server_name, database
 
     action_path = get_git_root_dir() + GITHUB_ACTION_PATH + action_name + '.yml'
     logger.warning("Making git commit for file %s", action_path)
-    run_subprocess("git add {}".format(action_path))
-    run_subprocess("git commit -m \"Add github action file\"")
+    run_subprocess(["git", "add", action_path])
+    run_subprocess(["git", "commit", "-m", "Add github action file"])
 
     if allow_push:
         logger.warning("Pushing the created action file to origin %s branch", branch)
-        run_subprocess("git push origin {}".format(branch))
+        run_subprocess(["git", "push", "origin", branch])
     else:
         logger.warning('You did not set --allow-push parameter. Please push the prepared file %s to your remote repo and run "deploy run" command to activate the workflow.', action_path)
 
@@ -237,17 +237,17 @@ def github_actions_run(action_name, branch):
 
     gitcli_check_and_login()
     logger.warning("Created an event for %s.yml in branch %s", action_name, branch)
-    run_subprocess("gh workflow run {}.yml --ref {}".format(action_name, branch))
+    run_subprocess(["gh", "workflow", "run", action_name + ".yml", "--ref",  branch])
 
 
 def gitcli_check_and_login():
-    output = run_subprocess_get_output("gh")
+    output = run_cmd(["gh"], capture_output=True)
     if output.returncode:
         raise ClientRequestError('Please install "Github CLI" to run this command.')
 
-    output = run_subprocess_get_output("gh auth status")
+    output = run_cmd(["gh", "auth", "status"], capture_output=True)
     if output.returncode:
-        run_subprocess("gh auth login", stdout_show=True)
+        run_subprocess(["gh", "auth", "login"], stdout_show=True)
 
 
 # Custom functions for server logs
