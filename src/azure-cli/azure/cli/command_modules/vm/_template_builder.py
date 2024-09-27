@@ -1529,9 +1529,6 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
         proxy_agent_settings['imds'] = imds
 
     if proxy_agent_settings:
-        vm_properties['securityProfile']['proxyAgentSettings'] = proxy_agent_settings
-
-    if proxy_agent_settings:
         security_profile['proxyAgentSettings'] = proxy_agent_settings
 
     if security_profile:

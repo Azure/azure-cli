@@ -10,7 +10,7 @@
 # Generation mode: Incremental
 # --------------------------------------------------------------------------
 
-# pylint: disable=no-self-use, too-many-lines, no-else-return
+# pylint: disable=no-self-use, too-many-lines, no-else-return, too-many-boolean-expressions
 # pylint: disable=protected-access
 import json
 import os
@@ -4159,7 +4159,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 in_vm_access_control_profile_reference_id = wire_server_access_control_profile_reference_id
             vmss.virtual_machine_profile.security_profile.proxy_agent_settings.imds.mode = imds_mode
             vmss.virtual_machine_profile.security_profile.proxy_agent_settings.imds.\
-                in_vm_access_control_profile_reference_id =  imds_access_control_profile_reference_id
+                in_vm_access_control_profile_reference_id = imds_access_control_profile_reference_id
 
     if regular_priority_count is not None or regular_priority_percentage is not None:
         if vmss.orchestration_mode != 'Flexible':
