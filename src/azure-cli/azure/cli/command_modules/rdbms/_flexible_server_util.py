@@ -17,7 +17,7 @@ from knack.log import get_logger
 from knack.prompting import prompt_y_n, NoTTYException
 from msrestazure.tools import parse_resource_id
 from msrestazure.azure_exceptions import CloudError
-from azure.cli.core.util import CLIError
+from azure.cli.core.util import CLIError, run_cmd
 from azure.cli.core.azclierror import AuthenticationError
 from azure.core.exceptions import HttpResponseError
 from azure.core.paging import ItemPaged
@@ -326,13 +326,6 @@ def run_subprocess(command, stdout_show=None):
         logger.warning(process.stderr.read().strip().decode('UTF-8'))
 
 
-def run_subprocess_get_output(command):
-    commands = command.split()
-    process = subprocess.Popen(commands, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    process.wait()
-    return process
-
-
 def register_credential_secrets(cmd, database_engine, server, repository):
     logger.warning('Adding secret "AZURE_CREDENTIALS" to github repository')
     resource_group = parse_resource_id(server.id)["resource_group"]
@@ -376,8 +369,8 @@ def fill_action_template(cmd, database_engine, server, database_name, administra
     if not os.path.exists(action_dir):
         os.makedirs(action_dir)
 
-    process = run_subprocess_get_output("gh secret list --repo {}".format(repository))
-    github_secrets = process.stdout.read().strip().decode('UTF-8')
+    process = run_cmd(["gh", "secret", "list", "--repo", repository], capture_output=True)
+    github_secrets = process.stdout.strip().decode('UTF-8')
     # connection_string = AZURE_POSTGRESQL_CONNECTION_STRING if database_engine == 'postgresql' else AZURE_MYSQL_CONNECTION_STRING
 
     if AZURE_CREDENTIALS not in github_secrets:
@@ -418,8 +411,8 @@ def fill_action_template(cmd, database_engine, server, database_name, administra
 
 
 def get_git_root_dir():
-    process = run_subprocess_get_output("git rev-parse --show-toplevel")
-    return process.stdout.read().strip().decode('UTF-8')
+    process = run_cmd(["git", "rev-parse", "--show-toplevel"], capture_output=True)
+    return process.stdout.strip().decode('UTF-8')
 
 
 def get_user_confirmation(message, yes=False):
