@@ -37,15 +37,14 @@ def create_snapshot(cmd,
 
     progress = IndeterminateStandardOut()
     progress.write({"message": "Starting"})
-   
+
     try:
         config_snapshot_poller = client.begin_create_snapshot(
             snapshot_name,
-            configurationSettingsFilters, 
-            composition_type=composition_type, 
-            retention_period=retention_period, 
+            configurationSettingsFilters,
+            composition_type=composition_type,
+            retention_period=retention_period,
             tags=tags)
-    
 
         # Poll snapshot creation status
         while config_snapshot_poller.status() != ProvisioningStatus.SUCCEEDED:
@@ -62,7 +61,7 @@ def create_snapshot(cmd,
 
     except Exception as exception:
         raise CLIError("Failed to create snapshot. {}".format(str(exception)))
-    
+
     finally:
         progress.clear()
 
@@ -99,7 +98,7 @@ def show_snapshot(cmd,
         raise CLIError("Request failed. {}".format(str(exception)))
 
     snapshot = Snapshot.from_configuration_snapshot(result)
-    
+
     if not query_fields:
         return snapshot
 

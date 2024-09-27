@@ -120,8 +120,8 @@ def convert_configuration_setting_filter(configuration_setting_filter):
 
     if configuration_setting_filter.label is not None:
         result[SnapshotFilterFields.LABEL] = configuration_setting_filter.label
-    
+
     if configuration_setting_filter.tags is not None:
         result[SnapshotFilterFields.TAGS] = configuration_setting_filter.tags
-    
+
     return result

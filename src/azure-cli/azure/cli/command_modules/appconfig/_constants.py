@@ -95,6 +95,7 @@ class SnapshotFilterFields:
     LABEL = "label"
     TAGS = "tags"
 
+
 class JsonDiff:
     ADD = "add"
     DELETE = "delete"
