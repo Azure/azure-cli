@@ -901,7 +901,7 @@ def add_ingress_appgw_addon_role_assignment(result, cmd):
             )
             if not add_role_assignment(
                 cmd,
-                "Contributor",
+                "Network Contributor",
                 service_principal_msi_id,
                 is_service_principal,
                 scope=appgw_group_id,
@@ -943,7 +943,7 @@ def add_ingress_appgw_addon_role_assignment(result, cmd):
                 )
                 if not add_role_assignment(
                     cmd,
-                    "Contributor",
+                    "Network Contributor",
                     service_principal_msi_id,
                     is_service_principal,
                     scope=vnet_id,
