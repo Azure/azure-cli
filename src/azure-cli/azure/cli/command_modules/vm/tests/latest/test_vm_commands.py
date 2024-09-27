@@ -10736,40 +10736,52 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             'subnet': 'subnet1',
             'vnet': 'vnet1'
         })
-        self.cmd('vm create -g {rg} -n {vm1} --image ubuntu2204 --enable-proxy-agent --proxy-agent-mode Audit --size Standard_D2s_v3 --subnet {subnet} --vnet-name {vnet}')
+        self.cmd('vm create -g {rg} -n {vm1} --image Win2022Datacenter --enable-proxy-agent --wire-server-mode Audit --imds-mode Audit --key-incarnation-id 1 --size Standard_D2s_v3 --subnet {subnet} --vnet-name {vnet} --admin-password Password001! --nsg-rule NONE')
 
         # Disable default outbound access
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
         self.cmd('vm show -g {rg} -n {vm1}', checks=[
             self.check('securityProfile.proxyAgentSettings.enabled', True),
-            self.check('securityProfile.proxyAgentSettings.wireServer.mode', 'Audit')
+            self.check('securityProfile.proxyAgentSettings.wireServer.mode', 'Audit'),
+            self.check('securityProfile.proxyAgentSettings.imds.mode', 'Audit'),
+            self.check('securityProfile.proxyAgentSettings.keyIncarnationId', 1)
         ])
-        self.cmd('vm update -g {rg} -n {vm1} --enable-proxy-agent False --proxy-agent-mode Enforce', checks=[
+        self.cmd('vm update -g {rg} -n {vm1} --enable-proxy-agent False --wire-server-mode Enforce --imds-mode Enforce --key-incarnation-id 2', checks=[
             self.check('securityProfile.proxyAgentSettings.enabled', False),
-            self.check('securityProfile.proxyAgentSettings.wireServer.mode', 'Enforce')
+            self.check('securityProfile.proxyAgentSettings.wireServer.mode', 'Enforce'),
+            self.check('securityProfile.proxyAgentSettings.imds.mode', 'Enforce'),
+            self.check('securityProfile.proxyAgentSettings.keyIncarnationId', 2)
         ])
 
-        self.cmd('vm create -g {rg} -n {vm2} --image ubuntu2204 --size Standard_D2s_v3 --subnet {subnet} --vnet-name {vnet}')
-        self.cmd('vm update -g {rg} -n {vm2} --enable-proxy-agent True --proxy-agent-mode Enforce')
+        self.cmd('vm create -g {rg} -n {vm2} --image Win2022Datacenter --size Standard_D2s_v3 --subnet {subnet} --vnet-name {vnet} --admin-password Password001! --nsg-rule NONE')
+        self.cmd('vm update -g {rg} -n {vm2} --enable-proxy-agent True --wire-server-mode Enforce --imds-mode Enforce --key-incarnation-id 1')
         self.cmd('vm show -g {rg} -n {vm2}', checks=[
             self.check('securityProfile.proxyAgentSettings.enabled', True),
-            self.check('securityProfile.proxyAgentSettings.wireServer.mode', 'Enforce')
+            self.check('securityProfile.proxyAgentSettings.wireServer.mode', 'Enforce'),
+            self.check('securityProfile.proxyAgentSettings.imds.mode', 'Enforce'),
+            self.check('securityProfile.proxyAgentSettings.keyIncarnationId', 1)
         ])
 
-        self.cmd('vmss create -g {rg} -n {vmss1} --image ubuntu2204 --enable-proxy-agent --proxy-agent-mode Audit --vm-sku Standard_D2s_v3 --orchestration-mode Flexible', checks=[
+        self.cmd('vmss create -g {rg} -n {vmss1} --image Win2022Datacenter --enable-proxy-agent --wire-server-mode Audit --imds-mode Audit --key-incarnation-id 1 --vm-sku Standard_D2s_v3 --orchestration-mode Flexible', checks=[
             self.check('vmss.virtualMachineProfile.securityProfile.proxyAgentSettings.enabled', True),
-            self.check('vmss.virtualMachineProfile.securityProfile.proxyAgentSettings.wireServer.mode', 'Audit')
+            self.check('vmss.virtualMachineProfile.securityProfile.proxyAgentSettings.wireServer.mode', 'Audit'),
+            self.check('vmss.virtualMachineProfile.securityProfile.proxyAgentSettings.imds.mode', 'Audit'),
+            self.check('vmss.virtualMachineProfile.securityProfile.proxyAgentSettings.keyIncarnationId', 1)
         ])
-        self.cmd('vmss update -g {rg} -n {vmss1} --enable-proxy-agent False --proxy-agent-mode Enforce', checks=[
+        self.cmd('vmss update -g {rg} -n {vmss1} --enable-proxy-agent False --wire-server-mode Enforce --imds-mode Enforce --key-incarnation-id 2', checks=[
             self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.enabled', False),
-            self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.wireServer.mode', 'Enforce')
+            self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.wireServer.mode', 'Enforce'),
+            self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.imds.mode', 'Enforce'),
+            self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.keyIncarnationId', 2)
         ])
 
-        self.cmd('vmss create -g {rg} -n {vmss2} --image ubuntu2204 --vm-sku Standard_D2s_v3 --orchestration-mode Flexible')
-        self.cmd('vmss update -g {rg} -n {vmss2} --enable-proxy-agent True --proxy-agent-mode Audit', checks=[
+        self.cmd('vmss create -g {rg} -n {vmss2} --image Win2022Datacenter --vm-sku Standard_D2s_v3 --orchestration-mode Flexible')
+        self.cmd('vmss update -g {rg} -n {vmss2} --enable-proxy-agent True --wire-server-mode Audit --imds-mode Audit --key-incarnation-id 1', checks=[
             self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.enabled', True),
-            self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.wireServer.mode', 'Audit')
+            self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.wireServer.mode', 'Audit'),
+            self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.imds.mode', 'Audit'),
+            self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.keyIncarnationId', 1)
         ])
 
 class DiskHibernationScenarioTest(ScenarioTest):

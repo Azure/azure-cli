@@ -307,7 +307,9 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
         enable_vtpm=None, count=None, edge_zone=None, os_disk_delete_option=None, user_data=None,
         capacity_reservation_group=None, enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None,
         os_disk_security_encryption_type=None, os_disk_secure_vm_disk_encryption_set=None, disk_controller_type=None,
-        enable_proxy_agent=None, proxy_agent_mode=None):
+        enable_proxy_agent=None, proxy_agent_mode=None, wire_server_mode=None, imds_mode=None,
+        wire_server_access_control_profile_reference_id=None, imds_access_control_profile_reference_id=None,
+        key_incarnation_id=None):
 
     os_caching = disk_info['os'].get('caching')
 
@@ -631,11 +633,30 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
         vm_properties['securityProfile']['encryptionAtHost'] = encryption_at_host
 
     proxy_agent_settings = {}
+    wire_server = {}
+    imds = {}
     if enable_proxy_agent is not None:
         proxy_agent_settings['enabled'] = enable_proxy_agent
 
     if proxy_agent_mode is not None:
         proxy_agent_settings['mode'] = proxy_agent_mode
+
+    if key_incarnation_id is not None:
+        proxy_agent_settings['keyIncarnationId'] = key_incarnation_id
+
+    if wire_server_mode is not None or wire_server_access_control_profile_reference_id is not None:
+        wire_server['mode'] = wire_server_mode
+        wire_server['inVMAccessControlProfileReferenceId'] = wire_server_access_control_profile_reference_id
+
+    if imds_mode is not None or imds_access_control_profile_reference_id is not None:
+        imds['mode'] = imds_mode
+        imds['inVMAccessControlProfileReferenceId'] = imds_access_control_profile_reference_id
+
+    if wire_server:
+        proxy_agent_settings['wireServer'] = wire_server
+
+    if imds:
+        proxy_agent_settings['imds'] = imds
 
     if proxy_agent_settings:
         vm_properties['securityProfile']['proxyAgentSettings'] = proxy_agent_settings
@@ -970,7 +991,9 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         security_posture_reference_id=None, security_posture_reference_exclude_extensions=None,
                         enable_resilient_vm_creation=None, enable_resilient_vm_deletion=None,
                         additional_scheduled_events=None, enable_user_reboot_scheduled_events=None,
-                        enable_user_redeploy_scheduled_events=None):
+                        enable_user_redeploy_scheduled_events=None, wire_server_mode=None, imds_mode=None,
+                        wire_server_access_control_profile_reference_id=None,
+                        imds_access_control_profile_reference_id=None, key_incarnation_id=None):
 
     # Build IP configuration
     ip_configuration = {}
@@ -1480,11 +1503,33 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
         }
 
     proxy_agent_settings = {}
+    wire_server = {}
+    imds = {}
     if enable_proxy_agent is not None:
         proxy_agent_settings['enabled'] = enable_proxy_agent
 
     if proxy_agent_mode is not None:
         proxy_agent_settings['mode'] = proxy_agent_mode
+
+    if key_incarnation_id is not None:
+        proxy_agent_settings['keyIncarnationId'] = key_incarnation_id
+
+    if wire_server_mode is not None or wire_server_access_control_profile_reference_id is not None:
+        wire_server['mode'] = wire_server_mode
+        wire_server['inVMAccessControlProfileReferenceId'] = wire_server_access_control_profile_reference_id
+
+    if imds_mode is not None or imds_access_control_profile_reference_id is not None:
+        imds['mode'] = imds_mode
+        imds['inVMAccessControlProfileReferenceId'] = imds_access_control_profile_reference_id
+
+    if wire_server:
+        proxy_agent_settings['wireServer'] = wire_server
+
+    if imds:
+        proxy_agent_settings['imds'] = imds
+
+    if proxy_agent_settings:
+        vm_properties['securityProfile']['proxyAgentSettings'] = proxy_agent_settings
 
     if proxy_agent_settings:
         security_profile['proxyAgentSettings'] = proxy_agent_settings

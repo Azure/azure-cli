@@ -1236,6 +1236,11 @@ def load_arguments(self, _):
             c.argument('disk_controller_type', disk_controller_type)
             c.argument('enable_proxy_agent', arg_type=get_three_state_flag(), min_api='2023-09-01', help='Specify whether proxy agent feature should be enabled on the virtual machine or virtual machine scale set.')
             c.argument('proxy_agent_mode', arg_type=get_enum_type(self.get_models('Mode')), min_api='2023-09-01', help='Specify the mode that proxy agent will execute on if the feature is enabled.')
+            c.argument('wire_server_mode', arg_type=get_enum_type(self.get_models('Mode')), min_api='2024-07-01', help='Specify the mode that proxy agent will execute on if the feature is enabled.')
+            c.argument('wire_server_access_control_profile_reference_id', options_list=['--wire-server-access-control-profile-reference-id', '--wire-server-profile-id'], min_api='2024-07-01', help='Specify the access control profile version resource id of wire server.')
+            c.argument('imds_mode', arg_type=get_enum_type(self.get_models('Mode')), min_api='2024-07-01', help='Specify the mode that proxy agent will execute on if the feature is enabled.')
+            c.argument('imds_access_control_profile_reference_id', options_list=['--imds-access-control-profile-reference-id', '--imds-profile-id'], min_api='2024-07-01', help='Specify the access control profile version resource id resource id of imds.')
+            c.argument('key_incarnation_id', type=int, min_api='2024-07-01', help='Increase the value of this property allows user to reset the key used for securing communication channel between guest and host.')
 
     with self.argument_context('vm update') as c:
         c.argument('license_type', license_type)
