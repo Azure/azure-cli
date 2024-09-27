@@ -12,7 +12,7 @@ from azure.cli.core.aaz import *
 
 
 @register_command_group(
-    "resources data-boundary",
+    "data-boundary",
 )
 class __CMDGroup(AAZCommandGroup):
     """data boundary operations

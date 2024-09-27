@@ -12,13 +12,13 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "resources data-boundary show-tenant",
+    "data-boundary show-tenant",
 )
 class ShowTenant(AAZCommand):
     """Get data boundary of tenant.
 
     :example: Get data boundary for tenant
-        az resources data-boundary show-tenant --default default
+        az data-boundary show-tenant --default default
     """
 
     _aaz_info = {

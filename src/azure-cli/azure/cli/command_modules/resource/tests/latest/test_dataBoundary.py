@@ -8,7 +8,7 @@ from azure.cli.testsdk import ScenarioTest, record_only, live_only
 class AzureDataBoundaryScenarioTest(ScenarioTest):
 
     def test_get_data_boundary_tenant(self):
-        self.cmd('az resources data-boundary show-tenant --default default', checks=[
+        self.cmd('az data-boundary show-tenant --default default', checks=[
             self.check('dataBoundary', 'EU'),
             self.check('properties.provisioningState', 'Succeeded')
         ])
@@ -18,13 +18,13 @@ class AzureDataBoundaryScenarioTest(ScenarioTest):
         self.kwargs['scope'] = '/subscriptions/{sub}'.format(
             **self.kwargs)
         
-        self.cmd('az resources data-boundary show --scope {scope} --default default', checks=[
+        self.cmd('az data-boundary show --scope {scope} --default default', checks=[
             self.check('dataBoundary', 'EU'),
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
-    def test_data_boundary_put(self):
-        self.cmd('az resources data-boundary create --data-boundary EU --default default', checks=[
+    def test_put_data_boundary(self):
+        self.cmd('az data-boundary create --data-boundary EU --default default', checks=[
             self.check('dataBoundary', 'EU'),
             self.check('properties.provisioningState', 'Succeeded')
         ])

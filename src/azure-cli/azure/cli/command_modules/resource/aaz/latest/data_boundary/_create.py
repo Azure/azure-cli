@@ -12,20 +12,19 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "resources data-boundary show",
+    "data-boundary create",
 )
-class Show(AAZCommand):
-    """Get data boundary at specified scope
+class Create(AAZCommand):
+    """Create tenant to data boundary.
 
-    :example: Get data boundary at scope
-        az resources data-boundary show --scope subscriptions/11111111-1111-1111-1111-111111111111/resourcegroups/my-resource-group --default default
-        az resources data-boundary show --scope subscriptions/11111111-1111-1111-1111-111111111111 --default default
+    :example: Opt-in to data boundary
+        az data-boundary create --data-boundary EU --default default
     """
 
     _aaz_info = {
         "version": "2024-08-01",
         "resources": [
-            ["mgmt-plane", "/{scope}/providers/microsoft.resources/databoundaries/{}", "2024-08-01"],
+            ["mgmt-plane", "/providers/microsoft.resources/databoundaries/{}", "2024-08-01"],
         ]
     }
 
@@ -51,19 +50,21 @@ class Show(AAZCommand):
             required=True,
             enum={"default": "default"},
         )
-        _args_schema.scope = AAZStrArg(
-            options=["--scope"],
-            help="The scope at which the operation is performed.",
-            required=True,
-            fmt=AAZStrArgFormat(
-                min_length=1,
-            ),
+
+        # define Arg Group "Properties"
+
+        _args_schema = cls._args_schema
+        _args_schema.data_boundary = AAZStrArg(
+            options=["--data-boundary"],
+            arg_group="Properties",
+            help="The data boundary definition.",
+            enum={"EU": "EU", "Global": "Global", "NotDefined": "NotDefined"},
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.DataBoundariesGetScope(ctx=self.ctx)()
+        self.DataBoundariesPut(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -78,27 +79,27 @@ class Show(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class DataBoundariesGetScope(AAZHttpOperation):
+    class DataBoundariesPut(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
             request = self.make_request()
             session = self.client.send_request(request=request, stream=False, **kwargs)
-            if session.http_response.status_code in [200]:
-                return self.on_200(session)
+            if session.http_response.status_code in [200, 201]:
+                return self.on_200_201(session)
 
             return self.on_error(session.http_response)
 
         @property
         def url(self):
             return self.client.format_url(
-                "/{scope}/providers/Microsoft.Resources/dataBoundaries/{default}",
+                "/providers/Microsoft.Resources/dataBoundaries/{default}",
                 **self.url_parameters
             )
 
         @property
         def method(self):
-            return "GET"
+            return "PUT"
 
         @property
         def error_format(self):
@@ -109,11 +110,6 @@ class Show(AAZCommand):
             parameters = {
                 **self.serialize_url_param(
                     "default", self.ctx.args.default,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "scope", self.ctx.args.scope,
-                    skip_quote=True,
                     required=True,
                 ),
             }
@@ -133,45 +129,63 @@ class Show(AAZCommand):
         def header_parameters(self):
             parameters = {
                 **self.serialize_header_param(
+                    "Content-Type", "application/json",
+                ),
+                **self.serialize_header_param(
                     "Accept", "application/json",
                 ),
             }
             return parameters
 
-        def on_200(self, session):
+        @property
+        def content(self):
+            _content_value, _builder = self.new_content_builder(
+                self.ctx.args,
+                typ=AAZObjectType,
+                typ_kwargs={"flags": {"required": True, "client_flatten": True}}
+            )
+            _builder.set_prop("properties", AAZObjectType)
+
+            properties = _builder.get(".properties")
+            if properties is not None:
+                properties.set_prop("dataBoundary", AAZStrType, ".data_boundary")
+
+            return self.serialize_content(_content_value)
+
+        def on_200_201(self, session):
             data = self.deserialize_http_content(session)
             self.ctx.set_var(
                 "instance",
                 data,
-                schema_builder=self._build_schema_on_200
+                schema_builder=self._build_schema_on_200_201
             )
 
-        _schema_on_200 = None
+        _schema_on_200_201 = None
 
         @classmethod
-        def _build_schema_on_200(cls):
-            if cls._schema_on_200 is not None:
-                return cls._schema_on_200
+        def _build_schema_on_200_201(cls):
+            if cls._schema_on_200_201 is not None:
+                return cls._schema_on_200_201
 
-            cls._schema_on_200 = AAZObjectType()
+            cls._schema_on_200_201 = AAZObjectType()
 
-            _schema_on_200 = cls._schema_on_200
-            _schema_on_200.id = AAZStrType(
+            _schema_on_200_201 = cls._schema_on_200_201
+            _schema_on_200_201.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200.name = AAZStrType(
+            _schema_on_200_201.name = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200.properties = AAZObjectType()
-            _schema_on_200.system_data = AAZObjectType(
+            _schema_on_200_201.properties = AAZObjectType()
+            _schema_on_200_201.system_data = AAZObjectType(
                 serialized_name="systemData",
                 flags={"read_only": True},
             )
-            _schema_on_200.type = AAZStrType(
+            _schema_on_200_201.type = AAZStrType(
                 flags={"read_only": True},
             )
 
-            properties = cls._schema_on_200.properties
+            properties = cls._schema_on_200_201.properties
             properties.data_boundary = AAZStrType(
                 serialized_name="dataBoundary",
             )
@@ -180,7 +194,7 @@ class Show(AAZCommand):
                 flags={"read_only": True},
             )
 
-            system_data = cls._schema_on_200.system_data
+            system_data = cls._schema_on_200_201.system_data
             system_data.created_at = AAZStrType(
                 serialized_name="createdAt",
             )
@@ -200,11 +214,11 @@ class Show(AAZCommand):
                 serialized_name="lastModifiedByType",
             )
 
-            return cls._schema_on_200
+            return cls._schema_on_200_201
 
 
-class _ShowHelper:
-    """Helper class for Show"""
+class _CreateHelper:
+    """Helper class for Create"""
 
 
-__all__ = ["Show"]
+__all__ = ["Create"]
