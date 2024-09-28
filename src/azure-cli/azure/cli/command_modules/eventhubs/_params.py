@@ -47,7 +47,7 @@ def load_arguments_eh(self, _):
                    help='Enable System Assigned Identity')
         c.argument('mi_user_assigned', arg_group='Managed Identity', nargs='+', help='List of User Assigned Identity ids.')
         c.argument('encryption_config', action=AlertAddEncryption, nargs='+', help='List of KeyVaultProperties objects.')
-        c.argument('geo_data_replication_config', action=AlertAddlocation, nargs='+', help='A list of regions where replicas of the namespace are maintained Object')
+        c.argument('geo_data_replication_config', action=AlertAddlocation, options_list=['--geo-data-replication-config', '--replica-config'], nargs='+', help='A list of regions where replicas of the namespace are maintained Object')
         c.argument('minimum_tls_version', arg_type=get_enum_type(TlsVersion), options_list=['--minimum-tls-version', '--min-tls'], help='The minimum TLS version for the cluster to support, e.g. 1.2')
         c.argument('require_infrastructure_encryption', options_list=['--infra-encryption'],
                    arg_type=get_three_state_flag(),
@@ -56,7 +56,7 @@ def load_arguments_eh(self, _):
                    arg_type=get_enum_type(['Enabled', 'Disabled']),
                    help='This determines if traffic is allowed over public network. By default it is enabled. If value is SecuredByPerimeter then Inbound and Outbound communication is controlled by the network security perimeter and profile\' access rules.')
         c.argument('alternate_name', help='Alternate name specified when alias and namespace names are same.')
-        c.argument('max_replication_lag_duration_in_seconds', type=int, help='The maximum acceptable lag for data replication operations from the primary replica to a quorum of secondary replicas')
+        c.argument('max_replication_lag_duration_in_seconds', type=int, options_list=['--max-replication-lag-duration-in-seconds', '--max-lag'], help='The maximum acceptable lag for data replication operations from the primary replica to a quorum of secondary replicas')
 
     with self.argument_context('eventhubs namespace create', min_api='2021-06-01-preview') as c:
         c.argument('cluster_arm_id', options_list=['--cluster-arm-id'], help='Cluster ARM ID of the Namespace')
