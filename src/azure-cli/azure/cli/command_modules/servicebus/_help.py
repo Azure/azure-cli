@@ -340,7 +340,7 @@ short-summary: Add one or more Replica properties to a namespace.
 examples:
   - name: Add one or more Replica properties to a namespace.
     text: |
-        az servicebus namespace replica add --namespace-name mynamespace -g MyResourceGroup --geo-data-replication-config role-type=Secondary location-name=mylocation                                                                      
+        az servicebus namespace replica add --namespace-name mynamespace -g MyResourceGroup --geo-data-replication-config role-type=Secondary location-name=mylocation
 """
 
 helps['servicebus namespace replica remove'] = """
@@ -349,7 +349,7 @@ short-summary: Remove one or more Replica properties to a namespace.
 examples:
   - name: Remove one or more Replica properties to a namespace.
     text: |
-        az servicebus namespace replica remove --namespace-name mynamespace -g MyResourceGroup --geo-data-replication-config role-type=Secondary location-name=mylocation                                                                                                         
+        az servicebus namespace replica remove --namespace-name mynamespace -g MyResourceGroup --geo-data-replication-config role-type=Secondary location-name=mylocation
 """
 
 helps['servicebus queue'] = """

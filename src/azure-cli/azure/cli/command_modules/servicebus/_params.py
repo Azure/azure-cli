@@ -49,9 +49,9 @@ def load_arguments_sb(self, _):
                    help='This determines if traffic is allowed over public network. By default it is enabled. If value is SecuredByPerimeter then Inbound and Outbound communication is controlled by the network security perimeter and profile\' access rules.')
         c.argument('premium_messaging_partitions', options_list=['--premium-messaging-partitions', '--premium-partitions'], is_preview=True, type=int, help='The number of partitions of a Service Bus namespace. This property is only applicable to Premium SKU namespaces. The default value is 1 and possible values are 1, 2 and 4')
         c.argument('alternate_name', help='Alternate name specified when alias and namespace names are same.')
-        c.argument('geo_data_replication_config', action=AlertAddlocation, nargs='+',
+        c.argument('geo_data_replication_config', action=AlertAddlocation, nargs='+', options_list=['--geo-data-replication-config', '--replica-config'],
                    help='A list of regions where replicas of the namespace are maintained Object')
-        c.argument('max_replication_lag_duration_in_seconds', type=int,
+        c.argument('max_replication_lag_duration_in_seconds', type=int, options_list=['--max-replication-lag-duration-in-seconds', '--max-lag'],
                    help='The maximum acceptable lag for data replication operations from the primary replica to a quorum of secondary replicas')
 
     with self.argument_context('servicebus namespace create') as c:

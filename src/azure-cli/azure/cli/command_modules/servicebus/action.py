@@ -100,6 +100,7 @@ class AlertAddIpRule(argparse._AppendAction):
             IpRuleList["action"] = 'Allow'
         return IpRuleList
 
+
 class AlertAddlocation(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
         action = self.get_action(values, option_string)
