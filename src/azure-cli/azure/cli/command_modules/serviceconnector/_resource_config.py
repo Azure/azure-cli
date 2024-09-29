@@ -50,6 +50,7 @@ class RESOURCE(Enum):
     SignalR = 'signalr'
     WebPubSub = 'webpubsub'
     ConfluentKafka = 'confluent-cloud'
+    FabricSql = 'fabric-sql'
     AppInsights = 'app-insights'
     CognitiveServices = 'cognitiveservices'
 
@@ -152,7 +153,9 @@ TARGET_RESOURCES = {
 
     RESOURCE.CognitiveServices: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.CognitiveServices/accounts/{account}',
 
-    RESOURCE.ContainerApp: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.App/containerApps/{target_app_name}'
+    RESOURCE.ContainerApp: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.App/containerApps/{target_app_name}',
+
+    RESOURCE.FabricSql: 'https://api.fabric.microsoft.com/v1/workspaces/{workspace_id}/SqlDatabases/{sql_id}'
 }
 
 
@@ -665,6 +668,8 @@ TARGET_RESOURCES_PARAMS = {
             'help': 'Name of the target container app',
             'placeholder': 'MyTargetContainerApp'
         }
+    },
+    RESOURCE.FabricSql: {
     }
 }
 
@@ -826,6 +831,7 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.SignalR: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.WebPubSub: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.ConfluentKafka: [AUTH_TYPE.Secret],
+        RESOURCE.FabricSql: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.UserIdentity],
         RESOURCE.AppInsights: [AUTH_TYPE.SecretAuto],
 
         RESOURCE.CognitiveServices: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret]
@@ -857,6 +863,7 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.SignalR: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.WebPubSub: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.ConfluentKafka: [AUTH_TYPE.Secret],
+        RESOURCE.FabricSql: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.UserIdentity],
         RESOURCE.AppInsights: [AUTH_TYPE.SecretAuto],
 
         RESOURCE.CognitiveServices: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret]
@@ -919,6 +926,7 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.SignalR: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.WebPubSub: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.ConfluentKafka: [AUTH_TYPE.Secret],
+        RESOURCE.FabricSql: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.UserIdentity],
         RESOURCE.AppInsights: [AUTH_TYPE.SecretAuto],
 
         RESOURCE.CognitiveServices: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
@@ -1160,6 +1168,14 @@ SUPPORTED_CLIENT_TYPE = {
             CLIENT_TYPE.Python,
             CLIENT_TYPE.Go,
             CLIENT_TYPE.SpringBoot,
+            CLIENT_TYPE.Blank
+        ],
+        RESOURCE.FabricSql: [
+            CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.Java,
+            CLIENT_TYPE.Python,
+            CLIENT_TYPE.Go,
+            CLIENT_TYPE.Php,
             CLIENT_TYPE.Blank
         ],
         RESOURCE.AppInsights: [
