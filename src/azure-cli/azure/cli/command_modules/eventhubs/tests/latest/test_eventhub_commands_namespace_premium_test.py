@@ -220,7 +220,12 @@ class EHNamespaceBYOKCURDScenarioTest(ScenarioTest):
 
         namespace = self.cmd('eventhubs namespace failover --name {namespacename3} --resource-group {rg} '
                              '--primary-location {loc2} ').get_output_in_json()
+
         #az eventhubs namespace failover --name namespace51 -g test-migration21 --primary-location australiaeast --debug
+
+        '''namespace = self.cmd('eventhubs namespace replica remove --resource-group {rg} --name {namespacename3} '
+                             '--geo-data-replication-config cluster-arm-id={clusterid2} role-type=Secondary location-name={loc2} ').get_output_in_json()'''
+
         # List Namespace within ResourceGroup
         self.cmd('eventhubs namespace list --resource-group {rg}')
 
