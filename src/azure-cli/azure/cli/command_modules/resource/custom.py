@@ -4573,7 +4573,7 @@ class _ResourceUtils:  # pylint: disable=too-many-instance-attributes
         pipeline_response = client._pipeline.run(request, stream=False)
 
         return LROPoller(client=client, initial_response=pipeline_response, deserialization_callback=deserialization_cb,
-                         polling_method=ARMPolling(lro_options={"final-state-via": "azure-async-operation"}))
+                         polling_method=ARMPolling())
 
     @staticmethod
     def resolve_api_version(rcf, resource_provider_namespace, parent_resource_path, resource_type,
