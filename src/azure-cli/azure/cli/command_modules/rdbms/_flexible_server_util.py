@@ -15,7 +15,7 @@ import string
 import yaml
 from knack.log import get_logger
 from knack.prompting import prompt_y_n, NoTTYException
-from msrestazure.tools import parse_resource_id
+from azure.cli.core.arm_tools import parse_resource_id
 from msrestazure.azure_exceptions import CloudError
 from azure.cli.core.util import CLIError
 from azure.cli.core.azclierror import AuthenticationError

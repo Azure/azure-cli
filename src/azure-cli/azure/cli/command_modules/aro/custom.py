@@ -28,7 +28,7 @@ from azure.cli.command_modules.role import GraphError
 from knack.log import get_logger
 
 from msrestazure.azure_exceptions import CloudError
-from msrestazure.tools import resource_id, parse_resource_id
+from azure.cli.core.arm_tools import resource_id, parse_resource_id
 from msrest.exceptions import HttpOperationError
 
 from tabulate import tabulate

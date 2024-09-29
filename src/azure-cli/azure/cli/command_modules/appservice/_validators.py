@@ -12,7 +12,7 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_
 from azure.cli.core.commands.validators import validate_tags
 
 from knack.log import get_logger
-from msrestazure.tools import is_valid_resource_id, parse_resource_id
+from azure.cli.core.arm_tools import is_valid_resource_id, parse_resource_id
 
 from ._appservice_utils import _generic_site_operation
 from ._client_factory import web_client_factory

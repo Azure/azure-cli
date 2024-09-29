@@ -9,7 +9,7 @@ from datetime import datetime, timedelta, timezone
 # pylint: disable=too-many-lines
 from knack.log import get_logger
 from knack.prompting import prompt_y_n
-from azure.mgmt.core.tools import is_valid_resource_id
+from azure.cli.core.arm_tools import is_valid_resource_id
 
 from azure.mgmt.recoveryservicesbackup.activestamp import RecoveryServicesBackupClient
 from azure.mgmt.recoveryservices import RecoveryServicesClient

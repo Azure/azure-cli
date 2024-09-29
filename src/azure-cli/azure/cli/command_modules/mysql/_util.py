@@ -19,7 +19,7 @@ from datetime import datetime
 from knack.log import get_logger
 from knack.arguments import ignore_type
 from knack.prompting import prompt_pass, prompt_y_n, NoTTYException
-from msrestazure.tools import parse_resource_id
+from azure.cli.core.arm_tools import parse_resource_id
 from msrestazure.azure_exceptions import CloudError
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.commands.progress import IndeterminateProgressBar

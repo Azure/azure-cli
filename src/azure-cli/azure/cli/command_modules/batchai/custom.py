@@ -24,7 +24,7 @@ from knack.log import get_logger
 from knack.util import CLIError
 from msrest.serialization import Deserializer
 from msrestazure.azure_exceptions import CloudError
-from msrestazure.tools import is_valid_resource_id, parse_resource_id
+from azure.cli.core.arm_tools import is_valid_resource_id, parse_resource_id
 from urllib.parse import urlparse
 
 from azure.cli.core import keys

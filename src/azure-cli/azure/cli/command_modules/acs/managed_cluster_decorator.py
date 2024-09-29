@@ -111,7 +111,7 @@ from knack.log import get_logger
 from knack.prompting import NoTTYException, prompt, prompt_pass, prompt_y_n
 from knack.util import CLIError
 from msrestazure.azure_exceptions import CloudError
-from msrestazure.tools import is_valid_resource_id, parse_resource_id
+from azure.cli.core.arm_tools import is_valid_resource_id, parse_resource_id
 
 logger = get_logger(__name__)
 
@@ -6796,7 +6796,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 # mdm metrics is supported only in azure public cloud, so add the role assignment only in this cloud
                 cloud_name = self.cmd.cli_ctx.cloud.name
                 if cloud_name.lower() == "azurecloud":
-                    from msrestazure.tools import resource_id
+                    from azure.cli.core.arm_tools import resource_id
 
                     cluster_resource_id = resource_id(
                         subscription=self.context.get_subscription_id(),
@@ -8559,7 +8559,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 # mdm metrics is supported only in azure public cloud, so add the role assignment only in this cloud
                 cloud_name = self.cmd.cli_ctx.cloud.name
                 if cloud_name.lower() == "azurecloud":
-                    from msrestazure.tools import resource_id
+                    from azure.cli.core.arm_tools import resource_id
 
                     cluster_resource_id = resource_id(
                         subscription=self.context.get_subscription_id(),

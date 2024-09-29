@@ -13,7 +13,7 @@ from urllib.request import urlretrieve
 from dateutil.tz import tzutc   # pylint: disable=import-error
 import uuid
 from msrestazure.azure_exceptions import CloudError
-from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id  # pylint: disable=import-error
+from azure.cli.core.arm_tools import resource_id, is_valid_resource_id, parse_resource_id  # pylint: disable=import-error
 from knack.log import get_logger
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.local_context import ALL

@@ -523,7 +523,7 @@ DO:
 ```Python
 def my_command(cmd, resource_group_name, foo_name, storage_account):
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import is_valid_resource_id, resource_id
+    from azure.cli.core.arm_tools import is_valid_resource_id, resource_id
     if not is_valid_resource_id(storage_account):
         storage_account = resource_id(
             subscription=get_subscription_id(cmd.cli_ctx),
@@ -537,7 +537,7 @@ def my_command(cmd, resource_group_name, foo_name, storage_account):
 ```Python
 def validate_storage_name_or_id(cmd, namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import is_valid_resource_id, resource_id
+    from azure.cli.core.arm_tools import is_valid_resource_id, resource_id
     if namespace.storage_account:
         if not is_valid_resource_id(namespace.storage_account):
             namespace.storage_account = resource_id(

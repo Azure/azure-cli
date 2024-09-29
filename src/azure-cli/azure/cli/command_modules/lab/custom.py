@@ -487,7 +487,7 @@ class EnvironmentCreate(_EnvironmentCreate):
 
     def pre_operations(self):
         import json
-        from azure.mgmt.core.tools import resource_id, is_valid_resource_id
+        from azure.cli.core.arm_tools import resource_id, is_valid_resource_id
         from azure.cli.core.azclierror import RequiredArgumentMissingError
         from azure.cli.core.commands.client_factory import get_subscription_id
         args = self.ctx.args

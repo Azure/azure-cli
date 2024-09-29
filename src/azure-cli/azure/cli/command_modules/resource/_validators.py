@@ -30,7 +30,7 @@ def _validate_template_spec(namespace):
             raise CLIError('incorrect usage: Please enter '
                            'a resource group and resource name or a resource ID for --template-spec')
     else:
-        from azure.mgmt.core.tools import is_valid_resource_id
+        from azure.cli.core.arm_tools import is_valid_resource_id
         namespace.template_spec = namespace.template_spec.strip("\"")
         if not is_valid_resource_id(namespace.template_spec):
             raise CLIError('--template-spec is not a valid resource ID.')
@@ -59,7 +59,7 @@ def _validate_deployment_name_with_template_specs(namespace):
         if namespace.template_uri and urlparse(namespace.template_uri).scheme:
             template_filename = urlsplit(namespace.template_uri).path
         if namespace.template_spec:
-            from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id
+            from azure.cli.core.arm_tools import parse_resource_id, is_valid_resource_id
             namespace.template_spec = namespace.template_spec.strip("\"")
             if not is_valid_resource_id(namespace.template_spec):
                 raise CLIError('--template-spec is not a valid resource ID.')
@@ -109,7 +109,7 @@ def internal_validate_lock_parameters(namespace, resource_group, resource_provid
                                       parent_resource_path, resource_type, resource_name):
     if resource_group is None:
         if resource_name is not None:
-            from msrestazure.tools import parse_resource_id, is_valid_resource_id
+            from azure.cli.core.arm_tools import parse_resource_id, is_valid_resource_id
             if not is_valid_resource_id(resource_name):
                 raise CLIError('--resource is not a valid resource ID. '
                                '--resource as a resource name is ignored if --resource-group is not given.')

@@ -21,7 +21,7 @@ from azure.cli.core.azclierror import (ResourceNotFoundError, ValidationError,
                                        MutuallyExclusiveArgumentError)
 from importlib import import_module
 from knack.log import get_logger
-from msrestazure.tools import (parse_resource_id, is_valid_resource_id, resource_id)
+from azure.cli.core.arm_tools import (parse_resource_id, is_valid_resource_id, resource_id)
 
 VERSION_2019_08_01 = "2019-08-01"
 VERSION_2019_10_01 = "2019-10-01"

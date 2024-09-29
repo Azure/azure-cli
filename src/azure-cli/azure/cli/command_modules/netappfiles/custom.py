@@ -10,7 +10,7 @@ from enum import Enum
 from knack.log import get_logger
 from azure.cli.core.azclierror import ValidationError
 from azure.cli.core.aaz import has_value, AAZJsonSelector
-from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
+from azure.cli.core.arm_tools import is_valid_resource_id, parse_resource_id
 from .aaz.latest.netappfiles import UpdateNetworkSiblingSet as _UpdateNetworkSiblingSet
 from .aaz.latest.netappfiles.account import Create as _AccountCreate, Update as _AccountUpdate
 from .aaz.latest.netappfiles.account.ad import Add as _ActiveDirectoryAdd, List as _ActiveDirectoryList, Update as _ActiveDirectoryUpdate

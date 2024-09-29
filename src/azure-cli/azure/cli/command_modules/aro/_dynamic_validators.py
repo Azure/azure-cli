@@ -19,7 +19,7 @@ from azure.cli.core.azclierror import CLIInternalError, InvalidArgumentValueErro
     RequiredArgumentMissingError
 from azure.core.exceptions import ResourceNotFoundError
 from knack.log import get_logger
-from msrestazure.tools import is_valid_resource_id, parse_resource_id
+from azure.cli.core.arm_tools import is_valid_resource_id, parse_resource_id
 from msrestazure.azure_exceptions import CloudError
 import azure.cli.command_modules.aro.custom
 

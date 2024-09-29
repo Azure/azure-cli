@@ -21,7 +21,7 @@ from azure.cli.testsdk import (
 
 from knack.util import CLIError
 
-from msrestazure.tools import resource_id
+from azure.cli.core.arm_tools import resource_id
 
 from .credential_replacer import ExpressRoutePortLOAContentReplacer
 
