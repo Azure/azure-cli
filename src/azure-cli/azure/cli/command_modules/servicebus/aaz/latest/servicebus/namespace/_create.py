@@ -379,7 +379,7 @@ class Create(AAZCommand):
                 typ=AAZObjectType,
                 typ_kwargs={"flags": {"required": True, "client_flatten": True}}
             )
-            _builder.set_prop("identity", AAZObjectType, ".identity", typ_kwargs={"flags": {"client_flatten": True}})
+            _builder.set_prop("identity", AAZObjectType, ".identity")
             _builder.set_prop("location", AAZStrType, ".location", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
             _builder.set_prop("sku", AAZObjectType, ".sku")
@@ -398,7 +398,7 @@ class Create(AAZCommand):
             if properties is not None:
                 properties.set_prop("alternateName", AAZStrType, ".alternate_name")
                 properties.set_prop("disableLocalAuth", AAZBoolType, ".disable_local_auth")
-                properties.set_prop("encryption", AAZObjectType, ".encryption", typ_kwargs={"flags": {"client_flatten": True}})
+                properties.set_prop("encryption", AAZObjectType, ".encryption")
                 properties.set_prop("geoDataReplication", AAZObjectType, ".geo_data_replication")
                 properties.set_prop("minimumTlsVersion", AAZStrType, ".minimum_tls_version")
                 properties.set_prop("premiumMessagingPartitions", AAZIntType, ".premium_messaging_partitions")
@@ -418,7 +418,7 @@ class Create(AAZCommand):
 
             _elements = _builder.get(".properties.encryption.keyVaultProperties[]")
             if _elements is not None:
-                _elements.set_prop("identity", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+                _elements.set_prop("identity", AAZObjectType)
                 _elements.set_prop("keyName", AAZStrType, ".key_name")
                 _elements.set_prop("keyVaultUri", AAZStrType, ".key_vault_uri")
                 _elements.set_prop("keyVersion", AAZStrType, ".key_version")
@@ -498,9 +498,7 @@ class Create(AAZCommand):
             _schema_on_200_201.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200_201.identity = AAZObjectType(
-                flags={"client_flatten": True},
-            )
+            _schema_on_200_201.identity = AAZObjectType()
             _schema_on_200_201.location = AAZStrType(
                 flags={"required": True},
             )
@@ -559,9 +557,7 @@ class Create(AAZCommand):
             properties.disable_local_auth = AAZBoolType(
                 serialized_name="disableLocalAuth",
             )
-            properties.encryption = AAZObjectType(
-                flags={"client_flatten": True},
-            )
+            properties.encryption = AAZObjectType()
             properties.geo_data_replication = AAZObjectType(
                 serialized_name="geoDataReplication",
             )
@@ -615,9 +611,7 @@ class Create(AAZCommand):
             key_vault_properties.Element = AAZObjectType()
 
             _element = cls._schema_on_200_201.properties.encryption.key_vault_properties.Element
-            _element.identity = AAZObjectType(
-                flags={"client_flatten": True},
-            )
+            _element.identity = AAZObjectType()
             _element.key_name = AAZStrType(
                 serialized_name="keyName",
             )

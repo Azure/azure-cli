@@ -536,7 +536,7 @@ class Update(AAZCommand):
                 value=instance,
                 typ=AAZObjectType
             )
-            _builder.set_prop("identity", AAZObjectType, ".identity", typ_kwargs={"flags": {"client_flatten": True}})
+            _builder.set_prop("identity", AAZObjectType, ".identity")
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
             _builder.set_prop("sku", AAZObjectType)
             _builder.set_prop("tags", AAZDictType, ".tags")
@@ -554,7 +554,7 @@ class Update(AAZCommand):
             if properties is not None:
                 properties.set_prop("alternateName", AAZStrType, ".alternate_name")
                 properties.set_prop("disableLocalAuth", AAZBoolType, ".disable_local_auth")
-                properties.set_prop("encryption", AAZObjectType, ".encryption", typ_kwargs={"flags": {"client_flatten": True}})
+                properties.set_prop("encryption", AAZObjectType, ".encryption")
                 properties.set_prop("geoDataReplication", AAZObjectType)
                 properties.set_prop("minimumTlsVersion", AAZStrType, ".minimum_tls_version")
                 properties.set_prop("premiumMessagingPartitions", AAZIntType, ".premium_messaging_partitions")
@@ -573,7 +573,7 @@ class Update(AAZCommand):
 
             _elements = _builder.get(".properties.encryption.keyVaultProperties[]")
             if _elements is not None:
-                _elements.set_prop("identity", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+                _elements.set_prop("identity", AAZObjectType)
                 _elements.set_prop("keyName", AAZStrType, ".key_name")
                 _elements.set_prop("keyVaultUri", AAZStrType, ".key_vault_uri")
                 _elements.set_prop("keyVersion", AAZStrType, ".key_version")
@@ -666,9 +666,7 @@ class _UpdateHelper:
         sb_namespace_read.id = AAZStrType(
             flags={"read_only": True},
         )
-        sb_namespace_read.identity = AAZObjectType(
-            flags={"client_flatten": True},
-        )
+        sb_namespace_read.identity = AAZObjectType()
         sb_namespace_read.location = AAZStrType(
             flags={"required": True},
         )
@@ -727,9 +725,7 @@ class _UpdateHelper:
         properties.disable_local_auth = AAZBoolType(
             serialized_name="disableLocalAuth",
         )
-        properties.encryption = AAZObjectType(
-            flags={"client_flatten": True},
-        )
+        properties.encryption = AAZObjectType()
         properties.geo_data_replication = AAZObjectType(
             serialized_name="geoDataReplication",
         )

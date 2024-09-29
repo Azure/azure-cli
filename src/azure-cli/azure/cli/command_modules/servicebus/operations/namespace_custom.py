@@ -66,6 +66,12 @@ def create_servicebus_namespace(cmd, resource_group_name, namespace_name, locati
 
     if mi_system_assigned:
         identity_type = SYSTEM
+        command_args_dict.update({
+            "identity": {
+                "type": identity_type,
+                "user_assigned_identities": None
+            }
+        })
 
     if mi_user_assigned:
         if mi_system_assigned:
