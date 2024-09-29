@@ -679,7 +679,7 @@ short-summary: Add one or more Replica properties to a namespace.
 examples:
   - name: Add one or more Replica properties to a namespace.
     text: |
-        az eventhubs namespace replica add --namespace-name mynamespace -g MyResourceGroup --geo-data-replication-config role-type=Secondary location-name=mylocation cluster-arm-id=/subscriptions/{mysubcriptionid}/resourceGroups/{myResourcegroup}/providers/Microsoft.EventHub/clusters/{clustername}                             
+        az eventhubs namespace replica add --namespace-name mynamespace -g MyResourceGroup --geo-data-replication-config role-type=Secondary location-name=mylocation cluster-arm-id=/subscriptions/{mysubcriptionid}/resourceGroups/{myResourcegroup}/providers/Microsoft.EventHub/clusters/{clustername}
 """
 
 helps['eventhubs namespace replica remove'] = """
@@ -688,7 +688,7 @@ short-summary: Remove one or more Replica properties to a namespace.
 examples:
   - name: Remove one or more Replica properties to a namespace.
     text: |
-        az eventhubs namespace replica remove --namespace-name mynamespace -g MyResourceGroup --geo-data-replication-config role-type=Secondary location-name=mylocation cluster-arm-id=/subscriptions/{mysubcriptionid}/resourceGroups/{myResourcegroup}/providers/Microsoft.EventHub/clusters/{clustername}                                                                                       
+        az eventhubs namespace replica remove --namespace-name mynamespace -g MyResourceGroup --geo-data-replication-config role-type=Secondary location-name=mylocation cluster-arm-id=/subscriptions/{mysubcriptionid}/resourceGroups/{myResourcegroup}/providers/Microsoft.EventHub/clusters/{clustername}                                                                  
 """
 
 helps['eventhubs namespace schema-registry'] = """
