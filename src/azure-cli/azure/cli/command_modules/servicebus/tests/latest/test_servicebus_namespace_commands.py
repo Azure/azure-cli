@@ -23,11 +23,14 @@ class SBNamespaceCRUDScenarioTest(ScenarioTest):
             'namespacename': self.create_random_name(prefix='sb-nscli', length=20),
             'namespacename1': self.create_random_name(prefix='sb-nscli1', length=20),
             'namespacename2': self.create_random_name(prefix='sb-nscli2', length=20),
+            'namespacename3': self.create_random_name(prefix='sb-nscli3', length=20),
             'identity1': self.create_random_name(prefix='sb-identity1', length=20),
             'identity2': self.create_random_name(prefix='sb-identity2', length=20),
             'tags': 'tag1=value1',
             'tags2': 'tag2=value2',
-            'loc': 'East US'
+            'loc': 'East US',
+            'loc1': 'Australiaeast',
+            'loc2': 'TaiwanNorth'
         })
 
         identity1 = self.cmd('identity create --name {identity1} --resource-group {rg}').get_output_in_json()
@@ -102,6 +105,31 @@ class SBNamespaceCRUDScenarioTest(ScenarioTest):
 
         # List all Namespace within subscription
         self.cmd('servicebus namespace list')
+
+        # create a namespace with geo-replication enable
+        namespace = self.cmd('servicebus namespace create --resource-group {rg} --name {namespacename3} '
+                             '--location {loc1} --sku Premium --geo-data-replication-config role-type=Primary location-name={loc1} '
+                             '--geo-data-replication-config role-type=Secondary location-name={loc2}').get_output_in_json()
+
+        time.sleep(200)
+
+        '''namespace = self.cmd('servicebus namespace replica add --resource-group {rg} --name {namespacename3} '
+                             '--geo-data-replication-config role-type=Secondary location-name={loc2} ').get_output_in_json()'''
+
+        self.assertEqual(2, len(namespace['geoDataReplication']['locations']))
+
+        namespace = self.cmd('servicebus namespace update --resource-group {rg} --name {namespacename3} '
+                             '--max-replication-lag-duration-in-seconds 300').get_output_in_json()
+
+        self.assertEqual(300, namespace['geoDataReplication']['maxReplicationLagDurationInSeconds'])
+
+        time.sleep(600)
+
+        namespace = self.cmd('servicebus namespace failover --name {namespacename3} --resource-group {rg} '
+                             '--primary-location {loc2} ').get_output_in_json()
+
+        '''namespace = self.cmd('servicebus namespace replica remove --resource-group {rg} --name {namespacename3} '
+                             '--geo-data-replication-config cluster-arm-id={clusterid2} role-type=Secondary location-name={loc2} ').get_output_in_json()'''
 
         # Delete Namespace list by ResourceGroup
         self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename} ')
