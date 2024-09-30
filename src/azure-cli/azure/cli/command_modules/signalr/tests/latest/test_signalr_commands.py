@@ -87,7 +87,7 @@ class AzureSignalRServiceScenarioTest(ScenarioTest):
             self.check('name', '{signalr_name}'),
             self.check('location', '{location}'),
             self.check('provisioningState', 'Succeeded'), 
-            self.check('resourceStopped', 'False')
+            self.check('resourceStopped', 'false')
         ])
         
         # Test stop
@@ -95,7 +95,7 @@ class AzureSignalRServiceScenarioTest(ScenarioTest):
             self.check('name', '{signalr_name}'),
             self.check('location', '{location}'),
             self.check('provisioningState', 'Succeeded'), 
-            self.check('resourceStopped', 'True')
+            self.check('resourceStopped', 'true')
         ])
         
         # Test list
