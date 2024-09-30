@@ -143,7 +143,10 @@ def load_arguments(self, _):
     for scope in ['signalr replica create',
                   'signalr replica list',
                   'signalr replica delete',
-                  'signalr replica show']:
+                  'signalr replica show',
+                  'signalr replica start',
+                  'signalr replica stop',
+                  'signalr replica restart']:
         with self.argument_context(scope) as c:
             c.argument('sku', help='The sku name of the replica. Currently allowed values: Premium_P1')
             c.argument('unit_count', help='The number of signalr service unit count', type=int)
@@ -155,6 +158,9 @@ def load_arguments(self, _):
             c.argument('signalr_name', signalr_name_type, id_part=None)
 
     for scope in ['signalr replica show',
+                  'signalr replica start',
+                  'signalr replica stop',
+                  'signalr replica restart',
                   'signalr replica delete']:
         with self.argument_context(scope) as c:
             c.argument('signalr_name', signalr_name_type)

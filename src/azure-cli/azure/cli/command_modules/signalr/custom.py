@@ -45,13 +45,16 @@ def signalr_list(client, resource_group_name=None):
 def signalr_show(client, signalr_name, resource_group_name):
     return client.get(resource_group_name, signalr_name)
 
+
 def signalr_start(client: SignalROperations, signalr_name, resource_group_name):
     parameter = SignalRResource(location=None, resource_stopped=False)
     return client.begin_update(resource_group_name, signalr_name, parameter)
 
+
 def signalr_stop(client: SignalROperations, signalr_name, resource_group_name):
     parameter = SignalRResource(location=None, resource_stopped=True)
     return client.begin_update(resource_group_name, signalr_name, parameter)
+
 
 def signalr_restart(client, signalr_name, resource_group_name):
     return client.begin_restart(resource_group_name, signalr_name)

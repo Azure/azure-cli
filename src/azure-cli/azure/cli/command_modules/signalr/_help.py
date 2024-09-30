@@ -300,6 +300,33 @@ type: command
 short-summary: Show the detail of a custom certificate of SignalR Service.
 """
 
+helps['signalr replica start'] = """
+type: command
+short-summary: Start a replica of SignalR Service.
+examples:
+  - name: Start a replica
+    text: >
+        az signalr replica start --replica-name MyReplica --signalr-name MySignalR -g MyResourceGroup
+"""
+
+helps['signalr replica stop'] = """
+type: command
+short-summary: Stop a replica of SignalR Service.
+examples:
+  - name: Stop a replica
+    text: >
+        az signalr replica stop --replica-name MyReplica --signalr-name MySignalR -g MyResourceGroup
+"""
+
+helps['signalr replica restart'] = """
+type: command
+short-summary: Restart a replica of SignalR Service.
+examples:
+  - name: Restart a replica
+    text: >
+        az signalr replica restart --replica-name MyReplica --signalr-name MySignalR -g MyResourceGroup
+"""
+
 helps['signalr replica show'] = """
 type: command
 short-summary: Show the details of a replica
