@@ -9,7 +9,6 @@ import json
 import math
 import os
 import random
-import subprocess
 import secrets
 import string
 import yaml
@@ -23,7 +22,7 @@ from msrestazure.tools import parse_resource_id
 from msrestazure.azure_exceptions import CloudError
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.commands.progress import IndeterminateProgressBar
-from azure.cli.core.util import CLIError
+from azure.cli.core.util import CLIError, run_cmd
 from azure.core.exceptions import HttpResponseError
 from azure.core.paging import ItemPaged
 from azure.core.rest import HttpRequest
@@ -375,19 +374,11 @@ def _resolve_api_version(client, provider_namespace, resource_type, parent_path)
 
 def run_subprocess(command, stdout_show=None):
     if stdout_show:
-        process = subprocess.Popen(command, shell=True)
+        process = run_cmd(command)
     else:
-        process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    process.wait()
+        process = run_cmd(command, capture_output=True)
     if process.returncode:
-        logger.warning(process.stderr.read().strip().decode('UTF-8'))
-
-
-def run_subprocess_get_output(command):
-    commands = command.split()
-    process = subprocess.Popen(commands, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    process.wait()
-    return process
+        logger.warning(process.stderr.strip().decode('UTF-8'))
 
 
 def register_credential_secrets(cmd, database_engine, server, repository):
@@ -414,7 +405,7 @@ def register_credential_secrets(cmd, database_engine, server, repository):
     credential_file = "./temp_app_credential.txt"
     with open(credential_file, "w") as f:
         f.write(app_json)
-    run_subprocess('gh secret set {} --repo {} < {}'.format(AZURE_CREDENTIALS, repository, credential_file))
+    run_subprocess(["gh", "secret", "set", AZURE_CREDENTIALS, "--repo", repository, "<", credential_file])
     os.remove(credential_file)
 
 
@@ -423,7 +414,7 @@ def register_connection_secrets(server, database_name, administrator_login,
     logger.warning("Added secret %s to github repository", connection_string_name)
     connection_string = "Server={}; Port=3306; Database={}; Uid={}; Pwd={}; SslMode=Preferred;".format(
         server.fully_qualified_domain_name, database_name, administrator_login, administrator_login_password)
-    run_subprocess('gh secret set {} --repo {} -b"{}"'.format(connection_string_name, repository, connection_string))
+    run_subprocess(['gh', 'secret', 'set', connection_string_name, '--repo', repository, '-b', connection_string])
 
 
 def fill_action_template(cmd, database_engine, server, database_name, administrator_login,
@@ -433,8 +424,8 @@ def fill_action_template(cmd, database_engine, server, database_name, administra
     if not os.path.exists(action_dir):
         os.makedirs(action_dir)
 
-    process = run_subprocess_get_output("gh secret list --repo {}".format(repository))
-    github_secrets = process.stdout.read().strip().decode('UTF-8')
+    process = run_cmd(["gh", "secret", "list", "--repo", repository], capture_output=True)
+    github_secrets = process.stdout.strip().decode('UTF-8')
 
     if AZURE_CREDENTIALS not in github_secrets:
         try:
@@ -469,8 +460,8 @@ def fill_action_template(cmd, database_engine, server, database_name, administra
 
 
 def get_git_root_dir():
-    process = run_subprocess_get_output("git rev-parse --show-toplevel")
-    return process.stdout.read().strip().decode('UTF-8')
+    process = run_cmd(["git", "rev-parse", "--show-toplevel"], capture_output=True)
+    return process.stdout.strip().decode('UTF-8')
 
 
 def get_user_confirmation(message, yes=False):
