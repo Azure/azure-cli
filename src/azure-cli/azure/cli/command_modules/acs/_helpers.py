@@ -319,3 +319,9 @@ def _get_id_from_shared_control_plane_identity(shared_identity) -> int:
             )
         )
     return 0
+
+
+def get_vm_sizes(cli_ctx, location):
+    from azure.cli.command_modules.acs._client_factory import get_compute_client
+
+    return get_compute_client(cli_ctx).virtual_machine_sizes.list(location)
