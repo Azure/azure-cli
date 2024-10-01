@@ -30,10 +30,7 @@ class JMESPathCheck(object):  # pylint: disable=too-few-public-methods
             equals = actual_result == self._expected_result \
                 or str(actual_result).lower() == str(self._expected_result).lower()
         if not equals:
-            if actual_result:
-                raise JMESPathCheckAssertionError(self._query, self._expected_result, actual_result,
-                                                  execution_result.output)
-            raise JMESPathCheckAssertionError(self._query, self._expected_result, 'None',
+            raise JMESPathCheckAssertionError(self._query, self._expected_result, actual_result,
                                               execution_result.output)
 
 
@@ -74,11 +71,7 @@ class JMESPathCheckGreaterThan(object):  # pylint: disable=too-few-public-method
                                         jmespath.Options(collections.OrderedDict))
         if not actual_result > self._expected_result:
             expected_result_format = "> {}".format(self._expected_result)
-
-            if actual_result:
-                raise JMESPathCheckAssertionError(self._query, expected_result_format, actual_result,
-                                                  execution_result.output)
-            raise JMESPathCheckAssertionError(self._query, expected_result_format, 'None',
+            raise JMESPathCheckAssertionError(self._query, expected_result_format, actual_result,
                                               execution_result.output)
 
 
