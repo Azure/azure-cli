@@ -63,7 +63,7 @@ $contactsList = ($response.content -split "\n") | Where-Object { $_ -like '|*' }
 
 if ($null -ne $contactsList) {
     $idxServiceTeamLabel = 2
-    $idxPSNotifyGithubHandler = 6
+    $idxCLINotifyGithubHandler = 5
     $serviceContacts = [System.Collections.Generic.SortedList[System.String, PSCustomObject]]::new()
 
     foreach ($contacts in $contactsList) {
@@ -71,11 +71,11 @@ if ($null -ne $contactsList) {
         $colServiceTeamLabel = $items[$idxServiceTeamLabel]
         if (![string]::IsNullOrWhiteSpace($colServiceTeamLabel)) {
             $serviceTeamLabel = $colServiceTeamLabel.Trim()
-            $colPSNotifyGithubHandler = $items[$idxPSNotifyGithubHandler]
+            $colCLINotifyGithubHandler = $items[$idxCLINotifyGithubHandler]
 
-            if (![string]::IsNullOrWhiteSpace($colPSNotifyGithubHandler)) {
-                $psNotifyGithubHandler = $colPSNotifyGithubHandler.Trim()
-                [array]$mentionees = $psNotifyGithubHandler.Split(",", [StringSplitOptions]::RemoveEmptyEntries) | ForEach-Object {
+            if (![string]::IsNullOrWhiteSpace($colCLINotifyGithubHandler)) {
+                $CLINotifyGithubHandler = $colCLINotifyGithubHandler.Trim()
+                [array]$mentionees = $CLINotifyGithubHandler.Split(",", [StringSplitOptions]::RemoveEmptyEntries) | ForEach-Object {
                     $_.Trim()
                 }
 
