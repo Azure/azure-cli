@@ -66,7 +66,7 @@ jobs:
       git add .github/policies
       git commit -m "Sync resourceManagement.yml"
 
-      git remote set-url origin https://azure-powershell-bot:$(GithubToken)@github.com/Azure/azure-powershell.git;
+      git remote set-url origin https://azure-powershell-bot:$(GithubToken)@github.com/Azure/azure-cli.git;
       git push origin internal/sync-resourcemanagement-yml --force
     displayName: Git commit and push
     condition: and(succeeded(), eq(variables['ChangesDetected'], 'true'))
