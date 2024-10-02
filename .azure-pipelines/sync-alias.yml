@@ -85,13 +85,11 @@ jobs:
       $HeadBranch = "sync_alias_$env:Build_BuildId"
       $BaseBranch = "dev"
       $Description = "This PR synchronizes the task: 'Triage issues to the service team' part of resourceManagement.yml from table of Service Contact List in ADO wiki page"
-#      ./tools/Github/CreatePR.ps1 -Title $Title -HeadBranch $HeadBranch -BaseBranch $BaseBranch -BotAccessToken $(GithubToken) -Description $Description
       Invoke-RestMethod -Uri "https://api.github.com/repos/Azure/azure-cli/pulls" `
         -Method Post `
         -Headers @{ "Authorization" = "token $GITHUB_TOKEN" } `
         -Body (@{ title = $pr_title; body = $pr_body; head = $pr_head; base = "dev" } | ConvertTo-Json) `
         -ContentType "application/json"
-
     displayName: Create PR to main branch
     condition: and(succeeded(), eq(variables['ChangesDetected'], 'true'))
 
