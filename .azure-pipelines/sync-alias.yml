@@ -68,13 +68,14 @@ jobs:
         git config --global user.email "AzPyCLI@microsoft.com"
         git config --global user.name "Azure CLI Team"
         
-        git checkout -b "internal/sync-resourcemanagement-yml"
+        git remote add azclibot https://azclibot:${GITHUB_TOKEN}@github.com/azclibot/azure-cli.git
+        
+        git checkout -b sync_alias_$(Build.BuildId)
   
         git add .github/policies
         git commit -m "Sync resourceManagement.yml"
-  
-        git remote set-url origin https://azclibot:$(GithubToken)@github.com/Azure/azure-cli.git
-        git push origin internal/sync-resourcemanagement-yml --force
+          
+        git push --set-upstream azclibot sync_alias_$(Build.BuildId)
 
   - task: AzureCLI@1
     displayName: 'Create PR to dev branch'
