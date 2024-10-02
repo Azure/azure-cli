@@ -56,26 +56,64 @@ jobs:
       }
     displayName: Check if Wiki table has any changes
 
-  - template: templates/get-github-pat-steps.yml
-
-  - pwsh: |
-      git config --global user.email "65331932+azure-powershell-bot@users.noreply.github.com"
-      git config --global user.name "azure-powershell-bot"
-      git checkout -b "internal/sync-resourcemanagement-yml"
-
-      git add .github/policies
-      git commit -m "Sync resourceManagement.yml"
-
-      git remote set-url origin https://azure-powershell-bot:$(GithubToken)@github.com/Azure/azure-cli.git;
-      git push origin internal/sync-resourcemanagement-yml --force
+  - task: AzureCLI@1
     displayName: Git commit and push
     condition: and(succeeded(), eq(variables['ChangesDetected'], 'true'))
+    inputs:
+      azureSubscription: $(AZURE_SDK_INFRA_SUB_CONNECTED_SERVICE)
+      scriptLocation: inlineScript
+      inlineScript: |
+        set -ev
+        
+        git config --global user.email "AzPyCLI@microsoft.com"
+        git config --global user.name "Azure CLI Team"
+        
+        git checkout -b "internal/sync-resourcemanagement-yml"
+  
+        git add .github/policies
+        git commit -m "Sync resourceManagement.yml"
+  
+        git remote set-url origin https://azclibot:$(GithubToken)@github.com/Azure/azure-cli.git;
+        git push origin internal/sync-resourcemanagement-yml --force
 
-  - pwsh: |
-      $Title = "Sync resourceManagement.yml according To ADO Wiki Page - Service Contact List"
-      $HeadBranch = "internal/sync-resourcemanagement-yml"
-      $BaseBranch = "main"
-      $Description = "This PR synchronizes the task: 'Triage issues to the service team' part of resourceManagement.yml from table of Service Contact List in ADO wiki page"
-      ./tools/Github/CreatePR.ps1 -Title $Title -HeadBranch $HeadBranch -BaseBranch $BaseBranch -BotAccessToken $(GithubToken) -Description $Description
-    displayName: Create PR to main branch
+  - task: AzureCLI@1
+    displayName: 'Create PR to dev branch'
     condition: and(succeeded(), eq(variables['ChangesDetected'], 'true'))
+    inputs:
+      azureSubscription: $(AZURE_SDK_INFRA_SUB_CONNECTED_SERVICE)
+      scriptLocation: inlineScript
+      inlineScript: |
+        set -ev
+        GITHUB_TOKEN=$(az keyvault secret show --vault-name kv-azuresdk --name azclibot-pat --query value -otsv)
+        pr_title="Sync resourceManagement.yml according To ADO Wiki Page - Service Contact List"
+        pr_body="This PR synchronizes the task: 'Triage issues to the service team' part of resourceManagement.yml from table of Service Contact List in ADO wiki page"
+        pr_head="azclibot:sync_alias_$(Build.BuildId)"
+
+        curl \
+        -H "Authorization: token ${GITHUB_TOKEN}" \
+        -d "{\"title\": \"${pr_title}\", \"body\": \"${pr_body}\", \"head\": \"${pr_head}\", \"base\": \"dev\"}" \
+        https://api.github.com/repos/Azure/azure-cli/pulls
+
+#  - template: templates/get-github-pat-steps.yml
+
+#  - pwsh: |
+#      git config --global user.email "65331932+azure-powershell-bot@users.noreply.github.com"
+#      git config --global user.name "azure-powershell-bot"
+#      git checkout -b "internal/sync-resourcemanagement-yml"
+#
+#      git add .github/policies
+#      git commit -m "Sync resourceManagement.yml"
+#
+#      git remote set-url origin https://azure-powershell-bot:$(GithubToken)@github.com/Azure/azure-cli.git;
+#      git push origin internal/sync-resourcemanagement-yml --force
+#    displayName: Git commit and push
+#    condition: and(succeeded(), eq(variables['ChangesDetected'], 'true'))
+#
+#  - pwsh: |
+#      $Title = "Sync resourceManagement.yml according To ADO Wiki Page - Service Contact List"
+#      $HeadBranch = "internal/sync-resourcemanagement-yml"
+#      $BaseBranch = "main"
+#      $Description = "This PR synchronizes the task: 'Triage issues to the service team' part of resourceManagement.yml from table of Service Contact List in ADO wiki page"
+#      ./tools/Github/CreatePR.ps1 -Title $Title -HeadBranch $HeadBranch -BaseBranch $BaseBranch -BotAccessToken $(GithubToken) -Description $Description
+#    displayName: Create PR to main branch
+#    condition: and(succeeded(), eq(variables['ChangesDetected'], 'true'))
