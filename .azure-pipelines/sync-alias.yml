@@ -65,22 +65,19 @@ jobs:
       inlineScript: |
         set -ev
         
-        git credential-manager reject https://github.com
-        
+        GITHUB_TOKEN=$(az keyvault secret show --vault-name kv-azuresdk --name azclibot-pat --query value -otsv)
         git config --global user.email "AzPyCLI@microsoft.com"
         git config --global user.name "Azure CLI Team"
+        git remote add azclibot https://azclibot:${GITHUB_TOKEN}@github.com/Azure/azure-cli.git
         
-        GITHUB_TOKEN=$(az keyvault secret show --vault-name kv-azuresdk --name azclibot-pat --query value -otsv)
         git checkout -b sync_alias_$(Build.BuildId)
   
         git add .github/policies
         git commit -m "Sync resourceManagement.yml"
         
-        git remote set-url origin https://azclibot:$(GITHUB_TOKEN)@github.com/Azure/azure-cli.git
-        
         git remote -v
 
-        git push origin sync_alias_$(Build.BuildId) --force
+        git push --set-upstream azclibot sync_alias_$(Build.BuildId) --force
 
   - task: AzureCLI@1
     displayName: 'Create PR to dev branch'
