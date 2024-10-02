@@ -91,34 +91,6 @@ jobs:
         pr_head="azclibot:sync_alias_$(Build.BuildId)"
 
         curl \
-        -H "Authorization: token ${GITHUB_TOKEN}" \
+        -H "Authorization: token $GITHUB_TOKEN" \
         -d "{\"title\": \"${pr_title}\", \"body\": \"${pr_body}\", \"head\": \"${pr_head}\", \"base\": \"dev\"}" \
         https://api.github.com/repos/Azure/azure-cli/pulls
-
-#  - template: templates/get-github-pat-steps.yml
-
-#  - pwsh: |
-#      git config --global user.email "65331932+azure-powershell-bot@users.noreply.github.com"
-#      git config --global user.name "azure-powershell-bot"
-#      git checkout -b "internal/sync-resourcemanagement-yml"
-#
-#      git add .github/policies
-#      git commit -m "Sync resourceManagement.yml"
-#
-#      git remote set-url origin https://azure-powershell-bot:$(GithubToken)@github.com/Azure/azure-cli.git;
-#      git push origin internal/sync-resourcemanagement-yml --force
-#    displayName: Git commit and push
-#    condition: and(succeeded(), eq(variables['ChangesDetected'], 'true'))
-#
-#  - pwsh: |
-#      $Title = "Sync resourceManagement.yml according To ADO Wiki Page - Service Contact List"
-#      $HeadBranch = "internal/sync-resourcemanagement-yml"
-#      $BaseBranch = "main"
-#      $Description = "This PR synchronizes the task: 'Triage issues to the service team' part of resourceManagement.yml from table of Service Contact List in ADO wiki page"
-#      ./tools/Github/CreatePR.ps1 -Title $Title -HeadBranch $HeadBranch -BaseBranch $BaseBranch -BotAccessToken $(GithubToken) -Description $Description
-#    displayName: Create PR to main branch
-#    condition: and(succeeded(), eq(variables['ChangesDetected'], 'true'))
-
-#        git remote add azclibot https://azclibot:${GITHUB_TOKEN}@github.com/azclibot/azure-cli.git
-
-#        git push --set-upstream azclibot sync_alias_$(Build.BuildId)
