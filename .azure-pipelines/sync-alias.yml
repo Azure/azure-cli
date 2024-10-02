@@ -68,16 +68,12 @@ jobs:
         git config --global user.email "AzPyCLI@microsoft.com"
         git config --global user.name "Azure CLI Team"
         
+        GITHUB_TOKEN=$(az keyvault secret show --vault-name kv-azuresdk --name azclibot-pat --query value -otsv)
         git remote add azclibot https://azclibot:${GITHUB_TOKEN}@github.com/azclibot/azure-cli.git
-        
         git checkout -b sync_alias_$(Build.BuildId)
   
         git add .github/policies
         git commit -m "Sync resourceManagement.yml"
-        
-        git remote set-url azclibot https://azclibot:${GITHUB_TOKEN}@github.com/azclibot/azure-cli.git
-        
-        git remote -v
         
         git push --set-upstream azclibot sync_alias_$(Build.BuildId)
 
