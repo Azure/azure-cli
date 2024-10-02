@@ -87,7 +87,7 @@ jobs:
       $Description = "This PR synchronizes the task: 'Triage issues to the service team' part of resourceManagement.yml from table of Service Contact List in ADO wiki page"
       Invoke-RestMethod -Uri "https://api.github.com/repos/Azure/azure-cli/pulls" `
         -Method Post `
-        -Headers @{ "Authorization" = "token $GITHUB_TOKEN" } `
+        -Headers @{ "Authorization" = "token $GithubToken" } `
         -Body (@{ title = $pr_title; body = $pr_body; head = $pr_head; base = "dev" } | ConvertTo-Json) `
         -ContentType "application/json"
     displayName: Create PR to main branch
