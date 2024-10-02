@@ -69,7 +69,6 @@ jobs:
         git config --global user.name "Azure CLI Team"
         
         GITHUB_TOKEN=$(az keyvault secret show --vault-name kv-azuresdk --name azclibot-pat --query value -otsv)
-#        git remote add azclibot https://azclibot:${GITHUB_TOKEN}@github.com/azclibot/azure-cli.git
         git checkout -b sync_alias_$(Build.BuildId)
   
         git add .github/policies
@@ -77,8 +76,7 @@ jobs:
         
         git remote set-url origin https://azclibot:$(GITHUB_TOKEN)@github.com/Azure/azure-cli.git
         git remote -v
-        
-#        git push --set-upstream azclibot sync_alias_$(Build.BuildId)
+
         git push origin sync_alias_$(Build.BuildId) --force
 
   - task: AzureCLI@1
@@ -122,3 +120,7 @@ jobs:
 #      ./tools/Github/CreatePR.ps1 -Title $Title -HeadBranch $HeadBranch -BaseBranch $BaseBranch -BotAccessToken $(GithubToken) -Description $Description
 #    displayName: Create PR to main branch
 #    condition: and(succeeded(), eq(variables['ChangesDetected'], 'true'))
+
+#        git remote add azclibot https://azclibot:${GITHUB_TOKEN}@github.com/azclibot/azure-cli.git
+
+#        git push --set-upstream azclibot sync_alias_$(Build.BuildId)
