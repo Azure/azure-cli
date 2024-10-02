@@ -74,7 +74,9 @@ jobs:
   
         git add .github/policies
         git commit -m "Sync resourceManagement.yml"
-          
+        
+        git remote set-url azclibot https://azclibot:${GITHUB_TOKEN}@github.com/azclibot/azure-cli.git
+
         git push --set-upstream azclibot sync_alias_$(Build.BuildId)
 
   - task: AzureCLI@1
