@@ -65,6 +65,8 @@ jobs:
       inlineScript: |
         set -ev
         
+        git credential-manager reject https://github.com
+        
         git config --global user.email "AzPyCLI@microsoft.com"
         git config --global user.name "Azure CLI Team"
         
@@ -75,6 +77,7 @@ jobs:
         git commit -m "Sync resourceManagement.yml"
         
         git remote set-url origin https://azclibot:$(GITHUB_TOKEN)@github.com/Azure/azure-cli.git
+        
         git remote -v
 
         git push origin sync_alias_$(Build.BuildId) --force
