@@ -56,41 +56,75 @@ jobs:
       }
     displayName: Check if Wiki table has any changes
 
-  - task: AzureCLI@1
+  - task: AzurePowerShell@5
+    inputs:
+      pwsh: true
+      azureSubscription: '$(AZURE_SDK_INFRA_SUB_CONNECTED_SERVICE)'
+      ScriptType: 'InlineScript'
+      Inline: |
+        $GithubToken = Get-AzKeyVaultSecret -VaultName $(GithubPATKeyVaultName) -Name $(GithubPATKeyVaultAccount) -AsPlainText
+        Write-Host "##vso[task.setvariable variable=GithubToken;issecret=true]$GithubToken"
+      azurePowerShellVersion: 'LatestVersion'
+    displayName: Get Github PAT from Key Vault
+
+  - pwsh: |
+      git config --global user.email "AzPyCLI@microsoft.com"
+      git config --global user.name "Azure CLI Team"
+      git checkout -b "sync_alias_$env:Build_BuildId"
+
+      git add .github/policies
+      git commit -m "Sync resourceManagement.yml"
+
+      git remote set-url origin https://azclibot:$(GithubToken)@github.com/Azure/azure-cli.git;
+      git push origin "sync_alias_$env:Build_BuildId" --force
     displayName: Git commit and push
     condition: and(succeeded(), eq(variables['ChangesDetected'], 'true'))
-    inputs:
-      azureSubscription: $(AZURE_SDK_INFRA_SUB_CONNECTED_SERVICE)
-      scriptLocation: inlineScript
-      inlineScript: |
-        set -ev
-        
-        GITHUB_TOKEN=$(az keyvault secret show --vault-name kv-azuresdk --name azclibot-pat --query value -otsv)
-        git config --global user.email "AzPyCLI@microsoft.com"
-        git config --global user.name "Azure CLI Team"
-        git remote add azclibot https://azclibot:$GITHUB_TOKEN@github.com/azclibot/azure-cli.git
-        
-        git checkout -b sync_alias_$(Build.BuildId) 
-  
-        git add .github/policies
-        git commit -m "Sync resourceManagement.yml"
-        
-        git push --set-upstream azclibot sync_alias_$(Build.BuildId)
 
-  - task: AzureCLI@1
-    displayName: 'Create PR to dev branch'
+  - pwsh: |
+      $Title = "Sync resourceManagement.yml according To ADO Wiki Page - Service Contact List"
+      $HeadBranch = "sync_alias_$env:Build_BuildId"
+      $BaseBranch = "dev"
+      $Description = "This PR synchronizes the task: 'Triage issues to the service team' part of resourceManagement.yml from table of Service Contact List in ADO wiki page"
+      ./tools/Github/CreatePR.ps1 -Title $Title -HeadBranch $HeadBranch -BaseBranch $BaseBranch -BotAccessToken $(GithubToken) -Description $Description
+    displayName: Create PR to main branch
     condition: and(succeeded(), eq(variables['ChangesDetected'], 'true'))
-    inputs:
-      azureSubscription: $(AZURE_SDK_INFRA_SUB_CONNECTED_SERVICE)
-      scriptLocation: inlineScript
-      inlineScript: |
-        set -ev
-        GITHUB_TOKEN=$(az keyvault secret show --vault-name kv-azuresdk --name azclibot-pat --query value -otsv)
-        pr_title="Sync resourceManagement.yml according To ADO Wiki Page - Service Contact List"
-        pr_body="This PR synchronizes the task: 'Triage issues to the service team' part of resourceManagement.yml from table of Service Contact List in ADO wiki page"
-        pr_head="azclibot:sync_alias_$(Build.BuildId)"
 
-        curl \
-        -H "Authorization: token $GITHUB_TOKEN" \
-        -d "{\"title\": \"${pr_title}\", \"body\": \"${pr_body}\", \"head\": \"${pr_head}\", \"base\": \"dev\"}" \
-        https://api.github.com/repos/Azure/azure-cli/pulls
+#
+#  - task: AzureCLI@1
+#    displayName: Git commit and push
+#    condition: and(succeeded(), eq(variables['ChangesDetected'], 'true'))
+#    inputs:
+#      azureSubscription: $(AZURE_SDK_INFRA_SUB_CONNECTED_SERVICE)
+#      scriptLocation: inlineScript
+#      inlineScript: |
+#        set -ev
+#
+#        GITHUB_TOKEN=$(az keyvault secret show --vault-name kv-azuresdk --name azclibot-pat --query value -otsv)
+#        git config --global user.email "AzPyCLI@microsoft.com"
+#        git config --global user.name "Azure CLI Team"
+#        git remote add azclibot https://azclibot:$GITHUB_TOKEN@github.com/azclibot/azure-cli.git
+#
+#        git checkout -b sync_alias_$(Build.BuildId)
+#
+#        git add .github/policies
+#        git commit -m "Sync resourceManagement.yml"
+#
+#        git push --set-upstream azclibot sync_alias_$(Build.BuildId)
+#
+#  - task: AzureCLI@1
+#    displayName: 'Create PR to dev branch'
+#    condition: and(succeeded(), eq(variables['ChangesDetected'], 'true'))
+#    inputs:
+#      azureSubscription: $(AZURE_SDK_INFRA_SUB_CONNECTED_SERVICE)
+#      scriptLocation: inlineScript
+#      inlineScript: |
+#        set -ev
+#        GITHUB_TOKEN=$(az keyvault secret show --vault-name kv-azuresdk --name azclibot-pat --query value -otsv)
+#        pr_title="Sync resourceManagement.yml according To ADO Wiki Page - Service Contact List"
+#        pr_body="This PR synchronizes the task: 'Triage issues to the service team' part of resourceManagement.yml from table of Service Contact List in ADO wiki page"
+#        pr_head="azclibot:sync_alias_$(Build.BuildId)"
+#
+#        curl \
+#        -H "Authorization: token $GITHUB_TOKEN" \
+#        -d "{\"title\": \"${pr_title}\", \"body\": \"${pr_body}\", \"head\": \"${pr_head}\", \"base\": \"dev\"}" \
+#        https://api.github.com/repos/Azure/azure-cli/pulls
