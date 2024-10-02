@@ -4588,8 +4588,6 @@ def create_flex_app_service_plan(cmd, resource_group_name, name, location, zone_
         name=name
     )
 
-    logger.warning("zone_redundant: '%s'", zone_redundant)
-
     if zone_redundant:
         _enable_zone_redundant(plan_def, sku_def, 2)
 
@@ -4756,6 +4754,13 @@ def is_exactly_one_true(*args):
                 return False
             found = True
     return found
+
+
+def list_flexconsumption_zone_redundant_locations(cmd):
+    client = web_client_factory(cmd.cli_ctx)
+    regions = client.list_geo_regions(sku='FlexConsumption')
+    regions = [x for x in regions if 'FCZONEREDUNDANCY' in x.org_domain]
+    return [{'name': x.name.lower().replace(' ', '')} for x in regions]
 
 
 def create_functionapp(cmd, resource_group_name, name, storage_account, plan=None,
@@ -5146,6 +5151,15 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         create_app_insights = True
 
     if flexconsumption_location is not None:
+        if zone_redundant:
+            zone_redundant_locations = list_flexconsumption_zone_redundant_locations(cmd)
+            zone_redundant_location = next((loc for loc in zone_redundant_locations
+                                            if loc['name'].lower() == flexconsumption_location.lower()), None)
+            if zone_redundant_location is None:
+                raise ValidationError("Location doesn't support zone redundancy in Flex Consumption. "
+                                      "Use: az functionapp list-flexconsumption-locations --zone-redundant "
+                                      "for the list of locations that support zone redundancy.")
+
         site_config.net_framework_version = None
         functionapp_def.reserved = None
         functionapp_def.is_xenon = None
@@ -5698,7 +5712,10 @@ def list_consumption_locations(cmd):
     return [{'name': x.name.lower().replace(' ', '')} for x in regions]
 
 
-def list_flexconsumption_locations(cmd):
+def list_flexconsumption_locations(cmd, zone_redundant=False):
+    if zone_redundant:
+        return list_flexconsumption_zone_redundant_locations(cmd)
+
     from azure.cli.core.commands.client_factory import get_subscription_id
     sub_id = get_subscription_id(cmd.cli_ctx)
     geo_regions_api = 'subscriptions/{}/providers/Microsoft.Web/geoRegions?sku=FlexConsumption&api-version=2023-01-01'
