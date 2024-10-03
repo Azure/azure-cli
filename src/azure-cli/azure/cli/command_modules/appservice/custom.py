@@ -4758,8 +4758,8 @@ def is_exactly_one_true(*args):
 
 def list_flexconsumption_zone_redundant_locations(cmd):
     client = web_client_factory(cmd.cli_ctx)
-    regions = client.list_geo_regions(sku='FlexConsumption')
-    regions = [x for x in regions if 'FCZONEREDUNDANCY' in x.org_domain]
+    regions = client.list_geo_regions(sku="FlexConsumption")
+    regions = [x for x in regions if "FCZONEREDUNDANCY" in x.org_domain]
     return [{'name': x.name.lower().replace(' ', '')} for x in regions]
 
 
