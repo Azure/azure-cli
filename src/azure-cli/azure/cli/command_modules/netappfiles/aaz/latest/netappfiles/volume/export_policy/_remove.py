@@ -23,9 +23,9 @@ class Remove(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-05-01",
+        "version": "2024-03-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2023-05-01", "properties.exportPolicy.rules[]"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2024-03-01", "properties.exportPolicy.rules[]"],
         ]
     }
 
@@ -52,7 +52,7 @@ class Remove(AAZCommand):
             help="The name of the NetApp account",
             required=True,
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,127}$",
+                pattern="^[a-zA-Z0-9][a-zA-Z0-9\\-_]{0,127}$",
             ),
         )
         _args_schema.pool_name = AAZStrArg(
@@ -60,7 +60,7 @@ class Remove(AAZCommand):
             help="The name of the capacity pool",
             required=True,
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,63}$",
+                pattern="^[a-zA-Z0-9][a-zA-Z0-9\\-_]{0,63}$",
                 max_length=64,
                 min_length=1,
             ),
@@ -73,7 +73,7 @@ class Remove(AAZCommand):
             help="The name of the volume",
             required=True,
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z][a-zA-Z0-9\-_]{0,63}$",
+                pattern="^[a-zA-Z][a-zA-Z0-9\\-_]{0,63}$",
                 max_length=64,
                 min_length=1,
             ),
@@ -191,7 +191,7 @@ class Remove(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-05-01",
+                    "api-version", "2024-03-01",
                     required=True,
                 ),
             }
@@ -298,7 +298,7 @@ class Remove(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-05-01",
+                    "api-version", "2024-03-01",
                     required=True,
                 ),
             }
@@ -589,10 +589,22 @@ class _RemoveHelper:
         )
 
         data_protection = _schema_volume_read.properties.data_protection
+        data_protection.backup = AAZObjectType()
         data_protection.replication = AAZObjectType()
         data_protection.snapshot = AAZObjectType()
         data_protection.volume_relocation = AAZObjectType(
             serialized_name="volumeRelocation",
+        )
+
+        backup = _schema_volume_read.properties.data_protection.backup
+        backup.backup_policy_id = AAZStrType(
+            serialized_name="backupPolicyId",
+        )
+        backup.backup_vault_id = AAZStrType(
+            serialized_name="backupVaultId",
+        )
+        backup.policy_enforced = AAZBoolType(
+            serialized_name="policyEnforced",
         )
 
         replication = _schema_volume_read.properties.data_protection.replication

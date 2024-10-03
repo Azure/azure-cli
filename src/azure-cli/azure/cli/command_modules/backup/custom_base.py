@@ -197,13 +197,13 @@ def disable_protection(cmd, client, resource_group_name, vault_name, item_name, 
 
     if item.properties.backup_management_type.lower() == "azureiaasvm":
         return custom.disable_protection(cmd, client, resource_group_name, vault_name, item,
-                                         retain_recovery_points_as_per_policy)
+                                         retain_recovery_points_as_per_policy, tenant_id)
     if item.properties.backup_management_type.lower() == "azurestorage":
         return custom_afs.disable_protection(cmd, client, resource_group_name, vault_name, item,
-                                             retain_recovery_points_as_per_policy)
+                                             retain_recovery_points_as_per_policy, tenant_id)
     if item.properties.backup_management_type.lower() == "azureworkload":
         return custom_wl.disable_protection(cmd, client, resource_group_name, vault_name, item,
-                                            retain_recovery_points_as_per_policy)
+                                            retain_recovery_points_as_per_policy, tenant_id)
     return None
 
 
@@ -420,7 +420,8 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
                   rehydration_priority=None, disk_encryption_set_id=None, mi_system_assigned=None,
                   mi_user_assigned=None, target_zone=None, restore_mode='AlternateLocation', target_vm_name=None,
                   target_vnet_name=None, target_vnet_resource_group=None, target_subnet_name=None,
-                  target_subscription_id=None, storage_account_resource_group=None, restore_to_edge_zone=None):
+                  target_subscription_id=None, storage_account_resource_group=None, restore_to_edge_zone=None,
+                  tenant_id=None):
 
     if rehydration_duration < 10 or rehydration_duration > 30:
         raise InvalidArgumentValueError('--rehydration-duration must have a value between 10 and 30 (both inclusive).')
@@ -437,7 +438,8 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
                                 rehydration_duration, rehydration_priority, disk_encryption_set_id,
                                 mi_system_assigned, mi_user_assigned, target_zone, restore_mode, target_vm_name,
                                 target_vnet_name, target_vnet_resource_group, target_subnet_name,
-                                target_subscription_id, storage_account_resource_group, restore_to_edge_zone)
+                                target_subscription_id, storage_account_resource_group, restore_to_edge_zone,
+                                tenant_id)
 
 
 def enable_for_azurefileshare(cmd, client, resource_group_name, vault_name, policy_name, storage_account,
@@ -448,7 +450,7 @@ def enable_for_azurefileshare(cmd, client, resource_group_name, vault_name, poli
 
 def restore_azurefileshare(cmd, client, resource_group_name, vault_name, rp_name, container_name, item_name,
                            restore_mode, resolve_conflict, target_storage_account=None, target_file_share=None,
-                           target_folder=None, target_resource_group_name=None):
+                           target_folder=None, target_resource_group_name=None, tenant_id=None):
     backup_management_type = "AzureStorage"
     workload_type = "AzureFileShare"
     items_client = backup_protected_items_cf(cmd.cli_ctx)
@@ -463,12 +465,12 @@ def restore_azurefileshare(cmd, client, resource_group_name, vault_name, rp_name
                                              resolve_conflict, "FullShareRestore",
                                              target_storage_account_name=target_storage_account,
                                              target_file_share_name=target_file_share, target_folder=target_folder,
-                                             target_resource_group_name=target_resource_group_name)
+                                             target_resource_group_name=target_resource_group_name, tenant_id=tenant_id)
 
 
 def restore_azurefiles(cmd, client, resource_group_name, vault_name, rp_name, container_name, item_name, restore_mode,
                        resolve_conflict, target_storage_account=None, target_file_share=None, target_folder=None,
-                       source_file_type=None, source_file_path=None):
+                       source_file_type=None, source_file_path=None, tenant_id=None):
     backup_management_type = "AzureStorage"
     workload_type = "AzureFileShare"
     items_client = backup_protected_items_cf(cmd.cli_ctx)
@@ -482,7 +484,8 @@ def restore_azurefiles(cmd, client, resource_group_name, vault_name, rp_name, co
                                              resolve_conflict, "ItemLevelRestore",
                                              target_storage_account_name=target_storage_account,
                                              target_file_share_name=target_file_share, target_folder=target_folder,
-                                             source_file_type=source_file_type, source_file_path=source_file_path)
+                                             source_file_type=source_file_type, source_file_path=source_file_path,
+                                             tenant_id=tenant_id)
 
 
 def resume_protection(cmd, client, resource_group_name, vault_name, container_name, item_name, policy_name,
@@ -509,13 +512,13 @@ def resume_protection(cmd, client, resource_group_name, vault_name, container_na
 
 
 def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_config, rehydration_duration=15,
-                     rehydration_priority=None, use_secondary_region=None):
+                     rehydration_priority=None, use_secondary_region=None, tenant_id=None):
 
     if rehydration_duration < 10 or rehydration_duration > 30:
         raise InvalidArgumentValueError('--rehydration-duration must have a value between 10 and 30 (both inclusive).')
 
     return custom_wl.restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_config,
-                                      rehydration_duration, rehydration_priority, use_secondary_region)
+                                      rehydration_duration, rehydration_priority, use_secondary_region, tenant_id)
 
 
 def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_mode, container_name, item_name,

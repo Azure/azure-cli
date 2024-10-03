@@ -22,9 +22,9 @@ class PopulateAvailabilityZone(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-05-01",
+        "version": "2024-03-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/populateavailabilityzone", "2023-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/populateavailabilityzone", "2024-03-01"],
         ]
     }
 
@@ -51,7 +51,7 @@ class PopulateAvailabilityZone(AAZCommand):
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,127}$",
+                pattern="^[a-zA-Z0-9][a-zA-Z0-9\\-_]{0,127}$",
             ),
         )
         _args_schema.pool_name = AAZStrArg(
@@ -60,7 +60,7 @@ class PopulateAvailabilityZone(AAZCommand):
             required=True,
             id_part="child_name_1",
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,63}$",
+                pattern="^[a-zA-Z0-9][a-zA-Z0-9\\-_]{0,63}$",
                 max_length=64,
                 min_length=1,
             ),
@@ -74,7 +74,7 @@ class PopulateAvailabilityZone(AAZCommand):
             required=True,
             id_part="child_name_2",
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z][a-zA-Z0-9\-_]{0,63}$",
+                pattern="^[a-zA-Z][a-zA-Z0-9\\-_]{0,63}$",
                 max_length=64,
                 min_length=1,
             ),
@@ -170,7 +170,7 @@ class PopulateAvailabilityZone(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-05-01",
+                    "api-version", "2024-03-01",
                     required=True,
                 ),
             }
@@ -419,10 +419,22 @@ class PopulateAvailabilityZone(AAZCommand):
             )
 
             data_protection = cls._schema_on_200.properties.data_protection
+            data_protection.backup = AAZObjectType()
             data_protection.replication = AAZObjectType()
             data_protection.snapshot = AAZObjectType()
             data_protection.volume_relocation = AAZObjectType(
                 serialized_name="volumeRelocation",
+            )
+
+            backup = cls._schema_on_200.properties.data_protection.backup
+            backup.backup_policy_id = AAZStrType(
+                serialized_name="backupPolicyId",
+            )
+            backup.backup_vault_id = AAZStrType(
+                serialized_name="backupVaultId",
+            )
+            backup.policy_enforced = AAZBoolType(
+                serialized_name="policyEnforced",
             )
 
             replication = cls._schema_on_200.properties.data_protection.replication

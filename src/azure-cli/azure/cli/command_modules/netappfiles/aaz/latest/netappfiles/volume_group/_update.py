@@ -19,9 +19,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-05-01",
+        "version": "2024-03-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/volumegroups/{}", "2023-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/volumegroups/{}", "2024-03-01"],
         ]
     }
 
@@ -50,7 +50,7 @@ class Update(AAZCommand):
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,127}$",
+                pattern="^[a-zA-Z0-9][a-zA-Z0-9\\-_]{0,127}$",
             ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
@@ -62,7 +62,7 @@ class Update(AAZCommand):
             required=True,
             id_part="child_name_1",
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,63}$",
+                pattern="^[a-zA-Z0-9][a-zA-Z0-9\\-_]{0,63}$",
                 max_length=64,
                 min_length=1,
             ),
@@ -96,11 +96,6 @@ class Update(AAZCommand):
             default="SAP-HANA",
             nullable=True,
             enum={"ORACLE": "ORACLE", "SAP-HANA": "SAP-HANA"},
-        )
-        group_meta_data.deployment_spec_id = AAZStrArg(
-            options=["deployment-spec-id"],
-            help="Application specific identifier of deployment rules for the volume group",
-            nullable=True,
         )
         group_meta_data.global_placement_rules = AAZListArg(
             options=["global-placement-rules"],
@@ -157,15 +152,15 @@ class Update(AAZCommand):
             help="Specifies the number of days after which data that is not accessed by clients will be tiered.",
             nullable=True,
             fmt=AAZIntArgFormat(
-                maximum=63,
-                minimum=7,
+                maximum=183,
+                minimum=2,
             ),
         )
         _element.creation_token = AAZStrArg(
             options=["creation-token"],
             help="A unique file path for the volume. Used when creating mount targets",
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z][a-zA-Z0-9\-]{0,79}$",
+                pattern="^[a-zA-Z][a-zA-Z0-9\\-]{0,79}$",
                 max_length=80,
                 min_length=1,
             ),
@@ -315,7 +310,7 @@ class Update(AAZCommand):
             help="Maximum storage quota allowed for a file system in bytes. This is a soft quota used for alerting only. Minimum size is 100 GiB. Upper limit is 100TiB, 500Tib for LargeVolume or 2400Tib for LargeVolume on exceptional basis. Specified in bytes.",
             fmt=AAZIntArgFormat(
                 maximum=2638827906662400,
-                minimum=107374182400,
+                minimum=53687091200,
             ),
         )
         _element.volume_spec_name = AAZStrArg(
@@ -335,6 +330,11 @@ class Update(AAZCommand):
         )
 
         data_protection = cls._args_schema.volumes.Element.data_protection
+        data_protection.backup = AAZObjectArg(
+            options=["backup"],
+            help="Backup Properties",
+            nullable=True,
+        )
         data_protection.replication = AAZObjectArg(
             options=["replication"],
             help="Replication properties",
@@ -348,6 +348,23 @@ class Update(AAZCommand):
         data_protection.volume_relocation = AAZObjectArg(
             options=["volume-relocation"],
             help="VolumeRelocation properties",
+            nullable=True,
+        )
+
+        backup = cls._args_schema.volumes.Element.data_protection.backup
+        backup.backup_policy_id = AAZStrArg(
+            options=["backup-policy-id"],
+            help="Backup Policy Resource ID",
+            nullable=True,
+        )
+        backup.backup_vault_id = AAZStrArg(
+            options=["backup-vault-id"],
+            help="Backup Vault Resource ID",
+            nullable=True,
+        )
+        backup.policy_enforced = AAZBoolArg(
+            options=["policy-enforced"],
+            help="Policy Enforced",
             nullable=True,
         )
 
@@ -603,7 +620,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-05-01",
+                    "api-version", "2024-03-01",
                     required=True,
                 ),
             }
@@ -706,7 +723,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-05-01",
+                    "api-version", "2024-03-01",
                     required=True,
                 ),
             }
@@ -775,7 +792,6 @@ class Update(AAZCommand):
             if group_meta_data is not None:
                 group_meta_data.set_prop("applicationIdentifier", AAZStrType, ".application_identifier")
                 group_meta_data.set_prop("applicationType", AAZStrType, ".application_type")
-                group_meta_data.set_prop("deploymentSpecId", AAZStrType, ".deployment_spec_id")
                 group_meta_data.set_prop("globalPlacementRules", AAZListType, ".global_placement_rules")
                 group_meta_data.set_prop("groupDescription", AAZStrType, ".group_description")
 
@@ -833,9 +849,16 @@ class Update(AAZCommand):
 
             data_protection = _builder.get(".properties.volumes[].properties.dataProtection")
             if data_protection is not None:
+                data_protection.set_prop("backup", AAZObjectType, ".backup")
                 data_protection.set_prop("replication", AAZObjectType, ".replication")
                 data_protection.set_prop("snapshot", AAZObjectType, ".snapshot")
                 data_protection.set_prop("volumeRelocation", AAZObjectType, ".volume_relocation")
+
+            backup = _builder.get(".properties.volumes[].properties.dataProtection.backup")
+            if backup is not None:
+                backup.set_prop("backupPolicyId", AAZStrType, ".backup_policy_id")
+                backup.set_prop("backupVaultId", AAZStrType, ".backup_vault_id")
+                backup.set_prop("policyEnforced", AAZBoolType, ".policy_enforced")
 
             replication = _builder.get(".properties.volumes[].properties.dataProtection.replication")
             if replication is not None:
@@ -978,9 +1001,6 @@ class _UpdateHelper:
         )
         group_meta_data.application_type = AAZStrType(
             serialized_name="applicationType",
-        )
-        group_meta_data.deployment_spec_id = AAZStrType(
-            serialized_name="deploymentSpecId",
         )
         group_meta_data.global_placement_rules = AAZListType(
             serialized_name="globalPlacementRules",
@@ -1205,10 +1225,22 @@ class _UpdateHelper:
         )
 
         data_protection = _schema_volume_group_details_read.properties.volumes.Element.properties.data_protection
+        data_protection.backup = AAZObjectType()
         data_protection.replication = AAZObjectType()
         data_protection.snapshot = AAZObjectType()
         data_protection.volume_relocation = AAZObjectType(
             serialized_name="volumeRelocation",
+        )
+
+        backup = _schema_volume_group_details_read.properties.volumes.Element.properties.data_protection.backup
+        backup.backup_policy_id = AAZStrType(
+            serialized_name="backupPolicyId",
+        )
+        backup.backup_vault_id = AAZStrType(
+            serialized_name="backupVaultId",
+        )
+        backup.policy_enforced = AAZBoolType(
+            serialized_name="policyEnforced",
         )
 
         replication = _schema_volume_group_details_read.properties.volumes.Element.properties.data_protection.replication

@@ -5,7 +5,7 @@
 import os
 import time
 
-from datetime import datetime
+from datetime import datetime, timezone
 from time import sleep
 from azure.cli.core.util import parse_proxy_resource_id
 from dateutil import parser
@@ -77,6 +77,11 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location=postgres_location)
     def test_postgres_flexible_server_mgmt(self, resource_group):
         self._test_flexible_server_mgmt('postgres', resource_group)
+    
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    def test_postgres_flexible_server_mgmt_case_insensitive(self, resource_group):
+        self._test_flexible_server_mgmt_case_insensitive('postgres', resource_group)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -92,6 +97,11 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location=postgres_location)
     def test_postgres_flexible_server_georestore_mgmt(self, resource_group):
         self._test_flexible_server_georestore_mgmt('postgres', resource_group)
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location='eastus2euap')
+    def test_flexible_server_ssdv2_restore_mgmt(self, resource_group):
+        self._test_flexible_server_ssdv2_restore_mgmt('postgres', resource_group)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -112,7 +122,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         if self.cli_ctx.local_context.is_on:
             self.cmd('config param-persist off')
 
-        version = '12'
+        version = '16'
         storage_size = 128
         location = self.postgres_location
         sku_name = 'Standard_D2s_v3'
@@ -203,6 +213,50 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name), checks=NoneCheck())
 
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, restore_server_name), checks=NoneCheck())
+
+    def _test_flexible_server_mgmt_case_insensitive(self, database_engine, resource_group):
+
+        if self.cli_ctx.local_context.is_on:
+            self.cmd('config param-persist off')
+
+        version = '16'
+        storage_size = 128
+        sku_name = 'Standard_D2s_v3'
+        tier = 'GeneralPurpose'
+        backup_retention = 7
+        database_name = 'testdb'
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        ha_value = 'ZoneRedundant'
+
+        self.cmd('{} flexible-server create -g {} -n {} --backup-retention {} --sku-name {} --tier {} \
+                  --storage-size {} -u {} --version {} --tags keys=3 --database-name {} --high-availability {} \
+                  --public-access None'.format(database_engine, resource_group, server_name, backup_retention,
+                                               sku_name, tier, storage_size, 'dbadmin', version, database_name, ha_value))
+
+        tier = 'MemoryOptimized'
+        tier_lower = tier.lower()
+
+        sku_name = 'Standard_E2ds_v4'
+        sku_name_lower = sku_name.lower()
+        
+        self.cmd('{} flexible-server update -g {} -n {} --tier {} --sku-name {}'
+                 .format(database_engine, resource_group, server_name, tier_lower, sku_name_lower),
+                 checks=[JMESPathCheck('sku.tier', tier),
+                         JMESPathCheck('sku.name', sku_name)])
+        
+        maintainence_window = 'SUN'
+        maintainence_window_value = 0   # Sunday is defined as 0
+        
+        self.cmd('{} flexible-server update -g {} -n {} --maintenance-window {}'
+                 .format(database_engine, resource_group, server_name, maintainence_window),
+                 checks=[JMESPathCheck('maintenanceWindow.dayOfWeek', maintainence_window_value)])
+
+        performance_tier = 'P15'
+        performance_tier_lower = performance_tier.lower()
+
+        self.cmd('{} flexible-server update -g {} -n {} --performance-tier {}'
+                 .format(database_engine, resource_group, server_name, performance_tier_lower),
+                 checks=[JMESPathCheck('storage.tier', performance_tier)])
 
 
     def _test_flexible_server_ssdv2_mgmt(self, database_engine, resource_group):
@@ -315,7 +369,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.cmd('network vnet create -g {} -l {} -n {} --address-prefixes 172.1.0.0/16'.format(
                  resource_group, location, new_vnet))
 
-        subnet = self.cmd('network vnet subnet create -g {} -n {} --vnet-name {} --address-prefixes 172.1.0.0/24'.format(
+        subnet = self.cmd('network vnet subnet create -g {} -n {} --vnet-name {} --address-prefixes 172.1.0.0/24 --default-outbound false'.format(
                           resource_group, new_subnet, new_vnet)).get_output_in_json()
 
         private_dns_zone = '{}.private.{}.database.azure.com'.format(target_server_diff_vnet, database_engine)
@@ -392,7 +446,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.cmd('network vnet create -g {} -l {} -n {} --address-prefixes 172.1.0.0/16'.format(
                  resource_group, target_location, new_vnet))
 
-        subnet = self.cmd('network vnet subnet create -g {} -n {} --vnet-name {} --address-prefixes 172.1.0.0/24'.format(
+        subnet = self.cmd('network vnet subnet create -g {} -n {} --vnet-name {} --address-prefixes 172.1.0.0/24 --default-outbound false'.format(
                           resource_group, new_subnet, new_vnet)).get_output_in_json()
 
         restore_result = retryable_method(retries=10, interval_sec=360 if os.environ.get(ENV_LIVE_TEST, False) else 0, exception_type=HttpResponseError,
@@ -436,7 +490,54 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                  database_engine, resource_group, target_server_config), checks=NoneCheck())
 
 
+    def _test_flexible_server_ssdv2_restore_mgmt(self, database_engine, resource_group):
+
+        location = 'eastus2euap'
+        source_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        source_ssdv2_server = self.create_random_name(SERVER_NAME_PREFIX + 'ssdv2-', 40)
+        target_server_ssdv2_migration = self.create_random_name(SERVER_NAME_PREFIX + 'ssdv2-migrate-', 40)
+        target_server_ssdv2 = self.create_random_name(SERVER_NAME_PREFIX + 'ssdv2-restore-', 40)
+        storage_type = 'PremiumV2_LRS'
+        iops = 3000
+        throughput = 125
+
+        # Restore to ssdv2
+        self.cmd('{} flexible-server create -g {} -n {} -l {} --public-access None --yes'.format(
+                 database_engine, resource_group, source_server, location))
+
+        # Restore to ssdv2
+        self.cmd('{} flexible-server create -g {} -n {} -l {} --storage-type {} --iops {} --throughput {} --public-access None --yes'.format(
+                 database_engine, resource_group, source_ssdv2_server, location, storage_type, iops, throughput))
+
+        # Wait until snapshot is created
+        os.environ.get(ENV_LIVE_TEST, False) and sleep(1800)
+
+        # Restore to ssdv2
+        restore_migration_result = self.cmd('{} flexible-server restore -g {} --name {} --source-server {} --storage-type {}'
+                                  .format(database_engine, resource_group, target_server_ssdv2_migration, source_server, storage_type)).get_output_in_json()
+        self.assertEqual(restore_migration_result['storage']['type'], storage_type)
+
+        # Restore ssdv2 server
+        restore_ssdv2_result = self.cmd('{} flexible-server restore -g {} --name {} --source-server {}'
+                                  .format(database_engine, resource_group, target_server_ssdv2, source_ssdv2_server)).get_output_in_json()
+        self.assertEqual(restore_ssdv2_result['storage']['type'], storage_type)
+
+        # Delete servers
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
+                 database_engine, resource_group, source_server), checks=NoneCheck())
+
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
+                 database_engine, resource_group, source_ssdv2_server), checks=NoneCheck())
+
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
+                 database_engine, resource_group, target_server_ssdv2_migration), checks=NoneCheck())
+
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
+                 database_engine, resource_group, target_server_ssdv2), checks=NoneCheck())
+
+
     def _test_flexible_server_byok_mgmt(self, resource_group, vault_name, backup_vault_name=None):
+        live_test = False
         key_name = self.create_random_name('rdbmskey', 32)
         identity_name = self.create_random_name('identity', 32)
         backup_key_name = self.create_random_name('rdbmskey', 32)
@@ -453,30 +554,34 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         location = self.postgres_location
         backup_location = self.postgres_backup_location
         replication_role = 'AsyncReplica'
+        scope = '/subscriptions/{}/resourceGroups/{}'.format(self.get_subscription_id(), resource_group)
 
+        # Create identity and assign role
         key = self.cmd('keyvault key create --name {} -p software --vault-name {}'
                        .format(key_name, vault_name)).get_output_in_json()
 
         identity = self.cmd('identity create -g {} --name {} --location {}'.format(resource_group, identity_name, location)).get_output_in_json()
+        if (live_test):
+            self.cmd('role assignment create --assignee-object-id {} --assignee-principal-type ServicePrincipal --role "Key Vault Crypto User" --scope {}'.format( identity['principalId'], scope))
+            self.cmd('role assignment create --assignee-object-id {} --assignee-principal-type ServicePrincipal --role "Key Vault Certificate User" --scope {}'.format( identity['principalId'], scope))
 
-        self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'
-                 .format(resource_group, vault_name, identity['principalId']))
-
+        # Create backup identity and assign role
         backup_key = self.cmd('keyvault key create --name {} -p software --vault-name {}'
                                   .format(backup_key_name, backup_vault_name)).get_output_in_json()
 
         backup_identity = self.cmd('identity create -g {} --name {} --location {}'.format(resource_group, backup_identity_name, backup_location)).get_output_in_json()
+        if (live_test):
+            self.cmd('role assignment create --assignee-object-id {} --assignee-principal-type ServicePrincipal --role "Key Vault Crypto User" --scope {}'.format( backup_identity['principalId'], scope))
+            self.cmd('role assignment create --assignee-object-id {} --assignee-principal-type ServicePrincipal --role "Key Vault Certificate User" --scope {}'.format( backup_identity['principalId'], scope))
 
-        self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'
-                    .format(resource_group, backup_vault_name, backup_identity['principalId']))
-        
+        # Create identity 2 and assign role
         key_2 = self.cmd('keyvault key create --name {} -p software --vault-name {}'
                             .format(key_2_name, vault_name)).get_output_in_json()
 
         identity_2 = self.cmd('identity create -g {} --name {} --location {}'.format(resource_group, identity_2_name, location)).get_output_in_json()
-
-        self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'
-                    .format(resource_group, vault_name, identity_2['principalId']))
+        if (live_test):
+            self.cmd('role assignment create --assignee-object-id {} --assignee-principal-type ServicePrincipal --role "Key Vault Crypto User" --scope {}'.format( identity_2['principalId'], scope))
+            self.cmd('role assignment create --assignee-object-id {} --assignee-principal-type ServicePrincipal --role "Key Vault Certificate User" --scope {}'.format( identity_2['principalId'], scope))
 
         def invalid_input_tests():
             # key or identity only
@@ -696,7 +801,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.cmd('network vnet create -g {} -l {} -n {} --address-prefixes 172.1.0.0/16'.format(
                  resource_group, location, new_vnet))
 
-        subnet = self.cmd('network vnet subnet create -g {} -n {} --vnet-name {} --address-prefixes 172.1.0.0/24'.format(
+        subnet = self.cmd('network vnet subnet create -g {} -n {} --vnet-name {} --address-prefixes 172.1.0.0/24 --default-outbound false'.format(
                           resource_group, new_subnet, new_vnet)).get_output_in_json()
 
         private_dns_zone = '{}.private.{}.database.azure.com'.format(target_server_diff_vnet, database_engine)
@@ -1033,7 +1138,7 @@ class FlexibleServerValidatorScenarioTest(ScenarioTest):
         invalid_tier = self.create_random_name('tier', RANDOM_VARIABLE_MAX_LENGTH)
         valid_tier = 'GeneralPurpose'
         invalid_backup_retention = 40
-        version = 12
+        version = 16
         storage_size = 128
         location = self.postgres_location
         tier = 'Burstable'
@@ -1666,7 +1771,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
 
         # subnet exist
         subnet_address_pref = '172.1.1.0/24'
-        self.cmd('network vnet subnet create -g {} -n {} --address-prefixes {} --vnet-name {}'.format(
+        self.cmd('network vnet subnet create -g {} -n {} --address-prefixes {} --vnet-name {} --default-outbound false'.format(
                   resource_group, 'testsubnet2', subnet_address_pref, 'testvnet'))
         subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
                  self.get_subscription_id(), resource_group, 'testvnet', 'testsubnet2')
@@ -1697,7 +1802,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
                  expect_failure=True)
 
         # delegated to different service
-        subnet = self.cmd('network vnet subnet create -g {} -n {} --vnet-name {} --address-prefixes {} --delegations {}'.format(
+        subnet = self.cmd('network vnet subnet create -g {} -n {} --vnet-name {} --address-prefixes {} --delegations {} --default-outbound false'.format(
                           resource_group, subnet_name, vnet_name, subnet_prefix, "Microsoft.DBforMySQL/flexibleServers")).get_output_in_json()
 
         self.cmd('postgres flexible-server create -g {} -l {} --subnet {} --yes'.format(
@@ -1982,8 +2087,8 @@ class FlexibleServerUpgradeMgmtScenarioTest(ScenarioTest):
     def _test_flexible_server_upgrade_mgmt(self, database_engine, resource_group, public_access):
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         replica_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        current_version = '11'
-        new_version = '14'
+        current_version = '13'
+        new_version = '16'
         location = self.postgres_location
 
         create_command = '{} flexible-server create -g {} -n {} --tier GeneralPurpose --sku-name {} --location {} --version {} --yes'.format(

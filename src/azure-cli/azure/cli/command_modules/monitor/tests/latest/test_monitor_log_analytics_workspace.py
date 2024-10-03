@@ -60,6 +60,30 @@ class TestLogProfileScenarios(ScenarioTest):
 
         self.cmd("monitor log-analytics workspace delete -g {rg} -n {name} -y")
 
+    @ResourceGroupPreparer(name_prefix='cli_test_monitor_workspace_update_sku', location='westus')
+    @AllowLargeResponse()
+    def test_monitor_log_analytics_workspace_update_sku(self, resource_group):
+        workspace_name = self.create_random_name('clitest', 20)
+        self.kwargs.update({
+            'name': workspace_name
+        })
+
+        self.cmd("monitor log-analytics workspace create -g {rg} -n {name} --quota 1 --sku PerGB2018", checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('retentionInDays', 30),
+            self.check('sku.name', 'PerGB2018'),
+            self.check('workspaceCapping.dailyQuotaGb', 1.0)
+        ])
+
+        self.cmd("monitor log-analytics workspace update -g {rg} -n {name} --quota 2 --level 100 --sku CapacityReservation", checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('sku.name', 'CapacityReservation'),
+            self.check('sku.capacityReservationLevel', 100),
+            self.check('workspaceCapping.dailyQuotaGb', 2.0)
+        ])
+
+        self.cmd("monitor log-analytics workspace delete -g {rg} -n {name} -y")
+
     @record_only()
     def test_monitor_log_analytics_workspace_linked_service_common_scenario(self):
         cluster_resource_id_1 = '/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/azure-cli-test' \
@@ -512,7 +536,7 @@ class TestLogProfileScenarios(ScenarioTest):
             self.check('schema.columns[1].name', 'TimeGenerated'),
             self.check('schema.columns[1].type', 'datetime'),
         ])
-        self.cmd('monitor log-analytics workspace table update -g {rg} -n {table_name} --workspace-name {ws_name} --retention-time 50 --total-retention-time 80 --columns col2=guid', checks=[
+        self.cmd('monitor log-analytics workspace table update -g {rg} -n {table_name} --workspace-name {ws_name} --retention-time 50 --total-retention-time 80 --columns col2=guid TimeGenerated=datetime', checks=[
             self.check('name', '{table_name}'),
             self.check('retentionInDays', 50),
             self.check('totalRetentionInDays', 80),
@@ -555,7 +579,7 @@ class TestLogProfileScenarios(ScenarioTest):
                 self.check('schema.columns[1].type', 'datetime'),
             ])
         self.cmd(
-            'monitor log-analytics workspace table update -g {rg} -n {table_name} --workspace-name {ws_name} --total-retention-time 400 --columns col2=guid',
+            'monitor log-analytics workspace table update -g {rg} -n {table_name} --workspace-name {ws_name} --total-retention-time 400 --columns col2=guid TimeGenerated=datetime',
             checks=[
                 self.check('name', '{table_name}'),
                 self.check('totalRetentionInDays', 400),
@@ -671,7 +695,7 @@ class TestLogProfileScenarios(ScenarioTest):
         with self.assertRaisesRegex(InvalidArgumentValueError, "usage error: --retention-time should between 4 and 730"):
             self.cmd('monitor log-analytics workspace table create -g {rg} -n {table_name} --workspace-name {ws_name} --retention-time 3 --total-retention-time 3 --plan Analytics --columns col1=guid TimeGenerated=datetime')
 
-        with self.assertRaisesRegex(InvalidArgumentValueError, "usage error: --total-retention-time should between 4 and 2556"):
+        with self.assertRaisesRegex(InvalidArgumentValueError, "usage error: --total-retention-time should between 4 and 4383"):
             self.cmd('monitor log-analytics workspace table create -g {rg} -n {table_name} --workspace-name {ws_name} --retention-time -1 --total-retention-time 3 --plan Analytics --columns col1=guid TimeGenerated=datetime')
 
         self.cmd(
@@ -685,14 +709,14 @@ class TestLogProfileScenarios(ScenarioTest):
             ])
         with self.assertRaisesRegex(InvalidArgumentValueError, "usage error: --retention-time should between 4 and 730"):
             self.cmd('monitor log-analytics workspace table update -g {rg} -n {table_name} --workspace-name {ws_name} --retention-time 2 --total-retention-time 2')
-        with self.assertRaisesRegex(InvalidArgumentValueError, "usage error: --total-retention-time should between 4 and 2556"):
+        with self.assertRaisesRegex(InvalidArgumentValueError, "usage error: --total-retention-time should between 4 and 4383"):
             self.cmd('monitor log-analytics workspace table update -g {rg} -n {table_name} --workspace-name {ws_name} --retention-time 4 --total-retention-time 2')
         self.cmd(
-            'monitor log-analytics workspace table update -g {rg} -n {table_name} --workspace-name {ws_name} --retention-time 4 --total-retention-time 2556 --columns col2=guid',
+            'monitor log-analytics workspace table update -g {rg} -n {table_name} --workspace-name {ws_name} --retention-time 4 --total-retention-time 4383 --columns col2=guid TimeGenerated=datetime',
             checks=[
                 self.check('name', '{table_name}'),
                 self.check('retentionInDays', 4),
-                self.check('totalRetentionInDays', 2556),
+                self.check('totalRetentionInDays', 4383),
                 self.check('schema.columns[0].name', 'col2'),
                 self.check('schema.columns[0].type', 'guid'),
             ])
@@ -700,7 +724,7 @@ class TestLogProfileScenarios(ScenarioTest):
                  checks=[
                      self.check('name', '{table_name}'),
                      self.check('retentionInDays', 4),
-                     self.check('totalRetentionInDays', 2556),
+                     self.check('totalRetentionInDays', 4383),
                  ])
 
         self.cmd('monitor log-analytics workspace table delete -g {rg} -n {table_name} --workspace-name {ws_name} -y')
@@ -713,7 +737,7 @@ class TestLogProfileScenarios(ScenarioTest):
         })
 
         self.cmd('monitor log-analytics workspace create -g {rg} -n {ws_name}')
-        from azure.core.exceptions import ResourceNotFoundError
-        with self.assertRaises(ResourceNotFoundError):
+        from azure.core.exceptions import ClientAuthenticationError
+        with self.assertRaises(ClientAuthenticationError):
             self.cmd("monitor log-analytics workspace list-link-target")
         self.cmd("monitor log-analytics workspace list-available-service-tier -g {rg} --workspace-name {ws_name}")

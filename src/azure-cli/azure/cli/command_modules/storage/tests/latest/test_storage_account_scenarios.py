@@ -411,6 +411,9 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.cmd('az storage account create -n {} -g {} --min-tls-version TLS1_2'.format(name4, resource_group),
                  checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_2')])
 
+        self.cmd('az storage account create -n {} -g {} --min-tls-version TLS1_3'.format(name4, resource_group),
+                 checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_3')])
+
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
     @ResourceGroupPreparer(location='eastus', name_prefix='cli_storage_account')
     @StorageAccountPreparer(name_prefix='tls')
@@ -423,6 +426,9 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
 
         self.cmd('az storage account update -n {} -g {} --min-tls-version TLS1_2'.format(
             storage_account, resource_group), checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_2')])
+
+        self.cmd('az storage account update -n {} -g {} --min-tls-version TLS1_3'.format(
+            storage_account, resource_group), checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_3')])
 
         self.cmd('az storage account update -n {} -g {} --min-tls-version TLS1_0'.format(
             storage_account, resource_group), checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_0')])
@@ -876,7 +882,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
 
     @ResourceGroupPreparer(location='southcentralus')
     @StorageAccountPreparer(location='southcentralus')
-    @KeyVaultPreparer(location='southcentralus')
+    @KeyVaultPreparer(location='southcentralus', additional_params='--enable-rbac-authorization false')
     def test_customer_managed_key(self, resource_group, storage_account, key_vault):
         self.kwargs = {'rg': resource_group, 'sa': storage_account, 'vt': key_vault}
 
@@ -1767,9 +1773,9 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             'rg': resource_group,
             'container': self.create_random_name(prefix='container', length=24),
         }
-        self.cmd('storage account create -n {sa1} -g {rg} --edge-zone microsoftrrdclab1 -l eastus2euap --sku Premium_LRS',
+        self.cmd('storage account create -n {sa1} -g {rg} --edge-zone microsoftrrdclab3 -l eastus2euap --sku Premium_LRS',
                  checks=[
-                     JMESPathCheck('extendedLocation.name', 'microsoftrrdclab1'),
+                     JMESPathCheck('extendedLocation.name', 'microsoftrrdclab3'),
                      JMESPathCheck('extendedLocation.type', 'EdgeZone')
                  ])
         self.cmd('storage account create -n {sa2} -g {rg} --edge-zone microsoftlosangeles1 --sku Premium_LRS',
@@ -1794,6 +1800,58 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         # other status would take days to months
         self.cmd('az storage account migration show -n default -g {rg} --account-name {sa}',
                  checks=[JMESPathCheck('migrationStatus', 'SubmittedForConversion')])
+
+    @ResourceGroupPreparer(location='eastus')
+    def test_storage_account_upgrade_to_storagev2(self, resource_group):
+        self.kwargs.update({
+            'sastorage': self.create_random_name('sa', 24),
+            'sastoragewithtier': self.create_random_name('sa', 24),
+            'sablobstorage': self.create_random_name('sa', 24),
+            'sablobstoragewithtier': self.create_random_name('sa', 24),
+            'sastoragev2': self.create_random_name('sa', 24),
+            'sastoragecold': self.create_random_name('sa', 24)
+        })
+        # Storagev1
+        self.cmd('az storage account create --kind Storage -n {sastorage} -g {rg}',
+                 checks=[JMESPathCheck('kind', 'Storage'),
+                         JMESPathCheck('accessTier', None)])
+        self.cmd('az storage account update --upgrade-to-storagev2 -n {sastorage} -g {rg} -y',
+                 checks=[JMESPathCheck('kind', 'StorageV2'),
+                         JMESPathCheck('accessTier', 'Hot')])
+
+        self.cmd('az storage account create --kind Storage -n {sastoragewithtier} -g {rg}')
+        self.cmd('az storage account update --upgrade-to-storagev2 --access-tier Cool -n {sastoragewithtier} '
+                 '-g {rg} -y',
+                 checks=[JMESPathCheck('kind', 'StorageV2'),
+                         JMESPathCheck('accessTier', 'Cool')])
+        # BlobStorage
+        self.cmd('az storage account create --kind BlobStorage --access-tier Cool -n {sablobstorage} -g {rg}',
+                 checks=[JMESPathCheck('kind', 'BlobStorage'),
+                         JMESPathCheck('accessTier', 'Cool')])
+        self.cmd('az storage account update --upgrade-to-storagev2 -n {sablobstorage} -g {rg} -y',
+                 checks=[JMESPathCheck('kind', 'StorageV2'),
+                         JMESPathCheck('accessTier', 'Hot')])
+
+        self.cmd('az storage account create --kind Storage -n {sablobstoragewithtier} -g {rg}')
+        self.cmd('az storage account update --upgrade-to-storagev2 --access-tier Cool -n {sablobstoragewithtier} '
+                 '-g {rg} -y',
+                 checks=[JMESPathCheck('kind', 'StorageV2'),
+                         JMESPathCheck('accessTier', 'Cool')])
+
+        # StorageV2
+        self.cmd('az storage account create -n {sastoragev2} -g {rg}',
+                 checks=[JMESPathCheck('kind', 'StorageV2'),
+                         JMESPathCheck('accessTier', 'Hot')])
+        self.cmd('az storage account update --access-tier Cool -n {sastoragev2} -g {rg} -y',
+                 checks=[JMESPathCheck('accessTier', 'Cool')])
+
+        # Cold tier
+        self.cmd('az storage account create -n {sastoragecold} -g {rg} --access-tier Cold',
+                 checks=[JMESPathCheck('accessTier', 'Cold')])
+        self.cmd('az storage account update --access-tier Cool -n {sastoragecold} -g {rg} -y',
+                 checks=[JMESPathCheck('accessTier', 'Cool')])
+        self.cmd('az storage account update --access-tier Cold -n {sastoragecold} -g {rg} -y',
+                 checks=[JMESPathCheck('accessTier', 'Cold')])
 
 
 class RoleScenarioTest(LiveScenarioTest):
@@ -2494,8 +2552,7 @@ class StorageAccountORScenarioTest(StorageScenarioMixin, ScenarioTest):
             'src_sc': self.create_random_name(prefix='clicor', length=24),
         })
 
-        self.cmd('storage account create -n {src_sc} -g {rg} ', checks=[
-            JMESPathCheck('allowCrossTenantReplication', None)])
+        self.cmd('storage account create -n {src_sc} -g {rg} ')
 
         self.cmd('storage account update -n {src_sc} -g {rg} -r false', checks=[
             JMESPathCheck('allowCrossTenantReplication', False)])

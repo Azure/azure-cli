@@ -520,3 +520,23 @@ class StorageBlobCopyTests(StorageScenarioMixin, LiveScenarioTest):
             self.storage_cmd('storage blob show -c {} -n {} ', account_info, target_container, src) \
                 .assert_with_checks(JMESPathCheck('properties.blobTier', 'Archive'),
                                     JMESPathCheck('properties.rehydrationStatus', 'rehydrate-pending-to-cool'))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(kind='StorageV2', parameter_name='source_account', location='westus')
+    @StorageAccountPreparer(kind='StorageV2', parameter_name='target_account', location='westeurope')
+    def test_storage_blob_show_with_copy_in_progress(self, resource_group, source_account, target_account):
+        source_file = self.create_temp_file(4*1000*1000)
+        source_account_info = self.get_account_info(resource_group, source_account)
+        target_account_info = self.get_account_info(resource_group, target_account)
+        source_blob = self.create_random_name('blob', 16)
+        target_blob = self.create_random_name('blob', 16)
+
+        source_container = self.create_container(source_account_info)
+        target_container = self.create_container(target_account_info)
+
+        self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --type page', source_account_info,
+                         source_container, source_file, source_blob)
+        self.storage_cmd('storage blob copy start --source-account-name {} --source-container {} --source-blob {} '
+                         '--destination-container {} --destination-blob {}', target_account_info,
+                         source_account, source_container, source_blob, target_container, target_blob)
+        self.storage_cmd('storage blob show -n {} -c {}', target_account_info, target_blob, target_container)

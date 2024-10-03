@@ -11,6 +11,7 @@ from itertools import chain
 from json import JSONDecodeError
 from urllib.parse import urlparse
 from ._snapshot_custom_client import AppConfigSnapshotClient
+from ._constants import HttpHeaders
 
 import chardet
 import javaproperties
@@ -270,7 +271,8 @@ def __read_kv_from_config_store(azconfig_client,
                                 all_=True,
                                 cli_ctx=None,
                                 prefix_to_remove="",
-                                prefix_to_add=""):
+                                prefix_to_add="",
+                                correlation_request_id=None):
     # pylint: disable=too-many-branches too-many-statements
 
     # list_configuration_settings returns kv with null label when:
@@ -291,8 +293,13 @@ def __read_kv_from_config_store(azconfig_client,
 
     if snapshot:
         try:
-            configsetting_iterable = AppConfigSnapshotClient(azconfig_client).list_snapshot_kv(name=snapshot,
-                                                                                               fields=query_fields)
+            configsetting_iterable = AppConfigSnapshotClient(
+                azconfig_client
+            ).list_snapshot_kv(
+                name=snapshot,
+                fields=query_fields,
+                headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id}
+            )
 
         except HttpResponseError as exception:
             raise AzureResponseError('Failed to read key-values(s) from snapshot {}. '.format(snapshot) + str(exception))
@@ -302,7 +309,10 @@ def __read_kv_from_config_store(azconfig_client,
             configsetting_iterable = azconfig_client.list_configuration_settings(key_filter=key,
                                                                                  label_filter=label,
                                                                                  accept_datetime=datetime,
-                                                                                 fields=query_fields)
+                                                                                 fields=query_fields,
+                                                                                 headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id}
+                                                                                 )
+
         except HttpResponseError as exception:
             raise AzureResponseError('Failed to read key-value(s) that match the specified key and label. ' + str(exception))
 
@@ -346,7 +356,7 @@ def __read_kv_from_config_store(azconfig_client,
     # We first check if the snapshot exists before returning an empty result.
     if snapshot and len(retrieved_kvs) == 0:
         try:
-            _ = AppConfigSnapshotClient(azconfig_client).get_snapshot(name=snapshot)
+            _ = AppConfigSnapshotClient(azconfig_client).get_snapshot(name=snapshot, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
 
         except HttpResponseError as exception:
             if exception.status_code == StatusCodes.NOT_FOUND:
@@ -360,7 +370,8 @@ def __write_kv_and_features_to_config_store(azconfig_client,
                                             features=None,
                                             label=None,
                                             preserve_labels=False,
-                                            content_type=None):
+                                            content_type=None,
+                                            correlation_request_id=None):
     if not key_values and not features:
         logger.warning('\nSource configuration is empty. No changes will be made.')
         return
@@ -378,7 +389,7 @@ def __write_kv_and_features_to_config_store(azconfig_client,
         if content_type and not is_feature_flag(set_kv) and not __is_key_vault_ref(set_kv):
             set_kv.content_type = content_type
 
-        __write_configuration_setting_to_config_store(azconfig_client, set_kv)
+        __write_configuration_setting_to_config_store(azconfig_client, set_kv, correlation_request_id)
 
 
 def __is_key_vault_ref(kv):
@@ -433,7 +444,7 @@ def __read_kv_from_app_service(cmd, appservice_account, prefix_to_add="", conten
                             # this throws an exception for invalid format of secret identifier
                             parse_key_vault_id(source_id=secret_identifier)
                             kv = KeyValue(key=key,
-                                          value=json.dumps({"uri": secret_identifier}, ensure_ascii=False, separators=(',', ':')),
+                                          value=json.dumps({"uri": secret_identifier}, ensure_ascii=False),
                                           tags=tags,
                                           content_type=KeyVaultConstants.KEYVAULT_CONTENT_TYPE)
                             key_values.append(kv)
@@ -828,7 +839,7 @@ def __resolve_secret(cli_ctx, keyvault_reference):
         raise CLIError(str(exception))
 
 
-def __import_kvset_from_file(client, path, strict, yes, import_mode=ImportMode.IGNORE_MATCH):
+def __import_kvset_from_file(client, path, strict, yes, import_mode=ImportMode.IGNORE_MATCH, correlation_request_id=None):
     new_kvset = __read_with_appropriate_encoding(file_path=path, format_='json')
     if KVSetConstants.KVSETRootElementName not in new_kvset:
         raise FileOperationError("file '{0}' is not in a valid '{1}' format.".format(path, ImportExportProfiles.KVSET))
@@ -869,7 +880,7 @@ def __import_kvset_from_file(client, path, strict, yes, import_mode=ImportMode.I
         kvset_to_import_iter = kvset_from_file
 
     for config_setting in kvset_to_import_iter:
-        __write_configuration_setting_to_config_store(client, config_setting)
+        __write_configuration_setting_to_config_store(client, config_setting, correlation_request_id)
 
 
 def __validate_import_keyvault_ref(kv):
@@ -898,12 +909,12 @@ def __validate_import_feature_flag(kv):
     if kv and validate_import_feature_key(kv.key):
         try:
             ff = json.loads(kv.value)
-            if FEATURE_FLAG_PROPERTIES == ff.keys():
+            if FEATURE_FLAG_PROPERTIES.intersection(ff.keys()) == FEATURE_FLAG_PROPERTIES:
                 return validate_import_feature(ff[FeatureFlagConstants.ID])
 
-            logger.warning("The feature flag with key '{%s}' is not a valid feature flag. It will not be imported.", kv.key)
+            logger.warning("The feature flag with key '%s' is not a valid feature flag. It will not be imported.", kv.key)
         except JSONDecodeError as exception:
-            logger.warning("The feature flag with key '{%s}' is not in a valid JSON format. It will not be imported.\n{%s}", kv.id, str(exception))
+            logger.warning("The feature flag with key '%s' is not in a valid JSON format. It will not be imported.\n%s", kv.key, str(exception))
     return False
 
 
@@ -943,9 +954,9 @@ def __validate_import_tags(kv):
     return True
 
 
-def __write_configuration_setting_to_config_store(azconfig_client, configuration_setting):
+def __write_configuration_setting_to_config_store(azconfig_client, configuration_setting, correlation_request_id=None):
     try:
-        azconfig_client.set_configuration_setting(configuration_setting)
+        azconfig_client.set_configuration_setting(configuration_setting, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
     except ResourceReadOnlyError:
         logger.warning(
             "Failed to set read only key-value with key '%s' and label '%s'. Unlock the key-value before updating it.",

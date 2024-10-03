@@ -31,6 +31,9 @@ steps:
       if [ "${{ parameters.EnableCompactAAZ }}" == 'True' ]; then
         python $CLI_REPO_PATH/scripts/compact_aaz.py
       fi
+
+      # Verify installation and build command index
+      az --version
     displayName: 'azdev setup'
     env:
       CLI_REPO_PATH: ${{ parameters.CLIRepoPath }}

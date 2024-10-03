@@ -22,9 +22,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-05-01-preview",
+        "version": "2024-03-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2023-05-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2024-03-01"],
         ]
     }
 
@@ -53,7 +53,7 @@ class Update(AAZCommand):
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,127}$",
+                pattern="^[a-zA-Z0-9][a-zA-Z0-9\\-_]{0,127}$",
             ),
         )
         _args_schema.pool_name = AAZStrArg(
@@ -62,7 +62,7 @@ class Update(AAZCommand):
             required=True,
             id_part="child_name_1",
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,63}$",
+                pattern="^[a-zA-Z0-9][a-zA-Z0-9\\-_]{0,63}$",
                 max_length=64,
                 min_length=1,
             ),
@@ -76,7 +76,7 @@ class Update(AAZCommand):
             required=True,
             id_part="child_name_2",
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z][a-zA-Z0-9\-_]{0,63}$",
+                pattern="^[a-zA-Z][a-zA-Z0-9\\-_]{0,63}$",
                 max_length=64,
                 min_length=1,
             ),
@@ -85,16 +85,16 @@ class Update(AAZCommand):
         # define Arg Group "Backup"
 
         _args_schema = cls._args_schema
-        _args_schema.backup_enabled = AAZBoolArg(
-            options=["--backup-enabled"],
-            arg_group="Backup",
-            help="Backup Enabled",
-            nullable=True,
-        )
         _args_schema.backup_policy_id = AAZStrArg(
             options=["--backup-policy-id"],
             arg_group="Backup",
             help="Backup Policy Resource ID",
+            nullable=True,
+        )
+        _args_schema.backup_vault_id = AAZStrArg(
+            options=["--backup-vault-id"],
+            arg_group="Backup",
+            help="Backup Vault Resource ID",
             nullable=True,
         )
         _args_schema.policy_enforced = AAZBoolArg(
@@ -264,8 +264,8 @@ class Update(AAZCommand):
             help="Specifies the number of days after which data that is not accessed by clients will be tiered.",
             nullable=True,
             fmt=AAZIntArgFormat(
-                maximum=63,
-                minimum=7,
+                maximum=183,
+                minimum=2,
             ),
         )
         _args_schema.creation_token = AAZStrArg(
@@ -273,7 +273,7 @@ class Update(AAZCommand):
             arg_group="Properties",
             help="A unique file path for the volume. Used when creating mount targets",
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z][a-zA-Z0-9\-]{0,79}$",
+                pattern="^[a-zA-Z][a-zA-Z0-9\\-]{0,79}$",
                 max_length=80,
                 min_length=1,
             ),
@@ -304,7 +304,7 @@ class Update(AAZCommand):
             enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
         _args_schema.is_default_quota_enabled = AAZBoolArg(
-            options=["--is-def-quota-enabled", "--is-default-quota-enabled"],
+            options=["--is-def-quota-enabled", "--default-quota-enabled", "--is-default-quota-enabled"],
             arg_group="Properties",
             help="Specifies if default quota is enabled for the volume.",
             nullable=True,
@@ -330,7 +330,7 @@ class Update(AAZCommand):
         _args_schema.network_features = AAZStrArg(
             options=["--network-features"],
             arg_group="Properties",
-            help="Basic network, or Standard features available to the volume.",
+            help="Basic network, or Standard features available to the volume. hide me",
             nullable=True,
             enum={"Basic": "Basic", "Basic_Standard": "Basic_Standard", "Standard": "Standard", "Standard_Basic": "Standard_Basic"},
         )
@@ -422,10 +422,10 @@ class Update(AAZCommand):
         _args_schema.usage_threshold = AAZIntArg(
             options=["--usage-threshold"],
             arg_group="Properties",
-            help={"short-summary": "Maximum storage quota allowed for a file system in bytes.", "long-summary": "This is a soft quota used for alerting only. Minimum size is 100 GiB. \nUpper limit is 100TiB, 500Tib for LargeVolume."},
+            help={"short-summary": "Maximum storage quota allowed for a file system in GiB.", "long-summary": "Maximum storage quota allowed for a file system in bytes. This is a soft quota used for alerting only. For regular volumes, valid values are in the range 50GiB to 100TiB. For large volumes, valid values are in the range 100TiB to 500TiB, and on an exceptional basis, to 2400TiB."},
             fmt=AAZIntArgFormat(
                 maximum=2638827906662400,
-                minimum=107374182400,
+                minimum=53687091200,
             ),
         )
         _args_schema.volume_spec_name = AAZStrArg(
@@ -597,7 +597,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-05-01-preview",
+                    "api-version", "2024-03-01",
                     required=True,
                 ),
             }
@@ -704,7 +704,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-05-01-preview",
+                    "api-version", "2024-03-01",
                     required=True,
                 ),
             }
@@ -812,8 +812,8 @@ class Update(AAZCommand):
 
             backup = _builder.get(".properties.dataProtection.backup")
             if backup is not None:
-                backup.set_prop("backupEnabled", AAZBoolType, ".backup_enabled")
                 backup.set_prop("backupPolicyId", AAZStrType, ".backup_policy_id")
+                backup.set_prop("backupVaultId", AAZStrType, ".backup_vault_id")
                 backup.set_prop("policyEnforced", AAZBoolType, ".policy_enforced")
 
             replication = _builder.get(".properties.dataProtection.replication")
@@ -1005,11 +1005,6 @@ class _UpdateHelper:
             serialized_name="fileSystemId",
             flags={"read_only": True},
         )
-        properties.inherited_size_in_bytes = AAZIntType(
-            serialized_name="inheritedSizeInBytes",
-            nullable=True,
-            flags={"read_only": True},
-        )
         properties.is_default_quota_enabled = AAZBoolType(
             serialized_name="isDefaultQuotaEnabled",
         )
@@ -1136,9 +1131,6 @@ class _UpdateHelper:
         )
 
         backup = _schema_volume_read.properties.data_protection.backup
-        backup.backup_enabled = AAZBoolType(
-            serialized_name="backupEnabled",
-        )
         backup.backup_policy_id = AAZStrType(
             serialized_name="backupPolicyId",
         )
@@ -1153,9 +1145,6 @@ class _UpdateHelper:
         replication.endpoint_type = AAZStrType(
             serialized_name="endpointType",
         )
-        replication.remote_path = AAZObjectType(
-            serialized_name="remotePath",
-        )
         replication.remote_volume_region = AAZStrType(
             serialized_name="remoteVolumeRegion",
         )
@@ -1169,20 +1158,6 @@ class _UpdateHelper:
         )
         replication.replication_schedule = AAZStrType(
             serialized_name="replicationSchedule",
-        )
-
-        remote_path = _schema_volume_read.properties.data_protection.replication.remote_path
-        remote_path.external_host_name = AAZStrType(
-            serialized_name="externalHostName",
-            flags={"required": True},
-        )
-        remote_path.server_name = AAZStrType(
-            serialized_name="serverName",
-            flags={"required": True},
-        )
-        remote_path.volume_name = AAZStrType(
-            serialized_name="volumeName",
-            flags={"required": True},
         )
 
         snapshot = _schema_volume_read.properties.data_protection.snapshot

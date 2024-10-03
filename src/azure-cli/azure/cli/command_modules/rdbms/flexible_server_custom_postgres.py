@@ -33,7 +33,7 @@ from ._flexible_server_location_capabilities_util import get_postgres_location_c
 from .flexible_server_custom_common import create_firewall_rule
 from .flexible_server_virtual_network import prepare_private_network, prepare_private_dns_zone, prepare_public_network
 from .validators import pg_arguments_validator, validate_server_name, validate_and_format_restore_point_in_time, \
-    validate_postgres_replica, validate_georestore_network, pg_byok_validator
+    validate_postgres_replica, validate_georestore_network, pg_byok_validator, validate_migration_runtime_server
 
 logger = get_logger(__name__)
 DEFAULT_DB_NAME = 'flexibleserverdb'
@@ -57,7 +57,7 @@ def flexible_server_create(cmd, client,
                            high_availability=None, zone=None, standby_availability_zone=None,
                            geo_redundant_backup=None, byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None,
                            active_directory_auth=None, password_auth=None, auto_grow=None, performance_tier=None,
-                           storage_type=None, iops=None, throughput=None, yes=False):
+                           storage_type=None, iops=None, throughput=None, create_default_db='Enabled', yes=False):
 
     # Generate missing parameters
     location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
@@ -152,9 +152,9 @@ def flexible_server_create(cmd, client,
         firewall_id = create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip)
 
     # Create mysql database if it does not exist
-    if database_name is None:
-        database_name = DEFAULT_DB_NAME
-    _create_database(db_context, cmd, resource_group_name, server_name, database_name)
+    if database_name is not None or (create_default_db and create_default_db.lower() == 'enabled'):
+        db_name = database_name if database_name else DEFAULT_DB_NAME
+        _create_database(db_context, cmd, resource_group_name, server_name, db_name)
 
     user = server_result.administrator_login
     server_id = server_result.id
@@ -183,7 +183,7 @@ def flexible_server_restore(cmd, client,
                             source_server, restore_point_in_time=None, zone=None, no_wait=False,
                             subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
                             private_dns_zone_arguments=None, geo_redundant_backup=None,
-                            byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None, yes=False):
+                            byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None, storage_type=None, yes=False):
 
     server_name = server_name.lower()
 
@@ -220,12 +220,16 @@ def flexible_server_restore(cmd, client,
 
         pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup)
 
+        instance = client.get(id_parts['resource_group'], id_parts['name'])
+        storage = postgresql_flexibleservers.models.Storage(type=storage_type if instance.storage.type != "PremiumV2_LRS" else None)
+
         parameters = postgresql_flexibleservers.models.Server(
             location=location,
             point_in_time_utc=restore_point_in_time,
             source_server_resource_id=source_server_id,  # this should be the source server name, not id
             create_mode="PointInTimeRestore",
-            availability_zone=zone
+            availability_zone=zone,
+            storage=storage
         )
 
         if source_server_object.network.public_network_access == 'Disabled' and any((vnet, subnet)):
@@ -270,6 +274,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
                                        backup_byok_identity=None, backup_byok_key=None,
                                        active_directory_auth=None, password_auth=None,
                                        private_dns_zone_arguments=None,
+                                       public_access=None,
                                        tags=None,
                                        auto_grow=None,
                                        performance_tier=None,
@@ -311,6 +316,9 @@ def flexible_server_update_custom_func(cmd, client, instance,
     resource_group_name = server_id_parts['resource_group']
     server_name = server_id_parts['name']
 
+    if public_access:
+        instance.network.public_network_access = public_access
+
     if private_dns_zone_arguments:
         private_dns_zone_id = prepare_private_dns_zone(db_context,
                                                        resource_group_name,
@@ -351,13 +359,14 @@ def flexible_server_update_custom_func(cmd, client, instance,
     if backup_retention:
         instance.backup.backup_retention_days = backup_retention
 
-    if maintenance_window and maintenance_window.lower() == "disabled":
-        # if disabled is pass in reset to default values
-        day_of_week = start_hour = start_minute = 0
-        custom_window = "Disabled"
-    elif maintenance_window:
-        day_of_week, start_hour, start_minute = parse_maintenance_window(maintenance_window)
-        custom_window = "Enabled"
+    if maintenance_window:
+        if maintenance_window.lower() == "disabled":
+            # if disabled is pass in reset to default values
+            day_of_week = start_hour = start_minute = 0
+            custom_window = "Disabled"
+        else:
+            day_of_week, start_hour, start_minute = parse_maintenance_window(maintenance_window)
+            custom_window = "Enabled"
 
         # set values - if maintenance_window when is None when created then create a new object
         instance.maintenance_window.day_of_week = day_of_week
@@ -1117,7 +1126,7 @@ def migration_create_func(cmd, client, resource_group_name, server_name, propert
         # Use default migration_option as 'ValidateAndMigrate'
         migration_option = "ValidateAndMigrate"
 
-    return _create_migration(logging_name, client, subscription_id, resource_group_name, server_name, migration_name,
+    return _create_migration(cmd, logging_name, client, subscription_id, resource_group_name, server_name, migration_name,
                              migration_mode, migration_option, migration_parameters, tags, location)
 
 
@@ -1394,11 +1403,15 @@ def _get_pg_replica_zone(availabilityZones, sourceServerZone, replicaZone):
     return pg_replica_zone
 
 
-def _create_migration(logging_name, client, subscription_id, resource_group_name, target_db_server_name,
+def _create_migration(cmd, logging_name, client, subscription_id, resource_group_name, target_db_server_name,
                       migration_name, migration_mode, migration_option, parameters, tags, location):
-    logger.warning('Creating %s Migration for server \'%s\' in group \'%s\' and subscription \'%s\'...', logging_name, target_db_server_name, resource_group_name, subscription_id)
 
     parameter_keys = list(parameters.keys())
+    migrationInstanceResourceId = get_case_insensitive_key_value("MigrationRuntimeResourceId", parameter_keys, parameters)
+    if migrationInstanceResourceId is not None:
+        validate_migration_runtime_server(cmd, migrationInstanceResourceId, resource_group_name, target_db_server_name)
+
+    logger.warning('Creating %s Migration for server \'%s\' in group \'%s\' and subscription \'%s\'...', logging_name, target_db_server_name, resource_group_name, subscription_id)
     secret_parameter_dictionary = get_case_insensitive_key_value("SecretParameters", parameter_keys, parameters)
     secret_parameter_keys = list(secret_parameter_dictionary.keys())
     admin_credentials_dictionary = get_case_insensitive_key_value("AdminCredentials", secret_parameter_keys, secret_parameter_dictionary)
@@ -1419,12 +1432,15 @@ def _create_migration(logging_name, client, subscription_id, resource_group_name
         migration_mode=migration_mode,
         source_db_server_resource_id=get_case_insensitive_key_value("SourceDbServerResourceId", parameter_keys, parameters),
         secret_parameters=secret_parameters,
+        source_db_server_fully_qualified_domain_name=get_case_insensitive_key_value("SourceDbServerFullyQualifiedDomainName", parameter_keys, parameters),
+        target_db_server_fully_qualified_domain_name=get_case_insensitive_key_value("TargetDbServerFullyQualifiedDomainName", parameter_keys, parameters),
         dbs_to_migrate=get_case_insensitive_key_value("DbsToMigrate", parameter_keys, parameters),
         setup_logical_replication_on_source_db_if_needed=get_enum_value_true_false(get_case_insensitive_key_value("SetupLogicalReplicationOnSourceDbIfNeeded", parameter_keys, parameters), "SetupLogicalReplicationOnSourceDbIfNeeded"),
         overwrite_dbs_in_target=get_enum_value_true_false(get_case_insensitive_key_value("OverwriteDbsInTarget", parameter_keys, parameters), "OverwriteDbsInTarget"),
         source_type=source_type,
         migration_option=migration_option,
-        ssl_mode=ssl_mode)
+        ssl_mode=ssl_mode,
+        migration_instance_resource_id=migrationInstanceResourceId)
 
     return client.create(subscription_id, resource_group_name, target_db_server_name, migration_name, migration_parameters)
 

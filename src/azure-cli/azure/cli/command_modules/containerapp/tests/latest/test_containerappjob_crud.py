@@ -56,6 +56,7 @@ class ContainerAppJobsCRUDOperationsTest(ScenarioTest):
         # update the Container App Job resource
         self.cmd("az containerapp job update --resource-group {} --name {} --replica-timeout 300 --replica-retry-limit 1 --image mcr.microsoft.com/k8se/quickstart-jobs:latest --cpu '0.5' --memory '1.0Gi'".format(resource_group, job), checks=[
             JMESPathCheck('name', job),
+            JMESPathCheck('properties.provisioningState', "Succeeded"),
             JMESPathCheck('properties.configuration.replicaTimeout', 300),
             JMESPathCheck('properties.configuration.replicaRetryLimit', 1),
             JMESPathCheck('properties.configuration.triggerType', "manual", case_sensitive=False),
@@ -102,7 +103,16 @@ class ContainerAppJobsCRUDOperationsTest(ScenarioTest):
         self.assertTrue(len(jobs_list) == 1)
 
         # update the Container App Job resource
-        self.cmd("az containerapp job update --resource-group {} --name {} --replica-timeout 300 --replica-retry-limit 1 --cron-expression '*/10 * * * *' --image mcr.microsoft.com/k8se/quickstart-jobs:latest --cpu '0.5' --memory '1.0Gi'".format(resource_group, job2))
+        self.cmd("az containerapp job update --resource-group {} --name {} --replica-timeout 300 --replica-retry-limit 1 --cron-expression '*/10 * * * *' --image mcr.microsoft.com/k8se/quickstart-jobs:latest --cpu '0.5' --memory '1.0Gi'".format(resource_group, job2), checks=[
+            JMESPathCheck('properties.provisioningState', "Succeeded"),
+            JMESPathCheck('properties.configuration.replicaTimeout', 300),
+            JMESPathCheck('properties.configuration.replicaRetryLimit', 1),
+            JMESPathCheck('properties.configuration.triggerType', "schedule", case_sensitive=False),
+            JMESPathCheck('properties.configuration.scheduleTriggerConfig.cronExpression', "*/10 * * * *"),
+            JMESPathCheck('properties.template.containers[0].image', "mcr.microsoft.com/k8se/quickstart-jobs:latest"),
+            JMESPathCheck('properties.template.containers[0].resources.cpu', "0.5"),
+            JMESPathCheck('properties.template.containers[0].resources.memory', "1Gi"),
+        ])
 
         # verify the updated Container App Job resource
         self.cmd("az containerapp job show --resource-group {} --name {}".format(resource_group, job2), checks=[

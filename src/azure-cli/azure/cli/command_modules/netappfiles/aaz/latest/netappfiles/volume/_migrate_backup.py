@@ -20,9 +20,9 @@ class MigrateBackup(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-11-01-preview",
+        "version": "2024-03-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/migratebackups", "2022-11-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/migratebackups", "2024-03-01"],
         ]
     }
 
@@ -49,7 +49,7 @@ class MigrateBackup(AAZCommand):
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,127}$",
+                pattern="^[a-zA-Z0-9][a-zA-Z0-9\\-_]{0,127}$",
             ),
         )
         _args_schema.pool_name = AAZStrArg(
@@ -58,7 +58,7 @@ class MigrateBackup(AAZCommand):
             required=True,
             id_part="child_name_1",
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,63}$",
+                pattern="^[a-zA-Z0-9][a-zA-Z0-9\\-_]{0,63}$",
                 max_length=64,
                 min_length=1,
             ),
@@ -67,12 +67,12 @@ class MigrateBackup(AAZCommand):
             required=True,
         )
         _args_schema.volume_name = AAZStrArg(
-            options=["--volume-name"],
+            options=["-v", "--volume-name"],
             help="The name of the volume",
             required=True,
             id_part="child_name_2",
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z][a-zA-Z0-9\-_]{0,63}$",
+                pattern="^[a-zA-Z][a-zA-Z0-9\\-_]{0,63}$",
                 max_length=64,
                 min_length=1,
             ),
@@ -113,15 +113,6 @@ class MigrateBackup(AAZCommand):
                     self.ctx.args.no_wait,
                     session,
                     None,
-                    self.on_error,
-                    lro_options={"final-state-via": "location"},
-                    path_format_arguments=self.url_parameters,
-                )
-            if session.http_response.status_code in [204]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_204,
                     self.on_error,
                     lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
@@ -174,7 +165,7 @@ class MigrateBackup(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-11-01-preview",
+                    "api-version", "2024-03-01",
                     required=True,
                 ),
             }
@@ -199,9 +190,6 @@ class MigrateBackup(AAZCommand):
             _builder.set_prop("backupVaultId", AAZStrType, ".backup_vault_id", typ_kwargs={"flags": {"required": True}})
 
             return self.serialize_content(_content_value)
-
-        def on_204(self, session):
-            pass
 
 
 class _MigrateBackupHelper:

@@ -74,7 +74,6 @@ from ._validators import (
     validate_subnet
 )
 
-
 #####
 #        SizeWithUnitConverter - consider moving to common code (azure.cli.core.commands.parameters)
 #####
@@ -300,6 +299,11 @@ storage_param_type = CLIArgumentType(
     help='The storage size. If no unit is specified, defaults to gigabytes (GB).',
     validator=validate_managed_instance_storage_size)
 
+iops_param_type = CLIArgumentType(
+    options_list=['--iops'],
+    type=int,
+    help='The storage iops.')
+
 backup_storage_redundancy_param_type = CLIArgumentType(
     options_list=['--backup-storage-redundancy', '--bsr'],
     type=get_internal_backup_storage_redundancy,
@@ -397,6 +401,21 @@ event_hub_param_type = CLIArgumentType(
     configured_default='sql-server',
     help='The name of the event hub. If none is specified '
          'when providing event_hub_authorization_rule_id, the default event hub will be selected.')
+
+manual_cutover_param_type = CLIArgumentType(
+    options_list=['--manual-cutover'],
+    help='Whether to do manual cutover during Update SLO. Allowed when updating database to Hyperscale tier.',
+    arg_type=get_three_state_flag())
+
+perform_cutover_param_type = CLIArgumentType(
+    options_list=['--perform-cutover'],
+    help='Whether to perform cutover when updating database to Hyperscale tier is in progress.',
+    arg_type=get_three_state_flag())
+
+authentication_metadata_param_type = CLIArgumentType(
+    options_list=['--authentication-metadata', '--am'],
+    help='Preferred metadata to use for authentication of synced on-prem users. Default is AzureAD.',
+    arg_type=get_enum_type(['AzureAD', 'Windows', 'Paired']))
 
 db_service_objective_examples = 'Basic, S0, P1, GP_Gen4_1, GP_S_Gen5_8, BC_Gen5_2, HS_Gen5_32.'
 dw_service_objective_examples = 'DW100, DW1000c'
@@ -511,6 +530,12 @@ def _configure_db_dw_params(arg_ctx):
     arg_ctx.argument('encryption_protector_auto_rotation',
                      arg_type=database_encryption_protector_auto_rotation_param_type)
 
+    arg_ctx.argument('manual-cutover',
+                     arg_type=manual_cutover_param_type)
+
+    arg_ctx.argument('perform-cutover',
+                     arg_type=perform_cutover_param_type)
+
 
 def _configure_db_dw_create_params(
         arg_ctx,
@@ -613,7 +638,9 @@ def _configure_db_dw_create_params(
             'availability_zone',
             'encryption_protector_auto_rotation',
             'use_free_limit',
-            'free_limit_exhaustion_behavior'
+            'free_limit_exhaustion_behavior',
+            'manual_cutover',
+            'perform_cutover'
         ])
 
     # Create args that will be used to build up the Database's Sku object
@@ -696,6 +723,11 @@ def _configure_db_dw_create_params(
             CreateMode.RESTORE_LONG_TERM_RETENTION_BACKUP]:
         arg_ctx.ignore('collation', 'max_size_bytes')
 
+    # 'manual_cutover' and 'perform_cutover' are ignored when creating a database,
+    # as they are only applicable during update
+    if create_mode in CreateMode:
+        arg_ctx.ignore('manual_cutover', 'perform_cutover')
+
     if engine == Engine.dw:
         # Elastic pool is only for SQL DB.
         arg_ctx.ignore('elastic_pool_id')
@@ -757,6 +789,10 @@ def _configure_db_dw_create_params(
         arg_ctx.argument('zone_redundant',
                          options_list=['--zone-redundant'],
                          deprecate_info=arg_ctx.deprecate(hide=True))
+
+        # Manual-cutover and Perform-cutover are not valid for DataWarehouse
+        arg_ctx.ignore('manual_cutover')
+        arg_ctx.ignore('perform_cutover')
 
 
 # pylint: disable=too-many-statements
@@ -941,6 +977,12 @@ def load_arguments(self, _):
 
         c.argument('free_limit_exhaustion_behavior',
                    arg_type=database_free_limit_exhaustion_behavior)
+
+        c.argument('manual_cutover',
+                   arg_type=manual_cutover_param_type)
+
+        c.argument('perform_cutover',
+                   arg_type=perform_cutover_param_type)
 
     with self.argument_context('sql db export') as c:
         # Create args that will be used to build up the ExportDatabaseDefinition object
@@ -2239,11 +2281,22 @@ def load_arguments(self, _):
                    help='The compute generation component of the sku. '
                    'Allowed values include: Gen4, Gen5.')
 
+        c.argument('is_general_purpose_v2',
+                   options_list=['--gpv2'],
+                   arg_type=get_three_state_flag(),
+                   help='Whether or not this is a GPv2 variant of General Purpose edition.')
+
         c.argument('storage_size_in_gb',
                    options_list=['--storage'],
                    arg_type=storage_param_type,
                    help='The storage size of the managed instance. '
                    'Storage size must be specified in increments of 32 GB')
+
+        c.argument('storage_iops',
+                   options_list=['--iops'],
+                   arg_type=iops_param_type,
+                   help='The storage iops of the managed instance. '
+                   'Storage iops can be specified in increments of 1.')
 
         c.argument('license_type',
                    arg_type=get_enum_type(DatabaseLicenseType),
@@ -2300,13 +2353,22 @@ def load_arguments(self, _):
         c.argument('zone_redundant',
                    arg_type=zone_redundant_param_type)
 
+        c.argument('authentication_metadata',
+                   arg_type=authentication_metadata_param_type)
+
     with self.argument_context('sql mi create') as c:
         c.argument('location',
                    arg_type=get_location_type_with_default_from_resource_group(self.cli_ctx))
 
+        c.argument('dns_zone_partner',
+                   required=False,
+                   help='The resource id of the partner Managed Instance to inherit DnsZone property from for Managed '
+                        'Instance creation.')
+
         # Create args that will be used to build up the ManagedInstance object
         create_args_for_complex_type(
             c, 'parameters', ManagedInstance, [
+                'is_general_purpose_v2',
                 'administrator_login',
                 'administrator_login_password',
                 'license_type',
@@ -2314,6 +2376,7 @@ def load_arguments(self, _):
                 'virtual_network_subnet_id',
                 'vcores',
                 'storage_size_in_gb',
+                'storage_iops',
                 'collation',
                 'proxy_override',
                 'public_data_endpoint_enabled',
@@ -2327,7 +2390,8 @@ def load_arguments(self, _):
                 'zone_redundant',
                 'instance_pool_name',
                 'database_format',
-                'pricing_model'
+                'pricing_model',
+                'dns_zone_partner'
             ])
 
         # Create args that will be used to build up the Managed Instance's Sku object
@@ -2873,6 +2937,12 @@ def load_arguments(self, _):
     #           sql midb move/copy
     ######
     with self.argument_context('sql midb move') as c:
+        c.argument('dest_subscription_id',
+                   required=False,
+                   options_list=['--dest-subscription-id', '--dest-sub-id'],
+                   help='Id of the subscription to move the managed database to.'
+                   ' If unspecified, defaults to the origin subscription id.')
+
         c.argument('dest_resource_group_name',
                    required=False,
                    options_list=['--dest-resource-group', '--dest-rg'],
@@ -2885,6 +2955,12 @@ def load_arguments(self, _):
                    help='Name of the managed instance to move the managed database to.')
 
     with self.argument_context('sql midb copy') as c:
+        c.argument('dest_subscription_id',
+                   required=False,
+                   options_list=['--dest-subscription-id', '--dest-sub-id'],
+                   help='Id of the subscription to move the managed database to.'
+                   ' If unspecified, defaults to the origin subscription id.')
+
         c.argument('dest_resource_group_name',
                    required=False,
                    options_list=['--dest-resource-group', '--dest-rg'],
@@ -2906,6 +2982,12 @@ def load_arguments(self, _):
                    options_list=['--managed-instance', '--mi'],
                    required=True,
                    help='Name of the source managed instance.')
+
+        c.argument('dest_subscription_id',
+                   required=False,
+                   options_list=['--dest-subscription-id', '--dest-sub-id'],
+                   help='Id of the subscription to move the managed database to.'
+                   ' If unspecified, defaults to the origin subscription id.')
 
         c.argument('dest_instance_name',
                    required=False,
@@ -2932,6 +3014,12 @@ def load_arguments(self, _):
                    options_list=['--managed-instance', '--mi'],
                    required=True,
                    help='Name of the source managed instance.')
+
+        c.argument('dest_subscription_id',
+                   required=False,
+                   options_list=['--dest-subscription-id', '--dest-sub-id'],
+                   help='Id of the subscription to move the managed database to.'
+                   ' If unspecified, defaults to the origin subscription id.')
 
         c.argument('dest_instance_name',
                    required=False,

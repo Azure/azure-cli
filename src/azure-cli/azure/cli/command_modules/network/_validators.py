@@ -48,7 +48,7 @@ def get_vnet_validator(dest):
     from msrestazure.tools import is_valid_resource_id, resource_id
 
     def _validate_vnet_name_or_id(cmd, namespace):
-        SubResource = cmd.get_models('SubResource', resource_type=ResourceType.MGMT_NETWORK_DNS)
+        SubResource = cmd.get_models('SubResource', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
         subscription_id = get_subscription_id(cmd.cli_ctx)
 
         resource_group = namespace.resource_group_name
@@ -228,6 +228,25 @@ def validate_dns_record_type(namespace):
             else:
                 namespace.record_set_type = token
             return
+
+
+def validate_managed_identity_resource_id(resource_id):
+    if resource_id.lower() == 'none':
+        return True
+    parts = resource_id.split('/')
+    if len(parts) != 9:
+        raise ValueError(
+            'Invalid resource ID format for a managed identity. It should be in the format:'
+            '/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/'
+            'Microsoft.ManagedIdentity/userAssignedIdentities/{identity_name}')
+
+    if (parts[1] != 'subscriptions' or parts[3] != 'resourceGroups' or parts[5] != 'providers' or
+            parts[6] != 'Microsoft.ManagedIdentity' or parts[7] != 'userAssignedIdentities'):
+        raise ValueError(
+            'Invalid resource ID format for a managed identity. It should contain subscriptions,'
+            'resourceGroups, providers/Microsoft.ManagedIdentity/userAssignedIdentities'
+            'in the correct order.')
+    return True
 
 
 def validate_user_assigned_identity(cmd, namespace):

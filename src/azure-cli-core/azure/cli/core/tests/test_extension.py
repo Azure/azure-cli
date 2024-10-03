@@ -329,7 +329,7 @@ class TestExtensions(TestExtensionsBase):
             add_extension(cmd=self.cmd, source=test_ext_source)
             call_args = mock_logger.warning.call_args
             self.assertEqual("Default enabled including preview versions for extension installation now. "
-                       "Disabled in May 2024. "
+                       "Disabled in future release. "
                        "Use '--allow-preview true' to enable it specifically if needed. "
                        "Use '--allow-preview false' to install stable version only. ", call_args[0][0])
         ext = show_extension("extension-test-pkg")

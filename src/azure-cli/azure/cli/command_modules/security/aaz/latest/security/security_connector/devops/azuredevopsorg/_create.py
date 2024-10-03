@@ -11,6 +11,10 @@
 from azure.cli.core.aaz import *
 
 
+@register_command(
+    "security security-connector devops azuredevopsorg create",
+    is_preview=True,
+)
 class Create(AAZCommand):
     """Create monitored Azure DevOps organization details.
     """

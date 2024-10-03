@@ -78,15 +78,15 @@ class Create(AAZCommand):
             help="Instruct the system how to handle and charge the logs ingested to this table.",
             enum={"Analytics": "Analytics", "Basic": "Basic"},
         )
-        _args_schema.restore = AAZObjectArg(
-            options=["--restore"],
+        _args_schema.restored_logs = AAZObjectArg(
+            options=["--restored-logs"],
             arg_group="Properties",
             help="Parameters of the restore operation that initiated this table.",
         )
-        _args_schema.retention_time = AAZIntArg(
-            options=["--retention-time"],
+        _args_schema.retention_in_days = AAZIntArg(
+            options=["--retention-in-days"],
             arg_group="Properties",
-            help="The table retention in days, between 4 and 730.",
+            help="The table retention in days, between 4 and 730. Setting this property to -1 will default to the workspace retention.",
             fmt=AAZIntArgFormat(
                 maximum=730,
                 minimum=4,
@@ -97,31 +97,31 @@ class Create(AAZCommand):
             arg_group="Properties",
             help="Table schema.",
         )
-        _args_schema.search_job = AAZObjectArg(
-            options=["--search-job"],
+        _args_schema.search_results = AAZObjectArg(
+            options=["--search-results"],
             arg_group="Properties",
             help="Parameters of the search job that initiated this table.",
         )
-        _args_schema.total_retention_time = AAZIntArg(
-            options=["--total-retention-time"],
+        _args_schema.total_retention_in_days = AAZIntArg(
+            options=["--total-retention-in-days"],
             arg_group="Properties",
-            help="The table total retention in days, between 4 and 2555.",
+            help="The table total retention in days, between 4 and 4383. Setting this property to -1 will default to table retention.",
             fmt=AAZIntArgFormat(
-                maximum=2555,
+                maximum=4383,
                 minimum=4,
             ),
         )
 
-        restore = cls._args_schema.restore
-        restore.end_restore_time = AAZDateTimeArg(
+        restored_logs = cls._args_schema.restored_logs
+        restored_logs.end_restore_time = AAZDateTimeArg(
             options=["end-restore-time"],
             help="The timestamp to end the restore by (UTC).",
         )
-        restore.source_table = AAZStrArg(
+        restored_logs.source_table = AAZStrArg(
             options=["source-table"],
             help="The table to restore data from.",
         )
-        restore.start_restore_time = AAZDateTimeArg(
+        restored_logs.start_restore_time = AAZDateTimeArg(
             options=["start-restore-time"],
             help="The timestamp to start the restore from (UTC).",
         )
@@ -171,24 +171,24 @@ class Create(AAZCommand):
             enum={"boolean": "boolean", "dateTime": "dateTime", "dynamic": "dynamic", "guid": "guid", "int": "int", "long": "long", "real": "real", "string": "string"},
         )
 
-        search_job = cls._args_schema.search_job
-        search_job.description = AAZStrArg(
+        search_results = cls._args_schema.search_results
+        search_results.description = AAZStrArg(
             options=["description"],
             help="Search job Description.",
         )
-        search_job.end_search_time = AAZDateTimeArg(
+        search_results.end_search_time = AAZDateTimeArg(
             options=["end-search-time"],
             help="The timestamp to end the search by (UTC)",
         )
-        search_job.limit = AAZIntArg(
+        search_results.limit = AAZIntArg(
             options=["limit"],
             help="Limit the search job to return up to specified number of rows.",
         )
-        search_job.query = AAZStrArg(
+        search_results.query = AAZStrArg(
             options=["query"],
             help="Search job query.",
         )
-        search_job.start_search_time = AAZDateTimeArg(
+        search_results.start_search_time = AAZDateTimeArg(
             options=["start-search-time"],
             help="The timestamp to start the search from (UTC)",
         )
@@ -309,11 +309,11 @@ class Create(AAZCommand):
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("plan", AAZStrType, ".plan")
-                properties.set_prop("restoredLogs", AAZObjectType, ".restore")
-                properties.set_prop("retentionInDays", AAZIntType, ".retention_time")
+                properties.set_prop("restoredLogs", AAZObjectType, ".restored_logs")
+                properties.set_prop("retentionInDays", AAZIntType, ".retention_in_days")
                 properties.set_prop("schema", AAZObjectType, ".schema")
-                properties.set_prop("searchResults", AAZObjectType, ".search_job")
-                properties.set_prop("totalRetentionInDays", AAZIntType, ".total_retention_time")
+                properties.set_prop("searchResults", AAZObjectType, ".search_results")
+                properties.set_prop("totalRetentionInDays", AAZIntType, ".total_retention_in_days")
 
             restored_logs = _builder.get(".properties.restoredLogs")
             if restored_logs is not None:

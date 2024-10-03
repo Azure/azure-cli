@@ -29,7 +29,7 @@ def _get_resource_group_from_account_name(client, account_name):
 
 # COMMAND NAMESPACE VALIDATORS
 def validate_resource_group_name(cmd, ns):
-    from azure.mgmt.datalake.store import DataLakeStoreAccountManagementClient
+    from .vendored_sdks.azure_mgmt_datalake_store import DataLakeStoreAccountManagementClient
     if not ns.resource_group_name:
         try:
             account_name = ns.name

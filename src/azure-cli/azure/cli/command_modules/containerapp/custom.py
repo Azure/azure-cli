@@ -4,11 +4,11 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long, consider-using-f-string, logging-format-interpolation, inconsistent-return-statements, broad-except, bare-except, too-many-statements, too-many-locals, too-many-boolean-expressions, too-many-branches, too-many-nested-blocks, pointless-statement, expression-not-assigned, unbalanced-tuple-unpacking, unsupported-assignment-operation
 # pylint: disable=unused-argument, no-else-raise
+import json
 import threading
 import sys
 import time
 from urllib.parse import urlparse
-import json
 import requests
 
 
@@ -42,7 +42,8 @@ from ._clients import (
     StorageClient,
     AuthClient,
     WorkloadProfileClient,
-    ContainerAppsJobClient
+    ContainerAppsJobClient,
+    SubscriptionClient
 )
 from ._github_oauth import get_github_access_token
 from ._models import (
@@ -83,10 +84,14 @@ from ._utils import (_validate_subscription_registered,
 from ._validators import validate_revision_suffix
 from ._ssh_utils import (SSH_DEFAULT_ENCODING, WebSocketConnection, read_ssh, get_stdin_writer, SSH_CTRL_C_MSG,
                          SSH_BACKUP_ENCODING)
-from ._constants import (MAXIMUM_SECRET_LENGTH, MICROSOFT_SECRET_SETTING_NAME, FACEBOOK_SECRET_SETTING_NAME, GITHUB_SECRET_SETTING_NAME,
+from ._constants import (MICROSOFT_SECRET_SETTING_NAME, FACEBOOK_SECRET_SETTING_NAME, GITHUB_SECRET_SETTING_NAME,
                          GOOGLE_SECRET_SETTING_NAME, TWITTER_SECRET_SETTING_NAME, APPLE_SECRET_SETTING_NAME, CONTAINER_APPS_RP,
                          NAME_INVALID, NAME_ALREADY_EXISTS, ACR_IMAGE_SUFFIX, HELLO_WORLD_IMAGE, LOG_TYPE_SYSTEM, LOG_TYPE_CONSOLE,
-                         MANAGED_CERTIFICATE_RT, PRIVATE_CERTIFICATE_RT, PENDING_STATUS, SUCCEEDED_STATUS, CONTAINER_APPS_SDK_MODELS)
+                         MANAGED_CERTIFICATE_RT, PRIVATE_CERTIFICATE_RT, PENDING_STATUS, SUCCEEDED_STATUS, CONTAINER_APPS_SDK_MODELS,
+                         BLOB_STORAGE_TOKEN_STORE_SECRET_SETTING_NAME, DEFAULT_PORT)
+
+from .containerapp_job_registry_decorator import ContainerAppJobRegistryDecorator, ContainerAppJobRegistrySetDecorator, \
+    ContainerAppJobRegistryRemoveDecorator
 
 logger = get_logger(__name__)
 
@@ -598,19 +603,30 @@ def update_containerapp_logic(cmd,
         scale_rule_def = ScaleRuleModel
         curr_metadata = {}
         if scale_rule_http_concurrency:
-            if scale_rule_type in ('http', 'tcp'):
+            if scale_rule_type == 'http':
                 curr_metadata["concurrentRequests"] = str(scale_rule_http_concurrency)
+            elif scale_rule_type == 'tcp':
+                curr_metadata["concurrentConnections"] = str(scale_rule_http_concurrency)
         metadata_def = parse_metadata_flags(scale_rule_metadata, curr_metadata)
         auth_def = parse_auth_flags(scale_rule_auth)
         if scale_rule_type == "http":
             scale_rule_def["name"] = scale_rule_name
             scale_rule_def["custom"] = None
+            scale_rule_def["tcp"] = None
             scale_rule_def["http"] = {}
             scale_rule_def["http"]["metadata"] = metadata_def
             scale_rule_def["http"]["auth"] = auth_def
+        elif scale_rule_type == "tcp":
+            scale_rule_def["name"] = scale_rule_name
+            scale_rule_def["custom"] = None
+            scale_rule_def["http"] = None
+            scale_rule_def["tcp"] = {}
+            scale_rule_def["tcp"]["metadata"] = metadata_def
+            scale_rule_def["tcp"]["auth"] = auth_def
         else:
             scale_rule_def["name"] = scale_rule_name
             scale_rule_def["http"] = None
+            scale_rule_def["tcp"] = None
             scale_rule_def["custom"] = {}
             scale_rule_def["custom"]["type"] = scale_rule_type
             scale_rule_def["custom"]["metadata"] = metadata_def
@@ -784,6 +800,33 @@ def list_containerapp(cmd, resource_group_name=None, managed_env=None):
     return containerapp_list_decorator.list()
 
 
+def show_custom_domain_verification_id(cmd):
+    _validate_subscription_registered(cmd, CONTAINER_APPS_RP)
+    try:
+        r = SubscriptionClient.show_custom_domain_verification_id(cmd)
+        return r
+    except CLIError as e:
+        handle_raw_exception(e)
+
+
+def list_usages(cmd, location):
+    _validate_subscription_registered(cmd, CONTAINER_APPS_RP)
+    try:
+        r = SubscriptionClient.list_usages(cmd, location)
+        return r
+    except CLIError as e:
+        handle_raw_exception(e)
+
+
+def list_environment_usages(cmd, resource_group_name, name):
+    _validate_subscription_registered(cmd, CONTAINER_APPS_RP)
+    try:
+        r = ManagedEnvironmentClient.list_usages(cmd, resource_group_name, name)
+        return r
+    except CLIError as e:
+        handle_raw_exception(e)
+
+
 def delete_containerapp(cmd, name, resource_group_name, no_wait=False):
     raw_parameters = locals()
     containerapp_base_decorator = BaseContainerAppDecorator(
@@ -806,6 +849,7 @@ def create_managed_environment(cmd,
                                logs_key=None,
                                location=None,
                                instrumentation_key=None,
+                               dapr_connection_string=None,
                                infrastructure_subnet_resource_id=None,
                                docker_bridge_cidr=None,
                                platform_reserved_cidr=None,
@@ -819,6 +863,7 @@ def create_managed_environment(cmd,
                                certificate_password=None,
                                enable_workload_profiles=True,
                                mtls_enabled=None,
+                               p2p_encryption_enabled=None,
                                no_wait=False):
     raw_parameters = locals()
     containerapp_env_create_decorator = ContainerAppEnvCreateDecorator(
@@ -853,6 +898,7 @@ def update_managed_environment(cmd,
                                min_nodes=None,
                                max_nodes=None,
                                mtls_enabled=None,
+                               p2p_encryption_enabled=None,
                                no_wait=False):
     raw_parameters = locals()
     containerapp_env_update_decorator = ContainerAppEnvUpdateDecorator(
@@ -1404,7 +1450,7 @@ def update_containerappjob_yaml(cmd, name, resource_group_name, file_name, from_
     yaml_containerappsjob = process_loaded_yaml(load_yaml_file(file_name))
     # check if the type is dict
     if not isinstance(yaml_containerappsjob, dict):
-        raise ValidationError('Invalid YAML provided. Please see https://aka.ms/azure-container-apps-yaml for a valid YAML spec.')
+        raise ValidationError('Invalid YAML provided. Please see https://aka.ms/azure-container-apps-job-yaml for a valid YAML spec.')
 
     if not yaml_containerappsjob.get('name'):
         yaml_containerappsjob['name'] = name
@@ -1435,7 +1481,7 @@ def update_containerappjob_yaml(cmd, name, resource_group_name, file_name, from_
         deserializer = create_deserializer()
         containerappsjob_def = deserializer('ContainerAppsJob', yaml_containerappsjob)
     except DeserializationError as ex:
-        raise ValidationError('Invalid YAML provided. Please see https://aka.ms/azure-container-apps-yaml for a valid YAML spec.') from ex
+        raise ValidationError('Invalid YAML provided. Please see https://aka.ms/azure-container-apps-job-yaml for a valid YAML spec.') from ex
 
     # Remove tags before converting from snake case to camel case, then re-add tags. We don't want to change the case of the tags. Need this since we're not using SDK
     tags = None
@@ -1575,10 +1621,18 @@ def start_containerappjob_execution_yaml(cmd, name, resource_group_name, file_na
 
 def stop_containerappsjob(cmd, resource_group_name, name, job_execution_name=None, execution_name_list=None):
     try:
+        # todo: remove execution_name_list in future and allow calling with or without job_execution_name
         if execution_name_list is not None:
-            execution_name_list = execution_name_list.split(",")
-            execution_name_list = json.dumps({'jobExecutionName': execution_name_list})
-        return ContainerAppsJobClient.stop_job(cmd=cmd, resource_group_name=resource_group_name, name=name, job_execution_name=job_execution_name, job_execution_names=execution_name_list)
+            return "--execution-name-list is deprecated. Please use --job-execution-name instead."
+
+        r = ContainerAppsJobClient.stop_job(cmd=cmd, resource_group_name=resource_group_name, name=name, job_execution_name=job_execution_name)
+
+        # if stop is called for a single job execution, return generic response else return the response
+        if job_execution_name:
+            return "Job Execution: " + job_execution_name + ", stopped successfully."
+
+        # else return the response
+        return r
     except CLIError as e:
         handle_raw_exception(e)
 
@@ -2371,7 +2425,7 @@ def show_ingress(cmd, name, resource_group_name):
         raise ValidationError("The containerapp '{}' does not have ingress enabled.".format(name)) from e
 
 
-def enable_ingress(cmd, name, resource_group_name, type, target_port, transport="auto", exposed_port=None, allow_insecure=False, disable_warnings=False, no_wait=False):  # pylint: disable=redefined-builtin
+def enable_ingress(cmd, name, resource_group_name, type, target_port=None, transport="auto", exposed_port=None, allow_insecure=False, disable_warnings=False, no_wait=False):  # pylint: disable=redefined-builtin
     _validate_subscription_registered(cmd, CONTAINER_APPS_RP)
 
     containerapp_def = None
@@ -2391,13 +2445,17 @@ def enable_ingress(cmd, name, resource_group_name, type, target_port, transport=
             external_ingress = True
 
     ingress_def = None
-    if target_port is not None and type is not None:
+    if type is not None:
         ingress_def = IngressModel
         ingress_def["external"] = external_ingress
-        ingress_def["targetPort"] = target_port
         ingress_def["transport"] = transport
         ingress_def["allowInsecure"] = allow_insecure
         ingress_def["exposedPort"] = exposed_port if transport == "tcp" else None
+
+        if target_port is not None:
+            ingress_def["targetPort"] = target_port
+        else:
+            ingress_def["targetPort"] = DEFAULT_PORT
 
     containerapp_def["properties"]["configuration"]["ingress"] = ingress_def
 
@@ -2475,6 +2533,8 @@ def update_ingress(cmd, name, resource_group_name, type=None, target_port=None, 
         ingress_def["allowInsecure"] = allow_insecure
 
     if "transport" in ingress_def and ingress_def["transport"] == "tcp":
+        # Client certificate mode can only be set for http transport.
+        ingress_def["clientCertificateMode"] = None
         if exposed_port is not None:
             ingress_def["exposedPort"] = exposed_port
     else:
@@ -3077,14 +3137,6 @@ def set_secrets(cmd, name, resource_group_name, secrets,
                 no_wait=False):
     _validate_subscription_registered(cmd, CONTAINER_APPS_RP)
 
-    for s in secrets:
-        if s:
-            parsed = s.split("=")
-            if parsed:
-                if len(parsed[0]) > MAXIMUM_SECRET_LENGTH and not disable_max_length:
-                    raise ValidationError(f"Secret names cannot be longer than {MAXIMUM_SECRET_LENGTH}. "
-                                          f"Please shorten {parsed[0]}")
-
     # if not yaml and not secrets:
     #     raise RequiredArgumentMissingError('Usage error: --secrets is required if not using --yaml')
 
@@ -3206,14 +3258,6 @@ def set_secrets_job(cmd, name, resource_group_name, secrets,
                     no_wait=False):
     _validate_subscription_registered(cmd, CONTAINER_APPS_RP)
 
-    for s in secrets:
-        if s:
-            parsed = s.split("=")
-            if parsed:
-                if len(parsed[0]) > MAXIMUM_SECRET_LENGTH and not disable_max_length:
-                    raise ValidationError(f"Secret names cannot be longer than {MAXIMUM_SECRET_LENGTH}. "
-                                          f"Please shorten {parsed[0]}")
-
     containerappjob_def = None
     try:
         containerappjob_def = ContainerAppsJobClient.show(cmd=cmd, resource_group_name=resource_group_name, name=name)
@@ -3233,6 +3277,70 @@ def set_secrets_job(cmd, name, resource_group_name, secrets,
         return r["properties"]["configuration"]["secrets"]
     except Exception as e:
         handle_raw_exception(e)
+
+
+def show_registry_job(cmd, name, resource_group_name, server):
+    raw_parameters = locals()
+
+    containerapp_job_registry_decorator = ContainerAppJobRegistryDecorator(
+        cmd=cmd,
+        client=ContainerAppsJobClient,
+        raw_parameters=raw_parameters,
+        models=CONTAINER_APPS_SDK_MODELS
+    )
+    containerapp_job_registry_decorator.validate_subscription_registered(CONTAINER_APPS_RP)
+    containerapp_job_registry_decorator.validate_arguments()
+
+    r = containerapp_job_registry_decorator.show()
+    return r
+
+
+def list_registry_job(cmd, name, resource_group_name):
+    raw_parameters = locals()
+
+    containerapp_job_registry_decorator = ContainerAppJobRegistryDecorator(
+        cmd=cmd,
+        client=ContainerAppsJobClient,
+        raw_parameters=raw_parameters,
+        models=CONTAINER_APPS_SDK_MODELS
+    )
+    containerapp_job_registry_decorator.validate_subscription_registered(CONTAINER_APPS_RP)
+    containerapp_job_registry_decorator.validate_arguments()
+
+    r = containerapp_job_registry_decorator.list()
+    return r
+
+
+def set_registry_job(cmd, name, resource_group_name, server, username=None, password=None, disable_warnings=False, identity=None, no_wait=False):
+    raw_parameters = locals()
+
+    containerapp_job_registry_set_decorator = ContainerAppJobRegistrySetDecorator(
+        cmd=cmd,
+        client=ContainerAppsJobClient,
+        raw_parameters=raw_parameters,
+        models=CONTAINER_APPS_SDK_MODELS
+    )
+    containerapp_job_registry_set_decorator.validate_subscription_registered(CONTAINER_APPS_RP)
+    containerapp_job_registry_set_decorator.validate_arguments()
+    containerapp_job_registry_set_decorator.construct_payload()
+    r = containerapp_job_registry_set_decorator.set()
+    return r
+
+
+def remove_registry_job(cmd, name, resource_group_name, server, no_wait=False):
+    raw_parameters = locals()
+
+    containerapp_job_registry_remove_decorator = ContainerAppJobRegistryRemoveDecorator(
+        cmd=cmd,
+        client=ContainerAppsJobClient,
+        raw_parameters=raw_parameters,
+        models=CONTAINER_APPS_SDK_MODELS
+    )
+    containerapp_job_registry_remove_decorator.validate_subscription_registered(CONTAINER_APPS_RP)
+    containerapp_job_registry_remove_decorator.validate_arguments()
+    containerapp_job_registry_remove_decorator.construct_payload()
+    r = containerapp_job_registry_remove_decorator.remove()
+    return r
 
 
 def enable_dapr(cmd, name, resource_group_name,
@@ -3428,6 +3536,10 @@ def containerapp_ssh(cmd, resource_group_name, name, container=None, revision=No
 
     logger.warning("Use ctrl + D to exit.")
     while conn.is_connected:
+        if not reader.is_alive() or not writer.is_alive():
+            logger.warning("Reader or Writer for WebSocket is not alive. Closing the connection.")
+            conn.disconnect()
+
         try:
             time.sleep(0.1)
         except KeyboardInterrupt:
@@ -3477,9 +3589,10 @@ def stream_containerapp_logs(cmd, resource_group_name, name, container=None, rev
     for line in resp.iter_lines():
         if line:
             logger.info("received raw log line: %s", line)
-            # these .replaces are needed to display color/quotations properly
-            # for some reason the API returns garbled unicode special characters (may need to add more in the future)
-            print(line.decode("utf-8").replace("\\u0022", "\u0022").replace("\\u001B", "\u001B").replace("\\u002B", "\u002B").replace("\\u0027", "\u0027"))
+            if output_format == "json":
+                print(json.dumps(json.loads(line)))
+            else:
+                print(line.decode("utf-8"))
 
 
 def stream_environment_logs(cmd, resource_group_name, name, follow=False, tail=None):
@@ -3574,11 +3687,6 @@ def containerapp_up(cmd,
         ingress = "external" if not ingress else ingress
         target_port = 80 if not target_port else target_port
 
-    if image:
-        if ingress and not target_port:
-            target_port = 80
-            logger.warning("No ingress provided, defaulting to port 80. Try `az containerapp up --ingress %s --target-port <port>` to set a custom port.", ingress)
-
     if source and not _has_dockerfile(source, dockerfile):
         pass
     else:
@@ -3635,15 +3743,25 @@ def containerapp_up_logic(cmd, resource_group_name, name, managed_env, image, en
     return create_containerapp(cmd=cmd, name=name, resource_group_name=resource_group_name, managed_env=managed_env, image=image, env_vars=env_vars, ingress=ingress, target_port=target_port, registry_server=registry_server, registry_user=registry_user, registry_pass=registry_pass, workload_profile_name=workload_profile_name)
 
 
-def list_certificates(cmd, name, resource_group_name, location=None, certificate=None, thumbprint=None):
-    if certificate and is_valid_resource_id(certificate):
-        certificate_type = parse_resource_id(certificate)["resource_type"]
-    else:
-        certificate_type = PRIVATE_CERTIFICATE_RT
+def create_managed_certificate(cmd, name, resource_group_name, hostname, validation_method, certificate_name=None):
+    if certificate_name and not check_managed_cert_name_availability(cmd, resource_group_name, name, certificate_name):
+        raise ValidationError(f"Certificate name '{certificate_name}' is not available.")
+    cert_name = certificate_name
+    while not cert_name:
+        cert_name = generate_randomized_managed_cert_name(hostname, resource_group_name)
+        if not check_managed_cert_name_availability(cmd, resource_group_name, name, certificate_name):
+            cert_name = None
+    certificate_envelop = prepare_managed_certificate_envelop(cmd, name, resource_group_name, hostname, validation_method.upper())
+    try:
+        r = ManagedEnvironmentClient.create_or_update_managed_certificate(cmd, resource_group_name, name, cert_name, certificate_envelop, True, validation_method.upper() == 'TXT')
+        return r
+    except Exception as e:
+        handle_raw_exception(e)
 
-    if certificate_type != PRIVATE_CERTIFICATE_RT:
-        raise ValidationError(f"The certificate {certificate} is not private-key certificate.")
-    return list_certificates_logic(cmd, name, resource_group_name, location, certificate, thumbprint, private_key_certificates_only=True)
+
+def list_certificates(cmd, name, resource_group_name, location=None, certificate=None, thumbprint=None, managed_certificates_only=False, private_key_certificates_only=False):
+
+    return list_certificates_logic(cmd, name, resource_group_name, location, certificate, thumbprint, managed_certificates_only=managed_certificates_only, private_key_certificates_only=private_key_certificates_only)
 
 
 def list_certificates_logic(cmd, name, resource_group_name, location=None, certificate=None, thumbprint=None, managed_certificates_only=False, private_key_certificates_only=False):
@@ -3751,23 +3869,8 @@ def upload_certificate(cmd, name, resource_group_name, certificate_file, certifi
 
 
 def delete_certificate(cmd, resource_group_name, name, location=None, certificate=None, thumbprint=None):
-    if not certificate and not thumbprint:
-        raise RequiredArgumentMissingError('Please specify at least one of parameters: --certificate and --thumbprint')
-    # validate for GA
-    cert_name = certificate
-    if certificate and is_valid_resource_id(certificate):
-        cert_type = parse_resource_id(certificate)["resource_type"]
-        cert_name = parse_resource_id(certificate)["resource_name"]
-    else:
-        cert_type = PRIVATE_CERTIFICATE_RT
 
-    if thumbprint:
-        cert_type = PRIVATE_CERTIFICATE_RT
-
-    if cert_type != PRIVATE_CERTIFICATE_RT:
-        raise ValidationError(f"The certificate {cert_name} is not private-key certificate.")
-
-    delete_certificate_logic(cmd, resource_group_name, name, cert_name, location, certificate, thumbprint, cert_type)
+    delete_certificate_logic(cmd=cmd, resource_group_name=resource_group_name, name=name, cert_name=certificate, location=location, certificate=certificate, thumbprint=thumbprint)
 
 
 # this function will be used in extension
@@ -3807,11 +3910,19 @@ def delete_certificate_logic(cmd, resource_group_name, name, cert_name, location
             raise ResourceNotFoundError(f"The certificate '{cert_name}' does not exist in Container app environment '{name}'.")
         if len(managed_certs) > 0 and len(private_certs) > 0:
             raise RequiredArgumentMissingError(f"Found more than one certificates with name '{cert_name}':\n'{managed_certs[0]['id']}',\n'{private_certs[0]['id']}'.\nPlease specify the certificate id using --certificate.")
-        try:
-            ManagedEnvironmentClient.delete_managed_certificate(cmd, resource_group_name, name, cert_name)
-            logger.warning('Successfully deleted certificate: %s', cert_name)
-        except Exception as e:
-            handle_raw_exception(e)
+        if private_certs:
+            try:
+                ManagedEnvironmentClient.delete_certificate(cmd, resource_group_name, name, cert_name)
+                logger.warning('Successfully deleted certificate: %s', cert_name)
+            except Exception as e:
+                handle_raw_exception(e)
+
+        if managed_certs:
+            try:
+                ManagedEnvironmentClient.delete_managed_certificate(cmd, resource_group_name, name, cert_name)
+                logger.warning('Successfully deleted certificate: %s', cert_name)
+            except Exception as e:
+                handle_raw_exception(e)
 
 
 def upload_ssl(cmd, resource_group_name, name, environment, certificate_file, hostname, certificate_password=None, certificate_name=None, location=None):
@@ -3840,11 +3951,9 @@ def upload_ssl(cmd, resource_group_name, name, environment, certificate_file, ho
     return patch_new_custom_domain(cmd, resource_group_name, name, new_custom_domains)
 
 
-def bind_hostname(cmd, resource_group_name, name, hostname, thumbprint=None, certificate=None, location=None, environment=None):
-    # validate for GA
-    if not thumbprint and not certificate:
-        raise RequiredArgumentMissingError('Please specify at least one of parameters: --certificate and --thumbprint')
-    return bind_hostname_logic(cmd, resource_group_name, name, hostname, thumbprint, certificate, location, environment)
+def bind_hostname(cmd, resource_group_name, name, hostname, thumbprint=None, certificate=None, location=None, environment=None, validation_method=None):
+
+    return bind_hostname_logic(cmd, resource_group_name, name, hostname, thumbprint, certificate, location, environment, validation_method)
 
 
 def bind_hostname_logic(cmd, resource_group_name, name, hostname, thumbprint=None, certificate=None, location=None, environment=None, validation_method=None):
@@ -4124,7 +4233,7 @@ def update_aad_settings(cmd, resource_group_name, name,
         registration["clientSecretSettingName"] = client_secret_setting_name
     if client_secret is not None:
         registration["clientSecretSettingName"] = MICROSOFT_SECRET_SETTING_NAME
-        set_secrets(cmd, name, resource_group_name, secrets=[f"{MICROSOFT_SECRET_SETTING_NAME}={client_secret}"], no_wait=True, disable_max_length=True)
+        set_secrets(cmd, name, resource_group_name, secrets=[f"{MICROSOFT_SECRET_SETTING_NAME}={client_secret}"], no_wait=False, disable_max_length=True)
     if client_secret_setting_name is not None or client_secret is not None:
         fields = ["clientSecretCertificateThumbprint", "clientSecretCertificateSubjectAlternativeName", "clientSecretCertificateIssuer"]
         for field in [f for f in fields if registration.get(f)]:
@@ -4235,7 +4344,7 @@ def update_facebook_settings(cmd, resource_group_name, name,
         registration["appSecretSettingName"] = app_secret_setting_name
     if app_secret is not None:
         registration["appSecretSettingName"] = FACEBOOK_SECRET_SETTING_NAME
-        set_secrets(cmd, name, resource_group_name, secrets=[f"{FACEBOOK_SECRET_SETTING_NAME}={app_secret}"], no_wait=True, disable_max_length=True)
+        set_secrets(cmd, name, resource_group_name, secrets=[f"{FACEBOOK_SECRET_SETTING_NAME}={app_secret}"], no_wait=False, disable_max_length=True)
     if graph_api_version is not None:
         existing_auth["identityProviders"]["facebook"]["graphApiVersion"] = graph_api_version
     if scopes is not None:
@@ -4310,7 +4419,7 @@ def update_github_settings(cmd, resource_group_name, name,
         registration["clientSecretSettingName"] = client_secret_setting_name
     if client_secret is not None:
         registration["clientSecretSettingName"] = GITHUB_SECRET_SETTING_NAME
-        set_secrets(cmd, name, resource_group_name, secrets=[f"{GITHUB_SECRET_SETTING_NAME}={client_secret}"], no_wait=True, disable_max_length=True)
+        set_secrets(cmd, name, resource_group_name, secrets=[f"{GITHUB_SECRET_SETTING_NAME}={client_secret}"], no_wait=False, disable_max_length=True)
     if scopes is not None:
         existing_auth["identityProviders"]["gitHub"]["login"]["scopes"] = scopes.split(",")
     if client_id is not None or client_secret is not None or client_secret_setting_name is not None:
@@ -4387,7 +4496,7 @@ def update_google_settings(cmd, resource_group_name, name,
         registration["clientSecretSettingName"] = client_secret_setting_name
     if client_secret is not None:
         registration["clientSecretSettingName"] = GOOGLE_SECRET_SETTING_NAME
-        set_secrets(cmd, name, resource_group_name, secrets=[f"{GOOGLE_SECRET_SETTING_NAME}={client_secret}"], no_wait=True, disable_max_length=True)
+        set_secrets(cmd, name, resource_group_name, secrets=[f"{GOOGLE_SECRET_SETTING_NAME}={client_secret}"], no_wait=False, disable_max_length=True)
     if scopes is not None:
         existing_auth["identityProviders"]["google"]["login"]["scopes"] = scopes.split(",")
     if allowed_token_audiences is not None:
@@ -4460,7 +4569,7 @@ def update_twitter_settings(cmd, resource_group_name, name,
         registration["consumerSecretSettingName"] = consumer_secret_setting_name
     if consumer_secret is not None:
         registration["consumerSecretSettingName"] = TWITTER_SECRET_SETTING_NAME
-        set_secrets(cmd, name, resource_group_name, secrets=[f"{TWITTER_SECRET_SETTING_NAME}={consumer_secret}"], no_wait=True, disable_max_length=True)
+        set_secrets(cmd, name, resource_group_name, secrets=[f"{TWITTER_SECRET_SETTING_NAME}={consumer_secret}"], no_wait=False, disable_max_length=True)
     if consumer_key is not None or consumer_secret is not None or consumer_secret_setting_name is not None:
         existing_auth["identityProviders"]["twitter"]["registration"] = registration
     try:
@@ -4530,7 +4639,7 @@ def update_apple_settings(cmd, resource_group_name, name,
         registration["clientSecretSettingName"] = client_secret_setting_name
     if client_secret is not None:
         registration["clientSecretSettingName"] = APPLE_SECRET_SETTING_NAME
-        set_secrets(cmd, name, resource_group_name, secrets=[f"{APPLE_SECRET_SETTING_NAME}={client_secret}"], no_wait=True, disable_max_length=True)
+        set_secrets(cmd, name, resource_group_name, secrets=[f"{APPLE_SECRET_SETTING_NAME}={client_secret}"], no_wait=False, disable_max_length=True)
     if scopes is not None:
         existing_auth["identityProviders"]["apple"]["login"]["scopes"] = scopes.split(",")
     if client_id is not None or client_secret is not None or client_secret_setting_name is not None:
@@ -4689,7 +4798,7 @@ def update_openid_connect_provider_settings(cmd, resource_group_name, name, prov
     if client_secret is not None:
         final_client_secret_setting_name = get_oidc_client_setting_app_setting_name(provider_name)
         registration["clientSecretSettingName"] = final_client_secret_setting_name
-        set_secrets(cmd, name, resource_group_name, secrets=[f"{final_client_secret_setting_name}={client_secret}"], no_wait=True, disable_max_length=True)
+        set_secrets(cmd, name, resource_group_name, secrets=[f"{final_client_secret_setting_name}={client_secret}"], no_wait=False, disable_max_length=True)
     if openid_configuration is not None:
         registration["openIdConnectConfiguration"]["wellKnownOpenIdConfiguration"] = openid_configuration
     if scopes is not None:
@@ -4732,7 +4841,9 @@ def update_auth_config(cmd, resource_group_name, name, set_string=None, enabled=
                        runtime_version=None, config_file_path=None, unauthenticated_client_action=None,
                        redirect_provider=None, require_https=None,
                        proxy_convention=None, proxy_custom_host_header=None,
-                       proxy_custom_proto_header=None, excluded_paths=None):
+                       proxy_custom_proto_header=None, excluded_paths=None,
+                       token_store=None, sas_url_secret=None, sas_url_secret_name=None,
+                       yes=False):
     raw_parameters = locals()
     containerapp_auth_decorator = ContainerAppAuthDecorator(
         cmd=cmd,
@@ -4742,6 +4853,14 @@ def update_auth_config(cmd, resource_group_name, name, set_string=None, enabled=
     )
 
     containerapp_auth_decorator.construct_payload()
+    # Set secretes will add a secret to the containerapp
+    if containerapp_auth_decorator.get_argument_token_store() and containerapp_auth_decorator.get_argument_sas_url_secret() is not None:
+        if not containerapp_auth_decorator.get_argument_yes():
+            msg = 'Configuring --sas-url-secret will add a secret to the containerapp. Are you sure you want to continue?'
+            if not prompt_y_n(msg, default="n"):
+                raise ArgumentUsageError(
+                    'Usage Error: --sas-url-secret cannot be used without agreeing to add secret to the containerapp.')
+        set_secrets(cmd, name, resource_group_name, secrets=[f"{BLOB_STORAGE_TOKEN_STORE_SECRET_SETTING_NAME}={containerapp_auth_decorator.get_argument_sas_url_secret()}"], no_wait=False, disable_max_length=True)
     return containerapp_auth_decorator.create_or_update()
 
 
@@ -4801,7 +4920,8 @@ def create_containerapps_from_compose(cmd,  # pylint: disable=R0914
         managed_environment = create_containerapps_compose_environment(cmd,
                                                                        managed_env_name,
                                                                        env_rg,
-                                                                       tags=tags)
+                                                                       tags=tags,
+                                                                       location=location)
 
     compose_yaml = load_yaml_file(compose_file_path)
     parsed_compose_file = ComposeFile(compose_yaml)
@@ -4903,10 +5023,15 @@ def set_workload_profile(cmd, resource_group_name, env_name, workload_profile_na
 
 
 def add_workload_profile(cmd, resource_group_name, env_name, workload_profile_name, workload_profile_type=None, min_nodes=None, max_nodes=None):
+    r = None
     try:
         r = ManagedEnvironmentClient.show(cmd=cmd, resource_group_name=resource_group_name, name=env_name)
     except CLIError as e:
         handle_raw_exception(e)
+
+    if r and safe_get(r, "properties", "workloadProfiles") is None:
+        raise ValidationError("Cannot add workload profile because the environment doesn't enable workload profile.\n"
+                              "If you want to use Consumption and Dedicated environment, please create a new one with 'az containerapp env create'.")
 
     workload_profiles = r["properties"]["workloadProfiles"]
 
@@ -4919,10 +5044,15 @@ def add_workload_profile(cmd, resource_group_name, env_name, workload_profile_na
 
 
 def update_workload_profile(cmd, resource_group_name, env_name, workload_profile_name, min_nodes=None, max_nodes=None):
+    r = None
     try:
         r = ManagedEnvironmentClient.show(cmd=cmd, resource_group_name=resource_group_name, name=env_name)
     except CLIError as e:
         handle_raw_exception(e)
+
+    if r and safe_get(r, "properties", "workloadProfiles") is None:
+        raise ValidationError("Cannot update workload profile because the environment doesn't enable workload profile.\n"
+                              "If you want to use Consumption and Dedicated environment, please create a new one with 'az containerapp env create'.")
 
     workload_profiles = r["properties"]["workloadProfiles"]
 

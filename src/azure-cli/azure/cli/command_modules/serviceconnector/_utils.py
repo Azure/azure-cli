@@ -3,10 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import os
+import re
 import time
 from knack.log import get_logger
 from knack.util import todict, CLIError
-from msrestazure.tools import parse_resource_id
 from azure.cli.core.azclierror import (
     ValidationError,
     CLIInternalError
@@ -17,9 +18,17 @@ from ._resource_config import (
     TARGET_RESOURCES_USERTOKEN,
     RESOURCE
 )
-
+from azure.cli.core import get_default_cli
+from azure.mgmt.core.tools import (
+    parse_resource_id,
+    is_valid_resource_id as is_valid_resource_id_sdk
+)
 
 logger = get_logger(__name__)
+
+
+def is_valid_resource_id(value):
+    return is_valid_resource_id_sdk(value)
 
 
 def should_load_source(source):
@@ -77,24 +86,26 @@ def run_cli_cmd(cmd, retry=0, interval=0, should_retry_func=None):
     :param retry: The times to re-try
     :param interval: The seconds wait before retry
     '''
-    import json
-    import subprocess
+    output = _in_process_execute(cmd)
 
-    output = subprocess.run(cmd, shell=True, check=False,
-                            stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-    logger.debug(output)
-    if output.returncode != 0 or (should_retry_func and should_retry_func(output)):
+    if output.error or (should_retry_func and should_retry_func(output)):
         if retry:
             time.sleep(interval)
             return run_cli_cmd(cmd, retry - 1, interval)
-        err = output.stderr.decode(encoding='UTF-8', errors='ignore')
         raise CLIInternalError('Command execution failed, command is: '
-                               '{}, error message is: \n {}'.format(cmd, err))
-    try:
-        return json.loads(output.stdout.decode(encoding='UTF-8', errors='ignore')) if output.stdout else None
-    except ValueError as e:
-        logger.debug(e)
-        return output.stdout or None
+                               '{}, error message is: \n {}'.format(cmd, output.error))
+    return output.result
+
+
+def _in_process_execute(command):
+    import shlex
+
+    if command.startswith('az '):
+        command = command[3:]
+
+    cli = get_default_cli()
+    cli.invoke(shlex.split(command), out_file=open(os.devnull, 'w'))  # Don't print output
+    return cli.result
 
 
 def set_user_token_header(client, cli_ctx):
@@ -123,7 +134,7 @@ def provider_is_registered(subscription=None):
     # register the provider
     subs_arg = ''
     if subscription:
-        subs_arg = '--subscription {}'.format(subscription)
+        subs_arg = '--subscription "{}"'.format(subscription)
     output = run_cli_cmd(
         'az provider show -n Microsoft.ServiceLinker {}'.format(subs_arg))
     if output.get('registrationState') == 'NotRegistered':
@@ -137,7 +148,7 @@ def register_provider(subscription=None):
 
     subs_arg = ''
     if subscription:
-        subs_arg = '--subscription {}'.format(subscription)
+        subs_arg = '--subscription "{}"'.format(subscription)
 
     # register the provider
     run_cli_cmd(
@@ -249,22 +260,22 @@ def create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, k
 
 
 def get_auth_if_no_valid_key_vault_connection(source_name, source_id, key_vault_connections):
+    if source_name == RESOURCE.WebApp:
+        return get_auth_if_no_valid_key_vault_connection_for_webapp(source_id, key_vault_connections)
+
+    if source_name == RESOURCE.ContainerApp:
+        return get_auth_if_no_valid_key_vault_connection_for_containerapp(key_vault_connections)
+
+    # any connection with csi enabled is a valid connection
+    if source_name == RESOURCE.KubernetesCluster:
+        for connection in key_vault_connections:
+            if connection.get('targetService', dict()).get(
+                    'resourceProperties', dict()).get('connectAsKubernetesCsiDriver'):
+                return
+        return {'authType': 'userAssignedIdentity'}
+
+    # other source types
     if key_vault_connections:
-        if source_name == RESOURCE.WebApp:
-            return get_auth_if_no_valid_key_vault_connection_for_webapp(source_id, key_vault_connections)
-
-        if source_name == RESOURCE.ContainerApp:
-            return get_auth_if_no_valid_key_vault_connection_for_containerapp(key_vault_connections)
-
-        # any connection with csi enabled is a valid connection
-        if source_name == RESOURCE.KubernetesCluster:
-            for connection in key_vault_connections:
-                if connection.get('target_service', dict()).get(
-                        'resource_properties', dict()).get('connect_as_kubernetes_csi_driver'):
-                    return
-            return {'authType': 'userAssignedIdentity'}
-
-        # other source types
         logger.warning('key vault reference connection: %s',
                        key_vault_connections[0].get('id'))
         return
@@ -274,13 +285,10 @@ def get_auth_if_no_valid_key_vault_connection(source_name, source_id, key_vault_
 
 # https://docs.microsoft.com/azure/app-service/app-service-key-vault-references
 def get_auth_if_no_valid_key_vault_connection_for_webapp(source_id, key_vault_connections):
-    from msrestazure.tools import (
-        is_valid_resource_id
-    )
 
     try:
         webapp = run_cli_cmd(
-            'az rest -u {}?api-version=2020-09-01 -o json'.format(source_id))
+            'az rest -u "{}?api-version=2020-09-01" -o json'.format(source_id))
         reference_identity = webapp.get(
             'properties').get('keyVaultReferenceIdentity')
     except Exception as e:
@@ -298,7 +306,7 @@ def get_auth_if_no_valid_key_vault_connection_for_webapp(source_id, key_vault_co
         except Exception:  # pylint: disable=broad-except
             try:
                 identity = run_cli_cmd(
-                    'az identity show --ids {} -o json'.format(reference_identity))
+                    'az identity show --ids "{}" -o json'.format(reference_identity))
                 client_id = identity.get('clientId')
             except Exception:  # pylint: disable=broad-except
                 pass
@@ -333,6 +341,50 @@ def get_auth_if_no_valid_key_vault_connection_for_containerapp(key_vault_connect
     return {'authType': auth_type}
 
 
+def create_app_config_connection_if_not_exist(cmd, client, source_id, app_config_id,
+                                              scope=None):  # Resource.ContainerApp
+    from ._validators import get_source_resource_name
+
+    logger.warning('looking for valid app configuration connections')
+    for connection in client.list(resource_uri=source_id):
+        connection = todict(connection)
+        if connection.get('targetService', dict()).get('id') == app_config_id:
+            logger.warning('Valid app configuration connection found.')
+            return
+
+    logger.warning('no valid app configuration connection found. Creating with system identity...')
+
+    from ._resource_config import (
+        CLIENT_TYPE
+    )
+
+    connection_name = generate_random_string(prefix='appconfig_')
+    parameters = {
+        'target_service': {
+            "type": "AzureResource",
+            "id": app_config_id
+        },
+        'auth_info': {
+            'authType': 'systemAssignedIdentity'
+        },
+        # Container App container name
+        'scope': scope,
+        'client_type': CLIENT_TYPE.Blank,
+    }
+
+    source_name = get_source_resource_name(cmd)
+    if source_name == RESOURCE.KubernetesCluster:
+        parameters['target_service']['resource_properties'] = {
+            'type': 'KeyVault',
+            'connect_as_kubernetes_csi_driver': True,
+        }
+
+    return auto_register(client.begin_create_or_update,
+                         resource_uri=source_id,
+                         linker_name=connection_name,
+                         parameters=parameters)
+
+
 def is_packaged_installed(package_name):
     import pkg_resources
     installed_packages = pkg_resources.working_set
@@ -343,17 +395,24 @@ def is_packaged_installed(package_name):
 
 
 def get_object_id_of_current_user():
-    signed_in_user = run_cli_cmd('az account show').get('user')
+    signed_in_user_info = run_cli_cmd('az account show -o json')
+    if not isinstance(signed_in_user_info, dict):
+        raise CLIInternalError(
+            f"Can't parse login user information {signed_in_user_info}")
+    signed_in_user = signed_in_user_info.get('user')
     user_type = signed_in_user.get('type')
+    if not user_type or not signed_in_user.get('name'):
+        raise CLIInternalError(
+            f"Can't get user type or name from signed-in user {signed_in_user}")
     try:
         if user_type == 'user':
-            user_info = run_cli_cmd('az ad signed-in-user show')
+            user_info = run_cli_cmd('az ad signed-in-user show -o json')
             user_object_id = user_info.get('objectId') if user_info.get(
                 'objectId') else user_info.get('id')
             return user_object_id
         if user_type == 'servicePrincipal':
             user_info = run_cli_cmd(
-                f'az ad sp show --id {signed_in_user.get("name")}')
+                f'az ad sp show --id "{signed_in_user.get("name")}" -o json')
             user_object_id = user_info.get('id')
             return user_object_id
     except CLIInternalError as e:
@@ -365,7 +424,8 @@ def get_object_id_of_current_user():
 
 def get_cloud_conn_auth_info(secret_auth_info, secret_auth_info_auto,
                              user_identity_auth_info, system_identity_auth_info,
-                             service_principal_auth_info_secret, new_addon):
+                             service_principal_auth_info_secret, new_addon,
+                             auth_action=None, config_action=None, target_type=None):
     all_auth_info = []
     if secret_auth_info is not None:
         all_auth_info.append(secret_auth_info)
@@ -377,9 +437,16 @@ def get_cloud_conn_auth_info(secret_auth_info, secret_auth_info_auto,
         all_auth_info.append(system_identity_auth_info)
     if service_principal_auth_info_secret is not None:
         all_auth_info.append(service_principal_auth_info_secret)
+    if len(all_auth_info) == 0:
+        if (auth_action == 'optOutAllAuth' and config_action == 'optOut') \
+           or target_type == RESOURCE.ContainerApp:
+            return None
+        raise ValidationError('At least one auth info is needed')
     if not new_addon and len(all_auth_info) != 1:
         raise ValidationError('Only one auth info is needed')
     auth_info = all_auth_info[0] if len(all_auth_info) == 1 else None
+    if auth_info is not None and auth_action is not None:
+        auth_info.update({'auth_mode': auth_action})
     return auth_info
 
 
@@ -474,3 +541,43 @@ Learn more at https://spring.io/projects/spring-cloud-azure#overview"
         warning_message += both_version_message
 
     return warning_message
+
+
+# LinkerResource Model is converted into dict in update flow,
+# which conflicts with the default behavior of creation wrt the key name format.
+def get_auth_type_for_update(authInfo):
+    if authInfo is None:
+        return None
+    if 'auth_type' in authInfo:
+        return authInfo['auth_type']
+    return authInfo['authType']
+
+
+def get_secret_type_for_update(authInfo):
+    if 'secret_info' in authInfo:
+        return authInfo['secret_info']['secret_type']
+    if 'secretInfo' in authInfo:
+        return authInfo['secretInfo']['secretType']
+    return ''
+
+
+# Decorator for AKS configurations.
+def is_aks_linker_by_id(resource_id):
+    pattern = r'/subscriptions/([^/]+)/resourceGroups/([^/]+)/providers/Microsoft.ContainerService' + \
+        r'/managedClusters/([^/]+)/providers/Microsoft.ServiceLinker/linkers/([^/]+)'
+    return re.match(pattern, resource_id, re.IGNORECASE) is not None
+
+
+def get_aks_resource_name(linker):
+    secret_name = get_aks_resource_secret_name(linker["name"])
+    if linker["authInfo"] is not None and linker["authInfo"].get("authType") == "userAssignedIdentity" and \
+            not (linker["targetService"]["resourceProperties"] is not None and
+                 linker["targetService"]["resourceProperties"].get("connectAsKubernetesCsiDriver")):
+        service_account_name = f'sc-account-{linker["authInfo"].get("clientId")}'
+        return [secret_name, service_account_name]
+    return [secret_name]
+
+
+def get_aks_resource_secret_name(connection_name):
+    valid_name = re.sub(r'[^a-zA-Z0-9]', '', connection_name, flags=re.IGNORECASE)
+    return f'sc-{valid_name}-secret'

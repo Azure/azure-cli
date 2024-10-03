@@ -959,6 +959,12 @@ backup vault update:
     cross_subscription_restore_state:
       rule_exclusions:
       - option_length_too_long
+    backup_storage_redundancy:
+      rule_exclusions:
+      - option_length_too_long
+    cross_region_restore_flag:
+      rule_exclusions:
+      - option_length_too_long
 backup vault create:
   parameters:
     cross_subscription_restore_state:
@@ -2741,6 +2747,14 @@ network traffic-manager endpoint update:
       rule_exclusions:
       - option_length_too_long
 network vnet peering create:
+  parameters:
+    allow_forwarded_traffic:
+      rule_exclusions:
+      - option_length_too_long
+    allow_gateway_transit:
+      rule_exclusions:
+      - option_length_too_long
+network vnet peering update:
   parameters:
     allow_forwarded_traffic:
       rule_exclusions:

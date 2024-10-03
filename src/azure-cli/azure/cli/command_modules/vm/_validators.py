@@ -605,6 +605,26 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
     if not namespace.os_type:
         namespace.os_type = 'windows' if 'windows' in namespace.os_offer.lower() else 'linux'
 
+    if getattr(namespace, 'source_snapshots_or_disks', None) and \
+            getattr(namespace, 'source_snapshots_or_disks_size_gb', None):
+        if len(namespace.source_snapshots_or_disks) != len(namespace.source_snapshots_or_disks_size_gb):
+            raise ArgumentUsageError(
+                'Length of --source-snapshots-or-disks, --source-snapshots-or-disks-size-gb must be same.')
+    elif getattr(namespace, 'source_snapshots_or_disks', None) or \
+            getattr(namespace, 'source_snapshots_or_disks_size_gb', None):
+        raise ArgumentUsageError('usage error: --source-snapshots-or-disks and '
+                                 '--source-snapshots-or-disks-size-gb must be used together')
+
+    if getattr(namespace, 'source_disk_restore_point', None) and \
+            getattr(namespace, 'source_disk_restore_point_size_gb', None):
+        if len(namespace.source_disk_restore_point) != len(namespace.source_disk_restore_point_size_gb):
+            raise ArgumentUsageError(
+                'Length of --source-disk-restore-point, --source-disk-restore-point-size-gb must be same.')
+    elif getattr(namespace, 'source_disk_restore_point', None) or \
+            getattr(namespace, 'source_disk_restore_point_size_gb', None):
+        raise ArgumentUsageError('usage error: --source-disk-restore-point and '
+                                 '--source-disk-restore-point-size-gb must be used together')
+
     from ._vm_utils import normalize_disk_info
     # attach_data_disks are not exposed yet for VMSS, so use 'getattr' to avoid crash
     vm_size = (getattr(namespace, 'size', None) or getattr(namespace, 'vm_sku', None))
@@ -620,7 +640,12 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
                                               ephemeral_os_disk=getattr(namespace, 'ephemeral_os_disk', None),
                                               ephemeral_os_disk_placement=getattr(namespace, 'ephemeral_os_disk_placement', None),
                                               data_disk_delete_option=getattr(
-                                                  namespace, 'data_disk_delete_option', None))
+                                                  namespace, 'data_disk_delete_option', None),
+                                              source_snapshots_or_disks=getattr(namespace, 'source_snapshots_or_disks', None),
+                                              source_snapshots_or_disks_size_gb=getattr(namespace, 'source_snapshots_or_disks_size_gb', None),
+                                              source_disk_restore_point=getattr(namespace, 'source_disk_restore_point', None),
+                                              source_disk_restore_point_size_gb=getattr(namespace, 'source_disk_restore_point_size_gb', None)
+                                              )
 
 
 def _validate_vm_create_storage_account(cmd, namespace):
@@ -1207,6 +1232,7 @@ def _validate_admin_password(password, os_type):
 
 def validate_ssh_key(namespace, cmd=None):
     from azure.core.exceptions import HttpResponseError
+    ssh_key_type = namespace.ssh_key_type if hasattr(namespace, 'ssh_key_type') else 'RSA'
     if hasattr(namespace, 'ssh_key_name') and namespace.ssh_key_name:
         client = _compute_client_factory(cmd.cli_ctx)
         # --ssh-key-name
@@ -1223,7 +1249,7 @@ def validate_ssh_key(namespace, cmd=None):
         elif namespace.generate_ssh_keys:
             parameters = {}
             parameters['location'] = namespace.location
-            public_key = _validate_ssh_key_helper("", namespace.generate_ssh_keys)
+            public_key = _validate_ssh_key_helper("", namespace.generate_ssh_keys, ssh_key_type)
             parameters['public_key'] = public_key
             client.ssh_public_keys.create(resource_group_name=namespace.resource_group_name,
                                           ssh_public_key_name=namespace.ssh_key_name,
@@ -1236,16 +1262,22 @@ def validate_ssh_key(namespace, cmd=None):
 
         processed_ssh_key_values = []
         for ssh_key_value in namespace.ssh_key_value:
-            processed_ssh_key_values.append(_validate_ssh_key_helper(ssh_key_value, namespace.generate_ssh_keys))
+            processed_ssh_key_values.append(_validate_ssh_key_helper(ssh_key_value,
+                                                                     namespace.generate_ssh_keys,
+                                                                     ssh_key_type))
         namespace.ssh_key_value = processed_ssh_key_values
     # if no ssh keys processed, try to generate new key / use existing at root.
     else:
-        namespace.ssh_key_value = [_validate_ssh_key_helper("", namespace.generate_ssh_keys)]
+        namespace.ssh_key_value = [_validate_ssh_key_helper("",
+                                                            namespace.generate_ssh_keys,
+                                                            ssh_key_type)]
 
 
-def _validate_ssh_key_helper(ssh_key_value, should_generate_ssh_keys):
+def _validate_ssh_key_helper(ssh_key_value, should_generate_ssh_keys, ssh_key_type=None):
+    file_name = 'id_rsa.pub' if ssh_key_type is None or ssh_key_type == 'RSA' else 'id_ed25519.pub'
     string_or_file = (ssh_key_value or
-                      os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub'))
+                      os.path.join(os.path.expanduser('~'), '.ssh', file_name))
+
     content = string_or_file
     if os.path.exists(string_or_file):
         logger.info('Use existing SSH public key file: %s', string_or_file)
@@ -1260,7 +1292,12 @@ def _validate_ssh_key_helper(ssh_key_value, should_generate_ssh_keys):
                 private_key_filepath = public_key_filepath[:-4]
             else:
                 private_key_filepath = public_key_filepath + '.private'
-            content = keys.generate_ssh_keys(private_key_filepath, public_key_filepath)
+
+            if ssh_key_type == "Ed25519":
+                from azure.cli.command_modules.vm._vm_utils import generate_ssh_keys_ed25519
+                content = generate_ssh_keys_ed25519(private_key_filepath, public_key_filepath)
+            else:
+                content = keys.generate_ssh_keys(private_key_filepath, public_key_filepath)
             logger.warning("SSH key files '%s' and '%s' have been generated under ~/.ssh to "
                            "allow SSH access to the VM. If using machines without "
                            "permanent storage, back up your keys to a safe location.",
@@ -1703,7 +1740,6 @@ def process_vmss_create_namespace(cmd, namespace):
         namespace.load_balancer_sku = 'Standard'  # lb sku MUST be standard
         # namespace.public_ip_per_vm = True  # default to true for VMSS Flex
 
-        namespace.upgrade_policy_mode = None
         namespace.use_unmanaged_disk = None
 
         banned_params = {
@@ -2579,16 +2615,12 @@ def _validate_vm_vmss_create_ephemeral_placement(namespace):
 
 def _validate_vm_vmss_update_ephemeral_placement(cmd, namespace):  # pylint: disable=unused-argument
     size = getattr(namespace, 'size', None)
-    vm_sku = getattr(namespace, 'vm_sku', None)
     ephemeral_os_disk_placement = getattr(namespace, 'ephemeral_os_disk_placement', None)
     source = getattr(namespace, 'command').split()[0]
     if ephemeral_os_disk_placement:
         if source == 'vm' and not size:
             raise ArgumentUsageError('usage error: --ephemeral-os-disk-placement is only configurable when '
                                      '--size is specified.')
-        if source == 'vmss' and not vm_sku:
-            raise ArgumentUsageError('usage error: --ephemeral-os-disk-placement is only configurable when '
-                                     '--vm-sku is specified.')
 
 
 def _validate_community_gallery_legal_agreement_acceptance(cmd, namespace):
