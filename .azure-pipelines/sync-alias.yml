@@ -70,25 +70,25 @@ jobs:
   - pwsh: |
       git config --global user.email "AzPyCLI@microsoft.com"
       git config --global user.name "Azure CLI Team"
-      git checkout -b "sync_alias_$env:Build.BuildId"
+      git checkout -b "sync_alias_$env:Build_BuildId"
 
       git add .github/policies
       git commit -m "Sync resourceManagement.yml"
 
       git remote set-url origin https://azclibot:$(GithubToken)@github.com/Azure/azure-cli.git;
-      git push origin "sync_alias_$env:Build.BuildId" --force
+      git push origin "sync_alias_$env:Build_BuildId" --force
     displayName: Git commit and push
     condition: and(succeeded(), eq(variables['ChangesDetected'], 'true'))
 
   - pwsh: |
       $Title = "Sync resourceManagement.yml according To ADO Wiki Page - Service Contact List"
-      $HeadBranch = "sync_alias_$env:Build.BuildId"
+      $HeadBranch = "sync_alias_$env:Build_BuildId"
       $BaseBranch = "dev"
       $Description = "This PR synchronizes the task: 'Triage issues to the service team' part of resourceManagement.yml from table of Service Contact List in ADO wiki page"
       Invoke-RestMethod -Uri "https://api.github.com/repos/Azure/azure-cli/pulls" `
         -Method Post `
-        -Headers @{ "Authorization" = "token $GithubToken" } `
-        -Body (@{ title = $pr_title; body = $pr_body; head = $pr_head; base = "dev" } | ConvertTo-Json) `
+        -Headers @{ "Authorization" = "token $env:GithubToken" } `
+        -Body (@{ title = $Title; body = $Description; head = $HeadBranch; base = $BaseBranch } | ConvertTo-Json) `
         -ContentType "application/json"
     displayName: Create PR to main branch
     condition: and(succeeded(), eq(variables['ChangesDetected'], 'true'))
