@@ -6,13 +6,13 @@
 # --------------------------------------------------------------------------------------------
 # pylint: skip-file
 # flake8: noqa
-from azure.core.exceptions import HttpResponseError
 
 from azure.cli.core.aaz import *
+from azure.core.exceptions import HttpResponseError
 
 @register_command(
     "sql mi link failover",
-    confirmation="This operation may cause data loss if failover type is ForcedAllowDataLoss. Are you sure you want to proceed?"
+    confirmation="This operation may cause data loss if the failover type is ForcedAllowDataLoss. Are you sure you want to proceed?"
 )
 class Failover(AAZCommand):
     """Failovers an instance link.
