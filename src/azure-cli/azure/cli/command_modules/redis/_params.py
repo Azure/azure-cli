@@ -102,4 +102,4 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('mi_user_assigned', arg_type=user_identity_type)
 
     with self.argument_context('redis update') as c:
-        c.extra('no_wait', arg_type=get_three_state_flag())
+        c.extra('no_wait', arg_type=get_three_state_flag(), help="Specify as false to wait for result of long running operation")
