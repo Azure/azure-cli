@@ -82,6 +82,8 @@ def cli_redis_update(cmd, instance, sku=None, vm_size=None):
 
 
 def custom_update_setter(client, resource_group_name, name, parameters, no_wait=True):
+    if not no_wait:
+        no_wait = True
     # Custom update setter is used to match behavior from when update was not a LRO
     return sdk_no_wait(no_wait, client.begin_update, resource_group_name, name, parameters)
 
