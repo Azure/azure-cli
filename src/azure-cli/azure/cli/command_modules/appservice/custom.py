@@ -4589,7 +4589,7 @@ def create_flex_app_service_plan(cmd, resource_group_name, name, location, zone_
     )
 
     if zone_redundant:
-        _enable_zone_redundant(plan_def, sku_def, 2)
+        _enable_zone_redundant(plan_def, sku_def, None)
 
     poller = client.app_service_plans.begin_create_or_update(resource_group_name, name, plan_def)
     return LongRunningOperation(cmd.cli_ctx)(poller)
