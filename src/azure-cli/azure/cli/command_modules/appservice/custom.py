@@ -4822,7 +4822,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     if flexconsumption_location is None:
         if zone_redundant:
             raise ArgumentUsageError(
-                '--zone-redundant is only valid input for Azure Functions on the Flex Consumption plan. '
+                '--zone-redundant is only valid for the Flex Consumption plan.'
                 'Please try again without the --zone-redundant parameter.')
 
     if flexconsumption_location is not None:
