@@ -11732,6 +11732,5 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         normalClusterCalculated = noopDecorator3.update_k8s_support_plan(normalCluster)
         self.assertEqual(normalClusterCalculated, normalCluster)
 
-
 if __name__ == "__main__":
     unittest.main()
