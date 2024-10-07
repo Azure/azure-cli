@@ -14,32 +14,35 @@ class TestAAZIdentity(unittest.TestCase):
     def test_main_command(self):
         result = {}
         data = {
-            "miUserAssigned": ["a", "b"],
-            "miSystemAssigned": "SystemAssigned",
+            "userAssigned": ["a", "b"],
+            "systemAssigned": "SystemAssigned",
+            "action": "create",
         }
-        result = self.identity.build_identity(data, result)
-        self.assertTrue(result["type"] == "SystemAssigned, UserAssigned")
+        result = self.identity._build_identity(data, result)
+        self.assertTrue(result["type"] == "SystemAssigned,UserAssigned")
         self.assertTrue(result["userAssignedIdentities"] == {"a": {}, "b": {}})
 
         result = {}
         data = {
-            "miUserAssigned": [],
-            "miSystemAssigned": "SystemAssigned",
+            "userAssigned": [],
+            "systemAssigned": "SystemAssigned",
+            "action": "create",
         }
-        result = self.identity.build_identity(data, result)
+        result = self.identity._build_identity(data, result)
         self.assertTrue(result["type"] == "SystemAssigned")
         self.assertTrue("userAssignedIdentities" not in result)
 
         result = {}
         data = {
-            "miUserAssigned": [],
+            "userAssigned": [],
+            "action": "create",
         }
-        result = self.identity.build_identity(data, result)
+        result = self.identity._build_identity(data, result)
         self.assertTrue(result == {})
 
         result = {}
-        data = {}
-        result = self.identity.build_identity(data, result)
+        data = {"action": "create"}
+        result = self.identity._build_identity(data, result)
         self.assertTrue(result == {})
 
     def test_assign_command(self):
@@ -51,8 +54,8 @@ class TestAAZIdentity(unittest.TestCase):
             "userAssigned": ["b", "c"],
             "action": "assign",
         }
-        result = self.identity.build_identity(data, result)
-        self.assertTrue(result["type"] == "SystemAssigned, UserAssigned")
+        result = self.identity._build_identity(data, result)
+        self.assertTrue(result["type"] == "SystemAssigned,UserAssigned")
         self.assertTrue(result["userAssignedIdentities"] == {"a": {}, "b": {}, "c": {}})
 
         result = {
@@ -63,8 +66,8 @@ class TestAAZIdentity(unittest.TestCase):
             "systemAssigned": "SystemAssigned",
             "action": "assign",
         }
-        result = self.identity.build_identity(data, result)
-        self.assertTrue(result["type"] == "SystemAssigned, UserAssigned")
+        result = self.identity._build_identity(data, result)
+        self.assertTrue(result["type"] == "SystemAssigned,UserAssigned")
         self.assertTrue(result["userAssignedIdentities"] == {"a": {}, "b": {}})
 
         result = {
@@ -74,8 +77,8 @@ class TestAAZIdentity(unittest.TestCase):
             "userAssigned": ["a", "b"],
             "action": "assign",
         }
-        result = self.identity.build_identity(data, result)
-        self.assertTrue(result["type"] == "SystemAssigned, UserAssigned")
+        result = self.identity._build_identity(data, result)
+        self.assertTrue(result["type"] == "SystemAssigned,UserAssigned")
         self.assertTrue(result["userAssignedIdentities"] == {"a": {}, "b": {}})
 
         result = {}
@@ -83,7 +86,7 @@ class TestAAZIdentity(unittest.TestCase):
             "userAssigned": ["a", "b"],
             "action": "assign",
         }
-        result = self.identity.build_identity(data, result)
+        result = self.identity._build_identity(data, result)
         self.assertTrue(result["type"] == "UserAssigned")
         self.assertTrue(result["userAssignedIdentities"] == {"a": {}, "b": {}})
 
@@ -92,7 +95,7 @@ class TestAAZIdentity(unittest.TestCase):
             "userAssigned": [],
             "action": "assign",
         }
-        result = self.identity.build_identity(data, result)
+        result = self.identity._build_identity(data, result)
         self.assertTrue(result == {})
 
     def test_remove_command(self):
@@ -105,7 +108,7 @@ class TestAAZIdentity(unittest.TestCase):
             "systemAssigned": "SystemAssigned",
             "action": "remove",
         }
-        result = self.identity.build_identity(data, result)
+        result = self.identity._build_identity(data, result)
         self.assertTrue(result["type"] == "UserAssigned")
         self.assertTrue(result["userAssignedIdentities"] == {"a": {}})
 
@@ -117,7 +120,7 @@ class TestAAZIdentity(unittest.TestCase):
             "userAssigned": [],
             "action": "remove",
         }
-        result = self.identity.build_identity(data, result)
+        result = self.identity._build_identity(data, result)
         self.assertTrue(result["type"] == "SystemAssigned")
         self.assertTrue("userAssignedIdentities" not in result)
 
@@ -129,7 +132,7 @@ class TestAAZIdentity(unittest.TestCase):
             "userAssigned": [],
             "action": "remove",
         }
-        result = self.identity.build_identity(data, result)
+        result = self.identity._build_identity(data, result)
         self.assertTrue(result == {})
 
         result = {}
@@ -137,7 +140,7 @@ class TestAAZIdentity(unittest.TestCase):
             "userAssigned": ["a", "b"],
             "action": "remove",
         }
-        result = self.identity.build_identity(data, result)
+        result = self.identity._build_identity(data, result)
         self.assertTrue(result == {})
 
         result = {}
@@ -145,5 +148,5 @@ class TestAAZIdentity(unittest.TestCase):
             "userAssigned": [],
             "action": "remove",
         }
-        result = self.identity.build_identity(data, result)
+        result = self.identity._build_identity(data, result)
         self.assertTrue(result == {})

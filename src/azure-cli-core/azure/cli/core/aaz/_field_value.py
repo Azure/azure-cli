@@ -448,11 +448,6 @@ class AAZList(AAZBaseValue):
 
 
 class AAZIdentityObject(AAZObject):
-    M_USER_ASSIGNED = "miUserAssigned"
-    S_USER_ASSIGNED = "userAssigned"
-    M_SYSTEM_ASSIGNED = "miSystemAssigned"
-    S_SYSTEM_ASSIGNED = "systemAssigned"
-
     def to_serialized_data(self, processor=None, **kwargs):
         data = dict()  # parameters for build
         if self._data == AAZUndefined:
@@ -474,18 +469,14 @@ class AAZIdentityObject(AAZObject):
                     if field_schema._serialized_name:
                         name = field_schema._serialized_name
 
-                    if name in {
-                        self.M_SYSTEM_ASSIGNED, self.M_USER_ASSIGNED,
-                        self.S_SYSTEM_ASSIGNED, self.S_USER_ASSIGNED,
-                    }:
+                    if name in {"userAssigned", "systemAssigned"}:
                         data[name] = v
-                        if action := field_schema._flags.get("action", None):  # subcommand has action
-                            data["action"] = action
+                        data["action"] = field_schema._flags.get("action", None)  # no action in GET operation
 
                     else:
                         result[name] = v
 
-        result = self.build_identity(data, result)
+        result = self._build_identity(data, result)
 
         if not result:
             result = {"type": "None"}  # empty identity
@@ -498,60 +489,49 @@ class AAZIdentityObject(AAZObject):
 
         return result
 
-    def build_identity(self, data, result):
-        if not data:
+    def _build_identity(self, data, result):
+        action = data.get("action", None)
+        if not action:
             return result
 
-        if action := data.get("action", None):  # subcommand
-            identities = set(result.pop("userAssignedIdentities", {}).keys())
-            has_system_identity = "systemassigned" in result.pop("type", "").lower()
+        user_assigned = data.get("userAssigned", None)
+        system_assigned = data.get("systemAssigned", None)
 
-            user_assigned = data.get(self.S_USER_ASSIGNED, None)
-            system_assigned = data.get(self.S_SYSTEM_ASSIGNED, None)
+        identities = set(result.pop("userAssignedIdentities", {}).keys())
+        has_system_identity = "systemassigned" in result.pop("type", "").lower()
 
-            if action == "remove":
-                if user_assigned is not None:
-                    if len(user_assigned) > 1:  # remove each
-                        identities -= set(user_assigned)
+        if action == "remove":
+            if user_assigned is not None:
+                if len(user_assigned) > 1:  # remove each
+                    identities -= set(user_assigned)
 
-                    else:  # remove all
-                        identities = {}
+                else:  # remove all
+                    identities = {}
 
-                if identities:
-                    result["userAssignedIdentities"] = {k: {} for k in identities}
-                    if system_assigned or not has_system_identity:
-                        result["type"] = "UserAssigned"
+            if identities:
+                result["userAssignedIdentities"] = {k: {} for k in identities}
+                if system_assigned or not has_system_identity:
+                    result["type"] = "UserAssigned"
 
-                    else:
-                        result["type"] = "SystemAssigned, UserAssigned"
+                else:
+                    result["type"] = "SystemAssigned,UserAssigned"
 
-                elif not system_assigned and has_system_identity:
-                    result["type"] = "SystemAssigned"
+            elif not system_assigned and has_system_identity:
+                result["type"] = "SystemAssigned"
 
-            elif action == "assign":
-                if user_assigned:
-                    identities |= set(user_assigned)
+        else:  # assign or create
+            if user_assigned:
+                identities |= set(user_assigned)
 
-                if identities:
-                    result["userAssignedIdentities"] = {k: {} for k in identities}
-                    if system_assigned or has_system_identity:
-                        result["type"] = "SystemAssigned, UserAssigned"
+            if identities:
+                result["userAssignedIdentities"] = {k: {} for k in identities}
+                if system_assigned or has_system_identity:
+                    result["type"] = "SystemAssigned,UserAssigned"
 
-                    else:
-                        result["type"] = "UserAssigned"
+                else:
+                    result["type"] = "UserAssigned"
 
-                elif system_assigned or has_system_identity:
-                    result["type"] = "SystemAssigned"
-
-        else:  # main command
-            mi_user_assigned = data.get(self.M_USER_ASSIGNED, None)
-            mi_system_assigned = data.get(self.M_SYSTEM_ASSIGNED, None)
-
-            if mi_user_assigned:
-                result["userAssignedIdentities"] = {k: {} for k in mi_user_assigned}
-                result["type"] = "SystemAssigned, UserAssigned" if mi_user_assigned else "UserAssigned"
-
-            elif mi_system_assigned:
+            elif system_assigned or has_system_identity:
                 result["type"] = "SystemAssigned"
 
         return result
