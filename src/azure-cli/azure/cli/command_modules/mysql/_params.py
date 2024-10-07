@@ -110,6 +110,12 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         help='Enable or disable the auto scale iops. Default value is Disabled.'
     )
 
+    accelerated_logs_arg_type = CLIArgumentType(
+        arg_type=get_enum_type(['Enabled', 'Disabled']),
+        options_list=['--accelerated-logs'],
+        help='Enable or disable accelerated logs. Only support for Business Critical tier. Default value is Enabled.'
+    )
+
     yes_arg_type = CLIArgumentType(
         options_list=['--yes', '-y'],
         action='store_true',
@@ -199,6 +205,13 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         options_list=['--restore-time'],
         default=get_current_time(),
         help='The point in time in UTC to restore from (ISO8601 format), e.g., 2017-04-26T02:10:00+00:00'
+             'The default value is set to current time.'
+    )
+
+    maintenance_reschedule_time_arg_type = CLIArgumentType(
+        options_list=['--start-time'],
+        default=get_current_time(),
+        help='The maintenance reschedule start time in UTC(ISO8601 format), e.g., 2017-04-26T02:10:00+00:00'
              'The default value is set to current time.'
     )
 
@@ -308,6 +321,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         c.argument('iops', arg_type=iops_arg_type)
         c.argument('auto_grow', default='Enabled', arg_type=auto_grow_arg_type)
         c.argument('auto_scale_iops', default='Disabled', arg_type=auto_scale_iops_arg_type)
+        c.argument('accelerated_logs', default='Disabled', arg_type=accelerated_logs_arg_type)
         c.argument('backup_retention', default=7, arg_type=mysql_backup_retention_arg_type)
         c.argument('backup_byok_identity', arg_type=backup_identity_arg_type)
         c.argument('backup_byok_key', arg_type=backup_key_arg_type)
@@ -385,6 +399,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         c.argument('tier', arg_type=tier_arg_type)
         c.argument('storage_gb', arg_type=storage_gb_arg_type)
         c.argument('auto_grow', arg_type=auto_grow_arg_type)
+        c.argument('accelerated_logs', default='Disabled', arg_type=accelerated_logs_arg_type)
         c.argument('backup_retention', arg_type=mysql_backup_retention_arg_type)
         c.argument('geo_redundant_backup', arg_type=geo_redundant_backup_arg_type)
         c.argument('public_access', options_list=['--public-access'], arg_type=get_enum_type(['Enabled', 'Disabled']), help='Determines the public access. ')
@@ -405,6 +420,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         c.argument('tier', arg_type=tier_arg_type)
         c.argument('storage_gb', arg_type=storage_gb_arg_type)
         c.argument('auto_grow', arg_type=auto_grow_arg_type)
+        c.argument('accelerated_logs', default='Disabled', arg_type=accelerated_logs_arg_type)
         c.argument('backup_retention', arg_type=mysql_backup_retention_arg_type)
         c.argument('geo_redundant_backup', arg_type=geo_redundant_backup_arg_type)
         c.argument('public_access', options_list=['--public-access'], arg_type=get_enum_type(['Enabled', 'Disabled']), help='Determines the public access. ')
@@ -423,6 +439,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         c.argument('byok_identity', arg_type=identity_arg_type)
         c.argument('auto_grow', arg_type=auto_grow_arg_type)
         c.argument('auto_scale_iops', arg_type=auto_scale_iops_arg_type)
+        c.argument('accelerated_logs', arg_type=accelerated_logs_arg_type)
         c.argument('replication_role', options_list=['--replication-role'], help='The replication role of the server.')
         c.argument('iops', arg_type=iops_arg_type)
         c.argument('backup_retention', arg_type=mysql_backup_retention_arg_type)
@@ -590,6 +607,21 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
     with self.argument_context('mysql flexible-server identity show') as c:
         c.argument('identity', options_list=['--identity', '-n'], help='Name or ID of identity to show.', validator=validate_identity)
+
+    with self.argument_context('mysql flexible-server maintenance reschedule') as c:
+        c.argument('resource_group_name', arg_type=resource_group_name_type, help='Resource Group Name of the server.')
+        c.argument('server_name', options_list=['--server-name', '-s'], help='The name of the server.')
+        c.argument('maintenance_name', options_list=['--maintenance-name', '-m'], help='The name of the maintenance.')
+        c.argument('maintenance_start_time', arg_type=maintenance_reschedule_time_arg_type, help='The new start time of the rescheduled maintenance.')
+
+    with self.argument_context('mysql flexible-server maintenance list') as c:
+        c.argument('resource_group_name', id_part=None, arg_type=resource_group_name_type, help='Resource Group Name of the server.')
+        c.argument('server_name', id_part=None, options_list=['--server-name', '-s'], help='The name of the server.')
+
+    with self.argument_context('mysql flexible-server maintenance show') as c:
+        c.argument('resource_group_name', arg_type=resource_group_name_type, help='Resource Group Name of the server.')
+        c.argument('server_name', options_list=['--server-name', '-s'], help='The name of the server.')
+        c.argument('maintenance_name', options_list=['--maintenance-name', '-m'], help='The name of the maintenance.')
 
     # ad-admin
     with self.argument_context('mysql flexible-server ad-admin') as c:

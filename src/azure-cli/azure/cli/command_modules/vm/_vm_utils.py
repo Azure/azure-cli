@@ -676,25 +676,6 @@ def validate_image_trusted_launch(namespace):
         logger.warning(UPGRADE_SECURITY_HINT)
 
 
-def validate_update_vm_trusted_launch_supported(cmd, vm, os_disk_resource_group, os_disk_name):
-    from azure.cli.command_modules.vm._client_factory import _compute_client_factory
-    from azure.cli.core.azclierror import InvalidArgumentValueError
-
-    client = _compute_client_factory(cmd.cli_ctx).disks
-    os_disk_info = client.get(os_disk_resource_group, os_disk_name)
-    generation_version = os_disk_info.hyper_v_generation if hasattr(os_disk_info, 'hyper_v_generation') else None
-
-    if generation_version != "V2":
-        raise InvalidArgumentValueError(
-            "Trusted Launch security configuration can be enabled only with Azure Gen2 VMs. Please visit "
-            "https://learn.microsoft.com/en-us/azure/virtual-machines/trusted-launch for more details.")
-
-    if vm.security_profile is not None and vm.security_profile.security_type == "ConfidentialVM":
-        raise InvalidArgumentValueError("{} is already configured with ConfidentialVM. "
-                                        "Security Configuration cannot be updated from ConfidentialVM to TrustedLaunch."
-                                        .format(vm.name))
-
-
 def display_region_recommendation(cmd, namespace):
 
     identified_region_maps = {
@@ -727,3 +708,37 @@ def import_aaz_by_profile(profile, module_name):
     from azure.cli.core.aaz.utils import get_aaz_profile_module_name
     profile_module_name = get_aaz_profile_module_name(profile_name=profile)
     return importlib.import_module(f"azure.cli.command_modules.vm.aaz.{profile_module_name}.{module_name}")
+
+
+def generate_ssh_keys_ed25519(private_key_filepath, public_key_filepath):
+    from cryptography.hazmat.primitives import serialization
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+
+    ssh_dir = os.path.dirname(private_key_filepath)
+    if not os.path.exists(ssh_dir):
+        os.makedirs(ssh_dir)
+        os.chmod(ssh_dir, 0o700)
+
+    private_key = Ed25519PrivateKey.generate()
+    public_key = private_key.public_key()
+    private_bytes = private_key.private_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PrivateFormat.OpenSSH,
+        encryption_algorithm=serialization.NoEncryption()
+    )
+
+    with os.fdopen(os.open(private_key_filepath, flags=os.O_WRONLY | os.O_TRUNC | os.O_CREAT, mode=384, ), "w", ) as f:
+        f.write(
+            private_bytes.decode()
+        )
+    os.chmod(private_key_filepath, 0o600)
+
+    with open(public_key_filepath, 'w') as public_key_file:
+        s = public_key.public_bytes(
+            encoding=serialization.Encoding.OpenSSH,
+            format=serialization.PublicFormat.OpenSSH)
+        public_key = s.decode(encoding="utf8").replace("\n", "")
+        public_key_file.write(public_key)
+    os.chmod(public_key_filepath, 0o644)
+
+    return public_key

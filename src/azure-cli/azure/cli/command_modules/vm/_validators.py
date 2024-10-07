@@ -1232,6 +1232,7 @@ def _validate_admin_password(password, os_type):
 
 def validate_ssh_key(namespace, cmd=None):
     from azure.core.exceptions import HttpResponseError
+    ssh_key_type = namespace.ssh_key_type if hasattr(namespace, 'ssh_key_type') else 'RSA'
     if hasattr(namespace, 'ssh_key_name') and namespace.ssh_key_name:
         client = _compute_client_factory(cmd.cli_ctx)
         # --ssh-key-name
@@ -1248,7 +1249,7 @@ def validate_ssh_key(namespace, cmd=None):
         elif namespace.generate_ssh_keys:
             parameters = {}
             parameters['location'] = namespace.location
-            public_key = _validate_ssh_key_helper("", namespace.generate_ssh_keys)
+            public_key = _validate_ssh_key_helper("", namespace.generate_ssh_keys, ssh_key_type)
             parameters['public_key'] = public_key
             client.ssh_public_keys.create(resource_group_name=namespace.resource_group_name,
                                           ssh_public_key_name=namespace.ssh_key_name,
@@ -1261,16 +1262,22 @@ def validate_ssh_key(namespace, cmd=None):
 
         processed_ssh_key_values = []
         for ssh_key_value in namespace.ssh_key_value:
-            processed_ssh_key_values.append(_validate_ssh_key_helper(ssh_key_value, namespace.generate_ssh_keys))
+            processed_ssh_key_values.append(_validate_ssh_key_helper(ssh_key_value,
+                                                                     namespace.generate_ssh_keys,
+                                                                     ssh_key_type))
         namespace.ssh_key_value = processed_ssh_key_values
     # if no ssh keys processed, try to generate new key / use existing at root.
     else:
-        namespace.ssh_key_value = [_validate_ssh_key_helper("", namespace.generate_ssh_keys)]
+        namespace.ssh_key_value = [_validate_ssh_key_helper("",
+                                                            namespace.generate_ssh_keys,
+                                                            ssh_key_type)]
 
 
-def _validate_ssh_key_helper(ssh_key_value, should_generate_ssh_keys):
+def _validate_ssh_key_helper(ssh_key_value, should_generate_ssh_keys, ssh_key_type=None):
+    file_name = 'id_rsa.pub' if ssh_key_type is None or ssh_key_type == 'RSA' else 'id_ed25519.pub'
     string_or_file = (ssh_key_value or
-                      os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub'))
+                      os.path.join(os.path.expanduser('~'), '.ssh', file_name))
+
     content = string_or_file
     if os.path.exists(string_or_file):
         logger.info('Use existing SSH public key file: %s', string_or_file)
@@ -1285,7 +1292,12 @@ def _validate_ssh_key_helper(ssh_key_value, should_generate_ssh_keys):
                 private_key_filepath = public_key_filepath[:-4]
             else:
                 private_key_filepath = public_key_filepath + '.private'
-            content = keys.generate_ssh_keys(private_key_filepath, public_key_filepath)
+
+            if ssh_key_type == "Ed25519":
+                from azure.cli.command_modules.vm._vm_utils import generate_ssh_keys_ed25519
+                content = generate_ssh_keys_ed25519(private_key_filepath, public_key_filepath)
+            else:
+                content = keys.generate_ssh_keys(private_key_filepath, public_key_filepath)
             logger.warning("SSH key files '%s' and '%s' have been generated under ~/.ssh to "
                            "allow SSH access to the VM. If using machines without "
                            "permanent storage, back up your keys to a safe location.",

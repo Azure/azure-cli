@@ -74,7 +74,7 @@ steps:
   - push: ["$Registry/{{image_name}}"]
     timeout: 1800
 """
-DEFAULT_PORT = 8080  # used for no dockerfile scenario; not the hello world image
+DEFAULT_PORT = 0  # used for no dockerfile scenario; not the hello world image. Auto detect the port
 
 HELLO_WORLD_IMAGE = "mcr.microsoft.com/k8se/quickstart:latest"
 

@@ -12,25 +12,25 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g -n --admin-username --admin-password --image --storage-sku --data-disk-sizes-gb
-        --zone --location --vm-sku --instance-count --lb --orchestration-mode
+        --zone --location --vm-sku --instance-count --lb --orchestration-mode --lb-sku
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.30.1 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/publishers/Debian/artifacttypes/vmimage/offers/debian-10/skus/10/versions?$top=1&$orderby=name%20desc&api-version=2024-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/publishers/Debian/artifacttypes/vmimage/offers/debian-10/skus/10/versions?$top=1&$orderby=name%20desc&api-version=2024-07-01
   response:
     body:
-      string: "[\r\n  {\r\n    \"location\": \"eastus\",\r\n    \"name\": \"0.20240204.1647\"\
-        ,\r\n    \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/eastus/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20240204.1647\"\
+      string: "[\r\n  {\r\n    \"location\": \"eastus2\",\r\n    \"name\": \"0.20240430.1733\"\
+        ,\r\n    \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/eastus2/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20240430.1733\"\
         \r\n  }\r\n]"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '273'
+      - '275'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Apr 2024 04:12:50 GMT
+      - Mon, 26 Aug 2024 08:12:15 GMT
       expires:
       - '-1'
       pragma:
@@ -42,9 +42,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/ListVMImagesVersionsFromLocation3Min;15999,Microsoft.Compute/ListVMImagesVersionsFromLocation30Min;43994
+      - Microsoft.Compute/ListVMImagesVersionsFromLocation3Min;15999,Microsoft.Compute/ListVMImagesVersionsFromLocation30Min;43999
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 0DF08B55211948E8943E7953824016E4 Ref B: MAA201060516009 Ref C: 2024-04-24T04:12:50Z'
+      - 'Ref A: 58FA02FE167F4A2EA66057FAEE9B973A Ref B: TYO201100115009 Ref C: 2024-08-26T08:12:16Z'
     status:
       code: 200
       message: OK
@@ -61,11 +63,11 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g -n --admin-username --admin-password --image --storage-sku --data-disk-sizes-gb
-        --zone --location --vm-sku --instance-count --lb --orchestration-mode
+        --zone --location --vm-sku --instance-count --lb --orchestration-mode --lb-sku
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.30.1 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/publishers/Debian/artifacttypes/vmimage/offers/debian-10/skus/10/versions/0.20240204.1647?api-version=2024-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/publishers/Debian/artifacttypes/vmimage/offers/debian-10/skus/10/versions/0.20240430.1733?api-version=2024-07-01
   response:
     body:
       string: "{\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n \
@@ -79,18 +81,18 @@ interactions:
         \   \"value\": \"SCSI\"\r\n      },\r\n      {\r\n        \"name\": \"IsHibernateSupported\"\
         ,\r\n        \"value\": \"False\"\r\n      }\r\n    ],\r\n    \"osDiskImage\"\
         : {\r\n      \"operatingSystem\": \"Linux\",\r\n      \"sizeInBytes\": 32212255232\r\
-        \n    },\r\n    \"dataDiskImages\": []\r\n  },\r\n  \"location\": \"eastus\"\
-        ,\r\n  \"name\": \"0.20240204.1647\",\r\n  \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/eastus/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20240204.1647\"\
+        \n    },\r\n    \"dataDiskImages\": []\r\n  },\r\n  \"location\": \"eastus2\"\
+        ,\r\n  \"name\": \"0.20240430.1733\",\r\n  \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/eastus2/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20240430.1733\"\
         \r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1008'
+      - '1010'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Apr 2024 04:12:51 GMT
+      - Mon, 26 Aug 2024 08:12:16 GMT
       expires:
       - '-1'
       pragma:
@@ -102,9 +104,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetVMImageFromLocation3Min;12999,Microsoft.Compute/GetVMImageFromLocation30Min;73995
+      - Microsoft.Compute/GetVMImageFromLocation3Min;12999,Microsoft.Compute/GetVMImageFromLocation30Min;73999
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 758DC76860514B45A2C73D980E1FDE68 Ref B: MAA201060513033 Ref C: 2024-04-24T04:12:51Z'
+      - 'Ref A: DDE0989F3D024A5DBB0C23E4E4ECC2D8 Ref B: TYO201100117049 Ref C: 2024-08-26T08:12:16Z'
     status:
       code: 200
       message: OK
@@ -121,9 +125,9 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g -n --admin-username --admin-password --image --storage-sku --data-disk-sizes-gb
-        --zone --location --vm-sku --instance-count --lb --orchestration-mode
+        --zone --location --vm-sku --instance-count --lb --orchestration-mode --lb-sku
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.30.1 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Network/virtualNetworks?api-version=2022-01-01
   response:
@@ -137,7 +141,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Apr 2024 04:12:51 GMT
+      - Mon, 26 Aug 2024 08:12:17 GMT
       expires:
       - '-1'
       pragma:
@@ -148,8 +152,10 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 614CB28321154CDAAF89B32FB65A0417 Ref B: MAA201060513045 Ref C: 2024-04-24T04:12:52Z'
+      - 'Ref A: 10FA7A8C56144324965C2ED4C6FAC91F Ref B: TYO201151002034 Ref C: 2024-08-26T08:12:18Z'
     status:
       code: 200
       message: OK
@@ -166,25 +172,25 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g -n --admin-username --admin-password --image --storage-sku --data-disk-sizes-gb
-        --zone --location --vm-sku --instance-count --lb --orchestration-mode
+        --zone --location --vm-sku --instance-count --lb --orchestration-mode --lb-sku
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.30.1 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/publishers/Debian/artifacttypes/vmimage/offers/debian-10/skus/10/versions?$top=1&$orderby=name%20desc&api-version=2024-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/publishers/Debian/artifacttypes/vmimage/offers/debian-10/skus/10/versions?$top=1&$orderby=name%20desc&api-version=2024-07-01
   response:
     body:
-      string: "[\r\n  {\r\n    \"location\": \"eastus\",\r\n    \"name\": \"0.20240204.1647\"\
-        ,\r\n    \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/eastus/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20240204.1647\"\
+      string: "[\r\n  {\r\n    \"location\": \"eastus2\",\r\n    \"name\": \"0.20240430.1733\"\
+        ,\r\n    \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/eastus2/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20240430.1733\"\
         \r\n  }\r\n]"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '273'
+      - '275'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Apr 2024 04:12:53 GMT
+      - Mon, 26 Aug 2024 08:12:18 GMT
       expires:
       - '-1'
       pragma:
@@ -196,9 +202,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/ListVMImagesVersionsFromLocation3Min;15998,Microsoft.Compute/ListVMImagesVersionsFromLocation30Min;43993
+      - Microsoft.Compute/ListVMImagesVersionsFromLocation3Min;15998,Microsoft.Compute/ListVMImagesVersionsFromLocation30Min;43998
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: C3E169D4A55241679E0739ECF76D6A83 Ref B: MAA201060516017 Ref C: 2024-04-24T04:12:53Z'
+      - 'Ref A: A57A056A402741779F1585BCB6556A9D Ref B: TYO201151005060 Ref C: 2024-08-26T08:12:18Z'
     status:
       code: 200
       message: OK
@@ -215,11 +223,11 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g -n --admin-username --admin-password --image --storage-sku --data-disk-sizes-gb
-        --zone --location --vm-sku --instance-count --lb --orchestration-mode
+        --zone --location --vm-sku --instance-count --lb --orchestration-mode --lb-sku
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.30.1 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/publishers/Debian/artifacttypes/vmimage/offers/debian-10/skus/10/versions/0.20240204.1647?api-version=2024-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/publishers/Debian/artifacttypes/vmimage/offers/debian-10/skus/10/versions/0.20240430.1733?api-version=2024-07-01
   response:
     body:
       string: "{\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n \
@@ -233,18 +241,18 @@ interactions:
         \   \"value\": \"SCSI\"\r\n      },\r\n      {\r\n        \"name\": \"IsHibernateSupported\"\
         ,\r\n        \"value\": \"False\"\r\n      }\r\n    ],\r\n    \"osDiskImage\"\
         : {\r\n      \"operatingSystem\": \"Linux\",\r\n      \"sizeInBytes\": 32212255232\r\
-        \n    },\r\n    \"dataDiskImages\": []\r\n  },\r\n  \"location\": \"eastus\"\
-        ,\r\n  \"name\": \"0.20240204.1647\",\r\n  \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/eastus/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20240204.1647\"\
+        \n    },\r\n    \"dataDiskImages\": []\r\n  },\r\n  \"location\": \"eastus2\"\
+        ,\r\n  \"name\": \"0.20240430.1733\",\r\n  \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/eastus2/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20240430.1733\"\
         \r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1008'
+      - '1010'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Apr 2024 04:12:54 GMT
+      - Mon, 26 Aug 2024 08:12:19 GMT
       expires:
       - '-1'
       pragma:
@@ -256,9 +264,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetVMImageFromLocation3Min;12998,Microsoft.Compute/GetVMImageFromLocation30Min;73994
+      - Microsoft.Compute/GetVMImageFromLocation3Min;12998,Microsoft.Compute/GetVMImageFromLocation30Min;73998
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 3FA459D5FACB4912A082279FA171721B Ref B: MAA201060516029 Ref C: 2024-04-24T04:12:54Z'
+      - 'Ref A: 93307B122C3F441AB8A951BF30F37E8D Ref B: TYO201100117007 Ref C: 2024-08-26T08:12:19Z'
     status:
       code: 200
       message: OK
@@ -275,25 +285,25 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g -n --admin-username --admin-password --image --storage-sku --data-disk-sizes-gb
-        --zone --location --vm-sku --instance-count --lb --orchestration-mode
+        --zone --location --vm-sku --instance-count --lb --orchestration-mode --lb-sku
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.30.1 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/publishers/Debian/artifacttypes/vmimage/offers/debian-10/skus/10/versions?$top=1&$orderby=name%20desc&api-version=2024-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/publishers/Debian/artifacttypes/vmimage/offers/debian-10/skus/10/versions?$top=1&$orderby=name%20desc&api-version=2024-07-01
   response:
     body:
-      string: "[\r\n  {\r\n    \"location\": \"eastus\",\r\n    \"name\": \"0.20240204.1647\"\
-        ,\r\n    \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/eastus/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20240204.1647\"\
+      string: "[\r\n  {\r\n    \"location\": \"eastus2\",\r\n    \"name\": \"0.20240430.1733\"\
+        ,\r\n    \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/eastus2/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20240430.1733\"\
         \r\n  }\r\n]"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '273'
+      - '275'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Apr 2024 04:12:55 GMT
+      - Mon, 26 Aug 2024 08:12:20 GMT
       expires:
       - '-1'
       pragma:
@@ -305,9 +315,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/ListVMImagesVersionsFromLocation3Min;15997,Microsoft.Compute/ListVMImagesVersionsFromLocation30Min;43992
+      - Microsoft.Compute/ListVMImagesVersionsFromLocation3Min;15997,Microsoft.Compute/ListVMImagesVersionsFromLocation30Min;43997
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: FB3CA3DB317C458F861FAC07BAEA72B8 Ref B: MAA201060515017 Ref C: 2024-04-24T04:12:55Z'
+      - 'Ref A: 90D495DDB195450AA6E9E9CC23B1FB57 Ref B: TYO201100117031 Ref C: 2024-08-26T08:12:20Z'
     status:
       code: 200
       message: OK
@@ -324,11 +336,11 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g -n --admin-username --admin-password --image --storage-sku --data-disk-sizes-gb
-        --zone --location --vm-sku --instance-count --lb --orchestration-mode
+        --zone --location --vm-sku --instance-count --lb --orchestration-mode --lb-sku
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.30.1 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/publishers/Debian/artifacttypes/vmimage/offers/debian-10/skus/10/versions/0.20240204.1647?api-version=2024-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/publishers/Debian/artifacttypes/vmimage/offers/debian-10/skus/10/versions/0.20240430.1733?api-version=2024-07-01
   response:
     body:
       string: "{\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n \
@@ -342,18 +354,18 @@ interactions:
         \   \"value\": \"SCSI\"\r\n      },\r\n      {\r\n        \"name\": \"IsHibernateSupported\"\
         ,\r\n        \"value\": \"False\"\r\n      }\r\n    ],\r\n    \"osDiskImage\"\
         : {\r\n      \"operatingSystem\": \"Linux\",\r\n      \"sizeInBytes\": 32212255232\r\
-        \n    },\r\n    \"dataDiskImages\": []\r\n  },\r\n  \"location\": \"eastus\"\
-        ,\r\n  \"name\": \"0.20240204.1647\",\r\n  \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/eastus/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20240204.1647\"\
+        \n    },\r\n    \"dataDiskImages\": []\r\n  },\r\n  \"location\": \"eastus2\"\
+        ,\r\n  \"name\": \"0.20240430.1733\",\r\n  \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/eastus2/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20240430.1733\"\
         \r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1008'
+      - '1010'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Apr 2024 04:12:56 GMT
+      - Mon, 26 Aug 2024 08:12:22 GMT
       expires:
       - '-1'
       pragma:
@@ -365,9 +377,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetVMImageFromLocation3Min;12997,Microsoft.Compute/GetVMImageFromLocation30Min;73993
+      - Microsoft.Compute/GetVMImageFromLocation3Min;12997,Microsoft.Compute/GetVMImageFromLocation30Min;73997
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 29D6C895DB784079875FBF5A7BF7AF01 Ref B: MAA201060514047 Ref C: 2024-04-24T04:12:56Z'
+      - 'Ref A: 03518F8B515C4A7AA5E94BC436528911 Ref B: TYO201151003052 Ref C: 2024-08-26T08:12:21Z'
     status:
       code: 200
       message: OK
@@ -376,21 +390,21 @@ interactions:
       "contentVersion": "1.0.0.0", "parameters": {"adminPassword": {"type": "securestring",
       "metadata": {"description": "Secure adminPassword"}}}, "variables": {}, "resources":
       [{"name": "vm-ultrassdVNET", "type": "Microsoft.Network/virtualNetworks", "location":
-      "eastus", "apiVersion": "2015-06-15", "dependsOn": [], "tags": {}, "properties":
+      "eastus2", "apiVersion": "2015-06-15", "dependsOn": [], "tags": {}, "properties":
       {"addressSpace": {"addressPrefixes": ["10.0.0.0/16"]}, "subnets": [{"name":
       "vm-ultrassdSubnet", "properties": {"addressPrefix": "10.0.0.0/24"}}]}}, {"type":
       "Microsoft.Compute/virtualMachineScaleSets", "name": "vm-ultrassd", "location":
-      "eastus", "tags": {}, "apiVersion": "2024-03-01", "dependsOn": ["Microsoft.Network/virtualNetworks/vm-ultrassdVNET"],
-      "properties": {"overprovision": true, "upgradePolicy": {"mode": "manual", "rollingUpgradePolicy":
-      {}, "automaticOSUpgradePolicy": {}}, "singlePlacementGroup": false, "additionalCapabilities":
-      {"ultraSSDEnabled": true}, "virtualMachineProfile": {"storageProfile": {"osDisk":
-      {"createOption": "FromImage", "caching": "ReadWrite", "managedDisk": {"storageAccountType":
-      null}}, "imageReference": {"publisher": "Debian", "offer": "debian-10", "sku":
-      "10", "version": "latest"}, "dataDisks": [{"lun": 0, "managedDisk": {"storageAccountType":
-      "UltraSSD_LRS"}, "createOption": "empty", "diskSizeGB": 4}]}, "osProfile": {"computerNamePrefix":
-      "vmult1287", "adminUsername": "admin123", "adminPassword": "[parameters(''adminPassword'')]"},
-      "networkProfile": {"networkInterfaceConfigurations": [{"name": "vmult1287Nic",
-      "properties": {"ipConfigurations": [{"name": "vmult1287IPConfig", "properties":
+      "eastus2", "tags": {}, "apiVersion": "2024-07-01", "dependsOn": ["Microsoft.Network/virtualNetworks/vm-ultrassdVNET"],
+      "properties": {"overprovision": true, "upgradePolicy": {"mode": "manual"}, "singlePlacementGroup":
+      false, "additionalCapabilities": {"ultraSSDEnabled": true}, "virtualMachineProfile":
+      {"storageProfile": {"osDisk": {"createOption": "FromImage", "caching": "ReadWrite",
+      "managedDisk": {"storageAccountType": null}}, "imageReference": {"publisher":
+      "Debian", "offer": "debian-10", "sku": "10", "version": "latest"}, "dataDisks":
+      [{"lun": 0, "managedDisk": {"storageAccountType": "UltraSSD_LRS"}, "createOption":
+      "empty", "diskSizeGB": 4}]}, "osProfile": {"computerNamePrefix": "vmult652a",
+      "adminUsername": "admin123", "adminPassword": "[parameters(''adminPassword'')]"},
+      "networkProfile": {"networkInterfaceConfigurations": [{"name": "vmult652aNic",
+      "properties": {"ipConfigurations": [{"name": "vmult652aIPConfig", "properties":
       {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Network/virtualNetworks/vm-ultrassdVNET/subnets/vm-ultrassdSubnet"}}}],
       "primary": "true"}}]}}, "orchestrationMode": "Uniform"}, "sku": {"name": "Standard_D2s_v3",
       "capacity": 1}, "zones": ["2"]}], "outputs": {"VMSS": {"type": "object", "value":
@@ -407,30 +421,30 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '2326'
+      - '2268'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n --admin-username --admin-password --image --storage-sku --data-disk-sizes-gb
-        --zone --location --vm-sku --instance-count --lb --orchestration-mode
+        --zone --location --vm-sku --instance-count --lb --orchestration-mode --lb-sku
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.30.1 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-ultrassd000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Resources/deployments/vmss_deploy_XuL3BGfsl9YxN43tWNFeCcEWJoR1XLDv","name":"vmss_deploy_XuL3BGfsl9YxN43tWNFeCcEWJoR1XLDv","type":"Microsoft.Resources/deployments","properties":{"templateHash":"8543337188330473544","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2024-04-24T04:13:06.5677395Z","duration":"PT0.0008176S","correlationId":"f95e4ae9-b7b0-4546-b6ac-277fdf13e243","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["eastus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachineScaleSets","locations":["eastus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Network/virtualNetworks/vm-ultrassdVNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vm-ultrassdVNET"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Compute/virtualMachineScaleSets/vm-ultrassd","resourceType":"Microsoft.Compute/virtualMachineScaleSets","resourceName":"vm-ultrassd"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Resources/deployments/vmss_deploy_OV3nZYPUxco1XS0ilkUr1Cz8xSTrvPE2","name":"vmss_deploy_OV3nZYPUxco1XS0ilkUr1Cz8xSTrvPE2","type":"Microsoft.Resources/deployments","properties":{"templateHash":"12715379149370533661","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2024-08-26T08:12:31.9210138Z","duration":"PT0.0009207S","correlationId":"01e45faa-79b3-4d06-9f0b-7fb83ad9c311","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["eastus2"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachineScaleSets","locations":["eastus2"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Network/virtualNetworks/vm-ultrassdVNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vm-ultrassdVNET"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Compute/virtualMachineScaleSets/vm-ultrassd","resourceType":"Microsoft.Compute/virtualMachineScaleSets","resourceName":"vm-ultrassd"}]}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-ultrassd000001/providers/Microsoft.Resources/deployments/vmss_deploy_XuL3BGfsl9YxN43tWNFeCcEWJoR1XLDv/operationStatuses/08584876749018479888?api-version=2022-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-ultrassd000001/providers/Microsoft.Resources/deployments/vmss_deploy_OV3nZYPUxco1XS0ilkUr1Cz8xSTrvPE2/operationStatuses/08584769469356339879?api-version=2022-09-01
       cache-control:
       - no-cache
       content-length:
-      - '1333'
+      - '1336'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Apr 2024 04:13:09 GMT
+      - Mon, 26 Aug 2024 08:12:33 GMT
       expires:
       - '-1'
       pragma:
@@ -441,10 +455,14 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-deployment-engine-version:
+      - 1.95.0
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1194'
+      - '199'
       x-msedge-ref:
-      - 'Ref A: 78EF4196DF934432B91EE11135C9EF6B Ref B: MAA201060515031 Ref C: 2024-04-24T04:12:57Z'
+      - 'Ref A: 92EFB921F282429BBEA709D70AE8A584 Ref B: TYO201100114037 Ref C: 2024-08-26T08:12:23Z'
     status:
       code: 201
       message: Created
@@ -461,11 +479,11 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g -n --admin-username --admin-password --image --storage-sku --data-disk-sizes-gb
-        --zone --location --vm-sku --instance-count --lb --orchestration-mode
+        --zone --location --vm-sku --instance-count --lb --orchestration-mode --lb-sku
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.30.1 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-ultrassd000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08584876749018479888?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-ultrassd000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08584769469356339879?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -477,7 +495,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Apr 2024 04:13:11 GMT
+      - Mon, 26 Aug 2024 08:12:34 GMT
       expires:
       - '-1'
       pragma:
@@ -488,8 +506,10 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 412017F345974D8F81DAFD617493F80B Ref B: MAA201060516045 Ref C: 2024-04-24T04:13:10Z'
+      - 'Ref A: 6F0F0AB32D404286A7825D7E63CE7110 Ref B: TYO201100114037 Ref C: 2024-08-26T08:12:34Z'
     status:
       code: 200
       message: OK
@@ -506,11 +526,11 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g -n --admin-username --admin-password --image --storage-sku --data-disk-sizes-gb
-        --zone --location --vm-sku --instance-count --lb --orchestration-mode
+        --zone --location --vm-sku --instance-count --lb --orchestration-mode --lb-sku
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.30.1 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-ultrassd000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08584876749018479888?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-ultrassd000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08584769469356339879?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -522,7 +542,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Apr 2024 04:13:44 GMT
+      - Mon, 26 Aug 2024 08:13:06 GMT
       expires:
       - '-1'
       pragma:
@@ -533,8 +553,10 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: C740C57D037C49BE8DCD87519D17E7EA Ref B: MAA201060515023 Ref C: 2024-04-24T04:13:42Z'
+      - 'Ref A: F1AC7081B8F44B27AAE1CDB9EDCA1C18 Ref B: TYO201100114037 Ref C: 2024-08-26T08:13:05Z'
     status:
       code: 200
       message: OK
@@ -551,11 +573,11 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g -n --admin-username --admin-password --image --storage-sku --data-disk-sizes-gb
-        --zone --location --vm-sku --instance-count --lb --orchestration-mode
+        --zone --location --vm-sku --instance-count --lb --orchestration-mode --lb-sku
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.30.1 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-ultrassd000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08584876749018479888?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-ultrassd000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08584769469356339879?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -567,7 +589,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Apr 2024 04:14:16 GMT
+      - Mon, 26 Aug 2024 08:13:37 GMT
       expires:
       - '-1'
       pragma:
@@ -578,8 +600,10 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: F7570D0B30A14DFB8E02B66F45E582A2 Ref B: MAA201060513049 Ref C: 2024-04-24T04:14:15Z'
+      - 'Ref A: 9E9492C3857F47DABFD9905D0BC95D68 Ref B: TYO201100114037 Ref C: 2024-08-26T08:13:37Z'
     status:
       code: 200
       message: OK
@@ -596,23 +620,23 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g -n --admin-username --admin-password --image --storage-sku --data-disk-sizes-gb
-        --zone --location --vm-sku --instance-count --lb --orchestration-mode
+        --zone --location --vm-sku --instance-count --lb --orchestration-mode --lb-sku
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.30.1 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-ultrassd000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Resources/deployments/vmss_deploy_XuL3BGfsl9YxN43tWNFeCcEWJoR1XLDv","name":"vmss_deploy_XuL3BGfsl9YxN43tWNFeCcEWJoR1XLDv","type":"Microsoft.Resources/deployments","properties":{"templateHash":"8543337188330473544","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2024-04-24T04:14:05.8201828Z","duration":"PT59.2532609S","correlationId":"f95e4ae9-b7b0-4546-b6ac-277fdf13e243","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["eastus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachineScaleSets","locations":["eastus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Network/virtualNetworks/vm-ultrassdVNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vm-ultrassdVNET"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Compute/virtualMachineScaleSets/vm-ultrassd","resourceType":"Microsoft.Compute/virtualMachineScaleSets","resourceName":"vm-ultrassd"}],"outputs":{"vmss":{"type":"Object","value":{"singlePlacementGroup":false,"orchestrationMode":"Uniform","upgradePolicy":{"mode":"Manual","rollingUpgradePolicy":{"maxBatchInstancePercent":20,"maxUnhealthyInstancePercent":20,"maxUnhealthyUpgradedInstancePercent":20,"pauseTimeBetweenBatches":"PT0S","maxSurge":false,"rollbackFailedInstancesOnPolicyBreach":false},"automaticOSUpgradePolicy":{"enableAutomaticOSUpgrade":false,"useRollingUpgradePolicy":false,"disableAutomaticRollback":false}},"virtualMachineProfile":{"osProfile":{"computerNamePrefix":"vmult1287","adminUsername":"admin123","linuxConfiguration":{"disablePasswordAuthentication":false,"provisionVMAgent":true,"enableVMAgentPlatformUpdates":false},"secrets":[],"allowExtensionOperations":true,"requireGuestProvisionSignal":true},"storageProfile":{"osDisk":{"osType":"Linux","createOption":"FromImage","caching":"ReadWrite","managedDisk":{"storageAccountType":"Premium_LRS"},"diskSizeGB":30},"imageReference":{"publisher":"Debian","offer":"debian-10","sku":"10","version":"latest"},"dataDisks":[{"lun":0,"diskIOPSReadWrite":650,"diskMBpsReadWrite":82,"createOption":"Empty","caching":"None","managedDisk":{"storageAccountType":"UltraSSD_LRS"},"diskSizeGB":4}]},"networkProfile":{"networkInterfaceConfigurations":[{"name":"vmult1287Nic","properties":{"primary":true,"enableAcceleratedNetworking":false,"disableTcpStateTracking":false,"dnsSettings":{"dnsServers":[]},"enableIPForwarding":false,"ipConfigurations":[{"name":"vmult1287IPConfig","properties":{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Network/virtualNetworks/vm-ultrassdVNET/subnets/vm-ultrassdSubnet"},"privateIPAddressVersion":"IPv4"}}]}}]},"timeCreated":"2024-04-24T04:13:26.2294071+00:00"},"additionalCapabilities":{"ultraSSDEnabled":true},"provisioningState":"Succeeded","overprovision":true,"doNotRunExtensionsOnOverprovisionedVMs":false,"uniqueId":"cf7b9930-228d-4dd8-b85b-a737f2a59427","platformFaultDomainCount":1,"timeCreated":"2024-04-24T04:13:26.2294071+00:00"}}},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Compute/virtualMachineScaleSets/vm-ultrassd"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Network/virtualNetworks/vm-ultrassdVNET"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Resources/deployments/vmss_deploy_OV3nZYPUxco1XS0ilkUr1Cz8xSTrvPE2","name":"vmss_deploy_OV3nZYPUxco1XS0ilkUr1Cz8xSTrvPE2","type":"Microsoft.Resources/deployments","properties":{"templateHash":"12715379149370533661","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2024-08-26T08:13:15.879688Z","duration":"PT43.9595949S","correlationId":"01e45faa-79b3-4d06-9f0b-7fb83ad9c311","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["eastus2"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachineScaleSets","locations":["eastus2"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Network/virtualNetworks/vm-ultrassdVNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vm-ultrassdVNET"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Compute/virtualMachineScaleSets/vm-ultrassd","resourceType":"Microsoft.Compute/virtualMachineScaleSets","resourceName":"vm-ultrassd"}],"outputs":{"vmss":{"type":"Object","value":{"singlePlacementGroup":false,"orchestrationMode":"Uniform","upgradePolicy":{"mode":"Manual"},"virtualMachineProfile":{"osProfile":{"computerNamePrefix":"vmult652a","adminUsername":"admin123","linuxConfiguration":{"disablePasswordAuthentication":false,"provisionVMAgent":true},"secrets":[],"allowExtensionOperations":true,"requireGuestProvisionSignal":true},"storageProfile":{"osDisk":{"osType":"Linux","createOption":"FromImage","caching":"ReadWrite","managedDisk":{"storageAccountType":"Premium_LRS"},"diskSizeGB":30},"imageReference":{"publisher":"Debian","offer":"debian-10","sku":"10","version":"latest"},"dataDisks":[{"lun":0,"diskIOPSReadWrite":650,"diskMBpsReadWrite":82,"createOption":"Empty","caching":"None","managedDisk":{"storageAccountType":"UltraSSD_LRS"},"diskSizeGB":4}]},"networkProfile":{"networkInterfaceConfigurations":[{"name":"vmult652aNic","properties":{"primary":true,"enableAcceleratedNetworking":false,"disableTcpStateTracking":false,"dnsSettings":{"dnsServers":[]},"enableIPForwarding":false,"ipConfigurations":[{"name":"vmult652aIPConfig","properties":{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Network/virtualNetworks/vm-ultrassdVNET/subnets/vm-ultrassdSubnet"},"privateIPAddressVersion":"IPv4"}}]}}]},"timeCreated":"2024-08-26T08:12:44.3260184+00:00"},"additionalCapabilities":{"ultraSSDEnabled":true},"provisioningState":"Succeeded","overprovision":true,"doNotRunExtensionsOnOverprovisionedVMs":false,"uniqueId":"06bd7f12-07b1-47b7-8025-c166794097f2","platformFaultDomainCount":1,"timeCreated":"2024-08-26T08:12:44.3260184+00:00"}}},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Compute/virtualMachineScaleSets/vm-ultrassd"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Network/virtualNetworks/vm-ultrassdVNET"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3760'
+      - '3374'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Apr 2024 04:14:19 GMT
+      - Mon, 26 Aug 2024 08:13:39 GMT
       expires:
       - '-1'
       pragma:
@@ -623,8 +647,10 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3748'
       x-msedge-ref:
-      - 'Ref A: 0A5365CB8D254B81A024C808B8C7102D Ref B: MAA201060515025 Ref C: 2024-04-24T04:14:17Z'
+      - 'Ref A: 5410FE329FB84E9F99A1F22ED7B0E4D8 Ref B: TYO201100114037 Ref C: 2024-08-26T08:13:39Z'
     status:
       code: 200
       message: OK
@@ -642,63 +668,58 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.30.1 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Compute/virtualMachineScaleSets/vm-ultrassd?api-version=2024-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Compute/virtualMachineScaleSets/vm-ultrassd?api-version=2024-07-01
   response:
     body:
       string: "{\r\n  \"name\": \"vm-ultrassd\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Compute/virtualMachineScaleSets/vm-ultrassd\"\
         ,\r\n  \"type\": \"Microsoft.Compute/virtualMachineScaleSets\",\r\n  \"location\"\
-        : \"eastus\",\r\n  \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Standard_D2s_v3\"\
-        ,\r\n    \"tier\": \"Standard\",\r\n    \"capacity\": 1\r\n  },\r\n  \"properties\"\
-        : {\r\n    \"singlePlacementGroup\": false,\r\n    \"orchestrationMode\":\
-        \ \"Uniform\",\r\n    \"upgradePolicy\": {\r\n      \"mode\": \"Manual\",\r\
-        \n      \"rollingUpgradePolicy\": {\r\n        \"maxBatchInstancePercent\"\
-        : 20,\r\n        \"maxUnhealthyInstancePercent\": 20,\r\n        \"maxUnhealthyUpgradedInstancePercent\"\
-        : 20,\r\n        \"pauseTimeBetweenBatches\": \"PT0S\",\r\n        \"maxSurge\"\
-        : false,\r\n        \"rollbackFailedInstancesOnPolicyBreach\": false\r\n \
-        \     },\r\n      \"automaticOSUpgradePolicy\": {\r\n        \"enableAutomaticOSUpgrade\"\
-        : false,\r\n        \"useRollingUpgradePolicy\": false,\r\n        \"disableAutomaticRollback\"\
-        : false\r\n      }\r\n    },\r\n    \"virtualMachineProfile\": {\r\n     \
-        \ \"osProfile\": {\r\n        \"computerNamePrefix\": \"vmult1287\",\r\n \
-        \       \"adminUsername\": \"admin123\",\r\n        \"linuxConfiguration\"\
+        : \"eastus2\",\r\n  \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Standard_D2s_v3\"\
+        ,\r\n    \"tier\": \"Standard\",\r\n    \"capacity\": 1\r\n  },\r\n  \"etag\"\
+        : \"\\\"3\\\"\",\r\n  \"properties\": {\r\n    \"singlePlacementGroup\": false,\r\
+        \n    \"orchestrationMode\": \"Uniform\",\r\n    \"upgradePolicy\": {\r\n\
+        \      \"mode\": \"Manual\"\r\n    },\r\n    \"virtualMachineProfile\": {\r\
+        \n      \"osProfile\": {\r\n        \"computerNamePrefix\": \"vmult652a\"\
+        ,\r\n        \"adminUsername\": \"admin123\",\r\n        \"linuxConfiguration\"\
         : {\r\n          \"disablePasswordAuthentication\": false,\r\n          \"\
-        provisionVMAgent\": true,\r\n          \"enableVMAgentPlatformUpdates\": false\r\
-        \n        },\r\n        \"secrets\": [],\r\n        \"allowExtensionOperations\"\
-        : true,\r\n        \"requireGuestProvisionSignal\": true\r\n      },\r\n \
-        \     \"storageProfile\": {\r\n        \"osDisk\": {\r\n          \"osType\"\
-        : \"Linux\",\r\n          \"createOption\": \"FromImage\",\r\n          \"\
-        caching\": \"ReadWrite\",\r\n          \"managedDisk\": {\r\n            \"\
-        storageAccountType\": \"Premium_LRS\"\r\n          },\r\n          \"diskSizeGB\"\
-        : 30\r\n        },\r\n        \"imageReference\": {\r\n          \"publisher\"\
-        : \"Debian\",\r\n          \"offer\": \"debian-10\",\r\n          \"sku\"\
-        : \"10\",\r\n          \"version\": \"latest\"\r\n        },\r\n        \"\
-        dataDisks\": [\r\n          {\r\n            \"lun\": 0,\r\n            \"\
-        diskIOPSReadWrite\": 650,\r\n            \"diskMBpsReadWrite\": 82,\r\n  \
-        \          \"createOption\": \"Empty\",\r\n            \"caching\": \"None\"\
-        ,\r\n            \"managedDisk\": {\r\n              \"storageAccountType\"\
+        provisionVMAgent\": true\r\n        },\r\n        \"secrets\": [],\r\n   \
+        \     \"allowExtensionOperations\": true,\r\n        \"requireGuestProvisionSignal\"\
+        : true\r\n      },\r\n      \"storageProfile\": {\r\n        \"osDisk\": {\r\
+        \n          \"osType\": \"Linux\",\r\n          \"createOption\": \"FromImage\"\
+        ,\r\n          \"caching\": \"ReadWrite\",\r\n          \"managedDisk\": {\r\
+        \n            \"storageAccountType\": \"Premium_LRS\"\r\n          },\r\n\
+        \          \"diskSizeGB\": 30\r\n        },\r\n        \"imageReference\"\
+        : {\r\n          \"publisher\": \"Debian\",\r\n          \"offer\": \"debian-10\"\
+        ,\r\n          \"sku\": \"10\",\r\n          \"version\": \"latest\"\r\n \
+        \       },\r\n        \"dataDisks\": [\r\n          {\r\n            \"lun\"\
+        : 0,\r\n            \"diskIOPSReadWrite\": 650,\r\n            \"diskMBpsReadWrite\"\
+        : 82,\r\n            \"createOption\": \"Empty\",\r\n            \"caching\"\
+        : \"None\",\r\n            \"managedDisk\": {\r\n              \"storageAccountType\"\
         : \"UltraSSD_LRS\"\r\n            },\r\n            \"diskSizeGB\": 4\r\n\
         \          }\r\n        ]\r\n      },\r\n      \"networkProfile\": {\"networkInterfaceConfigurations\"\
-        :[{\"name\":\"vmult1287Nic\",\"properties\":{\"primary\":true,\"enableAcceleratedNetworking\"\
+        :[{\"name\":\"vmult652aNic\",\"properties\":{\"primary\":true,\"enableAcceleratedNetworking\"\
         :false,\"disableTcpStateTracking\":false,\"dnsSettings\":{\"dnsServers\":[]},\"\
-        enableIPForwarding\":false,\"ipConfigurations\":[{\"name\":\"vmult1287IPConfig\"\
+        enableIPForwarding\":false,\"ipConfigurations\":[{\"name\":\"vmult652aIPConfig\"\
         ,\"properties\":{\"subnet\":{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Network/virtualNetworks/vm-ultrassdVNET/subnets/vm-ultrassdSubnet\"\
         },\"privateIPAddressVersion\":\"IPv4\"}}]}}]},\r\n      \"timeCreated\": \"\
-        2024-04-24T04:13:26.2294071+00:00\"\r\n    },\r\n    \"additionalCapabilities\"\
+        2024-08-26T08:12:44.3260184+00:00\"\r\n    },\r\n    \"additionalCapabilities\"\
         : {\r\n      \"ultraSSDEnabled\": true\r\n    },\r\n    \"provisioningState\"\
         : \"Succeeded\",\r\n    \"overprovision\": true,\r\n    \"doNotRunExtensionsOnOverprovisionedVMs\"\
-        : false,\r\n    \"uniqueId\": \"cf7b9930-228d-4dd8-b85b-a737f2a59427\",\r\n\
-        \    \"platformFaultDomainCount\": 1,\r\n    \"timeCreated\": \"2024-04-24T04:13:26.2294071+00:00\"\
+        : false,\r\n    \"uniqueId\": \"06bd7f12-07b1-47b7-8025-c166794097f2\",\r\n\
+        \    \"platformFaultDomainCount\": 1,\r\n    \"timeCreated\": \"2024-08-26T08:12:44.3260184+00:00\"\
         \r\n  },\r\n  \"zones\": [\r\n    \"2\"\r\n  ]\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3253'
+      - '2740'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Apr 2024 04:14:20 GMT
+      - Mon, 26 Aug 2024 08:13:40 GMT
+      etag:
+      - '"3"'
       expires:
       - '-1'
       pragma:
@@ -710,9 +731,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetVMScaleSetSubscriptionMaximum;2395,Microsoft.Compute/GetVMScaleSetResource;31
+      - Microsoft.Compute/GetVMScaleSetSubscriptionMaximum;2396,Microsoft.Compute/GetVMScaleSetResource;32
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: B6B7DF42FD2C4F42B69C34E76114B8B5 Ref B: MAA201060514051 Ref C: 2024-04-24T04:14:20Z'
+      - 'Ref A: 46DD205EDA2A4CB6A39824365C02532E Ref B: TYO201100116017 Ref C: 2024-08-26T08:13:41Z'
     status:
       code: 200
       message: ''
@@ -729,25 +752,25 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g -n --admin-username --admin-password --image --ultra-ssd-enabled --zone
-        --location --vm-sku --lb --orchestration-mode
+        --location --vm-sku --lb --orchestration-mode --lb-sku
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.30.1 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/publishers/Debian/artifacttypes/vmimage/offers/debian-10/skus/10/versions?$top=1&$orderby=name%20desc&api-version=2024-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/publishers/Debian/artifacttypes/vmimage/offers/debian-10/skus/10/versions?$top=1&$orderby=name%20desc&api-version=2024-07-01
   response:
     body:
-      string: "[\r\n  {\r\n    \"location\": \"eastus\",\r\n    \"name\": \"0.20240204.1647\"\
-        ,\r\n    \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/eastus/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20240204.1647\"\
+      string: "[\r\n  {\r\n    \"location\": \"eastus2\",\r\n    \"name\": \"0.20240430.1733\"\
+        ,\r\n    \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/eastus2/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20240430.1733\"\
         \r\n  }\r\n]"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '273'
+      - '275'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Apr 2024 04:14:22 GMT
+      - Mon, 26 Aug 2024 08:13:41 GMT
       expires:
       - '-1'
       pragma:
@@ -759,9 +782,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/ListVMImagesVersionsFromLocation3Min;15995,Microsoft.Compute/ListVMImagesVersionsFromLocation30Min;43990
+      - Microsoft.Compute/ListVMImagesVersionsFromLocation3Min;15994,Microsoft.Compute/ListVMImagesVersionsFromLocation30Min;43994
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 485F84EE94B4446DBFAC6F91FE04AB9F Ref B: MAA201060516037 Ref C: 2024-04-24T04:14:22Z'
+      - 'Ref A: 8D144498D9BA404D8658AC9D1282BB19 Ref B: TYO201151004034 Ref C: 2024-08-26T08:13:41Z'
     status:
       code: 200
       message: OK
@@ -778,11 +803,11 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g -n --admin-username --admin-password --image --ultra-ssd-enabled --zone
-        --location --vm-sku --lb --orchestration-mode
+        --location --vm-sku --lb --orchestration-mode --lb-sku
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.30.1 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/publishers/Debian/artifacttypes/vmimage/offers/debian-10/skus/10/versions/0.20240204.1647?api-version=2024-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/publishers/Debian/artifacttypes/vmimage/offers/debian-10/skus/10/versions/0.20240430.1733?api-version=2024-07-01
   response:
     body:
       string: "{\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n \
@@ -796,18 +821,18 @@ interactions:
         \   \"value\": \"SCSI\"\r\n      },\r\n      {\r\n        \"name\": \"IsHibernateSupported\"\
         ,\r\n        \"value\": \"False\"\r\n      }\r\n    ],\r\n    \"osDiskImage\"\
         : {\r\n      \"operatingSystem\": \"Linux\",\r\n      \"sizeInBytes\": 32212255232\r\
-        \n    },\r\n    \"dataDiskImages\": []\r\n  },\r\n  \"location\": \"eastus\"\
-        ,\r\n  \"name\": \"0.20240204.1647\",\r\n  \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/eastus/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20240204.1647\"\
+        \n    },\r\n    \"dataDiskImages\": []\r\n  },\r\n  \"location\": \"eastus2\"\
+        ,\r\n  \"name\": \"0.20240430.1733\",\r\n  \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/eastus2/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20240430.1733\"\
         \r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1008'
+      - '1010'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Apr 2024 04:14:23 GMT
+      - Mon, 26 Aug 2024 08:13:42 GMT
       expires:
       - '-1'
       pragma:
@@ -819,9 +844,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetVMImageFromLocation3Min;12995,Microsoft.Compute/GetVMImageFromLocation30Min;73991
+      - Microsoft.Compute/GetVMImageFromLocation3Min;12995,Microsoft.Compute/GetVMImageFromLocation30Min;73995
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3748'
       x-msedge-ref:
-      - 'Ref A: 788F7936975F478B9427FF3B3AE33F9B Ref B: MAA201060514037 Ref C: 2024-04-24T04:14:23Z'
+      - 'Ref A: 548D23DAD59D4990879DC2702D1745AA Ref B: TYO201100116033 Ref C: 2024-08-26T08:13:42Z'
     status:
       code: 200
       message: OK
@@ -838,45 +865,23 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g -n --admin-username --admin-password --image --ultra-ssd-enabled --zone
-        --location --vm-sku --lb --orchestration-mode
+        --location --vm-sku --lb --orchestration-mode --lb-sku
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.30.1 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Network/virtualNetworks?api-version=2022-01-01
   response:
     body:
-      string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"vm-ultrassdVNET\"\
-        ,\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Network/virtualNetworks/vm-ultrassdVNET\"\
-        ,\r\n      \"etag\": \"W/\\\"44c83f1b-ee90-4539-a870-7570f95317a1\\\"\",\r\
-        \n      \"type\": \"Microsoft.Network/virtualNetworks\",\r\n      \"location\"\
-        : \"eastus\",\r\n      \"tags\": {},\r\n      \"properties\": {\r\n      \
-        \  \"provisioningState\": \"Succeeded\",\r\n        \"resourceGuid\": \"81fa9fed-b550-4375-b4f9-ef64405c432e\"\
-        ,\r\n        \"addressSpace\": {\r\n          \"addressPrefixes\": [\r\n \
-        \           \"10.0.0.0/16\"\r\n          ]\r\n        },\r\n        \"subnets\"\
-        : [\r\n          {\r\n            \"name\": \"vm-ultrassdSubnet\",\r\n   \
-        \         \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Network/virtualNetworks/vm-ultrassdVNET/subnets/vm-ultrassdSubnet\"\
-        ,\r\n            \"etag\": \"W/\\\"44c83f1b-ee90-4539-a870-7570f95317a1\\\"\
-        \",\r\n            \"properties\": {\r\n              \"provisioningState\"\
-        : \"Succeeded\",\r\n              \"addressPrefix\": \"10.0.0.0/24\",\r\n\
-        \              \"ipConfigurations\": [\r\n                {\r\n          \
-        \        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-ULTRASSDSZR4JVUL2BWL5CWZTS5CMMJKA7D566ZI6WW22F7TCNJUBBLRGDRPAWL5CP/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/VM-ULTRASSD/VIRTUALMACHINES/0/NETWORKINTERFACES/VMULT1287NIC/ipConfigurations/VMULT1287IPCONFIG\"\
-        \r\n                },\r\n                {\r\n                  \"id\": \"\
-        /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-ULTRASSDSZR4JVUL2BWL5CWZTS5CMMJKA7D566ZI6WW22F7TCNJUBBLRGDRPAWL5CP/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/VM-ULTRASSD/VIRTUALMACHINES/1/NETWORKINTERFACES/VMULT1287NIC/ipConfigurations/VMULT1287IPCONFIG\"\
-        \r\n                }\r\n              ],\r\n              \"delegations\"\
-        : [],\r\n              \"privateEndpointNetworkPolicies\": \"Disabled\",\r\
-        \n              \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n   \
-        \         },\r\n            \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\
-        \r\n          }\r\n        ],\r\n        \"virtualNetworkPeerings\": [],\r\
-        \n        \"enableDdosProtection\": false\r\n      }\r\n    }\r\n  ]\r\n}"
+      string: '{"value":[{"name":"vm-ultrassdVNET","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Network/virtualNetworks/vm-ultrassdVNET","etag":"W/\"09a999dc-dcd1-415a-813e-3aa0c995a1ab\"","type":"Microsoft.Network/virtualNetworks","location":"eastus2","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"ca4e57d8-4f3a-459c-965d-2040086af46f","addressSpace":{"addressPrefixes":["10.0.0.0/16"]},"subnets":[{"name":"vm-ultrassdSubnet","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Network/virtualNetworks/vm-ultrassdVNET/subnets/vm-ultrassdSubnet","etag":"W/\"09a999dc-dcd1-415a-813e-3aa0c995a1ab\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","ipConfigurations":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-ULTRASSD3B2XLLXEG5BP4L4UOWMJNV7HY4EJU5OTWBZC6FOIRYABQ4HPM66CE6CHJZ/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/VM-ULTRASSD/VIRTUALMACHINES/0/NETWORKINTERFACES/VMULT652ANIC/ipConfigurations/VMULT652AIPCONFIG"}],"delegations":[],"privateEndpointNetworkPolicies":"Disabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2227'
+      - '1364'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Apr 2024 04:14:25 GMT
+      - Mon, 26 Aug 2024 08:13:43 GMT
       expires:
       - '-1'
       pragma:
@@ -888,12 +893,14 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - eb836aed-600e-4d8d-8814-8e6f6a1c08b5
+      - b25275cd-8c04-447f-82ea-159d0ff929ee
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 7B433CF9CD094D7A8EF1982E6B15B3AA Ref B: MAA201060513053 Ref C: 2024-04-24T04:14:25Z'
+      - 'Ref A: 9449C18B75754CF2837995344CE953FF Ref B: TYO201151005036 Ref C: 2024-08-26T08:13:43Z'
     status:
       code: 200
-      message: OK
+      message: ''
 - request:
     body: null
     headers:
@@ -907,25 +914,25 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g -n --admin-username --admin-password --image --ultra-ssd-enabled --zone
-        --location --vm-sku --lb --orchestration-mode
+        --location --vm-sku --lb --orchestration-mode --lb-sku
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.30.1 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/publishers/Debian/artifacttypes/vmimage/offers/debian-10/skus/10/versions?$top=1&$orderby=name%20desc&api-version=2024-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/publishers/Debian/artifacttypes/vmimage/offers/debian-10/skus/10/versions?$top=1&$orderby=name%20desc&api-version=2024-07-01
   response:
     body:
-      string: "[\r\n  {\r\n    \"location\": \"eastus\",\r\n    \"name\": \"0.20240204.1647\"\
-        ,\r\n    \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/eastus/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20240204.1647\"\
+      string: "[\r\n  {\r\n    \"location\": \"eastus2\",\r\n    \"name\": \"0.20240430.1733\"\
+        ,\r\n    \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/eastus2/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20240430.1733\"\
         \r\n  }\r\n]"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '273'
+      - '275'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Apr 2024 04:14:26 GMT
+      - Mon, 26 Aug 2024 08:13:45 GMT
       expires:
       - '-1'
       pragma:
@@ -937,9 +944,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/ListVMImagesVersionsFromLocation3Min;15994,Microsoft.Compute/ListVMImagesVersionsFromLocation30Min;43989
+      - Microsoft.Compute/ListVMImagesVersionsFromLocation3Min;15993,Microsoft.Compute/ListVMImagesVersionsFromLocation30Min;43993
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: DF10ED1460A841319012B63FADEB600F Ref B: MAA201060516037 Ref C: 2024-04-24T04:14:26Z'
+      - 'Ref A: 19EB504F1FDB4899ADE14A0C357E604F Ref B: TYO201100115053 Ref C: 2024-08-26T08:13:44Z'
     status:
       code: 200
       message: OK
@@ -956,11 +965,11 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g -n --admin-username --admin-password --image --ultra-ssd-enabled --zone
-        --location --vm-sku --lb --orchestration-mode
+        --location --vm-sku --lb --orchestration-mode --lb-sku
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.30.1 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/publishers/Debian/artifacttypes/vmimage/offers/debian-10/skus/10/versions/0.20240204.1647?api-version=2024-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/publishers/Debian/artifacttypes/vmimage/offers/debian-10/skus/10/versions/0.20240430.1733?api-version=2024-07-01
   response:
     body:
       string: "{\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n \
@@ -974,18 +983,18 @@ interactions:
         \   \"value\": \"SCSI\"\r\n      },\r\n      {\r\n        \"name\": \"IsHibernateSupported\"\
         ,\r\n        \"value\": \"False\"\r\n      }\r\n    ],\r\n    \"osDiskImage\"\
         : {\r\n      \"operatingSystem\": \"Linux\",\r\n      \"sizeInBytes\": 32212255232\r\
-        \n    },\r\n    \"dataDiskImages\": []\r\n  },\r\n  \"location\": \"eastus\"\
-        ,\r\n  \"name\": \"0.20240204.1647\",\r\n  \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/eastus/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20240204.1647\"\
+        \n    },\r\n    \"dataDiskImages\": []\r\n  },\r\n  \"location\": \"eastus2\"\
+        ,\r\n  \"name\": \"0.20240430.1733\",\r\n  \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/eastus2/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20240430.1733\"\
         \r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1008'
+      - '1010'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Apr 2024 04:14:27 GMT
+      - Mon, 26 Aug 2024 08:13:46 GMT
       expires:
       - '-1'
       pragma:
@@ -997,9 +1006,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetVMImageFromLocation3Min;12994,Microsoft.Compute/GetVMImageFromLocation30Min;73990
+      - Microsoft.Compute/GetVMImageFromLocation3Min;12994,Microsoft.Compute/GetVMImageFromLocation30Min;73994
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: BCDD8FBF87EB417EBB23D67F47BA2674 Ref B: MAA201060516019 Ref C: 2024-04-24T04:14:27Z'
+      - 'Ref A: 8A31E31C4D8B46CBB77973D5DFE06A2A Ref B: TYO201100114009 Ref C: 2024-08-26T08:13:46Z'
     status:
       code: 200
       message: OK
@@ -1016,25 +1027,25 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g -n --admin-username --admin-password --image --ultra-ssd-enabled --zone
-        --location --vm-sku --lb --orchestration-mode
+        --location --vm-sku --lb --orchestration-mode --lb-sku
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.30.1 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/publishers/Debian/artifacttypes/vmimage/offers/debian-10/skus/10/versions?$top=1&$orderby=name%20desc&api-version=2024-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/publishers/Debian/artifacttypes/vmimage/offers/debian-10/skus/10/versions?$top=1&$orderby=name%20desc&api-version=2024-07-01
   response:
     body:
-      string: "[\r\n  {\r\n    \"location\": \"eastus\",\r\n    \"name\": \"0.20240204.1647\"\
-        ,\r\n    \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/eastus/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20240204.1647\"\
+      string: "[\r\n  {\r\n    \"location\": \"eastus2\",\r\n    \"name\": \"0.20240430.1733\"\
+        ,\r\n    \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/eastus2/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20240430.1733\"\
         \r\n  }\r\n]"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '273'
+      - '275'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Apr 2024 04:14:28 GMT
+      - Mon, 26 Aug 2024 08:13:46 GMT
       expires:
       - '-1'
       pragma:
@@ -1046,9 +1057,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/ListVMImagesVersionsFromLocation3Min;15993,Microsoft.Compute/ListVMImagesVersionsFromLocation30Min;43988
+      - Microsoft.Compute/ListVMImagesVersionsFromLocation3Min;15992,Microsoft.Compute/ListVMImagesVersionsFromLocation30Min;43992
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 5045E3C2D7BC436F929EA770C2C7DDD7 Ref B: MAA201060514045 Ref C: 2024-04-24T04:14:28Z'
+      - 'Ref A: 0DCCC2F285EF422CBA2558AE9EE84421 Ref B: TYO201100116007 Ref C: 2024-08-26T08:13:47Z'
     status:
       code: 200
       message: OK
@@ -1065,11 +1078,11 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g -n --admin-username --admin-password --image --ultra-ssd-enabled --zone
-        --location --vm-sku --lb --orchestration-mode
+        --location --vm-sku --lb --orchestration-mode --lb-sku
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.30.1 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/publishers/Debian/artifacttypes/vmimage/offers/debian-10/skus/10/versions/0.20240204.1647?api-version=2024-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/publishers/Debian/artifacttypes/vmimage/offers/debian-10/skus/10/versions/0.20240430.1733?api-version=2024-07-01
   response:
     body:
       string: "{\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n \
@@ -1083,18 +1096,18 @@ interactions:
         \   \"value\": \"SCSI\"\r\n      },\r\n      {\r\n        \"name\": \"IsHibernateSupported\"\
         ,\r\n        \"value\": \"False\"\r\n      }\r\n    ],\r\n    \"osDiskImage\"\
         : {\r\n      \"operatingSystem\": \"Linux\",\r\n      \"sizeInBytes\": 32212255232\r\
-        \n    },\r\n    \"dataDiskImages\": []\r\n  },\r\n  \"location\": \"eastus\"\
-        ,\r\n  \"name\": \"0.20240204.1647\",\r\n  \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/eastus/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20240204.1647\"\
+        \n    },\r\n    \"dataDiskImages\": []\r\n  },\r\n  \"location\": \"eastus2\"\
+        ,\r\n  \"name\": \"0.20240430.1733\",\r\n  \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/eastus2/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20240430.1733\"\
         \r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1008'
+      - '1010'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Apr 2024 04:14:28 GMT
+      - Mon, 26 Aug 2024 08:13:48 GMT
       expires:
       - '-1'
       pragma:
@@ -1106,9 +1119,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetVMImageFromLocation3Min;12993,Microsoft.Compute/GetVMImageFromLocation30Min;73989
+      - Microsoft.Compute/GetVMImageFromLocation3Min;12993,Microsoft.Compute/GetVMImageFromLocation30Min;73993
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: FA938D54BD4946C5BE4713401F4C9E68 Ref B: MAA201060515017 Ref C: 2024-04-24T04:14:29Z'
+      - 'Ref A: 08851302D2534ED394AFC6C8A2FB3C26 Ref B: TYO201151001011 Ref C: 2024-08-26T08:13:48Z'
     status:
       code: 200
       message: OK
@@ -1117,17 +1132,16 @@ interactions:
       "contentVersion": "1.0.0.0", "parameters": {"adminPassword": {"type": "securestring",
       "metadata": {"description": "Secure adminPassword"}}}, "variables": {}, "resources":
       [{"type": "Microsoft.Compute/virtualMachineScaleSets", "name": "vm-ultrassd2",
-      "location": "eastus", "tags": {}, "apiVersion": "2024-03-01", "dependsOn": [],
-      "properties": {"overprovision": true, "upgradePolicy": {"mode": "manual", "rollingUpgradePolicy":
-      {}, "automaticOSUpgradePolicy": {}}, "singlePlacementGroup": false, "additionalCapabilities":
-      {"ultraSSDEnabled": true}, "virtualMachineProfile": {"storageProfile": {"osDisk":
-      {"createOption": "FromImage", "caching": "ReadWrite", "managedDisk": {"storageAccountType":
-      null}}, "imageReference": {"publisher": "Debian", "offer": "debian-10", "sku":
-      "10", "version": "latest"}}, "osProfile": {"computerNamePrefix": "vmult2371",
-      "adminUsername": "admin123", "adminPassword": "[parameters(''adminPassword'')]"},
-      "networkProfile": {"networkInterfaceConfigurations": [{"name": "vmult2371Nic",
-      "properties": {"ipConfigurations": [{"name": "vmult2371IPConfig", "properties":
-      {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Network/virtualNetworks/vm-ultrassdVNET/subnets/vm-ultrassdSubnet"}}}],
+      "location": "eastus2", "tags": {}, "apiVersion": "2024-07-01", "dependsOn":
+      [], "properties": {"overprovision": true, "upgradePolicy": {"mode": "manual"},
+      "singlePlacementGroup": false, "additionalCapabilities": {"ultraSSDEnabled":
+      true}, "virtualMachineProfile": {"storageProfile": {"osDisk": {"createOption":
+      "FromImage", "caching": "ReadWrite", "managedDisk": {"storageAccountType": null}},
+      "imageReference": {"publisher": "Debian", "offer": "debian-10", "sku": "10",
+      "version": "latest"}}, "osProfile": {"computerNamePrefix": "vmultf37e", "adminUsername":
+      "admin123", "adminPassword": "[parameters(''adminPassword'')]"}, "networkProfile":
+      {"networkInterfaceConfigurations": [{"name": "vmultf37eNic", "properties": {"ipConfigurations":
+      [{"name": "vmultf37eIPConfig", "properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Network/virtualNetworks/vm-ultrassdVNET/subnets/vm-ultrassdSubnet"}}}],
       "primary": "true"}}]}}, "orchestrationMode": "Uniform"}, "sku": {"name": "Standard_D2s_v3",
       "capacity": 2}, "zones": ["2"]}], "outputs": {"VMSS": {"type": "object", "value":
       "[reference(resourceId(''Microsoft.Compute/virtualMachineScaleSets'', ''vm-ultrassd2''),providers(''Microsoft.Compute'',
@@ -1143,22 +1157,22 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1838'
+      - '1779'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n --admin-username --admin-password --image --ultra-ssd-enabled --zone
-        --location --vm-sku --lb --orchestration-mode
+        --location --vm-sku --lb --orchestration-mode --lb-sku
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.30.1 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-ultrassd000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Resources/deployments/vmss_deploy_dlnXzGZV8XPB2AS4ETWofdXpORXV8crM","name":"vmss_deploy_dlnXzGZV8XPB2AS4ETWofdXpORXV8crM","type":"Microsoft.Resources/deployments","properties":{"templateHash":"10155368785656352142","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2024-04-24T04:14:40.9297576Z","duration":"PT0.0009245S","correlationId":"6bfd931e-baa2-4941-9de4-78d083f20f0b","providers":[{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachineScaleSets","locations":["eastus"]}]}],"dependencies":[]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Resources/deployments/vmss_deploy_s8FJRO1kahD9hNmlWJae2rLBcXF4a0iL","name":"vmss_deploy_s8FJRO1kahD9hNmlWJae2rLBcXF4a0iL","type":"Microsoft.Resources/deployments","properties":{"templateHash":"2443943776169619101","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2024-08-26T08:13:57.3449069Z","duration":"PT0.0002714S","correlationId":"5954b16f-0017-4b34-8c18-e5516e0c244f","providers":[{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachineScaleSets","locations":["eastus2"]}]}],"dependencies":[]}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-ultrassd000001/providers/Microsoft.Resources/deployments/vmss_deploy_dlnXzGZV8XPB2AS4ETWofdXpORXV8crM/operationStatuses/08584876748075534436?api-version=2022-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-ultrassd000001/providers/Microsoft.Resources/deployments/vmss_deploy_s8FJRO1kahD9hNmlWJae2rLBcXF4a0iL/operationStatuses/08584769468507124643?api-version=2022-09-01
       cache-control:
       - no-cache
       content-length:
@@ -1166,7 +1180,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Apr 2024 04:14:43 GMT
+      - Mon, 26 Aug 2024 08:13:59 GMT
       expires:
       - '-1'
       pragma:
@@ -1177,10 +1191,14 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-deployment-engine-version:
+      - 1.95.0
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1195'
+      - '199'
       x-msedge-ref:
-      - 'Ref A: 5F8257CD7FC140608C125344B6F4C43F Ref B: MAA201060515033 Ref C: 2024-04-24T04:14:30Z'
+      - 'Ref A: 628DA9CE579A49C1947566F85028BBE4 Ref B: TYO201100116047 Ref C: 2024-08-26T08:13:49Z'
     status:
       code: 201
       message: Created
@@ -1197,11 +1215,11 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g -n --admin-username --admin-password --image --ultra-ssd-enabled --zone
-        --location --vm-sku --lb --orchestration-mode
+        --location --vm-sku --lb --orchestration-mode --lb-sku
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.30.1 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-ultrassd000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08584876748075534436?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-ultrassd000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08584769468507124643?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1213,7 +1231,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Apr 2024 04:14:46 GMT
+      - Mon, 26 Aug 2024 08:14:00 GMT
       expires:
       - '-1'
       pragma:
@@ -1224,8 +1242,10 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 5FEB1E16E7CD413F868891F63E453493 Ref B: MAA201060513045 Ref C: 2024-04-24T04:14:44Z'
+      - 'Ref A: ADB201DC705649839615A24EFADE46E4 Ref B: TYO201100116047 Ref C: 2024-08-26T08:13:59Z'
     status:
       code: 200
       message: OK
@@ -1242,11 +1262,11 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g -n --admin-username --admin-password --image --ultra-ssd-enabled --zone
-        --location --vm-sku --lb --orchestration-mode
+        --location --vm-sku --lb --orchestration-mode --lb-sku
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.30.1 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-ultrassd000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08584876748075534436?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-ultrassd000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08584769468507124643?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1258,7 +1278,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Apr 2024 04:15:19 GMT
+      - Mon, 26 Aug 2024 08:14:31 GMT
       expires:
       - '-1'
       pragma:
@@ -1269,8 +1289,10 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 61C91B00440B4C9DA0DD2B898901FE2C Ref B: MAA201060515047 Ref C: 2024-04-24T04:15:17Z'
+      - 'Ref A: F583EA84D0334F8BB4796407B4F9C5C8 Ref B: TYO201100116047 Ref C: 2024-08-26T08:14:31Z'
     status:
       code: 200
       message: OK
@@ -1287,11 +1309,11 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g -n --admin-username --admin-password --image --ultra-ssd-enabled --zone
-        --location --vm-sku --lb --orchestration-mode
+        --location --vm-sku --lb --orchestration-mode --lb-sku
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.30.1 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-ultrassd000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08584876748075534436?api-version=2022-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-ultrassd000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08584769468507124643?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -1303,7 +1325,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Apr 2024 04:15:51 GMT
+      - Mon, 26 Aug 2024 08:15:03 GMT
       expires:
       - '-1'
       pragma:
@@ -1314,8 +1336,10 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: B11CAE0375B747A190CE028F626E8826 Ref B: MAA201060514045 Ref C: 2024-04-24T04:15:50Z'
+      - 'Ref A: 19902310FDF141888357DD8DB99B7941 Ref B: TYO201100116047 Ref C: 2024-08-26T08:15:02Z'
     status:
       code: 200
       message: OK
@@ -1332,23 +1356,23 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g -n --admin-username --admin-password --image --ultra-ssd-enabled --zone
-        --location --vm-sku --lb --orchestration-mode
+        --location --vm-sku --lb --orchestration-mode --lb-sku
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.30.1 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-ultrassd000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Resources/deployments/vmss_deploy_dlnXzGZV8XPB2AS4ETWofdXpORXV8crM","name":"vmss_deploy_dlnXzGZV8XPB2AS4ETWofdXpORXV8crM","type":"Microsoft.Resources/deployments","properties":{"templateHash":"10155368785656352142","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2024-04-24T04:15:32.818948Z","duration":"PT51.8901149S","correlationId":"6bfd931e-baa2-4941-9de4-78d083f20f0b","providers":[{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachineScaleSets","locations":["eastus"]}]}],"dependencies":[],"outputs":{"vmss":{"type":"Object","value":{"singlePlacementGroup":false,"orchestrationMode":"Uniform","upgradePolicy":{"mode":"Manual","rollingUpgradePolicy":{"maxBatchInstancePercent":20,"maxUnhealthyInstancePercent":20,"maxUnhealthyUpgradedInstancePercent":20,"pauseTimeBetweenBatches":"PT0S","maxSurge":false,"rollbackFailedInstancesOnPolicyBreach":false},"automaticOSUpgradePolicy":{"enableAutomaticOSUpgrade":false,"useRollingUpgradePolicy":false,"disableAutomaticRollback":false}},"virtualMachineProfile":{"osProfile":{"computerNamePrefix":"vmult2371","adminUsername":"admin123","linuxConfiguration":{"disablePasswordAuthentication":false,"provisionVMAgent":true,"enableVMAgentPlatformUpdates":false},"secrets":[],"allowExtensionOperations":true,"requireGuestProvisionSignal":true},"storageProfile":{"osDisk":{"osType":"Linux","createOption":"FromImage","caching":"ReadWrite","managedDisk":{"storageAccountType":"Premium_LRS"},"diskSizeGB":30},"imageReference":{"publisher":"Debian","offer":"debian-10","sku":"10","version":"latest"}},"networkProfile":{"networkInterfaceConfigurations":[{"name":"vmult2371Nic","properties":{"primary":true,"enableAcceleratedNetworking":false,"disableTcpStateTracking":false,"dnsSettings":{"dnsServers":[]},"enableIPForwarding":false,"ipConfigurations":[{"name":"vmult2371IPConfig","properties":{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Network/virtualNetworks/vm-ultrassdVNET/subnets/vm-ultrassdSubnet"},"privateIPAddressVersion":"IPv4"}}]}}]},"timeCreated":"2024-04-24T04:14:48.6974829+00:00"},"additionalCapabilities":{"ultraSSDEnabled":true},"provisioningState":"Succeeded","overprovision":true,"doNotRunExtensionsOnOverprovisionedVMs":false,"uniqueId":"49bd6d56-f589-41fc-aa43-7de1b7327674","platformFaultDomainCount":1,"timeCreated":"2024-04-24T04:14:48.6974829+00:00"}}},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Compute/virtualMachineScaleSets/vm-ultrassd2"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Resources/deployments/vmss_deploy_s8FJRO1kahD9hNmlWJae2rLBcXF4a0iL","name":"vmss_deploy_s8FJRO1kahD9hNmlWJae2rLBcXF4a0iL","type":"Microsoft.Resources/deployments","properties":{"templateHash":"2443943776169619101","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2024-08-26T08:14:45.1334352Z","duration":"PT47.7887997S","correlationId":"5954b16f-0017-4b34-8c18-e5516e0c244f","providers":[{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachineScaleSets","locations":["eastus2"]}]}],"dependencies":[],"outputs":{"vmss":{"type":"Object","value":{"singlePlacementGroup":false,"orchestrationMode":"Uniform","upgradePolicy":{"mode":"Manual"},"virtualMachineProfile":{"osProfile":{"computerNamePrefix":"vmultf37e","adminUsername":"admin123","linuxConfiguration":{"disablePasswordAuthentication":false,"provisionVMAgent":true},"secrets":[],"allowExtensionOperations":true,"requireGuestProvisionSignal":true},"storageProfile":{"osDisk":{"osType":"Linux","createOption":"FromImage","caching":"ReadWrite","managedDisk":{"storageAccountType":"Premium_LRS"},"diskSizeGB":30},"imageReference":{"publisher":"Debian","offer":"debian-10","sku":"10","version":"latest"}},"networkProfile":{"networkInterfaceConfigurations":[{"name":"vmultf37eNic","properties":{"primary":true,"enableAcceleratedNetworking":false,"disableTcpStateTracking":false,"dnsSettings":{"dnsServers":[]},"enableIPForwarding":false,"ipConfigurations":[{"name":"vmultf37eIPConfig","properties":{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Network/virtualNetworks/vm-ultrassdVNET/subnets/vm-ultrassdSubnet"},"privateIPAddressVersion":"IPv4"}}]}}]},"timeCreated":"2024-08-26T08:14:01.3578217+00:00"},"additionalCapabilities":{"ultraSSDEnabled":true},"provisioningState":"Succeeded","overprovision":true,"doNotRunExtensionsOnOverprovisionedVMs":false,"uniqueId":"4c18961d-036e-4560-92ec-7665d5aa3493","platformFaultDomainCount":1,"timeCreated":"2024-08-26T08:14:01.3578217+00:00"}}},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Compute/virtualMachineScaleSets/vm-ultrassd2"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2804'
+      - '2417'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Apr 2024 04:15:53 GMT
+      - Mon, 26 Aug 2024 08:15:03 GMT
       expires:
       - '-1'
       pragma:
@@ -1359,8 +1383,10 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3748'
       x-msedge-ref:
-      - 'Ref A: 2EBCD0911920417192DCB9B93FFEB6A4 Ref B: MAA201060514025 Ref C: 2024-04-24T04:15:52Z'
+      - 'Ref A: 86A7A2820E3C4C7F94B05C1EDCF0CC32 Ref B: TYO201100116047 Ref C: 2024-08-26T08:15:04Z'
     status:
       code: 200
       message: OK
@@ -1378,58 +1404,53 @@ interactions:
       ParameterSetName:
       - -g --vmss-name --size-gb --sku
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.30.1 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Compute/virtualMachineScaleSets/vm-ultrassd2?api-version=2024-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Compute/virtualMachineScaleSets/vm-ultrassd2?api-version=2024-07-01
   response:
     body:
       string: "{\r\n  \"name\": \"vm-ultrassd2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Compute/virtualMachineScaleSets/vm-ultrassd2\"\
         ,\r\n  \"type\": \"Microsoft.Compute/virtualMachineScaleSets\",\r\n  \"location\"\
-        : \"eastus\",\r\n  \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Standard_D2s_v3\"\
-        ,\r\n    \"tier\": \"Standard\",\r\n    \"capacity\": 2\r\n  },\r\n  \"properties\"\
-        : {\r\n    \"singlePlacementGroup\": false,\r\n    \"orchestrationMode\":\
-        \ \"Uniform\",\r\n    \"upgradePolicy\": {\r\n      \"mode\": \"Manual\",\r\
-        \n      \"rollingUpgradePolicy\": {\r\n        \"maxBatchInstancePercent\"\
-        : 20,\r\n        \"maxUnhealthyInstancePercent\": 20,\r\n        \"maxUnhealthyUpgradedInstancePercent\"\
-        : 20,\r\n        \"pauseTimeBetweenBatches\": \"PT0S\",\r\n        \"maxSurge\"\
-        : false,\r\n        \"rollbackFailedInstancesOnPolicyBreach\": false\r\n \
-        \     },\r\n      \"automaticOSUpgradePolicy\": {\r\n        \"enableAutomaticOSUpgrade\"\
-        : false,\r\n        \"useRollingUpgradePolicy\": false,\r\n        \"disableAutomaticRollback\"\
-        : false\r\n      }\r\n    },\r\n    \"virtualMachineProfile\": {\r\n     \
-        \ \"osProfile\": {\r\n        \"computerNamePrefix\": \"vmult2371\",\r\n \
-        \       \"adminUsername\": \"admin123\",\r\n        \"linuxConfiguration\"\
+        : \"eastus2\",\r\n  \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Standard_D2s_v3\"\
+        ,\r\n    \"tier\": \"Standard\",\r\n    \"capacity\": 2\r\n  },\r\n  \"etag\"\
+        : \"\\\"3\\\"\",\r\n  \"properties\": {\r\n    \"singlePlacementGroup\": false,\r\
+        \n    \"orchestrationMode\": \"Uniform\",\r\n    \"upgradePolicy\": {\r\n\
+        \      \"mode\": \"Manual\"\r\n    },\r\n    \"virtualMachineProfile\": {\r\
+        \n      \"osProfile\": {\r\n        \"computerNamePrefix\": \"vmultf37e\"\
+        ,\r\n        \"adminUsername\": \"admin123\",\r\n        \"linuxConfiguration\"\
         : {\r\n          \"disablePasswordAuthentication\": false,\r\n          \"\
-        provisionVMAgent\": true,\r\n          \"enableVMAgentPlatformUpdates\": false\r\
-        \n        },\r\n        \"secrets\": [],\r\n        \"allowExtensionOperations\"\
-        : true,\r\n        \"requireGuestProvisionSignal\": true\r\n      },\r\n \
-        \     \"storageProfile\": {\r\n        \"osDisk\": {\r\n          \"osType\"\
-        : \"Linux\",\r\n          \"createOption\": \"FromImage\",\r\n          \"\
-        caching\": \"ReadWrite\",\r\n          \"managedDisk\": {\r\n            \"\
-        storageAccountType\": \"Premium_LRS\"\r\n          },\r\n          \"diskSizeGB\"\
-        : 30\r\n        },\r\n        \"imageReference\": {\r\n          \"publisher\"\
-        : \"Debian\",\r\n          \"offer\": \"debian-10\",\r\n          \"sku\"\
-        : \"10\",\r\n          \"version\": \"latest\"\r\n        }\r\n      },\r\n\
-        \      \"networkProfile\": {\"networkInterfaceConfigurations\":[{\"name\"\
-        :\"vmult2371Nic\",\"properties\":{\"primary\":true,\"enableAcceleratedNetworking\"\
+        provisionVMAgent\": true\r\n        },\r\n        \"secrets\": [],\r\n   \
+        \     \"allowExtensionOperations\": true,\r\n        \"requireGuestProvisionSignal\"\
+        : true\r\n      },\r\n      \"storageProfile\": {\r\n        \"osDisk\": {\r\
+        \n          \"osType\": \"Linux\",\r\n          \"createOption\": \"FromImage\"\
+        ,\r\n          \"caching\": \"ReadWrite\",\r\n          \"managedDisk\": {\r\
+        \n            \"storageAccountType\": \"Premium_LRS\"\r\n          },\r\n\
+        \          \"diskSizeGB\": 30\r\n        },\r\n        \"imageReference\"\
+        : {\r\n          \"publisher\": \"Debian\",\r\n          \"offer\": \"debian-10\"\
+        ,\r\n          \"sku\": \"10\",\r\n          \"version\": \"latest\"\r\n \
+        \       }\r\n      },\r\n      \"networkProfile\": {\"networkInterfaceConfigurations\"\
+        :[{\"name\":\"vmultf37eNic\",\"properties\":{\"primary\":true,\"enableAcceleratedNetworking\"\
         :false,\"disableTcpStateTracking\":false,\"dnsSettings\":{\"dnsServers\":[]},\"\
-        enableIPForwarding\":false,\"ipConfigurations\":[{\"name\":\"vmult2371IPConfig\"\
+        enableIPForwarding\":false,\"ipConfigurations\":[{\"name\":\"vmultf37eIPConfig\"\
         ,\"properties\":{\"subnet\":{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Network/virtualNetworks/vm-ultrassdVNET/subnets/vm-ultrassdSubnet\"\
         },\"privateIPAddressVersion\":\"IPv4\"}}]}}]},\r\n      \"timeCreated\": \"\
-        2024-04-24T04:14:48.6974829+00:00\"\r\n    },\r\n    \"additionalCapabilities\"\
+        2024-08-26T08:14:01.3578217+00:00\"\r\n    },\r\n    \"additionalCapabilities\"\
         : {\r\n      \"ultraSSDEnabled\": true\r\n    },\r\n    \"provisioningState\"\
         : \"Succeeded\",\r\n    \"overprovision\": true,\r\n    \"doNotRunExtensionsOnOverprovisionedVMs\"\
-        : false,\r\n    \"uniqueId\": \"49bd6d56-f589-41fc-aa43-7de1b7327674\",\r\n\
-        \    \"platformFaultDomainCount\": 1,\r\n    \"timeCreated\": \"2024-04-24T04:14:48.6974829+00:00\"\
+        : false,\r\n    \"uniqueId\": \"4c18961d-036e-4560-92ec-7665d5aa3493\",\r\n\
+        \    \"platformFaultDomainCount\": 1,\r\n    \"timeCreated\": \"2024-08-26T08:14:01.3578217+00:00\"\
         \r\n  },\r\n  \"zones\": [\r\n    \"2\"\r\n  ]\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2896'
+      - '2383'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Apr 2024 04:15:55 GMT
+      - Mon, 26 Aug 2024 08:15:05 GMT
+      etag:
+      - '"3"'
       expires:
       - '-1'
       pragma:
@@ -1441,30 +1462,28 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetVMScaleSetSubscriptionMaximum;2394,Microsoft.Compute/GetVMScaleSetResource;31
+      - Microsoft.Compute/GetVMScaleSetSubscriptionMaximum;2395,Microsoft.Compute/GetVMScaleSetResource;32
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 047E7CAEF86F40EBAD7B402FF71A0337 Ref B: MAA201060514031 Ref C: 2024-04-24T04:15:54Z'
+      - 'Ref A: 93F43681009B4050BDCEA7FD3C054C5D Ref B: TYO201100114047 Ref C: 2024-08-26T08:15:05Z'
     status:
       code: 200
       message: ''
 - request:
-    body: '{"location": "eastus", "tags": {}, "sku": {"name": "Standard_D2s_v3", "tier":
-      "Standard", "capacity": 2}, "zones": ["2"], "properties": {"upgradePolicy":
-      {"mode": "Manual", "rollingUpgradePolicy": {"maxBatchInstancePercent": 20, "maxUnhealthyInstancePercent":
-      20, "maxUnhealthyUpgradedInstancePercent": 20, "pauseTimeBetweenBatches": "PT0S",
-      "rollbackFailedInstancesOnPolicyBreach": false, "maxSurge": false}, "automaticOSUpgradePolicy":
-      {"enableAutomaticOSUpgrade": false, "disableAutomaticRollback": false, "useRollingUpgradePolicy":
-      false}}, "virtualMachineProfile": {"osProfile": {"computerNamePrefix": "vmult2371",
-      "adminUsername": "admin123", "linuxConfiguration": {"disablePasswordAuthentication":
-      false, "provisionVMAgent": true, "enableVMAgentPlatformUpdates": false}, "secrets":
-      [], "allowExtensionOperations": true, "requireGuestProvisionSignal": true},
-      "storageProfile": {"osDisk": {"caching": "ReadWrite", "createOption": "FromImage",
-      "diskSizeGB": 30, "osType": "Linux", "managedDisk": {"storageAccountType": "Premium_LRS"}},
-      "dataDisks": [{"lun": 0, "createOption": "Empty", "diskSizeGB": 5, "managedDisk":
-      {"storageAccountType": "UltraSSD_LRS"}}]}, "networkProfile": {"networkInterfaceConfigurations":
-      [{"name": "vmult2371Nic", "properties": {"primary": true, "enableAcceleratedNetworking":
+    body: '{"location": "eastus2", "tags": {}, "sku": {"name": "Standard_D2s_v3",
+      "tier": "Standard", "capacity": 2}, "zones": ["2"], "properties": {"upgradePolicy":
+      {"mode": "Manual"}, "virtualMachineProfile": {"osProfile": {"computerNamePrefix":
+      "vmultf37e", "adminUsername": "admin123", "linuxConfiguration": {"disablePasswordAuthentication":
+      false, "provisionVMAgent": true}, "secrets": [], "allowExtensionOperations":
+      true, "requireGuestProvisionSignal": true}, "storageProfile": {"osDisk": {"caching":
+      "ReadWrite", "createOption": "FromImage", "diskSizeGB": 30, "osType": "Linux",
+      "managedDisk": {"storageAccountType": "Premium_LRS"}}, "dataDisks": [{"lun":
+      0, "createOption": "Empty", "diskSizeGB": 5, "managedDisk": {"storageAccountType":
+      "UltraSSD_LRS"}}]}, "networkProfile": {"networkInterfaceConfigurations": [{"name":
+      "vmultf37eNic", "properties": {"primary": true, "enableAcceleratedNetworking":
       false, "disableTcpStateTracking": false, "dnsSettings": {"dnsServers": []},
-      "ipConfigurations": [{"name": "vmult2371IPConfig", "properties": {"subnet":
+      "ipConfigurations": [{"name": "vmultf37eIPConfig", "properties": {"subnet":
       {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Network/virtualNetworks/vm-ultrassdVNET/subnets/vm-ultrassdSubnet"},
       "privateIPAddressVersion": "IPv4"}}], "enableIPForwarding": false}}]}}, "overprovision":
       true, "doNotRunExtensionsOnOverprovisionedVMs": false, "singlePlacementGroup":
@@ -1480,73 +1499,68 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1938'
+      - '1529'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g --vmss-name --size-gb --sku
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.30.1 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Compute/virtualMachineScaleSets/vm-ultrassd2?api-version=2024-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Compute/virtualMachineScaleSets/vm-ultrassd2?api-version=2024-07-01
   response:
     body:
       string: "{\r\n  \"name\": \"vm-ultrassd2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Compute/virtualMachineScaleSets/vm-ultrassd2\"\
         ,\r\n  \"type\": \"Microsoft.Compute/virtualMachineScaleSets\",\r\n  \"location\"\
-        : \"eastus\",\r\n  \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Standard_D2s_v3\"\
-        ,\r\n    \"tier\": \"Standard\",\r\n    \"capacity\": 2\r\n  },\r\n  \"properties\"\
-        : {\r\n    \"singlePlacementGroup\": false,\r\n    \"orchestrationMode\":\
-        \ \"Uniform\",\r\n    \"upgradePolicy\": {\r\n      \"mode\": \"Manual\",\r\
-        \n      \"rollingUpgradePolicy\": {\r\n        \"maxBatchInstancePercent\"\
-        : 20,\r\n        \"maxUnhealthyInstancePercent\": 20,\r\n        \"maxUnhealthyUpgradedInstancePercent\"\
-        : 20,\r\n        \"pauseTimeBetweenBatches\": \"PT0S\",\r\n        \"maxSurge\"\
-        : false,\r\n        \"rollbackFailedInstancesOnPolicyBreach\": false\r\n \
-        \     },\r\n      \"automaticOSUpgradePolicy\": {\r\n        \"enableAutomaticOSUpgrade\"\
-        : false,\r\n        \"useRollingUpgradePolicy\": false,\r\n        \"disableAutomaticRollback\"\
-        : false\r\n      }\r\n    },\r\n    \"virtualMachineProfile\": {\r\n     \
-        \ \"osProfile\": {\r\n        \"computerNamePrefix\": \"vmult2371\",\r\n \
-        \       \"adminUsername\": \"admin123\",\r\n        \"linuxConfiguration\"\
+        : \"eastus2\",\r\n  \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Standard_D2s_v3\"\
+        ,\r\n    \"tier\": \"Standard\",\r\n    \"capacity\": 2\r\n  },\r\n  \"etag\"\
+        : \"\\\"4\\\"\",\r\n  \"properties\": {\r\n    \"singlePlacementGroup\": false,\r\
+        \n    \"orchestrationMode\": \"Uniform\",\r\n    \"upgradePolicy\": {\r\n\
+        \      \"mode\": \"Manual\"\r\n    },\r\n    \"virtualMachineProfile\": {\r\
+        \n      \"osProfile\": {\r\n        \"computerNamePrefix\": \"vmultf37e\"\
+        ,\r\n        \"adminUsername\": \"admin123\",\r\n        \"linuxConfiguration\"\
         : {\r\n          \"disablePasswordAuthentication\": false,\r\n          \"\
-        provisionVMAgent\": true,\r\n          \"enableVMAgentPlatformUpdates\": false\r\
-        \n        },\r\n        \"secrets\": [],\r\n        \"allowExtensionOperations\"\
-        : true,\r\n        \"requireGuestProvisionSignal\": true\r\n      },\r\n \
-        \     \"storageProfile\": {\r\n        \"osDisk\": {\r\n          \"osType\"\
-        : \"Linux\",\r\n          \"createOption\": \"FromImage\",\r\n          \"\
-        caching\": \"ReadWrite\",\r\n          \"managedDisk\": {\r\n            \"\
-        storageAccountType\": \"Premium_LRS\"\r\n          },\r\n          \"diskSizeGB\"\
-        : 30\r\n        },\r\n        \"imageReference\": {\r\n          \"publisher\"\
-        : \"Debian\",\r\n          \"offer\": \"debian-10\",\r\n          \"sku\"\
-        : \"10\",\r\n          \"version\": \"latest\"\r\n        },\r\n        \"\
-        dataDisks\": [\r\n          {\r\n            \"lun\": 0,\r\n            \"\
-        diskIOPSReadWrite\": 800,\r\n            \"diskMBpsReadWrite\": 102,\r\n \
-        \           \"createOption\": \"Empty\",\r\n            \"caching\": \"None\"\
-        ,\r\n            \"managedDisk\": {\r\n              \"storageAccountType\"\
+        provisionVMAgent\": true\r\n        },\r\n        \"secrets\": [],\r\n   \
+        \     \"allowExtensionOperations\": true,\r\n        \"requireGuestProvisionSignal\"\
+        : true\r\n      },\r\n      \"storageProfile\": {\r\n        \"osDisk\": {\r\
+        \n          \"osType\": \"Linux\",\r\n          \"createOption\": \"FromImage\"\
+        ,\r\n          \"caching\": \"ReadWrite\",\r\n          \"managedDisk\": {\r\
+        \n            \"storageAccountType\": \"Premium_LRS\"\r\n          },\r\n\
+        \          \"diskSizeGB\": 30\r\n        },\r\n        \"imageReference\"\
+        : {\r\n          \"publisher\": \"Debian\",\r\n          \"offer\": \"debian-10\"\
+        ,\r\n          \"sku\": \"10\",\r\n          \"version\": \"latest\"\r\n \
+        \       },\r\n        \"dataDisks\": [\r\n          {\r\n            \"lun\"\
+        : 0,\r\n            \"diskIOPSReadWrite\": 800,\r\n            \"diskMBpsReadWrite\"\
+        : 102,\r\n            \"createOption\": \"Empty\",\r\n            \"caching\"\
+        : \"None\",\r\n            \"managedDisk\": {\r\n              \"storageAccountType\"\
         : \"UltraSSD_LRS\"\r\n            },\r\n            \"diskSizeGB\": 5\r\n\
         \          }\r\n        ]\r\n      },\r\n      \"networkProfile\": {\"networkInterfaceConfigurations\"\
-        :[{\"name\":\"vmult2371Nic\",\"properties\":{\"primary\":true,\"enableAcceleratedNetworking\"\
+        :[{\"name\":\"vmultf37eNic\",\"properties\":{\"primary\":true,\"enableAcceleratedNetworking\"\
         :false,\"disableTcpStateTracking\":false,\"dnsSettings\":{\"dnsServers\":[]},\"\
-        enableIPForwarding\":false,\"ipConfigurations\":[{\"name\":\"vmult2371IPConfig\"\
+        enableIPForwarding\":false,\"ipConfigurations\":[{\"name\":\"vmultf37eIPConfig\"\
         ,\"properties\":{\"subnet\":{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Network/virtualNetworks/vm-ultrassdVNET/subnets/vm-ultrassdSubnet\"\
         },\"privateIPAddressVersion\":\"IPv4\"}}]}}]},\r\n      \"timeCreated\": \"\
-        2024-04-24T04:16:02.2281244+00:00\"\r\n    },\r\n    \"additionalCapabilities\"\
+        2024-08-26T08:15:13.4207684+00:00\"\r\n    },\r\n    \"additionalCapabilities\"\
         : {\r\n      \"ultraSSDEnabled\": true\r\n    },\r\n    \"provisioningState\"\
         : \"Updating\",\r\n    \"overprovision\": true,\r\n    \"doNotRunExtensionsOnOverprovisionedVMs\"\
-        : false,\r\n    \"uniqueId\": \"49bd6d56-f589-41fc-aa43-7de1b7327674\",\r\n\
-        \    \"platformFaultDomainCount\": 1,\r\n    \"timeCreated\": \"2024-04-24T04:14:48.6974829+00:00\"\
+        : false,\r\n    \"uniqueId\": \"4c18961d-036e-4560-92ec-7665d5aa3493\",\r\n\
+        \    \"platformFaultDomainCount\": 1,\r\n    \"timeCreated\": \"2024-08-26T08:14:01.3578217+00:00\"\
         \r\n  },\r\n  \"zones\": [\r\n    \"2\"\r\n  ]\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/operations/3c07ef01-d6e3-4af0-b24e-7e344865c207?p=54253b73-cb53-496f-ab42-5e5ee19426f8&api-version=2024-03-01&t=638495289628071956&c=MIIHADCCBeigAwIBAgITfARk1TE_ZglsTRafPwAABGTVMTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjQwMTMwMTUwODE5WhcNMjUwMTI0MTUwODE5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAK902W8oGHqHsYxfQcAXt6Ljumrh6DLgGihvCAJqh_U0j8R4Jupt1lXUnhMY-cA7JAT9q7SEoTZskdrko1uzzlaykxYQUacRB8irTYwbgK6DCIqWuOd2G-W2g3eWAyxRb-Dffjnsz-vBsjd1fyP0MvIXDSDMzp2oK65BSxTbBiStV3YxtKZ3eONvKga4d77iEw0zAZHIFkt0PSHzHO7kk-b_trhadwDxPYnjrQOGmouEj7HuNoC8H7-vKZvgbeplfrHtJO9vq0TOUUqIGlT236cbPe62XQNJRim_aa3chEFUmacjUnjEZtgJjup_tDQ0iV_Oe0ZqRBBGzpjoK23Wch0CAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBSnxeoeDA6bR-Af5MXqnvahGPcbyTAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAGj6QqaLOPa3RZUHMPeeSymifn86nh52yaIojZbdHUiE_o0iWzV-2ZRZOxE2IgkOrAeMYXIUhMoqV7XxTwfpi6zGwrzIeuTWMbNjgzbIZGIMJCbUyNbvEkGqxvBpcwzATT8KQYU2-J2iL5slKYZIACN6THLJn5BI6dAecS1X4PJ5vNAgI8qlsYmnafZSCIrWLUQQUsZeLUaxy3t-hozvyfVe-B-nktPdgNv3-iCsI0AtlvezwfFcJXQHQeNByXg5oxXPIe02On7O1u8swvMta16Va5_kDzD80TS3LYzVk2nzUVxEqPaGhpA-vs_ttjm7hDhYk80OIsQ_YZd286sA58Q&s=Fjdu4SICtBuhZWkDMSpX9zUe3wrpWkCXm7nuYN0cl1hEOvxhFh9MM18k8Hvm2EgRkUoF_SaTeTLHgUiQ6bD2X13VieqKuKentZH7ybJmOlAC-cgMeuwLM7y7VBBjmzLwvuvWFXhTEGc3YgFH0cQ3uVlZloIHelGdzdZ60Eqwip4Sus5v0vuxhoIObJicKg31gBZ16s1sfVWnn3Tecxq750Et78ezrtkd5rS-GvHEhAJ07PxApM52vuvQ5WcjiyQQC0NNj5Q7JwyiM0jzNjiPLUpnOyLERYJzz5vCAydta5VF8kOFIxCkOm660VJYlRy2QA1vQ31s3Qf4WaBWEZFv7A&h=f4O2B8DW9hen5qwYeFAthYWnlDFrQ6RO5dYDa7UodGg
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/operations/361dc898-6357-4d5a-84c6-048a0299b69a?p=4da1aac7-dfbb-41ae-bded-ca0db7baa978&api-version=2024-07-01&t=638602569138525167&c=MIIHhzCCBm-gAwIBAgITHgTLf2Bo2ctQx42TXQAABMt_YDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjQwNjI0MTExMDUyWhcNMjUwNjE5MTExMDUyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAJlnrj2pdevN1SIOk4Ymmo6b0y9Je4RZXWejQSMTCH35NFEHss9bBD2CGcY3xU4F2W7onMR_2J9BMUNk3BAub3AoLlqVrcx5dzI0ay_5toyOhu-L1pN7aSQdp7J-LzA-UW_CLp2D_65mjx1ZER-HWOV5QedBCvUwhqtSal8AbzrK5Qth8tntkg5tzjChuGo9vkh1pnXKQyYHQMdulCipi-EK8sPOQpZyiVIRujiHxTJMjdxz4gCG4rAFAK8_jK4UC73mwHm7BAlfbfkkZtxW5sVSGLrYwFPkNIDtNGoINbTjOqTmJR02AYrzu-AeRS1DP-HxtHci9UFjOurKjaUYhTUCAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBTxZpd7aM59MC90B8etCBMRpcVJhTAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAHAEnYrjKwIEeZD6k6Jnduw9QE83ye3e6yI36Y6jc5gavwpltarWjUevLWA6bzqnIMEbxZot_oo7GgSjb9hcbtTWjf_cW7PWDbQSC5WExVS4rTM5XJOQlXIeguIDWoXNGCzJBnYfUfUEfW8ZdjPKbJ7_7OQo_y-DgeRynB9KRCkpH4wZ1X5EQR-13kZvzXCVNpw1yiAELFyVScpLMqfm5iM9nMEMU7Og9hgeUL4q7EwPPbvn6qRq4ehK7ctlmEItOmMlgtNqT3IRhFnMIIsqnZu7BTfLyXR_8geMDnVJlhUXkb73ZpHNIBaoXmHwLpUQLBwoqG0ME1rP1_9UfVhYmNs&s=A9B49SHfsWM0nceaz-H7S9SYYa8aKTnz7hmoUtnGHH9DEtTb0CM8rDZiRMeIsOUHosDSG7aTp_4lhyD2e40AY_-PB0nreypIHKEoIK1LEhzYx2QbWt4fWwaVjjaWn4CHr4ivXvmpmM7hGCRmWVT-sevDurmbffjCDMr3d-2nnVfq4V0wCZlGLy7WZzP-CpZG_mCadvxnhg3rx7NolGSgp8rQPy6yHOqX-92AmyLhbE4jJX52tOIBIZ90lrgKQIaRi4rPjVyrlTYMz802CWjObi4AdIi82BlUIBKEIyPL50YOkjWxloIzlloa0bqfNpt_3DdZB7d8dfyEDVBCNw6ORA&h=Sb0HERfYe8PraqijRQydOxvVKgred94z2Zvz1169xRA
       cache-control:
       - no-cache
       content-length:
-      - '3255'
+      - '2742'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Apr 2024 04:16:02 GMT
+      - Mon, 26 Aug 2024 08:15:13 GMT
+      etag:
+      - '"4"'
       expires:
       - '-1'
       pragma:
@@ -1559,12 +1573,14 @@ interactions:
       - nosniff
       x-ms-ratelimit-remaining-resource:
       - Microsoft.Compute/CreateVMScaleSetSubscriptionMaximum;374,Microsoft.Compute/CreateVMScaleSetResource;11,Microsoft.Compute/VMScaleSetBatchedVMRequestsSubscriptionMaximum;6000,Microsoft.Compute/VmssQueuedVMOperations;0
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1195'
+      - '199'
       x-ms-request-charge:
       - '0'
       x-msedge-ref:
-      - 'Ref A: D037B84020F0444097565E058C8F8983 Ref B: MAA201060514023 Ref C: 2024-04-24T04:15:56Z'
+      - 'Ref A: 5AAD7090A4E64F78B6FE87DE0412CE6A Ref B: TYO201100114047 Ref C: 2024-08-26T08:15:05Z'
     status:
       code: 200
       message: ''
@@ -1582,110 +1598,14 @@ interactions:
       ParameterSetName:
       - -g --vmss-name --size-gb --sku
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.30.1 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/operations/3c07ef01-d6e3-4af0-b24e-7e344865c207?p=54253b73-cb53-496f-ab42-5e5ee19426f8&api-version=2024-03-01&t=638495289628071956&c=MIIHADCCBeigAwIBAgITfARk1TE_ZglsTRafPwAABGTVMTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjQwMTMwMTUwODE5WhcNMjUwMTI0MTUwODE5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAK902W8oGHqHsYxfQcAXt6Ljumrh6DLgGihvCAJqh_U0j8R4Jupt1lXUnhMY-cA7JAT9q7SEoTZskdrko1uzzlaykxYQUacRB8irTYwbgK6DCIqWuOd2G-W2g3eWAyxRb-Dffjnsz-vBsjd1fyP0MvIXDSDMzp2oK65BSxTbBiStV3YxtKZ3eONvKga4d77iEw0zAZHIFkt0PSHzHO7kk-b_trhadwDxPYnjrQOGmouEj7HuNoC8H7-vKZvgbeplfrHtJO9vq0TOUUqIGlT236cbPe62XQNJRim_aa3chEFUmacjUnjEZtgJjup_tDQ0iV_Oe0ZqRBBGzpjoK23Wch0CAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBSnxeoeDA6bR-Af5MXqnvahGPcbyTAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAGj6QqaLOPa3RZUHMPeeSymifn86nh52yaIojZbdHUiE_o0iWzV-2ZRZOxE2IgkOrAeMYXIUhMoqV7XxTwfpi6zGwrzIeuTWMbNjgzbIZGIMJCbUyNbvEkGqxvBpcwzATT8KQYU2-J2iL5slKYZIACN6THLJn5BI6dAecS1X4PJ5vNAgI8qlsYmnafZSCIrWLUQQUsZeLUaxy3t-hozvyfVe-B-nktPdgNv3-iCsI0AtlvezwfFcJXQHQeNByXg5oxXPIe02On7O1u8swvMta16Va5_kDzD80TS3LYzVk2nzUVxEqPaGhpA-vs_ttjm7hDhYk80OIsQ_YZd286sA58Q&s=Fjdu4SICtBuhZWkDMSpX9zUe3wrpWkCXm7nuYN0cl1hEOvxhFh9MM18k8Hvm2EgRkUoF_SaTeTLHgUiQ6bD2X13VieqKuKentZH7ybJmOlAC-cgMeuwLM7y7VBBjmzLwvuvWFXhTEGc3YgFH0cQ3uVlZloIHelGdzdZ60Eqwip4Sus5v0vuxhoIObJicKg31gBZ16s1sfVWnn3Tecxq750Et78ezrtkd5rS-GvHEhAJ07PxApM52vuvQ5WcjiyQQC0NNj5Q7JwyiM0jzNjiPLUpnOyLERYJzz5vCAydta5VF8kOFIxCkOm660VJYlRy2QA1vQ31s3Qf4WaBWEZFv7A&h=f4O2B8DW9hen5qwYeFAthYWnlDFrQ6RO5dYDa7UodGg
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/operations/361dc898-6357-4d5a-84c6-048a0299b69a?p=4da1aac7-dfbb-41ae-bded-ca0db7baa978&api-version=2024-07-01&t=638602569138525167&c=MIIHhzCCBm-gAwIBAgITHgTLf2Bo2ctQx42TXQAABMt_YDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjQwNjI0MTExMDUyWhcNMjUwNjE5MTExMDUyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAJlnrj2pdevN1SIOk4Ymmo6b0y9Je4RZXWejQSMTCH35NFEHss9bBD2CGcY3xU4F2W7onMR_2J9BMUNk3BAub3AoLlqVrcx5dzI0ay_5toyOhu-L1pN7aSQdp7J-LzA-UW_CLp2D_65mjx1ZER-HWOV5QedBCvUwhqtSal8AbzrK5Qth8tntkg5tzjChuGo9vkh1pnXKQyYHQMdulCipi-EK8sPOQpZyiVIRujiHxTJMjdxz4gCG4rAFAK8_jK4UC73mwHm7BAlfbfkkZtxW5sVSGLrYwFPkNIDtNGoINbTjOqTmJR02AYrzu-AeRS1DP-HxtHci9UFjOurKjaUYhTUCAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBTxZpd7aM59MC90B8etCBMRpcVJhTAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEATAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAHAEnYrjKwIEeZD6k6Jnduw9QE83ye3e6yI36Y6jc5gavwpltarWjUevLWA6bzqnIMEbxZot_oo7GgSjb9hcbtTWjf_cW7PWDbQSC5WExVS4rTM5XJOQlXIeguIDWoXNGCzJBnYfUfUEfW8ZdjPKbJ7_7OQo_y-DgeRynB9KRCkpH4wZ1X5EQR-13kZvzXCVNpw1yiAELFyVScpLMqfm5iM9nMEMU7Og9hgeUL4q7EwPPbvn6qRq4ehK7ctlmEItOmMlgtNqT3IRhFnMIIsqnZu7BTfLyXR_8geMDnVJlhUXkb73ZpHNIBaoXmHwLpUQLBwoqG0ME1rP1_9UfVhYmNs&s=A9B49SHfsWM0nceaz-H7S9SYYa8aKTnz7hmoUtnGHH9DEtTb0CM8rDZiRMeIsOUHosDSG7aTp_4lhyD2e40AY_-PB0nreypIHKEoIK1LEhzYx2QbWt4fWwaVjjaWn4CHr4ivXvmpmM7hGCRmWVT-sevDurmbffjCDMr3d-2nnVfq4V0wCZlGLy7WZzP-CpZG_mCadvxnhg3rx7NolGSgp8rQPy6yHOqX-92AmyLhbE4jJX52tOIBIZ90lrgKQIaRi4rPjVyrlTYMz802CWjObi4AdIi82BlUIBKEIyPL50YOkjWxloIzlloa0bqfNpt_3DdZB7d8dfyEDVBCNw6ORA&h=Sb0HERfYe8PraqijRQydOxvVKgred94z2Zvz1169xRA
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2024-04-24T04:16:02.2281244+00:00\",\r\n  \"\
-        status\": \"InProgress\",\r\n  \"name\": \"3c07ef01-d6e3-4af0-b24e-7e344865c207\"\
-        \r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '134'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 24 Apr 2024 04:16:03 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperationResource;44,Microsoft.Compute/GetOperationSubscriptionMaximum;14999
-      x-msedge-ref:
-      - 'Ref A: 2B6BD893139B475AB8BC58231973E6AC Ref B: MAA201060515039 Ref C: 2024-04-24T04:16:03Z'
-    status:
-      code: 200
-      message: ''
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - vmss disk attach
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g --vmss-name --size-gb --sku
-      User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.30.1 Python/3.10.11 (Windows-10-10.0.22631-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/operations/3c07ef01-d6e3-4af0-b24e-7e344865c207?p=54253b73-cb53-496f-ab42-5e5ee19426f8&api-version=2024-03-01&t=638495289628071956&c=MIIHADCCBeigAwIBAgITfARk1TE_ZglsTRafPwAABGTVMTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjQwMTMwMTUwODE5WhcNMjUwMTI0MTUwODE5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAK902W8oGHqHsYxfQcAXt6Ljumrh6DLgGihvCAJqh_U0j8R4Jupt1lXUnhMY-cA7JAT9q7SEoTZskdrko1uzzlaykxYQUacRB8irTYwbgK6DCIqWuOd2G-W2g3eWAyxRb-Dffjnsz-vBsjd1fyP0MvIXDSDMzp2oK65BSxTbBiStV3YxtKZ3eONvKga4d77iEw0zAZHIFkt0PSHzHO7kk-b_trhadwDxPYnjrQOGmouEj7HuNoC8H7-vKZvgbeplfrHtJO9vq0TOUUqIGlT236cbPe62XQNJRim_aa3chEFUmacjUnjEZtgJjup_tDQ0iV_Oe0ZqRBBGzpjoK23Wch0CAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBSnxeoeDA6bR-Af5MXqnvahGPcbyTAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAGj6QqaLOPa3RZUHMPeeSymifn86nh52yaIojZbdHUiE_o0iWzV-2ZRZOxE2IgkOrAeMYXIUhMoqV7XxTwfpi6zGwrzIeuTWMbNjgzbIZGIMJCbUyNbvEkGqxvBpcwzATT8KQYU2-J2iL5slKYZIACN6THLJn5BI6dAecS1X4PJ5vNAgI8qlsYmnafZSCIrWLUQQUsZeLUaxy3t-hozvyfVe-B-nktPdgNv3-iCsI0AtlvezwfFcJXQHQeNByXg5oxXPIe02On7O1u8swvMta16Va5_kDzD80TS3LYzVk2nzUVxEqPaGhpA-vs_ttjm7hDhYk80OIsQ_YZd286sA58Q&s=Fjdu4SICtBuhZWkDMSpX9zUe3wrpWkCXm7nuYN0cl1hEOvxhFh9MM18k8Hvm2EgRkUoF_SaTeTLHgUiQ6bD2X13VieqKuKentZH7ybJmOlAC-cgMeuwLM7y7VBBjmzLwvuvWFXhTEGc3YgFH0cQ3uVlZloIHelGdzdZ60Eqwip4Sus5v0vuxhoIObJicKg31gBZ16s1sfVWnn3Tecxq750Et78ezrtkd5rS-GvHEhAJ07PxApM52vuvQ5WcjiyQQC0NNj5Q7JwyiM0jzNjiPLUpnOyLERYJzz5vCAydta5VF8kOFIxCkOm660VJYlRy2QA1vQ31s3Qf4WaBWEZFv7A&h=f4O2B8DW9hen5qwYeFAthYWnlDFrQ6RO5dYDa7UodGg
-  response:
-    body:
-      string: "{\r\n  \"startTime\": \"2024-04-24T04:16:02.2281244+00:00\",\r\n  \"\
-        status\": \"InProgress\",\r\n  \"name\": \"3c07ef01-d6e3-4af0-b24e-7e344865c207\"\
-        \r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '134'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 24 Apr 2024 04:16:41 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperationResource;43,Microsoft.Compute/GetOperationSubscriptionMaximum;14995
-      x-msedge-ref:
-      - 'Ref A: 60407E300F494C2D8112859CA56B3681 Ref B: MAA201060514049 Ref C: 2024-04-24T04:16:41Z'
-    status:
-      code: 200
-      message: ''
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - vmss disk attach
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g --vmss-name --size-gb --sku
-      User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.30.1 Python/3.10.11 (Windows-10-10.0.22631-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/operations/3c07ef01-d6e3-4af0-b24e-7e344865c207?p=54253b73-cb53-496f-ab42-5e5ee19426f8&api-version=2024-03-01&t=638495289628071956&c=MIIHADCCBeigAwIBAgITfARk1TE_ZglsTRafPwAABGTVMTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjQwMTMwMTUwODE5WhcNMjUwMTI0MTUwODE5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAK902W8oGHqHsYxfQcAXt6Ljumrh6DLgGihvCAJqh_U0j8R4Jupt1lXUnhMY-cA7JAT9q7SEoTZskdrko1uzzlaykxYQUacRB8irTYwbgK6DCIqWuOd2G-W2g3eWAyxRb-Dffjnsz-vBsjd1fyP0MvIXDSDMzp2oK65BSxTbBiStV3YxtKZ3eONvKga4d77iEw0zAZHIFkt0PSHzHO7kk-b_trhadwDxPYnjrQOGmouEj7HuNoC8H7-vKZvgbeplfrHtJO9vq0TOUUqIGlT236cbPe62XQNJRim_aa3chEFUmacjUnjEZtgJjup_tDQ0iV_Oe0ZqRBBGzpjoK23Wch0CAwEAAaOCA-0wggPpMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFggvX2K4Py0SACAWQCAQowggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBSnxeoeDA6bR-Af5MXqnvahGPcbyTAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMBcGA1UdIAQQMA4wDAYKKwYBBAGCN3sBATAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAGj6QqaLOPa3RZUHMPeeSymifn86nh52yaIojZbdHUiE_o0iWzV-2ZRZOxE2IgkOrAeMYXIUhMoqV7XxTwfpi6zGwrzIeuTWMbNjgzbIZGIMJCbUyNbvEkGqxvBpcwzATT8KQYU2-J2iL5slKYZIACN6THLJn5BI6dAecS1X4PJ5vNAgI8qlsYmnafZSCIrWLUQQUsZeLUaxy3t-hozvyfVe-B-nktPdgNv3-iCsI0AtlvezwfFcJXQHQeNByXg5oxXPIe02On7O1u8swvMta16Va5_kDzD80TS3LYzVk2nzUVxEqPaGhpA-vs_ttjm7hDhYk80OIsQ_YZd286sA58Q&s=Fjdu4SICtBuhZWkDMSpX9zUe3wrpWkCXm7nuYN0cl1hEOvxhFh9MM18k8Hvm2EgRkUoF_SaTeTLHgUiQ6bD2X13VieqKuKentZH7ybJmOlAC-cgMeuwLM7y7VBBjmzLwvuvWFXhTEGc3YgFH0cQ3uVlZloIHelGdzdZ60Eqwip4Sus5v0vuxhoIObJicKg31gBZ16s1sfVWnn3Tecxq750Et78ezrtkd5rS-GvHEhAJ07PxApM52vuvQ5WcjiyQQC0NNj5Q7JwyiM0jzNjiPLUpnOyLERYJzz5vCAydta5VF8kOFIxCkOm660VJYlRy2QA1vQ31s3Qf4WaBWEZFv7A&h=f4O2B8DW9hen5qwYeFAthYWnlDFrQ6RO5dYDa7UodGg
-  response:
-    body:
-      string: "{\r\n  \"startTime\": \"2024-04-24T04:16:02.2281244+00:00\",\r\n  \"\
-        endTime\": \"2024-04-24T04:16:50.7121057+00:00\",\r\n  \"status\": \"Succeeded\"\
-        ,\r\n  \"name\": \"3c07ef01-d6e3-4af0-b24e-7e344865c207\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2024-08-26T08:15:13.4207684+00:00\",\r\n  \"\
+        endTime\": \"2024-08-26T08:15:13.7801448+00:00\",\r\n  \"status\": \"Succeeded\"\
+        ,\r\n  \"name\": \"361dc898-6357-4d5a-84c6-048a0299b69a\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -1694,7 +1614,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Apr 2024 04:17:12 GMT
+      - Mon, 26 Aug 2024 08:15:13 GMT
       expires:
       - '-1'
       pragma:
@@ -1707,8 +1627,10 @@ interactions:
       - nosniff
       x-ms-ratelimit-remaining-resource:
       - Microsoft.Compute/GetOperationResource;44,Microsoft.Compute/GetOperationSubscriptionMaximum;14997
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 56F7D3F3F8424EBEBB3C10E15D4EDD72 Ref B: MAA201060516039 Ref C: 2024-04-24T04:17:12Z'
+      - 'Ref A: 5E495B1F3757431683CB0F88BEC6B113 Ref B: TYO201100114047 Ref C: 2024-08-26T08:15:14Z'
     status:
       code: 200
       message: ''
@@ -1726,63 +1648,58 @@ interactions:
       ParameterSetName:
       - -g --vmss-name --size-gb --sku
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.30.1 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Compute/virtualMachineScaleSets/vm-ultrassd2?api-version=2024-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Compute/virtualMachineScaleSets/vm-ultrassd2?api-version=2024-07-01
   response:
     body:
       string: "{\r\n  \"name\": \"vm-ultrassd2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Compute/virtualMachineScaleSets/vm-ultrassd2\"\
         ,\r\n  \"type\": \"Microsoft.Compute/virtualMachineScaleSets\",\r\n  \"location\"\
-        : \"eastus\",\r\n  \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Standard_D2s_v3\"\
-        ,\r\n    \"tier\": \"Standard\",\r\n    \"capacity\": 2\r\n  },\r\n  \"properties\"\
-        : {\r\n    \"singlePlacementGroup\": false,\r\n    \"orchestrationMode\":\
-        \ \"Uniform\",\r\n    \"upgradePolicy\": {\r\n      \"mode\": \"Manual\",\r\
-        \n      \"rollingUpgradePolicy\": {\r\n        \"maxBatchInstancePercent\"\
-        : 20,\r\n        \"maxUnhealthyInstancePercent\": 20,\r\n        \"maxUnhealthyUpgradedInstancePercent\"\
-        : 20,\r\n        \"pauseTimeBetweenBatches\": \"PT0S\",\r\n        \"maxSurge\"\
-        : false,\r\n        \"rollbackFailedInstancesOnPolicyBreach\": false\r\n \
-        \     },\r\n      \"automaticOSUpgradePolicy\": {\r\n        \"enableAutomaticOSUpgrade\"\
-        : false,\r\n        \"useRollingUpgradePolicy\": false,\r\n        \"disableAutomaticRollback\"\
-        : false\r\n      }\r\n    },\r\n    \"virtualMachineProfile\": {\r\n     \
-        \ \"osProfile\": {\r\n        \"computerNamePrefix\": \"vmult2371\",\r\n \
-        \       \"adminUsername\": \"admin123\",\r\n        \"linuxConfiguration\"\
+        : \"eastus2\",\r\n  \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Standard_D2s_v3\"\
+        ,\r\n    \"tier\": \"Standard\",\r\n    \"capacity\": 2\r\n  },\r\n  \"etag\"\
+        : \"\\\"4\\\"\",\r\n  \"properties\": {\r\n    \"singlePlacementGroup\": false,\r\
+        \n    \"orchestrationMode\": \"Uniform\",\r\n    \"upgradePolicy\": {\r\n\
+        \      \"mode\": \"Manual\"\r\n    },\r\n    \"virtualMachineProfile\": {\r\
+        \n      \"osProfile\": {\r\n        \"computerNamePrefix\": \"vmultf37e\"\
+        ,\r\n        \"adminUsername\": \"admin123\",\r\n        \"linuxConfiguration\"\
         : {\r\n          \"disablePasswordAuthentication\": false,\r\n          \"\
-        provisionVMAgent\": true,\r\n          \"enableVMAgentPlatformUpdates\": false\r\
-        \n        },\r\n        \"secrets\": [],\r\n        \"allowExtensionOperations\"\
-        : true,\r\n        \"requireGuestProvisionSignal\": true\r\n      },\r\n \
-        \     \"storageProfile\": {\r\n        \"osDisk\": {\r\n          \"osType\"\
-        : \"Linux\",\r\n          \"createOption\": \"FromImage\",\r\n          \"\
-        caching\": \"ReadWrite\",\r\n          \"managedDisk\": {\r\n            \"\
-        storageAccountType\": \"Premium_LRS\"\r\n          },\r\n          \"diskSizeGB\"\
-        : 30\r\n        },\r\n        \"imageReference\": {\r\n          \"publisher\"\
-        : \"Debian\",\r\n          \"offer\": \"debian-10\",\r\n          \"sku\"\
-        : \"10\",\r\n          \"version\": \"latest\"\r\n        },\r\n        \"\
-        dataDisks\": [\r\n          {\r\n            \"lun\": 0,\r\n            \"\
-        diskIOPSReadWrite\": 800,\r\n            \"diskMBpsReadWrite\": 102,\r\n \
-        \           \"createOption\": \"Empty\",\r\n            \"caching\": \"None\"\
-        ,\r\n            \"managedDisk\": {\r\n              \"storageAccountType\"\
+        provisionVMAgent\": true\r\n        },\r\n        \"secrets\": [],\r\n   \
+        \     \"allowExtensionOperations\": true,\r\n        \"requireGuestProvisionSignal\"\
+        : true\r\n      },\r\n      \"storageProfile\": {\r\n        \"osDisk\": {\r\
+        \n          \"osType\": \"Linux\",\r\n          \"createOption\": \"FromImage\"\
+        ,\r\n          \"caching\": \"ReadWrite\",\r\n          \"managedDisk\": {\r\
+        \n            \"storageAccountType\": \"Premium_LRS\"\r\n          },\r\n\
+        \          \"diskSizeGB\": 30\r\n        },\r\n        \"imageReference\"\
+        : {\r\n          \"publisher\": \"Debian\",\r\n          \"offer\": \"debian-10\"\
+        ,\r\n          \"sku\": \"10\",\r\n          \"version\": \"latest\"\r\n \
+        \       },\r\n        \"dataDisks\": [\r\n          {\r\n            \"lun\"\
+        : 0,\r\n            \"diskIOPSReadWrite\": 800,\r\n            \"diskMBpsReadWrite\"\
+        : 102,\r\n            \"createOption\": \"Empty\",\r\n            \"caching\"\
+        : \"None\",\r\n            \"managedDisk\": {\r\n              \"storageAccountType\"\
         : \"UltraSSD_LRS\"\r\n            },\r\n            \"diskSizeGB\": 5\r\n\
         \          }\r\n        ]\r\n      },\r\n      \"networkProfile\": {\"networkInterfaceConfigurations\"\
-        :[{\"name\":\"vmult2371Nic\",\"properties\":{\"primary\":true,\"enableAcceleratedNetworking\"\
+        :[{\"name\":\"vmultf37eNic\",\"properties\":{\"primary\":true,\"enableAcceleratedNetworking\"\
         :false,\"disableTcpStateTracking\":false,\"dnsSettings\":{\"dnsServers\":[]},\"\
-        enableIPForwarding\":false,\"ipConfigurations\":[{\"name\":\"vmult2371IPConfig\"\
+        enableIPForwarding\":false,\"ipConfigurations\":[{\"name\":\"vmultf37eIPConfig\"\
         ,\"properties\":{\"subnet\":{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Network/virtualNetworks/vm-ultrassdVNET/subnets/vm-ultrassdSubnet\"\
         },\"privateIPAddressVersion\":\"IPv4\"}}]}}]},\r\n      \"timeCreated\": \"\
-        2024-04-24T04:16:02.2281244+00:00\"\r\n    },\r\n    \"additionalCapabilities\"\
+        2024-08-26T08:15:13.4207684+00:00\"\r\n    },\r\n    \"additionalCapabilities\"\
         : {\r\n      \"ultraSSDEnabled\": true\r\n    },\r\n    \"provisioningState\"\
         : \"Succeeded\",\r\n    \"overprovision\": true,\r\n    \"doNotRunExtensionsOnOverprovisionedVMs\"\
-        : false,\r\n    \"uniqueId\": \"49bd6d56-f589-41fc-aa43-7de1b7327674\",\r\n\
-        \    \"platformFaultDomainCount\": 1,\r\n    \"timeCreated\": \"2024-04-24T04:14:48.6974829+00:00\"\
+        : false,\r\n    \"uniqueId\": \"4c18961d-036e-4560-92ec-7665d5aa3493\",\r\n\
+        \    \"platformFaultDomainCount\": 1,\r\n    \"timeCreated\": \"2024-08-26T08:14:01.3578217+00:00\"\
         \r\n  },\r\n  \"zones\": [\r\n    \"2\"\r\n  ]\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3256'
+      - '2743'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Apr 2024 04:17:13 GMT
+      - Mon, 26 Aug 2024 08:15:14 GMT
+      etag:
+      - '"4"'
       expires:
       - '-1'
       pragma:
@@ -1794,9 +1711,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetVMScaleSetSubscriptionMaximum;2399,Microsoft.Compute/GetVMScaleSetResource;33
+      - Microsoft.Compute/GetVMScaleSetSubscriptionMaximum;2393,Microsoft.Compute/GetVMScaleSetResource;30
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 38BA924320A9442D8DC27E35BA4F494E Ref B: MAA201060516037 Ref C: 2024-04-24T04:17:13Z'
+      - 'Ref A: 472FF9124D8F487DB78ADB5C542495CB Ref B: TYO201100114047 Ref C: 2024-08-26T08:15:14Z'
     status:
       code: 200
       message: ''
@@ -1814,63 +1733,58 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.59.0 azsdk-python-core/1.30.1 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.63.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Compute/virtualMachineScaleSets/vm-ultrassd2?api-version=2024-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Compute/virtualMachineScaleSets/vm-ultrassd2?api-version=2024-07-01
   response:
     body:
       string: "{\r\n  \"name\": \"vm-ultrassd2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Compute/virtualMachineScaleSets/vm-ultrassd2\"\
         ,\r\n  \"type\": \"Microsoft.Compute/virtualMachineScaleSets\",\r\n  \"location\"\
-        : \"eastus\",\r\n  \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Standard_D2s_v3\"\
-        ,\r\n    \"tier\": \"Standard\",\r\n    \"capacity\": 2\r\n  },\r\n  \"properties\"\
-        : {\r\n    \"singlePlacementGroup\": false,\r\n    \"orchestrationMode\":\
-        \ \"Uniform\",\r\n    \"upgradePolicy\": {\r\n      \"mode\": \"Manual\",\r\
-        \n      \"rollingUpgradePolicy\": {\r\n        \"maxBatchInstancePercent\"\
-        : 20,\r\n        \"maxUnhealthyInstancePercent\": 20,\r\n        \"maxUnhealthyUpgradedInstancePercent\"\
-        : 20,\r\n        \"pauseTimeBetweenBatches\": \"PT0S\",\r\n        \"maxSurge\"\
-        : false,\r\n        \"rollbackFailedInstancesOnPolicyBreach\": false\r\n \
-        \     },\r\n      \"automaticOSUpgradePolicy\": {\r\n        \"enableAutomaticOSUpgrade\"\
-        : false,\r\n        \"useRollingUpgradePolicy\": false,\r\n        \"disableAutomaticRollback\"\
-        : false\r\n      }\r\n    },\r\n    \"virtualMachineProfile\": {\r\n     \
-        \ \"osProfile\": {\r\n        \"computerNamePrefix\": \"vmult2371\",\r\n \
-        \       \"adminUsername\": \"admin123\",\r\n        \"linuxConfiguration\"\
+        : \"eastus2\",\r\n  \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Standard_D2s_v3\"\
+        ,\r\n    \"tier\": \"Standard\",\r\n    \"capacity\": 2\r\n  },\r\n  \"etag\"\
+        : \"\\\"4\\\"\",\r\n  \"properties\": {\r\n    \"singlePlacementGroup\": false,\r\
+        \n    \"orchestrationMode\": \"Uniform\",\r\n    \"upgradePolicy\": {\r\n\
+        \      \"mode\": \"Manual\"\r\n    },\r\n    \"virtualMachineProfile\": {\r\
+        \n      \"osProfile\": {\r\n        \"computerNamePrefix\": \"vmultf37e\"\
+        ,\r\n        \"adminUsername\": \"admin123\",\r\n        \"linuxConfiguration\"\
         : {\r\n          \"disablePasswordAuthentication\": false,\r\n          \"\
-        provisionVMAgent\": true,\r\n          \"enableVMAgentPlatformUpdates\": false\r\
-        \n        },\r\n        \"secrets\": [],\r\n        \"allowExtensionOperations\"\
-        : true,\r\n        \"requireGuestProvisionSignal\": true\r\n      },\r\n \
-        \     \"storageProfile\": {\r\n        \"osDisk\": {\r\n          \"osType\"\
-        : \"Linux\",\r\n          \"createOption\": \"FromImage\",\r\n          \"\
-        caching\": \"ReadWrite\",\r\n          \"managedDisk\": {\r\n            \"\
-        storageAccountType\": \"Premium_LRS\"\r\n          },\r\n          \"diskSizeGB\"\
-        : 30\r\n        },\r\n        \"imageReference\": {\r\n          \"publisher\"\
-        : \"Debian\",\r\n          \"offer\": \"debian-10\",\r\n          \"sku\"\
-        : \"10\",\r\n          \"version\": \"latest\"\r\n        },\r\n        \"\
-        dataDisks\": [\r\n          {\r\n            \"lun\": 0,\r\n            \"\
-        diskIOPSReadWrite\": 800,\r\n            \"diskMBpsReadWrite\": 102,\r\n \
-        \           \"createOption\": \"Empty\",\r\n            \"caching\": \"None\"\
-        ,\r\n            \"managedDisk\": {\r\n              \"storageAccountType\"\
+        provisionVMAgent\": true\r\n        },\r\n        \"secrets\": [],\r\n   \
+        \     \"allowExtensionOperations\": true,\r\n        \"requireGuestProvisionSignal\"\
+        : true\r\n      },\r\n      \"storageProfile\": {\r\n        \"osDisk\": {\r\
+        \n          \"osType\": \"Linux\",\r\n          \"createOption\": \"FromImage\"\
+        ,\r\n          \"caching\": \"ReadWrite\",\r\n          \"managedDisk\": {\r\
+        \n            \"storageAccountType\": \"Premium_LRS\"\r\n          },\r\n\
+        \          \"diskSizeGB\": 30\r\n        },\r\n        \"imageReference\"\
+        : {\r\n          \"publisher\": \"Debian\",\r\n          \"offer\": \"debian-10\"\
+        ,\r\n          \"sku\": \"10\",\r\n          \"version\": \"latest\"\r\n \
+        \       },\r\n        \"dataDisks\": [\r\n          {\r\n            \"lun\"\
+        : 0,\r\n            \"diskIOPSReadWrite\": 800,\r\n            \"diskMBpsReadWrite\"\
+        : 102,\r\n            \"createOption\": \"Empty\",\r\n            \"caching\"\
+        : \"None\",\r\n            \"managedDisk\": {\r\n              \"storageAccountType\"\
         : \"UltraSSD_LRS\"\r\n            },\r\n            \"diskSizeGB\": 5\r\n\
         \          }\r\n        ]\r\n      },\r\n      \"networkProfile\": {\"networkInterfaceConfigurations\"\
-        :[{\"name\":\"vmult2371Nic\",\"properties\":{\"primary\":true,\"enableAcceleratedNetworking\"\
+        :[{\"name\":\"vmultf37eNic\",\"properties\":{\"primary\":true,\"enableAcceleratedNetworking\"\
         :false,\"disableTcpStateTracking\":false,\"dnsSettings\":{\"dnsServers\":[]},\"\
-        enableIPForwarding\":false,\"ipConfigurations\":[{\"name\":\"vmult2371IPConfig\"\
+        enableIPForwarding\":false,\"ipConfigurations\":[{\"name\":\"vmultf37eIPConfig\"\
         ,\"properties\":{\"subnet\":{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-ultrassd000001/providers/Microsoft.Network/virtualNetworks/vm-ultrassdVNET/subnets/vm-ultrassdSubnet\"\
         },\"privateIPAddressVersion\":\"IPv4\"}}]}}]},\r\n      \"timeCreated\": \"\
-        2024-04-24T04:16:02.2281244+00:00\"\r\n    },\r\n    \"additionalCapabilities\"\
+        2024-08-26T08:15:13.4207684+00:00\"\r\n    },\r\n    \"additionalCapabilities\"\
         : {\r\n      \"ultraSSDEnabled\": true\r\n    },\r\n    \"provisioningState\"\
         : \"Succeeded\",\r\n    \"overprovision\": true,\r\n    \"doNotRunExtensionsOnOverprovisionedVMs\"\
-        : false,\r\n    \"uniqueId\": \"49bd6d56-f589-41fc-aa43-7de1b7327674\",\r\n\
-        \    \"platformFaultDomainCount\": 1,\r\n    \"timeCreated\": \"2024-04-24T04:14:48.6974829+00:00\"\
+        : false,\r\n    \"uniqueId\": \"4c18961d-036e-4560-92ec-7665d5aa3493\",\r\n\
+        \    \"platformFaultDomainCount\": 1,\r\n    \"timeCreated\": \"2024-08-26T08:14:01.3578217+00:00\"\
         \r\n  },\r\n  \"zones\": [\r\n    \"2\"\r\n  ]\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3256'
+      - '2743'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 24 Apr 2024 04:17:15 GMT
+      - Mon, 26 Aug 2024 08:15:15 GMT
+      etag:
+      - '"4"'
       expires:
       - '-1'
       pragma:
@@ -1882,9 +1796,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetVMScaleSetSubscriptionMaximum;2398,Microsoft.Compute/GetVMScaleSetResource;32
+      - Microsoft.Compute/GetVMScaleSetSubscriptionMaximum;2399,Microsoft.Compute/GetVMScaleSetResource;29
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: AD8666E45FE14B6B88E62A8BE358DB3B Ref B: MAA201060515017 Ref C: 2024-04-24T04:17:15Z'
+      - 'Ref A: 5FDA04AF8C7C4FF8907B434A1BCFAF55 Ref B: TYO201100115011 Ref C: 2024-08-26T08:15:15Z'
     status:
       code: 200
       message: ''

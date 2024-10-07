@@ -444,7 +444,7 @@ def __read_kv_from_app_service(cmd, appservice_account, prefix_to_add="", conten
                             # this throws an exception for invalid format of secret identifier
                             parse_key_vault_id(source_id=secret_identifier)
                             kv = KeyValue(key=key,
-                                          value=json.dumps({"uri": secret_identifier}, ensure_ascii=False, separators=(',', ':')),
+                                          value=json.dumps({"uri": secret_identifier}, ensure_ascii=False),
                                           tags=tags,
                                           content_type=KeyVaultConstants.KEYVAULT_CONTENT_TYPE)
                             key_values.append(kv)
@@ -909,12 +909,12 @@ def __validate_import_feature_flag(kv):
     if kv and validate_import_feature_key(kv.key):
         try:
             ff = json.loads(kv.value)
-            if FEATURE_FLAG_PROPERTIES == ff.keys():
+            if FEATURE_FLAG_PROPERTIES.intersection(ff.keys()) == FEATURE_FLAG_PROPERTIES:
                 return validate_import_feature(ff[FeatureFlagConstants.ID])
 
-            logger.warning("The feature flag with key '{%s}' is not a valid feature flag. It will not be imported.", kv.key)
+            logger.warning("The feature flag with key '%s' is not a valid feature flag. It will not be imported.", kv.key)
         except JSONDecodeError as exception:
-            logger.warning("The feature flag with key '{%s}' is not in a valid JSON format. It will not be imported.\n{%s}", kv.id, str(exception))
+            logger.warning("The feature flag with key '%s' is not in a valid JSON format. It will not be imported.\n%s", kv.key, str(exception))
     return False
 
 
