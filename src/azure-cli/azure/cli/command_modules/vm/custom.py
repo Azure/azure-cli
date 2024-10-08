@@ -3207,8 +3207,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 enable_resilient_creation=None, enable_resilient_deletion=None,
                 additional_scheduled_events=None, enable_user_reboot_scheduled_events=None,
                 enable_user_redeploy_scheduled_events=None, wire_server_mode=None, imds_mode=None,
-                wire_server_access_control_profile_reference_id=None, imds_access_control_profile_reference_id=None,
-                key_incarnation_id=None):
+                wire_server_access_control_profile_reference_id=None, imds_access_control_profile_reference_id=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -3524,8 +3523,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             enable_user_redeploy_scheduled_events=enable_user_redeploy_scheduled_events,
             wire_server_mode=wire_server_mode, imds_mode=imds_mode,
             wire_server_access_control_profile_reference_id=wire_server_access_control_profile_reference_id,
-            imds_access_control_profile_reference_id=imds_access_control_profile_reference_id,
-            key_incarnation_id=key_incarnation_id)
+            imds_access_control_profile_reference_id=imds_access_control_profile_reference_id)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -3966,7 +3964,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None,
                 upgrade_policy_mode=None, enable_auto_os_upgrade=None, wire_server_mode=None, imds_mode=None,
                 wire_server_access_control_profile_reference_id=None, imds_access_control_profile_reference_id=None,
-                key_incarnation_id=None, **kwargs):
+                **kwargs):
     vmss = kwargs['parameters']
     aux_subscriptions = None
     # pylint: disable=too-many-boolean-expressions
@@ -4131,7 +4129,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
 
     if enable_proxy_agent is not None or wire_server_mode is not None or imds_mode is not None or \
             wire_server_access_control_profile_reference_id is not None or \
-            imds_access_control_profile_reference_id is not None or key_incarnation_id is not None:
+            imds_access_control_profile_reference_id is not None:
         SecurityProfile = cmd.get_models('SecurityProfile')
         ProxyAgentSettings = cmd.get_models('ProxyAgentSettings')
         HostEndpointSettings = cmd.get_models('HostEndpointSettings')
@@ -4146,14 +4144,12 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
         if vmss.virtual_machine_profile.security_profile is None:
             vmss.virtual_machine_profile.security_profile = SecurityProfile()
             vmss.virtual_machine_profile.security_profile.proxy_agent_settings = ProxyAgentSettings(
-                enabled=enable_proxy_agent, key_incarnation_id=key_incarnation_id, wire_server=wire_server, imds=imds)
+                enabled=enable_proxy_agent, wire_server=wire_server, imds=imds)
         elif vmss.virtual_machine_profile.security_profile.proxy_agent_settings is None:
             vmss.virtual_machine_profile.security_profile.proxy_agent_settings = ProxyAgentSettings(
-                enabled=enable_proxy_agent, key_incarnation_id=key_incarnation_id, wire_server=wire_server, imds=imds)
+                enabled=enable_proxy_agent, wire_server=wire_server, imds=imds)
         else:
             vmss.virtual_machine_profile.security_profile.proxy_agent_settings.enabled = enable_proxy_agent
-            vmss.virtual_machine_profile.security_profile.proxy_agent_settings.key_incarnation_id = key_incarnation_id
-
             vmss.virtual_machine_profile.security_profile.proxy_agent_settings.wire_server.mode = wire_server_mode
             vmss.virtual_machine_profile.security_profile.proxy_agent_settings.wire_server.\
                 in_vm_access_control_profile_reference_id = wire_server_access_control_profile_reference_id

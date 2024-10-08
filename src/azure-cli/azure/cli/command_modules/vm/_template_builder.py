@@ -993,7 +993,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         additional_scheduled_events=None, enable_user_reboot_scheduled_events=None,
                         enable_user_redeploy_scheduled_events=None, wire_server_mode=None, imds_mode=None,
                         wire_server_access_control_profile_reference_id=None,
-                        imds_access_control_profile_reference_id=None, key_incarnation_id=None):
+                        imds_access_control_profile_reference_id=None):
 
     # Build IP configuration
     ip_configuration = {}
@@ -1510,9 +1510,6 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
 
     if proxy_agent_mode is not None:
         proxy_agent_settings['mode'] = proxy_agent_mode
-
-    if key_incarnation_id is not None:
-        proxy_agent_settings['keyIncarnationId'] = key_incarnation_id
 
     if wire_server_mode is not None or wire_server_access_control_profile_reference_id is not None:
         wire_server['mode'] = wire_server_mode
