@@ -11,7 +11,7 @@ import codecs
 from io import open
 import requests
 from knack.log import get_logger
-from msrestazure.azure_exceptions import CloudError
+from azure.core.exceptions import HttpResponseError
 from azure.cli.core.azclierror import (CLIInternalError)
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.command_modules.acr._constants import TASK_VALID_VSTS_URLS
@@ -47,7 +47,7 @@ def upload_source_code(cmd, client,
             resource_group_name, registry_name)
         upload_url = source_upload_location.upload_url
         relative_path = source_upload_location.relative_path
-    except (AttributeError, CloudError) as e:
+    except (AttributeError, HttpResponseError) as e:
         raise CLIInternalError("Failed to get a SAS URL to upload context. Error: {}".format(e.message)) from e
 
     if not upload_url:

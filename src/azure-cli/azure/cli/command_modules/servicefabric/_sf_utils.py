@@ -12,11 +12,11 @@ logger = get_logger(__name__)
 
 
 def _get_resource_group_by_name(cli_ctx, resource_group_name):
-    from msrestazure.azure_exceptions import CloudError
+    from azure.core.exceptions import HttpResponseError
     try:
         resource_client = resource_client_factory(cli_ctx).resource_groups
         return resource_client.get(resource_group_name)
-    except CloudError as ex:
+    except HttpResponseError as ex:
         if ex.status_code == 404:
             return None
         raise

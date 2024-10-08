@@ -21,7 +21,7 @@ from azure.cli.testsdk import (
 
 from knack.util import CLIError
 
-from msrestazure.tools import resource_id
+from azure.mgmt.core.tools import resource_id
 
 from .credential_replacer import ExpressRoutePortLOAContentReplacer
 
@@ -284,7 +284,6 @@ class NetworkPrivateEndpoints(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='fanqiu_cli_test_network_private_endpoints', location='CentralUSEuap')
     @StorageAccountPreparer(name_prefix='saplr', kind='StorageV2')
     def test_network_private_endpoint_private_dns_zone_group(self, resource_group, storage_account):
-        from msrestazure.azure_exceptions import CloudError
         self.kwargs.update({
             'sa': storage_account,
             'loc': 'CentralUSEuap',
@@ -3481,7 +3480,6 @@ class NetworkExpressRouteGlobalReachScenarioTest(ScenarioTest):
     @record_only()  # record_only as the express route is extremely expensive, contact service team for an available ER
     @ResourceGroupPreparer(name_prefix='cli_test_express_route_peer_connection')
     def test_network_express_route_peer_connection(self, resource_group):
-        from msrestazure.azure_exceptions import CloudError
         from azure.core.exceptions import ResourceNotFoundError
         self.kwargs.update({
             'er1': 'er1',

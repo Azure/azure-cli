@@ -3189,7 +3189,7 @@ def aks_approuting_zone_list(
         resource_group_name,
         name
 ):
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
     mc = client.get(resource_group_name, name)
 
     if mc.ingress_profile and mc.ingress_profile.web_app_routing and mc.ingress_profile.web_app_routing.enabled:

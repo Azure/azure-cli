@@ -113,7 +113,7 @@ def validate_export(namespace):
 
 def validate_appservice_name_or_id(cmd, namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import is_valid_resource_id, parse_resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
     if namespace.appservice_account:
         if not is_valid_resource_id(namespace.appservice_account):
             config_store_name = ""
@@ -219,7 +219,7 @@ def validate_identity(namespace):
         return
 
     for identity in identities:
-        from msrestazure.tools import is_valid_resource_id
+        from azure.mgmt.core.tools import is_valid_resource_id
         if identity == '[all]' and subcommand == 'remove':
             continue
 
