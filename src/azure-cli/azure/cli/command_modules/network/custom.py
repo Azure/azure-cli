@@ -120,14 +120,14 @@ from .operations.dns import (RecordSetAShow as DNSRecordSetAShow, RecordSetAAAAS
                              RecordSetSOAShow as DNSRecordSetSOAShow)
 from .operations.dns import (RecordSetACreate as DNSRecordSetACreate, RecordSetAAAACreate as DNSRecordSetAAAACreate,  # pylint: disable=unused-import
                              RecordSetDSCreate as DNSRecordSetDSCreate, RecordSetMXCreate as DNSRecordSetMXCreate,
-                             RecordSetNAPTRShow as DNSRecordSetNAPTRShow, RecordSetNSCreate as DNSRecordSetNSCreate, 
+                             RecordSetNAPTRCreate as DNSRecordSetNAPTRCreate, RecordSetNSCreate as DNSRecordSetNSCreate, 
                              RecordSetPTRCreate as DNSRecordSetPTRCreate, RecordSetSRVCreate as DNSRecordSetSRVCreate, 
                              RecordSetTLSACreate as DNSRecordSetTLSACreate, RecordSetTXTCreate as DNSRecordSetTXTCreate, 
                              RecordSetCAACreate as DNSRecordSetCAACreate, RecordSetCNAMECreate as DNSRecordSetCNAMECreate, 
                              RecordSetSOACreate as DNSRecordSetSOACreate)
 from .operations.dns import (RecordSetAUpdate as DNSRecordSetAUpdate, RecordSetAAAAUpdate as DNSRecordSetAAAAUpdate,  # pylint: disable=unused-import
                              RecordSetDSUpdate as DNSRecordSetDSUpdate, RecordSetMXUpdate as DNSRecordSetMXUpdate,
-                             RecordSetNAPTRShow as DNSRecordSetNAPTRShow, RecordSetNSUpdate as DNSRecordSetNSUpdate, 
+                             RecordSetNAPTRUpdate as DNSRecordSetNAPTRSUpdate, RecordSetNSUpdate as DNSRecordSetNSUpdate, 
                              RecordSetPTRUpdate as DNSRecordSetPTRUpdate, RecordSetSRVUpdate as DNSRecordSetSRVUpdate, 
                              RecordSetTLSAUpdate as DNSRecordSetTLSAUpdate, RecordSetTXTUpdate as DNSRecordSetTXTUpdate, 
                              RecordSetCAAUpdate as DNSRecordSetCAAUpdate, RecordSetCNAMEUpdate as DNSRecordSetCNAMEUpdate)

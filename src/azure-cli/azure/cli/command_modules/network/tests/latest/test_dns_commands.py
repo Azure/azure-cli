@@ -525,6 +525,17 @@ class DnsParseZoneFiles(unittest.TestCase):
             self.assertEqual(int(record['weight']), records_to_check[i][2])
             self.assertEqual(int(record['port']), records_to_check[i][3])
             self.assertEqual(record['target'], records_to_check[i][4])
+    
+    def _check_naptr(self, zone, name, records_to_check):
+        self.assertEqual(len(records_to_check, len(zone[name]['naptr'])))
+        for i, record in enumerate(zone[name]['naptr']):
+            self.assertEqual(record['ttl'], records_to_check[i][0])
+            self.assertEqual(int(record['order']), records_to_check[i][1])
+            self.assertEqual(int(record['preference']), records_to_check[i][2])
+            self.assertEqual(record['flags'], records_to_check[i][3])
+            self.assertEqual(record['services'], records_to_check[i][4])
+            self.assertEqual(record['regexp'], records_to_check[i][5])
+            self.assertEqual(record['replacement'], records_to_check[i][6])
 
     def _check_ttl(self, zone, name, rec_type, ttl):
         for record in zone[name][rec_type]:
@@ -576,6 +587,10 @@ class DnsParseZoneFiles(unittest.TestCase):
         self._check_caa(zone, 'caa2.' + zn, [
             (60, 0, 'issue', 'ca1.contoso.com'),
             (60, 45, 'tag56', 'test test test')
+        ])
+        self._check_naptr(zone, 'mynaptr.' + zn, [
+            (10, 20, 'A', 'EAU+SIP', '', 'domain.com.'),
+            (20, 20, 'U', 'SIP+D2U', '!^(\\+441632960083)$!sip:\\1@example.com', '.')
         ])
 
     def test_zone_file_2(self):
