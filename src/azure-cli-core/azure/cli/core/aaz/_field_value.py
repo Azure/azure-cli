@@ -447,9 +447,9 @@ class AAZList(AAZBaseValue):
         return result
 
 
-class AAZIdentityObject(AAZObject):
+class AAZIdentityObject(AAZObject):  # pylint: disable=too-few-public-methods
     def to_serialized_data(self, processor=None, **kwargs):
-        data = dict()  # parameters for build
+        calculate_data = dict()
         if self._data == AAZUndefined:
             result = AAZUndefined
 
@@ -470,13 +470,13 @@ class AAZIdentityObject(AAZObject):
                         name = field_schema._serialized_name
 
                     if name in {"userAssigned", "systemAssigned"}:
-                        data[name] = v
-                        data["action"] = field_schema._flags.get("action", None)  # no action in GET operation
+                        calculate_data[name] = v
+                        calculate_data["action"] = field_schema._flags.get("action", None)  # no action in GET operation
 
                     else:
                         result[name] = v
 
-        result = self._build_identity(data, result)
+        result = self._build_identity(calculate_data, result)
 
         if not result:
             result = {"type": "None"}  # empty identity
@@ -489,13 +489,13 @@ class AAZIdentityObject(AAZObject):
 
         return result
 
-    def _build_identity(self, data, result):
-        action = data.get("action", None)
+    def _build_identity(self, calculate_data, result):
+        action = calculate_data.get("action", None)
         if not action:
             return result
 
-        user_assigned = data.get("userAssigned", None)
-        system_assigned = data.get("systemAssigned", None)
+        user_assigned = calculate_data.get("userAssigned", None)
+        system_assigned = calculate_data.get("systemAssigned", None)
 
         identities = set(result.pop("userAssignedIdentities", {}).keys())
         has_system_identity = "systemassigned" in result.pop("type", "").lower()
