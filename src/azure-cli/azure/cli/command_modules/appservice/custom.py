@@ -5156,7 +5156,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
             zone_redundant_location = next((loc for loc in zone_redundant_locations
                                             if loc['name'].lower() == flexconsumption_location.lower()), None)
             if zone_redundant_location is None:
-                raise ValidationError("The specified location '{0}' doesn't support zone redundancy in Flex Consumption. "
+                raise ValidationError("The specified location '{0}' "
+                                      "doesn't support zone redundancy in Flex Consumption. "
                                       "Use: az functionapp list-flexconsumption-locations --zone-redundant "
                                       "for the list of locations that support zone redundancy."
                                       .format(flexconsumption_location))
