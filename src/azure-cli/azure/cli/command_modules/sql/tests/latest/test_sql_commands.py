@@ -6494,7 +6494,7 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                            parameter_name_for_location="resource_group_location_2")
     @SqlServerPreparer(parameter_name="server_name_1",
                        resource_group_parameter_name="resource_group_1",
-                       location='westeurope')
+                       location='northeurope')
     @SqlServerPreparer(parameter_name="server_name_2",
                        resource_group_parameter_name="resource_group_2", location='eastus')
     def test_sql_failover_group_mgmt(self,
@@ -6595,6 +6595,59 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                  .format(s2.group, s2.name),
                  checks=[
                      JMESPathCheck('length(@)', 2)
+                 ])
+
+        if self.in_recording:
+            time.sleep(60)
+
+        # Add another database with secondary type standby
+        database_name2 = "db2"
+
+        # Create database on primary server
+        self.cmd('sql db create -g {} --server {} --name {}'
+                 .format(s1.group, s1.name, database_name2),
+                 checks=[
+                     JMESPathCheck('resourceGroup', s1.group),
+                     JMESPathCheck('name', database_name2)
+                 ])
+
+        # Update Failover Group with db2
+        self.cmd('sql failover-group update -g {} -s {} -n {} --grace-period 3 --add-db {}'
+                 .format(s1.group, s1.name, failover_group_name, database_name2),
+                 checks=[
+                     JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
+                     JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 180),
+                     JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled'),
+                     JMESPathCheck('length(databases)', 2)
+                 ])
+
+        # Check if properties got propagated to secondary server
+        self.cmd('sql failover-group show -g {} -s {} -n {}'
+                 .format(s2.group, s2.name, failover_group_name),
+                 checks=[
+                     JMESPathCheck('name', failover_group_name),
+                     JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
+                     JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 180),
+                     JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled'),
+                     JMESPathCheck('replicationRole', 'Secondary'),
+                     JMESPathCheck('length(databases)', 2)
+                 ])
+
+        # Check if db2 is created on partner side
+        self.cmd('sql db list -g {} -s {}'
+                 .format(s2.group, s2.name),
+                 checks=[
+                     JMESPathCheck('length(@)', 3)
+                 ])
+
+        # Remove db2 from failover group
+        self.cmd('sql failover-group update -g {} -s {} -n {} --remove-db {}'
+                 .format(s1.group, s1.name, failover_group_name, database_name2),
+                 checks=[
+                     JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
+                     JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 180),
+                     JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled'),
+                     JMESPathCheck('length(databases)', 1)
                  ])
 
         if self.in_recording:
