@@ -24,7 +24,6 @@ from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.core.exceptions import HttpResponseError, ResourceExistsError
 from knack.log import get_logger
 from knack.prompting import prompt_y_n
-from msrestazure.azure_exceptions import CloudError
 
 logger = get_logger(__name__)
 
@@ -127,7 +126,7 @@ def add_role_assignment(cmd, role, service_principal_msi_id, is_service_principa
                 resolve_assignee=is_service_principal,
             )
             break
-        except (CloudError, HttpResponseError) as ex:
+        except HttpResponseError as ex:
             if isinstance(ex, ResourceExistsError) or "The role assignment already exists." in ex.message:
                 break
             logger.info(ex.message)
@@ -209,7 +208,7 @@ def delete_role_assignments(cli_ctx, role, service_principal, delay=2, scope=Non
                 cli_ctx, role=role, assignee=service_principal, scope=scope, is_service_principal=is_service_principal
             )
             break
-        except (CloudError, HttpResponseError) as ex:
+        except HttpResponseError as ex:
             logger.info(ex.message)
         except Exception as ex:  # pylint: disable=broad-except
             logger.error(str(ex))
@@ -321,7 +320,7 @@ def ensure_aks_acr_role_assignment(cmd, assignee, registry_id, detach=False, is_
 
 # pylint: disable=unused-argument
 def ensure_aks_acr(cmd, assignee, acr_name_or_id, subscription_id, detach=False, is_service_principal=True):
-    from msrestazure.tools import is_valid_resource_id, parse_resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
 
     # Check if the ACR exists by resource ID.
     if is_valid_resource_id(acr_name_or_id):
@@ -329,7 +328,7 @@ def ensure_aks_acr(cmd, assignee, acr_name_or_id, subscription_id, detach=False,
             parsed_registry = parse_resource_id(acr_name_or_id)
             acr_client = get_container_registry_client(cmd.cli_ctx, subscription_id=parsed_registry["subscription"])
             registry = acr_client.registries.get(parsed_registry["resource_group"], parsed_registry["name"])
-        except (CloudError, HttpResponseError) as ex:
+        except HttpResponseError as ex:
             raise AzCLIError(ex.message)
         ensure_aks_acr_role_assignment(cmd, assignee, registry.id, detach, is_service_principal)
         return
@@ -339,7 +338,7 @@ def ensure_aks_acr(cmd, assignee, acr_name_or_id, subscription_id, detach=False,
     registry_resource = "Microsoft.ContainerRegistry/registries"
     try:
         registry = get_resource_by_name(cmd.cli_ctx, registry_name, registry_resource)
-    except (CloudError, HttpResponseError) as ex:
+    except HttpResponseError as ex:
         if "was not found" in ex.message:
             raise AzCLIError("ACR {} not found. Have you provided the right ACR name?".format(registry_name))
         raise AzCLIError(ex.message)

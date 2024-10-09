@@ -140,7 +140,7 @@ def get_key_value_pair(string):
 def cli_redis_create_server_link(cmd, client, resource_group_name, name, server_to_link, replication_role):
     redis_client = cf_redis(cmd.cli_ctx)
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import is_valid_resource_id, resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id, resource_id
     if not is_valid_resource_id(server_to_link):
         server_to_link = resource_id(
             subscription=get_subscription_id(cmd.cli_ctx),
@@ -179,7 +179,7 @@ def cli_redis_list_cache(client, resource_group_name=None):
 
 
 def get_cache_from_resource_id(client, cache_resource_id):
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
     id_comps = parse_resource_id(cache_resource_id)
     return client.get(id_comps['resource_group'], id_comps['name'])
 

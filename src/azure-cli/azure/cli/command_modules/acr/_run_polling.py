@@ -6,8 +6,8 @@
 import time
 
 from azure.core.polling import PollingMethod, LROPoller
+from azure.core.exceptions import HttpResponseError
 from msrest import Deserializer
-from msrestazure.azure_exceptions import CloudError
 
 from ._constants import get_acr_task_models, get_finished_run_status, get_succeeded_run_status
 
@@ -90,7 +90,7 @@ class RunPolling(PollingMethod):  # pylint: disable=too-many-instance-attributes
             self.operation_result = self._deserialize(response)
             self.operation_status = self.operation_result.status or RunStatus.queued.value
             return
-        raise CloudError(response)
+        raise HttpResponseError(response)
 
     def _update_status(self):
         self._response = self._client._pipeline.run(  # pylint: disable=protected-access

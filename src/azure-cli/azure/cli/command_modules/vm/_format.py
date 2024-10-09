@@ -35,7 +35,7 @@ def transform_vm(vm):
 
 
 def transform_vm_create_output(result):
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
     from collections import OrderedDict
     try:
         resource_group = getattr(result, 'resource_group', None) or parse_resource_id(result.id)['resource_group']

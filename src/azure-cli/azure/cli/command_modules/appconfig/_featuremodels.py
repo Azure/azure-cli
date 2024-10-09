@@ -56,20 +56,23 @@ class FeatureFlagValue:
                  id_,
                  description=None,
                  enabled=None,
-                 conditions=None):
+                 conditions=None,
+                 display_name=None):
         default_conditions = {FeatureFlagConstants.CLIENT_FILTERS: []}
 
         self.id = id_
         self.description = "" if description is None else description
         self.enabled = enabled if enabled else False
         self.conditions = conditions if conditions else default_conditions
+        self.display_name = display_name
 
     def __repr__(self):
         featureflagvalue = {
             FeatureFlagConstants.ID: self.id,
             FeatureFlagConstants.DESCRIPTION: self.description,
             FeatureFlagConstants.ENABLED: self.enabled,
-            FeatureFlagConstants.CONDITIONS: custom_serialize_conditions(self.conditions)
+            FeatureFlagConstants.CONDITIONS: custom_serialize_conditions(self.conditions),
+            FeatureFlagConstants.DISPLAY_NAME: self.display_name
         }
 
         return json.dumps(featureflagvalue, indent=2, ensure_ascii=False)

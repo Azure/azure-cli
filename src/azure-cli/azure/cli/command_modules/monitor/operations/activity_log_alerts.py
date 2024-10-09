@@ -152,7 +152,7 @@ class ActivityLogAlertCreate(_ActivityLogAlertCreate):
         process_condition_parameter_for_alert(args)
         webhook_properties = process_webhook_properties(args)
         if not has_value(args.scope_ui):
-            from msrestazure.tools import resource_id
+            from azure.mgmt.core.tools import resource_id
             from azure.cli.core.commands.client_factory import get_subscription_id
             # args.scopes = [resource_id(subscription=get_subscription_id(self.cli_ctx),
             #                            resource_group=args.resource_group)]
@@ -471,7 +471,7 @@ class ActivityLogAlertScopeRemove(_ActivityLogAlertUpdate):
 def _normalize_names(cli_ctx, resource_names, resource_group, namespace, resource_type):
     """Normalize a group of resource names. Returns a set of resource ids. Throws if any of the name can't be correctly
     converted to a resource id."""
-    from msrestazure.tools import is_valid_resource_id, resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id, resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
     rids = set()

@@ -18,7 +18,6 @@ class SBNamespacePrivateEndpointCRUDScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_sb_private')
     def test_sb_privateendpoint(self, resource_group):
-        from msrestazure.azure_exceptions import CloudError
         self.kwargs.update({
             'namespacename': self.create_random_name(prefix='servicebus-nscli', length=20),
             'loc': 'eastus',

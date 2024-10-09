@@ -299,6 +299,11 @@ storage_param_type = CLIArgumentType(
     help='The storage size. If no unit is specified, defaults to gigabytes (GB).',
     validator=validate_managed_instance_storage_size)
 
+iops_param_type = CLIArgumentType(
+    options_list=['--iops'],
+    type=int,
+    help='The storage iops.')
+
 backup_storage_redundancy_param_type = CLIArgumentType(
     options_list=['--backup-storage-redundancy', '--bsr'],
     type=get_internal_backup_storage_redundancy,
@@ -2276,11 +2281,22 @@ def load_arguments(self, _):
                    help='The compute generation component of the sku. '
                    'Allowed values include: Gen4, Gen5.')
 
+        c.argument('is_general_purpose_v2',
+                   options_list=['--gpv2'],
+                   arg_type=get_three_state_flag(),
+                   help='Whether or not this is a GPv2 variant of General Purpose edition.')
+
         c.argument('storage_size_in_gb',
                    options_list=['--storage'],
                    arg_type=storage_param_type,
                    help='The storage size of the managed instance. '
                    'Storage size must be specified in increments of 32 GB')
+
+        c.argument('storage_iops',
+                   options_list=['--iops'],
+                   arg_type=iops_param_type,
+                   help='The storage iops of the managed instance. '
+                   'Storage iops can be specified in increments of 1.')
 
         c.argument('license_type',
                    arg_type=get_enum_type(DatabaseLicenseType),
@@ -2352,6 +2368,7 @@ def load_arguments(self, _):
         # Create args that will be used to build up the ManagedInstance object
         create_args_for_complex_type(
             c, 'parameters', ManagedInstance, [
+                'is_general_purpose_v2',
                 'administrator_login',
                 'administrator_login_password',
                 'license_type',
@@ -2359,6 +2376,7 @@ def load_arguments(self, _):
                 'virtual_network_subnet_id',
                 'vcores',
                 'storage_size_in_gb',
+                'storage_iops',
                 'collation',
                 'proxy_override',
                 'public_data_endpoint_enabled',

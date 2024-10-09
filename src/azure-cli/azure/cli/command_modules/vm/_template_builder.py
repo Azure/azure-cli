@@ -266,7 +266,7 @@ def build_vnet_resource(_, name, location, tags, vnet_prefix=None, subnet=None,
 
 def build_msi_role_assignment(vm_vmss_name, vm_vmss_resource_id, role_definition_id,
                               role_assignment_guid, identity_scope, is_vm=True):
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
     result = parse_resource_id(identity_scope)
     if result.get('type'):  # is a resource id?
         name = '{}/Microsoft.Authorization/{}'.format(result['name'], role_assignment_guid)

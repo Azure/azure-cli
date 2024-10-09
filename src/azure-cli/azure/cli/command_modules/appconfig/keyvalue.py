@@ -529,7 +529,7 @@ def set_keyvault(cmd,
                  endpoint=None):
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
-    keyvault_ref_value = json.dumps({"uri": secret_identifier}, ensure_ascii=False, separators=(',', ':'))
+    keyvault_ref_value = json.dumps({"uri": secret_identifier}, ensure_ascii=False)
     retry_times = 3
     retry_interval = 1
 

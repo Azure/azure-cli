@@ -168,11 +168,23 @@ examples:
 
 helps['hdinsight update'] = """
 type: command
-short-summary: Update the tags or identity of the specified HDInsight cluster.
+short-summary: Update the tags or identity of the specified HDInsight cluster. Setting the identity property will override the existing identity configuration of the cluster.
 examples:
   - name: Update the tags.
     text: |-
         az hdinsight update --name MyCluster --resource-group rg --tags key=value
+  - name: Update manage identity with single UserAssigned msi.
+    text: |-
+        az hdinsight update --name MyCluster --resource-group rg --assign-identity-type UserAssigned --assign-identity MyMsi
+  - name: Update manage identity with multiple UserAssigned msi.
+    text: |-
+        az hdinsight update --name MyCluster --resource-group rg --assign-identity-type UserAssigned --assign-identity MyMsi1 MyMsi2
+  - name: Update SystemAssigned manage identity.
+    text: |-
+        az hdinsight update --name MyCluster --resource-group rg --assign-identity-type SystemAssigned
+  - name: Update manage identity with SystemAssigned,UserAssigned msi.
+    text: |-
+        az hdinsight update --name MyCluster --resource-group rg --assign-identity-type "SystemAssigned,UserAssigned" --assign-identity MyMsi1
 """
 
 helps['hdinsight list'] = """
@@ -228,16 +240,28 @@ short-summary: Manage Azure Monitor Agent logs integration on an HDInsight clust
 helps['hdinsight azure-monitor-agent disable'] = """
 type: command
 short-summary: Disable the Azure Monitor Agent logs integration on an HDInsight cluster.
+examples:
+  - name: Disable the Azure Monitor Agent logs integration on an HDInsight cluster.
+    text: |-
+        az hdinsight azure-monitor-agent disable --name MyCluster --resource-group rg
 """
 
 helps['hdinsight azure-monitor-agent enable'] = """
 type: command
 short-summary: Enable the Azure Monitor Agent logs integration on an HDInsight cluster.
+examples:
+  - name: Enable the Azure Monitor Agent logs integration on an HDInsight cluster.
+    text: |-
+        az hdinsight azure-monitor-agent enable --name MyCluster --resource-group rg --workspace WorkspaceId --primary-key WorkspaceKey
 """
 
 helps['hdinsight azure-monitor-agent show'] = """
 type: command
 short-summary: Get the status of Azure Monitor Agent logs integration on an HDInsight cluster.
+examples:
+  - name: Get the status of Azure Monitor Agent logs integration on an HDInsight cluster.
+    text: |-
+        az hdinsight azure-monitor-agent show --name MyCluster --resource-group rg
 """
 
 helps['hdinsight rotate-disk-encryption-key'] = """

@@ -7,7 +7,7 @@
 import re
 from azure.cli.core.azclierror import (ValidationError, ResourceNotFoundError, InvalidArgumentValueError,
                                        MutuallyExclusiveArgumentError)
-from msrestazure.tools import is_valid_resource_id, parse_resource_id
+from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
 from knack.log import get_logger
 
 from ._clients import ContainerAppClient, ManagedEnvironmentClient
@@ -75,7 +75,7 @@ def validate_cpu(namespace):
 
 def validate_managed_env_name_or_id(cmd, namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import resource_id
+    from azure.mgmt.core.tools import resource_id
 
     if namespace.managed_env:
         if not is_valid_resource_id(namespace.managed_env):
@@ -90,7 +90,7 @@ def validate_managed_env_name_or_id(cmd, namespace):
 
 def validate_storage_name_or_id(cmd, namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import resource_id
+    from azure.mgmt.core.tools import resource_id
 
     if namespace.storage_account:
         if not is_valid_resource_id(namespace.storage_account):

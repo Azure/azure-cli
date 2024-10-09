@@ -184,10 +184,11 @@ def load_arguments(self, _):
                    help='The client AAD security group name for Kafka Rest Proxy')
 
         # Managed Service Identity
-        c.argument('assign_identity', arg_group='Managed Service Identity', validator=validate_msi,
+        c.argument('assign_identity', nargs='*', arg_group='Managed Service Identity', validator=validate_msi,
                    completer=get_resource_name_completion_list_under_subscription(
                        'Microsoft.ManagedIdentity/userAssignedIdentities'),
-                   help="The name or ID of user assigned identity.")
+                   help=("The name or ID of user assigned identity. "
+                         "Skip this field when assign_identity_type is SystemAssigned."))
 
         # Encryption In Transit
         c.argument('encryption_in_transit', arg_group='Encryption In Transit', arg_type=get_three_state_flag(),
@@ -267,10 +268,10 @@ def load_arguments(self, _):
         # update
         with self.argument_context('hdinsight update') as c:
             c.argument('tags', tags_type)
-            c.argument('assign_identity', arg_group='Managed Service Identity', validator=validate_msi,
-                       completer=get_resource_name_completion_list_under_subscription(
-                           'Microsoft.ManagedIdentity/userAssignedIdentities'),
-                       help="The name or ID of user assigned identity.")
+            c.argument('assign_identity_type', arg_group='Managed Service Identity',
+                       help=("The type of identity used for the cluster. "
+                             "Allowed values: `None`, `SystemAssigned`, "
+                             "`SystemAssigned,UserAssigned`, `UserAssigned`."))
 
         # application
         with self.argument_context('hdinsight application') as c:

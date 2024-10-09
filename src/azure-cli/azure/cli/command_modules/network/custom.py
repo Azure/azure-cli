@@ -10,7 +10,7 @@ from collections import Counter, OrderedDict
 
 import socket
 from knack.log import get_logger
-from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
+from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id, resource_id
 
 from azure.cli.core.aaz import AAZClientConfiguration, has_value, register_client
 from azure.cli.core.aaz._client import AAZMgmtClient

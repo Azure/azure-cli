@@ -71,7 +71,7 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
                volume_type=None,
                encrypt_format_all=False,
                force=False):
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
     from knack.util import CLIError
 
     # pylint: disable=no-member
@@ -390,7 +390,7 @@ def encrypt_vmss(cmd, resource_group_name, vmss_name,  # pylint: disable=too-man
                  key_encryption_algorithm='RSA-OAEP',
                  volume_type=None,
                  force=False):
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
 
     # pylint: disable=no-member
     UpgradeMode, VirtualMachineScaleSetExtension, VirtualMachineScaleSetExtensionProfile = cmd.get_models(
@@ -547,7 +547,7 @@ def _verify_keyvault_good_for_encryption(cli_ctx, disk_vault_id, kek_vault_id, v
 
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.cli.core.profiles import ResourceType
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
 
     client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_KEYVAULT).vaults
     disk_vault_resource_info = parse_resource_id(disk_vault_id)

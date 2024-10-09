@@ -587,7 +587,7 @@ def get_scope_map_from_id(cmd, scope_map_id):
 def resolve_identity_client_id(cli_ctx, managed_identity_resource_id):
     from azure.mgmt.msi import ManagedServiceIdentityClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
 
     res = parse_resource_id(managed_identity_resource_id)
     client = get_mgmt_service_client(cli_ctx, ManagedServiceIdentityClient, subscription_id=res['subscription'])

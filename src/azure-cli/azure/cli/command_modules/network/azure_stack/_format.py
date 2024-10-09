@@ -152,7 +152,7 @@ def transform_effective_route_table(result):
 
 
 def transform_effective_nsg(result):
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
     transformed = []
     for item in result['value']:
         association = item['association']

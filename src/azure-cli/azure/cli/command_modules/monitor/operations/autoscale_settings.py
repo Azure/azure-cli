@@ -259,7 +259,7 @@ def autoscale_create(cmd, resource, count, autoscale_name=None, resource_group_n
                      scale_mode=None, scale_look_ahead_time=None):
 
     if not autoscale_name:
-        from msrestazure.tools import parse_resource_id
+        from azure.mgmt.core.tools import parse_resource_id
         autoscale_name = parse_resource_id(resource)['name']
     min_count = min_count or count
     max_count = max_count or count

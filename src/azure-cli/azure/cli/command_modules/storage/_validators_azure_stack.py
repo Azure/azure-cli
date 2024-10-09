@@ -48,7 +48,7 @@ def _query_account_rg(cli_ctx, account_name):
     scf = storage_client_factory(cli_ctx)
     acc = next((x for x in scf.storage_accounts.list() if x.name == account_name), None)
     if acc:
-        from msrestazure.tools import parse_resource_id
+        from azure.mgmt.core.tools import parse_resource_id
         return parse_resource_id(acc.id)['resource_group'], scf
     raise ValueError("Storage account '{}' not found.".format(account_name))
 
@@ -70,7 +70,7 @@ def _create_token_credential(cli_ctx):
 # region PARAMETER VALIDATORS
 def parse_storage_account(cmd, namespace):
     """Parse storage account which can be either account name or account id"""
-    from msrestazure.tools import parse_resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id
 
     if namespace.account_name and is_valid_resource_id(namespace.account_name):
         namespace.resource_group_name = parse_resource_id(namespace.account_name)['resource_group']
@@ -947,7 +947,7 @@ def process_metric_update_namespace(namespace):
 
 
 def validate_subnet(cmd, namespace):
-    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
     subnet = namespace.subnet

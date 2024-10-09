@@ -9,7 +9,7 @@ from unittest import mock
 import time
 import unittest
 
-from msrestazure.tools import parse_resource_id
+from azure.mgmt.core.tools import parse_resource_id
 
 from azure.cli.command_modules.containerapp.custom import containerapp_ssh
 from azure.cli.command_modules.containerapp.tests.latest.utils import create_containerapp_env, \

@@ -221,6 +221,7 @@ class ApplicationScenarioTest(GraphScenarioTestBase):
             'app_roles': TEST_APP_ROLES,
             'optional_claims': TEST_OPTIONAL_CLAIMS,
             'required_resource_accesses': TEST_REQUIRED_RESOURCE_ACCESS,
+            'service_management_reference': '96524024-75b0-497b-ab38-0381399a6a9d'
         })
 
         # Create
@@ -228,6 +229,7 @@ class ApplicationScenarioTest(GraphScenarioTestBase):
             'ad app create --display-name {display_name} '
             '--identifier-uris {identifier_uri} '
             '--is-fallback-public-client True '
+            '--service-management-reference {service_management_reference} '
             '--sign-in-audience AzureADMultipleOrgs '
             # web
             '--web-home-page-url {homepage} '
@@ -245,6 +247,7 @@ class ApplicationScenarioTest(GraphScenarioTestBase):
                 self.check('displayName', '{display_name}'),
                 self.check('identifierUris[0]', '{identifier_uri}'),
                 self.check('isFallbackPublicClient', True),
+                self.check('serviceManagementReference', '{service_management_reference}'),
                 self.check('signInAudience', 'AzureADMultipleOrgs'),
                 self.check('web.homePageUrl', '{homepage}'),
                 self.check('web.redirectUris[0]', '{web_redirect_uri_1}'),
@@ -281,6 +284,7 @@ class ApplicationScenarioTest(GraphScenarioTestBase):
             'ad app update --id {app_id} --display-name {display_name_3} '
             '--identifier-uris {identifier_uri_3} '
             '--is-fallback-public-client True '
+            '--service-management-reference {service_management_reference} '
             # signInAudience can't be PATCHed currently due to service issue. PATCH first fails with 404, then 500
             # '--sign-in-audience AzureADMultipleOrgs '
             # web
@@ -301,6 +305,7 @@ class ApplicationScenarioTest(GraphScenarioTestBase):
                 self.check('displayName', '{display_name_3}'),
                 self.check('identifierUris[0]', '{identifier_uri_3}'),
                 self.check('isFallbackPublicClient', True),
+                self.check('serviceManagementReference', '{service_management_reference}'),
                 # self.check('signInAudience', 'AzureADMultipleOrgs'),
                 self.check('web.homePageUrl', '{homepage}'),
                 # redirectUris doesn't preserve item order.
@@ -327,13 +332,28 @@ class ApplicationScenarioTest(GraphScenarioTestBase):
 
     def test_app_create_idempotent(self):
         self.kwargs = {
-            'display_name': self.create_random_name('app', 20)
+            'display_name': self.create_random_name('azure-cli-test', 30),
+            'service_management_reference': '96524024-75b0-497b-ab38-0381399a6a9d'
         }
-        result = self.cmd("ad app create --display-name {display_name} --is-fallback-public-client true").get_output_in_json()
+
+        # These properties' values are null by default
+        result = self.cmd(
+            'ad app create --display-name {display_name} ',
+            checks=[
+                self.check('isFallbackPublicClient', None),
+                self.check('serviceManagementReference', None)
+            ]).get_output_in_json()
         self.kwargs['app_id'] = result['appId']
-        self.cmd("ad app create --display-name {display_name} --is-fallback-public-client false",
-                 checks=[self.check('isFallbackPublicClient', False),
-                         self.check('appId', '{app_id}')])
+
+        self.cmd(
+            'ad app create --display-name {display_name} '
+            '--is-fallback-public-client true '
+            '--service-management-reference {service_management_reference}',
+            checks=[
+                self.check('appId', '{app_id}'),
+                self.check('isFallbackPublicClient', True),
+                self.check('serviceManagementReference', '{service_management_reference}'),
+            ])
 
     def test_app_resolution(self):
         """Test application can be resolved with identifierUris, appId, or id."""

@@ -332,7 +332,7 @@ def validate_client_parameters(cmd, namespace):
             acc = next((x for x in client.batch_account.list()
                         if x.name == namespace.account_name and x.account_endpoint == host), None)
             if acc:
-                from msrestazure.tools import parse_resource_id
+                from azure.mgmt.core.tools import parse_resource_id
                 rg = parse_resource_id(acc.id)['resource_group']
                 namespace.account_key = \
                     client.batch_account.get_keys(rg,  # pylint: disable=no-member

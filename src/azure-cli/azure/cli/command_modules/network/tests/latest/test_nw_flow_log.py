@@ -106,6 +106,137 @@ class NWFlowLogScenarioTest(LiveScenarioTest):
             self.check('retentionPolicy.enabled', False),
         ])
 
+    @ResourceGroupPreparer(name_prefix='test_nw_flow_log_', location='centraluseuap')
+    @StorageAccountPreparer(name_prefix='testflowlog', location='centraluseuap', kind='StorageV2')
+    def test_nw_flow_log_create_vnetflWithManagedIdentity(self, resource_group, resource_group_location, storage_account):
+        self.kwargs.update({
+            'rg': resource_group,
+            'location': resource_group_location,
+            'storage_account': storage_account,
+            'vnet': 'vnet1',
+            'subnet': 'subnet1',
+            'nic': 'nic1',
+            'watcher_rg': 'NetworkWatcherRG',
+            'watcher_name': 'NetworkWatcher_{}'.format(resource_group_location),
+            'flow_log': 'flow_log_test',
+            'identity': 'idtest',
+            'subscription': 'af15e575-f948-49ac-bce0-252d028e9379'
+        })
+
+        # create an managed identity
+        self.cmd('identity create -g {rg} -n {identity}').get_output_in_json()
+
+        # enable network watcher
+        # self.cmd('network watcher configure -g {rg} --locations {location} --enabled')
+
+        # prepare the target resource
+        self.cmd('network vnet create -g {rg} -n {vnet}')
+
+        #targetId as vnet
+        self.cmd('network watcher flow-log create '
+                 '--location {location} '
+                 '--resource-group {rg} '
+                 '--vnet {vnet} '
+                 '--storage-account {storage_account} '
+                 '--name {flow_log} '
+                 '--user-assigned-identity /subscriptions/{subscription}/resourceGroups/{rg}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{identity}')
+
+        self.cmd('network watcher flow-log list --location {location}')
+
+        # This output is Azure Management Resource formatted.
+        self.cmd('network watcher flow-log show --location {location} --name {flow_log}', checks=[
+            self.check('name', self.kwargs['flow_log']),
+           
+            self.check_pattern('targetResourceId', '.*/{vnet}$'),
+            self.check('retentionPolicy.days', 0),
+            self.check('retentionPolicy.enabled', False),
+            self.check('identity != null', True),
+            self.check('identity.type', 'userAssigned'),
+            self.check('identity.userAssignedIdentities != null', True),
+            # Check that userAssignedIdentities has at least one entry
+            self.check("length(identity.userAssignedIdentities)", 1),
+            self.check("identity.userAssignedIdentities.*.clientId | [0] != ''", True),  # Ensure clientId is not null
+            self.check("identity.userAssignedIdentities.*.principalId | [0] != ''", True),  # Ensure principalId is not null
+        ])
+
+    @ResourceGroupPreparer(name_prefix='test_nw_flow_log_', location='centraluseuap')
+    @StorageAccountPreparer(name_prefix='testflowlog', location='centraluseuap', kind='StorageV2')
+    def test_nw_flow_log_create_vnetflWithNoneManagedIdentity(self, resource_group, resource_group_location, storage_account):
+        self.kwargs.update({
+            'rg': resource_group,
+            'location': resource_group_location,
+            'storage_account': storage_account,
+            'vnet': 'vnet1',
+            'subnet': 'subnet1',
+            'nic': 'nic1',
+            'watcher_rg': 'NetworkWatcherRG',
+            'watcher_name': 'NetworkWatcher_{}'.format(resource_group_location),
+            'flow_log': 'flow_log_test',
+            'identity': 'idtest',
+            'subscription': 'af15e575-f948-49ac-bce0-252d028e9379',
+            'format' : 'JSON'
+        })
+
+        # create an managed identity
+        self.cmd('identity create -g {rg} -n {identity}').get_output_in_json()
+
+        # enable network watcher
+        # self.cmd('network watcher configure -g {rg} --locations {location} --enabled')
+
+        # prepare the target resource
+        self.cmd('network vnet create -g {rg} -n {vnet}')
+
+        #targetId as vnet
+        self.cmd('network watcher flow-log create '
+                 '--location {location} '
+                 '--resource-group {rg} '
+                 '--vnet {vnet} '
+                 '--storage-account {storage_account} '
+                 '--name {flow_log} '
+                 '--user-assigned-identity /subscriptions/{subscription}/resourceGroups/{rg}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{identity}')
+
+        self.cmd('network watcher flow-log list --location {location}')
+
+        # This output is Azure Management Resource formatted.
+        self.cmd('network watcher flow-log show --location {location} --name {flow_log}', checks=[
+            self.check('name', self.kwargs['flow_log']),
+           
+            self.check_pattern('targetResourceId', '.*/{vnet}$'),
+            self.check('retentionPolicy.days', 0),
+            self.check('retentionPolicy.enabled', False),
+            self.check('identity != null', True),
+            self.check('identity.type', 'userAssigned'),
+            self.check('identity.userAssignedIdentities != null', True),
+            # Check that userAssignedIdentities has at least one entry
+            self.check("length(identity.userAssignedIdentities)", 1),
+            self.check("identity.userAssignedIdentities.*.clientId | [0] != ''", True),  # Ensure clientId is not null
+            self.check("identity.userAssignedIdentities.*.principalId | [0] != ''", True),  # Ensure principalId is not null
+        ])
+
+        self.cmd('network watcher flow-log update '
+                 '--location {location} '
+                 '--resource-group {rg} '
+                 '--vnet {vnet} '
+                 '--storage-account {storage_account} '
+                 '--name {flow_log} '
+                 '--format {format} '
+                 '--user-assigned-identity none ')
+        
+        self.cmd('network watcher flow-log list --location {location}')
+
+        # This output is Azure Management Resource formatted.
+        self.cmd('network watcher flow-log show --location {location} --name {flow_log}', checks=[
+            self.check('name', self.kwargs['flow_log']),
+           
+            self.check_pattern('targetResourceId', '.*/{vnet}$'),
+            self.check('retentionPolicy.days', 0),
+            self.check('retentionPolicy.enabled', False),
+            self.check('identity != null', True),
+            self.check('identity.type', 'none'),
+            self.check('identity.userAssignedIdentities', None),
+        ])
+
+
     @ResourceGroupPreparer(name_prefix='test_nw_flow_log_', location='eastus')
     @StorageAccountPreparer(name_prefix='testflowlog', location='eastus', kind='StorageV2')
     def test_nw_flow_log_create(self, resource_group, resource_group_location, storage_account):

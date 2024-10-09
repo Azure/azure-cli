@@ -3,6 +3,90 @@
 Release History
 ===============
 
+2.65.0
+++++++
+
+**ACR**
+
+* Fix #21900: `az acr task identity remove`: Fix incorrect operation_group setting (#29885)
+* `az acr credential-set`: Improve help message (#29810)
+
+**AD**
+
+* `az ad app create/update`: Add `--service-management-reference` argument (#29860)
+
+**AKS**
+
+* `az aks nodepool delete-machines`: Add support to delete specific machines in an agent pool (#29921)
+
+**App Config**
+
+* `az appconfig`: Add premium SKU support (#29824)
+
+**App Service**
+
+* `az functionapp config set`: Map parameters explicitly for the internal update_site_configs function call (#29756)
+
+**Compute**
+
+* `az vm/vmss create`: Add `--ssh-key-type` parameter to support generating Ed25519 SSH keys (#29926)
+* `az vm image list`: Expose ImageDeprecationStatus property in output (#29932)
+
+**Container app**
+
+* Fix #29849: `az containerapp job stop`: Fix stop execution response (#29907)
+* Fix #29166: `az containerapp compose create`: Support image with tag and support get ACR from image (#29933)
+
+**Cosmos DB**
+
+* `az cosmosdb restore`: Add `--disable-ttl` to support for Restore with Time-To-Live Disabled (#29875)
+
+**DataLake**
+
+* `az dla`: Deprecate datalake analytics (#29879)
+
+**HDInsight**
+
+* `az hdinsight update`: Add parameter `--assign-identity-type` to allow to update to `SystemAssigned` identity. (#29816)
+
+**Monitor**
+
+* `az monitor action-group create`: Adjust formatting of `--actions` help message (#29747)
+* `az monitor action-group update`: Adjust formatting of `--add-actions` help message (#29747)
+* `az monitor action-group notification create`: Adjust formatting of `--add-actions` help message (#29747)
+
+**MySQL**
+
+* `az mysql flexible-server create/update`: Add `--accelerated-logs` to support configuring accelerated logs for Business Critical tier (#29936)
+
+**NetAppFiles**
+
+* `az netappfiles volume create`: Fix subnet id as resource id (#29813)
+
+**Network**
+
+* `az network vnet peering`: Refine command interface of subnet peering (#29817)
+
+**Packaging**
+
+* Release Docker image based on Azure Linux 3.0 (#29769)
+* Include `jq` in Azure Linux docker image (#29867)
+* Drop Debian 10 support (#29378)
+
+**Profile**
+
+* `az login`: Fall back to device code flow in GitHub Codespaces (#27443)
+
+**RDBMS**
+
+* `az postgres flexible-server update`: Support case-insensitive input for `--tier`, `--performance-tier`, `--sku`, and `--maintenance-window` (#29840)
+* `az postgres flexible-server migration create`: Add AWS_AURORA as a migration source type for PostgreSql (#29863)
+
+**SQL**
+
+* `az sql elastic-pool create`: Set `min_capacity` to `None` for non-serverless SKUs (#29886)
+* `az sql mi create/update`: Add gpv2 parameter and iops parameter (#29873)
+
 2.64.0
 ++++++
 

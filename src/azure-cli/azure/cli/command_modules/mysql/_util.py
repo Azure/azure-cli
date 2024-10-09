@@ -19,8 +19,7 @@ from datetime import datetime
 from knack.log import get_logger
 from knack.arguments import ignore_type
 from knack.prompting import prompt_pass, prompt_y_n, NoTTYException
-from msrestazure.tools import parse_resource_id
-from msrestazure.azure_exceptions import CloudError
+from azure.mgmt.core.tools import parse_resource_id
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.commands.progress import IndeterminateProgressBar
 from azure.cli.core.util import CLIError
@@ -442,7 +441,7 @@ def fill_action_template(cmd, database_engine, server, database_name, administra
                                         database_engine=database_engine,
                                         server=server,
                                         repository=repository)
-        except CloudError:
+        except HttpResponseError:
             raise AuthenticationError('You do not have authorization to create a service principal to run azure service in github actions. \n'
                                       'Please create a service principal that has access to the database server and add "AZURE_CREDENTIALS" secret to your github repository. \n'
                                       'Follow the instruction here "aka.ms/github-actions-azure-credentials".')

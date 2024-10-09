@@ -12,9 +12,8 @@ from dateutil.tz import tzutc
 from knack.log import get_logger
 from urllib.request import urlretrieve
 from importlib import import_module
-from msrestazure.azure_exceptions import CloudError
-from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id
-from azure.core.exceptions import ResourceNotFoundError
+from azure.mgmt.core.tools import resource_id, is_valid_resource_id, parse_resource_id
+from azure.core.exceptions import ResourceNotFoundError, HttpResponseError
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.command_modules.mysql.random.generate import generate_username
 from azure.cli.core.util import CLIError, sdk_no_wait, user_confirmation
@@ -30,7 +29,7 @@ from ._util import resolve_poller, generate_missing_parameters, get_mysql_list_s
     run_subprocess_get_output, fill_action_template, get_git_root_dir, get_single_to_flex_sku_mapping, get_firewall_rules_from_paged_response, \
     ImportFromStorageProgressHook, OperationProgressBar, GITHUB_ACTION_PATH
 from ._network import prepare_mysql_exist_private_dns_zone, prepare_mysql_exist_private_network, prepare_private_network, prepare_private_dns_zone, prepare_public_network
-from ._validators import mysql_arguments_validator, mysql_auto_grow_validator, mysql_georedundant_backup_validator, mysql_restore_tier_validator, \
+from ._validators import mysql_arguments_validator, mysql_auto_grow_validator, mysql_georedundant_backup_validator, mysql_restore_tier_validator, mysql_accelerated_logs_validator, \
     mysql_retention_validator, mysql_sku_name_validator, mysql_storage_validator, validate_mysql_replica, validate_server_name, \
     validate_mysql_tier_update, validate_and_format_restore_point_in_time, validate_public_access_server, mysql_import_single_server_ready_validator, \
     mysql_import_version_validator, mysql_import_storage_validator, validate_and_format_maintenance_start_time
@@ -338,7 +337,7 @@ def flexible_server_create(cmd, client,
                            subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
                            private_dns_zone_arguments=None, public_access=None,
                            high_availability=None, zone=None, standby_availability_zone=None,
-                           iops=None, auto_grow=None, auto_scale_iops=None, geo_redundant_backup=None,
+                           iops=None, auto_grow=None, auto_scale_iops=None, accelerated_logs=None, geo_redundant_backup=None,
                            byok_identity=None, backup_byok_identity=None, byok_key=None, backup_byok_key=None,
                            yes=False):
     # Generate missing parameters
@@ -376,6 +375,7 @@ def flexible_server_create(cmd, client,
                               byok_key=byok_key,
                               backup_byok_key=backup_byok_key,
                               auto_io_scaling=auto_scale_iops,
+                              accelerated_logs=accelerated_logs,
                               iops=iops)
     list_skus_info = get_mysql_list_skus_info(db_context.cmd, location)
     iops_info = list_skus_info['iops_info']
@@ -405,7 +405,8 @@ def flexible_server_create(cmd, client,
     storage = mysql_flexibleservers.models.Storage(storage_size_gb=storage_gb,
                                                    iops=iops,
                                                    auto_grow=auto_grow,
-                                                   auto_io_scaling=auto_scale_iops)
+                                                   auto_io_scaling=auto_scale_iops,
+                                                   log_on_disk=accelerated_logs)
 
     backup = mysql_flexibleservers.models.Backup(backup_retention_days=backup_retention,
                                                  geo_redundant_backup=geo_redundant_backup)
@@ -696,11 +697,11 @@ def flexible_server_import_replica_stop(client, resource_group_name, server_name
     return client.begin_update(resource_group_name, server_name, params)
 
 
-# pylint: disable=too-many-locals, too-many-statements, raise-missing-from
+# pylint: disable=too-many-branches, too-many-locals, too-many-statements, raise-missing-from
 def flexible_server_restore(cmd, client, resource_group_name, server_name, source_server, restore_point_in_time=None, zone=None,
                             no_wait=False, subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
                             private_dns_zone_arguments=None, public_access=None, yes=False, sku_name=None, tier=None,
-                            storage_gb=None, auto_grow=None, backup_retention=None, geo_redundant_backup=None, tags=None):
+                            storage_gb=None, auto_grow=None, accelerated_logs=None, backup_retention=None, geo_redundant_backup=None, tags=None):
     provider = 'Microsoft.DBforMySQL'
     server_name = server_name.lower()
 
@@ -748,6 +749,11 @@ def flexible_server_restore(cmd, client, resource_group_name, server_name, sourc
         else:
             mysql_auto_grow_validator(auto_grow, None, None, source_server_object)
 
+        if not accelerated_logs:
+            accelerated_logs = source_server_object.storage.log_on_disk
+        else:
+            mysql_accelerated_logs_validator(accelerated_logs, tier)
+
         if not backup_retention:
             backup_retention = source_server_object.backup.backup_retention_days
         else:
@@ -770,7 +776,8 @@ def flexible_server_restore(cmd, client, resource_group_name, server_name, sourc
                                iops_input=source_server_object.storage.iops, tier=tier, sku_name=sku_name)
 
         storage = mysql_flexibleservers.models.Storage(storage_size_gb=storage_gb, iops=iops, auto_grow=auto_grow,
-                                                       auto_io_scaling=source_server_object.storage.auto_io_scaling)
+                                                       auto_io_scaling=source_server_object.storage.auto_io_scaling,
+                                                       log_on_disk=accelerated_logs)
 
         backup = mysql_flexibleservers.models.Backup(backup_retention_days=backup_retention,
                                                      geo_redundant_backup=geo_redundant_backup)
@@ -833,7 +840,7 @@ def flexible_server_restore(cmd, client, resource_group_name, server_name, sourc
 def flexible_server_georestore(cmd, client, resource_group_name, server_name, source_server, location, zone=None, no_wait=False,
                                subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None, tags=None,
                                private_dns_zone_arguments=None, public_access=None, yes=False, sku_name=None, tier=None,
-                               storage_gb=None, auto_grow=None, backup_retention=None, geo_redundant_backup=None):
+                               storage_gb=None, auto_grow=None, accelerated_logs=None, backup_retention=None, geo_redundant_backup=None):
     provider = 'Microsoft.DBforMySQL'
     server_name = server_name.lower()
 
@@ -875,6 +882,11 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
         else:
             mysql_auto_grow_validator(auto_grow, None, None, source_server_object)
 
+        if not accelerated_logs:
+            accelerated_logs = source_server_object.storage.log_on_disk
+        else:
+            mysql_accelerated_logs_validator(accelerated_logs, tier)
+
         if not backup_retention:
             backup_retention = source_server_object.backup.backup_retention_days
         else:
@@ -900,7 +912,8 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
                                iops_input=source_server_object.storage.iops, tier=tier, sku_name=sku_name)
 
         storage = mysql_flexibleservers.models.Storage(storage_size_gb=storage_gb, iops=iops, auto_grow=auto_grow,
-                                                       auto_io_scaling=source_server_object.storage.auto_io_scaling)
+                                                       auto_io_scaling=source_server_object.storage.auto_io_scaling,
+                                                       log_on_disk=accelerated_logs)
 
         backup = mysql_flexibleservers.models.Backup(backup_retention_days=backup_retention,
                                                      geo_redundant_backup=geo_redundant_backup)
@@ -963,6 +976,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
                                        auto_grow=None,
                                        iops=None,
                                        auto_scale_iops=None,
+                                       accelerated_logs=None,
                                        backup_retention=None,
                                        geo_redundant_backup=None,
                                        administrator_login_password=None,
@@ -995,6 +1009,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
                               zone=instance.availability_zone,
                               standby_availability_zone=standby_availability_zone,
                               auto_grow=auto_grow,
+                              accelerated_logs=accelerated_logs,
                               replication_role=replication_role,
                               instance=instance,
                               geo_redundant_backup=geo_redundant_backup,
@@ -1096,6 +1111,9 @@ def flexible_server_update_custom_func(cmd, client, instance,
 
     if auto_grow:
         instance.storage.auto_grow = auto_grow
+
+    if accelerated_logs:
+        instance.storage.log_on_disk = accelerated_logs
 
     if public_access:
         instance.network.public_network_access = public_access
@@ -1240,7 +1258,7 @@ def flexible_parameter_update(client, server_name, configuration_name, resource_
             parameter = client.get(resource_group_name, server_name, configuration_name)
             value = parameter.default_value  # reset value to default
             source = "system-default"
-        except CloudError as e:
+        except HttpResponseError as e:
             raise CLIError('Unable to get default parameter value: {}.'.format(str(e)))
     elif source is None:
         source = "user-override"
@@ -1266,7 +1284,7 @@ def flexible_parameter_update_batch(client, server_name, resource_group_name, so
                 parameter = client.get(resource_group_name, server_name, name)
                 value = parameter.default_value  # reset value to default
                 source = "system-default"
-            except CloudError as e:
+            except HttpResponseError as e:
                 raise CLIError('Unable to get default parameter value: {}.'.format(str(e)))
         elif source is None:
             source = "user-override"

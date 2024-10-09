@@ -23,7 +23,7 @@ def rgetattr(obj, attr, *args):
 
 # Command validators
 def validate_resync_quotarule(cmd, namespace):
-    from msrestazure.tools import parse_resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id
     # Get volume params
     netAppVolumeClient = volumes_mgmt_client_factory(cmd.cli_ctx, None)
     netAppVolumeQuotaRuleClient = volume_quota_rules_mgmt_client_factory(cmd.cli_ctx, None)

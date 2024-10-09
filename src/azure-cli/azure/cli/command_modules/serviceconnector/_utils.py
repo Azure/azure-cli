@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import os
 import re
 import time
 from knack.log import get_logger
@@ -17,6 +18,7 @@ from ._resource_config import (
     TARGET_RESOURCES_USERTOKEN,
     RESOURCE
 )
+from azure.cli.core import get_default_cli
 from azure.mgmt.core.tools import (
     parse_resource_id,
     is_valid_resource_id as is_valid_resource_id_sdk
@@ -26,8 +28,6 @@ logger = get_logger(__name__)
 
 
 def is_valid_resource_id(value):
-    if re.search('[\"\'|]', value):
-        return False
     return is_valid_resource_id_sdk(value)
 
 
@@ -86,24 +86,26 @@ def run_cli_cmd(cmd, retry=0, interval=0, should_retry_func=None):
     :param retry: The times to re-try
     :param interval: The seconds wait before retry
     '''
-    import json
-    import subprocess
+    output = _in_process_execute(cmd)
 
-    output = subprocess.run(cmd, shell=True, check=False,
-                            stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-    logger.debug(output)
-    if output.returncode != 0 or (should_retry_func and should_retry_func(output)):
+    if output.error or (should_retry_func and should_retry_func(output)):
         if retry:
             time.sleep(interval)
             return run_cli_cmd(cmd, retry - 1, interval)
-        err = output.stderr.decode(encoding='UTF-8', errors='ignore')
         raise CLIInternalError('Command execution failed, command is: '
-                               '{}, error message is: \n {}'.format(cmd, err))
-    try:
-        return json.loads(output.stdout.decode(encoding='UTF-8', errors='ignore')) if output.stdout else None
-    except ValueError as e:
-        logger.debug(e)
-        return output.stdout or None
+                               '{}, error message is: \n {}'.format(cmd, output.error))
+    return output.result
+
+
+def _in_process_execute(command):
+    import shlex
+
+    if command.startswith('az '):
+        command = command[3:]
+
+    cli = get_default_cli()
+    cli.invoke(shlex.split(command), out_file=open(os.devnull, 'w'))  # Don't print output
+    return cli.result
 
 
 def set_user_token_header(client, cli_ctx):
