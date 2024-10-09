@@ -107,7 +107,7 @@ class Update(AAZCommand):
             nullable=True,
         )
         _args_schema.private_endpoint_vnet_policies = AAZStrArg(
-            options=["--private-endpoint-vnet-policies"],
+            options=["--pe-vnet-policies", "--private-endpoint-vnet-policies"],
             help="Private Endpoint VNet Policies.",
             nullable=True,
             enum={"Basic": "Basic", "Disabled": "Disabled"},

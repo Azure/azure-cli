@@ -109,7 +109,7 @@ class Create(AAZCommand):
             help="The FlowTimeout value (in minutes) for the Virtual Network.",
         )
         _args_schema.private_endpoint_vnet_policies = AAZStrArg(
-            options=["--private-endpoint-vnet-policies"],
+            options=["--pe-vnet-policies", "--private-endpoint-vnet-policies"],
             help="Private Endpoint VNet Policies.",
             enum={"Basic": "Basic", "Disabled": "Disabled"},
         )
