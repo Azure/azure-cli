@@ -10,7 +10,10 @@ import tempfile
 import time
 import unittest
 
-from azure.cli.command_modules.acs._format import version_to_tuple
+from azure.cli.command_modules.acs._format import (
+    version_to_tuple,
+    aks_machine_list_table_format
+)    
 from azure.cli.command_modules.acs._helpers import (
     _get_test_sp_object_id,
     get_shared_control_plane_identity,
@@ -2159,6 +2162,55 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(delete_cmd, checks=[
             self.is_empty(),
         ])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_machine_cmds(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'ssh_key_value': self.generate_ssh_keys()
+        })
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --enable-managed-identity ' \
+            '--ssh-key-value={ssh_key_value} -o json'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('addonProfiles.openServiceMesh', None),
+        ])
+        node_pool_name = self.create_random_name('c', 6)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'node_pool_name': node_pool_name,
+            'ssh_key_value': self.generate_ssh_keys(),
+        })
+        # add nodepool
+        self.cmd('aks nodepool add ' \
+                 ' --resource-group={resource_group} ' \
+                 ' --cluster-name={name} ' \
+                 ' --name={node_pool_name} --node-count=2', checks=[
+            self.check('provisioningState', 'Succeeded')
+        ])
+        list_cmd = 'aks machine list ' \
+                   ' --resource-group={resource_group} ' \
+                   ' --cluster-name={name} --nodepool-name={node_pool_name} -o json'
+        machine_list = self.cmd(list_cmd).get_output_in_json()
+        assert len(machine_list) == 2
+        aks_machine_list_table_format(machine_list)
+        machine_name = machine_list[0]["name"]
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'node_pool_name': node_pool_name,
+            'ssh_key_value': self.generate_ssh_keys(),
+            'machine_name': machine_name,
+        })    
+        show_cmd = 'aks machine show '\
+            '--resource-group={resource_group} --cluster-name={name} ' \
+            '--nodepool-name={node_pool_name} --machine-name={machine_name} -o json'
+        machine_show = self.cmd(show_cmd).get_output_in_json()
+        assert machine_show["name"] == machine_name
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
