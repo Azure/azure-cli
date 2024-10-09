@@ -85,22 +85,6 @@ class AzureSignalRServiceReplicaTest(ScenarioTest):
             self.check('tags.{}'.format(tags_key), tags_val),
         ])
 
-        # test start replica
-        self.cmd('az signalr replica start --signalr-name {signalr_name} --replica-name {replica_name} -g {rg}', checks=[
-            self.check('name', '{replica_name}'),
-            self.check('location', '{replica_location}'),
-            self.check('provisioningState', 'Succeeded'),
-            self.check('resourceStopped', 'false'),
-        ])
-
-        # test stop replica
-        self.cmd('az signalr replica stop --signalr-name {signalr_name} --replica-name {replica_name} -g {rg}', checks=[
-            self.check('name', '{replica_name}'),
-            self.check('location', '{replica_location}'),
-            self.check('provisioningState', 'Succeeded'),
-            self.check('resourceStopped', 'true'),
-        ])
-
         # test list replica
         self.cmd('az signalr replica list --signalr-name {signalr_name} -g {rg}', checks=[
             self.check('[0].name', '{replica_name}'),

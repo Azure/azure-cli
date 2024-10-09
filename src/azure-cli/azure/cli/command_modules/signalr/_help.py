@@ -22,6 +22,11 @@ type: group
 short-summary: Manage network rules.
 """
 
+helps['signalr network-rule ip-rule'] = """
+type: group
+short-summary: Manage SignalR Service IP rules.
+"""
+
 helps['signalr upstream'] = """
 type: group
 short-summary: Manage upstream settings.
@@ -226,6 +231,24 @@ examples:
   - name: Set denying client connection for both public network and private endpoint connections
     text: >
         az signalr network-rule update --public-network --connection-name MyPrivateEndpointConnection1 MyPrivateEndpointConnection2 -n MySignalR -g MyResourceGroup --deny ClientConnection
+"""
+
+helps['signalr network-rule ip-rule add'] = """
+type: command
+short-summary: Add IP rule to SignalR Service.
+examples:
+  - name: Add IP rule
+    text: >
+        az signalr network-rule ip-rule add -n MySignalR -g MyResourceGroup --ip-rule value="10.0.0.24" action="Allow" --ip-rule value="192.168.0.0/24" action="Deny"
+"""
+
+helps['signalr network-rule ip-rule remove'] = """
+type: command
+short-summary: Remove IP rule from SignalR Service.
+examples:
+  - name: Remove IP rule
+    text: >
+        az signalr network-rule ip-rule remove -n MySignalR -g MyResourceGroup --ip-rule value="10.0.0.24" action="Allow" --ip-rule value="192.168.0.0/24" action="Deny"
 """
 
 helps['signalr identity assign'] = """
