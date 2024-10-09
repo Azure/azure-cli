@@ -16,7 +16,8 @@ def cli_eventhub_create(cmd, resource_group_name, namespace_name, event_hub_name
                         partition_count=None, status=None, retention_time_in_hours=None, cleanup_policy=None, tombstone_retention_time_in_hours=None,
                         enable_capture=None, skip_empty_archives=None, capture_interval=None, capture_size_limit=None, destination_name=None,
                         blob_container=None, archive_name_format=None, storage_account=None,
-                        mi_user_assigned=None, mi_system_assigned=False):
+                        mi_user_assigned=None, mi_system_assigned=False,
+                        timestamp_type=None, user_metadata=None, min_compaction_lag_in_mins=None):
 
     from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.eventhub import Create
     command_arg_dict = {}
@@ -32,6 +33,10 @@ def cli_eventhub_create(cmd, resource_group_name, namespace_name, event_hub_name
         command_arg_dict.update({
             "tombstone_retention_time_in_hours": tombstone_retention_time_in_hours
         })
+    if min_compaction_lag_in_mins:
+        command_arg_dict.update({
+            "min_compaction_lag_in_mins": int(min_compaction_lag_in_mins)
+        })
     if partition_count:
         command_arg_dict.update({
             "partition_count": int(partition_count)
@@ -39,6 +44,14 @@ def cli_eventhub_create(cmd, resource_group_name, namespace_name, event_hub_name
     if status:
         command_arg_dict.update({
             "status": status
+        })
+    if timestamp_type:
+        command_arg_dict.update({
+            "timestamp_type": timestamp_type
+        })
+    if user_metadata:
+        command_arg_dict.update({
+            "user_metadata": user_metadata
         })
     if enable_capture:
         command_arg_dict.update({
