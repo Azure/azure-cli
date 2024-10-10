@@ -153,9 +153,6 @@ class ReplayableTest(IntegrationTestBase):  # pylint: disable=too-many-instance-
 
     def tearDown(self):
         os.environ = self.original_env
-        # Autorest.Python 2.x
-        assert not [t for t in threading.enumerate() if t.name.startswith("AzureOperationPoller")], \
-            "You need to call 'result' or 'wait' on all AzureOperationPoller you have created"
         # Autorest.Python 3.x
         assert not [t for t in threading.enumerate() if t.name.startswith("LROPoller")], \
             "You need to call 'result' or 'wait' on all LROPoller you have created"
