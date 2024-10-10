@@ -642,6 +642,7 @@ class FailoverPolicyType(Enum):
     automatic = 'Automatic'
     manual = 'Manual'
 
+
 class FailoverGroupDatabasesSecondaryType(Enum):
     geo = 'Geo'
     standby = 'Standby'
