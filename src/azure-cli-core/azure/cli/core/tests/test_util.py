@@ -17,7 +17,7 @@ from azure.cli.core.util import \
     (get_file_json, truncate_text, shell_safe_json_parse, b64_to_hex, hash_string, random_string,
      open_page_in_browser, can_launch_browser, handle_exception, ConfiguredDefaultSetter, send_raw_request,
      should_disable_connection_verify, parse_proxy_resource_id, get_az_user_agent, get_az_rest_user_agent,
-     _get_parent_proc_name, is_wsl, run_cmd)
+     _get_parent_proc_name, is_wsl, run_cmd, run_az_cmd)
 from azure.cli.core.mock import DummyCli
 
 
@@ -441,6 +441,14 @@ class TestUtils(unittest.TestCase):
         from azure.cli.core.azclierror import ArgumentUsageError
         with self.assertRaises(ArgumentUsageError):
             run_cmd(cmd, check=True)
+
+    def test_run_az_cmd(self):
+        cmd = ["az", "version"]
+        output = run_az_cmd(cmd)
+        self.assertEqual(output.exit_code, 0, "unexpected exit_code when run az version")
+        self.assertEqual(output.error, None, "unexpected error when run az cmd")
+        self.assertIsInstance(output.result, dict, "unexpected cmd execution result")
+        self.assertIn("azure-cli-core", output.result, "unexpected cmd execution result")
 
 
 class TestBase64ToHex(unittest.TestCase):
