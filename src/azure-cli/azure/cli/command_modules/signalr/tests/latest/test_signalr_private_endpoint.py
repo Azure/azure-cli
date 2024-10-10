@@ -36,14 +36,16 @@ class AzureSignalRServicePrivateEndpointScenarioTest(ScenarioTest):
 
         # Prepare network
         self.cmd('network vnet create -g {rg} -n {vnet} -l {location} --subnet-name {subnet}')
-        self.cmd('network vnet subnet update --name {subnet} --resource-group {rg} --vnet-name {vnet} --disable-private-endpoint-network-policies true')
+        self.cmd(
+            'network vnet subnet update --name {subnet} --resource-group {rg} --vnet-name {vnet} --disable-private-endpoint-network-policies true')
 
         self.kwargs.update({
             'signalr_id': signalr['id']
         })
 
         # Create a private endpoint connection
-        self.cmd('network private-endpoint create --resource-group {rg} --vnet-name {vnet} --subnet {subnet} --name {private_endpoint}  --private-connection-resource-id {signalr_id} --group-ids signalr --connection-name {private_endpoint_connection} --location {location} --manual-request')
+        self.cmd(
+            'network private-endpoint create --resource-group {rg} --vnet-name {vnet} --subnet {subnet} --name {private_endpoint}  --private-connection-resource-id {signalr_id} --group-ids signalr --connection-name {private_endpoint_connection} --location {location} --manual-request')
 
         # Test private link resource list
         self.cmd('network private-link-resource list -n {signalr_name} -g {rg} --type Microsoft.SignalRService/signalr', checks=[
@@ -92,6 +94,50 @@ class AzureSignalRServicePrivateEndpointScenarioTest(ScenarioTest):
         self.kwargs.update({
             'connection_name': n_r['privateEndpoints'][0]['name']
         })
+
+        # Test update public network rules
+        self.cmd('signalr network-rule update -g {rg} -n {signalr_name} --public-network --allow ServerConnection ClientConnection --deny RESTAPI Trace', checks=[
+            self.check('networkAcLs.publicNetwork.allow[0]', 'ServerConnection'),
+            self.check('networkAcLs.publicNetwork.allow[1]', 'ClientConnection'),
+            self.check('networkAcLs.publicNetwork.deny[0]', 'RESTAPI'),
+            self.check('networkAcLs.publicNetwork.deny[1]', 'Trace'),
+        ])
+
+        # Test add IP rule
+        self.cmd('signalr network-rule ip-rule add -g {rg} -n {signalr_name} --ip-rule value="10.0.0.0/24" action="Allow" --ip-rule value="192.168.0.0/24" action="Deny"', checks=[
+            self.check('networkAcLs.ipRules[0].value', '0.0.0.0/0'),  # default allow
+            self.check('networkAcLs.ipRules[0].action', 'Allow'),
+            self.check('networkAcLs.ipRules[1].value', '::/0'),  # default allow
+            self.check('networkAcLs.ipRules[1].action', 'Allow'),
+            self.check('networkAcLs.ipRules[2].value', '10.0.0.0/24'),
+            self.check('networkAcLs.ipRules[2].action', 'Allow'),
+            self.check('networkAcLs.ipRules[3].value', '192.168.0.0/24'),
+            self.check('networkAcLs.ipRules[3].action', 'Deny'),
+        ])
+
+        # Test list network rules
+        self.cmd('signalr network-rule list -g {rg} -n {signalr_name}', checks=[
+            self.check('publicNetwork.allow[0]', 'ServerConnection'),
+            self.check('publicNetwork.allow[1]', 'ClientConnection'),
+            self.check('publicNetwork.deny[0]', 'RESTAPI'),
+            self.check('publicNetwork.deny[1]', 'Trace'),
+            self.check('ipRules[0].value', '0.0.0.0/0'),  # default allow
+            self.check('ipRules[0].action', 'Allow'),
+            self.check('ipRules[1].value', '::/0'),  # default allow
+            self.check('ipRules[1].action', 'Allow'),
+            self.check('ipRules[2].value', '10.0.0.0/24'),
+            self.check('ipRules[2].action', 'Allow'),
+            self.check('ipRules[3].value', '192.168.0.0/24'),
+            self.check('ipRules[3].action', 'Deny'),
+        ])
+
+        # Test remove IP rule
+        self.cmd('signalr network-rule ip-rule remove -g {rg} -n {signalr_name} --ip-rule value="10.0.0.0/24" action="Allow" --ip-rule value="192.168.0.0/24" action="Deny"', checks=[
+            self.check('networkAcLs.ipRules[0].value', '0.0.0.0/0'),  # default allow
+            self.check('networkAcLs.ipRules[0].action', 'Allow'),
+            self.check('networkAcLs.ipRules[1].value', '::/0'),  # default allow
+            self.check('networkAcLs.ipRules[1].action', 'Allow'),
+        ])
 
         # Test update private network rules
         self.cmd('signalr network-rule update --connection-name {connection_name} -n {signalr_name} -g {rg} --allow RESTAPI', checks=[

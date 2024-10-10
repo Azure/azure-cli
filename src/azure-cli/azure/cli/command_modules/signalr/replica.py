@@ -19,6 +19,20 @@ def signalr_replica_show(client: SignalRReplicasOperations, signalr_name, replic
     return client.get(resource_group_name=resource_group_name, resource_name=signalr_name, replica_name=replica_name)
 
 
+def signalr_replica_start(client: SignalRReplicasOperations, signalr_name, replica_name, resource_group_name):
+    parameter = Replica(location=None, resource_stopped=False)
+    return client.begin_update(resource_group_name=resource_group_name, resource_name=signalr_name, replica_name=replica_name, parameters=parameter)
+
+
+def signalr_replica_stop(client: SignalRReplicasOperations, signalr_name, replica_name, resource_group_name):
+    parameter = Replica(location=None, resource_stopped=True)
+    return client.begin_update(resource_group_name=resource_group_name, resource_name=signalr_name, replica_name=replica_name, parameters=parameter)
+
+
+def signalr_replica_restart(client: SignalRReplicasOperations, signalr_name, replica_name, resource_group_name):
+    return client.begin_restart(resource_group_name=resource_group_name, resource_name=signalr_name, replica_name=replica_name)
+
+
 def signalr_replica_delete(client: SignalRReplicasOperations, signalr_name, replica_name, resource_group_name):
     return client.delete(resource_group_name=resource_group_name, resource_name=signalr_name, replica_name=replica_name)
 
