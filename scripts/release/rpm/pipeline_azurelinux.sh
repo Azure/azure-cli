@@ -16,6 +16,7 @@ docker build \
     --target build-env \
     --build-arg cli_version=${CLI_VERSION} \
     --build-arg image=${IMAGE} \
+    --secret id=PIP_INDEX_URL \
     -f ./scripts/release/rpm/azurelinux.dockerfile \
     -t azure/azure-cli:azurelinux-builder \
     .

@@ -16,6 +16,8 @@ variables:
 - template: ${{ variables.Pipeline.Workspace }}/.azure-pipelines/templates/variables.yml
 - name: Codeql.Enabled
   value: false
+- name: cfs_pip_index
+  value: https://pkgs.dev.azure.com/azclitools/public/_packaging/azure-cli-feed/pypi/simple
 
 parameters:
 - name: architectures
@@ -205,6 +207,8 @@ jobs:
       TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
       artifactName: metadata
 
+  - powershell: Write-Host "##vso[task.setvariable variable=PIP_INDEX_URL;]$(cfs_pip_index)"
+    displayName: Set CFS Pip Index
 
   - script: |
       set ARCH=$(Platform)
@@ -244,6 +248,8 @@ jobs:
         TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
         artifactName: metadata
 
+    - powershell: Write-Host "##vso[task.setvariable variable=PIP_INDEX_URL;]$(cfs_pip_index)"
+      displayName: Set CFS Pip Index
 
     - script: |
         set ARCH=$(Platform)
@@ -429,6 +435,8 @@ jobs:
     inputs:
       versionSpec: 3.11
 
+  - bash: echo "##vso[task.setvariable variable=PIP_INDEX_URL;]$(cfs_pip_index)"
+    displayName: Set CFS Pip Index
 
   - script: |
       if [[ "$(Build.Reason)" == "PullRequest" ]]; then
@@ -719,6 +727,9 @@ jobs:
   - bash: ./scripts/ci/install_docker.sh
     displayName: Install Docker
 
+  - bash: echo "##vso[task.setvariable variable=PIP_INDEX_URL;]$(cfs_pip_index)"
+    displayName: Set CFS Pip Index
+
   - task: Bash@3
     displayName: 'Build Rpm Package: Azure Linux'
     inputs:
@@ -809,6 +820,8 @@ jobs:
   steps:
   - bash: ./scripts/ci/install_docker.sh
     displayName: Install Docker
+  - bash: echo "##vso[task.setvariable variable=PIP_INDEX_URL;]$(cfs_pip_index)"
+    displayName: Set CFS Pip Index
   - task: Bash@3
     displayName: 'Build Rpm Package'
     inputs:
@@ -823,7 +836,6 @@ jobs:
     inputs:
       TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: $(artifact)
-
 
 - job: TestRpmPackage
   displayName: Test Rpm Package
@@ -926,6 +938,8 @@ jobs:
   steps:
   - bash: ./scripts/ci/install_docker.sh
     displayName: Install Docker
+  - bash: echo "##vso[task.setvariable variable=PIP_INDEX_URL;]$(cfs_pip_index)"
+    displayName: Set CFS Pip Index
   - task: Bash@3
     displayName: 'Build $(deb_system) $(distro) $(arch) Package'
     inputs:

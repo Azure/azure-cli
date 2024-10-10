@@ -21,6 +21,7 @@ docker build \
     --build-arg cli_version=${CLI_VERSION} \
     --build-arg image=${IMAGE} \
     --build-arg python_package=${PYTHON_PACKAGE} \
+    --secret id=PIP_INDEX_URL \
     -f ./scripts/release/rpm/${DOCKERFILE}.dockerfile \
     -t azure/azure-cli:${DOCKERFILE}-builder \
     .
