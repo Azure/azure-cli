@@ -7,6 +7,7 @@ import json
 from datetime import datetime, timedelta
 import unittest
 import time
+import random
 
 from azure.cli.testsdk import ScenarioTest, JMESPathCheckExists, ResourceGroupPreparer, \
     StorageAccountPreparer, KeyVaultPreparer, record_only, live_only
@@ -25,6 +26,24 @@ def _get_vm_version(vm_type):
 
 
 class BackupTests(ScenarioTest, unittest.TestCase):
+    def wait_for_restore_complete(self, job_id):
+        self.kwargs.update({'job_id': job_id})
+
+        status = "InProgress"
+        iteration = wait_iteration = 0
+        while status == "InProgress":
+            iteration += 1
+            if wait_iteration < 6:
+                wait_iteration += 1
+            time.sleep(2**wait_iteration + (random.randint(0, 1000) / 1000))
+            status = self.cmd('az backup job show --ids {job_id} --query properties.status').get_output_in_json()
+
+            if iteration > 30:
+                break
+        
+        return status
+
+
     @ResourceGroupPreparer(location="eastus2euap")
     @VaultPreparer(soft_delete=False)
     @VMPreparer()
@@ -577,6 +596,73 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("properties.status", "Completed"),
             self.check("resourceGroup", '{rg}')
         ])
+
+
+    # Prerequisites in case resource gets deleted - VM backed up in vault such that it is associated with a disk access set and RP contains isPrivateAccessEnabledOnAnyDisk
+    def test_backup_diskaccess_restore(self):
+        self.kwargs.update({
+            'rg': 'zubairRG',
+            'vault': 'ztestvault1',
+            'container_name': 'zvm-jsdk2',
+            'item_name': 'zvm-jsdk2',
+            'sa': 'zubairsaccy',
+            'target_rg': 'zubairRG',
+            'target_vm_name': 'zvm-jsdk2-clitestrestore',
+            'target_vnet_name': 'zvm-jsdk1-vnet',
+            'target_vnet_rg': 'zubairRG',
+            'target_subnet_name': 'default',
+            'target_disk_access_id': '/subscriptions/38304e13-357e-405e-9e9a-220351dcce8c/resourceGroups/zubairRG/providers/Microsoft.Compute/diskAccesses/clitest-access1'
+        })
+        self.cmd('vm delete -g {rg} -n {target_vm_name} --yes')
+
+        rp_details = self.cmd('backup recoverypoint list --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {container_name} -i {item_name} --query [0]').get_output_in_json()
+        self.assertTrue(rp_details['properties']['isPrivateAccessEnabledOnAnyDisk'])
+
+        self.kwargs['rp'] = rp_details['name']
+
+        base_command = 'az backup restore restore-disks -g {rg} -v {vault} --container-name {container_name} --item-name {item_name} --storage-account {sa} --rp-name {rp} '
+        base_command += '--target-resource-group {target_rg} --target-vm-name {target_vm_name} --target-vnet-name {target_vnet_name} --target-vnet-resource-group {target_vnet_rg} --target-subnet-name {target_subnet_name}'
+        target_disk_access_option = ' --target-disk-access-id {target_disk_access_id}'
+
+        # Command should fail as the RP contains isPrivateEAccessEnabledOnAnyDisk is true
+        self.cmd(base_command, expect_failure=True)
+        
+        # for same as source option, command should fail when target disk option is provided, but pass otherwise
+        same_as_source_command = base_command + ' --disk-access-option SameAsOnSourceDisks'
+        self.cmd(same_as_source_command + target_disk_access_option, expect_failure=True)
+        job_out = self.cmd(same_as_source_command, checks=[
+            self.check("properties.entityFriendlyName", '{container_name}'),
+            self.check("properties.operation", "Restore"),
+            self.check("properties.status", "InProgress"),
+            self.check("resourceGroup", '{rg}')
+        ]).get_output_in_json()
+        self.wait_for_restore_complete(job_out["id"])
+        self.cmd('vm delete -g {rg} -n {target_vm_name} --yes')
+
+        # for enable public access option, command should fail when target disk option is provided, but pass otherwise
+        public_command = base_command + ' --disk-access-option EnablePublicAccessForAllDisks'
+        self.cmd(public_command + target_disk_access_option, expect_failure=True)
+        job_out = self.cmd(public_command, checks=[
+            self.check("properties.entityFriendlyName", '{container_name}'),
+            self.check("properties.operation", "Restore"),
+            self.check("properties.status", "InProgress"),
+            self.check("resourceGroup", '{rg}')
+        ]).get_output_in_json()
+        self.wait_for_restore_complete(job_out["id"])
+        self.cmd('vm delete -g {rg} -n {target_vm_name} --yes')
+
+        # for enable private access option, command should fail when target disk option is NOT provided, but pass otherwise
+        private_command = base_command + ' --disk-access-option EnablePrivateAccessForAllDisks'
+        self.cmd(private_command, expect_failure=True)
+        job_out = self.cmd(private_command + target_disk_access_option, checks=[
+            self.check("properties.entityFriendlyName", '{container_name}'),
+            self.check("properties.operation", "Restore"),
+            self.check("properties.status", "InProgress"),
+            self.check("resourceGroup", '{rg}')
+        ]).get_output_in_json()
+        self.wait_for_restore_complete(job_out["id"])
+        self.cmd('vm delete -g {rg} -n {target_vm_name} --yes')
+
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location="eastus2euap")
