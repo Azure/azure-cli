@@ -4186,7 +4186,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             sku_profile['vmSizes'] = sku_profile_vmsizes_list
         if skuprofile_allostrat is not None:
             sku_profile['allocationStrategy'] = skuprofile_allostrat
-        vmss.skuProfile = sku_profile
+        vmss.sku_profile = sku_profile
 
     if ephemeral_os_disk_placement is not None or ephemeral_os_disk_option is not None:
         if vmss.virtual_machine_profile.storage_profile.os_disk.diff_disk_settings is not None:
