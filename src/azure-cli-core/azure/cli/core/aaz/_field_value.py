@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+# pylint: disable=protected-access
 import copy
 
 from ._base import AAZBaseValue, AAZValuePatch, AAZUndefined
@@ -443,4 +444,94 @@ class AAZList(AAZBaseValue):
 
         if processor:
             result = processor(self._schema, result)
+        return result
+
+
+class AAZIdentityObject(AAZObject):  # pylint: disable=too-few-public-methods
+    def to_serialized_data(self, processor=None, **kwargs):
+        calculate_data = dict()
+        if self._data == AAZUndefined:
+            result = AAZUndefined
+
+        elif self._data is None:
+            result = None
+
+        else:
+            result = {}
+            schema = self._schema
+
+            for name, field_schema in schema._fields.items():
+                if name in self._data:
+                    v = self[name].to_serialized_data(processor=processor, **kwargs)
+                    if v == AAZUndefined:
+                        continue
+
+                    if field_schema._serialized_name:
+                        name = field_schema._serialized_name
+
+                    if name in {"userAssigned", "systemAssigned"}:
+                        calculate_data[name] = v
+                        calculate_data["action"] = field_schema._flags.get("action", None)  # no action in GET operation
+
+                    else:
+                        result[name] = v
+
+        result = self._build_identity(calculate_data, result)
+
+        if not result:
+            result = {"type": "None"}  # empty identity
+
+        if not result and self._is_patch:
+            result = AAZUndefined
+
+        if processor:
+            result = processor(self._schema, result)
+
+        return result
+
+    def _build_identity(self, calculate_data, result):
+        action = calculate_data.get("action", None)
+        if not action:
+            return result
+
+        user_assigned = calculate_data.get("userAssigned", None)
+        system_assigned = calculate_data.get("systemAssigned", None)
+
+        identities = set(result.pop("userAssignedIdentities", {}).keys())
+        has_system_identity = "systemassigned" in result.pop("type", "").lower()
+
+        if action == "remove":
+            if user_assigned is not None:
+                if len(user_assigned) > 1:  # remove each
+                    identities -= set(user_assigned)
+
+                else:  # remove all
+                    identities = {}
+
+            if identities:
+                result["userAssignedIdentities"] = {k: {} for k in identities}
+                if system_assigned or not has_system_identity:
+                    result["type"] = "UserAssigned"
+
+                else:
+                    result["type"] = "SystemAssigned,UserAssigned"
+
+            elif not system_assigned and has_system_identity:
+                result["type"] = "SystemAssigned"
+
+        else:  # assign or create
+            if user_assigned:
+                identities |= set(user_assigned)
+
+            if identities:
+                result["userAssignedIdentities"] = {k: {} for k in identities}
+                if system_assigned or has_system_identity:
+                    result["type"] = "SystemAssigned,UserAssigned"
+
+                else:
+                    result["type"] = "UserAssigned"
+
+            elif system_assigned or has_system_identity:
+                result["type"] = "SystemAssigned"
+
         return result
