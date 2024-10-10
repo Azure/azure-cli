@@ -13,11 +13,10 @@ from knack.log import get_logger
 from knack.util import CLIError
 from msal import PublicClientApplication, ConfidentialClientApplication
 
+from .constants import AZURE_CLI_CLIENT_ID
 from .msal_credentials import UserCredential, ServicePrincipalCredential
 from .persistence import load_persisted_token_cache, file_extensions, load_secret_store
 from .util import check_result
-
-AZURE_CLI_CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
 
 # Service principal entry properties. Names are taken from OAuth 2.0 client credentials flow parameters:
 # https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-client-creds-grant-flow
