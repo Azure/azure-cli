@@ -57,8 +57,13 @@ class UserCredential:  # pylint: disable=too-few-public-methods
         if claims:
             logger.warning('Acquiring new access token silently for tenant %s with claims challenge: %s',
                            self._msal_app.authority.tenant, claims)
-        result = self._msal_app.acquire_token_silent_with_error(list(scopes), self._account, claims_challenge=claims,
-                                                                **kwargs)
+
+        msal_kwargs = {}
+        if 'data' in kwargs:
+            msal_kwargs['data'] = kwargs['data']
+
+        result = self._msal_app.acquire_token_silent_with_error(
+                list(scopes), self._account, claims_challenge=claims, **msal_kwargs)
 
         from azure.cli.core.azclierror import AuthenticationError
         try:
@@ -82,7 +87,7 @@ class UserCredential:  # pylint: disable=too-few-public-methods
                 result = self._msal_app.acquire_token_interactive(
                     list(scopes), login_hint=self._account['username'],
                     port=8400 if self._msal_app.authority.is_adfs else None,
-                    success_template=success_template, error_template=error_template, **kwargs)
+                    success_template=success_template, error_template=error_template, **msal_kwargs)
                 check_result(result)
 
             # For other scenarios like Storage Conditional Access MFA step-up, do not
@@ -105,6 +110,10 @@ class ServicePrincipalCredential:  # pylint: disable=too-few-public-methods
     def get_token(self, *scopes, **kwargs):
         logger.debug("ServicePrincipalCredential.get_token: scopes=%r, kwargs=%r", scopes, kwargs)
 
-        result = self._msal_app.acquire_token_for_client(list(scopes), **kwargs)
+        msal_kwargs = {}
+        if 'data' in kwargs:
+            msal_kwargs['data'] = kwargs['data']
+
+        result = self._msal_app.acquire_token_for_client(list(scopes), **msal_kwargs)
         check_result(result)
         return build_sdk_access_token(result)
