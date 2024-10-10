@@ -100,3 +100,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('name', arg_type=cache_name, id_part=None)
         c.argument('mi_system_assigned', arg_type=system_identity_type)
         c.argument('mi_user_assigned', arg_type=user_identity_type)
+
+    # hide --no-wait from customer usage, only use for functional tests to get LRO result
+    with self.argument_context('redis update') as c:
+        c.extra('no_wait', arg_type=get_three_state_flag(), help="Specify as false to wait for result of long running operation", deprecate_info=c.deprecate(hide=True))

@@ -44,7 +44,7 @@ def sqlpool_sensitivity_label_update(
 
     # Get the information protection policy
     from azure.mgmt.security import SecurityCenter
-    from msrestazure.azure_exceptions import CloudError
+    from azure.core.exceptions import HttpResponseError
 
     security_center_client = get_mgmt_service_client(cmd.cli_ctx, SecurityCenter, asc_location="centralus")
 
@@ -69,8 +69,8 @@ def sqlpool_sensitivity_label_update(
         sensitivity_label.information_type = current_label.information_type
         sensitivity_label.information_type_id = current_label.information_type_id
 
-    except CloudError as ex:
-        if not (ex.error and ex.error.error and 'SensitivityLabelsLabelNotFound' in ex.error.error):
+    except HttpResponseError as ex:
+        if not (ex and 'SensitivityLabelsLabelNotFound' in str(ex)):
             raise ex
 
     # Find the label id and information type id in the policy by the label name provided

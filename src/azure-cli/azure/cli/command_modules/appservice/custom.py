@@ -31,8 +31,8 @@ from knack.prompting import prompt_pass, NoTTYException, prompt_y_n
 from knack.util import CLIError
 from knack.log import get_logger
 
-from msrestazure.azure_exceptions import CloudError
-from msrestazure.tools import is_valid_resource_id, parse_resource_id, resource_id
+from azure.core.exceptions import HttpResponseError
+from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id, resource_id
 
 from azure.mgmt.storage import StorageManagementClient
 from azure.mgmt.applicationinsights import ApplicationInsightsManagementClient
@@ -982,7 +982,7 @@ def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
             client.web_apps.sync_function_triggers_slot(resource_group_name, name, slot)
         else:
             client.web_apps.sync_function_triggers(resource_group_name, name)
-    except CloudError as ex:
+    except HttpResponseError as ex:
         # This SDK function throws an error if Status Code is 200
         if ex.status_code != 200:
             raise ex
@@ -2302,15 +2302,20 @@ def update_site_configs_functionapp(cmd, resource_group_name, name, slot=None, n
                                     vnet_route_all_enabled=None, generic_configurations=None, min_replicas=None,
                                     max_replicas=None):
     check_language_runtime(cmd, resource_group_name, name)
-    return update_site_configs(cmd, resource_group_name, name, slot, number_of_workers, linux_fx_version,
-                               windows_fx_version, pre_warmed_instance_count, php_version,
-                               python_version, net_framework_version, power_shell_version,
-                               java_version, java_container, java_container_version,
-                               remote_debugging_enabled, web_sockets_enabled,
-                               always_on, auto_heal_enabled,
-                               use32_bit_worker_process, min_tls_version, http20_enabled, app_command_line,
-                               ftps_state, vnet_route_all_enabled, generic_configurations, min_replicas,
-                               max_replicas)
+    return update_site_configs(cmd, resource_group_name, name, slot, number_of_workers=number_of_workers,
+                               linux_fx_version=linux_fx_version, windows_fx_version=windows_fx_version,
+                               pre_warmed_instance_count=pre_warmed_instance_count, php_version=php_version,
+                               python_version=python_version, net_framework_version=net_framework_version,
+                               power_shell_version=power_shell_version, java_version=java_version,
+                               java_container=java_container, java_container_version=java_container_version,
+                               remote_debugging_enabled=remote_debugging_enabled,
+                               web_sockets_enabled=web_sockets_enabled, always_on=always_on,
+                               auto_heal_enabled=auto_heal_enabled, use32_bit_worker_process=use32_bit_worker_process,
+                               min_tls_version=min_tls_version, http20_enabled=http20_enabled,
+                               app_command_line=app_command_line, ftps_state=ftps_state,
+                               vnet_route_all_enabled=vnet_route_all_enabled,
+                               generic_configurations=generic_configurations, min_replicas=min_replicas,
+                               max_replicas=max_replicas)
 
 
 def update_container_settings_functionapp(cmd, resource_group_name, name, registry_server=None,
@@ -2695,7 +2700,7 @@ def enable_local_git(cmd, resource_group_name, name, slot=None):
 def sync_site_repo(cmd, resource_group_name, name, slot=None):
     try:
         return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'sync_repository', slot)
-    except CloudError as ex:  # Because of bad spec, sdk throws on 200. We capture it here
+    except HttpResponseError as ex:  # Because of bad spec, sdk throws on 200. We capture it here
         if ex.status_code not in [200, 204]:
             raise ex
 

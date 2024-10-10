@@ -81,7 +81,23 @@ class AzureSignalRServiceScenarioTest(ScenarioTest):
             self.exists('externalIp'),
             self.check('networkAcLs.defaultAction', '{default_action}')
         ])
-
+        
+        # Test start
+        self.cmd('az signalr start -n {signalr_name} -g {rg}', checks=[
+            self.check('name', '{signalr_name}'),
+            self.check('location', '{location}'),
+            self.check('provisioningState', 'Succeeded'), 
+            self.check('resourceStopped', 'false')
+        ])
+        
+        # Test stop
+        self.cmd('az signalr stop -n {signalr_name} -g {rg}', checks=[
+            self.check('name', '{signalr_name}'),
+            self.check('location', '{location}'),
+            self.check('provisioningState', 'Succeeded'), 
+            self.check('resourceStopped', 'true')
+        ])
+        
         # Test list
         self.cmd('az signalr list -g {rg}', checks=[
             self.check('[0].name', '{signalr_name}'),

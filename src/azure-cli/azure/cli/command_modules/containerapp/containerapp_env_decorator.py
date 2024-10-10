@@ -11,7 +11,7 @@ from azure.cli.command_modules.appservice.utils import _normalize_location
 from azure.cli.core.azclierror import RequiredArgumentMissingError, ValidationError
 from azure.cli.core.commands import AzCliCommand
 from knack.util import CLIError
-from msrestazure.tools import is_valid_resource_id
+from azure.mgmt.core.tools import is_valid_resource_id
 
 from ._constants import CONTAINER_APPS_RP
 from ._utils import (get_vnet_location,

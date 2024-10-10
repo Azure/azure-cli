@@ -8,7 +8,7 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 import time
 import datetime
 
-location = 'WestUS'
+location = 'WestEurope'
 seclocation = 'EastUS'
 premium_sku = 'Premium'
 basic_sku = 'Basic'
@@ -201,26 +201,17 @@ class RedisCacheTests(ScenarioTest):
         self.assertTrue(len(result) == 3)
 
         # Enable access keys on cache and verify
-        self.cmd('az redis update -n {name} -g {rg} --set "disableAccessKeyAuthentication=false"')
-        if self.is_live:
-            time.sleep(30)
+        self.cmd('az redis update -n {name} -g {rg} --set "disableAccessKeyAuthentication=false" --no-wait false')
         result = self.cmd('az redis show -n {name} -g {rg}').get_output_in_json()
         self.assertFalse(result['disableAccessKeyAuthentication'])
 
-        # Commenting out due to issues with tearing down test for update (need to provide exact sleep time for lro to complete)
-        """
         # Disable aad on cache
-        self.cmd('az redis update -n {name} -g {rg} --set redisConfiguration.aadEnabled=false --no-wait False')
+        self.cmd('az redis update -n {name} -g {rg} --set redisConfiguration.aadEnabled=false --no-wait false')
         result = self.cmd('az redis show -n {name} -g {rg}').get_output_in_json()
 
         # Verify cache is aad disabled
-        if self.is_live:
-            while result['provisioningState'] == 'ConfiguringAAD':
-                result = self.cmd('az redis show -n {name} -g {rg}').get_output_in_json()
-                time.sleep(1)
-        self.assertTrue(result['provisioningState'] == 'Succeeded')
-        self.assertTrue(result['redisConfiguration']['aadEnabled'] == "False")
-        """
+        assert result['provisioningState'] == 'Succeeded'
+        assert result['redisConfiguration']['aadEnabled'].lower() == "false"
 
 
     @ResourceGroupPreparer(name_prefix='cli_test_redis')
@@ -242,7 +233,6 @@ class RedisCacheTests(ScenarioTest):
         result = self.cmd('az redis list-keys -n {name} -g {rg}').get_output_in_json()
         self.assertTrue(result['primaryKey'] is not None)
         self.assertTrue(result['secondaryKey'] is not None)
-        # TODO: self.cmd('az redis update -n {name} -g {rg} --set "tags.mytag=mytagval"')
 
     @ResourceGroupPreparer(name_prefix='cli_test_redis')
     def test_redis_cache_patch_schedule(self, resource_group):
@@ -408,7 +398,7 @@ class RedisCacheTests(ScenarioTest):
 
         self.cmd('az redis regenerate-keys -n {name} -g {rg} --key-type Primary')
         self.cmd('az redis regenerate-keys -n {name} -g {rg} --key-type Secondary')
-        # TODO: self.cmd('az redis update -n {name} -g {rg} --set "tags.mytag=mytagval"')
+        self.cmd('az redis update -n {name} -g {rg} --set "tags.mytag=mytagval" --no-wait false')
         self.cmd('az redis delete -n {name} -g {rg} -y')
 
     @ResourceGroupPreparer(name_prefix='cli_test_redis')
@@ -426,9 +416,7 @@ class RedisCacheTests(ScenarioTest):
             self.check('length(identity.userAssignedIdentities)', 1)
         ])
 
-        # TODO: self.cmd('az redis update -n {name} -g {rg} --set "publicNetworkAccess=Disabled"')
-        if self.is_live:
-            time.sleep(5*60)
+        self.cmd('az redis update -n {name} -g {rg} --set "publicNetworkAccess=Disabled" --no-wait false')
 
         self.cmd('az redis identity remove -n {name} -g {rg} --mi-system-assigned --mi-user-assigned "{userIdentity}"',checks=[
             self.check('type', 'None')
@@ -561,10 +549,10 @@ class RedisCacheTests(ScenarioTest):
         self.cmd('az redis create -n {name} -g {rg} -l {location} --sku {sku} --vm-size {size}')
         if self.is_live:
             time.sleep(5*60)
-        # TODO: self.cmd('az redis update -n {name} -g {rg} --set "publicNetworkAccess=Disabled"')
-        if self.is_live:
-            time.sleep(5*60)
-        self.cmd('az redis create -n {name} -g {rg} -l {location} --sku {sku} --vm-size {size}')
+        self.cmd('az redis update -n {name} -g {rg} --set "publicNetworkAccess=Disabled" --no-wait false')
+
+        result = self.cmd('az redis show -n {name} -g {rg}').get_output_in_json()
+        assert result['publicNetworkAccess'] == 'Disabled'
 
     @ResourceGroupPreparer(name_prefix='cli_test_redis')
     def test_redis_cache_flush(self, resource_group):
@@ -592,12 +580,9 @@ class RedisCacheTests(ScenarioTest):
         self.cmd('az redis create -n {name} -g {rg} -l {location} --sku {sku} --vm-size {size} --update-channel Preview')
         if self.is_live:
             time.sleep(5*60)
-        # Commenting out due to issues with tearing down test for update (need to provide exact sleep time for lro to complete)
-        '''
-        self.cmd('az redis update -n {name} -g {rg} --set "RedisVersion=6.0" "UpdateChannel=Preview"')
-        if self.is_live:
-            time.sleep(5*60)
-        '''
+
+        self.cmd('az redis update -n {name} -g {rg} --set "RedisVersion=6.0" "UpdateChannel=Preview" --no-wait false')
+
         result = self.cmd('az redis show -n {name} -g {rg}').get_output_in_json()
         assert result['updateChannel'] == 'Preview'
         

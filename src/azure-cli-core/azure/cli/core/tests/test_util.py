@@ -486,21 +486,19 @@ class TestHandleException(unittest.TestCase):
         self.assertEqual(ex_result, 1)
 
     @mock.patch('azure.cli.core.azclierror.logger.error', autospec=True)
-    def test_handle_exception_clouderror(self, mock_logger_error):
-        from msrestazure.azure_exceptions import CloudError
+    def test_handle_exception_httpresponseerror(self, mock_logger_error):
+        from azure.core.exceptions import HttpResponseError
 
-        # create test CloudError Exception
-        err_detail = "There was a Cloud Error."
-        err_msg = "CloudError"
-        mock_cloud_error = mock.MagicMock(spec=CloudError)
-        mock_cloud_error.args = (err_detail, err_msg)
+        # create test HttpResponseError Exception
+        mock_http_response_error = HttpResponseError(response=mock.MagicMock(status_code="xxx",
+                                                                             reason="There was a Http Response Error."))
 
         # call handle_exception
-        ex_result = handle_exception(mock_cloud_error)
+        ex_result = handle_exception(mock_http_response_error)
 
         # test behavior
         self.assertTrue(mock_logger_error.called)
-        self.assertIn(mock_cloud_error.args[0], mock_logger_error.call_args[0][0])
+        self.assertIn(mock_http_response_error.args[0], mock_logger_error.call_args[0][0])
         self.assertEqual(ex_result, 1)
 
     @mock.patch('azure.cli.core.azclierror.logger.error', autospec=True)
