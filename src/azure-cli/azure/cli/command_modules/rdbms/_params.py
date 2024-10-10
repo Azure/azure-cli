@@ -839,6 +839,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('storage_gb', arg_type=storage_gb_arg_type)
                 c.argument('performance_tier', default=None, arg_type=performance_tier_arg_type)
                 c.argument('yes', arg_type=yes_arg_type)
+                c.argument('tags', arg_type=tags_type)
             if command_group == 'mysql':
                 c.argument('public_access', options_list=['--public-access'], arg_type=get_enum_type(['Enabled', 'Disabled']),
                            help='Determines the public access. ')

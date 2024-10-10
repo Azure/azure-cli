@@ -757,7 +757,8 @@ examples:
         --source-server testserver --zone 3 --location testLocation \\
         --vnet newVnet --subnet newSubnet \\
         --address-prefixes 172.0.0.0/16 --subnet-prefixes 172.0.0.0/24 \\
-        --private-dns-zone testDNS.postgres.database.azure.com
+        --private-dns-zone testDNS.postgres.database.azure.com \\
+        --tags "key=value"
   - name: >
       Create a read replica 'testreplicaserver' for 'testserver' with public or private access \
       in the specified location if available. Since zone is not passed, it will automatically pick up zone in the \
