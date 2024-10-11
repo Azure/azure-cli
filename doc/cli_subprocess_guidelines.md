@@ -67,7 +67,7 @@ return output.stdout
 All various kinds of `subprocess` Popen calling use cases can be easily adjusted into `run_cmd` with security risks processed and eliminated in this centralized function.
 
 #### Notes
-Besides that, users might need to know some parts of the accessibility in both `run_cmd` and `subprocess`
+Besides that, developers might need to know some parts of the accessibility in both `run_cmd` and `subprocess`
 1. when calling shell built-in cmds, like `dir` or `echo`, using `shell=True` **in windows platform**, `subprocess` implicitly uses `cmd.exe`, while `run_cmd` asks developers to provide the `cmd.exe` as executable file specifically in the arg list's first item, like `["cmd.exe", "/c", "echo", "abc"]`
 2. if developers want to find an easy way to split their current cmd string into list, **for unix-like platforms**, developers can apply [`shlex.split`](https://docs.python.org/3/library/shlex.html#shlex.split) for quick access. But a prepared cmd statement is still more recommended (for more info about prepared cmd statement, please read below sections). 
 3. if developers want to locate the target command's executable file, a tool developers can use is `shutil.which` that gives the full executable file path in system, like `shutil.which(git)` returns the full `git.exe` path in windows platform `C:\\Program Files\\Git\\cmd\\git.EXE`. 
@@ -77,7 +77,7 @@ Besides that, users might need to know some parts of the accessibility in both `
 
 If the target cmd is `az`-related, like `az group show --name xxxx`, instead of using `subprocess`, CLI recommends using internal function call to get the target information, as the following three options (if applicable):
  
-1. SDK operation. If target cmd is an operation from SDK, users can apply corresponding method from SDK directly. For example:
+1. SDK operation. If target cmd is an operation from SDK, developers can apply corresponding method from SDK directly. For example:
 ```python
 # code before:
 cmd = "az group show --name {}".format(resource_group_name)
@@ -94,7 +94,7 @@ resource_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURC
 location = resource_client.resource_groups.get(resource_group_name).location
 ```
 
-2. atomic cmd from codegen. If this cmd has been migrated through codegenV2, users can call its atomic cmd. For example:
+2. atomic cmd from codegen. If this cmd has been migrated through codegenV2, developers can call its atomic cmd. For example:
 ```python
 # code before:
 cmd = "az monitor autoscale show --name {} --resource-group {}".format(autoscale_name, resource_group_name)
@@ -111,7 +111,7 @@ autoscale_settings = AutoScaleShow(cli_ctx=instance.cli_ctx)(command_args={
 })
 ```
 
-3. if neither of the two methods above is applicable, users can apply the central function `run_az_cmd` CLI provided to execute `az`-related cmds. For example:
+3. if neither of the two methods above is applicable, developers can apply the central function `run_az_cmd` CLI provided to execute `az`-related cmds. For example:
 ```python
 # code before:
 cmd = "az group show --name {}".format(resource_group_name)
