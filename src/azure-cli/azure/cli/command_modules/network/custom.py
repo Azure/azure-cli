@@ -5249,7 +5249,7 @@ class PublicIPUpdate(_PublicIPUpdate):
     def pre_operations(self):
         args = self.ctx.args
         if has_value(args.ip_tags):
-            if ip_tags := args.ip_tags.to_serialized_data() is None:
+            if (ip_tags := args.ip_tags.to_serialized_data()) is None:
                 args.ip_tags_list = []
             else:
                 args.ip_tags_list = [{"ip_tag_type": k, "tag": v} for k, v in ip_tags.items()]
