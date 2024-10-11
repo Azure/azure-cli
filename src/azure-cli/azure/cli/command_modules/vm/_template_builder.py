@@ -266,7 +266,7 @@ def build_vnet_resource(_, name, location, tags, vnet_prefix=None, subnet=None,
 
 def build_msi_role_assignment(vm_vmss_name, vm_vmss_resource_id, role_definition_id,
                               role_assignment_guid, identity_scope, is_vm=True):
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
     result = parse_resource_id(identity_scope)
     if result.get('type'):  # is a resource id?
         name = '{}/Microsoft.Authorization/{}'.format(result['name'], role_assignment_guid)
@@ -1319,7 +1319,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
         if automatic_os_upgrade_policy:
             vmss_properties['upgradePolicy']['automaticOSUpgradePolicy'] = automatic_os_upgrade_policy
 
-    if upgrade_policy_mode and upgrade_policy_mode.lower() == 'rolling' and orchestration_mode.lower() == 'uniform' and\
+    if upgrade_policy_mode and upgrade_policy_mode.lower() == 'rolling' and\
             cmd.supported_api_version(min_api='2020-12-01', operation_group='virtual_machine_scale_sets'):
         if os_type.lower() == 'linux':
             from azure.cli.command_modules.vm._vmss_application_health import application_health_setting_for_linux

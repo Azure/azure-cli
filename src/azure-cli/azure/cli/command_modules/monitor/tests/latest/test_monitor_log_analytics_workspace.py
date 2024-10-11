@@ -148,7 +148,7 @@ class TestLogProfileScenarios(ScenarioTest):
                             location='eastus')
     def test_monitor_log_analytics_workspace_linked_storage(self, resource_group, account_1,
                                                             account_2, account_3, account_4):
-        from msrestazure.tools import resource_id
+        from azure.mgmt.core.tools import resource_id
         self.kwargs.update({
             'name': self.create_random_name('clitest', 20),
             'name_2': self.create_random_name('clitest', 20),
@@ -407,7 +407,7 @@ class TestLogProfileScenarios(ScenarioTest):
     @StorageAccountPreparer(name_prefix='saws1', kind='StorageV2', sku='Standard_LRS', parameter_name='account_1',
                             location='eastus')
     def test_monitor_log_analytics_workspace_data_export(self, resource_group, account_1):
-        from msrestazure.tools import resource_id
+        from azure.mgmt.core.tools import resource_id
         self.kwargs.update({
             'workspace_name': self.create_random_name('clitest', 20),
             'data_export_name': 'clitest',

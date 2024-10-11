@@ -8,16 +8,15 @@ from datetime import datetime, timedelta
 from importlib import import_module
 import re
 from dateutil.tz import tzutc   # pylint: disable=import-error
-from msrestazure.azure_exceptions import CloudError
-from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id  # pylint: disable=import-error
 from knack.log import get_logger
 from knack.util import todict
 from urllib.request import urlretrieve
-from azure.core.exceptions import ResourceNotFoundError
+from azure.core.exceptions import ResourceNotFoundError, HttpResponseError
 from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.cli.core.local_context import ALL
+from azure.mgmt.core.tools import resource_id, is_valid_resource_id, parse_resource_id
 from azure.mgmt.rdbms import postgresql, mysql, mariadb
 from azure.mgmt.rdbms.mysql.operations._servers_operations import ServersOperations as MySqlServersOperations
 from azure.mgmt.rdbms.postgresql.operations._location_based_performance_tier_operations import LocationBasedPerformanceTierOperations as PostgreSQLLocationOperations
@@ -334,7 +333,7 @@ def _replica_create(cmd, client, resource_group_name, server_name, source_server
     source_server_id_parts = parse_resource_id(source_server)
     try:
         source_server_object = client.get(source_server_id_parts['resource_group'], source_server_id_parts['name'])
-    except CloudError as e:
+    except HttpResponseError as e:
         raise CLIError('Unable to get source server: {}.'.format(str(e)))
 
     if location is None:

@@ -11,7 +11,7 @@ from azure.cli.command_modules.appservice.utils import _normalize_location
 from azure.cli.core.azclierror import RequiredArgumentMissingError, ValidationError
 from azure.cli.core.commands import AzCliCommand
 from knack.util import CLIError
-from msrestazure.tools import is_valid_resource_id
+from azure.mgmt.core.tools import is_valid_resource_id
 
 from ._constants import CONTAINER_APPS_RP
 from ._utils import (get_vnet_location,
@@ -68,9 +68,6 @@ class ContainerAppEnvDecorator(BaseResource):
 
     def get_argument_infrastructure_subnet_resource_id(self):
         return self.get_param("infrastructure_subnet_resource_id")
-
-    def get_argument_docker_bridge_cidr(self):
-        return self.get_param("docker_bridge_cidr")
 
     def get_argument_platform_reserved_cidr(self):
         return self.get_param("platform_reserved_cidr")
@@ -251,14 +248,11 @@ class ContainerAppEnvCreateDecorator(ContainerAppEnvDecorator):
         self.managed_env_def["properties"]["appLogsConfiguration"] = app_logs_config_def
 
     def set_up_vnet_configuration(self):
-        if self.get_argument_infrastructure_subnet_resource_id() or self.get_argument_docker_bridge_cidr() or self.get_argument_platform_reserved_cidr() or self.get_argument_platform_reserved_dns_ip():
+        if self.get_argument_infrastructure_subnet_resource_id() or self.get_argument_platform_reserved_cidr() or self.get_argument_platform_reserved_dns_ip():
             vnet_config_def = VnetConfigurationModel
 
             if self.get_argument_infrastructure_subnet_resource_id() is not None:
                 vnet_config_def["infrastructureSubnetId"] = self.get_argument_infrastructure_subnet_resource_id()
-
-            if self.get_argument_docker_bridge_cidr() is not None:
-                vnet_config_def["dockerBridgeCidr"] = self.get_argument_docker_bridge_cidr()
 
             if self.get_argument_platform_reserved_cidr() is not None:
                 vnet_config_def["platformReservedCidr"] = self.get_argument_platform_reserved_cidr()

@@ -23,7 +23,7 @@ import dateutil.parser
 from dateutil.relativedelta import relativedelta
 from knack.log import get_logger
 from knack.util import CLIError, todict
-from msrestazure.azure_exceptions import CloudError
+from azure.core.exceptions import HttpResponseError
 
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import get_file_json, shell_safe_json_parse, is_guid
@@ -102,7 +102,7 @@ def _create_update_role_definition(cmd, role_definition, for_update):
         scopes = (scopes_in_definition if scopes_in_definition else
                   ['/subscriptions/' + definitions_client._config.subscription_id])
         if role_resource_id:
-            from msrestazure.tools import parse_resource_id
+            from azure.mgmt.core.tools import parse_resource_id
             role_id = parse_resource_id(role_resource_id)['name']
             role_name = role_definition['roleName']
         else:
@@ -275,7 +275,7 @@ def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=Non
                 if principal_dics.get(worker.get_role_property(i, 'principalId')):
                     worker.set_role_property(i, 'principalName',
                                              principal_dics[worker.get_role_property(i, 'principalId')])
-        except (CloudError, GraphError) as ex:
+        except (HttpResponseError, GraphError) as ex:
             # failure on resolving principal due to graph permission should not fail the whole thing
             logger.info("Failed to resolve graph object information per error '%s'", ex)
 
@@ -628,7 +628,9 @@ def _resolve_role_id(role, scope, definitions_client):
 
 
 def create_application(cmd, client, display_name, identifier_uris=None,
-                       is_fallback_public_client=None, sign_in_audience=None,
+                       is_fallback_public_client=None,
+                       service_management_reference=None,
+                       sign_in_audience=None,
                        # keyCredentials
                        key_value=None, key_type=None, key_usage=None, start_date=None, end_date=None,
                        key_display_name=None,
@@ -655,7 +657,9 @@ def create_application(cmd, client, display_name, identifier_uris=None,
                            existing_apps[0][ID])
             body = update_application(
                 existing_apps[0], display_name=display_name, identifier_uris=identifier_uris,
-                is_fallback_public_client=is_fallback_public_client, sign_in_audience=sign_in_audience,
+                is_fallback_public_client=is_fallback_public_client,
+                service_management_reference=service_management_reference,
+                sign_in_audience=sign_in_audience,
                 # keyCredentials
                 key_value=key_value, key_type=key_type, key_usage=key_usage,
                 start_date=start_date, end_date=end_date,
@@ -670,9 +674,9 @@ def create_application(cmd, client, display_name, identifier_uris=None,
                 app_roles=app_roles,
                 optional_claims=optional_claims,
                 required_resource_accesses=required_resource_accesses)
-            patch_application(cmd, existing_apps[0][ID], body)
 
-            # no need to resolve identifierUris or appId. Just use id.
+            # No need to resolve identifierUris or appId. Just use object id.
+            client.application_update(existing_apps[0][ID], body)
             return client.application_get(existing_apps[0][ID])
 
     # identifierUris is no longer required, compared to AD Graph
@@ -684,7 +688,9 @@ def create_application(cmd, client, display_name, identifier_uris=None,
 
     _set_application_properties(
         body, display_name=display_name, identifier_uris=identifier_uris,
-        is_fallback_public_client=is_fallback_public_client, sign_in_audience=sign_in_audience,
+        is_fallback_public_client=is_fallback_public_client,
+        service_management_reference=service_management_reference,
+        sign_in_audience=sign_in_audience,
         # keyCredentials
         key_credentials=key_credentials,
         # web
@@ -709,7 +715,9 @@ def create_application(cmd, client, display_name, identifier_uris=None,
 
 
 def update_application(instance, display_name=None, identifier_uris=None,  # pylint: disable=unused-argument
-                       is_fallback_public_client=None, sign_in_audience=None,
+                       is_fallback_public_client=None,
+                       service_management_reference=None,
+                       sign_in_audience=None,
                        # keyCredentials
                        key_value=None, key_type=None, key_usage=None, start_date=None, end_date=None,
                        key_display_name=None,
@@ -730,7 +738,9 @@ def update_application(instance, display_name=None, identifier_uris=None,  # pyl
 
     _set_application_properties(
         body, display_name=display_name, identifier_uris=identifier_uris,
-        is_fallback_public_client=is_fallback_public_client, sign_in_audience=sign_in_audience,
+        is_fallback_public_client=is_fallback_public_client,
+        service_management_reference=service_management_reference,
+        sign_in_audience=sign_in_audience,
         # keyCredentials
         key_credentials=key_credentials,
         # web
@@ -862,7 +872,7 @@ def _get_grant_permissions(client, client_sp_object_id=None, query_filter=None):
     try:
         # Make the REST request immediately so that errors can be raised and handled.
         return list(grant_info)
-    except CloudError as ex:
+    except HttpResponseError as ex:
         if ex.status_code == 404:
             raise CLIError("Service principal with appId or objectId '{id}' doesn't exist. "
                            "If '{id}' is an appId, make sure an associated service principal is created "

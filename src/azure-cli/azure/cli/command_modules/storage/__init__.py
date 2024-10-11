@@ -159,7 +159,7 @@ class StorageArgumentContext(AzArgumentContext):
                       min_api='2017-06-01',
                       help='Generate and assign a new Storage Account Identity for this storage account for use '
                            'with key management services like Azure KeyVault.')
-        self.argument('access_tier', arg_type=get_enum_type([tier for tier in t_access_tier if tier != 'Cold']),
+        self.argument('access_tier', arg_type=get_enum_type(t_access_tier),
                       help='Required for storage accounts where kind = BlobStorage. '
                            'The access tier is used for billing. The "Premium" access tier is the default value for '
                            'premium block blobs storage account type and it cannot be changed for '

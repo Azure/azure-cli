@@ -256,11 +256,14 @@ parameters:
         --network-plugin=azure will use an overlay network (non-VNET IPs) for pods in the cluster.
   - name: --network-policy
     type: string
-    short-summary: The Kubernetes network policy to use.
+    short-summary: Network Policy Engine to use.
     long-summary: |
-        Using together with "azure" network plugin.
-        Specify "azure" for Azure network policy manager, "calico" for calico network policy controller, "cilium" for Azure CNI powered by Cilium.
-        Defaults to "" (network policy disabled).
+        Azure provides three Network Policy Engines for enforcing network policies that can be used together with "azure" network plugin. The following values can be specified:
+          - "azure" for Azure Network Policy Manager,
+          - "cilium" for Azure CNI Powered by Cilium,
+          - "calico" for open-source network and network security solution founded by Tigera,
+          - "none" when no Network Policy Engine is installed (default value).
+        Defaults to "none" (network policy disabled).
   - name: --network-dataplane
     type: string
     short-summary: The network dataplane to use.
@@ -556,8 +559,6 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --kubernetes-version 1.16.9
   - name: Create a Kubernetes cluster with a larger node pool.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --node-count 7
-  - name: Create a kubernetes cluster with k8s 1.13.9 but use vmas.
-    text: az aks create -g MyResourceGroup -n MyManagedCluster --kubernetes-version 1.16.9 --vm-set-type AvailabilitySet
   - name: Create a kubernetes cluster with default kubernetes version, default SKU load balancer (Standard) and default vm set type (VirtualMachineScaleSets).
     text: az aks create -g MyResourceGroup -n MyManagedCluster
   - name: Create a kubernetes cluster with standard SKU load balancer and two AKS created IPs for the load balancer outbound connection usage.
@@ -665,10 +666,14 @@ parameters:
     short-summary: Update the mode of a network plugin to migrate to a different pod networking setup.
   - name: --network-policy
     type: string
-    short-summary: Update the mode of a network policy.
+    short-summary: Update Network Policy Engine.
     long-summary: |
-        Specify "azure" for Azure network policy manager, "cilium" for Azure CNI powered by Cilium.
-        Defaults to "" (network policy disabled).
+        Azure provides three Network Policy Engines for enforcing network policies. The following values can be specified:
+          - "azure" for Azure Network Policy Manager,
+          - "cilium" for Azure CNI Powered by Cilium,
+          - "calico" for open-source network and network security solution founded by Tigera,
+          - "none" to uninstall Network Policy Engine (Azure Network Policy Manager or Calico).
+        Defaults to "none" (network policy disabled).
   - name: --pod-cidr
     type: string
     short-summary: Update the pod CIDR for a cluster. Used when updating a cluster from Azure CNI to Azure CNI Overlay.
@@ -1702,6 +1707,12 @@ parameters:
   - name: --os-sku
     type: string
     short-summary: The os-sku of the agent node pool.
+  - name: --enable-fips-image
+    type: bool
+    short-summary: Switch to use FIPS-enabled OS on agent nodes.
+  - name: --disable-fips-image
+    type: bool
+    short-summary: Switch to use non-FIPS-enabled OS on agent nodes.
 examples:
   - name: Reconcile the nodepool back to its current state.
     text: az aks nodepool update -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster
@@ -1778,6 +1789,18 @@ helps['aks operation-abort'] = """
     examples:
         - name: Abort operation on managed cluster
           text: az aks operation-abort -g myResourceGroup -n myAKSCluster
+"""
+
+helps['aks nodepool delete-machines'] = """
+    type: command
+    short-summary: Delete specific machines in an agentpool for a managed cluster.
+    parameters:
+        - name: --machine-names
+          type: string array
+          short-summary: Space-separated list of machine names from the agent pool to be deleted.
+    examples:
+        - name: Delete specific machines in an agent pool
+          text: az aks nodepool delete-machines -g myResourceGroup --nodepool-name nodepool1 --cluster-name myAKSCluster --machine-names machine1
 """
 
 helps['aks remove-dev-spaces'] = """
