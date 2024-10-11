@@ -6,6 +6,8 @@ trigger:
   branches:
     include:
     - '*'
+    exclude:
+    - 'cfs'
 
 pr:
   branches:
@@ -206,9 +208,10 @@ jobs:
       artifactName: metadata
 
   - task: PipAuthenticate@1
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/cfs')
     displayName: 'Pip Authenticate'
     inputs:
-      artifactFeeds: 'public/azure-cli-feed'
+      artifactFeeds: 'internal/azure-cli_PublicPackages'
 
   - script: |
       set ARCH=$(Platform)
@@ -249,9 +252,10 @@ jobs:
         artifactName: metadata
 
     - task: PipAuthenticate@1
+      condition: eq(variables['Build.SourceBranch'], 'refs/heads/cfs')
       displayName: 'Pip Authenticate'
       inputs:
-        artifactFeeds: 'public/azure-cli-feed'
+        artifactFeeds: 'internal/azure-cli_PublicPackages'
 
     - script: |
         set ARCH=$(Platform)
@@ -515,9 +519,10 @@ jobs:
       versionSpec: 3.11
 
   - task: PipAuthenticate@1
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/cfs')
     displayName: 'Pip Authenticate'
     inputs:
-      artifactFeeds: 'public/azure-cli-feed'
+      artifactFeeds: 'internal/azure-cli_PublicPackages'
 
   - script: |
       if [[ "$(Build.Reason)" == "PullRequest" ]]; then
@@ -809,9 +814,10 @@ jobs:
     displayName: Install Docker
 
   - task: PipAuthenticate@1
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/cfs')
     displayName: 'Pip Authenticate'
     inputs:
-      artifactFeeds: 'public/azure-cli-feed'
+      artifactFeeds: 'internal/azure-cli_PublicPackages'
 
   - task: Bash@3
     displayName: 'Build Rpm Package: Azure Linux'
@@ -904,9 +910,10 @@ jobs:
   - bash: ./scripts/ci/install_docker.sh
     displayName: Install Docker
   - task: PipAuthenticate@1
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/cfs')
     displayName: 'Pip Authenticate'
     inputs:
-      artifactFeeds: 'public/azure-cli-feed'
+      artifactFeeds: 'internal/azure-cli_PublicPackages'
   - task: Bash@3
     displayName: 'Build Rpm Package'
     inputs:
@@ -1031,9 +1038,10 @@ jobs:
   - bash: ./scripts/ci/install_docker.sh
     displayName: Install Docker
   - task: PipAuthenticate@1
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/cfs')
     displayName: 'Pip Authenticate'
     inputs:
-      artifactFeeds: 'public/azure-cli-feed'
+      artifactFeeds: 'internal/azure-cli_PublicPackages'
   - task: Bash@3
     displayName: 'Build $(deb_system) $(distro) $(arch) Package'
     inputs:
