@@ -12,10 +12,10 @@ from azure.cli.core.aaz import *
 
 
 @register_command_group(
-    "network public-ip ddos-protection-statu",
+    "network public-ip ddos-protection",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Manage public IP ddos protection statu.
+    """Manage public IP DDoS protection.
     """
     pass
 

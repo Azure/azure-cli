@@ -3117,8 +3117,7 @@ class NetworkPublicIpScenarioTest(ScenarioTest):
 
         # test ddos protection status
         self.cmd('network application-gateway create -g {rg} -n testag --public-ip-address {ip1} --sku Standard_v2 --priority 1001')
-        self.cmd('network public-ip ddos-protection-statu show -g {rg} -n {ip1}', self.check('isWorkloadProtected', True))
-
+        self.cmd('network public-ip ddos-protection show -g {rg} -n {ip1}', self.check('isWorkloadProtected', True))
         self.cmd('network public-ip update -g {rg} -n {ip1} --protection-mode Disabled --ddos-protection-plan null',
                  checks=[
                      self.check('ddosSettings.protectionMode', 'Disabled'),
