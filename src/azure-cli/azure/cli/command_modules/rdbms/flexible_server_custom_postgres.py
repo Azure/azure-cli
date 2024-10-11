@@ -12,13 +12,12 @@ import re
 from urllib.request import urlretrieve
 from dateutil.tz import tzutc   # pylint: disable=import-error
 import uuid
-from msrestazure.azure_exceptions import CloudError
-from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id  # pylint: disable=import-error
 from knack.log import get_logger
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.local_context import ALL
 from azure.cli.core.util import CLIError, sdk_no_wait, user_confirmation
 from azure.core.exceptions import HttpResponseError, ResourceNotFoundError
+from azure.mgmt.core.tools import resource_id, is_valid_resource_id, parse_resource_id
 from azure.cli.core.azclierror import BadRequestError, FileOperationError, MutuallyExclusiveArgumentError, RequiredArgumentMissingError, ArgumentUsageError, InvalidArgumentValueError
 from azure.mgmt.rdbms import postgresql_flexibleservers
 from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client, \
@@ -220,7 +219,7 @@ def flexible_server_restore(cmd, client,
 
         pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup)
 
-        instance = client.get(resource_group_name, id_parts['name'])
+        instance = client.get(id_parts['resource_group'], id_parts['name'])
         storage = postgresql_flexibleservers.models.Storage(type=storage_type if instance.storage.type != "PremiumV2_LRS" else None)
 
         parameters = postgresql_flexibleservers.models.Server(
@@ -464,7 +463,7 @@ def flexible_parameter_update(client, server_name, configuration_name, resource_
             # this should be 'system-default' but there is currently a bug in PG, so keeping as what it is for now
             # this will reset source to be 'system-default' anyway
             source = parameter.source
-        except CloudError as e:
+        except HttpResponseError as e:
             raise CLIError('Unable to get default parameter value: {}.'.format(str(e)))
     elif source is None:
         source = "user-override"
@@ -1432,6 +1431,8 @@ def _create_migration(cmd, logging_name, client, subscription_id, resource_group
         migration_mode=migration_mode,
         source_db_server_resource_id=get_case_insensitive_key_value("SourceDbServerResourceId", parameter_keys, parameters),
         secret_parameters=secret_parameters,
+        source_db_server_fully_qualified_domain_name=get_case_insensitive_key_value("SourceDbServerFullyQualifiedDomainName", parameter_keys, parameters),
+        target_db_server_fully_qualified_domain_name=get_case_insensitive_key_value("TargetDbServerFullyQualifiedDomainName", parameter_keys, parameters),
         dbs_to_migrate=get_case_insensitive_key_value("DbsToMigrate", parameter_keys, parameters),
         setup_logical_replication_on_source_db_if_needed=get_enum_value_true_false(get_case_insensitive_key_value("SetupLogicalReplicationOnSourceDbIfNeeded", parameter_keys, parameters), "SetupLogicalReplicationOnSourceDbIfNeeded"),
         overwrite_dbs_in_target=get_enum_value_true_false(get_case_insensitive_key_value("OverwriteDbsInTarget", parameter_keys, parameters), "OverwriteDbsInTarget"),

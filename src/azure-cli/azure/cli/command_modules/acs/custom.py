@@ -90,6 +90,7 @@ from azure.cli.core.azclierror import (
     ResourceNotFoundError,
     UnknownError,
     ValidationError,
+    RequiredArgumentMissingError,
 )
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_subscription_id
@@ -869,7 +870,7 @@ def aks_upgrade(cmd,
     if k8s_support_plan is not None:
         instance.support_plan = k8s_support_plan
 
-    if (instance.support_plan == KubernetesSupportPlan.AKS_LONG_TERM_SUPPORT and instance.tier is not None and instance.tier.lower() != CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM.lower()):
+    if (instance.support_plan == KubernetesSupportPlan.AKS_LONG_TERM_SUPPORT and instance.sku.tier is not None and instance.sku.tier.lower() != CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM.lower()):
         raise CLIError("AKS Long Term Support is only available for Premium tier clusters.")
 
     instance = _update_upgrade_settings(
@@ -2648,6 +2649,49 @@ def aks_operation_abort(cmd,   # pylint: disable=unused-argument
     return sdk_no_wait(no_wait, client.begin_abort_latest_operation, resource_group_name, name)
 
 
+def aks_agentpool_delete_machines(cmd,   # pylint: disable=unused-argument
+                                  client,
+                                  resource_group_name,
+                                  cluster_name,
+                                  nodepool_name,
+                                  machine_names,
+                                  no_wait=False):
+    agentpool_exists = False
+    instances = client.list(resource_group_name, cluster_name)
+    for agentpool_profile in instances:
+        if agentpool_profile.name.lower() == nodepool_name.lower():
+            agentpool_exists = True
+            break
+
+    if not agentpool_exists:
+        raise ResourceNotFoundError(
+            f"Node pool {nodepool_name} doesn't exist, "
+            "use 'az aks nodepool list' to get current node pool list"
+        )
+
+    if len(machine_names) == 0:
+        raise RequiredArgumentMissingError(
+            "--machine-names doesn't provide, "
+            "use 'az aks machine list' to get current machine list"
+        )
+
+    AgentPoolDeleteMachinesParameter = cmd.get_models(
+        "AgentPoolDeleteMachinesParameter",
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+        operation_group="agent_pools",
+    )
+
+    machines = AgentPoolDeleteMachinesParameter(machine_names=machine_names)
+    return sdk_no_wait(
+        no_wait,
+        client.begin_delete_machines,
+        resource_group_name,
+        cluster_name,
+        nodepool_name,
+        machines,
+    )
+
+
 def aks_agentpool_show(cmd, client, resource_group_name, cluster_name, nodepool_name):
     instance = client.get(resource_group_name, cluster_name, nodepool_name)
     return instance
@@ -3145,7 +3189,7 @@ def aks_approuting_zone_list(
         resource_group_name,
         name
 ):
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
     mc = client.get(resource_group_name, name)
 
     if mc.ingress_profile and mc.ingress_profile.web_app_routing and mc.ingress_profile.web_app_routing.enabled:

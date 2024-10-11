@@ -283,7 +283,6 @@ class NetworkPrivateLinkStorageAccountScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sa_pe')
     @StorageAccountPreparer(name_prefix='saplr', kind='StorageV2')
     def test_private_endpoint_connection_storage_account(self, storage_account):
-        from msrestazure.azure_exceptions import CloudError
         self.kwargs.update({
             'sa': storage_account,
             'loc': 'eastus',

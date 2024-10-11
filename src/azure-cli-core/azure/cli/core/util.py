@@ -56,10 +56,9 @@ DISALLOWED_USER_NAMES = [
 def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statements, too-many-branches
     # For error code, follow guidelines at https://docs.python.org/2/library/sys.html#sys.exit,
     from jmespath.exceptions import JMESPathError
-    from msrestazure.azure_exceptions import CloudError
     from msrest.exceptions import HttpOperationError, ValidationError, ClientRequestError
     from azure.common import AzureException
-    from azure.core.exceptions import AzureError, ServiceRequestError
+    from azure.core.exceptions import AzureError, ServiceRequestError, HttpResponseError
     from requests.exceptions import SSLError, HTTPError
     from azure.cli.core import azclierror
     from msal_extensions.persistence import PersistenceError
@@ -83,7 +82,7 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
         az_error = azclierror.AzureConnectionError(error_msg)
         az_error.set_recommendation(SSLERROR_TEMPLATE)
 
-    elif isinstance(ex, CloudError):
+    elif isinstance(ex, HttpResponseError):
         if extract_common_error_message(ex):
             error_msg = extract_common_error_message(ex)
         status_code = str(getattr(ex, 'status_code', 'Unknown Code'))
@@ -752,6 +751,11 @@ def is_wsl():
 def is_windows():
     platform_name, _ = _get_platform_info()
     return platform_name == 'windows'
+
+
+def is_github_codespaces():
+    # https://docs.github.com/en/codespaces/developing-in-a-codespace/default-environment-variables-for-your-codespace
+    return os.environ.get('CODESPACES') == 'true'
 
 
 def can_launch_browser():
