@@ -94,7 +94,7 @@ resource_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURC
 location = resource_client.resource_groups.get(resource_group_name).location
 ```
 
-2. atomic cmd from codegen. If this cmd has been migrated through codegenV2, developers can call its atomic cmd. For example:
+2. Atomic cmd from codegen. If this cmd has been migrated through codegenV2, developers can call its atomic cmd. For example:
 ```python
 # code before:
 cmd = "az monitor autoscale show --name {} --resource-group {}".format(autoscale_name, resource_group_name)
