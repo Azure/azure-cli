@@ -163,4 +163,4 @@ When using subprocess module, avoid `shell=True` argument when it comes with cmd
 
 
 ## Summary
-Ensuring the safety of Azure CLI from command injection under subprocess calling requires an in-depth understanding of these vulnerabilities and also proactive measures to counteract potential exploits. CLI developers should apply the security practices before using builtin `subprocess`, and it's recommended to use the centralized function `run_cmd` CLI provided (or the applicable three method for `az`-related cmds) , to safeguard CLI modules from command injection attack and for future more accessible security enforcements.
+Ensuring the safety of Azure CLI from command injection under subprocess calling requires an in-depth understanding of these vulnerabilities and also proactive measures to counteract potential exploits. CLI developers should apply the security practices before using builtin `subprocess`, and it's recommended to use the centralized function `run_cmd` CLI provided (or the applicable three methods for `az`-related cmds) , to safeguard CLI modules from command injection attack and for future more accessible security enforcements.
