@@ -73,7 +73,7 @@ Besides that, developers might need to know some parts of the accessibility in b
 3. if developers want to locate the target command's executable file, a tool developers can use is `shutil.which` that gives the full executable file path in system, like `shutil.which(git)` returns the full `git.exe` path in windows platform `C:\\Program Files\\Git\\cmd\\git.EXE`. 
 4. if the target cmd is `az`-related, like `az group show --name xxxx`, please see the following "`az`-related cmd execution" section.
 
-### `az`-related cmd execution
+### `az`-related command execution
 
 If the target cmd is `az`-related, like `az group show --name xxxx`, instead of using `subprocess`, CLI recommends using internal function call to get the target information, as the following three options (if applicable):
  
