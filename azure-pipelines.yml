@@ -7,7 +7,7 @@ trigger:
     include:
     - '*'
     exclude:
-    - 'cfs'
+    - 'release'
 
 pr:
   branches:
@@ -208,7 +208,7 @@ jobs:
       artifactName: metadata
 
   - task: PipAuthenticate@1
-    condition: eq(variables['Build.SourceBranch'], 'refs/heads/cfs')
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
     displayName: 'Pip Authenticate'
     inputs:
       artifactFeeds: 'internal/azure-cli_PublicPackages'
@@ -252,7 +252,7 @@ jobs:
         artifactName: metadata
 
     - task: PipAuthenticate@1
-      condition: eq(variables['Build.SourceBranch'], 'refs/heads/cfs')
+      condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
       displayName: 'Pip Authenticate'
       inputs:
         artifactFeeds: 'internal/azure-cli_PublicPackages'
@@ -442,7 +442,7 @@ jobs:
       versionSpec: 3.11
 
   - task: PipAuthenticate@1
-    condition: eq(variables['Build.SourceBranch'], 'refs/heads/cfs')
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
     displayName: 'Pip Authenticate'
     inputs:
       artifactFeeds: 'internal/azure-cli_PublicPackages'
@@ -737,7 +737,7 @@ jobs:
     displayName: Install Docker
 
   - task: PipAuthenticate@1
-    condition: eq(variables['Build.SourceBranch'], 'refs/heads/cfs')
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
     displayName: 'Pip Authenticate'
     inputs:
       artifactFeeds: 'internal/azure-cli_PublicPackages'
@@ -833,7 +833,7 @@ jobs:
   - bash: ./scripts/ci/install_docker.sh
     displayName: Install Docker
   - task: PipAuthenticate@1
-    condition: eq(variables['Build.SourceBranch'], 'refs/heads/cfs')
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
     displayName: 'Pip Authenticate'
     inputs:
       artifactFeeds: 'internal/azure-cli_PublicPackages'
@@ -955,7 +955,7 @@ jobs:
   - bash: ./scripts/ci/install_docker.sh
     displayName: Install Docker
   - task: PipAuthenticate@1
-    condition: eq(variables['Build.SourceBranch'], 'refs/heads/cfs')
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
     displayName: 'Pip Authenticate'
     inputs:
       artifactFeeds: 'internal/azure-cli_PublicPackages'
