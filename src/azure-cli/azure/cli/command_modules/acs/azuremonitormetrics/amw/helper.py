@@ -11,7 +11,7 @@ from azure.core.exceptions import HttpResponseError
 
 def get_amw_region(cmd, azure_monitor_workspace_resource_id):
     import re
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
     # Define the allowed characters in the final string
     allowed_chars = re.compile(r'[^a-zA-Z0-9]')
 

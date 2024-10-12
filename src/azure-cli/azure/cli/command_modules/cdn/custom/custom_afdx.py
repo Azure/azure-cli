@@ -320,7 +320,7 @@ class AFDOriginCreate(_AFDOriginCreate):
             options=['--enable-private-link'],
             help='Indicates whether private link is enanbled on that origin.',
             blank=True,
-            default=True
+            default=False
         )
         args_schema.private_link_location = AAZStrArg(
             options=['--private-link-location'],
@@ -713,7 +713,7 @@ class AFDRuleCreate(_AFDRuleCreate):
         )
         args_schema.cache_duration = AAZTimeArg(
             options=['--cache-duration'],
-            help='The duration for which the content needs to be cached. Allowed format is [d.]hh:mm:ss.',
+            help='The duration for which the content needs to be cached. Allowed format is hh:mm:ss.xxxxxx',
         )
         args_schema.custom_fragment = AAZStrArg(
             options=['--custom-fragment'],
@@ -961,7 +961,7 @@ class AFDRuleActionCreate(_AFDRuleUpdate):
         )
         args_schema.cache_duration = AAZTimeArg(
             options=['--cache-duration'],
-            help='The duration for which the content needs to be cached. Allowed format is [d.]hh:mm:ss.',
+            help='The duration for which the content needs to be cached. Allowed format is hh:mm:ss.xxxxxx',
         )
         args_schema.custom_fragment = AAZStrArg(
             options=['--custom-fragment'],

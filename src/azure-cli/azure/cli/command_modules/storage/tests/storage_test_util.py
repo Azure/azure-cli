@@ -59,9 +59,12 @@ class StorageScenarioMixin:
         cmd = '{} --account-name {} --account-key {}'.format(cmd, *account_info)
         return self.cmd(cmd, expect_failure=True)
 
-    def create_container(self, account_info, prefix='cont', length=24):
+    def create_container(self, account_info, prefix='cont', length=24, oauth=False):
         container_name = self.create_random_name(prefix=prefix, length=length)
-        self.storage_cmd('storage container create -n {}', account_info, container_name)
+        if oauth:
+            self.oauth_cmd('storage container create -n {} --account-name {}', container_name, account_info[0])
+        else:
+            self.storage_cmd('storage container create -n {}', account_info, container_name)
         return container_name
 
     def create_share(self, account_info, prefix='share', length=24):

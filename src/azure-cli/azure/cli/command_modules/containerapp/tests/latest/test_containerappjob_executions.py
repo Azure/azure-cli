@@ -6,7 +6,7 @@
 import os
 import time
 
-from msrestazure.tools import parse_resource_id
+from azure.mgmt.core.tools import parse_resource_id
 
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathCheck, LogAnalyticsWorkspacePreparer)
@@ -80,7 +80,9 @@ class ContainerAppJobsExecutionsTest(ScenarioTest):
             self.assertEqual(job in execution['name'], True)
 
         # stop the most recently started execution
-        self.cmd("az containerapp job stop --resource-group {} --name {} --job-execution-name {}".format(resource_group, job, execution['name'])).get_output_in_json()
+        stopExecution = self.cmd("az containerapp job stop --resource-group {} --name {} --job-execution-name {}".format(resource_group, job, execution['name']))
+        # check if the stopExecution response contains the job execution name
+        self.assertEqual(execution['name'] in stopExecution.output, True)
         
         # get stopped execution for the job and check status after waiting for 5 seconds to ensure job has stopped
         time.sleep(5)

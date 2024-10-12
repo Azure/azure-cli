@@ -144,7 +144,8 @@ class ActionGroupCreate(_ActionGroupCreate):
         args_schema.receiver_actions = AAZCustomListArg(
             options=["--actions"],
             singular_options=["--action", "-a"],
-            help="Add receivers to the action group during the creation." + '''
+            help='''
+        Add receivers to the action group during the creation.
         Usage:   --action TYPE NAME [ARG ...]
         Email:
             Format:     --action email NAME EMAIL_ADDRESS [usecommonalertschema]
@@ -225,7 +226,8 @@ class ActionGroupUpdate(_ActionGroupUpdate):
         args_schema.receiver_actions = AAZCustomListArg(
             options=["--add-actions"],
             singular_options=["--add-action", "-a"],
-            help="Add receivers to the action group." + '''
+            help='''
+        Add receivers to the action group.
         Usage:   --add-action TYPE NAME [ARG ...]
         Email:
             Format:     --add-action email NAME EMAIL_ADDRESS [usecommonalertschema]
@@ -356,7 +358,8 @@ class ActionGroupTestNotificationCreate(_ActionGroupTestNotificationCreate):
         args_schema.receiver_actions = AAZCustomListArg(
             options=["--add-actions"],
             singular_options=["--add-action", "-a"],
-            help="Add receivers to the action group." + '''
+            help='''
+        Add receivers to the action group.
         Usage:   --add-action TYPE NAME [ARG ...]
         Email:
             Format:     --add-action email NAME EMAIL_ADDRESS [usecommonalertschema]

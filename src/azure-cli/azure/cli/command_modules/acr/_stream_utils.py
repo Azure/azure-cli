@@ -9,7 +9,7 @@ import colorama
 import requests
 from knack.util import CLIError
 from knack.log import get_logger
-from msrestazure.azure_exceptions import CloudError
+from azure.core.exceptions import HttpResponseError
 from azure.common import AzureHttpError
 from azure.cli.core.profiles import ResourceType, get_sdk
 from ._azure_utils import get_blob_info
@@ -41,7 +41,7 @@ def stream_logs(cmd, client,
         else:
             log_file_sas = response.log_artifact_link
             artifact = True
-    except (AttributeError, CloudError) as e:
+    except (AttributeError, HttpResponseError) as e:
         logger.debug("%s Exception: %s", error_msg, e)
         raise CLIError(error_msg)
 

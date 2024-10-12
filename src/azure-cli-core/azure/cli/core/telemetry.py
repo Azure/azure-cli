@@ -72,6 +72,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         self.poll_end_time = None
         self.secrets_detected = None
         self.secret_keys = None
+        self.secret_names = None
         self.user_agent = None
         # authentication-related
         self.enable_broker_on_windows = None
@@ -227,6 +228,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         set_custom_properties(result, 'SecretsWarning', _get_secrets_warning_config())
         set_custom_properties(result, 'SecretsDetected', str(self.secrets_detected))
         set_custom_properties(result, 'SecretKeys', ','.join(self.secret_keys or []))
+        set_custom_properties(result, 'SecretNames', ','.join(self.secret_names or []))
         # authentication-related
         set_custom_properties(result, 'EnableBrokerOnWindows', str(self.enable_broker_on_windows))
         set_custom_properties(result, 'MsalTelemetry', self.msal_telemetry)
@@ -491,10 +493,12 @@ def set_user_agent(user_agent):
 
 
 @decorators.suppress_all_exceptions()
-def set_secrets_detected(secrets_detected, secret_keys=None):
+def set_secrets_detected(secrets_detected, secret_keys=None, secret_names=None):
     _session.secrets_detected = secrets_detected
     if secret_keys:
         _session.secret_keys = secret_keys
+    if secret_names:
+        _session.secret_names = secret_names
 
 
 @decorators.suppress_all_exceptions()

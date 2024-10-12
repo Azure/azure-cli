@@ -135,6 +135,24 @@ examples:
         az signalr list -g MySignalR -o table
 """
 
+helps['signalr start'] = """
+type: command
+short-summary: Start an existing SignalR Service.
+examples:
+  - name: Start a SignalR Service instance.
+    text: >
+        az signalr start -n MySignalR -g MyResourceGroup
+"""
+
+helps['signalr stop'] = """
+type: command
+short-summary: Stop an existing SignalR Service.
+examples:
+  - name: Stop a SignalR Service instance.
+    text: >
+        az signalr stop -n MySignalR -g MyResourceGroup
+"""
+
 helps['signalr restart'] = """
 type: command
 short-summary: Restart an existing SignalR Service.

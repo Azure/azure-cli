@@ -6,7 +6,7 @@ import unittest
 from unittest import mock
 import os
 
-from msrestazure.azure_exceptions import CloudError
+from azure.core.exceptions import HttpResponseError
 
 from azure.mgmt.web import WebSiteManagementClient
 from knack.util import CLIError
@@ -266,8 +266,8 @@ class TestWebappMocked(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
     def test_sync_repository_skip_bad_error(self, site_op_mock):
         resp = FakedResponse(200)  # because of bad spec, sdk throws on 200.
-        setattr(resp, 'text', '{"Message": ""}')
-        site_op_mock.side_effect = CloudError(resp, error="bad error")
+        setattr(resp, 'reason', 'bad error')
+        site_op_mock.side_effect = HttpResponseError(response=resp)
         # action
         sync_site_repo(mock.MagicMock(), 'myRG', 'myweb')
         # assert

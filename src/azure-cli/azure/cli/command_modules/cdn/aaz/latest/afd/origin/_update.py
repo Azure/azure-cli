@@ -78,7 +78,7 @@ class Update(AAZCommand):
         _args_schema.enabled_state = AAZStrArg(
             options=["--enabled-state"],
             arg_group="Properties",
-            help="Whether to enable health probes to be made against backends defined under backendPools. Health probes can only be disabled if there is a single enabled backend in single enabled backend pool.",
+            help="Whether to enable health probes to be made against backends defined under backendPools. Health probes can only be disabled if there is a single enabled backend in single enabled backend pool. When an origin is disabled, both routing and health probes to the origin are also disabled.",
             nullable=True,
             enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )

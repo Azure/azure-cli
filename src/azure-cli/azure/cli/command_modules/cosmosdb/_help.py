@@ -229,6 +229,8 @@ examples:
     text: az cosmosdb restore -g MyResourceGroup --target-database-account-name MyRestoredCosmosDBDatabaseAccount --account-name MySourceAccount --restore-timestamp 2020-07-13T16:03:41+0000 --location westus --gremlin-databases-to-restore name=graphdb1 graphs=graph1 graph2
   - name: Create a new Azure Cosmos DB Table database account by restoring only the selected tables from an existing database account.
     text: az cosmosdb restore -g MyResourceGroup --target-database-account-name MyRestoredCosmosDBDatabaseAccount --account-name MySourceAccount --restore-timestamp 2020-07-13T16:03:41+0000 --location westus --tables-to-restore table1,table2
+  - name: Create a new Azure Cosmos DB Table database account by restoring with Time-To-Live disabled.
+    text: az cosmosdb restore -g MyResourceGroup --target-database-account-name MyRestoredCosmosDBDatabaseAccount --account-name MySourceAccount --restore-timestamp 2020-07-13T16:03:41+0000 --location westus --disable-ttl True
 """
 
 helps['cosmosdb database'] = """
@@ -1661,6 +1663,12 @@ examples:
 helps['cosmosdb sql database restore'] = """
 type: command
 short-summary: Restore a deleted sql database within the same account.
+parameters:
+  - name: --disable-ttl
+    short-summary: Flag to restore with TTL disabled
+    long-summary: |
+        Usage:          --disable-ttl True
+        Default: false
 examples:
   - name: Restore a deleted sql database within the same account.
     text: |
@@ -1670,6 +1678,12 @@ examples:
 helps['cosmosdb sql container restore'] = """
 type: command
 short-summary: Restore a deleted sql container within the same account.
+parameters:
+  - name: --disable-ttl
+    short-summary: Flag to restore with TTL disabled
+    long-summary: |
+        Usage:          --disable-ttl True
+        Default: false
 examples:
   - name: Restore a deleted sql container within the same account.
     text: |
@@ -1679,6 +1693,12 @@ examples:
 helps['cosmosdb mongodb database restore'] = """
 type: command
 short-summary: Restore a deleted mongodb database within the same account.
+parameters:
+  - name: --disable-ttl
+    short-summary: Flag to restore with TTL disabled
+    long-summary: |
+        Usage:          --disable-ttl True
+        Default: false
 examples:
   - name: Restore a deleted mongodb database within the same account.
     text: |
@@ -1688,6 +1708,12 @@ examples:
 helps['cosmosdb mongodb collection restore'] = """
 type: command
 short-summary: Restore a deleted mongodb collection within the same account.
+parameters:
+  - name: --disable-ttl
+    short-summary: Flag to restore with TTL disabled
+    long-summary: |
+        Usage:          --disable-ttl True
+        Default: false
 examples:
   - name: Restore a deleted mongodb collection within the same account.
     text: |
@@ -1697,6 +1723,12 @@ examples:
 helps['cosmosdb gremlin database restore'] = """
 type: command
 short-summary: Restore a deleted gremlin database within the same account.
+parameters:
+  - name: --disable-ttl
+    short-summary: Flag to restore with TTL disabled
+    long-summary: |
+        Usage:          --disable-ttl True
+        Default: false
 examples:
   - name: Restore a deleted gremlin database within the same account.
     text: |
@@ -1706,6 +1738,12 @@ examples:
 helps['cosmosdb gremlin graph restore'] = """
 type: command
 short-summary: Restore a deleted gremlin graph within the same account.
+parameters:
+  - name: --disable-ttl
+    short-summary: Flag to restore with TTL disabled
+    long-summary: |
+        Usage:          --disable-ttl True
+        Default: false
 examples:
   - name: Restore a deleted gremlin graph within the same account.
     text: |
@@ -1715,6 +1753,12 @@ examples:
 helps['cosmosdb table restore'] = """
 type: command
 short-summary: Restore a deleted table within the same account.
+parameters:
+  - name: --disable-ttl
+    short-summary: Flag to restore with TTL disabled
+    long-summary: |
+        Usage:          --disable-ttl True
+        Default: false
 examples:
   - name: Restore a deleted table within the same account.
     text: |

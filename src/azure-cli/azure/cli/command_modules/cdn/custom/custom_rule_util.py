@@ -6,7 +6,7 @@
 
 from azure.cli.core.aaz._base import has_value
 from azure.mgmt.cdn.models import (RequestMethodOperator, RuleIsCompressionEnabled)
-from msrestazure.tools import is_valid_resource_id
+from azure.mgmt.core.tools import is_valid_resource_id
 
 
 def create_condition(match_variable,

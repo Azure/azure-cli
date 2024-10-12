@@ -16,7 +16,7 @@ class MonitorTests(ScenarioTest):
     @StorageAccountPreparer()
     def test_metric_alert_v2_scenario(self, resource_group, storage_account):
 
-        from msrestazure.tools import resource_id
+        from azure.mgmt.core.tools import resource_id
         self.kwargs.update({
             'alert': 'alert1',
             'sa': storage_account,
@@ -237,7 +237,7 @@ class MonitorTests(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_v1')
     @VMPreparer(parameter_name='vm1')
     def test_metric_alert_single_scope(self, resource_group, vm1):
-        from msrestazure.tools import resource_id
+        from azure.mgmt.core.tools import resource_id
         self.kwargs.update({
             'alert': 'alert1',
             'plan': 'plan1',
@@ -301,7 +301,7 @@ class MonitorTests(ScenarioTest):
     @VMPreparer(parameter_name='vm1')
     @VMPreparer(parameter_name='vm2')
     def test_metric_alert_multiple_scopes(self, resource_group, vm1, vm2):
-        from msrestazure.tools import resource_id
+        from azure.mgmt.core.tools import resource_id
         self.kwargs.update({
             'alert': 'alert1',
             'plan': 'plan1',
@@ -511,7 +511,7 @@ class MonitorTests(ScenarioTest):
     @VMPreparer(parameter_name='vm1')
     @VMPreparer(parameter_name='vm2', resource_group_parameter_name='resource_group_2')
     def test_metric_alert_for_rg_and_sub(self, resource_group, resource_group_2):
-        from msrestazure.tools import resource_id
+        from azure.mgmt.core.tools import resource_id
         self.kwargs.update({
             'alert': 'rg-alert',
             'alert2': 'sub-alert',

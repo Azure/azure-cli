@@ -10,7 +10,7 @@ from collections import Counter, OrderedDict
 
 import socket
 from knack.log import get_logger
-from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
+from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id, resource_id
 
 from azure.cli.core.aaz import AAZClientConfiguration, has_value, register_client
 from azure.cli.core.aaz._client import AAZMgmtClient
@@ -3872,7 +3872,7 @@ class PrivateLinkServiceCreate(_PrivateLinkServiceCreate):
         args_schema.private_ip_allocation_method = AAZStrArg(options=['--private-ip-allocation-method'], arg_group="IP Configuration", help="Private IP address allocation method.",
                                                              enum={"Dynamic": "Dynamic", "Static": "Static"})
         args_schema.lb_name = AAZStrArg(options=['--lb-name'], help="Name of the load balancer to retrieve frontend IP configs from. Ignored if a frontend IP configuration ID is supplied.")
-        args_schema.lb_frontend_ip_configs = AAZListArg(options=['--lb-frontend-ip-configs'], help="Space-separated list of names or IDs of load balancer frontend IP configurations to link to. If names are used, also supply `--lb-name`.", required=True)
+        args_schema.lb_frontend_ip_configs = AAZListArg(options=['--lb-frontend-ip-configs'], help="Space-separated list of names or IDs of load balancer frontend IP configurations to link to. If names are used, also supply `--lb-name`.")
         args_schema.lb_frontend_ip_configs.Element = AAZResourceIdArg(
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/frontendIpConfigurations/{}"
@@ -3902,6 +3902,8 @@ class PrivateLinkServiceCreate(_PrivateLinkServiceCreate):
 
         if has_value(args.edge_zone):
             args.edge_zone_type = 'EdgeZone'
+        if not has_value(args.lb_frontend_ip_configs) and not has_value(args.destination_ip_address):
+            raise CLIError("usage error: either --lb-frontend-ip-configs or --destination-ip-address is required")
 
 
 class PrivateLinkServiceUpdate(_PrivateLinkServiceUpdate):

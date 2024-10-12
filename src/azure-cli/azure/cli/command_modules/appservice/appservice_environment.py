@@ -13,6 +13,7 @@ from azure.mgmt.resource.resources.models import (DeploymentProperties, Deployme
 from azure.mgmt.privatedns.models import (PrivateZone, VirtualNetworkLink, RecordSet, ARecord)
 
 # Utils
+from azure.mgmt.core.tools import (parse_resource_id, is_valid_resource_id, resource_id)
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import (get_mgmt_service_client, get_subscription_id)
 from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -21,7 +22,6 @@ from azure.cli.core.azclierror import (ResourceNotFoundError, ValidationError,
                                        MutuallyExclusiveArgumentError)
 from importlib import import_module
 from knack.log import get_logger
-from msrestazure.tools import (parse_resource_id, is_valid_resource_id, resource_id)
 
 VERSION_2019_08_01 = "2019-08-01"
 VERSION_2019_10_01 = "2019-10-01"

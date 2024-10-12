@@ -5,7 +5,7 @@
 
 from azure.cli.command_modules.acs._client_factory import get_graph_client
 from azure.cli.command_modules.acs._helpers import _get_test_sp_object_id
-from azure.cli.core.azclierror import AzCLIError, RequiredArgumentMissingError
+from azure.cli.core.azclierror import AzCLIError
 from knack.log import get_logger
 
 logger = get_logger(__name__)
@@ -38,21 +38,3 @@ def resolve_object_id(cli_ctx, assignee):
     if not result:
         raise AzCLIError("No matches in graph database for '{}'".format(assignee))
     return result[0]["id"]
-
-
-# TODO: deprecated, will remove this after the adoption of v2 decorator in aks-preview.
-# pylint: disable=unused-argument
-def ensure_aks_service_principal(
-    cli_ctx,
-    service_principal=None,
-    client_secret=None,
-    subscription_id=None,
-    dns_name_prefix=None,
-    fqdn_subdomain=None,
-    location=None,
-    name=None,
-):
-    raise RequiredArgumentMissingError(
-        "Please provide both --service-principal and --client-secret to use sp as the cluster identity. "
-        "An sp can be created using the 'az ad sp create-for-rbac' command."
-    )

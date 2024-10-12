@@ -5,7 +5,7 @@
 
 from datetime import datetime
 import json
-from msrestazure.tools import resource_id, is_valid_resource_id
+from azure.mgmt.core.tools import resource_id, is_valid_resource_id
 from azure.cli.core.azclierror import (
     InvalidArgumentValueError,
     RequiredArgumentMissingError,

@@ -9,7 +9,7 @@ import re
 from enum import Enum
 from knack.log import get_logger
 from knack.util import CLIError
-from msrestazure.azure_exceptions import CloudError
+from azure.core.exceptions import HttpResponseError
 from azure.cli.core.azclierror import (
     ArgumentUsageError,
     BadRequestError,
@@ -586,7 +586,7 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
                     hub_description.identity.principal_id = principal_id
                     for scope in identity_scopes:
                         assign_identity(cmd.cli_ctx, lambda: hub_description, lambda hub: hub_description, identity_role=identity_role, identity_scope=scope)
-        except CloudError as e:
+        except HttpResponseError as e:
             raise e
 
     create = client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, hub_description)
@@ -1529,7 +1529,6 @@ def get_private_endpoint_connection(client, resource_group_name=None, connection
 
 
 def _update_private_endpoint_connection_status(client, resource_group_name, account_name, connection_id, private_endpoint_connection_name, is_approved=True, description=None):  # pylint: disable=unused-argument
-    from azure.core.exceptions import HttpResponseError
     getInfoArr = get_private_endpoint_connection(client,
                                                  resource_group_name=resource_group_name,
                                                  connection_id=connection_id,

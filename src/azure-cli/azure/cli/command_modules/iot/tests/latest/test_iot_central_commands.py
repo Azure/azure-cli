@@ -117,7 +117,6 @@ class IoTCentralTest(ScenarioTest):
     @live_only()
     @ResourceGroupPreparer()  # name_prefix not required, but can be useful
     def test_iot_central_private_link_and_private_endpoint(self, resource_group):
-        from msrestazure.azure_exceptions import CloudError
         name = self.create_random_name(prefix='iotc-cli-test', length=24)
         self.kwargs.update({
             'app_name': name,

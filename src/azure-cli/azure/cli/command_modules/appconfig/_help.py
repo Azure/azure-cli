@@ -18,6 +18,10 @@ short-summary: Create an App Configuration.
 examples:
   - name: Create an App Configuration store with name, location, sku, tags and resource group.
     text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Standard --tags key1=value1 key2=value2
+  - name: Create a premium sku App Configuration store with a replica
+    text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Premium --replica-name MyReplica --replica-location eastus
+  - name: Create a premium sku App Configuration store without a replica
+    text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Premium --no-replica
   - name: Create an App Configuration store with name, location, sku and resource group with system assigned identity.
     text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Standard --assign-identity
   - name: Create an App Configuration store with name, location, sku and resource group with user assigned identity.
@@ -355,8 +359,10 @@ short-summary: Update an App Configuration store.
 examples:
   - name: Update tags of an App Configuration store
     text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --tags key1=value1 key2=value2
-  - name: Upgrade sku of an App Configuration store to standard
+  - name: Upgrade sku of an App Configuration store to the standard tier
     text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --sku Standard
+  - name: Upgrade sku of an App Configuration store to the premium tier
+    text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --sku Premium
   - name: Enable customer encryption key with system assigned identity
     text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --encryption-key-name myKey --encryption-key-version keyVersion --encryption-key-vault https://keyVaultName.vault.azure.net
   - name: Remove customer encryption key

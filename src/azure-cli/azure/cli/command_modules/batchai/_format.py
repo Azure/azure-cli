@@ -34,7 +34,7 @@ def cluster_list_table_format(result):
 
 def cluster_show_table_format(result):
     """Format cluster as a table."""
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
     row = OrderedDict()
     row['Name'] = result['name']
     row['Resource Group'] = result['resourceGroup']
@@ -62,7 +62,7 @@ def experiment_list_table_format(result):
 
 def experiment_show_table_format(experiment):
     """Format the experiment as a table"""
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
     row = OrderedDict()
     row['Name'] = experiment['name']
     row['Resource Group'] = experiment['resourceGroup']
@@ -81,7 +81,7 @@ def job_list_table_format(result):
 
 def job_show_table_format(job):
     """Format job as a table."""
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
     row = OrderedDict()
     row['Name'] = job['name']
     cluster = parse_resource_id(job['cluster']['id'])

@@ -17,7 +17,7 @@ logger = get_logger(__name__)
 
 
 def get_vnet_validator(dest):
-    from msrestazure.tools import is_valid_resource_id, resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id, resource_id
 
     def _validate_vnet_name_or_id(cmd, namespace):
         SubResource = cmd.get_models('SubResource')
@@ -46,7 +46,7 @@ def get_vnet_validator(dest):
 
 def validate_ddos_name_or_id(cmd, namespace):
     if namespace.ddos_protection_plan:
-        from msrestazure.tools import is_valid_resource_id, resource_id
+        from azure.mgmt.core.tools import is_valid_resource_id, resource_id
         if not is_valid_resource_id(namespace.ddos_protection_plan):
             namespace.ddos_protection_plan = resource_id(
                 subscription=get_subscription_id(cmd.cli_ctx),
@@ -63,7 +63,7 @@ def dns_zone_name_type(value):
 
 
 def _generate_ag_subproperty_id(cli_ctx, namespace, child_type, child_name, subscription=None):
-    from msrestazure.tools import resource_id
+    from azure.mgmt.core.tools import resource_id
     return resource_id(
         subscription=subscription or get_subscription_id(cli_ctx),
         resource_group=namespace.resource_group_name,
@@ -75,7 +75,7 @@ def _generate_ag_subproperty_id(cli_ctx, namespace, child_type, child_name, subs
 
 
 def _generate_lb_subproperty_id(cli_ctx, namespace, child_type, child_name, subscription=None):
-    from msrestazure.tools import resource_id
+    from azure.mgmt.core.tools import resource_id
     return resource_id(
         subscription=subscription or get_subscription_id(cli_ctx),
         resource_group=namespace.resource_group_name,
@@ -87,7 +87,7 @@ def _generate_lb_subproperty_id(cli_ctx, namespace, child_type, child_name, subs
 
 
 def validate_address_pool_name_or_id(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id, parse_resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
     address_pool = namespace.backend_address_pool
     lb_name = namespace.load_balancer_name
     gateway_name = getattr(namespace, 'application_gateway_name', None)
@@ -145,7 +145,7 @@ def validate_metadata(namespace):
 
 
 def validate_public_ip_prefix(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id, resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id, resource_id
     if namespace.public_ip_prefix and not is_valid_resource_id(namespace.public_ip_prefix):
         namespace.public_ip_prefix = resource_id(
             subscription=get_subscription_id(cmd.cli_ctx),
@@ -164,7 +164,7 @@ def get_public_ip_validator(has_type_field=False, allow_none=False, allow_new=Fa
                             default_none=False):
     """ Retrieves a validator for public IP address. Accepting all defaults will perform a check
     for an existing name or ID with no ARM-required -type parameter. """
-    from msrestazure.tools import is_valid_resource_id, resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id, resource_id
 
     def simple_validator(cmd, namespace):
         if namespace.public_ip_address:
@@ -196,7 +196,7 @@ def get_public_ip_validator(has_type_field=False, allow_none=False, allow_new=Fa
 
 def get_subnet_validator(has_type_field=False, allow_none=False, allow_new=False,
                          default_none=False):
-    from msrestazure.tools import is_valid_resource_id, resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id, resource_id
 
     def simple_validator(cmd, namespace):
         if namespace.virtual_network_name is None and namespace.subnet is None:
@@ -299,7 +299,7 @@ def _inform_coming_breaking_change_for_public_ip(namespace):
 
 
 def process_vpn_connection_create_namespace(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id, resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id, resource_id
     get_default_location_from_resource_group(cmd, namespace)
     validate_tags(namespace)
 
@@ -359,7 +359,7 @@ def process_private_link_resource_id_argument(cmd, namespace):
                                  namespace.resource_provider])):
         raise CLIError("usage error: --id / -g -n --type")
 
-    from msrestazure.tools import is_valid_resource_id, parse_resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
     if not is_valid_resource_id(namespace.id):
         raise CLIError("Resource ID is invalid. Please check it.")
     split_resource_id = parse_resource_id(namespace.id)

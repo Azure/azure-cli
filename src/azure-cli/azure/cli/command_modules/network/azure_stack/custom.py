@@ -3,11 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 from collections import Counter, OrderedDict
-
-from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
-
 from knack.log import get_logger
-
+from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id, resource_id
 # pylint: disable=no-self-use,no-member,too-many-lines,unused-argument, line-too-long
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
 

@@ -107,11 +107,10 @@ from azure.cli.core.keys import is_valid_ssh_rsa_public_key
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import sdk_no_wait, truncate_text, get_file_json
 from azure.core.exceptions import HttpResponseError
+from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
 from knack.log import get_logger
 from knack.prompting import NoTTYException, prompt, prompt_pass, prompt_y_n
 from knack.util import CLIError
-from msrestazure.azure_exceptions import CloudError
-from msrestazure.tools import is_valid_resource_id, parse_resource_id
 
 logger = get_logger(__name__)
 
@@ -6796,7 +6795,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 # mdm metrics is supported only in azure public cloud, so add the role assignment only in this cloud
                 cloud_name = self.cmd.cli_ctx.cloud.name
                 if cloud_name.lower() == "azurecloud":
-                    from msrestazure.tools import resource_id
+                    from azure.mgmt.core.tools import resource_id
 
                     cluster_resource_id = resource_id(
                         subscription=self.context.get_subscription_id(),
@@ -6978,7 +6977,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 return cluster
             # CloudError was raised before, but since the adoption of track 2 SDK,
             # HttpResponseError would be raised instead
-            except (CloudError, HttpResponseError) as ex:
+            except HttpResponseError as ex:
                 error_msg = str(ex)
                 if "not found in Active Directory tenant" in ex.message:
                     time.sleep(3)
@@ -8559,7 +8558,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 # mdm metrics is supported only in azure public cloud, so add the role assignment only in this cloud
                 cloud_name = self.cmd.cli_ctx.cloud.name
                 if cloud_name.lower() == "azurecloud":
-                    from msrestazure.tools import resource_id
+                    from azure.mgmt.core.tools import resource_id
 
                     cluster_resource_id = resource_id(
                         subscription=self.context.get_subscription_id(),

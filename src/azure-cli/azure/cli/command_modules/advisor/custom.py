@@ -147,7 +147,7 @@ def _parse_recommendation_uri(recommendation_uri):
 
 
 def _generate_recommendations(client):
-    from msrestazure.azure_exceptions import CloudError
+    from azure.core.exceptions import HttpResponseError
 
     response = client.generate(cls=_callback)
     location = response.headers['Location']
@@ -155,7 +155,7 @@ def _generate_recommendations(client):
 
     try:
         client.get_generate_status(operation_id=operation_id)
-    except CloudError as ex:
+    except HttpResponseError as ex:
         # Advisor API returns 204 which is not aligned with ARM guidelines
         # so the SDK will throw an exception that we will have to ignore
         if ex.status_code != 204:

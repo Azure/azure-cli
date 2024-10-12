@@ -4,8 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
-from knack.util import CLIError
-from msrestazure.tools import is_valid_resource_id
+from azure.mgmt.core.tools import is_valid_resource_id
+from azure.cli.core.azclierror import ArgumentUsageError
 from azure.cli.command_modules.lab.validators import _update_artifacts
 
 
@@ -58,10 +58,10 @@ class ValidatorsCommandTest(unittest.TestCase):
             assert is_valid_resource_id(artifact.get('artifact_id'))
             self.assertEqual(artifact.get('artifact_id'), self.full_artifact.get('artifact_id'))
 
-        with self.assertRaises(CLIError):
+        with self.assertRaises(ArgumentUsageError):
             _update_artifacts({}, self.lab_resource_id)
 
         invalid_artifact = self.jdk_artifact
         del invalid_artifact['artifact_id']
-        with self.assertRaises(CLIError):
+        with self.assertRaises(ArgumentUsageError):
             _update_artifacts([invalid_artifact], self.lab_resource_id)

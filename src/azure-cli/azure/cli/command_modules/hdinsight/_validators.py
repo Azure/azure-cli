@@ -5,7 +5,7 @@
 
 import threading
 from knack.util import CLIError
-from msrestazure.tools import is_valid_resource_id
+from azure.mgmt.core.tools import is_valid_resource_id
 from azure.cli.core.commands.parameters import get_resources_in_subscription
 from .util import get_resource_id_by_name
 
@@ -48,9 +48,19 @@ def validate_subnet(cmd, namespace):
 
 # Validate managed identity.
 def validate_msi(cmd, namespace):
-    namespace.assign_identity = HDInsightValidator(
-        resource_type='Microsoft.ManagedIdentity/userAssignedIdentities',
-        resource_name=namespace.assign_identity).validate(cmd, namespace)
+    if namespace.assign_identity is None:
+        namespace.assign_identity = []
+    elif isinstance(namespace.assign_identity, str):
+        namespace.assign_identity = [namespace.assign_identity]
+
+    validated_identities = []
+    for identity in namespace.assign_identity:
+        validated_identity = HDInsightValidator(
+            resource_type='Microsoft.ManagedIdentity/userAssignedIdentities',
+            resource_name=identity).validate(cmd, namespace)
+        validated_identities.append(validated_identity)
+
+    namespace.assign_identity = validated_identities
 
 
 # Validate managed identity to access storage account v2.

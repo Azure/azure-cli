@@ -225,7 +225,7 @@ class AddServicePrincipalAuthInfo(argparse.Action):
                                   'Required keys are: client-id, secret')
         if 'principal_id' not in d:
             from ._utils import run_cli_cmd
-            output = run_cli_cmd('az ad sp show --id {}'.format(d['client_id']))
+            output = run_cli_cmd('az ad sp show --id "{}"'.format(d['client_id']))
             if output:
                 d['principal_id'] = output.get('id')
             else:
@@ -258,7 +258,7 @@ class AddWorkloadIdentityAuthInfo(argparse.Action):
         d = {}
         if 'user-identity-resource-id' in properties:
             from ._utils import run_cli_cmd
-            output = run_cli_cmd('az identity show --ids {}'.format(properties['user-identity-resource-id']))
+            output = run_cli_cmd('az identity show --ids "{}"'.format(properties['user-identity-resource-id']))
             if output:
                 d['client_id'] = output.get('clientId')
                 d['subscription_id'] = properties['user-identity-resource-id'].split('/')[2]

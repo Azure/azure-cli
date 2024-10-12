@@ -37,7 +37,7 @@ from knack.arguments import CLIArgumentType
 from .action import AddCustomizedKeys
 
 
-def add_source_resource_block(context, source, enable_id=True, validate_source_id=False):
+def add_source_resource_block(context, source, enable_id=True):
     source_args = SOURCE_RESOURCES_PARAMS.get(source)
     for resource, args in SOURCE_RESOURCES_PARAMS.items():
         if resource != source:
@@ -57,7 +57,7 @@ def add_source_resource_block(context, source, enable_id=True, validate_source_i
         required_args.append(content.get('options')[0])
 
     validator_kwargs = {
-        'validator': validate_params} if validate_source_id else {}
+        'validator': validate_params}
     if not enable_id:
         context.argument('source_id', options_list=['--source-id'], type=str,
                          help="The resource id of a {source}. Required if {required_args} "
@@ -140,14 +140,15 @@ def add_target_resource_block(context, target):
                     context.ignore(arg)
 
     required_args = []
-    for arg, content in TARGET_RESOURCES_PARAMS.get(target).items():
-        context.argument(arg, options_list=content.get('options'), type=str,
-                         help='{}. Required if \'--target-id\' is not specified.'.format(content.get('help')))
-        required_args.append(content.get('options')[0])
+    if target in TARGET_RESOURCES_PARAMS:
+        for arg, content in TARGET_RESOURCES_PARAMS.get(target).items():
+            context.argument(arg, options_list=content.get('options'), type=str,
+                             help='{}. Required if \'--target-id\' is not specified.'.format(content.get('help')))
+            required_args.append(content.get('options')[0])
 
-    context.argument('target_id', type=str,
-                     help='The resource id of target service. Required if {required_args} '
-                     'are not specified.'.format(required_args=str(required_args)))
+        context.argument('target_id', type=str,
+                         help='The resource id of target service. Required if {required_args} '
+                         'are not specified.'.format(required_args=str(required_args)))
 
     if target != RESOURCE.KeyVault:
         context.ignore('enable_csi')
@@ -262,7 +263,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
         with self.argument_context('{} connection list'.format(source.value)) as c:
             add_source_resource_block(
-                c, source, enable_id=False, validate_source_id=True)
+                c, source, enable_id=False)
 
         with self.argument_context('{} connection show'.format(source.value)) as c:
             add_source_resource_block(c, source)
