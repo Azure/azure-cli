@@ -211,7 +211,7 @@ jobs:
     condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
     displayName: 'Pip Authenticate'
     inputs:
-      artifactFeeds: 'internal/azure-cli_PublicPackages'
+      artifactFeeds: ${{ variables.cfs_feed }}
 
   - script: |
       set ARCH=$(Platform)
@@ -255,7 +255,7 @@ jobs:
       condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
       displayName: 'Pip Authenticate'
       inputs:
-        artifactFeeds: 'internal/azure-cli_PublicPackages'
+        artifactFeeds: ${{ variables.cfs_feed }}
 
     - script: |
         set ARCH=$(Platform)
@@ -445,7 +445,7 @@ jobs:
     condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
     displayName: 'Pip Authenticate'
     inputs:
-      artifactFeeds: 'internal/azure-cli_PublicPackages'
+      artifactFeeds: ${{ variables.cfs_feed }}
 
   - script: |
       if [[ "$(Build.Reason)" == "PullRequest" ]]; then
@@ -740,7 +740,7 @@ jobs:
     condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
     displayName: 'Pip Authenticate'
     inputs:
-      artifactFeeds: 'internal/azure-cli_PublicPackages'
+      artifactFeeds: ${{ variables.cfs_feed }}
 
   - task: Bash@3
     displayName: 'Build Rpm Package: Azure Linux'
@@ -836,7 +836,7 @@ jobs:
     condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
     displayName: 'Pip Authenticate'
     inputs:
-      artifactFeeds: 'internal/azure-cli_PublicPackages'
+      artifactFeeds: ${{ variables.cfs_feed }}
   - task: Bash@3
     displayName: 'Build Rpm Package'
     inputs:
@@ -958,7 +958,7 @@ jobs:
     condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
     displayName: 'Pip Authenticate'
     inputs:
-      artifactFeeds: 'internal/azure-cli_PublicPackages'
+      artifactFeeds: ${{ variables.cfs_feed }}
   - task: Bash@3
     displayName: 'Build $(deb_system) $(distro) $(arch) Package'
     inputs:
