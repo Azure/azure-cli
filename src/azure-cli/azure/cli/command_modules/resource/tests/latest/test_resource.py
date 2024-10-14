@@ -4577,7 +4577,7 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             role_assignment = self.cmd(
                 'role assignment create --assignee {upn} --role contributor --scope "/subscriptions/{sub}" ').get_output_in_json()
-        from msrestazure.tools import parse_resource_id
+        from azure.mgmt.core.tools import parse_resource_id
         role_definition_id = parse_resource_id(role_assignment['roleDefinitionId'])['name']
 
         self.kwargs.update({
@@ -4656,7 +4656,7 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             role_assignment = self.cmd(
                 'role assignment create --assignee {upn} --role contributor --scope "/subscriptions/{sub}" ').get_output_in_json()
-        from msrestazure.tools import parse_resource_id
+        from azure.mgmt.core.tools import parse_resource_id
         role_definition_id = parse_resource_id(role_assignment['roleDefinitionId'])['name']
 
         self.kwargs.update({
@@ -4717,7 +4717,7 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             role_assignment = self.cmd(
                 'role assignment create --assignee {upn} --role contributor --scope "/subscriptions/{sub}" ').get_output_in_json()
-        from msrestazure.tools import parse_resource_id
+        from azure.mgmt.core.tools import parse_resource_id
         role_definition_id = parse_resource_id(role_assignment['roleDefinitionId'])['name']
         self.kwargs.update({
             'app_def': self.create_random_name('def', 10),
@@ -4750,7 +4750,7 @@ class ManagedAppScenarioTest(ScenarioTest):
 
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             role_assignment = self.cmd('role assignment create --assignee {upn} --role contributor --scope "/subscriptions/{sub}" ').get_output_in_json()
-        from msrestazure.tools import parse_resource_id
+        from azure.mgmt.core.tools import parse_resource_id
         role_definition_id = parse_resource_id(role_assignment['roleDefinitionId'])['name']
 
         self.kwargs.update({

@@ -294,7 +294,7 @@ def _build_identities_info(identities):
 
 
 def _get_subnet_id(cmd, location, resource_group_name, vnet, vnet_address_prefix, subnet, subnet_address_prefix):
-    from msrestazure.tools import parse_resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id
     from azure.cli.core.commands import LongRunningOperation
     from azure.core.exceptions import HttpResponseError
     from .aaz.latest.network.vnet import Create as VNetCreate, Show as VNetShow
@@ -387,7 +387,7 @@ def _get_subnet_id(cmd, location, resource_group_name, vnet, vnet_address_prefix
 
 
 def _get_diagnostics_from_workspace(cli_ctx, log_analytics_workspace):
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
     log_analytics_workspace_client = cf_log_analytics_workspace(cli_ctx)
     log_analytics_workspace_shared_keys_client = cf_log_analytics_workspace_shared_keys(cli_ctx)
 
@@ -481,7 +481,7 @@ def _create_resource_requirements(cpu, memory):
 
 
 def _create_image_registry_credentials(cmd, resource_group_name, registry_login_server, registry_username, registry_password, image, identity):
-    from msrestazure.tools import is_valid_resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id
     image_registry_credentials = None
 
     if identity:

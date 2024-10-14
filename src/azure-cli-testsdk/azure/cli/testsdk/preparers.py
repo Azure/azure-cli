@@ -432,12 +432,12 @@ class VirtualNetworkPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
 
     def remove_resource(self, name, **kwargs):
         if not self.dev_setting_name:
-            from msrestazure.azure_exceptions import CloudError
+            from azure.core.exceptions import HttpResponseError
             try:
                 self.live_only_execute(
                     self.cli_ctx,
                     'az network vnet delete --name {} --resource-group {}'.format(name, self._get_resource_group(**kwargs)))
-            except CloudError:
+            except HttpResponseError:
                 # deletion of vnet may fail as service could create subresources like IPConfig. We could rely on the deletion of resource group to delete the vnet.
                 pass
 

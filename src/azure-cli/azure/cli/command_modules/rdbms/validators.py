@@ -8,7 +8,7 @@ from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
 from knack.log import get_logger
 import math
-from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id, is_valid_resource_name
+from azure.mgmt.core.tools import parse_resource_id, resource_id, is_valid_resource_id, is_valid_resource_name
 from azure.cli.core.azclierror import ValidationError, ArgumentUsageError
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.commands.validators import (
@@ -825,3 +825,16 @@ def _pg_storage_type_validator(storage_type, auto_grow, high_availability, geo_r
             raise CLIError('Updating throughput is only capable for server created with Premium SSD v2.')
         if iops is not None:
             raise CLIError('Updating storage iops is only capable for server created with Premium SSD v2.')
+
+
+def check_resource_group(resource_group_name):
+    resource_group_name = resource_group_name.replace("'", '')
+    resource_group_name = resource_group_name.replace('"', '')
+    if (not resource_group_name):
+        return False
+    return True
+
+
+def validate_resource_group(resource_group_name):
+    if (not check_resource_group(resource_group_name)):
+        raise CLIError('Resource group name cannot be empty.')
