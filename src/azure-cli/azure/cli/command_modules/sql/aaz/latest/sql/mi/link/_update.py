@@ -9,7 +9,18 @@
 # flake8: noqa
 
 from azure.cli.core.aaz import *
+from azure.cli.core.breaking_change import register_output_breaking_change
 
+register_output_breaking_change('sql mi link update',
+                                description='Deprecated output properties: targetDatabase, '
+                                            'primaryAvailabilityGroupName, secondaryAvailabilityGroupName'
+                                            'sourceEndpoint, sourceReplicaId, targetReplicaId, '
+                                            'linkState, lastHardenedLsn.'
+                                            '\nNew output properties: databases, partnerAvailabilityGroupName,'
+                                            ' instanceAvailabilityGroupName, partnerEndpoint,'
+                                            ' distributedAvailabilityGroupName, instanceLinkRole,'
+                                            ' partnerLinkRole, failoverMode, seedingMode.',
+                                doc_link='aka.ms/mi-link-rest-api-create-or-update')
 
 @register_command(
     "sql mi link update",
@@ -24,7 +35,9 @@ class Update(AAZCommand):
     _aaz_info = {
         "version": "2022-08-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.sql/managedinstances/{}/distributedavailabilitygroups/{}", "2022-08-01-preview"],
+            ["mgmt-plane",
+             "/subscriptions/{}/resourcegroups/{}/providers/microsoft.sql/managedinstances/{}/distributedavailabilitygroups/{}",
+             "2022-08-01-preview"],
         ]
     }
 

@@ -9,7 +9,18 @@
 # flake8: noqa
 
 from azure.cli.core.aaz import *
+from azure.cli.core.breaking_change import register_output_breaking_change
 
+register_output_breaking_change('sql mi link show',
+                                description='Deprecated output properties: targetDatabase, '
+                                            'primaryAvailabilityGroupName, secondaryAvailabilityGroupName'
+                                            'sourceEndpoint, sourceReplicaId, targetReplicaId, '
+                                            'linkState, lastHardenedLsn.'
+                                            '\nNew output properties: databases, partnerAvailabilityGroupName,'
+                                            ' instanceAvailabilityGroupName, partnerEndpoint,'
+                                            ' distributedAvailabilityGroupName, instanceLinkRole,'
+                                            ' partnerLinkRole, failoverMode, seedingMode.',
+                                doc_link='aka.ms/mi-link-rest-api-get')
 
 @register_command(
     "sql mi link show",
