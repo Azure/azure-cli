@@ -970,7 +970,8 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         security_posture_reference_id=None, security_posture_reference_exclude_extensions=None,
                         enable_resilient_vm_creation=None, enable_resilient_vm_deletion=None,
                         additional_scheduled_events=None, enable_user_reboot_scheduled_events=None,
-                        enable_user_redeploy_scheduled_events=None):
+                        enable_user_redeploy_scheduled_events=None,
+                        skuprofile_vmsizes=None, skuprofile_allostrat=None):
 
     # Build IP configuration
     ip_configuration = {}
@@ -1529,6 +1530,19 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
         if not vmss_properties.get('additionalCapabilities'):
             vmss_properties['additionalCapabilities'] = {}
         vmss_properties['additionalCapabilities']['hibernationEnabled'] = enable_hibernation
+
+    if skuprofile_vmsizes:
+        sku_profile_vmsizes_list = []
+        for vm_size in skuprofile_vmsizes:
+            vmsize_obj = {
+                'name': vm_size
+            }
+            sku_profile_vmsizes_list.append(vmsize_obj)
+        sku_profile = {
+            'vmSizes': sku_profile_vmsizes_list,
+            'allocationStrategy': skuprofile_allostrat
+        }
+        vmss_properties['skuProfile'] = sku_profile
 
     vmss = {
         'type': 'Microsoft.Compute/virtualMachineScaleSets',
