@@ -449,7 +449,6 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
     # Test create container with VNET argument validations.
     @ResourceGroupPreparer()
     def test_container_create_with_vnet(self, resource_group, resource_group_location):
-        from msrestazure.tools import resource_id
         from azure.core.exceptions import HttpResponseError
         from knack.util import CLIError
 

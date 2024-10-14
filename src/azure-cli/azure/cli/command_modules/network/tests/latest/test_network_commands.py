@@ -21,7 +21,7 @@ from azure.cli.testsdk import (
 
 from knack.util import CLIError
 
-from msrestazure.tools import resource_id
+from azure.mgmt.core.tools import resource_id
 
 from .credential_replacer import ExpressRoutePortLOAContentReplacer
 
@@ -284,7 +284,6 @@ class NetworkPrivateEndpoints(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='fanqiu_cli_test_network_private_endpoints', location='CentralUSEuap')
     @StorageAccountPreparer(name_prefix='saplr', kind='StorageV2')
     def test_network_private_endpoint_private_dns_zone_group(self, resource_group, storage_account):
-        from msrestazure.azure_exceptions import CloudError
         self.kwargs.update({
             'sa': storage_account,
             'loc': 'CentralUSEuap',
@@ -372,6 +371,29 @@ class NetworkPrivateEndpoints(ScenarioTest):
 
 class NetworkPrivateLinkService(ScenarioTest):
 
+    @ResourceGroupPreparer(name_prefix='cli_test_pls_udr')
+    @AllowLargeResponse()
+    def test_network_private_link_service_udr(self, resource_group):
+
+        self.kwargs.update({
+            'sku': 'Standard',
+            'vnet': 'vnet1',
+            'vnet_prefix': '10.0.0.0/16',
+            'subnet1': 'subnet1',
+            'subnet_prefix': '10.0.0.0/24',
+            'location': 'westcentralus',
+            'lks1': 'lks1',
+            'destination_ip': '10.0.0.10'
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet} --address-prefixes {vnet_prefix} --subnet-name {subnet1} --subnet-prefixes {subnet_prefix} -l {location}')
+        self.cmd('az network vnet subnet update -n {subnet1} --vnet-name {vnet} -g {rg} --pls-network-policies disabled')
+        self.cmd('network private-link-service create -n {lks1} -g {rg} --vnet-name {vnet} --subnet {subnet1} --destination-ip-address {destination_ip} -l {location}', checks=[
+            self.check('type', 'Microsoft.Network/privateLinkServices'),
+            self.check('enableProxyProtocol', False),
+            self.check('destinationIPAddress', '{destination_ip}')
+        ])
+
     @ResourceGroupPreparer(name_prefix='cli_test_network_private_link_service')
     @AllowLargeResponse()
     def test_network_private_link_service(self, resource_group):
@@ -382,11 +404,12 @@ class NetworkPrivateLinkService(ScenarioTest):
             'vnet': 'vnet1',
             'subnet1': 'subnet1',
             'subnet2': 'subnet2',
-            'location': 'centralus',
+            'location': 'westcentralus',
             'ip': 'pubip1',
             'lks1': 'lks1',
             'lks2': 'lks2',
-            'sub1': '00000000-0000-0000-0000-000000000000'
+            'sub1': '00000000-0000-0000-0000-000000000000',
+            'destination_ip': '10.0.0.1'
         })
 
         self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet1} -l {location}')
@@ -394,6 +417,9 @@ class NetworkPrivateLinkService(ScenarioTest):
         self.cmd('network vnet subnet update -g {rg} -n {subnet1} --vnet-name {vnet} --disable-private-link-service-network-policies')
         self.cmd('network vnet subnet create -g {rg} -n {subnet2} --vnet-name {vnet} --address-prefixes 10.0.2.0/24 --default-outbound false')
         self.cmd('network vnet subnet update -g {rg} -n {subnet2} --vnet-name {vnet} --disable-private-endpoint-network-policies')
+
+        with self.assertRaises(HttpResponseError, msg=' either one LoadBalancerFrontendIpConfiguration if PLS with LB based scenario or DestinationIPAddress if PLS UDR and NSG scenario'):
+            self.cmd('network private-link-service create -g {rg} -n {lks1} --vnet-name {vnet} --subnet {subnet1} --lb-name {lb} --lb-frontend-ip-configs LoadBalancerFrontEnd -l {location} --destination-ip-address {destination_ip}')
         self.cmd('network private-link-service create -g {rg} -n {lks1} --vnet-name {vnet} --subnet {subnet1} --lb-name {lb} --lb-frontend-ip-configs LoadBalancerFrontEnd -l {location}  --enable-proxy-protocol', checks=[
             self.check('type', 'Microsoft.Network/privateLinkServices'),
             self.check('length(ipConfigurations)', 1),
@@ -3481,7 +3507,6 @@ class NetworkExpressRouteGlobalReachScenarioTest(ScenarioTest):
     @record_only()  # record_only as the express route is extremely expensive, contact service team for an available ER
     @ResourceGroupPreparer(name_prefix='cli_test_express_route_peer_connection')
     def test_network_express_route_peer_connection(self, resource_group):
-        from msrestazure.azure_exceptions import CloudError
         from azure.core.exceptions import ResourceNotFoundError
         self.kwargs.update({
             'er1': 'er1',

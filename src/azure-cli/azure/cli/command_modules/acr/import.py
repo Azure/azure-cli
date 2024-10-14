@@ -5,7 +5,7 @@
 
 from knack.util import CLIError
 from knack.log import get_logger
-from msrestazure.tools import is_valid_resource_id, parse_resource_id
+from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
 from azure.cli.command_modules.acr._docker_utils import get_login_server_suffix
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import sdk_no_wait
@@ -118,7 +118,7 @@ def acr_import(cmd,  # pylint: disable=too-many-locals
 
 
 def _handle_import_exception(e, cmd, source_registry, source_image, registry):
-    from msrestazure.azure_exceptions import ClientException
+    from msrest.exceptions import ClientException
     try:
         # if command fails, it might be because user specified registry twice in --source and --registry
         if source_registry:

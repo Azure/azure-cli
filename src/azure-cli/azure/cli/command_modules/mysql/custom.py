@@ -12,9 +12,8 @@ from dateutil.tz import tzutc
 from knack.log import get_logger
 from urllib.request import urlretrieve
 from importlib import import_module
-from msrestazure.azure_exceptions import CloudError
-from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id
-from azure.core.exceptions import ResourceNotFoundError
+from azure.mgmt.core.tools import resource_id, is_valid_resource_id, parse_resource_id
+from azure.core.exceptions import ResourceNotFoundError, HttpResponseError
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.command_modules.mysql.random.generate import generate_username
 from azure.cli.core.util import CLIError, sdk_no_wait, user_confirmation
@@ -1259,7 +1258,7 @@ def flexible_parameter_update(client, server_name, configuration_name, resource_
             parameter = client.get(resource_group_name, server_name, configuration_name)
             value = parameter.default_value  # reset value to default
             source = "system-default"
-        except CloudError as e:
+        except HttpResponseError as e:
             raise CLIError('Unable to get default parameter value: {}.'.format(str(e)))
     elif source is None:
         source = "user-override"
@@ -1285,7 +1284,7 @@ def flexible_parameter_update_batch(client, server_name, resource_group_name, so
                 parameter = client.get(resource_group_name, server_name, name)
                 value = parameter.default_value  # reset value to default
                 source = "system-default"
-            except CloudError as e:
+            except HttpResponseError as e:
                 raise CLIError('Unable to get default parameter value: {}.'.format(str(e)))
         elif source is None:
             source = "user-override"

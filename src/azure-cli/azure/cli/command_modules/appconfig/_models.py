@@ -97,7 +97,6 @@ def convert_keyvalue_to_configurationsetting(keyvalue=None):
                                 label=keyvalue.label,
                                 content_type=keyvalue.content_type,
                                 value=keyvalue.value,
-                                last_modified=keyvalue.last_modified,
                                 tags=keyvalue.tags,
                                 read_only=keyvalue.locked,
                                 etag=keyvalue.etag)
