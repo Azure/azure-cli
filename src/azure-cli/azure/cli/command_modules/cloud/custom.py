@@ -38,7 +38,7 @@ def _populate_from_metadata_endpoint(cloud, arm_endpoint, session=None):
     endpoints_in_metadata = ['active_directory_graph_resource_id',
                              'active_directory_resource_id', 'active_directory']
     METADATA_ENDPOINT_SUFFIX = '/metadata/endpoints?api-version=2015-01-01'
-    if not arm_endpoint or all([cloud.endpoints.has_endpoint_set(n) for n in endpoints_in_metadata]):
+    if not arm_endpoint or all([cloud.endpoints.has_endpoint_set(n) for n in endpoints_in_metadata]):  # pylint: disable=use-a-generator
         return
     import requests
     error_msg_fmt = "Unable to get endpoints from the cloud.\n{}"
