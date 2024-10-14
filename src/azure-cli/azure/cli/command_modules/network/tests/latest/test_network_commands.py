@@ -2411,6 +2411,7 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_custom_rule_')
     def test_network_app_gateway_waf_custom_rule(self, resource_group):
+        from azure.cli.core.azclierror import ArgumentUsageError
         self.kwargs.update({
             'waf': 'agp1',
             'rule': 'rule1',
@@ -2450,7 +2451,7 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                      self.check('matchConditions | length(@)', 1)
                  ])
         # validate match condition
-        with self.assertRaisesRegex(SystemExit, '2'):
+        with self.assertRaisesRegex(ArgumentUsageError, 'requires --values'):
             self.cmd("network application-gateway waf-policy custom-rule match-condition add -g {rg} "
                      "--policy-name {waf} -n {rule} "
                      "--match-variables RequestHeaders.value --operator Contains --transform lowercase")
