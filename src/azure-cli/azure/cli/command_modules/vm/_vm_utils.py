@@ -711,6 +711,9 @@ def import_aaz_by_profile(profile, module_name):
 
 
 def generate_ssh_keys_ed25519(private_key_filepath, public_key_filepath):
+    def _open(filename, mode):
+        return os.open(filename, flags=os.O_WRONLY | os.O_TRUNC | os.O_CREAT, mode=mode)
+
     from cryptography.hazmat.primitives import serialization
     from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
@@ -727,18 +730,14 @@ def generate_ssh_keys_ed25519(private_key_filepath, public_key_filepath):
         encryption_algorithm=serialization.NoEncryption()
     )
 
-    with os.fdopen(os.open(private_key_filepath, flags=os.O_WRONLY | os.O_TRUNC | os.O_CREAT, mode=384, ), "w", ) as f:
-        f.write(
-            private_bytes.decode()
-        )
-    os.chmod(private_key_filepath, 0o600)
+    with os.fdopen(_open(private_key_filepath, 0o600), "w") as f:
+        f.write(private_bytes.decode())
 
-    with open(public_key_filepath, 'w') as public_key_file:
-        s = public_key.public_bytes(
-            encoding=serialization.Encoding.OpenSSH,
-            format=serialization.PublicFormat.OpenSSH)
-        public_key = s.decode(encoding="utf8").replace("\n", "")
-        public_key_file.write(public_key)
-    os.chmod(public_key_filepath, 0o644)
+    s = public_key.public_bytes(
+        encoding=serialization.Encoding.OpenSSH,
+        format=serialization.PublicFormat.OpenSSH)
+    public_key = s.decode(encoding="utf8").replace("\n", "")
+    with os.fdopen(_open(public_key_filepath, 0o644), 'w') as f:
+        f.write(public_key)
 
     return public_key
