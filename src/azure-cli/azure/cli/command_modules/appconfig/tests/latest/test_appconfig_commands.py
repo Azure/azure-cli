@@ -27,6 +27,10 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 class AppConfigMgmtScenarioTest(ScenarioTest):
 
+    def __init__(self, *args, **kwargs):
+        kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
+        super(AppConfigMgmtScenarioTest, self).__init__(*args, **kwargs)
+
     @ResourceGroupPreparer(parameter_name_for_location='location')
     @AllowLargeResponse()
     def test_azconfig_mgmt(self, resource_group, location):
@@ -376,6 +380,10 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
 
 class AppConfigCredentialScenarioTest(ScenarioTest):
 
+    def __init__(self, *args, **kwargs):
+        kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
+        super(AppConfigCredentialScenarioTest, self).__init__(*args, **kwargs)
+
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_credential(self, resource_group, location):
@@ -408,6 +416,10 @@ class AppConfigCredentialScenarioTest(ScenarioTest):
 
 
 class AppConfigIdentityScenarioTest(ScenarioTest):
+
+    def __init__(self, *args, **kwargs):
+        kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
+        super(AppConfigIdentityScenarioTest, self).__init__(*args, **kwargs)
 
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_identity(self, resource_group, location):
@@ -448,6 +460,10 @@ class AppConfigIdentityScenarioTest(ScenarioTest):
 
 
 class AppConfigKVScenarioTest(ScenarioTest):
+
+    def __init__(self, *args, **kwargs):
+        kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
+        super(AppConfigKVScenarioTest, self).__init__(*args, **kwargs)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
@@ -567,7 +583,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
         # KeyVault reference tests
         keyvault_key = "HostSecrets"
         keyvault_id = "https://fake.vault.azure.net/secrets/fakesecret"
-        keyvault_value = "{{\"uri\":\"https://fake.vault.azure.net/secrets/fakesecret\"}}"
+        keyvault_value = f"{{{json.dumps({'uri': keyvault_id})}}}"
 
         self.kwargs.update({
             'key': keyvault_key,
@@ -761,6 +777,10 @@ class AppConfigKVScenarioTest(ScenarioTest):
 
 
 class AppConfigImportExportScenarioTest(ScenarioTest):
+
+    def __init__(self, *args, **kwargs):
+        kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
+        super(AppConfigImportExportScenarioTest, self).__init__(*args, **kwargs)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
@@ -1252,7 +1272,7 @@ class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
         # KeyVault reference tests
         keyvault_key = "HostSecrets"
         keyvault_id = "https://fake.vault.azure.net/secrets/fakesecret"
-        appconfig_keyvault_value = "{{\"uri\":\"https://fake.vault.azure.net/secrets/fakesecret\"}}"
+        appconfig_keyvault_value = f"{{{json.dumps({'uri': keyvault_id})}}}"
         appsvc_keyvault_value = "@Microsoft.KeyVault(SecretUri=https://fake.vault.azure.net/secrets/fakesecret)"
         label = 'ForExportToAppService'
         self.kwargs.update({
@@ -1304,7 +1324,7 @@ class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
 
         # Update keyvault reference for slot export / import testing
         slot_keyvault_id = "https://fake.vault.azure.net/secrets/slotsecret"
-        appconfigslot_keyvault_value = "{{\"uri\":\"https://fake.vault.azure.net/secrets/slotsecret\"}}"
+        appconfigslot_keyvault_value = f"{{{json.dumps({'uri': slot_keyvault_id})}}}"
         appsvcslot_keyvault_value = "@Microsoft.KeyVault(SecretUri=https://fake.vault.azure.net/secrets/slotsecret)"
         label = 'ForExportToAppServiceSlot'
         self.kwargs.update({
@@ -1354,7 +1374,7 @@ class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
         alt_label = 'ImportedAltSyntaxFromAppService'
         alt_keyvault_key = "AltKeyVault"
         alt_keyvault_value = "@Microsoft.KeyVault(VaultName=myvault;SecretName=mysecret;SecretVersion=ec96f02080254f109c51a1f14cdb1931)"
-        appconfig_keyvault_value = "{{\"uri\":\"https://myvault.vault.azure.net/secrets/mysecret/ec96f02080254f109c51a1f14cdb1931\"}}"
+        appconfig_keyvault_value = f"{{{json.dumps({'uri': 'https://myvault.vault.azure.net/secrets/mysecret/ec96f02080254f109c51a1f14cdb1931'})}}}"
         keyvault_ref = "{0}={1}".format(alt_keyvault_key, alt_keyvault_value)
         slotsetting_tag = {"AppService:SlotSetting": "true"}
         self.kwargs.update({
@@ -1372,6 +1392,10 @@ class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
 
 
 class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
+
+    def __init__(self, *args, **kwargs):
+        kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
+        super(AppConfigImportExportNamingConventionScenarioTest, self).__init__(*args, **kwargs)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
@@ -1479,6 +1503,10 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
 
 class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
 
+    def __init__(self, *args, **kwargs):
+        kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
+        super(AppConfigToAppConfigImportExportScenarioTest, self).__init__(*args, **kwargs)
+    
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_appconfig_to_appconfig_import_export(self, resource_group, location):
@@ -1675,6 +1703,10 @@ class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
 
 
 class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
+
+    def __init__(self, *args, **kwargs):
+        kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
+        super(AppConfigJsonContentTypeScenarioTest, self).__init__(*args, **kwargs)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
@@ -1959,7 +1991,7 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
         # Add new KeyVault reference
         keyvault_key = "HostSecrets"
         keyvault_id = "https://fake.vault.azure.net/secrets/fakesecret"
-        keyvault_value = "{{\"uri\":\"https://fake.vault.azure.net/secrets/fakesecret\"}}"
+        keyvault_value = f"{{{json.dumps({'uri': keyvault_id})}}}"
         self.kwargs.update({
             'key': keyvault_key,
             'secret_identifier': keyvault_id
@@ -2103,6 +2135,10 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
 
 
 class AppConfigFeatureScenarioTest(ScenarioTest):
+
+    def __init__(self, *args, **kwargs):
+        kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
+        super(AppConfigFeatureScenarioTest, self).__init__(*args, **kwargs)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
@@ -2517,6 +2553,10 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
 
 class AppConfigFeatureFilterScenarioTest(ScenarioTest):
 
+    def __init__(self, *args, **kwargs):
+        kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
+        super(AppConfigFeatureFilterScenarioTest, self).__init__(*args, **kwargs)
+
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_feature_filter(self, resource_group, location):
@@ -2771,6 +2811,10 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
 
 class AppConfigKeyValidationScenarioTest(ScenarioTest):
 
+    def __init__(self, *args, **kwargs):
+        kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
+        super(AppConfigKeyValidationScenarioTest, self).__init__(*args, **kwargs)
+    
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_key_validation(self, resource_group, location):
@@ -2858,6 +2902,10 @@ class AppConfigKeyValidationScenarioTest(ScenarioTest):
 
 class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
 
+    def __init__(self, *args, **kwargs):
+        kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
+        super(AppConfigAadAuthLiveScenarioTest, self).__init__(*args, **kwargs)
+    
     @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
@@ -2982,7 +3030,7 @@ class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
         # Add a KeyVault reference
         keyvault_key = "HostSecrets"
         keyvault_id = "https://fake.vault.azure.net/secrets/fakesecret"
-        appconfig_keyvault_value = "{{\"uri\":\"https://fake.vault.azure.net/secrets/fakesecret\"}}"
+        appconfig_keyvault_value = f"{{{json.dumps({'uri': keyvault_id})}}}"
         self.kwargs.update({
             'key': keyvault_key,
             'secret_identifier': keyvault_id
@@ -3015,6 +3063,11 @@ class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
 
 
 class AppconfigReplicaLiveScenarioTest(ScenarioTest):
+
+    def __init__(self, *args, **kwargs):
+        kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
+        super(AppconfigReplicaLiveScenarioTest, self).__init__(*args, **kwargs)
+
     @ResourceGroupPreparer(parameter_name_for_location='location')
     @AllowLargeResponse()
     def test_azconfig_replica_mgmt(self, resource_group, location):

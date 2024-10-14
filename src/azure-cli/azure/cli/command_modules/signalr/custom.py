@@ -11,6 +11,8 @@ from azure.mgmt.signalr.models import (
     SignalRResource,
     SignalRNetworkACLs)
 
+from azure.mgmt.signalr.operations import SignalROperations
+
 
 def signalr_create(client, signalr_name, resource_group_name,
                    sku, unit_count=1, location=None, tags=None, service_mode='Default', enable_message_logs=False, allowed_origins=None, default_action="Allow"):
@@ -42,6 +44,16 @@ def signalr_list(client, resource_group_name=None):
 
 def signalr_show(client, signalr_name, resource_group_name):
     return client.get(resource_group_name, signalr_name)
+
+
+def signalr_start(client: SignalROperations, signalr_name, resource_group_name):
+    parameter = SignalRResource(location=None, resource_stopped=False)
+    return client.begin_update(resource_group_name, signalr_name, parameter)
+
+
+def signalr_stop(client: SignalROperations, signalr_name, resource_group_name):
+    parameter = SignalRResource(location=None, resource_stopped=True)
+    return client.begin_update(resource_group_name, signalr_name, parameter)
 
 
 def signalr_restart(client, signalr_name, resource_group_name):

@@ -2988,6 +2988,24 @@ class FunctionAppConfigTest(ScenarioTest):
         self.cmd(
             'functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
 
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_config_set(self, resource_group, storage_account):
+        plan = self.create_random_name(prefix='funcapplinplan', length=24)
+        functionapp = self.create_random_name(
+            prefix='functionapp-windows', length=24)
+        self.cmd('functionapp plan create -g {} -n {} --sku S1'.format(resource_group, plan))
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime dotnet-isolated --runtime-version 8 --functions-version 4'
+                 .format(resource_group, functionapp, plan, storage_account))
+        self.cmd('functionapp config set -g {} -n {} --always-on true --http20-enabled true --min-tls-version "1.2" --ftps-state "Disabled" --remote-debugging-enabled false --use-32bit-worker-process'
+                 .format(resource_group, functionapp)).assert_with_checks([
+                     JMESPathCheck('alwaysOn', True),
+                     JMESPathCheck('http20Enabled', True),
+                     JMESPathCheck('minTlsVersion', '1.2'),
+                     JMESPathCheck('ftpsState', 'Disabled'),
+                     JMESPathCheck('remoteDebuggingEnabled', False),
+                     JMESPathCheck('use32BitWorkerProcess', True)])
+
 class FunctionAppLanguageEOLTest(ScenarioTest):
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()

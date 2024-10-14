@@ -23,10 +23,10 @@ from azure.cli.core.azclierror import (
     MutuallyExclusiveArgumentError)
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import open_page_in_browser
+from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id
 from knack.log import get_logger
 from knack.prompting import prompt_y_n, prompt as prompt_str
 
-from msrestazure.tools import parse_resource_id, is_valid_resource_id
 from msrest.exceptions import DeserializationError
 
 from .containerapp_job_decorator import ContainerAppJobDecorator, ContainerAppJobCreateDecorator
