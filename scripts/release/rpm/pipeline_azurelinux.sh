@@ -11,6 +11,9 @@ set -exv
 
 CLI_VERSION=`cat src/azure-cli/azure/cli/__main__.py | grep __version__ | sed s/' '//g | sed s/'__version__='// |  sed s/\"//g`
 
+# PIP_INDEX_URL env must exist in `docker build --secret`, use an empty string if it doesn't exist.
+export PIP_INDEX_URL=${PIP_INDEX_URL}
+
 # Create a container image that includes the source code and a built RPM using this file.
 docker build \
     --target build-env \
