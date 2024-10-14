@@ -719,8 +719,7 @@ def generate_ssh_keys_ed25519(private_key_filepath, public_key_filepath):
 
     ssh_dir = os.path.dirname(private_key_filepath)
     if not os.path.exists(ssh_dir):
-        os.makedirs(ssh_dir)
-        os.chmod(ssh_dir, 0o700)
+        os.makedirs(ssh_dir, mode=0o700)
 
     private_key = Ed25519PrivateKey.generate()
     public_key = private_key.public_key()
