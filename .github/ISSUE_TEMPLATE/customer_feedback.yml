@@ -1,0 +1,52 @@
+name: "Customer feedback"
+description: Use this template to move reference feedback from UUF or azure-docs-cli
+labels: ["customer feedback"]
+body:
+  - type: markdown
+    id: example
+    attributes:
+      value: >
+        Thanks for helping us to improve Azure CLI reference content.
+        
+        - Make sure you are able to reproduce this issue on the latest released version of [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli).
+        
+        - Please search the existing issues to see if there has been a similar issue filed.
+        
+        - If you want to discover useful tips on how to avoid common pitfalls and use the Azure CLI successfully, please refer to [Tips for using the Azure CLI successfully](https://learn.microsoft.com/en-us/cli/azure/use-cli-effectively).
+  - type: textarea
+    id: request
+    attributes:
+      label: Engineering request
+      description: >
+        What action would you like the engineering team to take as a result of this customer feedback?
+      placeholder: >
+        A clear and concise request. Use a numbered list if you have more than one request
+    validations:
+      required: true
+  - type: textarea
+    id: feedback
+    attributes:
+      label: Customer feedback
+      description: >
+        Please copy the UUF or MicrosoftDocs/azure-docs-cli reference feedback here.
+      placeholder: >
+        Paste customer feedback here. Include where the feedback originated.
+    validations:
+      required: true
+  - type: textarea
+    id: cmd
+    attributes:
+      label: Related command
+      description: Please provide the related commands with az {command} if you can, so that we can quickly route to the related team for help.
+      placeholder: e.g., `az vm create`
+    validations:
+      required: true
+  - type: textarea
+    id: env
+    attributes:
+      label: Environment Summary
+      description: What was the version of the Azure CLI when this customer feedback was received?
+      placeholder: |
+        azure-cli                         2.48.1
+    validations:
+      required: true
