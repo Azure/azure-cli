@@ -2245,6 +2245,7 @@ class NetworkAppGatewayPublicIpScenarioTest(ScenarioTest):
 
 class NetworkAppGatewayWafConfigScenarioTest20170301(ScenarioTest):
 
+    @unittest.skip('SKU for this scenario is deprecated.')
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_config')
     def test_network_app_gateway_waf_config(self, resource_group):
