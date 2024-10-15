@@ -2334,46 +2334,28 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
         )
         self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
 
-    def common_set_up_secure_boot(self):
+    def common_set_up_agentpool_security_profile(self):
         dec_1 = AKSAgentPoolAddDecorator(
             self.cmd,
             self.client,
-            {"enable_secure_boot": True},
+            {
+                "enable_secure_boot": True,
+                "enable_vtpm": True,
+            },
             self.resource_type,
             self.agentpool_decorator_mode,
         )
         # fail on passing the wrong agentpool object
         with self.assertRaises(CLIInternalError):
-            dec_1.set_up_secure_boot(None)
+            dec_1.set_up_agentpool_security_profile(None)
         agentpool_1 = self.create_initialized_agentpool_instance(restore_defaults=False)
         dec_1.context.attach_agentpool(agentpool_1)
-        dec_agentpool_1 = dec_1.set_up_secure_boot(agentpool_1)
+        dec_agentpool_1 = dec_1.set_up_agentpool_security_profile(agentpool_1)
         dec_agentpool_1 = self._restore_defaults_in_agentpool(dec_agentpool_1)
         ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
             security_profile=self.models.AgentPoolSecurityProfile(
-                enable_secure_boot=True
-            )
-        )
-        self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
-
-    def common_set_up_vtpm(self):
-        dec_1 = AKSAgentPoolAddDecorator(
-            self.cmd,
-            self.client,
-            {"enable_vtpm": True},
-            self.resource_type,
-            self.agentpool_decorator_mode,
-        )
-        # fail on passing the wrong agentpool object
-        with self.assertRaises(CLIInternalError):
-            dec_1.set_up_vtpm(None)
-        agentpool_1 = self.create_initialized_agentpool_instance(restore_defaults=False)
-        dec_1.context.attach_agentpool(agentpool_1)
-        dec_agentpool_1 = dec_1.set_up_vtpm(agentpool_1)
-        dec_agentpool_1 = self._restore_defaults_in_agentpool(dec_agentpool_1)
-        ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
-            security_profile=self.models.AgentPoolSecurityProfile(
-                enable_vtpm=True
+                enable_secure_boot=True,
+                enable_vtpm=True,
             )
         )
         self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
@@ -2426,11 +2408,8 @@ class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCom
     def test_set_up_agentpool_windows_profile(self):
         self.common_set_up_agentpool_windows_profile()
 
-    def test_set_up_secure_boot(self):
-        self.common_set_up_secure_boot()
-
-    def test_set_up_vtpm(self):
-        self.common_set_up_vtpm()
+    def test_set_up_agentpool_security_profile(self):
+        self.common_set_up_agentpool_security_profile()
 
     def test_construct_agentpool_profile_default(self):
         import inspect
@@ -2579,11 +2558,8 @@ class AKSAgentPoolAddDecoratorManagedClusterModeTestCase(AKSAgentPoolAddDecorato
     def test_set_up_agentpool_windows_profile(self):
         self.common_set_up_agentpool_windows_profile()
 
-    def test_set_up_secure_boot(self):
-        self.common_set_up_secure_boot()
-
-    def test_set_up_vtpm(self):
-        self.common_set_up_vtpm()
+    def test_set_up_agentpool_security_profile(self):
+        self.common_set_up_agentpool_security_profile()
 
     def test_construct_agentpool_profile_default(self):
         import inspect

@@ -11762,6 +11762,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                 "resource_type": "Microsoft.ContainerService/ManagedClusters",
                 "node_pool_name": node_pool_name,
                 "node_pool_name_second": node_pool_name_second,
+                "node_pool_name_third": node_pool_name_third,
                 "ssh_key_value": self.generate_ssh_keys(),
             }
         )
