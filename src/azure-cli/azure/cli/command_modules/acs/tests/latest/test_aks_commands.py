@@ -11752,6 +11752,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         aks_name = self.create_random_name("cliakstest", 16)
         node_pool_name = self.create_random_name("c", 6)
         node_pool_name_second = self.create_random_name("c", 6)
+        node_pool_name_third = self.create_random_name("c", 6)
         self.kwargs.update(
             {
                 "resource_group": resource_group,
@@ -11794,13 +11795,27 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             ],
         )
 
-        # update to disable
+        # 3. update to disable
         self.cmd(
             "aks nodepool update --resource-group={resource_group} --cluster-name={name} --name={node_pool_name_second} "
             "--disable-secure-boot",
             checks=[
                 self.check("provisioningState", "Succeeded"),
                 self.check("securityProfile.enableSecureBoot", False),
+            ],
+        )
+
+        # 3. add another nodepool
+        self.cmd(
+            "aks nodepool add "
+            "--resource-group={resource_group} "
+            "--cluster-name={name} "
+            "--name={node_pool_name_third} "
+            "--os-type Linux ",
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("securityProfile.enableSecureBoot", False),
+                self.check("securityProfile.enableVtpm", False),
             ],
         )
 

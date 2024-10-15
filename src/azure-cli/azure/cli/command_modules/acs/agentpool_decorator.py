@@ -405,6 +405,7 @@ class AKSAgentPoolContext(BaseAKSContext):
             # try to read the property value corresponding to the parameter from the `agentpool` object
             if (
                 self.agentpool and
+                hasattr(self.agentpool, "security_profile") and
                 self.agentpool.security_profile is not None and
                 self.agentpool.security_profile.enable_vtpm is not None
             ):
@@ -463,6 +464,7 @@ class AKSAgentPoolContext(BaseAKSContext):
             # try to read the property value corresponding to the parameter from the `agentpool` object
             if (
                 self.agentpool and
+                hasattr(self.agentpool, "security_profile") and
                 self.agentpool.security_profile is not None and
                 self.agentpool.security_profile.enable_secure_boot is not None
             ):
@@ -1799,33 +1801,26 @@ class AKSAgentPoolAddDecorator:
         agentpool.capacity_reservation_group_id = self.context.get_crg_id()
         return agentpool
 
-    def set_up_vtpm(self, agentpool: AgentPool) -> AgentPool:
-        """Set up vtpm property for the AgentPool object.
+    def set_up_agentpool_security_profile(self, agentpool: AgentPool) -> AgentPool:
+        """Set up security profile for the AgentPool object.
 
         :return: the AgentPool object
         """
         self._ensure_agentpool(agentpool)
 
-        if self.context.get_enable_vtpm():
-            if agentpool.security_profile is None:
+        enable_vtpm = self.context.get_enable_vtpm()
+        enable_secure_boot = self.context.get_enable_secure_boot()
+
+        # Construct AgentPoolSecurityProfile if one of the fields has been set
+        if enable_vtpm:
+            agentpool.security_profile = self.models.AgentPoolSecurityProfile()  # pylint: disable=no-member
+            agentpool.security_profile.enable_vtpm = enable_vtpm
+
+        if enable_secure_boot:
+            if not agentpool.security_profile:
                 agentpool.security_profile = self.models.AgentPoolSecurityProfile()  # pylint: disable=no-member
+            agentpool.security_profile.enable_secure_boot = enable_secure_boot
 
-            agentpool.security_profile.enable_vtpm = True
-
-        # Default is disabled so no need to worry about that here
-        return agentpool
-
-    def set_up_secure_boot(self, agentpool: AgentPool) -> AgentPool:
-        """Set up secure boot property for the AgentPool object."""
-        self._ensure_agentpool(agentpool)
-
-        if self.context.get_enable_secure_boot():
-            if agentpool.security_profile is None:
-                agentpool.security_profile = self.models.AgentPoolSecurityProfile()  # pylint: disable=no-member
-
-            agentpool.security_profile.enable_secure_boot = True
-
-        # Default is disabled so no need to worry about that here
         return agentpool
 
     def set_up_agentpool_network_profile(self, agentpool: AgentPool) -> AgentPool:
@@ -1903,10 +1898,8 @@ class AKSAgentPoolAddDecorator:
         agentpool = self.set_up_agentpool_windows_profile(agentpool)
         # set up crg id
         agentpool = self.set_up_crg_id(agentpool)
-        # set up vtpm
-        agentpool = self.set_up_vtpm(agentpool)
-        # set up secure boot
-        agentpool = self.set_up_secure_boot(agentpool)
+        # set up agentpool security profile
+        agentpool = self.set_up_agentpool_security_profile(agentpool)
         # restore defaults
         if not bypass_restore_defaults:
             agentpool = self._restore_defaults_in_agentpool(agentpool)
