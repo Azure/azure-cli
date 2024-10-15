@@ -6,7 +6,7 @@
 from azure.cli.testsdk.preparers import RoleBasedServicePrincipalPreparer
 from azure.cli.testsdk.scenario_tests.utilities import is_text_payload
 from azure.cli.testsdk.utilities import GraphClientPasswordReplacer
-from msrestazure.tools import resource_id
+from azure.mgmt.core.tools import resource_id
 
 MOCK_GUID = '00000000-0000-0000-0000-000000000001'
 MOCK_SECRET = 'fake-secret'

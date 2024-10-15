@@ -138,7 +138,7 @@ jobs:
   displayName: 'Verify src/azure-cli/requirements.*.Darwin.txt'
   condition: succeeded()
   pool:
-    vmImage: 'macOS-12'
+    vmImage: ${{ variables.macos_pool }}
 
   steps:
   - task: UsePythonVersion@0
@@ -633,7 +633,7 @@ jobs:
   dependsOn: BuildHomebrewFormula
   condition: succeeded()
   pool:
-    vmImage: 'macOS-12'
+    vmImage: ${{ variables.macos_pool }}
   steps:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
@@ -677,7 +677,7 @@ jobs:
   # condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   condition: false
   pool:
-    vmImage: 'macOS-12'
+    vmImage: ${{ variables.macos_pool }}
   steps:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
@@ -911,12 +911,6 @@ jobs:
           pool: ${{ arch.pool }}
 
         # https://wiki.debian.org/DebianReleases
-        Buster ${{ arch.name }}:
-          # 10
-          deb_system: debian
-          distro: buster
-          arch: ${{ arch.value }}
-          pool: ${{ arch.pool }}
         Bullseye ${{ arch.name }}:
           # 11
           deb_system: debian
@@ -973,11 +967,6 @@ jobs:
         Noble ${{ arch.name }}:
           deb_system: ubuntu
           distro: noble
-          arch: ${{ arch.value }}
-          pool: ${{ arch.pool }}
-        Buster ${{ arch.name }}:
-          deb_system: debian
-          distro: buster
           arch: ${{ arch.value }}
           pool: ${{ arch.pool }}
         Bullseye ${{ arch.name }}:

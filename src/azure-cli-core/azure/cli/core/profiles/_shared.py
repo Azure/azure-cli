@@ -104,7 +104,6 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_DATALAKE_STORE = ('azure.cli.command_modules.dls.vendored_sdks.azure_mgmt_datalake_store', None)
     MGMT_DATAMIGRATION = ('azure.mgmt.datamigration', None)
     MGMT_EVENTGRID = ('azure.mgmt.eventgrid', None)
-    MGMT_DEVTESTLABS = ('azure.mgmt.devtestlabs', None)
     MGMT_MAPS = ('azure.mgmt.maps', None)
     MGMT_POLICYINSIGHTS = ('azure.mgmt.policyinsights', None)
     MGMT_RDBMS = ('azure.mgmt.rdbms', None)
@@ -261,7 +260,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_ARO: '2023-11-22',
         ResourceType.MGMT_DATABOXEDGE: '2021-02-01-preview',
         ResourceType.MGMT_CUSTOMLOCATION: '2021-03-15-preview',
-        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2024-05-01'),
+        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2024-08-01'),
         ResourceType.MGMT_APPCONTAINERS: '2022-10-01',
     },
     '2020-09-01-hybrid': {
