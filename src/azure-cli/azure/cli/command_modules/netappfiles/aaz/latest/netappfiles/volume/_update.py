@@ -364,7 +364,7 @@ class Update(AAZCommand):
             arg_group="Properties",
             help="serviceLevel",
             nullable=True,
-            enum={"Flexible": "Flexible", "Premium": "Premium", "Standard": "Standard", "StandardZRS": "StandardZRS", "Ultra": "Ultra"},
+            enum={"Premium": "Premium", "Standard": "Standard", "StandardZRS": "StandardZRS", "Ultra": "Ultra"},
         )
         _args_schema.smb_access_based_enumeration = AAZStrArg(
             options=["--smb-access-enumeration", "--smb-access-based-enumeration"],

@@ -97,12 +97,6 @@ class Update(AAZCommand):
             help="If enabled (true) the pool can contain cool Access enabled volumes.",
             nullable=True,
         )
-        _args_schema.custom_throughput_mibps = AAZFloatArg(
-            options=["--custom-throughput-mibps"],
-            arg_group="Properties",
-            help="Maximum throughput in MiB/s that can be achieved by this pool and this will be accepted as input only for manual qosType pool with Flexible service level",
-            nullable=True,
-        )
         _args_schema.qos_type = AAZStrArg(
             options=["--qos-type"],
             arg_group="Properties",
@@ -114,7 +108,7 @@ class Update(AAZCommand):
             options=["--service-level"],
             arg_group="Properties",
             help="serviceLevel",
-            enum={"Flexible": "Flexible", "Premium": "Premium", "Standard": "Standard", "StandardZRS": "StandardZRS", "Ultra": "Ultra"},
+            enum={"Premium": "Premium", "Standard": "Standard", "StandardZRS": "StandardZRS", "Ultra": "Ultra"},
         )
         _args_schema.size = AAZIntArg(
             options=["--size"],
@@ -372,7 +366,6 @@ class Update(AAZCommand):
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("coolAccess", AAZBoolType, ".cool_access")
-                properties.set_prop("customThroughputMibps", AAZFloatType, ".custom_throughput_mibps", typ_kwargs={"nullable": True})
                 properties.set_prop("qosType", AAZStrType, ".qos_type")
                 properties.set_prop("serviceLevel", AAZStrType, ".service_level", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("size", AAZIntType, ".size", typ_kwargs={"flags": {"required": True}})
@@ -440,10 +433,6 @@ class _UpdateHelper:
         properties = _schema_capacity_pool_read.properties
         properties.cool_access = AAZBoolType(
             serialized_name="coolAccess",
-        )
-        properties.custom_throughput_mibps = AAZFloatType(
-            serialized_name="customThroughputMibps",
-            nullable=True,
         )
         properties.encryption_type = AAZStrType(
             serialized_name="encryptionType",

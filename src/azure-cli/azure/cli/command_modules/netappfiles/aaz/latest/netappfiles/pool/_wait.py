@@ -195,10 +195,6 @@ class Wait(AAZWaitCommand):
             properties.cool_access = AAZBoolType(
                 serialized_name="coolAccess",
             )
-            properties.custom_throughput_mibps = AAZFloatType(
-                serialized_name="customThroughputMibps",
-                nullable=True,
-            )
             properties.encryption_type = AAZStrType(
                 serialized_name="encryptionType",
                 nullable=True,
