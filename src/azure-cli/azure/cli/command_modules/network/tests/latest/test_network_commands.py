@@ -2669,26 +2669,28 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
         # case 1: Initialize(add) managed rule set
         self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
                  '--type OWASP --version 3.0 '
-                 '--group-name {csr_grp1} --rule rule-id=921100 --rule rule-id=921110')
+                 '--group-name {csr_grp1} --rule rule-id=921100 --rule rule-id=921110 sensitivity=low')
         self.cmd('network application-gateway waf-policy show -g {rg} -n {waf}', checks=[
             self.check('managedRules.managedRuleSets[0].ruleSetType', 'OWASP'),
             self.check('managedRules.managedRuleSets[0].ruleSetVersion', '3.0'),
             self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules | length(@)', 2),
             self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].ruleGroupName', self.kwargs['csr_grp1']),
-            self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules[0].ruleId', '921100')
+            self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules[0].ruleId', '921100'),
+            self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules[1].sensitivity', 'Low')
         ])
 
         # case 2: Append(add) another managed rule set to same rule group
         self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
                  '--type OWASP --version 3.0 '
-                 '--group-name {csr_grp1} --rule rule-id=921150')
+                 '--group-name {csr_grp1} --rule rule-id=921150 sensitivity=medium')
         self.cmd('network application-gateway waf-policy managed-rule rule-set list -g {rg} --policy-name {waf}',
                  checks=[
                      self.check('managedRuleSets[0].ruleSetType', 'OWASP'),
                      self.check('managedRuleSets[0].ruleSetVersion', '3.0'),
                      self.check('managedRuleSets[0].ruleGroupOverrides[0].rules | length(@)', 3),
                      self.check('managedRuleSets[0].ruleGroupOverrides[0].ruleGroupName', self.kwargs['csr_grp1']),
-                     self.check('managedRuleSets[0].ruleGroupOverrides[0].rules[2].ruleId', '921150')
+                     self.check('managedRuleSets[0].ruleGroupOverrides[0].rules[2].ruleId', '921150'),
+                     self.check('managedRuleSets[0].ruleGroupOverrides[0].rules[2].sensitivity', 'Medium')
                  ])
 
         # case 3: Add another managed rule set of different rule group
