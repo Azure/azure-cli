@@ -655,7 +655,7 @@ class CDNEndpointRuleAdd(_CDNEndpointUpdate):
         args_schema.cache_duration = AAZTimeArg(
             options=['--cache-duration'],
             help='The duration for which the content needs to be cached. '
-            'Allowed format is [d.]hh:mm:ss.',
+            'Allowed format is hh:mm:ss.xxxxxx',
         )
         args_schema.custom_fragment = AAZStrArg(
             options=['--custom-fragment'],
@@ -882,7 +882,7 @@ class CDNEndpointRuleActionAdd(_CDNEndpointUpdate):
         args_schema.cache_duration = AAZTimeArg(
             options=['--cache-duration'],
             help='The duration for which the content needs to be cached. '
-            'Allowed format is [d.]hh:mm:ss.',
+            'Allowed format is hh:mm:ss.xxxxxx',
         )
         args_schema.custom_fragment = AAZStrArg(
             options=['--custom-fragment'],

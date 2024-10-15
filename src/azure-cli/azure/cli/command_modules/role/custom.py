@@ -23,7 +23,7 @@ import dateutil.parser
 from dateutil.relativedelta import relativedelta
 from knack.log import get_logger
 from knack.util import CLIError, todict
-from msrestazure.azure_exceptions import CloudError
+from azure.core.exceptions import HttpResponseError
 
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import get_file_json, shell_safe_json_parse, is_guid
@@ -102,7 +102,7 @@ def _create_update_role_definition(cmd, role_definition, for_update):
         scopes = (scopes_in_definition if scopes_in_definition else
                   ['/subscriptions/' + definitions_client._config.subscription_id])
         if role_resource_id:
-            from msrestazure.tools import parse_resource_id
+            from azure.mgmt.core.tools import parse_resource_id
             role_id = parse_resource_id(role_resource_id)['name']
             role_name = role_definition['roleName']
         else:
@@ -275,7 +275,7 @@ def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=Non
                 if principal_dics.get(worker.get_role_property(i, 'principalId')):
                     worker.set_role_property(i, 'principalName',
                                              principal_dics[worker.get_role_property(i, 'principalId')])
-        except (CloudError, GraphError) as ex:
+        except (HttpResponseError, GraphError) as ex:
             # failure on resolving principal due to graph permission should not fail the whole thing
             logger.info("Failed to resolve graph object information per error '%s'", ex)
 
@@ -872,7 +872,7 @@ def _get_grant_permissions(client, client_sp_object_id=None, query_filter=None):
     try:
         # Make the REST request immediately so that errors can be raised and handled.
         return list(grant_info)
-    except CloudError as ex:
+    except HttpResponseError as ex:
         if ex.status_code == 404:
             raise CLIError("Service principal with appId or objectId '{id}' doesn't exist. "
                            "If '{id}' is an appId, make sure an associated service principal is created "
