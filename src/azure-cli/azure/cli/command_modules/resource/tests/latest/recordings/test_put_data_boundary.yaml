@@ -1,0 +1,56 @@
+interactions:
+- request:
+    body: '{"properties": {"dataBoundary": "EU"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - data-boundary create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '38'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --data-boundary --default
+      User-Agent:
+      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.11.9 (Windows-10-10.0.22631-SP0)
+    method: PUT
+    uri: https://management.azure.com/providers/Microsoft.Resources/dataBoundaries/default?api-version=2024-08-01
+  response:
+    body:
+      string: '{"error":{"code":"AuthorizationFailed","message":"The client ''skadhiresan@microsoft.com''
+        with object id ''ee9b91a6-4b39-4fb5-ba1e-b0a4e6bcd2a0'' does not have authorization
+        to perform action ''Microsoft.Resources/dataBoundaries/write'' over scope
+        ''/providers/Microsoft.Resources/dataBoundaries/default'' or the scope is
+        invalid. If access was recently granted, please refresh your credentials."}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '391'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 10 Oct 2024 17:35:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - gateway
+      x-msedge-ref:
+      - 'Ref A: 4DD7619717D747C3935052F0F3AFC98D Ref B: CO6AA3150219035 Ref C: 2024-10-10T17:35:14Z'
+    status:
+      code: 403
+      message: Forbidden
+version: 1
