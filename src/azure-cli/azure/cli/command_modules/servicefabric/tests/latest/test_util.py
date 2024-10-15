@@ -14,14 +14,18 @@ logger = logging.getLogger(__name__)
 
 
 def _add_selfsigned_cert_to_keyvault(test, kwargs):
-    kwargs.update({'policy_path': os.path.join(TEST_DIR, 'policy.json')})
-    test.cmd('keyvault certificate create --vault-name {kv_name} -n {cert_name} -p @"{policy_path}"')
+    kwargs.update({"policy_path": os.path.join(TEST_DIR, "policy.json")})
+    test.cmd(
+        'keyvault certificate create --vault-name {kv_name} -n {cert_name} -p @"{policy_path}"'
+    )
 
     while True:
-        cert = test.cmd('keyvault certificate show --vault-name {kv_name} -n {cert_name}').get_output_in_json()
+        cert = test.cmd(
+            "keyvault certificate show --vault-name {kv_name} -n {cert_name}"
+        ).get_output_in_json()
         if cert:
             break
-    assert cert['sid'] is not None
+    assert cert["sid"] is not None
     return cert
 
 
