@@ -308,7 +308,7 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
             DecoratorMode.CREATE,
             self.agentpool_decorator_mode,
         )
-        self.assertEqual(ctx_1.get_enable_secure_boot(), None)
+        self.assertEqual(ctx_1.get_enable_secure_boot(), False)
         agentpool_1 = self.create_initialized_agentpool_instance(
             security_profile=self.models.AgentPoolSecurityProfile(
                 enable_secure_boot=True
@@ -316,23 +316,6 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         )
         ctx_1.attach_agentpool(agentpool_1)
         self.assertEqual(ctx_1.get_enable_secure_boot(), True)
-
-        # default
-        ctx_2 = AKSAgentPoolContext(
-            self.cmd,
-            AKSAgentPoolParamDict({"enable_secure_boot": None}),
-            self.models,
-            DecoratorMode.UPDATE,
-            self.agentpool_decorator_mode,
-        )
-        self.assertEqual(ctx_2.get_enable_secure_boot(), None)
-        agentpool_2 = self.create_initialized_agentpool_instance(
-            security_profile=self.models.AgentPoolSecurityProfile(
-                enable_secure_boot=True
-            )
-        )
-        ctx_2.attach_agentpool(agentpool_2)
-        self.assertEqual(ctx_2.get_enable_secure_boot(), None)
 
     def common_get_disable_secure_boot(self):
         # default
@@ -361,7 +344,7 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
             DecoratorMode.CREATE,
             self.agentpool_decorator_mode,
         )
-        self.assertEqual(ctx_1.get_enable_vtpm(), None)
+        self.assertEqual(ctx_1.get_enable_vtpm(), False)
         agentpool_1 = self.create_initialized_agentpool_instance(
             security_profile=self.models.AgentPoolSecurityProfile(
                 enable_vtpm=True
@@ -369,23 +352,6 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         )
         ctx_1.attach_agentpool(agentpool_1)
         self.assertEqual(ctx_1.get_enable_vtpm(), True)
-
-        # default
-        ctx_2 = AKSAgentPoolContext(
-            self.cmd,
-            AKSAgentPoolParamDict({"enable_vtpm": None}),
-            self.models,
-            DecoratorMode.UPDATE,
-            self.agentpool_decorator_mode,
-        )
-        self.assertEqual(ctx_2.get_enable_vtpm(), None)
-        agentpool_2 = self.create_initialized_agentpool_instance(
-            security_profile=self.models.AgentPoolSecurityProfile(
-                enable_vtpm=True
-            )
-        )
-        ctx_2.attach_agentpool(agentpool_2)
-        self.assertEqual(ctx_2.get_enable_vtpm(), None)
 
     def common_get_disable_vtpm(self):
         # default
