@@ -12,20 +12,16 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "netappfiles snapshot delete",
-    confirmation="Are you sure you want to perform this operation?",
+    "netappfiles volume replication peer-external-cluster",
 )
-class Delete(AAZCommand):
-    """Delete snapshot
-
-    :example: Delete an ANF snapshot
-        az netappfiles snapshot delete -g mygroup --account-name myaccname --pool-name mypoolname --volume-name myvolname --name mysnapname
+class PeerExternalCluster(AAZCommand):
+    """Starts peering the external cluster for this migration volume
     """
 
     _aaz_info = {
         "version": "2024-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/snapshots/{}", "2024-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/peerexternalcluster", "2024-07-01"],
         ]
     }
 
@@ -33,7 +29,7 @@ class Delete(AAZCommand):
 
     def _handler(self, command_args):
         super()._handler(command_args)
-        return self.build_lro_poller(self._execute_operations, None)
+        return self.build_lro_poller(self._execute_operations, self._output)
 
     _args_schema = None
 
@@ -69,14 +65,8 @@ class Delete(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
-        _args_schema.snapshot_name = AAZStrArg(
-            options=["-n", "-s", "--name", "--snapshot-name"],
-            help="The name of the snapshot",
-            required=True,
-            id_part="child_name_3",
-        )
         _args_schema.volume_name = AAZStrArg(
-            options=["-v", "--volume-name"],
+            options=["-n", "-v", "--volume-name"],
             help="The name of the volume",
             required=True,
             id_part="child_name_2",
@@ -86,11 +76,24 @@ class Delete(AAZCommand):
                 min_length=1,
             ),
         )
+
+        # define Arg Group "Body"
+
+        _args_schema = cls._args_schema
+        _args_schema.peer_ip_addresses = AAZListArg(
+            options=["--peer-ip-addresses"],
+            arg_group="Body",
+            help="A list of IC-LIF IPs that can be used to connect to the On-prem cluster",
+            required=True,
+        )
+
+        peer_ip_addresses = cls._args_schema.peer_ip_addresses
+        peer_ip_addresses.Element = AAZStrArg()
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.SnapshotsDelete(ctx=self.ctx)()
+        yield self.VolumesPeerExternalCluster(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -101,7 +104,11 @@ class Delete(AAZCommand):
     def post_operations(self):
         pass
 
-    class SnapshotsDelete(AAZHttpOperation):
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
+
+    class VolumesPeerExternalCluster(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -125,28 +132,19 @@ class Delete(AAZCommand):
                     lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
-            if session.http_response.status_code in [204]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_204,
-                    self.on_error,
-                    lro_options={"final-state-via": "location"},
-                    path_format_arguments=self.url_parameters,
-                )
 
             return self.on_error(session.http_response)
 
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/snapshots/{snapshotName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/peerExternalCluster",
                 **self.url_parameters
             )
 
         @property
         def method(self):
-            return "DELETE"
+            return "POST"
 
         @property
         def error_format(self):
@@ -165,10 +163,6 @@ class Delete(AAZCommand):
                 ),
                 **self.serialize_url_param(
                     "resourceGroupName", self.ctx.args.resource_group,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "snapshotName", self.ctx.args.snapshot_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -192,15 +186,60 @@ class Delete(AAZCommand):
             }
             return parameters
 
+        @property
+        def header_parameters(self):
+            parameters = {
+                **self.serialize_header_param(
+                    "Content-Type", "application/json",
+                ),
+                **self.serialize_header_param(
+                    "Accept", "application/json",
+                ),
+            }
+            return parameters
+
+        @property
+        def content(self):
+            _content_value, _builder = self.new_content_builder(
+                self.ctx.args,
+                typ=AAZObjectType,
+                typ_kwargs={"flags": {"required": True, "client_flatten": True}}
+            )
+            _builder.set_prop("peerIpAddresses", AAZListType, ".peer_ip_addresses", typ_kwargs={"flags": {"required": True}})
+
+            peer_ip_addresses = _builder.get(".peerIpAddresses")
+            if peer_ip_addresses is not None:
+                peer_ip_addresses.set_elements(AAZStrType, ".")
+
+            return self.serialize_content(_content_value)
+
         def on_200(self, session):
-            pass
+            data = self.deserialize_http_content(session)
+            self.ctx.set_var(
+                "instance",
+                data,
+                schema_builder=self._build_schema_on_200
+            )
 
-        def on_204(self, session):
-            pass
+        _schema_on_200 = None
+
+        @classmethod
+        def _build_schema_on_200(cls):
+            if cls._schema_on_200 is not None:
+                return cls._schema_on_200
+
+            cls._schema_on_200 = AAZObjectType()
+
+            _schema_on_200 = cls._schema_on_200
+            _schema_on_200.peer_accept_command = AAZStrType(
+                serialized_name="peerAcceptCommand",
+            )
+
+            return cls._schema_on_200
 
 
-class _DeleteHelper:
-    """Helper class for Delete"""
+class _PeerExternalClusterHelper:
+    """Helper class for PeerExternalCluster"""
 
 
-__all__ = ["Delete"]
+__all__ = ["PeerExternalCluster"]

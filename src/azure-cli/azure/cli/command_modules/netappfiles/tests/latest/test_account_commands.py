@@ -9,8 +9,10 @@ from azure.cli.core.azclierror import ValidationError
 from azure.core.exceptions import HttpResponseError
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 import time
-LOCATION = "eastus2"
-ADLOCATION = "northeurope"
+#LOCATION = "eastus2"
+LOCATION = "eastus2euap"
+#ADLOCATION = "northeurope"
+ADLOCATION = "eastus2euap"
 
 # No tidy up of tests required. The resource group is automatically removed
 
@@ -280,12 +282,12 @@ class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
         #         self.check('name', '{acc_name}'),
         #     ])
 
-    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_', additional_tags={'owner': 'cli_test'}, location='eastus')
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_', additional_tags={'owner': 'cli_test'}, location='eastus2euap')
     def test_create_account_with_no_location(self):
         self.kwargs.update({
             'acc_name': self.create_random_name(prefix='cli-acc-', length=24)
         })
         self.cmd("az netappfiles account create -g {rg} -a {acc_name}")
         self.cmd("az netappfiles account show --resource-group {rg} -a {acc_name}", checks=[
-            self.check('location', 'eastus')
+            self.check('location', LOCATION)
         ])
