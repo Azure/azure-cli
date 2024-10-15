@@ -213,7 +213,6 @@ def _get_mgmt_service_client(cli_ctx,
                              subscription_id=None,
                              api_version=None,
                              base_url_bound=True,
-                             resource=None,
                              sdk_profile=None,
                              aux_subscriptions=None,
                              aux_tenants=None,
@@ -221,10 +220,6 @@ def _get_mgmt_service_client(cli_ctx,
                              **kwargs):
     from azure.cli.core._profile import Profile
     logger.debug('Getting management service client client_type=%s', client_type.__name__)
-
-    # Track 1 SDK doesn't maintain the `resource`. The `resource` of the token is the one passed to
-    # get_login_credentials.
-    resource = resource or cli_ctx.cloud.endpoints.active_directory_resource_id
 
     if credential:
         # Use a custom credential
@@ -234,8 +229,7 @@ def _get_mgmt_service_client(cli_ctx,
         # Get a credential for the current `az login` context
         profile = Profile(cli_ctx=cli_ctx)
         credential, subscription_id, _ = profile.get_login_credentials(
-            subscription_id=subscription_id, resource=resource,
-            aux_subscriptions=aux_subscriptions, aux_tenants=aux_tenants)
+            subscription_id=subscription_id, aux_subscriptions=aux_subscriptions, aux_tenants=aux_tenants)
 
     client_kwargs = {}
     if base_url_bound:
