@@ -7,7 +7,7 @@ from azure.cli.core.breaking_change import register_command_group_deprecate
 
 register_command_group_deprecate(
     "network public-ip ddos-protection-statu",
-    redirect="az network public-ip ddos-protection-status",
+    redirect="az network public-ip ddos-protection",
 )
 # Warning Message: This command group has been deprecated and will be removed in next breaking change release (2.67.0).
-# Use `az network public-ip ddos-protection-status` instead.
+# Use `az network public-ip ddos-protection` instead.
