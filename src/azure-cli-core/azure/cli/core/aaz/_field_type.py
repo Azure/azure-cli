@@ -6,7 +6,8 @@ import abc
 
 from collections import OrderedDict
 from ._base import AAZBaseType, AAZValuePatch, AAZUndefined
-from ._field_value import AAZObject, AAZDict, AAZFreeFormDict, AAZList, AAZSimpleValue
+from ._field_value import AAZObject, AAZDict, AAZFreeFormDict, AAZList, AAZSimpleValue, \
+    AAZIdentityObject
 from ._utils import to_snack_case
 from .exceptions import AAZUnknownFieldError, AAZConflictFieldDefinitionError, AAZValuePrecisionLossError, \
     AAZInvalidFieldError, AAZInvalidValueError
@@ -409,3 +410,7 @@ class AAZListType(AAZBaseType):
                 value[idx] = sub_data
 
         return result
+
+
+class AAZIdentityObjectType(AAZObjectType):
+    _ValueCls = AAZIdentityObject
