@@ -173,7 +173,7 @@ def add_customized_keys_argument(context):
 
 
 def add_connstr_props_argument(context):
-    # linter: length '--additional-connection-string-properties' longer than 22
+    # linter: length '--additional-connection-string-properties' longer than 22, so use abbreviation
     context.argument('connstr_props', options_list=['--connstr-props'],
                      action=AddAdditionalConnectionStringProperties, nargs='*',
                      help='The addtional connection string properties used to for building connection string.')
