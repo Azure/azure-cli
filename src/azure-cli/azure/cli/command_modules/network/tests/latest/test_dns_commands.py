@@ -160,6 +160,7 @@ class DnsScenarioTest(ScenarioTest):
             'ds': '--key-tag 15288 --algorithm 5 --digest-type 2 --digest 49FD46E6C4B45C55D4AC',
             'mx': '--exchange 12 --preference 13',
             'ns': '--nsdname foobar.com',
+            'naptr': '--flags "U" --order 10 --preference 20 --services "E2U+sip" --regexp "!^.*$!sip:customer-service@example.com!" --replacement .',
             'ptr': '--ptrdname foobar.com',
             'soa': '--email foo.com --expire-time 30 --minimum-ttl 20 --refresh-time 60 --retry-time 90 --serial-number 123',
             'srv': '--port 1234 --priority 1 --target target.com --weight 50',
@@ -167,7 +168,7 @@ class DnsScenarioTest(ScenarioTest):
             'txt': '--value some_text'
         }
 
-        record_types = ['a', 'aaaa', 'caa', 'cname', 'ds', 'mx', 'ns', 'ptr', 'srv', 'tlsa', 'txt']
+        record_types = ['a', 'aaaa', 'caa', 'cname', 'ds', 'mx', 'naptr', 'ns', 'ptr', 'srv', 'tlsa', 'txt']
 
         for t in record_types:
             # test creating the record set and then adding records
@@ -239,6 +240,7 @@ class DnsScenarioTest(ScenarioTest):
             'cname': '--cname mycname',
             'ds': '--key-tag 15288 --algorithm 5 --digest-type 2 --digest 49FD46E6C4B45C55D4AC',
             'mx': '--exchange 12 --preference 13',
+            'naptr': '--flags "U" --order 10 --preference 20 --services "E2U+sip" --regexp "!^.*$!sip:customer-service@example.com!" --replacement .',
             'ns': '--nsdname foobar.com',
             'ptr': '--ptrdname foobar.com',
             'soa': '--email foo.com --expire-time 30 --minimum-ttl 20 --refresh-time 60 --retry-time 90 --serial-number 123',
@@ -247,7 +249,7 @@ class DnsScenarioTest(ScenarioTest):
             'txt': '--value some_text'
         }
 
-        record_types = ['a', 'aaaa', 'caa', 'cname', 'ds', 'mx', 'ns', 'ptr', 'srv', 'tlsa', 'txt']
+        record_types = ['a', 'aaaa', 'caa', 'cname', 'ds', 'mx', 'naptr', 'ns', 'ptr', 'srv', 'tlsa', 'txt']
 
         for t in record_types:
             add_command = 'set-record' if t == 'cname' else 'add-record'
@@ -523,6 +525,17 @@ class DnsParseZoneFiles(unittest.TestCase):
             self.assertEqual(int(record['weight']), records_to_check[i][2])
             self.assertEqual(int(record['port']), records_to_check[i][3])
             self.assertEqual(record['target'], records_to_check[i][4])
+    
+    def _check_naptr(self, zone, name, records_to_check):
+        self.assertEqual(len(records_to_check, len(zone[name]['naptr'])))
+        for i, record in enumerate(zone[name]['naptr']):
+            self.assertEqual(record['ttl'], records_to_check[i][0])
+            self.assertEqual(int(record['order']), records_to_check[i][1])
+            self.assertEqual(int(record['preference']), records_to_check[i][2])
+            self.assertEqual(record['flags'], records_to_check[i][3])
+            self.assertEqual(record['services'], records_to_check[i][4])
+            self.assertEqual(record['regexp'], records_to_check[i][5])
+            self.assertEqual(record['replacement'], records_to_check[i][6])
 
     def _check_ttl(self, zone, name, rec_type, ttl):
         for record in zone[name][rec_type]:
@@ -574,6 +587,10 @@ class DnsParseZoneFiles(unittest.TestCase):
         self._check_caa(zone, 'caa2.' + zn, [
             (60, 0, 'issue', 'ca1.contoso.com'),
             (60, 45, 'tag56', 'test test test')
+        ])
+        self._check_naptr(zone, 'mynaptr.' + zn, [
+            (10, 20, 'A', 'EAU+SIP', '', 'domain.com.'),
+            (20, 20, 'U', 'SIP+D2U', '!^(\\+441632960083)$!sip:\\1@example.com', '.')
         ])
 
     def test_zone_file_2(self):
