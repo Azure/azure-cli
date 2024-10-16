@@ -401,8 +401,8 @@ short-summary: Update a replica of SignalR Service.
 examples:
   - name: Enable or disable region endpoint for the replica of SignalR Service
     text: >
-        az signalr replica update --replica-name MyReplica --name MySignalR -g MyResourceGroup --region-endpoint-enabled true
+        az signalr replica update --replica-name MyReplica --signalr-name MySignalR -g MyResourceGroup --region-endpoint-enabled true
   - name: Update the unit count of the replica of SignalR Service
     text: >
-        az signalr replica update --replica-name MyReplica --name MySignalR -g MyResourceGroup --unit-count 2
+        az signalr replica update --replica-name MyReplica --signalr-name MySignalR -g MyResourceGroup --unit-count 2
 """
