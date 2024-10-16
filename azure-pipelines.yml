@@ -1095,6 +1095,26 @@ jobs:
         azdev linter --ci-exclusions --min-severity medium
       fi
 
+- job: AzdevScan
+  condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
+  displayName: "Secret Scan"
+  pool:
+    name: ${{ variables.ubuntu_pool }}
+  steps:
+    - task: UsePythonVersion@0
+      displayName: 'Use Python 3.11'
+      inputs:
+        versionSpec: 3.11
+    - template: .azure-pipelines/templates/azdev_setup.yml
+    - bash: |
+        set -ev
+        . env/bin/activate
+        git fetch origin --depth=1 $(System.PullRequest.TargetBranch)
+        for FILE in `git diff --name-only --diff-filter=AM origin/$(System.PullRequest.TargetBranch)` ; do
+          echo "Detected file added/modified:"$FILE
+        done
+
+
 - job: CodegenCoverage
   condition: and(succeededOrFailed(), in(variables['Build.Reason'], 'BatchedCI'))
   displayName: "Codegen Coverage"
