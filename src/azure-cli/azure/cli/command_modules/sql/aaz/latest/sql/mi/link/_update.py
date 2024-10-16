@@ -24,8 +24,7 @@ class Update(AAZCommand):
     _aaz_info = {
         "version": "2022-08-01-preview",
         "resources": [
-            ["mgmt-plane",
-             "/subscriptions/{}/resourcegroups/{}/providers/microsoft.sql/managedinstances/{}/distributedavailabilitygroups/{}", "2022-08-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.sql/managedinstances/{}/distributedavailabilitygroups/{}", "2022-08-01-preview"],
         ]
     }
 
