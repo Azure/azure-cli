@@ -114,7 +114,7 @@ def set_user_token_header(client, cli_ctx):
     # pylint: disable=protected-access
     # HACK: set custom header to work around OBO
     profile = Profile(cli_ctx=cli_ctx)
-    creds, _, _ = profile.get_raw_token()
+    # creds, _, _ = profile.get_raw_token()
     # client._client._config.headers_policy._headers['x-ms-serviceconnector-user-token'] = creds[1]
     # HACK: hide token header
     client._config.logging_policy.headers_to_redact.append(
