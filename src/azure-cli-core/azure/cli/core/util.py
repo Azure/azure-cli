@@ -869,7 +869,7 @@ def check_connectivity(url='https://azure.microsoft.com', max_retries=5, timeout
 
 def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
                      body=None, skip_authorization_header=False, resource=None, output_file=None,
-                     generated_client_request_id_name='x-ms-client-request-id'):
+                     generated_client_request_id_name='x-ms-client-request-id', credential=None):
     import uuid
     from requests import Session, Request
     from requests.structures import CaseInsensitiveDict
@@ -976,18 +976,24 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
             # But there are APIs which don't require subscription ID, like /subscriptions, /tenants
             # TODO: In the future when multi-tenant subscription is supported, we won't be able to uniquely identify
             #   the token from subscription anymore.
-            token_subscription = None
-            if url.lower().startswith(endpoints.resource_manager.rstrip('/')):
-                token_subscription = _extract_subscription_id(url)
-            if token_subscription:
-                logger.debug('Retrieving token for resource %s, subscription %s', resource, token_subscription)
-                token_info, _, _ = profile.get_raw_token(resource, subscription=token_subscription)
+            if credential:
+                from .auth.util import resource_to_scopes
+                token, _ = credential.get_token(*resource_to_scopes(resource))
+                headers = headers or {}
+                headers['Authorization'] = '{} {}'.format('Bearer', token)
             else:
-                logger.debug('Retrieving token for resource %s', resource)
-                token_info, _, _ = profile.get_raw_token(resource)
-            token_type, token, _ = token_info
-            headers = headers or {}
-            headers['Authorization'] = '{} {}'.format(token_type, token)
+                token_subscription = None
+                if url.lower().startswith(endpoints.resource_manager.rstrip('/')):
+                    token_subscription = _extract_subscription_id(url)
+                if token_subscription:
+                    logger.debug('Retrieving token for resource %s, subscription %s', resource, token_subscription)
+                    token_info, _, _ = profile.get_raw_token(resource, subscription=token_subscription)
+                else:
+                    logger.debug('Retrieving token for resource %s', resource)
+                    token_info, _, _ = profile.get_raw_token(resource)
+                token_type, token, _ = token_info
+                headers = headers or {}
+                headers['Authorization'] = '{} {}'.format(token_type, token)
         else:
             logger.warning("Can't derive appropriate Azure AD resource from --url to acquire an access token. "
                            "If access token is required, use --resource to specify the resource")
