@@ -29,7 +29,7 @@ from azure.core.rest import HttpRequest
 from azure.cli.core.commands import LongRunningOperation, AzArgumentContext, _is_poller
 from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError, AuthenticationError
 from azure.cli.command_modules.role.custom import create_service_principal_for_rbac
-from azure.mgmt.rdbms import mysql_flexibleservers, postgresql_flexibleservers
+from azure.mgmt.mysqlflexibleservers import models
 from azure.mgmt.resource.resources.models import ResourceGroup
 from ._client_factory import resource_client_factory, cf_mysql_flexible_location_capabilities, get_mysql_flexible_management_client
 from azure.cli.core.commands.validators import get_default_location_from_resource_group, validate_tags
@@ -511,23 +511,17 @@ def build_identity_and_data_encryption(db_engine, byok_identity=None, backup_byo
             identities[backup_byok_identity] = {}
 
         if db_engine == 'mysql':
-            identity = mysql_flexibleservers.models.MySQLServerIdentity(user_assigned_identities=identities,
+            identity = models.MySQLServerIdentity(user_assigned_identities=identities,
                                                                         type="UserAssigned")
 
-            data_encryption = mysql_flexibleservers.models.DataEncryption(
+            data_encryption = models.DataEncryption(
                 primary_user_assigned_identity_id=byok_identity,
                 primary_key_uri=byok_key,
                 geo_backup_user_assigned_identity_id=backup_byok_identity,
                 geo_backup_key_uri=backup_byok_key,
                 type="AzureKeyVault")
         else:
-            identity = postgresql_flexibleservers.models.UserAssignedIdentity(user_assigned_identities=identities,
-                                                                              type="UserAssigned")
-
-            data_encryption = postgresql_flexibleservers.models.DataEncryption(
-                primary_user_assigned_identity_id=byok_identity,
-                primary_key_uri=byok_key,
-                type="AzureKeyVault")
+            raise CLIError('Unsupported db engine.')
 
     return identity, data_encryption
 
