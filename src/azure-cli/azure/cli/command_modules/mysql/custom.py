@@ -333,13 +333,13 @@ def flexible_server_create(cmd, client,
                            sku_name=None, tier=None,
                            storage_gb=None, administrator_login=None,
                            administrator_login_password=None, version=None,
-                           tags=None, database_name=None,
+                           tags=None, database_name=None, database_port=None,
                            subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
                            private_dns_zone_arguments=None, public_access=None,
                            high_availability=None, zone=None, standby_availability_zone=None,
                            iops=None, auto_grow=None, auto_scale_iops=None, accelerated_logs=None, geo_redundant_backup=None,
                            byok_identity=None, backup_byok_identity=None, byok_key=None, backup_byok_key=None,
-                           yes=False):
+                           maintenance_policy_patch_strategy=None, yes=False):
     # Generate missing parameters
     location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name, server_name)
     db_context = DbContext(
@@ -413,8 +413,7 @@ def flexible_server_create(cmd, client,
 
     sku = models.MySQLServerSku(name=sku_name, tier=tier)
 
-    high_availability = models.HighAvailability(mode=high_availability,
-                                                                      standby_availability_zone=standby_availability_zone)
+    high_availability = models.HighAvailability(mode=high_availability, standby_availability_zone=standby_availability_zone)
 
     administrator_login_password = generate_password(administrator_login_password)
 
@@ -423,6 +422,8 @@ def flexible_server_create(cmd, client,
                                                                    backup_byok_identity=backup_byok_identity,
                                                                    byok_key=byok_key,
                                                                    backup_byok_key=backup_byok_key)
+    
+    maintenance_policy = models.MaintenancePolicy(patch_strategy=maintenance_policy_patch_strategy)
 
     # Create mysql server
     # Note : passing public_access has no effect as the accepted values are 'Enabled' and 'Disabled'. So the value ends up being ignored.
@@ -439,7 +440,9 @@ def flexible_server_create(cmd, client,
                                    version=version,
                                    high_availability=high_availability,
                                    availability_zone=zone,
-                                   data_encryption=data_encryption)
+                                   data_encryption=data_encryption,
+                                   database_port=database_port,
+                                   maintenance_policy=maintenance_policy)
 
     # Adding firewall rule
     if start_ip != -1 and end_ip != -1:
@@ -700,7 +703,7 @@ def flexible_server_import_replica_stop(client, resource_group_name, server_name
 # pylint: disable=too-many-branches, too-many-locals, too-many-statements, raise-missing-from
 def flexible_server_restore(cmd, client, resource_group_name, server_name, source_server, restore_point_in_time=None, zone=None,
                             no_wait=False, subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
-                            private_dns_zone_arguments=None, public_access=None, yes=False, sku_name=None, tier=None,
+                            private_dns_zone_arguments=None, public_access=None, yes=False, sku_name=None, tier=None, database_port=None,
                             storage_gb=None, auto_grow=None, accelerated_logs=None, backup_retention=None, geo_redundant_backup=None, tags=None):
     provider = 'Microsoft.DBforMySQL'
     server_name = server_name.lower()
@@ -795,7 +798,8 @@ def flexible_server_restore(cmd, client, resource_group_name, server_name, sourc
             data_encryption=data_encryption,
             sku=sku,
             storage=storage,
-            backup=backup
+            backup=backup,
+            database_port=database_port
         )
 
         if any((public_access, vnet, subnet)):
@@ -987,7 +991,8 @@ def flexible_server_update_custom_func(cmd, client, instance,
                                        replication_role=None,
                                        byok_identity=None, backup_byok_identity=None, byok_key=None, backup_byok_key=None,
                                        disable_data_encryption=False,
-                                       public_access=None):
+                                       public_access=None,
+                                       maintenance_policy_patch_strategy=None):
     # validator
     location = ''.join(instance.location.lower().split())
     db_context = DbContext(
@@ -1118,6 +1123,9 @@ def flexible_server_update_custom_func(cmd, client, instance,
     if public_access:
         instance.network.public_network_access = public_access
 
+    if maintenance_policy_patch_strategy:
+        maintenance_policy = models.MaintenancePolicy(patch_strategy=maintenance_policy_patch_strategy)
+
     params = ServerForUpdate(sku=instance.sku,
                              storage=instance.storage,
                              backup=instance.backup,
@@ -1126,7 +1134,8 @@ def flexible_server_update_custom_func(cmd, client, instance,
                              tags=tags,
                              identity=identity,
                              data_encryption=data_encryption,
-                             network=instance.network)
+                             network=instance.network,
+                             maintenance_policy=maintenance_policy)
 
     return params
 
@@ -1305,7 +1314,7 @@ def flexible_parameter_update_batch(client, server_name, resource_group_name, so
 # Custom functions for server replica, will add MySQL part after backend ready in future
 def flexible_replica_create(cmd, client, resource_group_name, source_server, replica_name, location=None, tags=None, sku_name=None,
                             private_dns_zone_arguments=None, vnet=None, subnet=None, zone=None, public_access=None, no_wait=False,
-                            storage_gb=None, iops=None, geo_redundant_backup=None, backup_retention=None, tier=None):
+                            storage_gb=None, iops=None, geo_redundant_backup=None, backup_retention=None, tier=None, database_port=None):
     provider = 'Microsoft.DBforMySQL'
     replica_name = replica_name.lower()
 
@@ -1353,9 +1362,9 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
     identity, data_encryption = get_identity_and_data_encryption(source_server_object)
 
     storage = models.Storage(storage_size_gb=storage_gb,
-                                                   iops=iops,
-                                                   auto_grow="Enabled",
-                                                   auto_io_scaling=source_server_object.storage.auto_io_scaling)
+                             iops=iops,
+                             auto_grow="Enabled",
+                             auto_io_scaling=source_server_object.storage.auto_io_scaling)
 
     backup = models.Backup(backup_retention_days=backup_retention,
                                                  geo_redundant_backup=geo_redundant_backup)
@@ -1370,6 +1379,7 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
         availability_zone=zone,
         identity=identity,
         data_encryption=data_encryption,
+        database_port=database_port,
         create_mode="Replica")
 
     if any((vnet, subnet, private_dns_zone_arguments)):
@@ -1425,7 +1435,7 @@ def flexible_list_skus(cmd, client, location):
 
 
 def _create_server(db_context, cmd, resource_group_name, server_name, tags, location, sku, administrator_login, administrator_login_password,
-                   storage, backup, network, version, high_availability, availability_zone, identity, data_encryption):
+                   storage, backup, network, version, high_availability, availability_zone, identity, data_encryption, database_port, maintenance_policy):
     logging_name, server_client = db_context.logging_name, db_context.server_client
     logger.warning('Creating %s Server \'%s\' in group \'%s\'...', logging_name, server_name, resource_group_name)
 
@@ -1447,6 +1457,8 @@ def _create_server(db_context, cmd, resource_group_name, server_name, tags, loca
         high_availability=high_availability,
         availability_zone=availability_zone,
         data_encryption=data_encryption,
+        database_port=database_port,
+        maintenance_policy=maintenance_policy,
         create_mode="Create")
 
     return resolve_poller(
