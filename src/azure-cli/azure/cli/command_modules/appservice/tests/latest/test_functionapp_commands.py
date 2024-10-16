@@ -779,9 +779,41 @@ class FunctionAppFlex(LiveScenarioTest):
         locations = self.cmd('functionapp list-flexconsumption-locations').get_output_in_json()
         self.assertTrue(len(locations) == 13)
 
+    def test_functionapp_list_flexconsumption_locations_zone_redundant(self):
+        locations = self.cmd('functionapp list-flexconsumption-locations --zone-redundant').get_output_in_json()
+        self.assertTrue(len(locations) > 0)
+
     def test_functionapp_list_flexconsumption_runtimes(self):
         runtimes = self.cmd('functionapp list-flexconsumption-runtimes -l eastasia --runtime python').get_output_in_json()
         self.assertTrue(len(runtimes) == 2)
+
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_flex_zone_redundant_active(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(
+            'functionapp', 40)
+
+        functionapp = self.cmd('functionapp create -g {} -n {} -f {} -s {} --runtime python --runtime-version 3.11 --zone-redundant'
+                               .format(resource_group, functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account)).get_output_in_json()
+
+        server_farm_id =functionapp['properties']['serverFarmId']
+        function_plan = self.cmd('az functionapp plan show --ids {}'
+                               .format(server_farm_id)).get_output_in_json()
+        self.assertTrue(function_plan['zoneRedundant'] == True) 
+
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_flex_zone_redundant_not_active(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(
+            'functionapp', 40)
+
+        functionapp = self.cmd('functionapp create -g {} -n {} -f {} -s {} --runtime python --runtime-version 3.11'
+                               .format(resource_group, functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account)).get_output_in_json()
+
+        server_farm_id =functionapp['properties']['serverFarmId']
+        function_plan = self.cmd('az functionapp plan show --ids {}'
+                               .format(server_farm_id)).get_output_in_json()
+        self.assertTrue(function_plan['zoneRedundant'] == False) 
 
     @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()

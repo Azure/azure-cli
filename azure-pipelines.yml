@@ -6,6 +6,8 @@ trigger:
   branches:
     include:
     - '*'
+    exclude:
+    - 'release'
 
 pr:
   branches:
@@ -205,6 +207,11 @@ jobs:
       TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
       artifactName: metadata
 
+  - task: PipAuthenticate@1
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
+    displayName: 'Pip Authenticate'
+    inputs:
+      artifactFeeds: $(AZURE_ARTIFACTS_FEEDS)
 
   - script: |
       set ARCH=$(Platform)
@@ -244,6 +251,11 @@ jobs:
         TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
         artifactName: metadata
 
+    - task: PipAuthenticate@1
+      condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
+      displayName: 'Pip Authenticate'
+      inputs:
+        artifactFeeds: $(AZURE_ARTIFACTS_FEEDS)
 
     - script: |
         set ARCH=$(Platform)
@@ -429,6 +441,11 @@ jobs:
     inputs:
       versionSpec: 3.11
 
+  - task: PipAuthenticate@1
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
+    displayName: 'Pip Authenticate'
+    inputs:
+      artifactFeeds: $(AZURE_ARTIFACTS_FEEDS)
 
   - script: |
       if [[ "$(Build.Reason)" == "PullRequest" ]]; then
@@ -719,6 +736,12 @@ jobs:
   - bash: ./scripts/ci/install_docker.sh
     displayName: Install Docker
 
+  - task: PipAuthenticate@1
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
+    displayName: 'Pip Authenticate'
+    inputs:
+      artifactFeeds: $(AZURE_ARTIFACTS_FEEDS)
+
   - task: Bash@3
     displayName: 'Build Rpm Package: Azure Linux'
     inputs:
@@ -809,6 +832,11 @@ jobs:
   steps:
   - bash: ./scripts/ci/install_docker.sh
     displayName: Install Docker
+  - task: PipAuthenticate@1
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
+    displayName: 'Pip Authenticate'
+    inputs:
+      artifactFeeds: $(AZURE_ARTIFACTS_FEEDS)
   - task: Bash@3
     displayName: 'Build Rpm Package'
     inputs:
@@ -926,6 +954,11 @@ jobs:
   steps:
   - bash: ./scripts/ci/install_docker.sh
     displayName: Install Docker
+  - task: PipAuthenticate@1
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
+    displayName: 'Pip Authenticate'
+    inputs:
+      artifactFeeds: $(AZURE_ARTIFACTS_FEEDS)
   - task: Bash@3
     displayName: 'Build $(deb_system) $(distro) $(arch) Package'
     inputs:
