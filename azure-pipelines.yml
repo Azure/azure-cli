@@ -1112,6 +1112,11 @@ jobs:
         git fetch origin --depth=1 $(System.PullRequest.TargetBranch)
         for FILE in `git diff --name-only --diff-filter=AM origin/$(System.PullRequest.TargetBranch)` ; do
           echo "Detected file added/modified:"$FILE
+          detected=$(azdev scan -f $FILE | python -c "import sys, json; print(json.load(sys.stdin)['secrets_detected'])")
+          if [ $detected == 'True' ]; then
+            echo "Secrets detected from "$FILE", Please remove or replace it. You can leverage 'azdev mask' command if needed." 1>&2
+            exit 1
+          fi
         done
 
 
