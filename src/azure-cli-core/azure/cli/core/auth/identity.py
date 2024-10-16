@@ -304,7 +304,8 @@ class ServicePrincipalAuth:  # pylint: disable=too-many-instance-attributes
         return ServicePrincipalAuth(entry)
 
     @classmethod
-    def build_credential(cls, secret_or_certificate=None, client_assertion=None, use_cert_sn_issuer=None):
+    def build_credential(cls, client_secret=None, client_assertion=None,
+                         certificate=None, use_cert_sn_issuer=None):
         """Build credential from user input. The credential looks like below, but only one key can exist.
         {
             'client_secret': 'my_secret',
@@ -313,14 +314,12 @@ class ServicePrincipalAuth:  # pylint: disable=too-many-instance-attributes
         }
         """
         entry = {}
-        if secret_or_certificate:
-            user_expanded = os.path.expanduser(secret_or_certificate)
-            if os.path.isfile(user_expanded):
-                entry[_CERTIFICATE] = user_expanded
-                if use_cert_sn_issuer:
-                    entry[_USE_CERT_SN_ISSUER] = use_cert_sn_issuer
-            else:
-                entry[_CLIENT_SECRET] = secret_or_certificate
+        if client_secret:
+            entry[_CLIENT_SECRET] = client_secret
+        elif certificate:
+            entry[_CERTIFICATE] = os.path.expanduser(certificate)
+            if use_cert_sn_issuer:
+                entry[_USE_CERT_SN_ISSUER] = use_cert_sn_issuer
         elif client_assertion:
             entry[_CLIENT_ASSERTION] = client_assertion
         return entry
