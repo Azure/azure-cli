@@ -409,7 +409,7 @@ class AKSAgentPoolContext(BaseAKSContext):
                 self.agentpool.security_profile is not None and
                 self.agentpool.security_profile.enable_vtpm is not None
             ):
-                enable_vtpm = self.agentpool.enable_vtpm
+                enable_vtpm = self.agentpool.security_profile.enable_vtpm
 
         # This parameter does not need dynamic completion.
         if enable_validation:
@@ -468,7 +468,7 @@ class AKSAgentPoolContext(BaseAKSContext):
                 self.agentpool.security_profile is not None and
                 self.agentpool.security_profile.enable_secure_boot is not None
             ):
-                enable_secure_boot = self.agentpool.enable_secure_boot
+                enable_secure_boot = self.agentpool.security_profile.enable_secure_boot
 
         # This parameter does not need dynamic completion.
         if enable_validation:
