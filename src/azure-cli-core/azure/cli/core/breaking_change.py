@@ -250,8 +250,10 @@ class BreakingChange(abc.ABC):
         elif self.is_command_group(cli_ctx):
             command_group = cli_ctx.invocation.commands_loader.command_group_table[self.command_name]
             if not command_group:
-                self._register_to_direct_sub_cg_or_command(cli_ctx, self.command_name, self.to_tag(cli_ctx))
-            else:
+                loader = self.find_suitable_command_loader(cli_ctx)
+                command_group = loader.command_group(self.command_name)
+                cli_ctx.invocation.commands_loader.command_group_table[self.command_name] = command_group
+            if command_group:
                 command_group.group_kwargs['deprecate_info'] = \
                     self.appended_status_tag(cli_ctx, command_group.group_kwargs.get('deprecate_info'),
                                              self.to_tag(cli_ctx))
@@ -270,22 +272,11 @@ class BreakingChange(abc.ABC):
             return old_status_tag
         return new_status_tag
 
-    def _register_to_direct_sub_cg_or_command(self, cli_ctx, cg_name, status_tag):
-        for key, command_group in cli_ctx.invocation.commands_loader.command_group_table.items():
-            split_key = key.rsplit(maxsplit=1)
-            # If inpass command group name is empty, all first level command group should be registered to.
-            # Otherwise, we need to find all direct sub command groups.
-            if (not cg_name and len(split_key) == 1) or (len(split_key) == 2 and split_key[0] == cg_name):
-                from azure.cli.core.commands import AzCommandGroup
-                if isinstance(command_group, AzCommandGroup):
-                    command_group.group_kwargs['deprecate_info'] = \
-                        self.appended_status_tag(cli_ctx, command_group.group_kwargs.get('deprecate_info'), status_tag)
-                else:
-                    self._register_to_direct_sub_cg_or_command(cli_ctx, key, status_tag)
-        for key, command in cli_ctx.invocation.commands_loader.command_table.items():
-            # If inpass command group name is empty, all first level command should be registered to.
-            if (not cg_name and ' ' not in key) or key.rsplit(maxsplit=1)[0] == cg_name:
-                command.deprecate_info = self.appended_status_tag(cli_ctx, command.deprecate_info, self.to_tag(cli_ctx))
+    def find_suitable_command_loader(self, cli_ctx):
+        for name, loader in cli_ctx.invocation.commands_loader.cmd_to_loader_map.items():
+            if name.startswith(self.command_name) and loader:
+                return loader[0]
+        return None
 
     def _register_option_deprecate(self, cli_ctx, arguments, option_name):
         for _, argument in arguments.items():
