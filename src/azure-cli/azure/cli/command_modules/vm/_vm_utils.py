@@ -721,22 +721,32 @@ def generate_ssh_keys_ed25519(private_key_filepath, public_key_filepath):
     if not os.path.exists(ssh_dir):
         os.makedirs(ssh_dir, mode=0o700)
 
-    private_key = Ed25519PrivateKey.generate()
+    if os.path.isfile(private_key_filepath):
+        # Try to use existing private key if it exists.
+        with open(private_key_filepath, "rb") as f:
+            private_bytes = f.read()
+        private_key = serialization.load_pem_private_key(private_bytes, password=None)
+        logger.warning("Private SSH key file '%s' was found in the directory: '%s'. "
+                       "A paired public key file '%s' will be generated.",
+                       private_key_filepath, ssh_dir, public_key_filepath)
+
+    else:
+        private_key = Ed25519PrivateKey.generate()
+        private_bytes = private_key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.OpenSSH,
+            encryption_algorithm=serialization.NoEncryption()
+        )
+
+        with os.fdopen(_open(private_key_filepath, 0o600), "w") as f:
+            f.write(private_bytes.decode())
+
     public_key = private_key.public_key()
-    private_bytes = private_key.private_bytes(
-        encoding=serialization.Encoding.PEM,
-        format=serialization.PrivateFormat.OpenSSH,
-        encryption_algorithm=serialization.NoEncryption()
-    )
-
-    with os.fdopen(_open(private_key_filepath, 0o600), "w") as f:
-        f.write(private_bytes.decode())
-
-    s = public_key.public_bytes(
+    public_bytes = public_key.public_bytes(
         encoding=serialization.Encoding.OpenSSH,
         format=serialization.PublicFormat.OpenSSH)
-    public_key = s.decode(encoding="utf8").replace("\n", "")
-    with os.fdopen(_open(public_key_filepath, 0o644), 'w') as f:
-        f.write(public_key)
 
-    return public_key
+    with os.fdopen(_open(public_key_filepath, 0o644), 'wb') as f:
+        f.write(public_bytes)
+
+    return public_bytes.decode()
