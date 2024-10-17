@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "cdn endpoint update",
 )
 class Update(AAZCommand):
-    """Update an existing CDN endpoint with the specified endpoint name under the specified subscription, resource group and profile.
+    """Update an existing CDN endpoint with the specified endpoint name under the specified subscription, resource group and profile. Only tags can be updated after creating an endpoint. To update origins, use the Update Origin operation. To update origin groups, use the Update Origin group operation. To update custom domains, use the Update Custom Domain operation.
 
     :example: Turn off HTTP traffic for an endpoint.
         az cdn endpoint update -g group -n endpoint --profile-name profile --no-http
