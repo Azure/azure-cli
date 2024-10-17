@@ -12,7 +12,7 @@ from azure.cli.core.azclierror import (
     ValidationError,
     CLIInternalError
 )
-from azure.cli.core._profile import Profile
+# from azure.cli.core._profile import Profile
 from ._resource_config import (
     SOURCE_RESOURCES_USERTOKEN,
     TARGET_RESOURCES_USERTOKEN,
@@ -108,6 +108,7 @@ def _in_process_execute(command):
     return cli.result
 
 
+# pylint: disable=unused-argument
 def set_user_token_header(client, cli_ctx):
     '''Set user token header to work around OBO'''
 
