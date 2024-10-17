@@ -10218,8 +10218,8 @@ class VMSSSecurityPostureScenarioTest(ScenarioTest):
             'dns_label': self.create_random_name('clivmss', 20)
         })
         self.cmd('network nsg create -g {rg} -n {nsg}')
-        self.cmd("vmss create -n {vmss1} -g {rg} --image Win2022Datacenter --admin-username clittester --ssh-key-value '{ssh_key}' --lb-sku Standard "
-                 "--vm-domain-name {dns_label} --public-ip-per-vm --dns-servers 10.0.0.6 10.0.0.5 --nsg {nsg} --admin-username vmtest --orchestration-mode Uniform "
+        self.cmd("vmss create -n {vmss1} -g {rg} --image Win2022Datacenter --admin-username clittester --lb-sku Standard "
+                 "--vm-domain-name {dns_label} --public-ip-per-vm --dns-servers 10.0.0.6 10.0.0.5 --nsg {nsg} --admin-username vmtest --admin-password Test123456789# --orchestration-mode Uniform "
                  "--security-posture-reference-id {security_posture_reference_id} --exclude-extensions SecurityPostureSecurityAgent --is-overridable True")
 
         self.cmd('vmss show -g {rg} -n {vmss1}', checks=[
