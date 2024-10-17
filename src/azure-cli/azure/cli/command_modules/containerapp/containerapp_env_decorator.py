@@ -309,6 +309,9 @@ class ContainerAppEnvUpdateDecorator(ContainerAppEnvDecorator):
 
         self.set_up_peer_to_peer_encryption()
 
+        # dapr
+        self.set_up_dapr()
+
     def set_up_app_log_configuration(self):
         logs_destination = self.get_argument_logs_destination()
 
@@ -371,6 +374,21 @@ class ContainerAppEnvUpdateDecorator(ContainerAppEnvDecorator):
                 workload_profiles[idx] = profile
 
             safe_set(self.managed_env_def, "properties", "workloadProfiles", value=workload_profiles)
+
+    def set_up_dapr(self):
+        instrumentation_key = self.get_argument_instrumentation_key()
+        if instrumentation_key is not None:
+            if instrumentation_key == "none":
+                safe_set(self.managed_env_def, "properties", "daprAIInstrumentationKey", value=None)
+            else:
+                safe_set(self.managed_env_def, "properties", "daprAIInstrumentationKey", value=instrumentation_key)
+
+        dapr_connection_string = self.get_argument_dapr_connection_string()
+        if dapr_connection_string is not None:
+            if dapr_connection_string == "none":
+                safe_set(self.managed_env_def, "properties", "daprAIConnectionString", value=None)
+            else:
+                safe_set(self.managed_env_def, "properties", "daprAIConnectionString", value=dapr_connection_string)
 
     def update(self):
         try:

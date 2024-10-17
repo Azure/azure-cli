@@ -160,6 +160,10 @@ def load_arguments(self, _):
         c.argument('instrumentation_key', options_list=['--dapr-instrumentation-key'], help='Application Insights instrumentation key used by Dapr to export Service to Service communication telemetry')
         c.argument('dapr_connection_string', options_list=['--dapr-connection-string', '-d'], help='Application Insights connection string used by Dapr to export service to service communication telemetry.')
 
+    with self.argument_context('containerapp env update', arg_group='Dapr') as c:
+        c.argument('instrumentation_key', options_list=['--dapr-instrumentation-key'], help='Application Insights instrumentation key used by Dapr to export Service to Service communication telemetry. Use "none" to remove it.')
+        c.argument('dapr_connection_string', options_list=['--dapr-connection-string', '-d'], help='Application Insights connection string used by Dapr to export service to service communication telemetry. Use "none" to remove it.')
+
     with self.argument_context('containerapp env', arg_group='Virtual Network') as c:
         c.argument('infrastructure_subnet_resource_id', options_list=['--infrastructure-subnet-resource-id', '-s'], help='Resource ID of a subnet for infrastructure components and user app containers.')
         c.argument('docker_bridge_cidr', options_list=['--docker-bridge-cidr'], help='CIDR notation IP range assigned to the Docker bridge. It must not overlap with any Subnet IP ranges or the IP range defined in Platform Reserved CIDR, if defined', deprecate_info=Deprecated(self.cli_ctx, target='--docker-bridge-cidr', hide=True, message_func=lambda x: "Option '--docker-bridge-cidr' has been deprecated and will be removed in the Ignite 2024"))
