@@ -17,14 +17,12 @@ try:
 except ImportError:
     from urlparse import urlparse  # pylint: disable=import-error
 
-from msrestazure.azure_exceptions import CloudError
-
 from azure.cli.core.util import CLIError, get_file_json, b64_to_hex, sdk_no_wait
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.command_modules.servicefabric._arm_deployment_utils import validate_and_deploy_arm_template
 from azure.cli.command_modules.servicefabric._sf_utils import _get_resource_group_by_name, _create_resource_group_name
-from azure.core.exceptions import ResourceNotFoundError
+from azure.core.exceptions import ResourceNotFoundError, HttpResponseError
 
 from azure.mgmt.servicefabric.models import (ClusterUpdateParameters,
                                              ClientCertificateThumbprint,
@@ -1359,8 +1357,8 @@ def _safe_get_vault(cli_ctx, resource_group_name, vault_name):
         return vault
     except ResourceNotFoundError:
         return None
-    except CloudError as ex:
-        if ex.error.error == 'ResourceNotFound':
+    except HttpResponseError as ex:
+        if ex.status_code == '404':
             return None
         raise
 
@@ -1652,7 +1650,7 @@ def _get_current_user_object_id(graph_client):
         current_user = graph_client.signed_in_user.get()
         if current_user and current_user.object_id:  # pylint:disable=no-member
             return current_user.object_id  # pylint:disable=no-member
-    except CloudError:
+    except HttpResponseError:
         pass
 
 

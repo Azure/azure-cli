@@ -1329,7 +1329,7 @@ class VMCreateExistingIdsOptions(ScenarioTest):
     @StorageAccountPreparer()
     def test_vm_create_existing_ids_options(self, resource_group, storage_account):
         from azure.cli.core.commands.client_factory import get_subscription_id
-        from msrestazure.tools import resource_id, is_valid_resource_id
+        from azure.mgmt.core.tools import resource_id, is_valid_resource_id
 
         subscription_id = self.get_subscription_id()
 
@@ -1933,7 +1933,7 @@ class VMSSCreateExistingIdsOptions(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_existing_ids')
     def test_vmss_create_existing_ids_options(self, resource_group):
 
-        from msrestazure.tools import resource_id, is_valid_resource_id
+        from azure.mgmt.core.tools import resource_id, is_valid_resource_id
         subscription_id = self.get_subscription_id()
 
         self.kwargs.update({

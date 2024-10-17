@@ -19,10 +19,10 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-11-01",
+        "version": "2024-03-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.network/applicationgatewaywebapplicationfirewallpolicies", "2023-11-01"],
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgatewaywebapplicationfirewallpolicies", "2023-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.network/applicationgatewaywebapplicationfirewallpolicies", "2024-03-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgatewaywebapplicationfirewallpolicies", "2024-03-01"],
         ]
     }
 
@@ -113,7 +113,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-11-01",
+                    "api-version", "2024-03-01",
                     required=True,
                 ),
             }
@@ -175,6 +175,10 @@ class List(AAZCommand):
             )
 
             properties = cls._schema_on_200.value.Element.properties
+            properties.application_gateway_for_containers = AAZListType(
+                serialized_name="applicationGatewayForContainers",
+                flags={"read_only": True},
+            )
             properties.application_gateways = AAZListType(
                 serialized_name="applicationGateways",
                 flags={"read_only": True},
@@ -206,6 +210,14 @@ class List(AAZCommand):
                 flags={"read_only": True},
             )
 
+            application_gateway_for_containers = cls._schema_on_200.value.Element.properties.application_gateway_for_containers
+            application_gateway_for_containers.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.application_gateway_for_containers.Element
+            _element.id = AAZStrType(
+                flags={"required": True},
+            )
+
             application_gateways = cls._schema_on_200.value.Element.properties.application_gateways
             application_gateways.Element = AAZObjectType()
 
@@ -215,6 +227,7 @@ class List(AAZCommand):
             )
             _element.id = AAZStrType()
             _element.identity = AAZObjectType()
+            _ListHelper._build_schema_managed_service_identity_read(_element.identity)
             _element.location = AAZStrType()
             _element.name = AAZStrType(
                 flags={"read_only": True},
@@ -227,33 +240,6 @@ class List(AAZCommand):
                 flags={"read_only": True},
             )
             _element.zones = AAZListType()
-
-            identity = cls._schema_on_200.value.Element.properties.application_gateways.Element.identity
-            identity.principal_id = AAZStrType(
-                serialized_name="principalId",
-                flags={"read_only": True},
-            )
-            identity.tenant_id = AAZStrType(
-                serialized_name="tenantId",
-                flags={"read_only": True},
-            )
-            identity.type = AAZStrType()
-            identity.user_assigned_identities = AAZDictType(
-                serialized_name="userAssignedIdentities",
-            )
-
-            user_assigned_identities = cls._schema_on_200.value.Element.properties.application_gateways.Element.identity.user_assigned_identities
-            user_assigned_identities.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.application_gateways.Element.identity.user_assigned_identities.Element
-            _element.client_id = AAZStrType(
-                serialized_name="clientId",
-                flags={"read_only": True},
-            )
-            _element.principal_id = AAZStrType(
-                serialized_name="principalId",
-                flags={"read_only": True},
-            )
 
             properties = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties
             properties.authentication_certificates = AAZListType(
@@ -1470,7 +1456,6 @@ class List(AAZCommand):
             _element = cls._schema_on_200.value.Element.properties.custom_rules.Element.match_conditions.Element
             _element.match_values = AAZListType(
                 serialized_name="matchValues",
-                flags={"required": True},
             )
             _element.match_variables = AAZListType(
                 serialized_name="matchVariables",
@@ -1505,11 +1490,40 @@ class List(AAZCommand):
             _ListHelper._build_schema_sub_resource_read(http_listeners.Element)
 
             managed_rules = cls._schema_on_200.value.Element.properties.managed_rules
+            managed_rules.exceptions = AAZListType()
             managed_rules.exclusions = AAZListType()
             managed_rules.managed_rule_sets = AAZListType(
                 serialized_name="managedRuleSets",
                 flags={"required": True},
             )
+
+            exceptions = cls._schema_on_200.value.Element.properties.managed_rules.exceptions
+            exceptions.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.managed_rules.exceptions.Element
+            _element.exception_managed_rule_sets = AAZListType(
+                serialized_name="exceptionManagedRuleSets",
+            )
+            _element.match_variable = AAZStrType(
+                serialized_name="matchVariable",
+                flags={"required": True},
+            )
+            _element.selector = AAZStrType()
+            _element.selector_match_operator = AAZStrType(
+                serialized_name="selectorMatchOperator",
+            )
+            _element.value_match_operator = AAZStrType(
+                serialized_name="valueMatchOperator",
+                flags={"required": True},
+            )
+            _element.values = AAZListType()
+
+            exception_managed_rule_sets = cls._schema_on_200.value.Element.properties.managed_rules.exceptions.Element.exception_managed_rule_sets
+            exception_managed_rule_sets.Element = AAZObjectType()
+            _ListHelper._build_schema_exclusion_managed_rule_set_read(exception_managed_rule_sets.Element)
+
+            values = cls._schema_on_200.value.Element.properties.managed_rules.exceptions.Element.values
+            values.Element = AAZStrType()
 
             exclusions = cls._schema_on_200.value.Element.properties.managed_rules.exclusions
             exclusions.Element = AAZObjectType()
@@ -1532,38 +1546,7 @@ class List(AAZCommand):
 
             exclusion_managed_rule_sets = cls._schema_on_200.value.Element.properties.managed_rules.exclusions.Element.exclusion_managed_rule_sets
             exclusion_managed_rule_sets.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.managed_rules.exclusions.Element.exclusion_managed_rule_sets.Element
-            _element.rule_groups = AAZListType(
-                serialized_name="ruleGroups",
-            )
-            _element.rule_set_type = AAZStrType(
-                serialized_name="ruleSetType",
-                flags={"required": True},
-            )
-            _element.rule_set_version = AAZStrType(
-                serialized_name="ruleSetVersion",
-                flags={"required": True},
-            )
-
-            rule_groups = cls._schema_on_200.value.Element.properties.managed_rules.exclusions.Element.exclusion_managed_rule_sets.Element.rule_groups
-            rule_groups.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.managed_rules.exclusions.Element.exclusion_managed_rule_sets.Element.rule_groups.Element
-            _element.rule_group_name = AAZStrType(
-                serialized_name="ruleGroupName",
-                flags={"required": True},
-            )
-            _element.rules = AAZListType()
-
-            rules = cls._schema_on_200.value.Element.properties.managed_rules.exclusions.Element.exclusion_managed_rule_sets.Element.rule_groups.Element.rules
-            rules.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.managed_rules.exclusions.Element.exclusion_managed_rule_sets.Element.rule_groups.Element.rules.Element
-            _element.rule_id = AAZStrType(
-                serialized_name="ruleId",
-                flags={"required": True},
-            )
+            _ListHelper._build_schema_exclusion_managed_rule_set_read(exclusion_managed_rule_sets.Element)
 
             managed_rule_sets = cls._schema_on_200.value.Element.properties.managed_rules.managed_rule_sets
             managed_rule_sets.Element = AAZObjectType()
@@ -1600,6 +1583,7 @@ class List(AAZCommand):
                 serialized_name="ruleId",
                 flags={"required": True},
             )
+            _element.sensitivity = AAZStrType()
             _element.state = AAZStrType()
 
             path_based_rules = cls._schema_on_200.value.Element.properties.path_based_rules
@@ -1706,7 +1690,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-11-01",
+                    "api-version", "2024-03-01",
                     required=True,
                 ),
             }
@@ -1768,6 +1752,10 @@ class List(AAZCommand):
             )
 
             properties = cls._schema_on_200.value.Element.properties
+            properties.application_gateway_for_containers = AAZListType(
+                serialized_name="applicationGatewayForContainers",
+                flags={"read_only": True},
+            )
             properties.application_gateways = AAZListType(
                 serialized_name="applicationGateways",
                 flags={"read_only": True},
@@ -1799,6 +1787,14 @@ class List(AAZCommand):
                 flags={"read_only": True},
             )
 
+            application_gateway_for_containers = cls._schema_on_200.value.Element.properties.application_gateway_for_containers
+            application_gateway_for_containers.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.application_gateway_for_containers.Element
+            _element.id = AAZStrType(
+                flags={"required": True},
+            )
+
             application_gateways = cls._schema_on_200.value.Element.properties.application_gateways
             application_gateways.Element = AAZObjectType()
 
@@ -1808,6 +1804,7 @@ class List(AAZCommand):
             )
             _element.id = AAZStrType()
             _element.identity = AAZObjectType()
+            _ListHelper._build_schema_managed_service_identity_read(_element.identity)
             _element.location = AAZStrType()
             _element.name = AAZStrType(
                 flags={"read_only": True},
@@ -1820,33 +1817,6 @@ class List(AAZCommand):
                 flags={"read_only": True},
             )
             _element.zones = AAZListType()
-
-            identity = cls._schema_on_200.value.Element.properties.application_gateways.Element.identity
-            identity.principal_id = AAZStrType(
-                serialized_name="principalId",
-                flags={"read_only": True},
-            )
-            identity.tenant_id = AAZStrType(
-                serialized_name="tenantId",
-                flags={"read_only": True},
-            )
-            identity.type = AAZStrType()
-            identity.user_assigned_identities = AAZDictType(
-                serialized_name="userAssignedIdentities",
-            )
-
-            user_assigned_identities = cls._schema_on_200.value.Element.properties.application_gateways.Element.identity.user_assigned_identities
-            user_assigned_identities.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.application_gateways.Element.identity.user_assigned_identities.Element
-            _element.client_id = AAZStrType(
-                serialized_name="clientId",
-                flags={"read_only": True},
-            )
-            _element.principal_id = AAZStrType(
-                serialized_name="principalId",
-                flags={"read_only": True},
-            )
 
             properties = cls._schema_on_200.value.Element.properties.application_gateways.Element.properties
             properties.authentication_certificates = AAZListType(
@@ -3063,7 +3033,6 @@ class List(AAZCommand):
             _element = cls._schema_on_200.value.Element.properties.custom_rules.Element.match_conditions.Element
             _element.match_values = AAZListType(
                 serialized_name="matchValues",
-                flags={"required": True},
             )
             _element.match_variables = AAZListType(
                 serialized_name="matchVariables",
@@ -3098,11 +3067,40 @@ class List(AAZCommand):
             _ListHelper._build_schema_sub_resource_read(http_listeners.Element)
 
             managed_rules = cls._schema_on_200.value.Element.properties.managed_rules
+            managed_rules.exceptions = AAZListType()
             managed_rules.exclusions = AAZListType()
             managed_rules.managed_rule_sets = AAZListType(
                 serialized_name="managedRuleSets",
                 flags={"required": True},
             )
+
+            exceptions = cls._schema_on_200.value.Element.properties.managed_rules.exceptions
+            exceptions.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.managed_rules.exceptions.Element
+            _element.exception_managed_rule_sets = AAZListType(
+                serialized_name="exceptionManagedRuleSets",
+            )
+            _element.match_variable = AAZStrType(
+                serialized_name="matchVariable",
+                flags={"required": True},
+            )
+            _element.selector = AAZStrType()
+            _element.selector_match_operator = AAZStrType(
+                serialized_name="selectorMatchOperator",
+            )
+            _element.value_match_operator = AAZStrType(
+                serialized_name="valueMatchOperator",
+                flags={"required": True},
+            )
+            _element.values = AAZListType()
+
+            exception_managed_rule_sets = cls._schema_on_200.value.Element.properties.managed_rules.exceptions.Element.exception_managed_rule_sets
+            exception_managed_rule_sets.Element = AAZObjectType()
+            _ListHelper._build_schema_exclusion_managed_rule_set_read(exception_managed_rule_sets.Element)
+
+            values = cls._schema_on_200.value.Element.properties.managed_rules.exceptions.Element.values
+            values.Element = AAZStrType()
 
             exclusions = cls._schema_on_200.value.Element.properties.managed_rules.exclusions
             exclusions.Element = AAZObjectType()
@@ -3125,38 +3123,7 @@ class List(AAZCommand):
 
             exclusion_managed_rule_sets = cls._schema_on_200.value.Element.properties.managed_rules.exclusions.Element.exclusion_managed_rule_sets
             exclusion_managed_rule_sets.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.managed_rules.exclusions.Element.exclusion_managed_rule_sets.Element
-            _element.rule_groups = AAZListType(
-                serialized_name="ruleGroups",
-            )
-            _element.rule_set_type = AAZStrType(
-                serialized_name="ruleSetType",
-                flags={"required": True},
-            )
-            _element.rule_set_version = AAZStrType(
-                serialized_name="ruleSetVersion",
-                flags={"required": True},
-            )
-
-            rule_groups = cls._schema_on_200.value.Element.properties.managed_rules.exclusions.Element.exclusion_managed_rule_sets.Element.rule_groups
-            rule_groups.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.managed_rules.exclusions.Element.exclusion_managed_rule_sets.Element.rule_groups.Element
-            _element.rule_group_name = AAZStrType(
-                serialized_name="ruleGroupName",
-                flags={"required": True},
-            )
-            _element.rules = AAZListType()
-
-            rules = cls._schema_on_200.value.Element.properties.managed_rules.exclusions.Element.exclusion_managed_rule_sets.Element.rule_groups.Element.rules
-            rules.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.managed_rules.exclusions.Element.exclusion_managed_rule_sets.Element.rule_groups.Element.rules.Element
-            _element.rule_id = AAZStrType(
-                serialized_name="ruleId",
-                flags={"required": True},
-            )
+            _ListHelper._build_schema_exclusion_managed_rule_set_read(exclusion_managed_rule_sets.Element)
 
             managed_rule_sets = cls._schema_on_200.value.Element.properties.managed_rules.managed_rule_sets
             managed_rule_sets.Element = AAZObjectType()
@@ -3193,6 +3160,7 @@ class List(AAZCommand):
                 serialized_name="ruleId",
                 flags={"required": True},
             )
+            _element.sensitivity = AAZStrType()
             _element.state = AAZStrType()
 
             path_based_rules = cls._schema_on_200.value.Element.properties.path_based_rules
@@ -3516,6 +3484,54 @@ class _ListHelper:
         _schema.tags = cls._schema_application_security_group_read.tags
         _schema.type = cls._schema_application_security_group_read.type
 
+    _schema_exclusion_managed_rule_set_read = None
+
+    @classmethod
+    def _build_schema_exclusion_managed_rule_set_read(cls, _schema):
+        if cls._schema_exclusion_managed_rule_set_read is not None:
+            _schema.rule_groups = cls._schema_exclusion_managed_rule_set_read.rule_groups
+            _schema.rule_set_type = cls._schema_exclusion_managed_rule_set_read.rule_set_type
+            _schema.rule_set_version = cls._schema_exclusion_managed_rule_set_read.rule_set_version
+            return
+
+        cls._schema_exclusion_managed_rule_set_read = _schema_exclusion_managed_rule_set_read = AAZObjectType()
+
+        exclusion_managed_rule_set_read = _schema_exclusion_managed_rule_set_read
+        exclusion_managed_rule_set_read.rule_groups = AAZListType(
+            serialized_name="ruleGroups",
+        )
+        exclusion_managed_rule_set_read.rule_set_type = AAZStrType(
+            serialized_name="ruleSetType",
+            flags={"required": True},
+        )
+        exclusion_managed_rule_set_read.rule_set_version = AAZStrType(
+            serialized_name="ruleSetVersion",
+            flags={"required": True},
+        )
+
+        rule_groups = _schema_exclusion_managed_rule_set_read.rule_groups
+        rule_groups.Element = AAZObjectType()
+
+        _element = _schema_exclusion_managed_rule_set_read.rule_groups.Element
+        _element.rule_group_name = AAZStrType(
+            serialized_name="ruleGroupName",
+            flags={"required": True},
+        )
+        _element.rules = AAZListType()
+
+        rules = _schema_exclusion_managed_rule_set_read.rule_groups.Element.rules
+        rules.Element = AAZObjectType()
+
+        _element = _schema_exclusion_managed_rule_set_read.rule_groups.Element.rules.Element
+        _element.rule_id = AAZStrType(
+            serialized_name="ruleId",
+            flags={"required": True},
+        )
+
+        _schema.rule_groups = cls._schema_exclusion_managed_rule_set_read.rule_groups
+        _schema.rule_set_type = cls._schema_exclusion_managed_rule_set_read.rule_set_type
+        _schema.rule_set_version = cls._schema_exclusion_managed_rule_set_read.rule_set_version
+
     _schema_extended_location_read = None
 
     @classmethod
@@ -3680,6 +3696,51 @@ class _ListHelper:
         _schema.name = cls._schema_ip_configuration_read.name
         _schema.properties = cls._schema_ip_configuration_read.properties
 
+    _schema_managed_service_identity_read = None
+
+    @classmethod
+    def _build_schema_managed_service_identity_read(cls, _schema):
+        if cls._schema_managed_service_identity_read is not None:
+            _schema.principal_id = cls._schema_managed_service_identity_read.principal_id
+            _schema.tenant_id = cls._schema_managed_service_identity_read.tenant_id
+            _schema.type = cls._schema_managed_service_identity_read.type
+            _schema.user_assigned_identities = cls._schema_managed_service_identity_read.user_assigned_identities
+            return
+
+        cls._schema_managed_service_identity_read = _schema_managed_service_identity_read = AAZObjectType()
+
+        managed_service_identity_read = _schema_managed_service_identity_read
+        managed_service_identity_read.principal_id = AAZStrType(
+            serialized_name="principalId",
+            flags={"read_only": True},
+        )
+        managed_service_identity_read.tenant_id = AAZStrType(
+            serialized_name="tenantId",
+            flags={"read_only": True},
+        )
+        managed_service_identity_read.type = AAZStrType()
+        managed_service_identity_read.user_assigned_identities = AAZDictType(
+            serialized_name="userAssignedIdentities",
+        )
+
+        user_assigned_identities = _schema_managed_service_identity_read.user_assigned_identities
+        user_assigned_identities.Element = AAZObjectType()
+
+        _element = _schema_managed_service_identity_read.user_assigned_identities.Element
+        _element.client_id = AAZStrType(
+            serialized_name="clientId",
+            flags={"read_only": True},
+        )
+        _element.principal_id = AAZStrType(
+            serialized_name="principalId",
+            flags={"read_only": True},
+        )
+
+        _schema.principal_id = cls._schema_managed_service_identity_read.principal_id
+        _schema.tenant_id = cls._schema_managed_service_identity_read.tenant_id
+        _schema.type = cls._schema_managed_service_identity_read.type
+        _schema.user_assigned_identities = cls._schema_managed_service_identity_read.user_assigned_identities
+
     _schema_network_interface_ip_configuration_read = None
 
     @classmethod
@@ -3800,6 +3861,7 @@ class _ListHelper:
         properties.location = AAZStrType()
         properties.outbound_rule = AAZObjectType(
             serialized_name="outboundRule",
+            flags={"read_only": True},
         )
         cls._build_schema_sub_resource_read(properties.outbound_rule)
         properties.outbound_rules = AAZListType(
@@ -3855,6 +3917,7 @@ class _ListHelper:
         cls._build_schema_sub_resource_read(properties.load_balancer_frontend_ip_configuration)
         properties.network_interface_ip_configuration = AAZObjectType(
             serialized_name="networkInterfaceIPConfiguration",
+            flags={"read_only": True},
         )
         cls._build_schema_sub_resource_read(properties.network_interface_ip_configuration)
         properties.subnet = AAZObjectType()
@@ -3918,6 +3981,7 @@ class _ListHelper:
         cls._build_schema_sub_resource_read(properties.backend_address_pool)
         properties.backend_ip_configuration = AAZObjectType(
             serialized_name="backendIPConfiguration",
+            flags={"read_only": True},
         )
         cls._build_schema_network_interface_ip_configuration_read(properties.backend_ip_configuration)
         properties.backend_port = AAZIntType(
@@ -4073,6 +4137,7 @@ class _ListHelper:
         )
         properties.dscp_configuration = AAZObjectType(
             serialized_name="dscpConfiguration",
+            flags={"read_only": True},
         )
         cls._build_schema_sub_resource_read(properties.dscp_configuration)
         properties.enable_accelerated_networking = AAZBoolType(
@@ -4127,6 +4192,7 @@ class _ListHelper:
         )
         properties.virtual_machine = AAZObjectType(
             serialized_name="virtualMachine",
+            flags={"read_only": True},
         )
         cls._build_schema_sub_resource_read(properties.virtual_machine)
         properties.vnet_encryption_supported = AAZBoolType(
@@ -4197,6 +4263,9 @@ class _ListHelper:
         )
         properties.auto_approval = AAZObjectType(
             serialized_name="autoApproval",
+        )
+        properties.destination_ip_address = AAZStrType(
+            serialized_name="destinationIPAddress",
         )
         properties.enable_proxy_protocol = AAZBoolType(
             serialized_name="enableProxyProtocol",
@@ -4413,6 +4482,8 @@ class _ListHelper:
             flags={"read_only": True},
         )
         _element.id = AAZStrType()
+        _element.identity = AAZObjectType()
+        cls._build_schema_managed_service_identity_read(_element.identity)
         _element.location = AAZStrType()
         _element.name = AAZStrType(
             flags={"read_only": True},
@@ -4427,6 +4498,9 @@ class _ListHelper:
 
         properties = _schema_network_security_group_read.properties.flow_logs.Element.properties
         properties.enabled = AAZBoolType()
+        properties.enabled_filtering_criteria = AAZStrType(
+            serialized_name="enabledFilteringCriteria",
+        )
         properties.flow_analytics_configuration = AAZObjectType(
             serialized_name="flowAnalyticsConfiguration",
         )
@@ -4779,6 +4853,7 @@ class _ListHelper:
         )
         properties.ip_configuration = AAZObjectType(
             serialized_name="ipConfiguration",
+            flags={"read_only": True},
         )
         cls._build_schema_ip_configuration_read(properties.ip_configuration)
         properties.ip_tags = AAZListType(
@@ -5210,9 +5285,7 @@ class _ListHelper:
         cls._build_schema_ip_configuration_read(ip_configurations.Element)
 
         private_endpoints = _schema_subnet_read.properties.private_endpoints
-        private_endpoints.Element = AAZObjectType(
-            flags={"read_only": True},
-        )
+        private_endpoints.Element = AAZObjectType()
         cls._build_schema_private_endpoint_read(private_endpoints.Element)
 
         resource_navigation_links = _schema_subnet_read.properties.resource_navigation_links
@@ -5297,6 +5370,7 @@ class _ListHelper:
         )
         properties.has_bgp_override = AAZBoolType(
             serialized_name="hasBgpOverride",
+            flags={"read_only": True},
         )
         properties.next_hop_ip_address = AAZStrType(
             serialized_name="nextHopIpAddress",
@@ -5438,6 +5512,10 @@ class _ListHelper:
 
         _element = _schema_subnet_read.properties.service_endpoints.Element
         _element.locations = AAZListType()
+        _element.network_identifier = AAZObjectType(
+            serialized_name="networkIdentifier",
+        )
+        cls._build_schema_sub_resource_read(_element.network_identifier)
         _element.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
             flags={"read_only": True},
