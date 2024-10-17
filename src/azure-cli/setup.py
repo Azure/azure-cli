@@ -137,6 +137,7 @@ DEPENDENCIES = [
     'javaproperties~=0.5.1',
     'jsondiff~=2.0.0',
     'packaging>=20.9',
+    'paramiko>=2.0.8,<4.0.0',
     'pycomposefile>=0.0.29',
     'PyGithub~=1.38',
     'PyNaCl~=1.5.0',
