@@ -80,7 +80,6 @@ def add_source_resource_block(context, source, enable_id=True, target=None):
                          help="Use keyvault as a secrets store via a CSI volume. "
                          "If specified, AuthType Arguments are not needed.")
         if target == RESOURCE.AppConfig:
-            print("target is AppConfig")
             context.argument('enable_appconfig_extension', options_list=['--enable-appconfig-extension', '-e'],
                              arg_type=get_three_state_flag(),
                              help="Install Azure App Configuration extension in the Kubernetes cluster.")
