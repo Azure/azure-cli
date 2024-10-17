@@ -551,6 +551,12 @@ parameters:
   - name: --enable-cost-analysis
     type: bool
     short-summary: Enable exporting Kubernetes Namespace and Deployment details to the Cost Analysis views in the Azure portal. For more information see aka.ms/aks/docs/cost-analysis.
+  - name: --enable-secure-boot
+    type: bool
+    short-summary: Enable Secure Boot on all node pools in the cluster. Must use VMSS agent pool type.
+  - name: --enable-vtpm
+    type: bool
+    short-summary: Enable vTPM on all node pools in the cluster. Must use VMSS agent pool type.
 
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
@@ -1601,6 +1607,12 @@ parameters:
   - name: --disable-windows-outbound-nat
     type: bool
     short-summary: Disable Windows OutboundNAT on Windows agent node pool.
+  - name: --enable-secure-boot
+    type: bool
+    short-summary: Enable Secure Boot on agent node pool. Must use VMSS agent pool type.
+  - name: --enable-vtpm
+    type: bool
+    short-summary: Enable vTPM on agent node pool. Must use VMSS agent pool type.
 
 examples:
   - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.
@@ -1713,6 +1725,18 @@ parameters:
   - name: --disable-fips-image
     type: bool
     short-summary: Switch to use non-FIPS-enabled OS on agent nodes.
+  - name: --enable-secure-boot
+    type: bool
+    short-summary: Enable Secure Boot on an existing Trusted Launch enabled agent node pool. Must use VMSS agent pool type.
+  - name: --disable-secure-boot
+    type: bool
+    short-summary: Disable Secure Boot on on an existing Trusted Launch enabled agent node pool.
+  - name: --enable-vtpm
+    type: bool
+    short-summary: Enable vTPM on an existing Trusted Launch enabled agent node pool. Must use VMSS agent pool type.
+  - name: --disable-vtpm
+    type: bool
+    short-summary: Disable vTPM on an existing Trusted Launch enabled agent node pool.
 examples:
   - name: Reconcile the nodepool back to its current state.
     text: az aks nodepool update -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster
@@ -1789,6 +1813,18 @@ helps['aks operation-abort'] = """
     examples:
         - name: Abort operation on managed cluster
           text: az aks operation-abort -g myResourceGroup -n myAKSCluster
+"""
+
+helps['aks nodepool delete-machines'] = """
+    type: command
+    short-summary: Delete specific machines in an agentpool for a managed cluster.
+    parameters:
+        - name: --machine-names
+          type: string array
+          short-summary: Space-separated list of machine names from the agent pool to be deleted.
+    examples:
+        - name: Delete specific machines in an agent pool
+          text: az aks nodepool delete-machines -g myResourceGroup --nodepool-name nodepool1 --cluster-name myAKSCluster --machine-names machine1
 """
 
 helps['aks remove-dev-spaces'] = """

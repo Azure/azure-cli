@@ -10,7 +10,7 @@ from enum import Enum
 from knack.log import get_logger
 from azure.cli.core.azclierror import ValidationError
 from azure.cli.core.aaz import has_value, AAZJsonSelector
-from msrestazure.tools import is_valid_resource_id, parse_resource_id
+from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
 from .aaz.latest.netappfiles import UpdateNetworkSiblingSet as _UpdateNetworkSiblingSet
 from .aaz.latest.netappfiles.account import Create as _AccountCreate, Update as _AccountUpdate
 from .aaz.latest.netappfiles.account.ad import Add as _ActiveDirectoryAdd, List as _ActiveDirectoryList, Update as _ActiveDirectoryUpdate
@@ -332,34 +332,29 @@ class VolumeCreate(_VolumeCreate):
         subnet_rg = args.resource_group
         subs_id = self.ctx.subscription_id
         vnetArg = args.vnet.to_serialized_data()
-        # determine vnet - supplied value can be name or ARM resource Id
-        if is_valid_resource_id(vnetArg):
-            resource_parts = parse_resource_id(vnetArg)
-            vnetArg = resource_parts['resource_name']
-            subnet_rg = resource_parts['resource_group']
-
         # determine subnet - supplied value can be name or ARM resource Id
-        if is_valid_resource_id(args.subnet_id.to_serialized_data()):
-            resource_parts = parse_resource_id(args.subnet_id.to_serialized_data())
-            subnet = resource_parts['resource_name']
-            subnet_rg = resource_parts['resource_group']
-
-        args.subnet_id = f"/subscriptions/{subs_id}/resourceGroups/{subnet_rg}/providers/Microsoft.Network/virtualNetworks/{vnetArg}/subnets/{subnet}"
+        if not is_valid_resource_id(args.subnet_id.to_serialized_data()):
+            if is_valid_resource_id(vnetArg):
+                # determine vnet - supplied value can be name or ARM resource Id
+                resource_parts = parse_resource_id(vnetArg)
+                vnetArg = resource_parts['resource_name']
+                subnet_rg = resource_parts['resource_group']
+            args.subnet_id = f"/subscriptions/{subs_id}/resourceGroups/{subnet_rg}/providers/Microsoft.Network/virtualNetworks/{vnetArg}/subnets/{subnet}"
 
         # if NFSv4 is specified then the export policy must reflect this
         # the RP ordinarily only creates a default setting NFSv3.
         logger.debug("ANF log: ProtocolTypes rules len:%s", len(args.protocol_types))
 
-        for protocl in args.protocol_types:
-            logger.debug("ANF log: ProtocolType: %s", protocl)
+        for protocol in args.protocol_types:
+            logger.debug("ANF log: ProtocolType: %s", protocol)
 
         logger.debug("ANF log: exportPolicy rules len:%s", len(args.export_policy_rules))
 
         for rule in args.export_policy_rules:
             logger.debug("ANF log: rule: %s", rule)
 
-        if (has_value(args.protocol_types) and any(x in ['NFSv3', 'NFSv4.1'] for x in args.protocol_types) and len(args.export_policy_rules) == 0)\
-                and not ((len(args.protocol_types) == 1 and all(elem == "NFSv3" for elem in args.protocol_types)) and len(args.export_policy_rules) == 0):
+        if (has_value(args.protocol_types) and any(x in ['NFSv3', 'NFSv4.1'] for x in args.protocol_types) and len(args.export_policy_rules) == 0) \
+                and not ((len(args.protocol_types) == 1 and all(elem == "NFSv3" for elem in args.protocol_types) and not has_value(args.rule_index)) and len(args.export_policy_rules) == 0):
             isNfs41 = False
             isNfs3 = False
             cifs = False
@@ -398,10 +393,9 @@ class VolumeCreate(_VolumeCreate):
             args.export_policy_rules[0]["has_root_access"] = args.has_root_access
             args.export_policy_rules[0]["chown_mode"] = args.chown_mode
 
-            logger.debug("ANF-Extension log: after exportPolicy rule => : %s, %s, %s, %s", args.export_policy_rules[0]["rule_index"], args.export_policy_rules[0]["nfsv3"], args.export_policy_rules[0]["nfsv41"], args.export_policy_rules[0]["cifs"])
-
+            logger.debug("ANF log: after exportPolicy rule => : %s, %s, %s, %s", args.export_policy_rules[0]["rule_index"], args.export_policy_rules[0]["nfsv3"], args.export_policy_rules[0]["nfsv41"], args.export_policy_rules[0]["cifs"])
         else:
-            logger.debug("Don't create export policy")
+            logger.debug("ANF log: Don't create export policy")
 
 # todo create export policy note no longer flatteneded
     # def post_operations(self):
@@ -426,7 +420,7 @@ class VolumeCreate(_VolumeCreate):
 class VolumeUpdate(_VolumeUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg, AAZIntArgFormat
+        from azure.cli.core.aaz import AAZIntArgFormat, AAZStrArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.vnet = AAZStrArg(
             options=["--vnet"],
@@ -459,7 +453,7 @@ class VolumeBreakFileLocks(_BreakFileLocks):
 
     def pre_operations(self):
         args = self.ctx.args
-        # RP expects bytes but CLI allows integer TiBs for ease of use
+        # RP expects confirm_running_disruptive_operation but we use standard Azure CLI prompts, if we are here we are confirmed
         logger.debug("ANF-Extension log: VolumeBreakFileLocks pre_operations")
         args.confirm_running_disruptive_operation = True
 # endregion

@@ -22,6 +22,11 @@ type: group
 short-summary: Manage network rules.
 """
 
+helps['signalr network-rule ip-rule'] = """
+type: group
+short-summary: Manage SignalR Service IP rules.
+"""
+
 helps['signalr upstream'] = """
 type: group
 short-summary: Manage upstream settings.
@@ -135,6 +140,24 @@ examples:
         az signalr list -g MySignalR -o table
 """
 
+helps['signalr start'] = """
+type: command
+short-summary: Start an existing SignalR Service.
+examples:
+  - name: Start a SignalR Service instance.
+    text: >
+        az signalr start -n MySignalR -g MyResourceGroup
+"""
+
+helps['signalr stop'] = """
+type: command
+short-summary: Stop an existing SignalR Service.
+examples:
+  - name: Stop a SignalR Service instance.
+    text: >
+        az signalr stop -n MySignalR -g MyResourceGroup
+"""
+
 helps['signalr restart'] = """
 type: command
 short-summary: Restart an existing SignalR Service.
@@ -210,6 +233,24 @@ examples:
         az signalr network-rule update --public-network --connection-name MyPrivateEndpointConnection1 MyPrivateEndpointConnection2 -n MySignalR -g MyResourceGroup --deny ClientConnection
 """
 
+helps['signalr network-rule ip-rule add'] = """
+type: command
+short-summary: Add IP rule to SignalR Service.
+examples:
+  - name: Add IP rule
+    text: >
+        az signalr network-rule ip-rule add -n MySignalR -g MyResourceGroup --ip-rule value="10.0.0.24" action="Allow" --ip-rule value="192.168.0.0/24" action="Deny"
+"""
+
+helps['signalr network-rule ip-rule remove'] = """
+type: command
+short-summary: Remove IP rule from SignalR Service.
+examples:
+  - name: Remove IP rule
+    text: >
+        az signalr network-rule ip-rule remove -n MySignalR -g MyResourceGroup --ip-rule value="10.0.0.24" action="Allow" --ip-rule value="192.168.0.0/24" action="Deny"
+"""
+
 helps['signalr identity assign'] = """
 type: command
 short-summary: Assign managed identity for SignalR Service.
@@ -280,6 +321,33 @@ short-summary: List custom certificate of SignalR Service.
 helps['signalr custom-certificate show'] = """
 type: command
 short-summary: Show the detail of a custom certificate of SignalR Service.
+"""
+
+helps['signalr replica start'] = """
+type: command
+short-summary: Start a replica of SignalR Service.
+examples:
+  - name: Start a replica
+    text: >
+        az signalr replica start --replica-name MyReplica --signalr-name MySignalR -g MyResourceGroup
+"""
+
+helps['signalr replica stop'] = """
+type: command
+short-summary: Stop a replica of SignalR Service.
+examples:
+  - name: Stop a replica
+    text: >
+        az signalr replica stop --replica-name MyReplica --signalr-name MySignalR -g MyResourceGroup
+"""
+
+helps['signalr replica restart'] = """
+type: command
+short-summary: Restart a replica of SignalR Service.
+examples:
+  - name: Restart a replica
+    text: >
+        az signalr replica restart --replica-name MyReplica --signalr-name MySignalR -g MyResourceGroup
 """
 
 helps['signalr replica show'] = """

@@ -417,16 +417,17 @@ def list_clusters(cmd, client, resource_group_name=None):  # pylint: disable=unu
     return list(clusters_list)
 
 
-def update_cluster(cmd, client, cluster_name, resource_group_name, tags=None, assign_identity=None, no_wait=False):
+def update_cluster(cmd, client, cluster_name, resource_group_name, tags=None,
+                   assign_identity_type=None, assign_identity=None, no_wait=False):
     from azure.mgmt.hdinsight.models import ClusterPatchParameters
-    from .util import build_identities_info
+    from .util import build_update_identities_info
     assign_identities = []
     if assign_identity:
         assign_identities.append(assign_identity)
 
     cluster_patch_parameters = ClusterPatchParameters(
         tags=tags,
-        identity=build_identities_info(assign_identities)
+        identity=build_update_identities_info(assign_identity_type, assign_identities)
     )
 
     return sdk_no_wait(no_wait, client.update, resource_group_name, cluster_name, cluster_patch_parameters)
@@ -547,7 +548,7 @@ def create_hdi_application(cmd, client, resource_group_name, cluster_name, appli
 def enable_hdi_monitoring(cmd, client, resource_group_name, cluster_name, workspace,
                           primary_key=None, workspace_type='resource_id', no_validation_timeout=False):
     from azure.mgmt.hdinsight.models import ClusterMonitoringRequest
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
     from ._client_factory import cf_log_analytics
 
     if workspace_type != 'resource_id' and not primary_key:
@@ -589,7 +590,7 @@ def enable_hdi_monitoring(cmd, client, resource_group_name, cluster_name, worksp
 def enable_hdi_azure_monitor(cmd, client, resource_group_name, cluster_name, workspace, primary_key=None,
                              workspace_type='resource_id', no_validation_timeout=False):
     from azure.mgmt.hdinsight.models import AzureMonitorRequest
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
     from ._client_factory import cf_log_analytics
 
     if workspace_type != 'resource_id' and not primary_key:
@@ -632,7 +633,7 @@ def enable_hdi_azure_monitor(cmd, client, resource_group_name, cluster_name, wor
 def enable_hdi_azure_monitor_agent(cmd, client, resource_group_name, cluster_name, workspace, primary_key=None,
                                    workspace_type='resource_id', no_validation_timeout=False):
     from azure.mgmt.hdinsight.models import AzureMonitorRequest
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
     from ._client_factory import cf_log_analytics
 
     if workspace_type != 'resource_id' and not primary_key:

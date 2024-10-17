@@ -45,7 +45,7 @@ def _resolve_api_version(rcf, resource_provider_namespace, parent_resource_path,
 
 
 def get_vnet_validator(dest):
-    from msrestazure.tools import is_valid_resource_id, resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id, resource_id
 
     def _validate_vnet_name_or_id(cmd, namespace):
         SubResource = cmd.get_models('SubResource', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
@@ -79,7 +79,7 @@ def _validate_vpn_gateway_generation(namespace):
 
 def validate_ddos_name_or_id(cmd, namespace):
     if namespace.ddos_protection_plan:
-        from msrestazure.tools import is_valid_resource_id, resource_id
+        from azure.mgmt.core.tools import is_valid_resource_id, resource_id
         if not is_valid_resource_id(namespace.ddos_protection_plan):
             namespace.ddos_protection_plan = resource_id(
                 subscription=get_subscription_id(cmd.cli_ctx),
@@ -96,7 +96,7 @@ def dns_zone_name_type(value):
 
 
 def _generate_ag_subproperty_id(cli_ctx, namespace, child_type, child_name, subscription=None):
-    from msrestazure.tools import resource_id
+    from azure.mgmt.core.tools import resource_id
     return resource_id(
         subscription=subscription or get_subscription_id(cli_ctx),
         resource_group=namespace.resource_group_name,
@@ -108,7 +108,7 @@ def _generate_ag_subproperty_id(cli_ctx, namespace, child_type, child_name, subs
 
 
 def _generate_lb_subproperty_id(cli_ctx, namespace, child_type, child_name, subscription=None):
-    from msrestazure.tools import resource_id
+    from azure.mgmt.core.tools import resource_id
     return resource_id(
         subscription=subscription or get_subscription_id(cli_ctx),
         resource_group=namespace.resource_group_name,
@@ -120,7 +120,7 @@ def _generate_lb_subproperty_id(cli_ctx, namespace, child_type, child_name, subs
 
 
 def _generate_lb_id_list_from_names_or_ids(cli_ctx, namespace, prop, child_type):
-    from msrestazure.tools import is_valid_resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id
     raw = getattr(namespace, prop)
     if not raw:
         return
@@ -144,7 +144,7 @@ def validate_address_pool_id_list(cmd, namespace):
 
 
 def validate_address_pool_name_or_id(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id, parse_resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
     address_pool = namespace.backend_address_pool
     lb_name = namespace.load_balancer_name
     gateway_name = namespace.application_gateway_name
@@ -230,8 +230,27 @@ def validate_dns_record_type(namespace):
             return
 
 
+def validate_managed_identity_resource_id(resource_id):
+    if resource_id.lower() == 'none':
+        return True
+    parts = resource_id.split('/')
+    if len(parts) != 9:
+        raise ValueError(
+            'Invalid resource ID format for a managed identity. It should be in the format:'
+            '/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/'
+            'Microsoft.ManagedIdentity/userAssignedIdentities/{identity_name}')
+
+    if (parts[1] != 'subscriptions' or parts[3] != 'resourceGroups' or parts[5] != 'providers' or
+            parts[6] != 'Microsoft.ManagedIdentity' or parts[7] != 'userAssignedIdentities'):
+        raise ValueError(
+            'Invalid resource ID format for a managed identity. It should contain subscriptions,'
+            'resourceGroups, providers/Microsoft.ManagedIdentity/userAssignedIdentities'
+            'in the correct order.')
+    return True
+
+
 def validate_user_assigned_identity(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id, resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id, resource_id
 
     if namespace.user_assigned_identity and not is_valid_resource_id(namespace.user_assigned_identity):
         namespace.user_assigned_identity = resource_id(
@@ -244,7 +263,7 @@ def validate_user_assigned_identity(cmd, namespace):
 
 
 def validate_waf_policy(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id, resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id, resource_id
     if namespace.firewall_policy and not is_valid_resource_id(namespace.firewall_policy):
         namespace.firewall_policy = resource_id(
             subscription=get_subscription_id(cmd.cli_ctx),
@@ -261,7 +280,7 @@ def validate_inbound_nat_rule_id_list(cmd, namespace):
 
 
 def validate_inbound_nat_rule_name_or_id(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id
     rule_name = namespace.inbound_nat_rule
     lb_name = namespace.load_balancer_name
 
@@ -286,7 +305,7 @@ def validate_ip_tags(namespace):
 
 
 def validate_frontend_ip_configs(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id
     if namespace.frontend_ip_configurations:
         config_ids = []
         for item in namespace.frontend_ip_configurations:
@@ -299,7 +318,7 @@ def validate_frontend_ip_configs(cmd, namespace):
 
 
 def validate_local_gateway(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id, resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id, resource_id
     if namespace.gateway_default_site and not is_valid_resource_id(namespace.gateway_default_site):
         namespace.gateway_default_site = resource_id(
             subscription=get_subscription_id(cmd.cli_ctx),
@@ -323,7 +342,7 @@ def validate_peering_type(namespace):
 
 
 def validate_public_ip_prefix(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id, resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id, resource_id
     if namespace.public_ip_prefix and not is_valid_resource_id(namespace.public_ip_prefix):
         namespace.public_ip_prefix = resource_id(
             subscription=get_subscription_id(cmd.cli_ctx),
@@ -334,7 +353,7 @@ def validate_public_ip_prefix(cmd, namespace):
 
 
 def validate_nat_gateway(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id, resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id, resource_id
     if namespace.nat_gateway and not is_valid_resource_id(namespace.nat_gateway):
         namespace.nat_gateway = resource_id(
             subscription=get_subscription_id(cmd.cli_ctx),
@@ -353,7 +372,7 @@ def get_public_ip_validator(has_type_field=False, allow_none=False, allow_new=Fa
                             default_none=False):
     """ Retrieves a validator for public IP address. Accepting all defaults will perform a check
     for an existing name or ID with no ARM-required -type parameter. """
-    from msrestazure.tools import is_valid_resource_id, resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id, resource_id
 
     def simple_validator(cmd, namespace):
         if namespace.public_ip_address:
@@ -385,7 +404,7 @@ def get_public_ip_validator(has_type_field=False, allow_none=False, allow_new=Fa
 
 def get_subnet_validator(has_type_field=False, allow_none=False, allow_new=False,
                          default_none=False):
-    from msrestazure.tools import is_valid_resource_id, resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id, resource_id
 
     def simple_validator(cmd, namespace):
         if namespace.virtual_network_name is None and namespace.subnet is None:
@@ -427,7 +446,7 @@ def get_subnet_validator(has_type_field=False, allow_none=False, allow_new=False
 
 
 def get_nsg_validator(has_type_field=False, allow_none=False, allow_new=False, default_none=False):
-    from msrestazure.tools import is_valid_resource_id, resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id, resource_id
 
     def simple_validator(cmd, namespace):
         if namespace.network_security_group:
@@ -450,7 +469,7 @@ def get_nsg_validator(has_type_field=False, allow_none=False, allow_new=False, d
 
 
 def validate_service_endpoint_policy(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id, resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id, resource_id
     if namespace.service_endpoint_policy:
         policy_ids = []
         for policy in namespace.service_endpoint_policy:
@@ -480,7 +499,7 @@ def get_servers_validator(camel_case=False):
 
 
 def validate_private_dns_zone(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id, resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id, resource_id
     if namespace.private_dns_zone and not is_valid_resource_id(namespace.private_dns_zone):
         namespace.private_dns_zone = resource_id(
             subscription=get_subscription_id(cmd.cli_ctx),
@@ -492,7 +511,7 @@ def validate_private_dns_zone(cmd, namespace):
 
 def get_virtual_network_validator(has_type_field=False, allow_none=False, allow_new=False,
                                   default_none=False):
-    from msrestazure.tools import is_valid_resource_id, resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id, resource_id
 
     def simple_validator(cmd, namespace):
         if namespace.virtual_network:
@@ -598,7 +617,7 @@ def _validate_cert(namespace, param_name):
 
 
 def process_vpn_connection_create_namespace(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id, resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id, resource_id
     get_default_location_from_resource_group(cmd, namespace)
     validate_tags(namespace)
 
@@ -657,7 +676,7 @@ def load_cert_file(param_name):
 def get_network_watcher_from_location(remove=False, watcher_name='watcher_name',
                                       rg_name='watcher_rg'):
     def _validator(cmd, namespace):
-        from msrestazure.tools import parse_resource_id
+        from azure.mgmt.core.tools import parse_resource_id
         from .aaz.latest.network.watcher import List
 
         location = namespace.location
@@ -676,7 +695,7 @@ def get_network_watcher_from_location(remove=False, watcher_name='watcher_name',
 
 
 def _process_vnet_name_and_id(vnet, cmd, resource_group_name):
-    from msrestazure.tools import is_valid_resource_id, resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id, resource_id
     if vnet and not is_valid_resource_id(vnet):
         vnet = resource_id(
             subscription=get_subscription_id(cmd.cli_ctx),
@@ -689,7 +708,7 @@ def _process_vnet_name_and_id(vnet, cmd, resource_group_name):
 
 def _process_subnet_name_and_id(subnet, vnet, cmd, resource_group_name):
     from azure.cli.core.azclierror import UnrecognizedArgumentError
-    from msrestazure.tools import is_valid_resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id
     if subnet and not is_valid_resource_id(subnet):
         vnet = _process_vnet_name_and_id(vnet, cmd, resource_group_name)
         if vnet is None:
@@ -700,7 +719,7 @@ def _process_subnet_name_and_id(subnet, vnet, cmd, resource_group_name):
 
 
 def process_nw_flow_log_show_namespace(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id, resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id, resource_id
     from azure.cli.core.commands.arm import get_arm_resource_by_id
 
     if hasattr(namespace, 'nsg') and namespace.nsg is not None:
@@ -722,7 +741,7 @@ def process_nw_flow_log_show_namespace(cmd, namespace):
 
 
 def process_lb_outbound_rule_namespace(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id
 
     validate_frontend_ip_configs(cmd, namespace)
 
@@ -733,7 +752,7 @@ def process_lb_outbound_rule_namespace(cmd, namespace):
 
 
 def validate_ag_address_pools(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id, resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id, resource_id
     address_pools = namespace.app_gateway_backend_address_pools
     gateway_name = namespace.application_gateway_name
     delattr(namespace, 'application_gateway_name')
@@ -865,7 +884,7 @@ def process_private_link_resource_id_argument(cmd, namespace):
                                  namespace.resource_provider])):
         raise CLIError("usage error: --id / -g -n --type")
 
-    from msrestazure.tools import is_valid_resource_id, parse_resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
     if not is_valid_resource_id(namespace.id):
         raise CLIError("Resource ID is invalid. Please check it.")
     split_resource_id = parse_resource_id(namespace.id)

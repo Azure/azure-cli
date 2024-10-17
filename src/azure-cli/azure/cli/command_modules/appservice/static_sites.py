@@ -10,8 +10,8 @@ from azure.cli.core.util import sdk_no_wait, send_raw_request
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.azclierror import (ResourceNotFoundError, ValidationError, RequiredArgumentMissingError,
                                        InvalidArgumentValueError, UnauthorizedError)
+from azure.mgmt.core.tools import parse_resource_id
 from knack.log import get_logger
-from msrestazure.tools import parse_resource_id
 from urllib.parse import urlparse
 import uuid
 from datetime import datetime, timedelta

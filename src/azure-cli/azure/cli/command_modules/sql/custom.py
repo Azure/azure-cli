@@ -596,7 +596,7 @@ def _complete_maintenance_configuration_id(cli_ctx, argument_value=None):
     Completes maintenance configuration id from short to full type if needed
     '''
 
-    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
     if argument_value and not is_valid_resource_id(argument_value):
@@ -736,7 +736,7 @@ def _get_managed_db_resource_id(
     Gets the Managed db resource id in this Azure environment.
     '''
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import resource_id
+    from azure.mgmt.core.tools import resource_id
 
     return resource_id(
         subscription=subscription_id if subscription_id else get_subscription_id(cli_ctx),
@@ -780,7 +780,7 @@ def _get_managed_dropped_db_resource_id(
 
     from urllib.parse import quote
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import resource_id
+    from azure.mgmt.core.tools import resource_id
 
     return (resource_id(
         subscription=subscription_id if subscription_id else get_subscription_id(cli_ctx),
@@ -803,7 +803,7 @@ def _get_managed_instance_resource_id(
     '''
 
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import resource_id
+    from azure.mgmt.core.tools import resource_id
 
     return (resource_id(
         subscription=subscription_id if subscription_id else get_subscription_id(cli_ctx),
@@ -822,7 +822,7 @@ def _get_managed_instance_pool_resource_id(
     '''
 
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import resource_id
+    from azure.mgmt.core.tools import resource_id
 
     if instance_pool_name:
         return (resource_id(
@@ -1023,7 +1023,7 @@ def _validate_elastic_pool_id(
     Returns the elastic_pool_id, which may have been updated and may be None.
     '''
 
-    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
     if elastic_pool_id and not is_valid_resource_id(elastic_pool_id):
@@ -5070,10 +5070,12 @@ def managed_instance_update(  # pylint: disable=too-many-locals
         cmd,
         instance,
         resource_group_name,
+        is_general_purpose_v2=None,
         administrator_login_password=None,
         license_type=None,
         vcores=None,
         storage_size_in_gb=None,
+        storage_iops=None,
         assign_identity=False,
         proxy_override=None,
         public_data_endpoint_enabled=None,
@@ -5110,6 +5112,18 @@ def managed_instance_update(  # pylint: disable=too-many-locals
     instance.service_principal = _get_service_principal_object_from_type(service_principal_type)
 
     # Apply params to instance
+    #   Note on is_general_purpose_v2
+    #     If this parameter was not set by the user, we do not want to pick up its current value.
+    #     This is due to the fact that this update might have a target edition that does not use this parameter.
+    #   Note on storage_iops
+    #     If this parameter was not set by the user, we do not want to pick up its current value.
+    #     This is due to the fact that this update might have a target edition that does not use this parameter.
+    #     If the target edition uses the parameter, the current value will get picked up later in the update process.
+    #   Note on storage_throughput_mbps
+    #     If this parameter was not set by the user, we do not want to pick up its current value.
+    #     This is due to the fact that this update might have a target edition that does not use this parameter.
+    #     If the target edition uses the parameter, the current value will get picked up later in the update process.
+    instance.is_general_purpose_v2 = is_general_purpose_v2
     instance.administrator_login_password = (
         administrator_login_password or instance.administrator_login_password)
     instance.license_type = (
@@ -5118,6 +5132,8 @@ def managed_instance_update(  # pylint: disable=too-many-locals
         vcores or instance.v_cores)
     instance.storage_size_in_gb = (
         storage_size_in_gb or instance.storage_size_in_gb)
+    instance.storage_iops = storage_iops
+    instance.storage_throughput_mbps = None
     instance.proxy_override = (
         proxy_override or instance.proxy_override)
     instance.minimal_tls_version = (
