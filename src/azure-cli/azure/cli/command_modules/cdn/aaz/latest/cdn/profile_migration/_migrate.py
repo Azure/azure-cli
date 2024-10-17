@@ -20,9 +20,9 @@ class Migrate(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-05-01-preview",
+        "version": "2024-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}/cdnmigratetoafd", "2024-05-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}/cdnmigratetoafd", "2024-09-01"],
         ]
     }
 
@@ -172,7 +172,7 @@ class Migrate(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-05-01-preview",
+                    "api-version", "2024-09-01",
                     required=True,
                 ),
             }
@@ -246,6 +246,7 @@ class Migrate(AAZCommand):
             properties = cls._schema_on_200.properties
             properties.migrated_profile_resource_id = AAZObjectType(
                 serialized_name="migratedProfileResourceId",
+                flags={"read_only": True},
             )
 
             migrated_profile_resource_id = cls._schema_on_200.properties.migrated_profile_resource_id

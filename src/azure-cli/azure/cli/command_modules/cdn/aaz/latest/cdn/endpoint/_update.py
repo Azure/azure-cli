@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "cdn endpoint update",
 )
 class Update(AAZCommand):
-    """Update an existing CDN endpoint with the specified endpoint name under the specified subscription, resource group and profile. Only tags can be updated after creating an endpoint. To update origins, use the Update Origin operation. To update origin groups, use the Update Origin group operation. To update custom domains, use the Update Custom Domain operation.
+    """Update an existing CDN endpoint with the specified endpoint name under the specified subscription, resource group and profile.
 
     :example: Turn off HTTP traffic for an endpoint.
         az cdn endpoint update -g group -n endpoint --profile-name profile --no-http
@@ -25,13 +25,15 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-02-01",
+        "version": "2024-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}/endpoints/{}", "2024-02-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}/endpoints/{}", "2024-09-01"],
         ]
     }
 
     AZ_SUPPORT_NO_WAIT = True
+
+    AZ_SUPPORT_GENERIC_UPDATE = True
 
     def _handler(self, command_args):
         super()._handler(command_args)
@@ -64,26 +66,27 @@ class Update(AAZCommand):
             required=True,
         )
 
-        # define Arg Group "DefaultOriginGroup"
+        # define Arg Group "Endpoint"
 
         _args_schema = cls._args_schema
-        _args_schema.default_origin_group = AAZStrArg(
-            options=["--default-origin-group"],
-            arg_group="DefaultOriginGroup",
-            help="The origin group to use for origins not explicitly included in an origin group. Can be specified as a resource ID or the name of an origin group of this endpoint.",
+        _args_schema.location = AAZResourceLocationArg(
+            arg_group="Endpoint",
+            help="Resource location.",
+            fmt=AAZResourceLocationArgFormat(
+                resource_group_arg="resource_group",
+            ),
         )
-
-        # define Arg Group "EndpointUpdateProperties"
-
-        _args_schema = cls._args_schema
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
-            arg_group="EndpointUpdateProperties",
-            help="Endpoint tags.",
+            arg_group="Endpoint",
+            help="Resource tags.",
+            nullable=True,
         )
 
         tags = cls._args_schema.tags
-        tags.Element = AAZStrArg()
+        tags.Element = AAZStrArg(
+            nullable=True,
+        )
 
         # define Arg Group "Properties"
 
@@ -92,111 +95,146 @@ class Update(AAZCommand):
             options=["--content-types-to-compress"],
             arg_group="Properties",
             help="List of content types on which compression applies. The value should be a valid MIME type.",
+            nullable=True,
         )
+        _args_schema.default_origin_group = AAZObjectArg(
+            options=["--default-origin-group"],
+            arg_group="Properties",
+            help="A reference to the origin group.",
+            nullable=True,
+        )
+        cls._build_args_resource_reference_update(_args_schema.default_origin_group)
         _args_schema.delivery_policy = AAZObjectArg(
             options=["--delivery-policy"],
             arg_group="Properties",
             help="A policy that specifies the delivery rules to be used for an endpoint.",
+            nullable=True,
         )
         _args_schema.geo_filters = AAZListArg(
             options=["--geo-filters"],
             arg_group="Properties",
             help="List of rules defining the user's geo access within a CDN endpoint. Each geo filter defines an access rule to a specified path or content, e.g. block APAC for path /pictures/",
+            nullable=True,
         )
         _args_schema.is_compression_enabled = AAZBoolArg(
             options=["--is-compression-enabled"],
             arg_group="Properties",
             help="Indicates whether content compression is enabled on CDN. Default value is false. If compression is enabled, content will be served as compressed if user requests for a compressed version. Content won't be compressed on CDN when requested content is smaller than 1 byte or larger than 1 MB.",
+            nullable=True,
         )
         _args_schema.is_http_allowed = AAZBoolArg(
             options=["--is-http-allowed"],
             arg_group="Properties",
             help="Indicates whether HTTP traffic is allowed on the endpoint. Default value is true. At least one protocol (HTTP or HTTPS) must be allowed.",
-            default=True,
+            nullable=True,
         )
         _args_schema.is_https_allowed = AAZBoolArg(
             options=["--is-https-allowed"],
             arg_group="Properties",
             help="Indicates whether HTTPS traffic is allowed on the endpoint. Default value is true. At least one protocol (HTTP or HTTPS) must be allowed.",
-            default=True,
+            nullable=True,
         )
         _args_schema.optimization_type = AAZStrArg(
             options=["--optimization-type"],
             arg_group="Properties",
             help="Specifies what scenario the customer wants this CDN endpoint to optimize for, e.g. Download, Media services. With this information, CDN can apply scenario driven optimization.",
+            nullable=True,
             enum={"DynamicSiteAcceleration": "DynamicSiteAcceleration", "GeneralMediaStreaming": "GeneralMediaStreaming", "GeneralWebDelivery": "GeneralWebDelivery", "LargeFileDownload": "LargeFileDownload", "VideoOnDemandMediaStreaming": "VideoOnDemandMediaStreaming"},
+        )
+        _args_schema.origin_groups = AAZListArg(
+            options=["--origin-groups"],
+            arg_group="Properties",
+            help="The origin groups comprising of origins that are used for load balancing the traffic based on availability.",
+            nullable=True,
         )
         _args_schema.origin_host_header = AAZStrArg(
             options=["--origin-host-header"],
             arg_group="Properties",
             help="The host header value sent to the origin with each request. This property at Endpoint is only allowed when endpoint uses single origin and can be overridden by the same property specified at origin.If you leave this blank, the request hostname determines this value. Azure CDN origins, such as Web Apps, Blob Storage, and Cloud Services require this host header value to match the origin hostname by default.",
+            nullable=True,
         )
         _args_schema.origin_path = AAZStrArg(
             options=["--origin-path"],
             arg_group="Properties",
             help="A directory path on the origin that CDN can use to retrieve content from, e.g. contoso.cloudapp.net/originpath.",
+            nullable=True,
+        )
+        _args_schema.origins = AAZListArg(
+            options=["--origins"],
+            arg_group="Properties",
+            help="The source of the content being delivered via CDN.",
         )
         _args_schema.probe_path = AAZStrArg(
             options=["--probe-path"],
             arg_group="Properties",
             help="Path to a file hosted on the origin which helps accelerate delivery of the dynamic content and calculate the most optimal routes for the CDN. This is relative to the origin path. This property is only relevant when using a single origin.",
+            nullable=True,
         )
         _args_schema.query_string_caching_behavior = AAZStrArg(
             options=["--query-string-caching-behavior"],
             arg_group="Properties",
             help="Defines how CDN caches requests that include query strings. You can ignore any query strings when caching, bypass caching to prevent requests that contain query strings from being cached, or cache every request with a unique URL.",
+            nullable=True,
             enum={"BypassCaching": "BypassCaching", "IgnoreQueryString": "IgnoreQueryString", "NotSet": "NotSet", "UseQueryString": "UseQueryString"},
         )
         _args_schema.url_signing_keys = AAZListArg(
             options=["--url-signing-keys"],
             arg_group="Properties",
             help="List of keys used to validate the signed URL hashes.",
+            nullable=True,
         )
         _args_schema.web_application_firewall_policy_link = AAZObjectArg(
             options=["--web-application-firewall-policy-link"],
             arg_group="Properties",
             help="Defines the Web Application Firewall policy for the endpoint (if applicable)",
+            nullable=True,
         )
 
         content_types_to_compress = cls._args_schema.content_types_to_compress
-        content_types_to_compress.Element = AAZStrArg()
+        content_types_to_compress.Element = AAZStrArg(
+            nullable=True,
+        )
 
         delivery_policy = cls._args_schema.delivery_policy
         delivery_policy.description = AAZStrArg(
             options=["description"],
             help="User-friendly description of the policy.",
+            nullable=True,
         )
         delivery_policy.rules = AAZListArg(
             options=["rules"],
             help="A list of the delivery rules.",
-            required=True,
         )
 
         rules = cls._args_schema.delivery_policy.rules
-        rules.Element = AAZObjectArg()
+        rules.Element = AAZObjectArg(
+            nullable=True,
+        )
 
         _element = cls._args_schema.delivery_policy.rules.Element
         _element.actions = AAZListArg(
             options=["actions"],
             help="A list of actions that are executed when all the conditions of a rule are satisfied.",
-            required=True,
         )
         _element.conditions = AAZListArg(
             options=["conditions"],
             help="A list of conditions that must be matched for the actions to be executed",
+            nullable=True,
         )
         _element.name = AAZStrArg(
             options=["name"],
             help="Name of the rule",
+            nullable=True,
         )
         _element.order = AAZIntArg(
             options=["order"],
             help="The order in which the rules are applied for the endpoint. Possible values {0,1,2,3,………}. A rule with a lesser order will be applied before a rule with a greater order. Rule with order 0 is a special rule. It does not require any condition and actions listed in it will always be applied.",
-            required=True,
         )
 
         actions = cls._args_schema.delivery_policy.rules.Element.actions
-        actions.Element = AAZObjectArg()
+        actions.Element = AAZObjectArg(
+            nullable=True,
+        )
 
         _element = cls._args_schema.delivery_policy.rules.Element.actions.Element
         _element.cache_expiration = AAZObjectArg(
@@ -231,14 +269,12 @@ class Update(AAZCommand):
         cache_expiration.parameters = AAZObjectArg(
             options=["parameters"],
             help="Defines the parameters for the action.",
-            required=True,
         )
 
         parameters = cls._args_schema.delivery_policy.rules.Element.actions.Element.cache_expiration.parameters
         parameters.cache_behavior = AAZStrArg(
             options=["cache-behavior"],
             help="Caching behavior for the requests",
-            required=True,
             enum={"BypassCache": "BypassCache", "Override": "Override", "SetIfMissing": "SetIfMissing"},
         )
         parameters.cache_duration = AAZStrArg(
@@ -249,20 +285,13 @@ class Update(AAZCommand):
         parameters.cache_type = AAZStrArg(
             options=["cache-type"],
             help="The level at which the content needs to be cached.",
-            required=True,
             enum={"All": "All"},
-        )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleCacheExpirationActionParameters": "DeliveryRuleCacheExpirationActionParameters"},
         )
 
         cache_key_query_string = cls._args_schema.delivery_policy.rules.Element.actions.Element.cache_key_query_string
         cache_key_query_string.parameters = AAZObjectArg(
             options=["parameters"],
             help="Defines the parameters for the action.",
-            required=True,
         )
 
         parameters = cls._args_schema.delivery_policy.rules.Element.actions.Element.cache_key_query_string.parameters
@@ -274,20 +303,13 @@ class Update(AAZCommand):
         parameters.query_string_behavior = AAZStrArg(
             options=["query-string-behavior"],
             help="Caching behavior for the requests",
-            required=True,
             enum={"Exclude": "Exclude", "ExcludeAll": "ExcludeAll", "Include": "Include", "IncludeAll": "IncludeAll"},
-        )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleCacheKeyQueryStringBehaviorActionParameters": "DeliveryRuleCacheKeyQueryStringBehaviorActionParameters"},
         )
 
         modify_request_header = cls._args_schema.delivery_policy.rules.Element.actions.Element.modify_request_header
         modify_request_header.parameters = AAZObjectArg(
             options=["parameters"],
             help="Defines the parameters for the action.",
-            required=True,
         )
         cls._build_args_header_action_parameters_update(modify_request_header.parameters)
 
@@ -295,7 +317,6 @@ class Update(AAZCommand):
         modify_response_header.parameters = AAZObjectArg(
             options=["parameters"],
             help="Defines the parameters for the action.",
-            required=True,
         )
         cls._build_args_header_action_parameters_update(modify_response_header.parameters)
 
@@ -303,66 +324,61 @@ class Update(AAZCommand):
         origin_group_override.parameters = AAZObjectArg(
             options=["parameters"],
             help="Defines the parameters for the action.",
-            required=True,
         )
 
         parameters = cls._args_schema.delivery_policy.rules.Element.actions.Element.origin_group_override.parameters
         parameters.origin_group = AAZObjectArg(
             options=["origin-group"],
             help="defines the OriginGroup that would override the DefaultOriginGroup.",
-            required=True,
+            nullable=True,
         )
         cls._build_args_resource_reference_update(parameters.origin_group)
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleOriginGroupOverrideActionParameters": "DeliveryRuleOriginGroupOverrideActionParameters"},
-        )
 
         route_configuration_override = cls._args_schema.delivery_policy.rules.Element.actions.Element.route_configuration_override
         route_configuration_override.parameters = AAZObjectArg(
             options=["parameters"],
             help="Defines the parameters for the action.",
-            required=True,
         )
 
         parameters = cls._args_schema.delivery_policy.rules.Element.actions.Element.route_configuration_override.parameters
         parameters.cache_configuration = AAZObjectArg(
             options=["cache-configuration"],
             help="The caching configuration associated with this rule. To disable caching, do not provide a cacheConfiguration object.",
+            nullable=True,
         )
         parameters.origin_group_override = AAZObjectArg(
             options=["origin-group-override"],
             help="A reference to the origin group override configuration. Leave empty to use the default origin group on route.",
-        )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleRouteConfigurationOverrideActionParameters": "DeliveryRuleRouteConfigurationOverrideActionParameters"},
+            nullable=True,
         )
 
         cache_configuration = cls._args_schema.delivery_policy.rules.Element.actions.Element.route_configuration_override.parameters.cache_configuration
         cache_configuration.cache_behavior = AAZStrArg(
             options=["cache-behavior"],
             help="Caching behavior for the requests",
+            nullable=True,
             enum={"HonorOrigin": "HonorOrigin", "OverrideAlways": "OverrideAlways", "OverrideIfOriginMissing": "OverrideIfOriginMissing"},
         )
         cache_configuration.cache_duration = AAZStrArg(
             options=["cache-duration"],
             help="The duration for which the content needs to be cached. Allowed format is [d.]hh:mm:ss",
+            nullable=True,
         )
         cache_configuration.is_compression_enabled = AAZStrArg(
             options=["is-compression-enabled"],
             help="Indicates whether content compression is enabled. If compression is enabled, content will be served as compressed if user requests for a compressed version. Content won't be compressed on AzureFrontDoor when requested content is smaller than 1 byte or larger than 1 MB.",
+            nullable=True,
             enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
         cache_configuration.query_parameters = AAZStrArg(
             options=["query-parameters"],
             help="query parameters to include or exclude (comma separated).",
+            nullable=True,
         )
         cache_configuration.query_string_caching_behavior = AAZStrArg(
             options=["query-string-caching-behavior"],
             help="Defines how Frontdoor caches requests that include query strings. You can ignore any query strings when caching, ignore specific query strings, cache every request with a unique URL, or cache specific query strings.",
+            nullable=True,
             enum={"IgnoreQueryString": "IgnoreQueryString", "IgnoreSpecifiedQueryStrings": "IgnoreSpecifiedQueryStrings", "IncludeSpecifiedQueryStrings": "IncludeSpecifiedQueryStrings", "UseQueryString": "UseQueryString"},
         )
 
@@ -370,11 +386,13 @@ class Update(AAZCommand):
         origin_group_override.forwarding_protocol = AAZStrArg(
             options=["forwarding-protocol"],
             help="Protocol this rule will use when forwarding traffic to backends.",
+            nullable=True,
             enum={"HttpOnly": "HttpOnly", "HttpsOnly": "HttpsOnly", "MatchRequest": "MatchRequest"},
         )
         origin_group_override.origin_group = AAZObjectArg(
             options=["origin-group"],
             help="defines the OriginGroup that would override the DefaultOriginGroup on route.",
+            nullable=True,
         )
         cls._build_args_resource_reference_update(origin_group_override.origin_group)
 
@@ -382,112 +400,101 @@ class Update(AAZCommand):
         url_redirect.parameters = AAZObjectArg(
             options=["parameters"],
             help="Defines the parameters for the action.",
-            required=True,
         )
 
         parameters = cls._args_schema.delivery_policy.rules.Element.actions.Element.url_redirect.parameters
         parameters.custom_fragment = AAZStrArg(
             options=["custom-fragment"],
             help="Fragment to add to the redirect URL. Fragment is the part of the URL that comes after #. Do not include the #.",
+            nullable=True,
         )
         parameters.custom_hostname = AAZStrArg(
             options=["custom-hostname"],
             help="Host to redirect. Leave empty to use the incoming host as the destination host.",
+            nullable=True,
         )
         parameters.custom_path = AAZStrArg(
             options=["custom-path"],
             help="The full path to redirect. Path cannot be empty and must start with /. Leave empty to use the incoming path as destination path.",
+            nullable=True,
         )
         parameters.custom_query_string = AAZStrArg(
             options=["custom-query-string"],
             help="The set of query strings to be placed in the redirect URL. Setting this value would replace any existing query string; leave empty to preserve the incoming query string. Query string must be in <key>=<value> format. ? and & will be added automatically so do not include them.",
+            nullable=True,
         )
         parameters.destination_protocol = AAZStrArg(
             options=["destination-protocol"],
             help="Protocol to use for the redirect. The default value is MatchRequest",
+            nullable=True,
             enum={"Http": "Http", "Https": "Https", "MatchRequest": "MatchRequest"},
         )
         parameters.redirect_type = AAZStrArg(
             options=["redirect-type"],
             help="The redirect type the rule will use when redirecting traffic.",
-            required=True,
             enum={"Found": "Found", "Moved": "Moved", "PermanentRedirect": "PermanentRedirect", "TemporaryRedirect": "TemporaryRedirect"},
-        )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleUrlRedirectActionParameters": "DeliveryRuleUrlRedirectActionParameters"},
         )
 
         url_rewrite = cls._args_schema.delivery_policy.rules.Element.actions.Element.url_rewrite
         url_rewrite.parameters = AAZObjectArg(
             options=["parameters"],
             help="Defines the parameters for the action.",
-            required=True,
         )
 
         parameters = cls._args_schema.delivery_policy.rules.Element.actions.Element.url_rewrite.parameters
         parameters.destination = AAZStrArg(
             options=["destination"],
             help="Define the relative URL to which the above requests will be rewritten by.",
-            required=True,
         )
         parameters.preserve_unmatched_path = AAZBoolArg(
             options=["preserve-unmatched-path"],
             help="Whether to preserve unmatched path. Default value is true.",
+            nullable=True,
         )
         parameters.source_pattern = AAZStrArg(
             options=["source-pattern"],
             help="define a request URI pattern that identifies the type of requests that may be rewritten. If value is blank, all strings are matched.",
-            required=True,
-        )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleUrlRewriteActionParameters": "DeliveryRuleUrlRewriteActionParameters"},
         )
 
         url_signing = cls._args_schema.delivery_policy.rules.Element.actions.Element.url_signing
         url_signing.parameters = AAZObjectArg(
             options=["parameters"],
             help="Defines the parameters for the action.",
-            required=True,
         )
 
         parameters = cls._args_schema.delivery_policy.rules.Element.actions.Element.url_signing.parameters
         parameters.algorithm = AAZStrArg(
             options=["algorithm"],
             help="Algorithm to use for URL signing",
+            nullable=True,
             enum={"SHA256": "SHA256"},
         )
         parameters.parameter_name_override = AAZListArg(
             options=["parameter-name-override"],
             help="Defines which query string parameters in the url to be considered for expires, key id etc. ",
-        )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleUrlSigningActionParameters": "DeliveryRuleUrlSigningActionParameters"},
+            nullable=True,
         )
 
         parameter_name_override = cls._args_schema.delivery_policy.rules.Element.actions.Element.url_signing.parameters.parameter_name_override
-        parameter_name_override.Element = AAZObjectArg()
+        parameter_name_override.Element = AAZObjectArg(
+            nullable=True,
+        )
 
         _element = cls._args_schema.delivery_policy.rules.Element.actions.Element.url_signing.parameters.parameter_name_override.Element
         _element.param_indicator = AAZStrArg(
             options=["param-indicator"],
             help="Indicates the purpose of the parameter",
-            required=True,
             enum={"Expires": "Expires", "KeyId": "KeyId", "Signature": "Signature"},
         )
         _element.param_name = AAZStrArg(
             options=["param-name"],
             help="Parameter name",
-            required=True,
         )
 
         conditions = cls._args_schema.delivery_policy.rules.Element.conditions
-        conditions.Element = AAZObjectArg()
+        conditions.Element = AAZObjectArg(
+            nullable=True,
+        )
 
         _element = cls._args_schema.delivery_policy.rules.Element.conditions.Element
         _element.client_port = AAZObjectArg(
@@ -552,40 +559,38 @@ class Update(AAZCommand):
         client_port.parameters = AAZObjectArg(
             options=["parameters"],
             help="Defines the parameters for the condition.",
-            required=True,
         )
 
         parameters = cls._args_schema.delivery_policy.rules.Element.conditions.Element.client_port.parameters
         parameters.match_values = AAZListArg(
             options=["match-values"],
             help="The match value for the condition of the delivery rule",
+            nullable=True,
         )
         parameters.negate_condition = AAZBoolArg(
             options=["negate-condition"],
             help="Describes if this is negate condition or not",
-            default=False,
+            nullable=True,
         )
         parameters.operator = AAZStrArg(
             options=["operator"],
             help="Describes operator to be matched",
-            required=True,
             enum={"Any": "Any", "BeginsWith": "BeginsWith", "Contains": "Contains", "EndsWith": "EndsWith", "Equal": "Equal", "GreaterThan": "GreaterThan", "GreaterThanOrEqual": "GreaterThanOrEqual", "LessThan": "LessThan", "LessThanOrEqual": "LessThanOrEqual", "RegEx": "RegEx"},
         )
         parameters.transforms = AAZListArg(
             options=["transforms"],
             help="List of transforms",
-        )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleClientPortConditionParameters": "DeliveryRuleClientPortConditionParameters"},
+            nullable=True,
         )
 
         match_values = cls._args_schema.delivery_policy.rules.Element.conditions.Element.client_port.parameters.match_values
-        match_values.Element = AAZStrArg()
+        match_values.Element = AAZStrArg(
+            nullable=True,
+        )
 
         transforms = cls._args_schema.delivery_policy.rules.Element.conditions.Element.client_port.parameters.transforms
         transforms.Element = AAZStrArg(
+            nullable=True,
             enum={"Lowercase": "Lowercase", "RemoveNulls": "RemoveNulls", "Trim": "Trim", "Uppercase": "Uppercase", "UrlDecode": "UrlDecode", "UrlEncode": "UrlEncode"},
         )
 
@@ -593,44 +598,43 @@ class Update(AAZCommand):
         cookies.parameters = AAZObjectArg(
             options=["parameters"],
             help="Defines the parameters for the condition.",
-            required=True,
         )
 
         parameters = cls._args_schema.delivery_policy.rules.Element.conditions.Element.cookies.parameters
         parameters.match_values = AAZListArg(
             options=["match-values"],
             help="The match value for the condition of the delivery rule",
+            nullable=True,
         )
         parameters.negate_condition = AAZBoolArg(
             options=["negate-condition"],
             help="Describes if this is negate condition or not",
-            default=False,
+            nullable=True,
         )
         parameters.operator = AAZStrArg(
             options=["operator"],
             help="Describes operator to be matched",
-            required=True,
             enum={"Any": "Any", "BeginsWith": "BeginsWith", "Contains": "Contains", "EndsWith": "EndsWith", "Equal": "Equal", "GreaterThan": "GreaterThan", "GreaterThanOrEqual": "GreaterThanOrEqual", "LessThan": "LessThan", "LessThanOrEqual": "LessThanOrEqual", "RegEx": "RegEx"},
         )
         parameters.selector = AAZStrArg(
             options=["selector"],
             help="Name of Cookies to be matched",
+            nullable=True,
         )
         parameters.transforms = AAZListArg(
             options=["transforms"],
             help="List of transforms",
-        )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleCookiesConditionParameters": "DeliveryRuleCookiesConditionParameters"},
+            nullable=True,
         )
 
         match_values = cls._args_schema.delivery_policy.rules.Element.conditions.Element.cookies.parameters.match_values
-        match_values.Element = AAZStrArg()
+        match_values.Element = AAZStrArg(
+            nullable=True,
+        )
 
         transforms = cls._args_schema.delivery_policy.rules.Element.conditions.Element.cookies.parameters.transforms
         transforms.Element = AAZStrArg(
+            nullable=True,
             enum={"Lowercase": "Lowercase", "RemoveNulls": "RemoveNulls", "Trim": "Trim", "Uppercase": "Uppercase", "UrlDecode": "UrlDecode", "UrlEncode": "UrlEncode"},
         )
 
@@ -638,40 +642,38 @@ class Update(AAZCommand):
         host_name.parameters = AAZObjectArg(
             options=["parameters"],
             help="Defines the parameters for the condition.",
-            required=True,
         )
 
         parameters = cls._args_schema.delivery_policy.rules.Element.conditions.Element.host_name.parameters
         parameters.match_values = AAZListArg(
             options=["match-values"],
             help="The match value for the condition of the delivery rule",
+            nullable=True,
         )
         parameters.negate_condition = AAZBoolArg(
             options=["negate-condition"],
             help="Describes if this is negate condition or not",
-            default=False,
+            nullable=True,
         )
         parameters.operator = AAZStrArg(
             options=["operator"],
             help="Describes operator to be matched",
-            required=True,
             enum={"Any": "Any", "BeginsWith": "BeginsWith", "Contains": "Contains", "EndsWith": "EndsWith", "Equal": "Equal", "GreaterThan": "GreaterThan", "GreaterThanOrEqual": "GreaterThanOrEqual", "LessThan": "LessThan", "LessThanOrEqual": "LessThanOrEqual", "RegEx": "RegEx"},
         )
         parameters.transforms = AAZListArg(
             options=["transforms"],
             help="List of transforms",
-        )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleHostNameConditionParameters": "DeliveryRuleHostNameConditionParameters"},
+            nullable=True,
         )
 
         match_values = cls._args_schema.delivery_policy.rules.Element.conditions.Element.host_name.parameters.match_values
-        match_values.Element = AAZStrArg()
+        match_values.Element = AAZStrArg(
+            nullable=True,
+        )
 
         transforms = cls._args_schema.delivery_policy.rules.Element.conditions.Element.host_name.parameters.transforms
         transforms.Element = AAZStrArg(
+            nullable=True,
             enum={"Lowercase": "Lowercase", "RemoveNulls": "RemoveNulls", "Trim": "Trim", "Uppercase": "Uppercase", "UrlDecode": "UrlDecode", "UrlEncode": "UrlEncode"},
         )
 
@@ -679,40 +681,38 @@ class Update(AAZCommand):
         http_version.parameters = AAZObjectArg(
             options=["parameters"],
             help="Defines the parameters for the condition.",
-            required=True,
         )
 
         parameters = cls._args_schema.delivery_policy.rules.Element.conditions.Element.http_version.parameters
         parameters.match_values = AAZListArg(
             options=["match-values"],
             help="The match value for the condition of the delivery rule",
+            nullable=True,
         )
         parameters.negate_condition = AAZBoolArg(
             options=["negate-condition"],
             help="Describes if this is negate condition or not",
-            default=False,
+            nullable=True,
         )
         parameters.operator = AAZStrArg(
             options=["operator"],
             help="Describes operator to be matched",
-            required=True,
             enum={"Equal": "Equal"},
         )
         parameters.transforms = AAZListArg(
             options=["transforms"],
             help="List of transforms",
-        )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleHttpVersionConditionParameters": "DeliveryRuleHttpVersionConditionParameters"},
+            nullable=True,
         )
 
         match_values = cls._args_schema.delivery_policy.rules.Element.conditions.Element.http_version.parameters.match_values
-        match_values.Element = AAZStrArg()
+        match_values.Element = AAZStrArg(
+            nullable=True,
+        )
 
         transforms = cls._args_schema.delivery_policy.rules.Element.conditions.Element.http_version.parameters.transforms
         transforms.Element = AAZStrArg(
+            nullable=True,
             enum={"Lowercase": "Lowercase", "RemoveNulls": "RemoveNulls", "Trim": "Trim", "Uppercase": "Uppercase", "UrlDecode": "UrlDecode", "UrlEncode": "UrlEncode"},
         )
 
@@ -720,42 +720,39 @@ class Update(AAZCommand):
         is_device.parameters = AAZObjectArg(
             options=["parameters"],
             help="Defines the parameters for the condition.",
-            required=True,
         )
 
         parameters = cls._args_schema.delivery_policy.rules.Element.conditions.Element.is_device.parameters
         parameters.match_values = AAZListArg(
             options=["match-values"],
             help="The match value for the condition of the delivery rule",
+            nullable=True,
         )
         parameters.negate_condition = AAZBoolArg(
             options=["negate-condition"],
             help="Describes if this is negate condition or not",
-            default=False,
+            nullable=True,
         )
         parameters.operator = AAZStrArg(
             options=["operator"],
             help="Describes operator to be matched",
-            required=True,
             enum={"Equal": "Equal"},
         )
         parameters.transforms = AAZListArg(
             options=["transforms"],
             help="List of transforms",
-        )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleIsDeviceConditionParameters": "DeliveryRuleIsDeviceConditionParameters"},
+            nullable=True,
         )
 
         match_values = cls._args_schema.delivery_policy.rules.Element.conditions.Element.is_device.parameters.match_values
         match_values.Element = AAZStrArg(
+            nullable=True,
             enum={"Desktop": "Desktop", "Mobile": "Mobile"},
         )
 
         transforms = cls._args_schema.delivery_policy.rules.Element.conditions.Element.is_device.parameters.transforms
         transforms.Element = AAZStrArg(
+            nullable=True,
             enum={"Lowercase": "Lowercase", "RemoveNulls": "RemoveNulls", "Trim": "Trim", "Uppercase": "Uppercase", "UrlDecode": "UrlDecode", "UrlEncode": "UrlEncode"},
         )
 
@@ -763,44 +760,43 @@ class Update(AAZCommand):
         post_args.parameters = AAZObjectArg(
             options=["parameters"],
             help="Defines the parameters for the condition.",
-            required=True,
         )
 
         parameters = cls._args_schema.delivery_policy.rules.Element.conditions.Element.post_args.parameters
         parameters.match_values = AAZListArg(
             options=["match-values"],
             help="The match value for the condition of the delivery rule",
+            nullable=True,
         )
         parameters.negate_condition = AAZBoolArg(
             options=["negate-condition"],
             help="Describes if this is negate condition or not",
-            default=False,
+            nullable=True,
         )
         parameters.operator = AAZStrArg(
             options=["operator"],
             help="Describes operator to be matched",
-            required=True,
             enum={"Any": "Any", "BeginsWith": "BeginsWith", "Contains": "Contains", "EndsWith": "EndsWith", "Equal": "Equal", "GreaterThan": "GreaterThan", "GreaterThanOrEqual": "GreaterThanOrEqual", "LessThan": "LessThan", "LessThanOrEqual": "LessThanOrEqual", "RegEx": "RegEx"},
         )
         parameters.selector = AAZStrArg(
             options=["selector"],
             help="Name of PostArg to be matched",
+            nullable=True,
         )
         parameters.transforms = AAZListArg(
             options=["transforms"],
             help="List of transforms",
-        )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRulePostArgsConditionParameters": "DeliveryRulePostArgsConditionParameters"},
+            nullable=True,
         )
 
         match_values = cls._args_schema.delivery_policy.rules.Element.conditions.Element.post_args.parameters.match_values
-        match_values.Element = AAZStrArg()
+        match_values.Element = AAZStrArg(
+            nullable=True,
+        )
 
         transforms = cls._args_schema.delivery_policy.rules.Element.conditions.Element.post_args.parameters.transforms
         transforms.Element = AAZStrArg(
+            nullable=True,
             enum={"Lowercase": "Lowercase", "RemoveNulls": "RemoveNulls", "Trim": "Trim", "Uppercase": "Uppercase", "UrlDecode": "UrlDecode", "UrlEncode": "UrlEncode"},
         )
 
@@ -808,40 +804,38 @@ class Update(AAZCommand):
         query_string.parameters = AAZObjectArg(
             options=["parameters"],
             help="Defines the parameters for the condition.",
-            required=True,
         )
 
         parameters = cls._args_schema.delivery_policy.rules.Element.conditions.Element.query_string.parameters
         parameters.match_values = AAZListArg(
             options=["match-values"],
             help="The match value for the condition of the delivery rule",
+            nullable=True,
         )
         parameters.negate_condition = AAZBoolArg(
             options=["negate-condition"],
             help="Describes if this is negate condition or not",
-            default=False,
+            nullable=True,
         )
         parameters.operator = AAZStrArg(
             options=["operator"],
             help="Describes operator to be matched",
-            required=True,
             enum={"Any": "Any", "BeginsWith": "BeginsWith", "Contains": "Contains", "EndsWith": "EndsWith", "Equal": "Equal", "GreaterThan": "GreaterThan", "GreaterThanOrEqual": "GreaterThanOrEqual", "LessThan": "LessThan", "LessThanOrEqual": "LessThanOrEqual", "RegEx": "RegEx"},
         )
         parameters.transforms = AAZListArg(
             options=["transforms"],
             help="List of transforms",
-        )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleQueryStringConditionParameters": "DeliveryRuleQueryStringConditionParameters"},
+            nullable=True,
         )
 
         match_values = cls._args_schema.delivery_policy.rules.Element.conditions.Element.query_string.parameters.match_values
-        match_values.Element = AAZStrArg()
+        match_values.Element = AAZStrArg(
+            nullable=True,
+        )
 
         transforms = cls._args_schema.delivery_policy.rules.Element.conditions.Element.query_string.parameters.transforms
         transforms.Element = AAZStrArg(
+            nullable=True,
             enum={"Lowercase": "Lowercase", "RemoveNulls": "RemoveNulls", "Trim": "Trim", "Uppercase": "Uppercase", "UrlDecode": "UrlDecode", "UrlEncode": "UrlEncode"},
         )
 
@@ -849,40 +843,38 @@ class Update(AAZCommand):
         remote_address.parameters = AAZObjectArg(
             options=["parameters"],
             help="Defines the parameters for the condition.",
-            required=True,
         )
 
         parameters = cls._args_schema.delivery_policy.rules.Element.conditions.Element.remote_address.parameters
         parameters.match_values = AAZListArg(
             options=["match-values"],
             help="Match values to match against. The operator will apply to each value in here with OR semantics. If any of them match the variable with the given operator this match condition is considered a match.",
+            nullable=True,
         )
         parameters.negate_condition = AAZBoolArg(
             options=["negate-condition"],
             help="Describes if this is negate condition or not",
-            default=False,
+            nullable=True,
         )
         parameters.operator = AAZStrArg(
             options=["operator"],
             help="Describes operator to be matched",
-            required=True,
             enum={"Any": "Any", "GeoMatch": "GeoMatch", "IPMatch": "IPMatch"},
         )
         parameters.transforms = AAZListArg(
             options=["transforms"],
             help="List of transforms",
-        )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleRemoteAddressConditionParameters": "DeliveryRuleRemoteAddressConditionParameters"},
+            nullable=True,
         )
 
         match_values = cls._args_schema.delivery_policy.rules.Element.conditions.Element.remote_address.parameters.match_values
-        match_values.Element = AAZStrArg()
+        match_values.Element = AAZStrArg(
+            nullable=True,
+        )
 
         transforms = cls._args_schema.delivery_policy.rules.Element.conditions.Element.remote_address.parameters.transforms
         transforms.Element = AAZStrArg(
+            nullable=True,
             enum={"Lowercase": "Lowercase", "RemoveNulls": "RemoveNulls", "Trim": "Trim", "Uppercase": "Uppercase", "UrlDecode": "UrlDecode", "UrlEncode": "UrlEncode"},
         )
 
@@ -890,40 +882,38 @@ class Update(AAZCommand):
         request_body.parameters = AAZObjectArg(
             options=["parameters"],
             help="Defines the parameters for the condition.",
-            required=True,
         )
 
         parameters = cls._args_schema.delivery_policy.rules.Element.conditions.Element.request_body.parameters
         parameters.match_values = AAZListArg(
             options=["match-values"],
             help="The match value for the condition of the delivery rule",
+            nullable=True,
         )
         parameters.negate_condition = AAZBoolArg(
             options=["negate-condition"],
             help="Describes if this is negate condition or not",
-            default=False,
+            nullable=True,
         )
         parameters.operator = AAZStrArg(
             options=["operator"],
             help="Describes operator to be matched",
-            required=True,
             enum={"Any": "Any", "BeginsWith": "BeginsWith", "Contains": "Contains", "EndsWith": "EndsWith", "Equal": "Equal", "GreaterThan": "GreaterThan", "GreaterThanOrEqual": "GreaterThanOrEqual", "LessThan": "LessThan", "LessThanOrEqual": "LessThanOrEqual", "RegEx": "RegEx"},
         )
         parameters.transforms = AAZListArg(
             options=["transforms"],
             help="List of transforms",
-        )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleRequestBodyConditionParameters": "DeliveryRuleRequestBodyConditionParameters"},
+            nullable=True,
         )
 
         match_values = cls._args_schema.delivery_policy.rules.Element.conditions.Element.request_body.parameters.match_values
-        match_values.Element = AAZStrArg()
+        match_values.Element = AAZStrArg(
+            nullable=True,
+        )
 
         transforms = cls._args_schema.delivery_policy.rules.Element.conditions.Element.request_body.parameters.transforms
         transforms.Element = AAZStrArg(
+            nullable=True,
             enum={"Lowercase": "Lowercase", "RemoveNulls": "RemoveNulls", "Trim": "Trim", "Uppercase": "Uppercase", "UrlDecode": "UrlDecode", "UrlEncode": "UrlEncode"},
         )
 
@@ -931,44 +921,43 @@ class Update(AAZCommand):
         request_header.parameters = AAZObjectArg(
             options=["parameters"],
             help="Defines the parameters for the condition.",
-            required=True,
         )
 
         parameters = cls._args_schema.delivery_policy.rules.Element.conditions.Element.request_header.parameters
         parameters.match_values = AAZListArg(
             options=["match-values"],
             help="The match value for the condition of the delivery rule",
+            nullable=True,
         )
         parameters.negate_condition = AAZBoolArg(
             options=["negate-condition"],
             help="Describes if this is negate condition or not",
-            default=False,
+            nullable=True,
         )
         parameters.operator = AAZStrArg(
             options=["operator"],
             help="Describes operator to be matched",
-            required=True,
             enum={"Any": "Any", "BeginsWith": "BeginsWith", "Contains": "Contains", "EndsWith": "EndsWith", "Equal": "Equal", "GreaterThan": "GreaterThan", "GreaterThanOrEqual": "GreaterThanOrEqual", "LessThan": "LessThan", "LessThanOrEqual": "LessThanOrEqual", "RegEx": "RegEx"},
         )
         parameters.selector = AAZStrArg(
             options=["selector"],
             help="Name of Header to be matched",
+            nullable=True,
         )
         parameters.transforms = AAZListArg(
             options=["transforms"],
             help="List of transforms",
-        )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleRequestHeaderConditionParameters": "DeliveryRuleRequestHeaderConditionParameters"},
+            nullable=True,
         )
 
         match_values = cls._args_schema.delivery_policy.rules.Element.conditions.Element.request_header.parameters.match_values
-        match_values.Element = AAZStrArg()
+        match_values.Element = AAZStrArg(
+            nullable=True,
+        )
 
         transforms = cls._args_schema.delivery_policy.rules.Element.conditions.Element.request_header.parameters.transforms
         transforms.Element = AAZStrArg(
+            nullable=True,
             enum={"Lowercase": "Lowercase", "RemoveNulls": "RemoveNulls", "Trim": "Trim", "Uppercase": "Uppercase", "UrlDecode": "UrlDecode", "UrlEncode": "UrlEncode"},
         )
 
@@ -976,42 +965,39 @@ class Update(AAZCommand):
         request_method.parameters = AAZObjectArg(
             options=["parameters"],
             help="Defines the parameters for the condition.",
-            required=True,
         )
 
         parameters = cls._args_schema.delivery_policy.rules.Element.conditions.Element.request_method.parameters
         parameters.match_values = AAZListArg(
             options=["match-values"],
             help="The match value for the condition of the delivery rule",
+            nullable=True,
         )
         parameters.negate_condition = AAZBoolArg(
             options=["negate-condition"],
             help="Describes if this is negate condition or not",
-            default=False,
+            nullable=True,
         )
         parameters.operator = AAZStrArg(
             options=["operator"],
             help="Describes operator to be matched",
-            required=True,
             enum={"Equal": "Equal"},
         )
         parameters.transforms = AAZListArg(
             options=["transforms"],
             help="List of transforms",
-        )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleRequestMethodConditionParameters": "DeliveryRuleRequestMethodConditionParameters"},
+            nullable=True,
         )
 
         match_values = cls._args_schema.delivery_policy.rules.Element.conditions.Element.request_method.parameters.match_values
         match_values.Element = AAZStrArg(
+            nullable=True,
             enum={"DELETE": "DELETE", "GET": "GET", "HEAD": "HEAD", "OPTIONS": "OPTIONS", "POST": "POST", "PUT": "PUT", "TRACE": "TRACE"},
         )
 
         transforms = cls._args_schema.delivery_policy.rules.Element.conditions.Element.request_method.parameters.transforms
         transforms.Element = AAZStrArg(
+            nullable=True,
             enum={"Lowercase": "Lowercase", "RemoveNulls": "RemoveNulls", "Trim": "Trim", "Uppercase": "Uppercase", "UrlDecode": "UrlDecode", "UrlEncode": "UrlEncode"},
         )
 
@@ -1019,42 +1005,39 @@ class Update(AAZCommand):
         request_scheme.parameters = AAZObjectArg(
             options=["parameters"],
             help="Defines the parameters for the condition.",
-            required=True,
         )
 
         parameters = cls._args_schema.delivery_policy.rules.Element.conditions.Element.request_scheme.parameters
         parameters.match_values = AAZListArg(
             options=["match-values"],
             help="The match value for the condition of the delivery rule",
+            nullable=True,
         )
         parameters.negate_condition = AAZBoolArg(
             options=["negate-condition"],
             help="Describes if this is negate condition or not",
-            default=False,
+            nullable=True,
         )
         parameters.operator = AAZStrArg(
             options=["operator"],
             help="Describes operator to be matched",
-            required=True,
             enum={"Equal": "Equal"},
         )
         parameters.transforms = AAZListArg(
             options=["transforms"],
             help="List of transforms",
-        )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleRequestSchemeConditionParameters": "DeliveryRuleRequestSchemeConditionParameters"},
+            nullable=True,
         )
 
         match_values = cls._args_schema.delivery_policy.rules.Element.conditions.Element.request_scheme.parameters.match_values
         match_values.Element = AAZStrArg(
+            nullable=True,
             enum={"HTTP": "HTTP", "HTTPS": "HTTPS"},
         )
 
         transforms = cls._args_schema.delivery_policy.rules.Element.conditions.Element.request_scheme.parameters.transforms
         transforms.Element = AAZStrArg(
+            nullable=True,
             enum={"Lowercase": "Lowercase", "RemoveNulls": "RemoveNulls", "Trim": "Trim", "Uppercase": "Uppercase", "UrlDecode": "UrlDecode", "UrlEncode": "UrlEncode"},
         )
 
@@ -1062,40 +1045,38 @@ class Update(AAZCommand):
         request_uri.parameters = AAZObjectArg(
             options=["parameters"],
             help="Defines the parameters for the condition.",
-            required=True,
         )
 
         parameters = cls._args_schema.delivery_policy.rules.Element.conditions.Element.request_uri.parameters
         parameters.match_values = AAZListArg(
             options=["match-values"],
             help="The match value for the condition of the delivery rule",
+            nullable=True,
         )
         parameters.negate_condition = AAZBoolArg(
             options=["negate-condition"],
             help="Describes if this is negate condition or not",
-            default=False,
+            nullable=True,
         )
         parameters.operator = AAZStrArg(
             options=["operator"],
             help="Describes operator to be matched",
-            required=True,
             enum={"Any": "Any", "BeginsWith": "BeginsWith", "Contains": "Contains", "EndsWith": "EndsWith", "Equal": "Equal", "GreaterThan": "GreaterThan", "GreaterThanOrEqual": "GreaterThanOrEqual", "LessThan": "LessThan", "LessThanOrEqual": "LessThanOrEqual", "RegEx": "RegEx"},
         )
         parameters.transforms = AAZListArg(
             options=["transforms"],
             help="List of transforms",
-        )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleRequestUriConditionParameters": "DeliveryRuleRequestUriConditionParameters"},
+            nullable=True,
         )
 
         match_values = cls._args_schema.delivery_policy.rules.Element.conditions.Element.request_uri.parameters.match_values
-        match_values.Element = AAZStrArg()
+        match_values.Element = AAZStrArg(
+            nullable=True,
+        )
 
         transforms = cls._args_schema.delivery_policy.rules.Element.conditions.Element.request_uri.parameters.transforms
         transforms.Element = AAZStrArg(
+            nullable=True,
             enum={"Lowercase": "Lowercase", "RemoveNulls": "RemoveNulls", "Trim": "Trim", "Uppercase": "Uppercase", "UrlDecode": "UrlDecode", "UrlEncode": "UrlEncode"},
         )
 
@@ -1103,40 +1084,38 @@ class Update(AAZCommand):
         server_port.parameters = AAZObjectArg(
             options=["parameters"],
             help="Defines the parameters for the condition.",
-            required=True,
         )
 
         parameters = cls._args_schema.delivery_policy.rules.Element.conditions.Element.server_port.parameters
         parameters.match_values = AAZListArg(
             options=["match-values"],
             help="The match value for the condition of the delivery rule",
+            nullable=True,
         )
         parameters.negate_condition = AAZBoolArg(
             options=["negate-condition"],
             help="Describes if this is negate condition or not",
-            default=False,
+            nullable=True,
         )
         parameters.operator = AAZStrArg(
             options=["operator"],
             help="Describes operator to be matched",
-            required=True,
             enum={"Any": "Any", "BeginsWith": "BeginsWith", "Contains": "Contains", "EndsWith": "EndsWith", "Equal": "Equal", "GreaterThan": "GreaterThan", "GreaterThanOrEqual": "GreaterThanOrEqual", "LessThan": "LessThan", "LessThanOrEqual": "LessThanOrEqual", "RegEx": "RegEx"},
         )
         parameters.transforms = AAZListArg(
             options=["transforms"],
             help="List of transforms",
-        )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleServerPortConditionParameters": "DeliveryRuleServerPortConditionParameters"},
+            nullable=True,
         )
 
         match_values = cls._args_schema.delivery_policy.rules.Element.conditions.Element.server_port.parameters.match_values
-        match_values.Element = AAZStrArg()
+        match_values.Element = AAZStrArg(
+            nullable=True,
+        )
 
         transforms = cls._args_schema.delivery_policy.rules.Element.conditions.Element.server_port.parameters.transforms
         transforms.Element = AAZStrArg(
+            nullable=True,
             enum={"Lowercase": "Lowercase", "RemoveNulls": "RemoveNulls", "Trim": "Trim", "Uppercase": "Uppercase", "UrlDecode": "UrlDecode", "UrlEncode": "UrlEncode"},
         )
 
@@ -1144,40 +1123,38 @@ class Update(AAZCommand):
         socket_addr.parameters = AAZObjectArg(
             options=["parameters"],
             help="Defines the parameters for the condition.",
-            required=True,
         )
 
         parameters = cls._args_schema.delivery_policy.rules.Element.conditions.Element.socket_addr.parameters
         parameters.match_values = AAZListArg(
             options=["match-values"],
             help="The match value for the condition of the delivery rule",
+            nullable=True,
         )
         parameters.negate_condition = AAZBoolArg(
             options=["negate-condition"],
             help="Describes if this is negate condition or not",
-            default=False,
+            nullable=True,
         )
         parameters.operator = AAZStrArg(
             options=["operator"],
             help="Describes operator to be matched",
-            required=True,
             enum={"Any": "Any", "IPMatch": "IPMatch"},
         )
         parameters.transforms = AAZListArg(
             options=["transforms"],
             help="List of transforms",
-        )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleSocketAddrConditionParameters": "DeliveryRuleSocketAddrConditionParameters"},
+            nullable=True,
         )
 
         match_values = cls._args_schema.delivery_policy.rules.Element.conditions.Element.socket_addr.parameters.match_values
-        match_values.Element = AAZStrArg()
+        match_values.Element = AAZStrArg(
+            nullable=True,
+        )
 
         transforms = cls._args_schema.delivery_policy.rules.Element.conditions.Element.socket_addr.parameters.transforms
         transforms.Element = AAZStrArg(
+            nullable=True,
             enum={"Lowercase": "Lowercase", "RemoveNulls": "RemoveNulls", "Trim": "Trim", "Uppercase": "Uppercase", "UrlDecode": "UrlDecode", "UrlEncode": "UrlEncode"},
         )
 
@@ -1185,42 +1162,39 @@ class Update(AAZCommand):
         ssl_protocol.parameters = AAZObjectArg(
             options=["parameters"],
             help="Defines the parameters for the condition.",
-            required=True,
         )
 
         parameters = cls._args_schema.delivery_policy.rules.Element.conditions.Element.ssl_protocol.parameters
         parameters.match_values = AAZListArg(
             options=["match-values"],
             help="The match value for the condition of the delivery rule",
+            nullable=True,
         )
         parameters.negate_condition = AAZBoolArg(
             options=["negate-condition"],
             help="Describes if this is negate condition or not",
-            default=False,
+            nullable=True,
         )
         parameters.operator = AAZStrArg(
             options=["operator"],
             help="Describes operator to be matched",
-            required=True,
             enum={"Equal": "Equal"},
         )
         parameters.transforms = AAZListArg(
             options=["transforms"],
             help="List of transforms",
-        )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleSslProtocolConditionParameters": "DeliveryRuleSslProtocolConditionParameters"},
+            nullable=True,
         )
 
         match_values = cls._args_schema.delivery_policy.rules.Element.conditions.Element.ssl_protocol.parameters.match_values
         match_values.Element = AAZStrArg(
+            nullable=True,
             enum={"TLSv1": "TLSv1", "TLSv1.1": "TLSv1.1", "TLSv1.2": "TLSv1.2"},
         )
 
         transforms = cls._args_schema.delivery_policy.rules.Element.conditions.Element.ssl_protocol.parameters.transforms
         transforms.Element = AAZStrArg(
+            nullable=True,
             enum={"Lowercase": "Lowercase", "RemoveNulls": "RemoveNulls", "Trim": "Trim", "Uppercase": "Uppercase", "UrlDecode": "UrlDecode", "UrlEncode": "UrlEncode"},
         )
 
@@ -1228,40 +1202,38 @@ class Update(AAZCommand):
         url_file_extension.parameters = AAZObjectArg(
             options=["parameters"],
             help="Defines the parameters for the condition.",
-            required=True,
         )
 
         parameters = cls._args_schema.delivery_policy.rules.Element.conditions.Element.url_file_extension.parameters
         parameters.match_values = AAZListArg(
             options=["match-values"],
             help="The match value for the condition of the delivery rule",
+            nullable=True,
         )
         parameters.negate_condition = AAZBoolArg(
             options=["negate-condition"],
             help="Describes if this is negate condition or not",
-            default=False,
+            nullable=True,
         )
         parameters.operator = AAZStrArg(
             options=["operator"],
             help="Describes operator to be matched",
-            required=True,
             enum={"Any": "Any", "BeginsWith": "BeginsWith", "Contains": "Contains", "EndsWith": "EndsWith", "Equal": "Equal", "GreaterThan": "GreaterThan", "GreaterThanOrEqual": "GreaterThanOrEqual", "LessThan": "LessThan", "LessThanOrEqual": "LessThanOrEqual", "RegEx": "RegEx"},
         )
         parameters.transforms = AAZListArg(
             options=["transforms"],
             help="List of transforms",
-        )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleUrlFileExtensionMatchConditionParameters": "DeliveryRuleUrlFileExtensionMatchConditionParameters"},
+            nullable=True,
         )
 
         match_values = cls._args_schema.delivery_policy.rules.Element.conditions.Element.url_file_extension.parameters.match_values
-        match_values.Element = AAZStrArg()
+        match_values.Element = AAZStrArg(
+            nullable=True,
+        )
 
         transforms = cls._args_schema.delivery_policy.rules.Element.conditions.Element.url_file_extension.parameters.transforms
         transforms.Element = AAZStrArg(
+            nullable=True,
             enum={"Lowercase": "Lowercase", "RemoveNulls": "RemoveNulls", "Trim": "Trim", "Uppercase": "Uppercase", "UrlDecode": "UrlDecode", "UrlEncode": "UrlEncode"},
         )
 
@@ -1269,40 +1241,38 @@ class Update(AAZCommand):
         url_file_name.parameters = AAZObjectArg(
             options=["parameters"],
             help="Defines the parameters for the condition.",
-            required=True,
         )
 
         parameters = cls._args_schema.delivery_policy.rules.Element.conditions.Element.url_file_name.parameters
         parameters.match_values = AAZListArg(
             options=["match-values"],
             help="The match value for the condition of the delivery rule",
+            nullable=True,
         )
         parameters.negate_condition = AAZBoolArg(
             options=["negate-condition"],
             help="Describes if this is negate condition or not",
-            default=False,
+            nullable=True,
         )
         parameters.operator = AAZStrArg(
             options=["operator"],
             help="Describes operator to be matched",
-            required=True,
             enum={"Any": "Any", "BeginsWith": "BeginsWith", "Contains": "Contains", "EndsWith": "EndsWith", "Equal": "Equal", "GreaterThan": "GreaterThan", "GreaterThanOrEqual": "GreaterThanOrEqual", "LessThan": "LessThan", "LessThanOrEqual": "LessThanOrEqual", "RegEx": "RegEx"},
         )
         parameters.transforms = AAZListArg(
             options=["transforms"],
             help="List of transforms",
-        )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleUrlFilenameConditionParameters": "DeliveryRuleUrlFilenameConditionParameters"},
+            nullable=True,
         )
 
         match_values = cls._args_schema.delivery_policy.rules.Element.conditions.Element.url_file_name.parameters.match_values
-        match_values.Element = AAZStrArg()
+        match_values.Element = AAZStrArg(
+            nullable=True,
+        )
 
         transforms = cls._args_schema.delivery_policy.rules.Element.conditions.Element.url_file_name.parameters.transforms
         transforms.Element = AAZStrArg(
+            nullable=True,
             enum={"Lowercase": "Lowercase", "RemoveNulls": "RemoveNulls", "Trim": "Trim", "Uppercase": "Uppercase", "UrlDecode": "UrlDecode", "UrlEncode": "UrlEncode"},
         )
 
@@ -1310,118 +1280,308 @@ class Update(AAZCommand):
         url_path.parameters = AAZObjectArg(
             options=["parameters"],
             help="Defines the parameters for the condition.",
-            required=True,
         )
 
         parameters = cls._args_schema.delivery_policy.rules.Element.conditions.Element.url_path.parameters
         parameters.match_values = AAZListArg(
             options=["match-values"],
             help="The match value for the condition of the delivery rule",
+            nullable=True,
         )
         parameters.negate_condition = AAZBoolArg(
             options=["negate-condition"],
             help="Describes if this is negate condition or not",
-            default=False,
+            nullable=True,
         )
         parameters.operator = AAZStrArg(
             options=["operator"],
             help="Describes operator to be matched",
-            required=True,
             enum={"Any": "Any", "BeginsWith": "BeginsWith", "Contains": "Contains", "EndsWith": "EndsWith", "Equal": "Equal", "GreaterThan": "GreaterThan", "GreaterThanOrEqual": "GreaterThanOrEqual", "LessThan": "LessThan", "LessThanOrEqual": "LessThanOrEqual", "RegEx": "RegEx", "Wildcard": "Wildcard"},
         )
         parameters.transforms = AAZListArg(
             options=["transforms"],
             help="List of transforms",
-        )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleUrlPathMatchConditionParameters": "DeliveryRuleUrlPathMatchConditionParameters"},
+            nullable=True,
         )
 
         match_values = cls._args_schema.delivery_policy.rules.Element.conditions.Element.url_path.parameters.match_values
-        match_values.Element = AAZStrArg()
+        match_values.Element = AAZStrArg(
+            nullable=True,
+        )
 
         transforms = cls._args_schema.delivery_policy.rules.Element.conditions.Element.url_path.parameters.transforms
         transforms.Element = AAZStrArg(
+            nullable=True,
             enum={"Lowercase": "Lowercase", "RemoveNulls": "RemoveNulls", "Trim": "Trim", "Uppercase": "Uppercase", "UrlDecode": "UrlDecode", "UrlEncode": "UrlEncode"},
         )
 
         geo_filters = cls._args_schema.geo_filters
-        geo_filters.Element = AAZObjectArg()
+        geo_filters.Element = AAZObjectArg(
+            nullable=True,
+        )
 
         _element = cls._args_schema.geo_filters.Element
         _element.action = AAZStrArg(
             options=["action"],
             help="Action of the geo filter, i.e. allow or block access.",
-            required=True,
             enum={"Allow": "Allow", "Block": "Block"},
         )
         _element.country_codes = AAZListArg(
             options=["country-codes"],
             help="Two letter country or region codes defining user country or region access in a geo filter, e.g. AU, MX, US.",
-            required=True,
         )
         _element.relative_path = AAZStrArg(
             options=["relative-path"],
             help="Relative path applicable to geo filter. (e.g. '/mypictures', '/mypicture/kitty.jpg', and etc.)",
-            required=True,
         )
 
         country_codes = cls._args_schema.geo_filters.Element.country_codes
-        country_codes.Element = AAZStrArg()
+        country_codes.Element = AAZStrArg(
+            nullable=True,
+        )
+
+        origin_groups = cls._args_schema.origin_groups
+        origin_groups.Element = AAZObjectArg(
+            nullable=True,
+        )
+
+        _element = cls._args_schema.origin_groups.Element
+        _element.name = AAZStrArg(
+            options=["name"],
+            help="Origin group name which must be unique within the endpoint.",
+        )
+        _element.health_probe_settings = AAZObjectArg(
+            options=["health-probe-settings"],
+            help="Health probe settings to the origin that is used to determine the health of the origin.",
+            nullable=True,
+        )
+        _element.origins = AAZListArg(
+            options=["origins"],
+            help="The source of the content being delivered via CDN within given origin group.",
+        )
+        _element.response_based_origin_error_detection_settings = AAZObjectArg(
+            options=["response-based-origin-error-detection-settings"],
+            help="The JSON object that contains the properties to determine origin health using real requests/responses.This property is currently not supported.",
+            nullable=True,
+        )
+        _element.traffic_restoration_time_to_healed_or_new_endpoints_in_minutes = AAZIntArg(
+            options=["traffic-restoration-time-to-healed-or-new-endpoints-in-minutes"],
+            help="Time in minutes to shift the traffic to the endpoint gradually when an unhealthy endpoint comes healthy or a new endpoint is added. Default is 10 mins. This property is currently not supported.",
+            nullable=True,
+            fmt=AAZIntArgFormat(
+                maximum=50,
+                minimum=0,
+            ),
+        )
+
+        health_probe_settings = cls._args_schema.origin_groups.Element.health_probe_settings
+        health_probe_settings.probe_interval_in_seconds = AAZIntArg(
+            options=["probe-interval-in-seconds"],
+            help="The number of seconds between health probes.Default is 240sec.",
+            nullable=True,
+            fmt=AAZIntArgFormat(
+                maximum=255,
+                minimum=1,
+            ),
+        )
+        health_probe_settings.probe_path = AAZStrArg(
+            options=["probe-path"],
+            help="The path relative to the origin that is used to determine the health of the origin.",
+            nullable=True,
+        )
+        health_probe_settings.probe_protocol = AAZStrArg(
+            options=["probe-protocol"],
+            help="Protocol to use for health probe.",
+            nullable=True,
+            enum={"Http": "Http", "Https": "Https", "NotSet": "NotSet"},
+        )
+        health_probe_settings.probe_request_type = AAZStrArg(
+            options=["probe-request-type"],
+            help="The type of health probe request that is made.",
+            nullable=True,
+            enum={"GET": "GET", "HEAD": "HEAD", "NotSet": "NotSet"},
+        )
+
+        origins = cls._args_schema.origin_groups.Element.origins
+        origins.Element = AAZObjectArg(
+            nullable=True,
+        )
+        cls._build_args_resource_reference_update(origins.Element)
+
+        response_based_origin_error_detection_settings = cls._args_schema.origin_groups.Element.response_based_origin_error_detection_settings
+        response_based_origin_error_detection_settings.http_error_ranges = AAZListArg(
+            options=["http-error-ranges"],
+            help="The list of Http status code ranges that are considered as server errors for origin and it is marked as unhealthy.",
+            nullable=True,
+        )
+        response_based_origin_error_detection_settings.response_based_detected_error_types = AAZStrArg(
+            options=["response-based-detected-error-types"],
+            help="Type of response errors for real user requests for which origin will be deemed unhealthy",
+            nullable=True,
+            enum={"None": "None", "TcpAndHttpErrors": "TcpAndHttpErrors", "TcpErrorsOnly": "TcpErrorsOnly"},
+        )
+        response_based_origin_error_detection_settings.response_based_failover_threshold_percentage = AAZIntArg(
+            options=["response-based-failover-threshold-percentage"],
+            help="The percentage of failed requests in the sample where failover should trigger.",
+            nullable=True,
+            fmt=AAZIntArgFormat(
+                maximum=100,
+                minimum=0,
+            ),
+        )
+
+        http_error_ranges = cls._args_schema.origin_groups.Element.response_based_origin_error_detection_settings.http_error_ranges
+        http_error_ranges.Element = AAZObjectArg(
+            nullable=True,
+        )
+
+        _element = cls._args_schema.origin_groups.Element.response_based_origin_error_detection_settings.http_error_ranges.Element
+        _element.begin = AAZIntArg(
+            options=["begin"],
+            help="The inclusive start of the http status code range.",
+            nullable=True,
+            fmt=AAZIntArgFormat(
+                maximum=999,
+                minimum=100,
+            ),
+        )
+        _element.end = AAZIntArg(
+            options=["end"],
+            help="The inclusive end of the http status code range.",
+            nullable=True,
+            fmt=AAZIntArgFormat(
+                maximum=999,
+                minimum=100,
+            ),
+        )
+
+        origins = cls._args_schema.origins
+        origins.Element = AAZObjectArg(
+            nullable=True,
+        )
+
+        _element = cls._args_schema.origins.Element
+        _element.name = AAZStrArg(
+            options=["name"],
+            help="Origin name which must be unique within the endpoint. ",
+        )
+        _element.enabled = AAZBoolArg(
+            options=["enabled"],
+            help="Origin is enabled for load balancing or not. By default, origin is always enabled.",
+            nullable=True,
+        )
+        _element.host_name = AAZStrArg(
+            options=["host-name"],
+            help="The address of the origin. It can be a domain name, IPv4 address, or IPv6 address. This should be unique across all origins in an endpoint.",
+        )
+        _element.http_port = AAZIntArg(
+            options=["http-port"],
+            help="The value of the HTTP port. Must be between 1 and 65535.",
+            nullable=True,
+            fmt=AAZIntArgFormat(
+                maximum=65535,
+                minimum=1,
+            ),
+        )
+        _element.https_port = AAZIntArg(
+            options=["https-port"],
+            help="The value of the HTTPS port. Must be between 1 and 65535.",
+            nullable=True,
+            fmt=AAZIntArgFormat(
+                maximum=65535,
+                minimum=1,
+            ),
+        )
+        _element.origin_host_header = AAZStrArg(
+            options=["origin-host-header"],
+            help="The host header value sent to the origin with each request. If you leave this blank, the request hostname determines this value. Azure CDN origins, such as Web Apps, Blob Storage, and Cloud Services require this host header value to match the origin hostname by default.",
+            nullable=True,
+        )
+        _element.priority = AAZIntArg(
+            options=["priority"],
+            help="Priority of origin in given origin group for load balancing. Higher priorities will not be used for load balancing if any lower priority origin is healthy.Must be between 1 and 5.",
+            nullable=True,
+            fmt=AAZIntArgFormat(
+                maximum=5,
+                minimum=1,
+            ),
+        )
+        _element.private_link_alias = AAZStrArg(
+            options=["private-link-alias"],
+            help="The Alias of the Private Link resource. Populating this optional field indicates that this origin is 'Private'",
+            nullable=True,
+        )
+        _element.private_link_approval_message = AAZStrArg(
+            options=["private-link-approval-message"],
+            help="A custom message to be included in the approval request to connect to the Private Link.",
+            nullable=True,
+        )
+        _element.private_link_location = AAZStrArg(
+            options=["private-link-location"],
+            help="The location of the Private Link resource. Required only if 'privateLinkResourceId' is populated",
+            nullable=True,
+        )
+        _element.private_link_resource_id = AAZStrArg(
+            options=["private-link-resource-id"],
+            help="The Resource Id of the Private Link resource. Populating this optional field indicates that this backend is 'Private'",
+            nullable=True,
+        )
+        _element.weight = AAZIntArg(
+            options=["weight"],
+            help="Weight of the origin in given origin group for load balancing. Must be between 1 and 1000",
+            nullable=True,
+            fmt=AAZIntArgFormat(
+                maximum=1000,
+                minimum=1,
+            ),
+        )
 
         url_signing_keys = cls._args_schema.url_signing_keys
-        url_signing_keys.Element = AAZObjectArg()
+        url_signing_keys.Element = AAZObjectArg(
+            nullable=True,
+        )
 
         _element = cls._args_schema.url_signing_keys.Element
         _element.key_id = AAZStrArg(
             options=["key-id"],
             help="Defines the customer defined key Id. This id will exist in the incoming request to indicate the key used to form the hash.",
-            required=True,
         )
         _element.key_source_parameters = AAZObjectArg(
             options=["key-source-parameters"],
             help="Defines the parameters for using customer key vault for Url Signing Key.",
-            required=True,
         )
 
         key_source_parameters = cls._args_schema.url_signing_keys.Element.key_source_parameters
         key_source_parameters.resource_group_name = AAZStrArg(
             options=["resource-group-name"],
             help="Resource group of the user's Key Vault containing the secret",
-            required=True,
         )
         key_source_parameters.secret_name = AAZStrArg(
             options=["secret-name"],
             help="The name of secret in Key Vault.",
-            required=True,
         )
         key_source_parameters.secret_version = AAZStrArg(
             options=["secret-version"],
             help="The version(GUID) of secret in Key Vault.",
-            required=True,
         )
         key_source_parameters.subscription_id = AAZStrArg(
             options=["subscription-id"],
             help="Subscription Id of the user's Key Vault containing the secret",
-            required=True,
         )
         key_source_parameters.type_name = AAZStrArg(
             options=["type-name"],
-            required=True,
             enum={"KeyVaultSigningKeyParameters": "KeyVaultSigningKeyParameters"},
         )
         key_source_parameters.vault_name = AAZStrArg(
             options=["vault-name"],
             help="The name of the user's Key Vault containing the secret",
-            required=True,
         )
 
         web_application_firewall_policy_link = cls._args_schema.web_application_firewall_policy_link
         web_application_firewall_policy_link.id = AAZStrArg(
             options=["id"],
             help="Resource ID.",
+            nullable=True,
         )
         return cls._args_schema
 
@@ -1432,7 +1592,6 @@ class Update(AAZCommand):
         if cls._args_header_action_parameters_update is not None:
             _schema.header_action = cls._args_header_action_parameters_update.header_action
             _schema.header_name = cls._args_header_action_parameters_update.header_name
-            _schema.type_name = cls._args_header_action_parameters_update.type_name
             _schema.value = cls._args_header_action_parameters_update.value
             return
 
@@ -1442,27 +1601,20 @@ class Update(AAZCommand):
         header_action_parameters_update.header_action = AAZStrArg(
             options=["header-action"],
             help="Action to perform",
-            required=True,
             enum={"Append": "Append", "Delete": "Delete", "Overwrite": "Overwrite"},
         )
         header_action_parameters_update.header_name = AAZStrArg(
             options=["header-name"],
             help="Name of the header to modify",
-            required=True,
-        )
-        header_action_parameters_update.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleHeaderActionParameters": "DeliveryRuleHeaderActionParameters"},
         )
         header_action_parameters_update.value = AAZStrArg(
             options=["value"],
             help="Value for the specified action",
+            nullable=True,
         )
 
         _schema.header_action = cls._args_header_action_parameters_update.header_action
         _schema.header_name = cls._args_header_action_parameters_update.header_name
-        _schema.type_name = cls._args_header_action_parameters_update.type_name
         _schema.value = cls._args_header_action_parameters_update.value
 
     _args_resource_reference_update = None
@@ -1473,19 +1625,27 @@ class Update(AAZCommand):
             _schema.id = cls._args_resource_reference_update.id
             return
 
-        cls._args_resource_reference_update = AAZObjectArg()
+        cls._args_resource_reference_update = AAZObjectArg(
+            nullable=True,
+        )
 
         resource_reference_update = cls._args_resource_reference_update
         resource_reference_update.id = AAZStrArg(
             options=["id"],
             help="Resource ID.",
+            nullable=True,
         )
 
         _schema.id = cls._args_resource_reference_update.id
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.EndpointsUpdate(ctx=self.ctx)()
+        self.EndpointsGet(ctx=self.ctx)()
+        self.pre_instance_update(self.ctx.vars.instance)
+        self.InstanceUpdateByJson(ctx=self.ctx)()
+        self.InstanceUpdateByGeneric(ctx=self.ctx)()
+        self.post_instance_update(self.ctx.vars.instance)
+        yield self.EndpointsCreate(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -1496,34 +1656,26 @@ class Update(AAZCommand):
     def post_operations(self):
         pass
 
+    @register_callback
+    def pre_instance_update(self, instance):
+        pass
+
+    @register_callback
+    def post_instance_update(self, instance):
+        pass
+
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class EndpointsUpdate(AAZHttpOperation):
+    class EndpointsGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
             request = self.make_request()
             session = self.client.send_request(request=request, stream=False, **kwargs)
-            if session.http_response.status_code in [202]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_200,
-                    self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
-                    path_format_arguments=self.url_parameters,
-                )
             if session.http_response.status_code in [200]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_200,
-                    self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
-                    path_format_arguments=self.url_parameters,
-                )
+                return self.on_200(session)
 
             return self.on_error(session.http_response)
 
@@ -1536,7 +1688,7 @@ class Update(AAZCommand):
 
         @property
         def method(self):
-            return "PATCH"
+            return "GET"
 
         @property
         def error_format(self):
@@ -1568,7 +1720,110 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-02-01",
+                    "api-version", "2024-09-01",
+                    required=True,
+                ),
+            }
+            return parameters
+
+        @property
+        def header_parameters(self):
+            parameters = {
+                **self.serialize_header_param(
+                    "Accept", "application/json",
+                ),
+            }
+            return parameters
+
+        def on_200(self, session):
+            data = self.deserialize_http_content(session)
+            self.ctx.set_var(
+                "instance",
+                data,
+                schema_builder=self._build_schema_on_200
+            )
+
+        _schema_on_200 = None
+
+        @classmethod
+        def _build_schema_on_200(cls):
+            if cls._schema_on_200 is not None:
+                return cls._schema_on_200
+
+            cls._schema_on_200 = AAZObjectType()
+            _UpdateHelper._build_schema_endpoint_read(cls._schema_on_200)
+
+            return cls._schema_on_200
+
+    class EndpointsCreate(AAZHttpOperation):
+        CLIENT_TYPE = "MgmtClient"
+
+        def __call__(self, *args, **kwargs):
+            request = self.make_request()
+            session = self.client.send_request(request=request, stream=False, **kwargs)
+            if session.http_response.status_code in [202]:
+                return self.client.build_lro_polling(
+                    self.ctx.args.no_wait,
+                    session,
+                    self.on_200_201,
+                    self.on_error,
+                    lro_options={"final-state-via": "azure-async-operation"},
+                    path_format_arguments=self.url_parameters,
+                )
+            if session.http_response.status_code in [200, 201]:
+                return self.client.build_lro_polling(
+                    self.ctx.args.no_wait,
+                    session,
+                    self.on_200_201,
+                    self.on_error,
+                    lro_options={"final-state-via": "azure-async-operation"},
+                    path_format_arguments=self.url_parameters,
+                )
+
+            return self.on_error(session.http_response)
+
+        @property
+        def url(self):
+            return self.client.format_url(
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cdn/profiles/{profileName}/endpoints/{endpointName}",
+                **self.url_parameters
+            )
+
+        @property
+        def method(self):
+            return "PUT"
+
+        @property
+        def error_format(self):
+            return "MgmtErrorFormat"
+
+        @property
+        def url_parameters(self):
+            parameters = {
+                **self.serialize_url_param(
+                    "endpointName", self.ctx.args.endpoint_name,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "profileName", self.ctx.args.profile_name,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "resourceGroupName", self.ctx.args.resource_group,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "subscriptionId", self.ctx.subscription_id,
+                    required=True,
+                ),
+            }
+            return parameters
+
+        @property
+        def query_parameters(self):
+            parameters = {
+                **self.serialize_query_param(
+                    "api-version", "2024-09-01",
                     required=True,
                 ),
             }
@@ -1590,24 +1845,60 @@ class Update(AAZCommand):
         def content(self):
             _content_value, _builder = self.new_content_builder(
                 self.ctx.args,
-                typ=AAZObjectType,
-                typ_kwargs={"flags": {"required": True, "client_flatten": True}}
+                value=self.ctx.vars.instance,
             )
+
+            return self.serialize_content(_content_value)
+
+        def on_200_201(self, session):
+            data = self.deserialize_http_content(session)
+            self.ctx.set_var(
+                "instance",
+                data,
+                schema_builder=self._build_schema_on_200_201
+            )
+
+        _schema_on_200_201 = None
+
+        @classmethod
+        def _build_schema_on_200_201(cls):
+            if cls._schema_on_200_201 is not None:
+                return cls._schema_on_200_201
+
+            cls._schema_on_200_201 = AAZObjectType()
+            _UpdateHelper._build_schema_endpoint_read(cls._schema_on_200_201)
+
+            return cls._schema_on_200_201
+
+    class InstanceUpdateByJson(AAZJsonInstanceUpdateOperation):
+
+        def __call__(self, *args, **kwargs):
+            self._update_instance(self.ctx.vars.instance)
+
+        def _update_instance(self, instance):
+            _instance_value, _builder = self.new_content_builder(
+                self.ctx.args,
+                value=instance,
+                typ=AAZObjectType
+            )
+            _builder.set_prop("location", AAZStrType, ".location", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
             _builder.set_prop("tags", AAZDictType, ".tags")
 
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("contentTypesToCompress", AAZListType, ".content_types_to_compress")
-                properties.set_prop("defaultOriginGroup", AAZObjectType)
+                _UpdateHelper._build_schema_resource_reference_update(properties.set_prop("defaultOriginGroup", AAZObjectType, ".default_origin_group"))
                 properties.set_prop("deliveryPolicy", AAZObjectType, ".delivery_policy")
                 properties.set_prop("geoFilters", AAZListType, ".geo_filters")
                 properties.set_prop("isCompressionEnabled", AAZBoolType, ".is_compression_enabled")
                 properties.set_prop("isHttpAllowed", AAZBoolType, ".is_http_allowed")
                 properties.set_prop("isHttpsAllowed", AAZBoolType, ".is_https_allowed")
                 properties.set_prop("optimizationType", AAZStrType, ".optimization_type")
+                properties.set_prop("originGroups", AAZListType, ".origin_groups")
                 properties.set_prop("originHostHeader", AAZStrType, ".origin_host_header")
                 properties.set_prop("originPath", AAZStrType, ".origin_path")
+                properties.set_prop("origins", AAZListType, ".origins", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("probePath", AAZStrType, ".probe_path")
                 properties.set_prop("queryStringCachingBehavior", AAZStrType, ".query_string_caching_behavior")
                 properties.set_prop("urlSigningKeys", AAZListType, ".url_signing_keys")
@@ -1616,10 +1907,6 @@ class Update(AAZCommand):
             content_types_to_compress = _builder.get(".properties.contentTypesToCompress")
             if content_types_to_compress is not None:
                 content_types_to_compress.set_elements(AAZStrType, ".")
-
-            default_origin_group = _builder.get(".properties.defaultOriginGroup")
-            if default_origin_group is not None:
-                default_origin_group.set_prop("id", AAZStrType, ".default_origin_group")
 
             delivery_policy = _builder.get(".properties.deliveryPolicy")
             if delivery_policy is not None:
@@ -1671,7 +1958,7 @@ class Update(AAZCommand):
                 parameters.set_prop("cacheBehavior", AAZStrType, ".cache_behavior", typ_kwargs={"flags": {"required": True}})
                 parameters.set_prop("cacheDuration", AAZStrType, ".cache_duration", typ_kwargs={"nullable": True})
                 parameters.set_prop("cacheType", AAZStrType, ".cache_type", typ_kwargs={"flags": {"required": True}})
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleCacheExpirationActionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             disc_cache_key_query_string = _builder.get(".properties.deliveryPolicy.rules[].actions[]{name:CacheKeyQueryString}")
             if disc_cache_key_query_string is not None:
@@ -1681,7 +1968,7 @@ class Update(AAZCommand):
             if parameters is not None:
                 parameters.set_prop("queryParameters", AAZStrType, ".query_parameters", typ_kwargs={"nullable": True})
                 parameters.set_prop("queryStringBehavior", AAZStrType, ".query_string_behavior", typ_kwargs={"flags": {"required": True}})
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleCacheKeyQueryStringBehaviorActionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             disc_modify_request_header = _builder.get(".properties.deliveryPolicy.rules[].actions[]{name:ModifyRequestHeader}")
             if disc_modify_request_header is not None:
@@ -1698,7 +1985,7 @@ class Update(AAZCommand):
             parameters = _builder.get(".properties.deliveryPolicy.rules[].actions[]{name:OriginGroupOverride}.parameters")
             if parameters is not None:
                 _UpdateHelper._build_schema_resource_reference_update(parameters.set_prop("originGroup", AAZObjectType, ".origin_group", typ_kwargs={"flags": {"required": True}}))
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleOriginGroupOverrideActionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             disc_route_configuration_override = _builder.get(".properties.deliveryPolicy.rules[].actions[]{name:RouteConfigurationOverride}")
             if disc_route_configuration_override is not None:
@@ -1708,7 +1995,7 @@ class Update(AAZCommand):
             if parameters is not None:
                 parameters.set_prop("cacheConfiguration", AAZObjectType, ".cache_configuration")
                 parameters.set_prop("originGroupOverride", AAZObjectType, ".origin_group_override")
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleRouteConfigurationOverrideActionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             cache_configuration = _builder.get(".properties.deliveryPolicy.rules[].actions[]{name:RouteConfigurationOverride}.parameters.cacheConfiguration")
             if cache_configuration is not None:
@@ -1735,7 +2022,7 @@ class Update(AAZCommand):
                 parameters.set_prop("customQueryString", AAZStrType, ".custom_query_string")
                 parameters.set_prop("destinationProtocol", AAZStrType, ".destination_protocol")
                 parameters.set_prop("redirectType", AAZStrType, ".redirect_type", typ_kwargs={"flags": {"required": True}})
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleUrlRedirectActionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             disc_url_rewrite = _builder.get(".properties.deliveryPolicy.rules[].actions[]{name:UrlRewrite}")
             if disc_url_rewrite is not None:
@@ -1746,7 +2033,7 @@ class Update(AAZCommand):
                 parameters.set_prop("destination", AAZStrType, ".destination", typ_kwargs={"flags": {"required": True}})
                 parameters.set_prop("preserveUnmatchedPath", AAZBoolType, ".preserve_unmatched_path")
                 parameters.set_prop("sourcePattern", AAZStrType, ".source_pattern", typ_kwargs={"flags": {"required": True}})
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleUrlRewriteActionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             disc_url_signing = _builder.get(".properties.deliveryPolicy.rules[].actions[]{name:UrlSigning}")
             if disc_url_signing is not None:
@@ -1756,7 +2043,7 @@ class Update(AAZCommand):
             if parameters is not None:
                 parameters.set_prop("algorithm", AAZStrType, ".algorithm")
                 parameters.set_prop("parameterNameOverride", AAZListType, ".parameter_name_override")
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleUrlSigningActionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             parameter_name_override = _builder.get(".properties.deliveryPolicy.rules[].actions[]{name:UrlSigning}.parameters.parameterNameOverride")
             if parameter_name_override is not None:
@@ -1822,7 +2109,7 @@ class Update(AAZCommand):
                 parameters.set_prop("negateCondition", AAZBoolType, ".negate_condition")
                 parameters.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
                 parameters.set_prop("transforms", AAZListType, ".transforms")
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleClientPortConditionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             match_values = _builder.get(".properties.deliveryPolicy.rules[].conditions[]{name:ClientPort}.parameters.matchValues")
             if match_values is not None:
@@ -1843,7 +2130,7 @@ class Update(AAZCommand):
                 parameters.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
                 parameters.set_prop("selector", AAZStrType, ".selector")
                 parameters.set_prop("transforms", AAZListType, ".transforms")
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleCookiesConditionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             match_values = _builder.get(".properties.deliveryPolicy.rules[].conditions[]{name:Cookies}.parameters.matchValues")
             if match_values is not None:
@@ -1863,7 +2150,7 @@ class Update(AAZCommand):
                 parameters.set_prop("negateCondition", AAZBoolType, ".negate_condition")
                 parameters.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
                 parameters.set_prop("transforms", AAZListType, ".transforms")
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleHostNameConditionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             match_values = _builder.get(".properties.deliveryPolicy.rules[].conditions[]{name:HostName}.parameters.matchValues")
             if match_values is not None:
@@ -1883,7 +2170,7 @@ class Update(AAZCommand):
                 parameters.set_prop("negateCondition", AAZBoolType, ".negate_condition")
                 parameters.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
                 parameters.set_prop("transforms", AAZListType, ".transforms")
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleHttpVersionConditionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             match_values = _builder.get(".properties.deliveryPolicy.rules[].conditions[]{name:HttpVersion}.parameters.matchValues")
             if match_values is not None:
@@ -1903,7 +2190,7 @@ class Update(AAZCommand):
                 parameters.set_prop("negateCondition", AAZBoolType, ".negate_condition")
                 parameters.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
                 parameters.set_prop("transforms", AAZListType, ".transforms")
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleIsDeviceConditionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             match_values = _builder.get(".properties.deliveryPolicy.rules[].conditions[]{name:IsDevice}.parameters.matchValues")
             if match_values is not None:
@@ -1924,7 +2211,7 @@ class Update(AAZCommand):
                 parameters.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
                 parameters.set_prop("selector", AAZStrType, ".selector")
                 parameters.set_prop("transforms", AAZListType, ".transforms")
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRulePostArgsConditionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             match_values = _builder.get(".properties.deliveryPolicy.rules[].conditions[]{name:PostArgs}.parameters.matchValues")
             if match_values is not None:
@@ -1944,7 +2231,7 @@ class Update(AAZCommand):
                 parameters.set_prop("negateCondition", AAZBoolType, ".negate_condition")
                 parameters.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
                 parameters.set_prop("transforms", AAZListType, ".transforms")
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleQueryStringConditionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             match_values = _builder.get(".properties.deliveryPolicy.rules[].conditions[]{name:QueryString}.parameters.matchValues")
             if match_values is not None:
@@ -1964,7 +2251,7 @@ class Update(AAZCommand):
                 parameters.set_prop("negateCondition", AAZBoolType, ".negate_condition")
                 parameters.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
                 parameters.set_prop("transforms", AAZListType, ".transforms")
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleRemoteAddressConditionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             match_values = _builder.get(".properties.deliveryPolicy.rules[].conditions[]{name:RemoteAddress}.parameters.matchValues")
             if match_values is not None:
@@ -1984,7 +2271,7 @@ class Update(AAZCommand):
                 parameters.set_prop("negateCondition", AAZBoolType, ".negate_condition")
                 parameters.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
                 parameters.set_prop("transforms", AAZListType, ".transforms")
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleRequestBodyConditionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             match_values = _builder.get(".properties.deliveryPolicy.rules[].conditions[]{name:RequestBody}.parameters.matchValues")
             if match_values is not None:
@@ -2005,7 +2292,7 @@ class Update(AAZCommand):
                 parameters.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
                 parameters.set_prop("selector", AAZStrType, ".selector")
                 parameters.set_prop("transforms", AAZListType, ".transforms")
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleRequestHeaderConditionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             match_values = _builder.get(".properties.deliveryPolicy.rules[].conditions[]{name:RequestHeader}.parameters.matchValues")
             if match_values is not None:
@@ -2025,7 +2312,7 @@ class Update(AAZCommand):
                 parameters.set_prop("negateCondition", AAZBoolType, ".negate_condition")
                 parameters.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
                 parameters.set_prop("transforms", AAZListType, ".transforms")
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleRequestMethodConditionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             match_values = _builder.get(".properties.deliveryPolicy.rules[].conditions[]{name:RequestMethod}.parameters.matchValues")
             if match_values is not None:
@@ -2045,7 +2332,7 @@ class Update(AAZCommand):
                 parameters.set_prop("negateCondition", AAZBoolType, ".negate_condition")
                 parameters.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
                 parameters.set_prop("transforms", AAZListType, ".transforms")
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleRequestSchemeConditionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             match_values = _builder.get(".properties.deliveryPolicy.rules[].conditions[]{name:RequestScheme}.parameters.matchValues")
             if match_values is not None:
@@ -2065,7 +2352,7 @@ class Update(AAZCommand):
                 parameters.set_prop("negateCondition", AAZBoolType, ".negate_condition")
                 parameters.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
                 parameters.set_prop("transforms", AAZListType, ".transforms")
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleRequestUriConditionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             match_values = _builder.get(".properties.deliveryPolicy.rules[].conditions[]{name:RequestUri}.parameters.matchValues")
             if match_values is not None:
@@ -2085,7 +2372,7 @@ class Update(AAZCommand):
                 parameters.set_prop("negateCondition", AAZBoolType, ".negate_condition")
                 parameters.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
                 parameters.set_prop("transforms", AAZListType, ".transforms")
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleServerPortConditionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             match_values = _builder.get(".properties.deliveryPolicy.rules[].conditions[]{name:ServerPort}.parameters.matchValues")
             if match_values is not None:
@@ -2105,7 +2392,7 @@ class Update(AAZCommand):
                 parameters.set_prop("negateCondition", AAZBoolType, ".negate_condition")
                 parameters.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
                 parameters.set_prop("transforms", AAZListType, ".transforms")
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleSocketAddrConditionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             match_values = _builder.get(".properties.deliveryPolicy.rules[].conditions[]{name:SocketAddr}.parameters.matchValues")
             if match_values is not None:
@@ -2125,7 +2412,7 @@ class Update(AAZCommand):
                 parameters.set_prop("negateCondition", AAZBoolType, ".negate_condition")
                 parameters.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
                 parameters.set_prop("transforms", AAZListType, ".transforms")
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleSslProtocolConditionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             match_values = _builder.get(".properties.deliveryPolicy.rules[].conditions[]{name:SslProtocol}.parameters.matchValues")
             if match_values is not None:
@@ -2145,7 +2432,7 @@ class Update(AAZCommand):
                 parameters.set_prop("negateCondition", AAZBoolType, ".negate_condition")
                 parameters.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
                 parameters.set_prop("transforms", AAZListType, ".transforms")
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleUrlFileExtensionMatchConditionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             match_values = _builder.get(".properties.deliveryPolicy.rules[].conditions[]{name:UrlFileExtension}.parameters.matchValues")
             if match_values is not None:
@@ -2165,7 +2452,7 @@ class Update(AAZCommand):
                 parameters.set_prop("negateCondition", AAZBoolType, ".negate_condition")
                 parameters.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
                 parameters.set_prop("transforms", AAZListType, ".transforms")
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleUrlFilenameConditionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             match_values = _builder.get(".properties.deliveryPolicy.rules[].conditions[]{name:UrlFileName}.parameters.matchValues")
             if match_values is not None:
@@ -2185,7 +2472,7 @@ class Update(AAZCommand):
                 parameters.set_prop("negateCondition", AAZBoolType, ".negate_condition")
                 parameters.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
                 parameters.set_prop("transforms", AAZListType, ".transforms")
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleUrlPathMatchConditionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             match_values = _builder.get(".properties.deliveryPolicy.rules[].conditions[]{name:UrlPath}.parameters.matchValues")
             if match_values is not None:
@@ -2208,6 +2495,71 @@ class Update(AAZCommand):
             country_codes = _builder.get(".properties.geoFilters[].countryCodes")
             if country_codes is not None:
                 country_codes.set_elements(AAZStrType, ".")
+
+            origin_groups = _builder.get(".properties.originGroups")
+            if origin_groups is not None:
+                origin_groups.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.originGroups[]")
+            if _elements is not None:
+                _elements.set_prop("name", AAZStrType, ".name", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+
+            properties = _builder.get(".properties.originGroups[].properties")
+            if properties is not None:
+                properties.set_prop("healthProbeSettings", AAZObjectType, ".health_probe_settings")
+                properties.set_prop("origins", AAZListType, ".origins", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("responseBasedOriginErrorDetectionSettings", AAZObjectType, ".response_based_origin_error_detection_settings")
+                properties.set_prop("trafficRestorationTimeToHealedOrNewEndpointsInMinutes", AAZIntType, ".traffic_restoration_time_to_healed_or_new_endpoints_in_minutes")
+
+            health_probe_settings = _builder.get(".properties.originGroups[].properties.healthProbeSettings")
+            if health_probe_settings is not None:
+                health_probe_settings.set_prop("probeIntervalInSeconds", AAZIntType, ".probe_interval_in_seconds")
+                health_probe_settings.set_prop("probePath", AAZStrType, ".probe_path")
+                health_probe_settings.set_prop("probeProtocol", AAZStrType, ".probe_protocol")
+                health_probe_settings.set_prop("probeRequestType", AAZStrType, ".probe_request_type")
+
+            origins = _builder.get(".properties.originGroups[].properties.origins")
+            if origins is not None:
+                _UpdateHelper._build_schema_resource_reference_update(origins.set_elements(AAZObjectType, "."))
+
+            response_based_origin_error_detection_settings = _builder.get(".properties.originGroups[].properties.responseBasedOriginErrorDetectionSettings")
+            if response_based_origin_error_detection_settings is not None:
+                response_based_origin_error_detection_settings.set_prop("httpErrorRanges", AAZListType, ".http_error_ranges")
+                response_based_origin_error_detection_settings.set_prop("responseBasedDetectedErrorTypes", AAZStrType, ".response_based_detected_error_types")
+                response_based_origin_error_detection_settings.set_prop("responseBasedFailoverThresholdPercentage", AAZIntType, ".response_based_failover_threshold_percentage")
+
+            http_error_ranges = _builder.get(".properties.originGroups[].properties.responseBasedOriginErrorDetectionSettings.httpErrorRanges")
+            if http_error_ranges is not None:
+                http_error_ranges.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.originGroups[].properties.responseBasedOriginErrorDetectionSettings.httpErrorRanges[]")
+            if _elements is not None:
+                _elements.set_prop("begin", AAZIntType, ".begin")
+                _elements.set_prop("end", AAZIntType, ".end")
+
+            origins = _builder.get(".properties.origins")
+            if origins is not None:
+                origins.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.origins[]")
+            if _elements is not None:
+                _elements.set_prop("name", AAZStrType, ".name", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+
+            properties = _builder.get(".properties.origins[].properties")
+            if properties is not None:
+                properties.set_prop("enabled", AAZBoolType, ".enabled")
+                properties.set_prop("hostName", AAZStrType, ".host_name", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("httpPort", AAZIntType, ".http_port")
+                properties.set_prop("httpsPort", AAZIntType, ".https_port")
+                properties.set_prop("originHostHeader", AAZStrType, ".origin_host_header")
+                properties.set_prop("priority", AAZIntType, ".priority")
+                properties.set_prop("privateLinkAlias", AAZStrType, ".private_link_alias")
+                properties.set_prop("privateLinkApprovalMessage", AAZStrType, ".private_link_approval_message")
+                properties.set_prop("privateLinkLocation", AAZStrType, ".private_link_location")
+                properties.set_prop("privateLinkResourceId", AAZStrType, ".private_link_resource_id")
+                properties.set_prop("weight", AAZIntType, ".weight")
 
             url_signing_keys = _builder.get(".properties.urlSigningKeys")
             if url_signing_keys is not None:
@@ -2235,27 +2587,15 @@ class Update(AAZCommand):
             if tags is not None:
                 tags.set_elements(AAZStrType, ".")
 
-            return self.serialize_content(_content_value)
+            return _instance_value
 
-        def on_200(self, session):
-            data = self.deserialize_http_content(session)
-            self.ctx.set_var(
-                "instance",
-                data,
-                schema_builder=self._build_schema_on_200
+    class InstanceUpdateByGeneric(AAZGenericInstanceUpdateOperation):
+
+        def __call__(self, *args, **kwargs):
+            self._update_instance_by_generic(
+                self.ctx.vars.instance,
+                self.ctx.generic_update_args
             )
-
-        _schema_on_200 = None
-
-        @classmethod
-        def _build_schema_on_200(cls):
-            if cls._schema_on_200 is not None:
-                return cls._schema_on_200
-
-            cls._schema_on_200 = AAZObjectType()
-            _UpdateHelper._build_schema_endpoint_read(cls._schema_on_200)
-
-            return cls._schema_on_200
 
 
 class _UpdateHelper:
@@ -2267,7 +2607,7 @@ class _UpdateHelper:
             return
         _builder.set_prop("headerAction", AAZStrType, ".header_action", typ_kwargs={"flags": {"required": True}})
         _builder.set_prop("headerName", AAZStrType, ".header_name", typ_kwargs={"flags": {"required": True}})
-        _builder.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+        _builder.set_const("typeName", "DeliveryRuleHeaderActionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
         _builder.set_prop("value", AAZStrType, ".value")
 
     @classmethod
@@ -3256,6 +3596,7 @@ class _UpdateHelper:
         properties.priority = AAZIntType()
         properties.private_endpoint_status = AAZStrType(
             serialized_name="privateEndpointStatus",
+            flags={"read_only": True},
         )
         properties.private_link_alias = AAZStrType(
             serialized_name="privateLinkAlias",
