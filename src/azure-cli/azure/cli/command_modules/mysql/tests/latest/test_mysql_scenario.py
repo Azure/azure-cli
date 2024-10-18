@@ -666,8 +666,8 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                  database_engine, resource_group, target_server_config), checks=NoneCheck())
 
     def _test_flexible_server_georestore_update_mgmt(self, database_engine, resource_group):
-        location = 'eastus'
-        target_location = 'westus'
+        location = 'northeurope'
+        target_location = 'westeurope'
 
         source_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         target_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
@@ -1893,14 +1893,14 @@ class FlexibleServerPublicAccessMgmtScenarioTest(ScenarioTest):
                    self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH),
                    self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)]
 
-        # Case 1 : Provision a server with public access all
+        # Case 1 : Provision a server with public access with 0.0.0.1-255.255.255.254
         result = self.cmd('{} flexible-server create -g {} -n {} --public-access {} -l {}'
-                          .format(database_engine, resource_group, servers[0], 'all', location)).get_output_in_json()
+                          .format(database_engine, resource_group, servers[0], '0.0.0.1-255.255.255.254', location)).get_output_in_json()
 
         self.cmd('{} flexible-server firewall-rule show -g {} -n {} -r {}'
                  .format(database_engine, resource_group, servers[0], result["firewallName"]),
-                 checks=[JMESPathCheck('startIpAddress', '0.0.0.0'),
-                         JMESPathCheck('endIpAddress', '255.255.255.255')])
+                 checks=[JMESPathCheck('startIpAddress', '0.0.0.1'),
+                         JMESPathCheck('endIpAddress', '255.255.255.254')])
 
         # Case 2 : Provision a server with public access allowing all azure services
         result = self.cmd('{} flexible-server create -g {} -n {} --public-access {} -l {}'
@@ -2253,7 +2253,6 @@ class FlexibleServerMaintenanceMgmtScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(location='northeurope')
     @record_only() # this test need a manually configured server.
-
     def test_mysql_flexible_server_maintenance_mgmt(self, resource_group):
         self._test_maintenance_mgmt('mysql', resource_group)
     
