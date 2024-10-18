@@ -25,12 +25,14 @@ class DummyCli(AzCli):
         from knack.completion import ARGCOMPLETE_ENV_NAME
         from knack.util import ensure_dir
 
+        env_patch = None
+
         if random_config_dir:
             config_dir = os.path.join(GLOBAL_CONFIG_DIR, 'dummy_cli_config_dir', random_string())
             # Knack prioritizes the AZURE_CONFIG_DIR env over the config_dir param, and other functions may call
             # get_config_dir directly. We need to set the env to make sure the config_dir is used.
-            self.env_patch = patch.dict(os.environ, {'AZURE_CONFIG_DIR': config_dir})
-            self.env_patch.start()
+            env_patch = patch.dict(os.environ, {'AZURE_CONFIG_DIR': config_dir})
+            env_patch.start()
 
             # Always copy command index to avoid initializing it again
             files_to_copy = ['commandIndex.json']
@@ -60,6 +62,9 @@ class DummyCli(AzCli):
             output_cls=AzOutputProducer,
             help_cls=AzCliHelp,
             invocation_cls=AzCliCommandInvoker)
+
+        if random_config_dir:
+            env_patch.stop()
 
         self.data['headers'] = {}  # the x-ms-client-request-id is generated before a command is to execute
         self.data['command'] = 'unknown'
