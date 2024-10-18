@@ -20,6 +20,7 @@ AUTHTYPES = {
     AUTH_TYPE.UserIdentity: 'userAssignedIdentity',
     AUTH_TYPE.ServicePrincipalSecret: 'servicePrincipalSecret',
     AUTH_TYPE.UserAccount: 'userAccount',
+    AUTH_TYPE.WorkloadIdentity: 'userAssignedIdentity'
 }
 
 

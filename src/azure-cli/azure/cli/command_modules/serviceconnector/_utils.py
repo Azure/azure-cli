@@ -12,7 +12,7 @@ from azure.cli.core.azclierror import (
     ValidationError,
     CLIInternalError
 )
-from azure.cli.core._profile import Profile
+# from azure.cli.core._profile import Profile
 from ._resource_config import (
     SOURCE_RESOURCES_USERTOKEN,
     TARGET_RESOURCES_USERTOKEN,
@@ -108,14 +108,15 @@ def _in_process_execute(command):
     return cli.result
 
 
+# pylint: disable=unused-argument
 def set_user_token_header(client, cli_ctx):
     '''Set user token header to work around OBO'''
 
     # pylint: disable=protected-access
     # HACK: set custom header to work around OBO
-    profile = Profile(cli_ctx=cli_ctx)
-    creds, _, _ = profile.get_raw_token()
-    client._client._config.headers_policy._headers['x-ms-serviceconnector-user-token'] = creds[1]
+    # profile = Profile(cli_ctx=cli_ctx)
+    # creds, _, _ = profile.get_raw_token()
+    # client._client._config.headers_policy._headers['x-ms-serviceconnector-user-token'] = creds[1]
     # HACK: hide token header
     client._config.logging_policy.headers_to_redact.append(
         'x-ms-serviceconnector-user-token')

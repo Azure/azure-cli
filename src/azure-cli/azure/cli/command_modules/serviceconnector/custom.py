@@ -300,6 +300,7 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                       store_in_connection_string=False,
                       customized_keys=None,
                       opt_out_list=None,
+                      enable_appconfig_extension=False,
                       new_addon=False, no_wait=False,
                       cluster=None, scope=None, enable_csi=False,            # Resource.KubernetesCluster
                       site=None, slot=None,                                  # Resource.WebApp
@@ -360,7 +361,8 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                                   cluster, scope, enable_csi,
                                   customized_keys=customized_keys,
                                   opt_out_list=opt_out_list,
-                                  app_config_id=app_config_id
+                                  app_config_id=app_config_id,
+                                  enable_appconfig_extension=enable_appconfig_extension
                                   )
 
 
@@ -394,6 +396,7 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
                            opt_out_list=None,
                            app_config_id=None,
                            target_app_name=None,                                  # Resource.ContainerApp
+                           enable_appconfig_extension=False,
                            **kwargs,
                            ):
     if not source_id:
@@ -473,6 +476,12 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
         parameters['target_service']['resource_properties'] = {
             'type': 'KeyVault',
             'connect_as_kubernetes_csi_driver': enable_csi,
+        }
+
+    if enable_appconfig_extension:
+        parameters['target_service']['resource_properties'] = {
+            'type': 'AppConfig',
+            'connect_with_kubernetes_extension': enable_appconfig_extension,
         }
 
     if new_addon:
