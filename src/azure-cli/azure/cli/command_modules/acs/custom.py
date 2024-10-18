@@ -1873,7 +1873,7 @@ def k8s_install_kubectl(cmd, client_version='latest', install_location=None, sou
     """
 
     if not source_url:
-        source_url = "https://storage.googleapis.com/kubernetes-release/release"
+        source_url = "https://dl.k8s.io/release"
         cloud_name = cmd.cli_ctx.cloud.name
         if cloud_name.lower() == 'azurechinacloud':
             source_url = 'https://mirror.azure.cn/kubernetes/kubectl'
