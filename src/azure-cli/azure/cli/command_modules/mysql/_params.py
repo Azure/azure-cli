@@ -125,7 +125,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
     maintenance_policy_patch_strategy_arg_type = CLIArgumentType(
         arg_type=get_enum_type(['Regular', 'VirtualCanary']),
         options_list=['--maintenance-policy-patch-strategy'],
-        help='The patch strategy of maintenance policy. Default value is Regular.'
+        help='The patch strategy of maintenance policy. Accepted values: Regular, VirtualCanary. Default value is Regular.'
     )
 
     yes_arg_type = CLIArgumentType(

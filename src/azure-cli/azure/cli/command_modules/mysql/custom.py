@@ -1124,7 +1124,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
         instance.network.public_network_access = public_access
 
     if maintenance_policy_patch_strategy:
-        maintenance_policy = models.MaintenancePolicy(patch_strategy=maintenance_policy_patch_strategy)
+        instance.maintenance_policy.patch_strategy = maintenance_policy_patch_strategy
 
     params = ServerForUpdate(sku=instance.sku,
                              storage=instance.storage,
@@ -1135,7 +1135,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
                              identity=identity,
                              data_encryption=data_encryption,
                              network=instance.network,
-                             maintenance_policy=maintenance_policy)
+                             maintenance_policy=instance.maintenance_policy)
 
     return params
 
