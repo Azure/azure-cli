@@ -25,7 +25,10 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 def GeneratePrivateZoneName(self):
     self.kwargs['zone'] = self.create_random_name(
         "clitest.privatedns.com", length=35)
-
+    
+def GeneratePrivateLinkZoneName(self):
+    self.kwargs['zone'] = self.create_random_name(
+        "privatelink.clitest.privatedns.com", length=40)
 
 def GenerateVirtualNetworkName(self):
     self.kwargs['vnet'] = self.create_random_name(
@@ -82,8 +85,11 @@ class BaseScenarioTests(ScenarioTest):
         createdZones.sort(key=lambda x: x['name'])
         return createdZones
 
-    def _Create_PrivateZone(self):
-        GeneratePrivateZoneName(self)
+    def _Create_PrivateZone(self, isPrivateLinkZone=False):
+        if isPrivateLinkZone is True:
+            GeneratePrivateLinkZoneName(self)
+        else:
+            GeneratePrivateZoneName(self)
         return self.cmd('az network private-dns zone create -g {rg} -n {zone}', checks=[
             self.check('name', '{zone}'),
             self.check_pattern('id', GeneratePrivateZoneArmId(self)),
@@ -111,8 +117,8 @@ class BaseScenarioTests(ScenarioTest):
         result = all(link in actualLinks for link in expectedLinks)
         self.check(result, True)
 
-    def _Create_VirtualNetworkLinks(self, numOfLinks=2):
-        self._Create_PrivateZone()
+    def _Create_VirtualNetworkLinks(self, numOfLinks=2, isPrivateLinkZone=False):
+        self._Create_PrivateZone(isPrivateLinkZone)
         createdLinks = []
         for num in range(numOfLinks):
             createdLinks.append(
@@ -135,6 +141,27 @@ class BaseScenarioTests(ScenarioTest):
             self.check('tags', None),
             self.check_pattern('virtualNetwork.id', GenerateVirtualNetworkArmId(self)),
             self.check('registrationEnabled', '{registrationEnabled}'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check_pattern('virtualNetworkLinkState', 'InProgress|Completed')
+        ]).get_output_in_json()
+    
+    def _Create_VirtualNetworkLinkWithResolutionPolicy(self, resolutionPolicy, registrationEnabled=False, createZone=True):
+        self.kwargs['registrationEnabled'] = registrationEnabled
+        self.kwargs['resolutionPolicy'] = resolutionPolicy
+        if createZone is True:
+            self._Create_PrivateZone(isPrivateLinkZone=True)
+        self._Create_VirtualNetwork()
+        GenerateVirtualNetworkLinkName(self)
+        return self.cmd('az network private-dns link vnet create -g {rg} -n {link} -z {zone} -v {vnet} -e {registrationEnabled} --resolution-policy {resolutionPolicy}', checks=[
+            self.check('name', '{link}'),
+            self.check_pattern('id', GenerateVirtualNetworkLinkArmId(self)),
+            self.check('location', 'global'),
+            self.check('type', 'Microsoft.Network/privateDnsZones/virtualNetworkLinks'),
+            self.exists('etag'),
+            self.check('tags', None),
+            self.check_pattern('virtualNetwork.id', GenerateVirtualNetworkArmId(self)),
+            self.check('registrationEnabled', '{registrationEnabled}'),
+            self.check('resolutionPolicy', '{resolutionPolicy}'),
             self.check('provisioningState', 'Succeeded'),
             self.check_pattern('virtualNetworkLinkState', 'InProgress|Completed')
         ]).get_output_in_json()
@@ -513,6 +540,10 @@ class PrivateDnsLinksTests(BaseScenarioTests):
         with self.assertRaisesRegex(HttpResponseError, 'PreconditionFailed'):
             self.cmd('az network private-dns link vnet create -g {rg} -n {link} -z {zone} -v {vnet} -e {registrationEnabled}')
 
+    @ResourceGroupPreparer(name_prefix='clitest_privatedns')
+    def test_PutLinkWithResolutionPolicy_LinkNotExists_ExpectLinkCreated(self, resource_group):
+        self._Create_VirtualNetworkLinkWithResolutionPolicy(resolutionPolicy='NxDomainRedirect')
+
     @live_only()    # live only until https://github.com/Azure/azure-python-devtools/pull/58 fixed
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
     def test_PatchLink_LinkExistsIfMatchSuccess_ExpectLinkUpdated(self, resource_group):
@@ -564,6 +595,19 @@ class PrivateDnsLinksTests(BaseScenarioTests):
         self.cmd('az network private-dns link vnet update -g {rg} -n {link} -z {zone} -e {registrationEnabled}', checks=[
             self.check('name', '{link}'),
             self.check('registrationEnabled', '{registrationEnabled}'),
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+    @live_only()    # live only until https://github.com/Azure/azure-python-devtools/pull/58 fixed
+    @ResourceGroupPreparer(name_prefix='clitest_privatedns')
+    def test_PatchLink_UpdateResolutionPolicyToNxDomainRedirect_ExpectResolutionPolicyUpdated(self, resource_group):
+        self._Create_VirtualNetworkLinkWithResolutionPolicy(resolutionPolicy='Default')
+        self.kwargs['registrationEnabled'] = False
+        self.kwargs['resolutionPolicy'] = 'NxDomainRedirect'
+        self.cmd('az network private-dns link vnet update -g {rg} -n {link} -z {zone} -e {registrationEnabled} --resolution-policy {resolutionPolicy}', checks=[
+            self.check('name', '{link}'),
+            self.check('registrationEnabled', '{registrationEnabled}'),
+            self.check('resolutionPolicy', '{resolutionPolicy}'),
             self.check('provisioningState', 'Succeeded')
         ])
 
@@ -645,6 +689,16 @@ class PrivateDnsLinksTests(BaseScenarioTests):
         ])
 
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
+    def test_GetLinkWithResolutionPolicy_LinkExists_ExpectLinkRetrieved(self, resource_group):
+        self._Create_VirtualNetworkLinkWithResolutionPolicy(resolutionPolicy='NxDomainRedirect')
+        self.cmd('az network private-dns link vnet show -g {rg} -n {link} -z {zone}', checks=[
+            self.check('name', '{link}'),
+            self.check('resolutionPolicy', '{resolutionPolicy}'),
+            self.check_pattern('id', GenerateVirtualNetworkLinkArmId(self)),
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='clitest_privatedns')
     def test_ListLinks_NoLinksPresent_ExpectNoLinksRetrieved(self, resource_group):
         self._Create_PrivateZone()
         self.cmd('az network private-dns link vnet list -g {rg} -z {zone}', checks=[
@@ -654,6 +708,14 @@ class PrivateDnsLinksTests(BaseScenarioTests):
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
     def test_ListLinks_MultipleLinksPresent_ExpectMultipleLinksRetrieved(self, resource_group):
         expectedLinks = self._Create_VirtualNetworkLinks(numOfLinks=2)
+        returnedLinks = self.cmd('az network private-dns link vnet list -g {rg} -z {zone}', checks=[
+            self.check('length(@)', 2)
+        ]).get_output_in_json()
+        self._Validate_Links(expectedLinks, returnedLinks)
+
+    @ResourceGroupPreparer(name_prefix='clitest_privatedns')
+    def test_ListLinks_PrivateLinkZone_MultipleLinksPresent_ExpectMultipleLinksWithResolutionPolicyRetrieved(self, resource_group):
+        expectedLinks = self._Create_VirtualNetworkLinks(numOfLinks=2, isPrivateLinkZone=True)
         returnedLinks = self.cmd('az network private-dns link vnet list -g {rg} -z {zone}', checks=[
             self.check('length(@)', 2)
         ]).get_output_in_json()
