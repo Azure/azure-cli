@@ -6,6 +6,8 @@ trigger:
   branches:
     include:
     - '*'
+    exclude:
+    - 'release'
 
 pr:
   branches:
@@ -138,7 +140,7 @@ jobs:
   displayName: 'Verify src/azure-cli/requirements.*.Darwin.txt'
   condition: succeeded()
   pool:
-    vmImage: 'macOS-12'
+    vmImage: ${{ variables.macos_pool }}
 
   steps:
   - task: UsePythonVersion@0
@@ -205,6 +207,11 @@ jobs:
       TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
       artifactName: metadata
 
+  - task: PipAuthenticate@1
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
+    displayName: 'Pip Authenticate'
+    inputs:
+      artifactFeeds: $(AZURE_ARTIFACTS_FEEDS)
 
   - script: |
       set ARCH=$(Platform)
@@ -244,6 +251,11 @@ jobs:
         TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
         artifactName: metadata
 
+    - task: PipAuthenticate@1
+      condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
+      displayName: 'Pip Authenticate'
+      inputs:
+        artifactFeeds: $(AZURE_ARTIFACTS_FEEDS)
 
     - script: |
         set ARCH=$(Platform)
@@ -323,83 +335,6 @@ jobs:
     displayName: Expand and Load CLI
     inputs:
       filePath: build_scripts\windows\scripts\test_zip_installation.ps1
-
-- job: BuildDockerImageAlpine
-  continueOnError: true
-  displayName: Build Docker Image Alpine
-  strategy:
-    matrix:
-      ${{ each arch in parameters.architectures }}:
-        ${{ arch.name }}:
-          pool: ${{ arch.pool }}
-          artifactName: docker-${{ arch.value }}
-          dockerfile: alpine.dockerfile
-  pool:
-    name: $(pool)
-  steps:
-  - bash: ./scripts/ci/install_docker.sh
-    displayName: Install Docker
-  - task: Bash@3
-    displayName: 'Bash Script'
-    inputs:
-      targetType: 'filePath'
-      filePath: scripts/release/docker/pipeline.sh
-
-  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
-    displayName: 'SBOM'
-    inputs:
-      BuildDropPath: $(Build.ArtifactStagingDirectory)
-      DockerImagesToScan: 'clibuild$BUILD_BUILDNUMBER:latest'
-
-  - task: PublishPipelineArtifact@0
-    displayName: 'Publish Artifact: docker image'
-    inputs:
-      TargetPath: $(Build.ArtifactStagingDirectory)
-      ArtifactName: $(artifactName)
-
-- job: TestDockerImageAlpine
-  continueOnError: true
-  displayName: Test Docker Image Alpine
-  dependsOn:
-    - BuildDockerImageAlpine
-    - ExtractMetadata
-  condition: succeeded()
-  strategy:
-    matrix:
-      ${{ each arch in parameters.architectures }}:
-        ${{ arch.name }}:
-          pool: ${{ arch.pool }}
-          artifactName: docker-${{ arch.value }}
-  pool:
-    name: $(pool)
-  steps:
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Metadata'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
-      artifactName: metadata
-
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Docker Image'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/docker'
-      artifactName: $(artifactName)
-
-  - bash: ./scripts/ci/install_docker.sh
-    displayName: Install Docker
-
-  - bash: |
-      set -exv
-      
-      CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
-      IMAGE_NAME=clibuild$BUILD_BUILDNUMBER:latest
-      TAR_FILE=$SYSTEM_ARTIFACTSDIRECTORY/docker/docker-azure-cli-$CLI_VERSION.tar
-      
-      echo "== Test docker image =="
-      
-      docker load < $TAR_FILE
-      docker run $IMAGE_NAME /bin/bash -c "time az self-test && time az --version && sleep 5"
-    displayName: 'Bash Script'
 
 - job: BuildDockerImageAzureLinux
   displayName: Build Docker Image Azure Linux
@@ -506,6 +441,11 @@ jobs:
     inputs:
       versionSpec: 3.11
 
+  - task: PipAuthenticate@1
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
+    displayName: 'Pip Authenticate'
+    inputs:
+      artifactFeeds: $(AZURE_ARTIFACTS_FEEDS)
 
   - script: |
       if [[ "$(Build.Reason)" == "PullRequest" ]]; then
@@ -710,7 +650,7 @@ jobs:
   dependsOn: BuildHomebrewFormula
   condition: succeeded()
   pool:
-    vmImage: 'macOS-12'
+    vmImage: ${{ variables.macos_pool }}
   steps:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
@@ -754,7 +694,7 @@ jobs:
   # condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   condition: false
   pool:
-    vmImage: 'macOS-12'
+    vmImage: ${{ variables.macos_pool }}
   steps:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
@@ -795,6 +735,12 @@ jobs:
   steps:
   - bash: ./scripts/ci/install_docker.sh
     displayName: Install Docker
+
+  - task: PipAuthenticate@1
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
+    displayName: 'Pip Authenticate'
+    inputs:
+      artifactFeeds: $(AZURE_ARTIFACTS_FEEDS)
 
   - task: Bash@3
     displayName: 'Build Rpm Package: Azure Linux'
@@ -886,6 +832,11 @@ jobs:
   steps:
   - bash: ./scripts/ci/install_docker.sh
     displayName: Install Docker
+  - task: PipAuthenticate@1
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
+    displayName: 'Pip Authenticate'
+    inputs:
+      artifactFeeds: $(AZURE_ARTIFACTS_FEEDS)
   - task: Bash@3
     displayName: 'Build Rpm Package'
     inputs:
@@ -988,12 +939,6 @@ jobs:
           pool: ${{ arch.pool }}
 
         # https://wiki.debian.org/DebianReleases
-        Buster ${{ arch.name }}:
-          # 10
-          deb_system: debian
-          distro: buster
-          arch: ${{ arch.value }}
-          pool: ${{ arch.pool }}
         Bullseye ${{ arch.name }}:
           # 11
           deb_system: debian
@@ -1009,6 +954,11 @@ jobs:
   steps:
   - bash: ./scripts/ci/install_docker.sh
     displayName: Install Docker
+  - task: PipAuthenticate@1
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
+    displayName: 'Pip Authenticate'
+    inputs:
+      artifactFeeds: $(AZURE_ARTIFACTS_FEEDS)
   - task: Bash@3
     displayName: 'Build $(deb_system) $(distro) $(arch) Package'
     inputs:
@@ -1050,11 +1000,6 @@ jobs:
         Noble ${{ arch.name }}:
           deb_system: ubuntu
           distro: noble
-          arch: ${{ arch.value }}
-          pool: ${{ arch.pool }}
-        Buster ${{ arch.name }}:
-          deb_system: debian
-          distro: buster
           arch: ${{ arch.value }}
           pool: ${{ arch.pool }}
         Bullseye ${{ arch.name }}:
@@ -1252,8 +1197,6 @@ jobs:
     - TestMsiInstallation
     - BuildWindowsZIP
     - TestZipInstallation
-    - BuildDockerImageAlpine
-    - TestDockerImageAlpine
     - BuildDockerImageAzureLinux
     - TestDockerImageAzureLinux
     - BuildPythonWheel

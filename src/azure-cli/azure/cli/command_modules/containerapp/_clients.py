@@ -159,12 +159,18 @@ class ContainerAppClient():
         if no_wait:
             return
         elif r.status_code == 202:
-            operation_url = r.headers.get(HEADER_LOCATION)
-            response = poll_results(cmd, operation_url)
-            if response is None:
-                raise ResourceNotFoundError("Could not find a container app")
+            operation_url = r.headers.get(HEADER_AZURE_ASYNC_OPERATION)
+            if operation_url:
+                poll_status(cmd, operation_url)
+                r = send_raw_request(cmd.cli_ctx, "GET", request_url)
+                return r.json()
             else:
-                return response
+                operation_url = r.headers.get(HEADER_LOCATION)
+                r = poll_results(cmd, operation_url)
+                if r is None:
+                    raise ResourceNotFoundError("Could not find a container app")
+                else:
+                    return r
 
         return r.json()
 
@@ -1017,7 +1023,7 @@ class ContainerAppsJobClient():
                 cls.api_version)
 
         r = send_raw_request(cmd.cli_ctx, "POST", request_url)
-        return r.json()
+        return r
 
     @classmethod
     def get_executions(cls, cmd, resource_group_name, name):

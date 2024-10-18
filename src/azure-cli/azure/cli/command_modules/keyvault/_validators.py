@@ -45,7 +45,7 @@ def _get_resource_group_from_resource_name(cli_ctx, vault_name, hsm_name=None):
     :return: resource group name or None
     :rtype: str
     """
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
 
     if vault_name:
         client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_KEYVAULT).vaults
@@ -383,7 +383,7 @@ def validate_deleted_vault_or_hsm_name(cmd, ns):
     """
     Validate a deleted vault name; populate or validate location and resource_group_name
     """
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
 
     vault_name = getattr(ns, 'vault_name', None)
     hsm_name = getattr(ns, 'hsm_name', None)
@@ -502,7 +502,7 @@ def get_hsm_base_url_type(cli_ctx):
 
 
 def _construct_vnet(cmd, resource_group_name, vnet_name, subnet_name):
-    from msrestazure.tools import resource_id
+    from azure.mgmt.core.tools import resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
     return resource_id(
@@ -516,7 +516,7 @@ def _construct_vnet(cmd, resource_group_name, vnet_name, subnet_name):
 
 
 def validate_subnet(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id
 
     subnet = namespace.subnet
     subnet_is_id = is_valid_resource_id(subnet)
@@ -705,7 +705,7 @@ def process_certificate_policy(cmd, ns):
     if policy is None:
         return
     if not isinstance(policy, dict):
-        raise CLIError('incorrect usage: policy should be an JSON encoded string '
+        raise CLIError('incorrect usage: policy should be a JSON encoded string '
                        'or can use @{file} to load from a file(e.g.@my_policy.json).')
 
     secret_properties = policy.get('secret_properties')

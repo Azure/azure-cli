@@ -147,7 +147,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
 
         subnet_id = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/virtualNetworks/%s/subnets/%s" % (subs_id, subnet_rg, vnet_name, subnet_name)
 
-        volume = self.cmd("az netappfiles volume create --resource-group %s --account-name %s --pool-name %s --volume-name %s -l %s %s --file-path %s --vnet %s --subnet %s" % (rg, account_name, pool_name, volume_name, RG_LOCATION, VOLUME_DEFAULT, file_path, vnet_name, subnet_id)).get_output_in_json()
+        volume = self.cmd("az netappfiles volume create --resource-group %s --account-name %s --pool-name %s --volume-name %s -l %s %s --file-path %s --subnet %s" % (rg, account_name, pool_name, volume_name, RG_LOCATION, VOLUME_DEFAULT, file_path, subnet_id)).get_output_in_json()
         assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
 
         self.cmd("az netappfiles volume delete --resource-group %s --account-name %s --pool-name %s --volume-name %s --yes" % (rg, account_name, pool_name, volume_name))
@@ -477,6 +477,25 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
 
     @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_', additional_tags={'owner': 'cli_test'})
+    def test_nfsv3_with_abn_export_policy_provided_is_successful(self):
+        vnet_name = self.create_random_name(prefix='cli-vnet-', length=24)
+        subnet_name = self.create_random_name(prefix='cli-subnet-', length=16)
+        account_name = self.create_random_name(prefix='cli-acc-', length=24)
+        pool_name = self.create_random_name(prefix='cli-pool-', length=24)
+        volume_name = self.create_random_name(prefix='cli-vol-', length=24)
+        allowed_clients = "1.2.3.0/24"
+        self.prepare_for_volume_creation('{rg}', account_name, pool_name, vnet_name, subnet_name)
+        volume = self.cmd("az netappfiles volume create --resource-group {rg} --account-name %s --pool-name %s "
+                          "--volume-name %s -l %s %s --file-path %s --vnet %s --subnet %s --protocol-types NFSv3 --allowed-clients %s --rule-index 1 --unix-read-write true" %
+                          (account_name, pool_name, volume_name, RG_LOCATION, VOLUME_DEFAULT, volume_name, vnet_name,
+                           subnet_name,allowed_clients)).get_output_in_json()
+        assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
+        assert len(volume['exportPolicy']['rules']) == 1
+        assert volume['exportPolicy']['rules'][0]['nfsv3']
+        assert volume['exportPolicy']['rules'][0]['allowedClients'] == allowed_clients
+
+    @serial_test()
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_', additional_tags={'owner': 'cli_test'})
     def test_add_export_policy_with_no_rule_index(self):
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
         pool_name = self.create_random_name(prefix='cli-pool-', length=24)
@@ -573,7 +592,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
     
     @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_', additional_tags={'owner': 'cli_test'})
-    def test_volumesize8Tib(self):
+    def test_volume_size_8Tib(self):
         # tests that adding export policy works with non-default service level/usage threshold
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
         pool_name = self.create_random_name(prefix='cli-pool-', length=24)
@@ -585,4 +604,20 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
         # check the specified volume properties
         assert volume['usageThreshold'] == 8192 * GIB_SCALE
+        assert volume['serviceLevel'] == "Standard"
+
+    @serial_test()
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_', additional_tags={'owner': 'cli_test'})
+    def test_volume_size_50Gib(self):
+        # tests that adding export policy works with non-default service level/usage threshold
+        account_name = self.create_random_name(prefix='cli-acc-', length=24)
+        pool_name = self.create_random_name(prefix='cli-pool-', length=24)
+        volume_name = self.create_random_name(prefix='cli-vol-', length=24)
+        pool_payload = "--service-level 'Standard' --size 8"
+        volume_payload = "--service-level 'Standard' --usage-threshold 50"
+
+        volume = self.create_volume(account_name, pool_name, volume_name, '{rg}', pool_payload=pool_payload, volume_payload=volume_payload)
+        assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
+        # check the specified volume properties
+        # assert volume['usageThreshold'] == 8192 * GIB_SCALE
         assert volume['serviceLevel'] == "Standard"

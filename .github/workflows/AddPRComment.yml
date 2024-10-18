@@ -5,25 +5,24 @@ on:
       - dev
       - release
 
-permissions:
-  pull-requests: write
+permissions: {}
 
 jobs:
   thank-user:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     name: Say thanks for the PR
     steps:
-      - name: get message
+      - name: Comment on PR
         env:
-          TITLE: ${{ github.event.pull_request.title }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+          REPO_TOKEN: ${{ secrets.CLI_BOT }}
         run: |
-          message=$(echo "$TITLE" | grep -oP '[{\[][^}\]]+[}\]]' | sed 's/{\|}\|\[\|\]//g')
-          echo "message=$message" >> $GITHUB_ENV
-          if [ -z $message ]; then
-              echo "message=$(echo 'Thank you for your contribution! We will review the pull request and get back to you soon.')" >> $GITHUB_ENV
-          fi
-      - name: comment on the pull request
-        uses: mshick/add-pr-comment@v2
-        with:
-          repo-token: ${{ secrets.CLI_BOT }}
-          message: "${{ env.message }}"
+          message='Thank you for your contribution! We will review the pull request and get back to you soon.'
+
+          # Comment on the PR using GitHub API
+          curl -X POST \
+            -H "Authorization: token $REPO_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/$REPO/issues/$PR_NUMBER/comments \
+            -d "{\"body\": \"$message\"}"
