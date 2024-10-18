@@ -323,12 +323,25 @@ def _extract_version(text):
     return semver.VersionInfo.parse(semver_match.group(0)) if semver_match else None
 
 
+def _get_bicep_env_vars(custom_env=None):
+    env_vars = (custom_env or os.environ).copy()
+
+    # See https://github.com/Azure/azure-cli/issues/29828 for background on this
+    from azure.cli.core._environment import _ENV_AZ_BICEP_GLOBALIZATION_INVARIANT
+    env_bicep_globalization_invariant = os.getenv(_ENV_AZ_BICEP_GLOBALIZATION_INVARIANT, 'False')
+
+    if env_bicep_globalization_invariant.lower() in ('true', '1'):
+        env_vars['DOTNET_SYSTEM_GLOBALIZATION_INVARIANT'] = '1'
+
+    return env_vars
+
+
 def _run_command(bicep_installation_path, args, custom_env=None):
     process = subprocess.run(
         [rf"{bicep_installation_path}"] + args,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
-        env=custom_env)
+        env=_get_bicep_env_vars(custom_env))
 
     try:
         process.check_returncode()
