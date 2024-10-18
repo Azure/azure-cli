@@ -725,7 +725,7 @@ def generate_ssh_keys_ed25519(private_key_filepath, public_key_filepath):
         # Try to use existing private key if it exists.
         with open(private_key_filepath, "rb") as f:
             private_bytes = f.read()
-        private_key = serialization.load_pem_private_key(private_bytes, password=None)
+        private_key = serialization.load_ssh_private_key(private_bytes, password=None)
         logger.warning("Private SSH key file '%s' was found in the directory: '%s'. "
                        "A paired public key file '%s' will be generated.",
                        private_key_filepath, ssh_dir, public_key_filepath)
@@ -734,7 +734,7 @@ def generate_ssh_keys_ed25519(private_key_filepath, public_key_filepath):
         private_key = Ed25519PrivateKey.generate()
         private_bytes = private_key.private_bytes(
             encoding=serialization.Encoding.PEM,
-            format=serialization.PrivateFormat.PKCS8,
+            format=serialization.PrivateFormat.OpenSSH,
             encryption_algorithm=serialization.NoEncryption()
         )
 
