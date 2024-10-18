@@ -769,6 +769,12 @@ class ContainerappEnvScenarioTest(ScenarioTest):
 
         self.cmd('containerapp env create -g {} -n {} --logs-destination none -d "Endpoint=https://foo.azconfig.io;Id=osOX-l9-s0:sig;InstrumentationKey=00000000000000000000000000000000000000000000"'.format(resource_group, env_name), expect_failure=False)
 
+        self.cmd('containerapp env update -g {} -n {} --logs-destination none -d none'.format(resource_group, env_name), expect_failure=False)
+
+        self.cmd('containerapp env update -g {} -n {} --logs-destination none --dapr-instrumentation-key test'.format(resource_group, env_name), expect_failure=False)
+
+        self.cmd('containerapp env update -g {} -n {} --logs-destination none --dapr-instrumentation-key none'.format(resource_group, env_name), expect_failure=False)
+
         self.cmd('containerapp env delete -g {} -n {} --yes --no-wait'.format(resource_group, env_name), expect_failure=False)
 
     @AllowLargeResponse(8192)
