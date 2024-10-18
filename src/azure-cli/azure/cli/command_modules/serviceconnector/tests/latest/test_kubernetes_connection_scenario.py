@@ -522,7 +522,7 @@ class KubernetesConnectionScenarioTest(ScenarioTest):
 
         # create connection
         self.cmd('aks connection create appconfig --connection {} --source-id {} --target-id {} '
-                 '--secret --client-type python --enable-appconfig-extension'.format(name, source_id, target_id))
+                 '--secret --client-type python --use-appconfig-extension'.format(name, source_id, target_id))
 
         # list connection
         connections = self.cmd(
