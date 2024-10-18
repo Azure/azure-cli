@@ -180,6 +180,9 @@ class Profile:
             else:
                 identity.login_with_service_principal(username, password, scopes=scopes)
 
+        # Clear existing sessions before finding subscriptions
+        self.clear_sessions()
+
         # We have finished login. Let's find all subscriptions.
         if show_progress:
             message = ('Retrieving subscriptions for the selection...' if tenant else
@@ -727,6 +730,9 @@ class Profile:
             self._storage[_INSTALLATION_ID] = installation_id
         return installation_id
 
+    def clear_sessions(self):
+        """Clear existing Azure CLI sessions."""
+        self._storage[_SUBSCRIPTIONS] = []
 
 class MsiAccountTypes:
     # pylint: disable=no-method-argument,no-self-argument
