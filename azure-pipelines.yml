@@ -6,6 +6,8 @@ trigger:
   branches:
     include:
     - '*'
+    exclude:
+    - 'release'
 
 pr:
   branches:
@@ -205,6 +207,11 @@ jobs:
       TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
       artifactName: metadata
 
+  - task: PipAuthenticate@1
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
+    displayName: 'Pip Authenticate'
+    inputs:
+      artifactFeeds: $(AZURE_ARTIFACTS_FEEDS)
 
   - script: |
       set ARCH=$(Platform)
@@ -244,6 +251,11 @@ jobs:
         TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
         artifactName: metadata
 
+    - task: PipAuthenticate@1
+      condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
+      displayName: 'Pip Authenticate'
+      inputs:
+        artifactFeeds: $(AZURE_ARTIFACTS_FEEDS)
 
     - script: |
         set ARCH=$(Platform)
@@ -429,6 +441,11 @@ jobs:
     inputs:
       versionSpec: 3.11
 
+  - task: PipAuthenticate@1
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
+    displayName: 'Pip Authenticate'
+    inputs:
+      artifactFeeds: $(AZURE_ARTIFACTS_FEEDS)
 
   - script: |
       if [[ "$(Build.Reason)" == "PullRequest" ]]; then
@@ -719,6 +736,12 @@ jobs:
   - bash: ./scripts/ci/install_docker.sh
     displayName: Install Docker
 
+  - task: PipAuthenticate@1
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
+    displayName: 'Pip Authenticate'
+    inputs:
+      artifactFeeds: $(AZURE_ARTIFACTS_FEEDS)
+
   - task: Bash@3
     displayName: 'Build Rpm Package: Azure Linux'
     inputs:
@@ -809,6 +832,11 @@ jobs:
   steps:
   - bash: ./scripts/ci/install_docker.sh
     displayName: Install Docker
+  - task: PipAuthenticate@1
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
+    displayName: 'Pip Authenticate'
+    inputs:
+      artifactFeeds: $(AZURE_ARTIFACTS_FEEDS)
   - task: Bash@3
     displayName: 'Build Rpm Package'
     inputs:
@@ -926,6 +954,11 @@ jobs:
   steps:
   - bash: ./scripts/ci/install_docker.sh
     displayName: Install Docker
+  - task: PipAuthenticate@1
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
+    displayName: 'Pip Authenticate'
+    inputs:
+      artifactFeeds: $(AZURE_ARTIFACTS_FEEDS)
   - task: Bash@3
     displayName: 'Build $(deb_system) $(distro) $(arch) Package'
     inputs:
@@ -1094,6 +1127,34 @@ jobs:
       else
         azdev linter --ci-exclusions --min-severity medium
       fi
+
+- job: AzdevScan
+  condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
+  displayName: "Secret Scan"
+  pool:
+    name: ${{ variables.ubuntu_pool }}
+  steps:
+    - task: UsePythonVersion@0
+      displayName: 'Use Python 3.11'
+      inputs:
+        versionSpec: 3.11
+    - template: .azure-pipelines/templates/azdev_setup.yml
+    - bash: |
+        set -ev
+        . env/bin/activate
+        git fetch origin --depth=1 $(System.PullRequest.TargetBranch)
+        declare -A secret_files
+        for FILE in `git diff --name-only --diff-filter=AM origin/$(System.PullRequest.TargetBranch)` ; do
+          detected=$(azdev scan -f $FILE | python -c "import sys, json; print(json.load(sys.stdin)['secrets_detected'])")
+          if [ $detected == 'True' ]; then
+            echo "Secrets detected from "$FILE", Please remove or replace it. You can leverage 'azdev scan'/'azdev mask' command if needed." 1>&2
+            secret_files+=$FILE
+          fi
+        done
+        if [ "${#secret_files[@]}" -gt 0 ]; then
+          exit 1
+        fi
+
 
 - job: CodegenCoverage
   condition: and(succeededOrFailed(), in(variables['Build.Reason'], 'BatchedCI'))

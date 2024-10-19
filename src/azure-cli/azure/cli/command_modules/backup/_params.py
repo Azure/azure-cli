@@ -33,6 +33,7 @@ allowed_softdelete_options = ['Enable', 'Disable', 'AlwaysOn']
 allowed_immutability_options = ['Disabled', 'Locked', 'Unlocked']
 enable_disable_options = ['Enable', 'Disable']
 enable_disable_permadisable_options = ['Enable', 'Disable', 'PermanentlyDisable']
+allowed_disk_access_options = ['EnablePrivateAccessForAllDisks', 'EnablePublicAccessForAllDisks', 'SameAsOnSourceDisks']
 
 backup_management_type_help = """Specify the backup management type. Define how Azure Backup manages the backup of entities within the ARM resource. For eg: AzureWorkloads refers to workloads installed within Azure VMs, AzureStorage refers to entities within Storage account. Required only if friendly name is used as Container name."""
 container_name_help = """Name of the backup container. Accepts 'Name' or 'FriendlyName' from the output of az backup container list command. If 'FriendlyName' is passed then BackupManagementType is required."""
@@ -399,6 +400,8 @@ def load_arguments(self, _):
         c.argument('storage_account_resource_group', help='Name of the resource group which contains the storage account. Default value will be same as --resource-group if not specified.')
         c.argument('restore_to_edge_zone', arg_type=get_three_state_flag(), help='Switch parameter to indicate edge zone VM restore. This parameter can\'t be used in cross region and cross subscription restore scenarios.')
         c.argument('tenant_id', help='ID of the tenant if the Resource Guard protecting the vault exists in a different tenant.')
+        c.argument('disk_access_option', arg_type=get_enum_type(allowed_disk_access_options), help='Specify the disk access option for target disks.')
+        c.argument('target_disk_access_id', help='Specify the target disk access ID when --disk-access-option is set to EnablePrivateAccessForAllDisks')
 
     with self.argument_context('backup restore restore-azurefileshare') as c:
         c.argument('resolve_conflict', resolve_conflict_type)
