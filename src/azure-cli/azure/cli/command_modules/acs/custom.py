@@ -1152,7 +1152,15 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                               rotation_poll_interval=rotation_poll_interval,
                               no_wait=no_wait,)
 
-    enable_monitoring = CONST_MONITORING_ADDON_NAME in instance.addon_profiles \
+    is_monitoring_addon = False
+    addon_args = addons.split(',')
+    for addon_arg in addon_args:
+        if addon_arg in ADDONS:
+            addon = ADDONS[addon_arg]
+            if addon == CONST_MONITORING_ADDON_NAME:
+                is_monitoring_addon = True
+                break
+    enable_monitoring = is_monitoring_addon and CONST_MONITORING_ADDON_NAME in instance.addon_profiles \
         and instance.addon_profiles[CONST_MONITORING_ADDON_NAME].enabled
     ingress_appgw_addon_enabled = CONST_INGRESS_APPGW_ADDON_NAME in instance.addon_profiles \
         and instance.addon_profiles[CONST_INGRESS_APPGW_ADDON_NAME].enabled
