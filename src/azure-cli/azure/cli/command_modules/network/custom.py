@@ -2007,9 +2007,9 @@ class WAFCustomRuleMatchConditionAdd(_WAFCustomRuleMatchConditionAdd):
         args.variables = variables
         # validate
         if str(args.operator).lower() == "any" and has_value(args.values):
-            raise ArgumentUsageError("Any operator does not require --match-values.")
+            raise ArgumentUsageError("\"Any\" operator does not require --values.")
         if str(args.operator).lower() != "any" and not has_value(args.values):
-            raise ArgumentUsageError("Non-any operator requires --match-values.")
+            raise ArgumentUsageError("Non-any operator requires --values.")
 
 
 class WAFPolicySettingUpdate(_WAFPolicySettingUpdate):

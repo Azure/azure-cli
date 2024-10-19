@@ -527,7 +527,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
         promote_mode_arg_type = CLIArgumentType(
             arg_type=get_enum_type(['standalone', 'switchover']),
-            help='Whether to promote read replica to an independent server or promite it as a primary server.'
+            help='Whether to promote read replica to an independent server or promote it as a primary server.'
         )
 
         promote_option_arg_type = CLIArgumentType(
