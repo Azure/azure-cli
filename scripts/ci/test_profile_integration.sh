@@ -6,13 +6,13 @@ ls -la $share_folder/build
 
 ALL_MODULES=`find $share_folder/build/ -name "*.whl"`
 
-pip install -e ./tools
-[ -d privates ] && pip install -qqq privates/*.whl
 pip install $ALL_MODULES
 
 set -ev
 
 output=$(az cloud list-profiles -otsv)
+which az
+which azdev
 
 azdev verify package $share_folder/build/
 
