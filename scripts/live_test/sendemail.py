@@ -52,7 +52,7 @@ USER_REPO = os.environ.get('USER_REPO')
 USER_REPO_EXT = os.environ.get('USER_REPO_EXT')
 USER_TARGET = os.environ.get('USER_TARGET')
 
-resource_html = """
+resource_html = r"""
 <!DOCTYPE html>
 <html>
   <head>
