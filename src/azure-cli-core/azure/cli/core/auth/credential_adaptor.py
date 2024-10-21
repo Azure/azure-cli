@@ -7,7 +7,7 @@ import requests
 from knack.log import get_logger
 from knack.util import CLIError
 
-from .util import resource_to_scopes, _normalize_scopes
+from .util import resource_to_scopes
 
 logger = get_logger(__name__)
 
@@ -61,7 +61,6 @@ class CredentialAdaptor:
         # so discard it.
         kwargs.pop('tenant_id', None)
 
-        scopes = _normalize_scopes(scopes)
         token, _ = self._get_token(scopes, **kwargs)
         return token
 
