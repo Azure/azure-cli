@@ -26,22 +26,37 @@ Methods:
 
 import os
 from azure.cli.testsdk import ScenarioTest
-from fleet_test_helper import ComputefleetScenario
+from azure.cli.testsdk import ResourceGroupPreparer
 
 subscriptionId = os.getenv('AZURE_SUBSCRIPTION_ID')
 if not subscriptionId:
     raise EnvironmentError("AZURE_SUBSCRIPTION_ID environment variable is not set.")
 
-class TestComputefleetScenario(ScenarioTest):
+fleet_name = 'testFleet'
+resource_group = 'testResourceGroup'
+location = "eastus"
 
+class TestComputefleetScenario(ScenarioTest):
+    @classmethod
+    def setUpClass(cls):
+        super(TestComputefleetScenario, cls).setUpClass()
+        cls.cmd('az group create --name {} --location {}'.format(resource_group, location))
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.cmd('az group delete --name {} --yes --no-wait'.format(resource_group))
+        super(TestComputefleetScenario, cls).tearDownClass()
+        
     def __init__(self, method_name):
         super(TestComputefleetScenario, self).__init__(method_name)
         self.scenario = ComputefleetScenario(self)
 
-    def test_fleet_create(self):
+    def test_fleet_create(self, fleet= fleet_name, rg= resource_group, loc= location):
+        fleetData = self.scenario.generate_fleet_parameters(subscriptionId, rg, loc) 
         self.kwargs.update({
-            'fleet_name': 'testFleet',
-            'resource_group': 'testResourceGroup'
+            'fleet_name': fleet,
+            'resource_group': rg,
+            'fleet_data': fleetData
         })
 
         self.cmd('az computefleet create --name {fleet_name} --resource-group {resource_group}', checks=[
@@ -49,10 +64,10 @@ class TestComputefleetScenario(ScenarioTest):
             self.check('resourceGroup', '{resource_group}')
         ])
 
-    def test_fleet_update(self):
+    def test_fleet_update(self, fleet= fleet_name, rg= resource_group):
         self.kwargs.update({
-            'fleet_name': 'testFleet',
-            'resource_group': 'testResourceGroup',
+            'fleet_name': fleet,
+            'resource_group': rg,
             'new_tag': 'newTag'
         })
 
@@ -60,10 +75,10 @@ class TestComputefleetScenario(ScenarioTest):
             self.check('tags.key', '{new_tag}')
         ])
 
-    def test_fleet_show(self):
+    def test_fleet_show(self, fleet= fleet_name, rg= resource_group):
         self.kwargs.update({
-            'fleet_name': 'testFleet',
-            'resource_group': 'testResourceGroup'
+            'fleet_name': fleet,
+            'resource_group': rg
         })
 
         self.cmd('az computefleet show --name {fleet_name} --resource-group {resource_group}', checks=[
@@ -71,19 +86,19 @@ class TestComputefleetScenario(ScenarioTest):
             self.check('resourceGroup', '{resource_group}')
         ])
 
-    def test_fleet_delete(self):
+    def test_fleet_delete(self, fleet= fleet_name, rg= resource_group):
         self.kwargs.update({
-            'fleet_name': 'testFleet',
-            'resource_group': 'testResourceGroup'
+            'fleet_name': fleet,
+            'resource_group': rg
         })
 
         self.cmd('az computefleet delete --name {fleet_name} --resource-group {resource_group}', checks=[
             self.is_empty()
         ])
 
-    def test_fleet_list(self):
+    def test_fleet_list(self, rg= resource_group):
         self.kwargs.update({
-            'resource_group': 'testResourceGroup'
+            'resource_group': rg
         })
 
         self.cmd('az computefleet list --resource-group {resource_group}', checks=[
@@ -91,24 +106,34 @@ class TestComputefleetScenario(ScenarioTest):
             self.check('length(@)', 1)
         ])
 
-    def test_fleet_scale(self):
+    def test_fleet_scale(self, fleet= fleet_name, rg= resource_group):
         self.kwargs.update({
-            'fleet_name': 'testFleet',
-            'resource_group': 'testResourceGroup',
-            'new_capacity': 50
+           'fleet_name': fleet,
+            'resource_group': rg,
+            'new_capacity': 5
         })
 
         self.cmd('az computefleet scale --name {fleet_name} --resource-group {resource_group} --capacity {new_capacity}', checks=[
             self.check('capacity', '{new_capacity}')
         ])
 
-    def test_fleet_restart(self):
+    def test_fleet_restart(self, fleet= fleet_name, rg= resource_group):
         self.kwargs.update({
-            'fleet_name': 'testFleet',
-            'resource_group': 'testResourceGroup'
+           'fleet_name': fleet,
+            'resource_group': rg
         })
 
         self.cmd('az computefleet restart --name {fleet_name} --resource-group {resource_group}', checks=[
             self.check('status', 'Succeeded')
         ])
+    
+    @ResourceGroupPreparer(name_prefix='cli_test_fleet')
+    def test_fleet_CURD(self):
+        self.test_fleet_create()
+        self.test_fleet_update()
+        self.test_fleet_show()
+        self.test_fleet_scale()
+        self.test_fleet_delete()
+        
+    test_fleet_CURD()
     pass
