@@ -3256,7 +3256,9 @@ def _aks_approuting_update(
 
 
 def is_monitoring_addon_enabled(addons, instance):
-        is_monitoring_addon = False
+    is_monitoring_addon_enabled = False
+    is_monitoring_addon = False
+    try:
         addon_args = addons.split(',')
         for addon_arg in addon_args:
             if addon_arg in ADDONS:
@@ -3266,5 +3268,8 @@ def is_monitoring_addon_enabled(addons, instance):
                     break
 
         addon_profiles = instance.addon_profiles or {}
-        return is_monitoring_addon and CONST_MONITORING_ADDON_NAME in addon_profiles and addon_profiles[
+        is_monitoring_addon_enabled = is_monitoring_addon and CONST_MONITORING_ADDON_NAME in addon_profiles and addon_profiles[
             CONST_MONITORING_ADDON_NAME].enabled
+    except Exception as ex:  # pylint: disable=broad-except
+        logger.debug("failed to check monitoring addon enabled: %s", ex)
+    return is_monitoring_addon_enabled
