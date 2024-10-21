@@ -581,7 +581,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
 
     def _test_flexible_server_byok_mgmt(self, resource_group, vault_name, backup_vault_name=None):
-        live_test = False
+        live_test = os.environ.get(ENV_LIVE_TEST, False)
         key_name = self.create_random_name('rdbmskey', 32)
         identity_name = self.create_random_name('identity', 32)
         backup_key_name = self.create_random_name('rdbmskey', 32)
@@ -717,11 +717,8 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                 JMESPathCheck('dataEncryption.primaryUserAssignedIdentityId', identity_2['id'])
             ])
 
-            # restore backup
-            current_time = datetime.utcnow().replace(tzinfo=tzutc()).isoformat()
-            earliest_restore_time = result['backup']['earliestRestoreDate']
-            seconds_to_wait = (parser.isoparse(earliest_restore_time) - parser.isoparse(current_time)).total_seconds()
-            sleep(max(0, seconds_to_wait))
+            # Wait until snapshot is created
+            os.environ.get(ENV_LIVE_TEST, False) and sleep(1800)
 
             # By default, Geo-redundant backup is disabled for restore hence no need to pass backup-key and backup-identity
             data_encryption_key_id_flag = '--key {} --identity {}'.format(key['key']['kid'], identity['id'])
@@ -736,10 +733,8 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
             # geo-restore backup
             if geo_redundant_backup:
-                current_time = datetime.utcnow().replace(tzinfo=tzutc()).isoformat()
-                earliest_restore_time = result['backup']['earliestRestoreDate']
-                seconds_to_wait = (parser.isoparse(earliest_restore_time) - parser.isoparse(current_time)).total_seconds()
-                sleep(max(0, seconds_to_wait))
+                # Wait until snapshot is created
+                os.environ.get(ENV_LIVE_TEST, False) and sleep(1800)
 
                 data_encryption_key_id_flag = '--key {} --identity {} --backup-key {} --backup-identity {}'.format(backup_key['key']['kid'], backup_identity['id'], key['key']['kid'], identity['id'])
 
