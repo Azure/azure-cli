@@ -102,6 +102,7 @@ DEPENDENCIES = [
     'azure-mgmt-msi~=7.0.0',
     'azure-mgmt-netapp~=10.1.0',
     'azure-mgmt-policyinsights==1.1.0b4',
+    'azure-mgmt-postgresqlflexibleservers==1.0.0',
     'azure-mgmt-privatedns~=1.0.0',
     'azure-mgmt-rdbms==10.2.0b17',
     'azure-mgmt-recoveryservicesbackup~=9.1.0',
