@@ -731,7 +731,13 @@ def generate_ssh_keys_ed25519(private_key_filepath, public_key_filepath):
                        private_key_filepath, ssh_dir, public_key_filepath)
 
     else:
+        # Otherwise generate new private key.
         private_key = Ed25519PrivateKey.generate()
+
+        # The private key will look like:
+        # -----BEGIN OPENSSH PRIVATE KEY-----
+        # ...
+        # -----END OPENSSH PRIVATE KEY-----
         private_bytes = private_key.private_bytes(
             encoding=serialization.Encoding.PEM,
             format=serialization.PrivateFormat.OpenSSH,
