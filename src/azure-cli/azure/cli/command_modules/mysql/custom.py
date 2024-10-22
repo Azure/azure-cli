@@ -403,13 +403,12 @@ def flexible_server_create(cmd, client,
                            sku_name=sku_name)
 
     storage = models.Storage(storage_size_gb=storage_gb,
-                                                   iops=iops,
-                                                   auto_grow=auto_grow,
-                                                   auto_io_scaling=auto_scale_iops,
-                                                   log_on_disk=accelerated_logs)
+                             iops=iops,
+                             auto_grow=auto_grow,
+                             auto_io_scaling=auto_scale_iops,
+                             log_on_disk=accelerated_logs)
 
-    backup = models.Backup(backup_retention_days=backup_retention,
-                                                 geo_redundant_backup=geo_redundant_backup)
+    backup = models.Backup(backup_retention_days=backup_retention, geo_redundant_backup=geo_redundant_backup)
 
     sku = models.MySQLServerSku(name=sku_name, tier=tier)
 
@@ -422,7 +421,7 @@ def flexible_server_create(cmd, client,
                                                                    backup_byok_identity=backup_byok_identity,
                                                                    byok_key=byok_key,
                                                                    backup_byok_key=backup_byok_key)
-    
+
     maintenance_policy = models.MaintenancePolicy(patch_strategy=maintenance_policy_patch_strategy)
 
     # Create mysql server
@@ -541,9 +540,9 @@ def flexible_server_import_create(cmd, client,
                                                                                               version=version,
                                                                                               administrator_login=administrator_login)
         import_source_properties = models.ImportSourceProperties(storage_type=models.ImportSourceStorageType.AZURE_BLOB,
-                                                                                       sas_token=data_source_sas_token,
-                                                                                       storage_url=data_source,
-                                                                                       data_dir_path=data_source_backup_dir)
+                                                                 sas_token=data_source_sas_token,
+                                                                 storage_url=data_source,
+                                                                 data_dir_path=data_source_backup_dir)
     # Generate missing parameters
     location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name, server_name)
 
@@ -611,17 +610,15 @@ def flexible_server_import_create(cmd, client,
                            sku_name=sku_name)
 
     storage = models.Storage(storage_size_gb=storage_gb,
-                                                   iops=iops,
-                                                   auto_grow=auto_grow,
-                                                   auto_io_scaling=auto_scale_iops)
+                             iops=iops,
+                             auto_grow=auto_grow,
+                             auto_io_scaling=auto_scale_iops)
 
-    backup = models.Backup(backup_retention_days=backup_retention,
-                                                 geo_redundant_backup=geo_redundant_backup)
+    backup = models.Backup(backup_retention_days=backup_retention, geo_redundant_backup=geo_redundant_backup)
 
     sku = models.MySQLServerSku(name=sku_name, tier=tier)
 
-    high_availability = models.HighAvailability(mode=high_availability,
-                                                                      standby_availability_zone=standby_availability_zone)
+    high_availability = models.HighAvailability(mode=high_availability, standby_availability_zone=standby_availability_zone)
 
     if create_mode == 'Create':
         administrator_login_password = generate_password(administrator_login_password)
@@ -779,11 +776,10 @@ def flexible_server_restore(cmd, client, resource_group_name, server_name, sourc
                                iops_input=source_server_object.storage.iops, tier=tier, sku_name=sku_name)
 
         storage = models.Storage(storage_size_gb=storage_gb, iops=iops, auto_grow=auto_grow,
-                                                       auto_io_scaling=source_server_object.storage.auto_io_scaling,
-                                                       log_on_disk=accelerated_logs)
+                                 auto_io_scaling=source_server_object.storage.auto_io_scaling,
+                                 log_on_disk=accelerated_logs)
 
-        backup = models.Backup(backup_retention_days=backup_retention,
-                                                     geo_redundant_backup=geo_redundant_backup)
+        backup = models.Backup(backup_retention_days=backup_retention, geo_redundant_backup=geo_redundant_backup)
 
         sku = models.MySQLServerSku(name=sku_name, tier=tier)
 
@@ -916,11 +912,10 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
                                iops_input=source_server_object.storage.iops, tier=tier, sku_name=sku_name)
 
         storage = models.Storage(storage_size_gb=storage_gb, iops=iops, auto_grow=auto_grow,
-                                                       auto_io_scaling=source_server_object.storage.auto_io_scaling,
-                                                       log_on_disk=accelerated_logs)
+                                 auto_io_scaling=source_server_object.storage.auto_io_scaling,
+                                 log_on_disk=accelerated_logs)
 
-        backup = models.Backup(backup_retention_days=backup_retention,
-                                                     geo_redundant_backup=geo_redundant_backup)
+        backup = models.Backup(backup_retention_days=backup_retention, geo_redundant_backup=geo_redundant_backup)
 
         sku = models.MySQLServerSku(name=sku_name, tier=tier)
 
@@ -1366,8 +1361,7 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
                              auto_grow="Enabled",
                              auto_io_scaling=source_server_object.storage.auto_io_scaling)
 
-    backup = models.Backup(backup_retention_days=backup_retention,
-                                                 geo_redundant_backup=geo_redundant_backup)
+    backup = models.Backup(backup_retention_days=backup_retention, geo_redundant_backup=geo_redundant_backup)
 
     parameters = models.Server(
         sku=models.MySQLServerSku(name=sku_name, tier=tier),

@@ -62,7 +62,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             name='database_name',
             actions=[LocalContextAction.GET, LocalContextAction.SET],
             scopes=['mysql flexible-server']))
-    
+
     database_port_arg_type = CLIArgumentType(
         type=int,
         options_list=['--database-port'],

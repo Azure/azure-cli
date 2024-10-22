@@ -686,7 +686,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         current_time = datetime.utcnow().replace(tzinfo=tzutc()).isoformat()
         earliest_restore_time = result['backup']['earliestRestoreDate']
         seconds_to_wait = (parser.isoparse(earliest_restore_time) - parser.isoparse(current_time)).total_seconds()
-        os.environ.get(ENV_LIVE_TEST, False) and sleep(max(0, seconds_to_wait) + 180)
+        os.environ.get(ENV_LIVE_TEST, False) and sleep(max(0, seconds_to_wait) + 1200)
 
         self.cmd('{} flexible-server geo-restore -g {} -l {} -n {} --source-server {}'
                  .format(database_engine, resource_group, target_location, target_server, source_server),
@@ -2269,7 +2269,7 @@ class FlexibleServerMaintenanceMgmtScenarioTest(ScenarioTest):
                  .format(database_engine, resource_group, server_name, maintenance_name)).get_output_in_json()
         self.assertEqual(maintenance_id, maintenance_read_response['id'])
 
-        reschedule_start_time = "2024-11-06T03:41Z"
+        reschedule_start_time = "2024-10-23T03:41Z"
         maintenance_reschedule_response = self.cmd('{} flexible-server maintenance reschedule --resource-group {} --server-name {} --maintenance-name {} --start-time {}'
                  .format(database_engine, resource_group, server_name, maintenance_name, reschedule_start_time)).get_output_in_json()
         maintenance_rescheduled_time = parser.parse(maintenance_reschedule_response['maintenanceStartTime']).strftime('%Y-%m-%dT%H:%MZ')
