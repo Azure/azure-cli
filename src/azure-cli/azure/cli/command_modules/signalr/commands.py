@@ -125,3 +125,5 @@ def load_command_table(self, _):
         g.command('stop', 'signalr_replica_stop', exception_handler=empty_on_404)
         g.command('restart', 'signalr_replica_restart', exception_handler=empty_on_404)
         g.show_command('delete', 'signalr_replica_delete')
+        g.generic_update_command('update', getter_name='signalr_replica_get', setter_name='signalr_replica_set',
+                                 custom_func_name='signalr_replica_update', custom_func_type=signalr_replica_utils)
