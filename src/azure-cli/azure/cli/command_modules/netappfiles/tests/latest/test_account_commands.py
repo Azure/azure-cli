@@ -9,10 +9,10 @@ from azure.cli.core.azclierror import ValidationError
 from azure.core.exceptions import HttpResponseError
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 import time
-#LOCATION = "eastus2"
-LOCATION = "eastus2euap"
-#ADLOCATION = "northeurope"
-ADLOCATION = "eastus2euap"
+LOCATION = "eastus2"
+#LOCATION = "eastus2euap"
+ADLOCATION = "northeurope"
+#ADLOCATION = "eastus2euap"
 
 # No tidy up of tests required. The resource group is automatically removed
 
@@ -116,7 +116,7 @@ class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
             'loc': ADLOCATION,
             'acc_name': self.create_random_name(prefix='cli-acc-', length=24),
             'ad_name': 'cli-ad-name',
-            'kdc_ip': '172.16.254.1',
+            'kdc_ip': '172.016.254.1',
             'ldap': True,
             'ldap_users': True,
             'ad_user': 'ad_user'
@@ -285,9 +285,10 @@ class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_', additional_tags={'owner': 'cli_test'}, location='eastus2euap')
     def test_create_account_with_no_location(self):
         self.kwargs.update({
-            'acc_name': self.create_random_name(prefix='cli-acc-', length=24)
+            'acc_name': self.create_random_name(prefix='cli-acc-', length=24)            
         })
+        location = "eastus2euap"
         self.cmd("az netappfiles account create -g {rg} -a {acc_name}")
         self.cmd("az netappfiles account show --resource-group {rg} -a {acc_name}", checks=[
-            self.check('location', LOCATION)
+            self.check('location', location)
         ])
