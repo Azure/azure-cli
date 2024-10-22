@@ -368,7 +368,7 @@ interactions:
         endpoint connections on Batch accounts should be enabled\",\"policyType\":\"BuiltIn\",\"mode\":\"Indexed\",\"description\":\"Private
         endpoint connections allow secure communication by enabling private connectivity
         to Batch accounts without a need for public IP addresses at the source or
-        destination. Learn more about private endpoints in Batch at https://docs.microsoft.com/azure/batch/private-connectivity.\",\"metadata\":{\"version\":\"1.0.0\",\"category\":\"Batch\"},\"parameters\":{\"effect\":{\"type\":\"String\",\"metadata\":{\"displayName\":\"Effect\",\"description\":\"Enable
+        destination. Learn more about private endpoints in Batch at https://learn.microsoft.com/azure/batch/private-connectivity.\",\"metadata\":{\"version\":\"1.0.0\",\"category\":\"Batch\"},\"parameters\":{\"effect\":{\"type\":\"String\",\"metadata\":{\"displayName\":\"Effect\",\"description\":\"Enable
         or disable the execution of the policy\"},\"allowedValues\":[\"AuditIfNotExists\",\"Disabled\"],\"defaultValue\":\"AuditIfNotExists\"}},\"policyRule\":{\"if\":{\"field\":\"type\",\"equals\":\"Microsoft.Batch/batchAccounts\"},\"then\":{\"effect\":\"[parameters('effect')]\",\"details\":{\"type\":\"Microsoft.Batch/batchAccounts/privateEndpointConnections\",\"existenceCondition\":{\"field\":\"Microsoft.Batch/batchAccounts/privateEndpointConnections/privateLinkServiceConnectionState.status\",\"equals\":\"Approved\"}}}}},\"id\":\"/providers/Microsoft.Authorization/policyDefinitions/009a0c92-f5b4-4776-9b66-4ed2b4775563\",\"type\":\"Microsoft.Authorization/policyDefinitions\",\"name\":\"009a0c92-f5b4-4776-9b66-4ed2b4775563\"},{\"properties\":{\"displayName\":\"Azure
         Backup should be enabled for Virtual Machines\",\"policyType\":\"BuiltIn\",\"mode\":\"Indexed\",\"description\":\"Ensure
         protection of your Azure Virtual Machines by enabling Azure Backup. Azure
@@ -655,7 +655,7 @@ interactions:
         to be charged monthly per Arc connected machine.\"},\"allowedValues\":[\"true\",\"false\"],\"defaultValue\":\"false\"}},\"policyRule\":{\"if\":{\"anyOf\":[{\"allOf\":[{\"field\":\"type\",\"equals\":\"Microsoft.Compute/virtualMachines\"},{\"anyOf\":[{\"field\":\"Microsoft.Compute/imagePublisher\",\"in\":[\"esri\",\"incredibuild\",\"MicrosoftDynamicsAX\",\"MicrosoftSharepoint\",\"MicrosoftVisualStudio\",\"MicrosoftWindowsDesktop\",\"MicrosoftWindowsServerHPCPack\"]},{\"allOf\":[{\"field\":\"Microsoft.Compute/imagePublisher\",\"equals\":\"MicrosoftWindowsServer\"},{\"field\":\"Microsoft.Compute/imageSKU\",\"notLike\":\"2008*\"}]},{\"allOf\":[{\"field\":\"Microsoft.Compute/imagePublisher\",\"equals\":\"MicrosoftSQLServer\"},{\"field\":\"Microsoft.Compute/imageOffer\",\"notLike\":\"SQL2008*\"}]},{\"allOf\":[{\"field\":\"Microsoft.Compute/imagePublisher\",\"equals\":\"microsoft-dsvm\"},{\"field\":\"Microsoft.Compute/imageOffer\",\"equals\":\"dsvm-windows\"}]},{\"allOf\":[{\"field\":\"Microsoft.Compute/imagePublisher\",\"equals\":\"microsoft-ads\"},{\"field\":\"Microsoft.Compute/imageOffer\",\"in\":[\"standard-data-science-vm\",\"windows-data-science-vm\"]}]},{\"allOf\":[{\"field\":\"Microsoft.Compute/imagePublisher\",\"equals\":\"batch\"},{\"field\":\"Microsoft.Compute/imageOffer\",\"equals\":\"rendering-windows2016\"}]},{\"allOf\":[{\"field\":\"Microsoft.Compute/imagePublisher\",\"equals\":\"center-for-internet-security-inc\"},{\"field\":\"Microsoft.Compute/imageOffer\",\"like\":\"cis-windows-server-201*\"}]},{\"allOf\":[{\"field\":\"Microsoft.Compute/imagePublisher\",\"equals\":\"pivotal\"},{\"field\":\"Microsoft.Compute/imageOffer\",\"like\":\"bosh-windows-server*\"}]},{\"allOf\":[{\"field\":\"Microsoft.Compute/imagePublisher\",\"equals\":\"cloud-infrastructure-services\"},{\"field\":\"Microsoft.Compute/imageOffer\",\"like\":\"ad*\"}]},{\"allOf\":[{\"anyOf\":[{\"field\":\"Microsoft.Compute/virtualMachines/osProfile.windowsConfiguration\",\"exists\":\"true\"},{\"field\":\"Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType\",\"like\":\"Windows*\"}]},{\"anyOf\":[{\"field\":\"Microsoft.Compute/imageSKU\",\"exists\":\"false\"},{\"allOf\":[{\"field\":\"Microsoft.Compute/imageSKU\",\"notLike\":\"2008*\"},{\"field\":\"Microsoft.Compute/imageOffer\",\"notLike\":\"SQL2008*\"}]}]}]}]}]},{\"allOf\":[{\"value\":\"[parameters('IncludeArcMachines')]\",\"equals\":\"true\"},{\"field\":\"type\",\"equals\":\"Microsoft.HybridCompute/machines\"},{\"field\":\"Microsoft.HybridCompute/imageOffer\",\"like\":\"windows*\"}]}]},\"then\":{\"effect\":\"auditIfNotExists\",\"details\":{\"type\":\"Microsoft.GuestConfiguration/guestConfigurationAssignments\",\"name\":\"WindowsDscConfiguration\",\"existenceCondition\":{\"field\":\"Microsoft.GuestConfiguration/guestConfigurationAssignments/complianceStatus\",\"equals\":\"Compliant\"}}}}},\"id\":\"/providers/Microsoft.Authorization/policyDefinitions/08a2f2d2-94b2-4a7b-aa3b-bb3f523ee6fd\",\"type\":\"Microsoft.Authorization/policyDefinitions\",\"name\":\"08a2f2d2-94b2-4a7b-aa3b-bb3f523ee6fd\"},{\"properties\":{\"displayName\":\"Configure
         Data Factories to disable public network access\",\"policyType\":\"BuiltIn\",\"mode\":\"Indexed\",\"description\":\"Disable
         public network access for your Data Factory so that it is not accessible over
-        the public internet. This can reduce data leakage risks. Learn more at: https://docs.microsoft.com/azure/data-factory/data-factory-private-link.\",\"metadata\":{\"version\":\"1.0.0\",\"category\":\"Data
+        the public internet. This can reduce data leakage risks. Learn more at: https://learn.microsoft.com/azure/data-factory/data-factory-private-link.\",\"metadata\":{\"version\":\"1.0.0\",\"category\":\"Data
         Factory\"},\"parameters\":{\"effect\":{\"type\":\"String\",\"metadata\":{\"displayName\":\"Effect\",\"description\":\"Enable
         or disable the execution of the policy\"},\"allowedValues\":[\"Modify\",\"Disabled\"],\"defaultValue\":\"Modify\"}},\"policyRule\":{\"if\":{\"allOf\":[{\"field\":\"type\",\"equals\":\"Microsoft.DataFactory/factories\"},{\"field\":\"Microsoft.DataFactory/factories/publicNetworkAccess\",\"notEquals\":\"Disabled\"}]},\"then\":{\"effect\":\"[parameters('effect')]\",\"details\":{\"conflictEffect\":\"audit\",\"roleDefinitionIds\":[\"/providers/microsoft.authorization/roleDefinitions/673868aa-7521-48a0-acc6-0f60742d39f5\"],\"operations\":[{\"condition\":\"[greaterOrEquals(requestContext().apiVersion,
         '2018-06-01')]\",\"operation\":\"addOrReplace\",\"field\":\"Microsoft.DataFactory/factories/publicNetworkAccess\",\"value\":\"Disabled\"}]}}}},\"id\":\"/providers/Microsoft.Authorization/policyDefinitions/08b1442b-7789-4130-8506-4f99a97226a7\",\"type\":\"Microsoft.Authorization/policyDefinitions\",\"name\":\"08b1442b-7789-4130-8506-4f99a97226a7\"},{\"properties\":{\"displayName\":\"[Deprecated]:
@@ -850,12 +850,12 @@ interactions:
         endpoint connections allow secure communication by enabling private connectivity
         to Automation accounts without a need for public IP addresses at the source
         or destination. Learn more about private endpoints in Azure Automation at
-        https://docs.microsoft.com/azure/automation/how-to/private-link-security\",\"metadata\":{\"version\":\"1.0.0\",\"category\":\"Automation\"},\"parameters\":{\"effect\":{\"type\":\"String\",\"metadata\":{\"displayName\":\"Effect\",\"description\":\"Enable
+        https://learn.microsoft.com/azure/automation/how-to/private-link-security\",\"metadata\":{\"version\":\"1.0.0\",\"category\":\"Automation\"},\"parameters\":{\"effect\":{\"type\":\"String\",\"metadata\":{\"displayName\":\"Effect\",\"description\":\"Enable
         or disable the execution of the policy\"},\"allowedValues\":[\"AuditIfNotExists\",\"Disabled\"],\"defaultValue\":\"AuditIfNotExists\"}},\"policyRule\":{\"if\":{\"field\":\"type\",\"equals\":\"Microsoft.Automation/automationAccounts\"},\"then\":{\"effect\":\"[parameters('effect')]\",\"details\":{\"type\":\"Microsoft.Automation/automationAccounts/privateEndpointConnections\",\"existenceCondition\":{\"field\":\"Microsoft.Automation/automationAccounts/privateEndpointConnections/privateLinkServiceConnectionState.status\",\"equals\":\"Approved\"}}}}},\"id\":\"/providers/Microsoft.Authorization/policyDefinitions/0c2b3618-68a8-4034-a150-ff4abc873462\",\"type\":\"Microsoft.Authorization/policyDefinitions\",\"name\":\"0c2b3618-68a8-4034-a150-ff4abc873462\"},{\"properties\":{\"displayName\":\"Application
         Insights components with Private Link enabled should use Bring Your Own Storage
         accounts for profiler and debugger.\",\"policyType\":\"BuiltIn\",\"mode\":\"Indexed\",\"description\":\"To
         support private link and customer-managed key policies, create your own storage
-        account for profiler and debugger. Learn more in https://docs.microsoft.com/azure/azure-monitor/app/profiler-bring-your-own-storage\",\"metadata\":{\"version\":\"1.0.0\",\"category\":\"Monitoring\"},\"parameters\":{\"effect\":{\"type\":\"String\",\"metadata\":{\"displayName\":\"Effect\",\"description\":\"Enable
+        account for profiler and debugger. Learn more in https://learn.microsoft.com/azure/azure-monitor/app/profiler-bring-your-own-storage\",\"metadata\":{\"version\":\"1.0.0\",\"category\":\"Monitoring\"},\"parameters\":{\"effect\":{\"type\":\"String\",\"metadata\":{\"displayName\":\"Effect\",\"description\":\"Enable
         or disable the execution of the policy\"},\"allowedValues\":[\"Deny\",\"Audit\",\"Disabled\"],\"defaultValue\":\"Audit\"}},\"policyRule\":{\"if\":{\"allOf\":[{\"field\":\"type\",\"equals\":\"Microsoft.Insights/components\"},{\"field\":\"Microsoft.Insights/components/ForceCustomerStorageForProfiler\",\"notEquals\":\"true\"}]},\"then\":{\"effect\":\"[parameters('effect')]\"}}},\"id\":\"/providers/Microsoft.Authorization/policyDefinitions/0c4bd2e8-8872-4f37-a654-03f6f38ddc76\",\"type\":\"Microsoft.Authorization/policyDefinitions\",\"name\":\"0c4bd2e8-8872-4f37-a654-03f6f38ddc76\"},{\"properties\":{\"displayName\":\"Microsoft
         Managed Control 1496 - System Security Plan\",\"policyType\":\"Static\",\"mode\":\"Indexed\",\"description\":\"Microsoft
         implements this Planning control\",\"metadata\":{\"version\":\"1.0.0\",\"category\":\"Regulatory
@@ -979,7 +979,7 @@ interactions:
         endpoints connect your virtual network to Azure services without a public
         IP address at the source or destination. By mapping private endpoints to Batch
         accounts, you can reduce data leakage risks. Learn more about private links
-        at: https://docs.microsoft.com/azure/batch/private-connectivity.\",\"metadata\":{\"version\":\"1.0.0\",\"category\":\"Batch\"},\"parameters\":{\"privateEndpointSubnetId\":{\"type\":\"String\",\"metadata\":{\"displayName\":\"Private
+        at: https://learn.microsoft.com/azure/batch/private-connectivity.\",\"metadata\":{\"version\":\"1.0.0\",\"category\":\"Batch\"},\"parameters\":{\"privateEndpointSubnetId\":{\"type\":\"String\",\"metadata\":{\"displayName\":\"Private
         endpoint subnet id\",\"description\":\"A subnet with private endpoint network
         policies disabled\",\"strongType\":\"Microsoft.Network/virtualNetworks/subnets\"}},\"effect\":{\"type\":\"String\",\"metadata\":{\"displayName\":\"Effect\",\"description\":\"Enable
         or disable the execution of the policy\"},\"allowedValues\":[\"DeployIfNotExists\",\"Disabled\"],\"defaultValue\":\"DeployIfNotExists\"}},\"policyRule\":{\"if\":{\"allOf\":[{\"field\":\"type\",\"equals\":\"Microsoft.Batch/batchAccounts\"},{\"field\":\"Microsoft.Batch/batchAccounts/publicNetworkAccess\",\"equals\":\"Disabled\"}]},\"then\":{\"effect\":\"[parameters('effect')]\",\"details\":{\"type\":\"Microsoft.Batch/batchAccounts/privateEndpointConnections\",\"existenceCondition\":{\"field\":\"Microsoft.Batch/batchAccounts/privateEndpointConnections/privateLinkServiceConnectionState.status\",\"equals\":\"Approved\"},\"roleDefinitionIds\":[\"/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c\"],\"deployment\":{\"properties\":{\"mode\":\"incremental\",\"parameters\":{\"name\":{\"value\":\"[field('name')]\"},\"serviceId\":{\"value\":\"[field('id')]\"},\"privateEndpointSubnetId\":{\"value\":\"[parameters('privateEndpointSubnetId')]\"}},\"template\":{\"$schema\":\"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\"contentVersion\":\"1.0.0.0\",\"parameters\":{\"name\":{\"type\":\"string\"},\"serviceId\":{\"type\":\"string\"},\"privateEndpointSubnetId\":{\"type\":\"string\"}},\"variables\":{\"privateEndpointName\":\"[concat('pe-',substring(parameters('name'),0,min(length(parameters('name')),50)),'-',uniquestring(deployment().name))]\"},\"resources\":[{\"type\":\"Microsoft.Resources/deployments\",\"name\":\"[variables('privateEndpointName')]\",\"apiVersion\":\"2020-06-01\",\"properties\":{\"mode\":\"Incremental\",\"expressionEvaluationOptions\":{\"scope\":\"inner\"},\"template\":{\"$schema\":\"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\"contentVersion\":\"1.0.0.0\",\"parameters\":{\"serviceId\":{\"type\":\"string\"},\"privateEndpointSubnetId\":{\"type\":\"string\"},\"subnetLocation\":{\"type\":\"string\"}},\"variables\":{\"privateEndpointName\":\"[deployment().name]\"},\"resources\":[{\"name\":\"[variables('privateEndpointName')]\",\"type\":\"Microsoft.Network/privateEndpoints\",\"apiVersion\":\"2020-07-01\",\"location\":\"[parameters('subnetLocation')]\",\"tags\":{},\"properties\":{\"subnet\":{\"id\":\"[parameters('privateEndpointSubnetId')]\"},\"privateLinkServiceConnections\":[{\"name\":\"[variables('privateEndpointName')]\",\"properties\":{\"privateLinkServiceId\":\"[parameters('serviceId')]\",\"groupIds\":[\"batchAccount\"],\"requestMessage\":\"autoapprove\"}}],\"manualPrivateLinkServiceConnections\":[]}}]},\"parameters\":{\"serviceId\":{\"value\":\"[parameters('serviceId')]\"},\"privateEndpointSubnetId\":{\"value\":\"[parameters('privateEndpointSubnetId')]\"},\"subnetLocation\":{\"value\":\"[reference(first(take(split(parameters('privateEndpointSubnetId'),'/subnets'),1)),'2020-07-01','Full').location]\"}}}}]}}}}}}},\"id\":\"/providers/Microsoft.Authorization/policyDefinitions/0ef5aac7-c064-427a-b87b-d47b3ddcaf73\",\"type\":\"Microsoft.Authorization/policyDefinitions\",\"name\":\"0ef5aac7-c064-427a-b87b-d47b3ddcaf73\"},{\"properties\":{\"displayName\":\"[Preview]:
@@ -1013,7 +1013,7 @@ interactions:
         handles the connectivity between the consumer and services over the Azure
         backbone network. By mapping private endpoints to Azure Monitor Private Links
         Scope, you can reduce data leakage risks. Learn more about private links at:
-        https://docs.microsoft.com/azure/azure-monitor/logs/private-link-security.\",\"metadata\":{\"version\":\"1.0.0\",\"category\":\"Monitoring\"},\"parameters\":{\"effect\":{\"type\":\"String\",\"metadata\":{\"displayName\":\"Effect\",\"description\":\"Enable
+        https://learn.microsoft.com/azure/azure-monitor/logs/private-link-security.\",\"metadata\":{\"version\":\"1.0.0\",\"category\":\"Monitoring\"},\"parameters\":{\"effect\":{\"type\":\"String\",\"metadata\":{\"displayName\":\"Effect\",\"description\":\"Enable
         or disable the execution of the policy\"},\"allowedValues\":[\"AuditIfNotExists\",\"Disabled\"],\"defaultValue\":\"AuditIfNotExists\"}},\"policyRule\":{\"if\":{\"allOf\":[{\"field\":\"type\",\"equals\":\"Microsoft.Insights/privateLinkScopes\"},{\"count\":{\"field\":\"Microsoft.Insights/privateLinkScopes/privateEndpointConnections[*]\",\"where\":{\"field\":\"Microsoft.Insights/privateLinkScopes/privateEndpointConnections[*].privateLinkServiceConnectionState.status\",\"equals\":\"Approved\"}},\"less\":1}]},\"then\":{\"effect\":\"[parameters('effect')]\"}}},\"id\":\"/providers/Microsoft.Authorization/policyDefinitions/0fc55270-f8bf-4feb-b7b8-5e7e7eacc6a6\",\"type\":\"Microsoft.Authorization/policyDefinitions\",\"name\":\"0fc55270-f8bf-4feb-b7b8-5e7e7eacc6a6\"},{\"properties\":{\"displayName\":\"Azure
         Cognitive Search services should use private link\",\"policyType\":\"BuiltIn\",\"mode\":\"Indexed\",\"description\":\"Azure
         Private Link lets you connect your virtual network to Azure services without
@@ -1158,7 +1158,7 @@ interactions:
         security: Minimum session security for NTLM SSP based (including secure RPC)
         clients\",\"description\":\"Specifies which behaviors are allowed by clients
         for applications using the NTLM Security Support Provider (SSP). The SSP Interface
-        (SSPI) is used by applications that need authentication services. See https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/network-security-minimum-session-security-for-ntlm-ssp-based-including-secure-rpc-servers
+        (SSPI) is used by applications that need authentication services. See https://learn.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/network-security-minimum-session-security-for-ntlm-ssp-based-including-secure-rpc-servers
         for more information.\"},\"defaultValue\":\"537395200\"},\"NetworkSecurityMinimumSessionSecurityForNTLMSSPBasedIncludingSecureRPCServers\":{\"type\":\"String\",\"metadata\":{\"displayName\":\"Network
         security: Minimum session security for NTLM SSP based (including secure RPC)
         servers\",\"description\":\"Specifies which behaviors are allowed by servers
@@ -1526,7 +1526,7 @@ interactions:
         a public IP address at the source or destination. The Private Link platform
         handles the connectivity between the consumer and services over the Azure
         backbone network. By mapping private endpoints to Service Bus namespaces,
-        data leakage risks are reduced. Learn more at: https://docs.microsoft.com/azure/service-bus-messaging/private-link-service.\",\"metadata\":{\"version\":\"1.0.0\",\"category\":\"Service
+        data leakage risks are reduced. Learn more at: https://learn.microsoft.com/azure/service-bus-messaging/private-link-service.\",\"metadata\":{\"version\":\"1.0.0\",\"category\":\"Service
         Bus\"},\"parameters\":{\"effect\":{\"type\":\"String\",\"metadata\":{\"displayName\":\"Effect\",\"description\":\"Enable
         or disable the execution of the policy\"},\"allowedValues\":[\"AuditIfNotExists\",\"Disabled\"],\"defaultValue\":\"AuditIfNotExists\"}},\"policyRule\":{\"if\":{\"allOf\":[{\"field\":\"type\",\"equals\":\"Microsoft.ServiceBus/namespaces\"},{\"field\":\"Microsoft.ServiceBus/namespaces/sku.tier\",\"equals\":\"Premium\"}]},\"then\":{\"effect\":\"[parameters('effect')]\",\"details\":{\"type\":\"Microsoft.ServiceBus/namespaces/privateEndpointConnections\",\"existenceCondition\":{\"field\":\"Microsoft.ServiceBus/namespaces/privateEndpointConnections/privateLinkServiceConnectionState.status\",\"equals\":\"Approved\"}}}}},\"id\":\"/providers/Microsoft.Authorization/policyDefinitions/1c06e275-d63d-4540-b761-71f364c2111d\",\"type\":\"Microsoft.Authorization/policyDefinitions\",\"name\":\"1c06e275-d63d-4540-b761-71f364c2111d\"},{\"properties\":{\"displayName\":\"Deploy
         - Configure Dependency agent to be enabled on Windows virtual machines\",\"policyType\":\"BuiltIn\",\"mode\":\"Indexed\",\"description\":\"Deploy
@@ -1647,7 +1647,7 @@ interactions:
         Azure Synapse workspaces to use private DNS zones\",\"policyType\":\"BuiltIn\",\"mode\":\"Indexed\",\"description\":\"Use
         private DNS zones to override the DNS resolution for a private endpoint. A
         private DNS zone links to your virtual network to resolve to Azure Synapse
-        workspace. Learn more at: https://docs.microsoft.com/azure/synapse-analytics/security/how-to-connect-to-workspace-from-restricted-network#appendix-dns-registration-for-private-endpoint.\",\"metadata\":{\"version\":\"1.0.0\",\"category\":\"Synapse\"},\"parameters\":{\"privateDnsZoneId\":{\"type\":\"String\",\"metadata\":{\"displayName\":\"Private
+        workspace. Learn more at: https://learn.microsoft.com/azure/synapse-analytics/security/how-to-connect-to-workspace-from-restricted-network#appendix-dns-registration-for-private-endpoint.\",\"metadata\":{\"version\":\"1.0.0\",\"category\":\"Synapse\"},\"parameters\":{\"privateDnsZoneId\":{\"type\":\"String\",\"metadata\":{\"displayName\":\"Private
         DNS Zone id\",\"description\":\"A private DNS zone Id\",\"strongType\":\"Microsoft.Network/privateDnsZones\"}},\"targetSubResource\":{\"type\":\"String\",\"metadata\":{\"displayName\":\"Target
         sub-resource\",\"description\":\"Target sub resource the private endpoint
         connects to\"},\"allowedValues\":[\"Dev\",\"Sql\",\"SqlOnDemand\"],\"defaultValue\":\"Dev\"},\"effect\":{\"type\":\"String\",\"metadata\":{\"displayName\":\"Effect\",\"description\":\"Enable
@@ -1677,7 +1677,7 @@ interactions:
         the log data is encrypted with service-managed keys, but customer-managed
         keys are commonly required to meet regulatory compliance. Customer-managed
         key in Azure Monitor gives you more control over the access to you data, see
-        https://docs.microsoft.com/azure/azure-monitor/platform/customer-managed-keys.\",\"metadata\":{\"version\":\"1.0.0\",\"category\":\"Monitoring\"},\"parameters\":{\"effect\":{\"type\":\"String\",\"metadata\":{\"displayName\":\"Effect\",\"description\":\"The
+        https://learn.microsoft.com/azure/azure-monitor/platform/customer-managed-keys.\",\"metadata\":{\"version\":\"1.0.0\",\"category\":\"Monitoring\"},\"parameters\":{\"effect\":{\"type\":\"String\",\"metadata\":{\"displayName\":\"Effect\",\"description\":\"The
         effect determines what happens when the policy rule is evaluated to match\"},\"allowedValues\":[\"audit\",\"deny\",\"disabled\"],\"defaultValue\":\"audit\"}},\"policyRule\":{\"if\":{\"allOf\":[{\"field\":\"type\",\"equals\":\"Microsoft.OperationalInsights/clusters\"},{\"anyOf\":[{\"anyOf\":[{\"field\":\"Microsoft.OperationalInsights/clusters/keyVaultProperties.keyVaultUri\",\"equals\":\"\"},{\"field\":\"Microsoft.OperationalInsights/clusters/keyVaultProperties.keyVaultUri\",\"exists\":\"false\"}]},{\"anyOf\":[{\"field\":\"Microsoft.OperationalInsights/clusters/keyVaultProperties.keyName\",\"equals\":\"\"},{\"field\":\"Microsoft.OperationalInsights/clusters/keyVaultProperties.keyName\",\"exists\":\"false\"}]},{\"not\":{\"field\":\"Microsoft.OperationalInsights/clusters/keyVaultProperties.keyVersion\",\"exists\":\"true\"}}]}]},\"then\":{\"effect\":\"[parameters('effect')]\"}}},\"id\":\"/providers/Microsoft.Authorization/policyDefinitions/1f68a601-6e6d-4e42-babf-3f643a047ea2\",\"type\":\"Microsoft.Authorization/policyDefinitions\",\"name\":\"1f68a601-6e6d-4e42-babf-3f643a047ea2\"},{\"properties\":{\"displayName\":\"Deploy
         Diagnostic Settings for Event Hub to Log Analytics workspace\",\"policyType\":\"BuiltIn\",\"mode\":\"Indexed\",\"description\":\"Deploys
         the diagnostic settings for Event Hub to stream to a regional Log Analytics
@@ -1771,7 +1771,7 @@ interactions:
         handles the connectivity between the consumer and services over the Azure
         backbone network. By mapping private endpoints to your VM Image Builder building
         resources, data leakage risks are reduced. Learn more about private links
-        at: https://docs.microsoft.com/azure/virtual-machines/linux/image-builder-networking#deploy-using-an-existing-vnet.\",\"metadata\":{\"version\":\"1.1.0\",\"category\":\"VM
+        at: https://learn.microsoft.com/azure/virtual-machines/linux/image-builder-networking#deploy-using-an-existing-vnet.\",\"metadata\":{\"version\":\"1.1.0\",\"category\":\"VM
         Image Builder\"},\"parameters\":{\"effect\":{\"type\":\"String\",\"metadata\":{\"displayName\":\"Effect\",\"description\":\"Enable
         or disable the execution of the policy\"},\"allowedValues\":[\"Audit\",\"Disabled\",\"Deny\"],\"defaultValue\":\"Audit\"}},\"policyRule\":{\"if\":{\"allOf\":[{\"field\":\"type\",\"equals\":\"Microsoft.VirtualMachineImages/imageTemplates\"},{\"field\":\"Microsoft.VirtualMachineImages/imageTemplates/vmProfile.vnetConfig\",\"exists\":\"false\"}]},\"then\":{\"effect\":\"[parameters('effect')]\"}}},\"id\":\"/providers/Microsoft.Authorization/policyDefinitions/2154edb9-244f-4741-9970-660785bccdaa\",\"type\":\"Microsoft.Authorization/policyDefinitions\",\"name\":\"2154edb9-244f-4741-9970-660785bccdaa\"},{\"properties\":{\"displayName\":\"Microsoft
         Managed Control 1181 - Baseline Configuration | Retention Of Previous Configurations\",\"policyType\":\"Static\",\"mode\":\"Indexed\",\"description\":\"Microsoft
@@ -2785,7 +2785,7 @@ interactions:
         security: Minimum session security for NTLM SSP based (including secure RPC)
         clients\",\"description\":\"Specifies which behaviors are allowed by clients
         for applications using the NTLM Security Support Provider (SSP). The SSP Interface
-        (SSPI) is used by applications that need authentication services. See https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/network-security-minimum-session-security-for-ntlm-ssp-based-including-secure-rpc-servers
+        (SSPI) is used by applications that need authentication services. See https://learn.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/network-security-minimum-session-security-for-ntlm-ssp-based-including-secure-rpc-servers
         for more information.\"},\"defaultValue\":\"537395200\"},\"NetworkSecurityMinimumSessionSecurityForNTLMSSPBasedIncludingSecureRPCServers\":{\"type\":\"String\",\"metadata\":{\"displayName\":\"Network
         security: Minimum session security for NTLM SSP based (including secure RPC)
         servers\",\"description\":\"Specifies which behaviors are allowed by servers
@@ -2896,7 +2896,7 @@ interactions:
         Synapse workspaces should disable public network access\",\"policyType\":\"BuiltIn\",\"mode\":\"Indexed\",\"description\":\"Disabling
         public network access improves security by ensuring that the Synapse workspace
         isn't exposed on the public internet. Creating private endpoints can limit
-        exposure of your Synapse workspaces. Learn more at: https://docs.microsoft.com/azure/synapse-analytics/security/connectivity-settings.\",\"metadata\":{\"version\":\"1.0.0\",\"category\":\"Synapse\"},\"parameters\":{\"effect\":{\"type\":\"String\",\"metadata\":{\"displayName\":\"Effect\",\"description\":\"Enable
+        exposure of your Synapse workspaces. Learn more at: https://learn.microsoft.com/azure/synapse-analytics/security/connectivity-settings.\",\"metadata\":{\"version\":\"1.0.0\",\"category\":\"Synapse\"},\"parameters\":{\"effect\":{\"type\":\"String\",\"metadata\":{\"displayName\":\"Effect\",\"description\":\"Enable
         or disable the execution of the policy\"},\"allowedValues\":[\"Audit\",\"Deny\",\"Disabled\"],\"defaultValue\":\"Audit\"}},\"policyRule\":{\"if\":{\"allOf\":[{\"field\":\"type\",\"equals\":\"Microsoft.Synapse/workspaces\"},{\"field\":\"Microsoft.Synapse/workspaces/publicNetworkAccess\",\"notEquals\":\"Disabled\"}]},\"then\":{\"effect\":\"[parameters('effect')]\"}}},\"id\":\"/providers/Microsoft.Authorization/policyDefinitions/38d8df46-cf4e-4073-8e03-48c24b29de0d\",\"type\":\"Microsoft.Authorization/policyDefinitions\",\"name\":\"38d8df46-cf4e-4073-8e03-48c24b29de0d\"},{\"properties\":{\"displayName\":\"Microsoft
         Managed Control 1416 - Nonlocal Maintenance | Document Nonlocal Maintenance\",\"policyType\":\"Static\",\"mode\":\"Indexed\",\"description\":\"Microsoft
         implements this Maintenance control\",\"metadata\":{\"version\":\"1.0.0\",\"category\":\"Regulatory
@@ -2969,7 +2969,7 @@ interactions:
         enables the use of ciphers such as NTLM v1 and TLS v1. These ciphers may be
         required for some legacy applications, but are considered weak and can be
         disabled if you don't need them. When TLS 1.2 only mode is enabled, any client
-        making a request that is not using TLS 1.2 will fail. Learn more at https://docs.microsoft.com/azure/active-directory-domain-services/secure-your-domain.\",\"metadata\":{\"version\":\"1.1.0\",\"category\":\"Azure
+        making a request that is not using TLS 1.2 will fail. Learn more at https://learn.microsoft.com/azure/active-directory-domain-services/secure-your-domain.\",\"metadata\":{\"version\":\"1.1.0\",\"category\":\"Azure
         Active Directory\"},\"parameters\":{\"effect\":{\"type\":\"String\",\"metadata\":{\"displayName\":\"Effect\",\"description\":\"Enable
         or disable the execution of the policy\"},\"allowedValues\":[\"Audit\",\"Deny\",\"Disabled\"],\"defaultValue\":\"Audit\"}},\"policyRule\":{\"if\":{\"allOf\":[{\"field\":\"type\",\"equals\":\"Microsoft.AAD/domainServices\"},{\"field\":\"Microsoft.AAD/domainServices/domainSecuritySettings.tlsV1\",\"notEquals\":\"Disabled\"}]},\"then\":{\"effect\":\"[parameters('effect')]\"}}},\"id\":\"/providers/Microsoft.Authorization/policyDefinitions/3aa87b5a-7813-4b57-8a43-42dd9df5aaa7\",\"type\":\"Microsoft.Authorization/policyDefinitions\",\"name\":\"3aa87b5a-7813-4b57-8a43-42dd9df5aaa7\"},{\"properties\":{\"displayName\":\"[Deprecated]:
         Pod Security Policies should be defined on Kubernetes Services\",\"policyType\":\"BuiltIn\",\"mode\":\"All\",\"description\":\"Define
@@ -2986,7 +2986,7 @@ interactions:
         endpoints connect your virtual network to Azure services without a public
         IP address at the source or destination. By mapping private endpoints to Azure
         Synapse workspaces, you can reduce data leakage risks. Learn more about private
-        links at: https://docs.microsoft.com/azure/synapse-analytics/security/how-to-connect-to-workspace-with-private-links.\",\"metadata\":{\"version\":\"1.0.0\",\"category\":\"Synapse\"},\"parameters\":{\"privateEndpointSubnetId\":{\"type\":\"String\",\"metadata\":{\"displayName\":\"Private
+        links at: https://learn.microsoft.com/azure/synapse-analytics/security/how-to-connect-to-workspace-with-private-links.\",\"metadata\":{\"version\":\"1.0.0\",\"category\":\"Synapse\"},\"parameters\":{\"privateEndpointSubnetId\":{\"type\":\"String\",\"metadata\":{\"displayName\":\"Private
         endpoint subnet id\",\"description\":\"A subnet with private endpoint network
         policies disabled\",\"strongType\":\"Microsoft.Network/virtualNetworks/subnets\"}},\"effect\":{\"type\":\"String\",\"metadata\":{\"displayName\":\"Effect\",\"description\":\"Enable
         or disable the execution of the policy\"},\"allowedValues\":[\"DeployIfNotExists\",\"Disabled\"],\"defaultValue\":\"DeployIfNotExists\"}},\"policyRule\":{\"if\":{\"field\":\"type\",\"equals\":\"Microsoft.Synapse/workspaces\"},\"then\":{\"effect\":\"[parameters('effect')]\",\"details\":{\"type\":\"Microsoft.Synapse/workspaces/privateEndpointConnections\",\"existenceCondition\":{\"field\":\"Microsoft.Synapse/workspaces/privateEndpointConnections/privateLinkServiceConnectionState.status\",\"equals\":\"Approved\"},\"roleDefinitionIds\":[\"/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c\"],\"deployment\":{\"properties\":{\"mode\":\"incremental\",\"parameters\":{\"name\":{\"value\":\"[field('name')]\"},\"serviceId\":{\"value\":\"[field('id')]\"},\"privateEndpointSubnetId\":{\"value\":\"[parameters('privateEndpointSubnetId')]\"}},\"template\":{\"$schema\":\"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\"contentVersion\":\"1.0.0.0\",\"parameters\":{\"name\":{\"type\":\"string\"},\"serviceId\":{\"type\":\"string\"},\"privateEndpointSubnetId\":{\"type\":\"string\"}},\"variables\":{\"privateEndpointName\":\"[concat('pe-',substring(parameters('name'),0,min(length(parameters('name')),50)),'-',uniquestring(deployment().name))]\"},\"resources\":[{\"type\":\"Microsoft.Resources/deployments\",\"name\":\"[variables('privateEndpointName')]\",\"apiVersion\":\"2020-06-01\",\"properties\":{\"mode\":\"Incremental\",\"expressionEvaluationOptions\":{\"scope\":\"inner\"},\"template\":{\"$schema\":\"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\"contentVersion\":\"1.0.0.0\",\"parameters\":{\"serviceId\":{\"type\":\"string\"},\"privateEndpointSubnetId\":{\"type\":\"string\"},\"subnetLocation\":{\"type\":\"string\"}},\"variables\":{\"privateEndpointName\":\"[deployment().name]\"},\"resources\":[{\"name\":\"[variables('privateEndpointName')]\",\"type\":\"Microsoft.Network/privateEndpoints\",\"apiVersion\":\"2020-07-01\",\"location\":\"[parameters('subnetLocation')]\",\"tags\":{},\"properties\":{\"subnet\":{\"id\":\"[parameters('privateEndpointSubnetId')]\"},\"privateLinkServiceConnections\":[{\"name\":\"[variables('privateEndpointName')]\",\"properties\":{\"privateLinkServiceId\":\"[parameters('serviceId')]\",\"groupIds\":[\"Dev\"],\"requestMessage\":\"Auto
@@ -3244,7 +3244,7 @@ interactions:
         a public IP address at the source or destination. The Private Link platform
         handles the connectivity between the consumer and services over the Azure
         backbone network. By mapping private endpoints to Azure Machine Learning workspaces,
-        data leakage risks are reduced. Learn more about private links at: https://docs.microsoft.com/azure/machine-learning/how-to-configure-private-link.\",\"metadata\":{\"version\":\"1.1.0\",\"category\":\"Machine
+        data leakage risks are reduced. Learn more about private links at: https://learn.microsoft.com/azure/machine-learning/how-to-configure-private-link.\",\"metadata\":{\"version\":\"1.1.0\",\"category\":\"Machine
         Learning\"},\"parameters\":{\"effect\":{\"type\":\"String\",\"metadata\":{\"displayName\":\"Effect\",\"description\":\"Enable
         or disable the execution of the policy\"},\"allowedValues\":[\"Audit\",\"Deny\",\"Disabled\"],\"defaultValue\":\"Audit\"}},\"policyRule\":{\"if\":{\"allOf\":[{\"field\":\"type\",\"equals\":\"Microsoft.MachineLearningServices/workspaces\"},{\"count\":{\"field\":\"Microsoft.MachineLearningServices/workspaces/privateEndpointConnections[*]\",\"where\":{\"field\":\"Microsoft.MachineLearningServices/workspaces/privateEndpointConnections[*].privateLinkServiceConnectionState.status\",\"equals\":\"Approved\"}},\"less\":1}]},\"then\":{\"effect\":\"[parameters('effect')]\"}}},\"id\":\"/providers/Microsoft.Authorization/policyDefinitions/40cec1dd-a100-4920-b15b-3024fe8901ab\",\"type\":\"Microsoft.Authorization/policyDefinitions\",\"name\":\"40cec1dd-a100-4920-b15b-3024fe8901ab\"},{\"properties\":{\"displayName\":\"Inherit
         a tag from the subscription if missing\",\"policyType\":\"BuiltIn\",\"mode\":\"Indexed\",\"description\":\"Adds
@@ -3357,7 +3357,7 @@ interactions:
         Azure Monitor Private Link Scope to use private DNS zones\",\"policyType\":\"BuiltIn\",\"mode\":\"Indexed\",\"description\":\"Use
         private DNS zones to override the DNS resolution for a private endpoint. A
         private DNS zone links to your virtual network to resolve to Azure Monitor
-        private link scope. Learn more at: https://docs.microsoft.com/azure/azure-monitor/logs/private-link-security#connect-to-a-private-endpoint.\",\"metadata\":{\"version\":\"1.0.0\",\"category\":\"Monitoring\"},\"parameters\":{\"privateDnsZoneId1\":{\"type\":\"String\",\"metadata\":{\"displayName\":\"Private
+        private link scope. Learn more at: https://learn.microsoft.com/azure/azure-monitor/logs/private-link-security#connect-to-a-private-endpoint.\",\"metadata\":{\"version\":\"1.0.0\",\"category\":\"Monitoring\"},\"parameters\":{\"privateDnsZoneId1\":{\"type\":\"String\",\"metadata\":{\"displayName\":\"Private
         DNS Zone for global endpoints used by Azure Monitor\",\"description\":\"One
         of the five private DNS zone IDs required for Microsoft.Insights/privateLinkScopes
         to resolve a private DNS Zone to your Azure Monitor Private Link scope.\",\"strongType\":\"Microsoft.Network/privateDnsZones\",\"assignPermissions\":true}},\"privateDnsZoneId2\":{\"type\":\"String\",\"metadata\":{\"displayName\":\"Private
@@ -3512,7 +3512,7 @@ interactions:
         public network access improves security by ensuring that the Azure Cache for
         Redis isn't exposed on the public internet. You can limit exposure of your
         Azure Cache for Redis by creating private endpoints instead. Learn more at:
-        https://docs.microsoft.com/azure/azure-cache-for-redis/cache-private-link.\",\"metadata\":{\"version\":\"1.0.0\",\"category\":\"Cache\"},\"parameters\":{\"effect\":{\"type\":\"String\",\"metadata\":{\"displayName\":\"Effect\",\"description\":\"Enable
+        https://learn.microsoft.com/azure/azure-cache-for-redis/cache-private-link.\",\"metadata\":{\"version\":\"1.0.0\",\"category\":\"Cache\"},\"parameters\":{\"effect\":{\"type\":\"String\",\"metadata\":{\"displayName\":\"Effect\",\"description\":\"Enable
         or disable the execution of the policy\"},\"allowedValues\":[\"Audit\",\"Deny\",\"Disabled\"],\"defaultValue\":\"Audit\"}},\"policyRule\":{\"if\":{\"allOf\":[{\"field\":\"type\",\"equals\":\"Microsoft.Cache/Redis\"},{\"field\":\"Microsoft.Cache/Redis/publicNetworkAccess\",\"notEquals\":\"Disabled\"}]},\"then\":{\"effect\":\"[parameters('effect')]\"}}},\"id\":\"/providers/Microsoft.Authorization/policyDefinitions/470baccb-7e51-4549-8b1a-3e5be069f663\",\"type\":\"Microsoft.Authorization/policyDefinitions\",\"name\":\"470baccb-7e51-4549-8b1a-3e5be069f663\"},{\"properties\":{\"displayName\":\"Storage
         accounts should have infrastructure encryption\",\"policyType\":\"BuiltIn\",\"mode\":\"Indexed\",\"description\":\"Enable
         infrastructure encryption for higher level of assurance that the data is secure.
@@ -3644,7 +3644,7 @@ interactions:
         endpoints connect your virtual network to Azure services without a public
         IP address at the source or destination.  By mapping private endpoints to
         your Azure Data Factory, you can reduce data leakage risks.  Learn more at:
-        https://docs.microsoft.com/azure/data-factory/data-factory-private-link.\",\"metadata\":{\"version\":\"1.0.0\",\"category\":\"Data
+        https://learn.microsoft.com/azure/data-factory/data-factory-private-link.\",\"metadata\":{\"version\":\"1.0.0\",\"category\":\"Data
         Factory\"},\"parameters\":{\"privateEndpointSubnetId\":{\"type\":\"String\",\"metadata\":{\"displayName\":\"Private
         endpoint subnet ID\",\"description\":\"A subnet with private endpoint network
         policies disabled.\",\"strongType\":\"Microsoft.Network/virtualNetworks/subnets\"}},\"effect\":{\"type\":\"String\",\"metadata\":{\"displayName\":\"Effect\",\"description\":\"Enable
@@ -3914,7 +3914,7 @@ interactions:
         records allow private connections to private endpoints. Private endpoint connections
         allow secure communication by enabling private connectivity to Batch accounts
         without a need for public IP addresses at the source or destination. For more
-        information on private endpoints and DNS zones in Batch, see https://docs.microsoft.com/azure/batch/private-connectivity.","metadata":{"version":"1.0.0","category":"Batch"},"parameters":{"privateDnsZoneId":{"type":"String","metadata":{"displayName":"Private
+        information on private endpoints and DNS zones in Batch, see https://learn.microsoft.com/azure/batch/private-connectivity.","metadata":{"version":"1.0.0","category":"Batch"},"parameters":{"privateDnsZoneId":{"type":"String","metadata":{"displayName":"Private
         DNS Zone","strongType":"Microsoft.Network/privateDnsZones","description":"The
         private DNS zone to deploy in a new private DNS zone group and link to the
         private endpoint"}},"effect":{"type":"String","metadata":{"displayName":"Effect","description":"Enable
@@ -3996,7 +3996,7 @@ interactions:
         standards names","description":"For all compliance standards, leave it empty.
         For specific compliance standards, enter a list of standards names separated
         by semicolons ('';''). Compliance standards names are available through the
-        regulatory compliance standards API (https://docs.microsoft.com/rest/api/securitycenter/regulatorycompliancestandards),
+        regulatory compliance standards API (https://learn.microsoft.com/rest/api/securitycenter/regulatorycompliancestandards),
         or Azure Resource Graph Explorer, choose securityresources and microsoft.security/regulatorycompliancestandards."},"defaultValue":[]},"regulatoryComplianceControlStates":{"type":"Array","metadata":{"displayName":"Compliance
         control states","description":"Determines compliance control states."},"allowedValues":["Failed","Passed","Skipped","Unsupported"],"defaultValue":["Failed","Passed","Skipped","Unsupported"]},"logicAppResourceId":{"type":"String","metadata":{"displayName":"Logic
         App","description":"The Logic App that is triggered.","strongType":"Microsoft.Logic/workflows","assignPermissions":true}},"logicAppTrigger":{"type":"String","metadata":{"displayName":"Logic
@@ -4043,7 +4043,7 @@ interactions:
         meet organizational security and compliance commitments. By default, Microsoft-managed
         encryption keys are used. For greater flexibility in managing keys or controlling
         access to your subscription, select customer-managed keys, also known as bring
-        your own key (BYOK). Learn more about Azure Bot Service encryption: https://docs.microsoft.com/azure/bot-service/bot-service-encryption.","metadata":{"version":"1.0.0","category":"Bot
+        your own key (BYOK). Learn more about Azure Bot Service encryption: https://learn.microsoft.com/azure/bot-service/bot-service-encryption.","metadata":{"version":"1.0.0","category":"Bot
         Service"},"parameters":{"effect":{"type":"String","metadata":{"displayName":"Effect","description":"The
         desired effect of the policy."},"allowedValues":["audit","deny","disabled"],"defaultValue":"audit"}},"policyRule":{"if":{"allOf":[{"field":"type","equals":"Microsoft.BotService/botServices"},{"field":"Microsoft.BotService/botServices/isCmekEnabled","notEquals":"true"}]},"then":{"effect":"[parameters(''effect'')]"}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/51522a96-0869-4791-82f3-981000c2c67f","type":"Microsoft.Authorization/policyDefinitions","name":"51522a96-0869-4791-82f3-981000c2c67f"},{"properties":{"displayName":"Microsoft
         Managed Control 1352 - Incident Response Policy And Procedures","policyType":"Static","mode":"Indexed","description":"Microsoft
@@ -4113,7 +4113,7 @@ interactions:
         DB database accounts should have local authentication methods disabled","policyType":"BuiltIn","mode":"Indexed","description":"Disabling
         local authentication methods improves security by ensuring that Cosmos DB
         database accounts exclusively require Azure Active Directory identities for
-        authentication. Learn more at: https://docs.microsoft.com/azure/cosmos-db/how-to-setup-rbac#disable-local-auth.","metadata":{"version":"1.0.0","category":"Cosmos
+        authentication. Learn more at: https://learn.microsoft.com/azure/cosmos-db/how-to-setup-rbac#disable-local-auth.","metadata":{"version":"1.0.0","category":"Cosmos
         DB"},"parameters":{"effect":{"type":"String","metadata":{"displayName":"Effect","description":"Enable
         or disable the execution of the policy"},"allowedValues":["Audit","Deny","Disabled"],"defaultValue":"Audit"}},"policyRule":{"if":{"allOf":[{"field":"type","equals":"Microsoft.DocumentDB/databaseAccounts"},{"field":"Microsoft.DocumentDB/databaseAccounts/disableLocalAuth","notEquals":true}]},"then":{"effect":"[parameters(''effect'')]"}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/5450f5bd-9c72-4390-a9c4-a7aba4edfdd2","type":"Microsoft.Authorization/policyDefinitions","name":"5450f5bd-9c72-4390-a9c4-a7aba4edfdd2"},{"properties":{"displayName":"App
         Service apps should use a SKU that supports private link","policyType":"BuiltIn","mode":"Indexed","description":"With
@@ -4235,7 +4235,7 @@ interactions:
         a public IP address at the source or destination. The Private Link platform
         handles the connectivity between the consumer and services over the Azure
         backbone network. By mapping private endpoints to your CosmosDB account, data
-        leakage risks are reduced. Learn more about private links at: https://docs.microsoft.com/azure/cosmos-db/how-to-configure-private-endpoints.","metadata":{"version":"1.0.0","category":"Cosmos
+        leakage risks are reduced. Learn more about private links at: https://learn.microsoft.com/azure/cosmos-db/how-to-configure-private-endpoints.","metadata":{"version":"1.0.0","category":"Cosmos
         DB"},"parameters":{"effect":{"type":"String","metadata":{"displayName":"Effect","description":"Enable
         or disable the execution of the policy"},"allowedValues":["Audit","Disabled"],"defaultValue":"Audit"}},"policyRule":{"if":{"allOf":[{"field":"type","equals":"Microsoft.DocumentDB/databaseAccounts"},{"count":{"field":"Microsoft.DocumentDB/databaseAccounts/privateEndpointConnections[*]","where":{"field":"Microsoft.DocumentDB/databaseAccounts/privateEndpointConnections[*].privateLinkServiceConnectionState.status","equals":"Approved"}},"less":1}]},"then":{"effect":"[parameters(''effect'')]"}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/58440f8a-10c5-4151-bdce-dfbaad4a20b7","type":"Microsoft.Authorization/policyDefinitions","name":"58440f8a-10c5-4151-bdce-dfbaad4a20b7"},{"properties":{"displayName":"Microsoft
         Managed Control 1584 - Information System Documentation","policyType":"Static","mode":"Indexed","description":"Microsoft
@@ -4419,7 +4419,7 @@ interactions:
         Azure Synapse workspaces to disable public network access","policyType":"BuiltIn","mode":"Indexed","description":"Disable
         public network access for your Synapse workspace so that it is not accessible
         over the public internet. This can reduce data leakage risks. Learn more at:
-        https://docs.microsoft.com/azure/synapse-analytics/security/connectivity-settings.","metadata":{"version":"1.0.0","category":"Synapse"},"parameters":{"effect":{"type":"String","metadata":{"displayName":"Effect","description":"Enable
+        https://learn.microsoft.com/azure/synapse-analytics/security/connectivity-settings.","metadata":{"version":"1.0.0","category":"Synapse"},"parameters":{"effect":{"type":"String","metadata":{"displayName":"Effect","description":"Enable
         or disable the execution of the policy"},"allowedValues":["Modify","Disabled"],"defaultValue":"Modify"}},"policyRule":{"if":{"allOf":[{"field":"type","equals":"Microsoft.Synapse/workspaces"},{"field":"Microsoft.Synapse/workspaces/publicNetworkAccess","notEquals":"Disabled"}]},"then":{"effect":"[parameters(''effect'')]","details":{"conflictEffect":"audit","roleDefinitionIds":["/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"],"operations":[{"operation":"addOrReplace","field":"Microsoft.Synapse/workspaces/publicNetworkAccess","value":"Disabled"}]}}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/5c8cad01-ef30-4891-b230-652dadb4876a","type":"Microsoft.Authorization/policyDefinitions","name":"5c8cad01-ef30-4891-b230-652dadb4876a"},{"properties":{"displayName":"Microsoft
         Managed Control 1483 - Water Damage Protection","policyType":"Static","mode":"Indexed","description":"Microsoft
         implements this Physical and Environmental Protection control","metadata":{"version":"1.0.0","category":"Regulatory
@@ -4538,7 +4538,7 @@ interactions:
         By default, system-assigned managed identity is used by Azure ML workspace
         to access the associated resources. User-assigned managed identity allows
         you to create the identity as an Azure resource and maintain the life cycle
-        of that identity. Learn more at https://docs.microsoft.com/azure/machine-learning/how-to-use-managed-identities?tabs=python.","metadata":{"version":"1.0.0","category":"Machine
+        of that identity. Learn more at https://learn.microsoft.com/azure/machine-learning/how-to-use-managed-identities?tabs=python.","metadata":{"version":"1.0.0","category":"Machine
         Learning"},"parameters":{"effect":{"type":"String","metadata":{"displayName":"Effect","description":"Enable
         or disable the execution of the policy"},"allowedValues":["Audit","Deny","Disabled"],"defaultValue":"Audit"}},"policyRule":{"if":{"allOf":[{"field":"type","equals":"Microsoft.MachineLearningServices/workspaces"},{"anyOf":[{"field":"Microsoft.MachineLearningServices/workspaces/primaryUserAssignedIdentity","exists":false},{"field":"Microsoft.MachineLearningServices/workspaces/primaryUserAssignedIdentity","equals":""}]}]},"then":{"effect":"[parameters(''effect'')]"}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/5f0c7d88-c7de-45b8-ac49-db49e72eaa78","type":"Microsoft.Authorization/policyDefinitions","name":"5f0c7d88-c7de-45b8-ac49-db49e72eaa78"},{"properties":{"displayName":"Vulnerabilities
         in Azure Container Registry images should be remediated","policyType":"BuiltIn","mode":"All","description":"Container
@@ -4706,7 +4706,7 @@ interactions:
         only over encrypted channels, set the endpoint to a valid HTTPS URI. This
         ensures the HTTPS protocol is used to encrypt your data in transit and is
         also often a requirement for compliance with regulatory or industry standards.
-        Please visit: https://docs.microsoft.com/azure/bot-service/bot-builder-security-guidelines.","metadata":{"version":"1.0.1","category":"Bot
+        Please visit: https://learn.microsoft.com/azure/bot-service/bot-builder-security-guidelines.","metadata":{"version":"1.0.1","category":"Bot
         Service"},"parameters":{"effect":{"type":"String","metadata":{"displayName":"Effect","description":"The
         desired effect of the policy."},"allowedValues":["audit","deny","disabled"],"defaultValue":"audit"}},"policyRule":{"if":{"allOf":[{"field":"type","equals":"Microsoft.BotService/botServices"},{"field":"Microsoft.BotService/botServices/endpoint","notLike":"https://*"}]},"then":{"effect":"[parameters(''effect'')]"}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/6164527b-e1ee-4882-8673-572f425f5e0a","type":"Microsoft.Authorization/policyDefinitions","name":"6164527b-e1ee-4882-8673-572f425f5e0a"},{"properties":{"displayName":"Service
         Fabric clusters should have the ClusterProtectionLevel property set to EncryptAndSign","policyType":"BuiltIn","mode":"Indexed","description":"Service
@@ -4785,7 +4785,7 @@ interactions:
         SSH itself provides an encrypted connection, using passwords with SSH still
         leaves the VM vulnerable to brute-force attacks. The most secure option for
         authenticating to an Azure Linux virtual machine over SSH is with a public-private
-        key pair, also known as SSH keys. Learn more: https://docs.microsoft.com/azure/virtual-machines/linux/create-ssh-keys-detailed.","metadata":{"category":"Guest
+        key pair, also known as SSH keys. Learn more: https://learn.microsoft.com/azure/virtual-machines/linux/create-ssh-keys-detailed.","metadata":{"category":"Guest
         Configuration","version":"2.0.1","requiredProviders":["Microsoft.GuestConfiguration"],"guestConfiguration":{"name":"LinuxNoPasswordForSSH","version":"1.*"}},"parameters":{"IncludeArcMachines":{"type":"String","metadata":{"displayName":"Include
         Arc connected servers","description":"By selecting this option, you agree
         to be charged monthly per Arc connected machine."},"allowedValues":["true","false"],"defaultValue":"false"},"effect":{"type":"String","metadata":{"displayName":"Effect","description":"Enable
@@ -5443,7 +5443,7 @@ interactions:
         extension for Azure Arc provides threat protection for your Arc enabled Kubernetes
         clusters. The extension collects data from all nodes in the cluster and sends
         it to the Azure Defender for Kubernetes backend in the cloud for further analysis.
-        Learn more in https://docs.microsoft.com/azure/security-center/defender-for-kubernetes-azure-arc.","metadata":{"version":"1.0.0-preview","category":"Kubernetes","preview":true},"parameters":{"effect":{"type":"String","metadata":{"displayName":"Effect","description":"Enable
+        Learn more in https://learn.microsoft.com/azure/security-center/defender-for-kubernetes-azure-arc.","metadata":{"version":"1.0.0-preview","category":"Kubernetes","preview":true},"parameters":{"effect":{"type":"String","metadata":{"displayName":"Effect","description":"Enable
         or disable the execution of the policy"},"allowedValues":["DeployIfNotExists","Disabled"],"defaultValue":"DeployIfNotExists"}},"policyRule":{"if":{"allOf":[{"field":"type","equals":"Microsoft.Kubernetes/connectedClusters"},{"field":"Microsoft.Kubernetes/connectedClusters/distribution","in":["generic","openshift","rancher_rke","tkg"]},{"field":"Microsoft.Kubernetes/connectedClusters/connectivityStatus","equals":"connected"}]},"then":{"effect":"[parameters(''effect'')]","details":{"type":"Microsoft.KubernetesConfiguration/extensions","deploymentScope":"subscription","existenceCondition":{"allOf":[{"field":"Microsoft.KubernetesConfiguration/extensions/extensionType","equals":"microsoft.azuredefender.kubernetes"},{"field":"Microsoft.KubernetesConfiguration/extensions/installState","equals":"Installed"}]},"roleDefinitionIds":["/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","/providers/microsoft.authorization/roleDefinitions/92aaf0da-9dab-42b6-94a3-d43ce8d16293"],"deployment":{"location":"westeurope","properties":{"mode":"incremental","parameters":{"clusterRegion":{"value":"[field(''location'')]"},"clusterResourceId":{"value":"[field(''id'')]"}},"template":{"$schema":"https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#","contentVersion":"1.0.0.0","parameters":{"clusterRegion":{"type":"string"},"clusterResourceId":{"type":"string"}},"variables":{"locationLongNameToShortMap":{"australiacentral":"CAU","australiaeast":"EAU","australiasoutheast":"SEAU","brazilsouth":"CQ","canadacentral":"CCA","centralindia":"CIN","centralus":"CUS","eastasia":"EA","eastus":"EUS","eastus2":"EUS2","eastus2euap":"eus2p","germanywestcentral":"DEWC","francecentral":"PAR","japaneast":"EJP","koreacentral":"SE","northcentralus":"NCUS","northeurope":"NEU","norwayeast":"NOE","southafricanorth":"JNB","southcentralus":"SCUS","southeastasia":"SEA","swedencentral":"SEC","switzerlandnorth":"CHN","switzerlandwest":"CHW","uaenorth":"DXB","uksouth":"SUK","ukwest":"WUK","westcentralus":"WCUS","westeurope":"WEU","westus":"WUS","westus2":"WUS2","usgovvirginia":"USGV","usgovarizona":"USGA","usgovtexas":"USGT","chinaeast":"CNE","chinaeast2":"CNE2","chinawest":"CNW","chinawest2":"CNW2"},"locationCode":"[variables(''locationLongNameToShortMap'')[parameters(''clusterRegion'')]]","subscriptionId":"[subscription().subscriptionId]","defaultRGName":"[concat(''DefaultResourceGroup-'',
         variables(''locationCode''))]","workspaceName":"[concat(''DefaultWorkspace-'',
         variables(''subscriptionId''),''-'', variables(''locationCode''))]","deployDefaultAscResourceGroup":"[concat(''deployDefaultAscResourceGroup-'',
@@ -5559,7 +5559,7 @@ interactions:
         Service Apps should be injected into a virtual network","policyType":"BuiltIn","mode":"Indexed","description":"Injecting
         App Service Apps in a virtual network unlocks advanced App Service networking
         and security features and provides you with greater control over your network
-        security configuration. Learn more at: https://docs.microsoft.com/azure/app-service/web-sites-integrate-with-vnet.","metadata":{"version":"1.0.0","category":"App
+        security configuration. Learn more at: https://learn.microsoft.com/azure/app-service/web-sites-integrate-with-vnet.","metadata":{"version":"1.0.0","category":"App
         Service"},"parameters":{"effect":{"type":"String","metadata":{"displayName":"Effect","description":"Enable
         or disable the execution of the policy"},"allowedValues":["Audit","Deny","Disabled"],"defaultValue":"Audit"}},"policyRule":{"if":{"allOf":[{"field":"type","equals":"Microsoft.Web/sites"},{"field":"Microsoft.Web/sites/virtualNetworkSubnetId","equals":""}]},"then":{"effect":"[parameters(''effect'')]"}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/72d04c29-f87d-4575-9731-419ff16a2757","type":"Microsoft.Authorization/policyDefinitions","name":"72d04c29-f87d-4575-9731-419ff16a2757"},{"properties":{"displayName":"Azure
         Synapse workspaces should use private link","policyType":"BuiltIn","mode":"Indexed","description":"Azure
@@ -5567,7 +5567,7 @@ interactions:
         a public IP address at the source or destination. The Private Link platform
         handles the connectivity between the consumer and services over the Azure
         backbone network. By mapping private endpoints to Azure Synapse workspace,
-        data leakage risks are reduced. Learn more about private links at: https://docs.microsoft.com/azure/synapse-analytics/security/how-to-connect-to-workspace-with-private-links.","metadata":{"version":"1.0.1","category":"Synapse"},"parameters":{"effect":{"type":"String","metadata":{"displayName":"Effect","description":"Enable
+        data leakage risks are reduced. Learn more about private links at: https://learn.microsoft.com/azure/synapse-analytics/security/how-to-connect-to-workspace-with-private-links.","metadata":{"version":"1.0.1","category":"Synapse"},"parameters":{"effect":{"type":"String","metadata":{"displayName":"Effect","description":"Enable
         or disable the execution of the policy"},"allowedValues":["Audit","Disabled"],"defaultValue":"Audit"}},"policyRule":{"if":{"allOf":[{"field":"type","equals":"Microsoft.Synapse/workspaces"},{"count":{"field":"Microsoft.Synapse/workspaces/privateEndpointConnections[*]","where":{"field":"Microsoft.Synapse/workspaces/privateEndpointConnections[*].privateLinkServiceConnectionState.status","equals":"Approved"}},"less":1}]},"then":{"effect":"[parameters(''effect'')]"}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/72d11df1-dd8a-41f7-8925-b05b960ebafc","type":"Microsoft.Authorization/policyDefinitions","name":"72d11df1-dd8a-41f7-8925-b05b960ebafc"},{"properties":{"displayName":"Microsoft
         Managed Control 1524 - Personnel Transfer","policyType":"Static","mode":"Indexed","description":"Microsoft
         implements this Personnel Security control","metadata":{"version":"1.0.0","category":"Regulatory
@@ -5604,7 +5604,7 @@ interactions:
         workflow automation are created.","strongType":"location"}},"recommendationNames":{"type":"Array","metadata":{"displayName":"Recommendation
         IDs","description":"For all recommendations, leave empty. For specific recommendations,
         enter a list of recommendation IDs separated by semicolons ('';''). Recommendation
-        IDs are available through the Assessments API (https://docs.microsoft.com/en-us/rest/api/securitycenter/assessments),
+        IDs are available through the Assessments API (https://learn.microsoft.com/en-us/rest/api/securitycenter/assessments),
         or Azure Resource Graph Explorer, choose securityresources and microsoft.security/assessments."},"defaultValue":[]},"recommendationSeverities":{"type":"Array","metadata":{"displayName":"Recommendation
         severities","description":"Determines recommendation severities. Example:
         High;Medium;Low;"},"allowedValues":["High","Medium","Low"],"defaultValue":["High","Medium","Low"]},"recommendationStates":{"type":"Array","metadata":{"displayName":"Recommendation
@@ -5688,7 +5688,7 @@ interactions:
         network access should be disabled for Batch accounts","policyType":"BuiltIn","mode":"Indexed","description":"Disabling
         public network access on a Batch account improves security by ensuring your
         Batch account can only be accessed from a private endpoint. Learn more about
-        disabling public network access at https://docs.microsoft.com/azure/batch/private-connectivity.","metadata":{"version":"1.0.0","category":"Batch"},"parameters":{"effect":{"type":"String","metadata":{"displayName":"Effect","description":"The
+        disabling public network access at https://learn.microsoft.com/azure/batch/private-connectivity.","metadata":{"version":"1.0.0","category":"Batch"},"parameters":{"effect":{"type":"String","metadata":{"displayName":"Effect","description":"The
         desired effect of the policy"},"allowedValues":["Audit","Deny","Disabled"],"defaultValue":"Audit"}},"policyRule":{"if":{"allOf":[{"field":"type","equals":"Microsoft.Batch/batchAccounts"},{"field":"Microsoft.Batch/batchAccounts/publicNetworkAccess","notEquals":"Disabled"}]},"then":{"effect":"[parameters(''effect'')]"}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/74c5a0ae-5e48-4738-b093-65e23a060488","type":"Microsoft.Authorization/policyDefinitions","name":"74c5a0ae-5e48-4738-b093-65e23a060488"},{"properties":{"displayName":"Public
         IP addresses should have resource logs enabled for Azure DDoS Protection Standard","policyType":"BuiltIn","mode":"Indexed","description":"Enable
         resource logs for public IP addressess in diagnostic settings to stream to
@@ -5796,7 +5796,7 @@ interactions:
         endpoints lets you connect your virtual network to Azure services without
         a public IP address at the source or destination. By mapping private endpoints
         to your Azure Cache for Redis instances, data leakage risks are reduced. Learn
-        more at: https://docs.microsoft.com/azure/azure-cache-for-redis/cache-private-link.","metadata":{"version":"1.0.0","category":"Cache"},"parameters":{"effect":{"type":"String","metadata":{"displayName":"Effect","description":"Enable
+        more at: https://learn.microsoft.com/azure/azure-cache-for-redis/cache-private-link.","metadata":{"version":"1.0.0","category":"Cache"},"parameters":{"effect":{"type":"String","metadata":{"displayName":"Effect","description":"Enable
         or disable the execution of the policy"},"allowedValues":["AuditIfNotExists","Disabled"],"defaultValue":"AuditIfNotExists"}},"policyRule":{"if":{"field":"type","equals":"Microsoft.Cache/redis"},"then":{"effect":"[parameters(''effect'')]","details":{"type":"Microsoft.Cache/redis/privateEndpointConnections","existenceCondition":{"field":"Microsoft.Cache/redis/privateEndpointConnections/privateLinkServiceConnectionState.status","equals":"Approved"}}}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/7803067c-7d34-46e3-8c79-0ca68fc4036d","type":"Microsoft.Authorization/policyDefinitions","name":"7803067c-7d34-46e3-8c79-0ca68fc4036d"},{"properties":{"displayName":"Microsoft
         Managed Control 1258 - Contingency Training","policyType":"Static","mode":"Indexed","description":"Microsoft
         implements this Contingency Planning control","metadata":{"version":"1.0.0","category":"Regulatory
@@ -5815,7 +5815,7 @@ interactions:
         endpoints connect your virtual network to Azure services without a public
         IP address at the source or destination. By mapping private endpoints to your
         Azure Machine Learning workspace, you can reduce data leakage risks. Learn
-        more about private links at: https://docs.microsoft.com/azure/machine-learning/how-to-configure-private-link.","metadata":{"version":"1.0.0","category":"Machine
+        more about private links at: https://learn.microsoft.com/azure/machine-learning/how-to-configure-private-link.","metadata":{"version":"1.0.0","category":"Machine
         Learning"},"parameters":{"privateEndpointSubnetId":{"type":"String","metadata":{"displayName":"Private
         endpoint subnet id","description":"A subnet with private endpoint network
         policies disabled.","strongType":"Microsoft.Network/virtualNetworks/subnets"}},"effect":{"type":"String","metadata":{"displayName":"Effect","description":"Enable
@@ -5836,7 +5836,7 @@ interactions:
         Cosmos DB should disable public network access","policyType":"BuiltIn","mode":"Indexed","description":"Disabling
         public network access improves security by ensuring that your CosmosDB account
         isn''t exposed on the public internet. Creating private endpoints can limit
-        exposure of your CosmosDB account. Learn more at: https://docs.microsoft.com/azure/cosmos-db/how-to-configure-private-endpoints#blocking-public-network-access-during-account-creation.","metadata":{"version":"1.0.0","category":"Cosmos
+        exposure of your CosmosDB account. Learn more at: https://learn.microsoft.com/azure/cosmos-db/how-to-configure-private-endpoints#blocking-public-network-access-during-account-creation.","metadata":{"version":"1.0.0","category":"Cosmos
         DB"},"parameters":{"effect":{"type":"String","metadata":{"displayName":"Effect","description":"Enable
         or disable the execution of the policy"},"allowedValues":["Audit","Deny","Disabled"],"defaultValue":"Audit"}},"policyRule":{"if":{"allOf":[{"field":"type","equals":"Microsoft.DocumentDB/databaseAccounts"},{"field":"Microsoft.DocumentDB/databaseAccounts/publicNetworkAccess","notEquals":"Disabled"}]},"then":{"effect":"[parameters(''effect'')]"}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/797b37f7-06b8-444c-b1ad-fc62867f335a","type":"Microsoft.Authorization/policyDefinitions","name":"797b37f7-06b8-444c-b1ad-fc62867f335a"},{"properties":{"displayName":"Microsoft
         Managed Control 1510 - Position Risk Designation","policyType":"Static","mode":"Indexed","description":"Microsoft
@@ -5963,7 +5963,7 @@ interactions:
         Service Bus namespaces with private endpoints","policyType":"BuiltIn","mode":"Indexed","description":"Private
         endpoints connect your virtual network to Azure services without a public
         IP address at the source or destination. By mapping private endpoints to Service
-        Bus namespaces, you can reduce data leakage risks. Learn more at: https://docs.microsoft.com/azure/service-bus-messaging/private-link-service.","metadata":{"version":"1.0.0","category":"Service
+        Bus namespaces, you can reduce data leakage risks. Learn more at: https://learn.microsoft.com/azure/service-bus-messaging/private-link-service.","metadata":{"version":"1.0.0","category":"Service
         Bus"},"parameters":{"privateEndpointSubnetId":{"type":"String","metadata":{"displayName":"Private
         endpoint subnet id","description":"Specifies the subnet to use to configure
         private endpoint","strongType":"Microsoft.Network/virtualNetworks/subnets"}},"effect":{"type":"String","metadata":{"displayName":"Effect","description":"Enable
@@ -6643,7 +6643,7 @@ interactions:
         connections allow secure communication by enabling private connectivity to
         your Azure Data Factory without a need for public IP addresses at the source
         or destination. For more information on private endpoints and DNS zones in
-        Azure Data Factory, see https://docs.microsoft.com/azure/data-factory/data-factory-private-link.","metadata":{"version":"1.0.0","category":"Data
+        Azure Data Factory, see https://learn.microsoft.com/azure/data-factory/data-factory-private-link.","metadata":{"version":"1.0.0","category":"Data
         Factory"},"parameters":{"privateDnsZoneId":{"type":"String","metadata":{"displayName":"Private
         DNS Zone","strongType":"Microsoft.Network/privateDnsZones","description":"The
         private DNS zone to deploy in a new private DNS zone group and link to the
@@ -6835,7 +6835,7 @@ interactions:
         a public IP address at the source or destination. The Private Link platform
         handles the connectivity between the consumer and services over the Azure
         backbone network. By mapping private endpoints to Azure Data Factory, data
-        leakage risks are reduced. Learn more about private links at: https://docs.microsoft.com/azure/data-factory/data-factory-private-link.","metadata":{"version":"1.0.0","category":"Data
+        leakage risks are reduced. Learn more about private links at: https://learn.microsoft.com/azure/data-factory/data-factory-private-link.","metadata":{"version":"1.0.0","category":"Data
         Factory"},"parameters":{"effect":{"type":"String","metadata":{"displayName":"Effect","description":"Enable
         or disable the execution of the policy"},"allowedValues":["AuditIfNotExists","Disabled"],"defaultValue":"AuditIfNotExists"}},"policyRule":{"if":{"field":"type","equals":"Microsoft.DataFactory/factories"},"then":{"effect":"[parameters(''effect'')]","details":{"type":"Microsoft.DataFactory/factories/privateEndpointConnections","existenceCondition":{"field":"Microsoft.DataFactory/factories/privateEndpointConnections/privateLinkServiceConnectionState.status","equals":"Approved"}}}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/8b0323be-cc25-4b61-935d-002c3798c6ea","type":"Microsoft.Authorization/policyDefinitions","name":"8b0323be-cc25-4b61-935d-002c3798c6ea"},{"properties":{"displayName":"[Deprecated]:
         Show audit results from Windows VMs with a pending reboot","policyType":"BuiltIn","mode":"All","description":"This
@@ -6938,7 +6938,7 @@ interactions:
         extension for Azure Arc provides threat protection for your Arc enabled Kubernetes
         clusters. The extension collects data from nodes in the cluster and sends
         it to the Azure Defender for Kubernetes backend in the cloud for further analysis.
-        Learn more in https://docs.microsoft.com/azure/security-center/defender-for-kubernetes-azure-arc.","metadata":{"version":"2.0.0-preview","category":"Kubernetes","preview":true},"parameters":{"effect":{"type":"String","metadata":{"displayName":"Effect","description":"Enable
+        Learn more in https://learn.microsoft.com/azure/security-center/defender-for-kubernetes-azure-arc.","metadata":{"version":"2.0.0-preview","category":"Kubernetes","preview":true},"parameters":{"effect":{"type":"String","metadata":{"displayName":"Effect","description":"Enable
         or disable the execution of the policy"},"allowedValues":["AuditIfNotExists","Disabled"],"defaultValue":"AuditIfNotExists"}},"policyRule":{"if":{"allOf":[{"field":"type","equals":"Microsoft.Kubernetes/connectedClusters"},{"field":"Microsoft.Kubernetes/connectedClusters/distribution","in":["generic","openshift","rancher_rke","tkg"]},{"field":"Microsoft.Kubernetes/connectedClusters/connectivityStatus","equals":"connected"}]},"then":{"effect":"[parameters(''effect'')]","details":{"type":"Microsoft.KubernetesConfiguration/extensions","existenceCondition":{"allOf":[{"field":"Microsoft.KubernetesConfiguration/extensions/extensionType","equals":"microsoft.azuredefender.kubernetes"},{"field":"Microsoft.KubernetesConfiguration/extensions/installState","equals":"Installed"}]}}}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/8dfab9c4-fe7b-49ad-85e4-1e9be085358f","type":"Microsoft.Authorization/policyDefinitions","name":"8dfab9c4-fe7b-49ad-85e4-1e9be085358f"},{"properties":{"displayName":"[Deprecated]:
         Deploy prerequisites to audit Windows VMs configurations in ''System Audit
         Policies - Object Access''","policyType":"BuiltIn","mode":"Indexed","description":"This
@@ -7243,7 +7243,7 @@ interactions:
         Event Hub namespaces with private endpoints","policyType":"BuiltIn","mode":"Indexed","description":"Private
         endpoints connect your virtual network to Azure services without a public
         IP address at the source or destination. By mapping private endpoints to Event
-        Hub namespaces, you can reduce data leakage risks. Learn more at: https://docs.microsoft.com/azure/event-hubs/private-link-service.","metadata":{"version":"1.0.0","category":"Event
+        Hub namespaces, you can reduce data leakage risks. Learn more at: https://learn.microsoft.com/azure/event-hubs/private-link-service.","metadata":{"version":"1.0.0","category":"Event
         Hub"},"parameters":{"privateEndpointSubnetId":{"type":"String","metadata":{"displayName":"Private
         endpoint subnet id","description":"Specifies the subnet to use to configure
         private endpoint","strongType":"Microsoft.Network/virtualNetworks/subnets"}},"effect":{"type":"String","metadata":{"displayName":"Effect","description":"Enable
@@ -7364,7 +7364,7 @@ interactions:
         keys","policyType":"BuiltIn","mode":"Indexed","description":"Ensure that Azure
         Log Search Alerts are implementing customer-managed keys, by storing the query
         text using the storage account that the customer had provided for the queried
-        Log Analytics workspace. For more information, visit https://docs.microsoft.com/azure/azure-monitor/platform/customer-managed-keys#customer-managed-key-overview.","metadata":{"version":"1.0.0","category":"Monitoring"},"parameters":{"effect":{"type":"String","metadata":{"displayName":"Effect","description":"The
+        Log Analytics workspace. For more information, visit https://learn.microsoft.com/azure/azure-monitor/platform/customer-managed-keys#customer-managed-key-overview.","metadata":{"version":"1.0.0","category":"Monitoring"},"parameters":{"effect":{"type":"String","metadata":{"displayName":"Effect","description":"The
         effect determines what happens when the policy rule is evaluated to match"},"allowedValues":["Audit","Disabled","Deny"],"defaultValue":"Audit"}},"policyRule":{"if":{"allOf":[{"field":"type","equals":"Microsoft.Insights/scheduledqueryrules"},{"field":"Microsoft.Insights/scheduledqueryrules/checkWorkspaceAlertsStorageConfigured","notEquals":"true"}]},"then":{"effect":"[parameters(''effect'')]"}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/94c1f94d-33b0-4062-bd04-1cdc3e7eece2","type":"Microsoft.Authorization/policyDefinitions","name":"94c1f94d-33b0-4062-bd04-1cdc3e7eece2"},{"properties":{"displayName":"Windows
         machines should meet requirements for ''System Audit Policies - Account Management''","policyType":"BuiltIn","mode":"Indexed","description":"Windows
         machines should have the specified Group Policy settings in the category ''System
@@ -7408,7 +7408,7 @@ interactions:
         accounts should disable public network access","policyType":"BuiltIn","mode":"Indexed","description":"Disabling
         public network access improves security by ensuring that the resource isn''t
         exposed on the public internet. You can limit exposure of your Automation
-        account resources by creating private endpoints instead. Learn more at: https://docs.microsoft.com/azure/automation/how-to/private-link-security.","metadata":{"version":"1.0.0","category":"Automation"},"parameters":{"effect":{"type":"String","metadata":{"displayName":"Effect","description":"Enable
+        account resources by creating private endpoints instead. Learn more at: https://learn.microsoft.com/azure/automation/how-to/private-link-security.","metadata":{"version":"1.0.0","category":"Automation"},"parameters":{"effect":{"type":"String","metadata":{"displayName":"Effect","description":"Enable
         or disable the execution of the policy"},"allowedValues":["Audit","Deny","Disabled"],"defaultValue":"Audit"}},"policyRule":{"if":{"allOf":[{"field":"type","equals":"Microsoft.Automation/automationAccounts"},{"field":"Microsoft.Automation/automationAccounts/publicNetworkAccess","notEquals":"false"}]},"then":{"effect":"[parameters(''effect'')]"}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/955a914f-bf86-4f0e-acd5-e0766b0efcb6","type":"Microsoft.Authorization/policyDefinitions","name":"955a914f-bf86-4f0e-acd5-e0766b0efcb6"},{"properties":{"displayName":"Authentication
         should be enabled on your web app","policyType":"BuiltIn","mode":"Indexed","description":"Azure
         App Service Authentication is a feature that can prevent anonymous HTTP requests
@@ -8020,7 +8020,7 @@ interactions:
         logs in Azure Key Vault Managed HSM should be enabled","policyType":"BuiltIn","mode":"Indexed","description":"To
         recreate activity trails for investigation purposes when a security incident
         occurs or when your network is compromised, you may want to audit by enabling
-        resource logs on Managed HSMs. Please follow the instructions here: https://docs.microsoft.com/azure/key-vault/managed-hsm/logging.","metadata":{"version":"1.0.0","category":"Key
+        resource logs on Managed HSMs. Please follow the instructions here: https://learn.microsoft.com/azure/key-vault/managed-hsm/logging.","metadata":{"version":"1.0.0","category":"Key
         Vault"},"parameters":{"effect":{"type":"String","metadata":{"displayName":"Effect","description":"Enable
         or disable the execution of the policy"},"allowedValues":["AuditIfNotExists","Disabled"],"defaultValue":"AuditIfNotExists"},"requiredRetentionDays":{"type":"String","metadata":{"displayName":"Required
         retention (days)","description":"The required resource logs retention in days"},"defaultValue":"365"}},"policyRule":{"if":{"field":"type","equals":"Microsoft.KeyVault/managedHsms"},"then":{"effect":"[parameters(''effect'')]","details":{"type":"Microsoft.Insights/diagnosticSettings","existenceCondition":{"count":{"field":"Microsoft.Insights/diagnosticSettings/logs[*]","where":{"anyOf":[{"allOf":[{"field":"Microsoft.Insights/diagnosticSettings/logs[*].retentionPolicy.enabled","equals":"true"},{"anyOf":[{"field":"Microsoft.Insights/diagnosticSettings/logs[*].retentionPolicy.days","equals":"0"},{"field":"Microsoft.Insights/diagnosticSettings/logs[*].retentionPolicy.days","equals":"[parameters(''requiredRetentionDays'')]"}]},{"field":"Microsoft.Insights/diagnosticSettings/logs.enabled","equals":"true"}]},{"allOf":[{"field":"Microsoft.Insights/diagnosticSettings/logs.enabled","equals":"true"},{"anyOf":[{"field":"Microsoft.Insights/diagnosticSettings/logs[*].retentionPolicy.enabled","notEquals":"true"},{"field":"Microsoft.Insights/diagnosticSettings/storageAccountId","exists":false}]}]}]}},"greaterOrEquals":1}}}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/a2a5b911-5617-447e-a49e-59dbe0e0434b","type":"Microsoft.Authorization/policyDefinitions","name":"a2a5b911-5617-447e-a49e-59dbe0e0434b"},{"properties":{"displayName":"Microsoft
@@ -8671,7 +8671,7 @@ interactions:
         App Services to use private DNS zones","policyType":"BuiltIn","mode":"Indexed","description":"Use
         private DNS zones to override the DNS resolution for a private endpoint. A
         private DNS zone links a virtual network to an App Service. Learn more at:
-        https://docs.microsoft.com/azure/app-service/networking/private-endpoint#dns.","metadata":{"version":"1.0.0","category":"App
+        https://learn.microsoft.com/azure/app-service/networking/private-endpoint#dns.","metadata":{"version":"1.0.0","category":"App
         Service"},"parameters":{"privateDnsZoneId":{"type":"String","metadata":{"displayName":"Private
         Dns Zone Id","description":"The private DNS zone to deploy in a new private
         DNS zone group and link to the private endpoint","strongType":"Microsoft.Network/privateDnsZones"}},"effect":{"type":"String","metadata":{"displayName":"Effect","description":"Enable
@@ -8822,7 +8822,7 @@ interactions:
         endpoints connect your virtual network to Azure services without a public
         IP address at the source or destination. By mapping private endpoints to your
         CosmosDB account, you can reduce data leakage risks. Learn more about private
-        links at: https://docs.microsoft.com/azure/cosmos-db/how-to-configure-private-endpoints.","metadata":{"version":"1.0.0","category":"Cosmos
+        links at: https://learn.microsoft.com/azure/cosmos-db/how-to-configure-private-endpoints.","metadata":{"version":"1.0.0","category":"Cosmos
         DB"},"parameters":{"privateEndpointSubnetId":{"type":"String","metadata":{"displayName":"privateEndpointSubnetId","description":"A
         subnet in the location","strongType":"Microsoft.Network/virtualNetworks/subnets"}},"privateEndpointGroupId":{"type":"String","metadata":{"displayName":"privateEndpointGroupId","description":"A
         group Id for the private endpoint"}},"effect":{"type":"String","metadata":{"displayName":"Effect","description":"Enable
@@ -8927,7 +8927,7 @@ interactions:
         a public IP address at the source or destination. The Private Link platform
         handles the connectivity between the consumer and services over the Azure
         backbone network. By mapping private endpoints to Event Hub namespaces, data
-        leakage risks are reduced. Learn more at: https://docs.microsoft.com/azure/event-hubs/private-link-service.","metadata":{"version":"1.0.0","category":"Event
+        leakage risks are reduced. Learn more at: https://learn.microsoft.com/azure/event-hubs/private-link-service.","metadata":{"version":"1.0.0","category":"Event
         Hub"},"parameters":{"effect":{"type":"String","metadata":{"displayName":"Effect","description":"Enable
         or disable the execution of the policy"},"allowedValues":["AuditIfNotExists","Disabled"],"defaultValue":"AuditIfNotExists"}},"policyRule":{"if":{"allOf":[{"field":"type","equals":"Microsoft.EventHub/namespaces"}]},"then":{"effect":"[parameters(''effect'')]","details":{"type":"Microsoft.EventHub/namespaces/privateEndpointConnections","existenceCondition":{"field":"Microsoft.EventHub/namespaces/privateEndpointConnections/privateLinkServiceConnectionState.status","equals":"Approved"}}}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/b8564268-eb4a-4337-89be-a19db070c59d","type":"Microsoft.Authorization/policyDefinitions","name":"b8564268-eb4a-4337-89be-a19db070c59d"},{"properties":{"displayName":"[Deprecated]:
         Show audit results from Windows VMs configurations in ''Security Options -
@@ -9308,7 +9308,7 @@ interactions:
         endpoint connections allow secure communication by enabling private connectivity
         to Azure Automation accounts without a need for public IP addresses at the
         source or destination. Learn more about private endpoints in Azure Automation
-        at https://docs.microsoft.com/azure/automation/how-to/private-link-security.","metadata":{"version":"1.0.0","category":"Automation"},"parameters":{"privateEndpointSubnetId":{"type":"String","metadata":{"displayName":"Private
+        at https://learn.microsoft.com/azure/automation/how-to/private-link-security.","metadata":{"version":"1.0.0","category":"Automation"},"parameters":{"privateEndpointSubnetId":{"type":"String","metadata":{"displayName":"Private
         endpoint subnet id","description":"A subnet with private endpoint network
         policies disabled","strongType":"Microsoft.Network/virtualNetworks/subnets"}},"effect":{"type":"String","metadata":{"displayName":"Effect","description":"Enable
         or disable the execution of the policy"},"allowedValues":["DeployIfNotExists","Disabled"],"defaultValue":"DeployIfNotExists"}},"policyRule":{"if":{"field":"type","equals":"Microsoft.Automation/automationAccounts"},"then":{"effect":"[parameters(''effect'')]","details":{"type":"Microsoft.Automation/automationAccounts/privateEndpointConnections","existenceCondition":{"field":"Microsoft.Automation/automationAccounts/privateEndpointConnections/privateLinkServiceConnectionState.status","equals":"Approved"},"roleDefinitionIds":["/providers/Microsoft.Authorization/roleDefinitions/4d97b98b-1d4f-4787-a291-c67834d212e7","/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"],"deployment":{"properties":{"mode":"incremental","parameters":{"name":{"value":"[field(''name'')]"},"serviceId":{"value":"[field(''id'')]"},"privateEndpointSubnetId":{"value":"[parameters(''privateEndpointSubnetId'')]"}},"template":{"$schema":"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#","contentVersion":"1.0.0.0","parameters":{"name":{"type":"string"},"serviceId":{"type":"string"},"privateEndpointSubnetId":{"type":"string"}},"variables":{"privateEndpointName":"[concat(''pe-'',substring(parameters(''name''),0,min(length(parameters(''name'')),50)),''-'',uniquestring(deployment().name))]"},"resources":[{"type":"Microsoft.Resources/deployments","name":"[variables(''privateEndpointName'')]","apiVersion":"2020-06-01","properties":{"mode":"Incremental","expressionEvaluationOptions":{"scope":"inner"},"template":{"$schema":"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#","contentVersion":"1.0.0.0","parameters":{"serviceId":{"type":"string"},"privateEndpointSubnetId":{"type":"string"},"subnetLocation":{"type":"string"}},"variables":{"privateEndpointName":"[deployment().name]"},"resources":[{"name":"[concat(variables(''privateEndpointName''),''Webhook'')]","type":"Microsoft.Network/privateEndpoints","apiVersion":"2020-07-01","location":"[parameters(''subnetLocation'')]","tags":{},"properties":{"subnet":{"id":"[parameters(''privateEndpointSubnetId'')]"},"privateLinkServiceConnections":[{"name":"[concat(variables(''privateEndpointName''),''Webhook'')]","properties":{"privateLinkServiceId":"[parameters(''serviceId'')]","groupIds":["Webhook"],"requestMessage":"autoapprove"}}],"manualPrivateLinkServiceConnections":[]}},{"name":"[concat(variables(''privateEndpointName''),''DSCAndHybridWorker'')]","type":"Microsoft.Network/privateEndpoints","apiVersion":"2020-07-01","location":"[parameters(''subnetLocation'')]","tags":{},"properties":{"subnet":{"id":"[parameters(''privateEndpointSubnetId'')]"},"privateLinkServiceConnections":[{"name":"[concat(variables(''privateEndpointName''),''DSCAndHybridWorker'')]","properties":{"privateLinkServiceId":"[parameters(''serviceId'')]","groupIds":["DSCAndHybridWorker"],"requestMessage":"autoapprove"}}],"manualPrivateLinkServiceConnections":[]}}]},"parameters":{"serviceId":{"value":"[parameters(''serviceId'')]"},"privateEndpointSubnetId":{"value":"[parameters(''privateEndpointSubnetId'')]"},"subnetLocation":{"value":"[reference(first(take(split(parameters(''privateEndpointSubnetId''),''/subnets''),1)),''2020-07-01'',''Full'').location]"}}}}]}}}}}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/c0c3130e-7dda-4187-aed0-ee4a472eaa60","type":"Microsoft.Authorization/policyDefinitions","name":"c0c3130e-7dda-4187-aed0-ee4a472eaa60"},{"properties":{"displayName":"Only
@@ -10018,7 +10018,7 @@ interactions:
         IDs","description":"Applicable only for export of security recommendations.
         To export all recommendations, leave this empty. To export specific recommendations,
         enter a list of recommendation IDs separated by semicolons ('';''). Recommendation
-        IDs are available through the Assessments API (https://docs.microsoft.com/rest/api/securitycenter/assessments),
+        IDs are available through the Assessments API (https://learn.microsoft.com/rest/api/securitycenter/assessments),
         or Azure Resource Graph Explorer, choose securityresources and microsoft.security/assessments."},"defaultValue":[]},"recommendationSeverities":{"type":"Array","metadata":{"displayName":"Recommendation
         severities","description":"Applicable only for export of security recommendations.
         Determines recommendation severities. Example: High;Medium;Low;"},"allowedValues":["High","Medium","Low"],"defaultValue":["High","Medium","Low"]},"isSecurityFindingsEnabled":{"type":"Boolean","metadata":{"displayName":"Include
@@ -10029,7 +10029,7 @@ interactions:
         controls. To export all secure score controls, leave this empty. To export
         specific secure score controls, enter a list of secure score controls IDs
         separated by semicolons ('';''). Secure score controls IDs are available through
-        the Secure score controls API (https://docs.microsoft.com/rest/api/securitycenter/securescorecontrols),
+        the Secure score controls API (https://learn.microsoft.com/rest/api/securitycenter/securescorecontrols),
         or Azure Resource Graph Explorer, choose securityresources and microsoft.security/securescores/securescorecontrols."},"defaultValue":[]},"alertSeverities":{"type":"Array","metadata":{"displayName":"Alert
         severities","description":"Applicable only for export of security alerts.
         Determines alert severities. Example: High;Medium;Low;"},"allowedValues":["High","Medium","Low"],"defaultValue":["High","Medium","Low"]},"regulatoryComplianceStandardsNames":{"type":"Array","metadata":{"displayName":"Regulatory
@@ -10037,7 +10037,7 @@ interactions:
         compliance. To export all regulatory compliance, leave this empty. To export
         specific regulatory compliance standards, enter a list of these standards
         names separated by semicolons ('';''). Regulatory compliance standards names
-        are available through the regulatory compliance standards API (https://docs.microsoft.com/rest/api/securitycenter/regulatorycompliancestandards),
+        are available through the regulatory compliance standards API (https://learn.microsoft.com/rest/api/securitycenter/regulatorycompliancestandards),
         or Azure Resource Graph Explorer, choose securityresources and microsoft.security/regulatorycompliancestandards."},"defaultValue":[]},"eventHubDetails":{"type":"String","metadata":{"displayName":"Event
         Hub details","description":"The Event Hub details of where the data should
         be exported to: Subscription, Event Hub Namespace, Event Hub, and Authorizations
@@ -10282,7 +10282,7 @@ interactions:
         and for more control over the access to your data in Azure Monitor. Linking
         your component to a Log Analytics workspace that''s enabled with a customer-managed
         key, ensures that your Application Insights logs meet this compliance requirement,
-        see https://docs.microsoft.com/azure/azure-monitor/platform/customer-managed-keys.","metadata":{"version":"1.0.0","category":"Monitoring"},"parameters":{"effect":{"type":"String","metadata":{"displayName":"Effect","description":"The
+        see https://learn.microsoft.com/azure/azure-monitor/platform/customer-managed-keys.","metadata":{"version":"1.0.0","category":"Monitoring"},"parameters":{"effect":{"type":"String","metadata":{"displayName":"Effect","description":"The
         effect determines what happens when the policy rule is evaluated to match"},"allowedValues":["audit","deny","disabled"],"defaultValue":"audit"}},"policyRule":{"if":{"allOf":[{"field":"type","equals":"Microsoft.Insights/components"},{"anyOf":[{"field":"Microsoft.Insights/components/WorkspaceResourceId","equals":""},{"field":"Microsoft.Insights/components/WorkspaceResourceId","exists":"false"}]}]},"then":{"effect":"[parameters(''effect'')]"}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/d550e854-df1a-4de9-bf44-cd894b39a95e","type":"Microsoft.Authorization/policyDefinitions","name":"d550e854-df1a-4de9-bf44-cd894b39a95e"},{"properties":{"displayName":"Deploy
         Diagnostic Settings for Data Lake Analytics to Log Analytics workspace","policyType":"BuiltIn","mode":"Indexed","description":"Deploys
         the diagnostic settings for Data Lake Analytics to stream to a regional Log
@@ -10453,7 +10453,7 @@ interactions:
         CosmosDB accounts to disable public network access ","policyType":"BuiltIn","mode":"Indexed","description":"Disable
         public network access for your CosmosDB resource so that it''s not accessible
         over the public internet. This can reduce data leakage risks. Learn more at:
-        https://docs.microsoft.com/azure/cosmos-db/how-to-configure-private-endpoints#blocking-public-network-access-during-account-creation.","metadata":{"version":"1.0.0","category":"Cosmos
+        https://learn.microsoft.com/azure/cosmos-db/how-to-configure-private-endpoints#blocking-public-network-access-during-account-creation.","metadata":{"version":"1.0.0","category":"Cosmos
         DB"},"parameters":{"effect":{"type":"String","metadata":{"displayName":"Effect","description":"Enable
         or disable the execution of the policy"},"allowedValues":["Modify","Disabled"],"defaultValue":"Modify"}},"policyRule":{"if":{"allOf":[{"field":"type","equals":"Microsoft.DocumentDB/databaseAccounts"},{"field":"Microsoft.DocumentDB/databaseAccounts/publicNetworkAccess","notEquals":"Disabled"}]},"then":{"effect":"[parameters(''effect'')]","details":{"roleDefinitionIds":["/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","/providers/Microsoft.Authorization/roleDefinitions/5bd9cd88-fe45-4216-938b-f97437e15450"],"conflictEffect":"audit","operations":[{"condition":"[greaterOrEquals(requestContext().apiVersion,
         ''2021-01-15'')]","operation":"addOrReplace","field":"Microsoft.DocumentDB/databaseAccounts/publicNetworkAccess","value":"Disabled"}]}}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/da69ba51-aaf1-41e5-8651-607cd0b37088","type":"Microsoft.Authorization/policyDefinitions","name":"da69ba51-aaf1-41e5-8651-607cd0b37088"},{"properties":{"displayName":"Azure
@@ -10508,7 +10508,7 @@ interactions:
         Cosmos DB database accounts to disable local authentication","policyType":"BuiltIn","mode":"Indexed","description":"Disable
         local authentication methods so that your Cosmos DB database accounts exclusively
         require Azure Active Directory identities for authentication. Learn more at:
-        https://docs.microsoft.com/azure/cosmos-db/how-to-setup-rbac#disable-local-auth.","metadata":{"version":"1.0.0","category":"Cosmos
+        https://learn.microsoft.com/azure/cosmos-db/how-to-setup-rbac#disable-local-auth.","metadata":{"version":"1.0.0","category":"Cosmos
         DB"},"parameters":{"effect":{"type":"String","metadata":{"displayName":"Effect","description":"Enable
         or disable the execution of the policy"},"allowedValues":["Modify","Disabled"],"defaultValue":"Modify"}},"policyRule":{"if":{"allOf":[{"field":"type","equals":"Microsoft.DocumentDB/databaseAccounts"},{"field":"Microsoft.DocumentDB/databaseAccounts/disableLocalAuth","notEquals":true}]},"then":{"effect":"[parameters(''effect'')]","details":{"roleDefinitionIds":["/providers/Microsoft.Authorization/roleDefinitions/5bd9cd88-fe45-4216-938b-f97437e15450"],"conflictEffect":"audit","operations":[{"condition":"[greaterOrEquals(requestContext().apiVersion,
         ''2021-06-15'')]","operation":"addOrReplace","field":"Microsoft.DocumentDB/databaseAccounts/disableLocalAuth","value":true}]}}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/dc2d41d1-4ab1-4666-a3e1-3d51c43e0049","type":"Microsoft.Authorization/policyDefinitions","name":"dc2d41d1-4ab1-4666-a3e1-3d51c43e0049"},{"properties":{"displayName":"Microsoft
@@ -11113,7 +11113,7 @@ interactions:
         endpoints connect your virtual networks to Azure services without a public
         IP address at the source or destination. By mapping private endpoints to Azure
         Monitor Private Link Scopes, you can reduce data leakage risks. Learn more
-        about private links at: https://docs.microsoft.com/azure/azure-monitor/logs/private-link-security.","metadata":{"version":"1.0.0","category":"Monitoring"},"parameters":{"privateEndpointSubnetId":{"type":"String","metadata":{"displayName":"Private
+        about private links at: https://learn.microsoft.com/azure/azure-monitor/logs/private-link-security.","metadata":{"version":"1.0.0","category":"Monitoring"},"parameters":{"privateEndpointSubnetId":{"type":"String","metadata":{"displayName":"Private
         endpoint subnet ID","description":"A subnet with private endpoint network
         policies disabled.","strongType":"Microsoft.Network/virtualNetworks/subnets"}},"effect":{"type":"String","metadata":{"displayName":"Effect","description":"Enable
         or disable the execution of the policy"},"allowedValues":["DeployIfNotExists","Disabled"],"defaultValue":"DeployIfNotExists"}},"policyRule":{"if":{"field":"type","equals":"Microsoft.Insights/privateLinkScopes"},"then":{"effect":"[parameters(''effect'')]","details":{"type":"Microsoft.Insights/privateLinkScopes/privateEndpointConnections","existenceCondition":{"field":"Microsoft.Insights/privateLinkScopes/privateEndpointConnections/privateLinkServiceConnectionState.status","equals":"Approved"},"roleDefinitionIds":["/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"],"deployment":{"properties":{"mode":"incremental","parameters":{"name":{"value":"[field(''name'')]"},"serviceId":{"value":"[field(''id'')]"},"privateEndpointSubnetId":{"value":"[parameters(''privateEndpointSubnetId'')]"}},"template":{"$schema":"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#","contentVersion":"1.0.0.0","parameters":{"name":{"type":"string"},"serviceId":{"type":"string"},"privateEndpointSubnetId":{"type":"string"}},"variables":{"privateEndpointName":"[concat(''pe-'',substring(parameters(''name''),0,min(length(parameters(''name'')),50)),''-'',uniquestring(deployment().name))]"},"resources":[{"type":"Microsoft.Resources/deployments","name":"[variables(''privateEndpointName'')]","apiVersion":"2020-06-01","properties":{"mode":"Incremental","expressionEvaluationOptions":{"scope":"inner"},"template":{"$schema":"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#","contentVersion":"1.0.0.0","parameters":{"serviceId":{"type":"string"},"privateEndpointSubnetId":{"type":"string"},"subnetLocation":{"type":"string"}},"variables":{"privateEndpointName":"[deployment().name]"},"resources":[{"name":"[variables(''privateEndpointName'')]","type":"Microsoft.Network/privateEndpoints","apiVersion":"2020-07-01","location":"[parameters(''subnetLocation'')]","tags":{},"properties":{"subnet":{"id":"[parameters(''privateEndpointSubnetId'')]"},"privateLinkServiceConnections":[{"name":"[variables(''privateEndpointName'')]","properties":{"privateLinkServiceId":"[parameters(''serviceId'')]","groupIds":["azuremonitor"],"requestMessage":"autoapprove"}}],"manualPrivateLinkServiceConnections":[]}}]},"parameters":{"serviceId":{"value":"[parameters(''serviceId'')]"},"privateEndpointSubnetId":{"value":"[parameters(''privateEndpointSubnetId'')]"},"subnetLocation":{"value":"[reference(first(take(split(parameters(''privateEndpointSubnetId''),''/subnets''),1)),''2020-07-01'',''Full'').location]"}}}}]}}}}}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/e8185402-357b-4768-8058-f620bc0ae6b5","type":"Microsoft.Authorization/policyDefinitions","name":"e8185402-357b-4768-8058-f620bc0ae6b5"},{"properties":{"displayName":"Vulnerabilities
@@ -11214,7 +11214,7 @@ interactions:
         IP address at the source or destination. By mapping private endpoints to your
         site recovery resources of Recovery Services vaults, you can reduce data leakage
         risks. To use private links, managed service identity must be assigned to
-        Recovery Services Vaults. Learn more about private links at: https://docs.microsoft.com/azure/site-recovery/azure-to-azure-how-to-enable-replication-private-endpoints.","metadata":{"version":"1.0.0-preview","category":"Site
+        Recovery Services Vaults. Learn more about private links at: https://learn.microsoft.com/azure/site-recovery/azure-to-azure-how-to-enable-replication-private-endpoints.","metadata":{"version":"1.0.0-preview","category":"Site
         Recovery","preview":true},"parameters":{"privateEndpointSubnetId":{"type":"String","metadata":{"displayName":"Private
         endpoint subnet id","description":"A subnet with private endpoint network
         policies disabled","strongType":"Microsoft.Network/virtualNetworks/subnets"}},"effect":{"type":"String","metadata":{"displayName":"Effect","description":"Enable
@@ -11254,7 +11254,7 @@ interactions:
         ensure secure data encryption is enabled at the service level and the infrastructure
         level with two different encryption algorithms and two different keys, use
         an Azure Monitor dedicated cluster. This option is enabled by default when
-        supported at the region, see https://docs.microsoft.com/azure/azure-monitor/platform/customer-managed-keys#customer-managed-key-overview.","metadata":{"version":"1.0.0","category":"Monitoring"},"parameters":{"effect":{"type":"String","metadata":{"displayName":"Effect","description":"The
+        supported at the region, see https://learn.microsoft.com/azure/azure-monitor/platform/customer-managed-keys#customer-managed-key-overview.","metadata":{"version":"1.0.0","category":"Monitoring"},"parameters":{"effect":{"type":"String","metadata":{"displayName":"Effect","description":"The
         effect determines what happens when the policy rule is evaluated to match"},"allowedValues":["audit","deny","disabled"],"defaultValue":"audit"}},"policyRule":{"if":{"allOf":[{"field":"type","equals":"Microsoft.OperationalInsights/clusters"},{"not":{"field":"Microsoft.OperationalInsights/clusters/isDoubleEncryptionEnabled","equals":"true"}}]},"then":{"effect":"[parameters(''effect'')]"}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/ea0dfaed-95fb-448c-934e-d6e713ce393d","type":"Microsoft.Authorization/policyDefinitions","name":"ea0dfaed-95fb-448c-934e-d6e713ce393d"},{"properties":{"displayName":"Microsoft
         Managed Control 1363 - Incident Handling | Automated Incident Handling Processes","policyType":"Static","mode":"Indexed","description":"Microsoft
         implements this Incident Response control","metadata":{"version":"1.0.0","category":"Regulatory
@@ -11404,7 +11404,7 @@ interactions:
         Event Hub namespaces to use private DNS zones","policyType":"BuiltIn","mode":"Indexed","description":"Use
         private DNS zones to override the DNS resolution for a private endpoint. A
         private DNS zone links to your virtual network to resolve to Event Hub namespaces.
-        Learn more at: https://docs.microsoft.com/azure/event-hubs/private-link-service.","metadata":{"version":"1.0.0","category":"Event
+        Learn more at: https://learn.microsoft.com/azure/event-hubs/private-link-service.","metadata":{"version":"1.0.0","category":"Event
         Hub"},"parameters":{"privateDnsZoneId":{"type":"String","metadata":{"displayName":"Private
         DNS Zone ID","description":"Specifies the private DNS zone to use to configure
         private endpoint","strongType":"Microsoft.Network/privateDnsZones"}},"effect":{"type":"String","metadata":{"displayName":"Effect","description":"Enable
@@ -11452,7 +11452,7 @@ interactions:
         Azure Machine Learning workspace to use private DNS zones","policyType":"BuiltIn","mode":"Indexed","description":"Use
         private DNS zones to override the DNS resolution for a private endpoint. A
         private DNS zone links to your virtual network to resolve to Azure Machine
-        Learning workspaces. Learn more at: https://docs.microsoft.com/azure/machine-learning/how-to-network-security-overview.","metadata":{"version":"1.0.0","category":"Machine
+        Learning workspaces. Learn more at: https://learn.microsoft.com/azure/machine-learning/how-to-network-security-overview.","metadata":{"version":"1.0.0","category":"Machine
         Learning"},"parameters":{"privateDnsZoneId":{"type":"String","metadata":{"displayName":"Private
         DNS Zone id","description":"A private DNS zone id to connect to the private
         endpoint.","strongType":"Microsoft.Network/privateDnsZones"}},"effect":{"type":"String","metadata":{"displayName":"Effect","description":"Enable
@@ -11626,7 +11626,7 @@ interactions:
         Service Bus namespaces to use private DNS zones\",\"policyType\":\"BuiltIn\",\"mode\":\"Indexed\",\"description\":\"Use
         private DNS zones to override the DNS resolution for a private endpoint. A
         private DNS zone links to your virtual network to resolve to Service Bus namespaces.
-        Learn more at: https://docs.microsoft.com/azure/service-bus-messaging/private-link-service.\",\"metadata\":{\"version\":\"1.0.0\",\"category\":\"Service
+        Learn more at: https://learn.microsoft.com/azure/service-bus-messaging/private-link-service.\",\"metadata\":{\"version\":\"1.0.0\",\"category\":\"Service
         Bus\"},\"parameters\":{\"privateDnsZoneId\":{\"type\":\"String\",\"metadata\":{\"displayName\":\"Private
         DNS Zone ID\",\"description\":\"Specifies the private DNS zone to use to configure
         private endpoint\",\"strongType\":\"Microsoft.Network/privateDnsZones\"}},\"effect\":{\"type\":\"String\",\"metadata\":{\"displayName\":\"Effect\",\"description\":\"Enable
@@ -11645,7 +11645,7 @@ interactions:
         group location\",\"description\":\"The location where the resource group and
         the workflow automation are created.\",\"strongType\":\"location\"}},\"alertName\":{\"type\":\"String\",\"metadata\":{\"displayName\":\"Alert
         name contains\",\"description\":\"String included in the required alert name.
-        For a full reference list of Security Center's alerts, see https://docs.microsoft.com/azure/security-center/alerts-reference.\"},\"defaultValue\":\"\"},\"alertSeverities\":{\"type\":\"Array\",\"metadata\":{\"displayName\":\"Alert
+        For a full reference list of Security Center's alerts, see https://learn.microsoft.com/azure/security-center/alerts-reference.\"},\"defaultValue\":\"\"},\"alertSeverities\":{\"type\":\"Array\",\"metadata\":{\"displayName\":\"Alert
         severities\",\"description\":\"Determines alert severities. Example: High;Medium;Low;\"},\"allowedValues\":[\"High\",\"Medium\",\"Low\"],\"defaultValue\":[\"High\",\"Medium\",\"Low\"]},\"logicAppResourceId\":{\"type\":\"String\",\"metadata\":{\"displayName\":\"Logic
         App\",\"description\":\"The Logic App that is triggered.\",\"strongType\":\"Microsoft.Logic/workflows\",\"assignPermissions\":true}},\"logicAppTrigger\":{\"type\":\"String\",\"metadata\":{\"displayName\":\"Logic
         app trigger\",\"description\":\"The trigger connector of the logic app that
@@ -12112,7 +12112,7 @@ interactions:
         storage account to Log Analytics workspace to protect saved-queries with storage
         account encryption. Customer-managed keys are commonly required to meet regulatory
         compliance and for more control over the access to your saved-queries in Azure
-        Monitor. For more details on the above, see https://docs.microsoft.com/azure/azure-monitor/platform/customer-managed-keys?tabs=portal#customer-managed-key-for-saved-queries.\",\"metadata\":{\"version\":\"1.0.0\",\"category\":\"Monitoring\"},\"parameters\":{\"effect\":{\"type\":\"String\",\"metadata\":{\"displayName\":\"Effect\",\"description\":\"The
+        Monitor. For more details on the above, see https://learn.microsoft.com/azure/azure-monitor/platform/customer-managed-keys?tabs=portal#customer-managed-key-for-saved-queries.\",\"metadata\":{\"version\":\"1.0.0\",\"category\":\"Monitoring\"},\"parameters\":{\"effect\":{\"type\":\"String\",\"metadata\":{\"displayName\":\"Effect\",\"description\":\"The
         effect determines what happens when the policy rule is evaluated to match\"},\"allowedValues\":[\"audit\",\"deny\",\"disabled\"],\"defaultValue\":\"audit\"}},\"policyRule\":{\"if\":{\"allOf\":[{\"field\":\"type\",\"equals\":\"Microsoft.OperationalInsights/workspaces\"},{\"not\":{\"field\":\"Microsoft.OperationalInsights/workspaces/forceCmkForQuery\",\"equals\":\"true\"}}]},\"then\":{\"effect\":\"[parameters('effect')]\"}}},\"id\":\"/providers/Microsoft.Authorization/policyDefinitions/fa298e57-9444-42ba-bf04-86e8470e32c7\",\"type\":\"Microsoft.Authorization/policyDefinitions\",\"name\":\"fa298e57-9444-42ba-bf04-86e8470e32c7\"},{\"properties\":{\"displayName\":\"Microsoft
         Managed Control 1037 - Least Privilege | Network Access To Privileged Commands\",\"policyType\":\"Static\",\"mode\":\"Indexed\",\"description\":\"Microsoft
         implements this Access Control control\",\"metadata\":{\"version\":\"1.0.0\",\"category\":\"Regulatory
@@ -12148,7 +12148,7 @@ interactions:
         Service Environment should enable internal encryption\",\"policyType\":\"BuiltIn\",\"mode\":\"Indexed\",\"description\":\"Setting
         InternalEncryption to true encrypts the pagefile, worker disks, and internal
         network traffic between the front ends and workers in an App Service Environment.
-        To learn more, refer to https://docs.microsoft.com/azure/app-service/environment/app-service-app-service-environment-custom-settings#enable-internal-encryption.\",\"metadata\":{\"version\":\"1.0.0\",\"category\":\"App
+        To learn more, refer to https://learn.microsoft.com/azure/app-service/environment/app-service-app-service-environment-custom-settings#enable-internal-encryption.\",\"metadata\":{\"version\":\"1.0.0\",\"category\":\"App
         Service\"},\"parameters\":{\"effect\":{\"type\":\"String\",\"metadata\":{\"displayName\":\"Effect\",\"description\":\"Enable
         or disable the execution of the policy\"},\"allowedValues\":[\"Audit\",\"Disabled\"],\"defaultValue\":\"Audit\"}},\"policyRule\":{\"if\":{\"allOf\":[{\"field\":\"type\",\"equals\":\"Microsoft.Web/hostingEnvironments\"},{\"field\":\"kind\",\"like\":\"ASE*\"},{\"count\":{\"field\":\"Microsoft.Web/HostingEnvironments/clusterSettings[*]\",\"where\":{\"allOf\":[{\"field\":\"Microsoft.Web/HostingEnvironments/clusterSettings[*].name\",\"equals\":\"InternalEncryption\"},{\"field\":\"Microsoft.Web/HostingEnvironments/clusterSettings[*].value\",\"equals\":\"true\"}]}},\"less\":1}]},\"then\":{\"effect\":\"[parameters('effect')]\"}}},\"id\":\"/providers/Microsoft.Authorization/policyDefinitions/fb74e86f-d351-4b8d-b034-93da7391c01f\",\"type\":\"Microsoft.Authorization/policyDefinitions\",\"name\":\"fb74e86f-d351-4b8d-b034-93da7391c01f\"},{\"properties\":{\"displayName\":\"Kubernetes
         Services should be upgraded to a non-vulnerable Kubernetes version\",\"policyType\":\"BuiltIn\",\"mode\":\"Indexed\",\"description\":\"Upgrade
@@ -12296,7 +12296,7 @@ interactions:
         IDs\",\"description\":\"Applicable only for export of security recommendations.
         To export all recommendations, leave this empty. To export specific recommendations,
         enter a list of recommendation IDs separated by semicolons (';'). Recommendation
-        IDs are available through the Assessments API (https://docs.microsoft.com/rest/api/securitycenter/assessments),
+        IDs are available through the Assessments API (https://learn.microsoft.com/rest/api/securitycenter/assessments),
         or Azure Resource Graph Explorer, choose securityresources and microsoft.security/assessments.\"},\"defaultValue\":[]},\"recommendationSeverities\":{\"type\":\"Array\",\"metadata\":{\"displayName\":\"Recommendation
         severities\",\"description\":\"Applicable only for export of security recommendations.
         Determines recommendation severities. Example: High;Medium;Low;\"},\"allowedValues\":[\"High\",\"Medium\",\"Low\"],\"defaultValue\":[\"High\",\"Medium\",\"Low\"]},\"isSecurityFindingsEnabled\":{\"type\":\"Boolean\",\"metadata\":{\"displayName\":\"Include
@@ -12307,7 +12307,7 @@ interactions:
         score controls. To export all secure score controls, leave this empty. To
         export specific secure score controls, enter a list of secure score controls
         IDs separated by semicolons (';'). Secure score controls IDs are available
-        through the Secure score controls API (https://docs.microsoft.com/rest/api/securitycenter/securescorecontrols),
+        through the Secure score controls API (https://learn.microsoft.com/rest/api/securitycenter/securescorecontrols),
         or Azure Resource Graph Explorer, choose securityresources and microsoft.security/securescores/securescorecontrols.\"},\"defaultValue\":[]},\"alertSeverities\":{\"type\":\"Array\",\"metadata\":{\"displayName\":\"Alert
         severities\",\"description\":\"Applicable only for export of security alerts.
         Determines alert severities. Example: High;Medium;Low;\"},\"allowedValues\":[\"High\",\"Medium\",\"Low\"],\"defaultValue\":[\"High\",\"Medium\",\"Low\"]},\"regulatoryComplianceStandardsNames\":{\"type\":\"Array\",\"metadata\":{\"displayName\":\"Regulatory
@@ -12316,7 +12316,7 @@ interactions:
         empty. To export specific regulatory compliance standards, enter a list of
         these standards names separated by semicolons (';'). Regulatory compliance
         standards names are available through the regulatory compliance standards
-        API (https://docs.microsoft.com/rest/api/securitycenter/regulatorycompliancestandards),
+        API (https://learn.microsoft.com/rest/api/securitycenter/regulatorycompliancestandards),
         or Azure Resource Graph Explorer, choose securityresources and microsoft.security/regulatorycompliancestandards.\"},\"defaultValue\":[]},\"workspaceResourceId\":{\"type\":\"String\",\"metadata\":{\"displayName\":\"Log
         Analytics workspace\",\"description\":\"The Log Analytics workspace of where
         the data should be exported to.\",\"strongType\":\"Microsoft.OperationalInsights/workspaces\",\"assignPermissions\":true}}},\"policyRule\":{\"if\":{\"field\":\"type\",\"equals\":\"Microsoft.Resources/subscriptions\"},\"then\":{\"effect\":\"deployIfNotExists\",\"details\":{\"type\":\"Microsoft.Security/automations\",\"name\":\"ExportToWorkspace\",\"existenceScope\":\"resourcegroup\",\"ResourceGroupName\":\"[parameters('resourceGroupName')]\",\"deploymentScope\":\"subscription\",\"roleDefinitionIds\":[\"/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c\"],\"existenceCondition\":{\"allOf\":[{\"field\":\"Microsoft.Security/automations/isEnabled\",\"equals\":true},{\"count\":{\"field\":\"Microsoft.Security/automations/sources[*]\"},\"equals\":\"[if(parameters('isSecurityFindingsEnabled'),add(length(parameters('exportedDataTypes')),1),length(parameters('exportedDataTypes')))]\"},{\"count\":{\"value\":\"[parameters('exportedDataTypes')]\",\"name\":\"dataType\",\"where\":{\"count\":{\"field\":\"Microsoft.Security/automations/sources[*]\",\"where\":{\"anyOf\":[{\"allOf\":[{\"field\":\"Microsoft.Security/automations/sources[*].eventSource\",\"equals\":\"Assessments\"},{\"value\":\"[current('dataType')]\",\"equals\":\"Security

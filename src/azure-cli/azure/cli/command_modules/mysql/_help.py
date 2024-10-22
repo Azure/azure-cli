@@ -47,11 +47,11 @@ long-summary: >
 
     - Configure public access
 
-    https://docs.microsoft.com/en-us/azure/mysql/flexible-server/how-to-manage-firewall-cli
+    https://learn.microsoft.com/en-us/azure/mysql/flexible-server/how-to-manage-firewall-cli
 
     - Configure private access
 
-    https://docs.microsoft.com/en-us/azure/mysql/flexible-server/how-to-manage-virtual-network-cli
+    https://learn.microsoft.com/en-us/azure/mysql/flexible-server/how-to-manage-virtual-network-cli
 
 examples:
   - name: >
@@ -231,11 +231,11 @@ long-summary: >
 
     - Configure public access
 
-    https://docs.microsoft.com/en-us/azure/mysql/flexible-server/how-to-manage-firewall-cli
+    https://learn.microsoft.com/en-us/azure/mysql/flexible-server/how-to-manage-firewall-cli
 
     - Configure private access
 
-    https://docs.microsoft.com/en-us/azure/mysql/flexible-server/how-to-manage-virtual-network-cli
+    https://learn.microsoft.com/en-us/azure/mysql/flexible-server/how-to-manage-virtual-network-cli
 
 examples:
   - name: >
