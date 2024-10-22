@@ -65,7 +65,7 @@ def _validate_auto_delete_on_idle(namespace):
 
 def validate_partner_namespace(cmd, namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import is_valid_resource_id, resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id, resource_id
     if namespace.partner_namespace:
         if not is_valid_resource_id(namespace.partner_namespace):
             namespace.partner_namespace = resource_id(
@@ -78,7 +78,7 @@ def validate_partner_namespace(cmd, namespace):
 
 def validate_target_namespace(cmd, namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import is_valid_resource_id, resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id, resource_id
     if namespace.target_namespace:
         if not is_valid_resource_id(namespace.target_namespace):
             namespace.target_namespace = resource_id(
@@ -96,7 +96,7 @@ def validate_premiumsku_capacity(namespace):
 
 # Validates if a subnet id or name have been given by the user. If subnet id is given, vnet-name should not be provided.
 def validate_subnet(cmd, namespace):
-    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
     subnet = namespace.subnet

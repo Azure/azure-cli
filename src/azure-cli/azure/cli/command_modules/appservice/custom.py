@@ -31,8 +31,8 @@ from knack.prompting import prompt_pass, NoTTYException, prompt_y_n
 from knack.util import CLIError
 from knack.log import get_logger
 
-from msrestazure.azure_exceptions import CloudError
-from msrestazure.tools import is_valid_resource_id, parse_resource_id, resource_id
+from azure.core.exceptions import HttpResponseError
+from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id, resource_id
 
 from azure.mgmt.storage import StorageManagementClient
 from azure.mgmt.applicationinsights import ApplicationInsightsManagementClient
@@ -982,7 +982,7 @@ def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
             client.web_apps.sync_function_triggers_slot(resource_group_name, name, slot)
         else:
             client.web_apps.sync_function_triggers(resource_group_name, name)
-    except CloudError as ex:
+    except HttpResponseError as ex:
         # This SDK function throws an error if Status Code is 200
         if ex.status_code != 200:
             raise ex
@@ -2302,15 +2302,20 @@ def update_site_configs_functionapp(cmd, resource_group_name, name, slot=None, n
                                     vnet_route_all_enabled=None, generic_configurations=None, min_replicas=None,
                                     max_replicas=None):
     check_language_runtime(cmd, resource_group_name, name)
-    return update_site_configs(cmd, resource_group_name, name, slot, number_of_workers, linux_fx_version,
-                               windows_fx_version, pre_warmed_instance_count, php_version,
-                               python_version, net_framework_version, power_shell_version,
-                               java_version, java_container, java_container_version,
-                               remote_debugging_enabled, web_sockets_enabled,
-                               always_on, auto_heal_enabled,
-                               use32_bit_worker_process, min_tls_version, http20_enabled, app_command_line,
-                               ftps_state, vnet_route_all_enabled, generic_configurations, min_replicas,
-                               max_replicas)
+    return update_site_configs(cmd, resource_group_name, name, slot, number_of_workers=number_of_workers,
+                               linux_fx_version=linux_fx_version, windows_fx_version=windows_fx_version,
+                               pre_warmed_instance_count=pre_warmed_instance_count, php_version=php_version,
+                               python_version=python_version, net_framework_version=net_framework_version,
+                               power_shell_version=power_shell_version, java_version=java_version,
+                               java_container=java_container, java_container_version=java_container_version,
+                               remote_debugging_enabled=remote_debugging_enabled,
+                               web_sockets_enabled=web_sockets_enabled, always_on=always_on,
+                               auto_heal_enabled=auto_heal_enabled, use32_bit_worker_process=use32_bit_worker_process,
+                               min_tls_version=min_tls_version, http20_enabled=http20_enabled,
+                               app_command_line=app_command_line, ftps_state=ftps_state,
+                               vnet_route_all_enabled=vnet_route_all_enabled,
+                               generic_configurations=generic_configurations, min_replicas=min_replicas,
+                               max_replicas=max_replicas)
 
 
 def update_container_settings_functionapp(cmd, resource_group_name, name, registry_server=None,
@@ -2695,7 +2700,7 @@ def enable_local_git(cmd, resource_group_name, name, slot=None):
 def sync_site_repo(cmd, resource_group_name, name, slot=None):
     try:
         return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'sync_repository', slot)
-    except CloudError as ex:  # Because of bad spec, sdk throws on 200. We capture it here
+    except HttpResponseError as ex:  # Because of bad spec, sdk throws on 200. We capture it here
         if ex.status_code not in [200, 204]:
             raise ex
 
@@ -4576,7 +4581,7 @@ def get_app_insights_connection_string(cli_ctx, resource_group, name):
     return appinsights.connection_string
 
 
-def create_flex_app_service_plan(cmd, resource_group_name, name, location):
+def create_flex_app_service_plan(cmd, resource_group_name, name, location, zone_redundant):
     SkuDescription, AppServicePlan = cmd.get_models('SkuDescription', 'AppServicePlan')
     client = web_client_factory(cmd.cli_ctx)
     sku_def = SkuDescription(tier="FlexConsumption", name="FC1", size="FC", family="FC")
@@ -4587,6 +4592,10 @@ def create_flex_app_service_plan(cmd, resource_group_name, name, location):
         kind="functionapp",
         name=name
     )
+
+    if zone_redundant:
+        _enable_zone_redundant(plan_def, sku_def, None)
+
     poller = client.app_service_plans.begin_create_or_update(resource_group_name, name, plan_def)
     return LongRunningOperation(cmd.cli_ctx)(poller)
 
@@ -4752,6 +4761,13 @@ def is_exactly_one_true(*args):
     return found
 
 
+def list_flexconsumption_zone_redundant_locations(cmd):
+    client = web_client_factory(cmd.cli_ctx)
+    regions = client.list_geo_regions(sku="FlexConsumption")
+    regions = [x for x in regions if "FCZONEREDUNDANCY" in x.org_domain]
+    return [{'name': x.name.lower().replace(' ', '')} for x in regions]
+
+
 def create_functionapp(cmd, resource_group_name, name, storage_account, plan=None,
                        os_type=None, functions_version=None, runtime=None, runtime_version=None,
                        consumption_plan_location=None, app_insights=None, app_insights_key=None,
@@ -4767,8 +4783,9 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        always_ready_instances=None, maximum_instance_count=None, instance_memory=None,
                        flexconsumption_location=None, deployment_storage_name=None,
                        deployment_storage_container_name=None, deployment_storage_auth_type=None,
-                       deployment_storage_auth_value=None):
+                       deployment_storage_auth_value=None, zone_redundant=False):
     # pylint: disable=too-many-statements, too-many-branches
+
     if functions_version is None and flexconsumption_location is None:
         logger.warning("No functions version specified so defaulting to 4.")
         functions_version = '4'
@@ -4806,6 +4823,12 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     from azure.mgmt.web.models import Site
     SiteConfig, NameValuePair, DaprConfig, ResourceConfig = cmd.get_models('SiteConfig', 'NameValuePair',
                                                                            'DaprConfig', 'ResourceConfig')
+
+    if flexconsumption_location is None:
+        if zone_redundant:
+            raise ArgumentUsageError(
+                '--zone-redundant is only valid for the Flex Consumption plan. '
+                'Please try again without the --zone-redundant parameter.')
 
     if flexconsumption_location is not None:
         if image is not None:
@@ -5133,6 +5156,17 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         create_app_insights = True
 
     if flexconsumption_location is not None:
+        if zone_redundant:
+            zone_redundant_locations = list_flexconsumption_zone_redundant_locations(cmd)
+            zone_redundant_location = next((loc for loc in zone_redundant_locations
+                                            if loc['name'].lower() == flexconsumption_location.lower()), None)
+            if zone_redundant_location is None:
+                raise ValidationError("The specified location '{0}' "
+                                      "doesn't support zone redundancy in Flex Consumption. "
+                                      "Use: az functionapp list-flexconsumption-locations --zone-redundant "
+                                      "for the list of locations that support zone redundancy."
+                                      .format(flexconsumption_location))
+
         site_config.net_framework_version = None
         functionapp_def.reserved = None
         functionapp_def.is_xenon = None
@@ -5140,7 +5174,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         try:
             plan_name = generatePlanName(resource_group_name)
             plan_info = create_flex_app_service_plan(
-                cmd, resource_group_name, plan_name, flexconsumption_location)
+                cmd, resource_group_name, plan_name, flexconsumption_location, zone_redundant)
             functionapp_def.server_farm_id = plan_info.id
             functionapp_def.location = flexconsumption_location
 
@@ -5685,7 +5719,10 @@ def list_consumption_locations(cmd):
     return [{'name': x.name.lower().replace(' ', '')} for x in regions]
 
 
-def list_flexconsumption_locations(cmd):
+def list_flexconsumption_locations(cmd, zone_redundant=False):
+    if zone_redundant:
+        return list_flexconsumption_zone_redundant_locations(cmd)
+
     from azure.cli.core.commands.client_factory import get_subscription_id
     sub_id = get_subscription_id(cmd.cli_ctx)
     geo_regions_api = 'subscriptions/{}/providers/Microsoft.Web/geoRegions?sku=FlexConsumption&api-version=2023-01-01'

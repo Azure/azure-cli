@@ -10,7 +10,7 @@ from knack.util import CLIError
 
 
 def process_autoscale_create_namespace(cmd, namespace):
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
 
     validate_tags(namespace)
     get_target_resource_validator('resource', required=True, preserve_resource_group_parameter=True)(cmd, namespace)
@@ -102,7 +102,7 @@ def validate_autoscale_timegrain(namespace):
 
 def get_target_resource_validator(dest, required, preserve_resource_group_parameter=False, alias='resource'):
     def _validator(cmd, namespace):
-        from msrestazure.tools import is_valid_resource_id
+        from azure.mgmt.core.tools import is_valid_resource_id
         name_or_id = getattr(namespace, dest)
         rg = namespace.resource_group_name
         res_ns = namespace.namespace
@@ -203,7 +203,7 @@ def validate_metrics_alert_condition(namespace):
 
 def validate_diagnostic_settings(cmd, namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import is_valid_resource_id, resource_id, parse_resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id, resource_id, parse_resource_id
 
     get_target_resource_validator('resource_uri', required=True, preserve_resource_group_parameter=True)(cmd, namespace)
     if not namespace.resource_group_name:
@@ -338,7 +338,7 @@ def get_action_group_validator(dest):
         if not action_groups:
             return
 
-        from msrestazure.tools import is_valid_resource_id, resource_id
+        from azure.mgmt.core.tools import is_valid_resource_id, resource_id
         from azure.cli.core.commands.client_factory import get_subscription_id
 
         subscription = get_subscription_id(cmd.cli_ctx)
@@ -362,7 +362,7 @@ def get_action_group_id_validator(dest):
         if not action_groups:
             return
 
-        from msrestazure.tools import is_valid_resource_id, resource_id
+        from azure.mgmt.core.tools import is_valid_resource_id, resource_id
         from azure.cli.core.commands.client_factory import get_subscription_id
 
         action_group_ids = []
@@ -384,7 +384,7 @@ def get_action_group_id_validator(dest):
 
 def validate_storage_accounts_name_or_id(cmd, namespace):
     if namespace.storage_account_ids:
-        from msrestazure.tools import is_valid_resource_id, resource_id
+        from azure.mgmt.core.tools import is_valid_resource_id, resource_id
         from azure.cli.core.commands.client_factory import get_subscription_id
         for index, storage_account_id in enumerate(namespace.storage_account_ids):
             if not is_valid_resource_id(storage_account_id):

@@ -8,7 +8,7 @@ from unittest import mock
 
 from azure.core.exceptions import HttpResponseError
 from knack.util import CLIError
-from msrestazure.tools import parse_resource_id
+from azure.mgmt.core.tools import parse_resource_id
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse

@@ -23,7 +23,6 @@ from azure.cli.core.azclierror import (
     UnclassifiedUserFault,
 )
 from azure.core.exceptions import AzureError, HttpResponseError, ServiceRequestError, ServiceResponseError
-from msrestazure.azure_exceptions import CloudError
 
 # type variables
 ManagedCluster = TypeVar("ManagedCluster")
@@ -208,8 +207,7 @@ def get_user_assigned_identity(cli_ctx, subscription_id, resource_group_name, id
         identity = msi_client.user_assigned_identities.get(
             resource_group_name=resource_group_name, resource_name=identity_name
         )
-    # track 1 sdk raise exception from msrestazure.azure_exceptions
-    except CloudError as ex:
+    except HttpResponseError as ex:
         if "was not found" in ex.message:
             raise ResourceNotFoundError("Identity '{}' not found.".format(identity_name))
         raise ServiceError(ex.message)

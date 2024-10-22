@@ -466,6 +466,8 @@ def load_arguments(self, _):
         # misc
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
         c.argument('enable_cost_analysis', action='store_true')
+        c.argument('enable_vtpm', action="store_true")
+        c.argument('enable_secure_boot', action="store_true")
 
     with self.argument_context('aks update') as c:
         # managed cluster paramerters
@@ -765,6 +767,8 @@ def load_arguments(self, _):
         c.argument('asg_ids', nargs='+', validator=validate_application_security_groups)
         c.argument('node_public_ip_tags', arg_type=tags_type, validator=validate_node_public_ip_tags,
                    help='space-separated tags: key[=value] [key[=value] ...].')
+        c.argument('enable_vtpm', action='store_true')
+        c.argument('enable_secure_boot', action='store_true')
 
     with self.argument_context('aks nodepool update', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='agent_pools') as c:
         c.argument('enable_cluster_autoscaler', options_list=[
@@ -788,6 +792,10 @@ def load_arguments(self, _):
         c.argument('os_sku', arg_type=get_enum_type(node_os_skus_update), validator=validate_os_sku)
         c.argument("enable_fips_image", action="store_true")
         c.argument("disable_fips_image", action="store_true")
+        c.argument('enable_vtpm', action='store_true')
+        c.argument('disable_vtpm', action='store_true')
+        c.argument('enable_secure_boot', action='store_true')
+        c.argument('disable_secure_boot', action='store_true')
 
     with self.argument_context('aks nodepool upgrade') as c:
         c.argument('max_surge', validator=validate_max_surge)
@@ -912,6 +920,14 @@ def load_arguments(self, _):
     with self.argument_context('aks approuting zone update') as c:
         c.argument('dns_zone_resource_ids', options_list=['--ids'], required=True)
         c.argument('attach_zones')
+
+    with self.argument_context("aks nodepool delete-machines") as c:
+        c.argument(
+            "machine_names",
+            nargs="+",
+            required=True,
+            help="Space-separated machine names to delete.",
+        )
 
 
 def _get_default_install_location(exe_name):

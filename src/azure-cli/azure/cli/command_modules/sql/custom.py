@@ -596,7 +596,7 @@ def _complete_maintenance_configuration_id(cli_ctx, argument_value=None):
     Completes maintenance configuration id from short to full type if needed
     '''
 
-    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
     if argument_value and not is_valid_resource_id(argument_value):
@@ -736,7 +736,7 @@ def _get_managed_db_resource_id(
     Gets the Managed db resource id in this Azure environment.
     '''
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import resource_id
+    from azure.mgmt.core.tools import resource_id
 
     return resource_id(
         subscription=subscription_id if subscription_id else get_subscription_id(cli_ctx),
@@ -780,7 +780,7 @@ def _get_managed_dropped_db_resource_id(
 
     from urllib.parse import quote
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import resource_id
+    from azure.mgmt.core.tools import resource_id
 
     return (resource_id(
         subscription=subscription_id if subscription_id else get_subscription_id(cli_ctx),
@@ -803,7 +803,7 @@ def _get_managed_instance_resource_id(
     '''
 
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import resource_id
+    from azure.mgmt.core.tools import resource_id
 
     return (resource_id(
         subscription=subscription_id if subscription_id else get_subscription_id(cli_ctx),
@@ -822,7 +822,7 @@ def _get_managed_instance_pool_resource_id(
     '''
 
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import resource_id
+    from azure.mgmt.core.tools import resource_id
 
     if instance_pool_name:
         return (resource_id(
@@ -1023,7 +1023,7 @@ def _validate_elastic_pool_id(
     Returns the elastic_pool_id, which may have been updated and may be None.
     '''
 
-    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
     if elastic_pool_id and not is_valid_resource_id(elastic_pool_id):
