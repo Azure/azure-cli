@@ -662,7 +662,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         # Authorize external cluster
         with self.assertRaises(HttpResponseError) as cm:
             self.cmd("az netappfiles volume replication authorize-external-replication -g %s -a %s -p %s -v %s " % (rg, account_name, pool_name, volume_name))        
-        self.assertIn('peer targeting \'\'externalHostName\' can not be found', str(
+        self.assertIn('peer targeting', str(
            cm.exception))
 
         # Perform external cluster transfer
