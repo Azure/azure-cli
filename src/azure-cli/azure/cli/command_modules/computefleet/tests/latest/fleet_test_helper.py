@@ -20,7 +20,6 @@ Methods:
     create_nat_gateway(public_ip): Creates a NAT gateway using the provided public IP address and returns its ID.
 """
 # --------------------------------------------------------------------------------------------
-
 import json
 
 class ComputefleetHelper: 
@@ -48,7 +47,6 @@ class ComputefleetHelper:
         
         subnets = [subnet]
         addressSpaces = {"addressPrefixes": ["10.0.0.0/16"]}
-        subnets = [subnet]
 
         input_data = {
             "location": location,
@@ -81,7 +79,6 @@ class ComputefleetHelper:
             "maintain": False
         }
 
-        zones = ["zone1", "zone2"]
         regular_priority_profile = {
             "capacity": 20,
             "min_capacity": 2,
@@ -127,9 +124,7 @@ class ComputefleetHelper:
                         }
                     }
                 },
-               
-             
-               "platformFaultDomainCount": 1,
+                "platformFaultDomainCount": 1,
                 "computeApiVersion": "2023-09-01"
             }
         
@@ -143,7 +138,6 @@ class ComputefleetHelper:
                 }
         
         networkInterfaceConfiguration = {
-            
                             "name": "exampleNic",
                             "properties": [
                                 computeFleetVmssIPConfiguration
@@ -170,17 +164,15 @@ class ComputefleetHelper:
         }
         
         computeFleetData = {
-            "properties": {
-                "spot_priority_profile": spot_priority_profile,
-                "vm-sizes-profile": vm_sizes_profile,
-                "compute-profile": computeProfile,
-                "regular-priority-profile": regular_priority_profile,
-                "zones": zones,
-                "tags": { "key3518": "test_tag1" },
-            }
+            "spot-priority-profile": spot_priority_profile,
+            "vm-sizes-profile": vm_sizes_profile,
+            "compute-profile": computeProfile,
+            "regular-priority-profile": regular_priority_profile,
+            "zones": ["zone1", "zone2"],
+            "tags": {"key3518": "luvrnuvsgdpbuofdskkcoqhfh"}
         }
-        return  computeFleetData
-        
+        return computeFleetData
+
     @staticmethod
     def get_subnet_id(self, vnet):
         properties = vnet['properties']
@@ -207,7 +199,6 @@ class ComputefleetHelper:
         
         self.cmd(f'az network nsg create --resource-group {resourceGroupName} --name {network_security_groups} --location {location}')
         
-        return network_security_groups_id
         return network_security_groups_id
 
     def create_nat_gateway(self, public_ip, subscription_id, resource_group_name, location):
@@ -236,4 +227,3 @@ class ComputefleetHelper:
         
         self.cmd(f'az network nat gateway create --resource-group {resource_group_name} --name  {nat_name} --location {location} --public-ip-addresses  {public_ip_json} --idle-timeout 4')
         return nat_id
-    

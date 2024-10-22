@@ -27,11 +27,8 @@ Methods:
 import os
 import unittest
 import json
-
 from azure.cli.testsdk import ScenarioTest
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse, record_only
-import random
-import string
 from fleet_test_helper import ComputefleetHelper  # Ensure this import points to the correct module
 
 defaultSubscription = 'ac302a10-6fb1-4308-baf6-ad855c4d7f3d'
@@ -42,6 +39,8 @@ if not subscriptionId:
 fleet_name = 'testFleet'
 
 def generate_random_rg_name(prefix='test_fleet_cli_rg_', length=8):
+    import random
+    import string
     suffix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=length))
     return prefix + suffix
 
@@ -107,7 +106,7 @@ class TestComputefleetScenario(ScenarioTest):
         fleetData = self.generate_fleet_parameters(subscriptionId, rg, loc)
         compute_profile = fleetData['compute-profile']
         spot_profile = fleetData['spot-priority-profile']
-        regualr_profile = fleetData['regular-priority-profile']
+        regular_profile = fleetData['regular-priority-profile']
         vm_sizes_profile = fleetData['vm-sizes-profile']
         zones = fleetData['zones']
         tags = fleetData['tags']
@@ -120,15 +119,15 @@ class TestComputefleetScenario(ScenarioTest):
             'resource_group': rg,
             'location': loc,
             'fleet_data_json': fleetData_json,
-            'compute_profile': json.dump(compute_profile),
-            'spot_profile': json.dump(spot_profile),
-            'regular-priority-profile': json.dump(regular-priority-profile),
-            'vm_sizes_profile': json.dump(vm_sizes_profile),
-            'zones': json.dump(zones),
-            'tags': tags
+            'compute_profile': json.dumps(compute_profile),
+            'spot_profile': json.dumps(spot_profile),
+            'regular_priority_profile': json.dumps(regular_profile),
+            'vm_sizes_profile': json.dumps(vm_sizes_profile),
+            'zones': json.dumps(zones),
+            'tags': json.dumps(tags)
         })
 
-        self.cmd('az computefleet create --name {fleet_name} --resource-group {resource_group} --spot-priority-profile {spot_profile} --compute-profile {compute_profile}, --vm-sizes-profile {vm_sizes_profile} --zones {zones} --location {location} --tags {tags}', checks=[
+        self.cmd('az computefleet create --name {fleet_name} --resource-group {resource_group} --spot-priority-profile {spot_profile} --compute-profile {compute_profile} --vm-sizes-profile {vm_sizes_profile} --zones {zones} --location {location} --tags {tags} --regular-priority-profile {regular_priority_profile}', checks=[
             self.check('name', '{fleet_name}'),
             self.check('resourceGroup', '{resource_group}')
         ])
@@ -196,7 +195,7 @@ class TestComputefleetScenario(ScenarioTest):
         self.cmd('az computefleet delete --name {fleet_name} --resource-group {resource_group}', checks=[
             self.is_empty()
         ])
-  
+
     @AllowLargeResponse()
     @record_only()
     def test_all_fleet_operations(self):
