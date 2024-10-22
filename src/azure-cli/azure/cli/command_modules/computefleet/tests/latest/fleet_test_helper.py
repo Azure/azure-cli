@@ -57,9 +57,20 @@ class ComputefleetHelper:
             }
         }
 
-        vnet_name = self.create_random_name('testVNet-', 24)
-        vnet_id = f"/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworks/{vnet_name}"
-        self.cmd(f'az resource create --id {vnet_id} --properties "{input_data}"')
+        virtual_network_name = self.create_random_name('testVNet-', 32)
+        virtual_network_id = f"/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworks/{virtual_network_name}"
+        input_data_json = json.dumps(input_data)
+        
+        self.kwargs.update({
+            'virtual_network_id':  virtual_network_id,
+            'input_data_json': input_data_json,
+            'location': location,
+            'resource_group': resourceGroupName,
+            'virtual_network_name': virtual_network_name
+        })
+        
+        self.cmd(f'az network vnet create --name {virtual_network_name} --resource-group {resourceGroupName} --location {location} --subnet-name "subnet-fleet" --address-prefixes "10.0.0.0/16"  --subnet-prefixes "10.0.0.0/24"')
+        #self.cmd(f'az resource create --id {virtual_network_id} --properties {input_data_json}')
         
         spot_priority_profile = {
             "capacity": 3,
@@ -234,7 +245,7 @@ class ComputefleetHelper:
                                 "disableTcpStateTracking": True,
                                 "enableFpga": True,
                                 "networkSecurityGroup": {
-                                    "id": self.create_network_security_groups()
+                                    "id": network_security_groups_id
                                 },
                                 "dnsSettings": {
                                     "dnsServers": ["nxmmfolhclsesu"]
@@ -399,10 +410,13 @@ class ComputefleetHelper:
         self.kwargs.update({
             'location': location,
             'input_data_json': input_data_json,
-            'network_security_groups_id': network_security_groups_id
+            'network_security_groups_id': network_security_groups_id,
+            'resourceGroupName': resourceGroupName,
+            'network_security_groups': network_security_groups
          })
         
-        self.cmd(f'az resource create --id {network_security_groups_id} --properties "{input_data_json}"')
+        self.cmd(f'az network nsg create --resource-group {resourceGroupName} --name {network_security_groups} --location {location}')
+        
         return network_security_groups_id
         return network_security_groups_id
 
@@ -427,11 +441,9 @@ class ComputefleetHelper:
             'location': location,
             'resource_group_name': resource_group_name,
             'nat_name': nat_name,
-            'public_ip': public_ip_json
+            'public_ip_json': public_ip_json
         })
         
-        #self.cmd(f'az resource create --id {nat_id} --properties {input_data_json}')
-        
-        self.cmd(f'az network nat gateway create --resource-group {resource_group_name} --name  {nat_name} --location {location} --public-ip-addresses  {public_ip} --idle-timeout 4')
+        self.cmd(f'az network nat gateway create --resource-group {resource_group_name} --name  {nat_name} --location {location} --public-ip-addresses  {public_ip_json} --idle-timeout 4')
         return nat_id
     

@@ -105,14 +105,16 @@ class TestComputefleetScenario(ScenarioTest):
     @AllowLargeResponse()
     def test_fleet_create(self, fleet=fleet_name, rg=resource_group, loc=location):
         fleetData = self.generate_fleet_parameters(subscriptionId, rg, loc)
+        fleetData_json = json.dumps(fleetData)
+        
         self.kwargs.update({
             'fleet_name': fleet,
             'resource_group': rg,
             'location': loc,
-            'fleet_data': fleetData
+            'fleet_data_json': fleetData_json
         })
 
-        self.cmd('az computefleet create --name {fleet_name} --resource-group {resource_group}', checks=[
+        self.cmd('az computefleet create --name {fleet_name} --resource-group {resource_group} --spot-priority-profile {fleet_data_json}', checks=[
             self.check('name', '{fleet_name}'),
             self.check('resourceGroup', '{resource_group}')
         ])
