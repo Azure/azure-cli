@@ -520,7 +520,7 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
 
     validate_service_state(parameters)
     if enable_mi_for_db_linker and auth_action != 'optOutAllAuth':
-        logger.warning('Start creating mi for db linker')
+        logger.warning('Start enabling managed identity for database linker')
         new_auth_info = enable_mi_for_db_linker(
             cmd, source_id, target_id, auth_info, client_type, connection_name, connstr_props)
         parameters['auth_info'] = new_auth_info or parameters['auth_info']
@@ -532,7 +532,6 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
         logger.warning(springboot_migration_warning(require_update=False,
                                                     check_version=(not isSecretType),
                                                     both_version=isSecretType))
-    logger.warning('request payload: %s', parameters)
     return auto_register(sdk_no_wait, no_wait,
                          client.begin_create_or_update,
                          resource_uri=source_id,
