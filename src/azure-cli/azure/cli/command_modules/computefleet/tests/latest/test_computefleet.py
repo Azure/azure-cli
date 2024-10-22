@@ -27,6 +27,9 @@ Methods:
 import os
 import unittest
 import json
+import random
+import string
+
 from azure.cli.testsdk import ScenarioTest
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse, record_only
 from fleet_test_helper import ComputefleetHelper  # Ensure this import points to the correct module
@@ -37,13 +40,19 @@ if not subscriptionId:
     subscriptionId = defaultSubscription
 
 fleet_name = 'testFleet'
-
+fleet_name_regular = 'testFleet_rg'
+fleet_name_spot = 'testFleet_sp'
 def generate_random_rg_name(prefix='test_fleet_cli_rg_', length=8):
-    import random
-    import string
     suffix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=length))
     return prefix + suffix
 
+def generate_random_fleet_name(prefix='test_fleet_cli', length=8):
+    suffix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=length))
+    return prefix + suffix
+
+fleet_name = generate_random_fleet_name(fleet_name)
+fleet_name_regular = generate_random_fleet_name(fleet_name_regular)
+fleet_name_spot = generate_random_fleet_name(fleet_name_spot)
 resource_group = generate_random_rg_name()
 location = "eastus"
 
@@ -102,7 +111,7 @@ class TestComputefleetScenario(ScenarioTest):
         return public_ip_address_id
     
     @AllowLargeResponse()
-    def test_fleet_create(self, fleet=fleet_name, rg=resource_group, loc=location):
+    def test_fleet_create(self, fleet=fleet_name, rg=resource_group, loc=location, fleet_name_reg=fleet_name_regular):
         fleetData = self.generate_fleet_parameters(subscriptionId, rg, loc)
         compute_profile = fleetData['compute-profile']
         spot_profile = fleetData['spot-priority-profile']
@@ -113,9 +122,12 @@ class TestComputefleetScenario(ScenarioTest):
         
         fleetData_json = json.dumps(fleetData)
         print(fleetData_json)
-        
+        tagsNew = {"multi": "mixed"}
+         
         self.kwargs.update({
             'fleet_name': fleet,
+            'fleet_name_reg': fleet_name_reg,
+            'fleet_name_spot': fleet_name_spot,
             'resource_group': rg,
             'location': loc,
             'fleet_data_json': fleetData_json,
@@ -124,13 +136,26 @@ class TestComputefleetScenario(ScenarioTest):
             'regular_priority_profile': json.dumps(regular_profile),
             'vm_sizes_profile': json.dumps(vm_sizes_profile),
             'zones': json.dumps(zones),
-            'tags': json.dumps(tags)
+            'tags': json.dumps(tags),
+            'tagsNew': json.dumps(tagsNew)
         })
 
-        self.cmd('az computefleet create --name {fleet_name} --resource-group {resource_group} --spot-priority-profile {spot_profile} --compute-profile {compute_profile} --vm-sizes-profile {vm_sizes_profile} --zones {zones} --location {location} --tags {tags} --regular-priority-profile {regular_priority_profile}', checks=[
+        self.cmd('az computefleet create --name {fleet_name_spot} --resource-group {resource_group} --spot-priority-profile {spot_profile}  --location {location} --tags {tags} ', checks=[
+            self.check('name', '{fleet_name_spot}'),
+            self.check('resourceGroup', '{resource_group}')
+        ])
+         
+        self.cmd('az computefleet create --name {fleet_name} --resource-group {resource_group} --spot-priority-profile {spot_profile} --compute-profile {compute_profile} --location {location} --tags {tags} ', checks=[
             self.check('name', '{fleet_name}'),
             self.check('resourceGroup', '{resource_group}')
         ])
+
+       
+        self.cmd('az computefleet create --name {fleet_name_reg} --resource-group {resource_group} --spot-priority-profile {spot_profile} --compute-profile {compute_profile} --vm-sizes-profile {vm_sizes_profile} --zones {zones} --location {location} --tags {tagsNew} ', checks=[
+            self.check('name', '{fleet_name_reg'),
+            self.check('resourceGroup', '{resource_group}')
+        ])
+    
 
     def test_fleet_update(self, fleet=fleet_name, rg=resource_group):
         self.kwargs.update({
@@ -162,7 +187,7 @@ class TestComputefleetScenario(ScenarioTest):
 
         self.cmd('az computefleet list --resource-group {resource_group}', checks=[
             self.check('type(@)', 'array'),
-            self.check('length(@)', 1)
+            self.check('length(@)', 3)
         ])
 
     def test_fleet_scale(self, fleet=fleet_name, rg=resource_group):
@@ -186,13 +211,23 @@ class TestComputefleetScenario(ScenarioTest):
             self.check('status', 'Succeeded')
         ])
 
-    def test_fleet_delete(self, fleet=fleet_name, rg=resource_group):
+    def test_fleet_delete(self, fleet=fleet_name, rg=resource_group, fleet_reg=fleet_name_regular):
         self.kwargs.update({
             'fleet_name': fleet,
+            'fleet_name_reg': fleet_reg,
+            'fleet_name_spot': fleet_name_spot,
             'resource_group': rg
         })
 
         self.cmd('az computefleet delete --name {fleet_name} --resource-group {resource_group}', checks=[
+            self.is_empty()
+        ])
+        
+        self.cmd('az computefleet delete --name {fleet_name_reg} --resource-group {resource_group}', checks=[
+            self.is_empty()
+            ])
+        
+        self.cmd('az computefleet delete --name {fleet_name_spot} --resource-group {resource_group}', checks=[
             self.is_empty()
         ])
 

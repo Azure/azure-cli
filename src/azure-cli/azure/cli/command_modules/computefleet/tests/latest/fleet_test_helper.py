@@ -80,7 +80,7 @@ class ComputefleetHelper:
         }
 
         regular_priority_profile = {
-            "capacity": 20,
+            "capacity": 3,
             "min_capacity": 2,
             "allocation_strategy": "LowestPrice"
         }
@@ -168,7 +168,7 @@ class ComputefleetHelper:
             "vm-sizes-profile": vm_sizes_profile,
             "compute-profile": computeProfile,
             "regular-priority-profile": regular_priority_profile,
-            "zones": ["zone1", "zone2"],
+            "zones": ["1","2","3"],
             "tags": {"key3518": "luvrnuvsgdpbuofdskkcoqhfh"}
         }
         return computeFleetData
