@@ -364,12 +364,9 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                                   customized_keys=customized_keys,
                                   opt_out_list=opt_out_list,
                                   app_config_id=app_config_id,
-<<<<<<< HEAD
-                                  connstr_props=connstr_props)
-=======
-                                  enable_appconfig_extension=enable_appconfig_extension
+                                  enable_appconfig_extension=enable_appconfig_extension,
+                                  connstr_props=connstr_props
                                   )
->>>>>>> dev
 
 
 # The function is used in extension, new feature must be added in the end for backward compatibility
@@ -1326,26 +1323,3 @@ def connection_update_kafka(cmd, client,  # pylint: disable=too-many-locals
     return client.begin_create_or_update(resource_uri=source_id,
                                          linker_name=connection_name,
                                          parameters=parameters)
-
-
-{
-  "properties": {
-    "targetService": {
-      "type": "ConfluentBootstrapServer",
-      "endpoint": "https://api.fabric.microsoft.com/v1/workspaces/13c65326-ecab-43f6-8a05-60927aaa4cec/SqlDatabases/4fdf6efe-23a9-4d74-8c4a-4ecc70c4d323"
-    },
-    "publicNetworkSolution": {
-      "action": "optOut"
-    },
-    "authInfo": {
-      "authType": "systemAssignedIdentity",
-      "username": "DotNetAppSqlDb20240704"
-    },
-    "configurationInfo": {
-            "additionalConnectionStringProperties": {
-                "Server": "tcp:renzo-srv-6ae35870-c362-44b9-8389-ada214a46bb5-51240650dd56.database.windows.net,1433",
-                "Database": "AzureServiceConnectorTestSqlDb-4fdf6efe-23a9-4d74-8c4a-4ecc70c4d323"
-            }
-    }
-  }
-}
