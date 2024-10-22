@@ -35,7 +35,6 @@ class AddAdditionalConnectionStringProperties(argparse.Action):
             for (k, v) in (x.split('=', 1) for x in values):
                 properties[k] = v
             properties = dict(properties)
-            print(properties.keys(), properties.values(), properties.items())
             return properties
         except ValueError:
             raise ValidationError('Usage error: {} [KEY=VALUE ...]'.format(option_string))
