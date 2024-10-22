@@ -149,10 +149,10 @@ register_argument_deprecate('bar foo', '--name', '--new-name')
 
 Declare breaking changes that affect the output of a command. This ensures users are aware of modifications to the command’s output format or content.
 
-* `command`: The name of the command group or command. If it is a command group, the warning would show in the execution of all commands in the group. 
-* `description`: The description of the breaking change. The description will display in warning messages.
-* `target_version`: The version when the deprecated item should be removed. The `target_version` is the next breaking change window by default.
-* `guide`: The guide that customers could take action to prepare for the future breaking change.
+* `command`: REQUIRED: The name of the command group or command. If it is a command group, the warning would show in the execution of all commands in the group. 
+* `description`: REQUIRED: The short-summary description of the breaking change. The description displays in warning messages.
+* `target_version`: REQUIRED: The version when the deprecated item should be removed. The `target_version` is the next breaking change window by default.
+* `guide`: REQUIRED: The migration guide that customers can follow to prepare for the future breaking change. Provide as much detail as possible to help our customers transition smoothly. This information is published in the [Azure CLI Breaking Changes]() article, but does NOT display in the warning message.
 * `doc_link`: A link to related documentation, which will be displayed in warning messages.
 
 ```python
@@ -167,10 +167,10 @@ register_output_breaking_change('bar foo', description='Reduce the output field 
 
 Declare breaking changes in the logic of the command.
 
-* `command`: The name of the command.
-* `summary`: Summary of the breaking change, which will be displayed in warning messages.
-* `target_version`: The version when the breaking change should happen. The `target_version` is the next breaking change window by default.
-* `detail`: A detailed description of the breaking change, including the actions customers should take.
+* `command`: REQUIRED: The name of the command.
+* `summary`: REQUIRED: The short-summary description of the breaking change. The description displays in warning messages.
+* `target_version`: REQUIRED: The version when the breaking change should happen. The `target_version` is the next breaking change window by default.
+* `detail`: A detailed description of the breaking change, including the actions customers should take. Provide as much detail as possible to help our customers transition smoothly. This information is published in the [Azure CLI Breaking Changes]() article, but does NOT display in the warning message.
 * `doc_link`: A link to related documentation, which will be displayed in warning messages.
 
 ```python
@@ -184,11 +184,11 @@ register_logic_breaking_change('bar foo', 'Update the validator', detail='The xx
 
 Declare breaking changes caused by changes in default values. This ensures users are aware of modifications to default values.
 
-* `command`: The name of the command.
-* `arg`: The name of the argument or one of its options. The default change warning will display whether the argument is used or not.
-* `current_default`: The current default value of the argument.
-* `new_default`: The new default value of the argument.
-* `target_version`: The version in which the breaking change should happen. By default, this is set to the next breaking change window.
+* `command`: REQUIRED: The name of the command.
+* `arg`: REQUIRED: The name of the argument or one of its options. The default change warning will display whether the argument is used or not.
+* `current_default`: REQUIRED: The current default value of the argument.
+* `new_default`: REQUIRED: The new default value of the argument.
+* `target_version`: REQUIRED: The version in which the breaking change should happen. By default, this is set to the next breaking change window.
 * `target`: Use this field to overwrite the argument display in warning messages.
 * `doc_link`: A link to related documentation, which will be displayed in warning messages.
 
@@ -203,9 +203,9 @@ register_default_value_breaking_change('bar foo', '--type', 'TypeA', 'TypeB')
 
 Declare breaking changes that will make an argument required in a future release. This ensures users are aware of upcoming mandatory parameters.
 
-* `command`: The name of the command.
-* `arg`: The name of the argument that will become required.
-* `target_version`: The version in which the argument will become required. By default, this is set to the next breaking change window.
+* `command`: REQUIRED: The name of the command.
+* `arg`: REQUIRED: The name of the argument that will become required.
+* `target_version`: REQUIRED: The version in which the argument will become required. By default, this is set to the next breaking change window.
 * `target`: Use this field to overwrite the argument display in warning messages.
 * `doc_link`: A link to related documentation, which will be displayed in warning messages.
 
@@ -218,12 +218,12 @@ register_required_flag_breaking_change('bar foo', '--type')
 
 **Other Changes**
 
-Declare other custom breaking changes that do not fall into the predefined categories. This allows for flexibility in communicating various types of breaking changes to users.
+Declare other custom-breaking changes that do not fall into the predefined categories. This allows for flexibility in communicating various types of breaking changes to users.
 
-* `command`: The name of the command.
-* `message`: A description of the breaking change.
-* `arg`: The name of the argument associated with the breaking change. If arg is not None, the warning message will only be displayed when the argument is used.
-* `target_version`: The version in which the breaking change will occur. By default, this is set to the next breaking change window. This value won't display in warning message but is used to generate upcoming breaking change document.
+* `command`: REQUIRED: The name of the command.
+* `message`: REQUIRED: The short-summary description of the breaking change. The description displays in warning messages.
+* `arg`: REQUIRED: The name of the argument associated with the breaking change. If arg is not None, the warning message will only be displayed when the argument is used.
+* `target_version`: REQUIRED: The version in which the breaking change will occur. By default, this is set to the next breaking change window. This information is published in the [Azure CLI Breaking Changes]() article, but does NOT display in the warning message.
 
 ```python
 from azure.cli.core.breaking_change import register_other_breaking_change
@@ -256,7 +256,7 @@ def create_vm(cmd, vm_name, **):
     print_conditional_breaking_change(cmd.cli_ctx, tag='SpecialBreakingChangeB', custom_logger=logger)
 ```
 
-This way, the pre-announcement wouldn't be display unless running into the branch, but still could be collected into the upcoming breaking change documentation.
+This way, the pre-announcement wouldn't be displayed unless running into the branch, but still could be published in the [Azure CLI Breaking Changes]() article.
 
 ### Check Your Breaking Change Pre-Announcement
 
@@ -272,7 +272,7 @@ If your breaking change is not for the next breaking change window, you can see 
 azdev genereate-breaking-change-report --target-version None
 ```
 
-The output should be a json object including the pre-announcement you made.
+The output should be a JSON object including the pre-announcement you made.
 
 ### Adopt Breaking Changes
 
