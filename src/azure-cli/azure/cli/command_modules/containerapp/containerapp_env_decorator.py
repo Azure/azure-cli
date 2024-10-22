@@ -376,13 +376,6 @@ class ContainerAppEnvUpdateDecorator(ContainerAppEnvDecorator):
             safe_set(self.managed_env_def, "properties", "workloadProfiles", value=workload_profiles)
 
     def set_up_dapr(self):
-        instrumentation_key = self.get_argument_instrumentation_key()
-        if instrumentation_key is not None:
-            if instrumentation_key == "none":
-                safe_set(self.managed_env_def, "properties", "daprAIInstrumentationKey", value=None)
-            else:
-                safe_set(self.managed_env_def, "properties", "daprAIInstrumentationKey", value=instrumentation_key)
-
         dapr_connection_string = self.get_argument_dapr_connection_string()
         if dapr_connection_string is not None:
             if dapr_connection_string == "none":
