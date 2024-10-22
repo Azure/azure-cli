@@ -31,6 +31,8 @@ from azure.cli.command_modules.acs._roleassignments import (
     delete_role_assignments,
 )
 from azure.cli.core.azclierror import UnknownError
+from cachetools import cached
+from cachetools.keys import hashkey
 from knack.log import get_logger
 
 logger = get_logger(__name__)
@@ -410,38 +412,6 @@ def get_desired_resource_value_args(
     )
 
 
-# get_cores_from_sku returns the number of core in the vm_size passed.
-# Returns -1 if there is a problem with parsing the vm_size.
-def get_cores_from_sku(vm_size):
-    cpu_value = -1
-    pattern = r'([a-z])+(\d+)[a-z]*(?=_v(\d+)[^_]*$|$)'
-    match = re.search(pattern, vm_size.lower())
-    if match:
-        series_prefix = match.group(1)
-        size_val = int(match.group(2))
-        version_val = match.group(3)
-        version = -1
-        if version_val is not None:
-            version = int(version_val)
-
-        cpu_value = size_val
-        # https://learn.microsoft.com/en-us/azure/virtual-machines/dv2-dsv2-series
-        # https://learn.microsoft.com/en-us/azure/virtual-machines/dv2-dsv2-series-memory
-        if version == 2 and (series_prefix in ('d', 'ds')):
-            if size_val in (2, 11):
-                cpu_value = 2
-            elif size_val in (3, 12):
-                cpu_value = 4
-            elif size_val in (4, 13):
-                cpu_value = 8
-            elif size_val in (5, 14):
-                cpu_value = 16
-            elif size_val == 15:
-                cpu_value = 20
-
-    return cpu_value
-
-
 def check_if_new_storagepool_creation_required(
     storage_pool_type,
     ephemeral_disk_volume_type,
@@ -467,6 +437,35 @@ def check_if_new_storagepool_creation_required(
     return should_create_storagepool
 
 
+def generate_vm_sku_cache_for_region(cli_ctx, location=None):
+    result = _get_vm_sku_details(cli_ctx, location)
+    for vm_data in result:
+        sku_name = vm_data.name.lower()
+        capabilities = vm_data.capabilities
+        cpu_value = -1
+        nvme_enabled = False
+        for entry in capabilities:
+            if entry.name == 'vCPUs' and cpu_value == -1:
+                cpu_value = int(entry.value)
+
+            if entry.name == 'vCPUsAvailable':
+                cpu_value = int(entry.value)
+
+            if entry.name == 'NvmeDiskSizeInMiB':
+                nvme_enabled = True
+
+        vm_sku_details(sku_name, cpu_value, nvme_enabled)
+
+
+@cached(
+    cache={},
+    key=lambda sku_name, cpu_value=None, nvme_enabled=None: hashkey(sku_name)
+)
+def vm_sku_details(sku_name, cpu_value=None, nvme_enabled=None):
+    print("AKASH: ", sku_name, cpu_value, nvme_enabled)
+    return cpu_value, nvme_enabled
+
+
 def _get_ephemeral_nvme_cpu_value_based_on_vm_size_perf_tier(nodepool_skus, perf_tier):
     cpu_value = -1
     multiplication_factor = 0.25
@@ -475,7 +474,7 @@ def _get_ephemeral_nvme_cpu_value_based_on_vm_size_perf_tier(nodepool_skus, perf
     elif perf_tier.lower() == CONST_EPHEMERAL_NVME_PERF_TIER_PREMIUM.lower():
         multiplication_factor = 0.5
     for vm_size in nodepool_skus:
-        number_of_cores = get_cores_from_sku(vm_size)
+        number_of_cores, _ = vm_sku_details(vm_size.lower())
         if number_of_cores != -1:
             if cpu_value == -1:
                 cpu_value = number_of_cores * multiplication_factor
@@ -554,3 +553,18 @@ def _generate_k8s_extension_resource_args(
     ]
 
     return resource_args
+
+
+def _get_vm_sku_details(cli_ctx, location=None):
+    def _is_vm_in_required_location(desired_location, location_list):
+        for val in location_list:
+            if desired_location.lower() == val.lower():
+                return True
+        return False
+
+    from azext_aks_preview._client_factory import get_compute_client
+    result = get_compute_client(cli_ctx).resource_skus.list()
+    result = [x for x in result if x.resource_type.lower() == 'virtualmachines']
+    if location:
+        result = [r for r in result if _is_vm_in_required_location(location, r.locations)]
+    return result
