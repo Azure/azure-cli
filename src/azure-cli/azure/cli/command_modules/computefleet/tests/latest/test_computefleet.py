@@ -106,6 +106,7 @@ class TestComputefleetScenario(ScenarioTest):
     def test_fleet_create(self, fleet=fleet_name, rg=resource_group, loc=location):
         fleetData = self.generate_fleet_parameters(subscriptionId, rg, loc)
         fleetData_json = json.dumps(fleetData)
+        print(fleetData_json)
         
         self.kwargs.update({
             'fleet_name': fleet,
