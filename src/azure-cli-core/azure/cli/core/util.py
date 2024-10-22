@@ -868,11 +868,16 @@ def check_connectivity(url='https://azure.microsoft.com', max_retries=5, timeout
 
 
 def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
-                     body=None, skip_authorization_header=False, resource=None, output_file=None,
+                     body=None, skip_authorization_header=False, resource=None, scopes=None, output_file=None,
                      generated_client_request_id_name='x-ms-client-request-id'):
     import uuid
     from requests import Session, Request
     from requests.structures import CaseInsensitiveDict
+    from .auth.util import resource_to_scopes
+
+    # Use MSAL-styled scopes instead of ADAL-styled resource
+    if resource and not scopes:
+        scopes = resource_to_scopes(resource)
 
     result = CaseInsensitiveDict()
     for s in headers or []:
@@ -953,13 +958,13 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
 
     # Prepare the Bearer token for `Authorization` header
     if not skip_authorization_header and url.lower().startswith('https://'):
-        # Prepare `resource` for `get_raw_token`
-        if not resource:
+        # Prepare `scopes` for `get_raw_token`
+        if not scopes:
             # If url starts with ARM endpoint, like `https://management.azure.com/`,
-            # use `active_directory_resource_id` for resource, like `https://management.core.windows.net/`.
+            # use `active_directory_resource_id` for scopes, like `https://management.core.windows.net//.default`.
             # This follows the same behavior as `azure.cli.core.commands.client_factory._get_mgmt_service_client`
             if url.lower().startswith(endpoints.resource_manager.rstrip('/')):
-                resource = endpoints.active_directory_resource_id
+                scopes = resource_to_scopes(endpoints.active_directory_resource_id)
             else:
                 from azure.cli.core.cloud import CloudEndpointNotSetException
                 for p in [x for x in dir(endpoints) if not x.startswith('_')]:
@@ -968,9 +973,9 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
                     except CloudEndpointNotSetException:
                         continue
                     if isinstance(value, str) and url.lower().startswith(value.lower()):
-                        resource = value
+                        scopes = resource_to_scopes(value)
                         break
-        if resource:
+        if scopes:
             # Prepare `subscription` for `get_raw_token`
             # If this is an ARM request, try to extract subscription ID from the URL.
             # But there are APIs which don't require subscription ID, like /subscriptions, /tenants
@@ -980,17 +985,17 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
             if url.lower().startswith(endpoints.resource_manager.rstrip('/')):
                 token_subscription = _extract_subscription_id(url)
             if token_subscription:
-                logger.debug('Retrieving token for resource %s, subscription %s', resource, token_subscription)
-                token_info, _, _ = profile.get_raw_token(resource, subscription=token_subscription)
+                logger.debug('Retrieving token for scopes %s, subscription %s', scopes, token_subscription)
+                token_info, _, _ = profile.get_raw_token(scopes=scopes, subscription=token_subscription)
             else:
-                logger.debug('Retrieving token for resource %s', resource)
-                token_info, _, _ = profile.get_raw_token(resource)
+                logger.debug('Retrieving token for scopes %s', scopes)
+                token_info, _, _ = profile.get_raw_token(scopes=scopes)
             token_type, token, _ = token_info
             headers = headers or {}
             headers['Authorization'] = '{} {}'.format(token_type, token)
         else:
-            logger.warning("Can't derive appropriate Azure AD resource from --url to acquire an access token. "
-                           "If access token is required, use --resource to specify the resource")
+            logger.warning("Can't derive appropriate Microsoft Entra scopes from --url to acquire an access token. "
+                           "If access token is required, use --scope to specify the scopes")
 
     # https://requests.readthedocs.io/en/latest/user/advanced/#prepared-requests
     s = Session()

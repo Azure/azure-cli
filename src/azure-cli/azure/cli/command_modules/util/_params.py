@@ -30,7 +30,12 @@ def load_arguments(self, _):
                         'see https://github.com/Azure/azure-cli/blob/dev/doc/use_cli_effectively.md#quoting-issues')
         c.argument('output_file', help='save response payload to a file')
         c.argument('resource',
-                   help='Resource url for which CLI should acquire a token from AAD in order to access '
+                   help='Resource url for which CLI should acquire a token from Microsoft Entra in order to access '
+                        'the service. The token will be placed in the Authorization header. By default, '
+                        'CLI can figure this out based on --url argument, unless you use ones not in the list '
+                        'of "az cloud show --query endpoints"')
+        c.argument('scopes', options_list=['--scope'], nargs='+',
+                   help='Scopes for which CLI should acquire a token from Microsoft Entra in order to access '
                         'the service. The token will be placed in the Authorization header. By default, '
                         'CLI can figure this out based on --url argument, unless you use ones not in the list '
                         'of "az cloud show --query endpoints"')
