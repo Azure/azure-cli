@@ -950,7 +950,7 @@ def validate_service_state(linker_parameters):
     # AzureResource and other types (e.g., FabricResource, SelfHostedResource)
     if target_type == "AzureResource":
         target_id = linker_parameters.get('target_service', dict()).get('id')
-    else :
+    else:
         target_id = linker_parameters.get('target_service', dict()).get('endpoint')
 
     for target, resource_id in TARGET_RESOURCES.items():

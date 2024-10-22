@@ -426,7 +426,7 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
 
     public_network_action = 'optOut' if (opt_out_list is not None and
                                          OPT_OUT_OPTION.PUBLIC_NETWORK.value in opt_out_list) else None
-    
+
     if target_type == RESOURCE.FabricSql:
         targetService = {
             "type": "FabricPlatform",
