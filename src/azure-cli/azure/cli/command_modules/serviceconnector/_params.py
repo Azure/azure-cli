@@ -37,7 +37,7 @@ from knack.arguments import CLIArgumentType
 from .action import AddCustomizedKeys
 
 
-def add_source_resource_block(context, source, enable_id=True):
+def add_source_resource_block(context, source, enable_id=True, target=None):
     source_args = SOURCE_RESOURCES_PARAMS.get(source)
     for resource, args in SOURCE_RESOURCES_PARAMS.items():
         if resource != source:
@@ -79,14 +79,22 @@ def add_source_resource_block(context, source, enable_id=True):
         context.argument('enable_csi', options_list=['--enable-csi'], arg_type=get_three_state_flag(),
                          help="Use keyvault as a secrets store via a CSI volume. "
                          "If specified, AuthType Arguments are not needed.")
+        if target == RESOURCE.AppConfig:
+            context.argument('enable_appconfig_extension', options_list=['--use-appconfig-extension', '-e'],
+                             arg_type=get_three_state_flag(),
+                             help="Install Azure App Configuration extension in the Kubernetes cluster.")
+        else:
+            context.ignore('enable_appconfig_extension')
     elif source == RESOURCE.ContainerApp:
         for arg, content in SOURCE_RESOURCES_CREATE_PARAMS.get(source).items():
             context.argument(arg, options_list=content.get(
                 'options'), type=str, help=content.get('help'))
         context.ignore('enable_csi')
+        context.ignore('enable_appconfig_extension')
     else:
         context.ignore('scope')
         context.ignore('enable_csi')
+        context.ignore('enable_appconfig_extension')
 
     # slot parameter
     for resource, args in SOURCE_RESOURCES_OPTIONAL_PARAMS.items():
@@ -291,7 +299,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
             with self.argument_context('{} connection create {}'.format(source.value, target.value)) as c:
                 add_client_type_argument(c, source, target)
                 add_connection_name_argument(c, source)
-                add_source_resource_block(c, source, enable_id=False)
+                add_source_resource_block(c, source, enable_id=False, target=target)
                 add_target_resource_block(c, target)
                 add_auth_block(c, source, target)
                 add_new_addon_argument(c, source, target)
@@ -304,7 +312,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
             with self.argument_context('{} connection update {}'.format(source.value, target.value)) as c:
                 add_client_type_argument(c, source, target)
                 add_connection_name_argument(c, source)
-                add_source_resource_block(c, source)
+                add_source_resource_block(c, source, enable_id=True, target=target)
                 add_auth_block(c, source, target)
                 add_configuration_store_argument(c)
                 add_secret_store_argument(c, source)
