@@ -10,7 +10,7 @@
 """
 This module contains helper functions and test cases for managing Azure Compute Fleet resources.
 Classes:
-    ComputefleetHelper: Provides methods to manage and test Azure Compute Fleet resources.
+    FleetTestHelper: Provides methods to manage and test Azure Compute Fleet resources.
 Methods:
     get_subnet_id(vnet): Extracts and returns the subnet ID from a given virtual network dictionary.
     test_get_subnet_id(): Tests the get_subnet_id method.
@@ -22,12 +22,12 @@ Methods:
 # --------------------------------------------------------------------------------------------
 import json
 
-class ComputefleetHelper: 
+class FleetTestHelper: 
 
     @staticmethod
     def generate_fleet_parameters(self, subscriptionId, resourceGroupName, location, public_ip_address_id):
-        nat_gateway_id = ComputefleetHelper.create_nat_gateway(self, public_ip_address_id, subscriptionId, resourceGroupName, location)
-        network_security_groups_id = ComputefleetHelper.create_network_security_groups(self, subscriptionId, resourceGroupName, location)
+        nat_gateway_id = FleetTestHelper.create_nat_gateway(self, public_ip_address_id, subscriptionId, resourceGroupName, location)
+        network_security_groups_id = FleetTestHelper.create_network_security_groups(self, subscriptionId, resourceGroupName, location)
         adminUsername = "adminuser"
         
         addressSpaces = { "addressPrefixes": ["10.0.0.0/16"] }

@@ -9,3 +9,39 @@
 # pylint: disable=too-many-lines
 
 from knack.help_files import helps  # pylint: disable=unused-import
+helps['computefleet'] = """
+    type: group
+    short-summary: Manage compute fleets.
+"""
+
+helps['computefleet create'] = """
+    type: command
+    short-summary: Create a new compute fleet.
+    examples:
+        - name: Create a compute fleet
+          text: az computefleet create --name MyFleet --resource-group MyResourceGroup
+"""
+
+helps['computefleet delete'] = """
+    type: command
+    short-summary: Delete a compute fleet.
+    examples:
+        - name: Delete a compute fleet
+          text: az computefleet delete --name MyFleet --resource-group MyResourceGroup
+"""
+
+helps['computefleet list'] = """
+    type: command
+    short-summary: List all compute fleets.
+    examples:
+        - name: List compute fleets
+          text: az computefleet list --resource-group MyResourceGroup
+"""
+
+helps['computefleet show'] = """
+    type: command
+    short-summary: Show details of a compute fleet.
+    examples:
+        - name: Show compute fleet details
+          text: az computefleet show --name MyFleet --resource-group MyResourceGroup
+"""

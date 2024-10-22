@@ -32,7 +32,7 @@ import string
 
 from azure.cli.testsdk import ScenarioTest
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse, record_only
-from fleet_test_helper import ComputefleetHelper  # Ensure this import points to the correct module
+from .fleet_test_helper import FleetTestHelper  # Ensure this import points to the correct module
 
 defaultSubscription = 'ac302a10-6fb1-4308-baf6-ad855c4d7f3d'
 subscriptionId = os.getenv('AZURE_SUBSCRIPTION_ID')
@@ -83,7 +83,7 @@ class TestComputefleetScenario(ScenarioTest):
     def generate_fleet_parameters(self, subscription_id, resource_group, location):
         public_ip_address_id = self.create_public_ip_address(subscription_id, resource_group, location)
         # Use the ComputefleetHelper to generate fleet parameters
-        return ComputefleetHelper.generate_fleet_parameters(self, subscription_id, resource_group, location, public_ip_address_id)
+        return FleetTestHelper.generate_fleet_parameters(self, subscription_id, resource_group, location, public_ip_address_id)
       
     def create_public_ip_address(self,  subscriptionId, resourceGroupName, location):
         public_ip_address_name = self.create_random_name('testFleetPublicIP-', 24)

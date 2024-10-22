@@ -11,6 +11,16 @@
 # from azure.cli.core.commands import CliCommandType
 # from azure.cli.core.profiles import ResourceType
 
+from azure.cli.core.commands import CliCommandType
 
 def load_command_table(self, _):  # pylint: disable=unused-argument
     pass
+    computefleet_custom = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.computefleet.custom#{}'
+    )
+
+    with self.command_group('computefleet', computefleet_custom, client_factory=None) as g:
+        g.command('create', 'create_computefleet')
+        g.command('delete', 'delete_computefleet')
+        g.command('list', 'list_computefleets')
+        g.command('show', 'show_computefleet')
