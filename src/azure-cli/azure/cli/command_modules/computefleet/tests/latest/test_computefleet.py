@@ -25,37 +25,90 @@ Methods:
 # --------------------------------------------------------------------------------------------
 
 import os
-from azure.cli.testsdk import ScenarioTest
-from azure.cli.testsdk import ResourceGroupPreparer
+import unittest
+import json
 
+from azure.cli.testsdk import ScenarioTest
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse, record_only
+import random
+import string
+from fleet_test_helper import ComputefleetHelper  # Ensure this import points to the correct module
+
+defaultSubscription = 'ac302a10-6fb1-4308-baf6-ad855c4d7f3d'
 subscriptionId = os.getenv('AZURE_SUBSCRIPTION_ID')
 if not subscriptionId:
-    raise EnvironmentError("AZURE_SUBSCRIPTION_ID environment variable is not set.")
+    subscriptionId = defaultSubscription
 
 fleet_name = 'testFleet'
-resource_group = 'testResourceGroup'
+
+def generate_random_rg_name(prefix='test_fleet_cli_rg_', length=8):
+    suffix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=length))
+    return prefix + suffix
+
+resource_group = generate_random_rg_name()
 location = "eastus"
 
 class TestComputefleetScenario(ScenarioTest):
+
     @classmethod
     def setUpClass(cls):
         super(TestComputefleetScenario, cls).setUpClass()
-        cls.cmd('az group create --name {} --location {}'.format(resource_group, location))
+        cls.resource_group = resource_group
+        cls.location = location
+        cls.create_resource_group()
 
     @classmethod
     def tearDownClass(cls):
-        cls.cmd('az group delete --name {} --yes --no-wait'.format(resource_group))
+        cls.delete_resource_group()
         super(TestComputefleetScenario, cls).tearDownClass()
-        
-    def __init__(self, method_name):
-        super(TestComputefleetScenario, self).__init__(method_name)
-        self.scenario = ComputefleetScenario(self)
 
-    def test_fleet_create(self, fleet= fleet_name, rg= resource_group, loc= location):
-        fleetData = self.scenario.generate_fleet_parameters(subscriptionId, rg, loc) 
+    @classmethod
+    def create_resource_group(cls):
+        instance = cls('test_fleet_create')
+        instance.cmd('az group create --name {} --location {}'.format(cls.resource_group, cls.location))
+
+    @classmethod
+    def delete_resource_group(cls):
+        instance = cls('test_fleet_create')
+        instance.cmd('az group delete --name {} --yes --no-wait'.format(cls.resource_group))
+
+    def generate_fleet_parameters(self, subscription_id, resource_group, location):
+        public_ip_address_id = self.create_public_ip_address(subscription_id, resource_group, location)
+        # Use the ComputefleetHelper to generate fleet parameters
+        return ComputefleetHelper.generate_fleet_parameters(self, subscription_id, resource_group, location, public_ip_address_id)
+      
+    def create_public_ip_address(self,  subscriptionId, resourceGroupName, location):
+        public_ip_address_name = self.create_random_name('testFleetPublicIP-', 24)
+        public_ip_address_id = f"/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/publicIPAddresses/{public_ip_address_name}"
+        input_data = {
+            "location": location,
+            "sku": {"name": "Standard"},
+            "properties": {
+                "publicIPAllocationMethod": "Static"
+            }
+        }
+        
+        input_data_json = json.dumps(input_data)
+        properties = '"{input_data_json}"'
+        self.kwargs.update({
+            'public_ip_address_id': public_ip_address_id,
+            'input_data_json': input_data_json,
+            'location': location,
+            'ip_properties': properties,
+            'resource_group': resourceGroupName,
+            'public_ip_address_name': public_ip_address_name
+        })
+        
+        self.cmd('az network public-ip create --name {public_ip_address_name} --resource-group {resource_group} --allocation-method Static --sku Standard --location {location} --sku Standard ')
+        return public_ip_address_id
+    
+    @AllowLargeResponse()
+    def test_fleet_create(self, fleet=fleet_name, rg=resource_group, loc=location):
+        fleetData = self.generate_fleet_parameters(subscriptionId, rg, loc)
         self.kwargs.update({
             'fleet_name': fleet,
             'resource_group': rg,
+            'location': loc,
             'fleet_data': fleetData
         })
 
@@ -64,7 +117,7 @@ class TestComputefleetScenario(ScenarioTest):
             self.check('resourceGroup', '{resource_group}')
         ])
 
-    def test_fleet_update(self, fleet= fleet_name, rg= resource_group):
+    def test_fleet_update(self, fleet=fleet_name, rg=resource_group):
         self.kwargs.update({
             'fleet_name': fleet,
             'resource_group': rg,
@@ -75,7 +128,7 @@ class TestComputefleetScenario(ScenarioTest):
             self.check('tags.key', '{new_tag}')
         ])
 
-    def test_fleet_show(self, fleet= fleet_name, rg= resource_group):
+    def test_fleet_show(self, fleet=fleet_name, rg=resource_group):
         self.kwargs.update({
             'fleet_name': fleet,
             'resource_group': rg
@@ -86,17 +139,8 @@ class TestComputefleetScenario(ScenarioTest):
             self.check('resourceGroup', '{resource_group}')
         ])
 
-    def test_fleet_delete(self, fleet= fleet_name, rg= resource_group):
-        self.kwargs.update({
-            'fleet_name': fleet,
-            'resource_group': rg
-        })
-
-        self.cmd('az computefleet delete --name {fleet_name} --resource-group {resource_group}', checks=[
-            self.is_empty()
-        ])
-
-    def test_fleet_list(self, rg= resource_group):
+    @AllowLargeResponse()
+    def test_fleet_list(self, rg=resource_group):
         self.kwargs.update({
             'resource_group': rg
         })
@@ -106,9 +150,9 @@ class TestComputefleetScenario(ScenarioTest):
             self.check('length(@)', 1)
         ])
 
-    def test_fleet_scale(self, fleet= fleet_name, rg= resource_group):
+    def test_fleet_scale(self, fleet=fleet_name, rg=resource_group):
         self.kwargs.update({
-           'fleet_name': fleet,
+            'fleet_name': fleet,
             'resource_group': rg,
             'new_capacity': 5
         })
@@ -117,23 +161,35 @@ class TestComputefleetScenario(ScenarioTest):
             self.check('capacity', '{new_capacity}')
         ])
 
-    def test_fleet_restart(self, fleet= fleet_name, rg= resource_group):
+    def test_fleet_restart(self, fleet=fleet_name, rg=resource_group):
         self.kwargs.update({
-           'fleet_name': fleet,
+            'fleet_name': fleet,
             'resource_group': rg
         })
 
         self.cmd('az computefleet restart --name {fleet_name} --resource-group {resource_group}', checks=[
             self.check('status', 'Succeeded')
         ])
-    
-    @ResourceGroupPreparer(name_prefix='cli_test_fleet')
-    def test_fleet_CURD(self):
+
+    def test_fleet_delete(self, fleet=fleet_name, rg=resource_group):
+        self.kwargs.update({
+            'fleet_name': fleet,
+            'resource_group': rg
+        })
+
+        self.cmd('az computefleet delete --name {fleet_name} --resource-group {resource_group}', checks=[
+            self.is_empty()
+        ])
+  
+    @AllowLargeResponse()
+    @record_only()
+    def test_all_fleet_operations(self):
         self.test_fleet_create()
         self.test_fleet_update()
         self.test_fleet_show()
         self.test_fleet_scale()
+        self.test_fleet_restart()
         self.test_fleet_delete()
-        
-    test_fleet_CURD()
-    pass
+
+if __name__ == '__main__':
+    unittest.main()

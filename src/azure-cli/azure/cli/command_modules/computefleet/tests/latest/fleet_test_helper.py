@@ -13,30 +13,23 @@ Classes:
     ComputefleetHelper: Provides methods to manage and test Azure Compute Fleet resources.
 Methods:
     get_subnet_id(vnet): Extracts and returns the subnet ID from a given virtual network dictionary.
-    test_fleet_create(): Tests the creation of a compute fleet.
-    test_fleet_update(): Tests the update of a compute fleet.
-    test_fleet_show(): Tests the retrieval of a compute fleet.
-    test_fleet_delete(): Tests the deletion of a compute fleet.
     test_get_subnet_id(): Tests the get_subnet_id method.
+    generate_fleet_parameters(): Generates and returns parameters for creating a compute fleet.
     create_network_security_groups(): Creates a network security group and returns its ID.
     create_public_ip_address(): Creates a public IP address and returns its ID.
     create_nat_gateway(public_ip): Creates a NAT gateway using the provided public IP address and returns its ID.
-    test_create_resources(): Tests the creation of network security groups, public IP addresses, and NAT gateways.
-    generate_fleet_parameters(): Generates and returns parameters for creating a compute fleet.
 """
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+import json
 
-class ComputefleetHelper(ScenarioTest):
-    def __init__(self, method_name):
-        super(ComputefleetHelper, self).__init__(method_name) 
+class ComputefleetHelper:
+
+    @staticmethod
+    def generate_fleet_parameters(self, subscriptionId, resourceGroupName, location, public_ip_address_id):
+        nat_gateway_id = ComputefleetHelper.create_nat_gateway(self, public_ip_address_id, subscriptionId, resourceGroupName, location)
+        network_security_groups_id = ComputefleetHelper.create_network_security_groups(self, subscriptionId, resourceGroupName, location)
         
-    def generate_fleet_parameters(self, subscriptionId, resourceGroupName, location):
-        public_ip_address_id = self.create_public_ip_address(subscriptionId, resourceGroupName, location)
-        nat_gateway_id = self.create_nat_gateway(public_ip_address_id, subscriptionId, resourceGroupName, location)
-        network_security_groups_id = self.create_network_security_groups(subscriptionId, resourceGroupName)
-        network_security_groups_id = self.create_network_security_groups()
         addressSpaces = { "addressPrefixes": ["10.0.0.0/16"] }
         
         subnet = {
@@ -387,47 +380,34 @@ class ComputefleetHelper(ScenarioTest):
             "zones": zones
         }
 
+    @staticmethod
     def get_subnet_id(self, vnet):
         properties = vnet['properties']
         subnets = properties['subnets']
         subnet = subnets[0]
-        return subnet['id']
-
-    def test_get_subnet_id(self):
-        vnet = {
-            'properties': {
-                'subnets': [
-                    {'id': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworks/{vnetName}/subnets/{subnetName}'}
-                ]
-            }
-        }
-        return self.get_subnet_id(vnet)
+        return subnet['id']  
     
-    def create_network_security_groups(self, subscriptionId, resourceGroupName):
-        network_security_groups = self.create_random_name('testVNetSecurityGroups-', 24)
+    @staticmethod
+    def create_network_security_groups(self, subscriptionId, resourceGroupName, location):
+        network_security_groups = self.create_random_name('testVNetNSG-', 32)
         network_security_groups_id = f"/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkSecurityGroups/{network_security_groups}"
         input_data = {
-            "location": "eastus"
+            "location": location
         }
-        self.cmd(f'az resource create --id {network_security_groups_id} --properties "{input_data}"')
+        
+        input_data_json = json.dumps(input_data)
+        self.kwargs.update({
+            'location': location,
+            'input_data_json': input_data_json,
+            'network_security_groups_id': network_security_groups_id
+         })
+        
+        self.cmd(f'az resource create --id {network_security_groups_id} --properties "{input_data_json}"')
         return network_security_groups_id
         return network_security_groups_id
 
-    def create_public_ip_address(self,  subscriptionId, resourceGroupName, location = "eastus"):
-        public_ip_address_name = self.create_random_name('testPublicIP-', 24)
-        public_ip_address_id = f"/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/publicIPAddresses/{public_ip_address_name}"
-        input_data = {
-            "location": location,
-            "sku": {"name": "Standard"},
-            "properties": {
-                "publicIPAllocationMethod": "Static"
-            }
-        }
-        self.cmd(f'az resource create --id {public_ip_address_id} --properties "{input_data}"')
-        return public_ip_address_id
-
-    def create_nat_gateway(self, public_ip, subscription_id, resource_group_name, location="eastus"):
-        nat_name = self.create_random_name('testNatGateway-', 24)
+    def create_nat_gateway(self, public_ip, subscription_id, resource_group_name, location):
+        nat_name = self.create_random_name('testFleetNatGW-', 34)
         nat_id = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Network/natGateways/{nat_name}"
         input_data = {
             "location": location,
@@ -438,33 +418,20 @@ class ComputefleetHelper(ScenarioTest):
                 ]
             }
         }
-        self.cmd(f'az resource create --id {nat_id} --properties "{input_data}"')
+        
+        input_data_json = json.dumps(input_data)
+        public_ip_json = json.dumps(public_ip)
+        self.kwargs.update({
+            'nat_id': nat_id,
+            'input_data_json': input_data_json,
+            'location': location,
+            'resource_group_name': resource_group_name,
+            'nat_name': nat_name,
+            'public_ip': public_ip_json
+        })
+        
+        #self.cmd(f'az resource create --id {nat_id} --properties {input_data_json}')
+        
+        self.cmd(f'az network nat gateway create --resource-group {resource_group_name} --name  {nat_name} --location {location} --public-ip-addresses  {public_ip} --idle-timeout 4')
         return nat_id
-        nat_name = self.create_random_name('testNatGateway-', 24)
-        nat_id = f"/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/natGateways/{nat_name}"
-        def create_nat_gateway(self, public_ip, location="eastus"):
-            nat_name = self.create_random_name('testNatGateway-', 24)
-            subscriptionId = "your_subscription_id"
-            resourceGroupName = "your_resource_group_name"
-            nat_id = f"/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/natGateways/{nat_name}"
-            input_data = {
-                "location": location,
-                "sku": {"name": "Standard"},
-                "properties": {
-                    "publicIpAddresses": [
-                        {"id": public_ip}
-                    ]
-                }
-            }
-            self.cmd(f'az resource create --id {nat_id} --properties "{input_data}"')
-            return nat_id
-        self.cmd(f'az resource create --id {nat_id} --properties "{input_data}"')
-        return nat_id
-    
-    def test_create_resources(self, subscriptionId, resourceGroupName, location="eastus"):
-        public_ip_address_id = self.create_public_ip_address(subscriptionId, resourceGroupName, location)
-        nat_gateway_id = self.create_nat_gateway(public_ip_address_id, subscriptionId, resourceGroupName, location)
-        network_security_groups_id = self.create_network_security_groups(subscriptionId, resourceGroupName)
-        network_security_groups_id = self.create_network_security_groups()
-        return public_ip_address_id, nat_gateway_id, network_security_groups_id
     
