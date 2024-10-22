@@ -81,7 +81,7 @@ class ComputefleetHelper:
             "maintain": False
         }
 
-        #zones = ["zone1", "zone2"]
+        zones = ["zone1", "zone2"]
         regular_priority_profile = {
             "capacity": 20,
             "min_capacity": 2,
@@ -171,10 +171,12 @@ class ComputefleetHelper:
         
         computeFleetData = {
             "properties": {
-                "spotPriorityProfile": spot_priority_profile,
-                "vmSizesProfile": vm_sizes_profile,
-                "computeProfile": computeProfile,
-               "regularPriorityProfile": regular_priority_profile
+                "spot_priority_profile": spot_priority_profile,
+                "vm-sizes-profile": vm_sizes_profile,
+                "compute-profile": computeProfile,
+                "regular-priority-profile": regular_priority_profile,
+                "zones": zones,
+                "tags": { "key3518": "test_tag1" },
             }
         }
         return  computeFleetData

@@ -105,6 +105,13 @@ class TestComputefleetScenario(ScenarioTest):
     @AllowLargeResponse()
     def test_fleet_create(self, fleet=fleet_name, rg=resource_group, loc=location):
         fleetData = self.generate_fleet_parameters(subscriptionId, rg, loc)
+        compute_profile = fleetData['compute-profile']
+        spot_profile = fleetData['spot-priority-profile']
+        regualr_profile = fleetData['regular-priority-profile']
+        vm_sizes_profile = fleetData['vm-sizes-profile']
+        zones = fleetData['zones']
+        tags = fleetData['tags']
+        
         fleetData_json = json.dumps(fleetData)
         print(fleetData_json)
         
@@ -112,10 +119,16 @@ class TestComputefleetScenario(ScenarioTest):
             'fleet_name': fleet,
             'resource_group': rg,
             'location': loc,
-            'fleet_data_json': fleetData_json
+            'fleet_data_json': fleetData_json,
+            'compute_profile': json.dump(compute_profile),
+            'spot_profile': json.dump(spot_profile),
+            'regular-priority-profile': json.dump(regular-priority-profile),
+            'vm_sizes_profile': json.dump(vm_sizes_profile),
+            'zones': json.dump(zones),
+            'tags': tags
         })
 
-        self.cmd('az computefleet create --name {fleet_name} --resource-group {resource_group} --spot-priority-profile {fleet_data_json}', checks=[
+        self.cmd('az computefleet create --name {fleet_name} --resource-group {resource_group} --spot-priority-profile {spot_profile} --compute-profile {compute_profile}, --vm-sizes-profile {vm_sizes_profile} --zones {zones} --location {location} --tags {tags}', checks=[
             self.check('name', '{fleet_name}'),
             self.check('resourceGroup', '{resource_group}')
         ])
