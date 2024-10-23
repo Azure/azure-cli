@@ -9,7 +9,6 @@ from azure.cli.core import AzCommandsLoader
 from azure.cli.command_modules.computefleet._help import helps  # pylint: disable=unused-import
 # from azure.cli.core.profiles import ResourceType  # required when using python sdk
 
-
 class ComputefleetCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):

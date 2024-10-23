@@ -19,7 +19,15 @@ helps['computefleet create'] = """
     short-summary: Create a new compute fleet.
     examples:
         - name: Create a compute fleet
-          text: az computefleet create --name MyFleet --resource-group MyResourceGroup
+          text: az computefleet create --name MyFleet --resource-group MyResourceGroup --location eastus --spot-priority-profile SpotPriorityProfile.json --compute-profile ComputeProfile.json
+"""
+
+helps['computefleet update'] = """
+    type: command
+    short-summary: Updates the compute fleet.
+    examples:
+        - name: Updates the compute fleet
+          text: az computefleet update --name MyFleet --resource-group MyResourceGroup --location eastus --set tags.key  value
 """
 
 helps['computefleet delete'] = """

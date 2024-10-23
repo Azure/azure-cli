@@ -2,10 +2,10 @@ from setuptools import setup, find_packages
 
 setup(
     name='azure-cli-computefleet',
-    version='0.1.0',
+    version='1.0.0',
     description='Microsoft Azure Command-Line Tools Compute Fleet Module',
     author='Your Name',
-    author_email='your-email@example.com',
+    author_email='rahuls@microsoft.com',
     url='https://github.com/Azure/azure-cli',
     packages=find_packages(),
     include_package_data=True,
