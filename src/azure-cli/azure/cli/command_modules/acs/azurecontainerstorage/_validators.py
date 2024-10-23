@@ -22,7 +22,7 @@ from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
     CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK,
 )
 from azure.cli.command_modules.acs.azurecontainerstorage._helpers import (
-    get_cores_from_sku
+    vm_sku_details
 )
 from azure.cli.core.azclierror import (
     ArgumentUsageError,
