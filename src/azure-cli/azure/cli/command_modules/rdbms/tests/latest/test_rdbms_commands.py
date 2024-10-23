@@ -343,6 +343,7 @@ class ServerMgmtScenarioTest(ScenarioTest):
 
 class ProxyResourcesMgmtScenarioTest(ScenarioTest):
 
+    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer()
     @ServerPreparer(engine_type='mariadb')
