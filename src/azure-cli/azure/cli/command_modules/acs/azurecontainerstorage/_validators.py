@@ -446,9 +446,10 @@ def _validate_nodepools(  # pylint: disable=too-many-branches,too-many-locals
     if is_extension_installed:
         if nodepool_list is not None:
             raise ArgumentUsageError(
-                'Cannot set --azure-container-storage-nodepools while using '
-                '--enable-azure-container-storage to enable a type of storage pool '
-                'in a cluster where Azure Container Storage is already installed.'
+                "Cannot set --azure-container-storage-nodepools while using "
+                "--enable-azure-container-storage to enable a type of storage pool "
+                "in a cluster where Azure Container Storage is already installed. "
+                "Use 'az aks nodepool' to label the node pool instead."
             )
 
         if agentpool_details is not None:
@@ -494,8 +495,8 @@ def _validate_nodepools(  # pylint: disable=too-many-branches,too-many-locals
     available_node_count = 0
     multi_zoned_cluster = False
 
-    for nodepool in nodepool_arr:
-        agentpool = agentpool_details.get(nodepool)
+    for pool_name in nodepool_arr:
+        agentpool = agentpool_details.get(pool_name)
         if agentpool is not None:
             os_type = agentpool.get("os_type")
             if os_type is not None and os_type.lower() != CONST_DEFAULT_NODE_OS_TYPE.lower():
@@ -533,12 +534,12 @@ def _validate_nodepools(  # pylint: disable=too-many-branches,too-many-locals
             if zoned_nodepool:
                 multi_zoned_cluster = True
         else:
-            agentpool_names_str = ",".join(agentpool_details.keys())
+            agentpool_names_str = ", ".join(agentpool_details.keys())
             nodepool_str = "Node pool"
-            if len(agentpool_details.keys()):
+            if len(agentpool_details.keys()) > 1:
                 nodepool_str = "Node pools"
             raise InvalidArgumentValueError(
-                f'Node pool: {nodepool} not found. '
+                f'Node pool: {pool_name} not found. '
                 'Please provide a comma separated string of existing node pool names '
                 'in --azure-container-storage-nodepools.'
                 f'\n{nodepool_str} available in the cluster: {agentpool_names_str}.'
