@@ -77,6 +77,7 @@ class ServerMgmtScenarioTest(ScenarioTest):
     def test_mariadb_server_mgmt(self, resource_group_1, resource_group_2):
         self._test_server_mgmt('mariadb', resource_group_1, resource_group_2)
 
+    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name='resource_group_1')
     @ResourceGroupPreparer(parameter_name='resource_group_2')
