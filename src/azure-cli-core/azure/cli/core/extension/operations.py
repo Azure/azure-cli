@@ -399,12 +399,6 @@ def show_extension(extension_name):
 
 
 def update_extension(cmd=None, extension_name=None, index_url=None, pip_extra_index_urls=None, pip_proxy=None, allow_preview=None, cli_ctx=None, version=None, download_url=None, ext_sha256=None):
-    if allow_preview is None:
-        logger.warning("Default enabled including preview versions for extension installation now. "
-                       "Disabled in future release. "
-                       "Use '--allow-preview true' to enable it specifically if needed. "
-                       "Use '--allow-preview false' to install stable version only. ")
-        allow_preview = True
     try:
         cmd_cli_ctx = cli_ctx or cmd.cli_ctx
         ext = get_extension(extension_name, ext_type=WheelExtension)
