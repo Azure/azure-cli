@@ -107,7 +107,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ).get_output_in_json()
         sorted_lts_versions = sorted(lts_versions, key=version_to_tuple, reverse=False)
         return sorted_lts_versions
-    
+
     def _get_newer_non_lts_version(self, location, version):
         """Return the nearest newer non-lts version of the specified version."""
         supported_versions = self.cmd(
@@ -8147,6 +8147,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
     @live_only()
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_with_monitoring_aad_auth_msi_with_datacollectionsettings_and_otheraddon(self, resource_group, resource_group_location,):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.create_new_cluster_with_monitoring_aad_auth(resource_group, resource_group_location, aks_name, user_assigned_identity=False, syslog_enabled=False, data_collection_settings=get_test_data_file_path('datacollectionsettings.json'), use_ampls=False, highlogscale_mode_enabled=True, enableOtherAddon=True)
+
+    @live_only()
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_create_with_monitoring_aad_auth_uai_with_syslog(self, resource_group, resource_group_location):
         aks_name = self.create_random_name('cliakstest', 16)
         self.create_new_cluster_with_monitoring_aad_auth(resource_group, resource_group_location, aks_name, user_assigned_identity=True, syslog_enabled=True)
@@ -8176,7 +8183,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
 
 
-    def create_new_cluster_with_monitoring_aad_auth(self, resource_group, resource_group_location, aks_name, user_assigned_identity=False, syslog_enabled=False, data_collection_settings=None, use_ampls=False, highlogscale_mode_enabled=False):
+    def create_new_cluster_with_monitoring_aad_auth(self, resource_group, resource_group_location, aks_name, user_assigned_identity=False, syslog_enabled=False, data_collection_settings=None, use_ampls=False, highlogscale_mode_enabled=False, enableOtherAddon=False):
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
@@ -8207,6 +8214,10 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         create_cmd += f'--enable-private-cluster ' if use_ampls else ''
         create_cmd += f'--ampls-resource-id {ampls_resource_id} ' if use_ampls else ''
         create_cmd += f'--enable-high-log-scale-mode ' if highlogscale_mode_enabled else ''
+
+        if enableOtherAddon:
+            # enable other addon such azure-policy to verify the monitoring addon and DCRs etc.. remainins intact.
+            self.cmd(f'aks enable-addons -a azure-policy -g={resource_group} -n={aks_name}')
 
         response = self.cmd(create_cmd, checks=[
             self.check('addonProfiles.omsagent.enabled', True),
@@ -10555,7 +10566,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         upgrade_version = self._get_newer_non_lts_version(resource_group_location, create_version)
         if upgrade_version is None:
             self.skipTest('No newer non-LTS versions found in the location')
-            
+
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
