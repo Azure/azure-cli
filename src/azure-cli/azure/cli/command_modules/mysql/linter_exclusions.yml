@@ -1,16 +1,16 @@
 ---
-mysql flexible-server update:
-  parameters:
-      disable_data_encryption:
-          rule_exclusions:
-          - option_length_too_long
-      maintenance-policy-patch-strategy:
-          rule_exclusions:
-          - option_length_too_long
-
 mysql flexible-server create:
   parameters:
       maintenance_policy_patch_strategy:
+          rule_exclusions:
+          - option_length_too_long
+
+mysql flexible-server update:
+  parameters:
+      maintenance-policy-patch-strategy:
+          rule_exclusions:
+          - option_length_too_long
+      disable_data_encryption:
           rule_exclusions:
           - option_length_too_long
 
