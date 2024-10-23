@@ -9,4 +9,4 @@ register_default_value_breaking_change('extension add', '--allow-preview',
                                        'true', 'false')
 register_default_value_breaking_change('extension update', '--allow-preview',
                                        'true', 'false')
-#The default value of '--allow-preview' will be changed to 'false' from 'true' in next breaking change release(2.67.0).
+# The default value of '--allow-preview' will be changed to 'false' from 'true' in next breaking change release(2.67.0).
