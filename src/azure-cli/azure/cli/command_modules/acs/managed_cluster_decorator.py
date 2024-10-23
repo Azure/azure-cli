@@ -8256,7 +8256,6 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                         if len(labelled_nodepool_arr) > 0:
                             nodepool_list = ','.join(labelled_nodepool_arr)
                         elif len(agentpool_details) == 1:
-                            pool_detail = agentpool_details[0]
                             nodepool_list = ','.join(agentpool_details.keys())
 
                 from azure.cli.command_modules.acs.azurecontainerstorage._validators import (
