@@ -9,7 +9,9 @@ from azure.mgmt.signalr.models import (
     SignalRFeature,
     SignalRCorsSettings,
     SignalRResource,
-    SignalRNetworkACLs)
+    SignalRNetworkACLs,
+    SignalRTlsSettings
+)
 
 from azure.mgmt.signalr.operations import SignalROperations
 
@@ -68,7 +70,9 @@ def signalr_update_set(client, signalr_name, resource_group_name, parameters):
     return client.begin_update(resource_group_name, signalr_name, parameters)
 
 
-def signalr_update_custom(instance, sku=None, unit_count=1, tags=None, service_mode=None, allowed_origins=None, default_action=None, enable_message_logs=None):
+def signalr_update_custom(instance, sku=None, unit_count=1, tags=None, service_mode=None,
+                          allowed_origins=None, default_action=None, enable_message_logs=None,
+                          client_cert_enabled=None, disable_local_auth=None, region_endpoint_enabled=None):
     instance.features = []
 
     if sku is not None:
@@ -88,5 +92,17 @@ def signalr_update_custom(instance, sku=None, unit_count=1, tags=None, service_m
 
     if default_action is not None:
         instance.network_ac_ls = SignalRNetworkACLs(default_action=default_action)
+
+    if client_cert_enabled is not None:
+        instance.tls = SignalRTlsSettings(client_cert_enabled=client_cert_enabled)
+
+    if disable_local_auth is not None:
+        instance.disable_local_auth = disable_local_auth
+
+    if region_endpoint_enabled is not None:
+        if region_endpoint_enabled:
+            instance.region_endpoint_enabled = "Enabled"
+        else:
+            instance.region_endpoint_enabled = "Disabled"
 
     return instance
