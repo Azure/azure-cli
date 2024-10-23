@@ -8,6 +8,12 @@ mysql flexible-server update:
           rule_exclusions:
           - option_length_too_long
 
+mysql flexible-server create:
+  parameters:
+      maintenance_policy_patch_strategy:
+          rule_exclusions:
+          - option_length_too_long
+
 mysql flexible-server export create:
     rule_exclusions:
       - missing_command_test_coverage
