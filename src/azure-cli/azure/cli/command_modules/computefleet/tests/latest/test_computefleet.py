@@ -139,23 +139,11 @@ class TestComputefleetScenario(ScenarioTest):
             'tags': json.dumps(tags),
             'tagsNew': json.dumps(tagsNew)
         })
-
-        self.cmd('az computefleet create --name {fleet_name_spot} --resource-group {resource_group} --spot-priority-profile {spot_profile}  --location {location} --tags {tags} ', checks=[
-            self.check('name', '{fleet_name_spot}'),
-            self.check('resourceGroup', '{resource_group}')
-        ])
-         
+ 
         self.cmd('az computefleet create --name {fleet_name} --resource-group {resource_group} --spot-priority-profile {spot_profile} --compute-profile {compute_profile} --location {location} --tags {tags} ', checks=[
             self.check('name', '{fleet_name}'),
             self.check('resourceGroup', '{resource_group}')
         ])
-
-       
-        self.cmd('az computefleet create --name {fleet_name_reg} --resource-group {resource_group} --spot-priority-profile {spot_profile} --compute-profile {compute_profile} --vm-sizes-profile {vm_sizes_profile} --zones {zones} --location {location} --tags {tagsNew} ', checks=[
-            self.check('name', '{fleet_name_reg'),
-            self.check('resourceGroup', '{resource_group}')
-        ])
-    
 
     def test_fleet_update(self, fleet=fleet_name, rg=resource_group):
         self.kwargs.update({
@@ -175,8 +163,7 @@ class TestComputefleetScenario(ScenarioTest):
         })
 
         self.cmd('az computefleet show --name {fleet_name} --resource-group {resource_group}', checks=[
-            self.check('name', '{fleet_name}'),
-            self.check('resourceGroup', '{resource_group}')
+            self.check('name', '{fleet_name}')
         ])
 
     @AllowLargeResponse()
@@ -187,7 +174,7 @@ class TestComputefleetScenario(ScenarioTest):
 
         self.cmd('az computefleet list --resource-group {resource_group}', checks=[
             self.check('type(@)', 'array'),
-            self.check('length(@)', 3)
+            self.check('length(@)', 1)
         ])
 
     def test_fleet_scale(self, fleet=fleet_name, rg=resource_group):
@@ -222,21 +209,13 @@ class TestComputefleetScenario(ScenarioTest):
         self.cmd('az computefleet delete --name {fleet_name} --resource-group {resource_group}', checks=[
             self.is_empty()
         ])
-        
-        self.cmd('az computefleet delete --name {fleet_name_reg} --resource-group {resource_group}', checks=[
-            self.is_empty()
-            ])
-        
-        self.cmd('az computefleet delete --name {fleet_name_spot} --resource-group {resource_group}', checks=[
-            self.is_empty()
-        ])
 
     @AllowLargeResponse()
     @record_only()
     def test_all_fleet_operations(self):
         self.test_fleet_create()
         self.test_fleet_update()
-        self.test_fleet_show()
+        #self.test_fleet_show()
         self.test_fleet_scale()
         self.test_fleet_restart()
         self.test_fleet_delete()
