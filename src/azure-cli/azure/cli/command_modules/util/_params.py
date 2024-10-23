@@ -38,7 +38,7 @@ def load_arguments(self, _):
     with self.argument_context('upgrade') as c:
         c.argument('update_all', options_list=['--all'], arg_type=get_three_state_flag(), help='Enable updating extensions as well.', default='true')
         c.argument('yes', options_list=['--yes', '-y'], action='store_true', help='Do not prompt for checking release notes.')
-        c.argument('allow_preview', options_list=['--allow-preview-extensions', '--allow-preview'],
+        c.argument('allow_preview', options_list=['--allow-preview-extensions', '--allow-preview'], default=False,
                    arg_type=get_three_state_flag(), help="Include preview packages for extension installation, if exists")
 
     with self.argument_context('demo style') as c:

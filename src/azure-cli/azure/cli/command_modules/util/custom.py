@@ -172,12 +172,6 @@ def upgrade_version(cmd, update_all=None, yes=None, allow_preview=None):  # pyli
 
     if exts:
         logger.warning("Upgrading extensions")
-        if allow_preview is None:
-            logger.warning("Default enabled including preview versions for extension installation now. "
-                           "Disabled in future release. "
-                           "Use '--allow-preview-extensions true' to enable it specifically if needed. "
-                           "Use '--allow-preview-extensions false' to install stable version only. ")
-            allow_preview = True
     for ext_name in exts:
         try:
             logger.warning("Checking update for %s", ext_name)
