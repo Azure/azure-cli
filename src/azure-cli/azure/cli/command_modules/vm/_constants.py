@@ -12,7 +12,7 @@
 
 UPGRADE_SECURITY_HINT = 'Consider upgrading security for your workloads using Azure Trusted Launch VMs. ' \
                         'To know more about Trusted Launch, please visit ' \
-                        'https://learn.microsoft.com/en-us/azure/virtual-machines/trusted-launch.'
+                        'https://aka.ms/TrustedLaunch.'
 
 TLAD_DEFAULT_CHANGE_MSG = 'Ignite (November) 2023 onwards "{}" command will deploy Gen2-Trusted ' \
                           'Launch VM by default. To know more about the default change and Trusted Launch, ' \

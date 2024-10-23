@@ -15,8 +15,10 @@ import stat
 from urllib.parse import urlparse
 from urllib.request import urlopen
 from azure.cli.core._profile import Profile
+from azure.cli.core.api import get_config_dir
 from knack.log import get_logger
 from knack.util import CLIError
+from packaging.version import parse as parse_version
 
 logger = get_logger(__name__)
 
@@ -30,10 +32,28 @@ class AzCopy:
     def __init__(self, creds=None):
         self.system = platform.system()
         install_location = _get_default_install_location()
-        self.executable = install_location
+        self.executable = None
+        if os.path.isfile(install_location):
+            self.executable = install_location
+            version = self.check_version()
+            if not version or parse_version(version) < parse_version(AZCOPY_VERSION):
+                self.executable = None
+        else:
+            try:
+                import re
+                args = ["azcopy", "--version"]
+                out_bytes = subprocess.check_output(args)
+                out_text = out_bytes.decode('utf-8')
+                version = re.findall(r"azcopy version (.+?)\n", out_text)[0]
+                if version and parse_version(version) >= parse_version(AZCOPY_VERSION):
+                    self.executable = "azcopy"
+            except Exception:  # pylint: disable=broad-except
+                self.executable = None
         self.creds = creds
-        if not os.path.isfile(install_location) or self.check_version() != AZCOPY_VERSION:
+        if not self.executable:
+            logger.warning("Azcopy not found, installing at %s", install_location)
             self.install_azcopy(install_location)
+            self.executable = install_location
 
     def install_azcopy(self, install_location):
         install_dir = os.path.dirname(install_location)
@@ -182,14 +202,12 @@ def _generate_sas_token(cmd, account_name, account_key, service, resource_types=
 
 def _get_default_install_location():
     system = platform.system()
+    _config_dir = get_config_dir()
+    _azcopy_installation_dir = os.path.join(_config_dir, "bin")
     if system == 'Windows':
-        home_dir = os.environ.get('USERPROFILE')
-        if not home_dir:
-            raise CLIError('In the Windows platform, please specify the environment variable "USERPROFILE" '
-                           'as the installation location.')
-        install_location = os.path.join(home_dir, r'.azcopy\azcopy.exe')
+        install_location = os.path.join(_azcopy_installation_dir, 'azcopy.exe')
     elif system in ('Linux', 'Darwin'):
-        install_location = os.path.expanduser(os.path.join('~', 'bin/azcopy'))
+        install_location = os.path.join(_azcopy_installation_dir, 'azcopy')
     else:
         raise CLIError('The {} platform is not currently supported. If you want to know which platforms are supported, '
                        'please refer to the document for supported platforms: '

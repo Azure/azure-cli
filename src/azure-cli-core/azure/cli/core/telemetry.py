@@ -191,7 +191,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
                               lambda: _get_config().get('core', 'output', fallback='unknown'))
         set_custom_properties(result, 'EnvironmentVariables', _get_env_string)
         set_custom_properties(result, 'Locale',
-                              lambda: '{},{}'.format(locale.getdefaultlocale()[0], locale.getdefaultlocale()[1]))
+                              lambda: '{},{}'.format(locale.getlocale()[0], locale.getlocale()[1]))
         set_custom_properties(result, 'StartTime', str(self.start_time))
         set_custom_properties(result, 'EndTime', str(self.end_time))
         set_custom_properties(result, 'InitTimeElapsed', str(self.init_time_elapsed))

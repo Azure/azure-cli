@@ -32,6 +32,7 @@ from azure.mgmt.security.models import (SecurityContact,
                                         AutomationTriggeringRule,
                                         SettingName)
 from azure.mgmt.security.v2020_07_01_preview.models import (RuleResultsInput, RulesResultsInput)
+from azure.mgmt.security.v2023_01_01.models import (Extension)
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.azclierror import (MutuallyExclusiveArgumentError)
 from msrestazure.tools import resource_id
@@ -432,9 +433,10 @@ def get_security_pricing(client, resource_name):
     return client.get(resource_name)
 
 
-def create_security_pricing(client, resource_name, tier):
-
-    return client.update(resource_name, Pricing(pricing_tier=tier))
+def create_security_pricing(client, resource_name, tier, subplan, extensions):
+    if extensions is not None:
+        extensions = [Extension(**extension) for extension in extensions]
+    return client.update(resource_name, Pricing(pricing_tier=tier, sub_plan=subplan, extensions=extensions))
 
 # --------------------------------------------------------------------------------------------
 # Security Topology

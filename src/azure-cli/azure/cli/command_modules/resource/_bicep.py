@@ -57,7 +57,7 @@ def validate_bicep_target_scope(template_schema, deployment_scope):
         )
 
 
-def run_bicep_command(cli_ctx, args, auto_install=True):
+def run_bicep_command(cli_ctx, args, auto_install=True, custom_env=None):
     if _use_binary_from_path(cli_ctx):
         from shutil import which
 
@@ -70,7 +70,7 @@ def run_bicep_command(cli_ctx, args, auto_install=True):
 
         _logger.debug("Using Bicep CLI from PATH. %s", bicep_version_message)
 
-        return _run_command("bicep", args)
+        return _run_command("bicep", args, custom_env)
 
     installation_path = _get_bicep_installation_path(platform.system())
     _logger.debug("Bicep CLI installation path: %s", installation_path)
@@ -104,7 +104,7 @@ def run_bicep_command(cli_ctx, args, auto_install=True):
             if cache_expired:
                 _refresh_bicep_version_check_cache(latest_release_tag)
 
-    return _run_command(installation_path, args)
+    return _run_command(installation_path, args, custom_env)
 
 
 def ensure_bicep_installation(cli_ctx, release_tag=None, target_platform=None, stdout=True):
@@ -301,8 +301,12 @@ def _extract_version(text):
     return semver.VersionInfo.parse(semver_match.group(0)) if semver_match else None
 
 
-def _run_command(bicep_installation_path, args):
-    process = subprocess.run([rf"{bicep_installation_path}"] + args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+def _run_command(bicep_installation_path, args, custom_env=None):
+    process = subprocess.run(
+        [rf"{bicep_installation_path}"] + args,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        env=custom_env)
 
     try:
         process.check_returncode()

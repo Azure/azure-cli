@@ -931,6 +931,26 @@ class AKSAgentPoolContext(BaseAKSContext):
         # this parameter does not need validation
         return max_surge
 
+    def get_drain_timeout(self):
+        """Obtain the value of drain_timeout.
+
+        :return: int
+        """
+        # read the original value passed by the command
+        drain_timeout = self.raw_param.get("drain_timeout")
+        # In create mode, try to read the property value corresponding to the parameter from the `agentpool` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.agentpool and
+                self.agentpool.upgrade_settings and
+                self.agentpool.upgrade_settings.drain_timeout_in_minutes is not None
+            ):
+                drain_timeout = self.agentpool.upgrade_settings.drain_timeout_in_minutes
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return drain_timeout
+
     def get_vm_set_type(self) -> str:
         """Obtain the value of vm_set_type, default value is CONST_VIRTUAL_MACHINE_SCALE_SETS.
 
@@ -1468,6 +1488,11 @@ class AKSAgentPoolAddDecorator:
         max_surge = self.context.get_max_surge()
         if max_surge:
             upgrade_settings.max_surge = max_surge
+
+        drain_timeout = self.context.get_drain_timeout()
+        if drain_timeout:
+            upgrade_settings.drain_timeout_in_minutes = drain_timeout
+
         agentpool.upgrade_settings = upgrade_settings
         return agentpool
 
@@ -1726,7 +1751,14 @@ class AKSAgentPoolUpdateDecorator:
         max_surge = self.context.get_max_surge()
         if max_surge:
             upgrade_settings.max_surge = max_surge
+            # why not always set this? so we don't wipe out a preview feaure in upgrade settigns like NodeSoakDuration?
             agentpool.upgrade_settings = upgrade_settings
+
+        drain_timeout = self.context.get_drain_timeout()
+        if drain_timeout:
+            upgrade_settings.drain_timeout_in_minutes = drain_timeout
+            agentpool.upgrade_settings = upgrade_settings
+
         return agentpool
 
     def update_vm_properties(self, agentpool: AgentPool) -> AgentPool:

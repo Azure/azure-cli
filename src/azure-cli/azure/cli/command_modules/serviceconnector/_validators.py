@@ -41,6 +41,7 @@ from ._resource_config import (
     SUPPORTED_AUTH_TYPE,
     LOCAL_CONNECTION_RESOURCE,
     LOCAL_CONNECTION_PARAMS,
+    SPRING_APP_DEPLOYMENT_RESOURCE,
     WEB_APP_SLOT_RESOURCE
 )
 
@@ -361,6 +362,12 @@ def validate_source_resource_id(cmd, namespace):
             if matched:
                 namespace.source_id = matched.group()
                 return True
+        if source == RESOURCE.SpringCloud:
+            deploymentPattern = SPRING_APP_DEPLOYMENT_RESOURCE
+            matched = re.match(get_resource_regex(deploymentPattern), namespace.source_id, re.IGNORECASE)
+            if matched:
+                namespace.source_id = matched.group()
+                return True
 
         # For other source and Web App which cannot match slot pattern
         pattern = SOURCE_RESOURCES.get(source)
@@ -382,7 +389,7 @@ def validate_connection_id(namespace):
     '''
     if getattr(namespace, 'indentifier', None):
         matched = False
-        for resource in list(SOURCE_RESOURCES.values()) + [WEB_APP_SLOT_RESOURCE]:
+        for resource in list(SOURCE_RESOURCES.values()) + [WEB_APP_SLOT_RESOURCE, SPRING_APP_DEPLOYMENT_RESOURCE]:
             regex = '({})/providers/Microsoft.ServiceLinker/linkers/([^/]*)'.format(get_resource_regex(resource))
             matched = re.match(regex, namespace.indentifier, re.IGNORECASE)
             if matched:
@@ -666,6 +673,14 @@ def apply_source_optional_args(cmd, namespace, arg_values):
     if source == RESOURCE.WebApp:
         if arg_values.get('slot', None):
             resource = WEB_APP_SLOT_RESOURCE
+            if check_required_args(resource, arg_values):
+                namespace.source_id = resource.format(
+                    subscription=get_subscription_id(cmd.cli_ctx),
+                    **arg_values
+                )
+    if source == RESOURCE.SpringCloud:
+        if arg_values.get('deployment', None):
+            resource = SPRING_APP_DEPLOYMENT_RESOURCE
             if check_required_args(resource, arg_values):
                 namespace.source_id = resource.format(
                     subscription=get_subscription_id(cmd.cli_ctx),

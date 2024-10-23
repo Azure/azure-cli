@@ -507,8 +507,8 @@ def build_identity_and_data_encryption(db_engine, byok_identity=None, backup_byo
             identities[backup_byok_identity] = {}
 
         if db_engine == 'mysql':
-            identity = mysql_flexibleservers.models.Identity(user_assigned_identities=identities,
-                                                             type="UserAssigned")
+            identity = mysql_flexibleservers.models.MySQLServerIdentity(user_assigned_identities=identities,
+                                                                        type="UserAssigned")
 
             data_encryption = mysql_flexibleservers.models.DataEncryption(
                 primary_user_assigned_identity_id=byok_identity,
@@ -566,3 +566,7 @@ def get_single_to_flex_sku_mapping(source_single_server_sku, tier, sku_name):
         else:
             sku_name = single_to_flex_sku_mapping.get(tier).get(source_single_server_sku.capacity)
     return tier, sku_name
+
+
+def get_firewall_rules_from_paged_response(firewall_rules):
+    return list(firewall_rules) if isinstance(firewall_rules, ItemPaged) else firewall_rules

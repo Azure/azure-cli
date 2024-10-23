@@ -256,14 +256,30 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
     data_source_type_arg_type = CLIArgumentType(
         options_list=['--data-source-type'],
-        arg_type=get_enum_type(['mysql_single']),
+        arg_type=get_enum_type(['mysql_single', 'azure_blob']),
         help='Data source type. e.g., mysql_single: Azure Database for MySQL Servers. '
+             'azure_blob: Source backup provided in Azure blob container.'
     )
 
     data_source_arg_type = CLIArgumentType(
         options_list=['--data-source'],
         help='Data source for importing to Flexible Server. Based on the data source type provide the data source as mentioned below. '
              'e.g., mysql_single: The name or resource ID of the Azure MySQL single server. '
+             'azure_blob: The name or resource ID of the Azure blob container. The storage uri of the azure blob container. '
+             'Example: https://{blob_name}.blob.core.windows.net/{container_name}. The storage uri should not contain the sas token. '
+             'If required, sas token can be provided in "data-source-sas-token" parameter.'
+    )
+
+    data_source_backup_dir_arg_type = CLIArgumentType(
+        options_list=['--data-source-backup-dir'],
+        help='Relative path of the directory in which source backup is stored. '
+             'By default, the backup files will be read from the root of storage. '
+             'This parameter is valid for storage based data source. Example: azure_blob. '
+    )
+
+    data_source_sas_token_arg_type = CLIArgumentType(
+        options_list=['--data-source-sas-token'],
+        help='Sas token for accessing the data source. This parameter is valid for storage based data source. Example: azure_blob. '
     )
 
     mode_arg_type = CLIArgumentType(
@@ -336,6 +352,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         c.argument('yes', arg_type=yes_arg_type)
         c.argument('data_source_type', arg_type=data_source_type_arg_type)
         c.argument('data_source', arg_type=data_source_arg_type)
+        c.argument('data_source_backup_dir', arg_type=data_source_backup_dir_arg_type)
+        c.argument('data_source_sas_token', arg_type=data_source_sas_token_arg_type)
         c.argument('mode', default='Offline', arg_type=mode_arg_type)
 
     with self.argument_context('mysql flexible-server delete') as c:
@@ -449,7 +467,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         argument_context_string = 'mysql flexible-server firewall-rule {}'.format(scope)
         with self.argument_context(argument_context_string) as c:
             c.argument('firewall_rule_name', id_part='child_name_1', options_list=['--rule-name', '-r'], validator=firewall_rule_name_validator,
-                       help='The name of the firewall rule. If name is omitted, default name will be chosen for firewall name. The firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'. Additionally, the name of the firewall rule must be at least 3 characters and no more than 128 characters in length. ')
+                       help='The name of the firewall rule. If name is omitted, default name will be chosen for firewall name. The firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'. Additionally, the name of the firewall rule must be at least 1 character and no more than 80 characters in length. ')
             c.argument('end_ip_address', options_list=['--end-ip-address'], validator=ip_address_validator,
                        help='The end IP address of the firewall rule. Must be IPv4 format. Use value \'0.0.0.0\' to represent all Azure-internal IP addresses. ')
             c.argument('start_ip_address', options_list=['--start-ip-address'], validator=ip_address_validator,

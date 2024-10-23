@@ -1,0 +1,596 @@
+interactions:
+- request:
+    body: '{"tags": {"key": "value"}, "location": "eastus", "sku": {"name": "Premium_P1",
+      "capacity": 1}, "properties": {"features": [{"flag": "ServiceMode", "value":
+      "Classic"}, {"flag": "EnableMessagingLogs", "value": "True"}], "cors": {"allowedOrigins":
+      ["http://example1.com", "http://example2.com"]}, "networkACLs": {"defaultAction":
+      "Deny"}, "publicNetworkAccess": "Enabled", "disableLocalAuth": false, "disableAadAuth":
+      false}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - signalr create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '423'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --sku --unit-count -l --tags --service-mode --enable-message-logs --allowed-origins
+        --default-action
+      User-Agent:
+      - AZURECLI/2.53.0 azsdk-python-mgmt-signalr/2.0.0b1 Python/3.8.17 (macOS-14.0-arm64-arm-64bit)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Premium_P1","tier":"Premium","size":"P1","capacity":1},"properties":{"provisioningState":"Creating","externalIP":null,"hostName":"signalr000002.service.signalr.net","publicPort":443,"serverPort":443,"version":"1.0-preview","privateEndpointConnections":[],"sharedPrivateLinkResources":[],"tls":{"clientCertEnabled":false},"hostNamePrefix":"signalr000002","features":[{"flag":"ServiceMode","value":"Classic","properties":{}},{"flag":"EnableConnectivityLogs","value":"False","properties":{}},{"flag":"EnableMessagingLogs","value":"True","properties":{}},{"flag":"EnableLiveTrace","value":"False","properties":{}}],"liveTraceConfiguration":null,"resourceLogConfiguration":null,"cors":{"allowedOrigins":["http://example1.com","http://example2.com"]},"serverless":{"connectionTimeoutInSeconds":30},"upstream":{"templates":null},"networkACLs":{"defaultAction":"Deny","publicNetwork":{"allow":["ServerConnection","ClientConnection","RESTAPI","Trace"],"deny":null},"privateEndpoints":[]},"publicNetworkAccess":"Enabled","disableLocalAuth":false,"disableAadAuth":false},"kind":"SignalR","location":"eastus","tags":{"key":"value"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002","name":"signalr000002","type":"Microsoft.SignalRService/SignalR","systemData":{"createdBy":"biqian@microsoft.com","createdByType":"User","createdAt":"2023-10-08T10:00:43.9458806Z","lastModifiedBy":"biqian@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-10-08T10:00:43.9458806Z"}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/571c36e6-3a8c-4f4d-b7ec-815c65fbe9b9?api-version=2023-06-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '1581'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 08 Oct 2023 10:00:47 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationResults/571c36e6-3a8c-4f4d-b7ec-815c65fbe9b9?api-version=2023-06-01-preview
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-rp-server-mvid:
+      - 7a9fbd09-41be-4571-843d-17367567ea6a
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - signalr create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku --unit-count -l --tags --service-mode --enable-message-logs --allowed-origins
+        --default-action
+      User-Agent:
+      - AZURECLI/2.53.0 azsdk-python-mgmt-signalr/2.0.0b1 Python/3.8.17 (macOS-14.0-arm64-arm-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/571c36e6-3a8c-4f4d-b7ec-815c65fbe9b9?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/571c36e6-3a8c-4f4d-b7ec-815c65fbe9b9","name":"571c36e6-3a8c-4f4d-b7ec-815c65fbe9b9","status":"Running","startTime":"2023-10-08T10:00:46.0464547Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '312'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 08 Oct 2023 10:00:47 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - 7a9fbd09-41be-4571-843d-17367567ea6a
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - signalr create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku --unit-count -l --tags --service-mode --enable-message-logs --allowed-origins
+        --default-action
+      User-Agent:
+      - AZURECLI/2.53.0 azsdk-python-mgmt-signalr/2.0.0b1 Python/3.8.17 (macOS-14.0-arm64-arm-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/571c36e6-3a8c-4f4d-b7ec-815c65fbe9b9?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/operationStatuses/571c36e6-3a8c-4f4d-b7ec-815c65fbe9b9","name":"571c36e6-3a8c-4f4d-b7ec-815c65fbe9b9","status":"Succeeded","startTime":"2023-10-08T10:00:46.0464547Z","endTime":"2023-10-08T10:01:46.7179858Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '355'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 08 Oct 2023 10:02:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - 7a9fbd09-41be-4571-843d-17367567ea6a
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - signalr create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku --unit-count -l --tags --service-mode --enable-message-logs --allowed-origins
+        --default-action
+      User-Agent:
+      - AZURECLI/2.53.0 azsdk-python-mgmt-signalr/2.0.0b1 Python/3.8.17 (macOS-14.0-arm64-arm-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Premium_P1","tier":"Premium","size":"P1","capacity":1},"properties":{"provisioningState":"Succeeded","externalIP":"20.88.155.49","hostName":"signalr000002.service.signalr.net","publicPort":443,"serverPort":443,"version":"1.0","privateEndpointConnections":[],"sharedPrivateLinkResources":[],"tls":{"clientCertEnabled":false},"hostNamePrefix":"signalr000002","features":[{"flag":"ServiceMode","value":"Classic","properties":{}},{"flag":"EnableConnectivityLogs","value":"False","properties":{}},{"flag":"EnableMessagingLogs","value":"True","properties":{}},{"flag":"EnableLiveTrace","value":"False","properties":{}}],"liveTraceConfiguration":null,"resourceLogConfiguration":null,"cors":{"allowedOrigins":["http://example1.com","http://example2.com"]},"serverless":{"connectionTimeoutInSeconds":30},"upstream":{"templates":null},"networkACLs":{"defaultAction":"Deny","publicNetwork":{"allow":["ServerConnection","ClientConnection","RESTAPI","Trace"],"deny":null},"privateEndpoints":[]},"publicNetworkAccess":"Enabled","disableLocalAuth":false,"disableAadAuth":false},"kind":"SignalR","location":"eastus","tags":{"key":"value"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002","name":"signalr000002","type":"Microsoft.SignalRService/SignalR","systemData":{"createdBy":"biqian@microsoft.com","createdByType":"User","createdAt":"2023-10-08T10:00:43.9458806Z","lastModifiedBy":"biqian@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-10-08T10:00:43.9458806Z"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1584'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 08 Oct 2023 10:02:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - 7a9fbd09-41be-4571-843d-17367567ea6a
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"tags": {"key": "value"}, "location": "westus", "sku": {"name": "Premium_P1",
+      "capacity": 1}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - signalr replica create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '94'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --signalr-name --replica-name -g --sku --unit-count -l --tags
+      User-Agent:
+      - AZURECLI/2.53.0 azsdk-python-mgmt-signalr/2.0.0b1 Python/3.8.17 (macOS-14.0-arm64-arm-64bit)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002/replicas/clitestReplica?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Premium_P1","tier":"Premium","size":"P1","capacity":1},"properties":{"provisioningState":"Creating"},"location":"westus","tags":{"key":"value"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/replicas/clitestReplica","name":"clitestReplica","type":"Microsoft.SignalRService/SignalR/replicas","systemData":{"createdBy":"biqian@microsoft.com","createdByType":"User","createdAt":"2023-10-08T10:02:13.1490032Z","lastModifiedBy":"biqian@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-10-08T10:02:13.1490032Z"}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002/replicas/clitestReplica/operationStatuses/0c9418b7-80a5-4643-96ca-9f097a6a200a?api-version=2023-06-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '639'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 08 Oct 2023 10:02:17 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002/replicas/clitestReplica/operationResults/0c9418b7-80a5-4643-96ca-9f097a6a200a?api-version=2023-06-01-preview
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-rp-server-mvid:
+      - 7f8eb303-e4e8-4c4c-82e1-057395a819b2
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - signalr replica create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --signalr-name --replica-name -g --sku --unit-count -l --tags
+      User-Agent:
+      - AZURECLI/2.53.0 azsdk-python-mgmt-signalr/2.0.0b1 Python/3.8.17 (macOS-14.0-arm64-arm-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002/replicas/clitestReplica/operationStatuses/0c9418b7-80a5-4643-96ca-9f097a6a200a?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/replicas/clitestReplica/operationStatuses/0c9418b7-80a5-4643-96ca-9f097a6a200a","name":"0c9418b7-80a5-4643-96ca-9f097a6a200a","status":"Running","startTime":"2023-10-08T10:02:16.4024891Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '336'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 08 Oct 2023 10:02:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - 7f8eb303-e4e8-4c4c-82e1-057395a819b2
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - signalr replica create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --signalr-name --replica-name -g --sku --unit-count -l --tags
+      User-Agent:
+      - AZURECLI/2.53.0 azsdk-python-mgmt-signalr/2.0.0b1 Python/3.8.17 (macOS-14.0-arm64-arm-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002/replicas/clitestReplica/operationStatuses/0c9418b7-80a5-4643-96ca-9f097a6a200a?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/replicas/clitestReplica/operationStatuses/0c9418b7-80a5-4643-96ca-9f097a6a200a","name":"0c9418b7-80a5-4643-96ca-9f097a6a200a","status":"Running","startTime":"2023-10-08T10:02:16.4024891Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '336'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 08 Oct 2023 10:02:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - 7f8eb303-e4e8-4c4c-82e1-057395a819b2
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - signalr replica create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --signalr-name --replica-name -g --sku --unit-count -l --tags
+      User-Agent:
+      - AZURECLI/2.53.0 azsdk-python-mgmt-signalr/2.0.0b1 Python/3.8.17 (macOS-14.0-arm64-arm-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002/replicas/clitestReplica/operationStatuses/0c9418b7-80a5-4643-96ca-9f097a6a200a?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/replicas/clitestReplica/operationStatuses/0c9418b7-80a5-4643-96ca-9f097a6a200a","name":"0c9418b7-80a5-4643-96ca-9f097a6a200a","status":"Succeeded","startTime":"2023-10-08T10:02:16.4024891Z","endTime":"2023-10-08T10:03:09.4443667Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '379'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 08 Oct 2023 10:03:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - 7f8eb303-e4e8-4c4c-82e1-057395a819b2
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - signalr replica create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --signalr-name --replica-name -g --sku --unit-count -l --tags
+      User-Agent:
+      - AZURECLI/2.53.0 azsdk-python-mgmt-signalr/2.0.0b1 Python/3.8.17 (macOS-14.0-arm64-arm-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002/replicas/clitestReplica?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Premium_P1","tier":"Premium","size":"P1","capacity":1},"properties":{"provisioningState":"Succeeded"},"location":"westus","tags":{"key":"value"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/replicas/clitestReplica","name":"clitestReplica","type":"Microsoft.SignalRService/SignalR/replicas","systemData":{"createdBy":"biqian@microsoft.com","createdByType":"User","createdAt":"2023-10-08T10:02:13.1490032Z","lastModifiedBy":"biqian@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-10-08T10:02:13.1490032Z"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '640'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 08 Oct 2023 10:03:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - 7f8eb303-e4e8-4c4c-82e1-057395a819b2
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - signalr replica show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --signalr-name --replica-name -g
+      User-Agent:
+      - AZURECLI/2.53.0 azsdk-python-mgmt-signalr/2.0.0b1 Python/3.8.17 (macOS-14.0-arm64-arm-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002/replicas/clitestReplica?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Premium_P1","tier":"Premium","size":"P1","capacity":1},"properties":{"provisioningState":"Succeeded"},"location":"westus","tags":{"key":"value"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/replicas/clitestReplica","name":"clitestReplica","type":"Microsoft.SignalRService/SignalR/replicas","systemData":{"createdBy":"biqian@microsoft.com","createdByType":"User","createdAt":"2023-10-08T10:02:13.1490032Z","lastModifiedBy":"biqian@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-10-08T10:02:13.1490032Z"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '640'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 08 Oct 2023 10:03:21 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - 7f8eb303-e4e8-4c4c-82e1-057395a819b2
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - signalr replica list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --signalr-name -g
+      User-Agent:
+      - AZURECLI/2.53.0 azsdk-python-mgmt-signalr/2.0.0b1 Python/3.8.17 (macOS-14.0-arm64-arm-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002/replicas?api-version=2023-06-01-preview
+  response:
+    body:
+      string: '{"value":[{"sku":{"name":"Premium_P1","tier":"Premium","size":"P1","capacity":1},"properties":{"provisioningState":"Succeeded"},"location":"westus","tags":{"key":"value"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002/replicas/clitestReplica","name":"clitestReplica","type":"Microsoft.SignalRService/SignalR/replicas"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '420'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 08 Oct 2023 10:03:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - 7a9fbd09-41be-4571-843d-17367567ea6a
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - signalr replica delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --signalr-name --replica-name -g
+      User-Agent:
+      - AZURECLI/2.53.0 azsdk-python-mgmt-signalr/2.0.0b1 Python/3.8.17 (macOS-14.0-arm64-arm-64bit)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002/replicas/clitestReplica?api-version=2023-06-01-preview
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      date:
+      - Sun, 08 Oct 2023 10:03:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+      x-rp-server-mvid:
+      - 7f8eb303-e4e8-4c4c-82e1-057395a819b2
+    status:
+      code: 204
+      message: No Content
+version: 1

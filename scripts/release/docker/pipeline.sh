@@ -13,6 +13,7 @@ docker build --no-cache \
              --build-arg BUILD_DATE="`date -u +"%Y-%m-%dT%H:%M:%SZ"`" \
              --build-arg CLI_VERSION=$CLI_VERSION \
              --tag $IMAGE_NAME:latest \
+             --file $DOCKERFILE \
              $BUILD_SOURCESDIRECTORY
 
 docker save -o "$BUILD_STAGINGDIRECTORY/docker-azure-cli-${CLI_VERSION}.tar" $IMAGE_NAME:latest

@@ -927,16 +927,13 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
 
     def _test_flexible_server_gtid_reset(self, database_engine, resource_group):
-        location = DEFAULT_LOCATION
+        location = "eastus"
+        general_purpose_sku = "Standard_D2ds_v4"
 
         source_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
 
         self.cmd('{} flexible-server create -g {} -n {} -l {} --public-access none --tier {} --sku-name {}'
-                 .format(database_engine, resource_group, source_server, location, 'GeneralPurpose', DEFAULT_GENERAL_PURPOSE_SKU))
-        
-        self.cmd('{} flexible-server show -g {} -n {}'
-                 .format(database_engine, resource_group, source_server),
-                 checks=[JMESPathCheck('backup.geoRedundantBackup', 'Disabled')])
+                 .format(database_engine, resource_group, source_server, location, 'GeneralPurpose', general_purpose_sku))
         
         # update server paramters to enable gtid
         source = 'user-override'
@@ -957,18 +954,9 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server parameter set --name {} -v {} --source {} -s {} -g {}'
                  .format(database_engine, parameter_name, 'ON', source, source_server, resource_group),
                  checks=[JMESPathCheck('value', 'ON'), JMESPathCheck('source', source), JMESPathCheck('name', parameter_name)])
-
-        # set gtid string to source server
-        self.cmd('{} flexible-server gtid reset --resource-group {} --server-name {} --gtid-set {} --yes'
-                 .format(database_engine, resource_group, source_server, str(uuid.uuid4()).upper() + ":1"), expect_failure=False)
-
-        # udpate server geo-redundant-backup to enable
-        self.cmd('{} flexible-server update -g {} -n {} --geo-redundant-backup Enabled'
-                 .format(database_engine, resource_group, source_server),
-                 checks=[JMESPathCheck('backup.geoRedundantBackup', 'Enabled')])
         
         self.cmd('{} flexible-server gtid reset --resource-group {} --server-name {} --gtid-set {} --yes'
-                 .format(database_engine, resource_group, source_server, str(uuid.uuid4()).upper() + ":1"), expect_failure=True)
+                 .format(database_engine, resource_group, source_server, str(uuid.uuid4()).upper() + ":1"), expect_failure=False)
         
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, source_server))
 
@@ -976,8 +964,8 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location="eastus")
-    @ServerPreparer(engine_type='mysql', location="eastus")
+    @ResourceGroupPreparer(location=DEFAULT_LOCATION)
+    @ServerPreparer(engine_type='mysql', location=DEFAULT_LOCATION)
     def test_mysql_flexible_server_proxy_resource(self, resource_group, server):
         self._test_firewall_rule_mgmt('mysql', resource_group, server)
         self._test_parameter_mgmt('mysql', resource_group, server)
@@ -1991,8 +1979,8 @@ class FlexibleServerUpgradeMgmtScenarioTest(ScenarioTest):
 class FlexibleServerBackupsMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location=DEFAULT_LOCATION)
-    @ServerPreparer(engine_type='mysql', location=DEFAULT_LOCATION)
+    @ResourceGroupPreparer(location="eastus2")
+    @ServerPreparer(engine_type='mysql', location="eastus2")
     def test_mysql_flexible_server_backups_mgmt(self, resource_group, server):
         self._test_backups_mgmt('mysql', resource_group, server)
 

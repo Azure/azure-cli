@@ -463,8 +463,9 @@ def load_command_table(self, _):
             self.command_table['vmss list'] = VMSS.List(loader=self,
                                                         table_transformer=transform_vmss_list_without_zones_table_output)
 
-        from .custom import VMSSListInstances
-        self.command_table['vmss list-instances'] = VMSSListInstances(loader=self)
+        if self.cli_ctx.cloud.profile == 'latest':
+            from .custom import VMSSListInstances
+            self.command_table['vmss list-instances'] = VMSSListInstances(loader=self)
 
     with self.command_group('vmss diagnostics', compute_vmss_sdk) as g:
         g.custom_command('set', 'set_vmss_diagnostics_extension')

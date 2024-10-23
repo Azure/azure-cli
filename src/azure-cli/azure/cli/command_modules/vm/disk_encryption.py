@@ -10,7 +10,7 @@ from knack.log import get_logger
 from azure.cli.core.commands import LongRunningOperation
 
 from azure.cli.command_modules.vm.custom import set_vm, _compute_client_factory, _is_linux_os
-from azure.cli.command_modules.vm._vm_utils import get_key_vault_base_url, create_keyvault_data_plane_client
+from azure.cli.command_modules.vm._vm_utils import get_key_vault_base_url, create_data_plane_keyvault_key_client
 
 _DATA_VOLUME_TYPE = 'DATA'
 _ALL_VOLUME_TYPE = 'ALL'
@@ -363,9 +363,9 @@ def show_vm_encryption_status(cmd, resource_group_name, vm_name):
 
 def _get_keyvault_key_url(cli_ctx, keyvault_name, key_name):
     vault_base_url = get_key_vault_base_url(cli_ctx, keyvault_name)
-    client = create_keyvault_data_plane_client(cli_ctx, vault_base_url)
-    result = client.get_key(key_name)
-    return result.key.kid  # pylint: disable=no-member
+    client = create_data_plane_keyvault_key_client(cli_ctx, vault_base_url)
+    key = client.get_key(key_name)
+    return key.id
 
 
 def _handles_default_volume_type_for_vmss_encryption(is_linux, volume_type, force):

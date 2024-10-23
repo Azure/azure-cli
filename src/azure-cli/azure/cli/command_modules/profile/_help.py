@@ -71,6 +71,10 @@ short-summary: Get a token for utilities to access Azure.
 long-summary: >
     The token will be valid for at least 5 minutes with the maximum at 60 minutes.
     If the subscription argument isn't specified, the current account is used.
+
+
+    In the output, `expires_on` represents a POSIX timestamp and `expiresOn` represents a local datetime.
+    It is recommended for downstream applications to use `expires_on` because it is in UTC.
 examples:
     - name: Get an access token for the current account
       text: >

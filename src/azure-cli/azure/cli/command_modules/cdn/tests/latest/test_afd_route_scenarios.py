@@ -68,8 +68,8 @@ class CdnAfdRouteScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
                                           profile_name,
                                           custom_domain_name,
                                           host_name,
-                                          AfdCertificateType.managed_certificate,
-                                          AfdMinimumTlsVersion.tls12,
+                                          AfdCertificateType.managed_certificate.value,
+                                          AfdMinimumTlsVersion.tls12.value,
                                           None,
                                           None)
 

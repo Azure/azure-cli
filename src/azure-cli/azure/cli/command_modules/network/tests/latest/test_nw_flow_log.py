@@ -3,11 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer)
+from azure.cli.testsdk import (LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer)
 from azure.cli.testsdk.scenario_tests.decorators import AllowLargeResponse
 
 
-class NWFlowLogScenarioTest(ScenarioTest):
+class NWFlowLogScenarioTest(LiveScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='test_nw_flow_log_', location='centraluseuap')
     @StorageAccountPreparer(name_prefix='testflowlog', location='centraluseuap', kind='StorageV2')

@@ -61,7 +61,8 @@ from .custom import (
     ServicePrincipalType,
     SqlServerMinimalTlsVersionType,
     SqlManagedInstanceMinimalTlsVersionType,
-    AuthenticationType
+    AuthenticationType,
+    FreeLimitExhaustionBehavior
 )
 
 from ._validators import (
@@ -260,6 +261,19 @@ database_availability_zone_param_type = CLIArgumentType(
     options_list=['--availability-zone'],
     help='Availability zone')
 
+database_use_free_limit = CLIArgumentType(
+    options_list=['--use-free-limit', '--free-limit'],
+    help='Whether or not the database uses free monthly limits. Allowed on one database in a subscription.',
+    arg_type=get_three_state_flag())
+
+database_free_limit_exhaustion_behavior = CLIArgumentType(
+    options_list=['--free-limit-exhaustion-behavior', '--exhaustion-behavior', '--fleb'],
+    help='Specifies the behavior when monthly free limits are exhausted for the free database.'
+    'AutoPause: The database will be auto paused upon exhaustion of free limits for remainder of the month.'
+    'BillForUsage: The database will continue to be online upon exhaustion of free limits'
+    'and any overage will be billed.',
+    arg_type=get_enum_type(FreeLimitExhaustionBehavior))
+
 managed_instance_param_type = CLIArgumentType(
     options_list=['--managed-instance', '--mi'],
     help='Name of the Azure SQL Managed Instance.')
@@ -382,7 +396,7 @@ event_hub_param_type = CLIArgumentType(
     help='The name of the event hub. If none is specified '
          'when providing event_hub_authorization_rule_id, the default event hub will be selected.')
 
-db_service_objective_examples = 'Basic, S0, P1, GP_Gen4_1, GP_Gen5_S_8, BC_Gen5_2, HS_Gen5_32.'
+db_service_objective_examples = 'Basic, S0, P1, GP_Gen4_1, GP_S_Gen5_8, BC_Gen5_2, HS_Gen5_32.'
 dw_service_objective_examples = 'DW100, DW1000c'
 
 
@@ -485,6 +499,12 @@ def _configure_db_dw_params(arg_ctx):
 
     arg_ctx.argument('availability_zone',
                      arg_type=database_availability_zone_param_type)
+
+    arg_ctx.argument('use_free_limit',
+                     arg_type=database_use_free_limit)
+
+    arg_ctx.argument('free_limit_exhaustion_behavior',
+                     arg_type=database_free_limit_exhaustion_behavior)
 
     arg_ctx.argument('encryption_protector_auto_rotation',
                      arg_type=database_encryption_protector_auto_rotation_param_type)
@@ -589,7 +609,9 @@ def _configure_db_dw_create_params(
             'user_assigned_identity_id',
             'federated_client_id',
             'availability_zone',
-            'encryption_protector_auto_rotation'
+            'encryption_protector_auto_rotation',
+            'use_free_limit',
+            'free_limit_exhaustion_behavior'
         ])
 
     # Create args that will be used to build up the Database's Sku object
@@ -651,6 +673,8 @@ def _configure_db_dw_create_params(
         arg_ctx.ignore('catalog_collation')
         arg_ctx.ignore('maintenance_configuration_id')
         arg_ctx.ignore('is_ledger_on')
+        arg_ctx.ignore('use_free_limit')
+        arg_ctx.ignore('free_limit_exhaustion_behavior')
 
     # Only applicable to point in time restore or deleted restore create mode.
     if create_mode not in [CreateMode.restore, CreateMode.point_in_time_restore]:
@@ -712,11 +736,16 @@ def _configure_db_dw_create_params(
         arg_ctx.ignore('min_capacity')
         arg_ctx.ignore('compute_model')
 
+        # Free limit parameters are not applicable to DataWarehouse
+        arg_ctx.ignore('use_free_limit')
+        arg_ctx.ignore('free_limit_exhaustion_behavior')
+
         # ReadScale properties are not valid for DataWarehouse
         # --read-replica-count was accidentally included in previous releases and
         # therefore is hidden using `deprecate_info` instead of `ignore`
         arg_ctx.ignore('read_scale')
         arg_ctx.ignore('high_availability_replica_count')
+
         arg_ctx.argument('read_replica_count',
                          options_list=['--read-replica-count'],
                          deprecate_info=arg_ctx.deprecate(hide=True))
@@ -904,6 +933,12 @@ def load_arguments(self, _):
 
         c.argument('availability_zone',
                    arg_type=database_availability_zone_param_type)
+
+        c.argument('use_free_limit',
+                   arg_type=database_use_free_limit)
+
+        c.argument('free_limit_exhaustion_behavior',
+                   arg_type=database_free_limit_exhaustion_behavior)
 
     with self.argument_context('sql db export') as c:
         # Create args that will be used to build up the ExportDatabaseDefinition object

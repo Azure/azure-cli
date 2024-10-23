@@ -863,6 +863,11 @@ def load_arguments(self, _):
         c.argument('output_format', help="Set output format. Valid values are ( json | bicepparam ).")
         c.argument('include_params', help="Set include params. Valid values are ( all | required-only ).")
 
+    with self.argument_context('bicep lint') as c:
+        c.argument('file', arg_type=bicep_file_type, help="The path to the Bicep module file to lint in the file system.")
+        c.argument('no_restore', arg_type=bicep_no_restore_type, help="When set, generates the parameters file without restoring external modules.")
+        c.argument('diagnostics_format', arg_type=get_enum_type(['default', 'sarif']), help="Set diagnostics format.")
+
     with self.argument_context('resourcemanagement private-link create') as c:
         c.argument('resource_group', arg_type=resource_group_name_type,
                    help='The name of the resource group.')

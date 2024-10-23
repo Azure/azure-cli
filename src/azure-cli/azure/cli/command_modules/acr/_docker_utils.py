@@ -7,7 +7,6 @@ try:
     from urllib.parse import urlencode, urlparse, urlunparse
 except ImportError:
     from urllib import urlencode
-    from urlparse import urlparse, urlunparse
 
 import time
 from json import loads
@@ -54,6 +53,8 @@ class RepoAccessTokenPermission(Enum):
     DELETED_READ = 'deleted_read'
     DELETED_RESTORE = 'deleted_restore'
     PULL = 'pull'
+    PUSH = 'push'
+    PULL_PUSH = '{},{}'.format(PULL, PUSH)
     META_WRITE_META_READ = '{},{}'.format(METADATA_WRITE, METADATA_READ)
     DELETE_META_READ = '{},{}'.format(DELETE, METADATA_READ)
     PULL_META_READ = '{},{}'.format(PULL, METADATA_READ)
@@ -614,20 +615,20 @@ def request_data_from_registry(http_method,
             log_registry_response(response)
 
             if manifest_headers and raw and response.status_code == 200:
-                return response.content.decode('utf-8'), None
+                return response.content.decode('utf-8'), None, response.status_code
             if response.status_code == 200:
                 result = response.json()[result_index] if result_index else response.json()
                 next_link = response.headers['link'] if 'link' in response.headers else None
-                return result, next_link
+                return result, next_link, response.status_code
             if response.status_code == 201 or response.status_code == 202:
                 result = None
                 try:
                     result = response.json()[result_index] if result_index else response.json()
                 except ValueError as e:
                     logger.debug('Response is empty or is not a valid json. Exception: %s', str(e))
-                return result, None
+                return result, None, response.status_code
             if response.status_code == 204:
-                return None, None
+                return None, None, response.status_code
             if response.status_code == 401:
                 raise RegistryException(
                     parse_error_message('Authentication required.', response),
@@ -655,11 +656,43 @@ def request_data_from_registry(http_method,
     raise CLIError(errorMessage)
 
 
+def parse_image_name(image, allow_digest=False, default_latest=True):
+    if allow_digest and '@' in image:
+        # This is probably an image name by manifest digest
+        tokens = image.split('@')
+        if len(tokens) == 2:
+            return tokens[0], None, tokens[1]
+
+    if ':' in image and '@' not in image:
+        # This is probably an image name by tag
+        tokens = image.split(':')
+        if len(tokens) == 2:
+            return tokens[0], tokens[1], None
+
+    if ':' not in image and '@' not in image:
+        # This is probably an image with implicit latest tag
+        if default_latest:
+            return image, 'latest', None
+
+        return image, None, None
+
+    if allow_digest:
+        raise CLIError("The name of the image may include a tag in the format"
+                       " 'name:tag' or digest in the format 'name@digest'.")
+    raise CLIError("The name of the image may include a tag in the format 'name:tag'.")
+
+
 def parse_error_message(error_message, response):
     import json
     try:
-        server_message = json.loads(response.text)['errors'][0]['message']
-        error_message = 'Error: {}'.format(server_message) if server_message else error_message
+        server_error = json.loads(response.text)['errors'][0]
+        if 'message' in server_error:
+            server_message = server_error['message']
+            if 'detail' in server_error and isinstance(server_error['detail'], str):
+                server_details = server_error['detail']
+                error_message = 'Error: {} Detail: {}'.format(server_message, server_details)
+            else:
+                error_message = 'Error: {}'.format(server_message)
     except (ValueError, KeyError, TypeError, IndexError):
         pass
 

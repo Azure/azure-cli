@@ -107,7 +107,8 @@ def mysql_arguments_validator(db_context, location, tier, sku_name, storage_gb, 
                               public_access=None, version=None, auto_grow=None, replication_role=None, subnet=None,
                               byok_identity=None, backup_byok_identity=None, byok_key=None, geo_redundant_backup=None,
                               disable_data_encryption=None, iops=None, auto_io_scaling=None, instance=None,
-                              data_source_type=None, mode=None):
+                              data_source_type=None, mode=None,
+                              data_source_backup_dir=None, data_source_sas_token=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforMySQL/flexibleServers')
 
     list_skus_info = get_mysql_list_skus_info(db_context.cmd, location, server_name=instance.name if instance else None)
@@ -132,15 +133,20 @@ def mysql_arguments_validator(db_context, location, tier, sku_name, storage_gb, 
     _mysql_byok_validator(byok_identity, backup_byok_identity, byok_key, backup_byok_key,
                           disable_data_encryption, geo_redundant_backup, instance)
     _mysql_iops_validator(iops, auto_io_scaling, instance)
-    _mysql_import_data_source_type_validator(data_source_type)
+    _mysql_import_data_source_type_validator(data_source_type, data_source_backup_dir, data_source_sas_token)
     _mysql_import_mode_validator(mode)
 
 
-def _mysql_import_data_source_type_validator(data_source_type):
-    allowed_values = ['mysql_single']
+def _mysql_import_data_source_type_validator(data_source_type, data_source_backup_dir=None, data_source_sas_token=None):
+    allowed_values = ['mysql_single', 'azure_blob']
     if data_source_type is not None and data_source_type.lower() not in allowed_values:
         raise InvalidArgumentValueError('Incorrect value for --data-source-type. Allowed values : {}'
                                         .format(allowed_values))
+    if data_source_type is not None and data_source_type.lower() == 'mysql_single':
+        if data_source_backup_dir is not None or data_source_sas_token is not None:
+            raise CLIError('Incorrect usage: --data-source-backup-dir and --data-source-sas-token. '
+                           'These parameters are not valid for data_source_type mysql_single. '
+                           'Make sure to provide correct parameters. Read more at help section. ')
 
 
 def _mysql_import_mode_validator(mode):
@@ -399,10 +405,10 @@ def _valid_range(addr_range):
 
 
 def firewall_rule_name_validator(ns):
-    if not re.search(r'^[a-zA-Z0-9][-_a-zA-Z0-9]{1,126}[_a-zA-Z0-9]$', ns.firewall_rule_name):
+    if not re.search(r'^[a-zA-Z0-9][-_a-zA-Z0-9]{0,79}(?<!-)$', ns.firewall_rule_name):
         raise ValidationError("The firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'. "
-                              "Additionally, the name of the firewall rule must be at least 3 characters "
-                              "and no more than 128 characters in length. ")
+                              "Additionally, the name of the firewall rule must be at least 1 character "
+                              "and no more than 80 characters in length. ")
 
 
 def validate_server_name(db_context, server_name, type_):

@@ -684,9 +684,6 @@ short-summary: Manage role assignments.
 helps['role assignment create'] = """
 type: command
 short-summary: Create a new role assignment for a user, group, or service principal.
-long-summary: >-
-    --scope argument will become required for creating a role assignment in the breaking change release of the fall
-    of 2023. Please explicitly specify --scope.
 examples:
   - name: Create role assignment to grant the specified assignee the Reader role on an Azure virtual machine.
     text: az role assignment create --assignee sp_name --role Reader --scope /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.Compute/virtualMachines/MyVm

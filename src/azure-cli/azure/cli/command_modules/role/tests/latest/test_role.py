@@ -255,6 +255,12 @@ class RoleDefinitionScenarioTest(RoleScenarioTestBase):
 
 class RoleAssignmentScenarioTest(RoleScenarioTestBase):
 
+    def _prepare_scope_kwargs(self):
+        # Get the resource ID of the current subscription
+        self.kwargs['sub_id'] = '/subscriptions/{}'.format(self.cmd('account show').get_output_in_json()['id'])
+        # Get the resource ID of the resource group
+        self.kwargs['rg_id'] = '{}/resourceGroups/{}'.format(self.kwargs['sub_id'], self.kwargs['rg'])
+
     @ResourceGroupPreparer(name_prefix='cli_role_assign')
     @AllowLargeResponse()
     def test_role_assignment_scenario(self, resource_group):
@@ -266,8 +272,15 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
             self.kwargs.update({
                 'upn': user + TEST_TENANT_DOMAIN,
                 'nsg': 'nsg1',
-                'role': 'reader'  # Use low-privileged role to make the test secure
+                'role': 'reader',  # Use low-privileged role to make the test secure
+                # https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles
+                'reader_guid': 'acdd72a7-3385-48ef-bd42-f606fba81ae7'
             })
+            self._prepare_scope_kwargs()
+
+            # test create role assignment without --scope
+            with self.assertRaisesRegex(SystemExit, '2'):
+                self.cmd('role assignment create --assignee {upn} --role {role}')
 
             result = self.cmd('ad user create --display-name tester123 --password Test123456789'
                               ' --user-principal-name {upn}').get_output_in_json()
@@ -293,9 +306,9 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
                 self.kwargs['nsg_id'] = result['id']
 
                 # test role assignments on a resource group for the user
-                self.cmd('role assignment create --assignee {upn} --role {role} -g {rg}')
+                self.cmd('role assignment create --assignee {upn} --role {role} --scope {rg_id}')
                 # verify role assignment create is idempotent
-                self.cmd('role assignment create --assignee {upn} --role {role} -g {rg}',
+                self.cmd('role assignment create --assignee {upn} --role {role} --scope {rg_id}',
                          self.check("principalName", self.kwargs["upn"]))
 
                 self.cmd('role assignment list -g {rg}', checks=self.check("length([])", 1))
@@ -305,7 +318,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
                 ])
 
                 # Create role assignment for the group
-                self.cmd('role assignment create --assignee {group_id} --role {role} -g {rg}')
+                self.cmd('role assignment create --assignee {group_id} --role {role} --scope {rg_id}')
 
                 # test include-groups
                 self.cmd('role assignment list --assignee {upn} --all --include-groups', checks=[
@@ -317,33 +330,35 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
                 self.cmd('role assignment list -g {rg}',
                          checks=self.is_empty())
 
+                # From now on, directly use role definition ID to avoid querying definition ID and reduce recording
+                # YAML size.
+
                 # test role assignments on a resource
-                self.cmd('role assignment create --assignee {upn} --role {role} --scope {nsg_id}')
-                self.cmd('role assignment list --assignee {upn} --role {role} --scope {nsg_id}',
+                self.cmd('role assignment create --assignee {upn} --role {reader_guid} --scope {nsg_id}')
+                self.cmd('role assignment list --assignee {upn} --role {reader_guid} --scope {nsg_id}',
                          checks=self.check("length([])", 1))
-                self.cmd('role assignment delete --assignee {upn} --role {role} --scope {nsg_id}')
+                self.cmd('role assignment delete --assignee {upn} --role {reader_guid} --scope {nsg_id}')
                 self.cmd('role assignment list --scope {nsg_id}',
                          checks=self.is_empty())
 
                 # test role assignment on subscription level
-                self.cmd('role assignment create --assignee {upn} --role {role}')
-                self.cmd('role assignment list --assignee {upn} --role {role}',
+                self.cmd('role assignment create --assignee {upn} --role {reader_guid} --scope {sub_id}')
+                self.cmd('role assignment list --assignee {upn} --role {reader_guid}',
                          checks=self.check("length([])", 1))
                 self.cmd('role assignment list --assignee {upn}',
                          checks=self.check("length([])", 1))
-                self.cmd('role assignment delete --assignee {upn} --role {role}')
+                self.cmd('role assignment delete --assignee {upn} --role {reader_guid}')
                 self.cmd('role assignment list --assignee {upn}',
                          checks=self.check("length([])", 0))
 
                 # Test bring-your-own assignment name
                 self.kwargs['assignment_name'] = self.create_guid()
-                # Directly use GUID to avoid querying definition ID and reduce recording YAML size
-                # https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles
-                self.kwargs['reader_guid'] = 'acdd72a7-3385-48ef-bd42-f606fba81ae7'
-                self.kwargs['assignment_id'] = self.cmd('role assignment create --assignee {upn} --role {reader_guid} '
-                                                        '--name {assignment_name}').get_output_in_json()['id']
+                self.kwargs['assignment_id'] = self.cmd(
+                    'role assignment create --assignee {upn} --role {reader_guid} --scope {rg_id} '
+                    '--name {assignment_name}').get_output_in_json()['id']
                 # Should be idempotent
-                self.cmd('role assignment create --assignee {upn} --role {reader_guid} --name {assignment_name}')
+                self.cmd('role assignment create --assignee {upn} --role {reader_guid} --scope {rg_id} '
+                         '--name {assignment_name}')
                 self.cmd('role assignment list --assignee {upn} --role {reader_guid} --all',
                          checks=[self.check("length([])", 1), self.check("[0].name", '{assignment_name}')])
                 # Delete by assignment id
@@ -351,8 +366,9 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
 
                 # Test delete by ID, but with other arguments ignored
                 self.kwargs['assignment_name'] = self.create_guid()
-                self.kwargs['assignment_id'] = self.cmd('role assignment create --assignee {upn} --role {reader_guid} '
-                                                        '--name {assignment_name}').get_output_in_json()['id']
+                self.kwargs['assignment_id'] = self.cmd(
+                    'role assignment create --assignee {upn} --role {reader_guid} --scope {rg_id} '
+                    '--name {assignment_name}').get_output_in_json()['id']
                 # Besides --ids, all other arguments are ignored
                 self.cmd('role assignment delete --ids {assignment_id} '
                          '--assignee test --role test --resource-group test --scope test --include-inherit')
@@ -360,10 +376,11 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
 
                 # test create role assignment for invalid assignee
                 with self.assertRaisesRegex(CLIError, "Cannot find user or service principal in graph database for 'fake'."):
-                    self.cmd('role assignment create --assignee fake --role {role}')
+                    self.cmd('role assignment create --assignee fake --role {reader_guid} --scope {rg_id}')
             finally:
                 try:
                     self.cmd('ad user delete --id {upn}')
+                    self.cmd('ad group delete --group {group_id}')
                 except:
                     pass
 
@@ -373,7 +390,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
         if self.run_under_service_principal():
             return  # this test delete users which are beyond a SP's capacity, so quit...
 
-        self.kwargs['rg'] = resource_group
+        self._prepare_scope_kwargs()
 
         def _test_role_assignment(assignee_object_id, assignee_principal_type=None, graph_call_fails=False):
             self.kwargs['object_id'] = assignee_object_id
@@ -386,7 +403,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
                         as directory_object_get_by_ids_mock:
                     self.cmd(
                         'role assignment create --assignee-object-id {object_id} '
-                        '--assignee-principal-type {assignee_principal_type} --role Reader -g {rg}')
+                        '--assignee-principal-type {assignee_principal_type} --role Reader --scope {rg_id}')
                     # Verify no graph call
                     directory_object_get_by_ids_mock.assert_not_called()
             else:
@@ -399,9 +416,9 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
                     with mock.patch(
                             'azure.cli.command_modules.role._msgrpah._graph_client.GraphClient.directory_object_get_by_ids',
                             side_effect=GraphError('403', mock_response)):
-                        self.cmd('role assignment create --assignee-object-id {object_id} --role Reader -g {rg}')
+                        self.cmd('role assignment create --assignee-object-id {object_id} --role Reader --scope {rg_id}')
                 else:
-                    self.cmd('role assignment create --assignee-object-id {object_id} --role Reader -g {rg}')
+                    self.cmd('role assignment create --assignee-object-id {object_id} --role Reader --scope {rg_id}')
 
             self.cmd('role assignment list -g {rg}', checks=self.check("length([])", 1))
             self.cmd('role assignment delete -g {rg}')
@@ -471,17 +488,17 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
             user = self.create_random_name('testuser', 15)
             self.kwargs.update({
                 'upn': user + TEST_TENANT_DOMAIN,
-                'rg': resource_group,
                 'description': "Role assignment foo to check on bar",
                 'condition': "@Resource[Microsoft.Storage/storageAccounts/blobServices/containers:Name] stringEquals 'foo'",
                 'condition_version': "2.0"
             })
+            self._prepare_scope_kwargs()
 
             result = self.cmd('ad user create --display-name tester123 --password Test123456789 --user-principal-name {upn}').get_output_in_json()
             self.kwargs['object_id'] = result['id']
             try:
                 # Test create role assignment with description, condition and condition_version
-                self.cmd('role assignment create --assignee-object-id {object_id} --assignee-principal-type User --role reader -g {rg} '
+                self.cmd('role assignment create --assignee-object-id {object_id} --assignee-principal-type User --role reader --scope {rg_id} '
                          # Include double quotes to tell shlex to treat arguments as a whole
                          '--description "{description}" '
                          '--condition "{condition}" --condition-version {condition_version}',
@@ -493,7 +510,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
                 self.cmd('role assignment delete -g {rg}')
 
                 # Test create role assignment with description, condition. condition_version defaults to 2.0
-                self.cmd('role assignment create --assignee-object-id {object_id} --assignee-principal-type User --role reader -g {rg} '
+                self.cmd('role assignment create --assignee-object-id {object_id} --assignee-principal-type User --role reader --scope {rg_id} '
                          '--description "{description}" '
                          '--condition "{condition}"',
                          checks=[
@@ -505,11 +522,11 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
 
                 # Test error is raised if condition-version is set but condition is not
                 with self.assertRaisesRegex(CLIError, "--condition must be set"):
-                    self.cmd('role assignment create --assignee-object-id {object_id} --assignee-principal-type User --role reader -g {rg} '
+                    self.cmd('role assignment create --assignee-object-id {object_id} --assignee-principal-type User --role reader --scope {rg_id} '
                              '--condition-version {condition_version}')
 
                 # Update
-                output = self.cmd('role assignment create --assignee-object-id {object_id} --assignee-principal-type User --role reader -g {rg} '
+                output = self.cmd('role assignment create --assignee-object-id {object_id} --assignee-principal-type User --role reader --scope {rg_id} '
                                   '--description "{description}" '
                                   '--condition "{condition}" --condition-version {condition_version}').get_output_in_json()
 
@@ -599,12 +616,13 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
             self.kwargs.update({
                 'upn': user + TEST_TENANT_DOMAIN,
             })
+            self._prepare_scope_kwargs()
 
             self.cmd('ad user create --display-name tester123 --password Test123456789 --user-principal-name {upn}')
             time.sleep(15)  # By-design, it takes some time for RBAC system propagated with graph object change
 
             try:
-                self.cmd('role assignment create --assignee {upn} --role reader -g {rg}')
+                self.cmd('role assignment create --assignee {upn} --role reader --scope {rg_id}')
 
                 if self.is_live or self.in_recording:
                     now = datetime.datetime.utcnow()

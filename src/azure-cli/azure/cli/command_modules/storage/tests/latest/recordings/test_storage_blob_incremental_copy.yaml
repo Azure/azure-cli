@@ -15,13 +15,13 @@ interactions:
       ParameterSetName:
       - -n -g --query -o
       User-Agent:
-      - AZURECLI/2.42.0 azsdk-python-azure-mgmt-storage/21.0.0 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-storage/21.1.0 Python/3.10.13 (Linux-5.15.0-1047-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2022-09-01&$expand=kerb
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2023-01-01&$expand=kerb
   response:
     body:
-      string: '{"keys":[{"creationTime":"2022-11-18T06:32:59.3532604Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2022-11-18T06:32:59.3532604Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+      string: '{"keys":[{"creationTime":"2023-10-19T09:10:19.4059403Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2023-10-19T09:10:19.4059403Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
     headers:
       cache-control:
       - no-cache
@@ -30,7 +30,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Fri, 18 Nov 2022 06:33:43 GMT
+      - Thu, 19 Oct 2023 09:11:01 GMT
       expires:
       - '-1'
       pragma:
@@ -43,6 +43,194 @@ interactions:
       - chunked
       vary:
       - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11997'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage container create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n --account-name --account-key
+      User-Agent:
+      - AZURECLI/2.53.0 azsdk-python-storage-blob/12.16.0 Python/3.10.13 (Linux-5.15.0-1047-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      x-ms-date:
+      - Thu, 19 Oct 2023 09:11:02 GMT
+      x-ms-version:
+      - '2022-11-02'
+    method: PUT
+    uri: https://clitest000002.blob.core.windows.net/cont000004?restype=container
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      date:
+      - Thu, 19 Oct 2023 09:11:03 GMT
+      etag:
+      - '"0x8DBD08351950162"'
+      last-modified:
+      - Thu, 19 Oct 2023 09:11:03 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-version:
+      - '2022-11-02'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage blob upload
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      If-None-Match:
+      - '*'
+      ParameterSetName:
+      - -c -n -f -t --account-name --account-key
+      User-Agent:
+      - AZURECLI/2.53.0 azsdk-python-storage-blob/12.16.0 Python/3.10.13 (Linux-5.15.0-1047-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      x-ms-blob-content-length:
+      - '16384'
+      x-ms-blob-type:
+      - PageBlob
+      x-ms-date:
+      - Thu, 19 Oct 2023 09:11:03 GMT
+      x-ms-version:
+      - '2022-11-02'
+    method: PUT
+    uri: https://clitest000002.blob.core.windows.net/cont000004/src
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      date:
+      - Thu, 19 Oct 2023 09:11:02 GMT
+      etag:
+      - '"0x8DBD08351CD8BB3"'
+      last-modified:
+      - Thu, 19 Oct 2023 09:11:03 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-request-server-encrypted:
+      - 'true'
+      x-ms-version:
+      - '2022-11-02'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage blob snapshot
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -c -n --account-name --account-key
+      User-Agent:
+      - AZURECLI/2.53.0 azsdk-python-storage-blob/12.16.0 Python/3.10.13 (Linux-5.15.0-1047-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      x-ms-date:
+      - Thu, 19 Oct 2023 09:11:03 GMT
+      x-ms-version:
+      - '2022-11-02'
+    method: PUT
+    uri: https://clitest000002.blob.core.windows.net/cont000004/src?comp=snapshot
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      date:
+      - Thu, 19 Oct 2023 09:11:03 GMT
+      etag:
+      - '"0x8DBD08351CD8BB3"'
+      last-modified:
+      - Thu, 19 Oct 2023 09:11:03 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-request-server-encrypted:
+      - 'false'
+      x-ms-snapshot:
+      - '2023-10-19T09:11:03.8353397Z'
+      x-ms-version:
+      - '2022-11-02'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account keys list
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g --query -o
+      User-Agent:
+      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-storage/21.1.0 Python/3.10.13 (Linux-5.15.0-1047-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000003/listKeys?api-version=2023-01-01&$expand=kerb
+  response:
+    body:
+      string: '{"keys":[{"creationTime":"2023-10-19T09:10:41.9059729Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2023-10-19T09:10:41.9059729Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '260'
+      content-type:
+      - application/json
+      date:
+      - Thu, 19 Oct 2023 09:11:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
@@ -66,204 +254,12 @@ interactions:
       ParameterSetName:
       - -n --account-name --account-key
       User-Agent:
-      - AZURECLI/2.42.0 azsdk-python-storage-blob/12.12.0 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.53.0 azsdk-python-storage-blob/12.16.0 Python/3.10.13 (Linux-5.15.0-1047-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
       x-ms-date:
-      - Fri, 18 Nov 2022 06:33:43 GMT
+      - Thu, 19 Oct 2023 09:11:04 GMT
       x-ms-version:
-      - '2021-06-08'
-    method: PUT
-    uri: https://clitest000002.blob.core.windows.net/cont000004?restype=container
-  response:
-    body:
-      string: ''
-    headers:
-      content-length:
-      - '0'
-      date:
-      - Fri, 18 Nov 2022 06:33:43 GMT
-      etag:
-      - '"0x8DAC92ED6FBCFBD"'
-      last-modified:
-      - Fri, 18 Nov 2022 06:33:43 GMT
-      server:
-      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
-      x-ms-version:
-      - '2021-06-08'
-    status:
-      code: 201
-      message: Created
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/xml
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - storage blob upload
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      If-None-Match:
-      - '*'
-      ParameterSetName:
-      - -c -n -f -t --account-name --account-key
-      User-Agent:
-      - AZURECLI/2.42.0 azsdk-python-storage-blob/12.12.0 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
-      x-ms-blob-content-length:
-      - '16384'
-      x-ms-blob-type:
-      - PageBlob
-      x-ms-date:
-      - Fri, 18 Nov 2022 06:33:44 GMT
-      x-ms-version:
-      - '2021-06-08'
-    method: PUT
-    uri: https://clitest000002.blob.core.windows.net/cont000004/src
-  response:
-    body:
-      string: ''
-    headers:
-      content-length:
-      - '0'
-      date:
-      - Fri, 18 Nov 2022 06:33:43 GMT
-      etag:
-      - '"0x8DAC92ED7377F9B"'
-      last-modified:
-      - Fri, 18 Nov 2022 06:33:44 GMT
-      server:
-      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
-      x-ms-request-server-encrypted:
-      - 'true'
-      x-ms-version:
-      - '2021-06-08'
-    status:
-      code: 201
-      message: Created
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/xml
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - storage blob snapshot
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      ParameterSetName:
-      - -c -n --account-name --account-key
-      User-Agent:
-      - AZURECLI/2.42.0 azsdk-python-storage-blob/12.12.0 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
-      x-ms-date:
-      - Fri, 18 Nov 2022 06:33:44 GMT
-      x-ms-version:
-      - '2021-06-08'
-    method: PUT
-    uri: https://clitest000002.blob.core.windows.net/cont000004/src?comp=snapshot
-  response:
-    body:
-      string: ''
-    headers:
-      content-length:
-      - '0'
-      date:
-      - Fri, 18 Nov 2022 06:33:44 GMT
-      etag:
-      - '"0x8DAC92ED7377F9B"'
-      last-modified:
-      - Fri, 18 Nov 2022 06:33:44 GMT
-      server:
-      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
-      x-ms-request-server-encrypted:
-      - 'false'
-      x-ms-snapshot:
-      - '2022-11-18T06:33:44.7660894Z'
-      x-ms-version:
-      - '2021-06-08'
-    status:
-      code: 201
-      message: Created
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - storage account keys list
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      ParameterSetName:
-      - -n -g --query -o
-      User-Agent:
-      - AZURECLI/2.42.0 azsdk-python-azure-mgmt-storage/21.0.0 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
-    method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000003/listKeys?api-version=2022-09-01&$expand=kerb
-  response:
-    body:
-      string: '{"keys":[{"creationTime":"2022-11-18T06:33:22.5723149Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2022-11-18T06:33:22.5723149Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '260'
-      content-type:
-      - application/json
-      date:
-      - Fri, 18 Nov 2022 06:33:44 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11998'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/xml
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - storage container create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      ParameterSetName:
-      - -n --account-name --account-key
-      User-Agent:
-      - AZURECLI/2.42.0 azsdk-python-storage-blob/12.12.0 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
-      x-ms-date:
-      - Fri, 18 Nov 2022 06:33:45 GMT
-      x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     method: PUT
     uri: https://clitest000003.blob.core.windows.net/cont000005?restype=container
   response:
@@ -273,15 +269,15 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 18 Nov 2022 06:33:44 GMT
+      - Thu, 19 Oct 2023 09:11:04 GMT
       etag:
-      - '"0x8DAC92ED7EC8420"'
+      - '"0x8DBD083527A7166"'
       last-modified:
-      - Fri, 18 Nov 2022 06:33:45 GMT
+      - Thu, 19 Oct 2023 09:11:04 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     status:
       code: 201
       message: Created
@@ -295,12 +291,12 @@ interactions:
       If-Modified-Since:
       - Mon, 29 Jun 2020 06:32:00 GMT
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.10.8; Linux 5.15.0-1022-azure)
-        AZURECLI/2.42.0
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.10.13; Linux 5.15.0-1047-azure)
+        AZURECLI/2.53.0
       x-ms-copy-source:
-      - https://clitestvxvw7lt7ku36la4tq.blob.core.windows.net/contjpilt4do5zdpujwuqlf6/src?se=2022-11-19T06%3A33%3A45Z&sp=r&spr=https&sv=2018-11-09&sr=b&sig=6cZuNpC79r9jntXa8xg/1tB9/J6HeKC9TFYc5sRMixM%3D&snapshot=2022-11-18T06:33:44.7660894Z
+      - https://cliteste5i3eyuurl7ihugaj.blob.core.windows.net/contjkjdxa47hdeeuwdyvf5m/src?se=2023-10-20T09%3A11%3A04Z&sp=r&spr=https&sv=2018-11-09&sr=b&sig=hixfb5ERCJGgzhTbanelGQjxwLwM8TfqpnRWH8ocu7A%3D&snapshot=2023-10-19T09:11:03.8353397Z
       x-ms-date:
-      - Fri, 18 Nov 2022 06:33:45 GMT
+      - Thu, 19 Oct 2023 09:11:04 GMT
       x-ms-version:
       - '2018-11-09'
     method: PUT
@@ -312,15 +308,15 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 18 Nov 2022 06:33:45 GMT
+      - Thu, 19 Oct 2023 09:11:05 GMT
       etag:
-      - '"0x8DAC92ED82DFD36"'
+      - '"0x8DBD08352CF49A6"'
       last-modified:
-      - Fri, 18 Nov 2022 06:33:45 GMT
+      - Thu, 19 Oct 2023 09:11:05 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-copy-id:
-      - dc4c1726-3602-48f7-af7c-860eeb784890
+      - 6f17ada5-2c0b-4062-8981-59b63b203874
       x-ms-copy-status:
       - pending
       x-ms-version:

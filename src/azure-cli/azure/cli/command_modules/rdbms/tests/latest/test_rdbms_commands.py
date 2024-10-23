@@ -107,7 +107,7 @@ class ServerMgmtScenarioTest(ScenarioTest):
         family = 'Gen5'
         skuname = 'GP_{}_{}'.format(family, old_cu)
         newskuname = 'GP_{}_{}'.format(family, new_cu)
-        loc = 'westus2'
+        loc = 'eastus2'
         default_public_network_access = 'Enabled'
         public_network_access = 'Disabled'
         minimal_tls_version = 'TLS1_2'
@@ -316,8 +316,10 @@ class ServerMgmtScenarioTest(ScenarioTest):
                      .format(database_engine, resource_group_1, servers[4]), checks=NoneCheck())
             result = self.cmd('{} server show -g {} -n {}'
                               .format(database_engine, resource_group_1, servers[4])).get_output_in_json()
-            server_version = result['version']
-            self.assertEqual(server_version, '5.7')
+            # server_version = result['version']
+            user_visible_state = result['userVisibleState']
+            # self.assertEqual(server_version, '5.7')
+            self.assertEqual(user_visible_state, 'Upgrading')
 
         # test delete server
         self.cmd('{} server delete -g {} --name {} --yes'

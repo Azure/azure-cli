@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.53.0"
+VERSION = "2.53.1"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -45,11 +45,12 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
     'License :: OSI Approved :: MIT License',
 ]
 
 DEPENDENCIES = [
-    "antlr4-python3-runtime~=4.9.3",
+    "antlr4-python3-runtime~=4.13.1",
     'azure-appconfiguration~=1.1.1',
     'azure-batch~=14.0.0',
     'azure-cli-core=={}'.format(VERSION),
@@ -74,11 +75,11 @@ DEPENDENCIES = [
     'azure-mgmt-botservice~=2.0.0b3',
     'azure-mgmt-cdn==12.0.0',
     'azure-mgmt-cognitiveservices~=13.5.0',
-    'azure-mgmt-compute~=30.0.0',
+    'azure-mgmt-compute~=30.2.0',
     'azure-mgmt-containerinstance==10.1.0',
     'azure-mgmt-containerregistry==10.1.0',
-    'azure-mgmt-containerservice~=26.0.0',
-    'azure-mgmt-cosmosdb==9.2.0',
+    'azure-mgmt-containerservice~=27.0.0',
+    'azure-mgmt-cosmosdb==9.3.0',
     'azure-mgmt-databoxedge~=1.0.0',
     'azure-mgmt-datalake-store~=0.5.0',
     'azure-mgmt-datamigration~=10.0.0',
@@ -90,7 +91,7 @@ DEPENDENCIES = [
     'azure-mgmt-hdinsight~=9.0.0',
     'azure-mgmt-imagebuilder~=1.2.0',
     'azure-mgmt-iotcentral~=10.0.0b1',
-    'azure-mgmt-iothub==2.3.0',
+    'azure-mgmt-iothub==3.0.0',
     'azure-mgmt-iothubprovisioningservices==1.1.0',
     'azure-mgmt-keyvault==10.2.3',
     'azure-mgmt-kusto~=0.3.0',
@@ -105,10 +106,10 @@ DEPENDENCIES = [
     'azure-mgmt-netapp~=10.1.0',
     'azure-mgmt-policyinsights==1.1.0b4',
     'azure-mgmt-privatedns~=1.0.0',
-    'azure-mgmt-rdbms~=10.2.0b10',
+    'azure-mgmt-rdbms~=10.2.0b11',
     'azure-mgmt-recoveryservicesbackup~=7.0.0',
     'azure-mgmt-recoveryservices~=2.5.0',
-    'azure-mgmt-redhatopenshift~=1.3.0',
+    'azure-mgmt-redhatopenshift~=1.4.0',
     'azure-mgmt-redis~=14.1.0',
     'azure-mgmt-resource==23.1.0b2',
     'azure-mgmt-search~=9.0',
@@ -117,10 +118,10 @@ DEPENDENCIES = [
     'azure-mgmt-servicefabricmanagedclusters~=1.0.0',
     'azure-mgmt-servicelinker==1.2.0b1',
     'azure-mgmt-servicefabric~=1.0.0',
-    'azure-mgmt-signalr==1.1.0',
+    'azure-mgmt-signalr==2.0.0b1',
     'azure-mgmt-sqlvirtualmachine==1.0.0b5',
     'azure-mgmt-sql==4.0.0b12',
-    'azure-mgmt-storage~=21.0.0',
+    'azure-mgmt-storage==21.1.0',
     'azure-mgmt-synapse==2.1.0b5',
     'azure-mgmt-trafficmanager~=1.0.0',
     'azure-mgmt-web==7.0.0',

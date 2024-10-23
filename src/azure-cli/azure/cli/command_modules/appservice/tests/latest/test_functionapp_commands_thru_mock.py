@@ -13,6 +13,7 @@ from azure.cli.command_modules.appservice.custom import (
     enable_zip_deploy,
     add_remote_build_app_settings,
     remove_remote_build_app_settings,
+    config_source_control,
     validate_app_settings_in_scm)
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.azclierror import (AzureInternalError, UnclassifiedUserFault)
@@ -203,11 +204,13 @@ class TestFunctionappMocked(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers')
     @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url', return_value='https://mock-scm')
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     @mock.patch('requests.post', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom._check_zip_deployment_status')
     def test_enable_zip_deploy_accepted(self,
                                         check_zip_deployment_status_mock,
                                         requests_post_mock,
+                                        web_client_factory_mock,
                                         get_scm_url_mock,
                                         get_scm_headers_mock):
         # prepare
@@ -219,6 +222,14 @@ class TestFunctionappMocked(unittest.TestCase):
         response.status_code = 202
         requests_post_mock.return_value = response
 
+        appservice_mock = mock.Mock()
+        appservice_mock.kind = "functionapp"
+
+        web_client_mock = mock.Mock()
+        web_client_mock.web_apps = mock.Mock()
+        web_client_mock.web_apps.get = mock.Mock(return_value=appservice_mock)
+        web_client_factory_mock.return_value = web_client_mock
+
         expected_zip_deploy_headers = _get_zip_deploy_headers('usr', 'pwd', cmd_mock.cli_ctx)
         get_scm_headers_mock.return_value = expected_zip_deploy_headers
 
@@ -227,7 +238,7 @@ class TestFunctionappMocked(unittest.TestCase):
             enable_zip_deploy(cmd_mock, 'rg', 'name', 'src', slot=None)
 
         # assert
-        requests_post_mock.assert_called_with('https://mock-scm/api/zipdeploy?isAsync=true', data='zip-content',
+        requests_post_mock.assert_called_with('https://mock-scm/api/zipdeploy?isAsync=true&Deployer=az_cli_functions', data='zip-content',
                                               headers=expected_zip_deploy_headers, verify=mock.ANY)
         # TODO improve authorization matcher
         check_zip_deployment_status_mock.assert_called_with(cmd_mock, 'rg', 'name',
@@ -235,9 +246,11 @@ class TestFunctionappMocked(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers')
     @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url', return_value='https://mock-scm')
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     @mock.patch('requests.post', autospec=True)
     def test_enable_zip_deploy_conflict(self,
                                         requests_post_mock,
+                                        web_client_factory_mock,
                                         get_scm_url_mock,
                                         get_scm_headers_mock):
         # prepare
@@ -249,6 +262,14 @@ class TestFunctionappMocked(unittest.TestCase):
         response.status_code = 409
         requests_post_mock.return_value = response
 
+        appservice_mock = mock.Mock()
+        appservice_mock.kind = "functionapp"
+
+        web_client_mock = mock.Mock()
+        web_client_mock.web_apps = mock.Mock()
+        web_client_mock.web_apps.get = mock.Mock(return_value=appservice_mock)
+        web_client_factory_mock.return_value = web_client_mock
+
         expected_zip_deploy_headers = _get_zip_deploy_headers('usr', 'pwd', cmd_mock.cli_ctx)
         get_scm_headers_mock.return_value = expected_zip_deploy_headers
 
@@ -258,14 +279,16 @@ class TestFunctionappMocked(unittest.TestCase):
                 enable_zip_deploy(cmd_mock, 'rg', 'name', 'src', slot=None)
 
         # assert
-        requests_post_mock.assert_called_with('https://mock-scm/api/zipdeploy?isAsync=true', data='zip-content',
+        requests_post_mock.assert_called_with('https://mock-scm/api/zipdeploy?isAsync=true&Deployer=az_cli_functions', data='zip-content',
                                               headers=expected_zip_deploy_headers, verify=mock.ANY)
 
     @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers')
     @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url', return_value='https://mock-scm')
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     @mock.patch('requests.post', autospec=True)
     def test_enable_zip_deploy_service_unavailable(self,
                                                    requests_post_mock,
+                                                   web_client_factory_mock,
                                                    get_scm_url_mock,
                                                    get_scm_headers_mock):
         # prepare
@@ -277,6 +300,15 @@ class TestFunctionappMocked(unittest.TestCase):
         response.status_code = 503
         requests_post_mock.return_value = response
 
+        appservice_mock = mock.Mock()
+        appservice_mock.kind = "functionapp"
+
+        web_client_mock = mock.Mock()
+        web_client_mock.web_apps = mock.Mock()
+        web_client_mock.web_apps.get = mock.Mock(return_value=appservice_mock)
+        web_client_factory_mock.return_value = web_client_mock
+
+
         expected_zip_deploy_headers = _get_zip_deploy_headers('usr', 'pwd', cmd_mock.cli_ctx)
         get_scm_headers_mock.return_value = expected_zip_deploy_headers
 
@@ -286,7 +318,7 @@ class TestFunctionappMocked(unittest.TestCase):
                 enable_zip_deploy(cmd_mock, 'rg', 'name', 'src', slot=None)
 
         # assert
-        requests_post_mock.assert_called_with('https://mock-scm/api/zipdeploy?isAsync=true', data='zip-content',
+        requests_post_mock.assert_called_with('https://mock-scm/api/zipdeploy?isAsync=true&Deployer=az_cli_functions', data='zip-content',
                                               headers=expected_zip_deploy_headers, verify=mock.ANY)
 
     @mock.patch('azure.cli.command_modules.appservice.custom._get_app_settings_from_scm', return_value={
@@ -513,3 +545,36 @@ class TestFunctionappMocked(unittest.TestCase):
         # assert
         update_app_settings_mock.assert_not_called()
         validate_app_settings_in_scm_mock.assert_not_called()
+
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_location_from_webapp')
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.LongRunningOperation.__call__', autospec=True)
+    def test_config_source_control(self,
+                                   long_running_operation_mock,
+                                   site_op_mock,
+                                   location_mock,
+                                   web_client_factory_mock):
+        # prepare
+        client = mock.Mock()
+        web_client_factory_mock.return_value = client
+
+        location_mock.return_value = mock.MagicMock()
+
+        site_op_mock.return_value = mock.MagicMock()
+
+        cmd_mock = _get_test_cmd()
+
+        SiteSourceControl, GitHubActionConfiguration, GitHubActionContainerConfiguration = cmd_mock.get_models('SiteSourceControl', 'GitHubActionConfiguration', 'GitHubActionContainerConfiguration')
+        container_config = GitHubActionContainerConfiguration(username="username", password="password")
+        github_action_config = GitHubActionConfiguration(container_configuration=container_config)
+        source_control = SiteSourceControl(git_hub_action_configuration=github_action_config)
+
+        long_running_operation_mock.return_value = source_control
+
+        # action
+        response = config_source_control(cmd_mock, 'rg', 'functionapp', 'https://github.com/yugang/azure-site-test')
+
+        # assert
+        self.assertEqual(response.git_hub_action_configuration.container_configuration.password, None)

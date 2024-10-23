@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.53.1
+++++++
+* No changes
+
 2.53.0
 ++++++
 * `aaz`: Fix command name case issue for aaz command table lazy load (#27344)
