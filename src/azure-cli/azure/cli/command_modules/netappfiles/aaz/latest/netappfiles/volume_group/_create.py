@@ -398,7 +398,6 @@ class Create(AAZCommand):
         replication.remote_volume_resource_id = AAZStrArg(
             options=["remote-volume-resource-id"],
             help="The resource ID of the remote volume.",
-            required=True,
         )
         replication.replication_schedule = AAZStrArg(
             options=["replication-schedule"],
@@ -764,7 +763,7 @@ class Create(AAZCommand):
                 replication.set_prop("endpointType", AAZStrType, ".endpoint_type")
                 replication.set_prop("remotePath", AAZObjectType, ".remote_path")
                 replication.set_prop("remoteVolumeRegion", AAZStrType, ".remote_volume_region")
-                replication.set_prop("remoteVolumeResourceId", AAZStrType, ".remote_volume_resource_id", typ_kwargs={"flags": {"required": True}})
+                replication.set_prop("remoteVolumeResourceId", AAZStrType, ".remote_volume_resource_id")
                 replication.set_prop("replicationSchedule", AAZStrType, ".replication_schedule")
 
             remote_path = _builder.get(".properties.volumes[].properties.dataProtection.replication.remotePath")
@@ -1130,7 +1129,6 @@ class Create(AAZCommand):
             )
             replication.remote_volume_resource_id = AAZStrType(
                 serialized_name="remoteVolumeResourceId",
-                flags={"required": True},
             )
             replication.replication_id = AAZStrType(
                 serialized_name="replicationId",

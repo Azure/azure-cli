@@ -383,6 +383,7 @@ class Update(AAZCommand):
         replication.remote_volume_resource_id = AAZStrArg(
             options=["remote-volume-resource-id"],
             help="The resource ID of the remote volume.",
+            nullable=True,
         )
         replication.replication_schedule = AAZStrArg(
             options=["replication-schedule"],
@@ -864,7 +865,7 @@ class Update(AAZCommand):
             if replication is not None:
                 replication.set_prop("endpointType", AAZStrType, ".endpoint_type")
                 replication.set_prop("remoteVolumeRegion", AAZStrType, ".remote_volume_region")
-                replication.set_prop("remoteVolumeResourceId", AAZStrType, ".remote_volume_resource_id", typ_kwargs={"flags": {"required": True}})
+                replication.set_prop("remoteVolumeResourceId", AAZStrType, ".remote_volume_resource_id")
                 replication.set_prop("replicationSchedule", AAZStrType, ".replication_schedule")
 
             snapshot = _builder.get(".properties.volumes[].properties.dataProtection.snapshot")
@@ -1258,7 +1259,6 @@ class _UpdateHelper:
         )
         replication.remote_volume_resource_id = AAZStrType(
             serialized_name="remoteVolumeResourceId",
-            flags={"required": True},
         )
         replication.replication_id = AAZStrType(
             serialized_name="replicationId",
