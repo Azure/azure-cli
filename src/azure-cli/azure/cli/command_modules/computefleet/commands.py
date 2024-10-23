@@ -10,7 +10,7 @@
 
 from azure.cli.core import AzCommandsLoader
 from ._client_factory import cf_computefleet
-from azure.cli.command_modules.mymod._help import helps  # pylint: disable=unused-import
+from azure.cli.command_modules.computefleet._help import helps  # pylint: disable=unused-import
 
 class ComputeFleetCommandsLoader(AzCommandsLoader):
 
