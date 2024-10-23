@@ -70,6 +70,12 @@ def load_arguments(self, _):
                    arg_type=get_three_state_flag())
         c.argument('allowed_origins', options_list=['--allowed-origins', '-a'], nargs='*',
                    help='space separated origins that should be allowed to make cross-origin calls (for example: http://example.com:12345). To allow all, use "*"')
+        c.argument('client_cert_enabled',
+                   help='Enable or disable client certificate authentication for a SignalR Service', arg_type=get_three_state_flag())
+        c.argument('disable_local_auth',
+                   help='Enable or disable local auth for a SignalR Service', arg_type=get_three_state_flag())
+        c.argument('region_endpoint_enabled',
+                   help='Enable or disable region endpoint for a SignalR Service', arg_type=get_three_state_flag())
 
     for scope in ['signalr create', 'signalr update']:
         with self.argument_context(scope, arg_group='Network Rule') as c:
@@ -177,7 +183,8 @@ def load_arguments(self, _):
             c.argument('replica_name', signalr_replica_name_type)
 
     for scope in ['signalr replica create',
-                  'signalr replica list']:
+                  'signalr replica list',
+                  'signalr replica update']:
         with self.argument_context(scope) as c:
             c.argument('signalr_name', signalr_name_type, id_part=None)
 
@@ -188,3 +195,9 @@ def load_arguments(self, _):
                   'signalr replica delete']:
         with self.argument_context(scope) as c:
             c.argument('signalr_name', signalr_name_type)
+
+    with self.argument_context('signalr replica update') as c:
+        c.argument('replica_name', signalr_replica_name_type)
+        c.argument('unit_count', help='The number of signalr service unit count', type=int)
+        c.argument('region_endpoint_enabled',
+                   help='Enable or disable region endpoint for a SignalR Service', arg_type=get_three_state_flag())
