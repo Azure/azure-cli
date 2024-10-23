@@ -560,7 +560,7 @@ def _get_vm_sku_details(cli_ctx, location=None):
                 return True
         return False
 
-    from azext_aks_preview._client_factory import get_compute_client
+    from azure.cli.command_modules.acs._client_factory import get_compute_client
     result = get_compute_client(cli_ctx).resource_skus.list()
     result = [x for x in result if x.resource_type.lower() == 'virtualmachines']
     if location:
