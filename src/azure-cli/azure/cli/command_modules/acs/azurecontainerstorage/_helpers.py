@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import re
 from typing import Tuple
 
 from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
@@ -461,8 +460,7 @@ def generate_vm_sku_cache_for_region(cli_ctx, location=None):
     cache={},
     key=lambda sku_name, cpu_value=None, nvme_enabled=None: hashkey(sku_name)
 )
-def vm_sku_details(sku_name, cpu_value=None, nvme_enabled=None):
-    print("AKASH: ", sku_name, cpu_value, nvme_enabled)
+def vm_sku_details(sku_name, cpu_value=None, nvme_enabled=None):  # pylint: disable=unused-argument
     return cpu_value, nvme_enabled
 
 
