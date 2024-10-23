@@ -78,6 +78,17 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         cmd.get_models('StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
     scf = storage_client_factory(cmd.cli_ctx)
+
+    # check name availability and throw a warning if an account with the same name is found
+    # TODO throw error instead of just a warning during the next breaking change window
+    StorageAccountCheckNameAvailabilityParameters = cmd.get_models('StorageAccountCheckNameAvailabilityParameters')
+    account_name_param = StorageAccountCheckNameAvailabilityParameters(name=account_name,
+                                                                       type="Microsoft.Storage/storageAccounts")
+    name_is_available = scf.storage_accounts.check_name_availability(account_name_param)
+    if name_is_available and not name_is_available.name_available and name_is_available.reason == "AlreadyExists":
+        logger.warning("A storage account with the provided name %s is found. "
+                       "Will continue to update the existing account.", account_name)
+
     if kind is None:
         logger.warning("The default kind for created storage account will change to 'StorageV2' from 'Storage' "
                        "in the future")
@@ -192,7 +203,7 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         if bypass and not default_action:
             raise CLIError('incorrect usage: --default-action ACTION [--bypass SERVICE ...]')
         if subnet:
-            from msrestazure.tools import is_valid_resource_id
+            from azure.mgmt.core.tools import is_valid_resource_id
             if not is_valid_resource_id(subnet):
                 raise CLIError("Expected fully qualified resource ID: got '{}'".format(subnet))
             VirtualNetworkRule = cmd.get_models('VirtualNetworkRule')
@@ -354,7 +365,7 @@ def show_storage_account_usage_no_location(cmd):
 
 def get_storage_account_properties(cli_ctx, account_id):
     scf = storage_client_factory(cli_ctx)
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
     result = parse_resource_id(account_id)
     return scf.storage_accounts.get_properties(result['resource_group'], result['name'])
 
@@ -375,10 +386,11 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                            sas_expiration_period=None, key_expiration_period_in_days=None,
                            allow_cross_tenant_replication=None, default_share_permission=None,
                            immutability_period_since_creation_in_days=None, immutability_policy_state=None,
-                           allow_protected_append_writes=None, public_network_access=None):
-    StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
+                           allow_protected_append_writes=None, public_network_access=None, upgrade_to_storagev2=None,
+                           yes=None):
+    StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet, Kind = \
         cmd.get_models('StorageAccountUpdateParameters', 'Sku', 'CustomDomain', 'AccessTier', 'Identity', 'Encryption',
-                       'NetworkRuleSet')
+                       'NetworkRuleSet', 'Kind')
 
     domain = instance.custom_domain
     if custom_domain is not None:
@@ -414,6 +426,36 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
     if encryption_key_version is not None:
         encryption.key_vault_properties.key_version = encryption_key_version
 
+    warning_message = None
+    if upgrade_to_storagev2:
+        if instance.kind == Kind.STORAGE:
+            warning_message = "Upgrading a General Purpose v1 storage account to a general-purpose v2 account is " \
+                              "free. You may specify the desired account tier during the upgrade process. " \
+                              "If an account tier is not specified on upgrade, the default account tier of the " \
+                              "upgraded account will be Hot. \nHowever, changing the storage access tier after the " \
+                              "upgrade may result in changes to your bill so it is recommended to specify the new " \
+                              "account tier during upgrade. \n" \
+                              "See (http://go.microsoft.com/fwlink/?LinkId=786482) to learn more."
+        elif instance.kind == Kind.BLOB_STORAGE:
+            warning_message = "Upgrading a BlobStorage account to a general-purpose v2 account is free as long as " \
+                              "the upgraded account's tier remains unchanged. If an account tier is not specified " \
+                              "on upgrade, the default account tier of the upgraded account will be Hot. \nIf there " \
+                              "are account access tier changes as part of the upgrade, there will be charges " \
+                              "associated with moving blobs as part of the account access tier change. \n" \
+                              "See (http://go.microsoft.com/fwlink/?LinkId=786482) to learn more."
+            if access_tier is None:
+                access_tier = AccessTier.HOT
+        elif access_tier is not None:
+            warning_message = "Changing the access tier may result in additional charges. \n" \
+                              "See (http://go.microsoft.com/fwlink/?LinkId=786482) to learn more."
+    else:
+        if access_tier is not None:
+            warning_message = "Changing the access tier may result in additional charges. \n" \
+                              "See (http://go.microsoft.com/fwlink/?LinkId=786482) to learn more."
+
+    if warning_message:
+        user_confirmation(warning_message, yes)
+
     params = StorageAccountUpdateParameters(
         sku=Sku(name=sku) if sku is not None else instance.sku,
         tags=tags if tags is not None else instance.tags,
@@ -422,6 +464,9 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
         access_tier=AccessTier(access_tier) if access_tier is not None else instance.access_tier,
         enable_https_traffic_only=https_only if https_only is not None else instance.enable_https_traffic_only
     )
+
+    if upgrade_to_storagev2:
+        params.kind = Kind.STORAGE_V2
 
     if identity_type and 'UserAssigned' in identity_type and user_identity_id:
         user_assigned_identities = {user_identity_id: {}}
@@ -644,7 +689,7 @@ def add_network_rule(cmd, client, resource_group_name, account_name, action='All
     if not subnet and not ip_address:
         logger.warning('No subnet or ip address supplied.')
     if subnet:
-        from msrestazure.tools import is_valid_resource_id
+        from azure.mgmt.core.tools import is_valid_resource_id
         if not is_valid_resource_id(subnet):
             raise CLIError("Expected fully qualified resource ID: got '{}'".format(subnet))
         VirtualNetworkRule = cmd.get_models('VirtualNetworkRule')
@@ -948,7 +993,7 @@ def create_or_policy(cmd, client, account_name, resource_group_name=None, proper
                                        object_replication_policy_id=policy_id, properties=or_policy)
     except HttpResponseError as ex:
         if ex.error.code == 'InvalidRequestPropertyValue' and policy_id == 'default':
-            from msrestazure.tools import parse_resource_id
+            from azure.mgmt.core.tools import parse_resource_id
             if account_name == parse_resource_id(or_policy.source_account)['name']:
                 raise CLIError('ValueError: Please specify --policy-id with auto-generated policy id value on '
                                'destination account.')

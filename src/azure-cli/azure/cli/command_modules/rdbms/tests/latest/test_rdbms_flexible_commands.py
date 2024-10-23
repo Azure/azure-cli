@@ -5,8 +5,9 @@
 import os
 import time
 
-from datetime import datetime
+from datetime import datetime, timezone
 from time import sleep
+from azure.cli.core.util import parse_proxy_resource_id
 from dateutil import parser
 from dateutil.tz import tzutc
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
@@ -79,6 +80,21 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
+    def test_postgres_flexible_server_empty_rg_name(self):
+        self._test_flexible_server_mgmt_empty_rg_name_return_error('postgres')
+    
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    def test_postgres_flexible_server_mgmt_case_insensitive(self, resource_group):
+        self._test_flexible_server_mgmt_case_insensitive('postgres', resource_group)
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    def test_flexible_server_ssdv2_mgmt(self, resource_group):
+        self._test_flexible_server_ssdv2_mgmt('postgres', resource_group)
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
     def test_postgres_flexible_server_restore_mgmt(self, resource_group):
         self._test_flexible_server_restore_mgmt('postgres', resource_group)
 
@@ -86,6 +102,11 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location=postgres_location)
     def test_postgres_flexible_server_georestore_mgmt(self, resource_group):
         self._test_flexible_server_georestore_mgmt('postgres', resource_group)
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location='eastus2euap')
+    def test_flexible_server_ssdv2_restore_mgmt(self, resource_group):
+        self._test_flexible_server_ssdv2_restore_mgmt('postgres', resource_group)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -106,7 +127,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         if self.cli_ctx.local_context.is_on:
             self.cmd('config param-persist off')
 
-        version = '12'
+        version = '16'
         storage_size = 128
         location = self.postgres_location
         sku_name = 'Standard_D2s_v3'
@@ -199,6 +220,157 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, restore_server_name), checks=NoneCheck())
 
 
+    def _test_flexible_server_mgmt_empty_rg_name_return_error(self, database_engine):
+
+        if self.cli_ctx.local_context.is_on:
+            self.cmd('config param-persist off')
+
+        version = '16'
+        storage_size = 128
+        sku_name = 'Standard_D2s_v3'
+        tier = 'GeneralPurpose'
+        backup_retention = 7
+        database_name = 'testdb'
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        replica_1_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        ha_value = 'ZoneRedundant'
+        random_rg_name_prefix = "random_rg"
+        random_rg_name = self.create_random_name(random_rg_name_prefix, 15)
+
+        self.cmd('{} flexible-server create -g {} -n {} --backup-retention {} --sku-name {} --tier {} \
+                  --storage-size {} -u {} --version {} --tags keys=3 --database-name {} --high-availability {} \
+                  --public-access None'.format(database_engine, random_rg_name, server_name, backup_retention,
+                                               sku_name, tier, storage_size, 'dbadmin', version, database_name, ha_value))
+
+        self.cmd('postgres flexible-server replica create -g "" --replica-name {} --source-server {}'.format(
+                        replica_1_name,
+                        server_name
+            ), expect_failure=True)
+
+        self.cmd('postgres flexible-server replica create -g \'\' --replica-name {} --source-server {}'.format(
+                        replica_1_name,
+                        server_name
+            ), expect_failure=True)
+
+        self.cmd('{} flexible-server update -g "" -n {} -p randompw321##@!'
+                 .format(database_engine, server_name), expect_failure=True)
+        self.cmd('{} flexible-server update -g \'\' -n {} -p randompw321##@!'
+                 .format(database_engine, server_name), expect_failure=True)
+
+
+    def _test_flexible_server_mgmt_case_insensitive(self, database_engine, resource_group):
+
+        if self.cli_ctx.local_context.is_on:
+            self.cmd('config param-persist off')
+
+        version = '16'
+        storage_size = 128
+        sku_name = 'Standard_D2s_v3'
+        tier = 'GeneralPurpose'
+        backup_retention = 7
+        database_name = 'testdb'
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        ha_value = 'ZoneRedundant'
+
+        self.cmd('{} flexible-server create -g {} -n {} --backup-retention {} --sku-name {} --tier {} \
+                  --storage-size {} -u {} --version {} --tags keys=3 --database-name {} --high-availability {} \
+                  --public-access None'.format(database_engine, resource_group, server_name, backup_retention,
+                                               sku_name, tier, storage_size, 'dbadmin', version, database_name, ha_value))
+
+        tier = 'MemoryOptimized'
+        tier_lower = tier.lower()
+
+        sku_name = 'Standard_E2ds_v4'
+        sku_name_lower = sku_name.lower()
+        
+        self.cmd('{} flexible-server update -g {} -n {} --tier {} --sku-name {}'
+                 .format(database_engine, resource_group, server_name, tier_lower, sku_name_lower),
+                 checks=[JMESPathCheck('sku.tier', tier),
+                         JMESPathCheck('sku.name', sku_name)])
+        
+        maintainence_window = 'SUN'
+        maintainence_window_value = 0   # Sunday is defined as 0
+        
+        self.cmd('{} flexible-server update -g {} -n {} --maintenance-window {}'
+                 .format(database_engine, resource_group, server_name, maintainence_window),
+                 checks=[JMESPathCheck('maintenanceWindow.dayOfWeek', maintainence_window_value)])
+
+        performance_tier = 'P15'
+        performance_tier_lower = performance_tier.lower()
+
+        self.cmd('{} flexible-server update -g {} -n {} --performance-tier {}'
+                 .format(database_engine, resource_group, server_name, performance_tier_lower),
+                 checks=[JMESPathCheck('storage.tier', performance_tier)])
+
+
+    def _test_flexible_server_ssdv2_mgmt(self, database_engine, resource_group):
+
+        if self.cli_ctx.local_context.is_on:
+            self.cmd('config param-persist off')
+
+        version = '15'
+        storage_size = 200
+        location = self.postgres_location
+        sku_name = 'Standard_D2s_v3'
+        tier = 'GeneralPurpose'
+        storage_type = 'PremiumV2_LRS'
+        iops = 3000
+        throughput = 125
+        backup_retention = 7
+        database_name = 'testdb'
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+
+        # test create
+        self.cmd('{} flexible-server create -g {} -n {} --backup-retention {} --sku-name {} --tier {} \
+                  --storage-size {} -u {} --version {} --tags keys=3 --database-name {} --storage-type {} \
+                  --iops {} --throughput {} --public-access None'.format(database_engine, resource_group, server_name,
+                                                                                    backup_retention, sku_name, tier, storage_size,
+                                                                                    'dbadmin', version, database_name, storage_type,
+                                                                                    iops, throughput))
+
+        basic_info = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name)).get_output_in_json()
+        self.assertEqual(basic_info['name'], server_name)
+        self.assertEqual(str(basic_info['location']).replace(' ', '').lower(), location)
+        self.assertEqual(basic_info['resourceGroup'], resource_group)
+        self.assertEqual(basic_info['sku']['name'], sku_name)
+        self.assertEqual(basic_info['sku']['tier'], tier)
+        self.assertEqual(basic_info['version'], version)
+        self.assertEqual(basic_info['storage']['storageSizeGb'], storage_size)
+        self.assertEqual(basic_info['storage']['type'], storage_type)
+        self.assertEqual(basic_info['storage']['iops'], iops)
+        self.assertEqual(basic_info['storage']['throughput'], throughput)
+        self.assertEqual(basic_info['backup']['backupRetentionDays'], backup_retention)
+
+        # test updates
+        self.cmd('{} flexible-server update -g {} -n {} --storage-size 300'
+                 .format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('storage.storageSizeGb', 300 )])
+
+        self.cmd('{} flexible-server update -g {} -n {} --iops 3500'
+                 .format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('storage.iops', 3500 )])
+
+        self.cmd('{} flexible-server update -g {} -n {} --throughput 400'
+                 .format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('storage.throughput', 400 )])
+
+        # test failures
+        self.cmd('{} flexible-server update -g {} -n {} --storage-auto-grow Enabled'
+                 .format(database_engine, resource_group, server_name),
+                 expect_failure=True)
+
+        self.cmd('{} flexible-server update -g {} -n {} --high-availability SameZone'
+                 .format(database_engine, resource_group, server_name),
+                 expect_failure=True)
+
+        replica_name = 'rep-ssdv2-' + server_name
+        self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {}'
+                 .format(database_engine, resource_group, replica_name, basic_info['id']),
+                 expect_failure=True)
+
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name), checks=NoneCheck())
+
+
     def _test_flexible_server_restore_mgmt(self, database_engine, resource_group):
 
         private_dns_param = 'privateDnsZoneArmResourceId'
@@ -241,7 +413,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.cmd('network vnet create -g {} -l {} -n {} --address-prefixes 172.1.0.0/16'.format(
                  resource_group, location, new_vnet))
 
-        subnet = self.cmd('network vnet subnet create -g {} -n {} --vnet-name {} --address-prefixes 172.1.0.0/24'.format(
+        subnet = self.cmd('network vnet subnet create -g {} -n {} --vnet-name {} --address-prefixes 172.1.0.0/24 --default-outbound false'.format(
                           resource_group, new_subnet, new_vnet)).get_output_in_json()
 
         private_dns_zone = '{}.private.{}.database.azure.com'.format(target_server_diff_vnet, database_engine)
@@ -318,7 +490,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.cmd('network vnet create -g {} -l {} -n {} --address-prefixes 172.1.0.0/16'.format(
                  resource_group, target_location, new_vnet))
 
-        subnet = self.cmd('network vnet subnet create -g {} -n {} --vnet-name {} --address-prefixes 172.1.0.0/24'.format(
+        subnet = self.cmd('network vnet subnet create -g {} -n {} --vnet-name {} --address-prefixes 172.1.0.0/24 --default-outbound false'.format(
                           resource_group, new_subnet, new_vnet)).get_output_in_json()
 
         restore_result = retryable_method(retries=10, interval_sec=360 if os.environ.get(ENV_LIVE_TEST, False) else 0, exception_type=HttpResponseError,
@@ -362,7 +534,54 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                  database_engine, resource_group, target_server_config), checks=NoneCheck())
 
 
+    def _test_flexible_server_ssdv2_restore_mgmt(self, database_engine, resource_group):
+
+        location = 'eastus2euap'
+        source_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        source_ssdv2_server = self.create_random_name(SERVER_NAME_PREFIX + 'ssdv2-', 40)
+        target_server_ssdv2_migration = self.create_random_name(SERVER_NAME_PREFIX + 'ssdv2-migrate-', 40)
+        target_server_ssdv2 = self.create_random_name(SERVER_NAME_PREFIX + 'ssdv2-restore-', 40)
+        storage_type = 'PremiumV2_LRS'
+        iops = 3000
+        throughput = 125
+
+        # Restore to ssdv2
+        self.cmd('{} flexible-server create -g {} -n {} -l {} --public-access None --yes'.format(
+                 database_engine, resource_group, source_server, location))
+
+        # Restore to ssdv2
+        self.cmd('{} flexible-server create -g {} -n {} -l {} --storage-type {} --iops {} --throughput {} --public-access None --yes'.format(
+                 database_engine, resource_group, source_ssdv2_server, location, storage_type, iops, throughput))
+
+        # Wait until snapshot is created
+        os.environ.get(ENV_LIVE_TEST, False) and sleep(1800)
+
+        # Restore to ssdv2
+        restore_migration_result = self.cmd('{} flexible-server restore -g {} --name {} --source-server {} --storage-type {}'
+                                  .format(database_engine, resource_group, target_server_ssdv2_migration, source_server, storage_type)).get_output_in_json()
+        self.assertEqual(restore_migration_result['storage']['type'], storage_type)
+
+        # Restore ssdv2 server
+        restore_ssdv2_result = self.cmd('{} flexible-server restore -g {} --name {} --source-server {}'
+                                  .format(database_engine, resource_group, target_server_ssdv2, source_ssdv2_server)).get_output_in_json()
+        self.assertEqual(restore_ssdv2_result['storage']['type'], storage_type)
+
+        # Delete servers
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
+                 database_engine, resource_group, source_server), checks=NoneCheck())
+
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
+                 database_engine, resource_group, source_ssdv2_server), checks=NoneCheck())
+
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
+                 database_engine, resource_group, target_server_ssdv2_migration), checks=NoneCheck())
+
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
+                 database_engine, resource_group, target_server_ssdv2), checks=NoneCheck())
+
+
     def _test_flexible_server_byok_mgmt(self, resource_group, vault_name, backup_vault_name=None):
+        live_test = False
         key_name = self.create_random_name('rdbmskey', 32)
         identity_name = self.create_random_name('identity', 32)
         backup_key_name = self.create_random_name('rdbmskey', 32)
@@ -379,30 +598,34 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         location = self.postgres_location
         backup_location = self.postgres_backup_location
         replication_role = 'AsyncReplica'
+        scope = '/subscriptions/{}/resourceGroups/{}'.format(self.get_subscription_id(), resource_group)
 
+        # Create identity and assign role
         key = self.cmd('keyvault key create --name {} -p software --vault-name {}'
                        .format(key_name, vault_name)).get_output_in_json()
 
         identity = self.cmd('identity create -g {} --name {} --location {}'.format(resource_group, identity_name, location)).get_output_in_json()
+        if (live_test):
+            self.cmd('role assignment create --assignee-object-id {} --assignee-principal-type ServicePrincipal --role "Key Vault Crypto User" --scope {}'.format( identity['principalId'], scope))
+            self.cmd('role assignment create --assignee-object-id {} --assignee-principal-type ServicePrincipal --role "Key Vault Certificate User" --scope {}'.format( identity['principalId'], scope))
 
-        self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'
-                 .format(resource_group, vault_name, identity['principalId']))
-
+        # Create backup identity and assign role
         backup_key = self.cmd('keyvault key create --name {} -p software --vault-name {}'
                                   .format(backup_key_name, backup_vault_name)).get_output_in_json()
 
         backup_identity = self.cmd('identity create -g {} --name {} --location {}'.format(resource_group, backup_identity_name, backup_location)).get_output_in_json()
+        if (live_test):
+            self.cmd('role assignment create --assignee-object-id {} --assignee-principal-type ServicePrincipal --role "Key Vault Crypto User" --scope {}'.format( backup_identity['principalId'], scope))
+            self.cmd('role assignment create --assignee-object-id {} --assignee-principal-type ServicePrincipal --role "Key Vault Certificate User" --scope {}'.format( backup_identity['principalId'], scope))
 
-        self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'
-                    .format(resource_group, backup_vault_name, backup_identity['principalId']))
-        
+        # Create identity 2 and assign role
         key_2 = self.cmd('keyvault key create --name {} -p software --vault-name {}'
                             .format(key_2_name, vault_name)).get_output_in_json()
 
         identity_2 = self.cmd('identity create -g {} --name {} --location {}'.format(resource_group, identity_2_name, location)).get_output_in_json()
-
-        self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'
-                    .format(resource_group, vault_name, identity_2['principalId']))
+        if (live_test):
+            self.cmd('role assignment create --assignee-object-id {} --assignee-principal-type ServicePrincipal --role "Key Vault Crypto User" --scope {}'.format( identity_2['principalId'], scope))
+            self.cmd('role assignment create --assignee-object-id {} --assignee-principal-type ServicePrincipal --role "Key Vault Certificate User" --scope {}'.format( identity_2['principalId'], scope))
 
         def invalid_input_tests():
             # key or identity only
@@ -622,7 +845,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.cmd('network vnet create -g {} -l {} -n {} --address-prefixes 172.1.0.0/16'.format(
                  resource_group, location, new_vnet))
 
-        subnet = self.cmd('network vnet subnet create -g {} -n {} --vnet-name {} --address-prefixes 172.1.0.0/24'.format(
+        subnet = self.cmd('network vnet subnet create -g {} -n {} --vnet-name {} --address-prefixes 172.1.0.0/24 --default-outbound false'.format(
                           resource_group, new_subnet, new_vnet)).get_output_in_json()
 
         private_dns_zone = '{}.private.{}.database.azure.com'.format(target_server_diff_vnet, database_engine)
@@ -959,7 +1182,7 @@ class FlexibleServerValidatorScenarioTest(ScenarioTest):
         invalid_tier = self.create_random_name('tier', RANDOM_VARIABLE_MAX_LENGTH)
         valid_tier = 'GeneralPurpose'
         invalid_backup_retention = 40
-        version = 12
+        version = 16
         storage_size = 128
         location = self.postgres_location
         tier = 'Burstable'
@@ -1036,7 +1259,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
         result = self.cmd('{} flexible-server show -g {} --name {} '
                           .format(database_engine, resource_group, master_server),
                           checks=[
-                              JMESPathCheck('replicationRole', primary_role),
+                              JMESPathCheck('replica.role', primary_role),
                               JMESPathCheck('storage.autoGrow', source_server_auto_grow)]).get_output_in_json()
         
         # test replica create
@@ -1050,8 +1273,10 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
         replica_role = 'AsyncReplica'
         public_access_arg = ''
         public_access_check = []
+        virtual_endpoint_name = self.create_random_name(F'virtual-endpoint', 32)
+        read_write_endpoint_type = 'ReadWrite'
         master_server = self.create_random_name(SERVER_NAME_PREFIX, 32)
-        replicas = [self.create_random_name(F'azuredbclirep{i+1}', SERVER_NAME_MAX_LENGTH) for i in range(2)]
+        replicas = [self.create_random_name(F'azuredbclirep{i+1}', SERVER_NAME_MAX_LENGTH) for i in range(3)]
 
         if vnet_enabled:
             master_vnet = self.create_random_name('VNET', SERVER_NAME_MAX_LENGTH)
@@ -1072,7 +1297,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                  .format(database_engine, resource_group, master_server, location, 256, master_vnet_args))
         result = self.cmd('{} flexible-server show -g {} --name {} '
                           .format(database_engine, resource_group, master_server),
-                          checks=[JMESPathCheck('replicationRole', primary_role)] + master_vnet_check).get_output_in_json()
+                          checks=[JMESPathCheck('replica.role', primary_role)] + master_vnet_check).get_output_in_json()
         
         # test replica create
         self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {} --zone 2 {} {}'
@@ -1083,9 +1308,9 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('sku.tier', result['sku']['tier']),
                      JMESPathCheck('sku.name', result['sku']['name']),
-                     JMESPathCheck('replicationRole', replica_role),
+                     JMESPathCheck('replica.role', replica_role),
                      JMESPathCheck('sourceServerResourceId', result['id']),
-                     JMESPathCheck('replicaCapacity', '0')] + replica_vnet_check[0] + public_access_check)
+                     JMESPathCheck('replica.capacity', '0')] + replica_vnet_check[0] + public_access_check)
         
         # test storage auto-grow not allowed for replica server update
         self.cmd('{} flexible-server update -g {} -n {} --storage-auto-grow Enabled'
@@ -1097,23 +1322,23 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                  .format(database_engine, resource_group, master_server),
                  checks=[JMESPathCheck('length(@)', 1)])
 
-        # test replica stop
+        # test replica stop-replication
         self.cmd('{} flexible-server replica stop-replication -g {} --name {} --yes'
                  .format(database_engine, resource_group, replicas[0]),
                  checks=[
                      JMESPathCheck('name', replicas[0]),
                      JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('replicationRole', primary_role),
+                     JMESPathCheck('replica.role', primary_role),
                      JMESPathCheck('sourceServerResourceId', 'None'),
-                     JMESPathCheck('replicaCapacity', result['replicaCapacity'])])
+                     JMESPathCheck('replica.capacity', result['replica']['capacity'])])
 
         # test show server with replication info, master becomes normal server
         self.cmd('{} flexible-server show -g {} --name {}'
                  .format(database_engine, resource_group, master_server),
                  checks=[
-                     JMESPathCheck('replicationRole', primary_role),
+                     JMESPathCheck('replica.role', primary_role),
                      JMESPathCheck('sourceServerResourceId', 'None'),
-                     JMESPathCheck('replicaCapacity', result['replicaCapacity'])])
+                     JMESPathCheck('replica.capacity', result['replica']['capacity'])])
 
         # test delete master server
         self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {} {}'
@@ -1122,14 +1347,90 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                     JMESPathCheck('name', replicas[1]),
                     JMESPathCheck('resourceGroup', resource_group),
                     JMESPathCheck('sku.name', result['sku']['name']),
-                    JMESPathCheck('replicationRole', replica_role),
+                    JMESPathCheck('replica.role', replica_role),
                     JMESPathCheck('sourceServerResourceId', result['id']),
-                    JMESPathCheck('replicaCapacity', '0')] + replica_vnet_check[1])
+                    JMESPathCheck('replica.capacity', '0')] + replica_vnet_check[1])
 
         # in postgres we can't delete master server if it has replicas
         self.cmd('{} flexible-server delete -g {} --name {} --yes'
                     .format(database_engine, resource_group, master_server),
                     expect_failure=True)
+
+        # test virtual-endpoint
+        if not vnet_enabled:
+            self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {}'
+                    .format(database_engine, resource_group, replicas[2], result['id']),
+                    checks=[
+                        JMESPathCheck('name', replicas[2]),
+                        JMESPathCheck('replica.role', replica_role),
+                        JMESPathCheck('sourceServerResourceId', result['id'])])
+
+            # test virtual-endpoint create
+            self.cmd('{} flexible-server virtual-endpoint create -g {} --server-name {} --name {} --endpoint-type {} --members {}'
+                    .format(database_engine, resource_group, master_server, virtual_endpoint_name, read_write_endpoint_type, master_server),
+                    checks=[
+                        JMESPathCheck('endpointType', read_write_endpoint_type),
+                        JMESPathCheck('name', virtual_endpoint_name),
+                        JMESPathCheck('length(virtualEndpoints)', 2)])
+
+            # test virtual-endpoint update
+            update_result = self.cmd('{} flexible-server virtual-endpoint update -g {} --server-name {} --name {} --endpoint-type {} --members {}'
+                    .format(database_engine, resource_group, master_server, virtual_endpoint_name, read_write_endpoint_type, replicas[2]),
+                    checks=[JMESPathCheck('length(members)', 2)]).get_output_in_json()
+
+            # test virtual-endpoint show
+            self.cmd('{} flexible-server virtual-endpoint show -g {} --server-name {} --name {}'
+                    .format(database_engine, resource_group, master_server, virtual_endpoint_name),
+                    checks=[JMESPathCheck('members', update_result['members'])])
+
+            # test replica switchover planned
+            switchover_result = self.cmd('{} flexible-server replica promote -g {} --name {} --promote-mode switchover --promote-option planned --yes'
+                    .format(database_engine, resource_group, replicas[2]),
+                    checks=[
+                        JMESPathCheck('name', replicas[2]),
+                        JMESPathCheck('replica.role', primary_role),
+                        JMESPathCheck('sourceServerResourceId', 'None'),
+                        JMESPathCheck('replica.capacity', result['replica']['capacity'])]).get_output_in_json()
+
+            # test show server with replication info, master became replica server
+            self.cmd('{} flexible-server show -g {} --name {}'
+                    .format(database_engine, resource_group, master_server),
+                    checks=[
+                        JMESPathCheck('replica.role',replica_role),
+                        JMESPathCheck('sourceServerResourceId', switchover_result['id']),
+                        JMESPathCheck('replica.capacity', '0')])
+
+            # test replica switchover forced
+            self.cmd('{} flexible-server replica promote -g {} --name {} --promote-mode switchover --promote-option forced --yes'
+                    .format(database_engine, resource_group, master_server),
+                    checks=[
+                        JMESPathCheck('name', master_server),
+                        JMESPathCheck('replica.role', primary_role),
+                        JMESPathCheck('sourceServerResourceId', 'None'),
+                        JMESPathCheck('replica.capacity', result['replica']['capacity'])])
+
+            # test promote replica standalone forced
+            self.cmd('{} flexible-server replica promote -g {} --name {} --promote-mode standalone --promote-option forced --yes'
+                    .format(database_engine, resource_group, replicas[2]),
+                    checks=[
+                        JMESPathCheck('name',replicas[2]),
+                        JMESPathCheck('replica.role', primary_role),
+                        JMESPathCheck('sourceServerResourceId', 'None'),
+                        JMESPathCheck('replica.capacity', result['replica']['capacity'])])
+
+            # test virtual-endpoint delete
+            self.cmd('{} flexible-server virtual-endpoint delete -g {} --server-name {} --name {} --yes'
+                    .format(database_engine, resource_group, master_server, virtual_endpoint_name))
+
+            # test virtual-endpoint list
+            self.cmd('{} flexible-server virtual-endpoint list -g {} --server-name {}'
+                    .format(database_engine, resource_group, master_server),
+                    checks=[JMESPathCheck('length(@)', 0)])
+
+            # delete standalone server
+            self.cmd('{} flexible-server delete -g {} --name {} --yes'
+                        .format(database_engine, resource_group, replicas[2]))
+
 
         # delete replica server first
         self.cmd('{} flexible-server delete -g {} --name {} --yes'
@@ -1514,7 +1815,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
 
         # subnet exist
         subnet_address_pref = '172.1.1.0/24'
-        self.cmd('network vnet subnet create -g {} -n {} --address-prefixes {} --vnet-name {}'.format(
+        self.cmd('network vnet subnet create -g {} -n {} --address-prefixes {} --vnet-name {} --default-outbound false'.format(
                   resource_group, 'testsubnet2', subnet_address_pref, 'testvnet'))
         subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
                  self.get_subscription_id(), resource_group, 'testvnet', 'testsubnet2')
@@ -1545,7 +1846,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
                  expect_failure=True)
 
         # delegated to different service
-        subnet = self.cmd('network vnet subnet create -g {} -n {} --vnet-name {} --address-prefixes {} --delegations {}'.format(
+        subnet = self.cmd('network vnet subnet create -g {} -n {} --vnet-name {} --address-prefixes {} --delegations {} --default-outbound false'.format(
                           resource_group, subnet_name, vnet_name, subnet_prefix, "Microsoft.DBforMySQL/flexibleServers")).get_output_in_json()
 
         self.cmd('postgres flexible-server create -g {} -l {} --subnet {} --yes'.format(
@@ -1830,8 +2131,8 @@ class FlexibleServerUpgradeMgmtScenarioTest(ScenarioTest):
     def _test_flexible_server_upgrade_mgmt(self, database_engine, resource_group, public_access):
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         replica_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        current_version = '11'
-        new_version = '14'
+        current_version = '13'
+        new_version = '16'
         location = self.postgres_location
 
         create_command = '{} flexible-server create -g {} -n {} --tier GeneralPurpose --sku-name {} --location {} --version {} --yes'.format(
@@ -2070,3 +2371,311 @@ class FlexibleServerIdentityAADAdminMgmtScenarioTest(ScenarioTest):
             self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name))
 
 
+class FlexibleServerAdvancedThreatProtectionSettingMgmtScenarioTest(ScenarioTest):
+    postgres_location = 'eastus'
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    def test_postgres_flexible_server_advanced_threat_protection_setting_mgmt(self, resource_group):
+        self._test_advanced_threat_protection_setting_mgmt('postgres', resource_group)
+
+
+    def _test_advanced_threat_protection_setting_mgmt(self, database_engine, resource_group):
+        location = self.postgres_location
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, 32)
+
+        # create a server
+        self.cmd('{} flexible-server create -g {} --name {} -l {} --storage-size {} --public-access none '
+                 '--tier GeneralPurpose --sku-name Standard_D2s_v3 --yes'
+                 .format(database_engine, resource_group, server_name, location, 128))
+        
+        # show advanced threat protection setting for server
+        self.cmd('{} flexible-server advanced-threat-protection-setting show -g {} --server-name {} '
+                    .format(database_engine, resource_group, server_name),
+                    checks=[JMESPathCheck('state', "Disabled")]).get_output_in_json()
+        
+        # Enable advanced threat protection setting for server
+        self.cmd('{} flexible-server advanced-threat-protection-setting update -g {} --server-name {} --state Enabled'
+                    .format(database_engine, resource_group, server_name))
+
+        os.environ.get(ENV_LIVE_TEST, False) and sleep(2 * 60)
+        
+        # show advanced threat protection setting for server
+        self.cmd('{} flexible-server advanced-threat-protection-setting show -g {} --server-name {} '
+                    .format(database_engine, resource_group, server_name),
+                    checks=[JMESPathCheck('state', "Enabled")]).get_output_in_json()
+        
+        # Disable advanced threat protection setting for server
+        self.cmd('{} flexible-server advanced-threat-protection-setting update -g {} --server-name {} --state Disabled'
+                    .format(database_engine, resource_group, server_name))
+
+        os.environ.get(ENV_LIVE_TEST, False) and sleep(2 * 60)
+
+        # show advanced threat protection setting for server
+        self.cmd('{} flexible-server advanced-threat-protection-setting show -g {} --server-name {} '
+                    .format(database_engine, resource_group, server_name),
+                    checks=[JMESPathCheck('state', "Disabled")]).get_output_in_json()
+
+        # delete everything
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name))
+
+
+class FlexibleServerLogsMgmtScenarioTest(ScenarioTest):
+    postgres_location = 'eastus'
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    def test_postgres_flexible_server_logs_mgmt(self, resource_group):
+        self._test_server_logs_mgmt('postgres', resource_group)
+
+
+    def _test_server_logs_mgmt(self, database_engine, resource_group):
+        location = self.postgres_location
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, 32)
+
+        # create a server
+        self.cmd('{} flexible-server create -g {} --name {} -l {} --storage-size {} --public-access none '
+                 '--tier GeneralPurpose --sku-name Standard_D2s_v3 --yes'
+                 .format(database_engine, resource_group, server_name, location, 128))
+        
+        # enable server logs for server
+        self.cmd('{} flexible-server parameter set -g {} --server-name {} --name logfiles.download_enable --value on'
+                    .format(database_engine, resource_group, server_name),
+                    checks=[JMESPathCheck('value', "on"),
+                            JMESPathCheck('name', "logfiles.download_enable")]).get_output_in_json()
+        
+        # set retention period for server logs for server
+        self.cmd('{} flexible-server parameter set -g {} --server-name {} --name logfiles.retention_days --value 1'
+                    .format(database_engine, resource_group, server_name),
+                    checks=[JMESPathCheck('value', "1"),
+                            JMESPathCheck('name', "logfiles.retention_days")]).get_output_in_json()
+
+        if os.environ.get(ENV_LIVE_TEST, True):
+            return
+
+        # wait for around 30 min to allow log files to be generated
+        sleep(30*60)
+
+        # list server log files
+        server_log_files = self.cmd('{} flexible-server server-logs list -g {} --server-name {} '
+                                    .format(database_engine, resource_group, server_name)).get_output_in_json()
+        
+        self.assertGreater(len(server_log_files), 0, "Server logFiles are not yet created")
+        
+        # download server log files
+        self.cmd('{} flexible-server server-logs download -g {} --server-name {} --name {}'
+                    .format(database_engine, resource_group, server_name, server_log_files[0]['name']),
+                    checks=NoneCheck())
+        
+        # disable server logs for server
+        self.cmd('{} flexible-server parameter set -g {} --server-name {} --name logfiles.download_enable --value off'
+                    .format(database_engine, resource_group, server_name),
+                    checks=[JMESPathCheck('value', "off"),
+                            JMESPathCheck('name', "logfiles.download_enable")]).get_output_in_json()
+
+        # delete everything
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name))
+
+
+
+class FlexibleServerPrivateEndpointsMgmtScenarioTest(ScenarioTest):
+
+    postgres_location = 'eastus'
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    @ServerPreparer(engine_type='postgres', location=postgres_location)
+    def test_postgres_flexible_server_private_endpoint_mgmt(self, resource_group, server):
+        self._test_private_endpoint_connection('postgres', resource_group, server)
+        self._test_private_link_resource('postgres', resource_group, server, 'postgresqlServer')
+
+    def _test_private_endpoint_connection(self, database_engine, resource_group, server_name):
+        loc = self.postgres_location
+        vnet = self.create_random_name('cli-vnet-', 24)
+        subnet = self.create_random_name('cli-subnet-', 24)
+        pe_name_auto = self.create_random_name('cli-pe-', 24)
+        pe_name_manual_approve = self.create_random_name('cli-pe-', 24)
+        pe_name_manual_reject = self.create_random_name('cli-pe-', 24)
+        pe_connection_name_auto = self.create_random_name('cli-pec-', 24)
+        pe_connection_name_manual_approve = self.create_random_name('cli-pec-', 24)
+        pe_connection_name_manual_reject = self.create_random_name('cli-pec-', 24)
+
+        result = self.cmd('{} flexible-server show -n {} -g {}'.format(database_engine, server_name, resource_group),
+                               checks=[JMESPathCheck('resourceGroup', resource_group),
+                                       JMESPathCheck('name', server_name)]).get_output_in_json()
+        self.assertEqual(''.join(result['location'].lower().split()), self.postgres_location)
+
+        # Prepare network and disable network policies
+        self.cmd('network vnet create -n {} -g {} -l {} --subnet-name {}'
+                 .format(vnet, resource_group, loc, subnet),
+                 checks=self.check('length(newVNet.subnets)', 1))
+        self.cmd('network vnet subnet update -n {} --vnet-name {} -g {} '
+                 '--disable-private-endpoint-network-policies true'
+                 .format(subnet, vnet, resource_group),
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+
+        # Get Server Id and Group Id
+        result = self.cmd('{} flexible-server show -g {} -n {}'
+                          .format(database_engine, resource_group, server_name)).get_output_in_json()
+        server_id = result['id']
+        group_id = 'postgresqlServer'
+
+        approval_description = 'You are approved!'
+        rejection_description = 'You are rejected!'
+
+        # Testing Auto-Approval workflow
+        # Create a private endpoint connection
+        private_endpoint = self.cmd('network private-endpoint create -g {} -n {} --vnet-name {} --subnet {} -l {} '
+                                    '--connection-name {} --private-connection-resource-id {} '
+                                    '--group-id {}'
+                                    .format(resource_group, pe_name_auto, vnet, subnet, loc, pe_connection_name_auto,
+                                            server_id, group_id)).get_output_in_json()
+        self.assertEqual(private_endpoint['name'], pe_name_auto)
+        self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['name'], pe_connection_name_auto)
+        self.assertEqual(
+            private_endpoint['privateLinkServiceConnections'][0]['privateLinkServiceConnectionState']['status'],
+            'Approved')
+        self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['provisioningState'], 'Succeeded')
+        self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['groupIds'][0], group_id)
+
+        # Get Private Endpoint Connection Name and Id
+        result = self.cmd('{} flexible-server show -g {} -n {}'
+                          .format(database_engine, resource_group, server_name)).get_output_in_json()
+        self.assertEqual(len(result['privateEndpointConnections']), 1)
+        self.assertEqual(
+            result['privateEndpointConnections'][0]['privateLinkServiceConnectionState']['status'],
+            'Approved')
+        server_pec_id = result['privateEndpointConnections'][0]['id']
+        result = parse_proxy_resource_id(server_pec_id)
+        server_pec_name = result['child_name_1']
+
+        self.cmd('{} flexible-server private-endpoint-connection show --server-name {} -g {} --name {}'
+                 .format(database_engine, server_name, resource_group, server_pec_name),
+                 checks=[
+                     self.check('id', server_pec_id),
+                     self.check('privateLinkServiceConnectionState.status', 'Approved')
+                 ])
+        
+        self.cmd('{} flexible-server private-endpoint-connection approve --server-name {} -g {} --name {} --description "{}"'
+                     .format(database_engine, server_name, resource_group, server_pec_name, approval_description))
+
+        self.cmd('{} flexible-server private-endpoint-connection reject --server-name {} -g {} --name {} --description "{}"'
+                     .format(database_engine, server_name, resource_group, server_pec_name, rejection_description))
+
+        self.cmd('{} flexible-server private-endpoint-connection delete --server-name {} -g {} --id {}'
+                 .format(database_engine, server_name, resource_group, server_pec_id))
+
+        # Testing Manual-Approval workflow [Approval]
+        # Create a private endpoint connection
+        private_endpoint = self.cmd('network private-endpoint create -g {} -n {} --vnet-name {} --subnet {} -l {} '
+                                    '--connection-name {} --private-connection-resource-id {} '
+                                    '--group-id {} --manual-request'
+                                    .format(resource_group, pe_name_manual_approve, vnet, subnet, loc,
+                                            pe_connection_name_manual_approve, server_id,
+                                            group_id)).get_output_in_json()
+        self.assertEqual(private_endpoint['name'], pe_name_manual_approve)
+        self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['name'],
+                         pe_connection_name_manual_approve)
+        self.assertEqual(
+            private_endpoint['manualPrivateLinkServiceConnections'][0]['privateLinkServiceConnectionState']['status'],
+            'Pending')
+        self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['provisioningState'], 'Succeeded')
+        self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['groupIds'][0], group_id)
+
+        # Get Private Endpoint Connection Name and Id
+        result = self.cmd('{} flexible-server show -g {} -n {}'
+                          .format(database_engine, resource_group, server_name)).get_output_in_json()
+        self.assertEqual(len(result['privateEndpointConnections']), 1)
+        self.assertEqual(
+            result['privateEndpointConnections'][0]['privateLinkServiceConnectionState']['status'],
+            'Pending')
+        server_pec_id = result['privateEndpointConnections'][0]['id']
+        result = parse_proxy_resource_id(server_pec_id)
+        server_pec_name = result['child_name_1']
+
+        self.cmd('{} flexible-server private-endpoint-connection show --server-name {} -g {} --name {}'
+                 .format(database_engine, server_name, resource_group, server_pec_name),
+                 checks=[
+                     self.check('id', server_pec_id),
+                     self.check('privateLinkServiceConnectionState.status', 'Pending'),
+                     self.check('provisioningState', 'Succeeded')
+                 ])
+
+        self.cmd('{} flexible-server private-endpoint-connection approve --server-name {} -g {} --name {} --description "{}"'
+                 .format(database_engine, server_name, resource_group, server_pec_name, approval_description),
+                 checks=[
+                     self.check('privateLinkServiceConnectionState.status', 'Approved'),
+                     self.check('privateLinkServiceConnectionState.description', approval_description),
+                     self.check('provisioningState', 'Succeeded')
+                 ])
+
+        self.cmd('{} flexible-server private-endpoint-connection reject --server-name {} -g {} --name {} --description "{}"'
+                     .format(database_engine, server_name, resource_group, server_pec_name, rejection_description))
+
+        self.cmd('{} flexible-server private-endpoint-connection delete --server-name {} -g {}  --id {}'
+                 .format(database_engine, server_name, resource_group, server_pec_id))
+
+        # Testing Manual-Approval workflow [Rejection]
+        # Create a private endpoint connection
+        private_endpoint = self.cmd('network private-endpoint create -g {} -n {} --vnet-name {} --subnet {} -l {} '
+                                    '--connection-name {} --private-connection-resource-id {} '
+                                    '--group-id {} --manual-request true'
+                                    .format(resource_group, pe_name_manual_reject, vnet, subnet, loc,
+                                            pe_connection_name_manual_reject, server_id, group_id)).get_output_in_json()
+        self.assertEqual(private_endpoint['name'], pe_name_manual_reject)
+        self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['name'],
+                         pe_connection_name_manual_reject)
+        self.assertEqual(
+            private_endpoint['manualPrivateLinkServiceConnections'][0]['privateLinkServiceConnectionState']['status'],
+            'Pending')
+        self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['provisioningState'], 'Succeeded')
+        self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['groupIds'][0], group_id)
+
+        # Get Private Endpoint Connection Name and Id
+        result = self.cmd('{} flexible-server show -g {} -n {}'
+                          .format(database_engine, resource_group, server_name)).get_output_in_json()
+        self.assertEqual(len(result['privateEndpointConnections']), 1)
+        self.assertEqual(
+            result['privateEndpointConnections'][0]['privateLinkServiceConnectionState']['status'],
+            'Pending')
+        server_pec_id = result['privateEndpointConnections'][0]['id']
+        result = parse_proxy_resource_id(server_pec_id)
+        server_pec_name = result['child_name_1']
+
+        self.cmd('{} flexible-server private-endpoint-connection list -g {} --server-name {}'.format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('type(@)', 'array'),
+                         JMESPathCheck('length(@)', 1)])
+
+        self.cmd('{} flexible-server private-endpoint-connection show --server-name {} -g {} --name {}'
+                 .format(database_engine, server_name, resource_group, server_pec_name),
+                 checks=[
+                     self.check('id', server_pec_id),
+                     self.check('privateLinkServiceConnectionState.status', 'Pending'),
+                     self.check('provisioningState', 'Succeeded')
+                 ])
+
+        self.cmd('{} flexible-server private-endpoint-connection reject --server-name {} -g {} --name {} --description "{}"'
+                 .format(database_engine, server_name, resource_group, server_pec_name, rejection_description),
+                 checks=[
+                     self.check('privateLinkServiceConnectionState.status', 'Rejected'),
+                     self.check('privateLinkServiceConnectionState.description', rejection_description),
+                     self.check('provisioningState', 'Succeeded')
+                 ])
+
+        self.cmd('{} flexible-server private-endpoint-connection approve --server-name {} -g {} --name {} --description "{}"'
+                     .format(database_engine, server_name, resource_group, server_pec_name, approval_description), expect_failure=True)
+
+        self.cmd('{} flexible-server private-endpoint-connection delete --server-name {} -g {}  --id {}'
+                 .format(database_engine, server_name, resource_group, server_pec_id))
+        result = self.cmd('{} flexible-server show -g {} -n {}'
+                          .format(database_engine, resource_group, server_name)).get_output_in_json()
+        self.assertEqual(len(result['privateEndpointConnections']), 0)
+
+    def _test_private_link_resource(self, database_engine, resource_group, server, group_id):
+        result = self.cmd('{} flexible-server private-link-resource list -g {} -s {}'
+                          .format(database_engine, resource_group, server)).get_output_in_json()
+        self.assertEqual(result[0]['groupId'], group_id)
+
+        result = self.cmd('{} flexible-server private-link-resource show -g {} -s {}'
+                          .format(database_engine, resource_group, server)).get_output_in_json()
+        self.assertEqual(result['groupId'], group_id)

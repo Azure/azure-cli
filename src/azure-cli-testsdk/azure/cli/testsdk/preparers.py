@@ -115,7 +115,7 @@ class ResourceGroupPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
 # pylint: disable=too-many-instance-attributes
 class StorageAccountPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
     def __init__(self, name_prefix='clitest', sku='Standard_LRS', location='westus', kind='Storage',
-                 allow_blob_public_access=False, hns=False, length=24,
+                 allow_blob_public_access=False, allow_shared_key_access=None, hns=False, length=24,
                  parameter_name='storage_account', resource_group_parameter_name='resource_group', skip_delete=True,
                  dev_setting_name='AZURE_CLI_TEST_DEV_STORAGE_ACCOUNT_NAME', key='sa'):
         super(StorageAccountPreparer, self).__init__(name_prefix, length)
@@ -124,6 +124,7 @@ class StorageAccountPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
         self.sku = sku
         self.kind = kind
         self.allow_blob_public_access = allow_blob_public_access
+        self.allow_shared_key_access = allow_shared_key_access
         self.hns = hns
         self.resource_group_parameter_name = resource_group_parameter_name
         self.skip_delete = skip_delete
@@ -140,6 +141,11 @@ class StorageAccountPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
                 template += ' --allow-blob-public-access false'
             else:
                 template += ' --allow-blob-public-access true'
+            if self.allow_shared_key_access is not None:
+                if not self.allow_shared_key_access:
+                    template += ' --allow-shared-key-access false'
+                else:
+                    template += ' --allow-shared-key-access true'
             if self.hns:
                 template += ' --hns'
             self.live_only_execute(self.cli_ctx, template.format(
@@ -277,15 +283,16 @@ class ManagedHSMPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
         security_domain = os.path.join(self.certs_path, f'{name}-SD.json').replace('\\', '\\\\')
         if os.path.exists(security_domain):
             os.remove(security_domain)
-        if not self.skip_delete:
-            group = self._get_resource_group(**kwargs)
-            self.live_only_execute(self.cli_ctx, 'az keyvault delete --hsm-name {} -g {}'.format(name, group))
-        if self.skip_purge:
-            return
         from azure.core.exceptions import HttpResponseError
         try:
+            if not self.skip_delete:
+                group = self._get_resource_group(**kwargs)
+                self.live_only_execute(self.cli_ctx, 'az keyvault delete --hsm-name {} -g {}'.format(name, group))
+            if self.skip_purge:
+                return
             self.live_only_execute(self.cli_ctx, 'az keyvault purge --hsm-name {} -l {}'.format(name, self.location))
         except HttpResponseError:
+            # delete operation will fail with HttpResponseError when there's ongoing updates
             # purge operation will fail with HttpResponseError when --enable-purge-protection
             pass
 
@@ -425,12 +432,12 @@ class VirtualNetworkPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
 
     def remove_resource(self, name, **kwargs):
         if not self.dev_setting_name:
-            from msrestazure.azure_exceptions import CloudError
+            from azure.core.exceptions import HttpResponseError
             try:
                 self.live_only_execute(
                     self.cli_ctx,
                     'az network vnet delete --name {} --resource-group {}'.format(name, self._get_resource_group(**kwargs)))
-            except CloudError:
+            except HttpResponseError:
                 # deletion of vnet may fail as service could create subresources like IPConfig. We could rely on the deletion of resource group to delete the vnet.
                 pass
 

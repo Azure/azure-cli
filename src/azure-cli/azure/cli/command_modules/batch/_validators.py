@@ -64,6 +64,23 @@ def metadata_item_format(value):
     return {'name': data_name, 'value': data_value}
 
 
+def resource_tag_format(values):
+    """Space-separated values in 'key=value' format."""
+    if not values:
+        raise ValueError("No values in resource tags. "
+                         "Argument values should be in the format a=b c=d")
+    result = {}
+    try:
+        for value in values.split(' '):
+            k, v = value.split('=')
+            result[k] = v
+    except ValueError:
+        message = ("Incorrectly formatted resource tags. "
+                   "Argument values should be in the format a=b c=d")
+        raise ValueError(message)
+    return result
+
+
 def environment_setting_format(value):
     """Space-separated values in 'key=value' format."""
     try:
@@ -315,7 +332,7 @@ def validate_client_parameters(cmd, namespace):
             acc = next((x for x in client.batch_account.list()
                         if x.name == namespace.account_name and x.account_endpoint == host), None)
             if acc:
-                from msrestazure.tools import parse_resource_id
+                from azure.mgmt.core.tools import parse_resource_id
                 rg = parse_resource_id(acc.id)['resource_group']
                 namespace.account_key = \
                     client.batch_account.get_keys(rg,  # pylint: disable=no-member

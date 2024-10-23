@@ -9,7 +9,7 @@ from unittest import mock
 import time
 import unittest
 
-from msrestazure.tools import parse_resource_id
+from azure.mgmt.core.tools import parse_resource_id
 
 from azure.cli.command_modules.containerapp.custom import containerapp_ssh
 from azure.cli.command_modules.containerapp.tests.latest.utils import create_containerapp_env, \
@@ -17,8 +17,8 @@ from azure.cli.command_modules.containerapp.tests.latest.utils import create_con
 
 from azure.cli.testsdk.reverse_dependency import get_dummy_cli
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathCheck, live_only,
-                               LogAnalyticsWorkspacePreparer)
+from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathCheck, StringCheck, live_only,
+                               JMESPathCheckNotExists, LogAnalyticsWorkspacePreparer)
 from knack.util import CLIError
 
 from azure.cli.command_modules.containerapp.tests.latest.common import TEST_LOCATION, write_test_file, \
@@ -58,10 +58,10 @@ class ContainerappScenarioTest(ScenarioTest):
         ])
 
         # Create Container App with image, resource and replica limits
-        create_string = "containerapp create -g {} -n {} --environment {} --image nginx --cpu 0.5 --memory 1.0Gi --min-replicas 2 --max-replicas 4".format(resource_group, containerapp_name, env)
+        create_string = "containerapp create -g {} -n {} --environment {} --image mcr.microsoft.com/azuredocs/containerapps-helloworld:latest --cpu 0.5 --memory 1.0Gi --min-replicas 2 --max-replicas 4".format(resource_group, containerapp_name, env)
         self.cmd(create_string, checks=[
             JMESPathCheck('name', containerapp_name),
-            JMESPathCheck('properties.template.containers[0].image', 'nginx'),
+            JMESPathCheck('properties.template.containers[0].image', 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'),
             JMESPathCheck('properties.template.containers[0].resources.cpu', '0.5'),
             JMESPathCheck('properties.template.containers[0].resources.memory', '1Gi'),
             JMESPathCheck('properties.template.scale.minReplicas', '2'),
@@ -73,9 +73,11 @@ class ContainerappScenarioTest(ScenarioTest):
             JMESPathCheck('properties.configuration.ingress.targetPort', 8080)
         ])
 
-        # Container App with ingress should fail unless target port is specified
-        with self.assertRaises(CLIError):
-            self.cmd('containerapp create -g {} -n {} --environment {} --ingress external'.format(resource_group, containerapp_name, env))
+        # target port is optional
+        self.cmd('containerapp create -g {} -n {} --environment {} --ingress external'.format(resource_group, containerapp_name, env), checks=[
+            JMESPathCheck('properties.configuration.ingress.external', True),
+            JMESPathCheck('properties.configuration.ingress.targetPort', 0)
+        ])
 
         # Create Container App with secrets and environment variables
         containerapp_name = self.create_random_name(prefix='containerapp-e2e', length=24)
@@ -86,6 +88,56 @@ class ContainerappScenarioTest(ScenarioTest):
             JMESPathCheck('length(properties.template.containers[0].env)', 2),
             JMESPathCheck('length(properties.configuration.secrets)', 2)
         ])
+
+    @live_only()  # Pass lively, But failed in playback mode with error: WebSocketBadStatusException: Handshake status 401 Unauthorized
+    @ResourceGroupPreparer(location="eastus2")
+    def test_containerapp_exec(self, resource_group):
+        self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
+        env = prepare_containerapp_env_for_app_e2e_tests(self)
+
+        containerapp_name = self.create_random_name(prefix='containerapp-e2e1', length=24)
+        # create an app with ingress is None
+        app = self.cmd(f'containerapp create -g {resource_group} -n {containerapp_name} --environment {env}', checks=[
+            JMESPathCheck('name', containerapp_name),
+            JMESPathCheck('properties.configuration.ingress', None),
+
+        ]).get_output_in_json()
+
+        self.containerapp_exec_test_helper(resource_group, containerapp_name, app["properties"]["latestRevisionName"])
+
+        #  Test external App
+        external_containerapp_name = self.create_random_name(prefix='containerapp-e2e2', length=24)
+        # create an app with ingress is None
+        external_containerapp = self.cmd(f'containerapp create -g {resource_group} -n {external_containerapp_name} --environment {env} --ingress external --target-port 8080', checks=[
+            JMESPathCheck('name', external_containerapp_name),
+            JMESPathCheck('properties.configuration.ingress.external', True),
+            JMESPathCheck('properties.configuration.ingress.targetPort', 8080)
+        ]).get_output_in_json()
+
+        self.containerapp_exec_test_helper(resource_group, external_containerapp_name, external_containerapp["properties"]["latestRevisionName"])
+
+        #  Test internal App
+        # update ingress to internal
+        self.cmd(
+            f'containerapp ingress update -g {resource_group} -n {external_containerapp_name} --type internal',
+            checks=[
+                JMESPathCheck('external', False),
+            ]).get_output_in_json()
+        internal_containerapp = self.cmd(f'containerapp show -g {resource_group} -n {external_containerapp_name}').get_output_in_json()
+        self.containerapp_exec_test_helper(resource_group, external_containerapp_name, internal_containerapp["properties"]["latestRevisionName"])
+
+    def containerapp_exec_test_helper(self, resource_group, containerapp_name, latest_revision_name):
+        self.cmd(f'containerapp exec -g {resource_group} -n {containerapp_name}')
+
+        self.cmd(f'containerapp exec -g {resource_group} -n {containerapp_name} --command ls')
+
+        replica_list = self.cmd(
+            f'containerapp replica list -g {resource_group} -n {containerapp_name} --revision {latest_revision_name}',
+            expect_failure=False).get_output_in_json()
+
+        self.cmd(
+            f'containerapp exec -g {resource_group} -n {containerapp_name} --replica {replica_list[0]["name"]} --revision {latest_revision_name} --command ls',
+            expect_failure=False)
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="eastus2")
@@ -144,10 +196,10 @@ class ContainerappScenarioTest(ScenarioTest):
         ])
 
         # Create Container App with image, resource and replica limits
-        create_string = "containerapp create -g {} -n {} --environment {} --image nginx --cpu 0.5 --memory 1.0Gi --min-replicas 2 --max-replicas 4".format(resource_group, containerapp_name, env_id)
+        create_string = "containerapp create -g {} -n {} --environment {} --image mcr.microsoft.com/azuredocs/containerapps-helloworld:latest --cpu 0.5 --memory 1.0Gi --min-replicas 2 --max-replicas 4".format(resource_group, containerapp_name, env_id)
         self.cmd(create_string, checks=[
             JMESPathCheck('name', containerapp_name),
-            JMESPathCheck('properties.template.containers[0].image', 'nginx'),
+            JMESPathCheck('properties.template.containers[0].image', 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'),
             JMESPathCheck('properties.template.containers[0].resources.cpu', '0.5'),
             JMESPathCheck('properties.template.containers[0].resources.memory', '1Gi'),
             JMESPathCheck('properties.template.scale.minReplicas', '2'),
@@ -159,9 +211,37 @@ class ContainerappScenarioTest(ScenarioTest):
             JMESPathCheck('properties.configuration.ingress.targetPort', 8080)
         ])
 
-        # Container App with ingress should fail unless target port is specified
-        with self.assertRaises(CLIError):
-            self.cmd('containerapp create -g {} -n {} --environment {} --ingress external'.format(resource_group, containerapp_name, env_id))
+        # target port is optional
+        self.cmd('containerapp create -g {} -n {} --environment {} --ingress external'.format(resource_group, containerapp_name, env_id), checks=[
+            JMESPathCheck('properties.configuration.ingress.external', True),
+            JMESPathCheck('properties.configuration.ingress.targetPort', 0)
+        ])
+
+        self.cmd('containerapp ingress disable -g {} -n {}'.format(resource_group, containerapp_name), checks=[
+            StringCheck('')
+        ])
+
+        self.cmd('containerapp show -g {} -n {}'.format(resource_group, containerapp_name), checks=[
+            JMESPathCheckNotExists('properties.configuration.ingress'),
+        ])
+
+        self.cmd('containerapp ingress enable -g {} -n {} --type external --target-port 8080'.format(resource_group, containerapp_name), checks=[
+            JMESPathCheck('external', True),
+            JMESPathCheck('targetPort', 8080)
+        ])
+
+        self.cmd('containerapp ingress disable -g {} -n {}'.format(resource_group, containerapp_name), checks=[
+            StringCheck('')
+        ])
+
+        self.cmd('containerapp show -g {} -n {}'.format(resource_group, containerapp_name), checks=[
+            JMESPathCheckNotExists('properties.configuration.ingress'),
+        ])
+
+        self.cmd('containerapp ingress enable -g {} -n {} --type external'.format(resource_group, containerapp_name), checks=[
+            JMESPathCheck('external', True),
+            JMESPathCheck('targetPort', 0)
+        ])
 
         # Create Container App with secrets and environment variables
         containerapp_name = self.create_random_name(prefix='containerapp-e2e', length=24)
@@ -202,15 +282,15 @@ class ContainerappScenarioTest(ScenarioTest):
             JMESPathCheck('length(properties.configuration.secrets)', 1),
         ])
 
-        # Update Container App with ACR
-        update_string = 'containerapp update -g {} -n {} --min-replicas 0 --max-replicas 1 --set-env-vars testenv=testing'.format(
+        # Update Container App with ACR, set --min-replicas 1
+        update_string = 'containerapp update -g {} -n {} --min-replicas 1 --max-replicas 1 --set-env-vars testenv=testing'.format(
             resource_group, containerapp_name)
         self.cmd(update_string, checks=[
             JMESPathCheck('name', containerapp_name),
             JMESPathCheck('properties.configuration.registries[0].server', registry_server),
             JMESPathCheck('properties.configuration.registries[0].username', registry_username),
             JMESPathCheck('length(properties.configuration.secrets)', 1),
-            JMESPathCheck('properties.template.scale.minReplicas', '0'),
+            JMESPathCheck('properties.template.scale.minReplicas', '1'),
             JMESPathCheck('properties.template.scale.maxReplicas', '1'),
             JMESPathCheck('length(properties.template.containers[0].env)', 1),
             JMESPathCheck('properties.template.containers[0].env[0].name', "testenv"),
@@ -233,7 +313,7 @@ class ContainerappScenarioTest(ScenarioTest):
             # Removing ACR password should fail since it is needed for ACR
             self.cmd('containerapp secret remove -g {} -n {} --secret-names {}'.format(resource_group, containerapp_name, secret_name))
 
-        # Update Container App with ACR
+        # Update Container App with ACR, --min-replicas 0
         update_string = 'containerapp update -g {} -n {} --min-replicas 0 --max-replicas 1 --replace-env-vars testenv=testing2'.format(
             resource_group, containerapp_name)
         self.cmd(update_string, checks=[
@@ -407,6 +487,7 @@ class ContainerappScenarioTest(ScenarioTest):
         self.cmd(f'containerapp env logs show -n {env_name} -g {env_rg} --tail 15 --follow false')
 
     @ResourceGroupPreparer(location="northeurope")
+    @AllowLargeResponse()
     def test_containerapp_registry_msi(self, resource_group):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
@@ -459,6 +540,23 @@ class ContainerappScenarioTest(ScenarioTest):
         create_containerapp_env(self, env2, resource_group, logs_workspace=laworkspace_customer_id, logs_workspace_shared_key=laworkspace_shared_key)
         containerapp_env2 = self.cmd(
             'containerapp env show -g {} -n {}'.format(resource_group, env2)).get_output_in_json()
+        # test `az containerapp up` with --environment
+        image = 'mcr.microsoft.com/azuredocs/aks-helloworld:v1'
+        ca_name = self.create_random_name(prefix='containerapp', length=24)
+        self.cmd('containerapp up -g {} -n {} --environment {} --image {}'.format(resource_group, ca_name, env2, image), expect_failure=False)
+        self.cmd(f'containerapp show -g {resource_group} -n {ca_name}', checks=[
+            JMESPathCheck("properties.provisioningState", "Succeeded"),
+            JMESPathCheck("properties.environmentId", containerapp_env2["id"]),
+            JMESPathCheck('properties.template.containers[0].image', image),
+        ])
+        # test `az containerapp up` for existing containerapp without --environment
+        image2 = 'mcr.microsoft.com/k8se/quickstart:latest'
+        self.cmd('containerapp up -g {} -n {} --image {}'.format(resource_group, ca_name, image2), expect_failure=False)
+        self.cmd(f'containerapp show -g {resource_group} -n {ca_name}', checks=[
+            JMESPathCheck("properties.provisioningState", "Succeeded"),
+            JMESPathCheck("properties.environmentId", containerapp_env2["id"]),
+            JMESPathCheck('properties.template.containers[0].image', image2),
+        ])
 
         user_identity_name = self.create_random_name(prefix='containerapp-user', length=24)
         user_identity = self.cmd(

@@ -10,7 +10,7 @@ from azure.cli.command_modules.iot.tests.latest._test_utils import (
     _create_test_cert, _delete_test_cert, _create_verification_cert, _create_fake_chain_cert
 )
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.command_modules.iot.tests.latest.recording_processors import KeyReplacer
+from azure.cli.command_modules.iot.tests.utils import KeyReplacer
 from azure.core.exceptions import HttpResponseError
 import random
 
@@ -82,17 +82,33 @@ class IoTDpsTest(ScenarioTest):
         ])
 
         # Get access policy
-        self.cmd('az iot dps policy show -g {} --dps-name {} --pn {}'.format(group_name, dps_name, policy_name), checks=[
+        policy = self.cmd('az iot dps policy show -g {} --dps-name {} --pn {}'.format(group_name, dps_name, policy_name), checks=[
             self.check('keyName', policy_name),
             self.check('rights', right)
-        ])
+        ]).get_output_in_json()
 
-        # Create update policy
+        # Update policy
         self.cmd('az iot dps policy update -g {} --dps-name {} --pn {} -r {}'.format(group_name, dps_name, policy_name, new_right),
                  checks=[
                      self.check('keyName', policy_name),
                      self.check('rights', new_right)
         ])
+
+        # Rotate primary key
+        primary_key = policy['primaryKey']
+        policy = self.cmd('az iot dps policy update -g {} --dps-name {} --pn {} --primary-key ""'.format(group_name, dps_name, policy_name),
+                checks=[self.check('secondaryKey', policy['secondaryKey'])]
+        ).get_output_in_json()
+        if self.is_live:
+            assert policy['primaryKey'] != primary_key
+
+        # Rotate secondary key
+        secondary_key = policy['secondaryKey']
+        policy = self.cmd('az iot dps policy update -g {} --dps-name {} --pn {} --secondary-key ""'.format(group_name, dps_name, policy_name),
+                 checks=[self.check('primaryKey', policy['primaryKey'])]
+        ).get_output_in_json()
+        if self.is_live:
+            assert policy['secondaryKey'] != secondary_key
 
         # Delete policy
         self.cmd('az iot dps policy delete -g {} --dps-name {} --pn {}'.format(group_name, dps_name, policy_name))

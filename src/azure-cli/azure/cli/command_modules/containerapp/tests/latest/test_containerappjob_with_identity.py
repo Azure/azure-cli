@@ -5,7 +5,7 @@
 
 import os
 
-from msrestazure.tools import parse_resource_id
+from azure.mgmt.core.tools import parse_resource_id
 
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathCheck, JMESPathCheckExists,
@@ -20,7 +20,7 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 # pylint: skip-file
 
 
-class ContainerAppJobsCRUDOperationsTest(ScenarioTest):
+class ContainerAppJobsIdentityOperationsTest(ScenarioTest):
     def __init__(self, *arg, **kwargs):
         super().__init__(*arg, random_config_dir=True, **kwargs)
 

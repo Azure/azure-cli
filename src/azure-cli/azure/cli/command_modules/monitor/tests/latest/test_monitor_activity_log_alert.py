@@ -39,6 +39,32 @@ class TestMonitorActivityLogAlert(ScenarioTest):
                          JMESPathCheck('condition.allOf[0].field', 'category')])
 
     @ResourceGroupPreparer(location='southcentralus')
+    def test_monitor_create_update_activity_log_alert_anyof_conditon(self, resource_group):
+        name = self.create_random_name('clialert', 32)
+        create_cmd = 'az monitor activity-log alert create -n {} -g {} --disable'.format(name, resource_group)  + ' --all-of "[{{any-of:[{{field:level,equals:Informational}}]}}]"'
+        self.cmd(create_cmd,
+                 checks=[JMESPathCheck('name', name),
+                         JMESPathCheck('enabled', False),
+                         JMESPathCheck('location', 'Global'),
+                         JMESPathCheck('length(scopes)', 1),
+                         JMESPathCheck('length(condition.allOf)', 2),
+                         JMESPathCheck('length(actions.actionGroups)', 0),
+                         JMESPathCheck('condition.allOf[0].anyOf[0].field', 'level'),
+                         JMESPathCheck('condition.allOf[0].anyOf[0].equals', 'Informational'),
+                         JMESPathCheck('condition.allOf[1].field', 'category'),
+                         JMESPathCheck('condition.allOf[1].equals', 'ServiceHealth'),
+                         ])
+        update_cmd = 'az monitor activity-log alert update -n {} -g {}'.format(name, resource_group) + ' --all-of "[{{any-of:[{{field:level,equals:Error}}]}}]"'
+        self.cmd(update_cmd,
+                 checks=[
+                     JMESPathCheck('length(condition.allOf)', 2),
+                     JMESPathCheck('condition.allOf[0].anyOf[0].field', 'level'),
+                     JMESPathCheck('condition.allOf[0].anyOf[0].equals', 'Error'),
+                     JMESPathCheck('condition.allOf[1].field', 'category'),
+                     JMESPathCheck('condition.allOf[1].equals', 'ServiceHealth'),
+                 ])
+
+    @ResourceGroupPreparer(location='southcentralus')
     def test_monitor_create_full_fledged_activity_log_alert(self, resource_group):
         scope = self.cmd('az group show -n {} -ojson'.format(resource_group)).get_output_in_json()['id']
 

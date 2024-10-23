@@ -3,6 +3,67 @@
 Release History
 ===============
 
+2.65.0
+++++++
+* Minor fixes
+
+2.64.0
+++++++
+* Minor fixes
+
+2.63.0
+++++++
+* Resolve CVE-2024-39689 (#29320)
+* Support `az config set extension.dynamic_install_allow_preview` for extension dynamic installation configuration (#29413)
+* Resolve CVE-2024-6345 (#29433)
+* `az logout`: Remove service principal access tokens from token cache (#29441)
+
+2.62.0
+++++++
+* Fix #28997: Fix error "User cancelled the Accounts Control Operation" when logging in with WAM as Administrator (#29088)
+* Resolve CVE-2024-37891 (#29194)
+* Resolve CVE-2024-35195 (#29186)
+* `aaz`: Add argument completer support (#29204)
+
+2.61.0
+++++++
+* Resolve CVE-2024-34064 (#28895)
+* [BREAKING CHANGE] `az login`: Use WAM as the default authentication method on Windows. For more details, see https://go.microsoft.com/fwlink/?linkid=2271136 (#28841)
+* `aaz`: Support extended values in `AAZArgEnum` (#28850)
+* Add `tenantDefaultDomain` and `tenantDisplayName` properties to login contexts (shown by `az account list`) (#28910)
+* Prompt for interactive authentication for all silent authentication failures (#28966)
+
+2.60.0
+++++++
+* Fix #28737: Fix token cache for service principal authentication (#28747)
+* Resolve CVE-2023-3651 (#28735)
+
+2.59.0
+++++++
+* Minor fixes
+
+2.58.0
+++++++
+* [BREAKING CHANGE] `az login`: Replace `allow_broker` with `enable_broker_on_windows` (#27726)
+
+2.57.0
+++++++
+* `aaz`: Handle null value when deserialize output (#28253)
+* Add warning for customers when there're credentials in cli output if this feature has been turned on through `az config set clients.show_secrets_warning=True` (#27929)
+
+2.56.0
+++++++
+* Minor fixes
+
+2.55.0
+++++++
+* Minor fixes
+
+2.54.0
+++++++
+* `aaz`: Support data-plane clients (#27617)
+* [PREVIEW] Support disabling instance discovery by running `az config set core.instance_discovery=false` (#27494)
+
 2.53.1
 ++++++
 * No changes

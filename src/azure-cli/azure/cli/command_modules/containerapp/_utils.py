@@ -37,9 +37,9 @@ from azure.cli.core.profiles import ResourceType
 from azure.mgmt.containerregistry import ContainerRegistryManagementClient
 from azure.mgmt.resource import ResourceManagementClient
 from azure.mgmt.servicelinker import ServiceLinkerManagementClient
+from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id, resource_id
 
 from knack.log import get_logger
-from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
 
 from ._clients import ContainerAppClient, ManagedEnvironmentClient, WorkloadProfileClient, ContainerAppsJobClient
 from ._client_factory import handle_raw_exception, providers_client_factory, cf_resource_groups, log_analytics_client_factory, log_analytics_shared_key_client_factory
@@ -948,13 +948,13 @@ def _remove_readonly_attributes(containerapp_def):
             del containerapp_def['properties'][unneeded_property]
 
 
-# Remove null/None properties in a model since the PATCH API will delete those. Not needed once we move to the SDK
+# Remove null/None/empty properties in a model since the PATCH API will delete those. Not needed once we move to the SDK
 def clean_null_values(d):
     if isinstance(d, dict):
         return {
             k: v
             for k, v in ((k, clean_null_values(v)) for k, v in d.items())
-            if v or isinstance(v, list)
+            if (isinstance(v, dict) and len(v.items()) > 0) or (not isinstance(v, dict) and v is not None)
         }
     if isinstance(d, list):
         return [v for v in map(clean_null_values, d) if v]
@@ -1395,7 +1395,7 @@ def create_new_acr(cmd, registry_name, resource_group_name, location=None, sku="
 
 def set_field_in_auth_settings(auth_settings, set_string):
     if set_string is not None:
-        split1 = set_string.split("=")
+        split1 = set_string.split("=", 1)
         fieldName = split1[0]
         fieldValue = split1[1]
         split2 = fieldName.split(".")
@@ -1461,6 +1461,8 @@ def get_oidc_client_setting_app_setting_name(provider_name):
 def load_cert_file(file_path, cert_password=None):
     from base64 import b64encode
     from OpenSSL import crypto
+    from cryptography.hazmat.primitives.serialization import pkcs12
+    from cryptography.hazmat.primitives import hashes
     import os
 
     cert_data = None
@@ -1477,12 +1479,15 @@ def load_cert_file(file_path, cert_password=None):
             elif os.path.splitext(file_path)[1] in ['.pfx']:
                 cert_data = f.read()
                 try:
-                    p12 = crypto.load_pkcs12(cert_data, cert_password)
+                    # The password to use to decrypt the data. None if the PKCS12 is not encrypted.
+                    cert_password_bytes = cert_password.encode('utf-8') if cert_password else None
+                    p12 = pkcs12.load_pkcs12(cert_data, cert_password_bytes)
                 except Exception as e:
                     raise FileOperationError('Failed to load the certificate file. This may be due to an incorrect or missing password. Please double check and try again.\nError: {}'.format(e)) from e
-                x509 = p12.get_certificate()
-                digest_algorithm = 'sha256'
-                thumbprint = x509.digest(digest_algorithm).decode("utf-8").replace(':', '')
+                if p12.cert is None:
+                    raise ValidationError("Failed to load the certificate file. The loading result is None.")
+                x509 = p12.cert.certificate
+                thumbprint = x509.fingerprint(hashes.SHA256()).hex().upper()
                 blob = b64encode(cert_data).decode("utf-8")
             else:
                 raise FileOperationError('Not a valid file type. Only .PFX and .PEM files are supported.')
@@ -1737,7 +1742,7 @@ def ensure_workload_profile_supported(cmd, env_name, env_rg, workload_profile_na
 def set_ip_restrictions(ip_restrictions, ip_restriction_name, ip_address_range, description, action):
     updated = False
     for e in ip_restrictions:
-        if ip_restriction_name.lower() == e["name"].lower():
+        if e.get("name") and ip_restriction_name.lower() == e["name"].lower():
             e["description"] = description
             e["ipAddressRange"] = ip_address_range
             e["action"] = action

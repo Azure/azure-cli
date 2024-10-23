@@ -32,9 +32,9 @@ logger = get_logger(__name__)
 
 def _resource_not_exists(cli_ctx, resource_type):
     def _handle_resource_not_exists(namespace):
-        # TODO: hook up namespace._subscription_id once we support it
         ns, t = resource_type.split('/')
-        if resource_exists(cli_ctx, namespace.resource_group_name, namespace.name, ns, t):
+        # pylint: disable=protected-access
+        if resource_exists(cli_ctx, namespace._subscription_id, namespace.resource_group_name, namespace.name, ns, t):
             raise CLIError('Resource {} of type {} in group {} already exists.'.format(
                 namespace.name,
                 resource_type,
@@ -81,7 +81,7 @@ def load_images_thru_services(cli_ctx, publisher, offer, sku, location, edge_zon
                 skus = [s for s in skus if _matched(sku, s.name)]
             for s in skus:
                 try:
-                    expand = "properties"
+                    expand = "properties/imageDeprecationStatus"
                     if edge_zone is not None:
                         images = edge_zone_client.list(location=location, edge_zone=edge_zone, publisher_name=publisher,
                                                        offer=o.name, skus=s.name, expand=expand)
@@ -97,7 +97,9 @@ def load_images_thru_services(cli_ctx, publisher, offer, sku, location, edge_zon
                         'offer': o.name,
                         'sku': s.name,
                         'version': i.name,
-                        'architecture': i.additional_properties.get("properties", {}).get("architecture", None) or ""
+                        'architecture': i.additional_properties.get("properties", {}).get("architecture", None) or "",
+                        'imageDeprecationStatus': i.additional_properties.get(
+                            "properties", {}).get("imageDeprecationStatus", {}) or ""
                     }
                     if edge_zone is not None:
                         image_info['edge_zone'] = edge_zone

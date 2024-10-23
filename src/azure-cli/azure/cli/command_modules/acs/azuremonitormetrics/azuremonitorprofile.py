@@ -19,7 +19,10 @@ from azure.cli.command_modules.acs.azuremonitormetrics.helper import (
 from azure.cli.command_modules.acs.azuremonitormetrics.recordingrules.create import create_rules
 from azure.cli.command_modules.acs.azuremonitormetrics.recordingrules.delete import delete_rules
 from azure.cli.core.azclierror import InvalidArgumentValueError
-from knack.util import CLIError
+from knack.log import get_logger
+
+
+logger = get_logger(__name__)
 
 
 # pylint: disable=line-too-long
@@ -51,6 +54,7 @@ def link_azure_monitor_profile_artifacts(
 
 # pylint: disable=line-too-long
 def unlink_azure_monitor_profile_artifacts(cmd, cluster_subscription, cluster_resource_group_name, cluster_name):
+    logger.warning("Deleting all custom resources for the `azmonitoring.coreos.com` custom resource defintion created by the Managed Prometheus addon")
     # Remove DC* if prometheus is enabled
     dc_objects_list = get_dc_objects_list(cmd, cluster_subscription, cluster_resource_group_name, cluster_name)
     delete_dc_objects_if_prometheus_enabled(cmd, dc_objects_list, cluster_subscription, cluster_resource_group_name, cluster_name)
@@ -71,14 +75,11 @@ def ensure_azure_monitor_profile_prerequisites(
     create_flow=False
 ):
     cloud_name = cmd.cli_ctx.cloud.name
-    if cloud_name.lower() == 'azurechinacloud':
-        raise CLIError("Azure China Cloud is not supported for the Azure Monitor Metrics addon")
-
-    if cloud_name.lower() == "azureusgovernment":
+    if cloud_name.lower() == "ussec" or cloud_name.lower() == "usdod":
         grafana_resource_id = raw_parameters.get("grafana_resource_id")
         if grafana_resource_id is not None:
             if grafana_resource_id != "":
-                raise InvalidArgumentValueError("Azure US Government cloud does not support Azure Managed Grarfana yet. Please follow this documenation for enabling it via the public cloud : aka.ms/ama-grafana-link-ff")
+                raise InvalidArgumentValueError(f"{cloud_name} does not support Azure Managed Grafana yet.")
 
     if remove_azuremonitormetrics:
         unlink_azure_monitor_profile_artifacts(
@@ -88,17 +89,22 @@ def ensure_azure_monitor_profile_prerequisites(
             cluster_name
         )
     else:
+        is_prometheus_enabled = False
         # Check if already onboarded
         if create_flow is False:
-            check_azuremonitormetrics_profile(cmd, cluster_subscription, cluster_resource_group_name, cluster_name)
-        # Do RP registrations if required
-        rp_registrations(cmd, cluster_subscription)
-        link_azure_monitor_profile_artifacts(
-            cmd,
-            cluster_subscription,
-            cluster_resource_group_name,
-            cluster_name,
-            cluster_region,
-            raw_parameters,
-            create_flow
-        )
+            is_prometheus_enabled = check_azuremonitormetrics_profile(cmd, cluster_subscription, cluster_resource_group_name, cluster_name)
+        if is_prometheus_enabled:
+            print("Azure Prometheus is already enabled : This command will only allow updates to the KSM parameters. All other parameters will be ignored")
+        # Do RP registrations and artifact creation (DC*, rules, grafana link etc.) if not enabled already
+        # Otherwise move forward so that the addon can be enabled with new KSM parameters
+        if is_prometheus_enabled is False:
+            rp_registrations(cmd, cluster_subscription, raw_parameters)
+            link_azure_monitor_profile_artifacts(
+                cmd,
+                cluster_subscription,
+                cluster_resource_group_name,
+                cluster_name,
+                cluster_region,
+                raw_parameters,
+                create_flow
+            )

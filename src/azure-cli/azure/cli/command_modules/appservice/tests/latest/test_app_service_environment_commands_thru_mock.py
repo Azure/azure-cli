@@ -113,14 +113,14 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
             create_appserviceenvironment_arm(self.mock_cmd, resource_group_name=rg_name, name=ase_name,
                                              subnet=subnet_name, vnet_name=vnet_name,
                                              ignore_network_security_group=True, ignore_route_table=True,
-                                             location='westeurope')
+                                             location='westeurope', kind='ASEv2')
 
         fake_data = {"id": "1", "addressPrefix": "10.10.10.10/24"}
         show.return_value = fake_data
         create_appserviceenvironment_arm(self.mock_cmd, resource_group_name=rg_name, name=ase_name,
                                          subnet=subnet_name, vnet_name=vnet_name,
                                          ignore_network_security_group=True, ignore_route_table=True,
-                                         location='westeurope')
+                                         location='westeurope', kind='ASEv2')
 
         # Assert begin_create_or_update is called with correct rg and deployment name
         resource_client_mock.deployments.begin_create_or_update.assert_called_once()
@@ -247,7 +247,7 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
         }
         show.return_value = fake_data
         create_appserviceenvironment_arm(self.mock_cmd, resource_group_name=rg_name, name=ase_name,
-                                         subnet=subnet_name, vnet_name=vnet_name, kind='ASEv3',
+                                         subnet=subnet_name, vnet_name=vnet_name,
                                          location='westeurope')
 
         # Assert begin_create_or_update is called with correct rg and deployment name
@@ -289,7 +289,7 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
         }
         show.return_value = fake_data
         create_appserviceenvironment_arm(self.mock_cmd, resource_group_name=rg_name, name=ase_name,
-                                         subnet=subnet_name, vnet_name=vnet_name, kind='ASEv3',
+                                         subnet=subnet_name, vnet_name=vnet_name,
                                          location='westeurope', zone_redundant=True)
 
         # Assert begin_create_or_update is called with correct rg and deployment name

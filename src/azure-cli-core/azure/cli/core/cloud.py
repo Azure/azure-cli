@@ -59,49 +59,73 @@ class CloudSuffixNotSetException(CLIError):
 
 class CloudEndpoints:  # pylint: disable=too-few-public-methods,too-many-instance-attributes
 
+    ARM_METADATA_INDEX = {
+        "active_directory": "authentication.loginEndpoint",
+        "active_directory_data_lake_resource_id": "activeDirectoryDataLake",
+        "active_directory_graph_resource_id": "graphAudience",
+        "active_directory_resource_id": "authentication.audiences[0]",
+        "app_insights_resource_id": "appInsightsResourceId",
+        "app_insights_telemetry_channel_resource_id": "appInsightsTelemetryChannelResourceId",
+        "attestation_resource_id": "attestationResourceId",
+        "azmirror_storage_account_resource_id": "azmirrorStorageAccountResourceId",
+        "batch_resource_id": "batch",
+        "gallery": "gallery",
+        "log_analytics_resource_id": "logAnalyticsResourceId",
+        "management": "authentication.audiences[0]",
+        "media_resource_id": "media",
+        "microsoft_graph_resource_id": "microsoftGraphResourceId",
+        "ossrdbms_resource_id": "ossrdbmsResourceId",
+        "portal": "portal",
+        "resource_manager": "resourceManager",
+        "sql_management": "sqlManagement",
+        "synapse_analytics_resource_id": "synapseAnalyticsResourceId",
+        "vm_image_alias_doc": "vmImageAliasDoc",
+    }  # Please keep the endpoints in alphabetical order
+
     def __init__(self,  # pylint: disable=unused-argument
-                 management=None,
-                 resource_manager=None,
-                 sql_management=None,
-                 batch_resource_id=None,
-                 gallery=None,
                  active_directory=None,
-                 active_directory_resource_id=None,
-                 active_directory_graph_resource_id=None,
-                 microsoft_graph_resource_id=None,
                  active_directory_data_lake_resource_id=None,
-                 vm_image_alias_doc=None,
-                 media_resource_id=None,
-                 ossrdbms_resource_id=None,
-                 log_analytics_resource_id=None,
+                 active_directory_graph_resource_id=None,
+                 active_directory_resource_id=None,
                  app_insights_resource_id=None,
                  app_insights_telemetry_channel_resource_id=None,
-                 synapse_analytics_resource_id=None,
                  attestation_resource_id=None,
-                 portal=None,
                  azmirror_storage_account_resource_id=None,
+                 batch_resource_id=None,
+                 gallery=None,
+                 log_analytics_resource_id=None,
+                 management=None,
+                 media_resource_id=None,
+                 microsoft_graph_resource_id=None,
+                 ossrdbms_resource_id=None,
+                 portal=None,
+                 resource_manager=None,
+                 sql_management=None,
+                 synapse_analytics_resource_id=None,
+                 vm_image_alias_doc=None,
                  **kwargs):  # To support init with __dict__ for deserialization
         # Attribute names are significant. They are used when storing/retrieving clouds from config
-        self.management = management
-        self.resource_manager = resource_manager
-        self.sql_management = sql_management
-        self.batch_resource_id = batch_resource_id
-        self.gallery = gallery
         self.active_directory = active_directory
-        self.active_directory_resource_id = active_directory_resource_id
-        self.active_directory_graph_resource_id = active_directory_graph_resource_id
-        self.microsoft_graph_resource_id = microsoft_graph_resource_id
         self.active_directory_data_lake_resource_id = active_directory_data_lake_resource_id
-        self.vm_image_alias_doc = vm_image_alias_doc
-        self.media_resource_id = media_resource_id
-        self.ossrdbms_resource_id = ossrdbms_resource_id
-        self.log_analytics_resource_id = log_analytics_resource_id
+        self.active_directory_graph_resource_id = active_directory_graph_resource_id
+        self.active_directory_resource_id = active_directory_resource_id
         self.app_insights_resource_id = app_insights_resource_id
         self.app_insights_telemetry_channel_resource_id = app_insights_telemetry_channel_resource_id
-        self.synapse_analytics_resource_id = synapse_analytics_resource_id
         self.attestation_resource_id = attestation_resource_id
-        self.portal = portal
         self.azmirror_storage_account_resource_id = azmirror_storage_account_resource_id
+        self.batch_resource_id = batch_resource_id
+        self.gallery = gallery
+        self.log_analytics_resource_id = log_analytics_resource_id
+        self.management = management
+        self.media_resource_id = media_resource_id
+        self.microsoft_graph_resource_id = microsoft_graph_resource_id
+        self.ossrdbms_resource_id = ossrdbms_resource_id
+        self.portal = portal
+        self.resource_manager = resource_manager
+        self.sql_management = sql_management
+        self.synapse_analytics_resource_id = synapse_analytics_resource_id
+        self.vm_image_alias_doc = vm_image_alias_doc
+        # Please keep the endpoints in alphabetical order
 
     def has_endpoint_set(self, endpoint_name):
         try:
@@ -125,35 +149,52 @@ class CloudEndpoints:  # pylint: disable=too-few-public-methods,too-many-instanc
 
 class CloudSuffixes:  # pylint: disable=too-few-public-methods,too-many-instance-attributes
 
+    ARM_METADATA_INDEX = {
+        "acr_login_server_endpoint": "suffixes.acrLoginServer",
+        "attestation_endpoint": "suffixes.attestationEndpoint",
+        "azure_datalake_analytics_catalog_and_job_endpoint": "suffixes.azureDataLakeAnalyticsCatalogAndJob",
+        "azure_datalake_store_file_system_endpoint": "suffixes.azureDataLakeStoreFileSystem",
+        "keyvault_dns": "suffixes.keyVaultDns",
+        "mariadb_server_endpoint": "suffixes.mariadbServerEndpoint",
+        "mhsm_dns": "suffixes.mhsmDns",
+        "mysql_server_endpoint": "suffixes.mysqlServerEndpoint",
+        "postgresql_server_endpoint": "suffixes.postgresqlServerEndpoint",
+        "sql_server_hostname": "suffixes.sqlServerHostname",
+        "storage_endpoint": "suffixes.storage",
+        "storage_sync_endpoint": "suffixes.storageSyncEndpointSuffix",
+        "synapse_analytics_endpoint": "suffixes.synapseAnalytics"
+    }  # Please keep the suffixes in alphabetical order
+
     def __init__(self,  # pylint: disable=unused-argument
-                 storage_endpoint=None,
-                 storage_sync_endpoint=None,
-                 keyvault_dns=None,
-                 mhsm_dns=None,
-                 sql_server_hostname=None,
-                 azure_datalake_store_file_system_endpoint=None,
-                 azure_datalake_analytics_catalog_and_job_endpoint=None,
                  acr_login_server_endpoint=None,
+                 attestation_endpoint=None,
+                 azure_datalake_analytics_catalog_and_job_endpoint=None,
+                 azure_datalake_store_file_system_endpoint=None,
+                 keyvault_dns=None,
+                 mariadb_server_endpoint=None,
+                 mhsm_dns=None,
                  mysql_server_endpoint=None,
                  postgresql_server_endpoint=None,
-                 mariadb_server_endpoint=None,
+                 sql_server_hostname=None,
+                 storage_endpoint=None,
+                 storage_sync_endpoint=None,
                  synapse_analytics_endpoint=None,
-                 attestation_endpoint=None,
                  **kwargs):  # To support init with __dict__ for deserialization
         # Attribute names are significant. They are used when storing/retrieving clouds from config
-        self.storage_endpoint = storage_endpoint
-        self.storage_sync_endpoint = storage_sync_endpoint
+        self.acr_login_server_endpoint = acr_login_server_endpoint
+        self.attestation_endpoint = attestation_endpoint
+        self.azure_datalake_analytics_catalog_and_job_endpoint = azure_datalake_analytics_catalog_and_job_endpoint
+        self.azure_datalake_store_file_system_endpoint = azure_datalake_store_file_system_endpoint
         self.keyvault_dns = keyvault_dns
+        self.mariadb_server_endpoint = mariadb_server_endpoint
         self.mhsm_dns = mhsm_dns
-        self.sql_server_hostname = sql_server_hostname
         self.mysql_server_endpoint = mysql_server_endpoint
         self.postgresql_server_endpoint = postgresql_server_endpoint
-        self.mariadb_server_endpoint = mariadb_server_endpoint
-        self.azure_datalake_store_file_system_endpoint = azure_datalake_store_file_system_endpoint
-        self.azure_datalake_analytics_catalog_and_job_endpoint = azure_datalake_analytics_catalog_and_job_endpoint
-        self.acr_login_server_endpoint = acr_login_server_endpoint
+        self.sql_server_hostname = sql_server_hostname
+        self.storage_endpoint = storage_endpoint
+        self.storage_sync_endpoint = storage_sync_endpoint
         self.synapse_analytics_endpoint = synapse_analytics_endpoint
-        self.attestation_endpoint = attestation_endpoint
+        # Please keep the suffixes in alphabetical order
 
     def __getattribute__(self, name):
         val = object.__getattribute__(self, name)
@@ -223,40 +264,54 @@ def _arm_to_cli_mapper(arm_dict):
     return Cloud(
         arm_dict['name'],
         endpoints=CloudEndpoints(  # please add fallback_value if the endpoint is not added to https://management.azure.com/metadata/endpoints?api-version=2019-05-01 yet
-            management=arm_dict['authentication']['audiences'][0],
-            resource_manager=get_endpoint('resourceManager'),
-            sql_management=get_endpoint('sqlManagement'),
+            active_directory=arm_dict['authentication']['loginEndpoint'],
+            active_directory_data_lake_resource_id=get_endpoint('activeDirectoryDataLake'),
+            active_directory_graph_resource_id=get_endpoint('graphAudience'),
+            active_directory_resource_id=arm_dict['authentication']['audiences'][0],
+            app_insights_resource_id=get_endpoint('appInsightsResourceId',
+                                                  fallback_value=get_endpoint_fallback_value('app_insights_resource_id')),
+            app_insights_telemetry_channel_resource_id=get_endpoint('appInsightsTelemetryChannelResourceId',
+                                                                    fallback_value=get_endpoint_fallback_value('app_insights_telemetry_channel_resource_id')),
+            attestation_resource_id=get_endpoint('attestationResourceId',
+                                                 fallback_value=get_endpoint_fallback_value('attestation_resource_id')),
+            azmirror_storage_account_resource_id=get_endpoint('azmirrorStorageAccountResourceId'),
             batch_resource_id=get_endpoint('batch'),
             gallery=get_endpoint('gallery'),
-            active_directory=arm_dict['authentication']['loginEndpoint'],
-            active_directory_resource_id=arm_dict['authentication']['audiences'][0],
-            active_directory_graph_resource_id=get_endpoint('graphAudience'),
-            microsoft_graph_resource_id=get_endpoint('microsoftGraphResourceId', fallback_value=get_endpoint_fallback_value('microsoft_graph_resource_id')),  # change once microsoft_graph_resource_id is fixed in ARM
-            vm_image_alias_doc=get_endpoint('vmImageAliasDoc'),
+            log_analytics_resource_id=get_endpoint('logAnalyticsResourceId',
+                                                   fallback_value=get_endpoint_fallback_value('log_analytics_resource_id')),
+            management=arm_dict['authentication']['audiences'][0],
             media_resource_id=get_endpoint('media'),
-            ossrdbms_resource_id=get_endpoint('ossrdbmsResourceId', fallback_value=get_endpoint_fallback_value('ossrdbms_resource_id')),  # change once ossrdbms_resource_id is available via ARM
-            active_directory_data_lake_resource_id=get_endpoint('activeDirectoryDataLake'),
-            app_insights_resource_id=get_endpoint('appInsightsResourceId', fallback_value=get_endpoint_fallback_value('app_insights_resource_id')),
-            log_analytics_resource_id=get_endpoint('logAnalyticsResourceId', fallback_value=get_endpoint_fallback_value('log_analytics_resource_id')),
-            synapse_analytics_resource_id=get_endpoint('synapseAnalyticsResourceId', fallback_value=get_endpoint_fallback_value('synapse_analytics_resource_id')),
-            app_insights_telemetry_channel_resource_id=get_endpoint('appInsightsTelemetryChannelResourceId', fallback_value=get_endpoint_fallback_value('app_insights_telemetry_channel_resource_id')),
-            attestation_resource_id=get_endpoint('attestationResourceId', fallback_value=get_endpoint_fallback_value('attestation_resource_id')),
+            microsoft_graph_resource_id=get_endpoint('microsoftGraphResourceId',
+                                                     fallback_value=get_endpoint_fallback_value('microsoft_graph_resource_id')),  # change once microsoft_graph_resource_id is fixed in ARM
+            ossrdbms_resource_id=get_endpoint('ossrdbmsResourceId',
+                                              fallback_value=get_endpoint_fallback_value('ossrdbms_resource_id')),  # change once ossrdbms_resource_id is available via ARM
             portal=get_endpoint('portal'),
-            azmirror_storage_account_resource_id=get_endpoint('azmirrorStorageAccountResourceId')),
+            resource_manager=get_endpoint('resourceManager'),
+            sql_management=get_endpoint('sqlManagement'),
+            synapse_analytics_resource_id=get_endpoint('synapseAnalyticsResourceId',
+                                                       fallback_value=get_endpoint_fallback_value('synapse_analytics_resource_id')),
+            vm_image_alias_doc=get_endpoint('vmImageAliasDoc'),
+        ),  # Please keep the endpoints in alphabetical order
         suffixes=CloudSuffixes(
+            acr_login_server_endpoint=get_suffix('acrLoginServer', add_dot=True),
+            attestation_endpoint=get_suffix('attestationEndpoint', add_dot=True,
+                                            fallback_value=get_suffix_fallback_value('attestation_endpoint')),
+            azure_datalake_analytics_catalog_and_job_endpoint=get_suffix('azureDataLakeAnalyticsCatalogAndJob'),
+            azure_datalake_store_file_system_endpoint=get_suffix('azureDataLakeStoreFileSystem'),
+            keyvault_dns=get_suffix('keyVaultDns', add_dot=True),
+            mariadb_server_endpoint=get_suffix('mariadbServerEndpoint', add_dot=True,
+                                               fallback_value=get_db_server_endpoint('.mariadb')),
+            mhsm_dns=get_suffix('mhsmDns', add_dot=True, fallback_value=get_suffix_fallback_value('mhsm_dns')),
+            mysql_server_endpoint=get_suffix('mysqlServerEndpoint', add_dot=True,
+                                             fallback_value=get_db_server_endpoint('.mysql')),
+            postgresql_server_endpoint=get_suffix('postgresqlServerEndpoint', add_dot=True,
+                                                  fallback_value=get_db_server_endpoint('.postgres')),
+            sql_server_hostname=sql_server_hostname,
             storage_endpoint=get_suffix('storage'),
             storage_sync_endpoint=get_suffix('storageSyncEndpointSuffix', fallback_value=get_suffix_fallback_value('storage_sync_endpoint')),
-            keyvault_dns=get_suffix('keyVaultDns', add_dot=True),
-            mhsm_dns=get_suffix('mhsmDns', add_dot=True, fallback_value=get_suffix_fallback_value('mhsm_dns')),
-            sql_server_hostname=sql_server_hostname,
-            mysql_server_endpoint=get_suffix('mysqlServerEndpoint', add_dot=True, fallback_value=get_db_server_endpoint('.mysql')),
-            postgresql_server_endpoint=get_suffix('postgresqlServerEndpoint', add_dot=True, fallback_value=get_db_server_endpoint('.postgres')),
-            mariadb_server_endpoint=get_suffix('mariadbServerEndpoint', add_dot=True, fallback_value=get_db_server_endpoint('.mariadb')),
-            azure_datalake_store_file_system_endpoint=get_suffix('azureDataLakeStoreFileSystem'),
-            azure_datalake_analytics_catalog_and_job_endpoint=get_suffix('azureDataLakeAnalyticsCatalogAndJob'),
             synapse_analytics_endpoint=get_suffix('synapseAnalytics', add_dot=True, fallback_value=get_suffix_fallback_value('synapse_analytics_endpoint')),
-            acr_login_server_endpoint=get_suffix('acrLoginServer', add_dot=True),
-            attestation_endpoint=get_suffix('attestationEndpoint', add_dot=True, fallback_value=get_suffix_fallback_value('attestation_endpoint'))))
+        )  # Please keep the suffixes in alphabetical order
+    )
 
 
 class Cloud:  # pylint: disable=too-few-public-methods
@@ -429,6 +484,12 @@ AZURE_GERMAN_CLOUD = Cloud(
 HARD_CODED_CLOUD_LIST = [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE_GERMAN_CLOUD]
 
 
+def retrieve_arm_cloud_metadata():
+    """ Retrieve Cloud metadata from ARM endpoint api defined in ARM_CLOUD_METADATA_URL"""
+    if 'ARM_CLOUD_METADATA_URL' in os.environ:
+        return json.loads(urlretrieve(os.getenv('ARM_CLOUD_METADATA_URL')))
+
+
 def get_known_clouds(refresh=False):
     if 'ARM_CLOUD_METADATA_URL' in os.environ:
         from azure.cli.core._session import CLOUD_ENDPOINTS
@@ -449,7 +510,7 @@ def get_known_clouds(refresh=False):
 
         if not CLOUD_ENDPOINTS['clouds']:
             try:
-                arm_cloud_dict = json.loads(urlretrieve(os.getenv('ARM_CLOUD_METADATA_URL')))
+                arm_cloud_dict = retrieve_arm_cloud_metadata()
                 cli_cloud_dict = _convert_arm_to_cli(arm_cloud_dict)
                 if 'AzureCloud' in cli_cloud_dict:
                     cli_cloud_dict['AzureCloud'].endpoints.active_directory = 'https://login.microsoftonline.com'  # change once active_directory is fixed in ARM for the public cloud

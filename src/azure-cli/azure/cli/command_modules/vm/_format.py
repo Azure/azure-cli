@@ -35,7 +35,7 @@ def transform_vm(vm):
 
 
 def transform_vm_create_output(result):
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
     from collections import OrderedDict
     try:
         resource_group = getattr(result, 'resource_group', None) or parse_resource_id(result.id)['resource_group']
@@ -149,14 +149,10 @@ def transform_log_analytics_query_output(result):
     tables_output = []
 
     def _transform_query_output(table):
-        columns = table.columns
         name = table.name
         rows = table.rows
-
-        column_names = []
+        column_names = table.columns
         table_output = []
-        for column in columns:
-            column_names.append(column.name)
         for row in rows:
             item = OrderedDict()
             item['TableName'] = name

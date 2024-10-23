@@ -1,0 +1,343 @@
+interactions:
+- request:
+    body: '{"location": "global", "properties": {"zoneType": "Public"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns zone create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '60'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns_zone_update000001/providers/Microsoft.Network/dnsZones/myzonex.com?api-version=2023-07-01-preview
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns_zone_update000001\/providers\/Microsoft.Network\/dnszones\/myzonex.com","name":"myzonex.com","type":"Microsoft.Network\/dnszones","etag":"f99cd07a-86f2-4125-9d60-77e6ef02ede3","location":"global","tags":{},"properties":{"maxNumberOfRecordSets":10000,"maxNumberOfRecordsPerRecordSet":null,"nameServers":["ns1-35.ppe.azure-dns.com.","ns2-35.ppe.azure-dns.net.","ns3-35.ppe.azure-dns.org.","ns4-35.ppe.azure-dns.info."],"numberOfRecordSets":2,"zoneType":"Public"}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '552'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 26 Mar 2024 01:43:04 GMT
+      etag:
+      - f99cd07a-86f2-4125-9d60-77e6ef02ede3
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+      x-msedge-ref:
+      - 'Ref A: FEE853B9E57D44AEAEFB65CA0EF8561F Ref B: CO6AA3150219023 Ref C: 2024-03-26T01:43:01Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns zone update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --tags
+      User-Agent:
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns_zone_update000001/providers/Microsoft.Network/dnsZones/myzonex.com?api-version=2023-07-01-preview
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns_zone_update000001\/providers\/Microsoft.Network\/dnszones\/myzonex.com","name":"myzonex.com","type":"Microsoft.Network\/dnszones","etag":"f99cd07a-86f2-4125-9d60-77e6ef02ede3","location":"global","tags":{},"properties":{"maxNumberOfRecordSets":10000,"maxNumberOfRecordsPerRecordSet":null,"nameServers":["ns1-35.ppe.azure-dns.com.","ns2-35.ppe.azure-dns.net.","ns3-35.ppe.azure-dns.org.","ns4-35.ppe.azure-dns.info."],"numberOfRecordSets":2,"zoneType":"Public"}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '552'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 26 Mar 2024 01:43:05 GMT
+      etag:
+      - f99cd07a-86f2-4125-9d60-77e6ef02ede3
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-msedge-ref:
+      - 'Ref A: 9A7BE699CE47403E92285BB82473A3DA Ref B: CO6AA3150217047 Ref C: 2024-03-26T01:43:05Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"etag": "f99cd07a-86f2-4125-9d60-77e6ef02ede3", "location": "global",
+      "properties": {"zoneType": "Public"}, "tags": {"tag1": "foo"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns zone update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '133'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --tags
+      User-Agent:
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns_zone_update000001/providers/Microsoft.Network/dnsZones/myzonex.com?api-version=2023-07-01-preview
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns_zone_update000001\/providers\/Microsoft.Network\/dnszones\/myzonex.com","name":"myzonex.com","type":"Microsoft.Network\/dnszones","etag":"0e02dcf6-b3de-4f0d-bb25-7a1e171fd14e","location":"global","tags":{"tag1":"foo"},"properties":{"maxNumberOfRecordSets":10000,"maxNumberOfRecordsPerRecordSet":null,"nameServers":["ns1-35.ppe.azure-dns.com.","ns2-35.ppe.azure-dns.net.","ns3-35.ppe.azure-dns.org.","ns4-35.ppe.azure-dns.info."],"numberOfRecordSets":2,"zoneType":"Public"}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '564'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 26 Mar 2024 01:43:08 GMT
+      etag:
+      - 0e02dcf6-b3de-4f0d-bb25-7a1e171fd14e
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+      x-msedge-ref:
+      - 'Ref A: 339339650A4048A58571DD7C84226202 Ref B: CO6AA3150217047 Ref C: 2024-03-26T01:43:06Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns zone update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --set --set
+      User-Agent:
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns_zone_update000001/providers/Microsoft.Network/dnsZones/myzonex.com?api-version=2023-07-01-preview
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns_zone_update000001\/providers\/Microsoft.Network\/dnszones\/myzonex.com","name":"myzonex.com","type":"Microsoft.Network\/dnszones","etag":"0e02dcf6-b3de-4f0d-bb25-7a1e171fd14e","location":"global","tags":{"tag1":"foo"},"properties":{"maxNumberOfRecordSets":10000,"maxNumberOfRecordsPerRecordSet":null,"nameServers":["ns1-35.ppe.azure-dns.com.","ns2-35.ppe.azure-dns.net.","ns3-35.ppe.azure-dns.org.","ns4-35.ppe.azure-dns.info."],"numberOfRecordSets":2,"zoneType":"Public"}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '564'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 26 Mar 2024 01:43:09 GMT
+      etag:
+      - 0e02dcf6-b3de-4f0d-bb25-7a1e171fd14e
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-msedge-ref:
+      - 'Ref A: 11ED6E53F56C4829876FD1094ED2D744 Ref B: CO6AA3150218011 Ref C: 2024-03-26T01:43:10Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"etag": "0e02dcf6-b3de-4f0d-bb25-7a1e171fd14e", "location": "global",
+      "properties": {"zoneType": "Public"}, "tags": {"tag1": "bar", "tag2": "foo"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns zone update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '148'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --set --set
+      User-Agent:
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns_zone_update000001/providers/Microsoft.Network/dnsZones/myzonex.com?api-version=2023-07-01-preview
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns_zone_update000001\/providers\/Microsoft.Network\/dnszones\/myzonex.com","name":"myzonex.com","type":"Microsoft.Network\/dnszones","etag":"9da56bf8-413f-4c5b-a26d-4e08bf64e300","location":"global","tags":{"tag1":"bar","tag2":"foo"},"properties":{"maxNumberOfRecordSets":10000,"maxNumberOfRecordsPerRecordSet":null,"nameServers":["ns1-35.ppe.azure-dns.com.","ns2-35.ppe.azure-dns.net.","ns3-35.ppe.azure-dns.org.","ns4-35.ppe.azure-dns.info."],"numberOfRecordSets":2,"zoneType":"Public"}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '577'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 26 Mar 2024 01:43:13 GMT
+      etag:
+      - 9da56bf8-413f-4c5b-a26d-4e08bf64e300
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+      x-msedge-ref:
+      - 'Ref A: CD9775AB8F7543FE9F876A92A1B12D89 Ref B: CO6AA3150218011 Ref C: 2024-03-26T01:43:10Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns zone update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --remove
+      User-Agent:
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns_zone_update000001/providers/Microsoft.Network/dnsZones/myzonex.com?api-version=2023-07-01-preview
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns_zone_update000001\/providers\/Microsoft.Network\/dnszones\/myzonex.com","name":"myzonex.com","type":"Microsoft.Network\/dnszones","etag":"9da56bf8-413f-4c5b-a26d-4e08bf64e300","location":"global","tags":{"tag1":"bar","tag2":"foo"},"properties":{"maxNumberOfRecordSets":10000,"maxNumberOfRecordsPerRecordSet":null,"nameServers":["ns1-35.ppe.azure-dns.com.","ns2-35.ppe.azure-dns.net.","ns3-35.ppe.azure-dns.org.","ns4-35.ppe.azure-dns.info."],"numberOfRecordSets":2,"zoneType":"Public"}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '577'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 26 Mar 2024 01:43:14 GMT
+      etag:
+      - 9da56bf8-413f-4c5b-a26d-4e08bf64e300
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-msedge-ref:
+      - 'Ref A: 552D3603CACA4AF684E0F0FC0B2954DC Ref B: CO6AA3150219019 Ref C: 2024-03-26T01:43:14Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"etag": "9da56bf8-413f-4c5b-a26d-4e08bf64e300", "location": "global",
+      "properties": {"zoneType": "Public"}, "tags": {"tag2": "foo"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network dns zone update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '133'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --remove
+      User-Agent:
+      - AZURECLI/2.58.0 azsdk-python-core/1.28.0 Python/3.11.8 (Windows-10-10.0.22631-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_dns_zone_update000001/providers/Microsoft.Network/dnsZones/myzonex.com?api-version=2023-07-01-preview
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_dns_zone_update000001\/providers\/Microsoft.Network\/dnszones\/myzonex.com","name":"myzonex.com","type":"Microsoft.Network\/dnszones","etag":"6260ae8b-ebdb-4032-82b6-e4d964a99cc0","location":"global","tags":{"tag2":"foo"},"properties":{"maxNumberOfRecordSets":10000,"maxNumberOfRecordsPerRecordSet":null,"nameServers":["ns1-35.ppe.azure-dns.com.","ns2-35.ppe.azure-dns.net.","ns3-35.ppe.azure-dns.org.","ns4-35.ppe.azure-dns.info."],"numberOfRecordSets":2,"zoneType":"Public"}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '564'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 26 Mar 2024 01:43:17 GMT
+      etag:
+      - 6260ae8b-ebdb-4032-82b6-e4d964a99cc0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+      x-msedge-ref:
+      - 'Ref A: 76B7E489C3914B2D9F288F184F7F98F7 Ref B: CO6AA3150219019 Ref C: 2024-03-26T01:43:14Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+version: 1

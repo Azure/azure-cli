@@ -95,11 +95,11 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
     with self.command_group('storage', command_type=block_blob_sdk,
                             custom_command_type=get_custom_sdk('azcopy', blob_data_service_factory)) as g:
-        g.storage_custom_command('remove', 'storage_remove')
+        g.storage_custom_command_oauth('remove', 'storage_remove')
 
     with self.command_group('storage', custom_command_type=get_custom_sdk('azcopy', None)) as g:
         from ._validators import validate_azcopy_credential
-        g.storage_custom_command('copy', 'storage_copy', validator=validate_azcopy_credential)
+        g.storage_custom_command_oauth('copy', 'storage_copy', validator=validate_azcopy_credential)
 
     with self.command_group('storage account', storage_account_sdk, resource_type=ResourceType.MGMT_STORAGE,
                             custom_command_type=storage_account_custom_type) as g:
@@ -450,7 +450,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
     with self.command_group('storage blob', command_type=block_blob_sdk,
                             custom_command_type=get_custom_sdk('azcopy', blob_data_service_factory)) as g:
-        g.storage_custom_command('sync', 'storage_blob_sync', is_preview=True)
+        g.storage_custom_command_oauth('sync', 'storage_blob_sync', is_preview=True)
 
     container_client_sdk = CliCommandType(
         operations_tmpl='azure.multiapi.storagev2.blob._container_client#'
@@ -471,9 +471,9 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command_oauth('exists', 'exists',
                                 transform=create_boolean_result_output_transformer('exists'),
                                 table_transformer=transform_boolean_for_table)
-        g.storage_custom_command_oauth('set-permission', 'set_container_permission')
-        g.storage_command_oauth('show-permission', 'get_container_access_policy',
-                                transform=transform_container_permission_output)
+        g.storage_custom_command('set-permission', 'set_container_permission')
+        g.storage_command('show-permission', 'get_container_access_policy',
+                          transform=transform_container_permission_output)
         g.storage_command_oauth('metadata update', 'set_container_metadata')
         g.storage_command_oauth('metadata show', 'get_container_properties',
                                 exception_handler=show_exception_handler,
@@ -515,16 +515,17 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command_oauth('restore', 'undelete_container', min_api='2020-02-10')
 
     with self.command_group('storage container policy', resource_type=ResourceType.DATA_STORAGE_BLOB,
-                            custom_command_type=get_custom_sdk('access_policy', client_factory=cf_container_client,
+                            custom_command_type=get_custom_sdk('container_access_policy',
+                                                               client_factory=cf_container_client,
                                                                resource_type=ResourceType.DATA_STORAGE_BLOB)) as g:
         from ._transformers import transform_acl_list_output, transform_acl_edit, transform_acl_datetime
-        g.storage_custom_command_oauth('create', 'create_acl_policy', transform=transform_acl_edit)
-        g.storage_custom_command_oauth('delete', 'delete_acl_policy', transform=transform_acl_edit)
-        g.storage_custom_command_oauth(
+        g.storage_custom_command('create', 'create_acl_policy', transform=transform_acl_edit)
+        g.storage_custom_command('delete', 'delete_acl_policy', transform=transform_acl_edit)
+        g.storage_custom_command(
             'update', 'set_acl_policy', transform=transform_acl_edit)
-        g.storage_custom_command_oauth(
+        g.storage_custom_command(
             'show', 'get_acl_policy', transform=transform_acl_datetime, exception_handler=show_exception_handler)
-        g.storage_custom_command_oauth(
+        g.storage_custom_command(
             'list', 'list_acl_policies', table_transformer=transform_acl_list_output)
 
     blob_container_mgmt_sdk = CliCommandType(
@@ -926,8 +927,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                        min_api='2020-02-10')
 
     with self.command_group('storage fs directory', custom_command_type=get_custom_sdk('azcopy', None))as g:
-        g.storage_custom_command('upload', 'storage_fs_directory_copy', is_preview=True)
-        g.storage_custom_command('download', 'storage_fs_directory_copy', is_preview=True)
+        g.storage_custom_command_oauth('upload', 'storage_fs_directory_copy', is_preview=True)
+        g.storage_custom_command_oauth('download', 'storage_fs_directory_copy', is_preview=True)
 
     with self.command_group('storage fs file', adls_file_sdk, resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE,
                             custom_command_type=get_custom_sdk('fs_file', cf_adls_file), min_api='2018-11-09') as g:

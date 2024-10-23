@@ -194,7 +194,7 @@ class AAZCommand(CLICommand):
 
         def processor(schema, result):
             """A processor used in AAZBaseValue to serialized data"""
-            if result == AAZUndefined:
+            if result == AAZUndefined or result is None:
                 return result
 
             if isinstance(schema, AAZObjectType):

@@ -71,6 +71,10 @@ class Create(AAZCommand):
             options=["--pip-prefixes"],
             help="Space-separated list of public IP prefixes (Names or IDs).",
         )
+        _args_schema.tags = AAZDictArg(
+            options=["--tags"],
+            help="Space-separated tags: key[=value] [key[=value] ...].",
+        )
         _args_schema.zone = AAZListArg(
             options=["-z", "--zone"],
             help="Availability zone into which to provision the resource. Allowed values: 1, 2, 3.",
@@ -82,6 +86,7 @@ class Create(AAZCommand):
         _element = cls._args_schema.pip_addresses.Element
         _element.id = AAZStrArg(
             options=["id"],
+            help="Resource ID.",
         )
 
         pip_prefixes = cls._args_schema.pip_prefixes
@@ -90,7 +95,11 @@ class Create(AAZCommand):
         _element = cls._args_schema.pip_prefixes.Element
         _element.id = AAZStrArg(
             options=["id"],
+            help="Resource ID.",
         )
+
+        tags = cls._args_schema.tags
+        tags.Element = AAZStrArg()
 
         zone = cls._args_schema.zone
         zone.Element = AAZStrArg()
@@ -221,6 +230,7 @@ class Create(AAZCommand):
             _builder.set_prop("location", AAZStrType, ".location")
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
             _builder.set_prop("sku", AAZObjectType, ".sku")
+            _builder.set_prop("tags", AAZDictType, ".tags")
             _builder.set_prop("zones", AAZListType, ".zone")
 
             properties = _builder.get(".properties")
@@ -248,6 +258,10 @@ class Create(AAZCommand):
             sku = _builder.get(".sku")
             if sku is not None:
                 sku.set_prop("name", AAZStrType, ".name")
+
+            tags = _builder.get(".tags")
+            if tags is not None:
+                tags.set_elements(AAZStrType, ".")
 
             zones = _builder.get(".zones")
             if zones is not None:

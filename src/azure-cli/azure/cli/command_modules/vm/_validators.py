@@ -34,7 +34,7 @@ logger = get_logger(__name__)
 
 
 def validate_asg_names_or_ids(cmd, namespace):
-    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id, resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
     resource_group = namespace.resource_group_name
@@ -58,7 +58,7 @@ def validate_asg_names_or_ids(cmd, namespace):
 
 
 def validate_nsg_name(cmd, namespace):
-    from msrestazure.tools import resource_id
+    from azure.mgmt.core.tools import resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
     vm_id = resource_id(name=namespace.vm_name, resource_group=namespace.resource_group_name,
                         namespace='Microsoft.Compute', type='virtualMachines',
@@ -83,7 +83,7 @@ def validate_vm_name_for_monitor_metrics(cmd, namespace):
 
 
 def _validate_proximity_placement_group(cmd, namespace):
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
 
     if namespace.proximity_placement_group:
         namespace.proximity_placement_group = _get_resource_id(cmd.cli_ctx, namespace.proximity_placement_group,
@@ -98,7 +98,7 @@ def _validate_proximity_placement_group(cmd, namespace):
 
 
 def process_vm_secret_format(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id
     from azure.cli.core._output import (get_output_format, set_output_format)
 
     keyvault_usage = CLIError('usage error: [--keyvault NAME --resource-group NAME | --keyvault ID]')
@@ -132,7 +132,7 @@ def _get_resource_group_from_vault_name(cli_ctx, vault_name):
     """
     from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
     client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_KEYVAULT).vaults
     for vault in client.list():
         id_comps = parse_resource_id(vault.id)
@@ -142,7 +142,7 @@ def _get_resource_group_from_vault_name(cli_ctx, vault_name):
 
 
 def _get_resource_id(cli_ctx, val, resource_group, resource_type, resource_namespace):
-    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
     if is_valid_resource_id(val):
         return val
@@ -238,7 +238,7 @@ def _validate_secrets(secrets, os_type):
 def _parse_image_argument(cmd, namespace):
     """ Systematically determines what type is supplied for the --image parameter. Updates the
         namespace and returns the type for subsequent processing. """
-    from msrestazure.tools import is_valid_resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id
     from azure.core.exceptions import HttpResponseError
     import re
 
@@ -374,7 +374,7 @@ def _validate_location(cmd, namespace, zone_info, size_info):
 
 # pylint: disable=too-many-branches, too-many-statements, too-many-locals
 def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
 
     _validate_vm_vmss_create_ephemeral_placement(namespace)
 
@@ -411,6 +411,16 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
                 namespace.storage_profile = StorageProfile.ManagedPirImage
         else:
             raise CLIError('Unrecognized image type: {}'.format(image_type))
+    elif not namespace.image and not getattr(namespace, 'attach_os_disk', None):
+        namespace.image = 'MicrosoftWindowsServer:WindowsServer:2022-datacenter-azure-edition:latest'
+        _parse_image_argument(cmd, namespace)
+        namespace.storage_profile = StorageProfile.ManagedPirImage
+        if namespace.enable_secure_boot is None:
+            namespace.enable_secure_boot = True
+        if namespace.enable_vtpm is None:
+            namespace.enable_vtpm = True
+        if namespace.security_type is None:
+            namespace.security_type = 'TrustedLaunch'
     else:
         # did not specify image XOR attach-os-disk
         raise CLIError('incorrect usage: --image IMAGE | --attach-os-disk DISK')
@@ -584,8 +594,36 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
             'usage error: The "--os-disk-secure-vm-disk-encryption-set" can only be passed in '
             'when "--os-disk-security-encryption-type" is "DiskWithVMGuestState"')
 
+    os_disk_security_encryption_type = getattr(namespace, 'os_disk_security_encryption_type', None)
+    if os_disk_security_encryption_type and os_disk_security_encryption_type.lower() == 'nonpersistedtpm':
+        if ((getattr(namespace, 'security_type', None) != 'ConfidentialVM') or
+                not getattr(namespace, 'enable_vtpm', None)):
+            raise ArgumentUsageError(
+                'usage error: The "--os-disk-security-encryption-type NonPersistedTPM" can only be passed in '
+                'when "--security-type" is "ConfidentialVM" and "--enable-vtpm" is True')
+
     if not namespace.os_type:
         namespace.os_type = 'windows' if 'windows' in namespace.os_offer.lower() else 'linux'
+
+    if getattr(namespace, 'source_snapshots_or_disks', None) and \
+            getattr(namespace, 'source_snapshots_or_disks_size_gb', None):
+        if len(namespace.source_snapshots_or_disks) != len(namespace.source_snapshots_or_disks_size_gb):
+            raise ArgumentUsageError(
+                'Length of --source-snapshots-or-disks, --source-snapshots-or-disks-size-gb must be same.')
+    elif getattr(namespace, 'source_snapshots_or_disks', None) or \
+            getattr(namespace, 'source_snapshots_or_disks_size_gb', None):
+        raise ArgumentUsageError('usage error: --source-snapshots-or-disks and '
+                                 '--source-snapshots-or-disks-size-gb must be used together')
+
+    if getattr(namespace, 'source_disk_restore_point', None) and \
+            getattr(namespace, 'source_disk_restore_point_size_gb', None):
+        if len(namespace.source_disk_restore_point) != len(namespace.source_disk_restore_point_size_gb):
+            raise ArgumentUsageError(
+                'Length of --source-disk-restore-point, --source-disk-restore-point-size-gb must be same.')
+    elif getattr(namespace, 'source_disk_restore_point', None) or \
+            getattr(namespace, 'source_disk_restore_point_size_gb', None):
+        raise ArgumentUsageError('usage error: --source-disk-restore-point and '
+                                 '--source-disk-restore-point-size-gb must be used together')
 
     from ._vm_utils import normalize_disk_info
     # attach_data_disks are not exposed yet for VMSS, so use 'getattr' to avoid crash
@@ -602,11 +640,16 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
                                               ephemeral_os_disk=getattr(namespace, 'ephemeral_os_disk', None),
                                               ephemeral_os_disk_placement=getattr(namespace, 'ephemeral_os_disk_placement', None),
                                               data_disk_delete_option=getattr(
-                                                  namespace, 'data_disk_delete_option', None))
+                                                  namespace, 'data_disk_delete_option', None),
+                                              source_snapshots_or_disks=getattr(namespace, 'source_snapshots_or_disks', None),
+                                              source_snapshots_or_disks_size_gb=getattr(namespace, 'source_snapshots_or_disks_size_gb', None),
+                                              source_disk_restore_point=getattr(namespace, 'source_disk_restore_point', None),
+                                              source_disk_restore_point_size_gb=getattr(namespace, 'source_disk_restore_point_size_gb', None)
+                                              )
 
 
 def _validate_vm_create_storage_account(cmd, namespace):
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
     if namespace.storage_account:
         storage_id = parse_resource_id(namespace.storage_account)
         rg = storage_id.get('resource_group', namespace.resource_group_name)
@@ -646,7 +689,7 @@ def _validate_vm_create_storage_account(cmd, namespace):
 
 
 def _validate_vm_create_availability_set(cmd, namespace):
-    from msrestazure.tools import parse_resource_id, resource_id
+    from azure.mgmt.core.tools import parse_resource_id, resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
     if namespace.availability_set:
         as_id = parse_resource_id(namespace.availability_set)
@@ -666,7 +709,7 @@ def _validate_vm_create_availability_set(cmd, namespace):
 
 
 def _validate_vm_create_vmss(cmd, namespace):
-    from msrestazure.tools import parse_resource_id, resource_id
+    from azure.mgmt.core.tools import parse_resource_id, resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
     if namespace.vmss:
         as_id = parse_resource_id(namespace.vmss)
@@ -702,7 +745,7 @@ def _validate_vm_create_dedicated_host(cmd, namespace):
     :param namespace:
     :return:
     """
-    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
     if namespace.dedicated_host and namespace.dedicated_host_group:
@@ -720,7 +763,7 @@ def _validate_vm_create_dedicated_host(cmd, namespace):
 
 
 def _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=False):
-    from msrestazure.tools import is_valid_resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id
     vnet = namespace.vnet_name
     subnet = namespace.subnet
     rg = namespace.resource_group_name
@@ -1032,7 +1075,7 @@ def validate_delete_option(string):
 
 
 def _validate_vm_create_nics(cmd, namespace):
-    from msrestazure.tools import resource_id
+    from azure.mgmt.core.tools import resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
     nic_ids = namespace.nics
     delete_option = validate_delete_options(nic_ids, getattr(namespace, 'nic_delete_option', None))
@@ -1189,6 +1232,7 @@ def _validate_admin_password(password, os_type):
 
 def validate_ssh_key(namespace, cmd=None):
     from azure.core.exceptions import HttpResponseError
+    ssh_key_type = namespace.ssh_key_type if hasattr(namespace, 'ssh_key_type') else 'RSA'
     if hasattr(namespace, 'ssh_key_name') and namespace.ssh_key_name:
         client = _compute_client_factory(cmd.cli_ctx)
         # --ssh-key-name
@@ -1205,7 +1249,7 @@ def validate_ssh_key(namespace, cmd=None):
         elif namespace.generate_ssh_keys:
             parameters = {}
             parameters['location'] = namespace.location
-            public_key = _validate_ssh_key_helper("", namespace.generate_ssh_keys)
+            public_key = _validate_ssh_key_helper("", namespace.generate_ssh_keys, ssh_key_type)
             parameters['public_key'] = public_key
             client.ssh_public_keys.create(resource_group_name=namespace.resource_group_name,
                                           ssh_public_key_name=namespace.ssh_key_name,
@@ -1218,16 +1262,22 @@ def validate_ssh_key(namespace, cmd=None):
 
         processed_ssh_key_values = []
         for ssh_key_value in namespace.ssh_key_value:
-            processed_ssh_key_values.append(_validate_ssh_key_helper(ssh_key_value, namespace.generate_ssh_keys))
+            processed_ssh_key_values.append(_validate_ssh_key_helper(ssh_key_value,
+                                                                     namespace.generate_ssh_keys,
+                                                                     ssh_key_type))
         namespace.ssh_key_value = processed_ssh_key_values
     # if no ssh keys processed, try to generate new key / use existing at root.
     else:
-        namespace.ssh_key_value = [_validate_ssh_key_helper("", namespace.generate_ssh_keys)]
+        namespace.ssh_key_value = [_validate_ssh_key_helper("",
+                                                            namespace.generate_ssh_keys,
+                                                            ssh_key_type)]
 
 
-def _validate_ssh_key_helper(ssh_key_value, should_generate_ssh_keys):
+def _validate_ssh_key_helper(ssh_key_value, should_generate_ssh_keys, ssh_key_type=None):
+    file_name = 'id_rsa.pub' if ssh_key_type is None or ssh_key_type == 'RSA' else 'id_ed25519.pub'
     string_or_file = (ssh_key_value or
-                      os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub'))
+                      os.path.join(os.path.expanduser('~'), '.ssh', file_name))
+
     content = string_or_file
     if os.path.exists(string_or_file):
         logger.info('Use existing SSH public key file: %s', string_or_file)
@@ -1242,7 +1292,12 @@ def _validate_ssh_key_helper(ssh_key_value, should_generate_ssh_keys):
                 private_key_filepath = public_key_filepath[:-4]
             else:
                 private_key_filepath = public_key_filepath + '.private'
-            content = keys.generate_ssh_keys(private_key_filepath, public_key_filepath)
+
+            if ssh_key_type == "Ed25519":
+                from azure.cli.command_modules.vm._vm_utils import generate_ssh_keys_ed25519
+                content = generate_ssh_keys_ed25519(private_key_filepath, public_key_filepath)
+            else:
+                content = keys.generate_ssh_keys(private_key_filepath, public_key_filepath)
             logger.warning("SSH key files '%s' and '%s' have been generated under ~/.ssh to "
                            "allow SSH access to the VM. If using machines without "
                            "permanent storage, back up your keys to a safe location.",
@@ -1322,29 +1377,55 @@ def _validate_trusted_launch(namespace):
         namespace.enable_secure_boot = True
 
 
+def trusted_launch_set_default(namespace, generation_version, features):
+    if not generation_version:
+        return
+
+    trusted_launch = ["TrustedLaunchSupported", "TrustedLaunchAndConfidentialVmSupported"]
+
+    features_security_type = None
+    for item in features:
+        if hasattr(item, 'name') and hasattr(item, 'value') and item.name == 'SecurityType':
+            features_security_type = item.value
+            break
+
+    from ._constants import UPGRADE_SECURITY_HINT, COMPATIBLE_SECURITY_TYPE_VALUE
+    if generation_version == 'V1':
+        logger.warning(UPGRADE_SECURITY_HINT)
+
+    elif generation_version == 'V2':
+        if features_security_type in trusted_launch:
+            if namespace.security_type is None:
+                namespace.security_type = 'TrustedLaunch'
+
+            if namespace.security_type != COMPATIBLE_SECURITY_TYPE_VALUE:
+                if namespace.enable_vtpm is None:
+                    namespace.enable_vtpm = True
+
+                if namespace.enable_secure_boot is None:
+                    namespace.enable_secure_boot = True
+        else:
+            if namespace.security_type is None:
+                namespace.security_type = COMPATIBLE_SECURITY_TYPE_VALUE
+            logger.warning(UPGRADE_SECURITY_HINT)
+
+
 def _validate_generation_version_and_trusted_launch(cmd, namespace):
     from azure.cli.core.profiles import ResourceType
     if not cmd.supported_api_version(resource_type=ResourceType.MGMT_COMPUTE, min_api='2020-12-01'):
         return
-    from ._vm_utils import trusted_launch_warning_log
+    from ._vm_utils import validate_image_trusted_launch, validate_vm_disk_trusted_launch
     if namespace.image is not None:
-        from ._vm_utils import parse_shared_gallery_image_id, parse_community_gallery_image_id, \
-            is_valid_image_version_id, parse_gallery_image_id
+        from ._vm_utils import is_valid_image_version_id
         if is_valid_image_version_id(namespace.image):
-            image_info = parse_gallery_image_id(namespace.image)
-            compute_client = _compute_client_factory(cmd.cli_ctx, subscription_id=image_info[0])
-            gallery_image_info = compute_client.gallery_images.get(
-                resource_group_name=image_info[1], gallery_name=image_info[2], gallery_image_name=image_info[3])
-            generation_version = gallery_image_info.hyper_v_generation if hasattr(gallery_image_info,
-                                                                                  'hyper_v_generation') else None
-            features = gallery_image_info.features if hasattr(gallery_image_info, 'features') else None
-            trusted_launch_warning_log(namespace, generation_version, features)
-            return
+            if namespace.security_type is None:
+                namespace.security_type = 'Standard'
 
         image_type = _parse_image_argument(cmd, namespace)
 
         if image_type == 'image_id':
             # managed image does not support trusted launch
+            validate_image_trusted_launch(namespace)
             return
 
         if image_type == 'uri':
@@ -1352,25 +1433,11 @@ def _validate_generation_version_and_trusted_launch(cmd, namespace):
             return
 
         if image_type == 'shared_gallery_image_id':
-            from ._client_factory import cf_shared_gallery_image
-            image_info = parse_shared_gallery_image_id(namespace.image)
-            gallery_image_info = cf_shared_gallery_image(cmd.cli_ctx).get(
-                location=namespace.location, gallery_unique_name=image_info[0], gallery_image_name=image_info[1])
-            generation_version = gallery_image_info.hyper_v_generation if hasattr(gallery_image_info,
-                                                                                  'hyper_v_generation') else None
-            features = gallery_image_info.features if hasattr(gallery_image_info, 'features') else None
-            trusted_launch_warning_log(namespace, generation_version, features)
+            validate_image_trusted_launch(namespace)
             return
 
         if image_type == 'community_gallery_image_id':
-            from ._client_factory import cf_community_gallery_image
-            image_info = parse_community_gallery_image_id(namespace.image)
-            gallery_image_info = cf_community_gallery_image(cmd.cli_ctx).get(
-                location=namespace.location, public_gallery_name=image_info[0], gallery_image_name=image_info[1])
-            generation_version = gallery_image_info.hyper_v_generation if hasattr(gallery_image_info,
-                                                                                  'hyper_v_generation') else None
-            features = gallery_image_info.features if hasattr(gallery_image_info, 'features') else None
-            trusted_launch_warning_log(namespace, generation_version, features)
+            validate_image_trusted_launch(namespace)
             return
 
         if image_type == 'urn':
@@ -1383,23 +1450,23 @@ def _validate_generation_version_and_trusted_launch(cmd, namespace):
                                        namespace.os_sku, os_version)
             generation_version = vm_image_info.hyper_v_generation if hasattr(vm_image_info,
                                                                              'hyper_v_generation') else None
-            features = vm_image_info.features if hasattr(vm_image_info, 'features') else None
-            trusted_launch_warning_log(namespace, generation_version, features)
+            features = vm_image_info.features if hasattr(vm_image_info, 'features') and vm_image_info.features else []
+
+            trusted_launch_set_default(namespace, generation_version, features)
             return
 
     # create vm with os disk
     if hasattr(namespace, 'attach_os_disk') and namespace.attach_os_disk is not None:
-        from msrestazure.tools import parse_resource_id
+        from azure.mgmt.core.tools import parse_resource_id
         if urlparse(namespace.attach_os_disk).scheme and "://" in namespace.attach_os_disk:
             # vhd does not support trusted launch
             return
         client = _compute_client_factory(cmd.cli_ctx).disks
         attach_os_disk_name = parse_resource_id(namespace.attach_os_disk)['name']
         attach_os_disk_info = client.get(namespace.resource_group_name, attach_os_disk_name)
-        generation_version = attach_os_disk_info.hyper_v_generation if hasattr(attach_os_disk_info,
-                                                                               'hyper_v_generation') else None
-        features = attach_os_disk_info.features if hasattr(attach_os_disk_info, 'features') else None
-        trusted_launch_warning_log(namespace, generation_version, features)
+        disk_security_profile = attach_os_disk_info.security_profile if hasattr(attach_os_disk_info,
+                                                                                'security_profile') else None
+        validate_vm_disk_trusted_launch(namespace, disk_security_profile)
 
 
 def _validate_vm_vmss_set_applications(cmd, namespace):  # pylint: disable=unused-argument
@@ -1530,7 +1597,7 @@ def _validate_vmss_single_placement_group(namespace):
 
 
 def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
     from azure.cli.core.profiles import ResourceType
     from azure.core.exceptions import HttpResponseError
     std_lb_is_available = cmd.supported_api_version(min_api='2017-08-01', resource_type=ResourceType.MGMT_NETWORK)
@@ -1653,15 +1720,7 @@ def get_network_lb(cli_ctx, resource_group_name, lb_name):
 
 def process_vmss_create_namespace(cmd, namespace):
     from azure.cli.core.azclierror import InvalidArgumentValueError
-    uniform_str = 'Uniform'
     flexible_str = 'Flexible'
-
-    if namespace.orchestration_mode is None:
-        namespace.orchestration_mode = uniform_str
-        logger.warning(
-            'Starting Ignite (November) 2023, the "az vmss create" command will use the new default '
-            'orchestration mode: Flexible. To learn more about Flexible Orchestration mode, '
-            'please visit https://aka.ms/orchestrationModeVMSS')
 
     if namespace.os_disk_delete_option is not None or namespace.data_disk_delete_option is not None:
         if namespace.orchestration_mode.lower() != flexible_str.lower():
@@ -1681,7 +1740,6 @@ def process_vmss_create_namespace(cmd, namespace):
         namespace.load_balancer_sku = 'Standard'  # lb sku MUST be standard
         # namespace.public_ip_per_vm = True  # default to true for VMSS Flex
 
-        namespace.upgrade_policy_mode = None
         namespace.use_unmanaged_disk = None
 
         banned_params = {
@@ -2006,7 +2064,7 @@ def process_snapshot_create_namespace(cmd, namespace):
 
 
 def process_image_create_namespace(cmd, namespace):
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
     validate_tags(namespace)
     validate_edge_zone(cmd, namespace)
     source_from_vm = False
@@ -2349,7 +2407,7 @@ def _disk_encryption_set_format(cmd, namespace, name):
     :param name: string
     :return: ID
     """
-    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
     if name is not None and not is_valid_resource_id(name):
         name = resource_id(
@@ -2471,7 +2529,7 @@ def _validate_vmss_automatic_repairs(cmd, namespace):  # pylint: disable=unused-
 
 
 def _validate_vmss_create_host_group(cmd, namespace):
-    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
     if namespace.host_group:
         if not is_valid_resource_id(namespace.host_group):
@@ -2535,7 +2593,7 @@ def _validate_capacity_reservation_group(cmd, namespace):
 
     if namespace.capacity_reservation_group and namespace.capacity_reservation_group != 'None':
 
-        from msrestazure.tools import is_valid_resource_id, resource_id
+        from azure.mgmt.core.tools import is_valid_resource_id, resource_id
         from azure.cli.core.commands.client_factory import get_subscription_id
         if not is_valid_resource_id(namespace.capacity_reservation_group):
             namespace.capacity_reservation_group = resource_id(
@@ -2557,16 +2615,12 @@ def _validate_vm_vmss_create_ephemeral_placement(namespace):
 
 def _validate_vm_vmss_update_ephemeral_placement(cmd, namespace):  # pylint: disable=unused-argument
     size = getattr(namespace, 'size', None)
-    vm_sku = getattr(namespace, 'vm_sku', None)
     ephemeral_os_disk_placement = getattr(namespace, 'ephemeral_os_disk_placement', None)
     source = getattr(namespace, 'command').split()[0]
     if ephemeral_os_disk_placement:
         if source == 'vm' and not size:
             raise ArgumentUsageError('usage error: --ephemeral-os-disk-placement is only configurable when '
                                      '--size is specified.')
-        if source == 'vmss' and not vm_sku:
-            raise ArgumentUsageError('usage error: --ephemeral-os-disk-placement is only configurable when '
-                                     '--vm-sku is specified.')
 
 
 def _validate_community_gallery_legal_agreement_acceptance(cmd, namespace):

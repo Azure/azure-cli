@@ -39,7 +39,7 @@ def show_version(cmd):  # pylint: disable=unused-argument
     return versions
 
 
-def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many-locals, too-many-statements, too-many-branches, no-member, unused-argument
+def upgrade_version(cmd, update_all=None, yes=None, allow_preview=None):  # pylint: disable=too-many-locals, too-many-statements, too-many-branches, no-member, unused-argument
     import platform
     import sys
     import subprocess
@@ -140,6 +140,10 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
                            "or run 'pip install --upgrade azure-cli' in this container")
         elif installer == 'MSI':
             _upgrade_on_windows()
+        elif installer == 'ZIP':
+            zip_url = 'https://aka.ms/installazurecliwindowszipx64'
+            logger.warning("Please download the latest ZIP from %s, delete the old installation folder and extract the "
+                           "new version to the same location", zip_url)
         else:
             logger.warning(UPGRADE_MSG)
     if exit_code:
@@ -168,11 +172,21 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
 
     if exts:
         logger.warning("Upgrading extensions")
+        if allow_preview is None:
+            logger.warning("Default enabled including preview versions for extension installation now. "
+                           "Disabled in future release. "
+                           "Use '--allow-preview-extensions true' to enable it specifically if needed. "
+                           "Use '--allow-preview-extensions false' to install stable version only. ")
+            allow_preview = True
     for ext_name in exts:
         try:
             logger.warning("Checking update for %s", ext_name)
-            subprocess.call(['az', 'extension', 'update', '-n', ext_name],
-                            shell=platform.system() == 'Windows')
+            cmds = ['az', 'extension', 'update', '-n', ext_name]
+            if allow_preview:
+                cmds += ["--allow-preview", "true"]
+            else:
+                cmds += ["--allow-preview", "false"]
+            subprocess.call(cmds, shell=platform.system() == 'Windows')
         except Exception as ex:  # pylint: disable=broad-except
             msg = "Extension {} update failed during az upgrade. {}".format(ext_name, str(ex))
             raise CLIError(msg)
@@ -253,6 +267,7 @@ def demo_style(cmd, theme=None):  # pylint: disable=unused-argument
     styled_text = [
         (Style.PRIMARY, placeholder.format("White", "Primary text color")),
         (Style.SECONDARY, placeholder.format("Grey", "Secondary text color")),
+        (Style.HIGHLIGHT, placeholder.format("Cyan", "Highlight text color")),
         (Style.IMPORTANT, placeholder.format("Magenta", "Important text color")),
         (Style.ACTION, placeholder.format(
             "Blue", "Commands, parameters, and system inputs (White in legacy powershell terminal)")),

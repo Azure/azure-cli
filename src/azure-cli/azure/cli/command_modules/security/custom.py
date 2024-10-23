@@ -6,8 +6,7 @@ import string
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.mgmt.security.models import (SecurityContact,
-                                        AutoProvisioningSetting,
+from azure.mgmt.security.models import (AutoProvisioningSetting,
                                         SecurityAssessment,
                                         SecurityAssessmentMetadata,
                                         AzureResourceDetails,
@@ -17,8 +16,6 @@ from azure.mgmt.security.models import (SecurityContact,
                                         Pricing,
                                         WorkspaceSetting,
                                         AdvancedThreatProtectionSetting,
-                                        AlertSyncSettings,
-                                        DataExportSettings,
                                         AlertsSuppressionRule,
                                         SuppressionAlertsScope,
                                         ScopeElement,
@@ -29,14 +26,13 @@ from azure.mgmt.security.models import (SecurityContact,
                                         AutomationActionLogicApp,
                                         AutomationActionEventHub,
                                         AutomationRuleSet,
-                                        AutomationTriggeringRule,
-                                        SettingName)
+                                        AutomationTriggeringRule)
 from azure.mgmt.security.v2020_07_01_preview.models import (RuleResultsInput, RulesResultsInput)
 from azure.mgmt.security.v2023_01_01.models import (Extension)
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.azclierror import (MutuallyExclusiveArgumentError)
-from msrestazure.tools import resource_id
-from msrestazure.azure_exceptions import CloudError
+from azure.mgmt.core.tools import resource_id
+from azure.core.exceptions import HttpResponseError
 from knack.log import get_logger
 from ._utils import (
     run_cli_cmd
@@ -223,71 +219,6 @@ def delete_security_alerts_suppression_rule_scope(client, rule_name, field):
         parent_object.suppression_alerts_scope = None
 
     return client.update(alerts_suppression_rule_name=rule_name, alerts_suppression_rule=parent_object)
-
-
-# --------------------------------------------------------------------------------------------
-# Security Settings
-# --------------------------------------------------------------------------------------------
-
-
-def list_security_settings(client):
-
-    return client.list()
-
-
-def get_security_setting(client, setting_name):
-
-    return client.get(setting_name)
-
-
-def update_security_setting(client, setting_name, enabled):
-
-    if setting_name == SettingName.SENTINEL:
-        setting = AlertSyncSettings()
-    else:
-        setting = DataExportSettings()
-
-    setting.enabled = enabled
-    return client.update(setting_name, setting)
-
-
-# --------------------------------------------------------------------------------------------
-# Security Contacts
-# --------------------------------------------------------------------------------------------
-
-
-def list_security_contacts(client):
-
-    return client.list()
-
-
-def get_security_contact(client, resource_name):
-
-    return client.get(resource_name)
-
-
-def create_security_contact(client, resource_name, email, phone=None, alert_notifications=None, alerts_admins=None):
-
-    if alert_notifications is None:
-        alert_notifications = ''
-
-    if alerts_admins is None:
-        alerts_admins = ''
-
-    if phone is None:
-        phone = ''
-
-    new_contact = SecurityContact(email=email,
-                                  phone=phone,
-                                  alert_notifications=alert_notifications,
-                                  alerts_to_admins=alerts_admins)
-
-    return client.create(resource_name, new_contact)
-
-
-def delete_security_contact(client, resource_name):
-
-    return client.delete(resource_name)
 
 
 # --------------------------------------------------------------------------------------------
@@ -688,7 +619,7 @@ def get_security_assessment_metadata(client, resource_name):
 
     try:
         return client.get(resource_name)
-    except CloudError:
+    except HttpResponseError:
         return client.get_in_subscription(resource_name)
 
 

@@ -7,7 +7,6 @@ import time
 from datetime import datetime
 from dateutil.tz import tzutc  # pylint: disable=import-error
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from msrestazure.azure_exceptions import CloudError
 from azure.core.exceptions import HttpResponseError
 from azure.cli.core.util import CLIError
 from azure.cli.core.util import parse_proxy_resource_id
@@ -491,7 +490,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
                                                                                   subnet_prefix_1))
         # add one more subnet
         self.cmd('network vnet subnet create --vnet-name {} -g {} '
-                 '--address-prefix {} -n {}'.format(vnet_name, resource_group, subnet_prefix_2, subnet_name_2))
+                 '--address-prefix {} -n {} --default-outbound false'.format(vnet_name, resource_group, subnet_prefix_2, subnet_name_2))
 
         # test vnet-rule create
         self.cmd('{} server vnet-rule create -n {} -g {} -s {} '
@@ -523,7 +522,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
 
         # add one more subnet
         self.cmd('network vnet subnet create --vnet-name {} -g {} '
-                 '--address-prefix {} -n {}'.format(vnet_name, resource_group, subnet_prefix_3, subnet_name_3))
+                 '--address-prefix {} -n {} --default-outbound false'.format(vnet_name, resource_group, subnet_prefix_3, subnet_name_3))
 
         self.cmd('{} server vnet-rule update -n {} -g {} -s {} '
                  '--vnet-name {} --subnet {} --ignore-missing-endpoint {}'

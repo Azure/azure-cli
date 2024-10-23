@@ -88,26 +88,12 @@ def create_container_rm(cmd, client, container_name, resource_group_name, accoun
 
 
 def update_container_rm(cmd, instance, metadata=None, public_access=None,
-                        default_encryption_scope=None, deny_encryption_scope_override=None,
                         enable_nfs_v3_root_squash=None, enable_nfs_v3_all_squash=None):
     BlobContainer = cmd.get_models('BlobContainer', resource_type=ResourceType.MGMT_STORAGE)
 
-    # # TODO will remove warning as well as the parameters in November 2023
-    if default_encryption_scope is not None:
-        logger.warning('--default-encryption-scope cannot be updated after container is created. '
-                       'When it is provided, it will be ignored by the server. '
-                       'This parameter will be removed for the update command in November 2023.')
-    if deny_encryption_scope_override is not None:
-        logger.warning('--deny-encryption-scope-override cannot be updated after container is created. '
-                       'When it is provided, it will be ignored by the server. '
-                       'This parameter will be removed for the update command in November 2023.')
     blob_container = BlobContainer(
         metadata=metadata if metadata is not None else instance.metadata,
         public_access=public_access if public_access is not None else instance.public_access,
-        default_encryption_scope=default_encryption_scope
-        if default_encryption_scope is not None else instance.default_encryption_scope,
-        deny_encryption_scope_override=deny_encryption_scope_override
-        if deny_encryption_scope_override is not None else instance.deny_encryption_scope_override,
         enable_nfs_v3_all_squash=enable_nfs_v3_all_squash
         if enable_nfs_v3_all_squash is not None else instance.enable_nfs_v3_all_squash,
         enable_nfs_v3_root_squash=enable_nfs_v3_root_squash
@@ -177,7 +163,10 @@ def delete_container(client, container_name, fail_not_exist=False, lease_id=None
 
 def set_container_permission(client, public_access=None, **kwargs):
     acl_response = client.get_container_access_policy()
-    signed_identifiers = {} if not acl_response.get('signed_identifiers', None) else acl_response['signed_identifiers']
+    signed_identifiers = {}
+    if acl_response.get('signed_identifiers'):
+        for identifier in acl_response["signed_identifiers"]:
+            signed_identifiers[identifier.id] = identifier.access_policy
     return client.set_container_access_policy(signed_identifiers=signed_identifiers,
                                               public_access=public_access, **kwargs)
 
@@ -574,12 +563,21 @@ def transform_blob_type(cmd, blob_type):
 
 # pylint: disable=protected-access
 def _adjust_block_blob_size(client, blob_type, length):
-    if not blob_type or blob_type != 'block' or length is None:
+    if not blob_type or blob_type == 'page' or length is None:
         return
+
+    # increase the block size to 8MB when blob size is >= 8MB to enable high throughput block/append blob
+    if length >= 8 * 1024 * 1024:
+        client._config.max_block_size = 8 * 1024 * 1024
+        client._config.max_single_put_size = 256 * 1024 * 1024
+
     # increase the block size to 100MB when the block list will contain more than 50,000 blocks(each block 4MB)
     if length > 50000 * 4 * 1024 * 1024:
         client._config.max_block_size = 100 * 1024 * 1024
         client._config.max_single_put_size = 256 * 1024 * 1024
+
+    if blob_type == 'append':
+        return
 
     # increase the block size to 4000MB when the block list will contain more than 50,000 blocks(each block 100MB)
     if length > 50000 * 100 * 1024 * 1024:
@@ -627,6 +625,7 @@ def upload_blob(cmd, client, file_path=None, container_name=None, blob_name=None
     if blob_type == 'append':
         if client.exists(timeout=timeout):
             client.get_blob_properties(lease=lease_id, timeout=timeout, **check_blob_args)
+        upload_args['max_concurrency'] = 1
     else:
         upload_args['if_modified_since'] = if_modified_since
         upload_args['if_unmodified_since'] = if_unmodified_since
@@ -753,13 +752,17 @@ def show_blob(cmd, client, container_name, blob_name, snapshot=None, lease_id=No
         if_modified_since=if_modified_since, if_unmodified_since=if_unmodified_since, if_match=if_match,
         if_none_match=if_none_match, timeout=timeout)
 
-    page_ranges = None
-    if blob.properties.blob_type == cmd.get_models('blob.models#_BlobTypes').PageBlob:
-        page_ranges = client.get_page_ranges(
-            container_name, blob_name, snapshot=snapshot, lease_id=lease_id, if_modified_since=if_modified_since,
-            if_unmodified_since=if_unmodified_since, if_match=if_match, if_none_match=if_none_match, timeout=timeout)
+    try:
+        page_ranges = None
+        if blob.properties.blob_type == cmd.get_models('blob.models#_BlobTypes').PageBlob:
+            page_ranges = client.get_page_ranges(
+                container_name, blob_name, snapshot=snapshot, lease_id=lease_id, if_modified_since=if_modified_since,
+                if_unmodified_since=if_unmodified_since, if_match=if_match, if_none_match=if_none_match,
+                timeout=timeout)
 
-    blob.properties.page_ranges = page_ranges
+        blob.properties.page_ranges = page_ranges
+    except HttpResponseError as ex:
+        logger.warning("GetPageRanges failed with status code: %d, message: %s", ex.status_code, ex.message)
 
     return blob
 
@@ -896,7 +899,7 @@ def create_blob_url(client, container_name, blob_name, snapshot, protocol='https
         url = blob_client.url
     else:
         container_client = client.get_container_client(container=container_name)
-        url = container_client.url + '/'
+        url = container_client.url if '?' in container_client.url else container_client.url + '/'
     if protocol == 'http':
         return url.replace('https', 'http', 1)
     return url
@@ -905,6 +908,14 @@ def create_blob_url(client, container_name, blob_name, snapshot, protocol='https
 def _copy_blob_to_blob_container(cmd, blob_service, source_blob_service, destination_container, destination_path,
                                  source_container, source_blob_name, source_sas, **kwargs):
     t_blob_client = cmd.get_models('_blob_client#BlobClient')
+    # generate sas for oauth copy source
+    if not source_sas:
+        from ..util import create_short_lived_blob_sas_v2
+        start = datetime.utcnow()
+        expiry = datetime.utcnow() + timedelta(hours=1)
+        source_user_delegation_key = source_blob_service.get_user_delegation_key(start, expiry)
+        source_sas = create_short_lived_blob_sas_v2(cmd, source_blob_service.account_name, source_container,
+                                                    source_blob_name, user_delegation_key=source_user_delegation_key)
     source_client = t_blob_client(account_url=source_blob_service.url, container_name=source_container,
                                   blob_name=source_blob_name, credential=source_sas)
     source_blob_url = source_client.url
@@ -928,7 +939,10 @@ def _copy_file_to_blob_container(blob_service, source_file_service, destination_
                                  source_share, source_sas, source_file_dir, source_file_name):
     t_share_client = source_file_service.get_share_client(source_share)
     t_file_client = t_share_client.get_file_client(os.path.join(source_file_dir, source_file_name))
-    source_file_url = '{}?{}'.format(t_file_client.url, source_sas)
+    if '?' not in t_file_client.url:
+        source_file_url = '{}?{}'.format(t_file_client.url, source_sas)
+    else:
+        source_file_url = t_file_client.url
 
     source_path = os.path.join(source_file_dir, source_file_name) if source_file_dir else source_file_name
     destination_blob_name = normalize_blob_file_path(destination_path, source_path)
@@ -944,11 +958,14 @@ def _copy_file_to_blob_container(blob_service, source_file_service, destination_
 def show_blob_v2(cmd, client, **kwargs):
     blob = client.get_blob_properties(**kwargs)
 
-    page_ranges = None
-    if blob.blob_type == cmd.get_models('_models#BlobType', resource_type=ResourceType.DATA_STORAGE_BLOB).PageBlob:
-        page_ranges = client.get_page_ranges(**kwargs)
+    try:
+        page_ranges = None
+        if blob.blob_type == cmd.get_models('_models#BlobType', resource_type=ResourceType.DATA_STORAGE_BLOB).PageBlob:
+            page_ranges = client.get_page_ranges(**kwargs)
 
-    blob.page_ranges = page_ranges
+        blob.page_ranges = page_ranges
+    except HttpResponseError as ex:
+        logger.warning("GetPageRanges failed with status code: %d, message: %s", ex.status_code, ex.message)
 
     return blob
 

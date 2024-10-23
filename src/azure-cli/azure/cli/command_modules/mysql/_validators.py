@@ -6,7 +6,7 @@ from dateutil import parser
 import re
 from knack.util import CLIError
 from knack.log import get_logger
-from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id, is_valid_resource_name
+from azure.mgmt.core.tools import parse_resource_id, resource_id, is_valid_resource_id, is_valid_resource_name
 from azure.cli.core.azclierror import ValidationError, ArgumentUsageError, InvalidArgumentValueError
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.util import parse_proxy_resource_id
@@ -106,8 +106,8 @@ def mysql_arguments_validator(db_context, location, tier, sku_name, storage_gb, 
                               zone=None, standby_availability_zone=None, high_availability=None, backup_byok_key=None,
                               public_access=None, version=None, auto_grow=None, replication_role=None, subnet=None,
                               byok_identity=None, backup_byok_identity=None, byok_key=None, geo_redundant_backup=None,
-                              disable_data_encryption=None, iops=None, auto_io_scaling=None, instance=None,
-                              data_source_type=None, mode=None,
+                              disable_data_encryption=None, iops=None, auto_io_scaling=None, accelerated_logs=None,
+                              instance=None, data_source_type=None, mode=None,
                               data_source_backup_dir=None, data_source_sas_token=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforMySQL/flexibleServers')
 
@@ -133,6 +133,7 @@ def mysql_arguments_validator(db_context, location, tier, sku_name, storage_gb, 
     _mysql_byok_validator(byok_identity, backup_byok_identity, byok_key, backup_byok_key,
                           disable_data_encryption, geo_redundant_backup, instance)
     _mysql_iops_validator(iops, auto_io_scaling, instance)
+    mysql_accelerated_logs_validator(accelerated_logs, tier)
     _mysql_import_data_source_type_validator(data_source_type, data_source_backup_dir, data_source_sas_token)
     _mysql_import_mode_validator(mode)
 
@@ -150,7 +151,7 @@ def _mysql_import_data_source_type_validator(data_source_type, data_source_backu
 
 
 def _mysql_import_mode_validator(mode):
-    allowed_values = ['offline']
+    allowed_values = ['offline', 'online']
     if mode is not None and mode.lower() not in allowed_values:
         raise InvalidArgumentValueError('Incorrect value for --mode. Allowed values : {}'.format(allowed_values))
 
@@ -307,6 +308,18 @@ def _mysql_iops_validator(iops, auto_io_scaling, instance):
         auto_io_scaling = instance.storage.auto_io_scaling if auto_io_scaling is None else auto_io_scaling
     if auto_io_scaling.lower() == 'enabled':
         logger.warning("The server has enabled the auto scale iops. So the iops will be ignored.")
+
+
+def mysql_accelerated_logs_validator(accelerated_logs, tier):
+    if accelerated_logs is None:
+        if tier == "MemoryOptimized":
+            accelerated_logs = "Enabled"
+        else:
+            accelerated_logs = "Disabled"
+    if tier != "MemoryOptimized" and accelerated_logs.lower() == "enabled":
+        accelerated_logs = "Disabled"
+        logger.warning("Accelerated logs are only supported for Memory Optimized tier. "
+                       "So the accelerated logs will be disabled.")
 
 
 def _network_arg_validator(subnet, public_access):
@@ -543,3 +556,21 @@ def validate_byok_identity(cmd, namespace):
 def validate_identities(cmd, namespace):
     if namespace.identities:
         namespace.identities = [_validate_identity(cmd, namespace, identity) for identity in namespace.identities]
+
+
+def validate_action_name(namespace):
+    if not re.search(r'^[-_a-zA-Z0-9]+$', namespace.action_name):
+        raise ValidationError("The action name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'.")
+
+
+def validate_branch(namespace):
+    if not re.search(r'^[-_a-zA-Z0-9]+$', namespace.branch):
+        raise ValidationError("The branch can only contain 0-9, a-z, A-Z, \'-\' and \'_\'.")
+
+
+def validate_and_format_maintenance_start_time(maintenance_start_time):
+    try:
+        return parser.parse(maintenance_start_time)
+    except:
+        raise ValidationError("The maintenance_start_time value has incorrect date format. "
+                              "Please use ISO format e.g., 2024-06-01T00:08:23+00:00")

@@ -397,6 +397,7 @@ def load_arguments(self, _):
         c.argument('assign_identity', nargs='*', help="Assign system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity.")
         c.argument('default_identity', help="The primary identity to access key vault in CMK related features. e.g. 'FirstPartyIdentity', 'SystemAssignedIdentity' and more.")
         c.argument('public_network_access', options_list=['--public-network-access', '-p'], arg_type=get_enum_type(['ENABLED', 'DISABLED']), help="Sets public network access in server to either Enabled or Disabled.")
+        c.argument('disable_ttl', options_list=['--disable-ttl', '-d'], arg_type=get_three_state_flag(), help="Enable or disable restoring with ttl disabled.")
 
     # Mongo role definition
     with self.argument_context('cosmosdb mongodb role definition') as c:
@@ -609,6 +610,51 @@ def load_arguments(self, _):
     with self.argument_context('managed-cassandra datacenter list') as c:
         c.argument('cluster_name', options_list=['--cluster-name', '-c'], help="Cluster Name", required=True)
 
+    # SQL database restore
+    with self.argument_context('cosmosdb sql database restore') as c:
+        c.argument('account_name', account_name_type, id_part=None, required=True)
+        c.argument('database_name', options_list=['--name', '-n'], help="Database name", required=True)
+        c.argument('restore_timestamp', options_list=['--restore-timestamp', '-t'], action=UtcDatetimeAction, help="The timestamp to which the database needs to be restored to.", required=False)
+
+    # SQL collection restore
+    with self.argument_context('cosmosdb sql container restore') as c:
+        c.argument('account_name', account_name_type, id_part=None, required=True)
+        c.argument('database_name', database_name_type, required=True)
+        c.argument('container_name', options_list=['--name', '-n'], help="Container name", required=True)
+        c.argument('restore_timestamp', options_list=['--restore-timestamp', '-t'], action=UtcDatetimeAction, help="The timestamp to which the container needs to be restored to.", required=False)
+
+    # MongoDB database restore
+    with self.argument_context('cosmosdb mongodb database restore') as c:
+        c.argument('account_name', account_name_type, id_part=None, required=True)
+        c.argument('database_name', options_list=['--name', '-n'], help="Database name", required=True)
+        c.argument('restore_timestamp', options_list=['--restore-timestamp', '-t'], action=UtcDatetimeAction, help="The timestamp to which the database needs to be restored to.", required=False)
+
+    # MongoDB collection restore
+    with self.argument_context('cosmosdb mongodb collection restore') as c:
+        c.argument('account_name', account_name_type, id_part=None, required=True)
+        c.argument('database_name', database_name_type, required=True)
+        c.argument('collection_name', options_list=['--name', '-n'], help="Collection name", required=True)
+        c.argument('restore_timestamp', options_list=['--restore-timestamp', '-t'], action=UtcDatetimeAction, help="The timestamp to which the collection needs to be restored to.", required=False)
+
+    # Gremlin database restore
+    with self.argument_context('cosmosdb gremlin database restore') as c:
+        c.argument('account_name', account_name_type, id_part=None, required=True)
+        c.argument('database_name', options_list=['--name', '-n'], help="Name of the CosmosDB Gremlin database name", required=True)
+        c.argument('restore_timestamp', options_list=['--restore-timestamp', '-t'], action=UtcDatetimeAction, help="The timestamp to which the database needs to be restored to.", required=False)
+
+    # Gremlin Graph restore
+    with self.argument_context('cosmosdb gremlin graph restore') as c:
+        c.argument('account_name', account_name_type, id_part=None, required=True)
+        c.argument('database_name', database_name_type, required=True, help='Name of the CosmosDB Gremlin database name')
+        c.argument('graph_name', options_list=['--name', '-n'], help="Name of the CosmosDB Gremlin graph name", required=True)
+        c.argument('restore_timestamp', options_list=['--restore-timestamp', '-t'], action=UtcDatetimeAction, help="The timestamp to which the graph needs to be restored to.", required=False)
+
+    # Table restore
+    with self.argument_context('cosmosdb table restore') as c:
+        c.argument('account_name', account_name_type, id_part=None, required=True)
+        c.argument('table_name', options_list=['--table-name', '-n'], required=True, help='Name of the CosmosDB Table name')
+        c.argument('restore_timestamp', options_list=['--restore-timestamp', '-t'], action=UtcDatetimeAction, help="The timestamp to which the Table needs to be restored to.", required=False)
+
     # ComputeV2 Services
     with self.argument_context('cosmosdb service') as c:
         c.argument('account_name', completer=None, options_list=['--account-name', '-a'], help='Name of the Cosmos DB database account.', id_part=None)
@@ -617,3 +663,4 @@ def load_arguments(self, _):
         c.argument('service_name', options_list=['--name', '-n'], help="Service Name.")
         c.argument('instance_count', options_list=['--count', '-c'], help="Instance Count.")
         c.argument('instance_size', options_list=['--size'], help="Instance Size. Possible values are: Cosmos.D4s, Cosmos.D8s, Cosmos.D16s etc")
+        c.argument('dedicated_gateway_type', options_list=['--gateway-type'], arg_type=get_enum_type(['IntegratedCache', 'DistributedQuery']), help="Dedicated Gateway Type. Valid only for SqlDedicatedGateway service kind")

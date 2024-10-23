@@ -211,7 +211,7 @@ class BatchArgumentTree:
 
     def _is_list(self, name):
         """Whether argument value is a list"""
-        return self._arg_tree[name]['type'].startswith('[')
+        return self._arg_tree[name]['type'].startswith('[') or self._arg_tree[name]['type'] == '{str}'
 
     def _is_datetime(self, name):
         """Whether argument value is a timestamp"""
@@ -612,7 +612,6 @@ class AzureBatchDataPlaneCommand:
             conditions.append(
                 model._validation.get(attr, {}).get('constant'))  # pylint: disable=protected-access
             conditions.append(any(i for i in pformat.IGNORE_PARAMETERS if i in full_path))
-            conditions.append(details['type'][0] in ['{'])
             if not any(conditions):
                 yield attr, details
 
@@ -693,7 +692,7 @@ class AzureBatchDataPlaneCommand:
                 if details['type'] in pformat.BASIC_TYPES:
                     self._resolve_conflict(param_attr, param_attr, path, options,
                                            details['type'], required_attrs, conflict_names)
-                elif details['type'].startswith('['):
+                elif details['type'].startswith('[') or details['type'].startswith('{'):
                     # We only expose a list arg if there's a validator for it
                     # This will fail for 2D arrays - though Batch doesn't have any yet
                     inner_type = details['type'][1:-1]

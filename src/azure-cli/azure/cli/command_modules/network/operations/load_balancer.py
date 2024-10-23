@@ -7,6 +7,7 @@ from knack.log import get_logger
 from azure.cli.core.azclierror import ArgumentUsageError
 from azure.cli.core.aaz import register_command, AAZResourceIdArgFormat, has_value, AAZListArg, AAZResourceIdArg, \
     AAZStrArg, AAZArgEnum
+from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
 from ..aaz.latest.network.lb import Delete as _LBDelete, Update as _LBUpdate, List as _LBList, Show as _LBShow
 from ..aaz.latest.network.lb.frontend_ip import Create as _LBFrontendIPCreate, Update as _LBFrontendIPUpdate, \
     Show as _LBFrontendIPShow, Delete as _LBFrontendIPDelete, List as _LBFrontendIPList
@@ -275,6 +276,20 @@ class LBRuleCreate(_LBRuleCreate):
             element_transformer=lambda _, id: {"id": id}
         )
 
+    def post_instance_create(self, instance):
+        args = self.ctx.args
+        if has_value(args.frontend_ip_name):
+            curr_id = args.frontend_ip_name.to_serialized_data()
+            curr_name = parse_resource_id(curr_id)["resource_name"] if is_valid_resource_id(curr_id) else curr_id
+
+            parent = self.ctx.vars.instance
+            frontend_ip_configurations = parent.properties.frontend_ip_configurations
+            for fip in frontend_ip_configurations:
+                if fip.name == curr_name:
+                    if has_value(fip.properties.gateway_load_balancer):
+                        rid = fip.properties.gateway_load_balancer.id.to_serialized_data()
+                        self.ctx.update_aux_subscriptions(parse_resource_id(rid)["subscription"])
+
 
 class LBRuleUpdate(_LBRuleUpdate):
 
@@ -323,6 +338,19 @@ class LBRuleUpdate(_LBRuleUpdate):
             instance.properties.probe = None
         # always remove backend_address_pool in update request, service will fill this property based on backend_address_pools property.
         instance.properties.backend_address_pool = None
+
+        args = self.ctx.args
+        if has_value(args.frontend_ip_name):
+            curr_id = args.frontend_ip_name.to_serialized_data()
+            curr_name = parse_resource_id(curr_id)["resource_name"] if is_valid_resource_id(curr_id) else curr_id
+
+            parent = self.ctx.vars.instance
+            frontend_ip_configurations = parent.properties.frontend_ip_configurations
+            for fip in frontend_ip_configurations:
+                if fip.name == curr_name:
+                    if has_value(fip.properties.gateway_load_balancer):
+                        rid = fip.properties.gateway_load_balancer.id.to_serialized_data()
+                        self.ctx.update_aux_subscriptions(parse_resource_id(rid)["subscription"])
 
 
 class LBOutboundRuleCreate(_LBOutboundRuleCreate):
@@ -446,6 +474,7 @@ class LBAddressPoolCreate(_LBAddressPoolBasicCreate):
         args_schema.backend_addresses.Element.name._required = True
         args_schema.backend_addresses.Element.ip_address._required = True
         args_schema.backend_addresses.Element.frontend_ip_address._registered = False
+        args_schema.vnet_id._registered = False
         return args_schema
 
     def _execute_operations(self):
@@ -464,9 +493,12 @@ class LBAddressPoolCreate(_LBAddressPoolBasicCreate):
         self.post_operations()
 
     def pre_operations(self):
-        from azure.mgmt.core.tools import is_valid_resource_id
+        from azure.cli.core.aaz import AAZUndefined
 
         args = self.ctx.args
+        if has_value(args.sync_mode) and has_value(args.vnet):
+            args.vnet_id = args.vnet
+            args.vnet = AAZUndefined
         if has_value(args.backend_addresses):
             for backend_address in args.backend_addresses:
                 if not has_value(backend_address.admin_state) and has_value(args.admin_state):
@@ -532,12 +564,16 @@ class LBAddressPoolUpdate(_LBAddressPoolUpdate):
         args_schema.backend_addresses.Element.name._nullable = False
         args_schema.backend_addresses.Element.ip_address._nullable = False
         args_schema.backend_addresses.Element.frontend_ip_address._registered = False
+        args_schema.vnet_id._registered = False
         return args_schema
 
     def pre_operations(self):
-        from azure.mgmt.core.tools import is_valid_resource_id
+        from azure.cli.core.aaz import AAZUndefined
 
         args = self.ctx.args
+        if has_value(args.sync_mode) and has_value(args.vnet):
+            args.vnet_id = args.vnet
+            args.vnet = AAZUndefined
         if has_value(args.backend_addresses) and args.backend_addresses.to_serialized_data() is not None:
             for backend_address in args.backend_addresses:
                 if not has_value(backend_address.admin_state) and has_value(args.admin_state):
@@ -589,8 +625,6 @@ class LBAddressPoolAddressAdd(_LBAddressPoolAddressAdd):
         return args_schema
 
     def pre_operations(self):
-        from azure.mgmt.core.tools import is_valid_resource_id
-
         args = self.ctx.args
         virtual_network = args.virtual_network.to_serialized_data()
         subnet = args.subnet.to_serialized_data()
@@ -627,8 +661,6 @@ class LBAddressPoolAddressUpdate(_LBAddressPoolAddressUpdate):
         return args_schema
 
     def pre_operations(self):
-        from azure.mgmt.core.tools import is_valid_resource_id
-
         args = self.ctx.args
         virtual_network = args.virtual_network.to_serialized_data()
         subnet = args.subnet.to_serialized_data()
@@ -696,11 +728,12 @@ class LBProbeCreate(_LBProbeCreate):
 
     def pre_operations(self):
         args = self.ctx.args
-        if has_value(args.probe_threshold):
+        if has_value(args.number_of_probes):
             logger.warning(
-                "Please note that the parameter --probe-threshold is currently in preview and is not recommended "
-                "for production workloads. For most scenarios, we recommend maintaining the default value of 1 "
-                "by not specifying the value of the property."
+                "The property \"numberOfProbes\" is not respected. Load Balancer health probes will probe up or down "
+                "immediately after one probe regardless of the property's configured value. To control the number of "
+                "successful or failed consecutive probes necessary to mark backend instances as healthy or unhealthy, "
+                "please leverage the property \"probeThreshold\" instead."
             )
         if has_value(args.request_path) and args.request_path == "":
             args.request_path = None
@@ -718,11 +751,12 @@ class LBProbeUpdate(_LBProbeUpdate):
 
     def pre_operations(self):
         args = self.ctx.args
-        if has_value(args.probe_threshold):
+        if has_value(args.number_of_probes):
             logger.warning(
-                "Please note that the parameter --probe-threshold is currently in preview and is not recommended "
-                "for production workloads. For most scenarios, we recommend maintaining the default value of 1 "
-                "by not specifying the value of the property."
+                "The property \"numberOfProbes\" is not respected. Load Balancer health probes will probe up or down "
+                "immediately after one probe regardless of the property's configured value. To control the number of "
+                "successful or failed consecutive probes necessary to mark backend instances as healthy or unhealthy, "
+                "please leverage the property \"probeThreshold\" instead."
             )
         if has_value(args.request_path) and args.request_path == "":
             args.request_path = None
@@ -1026,6 +1060,12 @@ class CrossRegionLoadBalancerAddressPoolCreate(_LBAddressPoolCreate):
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
 
+        args_schema.admin_state = AAZStrArg(
+            options=["--admin-state"],
+            arg_group="Properties",
+            help="Default administrative state to backend addresses in `--backend-addresses`.",
+        )
+        args_schema.admin_state.enum = args_schema.backend_addresses.Element.admin_state.enum
         # not support name, the frontend id should belong to a regional load balance
         args_schema.backend_addresses.Element.frontend_ip_address._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{}/frontendIPConfigurations/{}"
@@ -1034,11 +1074,18 @@ class CrossRegionLoadBalancerAddressPoolCreate(_LBAddressPoolCreate):
         args_schema.backend_addresses.Element.frontend_ip_address._required = True
 
         args_schema.tunnel_interfaces._registered = False
-        args_schema.backend_addresses.Element.admin_state._registered = False
         args_schema.backend_addresses.Element.ip_address._registered = False
         args_schema.backend_addresses.Element.subnet._registered = False
         args_schema.backend_addresses.Element.virtual_network._registered = False
         return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.backend_addresses):
+            for backend_address in args.backend_addresses:
+                if not has_value(backend_address.admin_state) and has_value(args.admin_state):
+                    # use the command level argument --admin-state
+                    backend_address.admin_state = args.admin_state
 
 
 @register_command("network cross-region-lb address-pool update")
@@ -1059,19 +1106,33 @@ class CrossRegionLoadBalancerAddressPoolUpdate(_LBAddressPoolUpdate):
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
 
+        args_schema.admin_state = AAZStrArg(
+            options=["--admin-state"],
+            arg_group="Properties",
+            help="Default administrative state to backend addresses in `--backend-addresses`.",
+        )
+        args_schema.admin_state.enum = args_schema.backend_addresses.Element.admin_state.enum
         # not support name, the frontend id should belong to a regional load balance
         args_schema.backend_addresses.Element.frontend_ip_address._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{}/frontendIPConfigurations/{}"
         )
         args_schema.backend_addresses.Element.name._nullable = False
         args_schema.backend_addresses.Element.frontend_ip_address._nullable = False
+        args_schema.backend_addresses.Element.admin_state._nullable = False
 
         args_schema.tunnel_interfaces._registered = False
-        args_schema.backend_addresses.Element.admin_state._registered = False
         args_schema.backend_addresses.Element.ip_address._registered = False
         args_schema.backend_addresses.Element.subnet._registered = False
         args_schema.backend_addresses.Element.virtual_network._registered = False
         return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.backend_addresses):
+            for backend_address in args.backend_addresses:
+                if not has_value(backend_address.admin_state) and has_value(args.admin_state):
+                    # use the command level argument --admin-state
+                    backend_address.admin_state = args.admin_state
 
 
 @register_command("network cross-region-lb address-pool show")
@@ -1117,7 +1178,6 @@ class CrossRegionLoadBalancerAddressPoolAddressAdd(_LBAddressPoolAddressAdd):
         )
 
         args_schema.frontend_ip_address._required = True
-        args_schema.admin_state._registered = False
         args_schema.ip_address._registered = False
         args_schema.subnet._registered = False
         args_schema.virtual_network._registered = False
@@ -1152,7 +1212,6 @@ class CrossRegionLoadBalancerAddressPoolAddressUpdate(_LBAddressPoolAddressUpdat
         )
 
         args_schema.frontend_ip_address._nullable = False
-        args_schema.admin_state._registered = False
         args_schema.ip_address._registered = False
         args_schema.subnet._registered = False
         args_schema.virtual_network._registered = False

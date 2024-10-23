@@ -148,7 +148,7 @@ def storage_file_upload(client, local_file_path, content_settings=None,
     }
     if progress_callback:
         upload_args['progress_hook'] = progress_callback
-    # Because the contents of the uploaded file may be too large, it should be passed into the a stream object,
+    # Because the contents of the uploaded file may be too large, it should be passed into a stream object,
     # upload_file() read file data in batches to avoid OOM problems
     count = os.path.getsize(local_file_path)
     with open(local_file_path, 'rb') as stream:

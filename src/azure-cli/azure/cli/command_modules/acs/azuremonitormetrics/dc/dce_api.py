@@ -10,7 +10,7 @@ from knack.util import CLIError
 
 def create_dce(cmd, cluster_subscription, cluster_resource_group_name, cluster_name, mac_region):
     from azure.cli.core.util import send_raw_request
-    dce_name = get_default_dce_name(cmd, mac_region, cluster_name)
+    dce_name = get_default_dce_name(mac_region, cluster_name)
     dce_resource_id = "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Insights/dataCollectionEndpoints/{2}"\
         .format(cluster_subscription, cluster_resource_group_name, dce_name)
     try:

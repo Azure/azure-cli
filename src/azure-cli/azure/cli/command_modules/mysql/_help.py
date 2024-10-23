@@ -12,6 +12,33 @@ type: group
 short-summary: Manage Azure Database for MySQL Flexible Servers.
 """
 
+helps['mysql flexible-server advanced-threat-protection-setting'] = """
+type: group
+short-summary: Manage the server's advanced threat protection setting.
+"""
+
+helps['mysql flexible-server advanced-threat-protection-setting show'] = """
+type: command
+short-summary: Get the server's advanced threat protection setting.
+examples:
+  - name: Get the advanced threat protection setting.
+    text: az mysql flexible-server advanced-threat-protection-setting show -g mygroup -n myserver
+"""
+
+helps['mysql flexible-server advanced-threat-protection-setting update'] = """
+type: command
+short-summary: Update the server's advanced threat protection setting.
+parameters:
+  - name: --state
+    type: string
+    short-summary: 'State of the advanced threat protection setting'
+examples:
+  - name: Enable the advanced threat protection setting.
+    text: az mysql flexible-server advanced-threat-protection-setting update -g mygroup -n myserver --state Enabled
+  - name: Disable the advanced threat protection setting.
+    text: az mysql flexible-server advanced-threat-protection-setting update -g mygroup -n myserver --state Disabled
+"""
+
 helps['mysql flexible-server create'] = """
 type: command
 short-summary: Create a MySQL flexible server.
@@ -198,7 +225,7 @@ long-summary: >
 
     To Migrate a Azure MySQL single server to Azure MySQL Flexible server. For more information for network configuration, see
 
-    - Migrate Azure Database for MySQL - Single Server to Flexible Server using Azure MySQL Import CLI
+    - Migrate Azure Database for MySQL - Single Server to Flexible Server using Azure Database for MySQL Import CLI
 
     https://learn.microsoft.com/en-us/azure/mysql/migrate/migrate-single-flexible-mysql-import-cli
 
@@ -212,10 +239,19 @@ long-summary: >
 
 examples:
   - name: >
-      Trigger a Import from azure mysql single server.
+      Trigger an Import from azure mysql single server.
     text: >
         az mysql flexible-server import create --data-source-type mysql_single \\
           --data-source test-single-server --resource-group test-rg \\
+          --location northeurope --name testserver \\
+          --sku-name Standard_B1ms --tier Burstable --public-access 0.0.0.0 \\
+          --storage-size 32 --tags "key=value" --version 5.7 --high-availability ZoneRedundant \\
+          --zone 1 --standby-zone 3 --storage-auto-grow Enabled --iops 500
+  - name: >
+      Trigger an Online Import from azure mysql single server.
+    text: >
+        az mysql flexible-server import create --data-source-type mysql_single \\
+          --data-source test-single-server --mode "Online" --resource-group test-rg \\
           --location northeurope --name testserver \\
           --sku-name Standard_B1ms --tier Burstable --public-access 0.0.0.0 \\
           --storage-size 32 --tags "key=value" --version 5.7 --high-availability ZoneRedundant \\
@@ -255,6 +291,14 @@ examples:
           --zone 1 --standby-zone 3 --storage-auto-grow Enabled --iops 500
 """
 
+helps['mysql flexible-server import stop-replication'] = """
+type: command
+short-summary: To stop replication between the source single server and target flexible server.
+examples:
+  - name: Stop replication to 'testFlexServer'.
+    text: az mysql flexible-server import stop-replication -g testGroup -n testFlexServer
+"""
+
 helps['mysql flexible-server show'] = """
 type: command
 short-summary: Get the details of a flexible server.
@@ -279,6 +323,9 @@ examples:
 helps['mysql flexible-server update'] = """
 type: command
 short-summary: Update a flexible server.
+long-summary: >
+    > [!WARNING]
+    > Enabling High-availability may result in a short downtime for the server based on your server configuration.
 examples:
   - name: Update a flexible server's sku, using local context for server and resource group.
     text: az mysql flexible-server update --sku-name Standard_D4ds_v4 --tier GeneralPurpose
@@ -398,6 +445,44 @@ examples:
     crafted: true
   - name: Restart a flexible server with failover
     text: az mysql flexible-server restart --resource-group testGroup --name testserver --failover Forced
+"""
+
+helps['mysql flexible-server detach-vnet'] = """
+type: command
+short-summary: Detach vnet for a flexible server.
+examples:
+  - name: Detach vnet for a flexible server with public access disabled.
+    text: az mysql flexible-server detach-vnet --resource-group testGroup --name testserver --public-network-access Disabled
+    crafted: true
+"""
+
+helps['mysql flexible-server maintenance'] = """
+type: group
+short-summary: Manage maintenance on a flexible server.
+"""
+
+helps['mysql flexible-server maintenance reschedule'] = """
+type: command
+short-summary: Reschedule the ongoing planned maintenance of a flexible server.
+examples:
+  - name: reschedule a existing maintenance '_T9Q-TS8' of the server 'testserver' under resource gruop 'testgroup' to a new start time 'UTC 20240601 09:00:00'
+    text: az mysql flexible-server maintenance reschedule --resource-group testgroup --server-name testserver --maintenance-name _T9Q-TS8 --start-time 2024-06-01T09:00:00Z
+"""
+
+helps['mysql flexible-server maintenance list'] = """
+type: command
+short-summary: List all of the maintenances of a flexible server.
+examples:
+  - name: List all of the maintenances of mysql flexible server 'testserver' under resource group 'testgroup'.
+    text: az mysql flexible-server maintenance list --resource-group testgroup --server-name testserver
+"""
+
+helps['mysql flexible-server maintenance show'] = """
+type: command
+short-summary: Get the specific maintenance of a flexible server by maintenance name.
+examples:
+  - name: Get a maintenance of mysql flexible server 'testserver' under resource group 'testgroup', with maintenance name '_T9Q-TS8'
+    text: az mysql flexible-server maintenance show --resource-group testgroup --server-name testserver --maintenance-name _T9Q-TS8
 """
 
 helps['mysql flexible-server wait'] = """

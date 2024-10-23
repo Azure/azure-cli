@@ -24,7 +24,7 @@ class AroScenarioTests(ScenarioTest):
     @ResourceGroupPreparer(random_name_length=28, name_prefix='clitestaro_create', location='eastus')
     @AROClusterServicePrincipalPreparer(name_prefix='clitestaro_create')
     def test_aro_create(self, resource_group):
-        from msrestazure.tools import resource_id
+        from azure.mgmt.core.tools import resource_id
 
         subscription = self.get_subscription_id()
 
@@ -44,8 +44,8 @@ class AroScenarioTests(ScenarioTest):
         })
 
         self.cmd('network vnet create -g {rg} -n dev-vnet --address-prefixes 10.0.0.0/9')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {master_subnet} --address-prefixes {master_ip_range} --service-endpoints Microsoft.ContainerRegistry')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {worker_subnet} --address-prefixes {worker_ip_range} --service-endpoints Microsoft.ContainerRegistry')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {master_subnet} --address-prefixes {master_ip_range} --service-endpoints Microsoft.ContainerRegistry --default-outbound false')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {worker_subnet} --address-prefixes {worker_ip_range} --service-endpoints Microsoft.ContainerRegistry --default-outbound false')
         self.cmd('network vnet subnet update -g {rg} --vnet-name dev-vnet -n {master_subnet} --disable-private-link-service-network-policies true')
 
         with mock.patch('azure.cli.command_modules.aro._rbac._gen_uuid', side_effect=self.create_guid):
@@ -61,7 +61,7 @@ class AroScenarioTests(ScenarioTest):
     @ResourceGroupPreparer(random_name_length=28, name_prefix='clitestaro_validate', location='eastus')
     @AROClusterServicePrincipalPreparer(name_prefix='clitestaro_validate')
     def test_aro_validate(self, resource_group):
-        from msrestazure.tools import resource_id
+        from azure.mgmt.core.tools import resource_id
 
         subscription = self.get_subscription_id()
 
@@ -81,8 +81,8 @@ class AroScenarioTests(ScenarioTest):
         })
 
         self.cmd('network vnet create -g {rg} -n dev-vnet --address-prefixes 10.0.0.0/9')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {master_subnet} --address-prefixes {master_ip_range} --service-endpoints Microsoft.ContainerRegistry')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {worker_subnet} --address-prefixes {worker_ip_range} --service-endpoints Microsoft.ContainerRegistry')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {master_subnet} --address-prefixes {master_ip_range} --service-endpoints Microsoft.ContainerRegistry --default-outbound false')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {worker_subnet} --address-prefixes {worker_ip_range} --service-endpoints Microsoft.ContainerRegistry --default-outbound false')
         self.cmd('network vnet subnet update -g {rg} --vnet-name dev-vnet -n {master_subnet} --disable-private-link-service-network-policies true')
 
         with mock.patch('azure.cli.command_modules.aro._rbac._gen_uuid', side_effect=self.create_guid):
@@ -92,7 +92,7 @@ class AroScenarioTests(ScenarioTest):
     @ResourceGroupPreparer(random_name_length=28, name_prefix='clitestaro_listcred', location='eastus')
     @AROClusterServicePrincipalPreparer(name_prefix='clitestaro_listcred')
     def test_aro_list_credentials(self, resource_group):
-        from msrestazure.tools import resource_id
+        from azure.mgmt.core.tools import resource_id
 
         subscription = self.get_subscription_id()
 
@@ -112,8 +112,8 @@ class AroScenarioTests(ScenarioTest):
         })
 
         self.cmd('network vnet create -g {rg} -n dev-vnet --address-prefixes 10.0.0.0/9')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {master_subnet} --address-prefixes {master_ip_range} --service-endpoints Microsoft.ContainerRegistry')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {worker_subnet} --address-prefixes {worker_ip_range} --service-endpoints Microsoft.ContainerRegistry')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {master_subnet} --address-prefixes {master_ip_range} --service-endpoints Microsoft.ContainerRegistry --default-outbound false')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {worker_subnet} --address-prefixes {worker_ip_range} --service-endpoints Microsoft.ContainerRegistry --default-outbound false')
         self.cmd('network vnet subnet update -g {rg} --vnet-name dev-vnet -n {master_subnet} --disable-private-link-service-network-policies true')
 
         with mock.patch('azure.cli.command_modules.aro._rbac._gen_uuid', side_effect=self.create_guid):
@@ -125,7 +125,7 @@ class AroScenarioTests(ScenarioTest):
     @ResourceGroupPreparer(random_name_length=28, name_prefix='clitestaro_admin', location='eastus')
     @AROClusterServicePrincipalPreparer(name_prefix='clitestaro_admin')
     def test_aro_get_admin_kubeconfig(self, resource_group):
-        from msrestazure.tools import resource_id
+        from azure.mgmt.core.tools import resource_id
 
         subscription = self.get_subscription_id()
 
@@ -148,8 +148,8 @@ class AroScenarioTests(ScenarioTest):
         })
 
         self.cmd('network vnet create -g {rg} -n dev-vnet --address-prefixes 10.0.0.0/9')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {master_subnet} --address-prefixes {master_ip_range} --service-endpoints Microsoft.ContainerRegistry')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {worker_subnet} --address-prefixes {worker_ip_range} --service-endpoints Microsoft.ContainerRegistry')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {master_subnet} --address-prefixes {master_ip_range} --service-endpoints Microsoft.ContainerRegistry --default-outbound false')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {worker_subnet} --address-prefixes {worker_ip_range} --service-endpoints Microsoft.ContainerRegistry --default-outbound false')
         self.cmd('network vnet subnet update -g {rg} --vnet-name dev-vnet -n {master_subnet} --disable-private-link-service-network-policies true')
 
         with mock.patch('azure.cli.command_modules.aro._rbac._gen_uuid', side_effect=self.create_guid):
@@ -165,7 +165,7 @@ class AroScenarioTests(ScenarioTest):
     @ResourceGroupPreparer(random_name_length=28, name_prefix='clitestaro_show', location='eastus')
     @AROClusterServicePrincipalPreparer(name_prefix='clitestaro_show')
     def test_aro_show(self, resource_group):
-        from msrestazure.tools import resource_id
+        from azure.mgmt.core.tools import resource_id
 
         subscription = self.get_subscription_id()
 
@@ -186,8 +186,8 @@ class AroScenarioTests(ScenarioTest):
         })
 
         self.cmd('network vnet create -g {rg} -n dev-vnet --address-prefixes 10.0.0.0/9')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {master_subnet} --address-prefixes {master_ip_range} --service-endpoints Microsoft.ContainerRegistry')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {worker_subnet} --address-prefixes {worker_ip_range} --service-endpoints Microsoft.ContainerRegistry')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {master_subnet} --address-prefixes {master_ip_range} --service-endpoints Microsoft.ContainerRegistry --default-outbound false')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {worker_subnet} --address-prefixes {worker_ip_range} --service-endpoints Microsoft.ContainerRegistry --default-outbound false')
         self.cmd('network vnet subnet update -g {rg} --vnet-name dev-vnet -n {master_subnet} --disable-private-link-service-network-policies true')
 
         with mock.patch('azure.cli.command_modules.aro._rbac._gen_uuid', side_effect=self.create_guid):
@@ -204,7 +204,7 @@ class AroScenarioTests(ScenarioTest):
     @ResourceGroupPreparer(random_name_length=28, name_prefix='clitestaro_list', location='eastus')
     @AROClusterServicePrincipalPreparer(name_prefix='clitestaro_list')
     def test_aro_list(self, resource_group):
-        from msrestazure.tools import resource_id
+        from azure.mgmt.core.tools import resource_id
 
         subscription = self.get_subscription_id()
 
@@ -224,8 +224,8 @@ class AroScenarioTests(ScenarioTest):
         })
 
         self.cmd('network vnet create -g {rg} -n dev-vnet --address-prefixes 10.0.0.0/9')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {master_subnet} --address-prefixes {master_ip_range} --service-endpoints Microsoft.ContainerRegistry')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {worker_subnet} --address-prefixes {worker_ip_range} --service-endpoints Microsoft.ContainerRegistry')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {master_subnet} --address-prefixes {master_ip_range} --service-endpoints Microsoft.ContainerRegistry --default-outbound false')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {worker_subnet} --address-prefixes {worker_ip_range} --service-endpoints Microsoft.ContainerRegistry --default-outbound false')
         self.cmd('network vnet subnet update -g {rg} --vnet-name dev-vnet -n {master_subnet} --disable-private-link-service-network-policies true')
 
         with mock.patch('azure.cli.command_modules.aro._rbac._gen_uuid', side_effect=self.create_guid):
@@ -241,7 +241,7 @@ class AroScenarioTests(ScenarioTest):
     @ResourceGroupPreparer(random_name_length=28, name_prefix='clitestaro_delete', location='eastus')
     @AROClusterServicePrincipalPreparer(name_prefix='clitestaro_delete')
     def test_aro_delete(self, resource_group):
-        from msrestazure.tools import resource_id
+        from azure.mgmt.core.tools import resource_id
 
         subscription = self.get_subscription_id()
 
@@ -261,8 +261,8 @@ class AroScenarioTests(ScenarioTest):
         })
 
         self.cmd('network vnet create -g {rg} -n dev-vnet --address-prefixes 10.0.0.0/9')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {master_subnet} --address-prefixes {master_ip_range} --service-endpoints Microsoft.ContainerRegistry')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {worker_subnet} --address-prefixes {worker_ip_range} --service-endpoints Microsoft.ContainerRegistry')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {master_subnet} --address-prefixes {master_ip_range} --service-endpoints Microsoft.ContainerRegistry --default-outbound false')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {worker_subnet} --address-prefixes {worker_ip_range} --service-endpoints Microsoft.ContainerRegistry --default-outbound false')
         self.cmd('network vnet subnet update -g {rg} --vnet-name dev-vnet -n {master_subnet} --disable-private-link-service-network-policies true')
 
         with mock.patch('azure.cli.command_modules.aro._rbac._gen_uuid', side_effect=self.create_guid):
@@ -274,7 +274,7 @@ class AroScenarioTests(ScenarioTest):
     @ResourceGroupPreparer(random_name_length=28, name_prefix='clitestaro_update', location='eastus')
     @AROClusterServicePrincipalPreparer(name_prefix='clitestaro_update')
     def test_aro_update(self, resource_group):
-        from msrestazure.tools import resource_id
+        from azure.mgmt.core.tools import resource_id
 
         subscription = self.get_subscription_id()
 
@@ -294,8 +294,8 @@ class AroScenarioTests(ScenarioTest):
         })
 
         self.cmd('network vnet create -g {rg} -n dev-vnet --address-prefixes 10.0.0.0/9')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {master_subnet} --address-prefixes {master_ip_range} --service-endpoints Microsoft.ContainerRegistry')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {worker_subnet} --address-prefixes {worker_ip_range} --service-endpoints Microsoft.ContainerRegistry')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {master_subnet} --address-prefixes {master_ip_range} --service-endpoints Microsoft.ContainerRegistry --default-outbound false')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {worker_subnet} --address-prefixes {worker_ip_range} --service-endpoints Microsoft.ContainerRegistry --default-outbound false')
         self.cmd('network vnet subnet update -g {rg} --vnet-name dev-vnet -n {master_subnet} --disable-private-link-service-network-policies true')
 
         with mock.patch('azure.cli.command_modules.aro._rbac._gen_uuid', side_effect=self.create_guid):

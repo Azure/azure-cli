@@ -12,7 +12,7 @@ from azure.cli.core.local_context import LocalContextAttribute, LocalContextActi
 from ._validators import (get_datetime_type, validate_metadata, get_permission_validator, get_permission_help_string,
                           validate_entity, validate_select, validate_blob_type,
                           validate_included_datasets_validator, validate_custom_domain, validate_hns_migration_type,
-                          validate_container_public_access, validate_allow_blob_public_access,
+                          validate_container_public_access,
                           add_progress_callback, process_resource_group,
                           storage_account_key_options, process_metric_update_namespace,
                           get_char_options_validator, validate_bypass, validate_encryption_source, validate_marker,
@@ -209,8 +209,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         arg_type=get_three_state_flag(), options_list=['--allow-cross-tenant-replication', '-r'], min_api='2021-04-01',
         help='Allow or disallow cross AAD tenant object replication. Set this property to true for new or existing '
              'accounts only if object replication policies will involve storage accounts in different AAD tenants. '
-             'If not specified, the default value is currently true and will be changed to false '
-             'for new accounts to follow best security practices.')
+             'If not specified, the default value is false for new accounts to follow best security practices.')
 
     t_share_permission = self.get_models('DefaultSharePermission', resource_type=ResourceType.MGMT_STORAGE)
 
@@ -378,16 +377,15 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    'platform managed keys for data at rest.')
         c.argument('allow_blob_public_access', arg_type=get_three_state_flag(), min_api='2019-04-01',
                    help='Allow or disallow public access to all blobs or containers in the storage account. '
-                   'If not specified, the default value is currently true and will be changed to false '
-                   'for new accounts to follow best security practices. '
+                   'If not specified, the default value is false for new accounts to follow best security practices. '
                    'When true, containers in the account may '
                    'be configured for public access. Note that setting this property to true does '
                    'not enable anonymous access to any data in the account. The additional step of configuring the '
-                   'public access setting for a container is required to enable anonymous access.',
-                   validator=validate_allow_blob_public_access)
+                   'public access setting for a container is required to enable anonymous access.')
         c.argument('min_tls_version', arg_type=get_enum_type(t_tls_version),
                    help='The minimum TLS version to be permitted on requests to storage. '
-                        'The default interpretation is TLS 1.0 for this property')
+                        'While the default setting is TLS 1.0 for this property, '
+                        'Microsoft recommends setting MinimumTlsVersion to 1.2 or above.')
         c.argument('allow_shared_key_access', allow_shared_key_access_type)
         c.argument('edge_zone', edge_zone_type, min_api='2020-08-01-preview')
         c.argument('identity_type', arg_type=get_enum_type(t_identity_type), arg_group='Identity',
@@ -484,16 +482,15 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('publish_internet_endpoints', publish_internet_endpoints_type)
         c.argument('allow_blob_public_access', arg_type=get_three_state_flag(), min_api='2019-04-01',
                    help='Allow or disallow public access to all blobs or containers in the storage account. '
-                   'If not specified, the default value is currently true and will be changed to false '
-                   'for new account to follow best security practices. '
+                   'If not specified, the default value is false for new account to follow best security practices. '
                    'When true, containers '
                    'in the account may be configured for public access. Note that setting this property to true does '
                    'not enable anonymous access to any data in the account. The additional step of configuring the '
-                   'public access setting for a container is required to enable anonymous access.',
-                   validator=validate_allow_blob_public_access)
+                   'public access setting for a container is required to enable anonymous access.')
         c.argument('min_tls_version', arg_type=get_enum_type(t_tls_version),
                    help='The minimum TLS version to be permitted on requests to storage. '
-                        'The default interpretation is TLS 1.0 for this property')
+                        'While the default setting is TLS 1.0 for this property, '
+                        'Microsoft recommends setting MinimumTlsVersion to 1.2 or above.')
         c.argument('allow_shared_key_access', allow_shared_key_access_type)
         c.argument('identity_type', arg_type=get_enum_type(t_identity_type), arg_group='Identity',
                    help='The identity type.')
@@ -520,6 +517,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('public_network_access', arg_type=get_enum_type(public_network_access_enum), min_api='2021-06-01',
                    help='Enable or disable public network access to the storage account. '
                         'Possible values include: `Enabled` or `Disabled`.')
+        c.argument('upgrade_to_storagev2', arg_type=get_three_state_flag(),
+                   help='Upgrade Storage Account Kind to StorageV2.')
+        c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
 
     for scope in ['storage account create', 'storage account update']:
         with self.argument_context(scope, arg_group='Customer managed key', min_api='2017-06-01',
@@ -796,7 +796,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The destination storage account name or resource Id. Apply --account-name value as '
                    'destination account when there is no destination account provided in --policy and '
                    '--destination-account.')
-        c.argument('properties', or_policy_type)
+        c.argument('properties', or_policy_type, validator=validate_or_policy)
         c.argument('prefix_match', prefix_math_type)
         c.argument('min_creation_time', min_creation_time_type)
 
@@ -809,9 +809,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                        help='The source storage container name. Required when no --policy provided.')
             c.argument('destination_container', options_list=['--destination-container', '--dcont'],
                        help='The destination storage container name. Required when no --policy provided.')
-
-    with self.argument_context('storage account or-policy create') as c:
-        c.argument('properties', or_policy_type, validator=validate_or_policy)
 
     with self.argument_context('storage account or-policy rule') as c:
         c.argument('policy_id', policy_id_type)
@@ -1071,7 +1068,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('length', type=int, help='Number of bytes to read from the stream. This is optional, but should be '
                                             'supplied for optimal performance. Cooperate with --data.', is_preview=True,
                    min_api='2019-02-02')
-        c.argument('overwrite', arg_type=get_three_state_flag(), arg_group="Additional Flags", is_preview=True,
+        c.argument('overwrite', arg_type=get_three_state_flag(), arg_group="Additional Flags",
                    help='Whether the blob to be uploaded should overwrite the current data. If True, blob upload '
                         'operation will overwrite the existing data. If set to False, the operation will fail with '
                         'ResourceExistsError. The exception to the above is with Append blob types: if set to False and the '
@@ -1108,20 +1105,24 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
         c.argument('source', options_list=('--source', '-s'))
         c.argument('destination', options_list=('--destination', '-d'))
-        c.argument('max_connections', type=int,
+        c.argument('max_connections', type=int, arg_group="Additional Flags",
                    help='Maximum number of parallel connections to use when the blob size exceeds 64MB.')
         c.argument('maxsize_condition', arg_group='Content Control')
         c.argument('validate_content', action='store_true', min_api='2016-05-31', arg_group='Content Control')
-        c.argument('blob_type', options_list=('--type', '-t'), arg_type=get_enum_type(get_blob_types()))
-        c.extra('no_progress', progress_type, validator=add_progress_callback)
-        c.extra('tier', tier_type, is_preview=True, validator=blob_tier_validator_track2)
-        c.extra('overwrite', arg_type=get_three_state_flag(), is_preview=True,
+        c.argument('blob_type', options_list=('--type', '-t'), arg_type=get_enum_type(get_blob_types()),
+                   arg_group="Additional Flags")
+        c.extra('no_progress', progress_type, validator=add_progress_callback, arg_group="Additional Flags")
+        c.extra('tier', tier_type, is_preview=True, validator=blob_tier_validator_track2, arg_group="Additional Flags")
+        c.extra('overwrite', arg_type=get_three_state_flag(), arg_group="Additional Flags",
                 help='Whether the blob to be uploaded should overwrite the current data. If True, blob upload '
                      'operation will overwrite the existing data. If set to False, the operation will fail with '
                      'ResourceExistsError. The exception to the above is with Append blob types: if set to False and the '
                      'data already exists, an error will not be raised and the data will be appended to the existing '
                      'blob. If set overwrite=True, then the existing append blob will be deleted, and a new one created. '
                      'Defaults to False.')
+        c.extra('tags', arg_type=tags_type, arg_group="Additional Flags")
+        c.argument('metadata', arg_group="Additional Flags")
+        c.argument('timeout', arg_group="Additional Flags")
 
     with self.argument_context('storage blob download', resource_type=ResourceType.DATA_STORAGE_BLOB) as c:
         c.register_blob_arguments_track2()
@@ -1545,6 +1546,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage container set-permission') as c:
         c.ignore('signed_identifiers')
 
+    for item in ['set', 'show']:
+        with self.argument_context('storage container {}-permission'.format(item)) as c:
+            c.extra('auth_mode', arg_type=get_enum_type(['key']),
+                    help='The mode in which to run the command. The legacy "key" mode will attempt to query for '
+                         'an account key if no authentication parameters for the account are provided. '
+                         'Environment variable: AZURE_STORAGE_AUTH_MODE')
+            c.ignore('sas_token')
+
     with self.argument_context('storage container') as c:
         c.argument('account_name', completer=get_resource_name_completion_list('Microsoft.Storage/storageAccounts'))
         c.argument('resource_group_name', required=False, validator=process_resource_group)
@@ -1584,11 +1593,16 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('start', type=get_datetime_type(False),
                    help='start UTC datetime (Y-m-d\'T\'H:M:S\'Z\'). Defaults to time of request.')
         c.argument('expiry', type=get_datetime_type(False), help='expiration UTC datetime in (Y-m-d\'T\'H:M:S\'Z\')')
+        c.ignore('sas_token')
 
     for item in ['create', 'delete', 'list', 'show', 'update']:
         with self.argument_context('storage container policy {}'.format(item)) as c:
             c.extra('container_name', container_name_type, required=True)
             c.extra('lease', options_list='--lease-id', help='The container lease ID.')
+            c.extra('auth_mode', arg_type=get_enum_type(['key']),
+                    help='The mode in which to run the command. The legacy "key" mode will attempt to query for '
+                         'an account key if no authentication parameters for the account are provided. '
+                         'Environment variable: AZURE_STORAGE_AUTH_MODE')
 
     with self.argument_context('storage container generate-sas', resource_type=ResourceType.DATA_STORAGE_BLOB) as c:
         from .completers import get_storage_acl_name_completion_list
@@ -1698,28 +1712,19 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                    resource_type=ResourceType.MGMT_STORAGE) as c:
             from ._validators import validate_container_nfsv3_squash
             t_root_squash = self.get_models('RootSquashType', resource_type=ResourceType.MGMT_STORAGE)
-            c.argument('default_encryption_scope', options_list=['--default-encryption-scope', '-d'],
-                       arg_group='Encryption Policy', min_api='2019-06-01',
-                       help='Default the container to use specified encryption scope for all writes.')
-            c.argument('deny_encryption_scope_override',
-                       options_list=['--deny-encryption-scope-override', '--deny-override'],
-                       arg_type=get_three_state_flag(), arg_group='Encryption Policy', min_api='2019-06-01',
-                       help='Block override of encryption scope from the container default.')
             c.extra('root_squash', arg_type=get_enum_type(t_root_squash), min_api='2021-06-01',
                     help='Enable NFSv3 squash on blob container.', validator=validate_container_nfsv3_squash)
             c.ignore('enable_nfs_v3_root_squash')
             c.ignore('enable_nfs_v3_all_squash')
 
-    with self.argument_context('storage container-rm update', resource_type=ResourceType.MGMT_STORAGE) as c:
+    with self.argument_context('storage container-rm create', resource_type=ResourceType.MGMT_STORAGE) as c:
         c.argument('default_encryption_scope', options_list=['--default-encryption-scope', '-d'],
                    arg_group='Encryption Policy', min_api='2019-06-01',
-                   help='Default the container to use specified encryption scope for all writes.',
-                   deprecate_info=c.deprecate(hide=True, target='--default-encryption-scope', expiration="2.54"))
+                   help='Default the container to use specified encryption scope for all writes.')
         c.argument('deny_encryption_scope_override',
                    options_list=['--deny-encryption-scope-override', '--deny-override'],
                    arg_type=get_three_state_flag(), arg_group='Encryption Policy', min_api='2019-06-01',
-                   help='Block override of encryption scope from the container default.',
-                   deprecate_info=c.deprecate(hide=True, target='--deny-encryption-scope-override', expiration="2.54"))
+                   help='Block override of encryption scope from the container default.')
 
     with self.argument_context('storage container-rm list', resource_type=ResourceType.MGMT_STORAGE) as c:
         c.argument('account_name', storage_account_type, id_part=None)
@@ -1855,9 +1860,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('expiry', type=get_datetime_type(True), help='expiration UTC datetime in (Y-m-d\'T\'H:M:S\'Z\')')
 
     with self.argument_context('storage share delete') as c:
-        from .sdkutil import get_delete_file_snapshot_type_names
+        t_delete_snapshot = self.get_sdk('_generated.models._azure_file_storage_enums#DeleteSnapshotsOptionType',
+                                         resource_type=ResourceType.DATA_STORAGE_FILESHARE)
         c.extra('share_name', share_name_type, options_list=('--name', '-n'), required=True)
-        c.argument('delete_snapshots', arg_type=get_enum_type(get_delete_file_snapshot_type_names()),
+        c.argument('delete_snapshots', arg_type=get_enum_type(t_delete_snapshot),
                    help='Specify the deletion strategy when the share has snapshots.')
         c.argument('fail_not_exist', help="Specify whether to throw an exception when the share doesn't exists. False "
                                           "by default.")

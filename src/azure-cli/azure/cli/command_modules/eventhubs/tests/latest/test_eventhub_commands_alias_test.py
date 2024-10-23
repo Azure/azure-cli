@@ -34,7 +34,10 @@ class EHgeorecoveryCURDScenarioTest(ScenarioTest):
             'primary': 'PrimaryKey',
             'secondary': 'SecondaryKey',
             'aliasname': self.create_random_name(prefix='cliAlias', length=20),
+            'aliasname1':self.create_random_name(prefix='clialias', length=20),
             'alternatename': self.create_random_name(prefix='cliAlter', length=20),
+            'namespacenameprimary1': self.create_random_name(prefix='eh-nscli', length=20),
+            'namespacenamesecondary1': self.create_random_name(prefix='eh-nscli', length=20),
             'id': '',
             'test': ''
         })
@@ -68,18 +71,18 @@ class EHgeorecoveryCURDScenarioTest(ScenarioTest):
 
         # Create alias
         alias = self.cmd('eventhubs georecovery-alias set  --resource-group {rg} --namespace-name {namespacenameprimary} --alias {aliasname} --partner-namespace {id}').get_output_in_json()
-        self.assertEqual(alias["partnerNamespace"], partnernamespaceid)
+        self.assertEqual(alias["partnerNamespace"].lower(), partnernamespaceid.lower())
         self.assertEqual(alias["role"], "Primary")
 
         # get alias - Primary
         primary_alias = self.cmd('eventhubs georecovery-alias show  --resource-group {rg} --namespace-name {namespacenameprimary} --alias {aliasname}').get_output_in_json()
         self.assertEqual(primary_alias["role"], "Primary")
-        self.assertEqual(primary_alias["partnerNamespace"], partnernamespaceid)
+        self.assertEqual(primary_alias["partnerNamespace"].lower(), partnernamespaceid.lower())
 
         # get alias - Secondary
         secondary_alias = self.cmd('eventhubs georecovery-alias show  --resource-group {rg} --namespace-name {namespacenamesecondary} --alias {aliasname}').get_output_in_json()
         self.assertEqual(secondary_alias["role"], "Secondary")
-        self.assertEqual(secondary_alias["partnerNamespace"], namespace["id"])
+        self.assertEqual(secondary_alias["partnerNamespace"].lower(), namespace["id"].lower())
 
         getaliasprimarynamespace = self.cmd('eventhubs georecovery-alias show  --resource-group {rg} --namespace-name {namespacenameprimary} --alias {aliasname}').get_output_in_json()
 
@@ -112,7 +115,7 @@ class EHgeorecoveryCURDScenarioTest(ScenarioTest):
         # Create alias
         secondary_alias = self.cmd('eventhubs georecovery-alias set  --resource-group {rg} --namespace-name {namespacenameprimary} --alias {aliasname} --partner-namespace {id}').get_output_in_json()
         self.assertEqual(secondary_alias["role"], "Primary")
-        self.assertEqual(secondary_alias["partnerNamespace"], partnernamespaceid)
+        self.assertEqual(secondary_alias["partnerNamespace"].lower(), partnernamespaceid.lower())
 
         getaliasaftercreate = self.cmd('eventhubs georecovery-alias show  --resource-group {rg} --namespace-name {namespacenameprimary} --alias {aliasname}').get_output_in_json()
 
@@ -142,6 +145,30 @@ class EHgeorecoveryCURDScenarioTest(ScenarioTest):
         self.cmd('eventhubs georecovery-alias delete  --resource-group {rg} --namespace-name {namespacenamesecondary} --alias {aliasname}')
 
         time.sleep(30)
+
+        # create alias using georecovery-alias create command
+
+        # Create Namespace - Primary
+        namespace = self.cmd(
+            'eventhubs namespace create --resource-group {rg} --name {namespacenameprimary1} --location {loc_south} --tags {tags} --sku {sku}',
+            checks=[self.check('sku.name', self.kwargs['sku'])]).get_output_in_json()
+
+        # Create Namespace - Secondary
+        self.cmd(
+            'eventhubs namespace create --resource-group {rg} --name {namespacenamesecondary1} --location {loc_north} --tags {tags} --sku {sku}',
+            checks=[self.check('sku.name', self.kwargs['sku'])])
+
+        # Get Created Namespace - Secondary
+        getnamespace2result = self.cmd('eventhubs namespace show --resource-group {rg} --name {namespacenamesecondary1}',
+                                       checks=[self.check('sku.name', self.kwargs['sku'])]).get_output_in_json()
+
+        partnernamespaceid = getnamespace2result['id']
+        self.kwargs.update({'id': partnernamespaceid})
+
+        alias = self.cmd(
+            'eventhubs georecovery-alias create  --resource-group {rg} --namespace-name {namespacenameprimary1} --alias {aliasname1} --partner-namespace {id}').get_output_in_json()
+        self.assertEqual(alias["partnerNamespace"].lower(), partnernamespaceid.lower())
+        self.assertEqual(alias["role"], "Primary")
 
         # Delete Namespace - primary
         self.cmd('eventhubs namespace delete --resource-group {rg} --name {namespacenameprimary}')

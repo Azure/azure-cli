@@ -19,9 +19,9 @@ class Delete(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2017-04-01",
+        "version": "2020-10-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.insights/activitylogalerts/{}", "2017-04-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.insights/activitylogalerts/{}", "2020-10-01"],
         ]
     }
 
@@ -81,7 +81,7 @@ class Delete(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/microsoft.insights/activityLogAlerts/{activityLogAlertName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/activityLogAlerts/{activityLogAlertName}",
                 **self.url_parameters
             )
 
@@ -115,7 +115,7 @@ class Delete(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2017-04-01",
+                    "api-version", "2020-10-01",
                     required=True,
                 ),
             }
