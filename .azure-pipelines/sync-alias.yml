@@ -1,14 +1,11 @@
 name: Azure CLI Sync Alias
 
-#schedules:
-#- cron: "50 15 * * *"
-#  displayName: 11:50 PM (UTC + 8:00) China Daily Run
-#  branches:
-#    include:
-#    - main
-
-trigger:
-  - bernard-auto-update-service-owner
+schedules:
+- cron: "50 15 * * *"
+  displayName: 11:50 PM (UTC + 8:00) China Daily Run
+  branches:
+    include:
+    - dev
 
 # The 'resources' and 'uses' below are used to resolve the error 'Repository associated with wiki ID <WikiId> does not exist or you do not have permissions for the operation you are attempting.'
 resources:
