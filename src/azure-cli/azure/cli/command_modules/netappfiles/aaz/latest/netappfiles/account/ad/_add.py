@@ -63,6 +63,13 @@ class Add(AAZCommand):
             required=True,
             nullable=True,
         )
+        _args_schema.kdc_ip = AAZStrArg(
+            options=["--kdc-ip"],
+            help="kdc server IP address for the active directory machine. This optional parameter is used only while creating kerberos volume.",
+            fmt=AAZStrArgFormat(
+                pattern="^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$",
+            ),
+        )
 
         # define Arg Group "Body.properties.activeDirectories[]"
 
@@ -113,14 +120,6 @@ class Add(AAZCommand):
             options=["--encrypt-dc-conn", "--encrypt-dc-connections"],
             arg_group="Body.properties.activeDirectories[]",
             help="If enabled, Traffic between the SMB server to Domain Controller (DC) will be encrypted.",
-        )
-        _args_schema.kdc_ip = AAZStrArg(
-            options=["--kdc-ip"],
-            arg_group="Body.properties.activeDirectories[]",
-            help="kdc server IP addresses for the active directory machine. This optional parameter is used only while creating kerberos volume.",
-            fmt=AAZStrArgFormat(
-                pattern="^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)((, ?)(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))*$",
-            ),
         )
         _args_schema.ldap_over_tls = AAZBoolArg(
             options=["--ldap-over-tls"],
