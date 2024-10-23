@@ -149,10 +149,11 @@ class TestComputefleetScenario(ScenarioTest):
         self.kwargs.update({
             'fleet_name': fleet,
             'resource_group': rg,
+            'location': loc,
             'new_tag': 'newTag'
         })
 
-        self.cmd('az computefleet update --name {fleet_name} --resource-group {resource_group} --set tags.key={new_tag}', checks=[
+        self.cmd('az computefleet update --name {fleet_name} --resource-group {resource_group} --location {location} --set tags.key={new_tag}', checks=[
             self.check('tags.key', '{new_tag}')
         ])
 
