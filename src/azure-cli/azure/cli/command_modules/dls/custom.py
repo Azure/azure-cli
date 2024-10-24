@@ -26,7 +26,6 @@ from azure.mgmt.datalake.store.models import (
     CreateOrUpdateFirewallRuleParameters,
     UpdateFirewallRuleParameters,
     CreateOrUpdateVirtualNetworkRuleParameters,
-    UpdateVirtualNetworkRuleParameters,
     CreateOrUpdateTrustedIdProviderParameters,
     UpdateTrustedIdProviderParameters)
 
@@ -156,10 +155,10 @@ def update_adls_virtual_network_rule(client,
                                      subnet,
                                      resource_group_name):
     return client.create_or_update(resource_group_name=resource_group_name,
-                         account_name=account_name,
-                         virtual_network_rule_name=virtual_network_rule_name,
-                         parameters=CreateOrUpdateVirtualNetworkRuleParameters(
-                             subnet_id=subnet))
+                                   account_name=account_name,
+                                   virtual_network_rule_name=virtual_network_rule_name,
+                                   parameters=CreateOrUpdateVirtualNetworkRuleParameters(
+                                       subnet_id=subnet))
 
 # endregion
 
@@ -182,10 +181,10 @@ def update_trusted_provider_rule(client,
                                  trusted_id_provider_name,
                                  id_provider=None):
     return client.update(resource_group_name=resource_group_name,
-                                   account_name=account_name,
-                                   trusted_id_provider_name=trusted_id_provider_name,
-                                   parameters=UpdateTrustedIdProviderParameters(
-                                       id_provider=id_provider))
+                         account_name=account_name,
+                         trusted_id_provider_name=trusted_id_provider_name,
+                         parameters=UpdateTrustedIdProviderParameters(
+                             id_provider=id_provider))
 # endregion
 
 
