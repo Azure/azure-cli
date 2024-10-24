@@ -17,27 +17,27 @@ def load_command_table(self, _):
     from ._validators import (
         validate_subnet
     )
-    adls_format_path = 'azure.mgmt.datalake.store.operations.{}#{}.{{}}'
+    adls_format_path = 'azure.mgmt.datalake.store.operations#{}.{{}}'
 
     dls_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.dls.custom#{}')
 
     dls_account_sdk = CliCommandType(
-        operations_tmpl=adls_format_path.format('accounts_operations', 'AccountsOperations'),
+        operations_tmpl=adls_format_path.format('AccountsOperations'),
         client_factory=cf_dls_account
     )
 
     dls_firewall_sdk = CliCommandType(
-        operations_tmpl=adls_format_path.format('firewall_rules_operations', 'FirewallRulesOperations'),
+        operations_tmpl=adls_format_path.format('FirewallRulesOperations'),
         client_factory=cf_dls_account
     )
 
     dls_virtual_network_sdk = CliCommandType(
-        operations_tmpl=adls_format_path.format('virtual_network_rules_operations', 'VirtualNetworkRulesOperations'),
+        operations_tmpl=adls_format_path.format('VirtualNetworkRulesOperations'),
         client_factory=cf_dls_account
     )
 
     dls_provider_sdk = CliCommandType(
-        operations_tmpl=adls_format_path.format('trusted_id_providers_operations', 'TrustedIdProvidersOperations'),
+        operations_tmpl=adls_format_path.format('TrustedIdProvidersOperations'),
         client_factory=cf_dls_account_trusted_provider
     )
 

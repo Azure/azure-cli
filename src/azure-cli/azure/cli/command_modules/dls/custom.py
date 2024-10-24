@@ -78,8 +78,7 @@ def create_adls_account(cmd, client, resource_group_name, account_name, location
         create_params.encryption_state = EncryptionState.disabled
         create_params.identity = None
         create_params.encryption_config = None
-
-    return client.create(resource_group_name, account_name, create_params).result()
+    return client.begin_create(resource_group_name, account_name, create_params)
 
 
 def update_adls_account(client, account_name, resource_group_name, tags=None, default_group=None, firewall_state=None,
@@ -97,7 +96,7 @@ def update_adls_account(client, account_name, resource_group_name, tags=None, de
         update_params.encryption_config = UpdateEncryptionConfig(
             key_vault_meta_info=UpdateKeyVaultMetaInfo(encryption_key_version=key_version))
 
-    return client.update(resource_group_name, account_name, update_params).result()
+    return client.begin_update(resource_group_name, account_name, update_params)
 # endregion
 
 
