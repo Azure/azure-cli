@@ -356,6 +356,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         self._test_private_link_resource(resource_group, server, database_engine, 'mariadbServer')
         self._test_private_endpoint_connection(resource_group, server, database_engine)
 
+    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer()
     @ServerPreparer(engine_type='mysql')
