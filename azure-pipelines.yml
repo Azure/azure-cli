@@ -129,9 +129,9 @@ jobs:
 
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.11'
+    displayName: 'Use Python 3.12'
     inputs:
-      versionSpec: 3.11
+      versionSpec: 3.12
 
   - bash: ./scripts/ci/dependency_check.sh
     displayName: 'Verify src/azure-cli/requirements.py3.Linux.txt'
@@ -144,9 +144,9 @@ jobs:
 
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.11'
+    displayName: 'Use Python 3.12'
     inputs:
-      versionSpec: 3.11
+      versionSpec: 3.12
 
   - bash: ./scripts/ci/dependency_check.sh
     displayName: 'Verify src/azure-cli/requirements.py3.Darwin.txt'
@@ -159,9 +159,9 @@ jobs:
 
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.11'
+    displayName: 'Use Python 3.12'
     inputs:
-      versionSpec: 3.11
+      versionSpec: 3.12
 
   - task: BatchScript@1
     inputs:
@@ -176,9 +176,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.11'
+    displayName: 'Use Python 3.12'
     inputs:
-      versionSpec: 3.11
+      versionSpec: 3.12
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -437,9 +437,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.11'
+    displayName: 'Use Python 3.12'
     inputs:
-      versionSpec: 3.11
+      versionSpec: 3.12
 
   - task: PipAuthenticate@1
     condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
@@ -469,7 +469,12 @@ jobs:
 
 - job: TestPythonWheel
   displayName: Test Python Wheels
-
+  strategy:
+    matrix:
+      Python39:
+        python.version: '3.9'
+      Python312:
+        python.version: '3.12'
   dependsOn: BuildPythonWheel
   condition: succeeded()
   pool:
@@ -480,35 +485,23 @@ jobs:
     inputs:
       TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
       artifactName: metadata
-
-
   - task: DownloadPipelineArtifact@1
     displayName: 'Download PyPI Packages'
     inputs:
       TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
       artifactName: pypi
-
-
+  - task: UsePythonVersion@0
+    displayName: 'Use Python $(python.version)'
+    inputs:
+      versionSpec: '$(python.version)'
   - bash: |
       #!/usr/bin/env bash
-      
-      # Verify the pip wheels
-      
       set -ex
       
       CLI_VERSION=`cat $BUILD_ARTIFACTSTAGINGDIRECTORY/metadata/version`
-      PYPI_FILES=$(cd $BUILD_ARTIFACTSTAGINGDIRECTORY/pypi; pwd)
-      
-      echo "== Testing pip install on Python 3.9 =="
-      docker run \
-        --rm -v $PYPI_FILES:/mnt/pypi mcr.microsoft.com/mirror/docker/library/python:3.9-slim \
-        /bin/bash -c "cd /mnt/pypi && ls && pip install --find-links ./ azure_cli-$CLI_VERSION*whl && az self-test && az --version && sleep 5"
-      
-      echo "== Testing pip install on Python 3.11 =="
-      docker run \
-        --rm -v $PYPI_FILES:/mnt/pypi mcr.microsoft.com/mirror/docker/library/python:3.11-slim \
-        /bin/bash -c "cd /mnt/pypi && ls && pip install --find-links ./ azure_cli-$CLI_VERSION*whl && az self-test && az --version && sleep 5"
-
+      echo "== Testing pip install on $PYTHON_VERSION =="
+      cd $BUILD_ARTIFACTSTAGINGDIRECTORY/pypi
+      pip install --find-links ./ azure_cli-$CLI_VERSION*whl && az self-test && az --version && sleep 5
     displayName: 'Test pip Install'
 
 - job: TestCore
@@ -520,8 +513,8 @@ jobs:
     matrix:
       Python39:
         python.version: '3.9'
-      Python311:
-        python.version: '3.11'
+      Python312:
+        python.version: '3.12'
   steps:
   - template: .azure-pipelines/templates/automation_test.yml
     parameters:
@@ -537,8 +530,8 @@ jobs:
     matrix:
       Python39:
         python.version: '3.9'
-      Python311:
-        python.version: '3.11'
+      Python312:
+        python.version: '3.12'
   steps:
   - template: .azure-pipelines/templates/automation_test.yml
     parameters:
@@ -557,14 +550,14 @@ jobs:
     matrix:
       Python39:
         python.version: '3.9'
-      Python311:
-        python.version: '3.11'
+      Python312:
+        python.version: '3.12'
   steps:
   - task: UsePythonVersion@0
     displayName: 'Use Python $(python.version)'
     inputs:
       versionSpec: '$(python.version)'
-  - bash: pip install --upgrade pip wheel
+  - bash: pip install --upgrade pip wheel setuptools
     displayName: 'Install pip and wheel'
   - bash: ./scripts/ci/test_profile_integration.sh
     displayName: 'Run Integration Test against Profiles'
@@ -578,15 +571,15 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   strategy:
     matrix:
-      Python311:
-        python.version: '3.11'
+      Python312:
+        python.version: '3.12'
   steps:
   - task: UsePythonVersion@0
     displayName: 'Use Python $(python.version)'
     inputs:
       versionSpec: '$(python.version)'
-  - bash: pip install --upgrade pip wheel
-    displayName: 'Install pip and wheel'
+  - bash: pip install --upgrade pip wheel setuptools
+    displayName: 'Install pip and wheel setuptools'
   - bash: ./scripts/ci/test_extensions.sh
     displayName: 'Load extensions'
 
@@ -623,7 +616,7 @@ jobs:
                  -e CLI_VERSION=$CLI_VERSION \
                  -e HOMEBREW_UPSTREAM_URL=$HOMEBREW_UPSTREAM_URL \
                  --name azurecli \
-                 mcr.microsoft.com/mirror/docker/library/python:3.11-slim \
+                 mcr.microsoft.com/azurelinux/base/python:3 \
                  /mnt/scripts/run.sh
       
       # clean up
@@ -670,7 +663,7 @@ jobs:
       set -ev
       # Force relink python@3.xx in Homebrew to resolve the conflict with pre-installed python 3.xx on macOS-12 image
       # See: https://github.com/Azure/azure-cli/issues/29054
-      python_version=3.11
+      python_version=3.12
       brew unlink python@$python_version && brew link --overwrite python@$python_version
       
       echo == Remove pre-installed azure-cli ==
@@ -1050,9 +1043,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.11'
+    displayName: 'Use Python 3.12'
     inputs:
-      versionSpec: 3.11
+      versionSpec: 3.12
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -1066,9 +1059,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.11'
+    displayName: 'Use Python 3.12'
     inputs:
-      versionSpec: 3.11
+      versionSpec: 3.12
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -1083,8 +1076,8 @@ jobs:
     matrix:
       Python39:
         python.version: '3.9'
-      Python311:
-        python.version: '3.11'
+      Python312:
+        python.version: '3.12'
   pool:
     name: ${{ variables.ubuntu_pool }}
   steps:
@@ -1112,9 +1105,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.11'
+    displayName: 'Use Python 3.12'
     inputs:
-      versionSpec: 3.11
+      versionSpec: 3.12
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -1135,9 +1128,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
     - task: UsePythonVersion@0
-      displayName: 'Use Python 3.11'
+      displayName: 'Use Python 3.12'
       inputs:
-        versionSpec: 3.11
+        versionSpec: 3.12
     - template: .azure-pipelines/templates/azdev_setup.yml
     - bash: |
         set -ev
@@ -1163,9 +1156,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.11'
+    displayName: 'Use Python 3.12'
     inputs:
-      versionSpec: 3.11
+      versionSpec: 3.12
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -1253,9 +1246,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.11'
+    displayName: 'Use Python 3.12'
     inputs:
-      versionSpec: 3.11
+      versionSpec: 3.12
   - task: AzureCLI@2
     inputs:
       azureSubscription: 'Azure CLI'
