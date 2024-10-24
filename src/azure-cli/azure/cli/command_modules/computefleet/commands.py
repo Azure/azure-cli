@@ -16,11 +16,9 @@ class ComputeFleetCommandsLoader(AzCommandsLoader):
 
     def load_command_table(self, args):
         from azure.cli.core.commands import CliCommandType
-      
         computefleet_custom = CliCommandType(
-          operations_tmpl='azure.mgmt.computefleet.operations#MyModOperations.{}',
-      )
-
+            operations_tmpl='azure.cli.command_modules.computefleet.custom#{}')
+        
         with self.command_group('computefleet', computefleet_custom, client_factory=cf_computefleet) as g:
             g.command('create', 'create_computefleet')
             g.command('update', 'update_computefleet')

@@ -11,18 +11,18 @@ setup(
     name='azure-cli-computefleet',
     version='1.0.0',
     description='Microsoft Azure Command-Line Tools Compute Fleet Module',
-    author='Your Name',
+    author='Rahul Singh',
     author_email='rahuls@microsoft.com',
     url='https://github.com/Azure/azure-cli',
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
         'azure-cli-core',
-        'azure-cli',
+        'azure-cli'
     ],
-    entry_points={
-        'console_scripts': [
-            'azext_computefleet=azext_computefleet.__main__:main',
+   entry_points={
+        'azure.cli.command_modules': [
+            'computefleet=azure.cli.command_modules.computefleet',
         ],
     },
 )
