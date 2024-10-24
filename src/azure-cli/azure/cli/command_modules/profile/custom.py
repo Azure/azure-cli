@@ -115,8 +115,13 @@ def account_clear(cmd):
 
 
 # pylint: disable=inconsistent-return-statements, too-many-branches
-def login(cmd, username=None, password=None, service_principal=None, tenant=None, allow_no_subscriptions=False,
-          identity=False, use_device_code=False, use_cert_sn_issuer=None, scopes=None, client_assertion=None):
+def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_subscriptions=False,
+          # Device code flow
+          use_device_code=False,
+          # Service principal
+          service_principal=None, use_cert_sn_issuer=None, client_assertion=None,
+          # Managed identity
+          identity=False):
     """Log in to access Azure subscriptions"""
 
     # quick argument usage check
