@@ -155,10 +155,10 @@ def update_adls_virtual_network_rule(client,
                                      virtual_network_rule_name,
                                      subnet,
                                      resource_group_name):
-    return client.update(resource_group_name=resource_group_name,
+    return client.create_or_update(resource_group_name=resource_group_name,
                          account_name=account_name,
                          virtual_network_rule_name=virtual_network_rule_name,
-                         parameters=UpdateVirtualNetworkRuleParameters(
+                         parameters=CreateOrUpdateVirtualNetworkRuleParameters(
                              subnet_id=subnet))
 
 # endregion
@@ -181,7 +181,7 @@ def update_trusted_provider_rule(client,
                                  resource_group_name,
                                  trusted_id_provider_name,
                                  id_provider=None):
-    return client.create_or_update(resource_group_name=resource_group_name,
+    return client.update(resource_group_name=resource_group_name,
                                    account_name=account_name,
                                    trusted_id_provider_name=trusted_id_provider_name,
                                    parameters=UpdateTrustedIdProviderParameters(

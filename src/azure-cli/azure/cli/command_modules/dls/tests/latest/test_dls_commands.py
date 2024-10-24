@@ -398,13 +398,12 @@ class DataLakeStoreAccountScenarioTest(ScenarioTest):
             self.check('name', '{network_rule}'),
         ])
 
-        '''
-        Update not working with the same rest request
+        #Update not working with the same rest request
         self.cmd('dls account network-rule update -g {rg} --account-name {dls} --name {network_rule} --subnet {updated_subnet_id}')
         self.cmd('dls account network-rule show -g {rg} --account-name {dls} --name {network_rule}', checks=[
             self.check('name', '{network_rule}'),
         ])
-        '''
+
         self.cmd('dls account network-rule list -g {rg} --account-name {dls}', checks=[
             self.check('type(@)', 'array'),
             self.check('length(@)', 1),
@@ -426,14 +425,12 @@ class DataLakeStoreAccountScenarioTest(ScenarioTest):
             self.check('idProvider', '{trusted_provider}'),
         ])
 
-        '''
-        Update not working with the same rest request
         self.cmd('dls account trusted-provider update -g {rg} -n {dls} --trusted-id-provider-name {provider} --id-provider {new_provider}')
         self.cmd('dls account trusted-provider show -g {rg} -n {dls} --trusted-id-provider-name {provider}', checks=[
             self.check('name', '{provider}'),
             self.check('idProvider', '{new_provider}'),
         ])
-        '''
+
         self.cmd('dls account trusted-provider list -g {rg} -n {dls}', checks=[
             self.check('type(@)', 'array'),
             self.check('length(@)', 1),
