@@ -376,7 +376,6 @@ def run_subprocess(command, stdout_show=None):
         process = run_cmd(command)
     else:
         process = run_cmd(command, capture_output=True)
-    process.wait()
     if process.returncode:
         if stdout_show:
             logger.warning("Error in running cmd | %s", command)
