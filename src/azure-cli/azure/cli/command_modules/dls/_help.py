@@ -155,6 +155,16 @@ type: group
 short-summary: Manage Data Lake Store account trusted identity providers.
 """
 
+helps['dls account trusted-provider create'] = """
+type: command
+short-summary:  Creates or updates the specified trusted identity provider.
+"""
+
+helps['dls account trusted-provider update'] = """
+type: command
+short-summary:   Updates the specified trusted identity provider.
+"""
+
 helps['dls account update'] = """
 type: command
 short-summary: Updates a Data Lake Store account.

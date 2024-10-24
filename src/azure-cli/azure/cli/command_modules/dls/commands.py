@@ -46,14 +46,14 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_adls_account')
         g.custom_command('update', 'update_adls_account')
         g.custom_command('list', 'list_adls_account')
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.show_command('show', 'get')
         g.command('enable-key-vault', 'enable_key_vault')
 
     # account firewall operations
     with self.command_group('dls account firewall', dls_firewall_sdk, client_factory=cf_dls_account_firewall) as g:
         g.custom_command('create', 'add_adls_firewall_rule')
-        g.command('update', 'update')
+        g.custom_command('update', 'update_adls_firewall_rule')
         g.command('list', 'list_by_account')
         g.show_command('show', 'get')
         g.command('delete', 'delete')
@@ -63,15 +63,16 @@ def load_command_table(self, _):
                             dls_virtual_network_sdk,
                             client_factory=cf_dls_account_virtual_network) as g:
         g.custom_command('create', 'add_adls_virtual_network_rule', validator=validate_subnet)
-        g.generic_update_command('update')
+        # TODO Figure out what does generic_update_command do. For now adding custom_function
+        g.custom_command('update', 'update_adls_virtual_network_rule', validator=validate_subnet)
         g.command('list', 'list_by_account')
         g.show_command('show', 'get')
         g.command('delete', 'delete')
 
     # account trusted id provider operations
-    with self.command_group('dls account trusted-provider', dls_provider_sdk) as g:
-        g.command('create', 'create_or_update')
-        g.command('update', 'update')
+    with self.command_group('dls account trusted-provider', dls_provider_sdk, client_factory=cf_dls_account_trusted_provider) as g:
+        g.custom_command('create', 'add_trusted_provider_rule')
+        g.custom_command('update', 'update_trusted_provider_rule')
         g.command('list', 'list_by_account')
         g.show_command('show', 'get')
         g.command('delete', 'delete')
