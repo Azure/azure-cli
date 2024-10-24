@@ -50,12 +50,6 @@ CREDENTIAL_WARNING = (
     "The output includes credentials that you must protect. Be sure that you do not include these credentials in "
     "your code or check the credentials into your source control. For more information, see https://aka.ms/azadsp-cli")
 
-CLASSIC_ADMINISTRATOR_WARNING = (
-    "Azure classic subscription administrators will be retired on August 31, 2024. "
-    "After August 31, 2024, all classic administrators risk losing access to the subscription. "
-    "Delete classic administrators who no longer need access or assign an Azure RBAC role for fine-grained access "
-    "control. Learn more: https://go.microsoft.com/fwlink/?linkid=2238474")
-
 logger = get_logger(__name__)
 
 # pylint: disable=too-many-lines, protected-access
@@ -214,14 +208,11 @@ def _create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, s
 
 def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=None,
                           scope=None, include_inherited=False,
-                          show_all=False, include_groups=False, include_classic_administrators=False):
+                          show_all=False, include_groups=False):
     '''
     :param include_groups: include extra assignments to the groups of which the user is a
     member(transitively).
     '''
-    if include_classic_administrators:
-        logger.warning(CLASSIC_ADMINISTRATOR_WARNING)
-
     graph_client = _graph_client_factory(cmd.cli_ctx)
     authorization_client = _auth_client_factory(cmd.cli_ctx, scope)
     assignments_client = authorization_client.role_assignments
@@ -240,8 +231,6 @@ def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=Non
                                            include_inherited, include_groups)
 
     results = todict(assignments) if assignments else []
-    if include_classic_administrators:
-        results += _backfill_assignments_for_co_admins(cmd.cli_ctx, authorization_client, assignee)
 
     if not results:
         return []
@@ -439,53 +428,6 @@ def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):  # py
                 for e in result:
                     e['principalName'] = principal_dics.get(e['principalId'], None)
 
-    return result
-
-
-def _backfill_assignments_for_co_admins(cli_ctx, auth_client, assignee=None):
-    worker = MultiAPIAdaptor(cli_ctx)
-    co_admins = auth_client.classic_administrators.list()  # known swagger bug on api-version handling
-    co_admins = [x for x in co_admins if x.email_address]
-    graph_client = _graph_client_factory(cli_ctx)
-    if assignee:  # apply assignee filter if applicable
-        if is_guid(assignee):
-            try:
-                result = _get_object_stubs(graph_client, [assignee])
-                if not result:
-                    return []
-                assignee = _get_displayable_name(result[0]).lower()
-            except ValueError:
-                pass
-        co_admins = [x for x in co_admins if assignee == x.email_address.lower()]
-
-    if not co_admins:
-        return []
-
-    result, users = [], []
-    for i in range(0, len(co_admins), 10):  # graph allows up to 10 query filters, so split into chunks here
-        upn_queries = ["userPrincipalName eq '{}'".format(x.email_address)
-                       for x in co_admins[i:i + 10]]
-        temp = list(list_users(graph_client, query_filter=' or '.join(upn_queries)))
-        users += temp
-    upns = {u['userPrincipalName']: u[ID] for u in users}
-    for admin in co_admins:
-        na_text = 'NA(classic admins)'
-        email = admin.email_address
-        result.append({
-            'id': na_text,
-            'name': na_text,
-        })
-        properties = {
-            'principalId': upns.get(email),
-            'principalName': email,
-            'roleDefinitionName': admin.role,
-            'roleDefinitionId': 'NA(classic admin role)',
-            'scope': '/subscriptions/' + auth_client._config.subscription_id
-        }
-        if worker.old_api:
-            result[-1]['properties'] = properties
-        else:
-            result[-1].update(properties)
     return result
 
 
