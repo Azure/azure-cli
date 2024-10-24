@@ -116,7 +116,7 @@ def create(cmd, client, resource_group_name, resource_name, msa_app_id, msa_app_
     except Exception as e:
         logger.debug(e)
         raise CLIError("--appid must be a valid GUID from a Microsoft Azure AD Application Registration. See "
-                       "https://docs.microsoft.com/azure/active-directory/develop/quickstart-register-app for "
+                       "https://learn.microsoft.com/azure/active-directory/develop/quickstart-register-app for "
                        "more information on App Registrations. See 'az bot create --help' for more CLI information.")
 
     # If display name was not provided, just use the resource name
