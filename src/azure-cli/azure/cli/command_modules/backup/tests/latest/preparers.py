@@ -7,14 +7,13 @@ import json
 import os
 from datetime import datetime, timedelta
 
+from knack.log import get_logger
 from azure.cli.testsdk import CliTestError, ResourceGroupPreparer
 from azure.cli.testsdk.preparers import AbstractPreparer, SingleValueReplacer, KeyVaultPreparer
 from azure.cli.testsdk.base import execute
 # pylint: disable=line-too-long
 
-from knack.log import get_logger
 logger = get_logger(__name__)
-
 
 class VaultPreparer(AbstractPreparer, SingleValueReplacer):  # pylint: disable=too-many-instance-attributes
     def __init__(self, name_prefix='clitest-vault', parameter_name='vault_name',
