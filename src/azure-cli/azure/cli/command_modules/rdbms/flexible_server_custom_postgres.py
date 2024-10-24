@@ -80,7 +80,6 @@ def flexible_server_create(cmd, client,
                            location=location,
                            tier=tier, sku_name=sku_name,
                            storage_gb=storage_gb,
-                           auto_grow=auto_grow,
                            storage_type=storage_type,
                            iops=iops, throughput=throughput,
                            high_availability=high_availability,
@@ -299,7 +298,6 @@ def flexible_server_update_custom_func(cmd, client, instance,
                            tier=tier,
                            sku_name=sku_name,
                            storage_gb=storage_gb,
-                           auto_grow=auto_grow,
                            replication_role=instance.replication_role if auto_grow is not None else None,
                            iops=iops,
                            throughput=throughput,
@@ -581,7 +579,7 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
 
     parameters.sku = postgresql_flexibleservers.models.Sku(name=sku_name, tier=tier)
 
-    parameters.storage = postgresql_flexibleservers.models.Storage(storage_size_gb=storage_gb, auto_grow="Disabled", tier=performance_tier)
+    parameters.storage = postgresql_flexibleservers.models.Storage(storage_size_gb=storage_gb, auto_grow=source_server_object.storage.auto_grow, tier=performance_tier)
 
     return sdk_no_wait(no_wait, client.begin_create, resource_group_name, replica_name, parameters)
 
