@@ -10,5 +10,8 @@ FROM $IMAGE
 # jq: It's widely used for parsing JSON output in Azure CLI and has a small size. See https://github.com/Azure/azure-cli/issues/29830
 RUN --mount=type=bind,target=/azure-cli.rpm,source=./docker-temp/azure-cli.rpm tdnf install ca-certificates jq /azure-cli.rpm -y && tdnf clean all && rm -rf /var/cache/tdnf
 
+# See https://github.com/Azure/azure-cli/issues/29828 for background on this
+ENV AZ_BICEP_GLOBALIZATION_INVARIANT=1
+
 ENV AZ_INSTALLER=DOCKER
 CMD bash
