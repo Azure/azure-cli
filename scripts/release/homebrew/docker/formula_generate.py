@@ -10,7 +10,7 @@ from typing import List, Tuple
 
 import requests
 import jinja2
-from poet.poet import make_graph, RESOURCE_TEMPLATE
+from poet.poet import make_graph, RESOURCE_TEMPLATE, research_package
 from collections import OrderedDict
 import bisect
 import argparse
@@ -19,7 +19,7 @@ TEMPLATE_FILE_NAME = 'formula_template.txt'
 CLI_VERSION = os.environ['CLI_VERSION']
 HOMEBREW_UPSTREAM_URL = os.environ['HOMEBREW_UPSTREAM_URL']
 HOMEBREW_FORMULAR_LATEST = "https://raw.githubusercontent.com/Homebrew/homebrew-core/master/Formula/a/azure-cli.rb"
-PYTHON_VERSION = '3.11'
+PYTHON_VERSION = '3.12'
 
 
 def main():
@@ -85,6 +85,13 @@ def collect_resources() -> str:
 
 def collect_resources_dict() -> dict:
     nodes = make_graph('azure-cli')
+
+    # Homebrew does not install pip and setuptools after Python 3.12
+    # see https://github.com/Azure/azure-cli/pull/29887
+    extra_dependencies = ['pip', 'setuptools']
+    for dependency in extra_dependencies:
+        nodes[dependency] = research_package(dependency)
+
     filtered_nodes = {nodes[node_name]['name']: nodes[node_name] for node_name in sorted(nodes) if
                       resource_filter(node_name)}
     return filtered_nodes

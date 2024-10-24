@@ -643,6 +643,11 @@ class FailoverPolicyType(Enum):
     manual = 'Manual'
 
 
+class FailoverGroupDatabasesSecondaryType(Enum):
+    geo = 'Geo'
+    standby = 'Standby'
+
+
 class SqlServerMinimalTlsVersionType(Enum):
     tls_1_0 = "1.0"
     tls_1_1 = "1.1"
@@ -6425,6 +6430,7 @@ def failover_group_create(
         server_name,
         failover_group_name,
         partner_server,
+        secondary_type=None,
         partner_resource_group=None,
         failover_policy=FailoverPolicyType.automatic.value,
         grace_period=1,
@@ -6461,18 +6467,24 @@ def failover_group_create(
         add_db,
         [])
 
+    failover_group_params = FailoverGroup(
+        partner_servers=[partner_server],
+        databases=databases,
+        read_write_endpoint=FailoverGroupReadWriteEndpoint(
+            failover_policy=failover_policy,
+            failover_with_data_loss_grace_period_minutes=grace_period),
+        read_only_endpoint=FailoverGroupReadOnlyEndpoint(
+            failover_policy="Disabled")
+    )
+
+    if secondary_type is not None:
+        failover_group_params.secondary_type = secondary_type
+
     return client.begin_create_or_update(
         resource_group_name=resource_group_name,
         server_name=server_name,
         failover_group_name=failover_group_name,
-        parameters=FailoverGroup(
-            partner_servers=[partner_server],
-            databases=databases,
-            read_write_endpoint=FailoverGroupReadWriteEndpoint(
-                failover_policy=failover_policy,
-                failover_with_data_loss_grace_period_minutes=grace_period),
-            read_only_endpoint=FailoverGroupReadOnlyEndpoint(
-                failover_policy="Disabled")))
+        parameters=failover_group_params)
 
 
 def failover_group_update(
@@ -6480,6 +6492,7 @@ def failover_group_update(
         instance,
         resource_group_name,
         server_name,
+        secondary_type=None,
         failover_policy=None,
         grace_period=None,
         add_db=None,
@@ -6508,6 +6521,8 @@ def failover_group_update(
         remove_db)
 
     instance.databases = databases
+    if secondary_type is not None:
+        instance.secondary_type = secondary_type
 
     return instance
 
