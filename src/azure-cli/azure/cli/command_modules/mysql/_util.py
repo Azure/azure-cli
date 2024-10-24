@@ -378,7 +378,10 @@ def run_subprocess(command, stdout_show=None):
     else:
         process = run_cmd(command, capture_output=True)
     if process.returncode:
-        logger.warning(process.stderr.strip().decode('UTF-8'))
+        if stdout_show:
+            logger.warning("Error in running cmd {}".format("|".join(command)))
+        else:
+            logger.warning(process.stderr.strip().decode('UTF-8'))
 
 
 def register_credential_secrets(cmd, database_engine, server, repository):
