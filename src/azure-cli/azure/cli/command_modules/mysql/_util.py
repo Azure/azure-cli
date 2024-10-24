@@ -379,7 +379,7 @@ def run_subprocess(command, stdout_show=None):
     process.wait()
     if process.returncode:
         if stdout_show:
-            logger.warning("Error in running cmd {}".format("|".join(command)))
+            logger.warning("Error in running cmd | %s", command)
         else:
             logger.warning(process.stderr.strip().decode('UTF-8'))
 
