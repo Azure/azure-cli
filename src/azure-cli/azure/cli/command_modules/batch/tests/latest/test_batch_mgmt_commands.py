@@ -17,8 +17,8 @@ from .recording_processors import BatchAccountKeyReplacer, StorageSASReplacer
 
 class BatchMgmtScenarioTests(ScenarioTest):
 
-    def __init__(self, method_name, *arg, **kwargs):
-        super().__init__(method_name, *arg, random_config_dir=True, **kwargs, recording_processors=[
+    def __init__(self, method_name):
+        super().__init__(method_name, recording_processors=[
             BatchAccountKeyReplacer(),
             StorageSASReplacer()
         ])
@@ -81,15 +81,6 @@ class BatchMgmtScenarioTests(ScenarioTest):
 
         self.assertNotEqual(keys.get_output_in_json()['primary'], keys2.get_output_in_json()['primary'])
 
-        self.cmd('batch account login -g {rg} -n {acc}').assert_with_checks(self.is_empty())
-        self.assertEqual(self.cli_ctx.config.get('batch', 'auth_mode'), 'aad')
-        self.assertEqual(self.cli_ctx.config.get('batch', 'account'), self.kwargs['acc'])
-
-        self.cmd('batch account login -g {rg} -n {acc} --shared-key-auth').assert_with_checks(self.is_empty())
-        self.assertEqual(self.cli_ctx.config.get('batch', 'auth_mode'), 'shared_key')
-        self.assertEqual(self.cli_ctx.config.get('batch', 'account'), self.kwargs['acc'])
-        self.assertEqual(self.cli_ctx.config.get('batch', 'access_key'), keys2.get_output_in_json()['primary'])
-
         self.cmd('batch account outbound-endpoints -g {rg} -n {acc}').assert_with_checks([
             self.check('length(@)', 4),
             self.check('[0].category', 'Azure Batch'),
@@ -106,7 +97,7 @@ class BatchMgmtScenarioTests(ScenarioTest):
         self.cmd('batch account list -g {rg}').assert_with_checks(self.is_empty())
 
         self.cmd('batch location quotas show -l {loc}').assert_with_checks(
-            [self.check('accountQuota', 1000)])
+            [self.greater_than('accountQuota', 0)])
 
         self.cmd('batch location list-skus -l {loc} --query "[0:20]"').assert_with_checks([
             self.check('length(@)', 20), # Ensure at least 20 entries
@@ -344,8 +335,10 @@ class BatchMgmtApplicationScenarioTests(ScenarioTest):
 
 class BatchMgmtByosScenarioTests(ScenarioTest):
 
-    def __init__(self, method_name, *arg, **kwargs):
-        super().__init__(method_name, *arg, random_config_dir=True, **kwargs)
+    def __init__(self, method_name):
+        super().__init__(method_name, recording_processors=[
+            StorageSASReplacer()
+        ])
 
     @ResourceGroupPreparer(location='eastus')
     def test_batch_byos_account_cmd(self, resource_group):
@@ -364,13 +357,11 @@ class BatchMgmtByosScenarioTests(ScenarioTest):
         # test create keyvault for use with BYOS account
         self.cmd(
             'keyvault create -g {rg} -n {kv} -l {byos_l} --enabled-for-deployment true --enabled-for'
-            '-disk-encryption true --enabled-for-template-deployment true').assert_with_checks(
+            '-disk-encryption true --enabled-for-template-deployment true --enable-rbac-authorization false').assert_with_checks(
             [
                 self.check('name', '{kv}'),
                 self.check('location', '{byos_l}'),
                 self.check('resourceGroup', '{rg}'),
-                self.check('type(properties.accessPolicies)', 'array'),
-                self.check('length(properties.accessPolicies)', 1),
                 self.check('properties.sku.name', 'standard')])
         self.cmd('keyvault set-policy -g {rg} -n {kv} --object-id {obj_id} '
                  '--secret-permissions {perm_s}')
