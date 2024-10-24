@@ -73,7 +73,10 @@ class TestComputefleetScenario(ScenarioTest):
     @classmethod
     def create_resource_group(cls):
         instance = cls('test_fleet_create')
-        instance.cmd('az group create --name {} --location {}'.format(cls.resource_group, cls.location))
+        instance.cmd('az group create --name {} --location {}'.format(cls.resource_group, cls.location), checks= [
+            instance.check('name', cls.resource_group),
+            instance.check('properties.provisioningState', 'Succeeded')
+        ])
 
     @classmethod
     def delete_resource_group(cls):
@@ -142,14 +145,15 @@ class TestComputefleetScenario(ScenarioTest):
  
         self.cmd('az computefleet create --name {fleet_name} --resource-group {resource_group} --spot-priority-profile {spot_profile} --compute-profile {compute_profile} --location {location} --tags {tags} ', checks=[
             self.check('name', '{fleet_name}'),
-            self.check('resourceGroup', '{resource_group}')
+            self.check('resourceGroup', '{resource_group}'),
+            self.check('properties.provisioningState', 'Succeeded')
         ])
 
     def test_fleet_update(self, fleet=fleet_name, rg=resource_group):
         self.kwargs.update({
             'fleet_name': fleet,
             'resource_group': rg,
-            'location': loc,
+            'location': location,
             'new_tag': 'newTag'
         })
 
