@@ -22,8 +22,8 @@ class ComputeFleetCommandsLoader(AzCommandsLoader):
         with self.command_group('computefleet', computefleet_custom, client_factory=cf_computefleet) as g:
             g.command('create', 'create_computefleet')
             g.command('update', 'update_computefleet')
-            g.command('delete', 'delete_computefleet')
             g.command('list', 'list_computefleets')
             g.command('show', 'show_computefleet')
+            g.command('delete', 'delete_computefleet')
 
 COMMAND_LOADER_CLS = ComputeFleetCommandsLoader

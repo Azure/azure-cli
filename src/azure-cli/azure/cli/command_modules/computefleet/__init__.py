@@ -6,13 +6,13 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core import AzCommandsLoader
+from azure.cli.core.commands import CliCommandType
 from azure.cli.command_modules.computefleet._help import helps  # pylint: disable=unused-import
 # from azure.cli.core.profiles import ResourceType  # required when using python sdk
 
 class ComputefleetCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
-        from azure.cli.core.commands import CliCommandType
         custom_command_type = CliCommandType(
             operations_tmpl='azure.cli.command_modules.computefleet.custom#{}')
         super().__init__(cli_ctx=cli_ctx,
@@ -20,20 +20,16 @@ class ComputefleetCommandsLoader(AzCommandsLoader):
                          custom_command_type=custom_command_type)
 
     def load_command_table(self, args):
-        from azure.cli.command_modules.computefleet.commands import load_command_table
-        from azure.cli.core.aaz import load_aaz_command_table
-        try:
-            from . import aaz
-        except ImportError:
-            aaz = None
-        if aaz:
-            load_aaz_command_table(
-                loader=self,
-                aaz_pkg_name=aaz.__name__,
-                args=args
-            )
-        load_command_table(self, args)
-        return self.command_table
+        computefleet_custom = CliCommandType(
+            operations_tmpl='azure.cli.command_modules.computefleet.custom#{}'
+        )
+
+        with self.command_group('computefleet', computefleet_custom) as g:
+            g.command('create', 'create_computefleet')
+            g.command('update', 'update_computefleet')
+            g.command('delete', 'delete_computefleet')
+            g.command('list', 'list_computefleets')
+            g.command('show', 'show_computefleet')
 
     def load_arguments(self, command):
         from azure.cli.command_modules.computefleet._params import load_arguments

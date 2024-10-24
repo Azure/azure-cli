@@ -8,6 +8,6 @@
 # pylint: disable=too-many-lines
 # pylint: disable=too-many-statements
 
-#from knack.log import get_logger
+from knack.log import get_logger
 
-#logger = get_logger(__name__)
+logger = get_logger(__name__)
