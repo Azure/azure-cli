@@ -71,6 +71,7 @@ class ServerPreparer(AbstractPreparer, SingleValueReplacer):
 
 class ServerMgmtScenarioTest(ScenarioTest):
 
+    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name='resource_group_1')
     @ResourceGroupPreparer(parameter_name='resource_group_2')
