@@ -13,16 +13,15 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "netappfiles volume migrate-backup",
-    is_preview=True,
 )
 class MigrateBackup(AAZCommand):
     """Migrate the backups under volume to backup vault
     """
 
     _aaz_info = {
-        "version": "2024-03-01",
+        "version": "2024-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/migratebackups", "2024-03-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/migratebackups", "2024-07-01"],
         ]
     }
 
@@ -81,7 +80,7 @@ class MigrateBackup(AAZCommand):
         # define Arg Group "Body"
 
         _args_schema = cls._args_schema
-        _args_schema.backup_vault_id = AAZStrArg(
+        _args_schema.backup_vault_id = AAZResourceIdArg(
             options=["--backup-vault-id"],
             arg_group="Body",
             help="The ResourceId of the Backup Vault",
@@ -165,7 +164,7 @@ class MigrateBackup(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-03-01",
+                    "api-version", "2024-07-01",
                     required=True,
                 ),
             }
