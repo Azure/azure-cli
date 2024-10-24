@@ -161,18 +161,18 @@ def build_nic_resource(_, name, location, tags, vm_name, subnet_id, private_ip_a
     if nsg_id:
         nic_properties['networkSecurityGroup'] = {'id': nsg_id}
 
-    api_version = '2015-06-15'
+    # api_version = '2015-06-15'
     if application_security_groups:
         asg_ids = [{'id': x['id']} for x in application_security_groups]
         nic_properties['ipConfigurations'][0]['properties']['applicationSecurityGroups'] = asg_ids
-        api_version = '2017-09-01'
+        # api_version = '2017-09-01'
 
     if accelerated_networking is not None:
         nic_properties['enableAcceleratedNetworking'] = accelerated_networking
-        api_version = '2016-09-01' if api_version < '2016-09-01' else api_version
+        # api_version = '2016-09-01' if api_version < '2016-09-01' else api_version
 
     nic = {
-        'apiVersion': api_version,
+        'apiVersion': "2024-05-01",
         'type': 'Microsoft.Network/networkInterfaces',
         'name': name,
         'location': location,
@@ -200,7 +200,7 @@ def build_nsg_resource(_, name, location, tags, nsg_rule):
     nsg = {
         'type': 'Microsoft.Network/networkSecurityGroups',
         'name': name,
-        'apiVersion': '2015-06-15',
+        'apiVersion': '2024-05-01',
         'location': location,
         'tags': tags,
         'dependsOn': []
@@ -239,7 +239,7 @@ def build_vnet_resource(_, name, location, tags, vnet_prefix=None, subnet=None,
         'name': name,
         'type': 'Microsoft.Network/virtualNetworks',
         'location': location,
-        'apiVersion': '2015-06-15',
+        'apiVersion': '2024-05-01',
         'dependsOn': [],
         'tags': tags,
         'properties': {
