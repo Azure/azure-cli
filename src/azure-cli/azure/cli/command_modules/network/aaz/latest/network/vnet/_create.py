@@ -24,12 +24,15 @@ class Create(AAZCommand):
 
     :example: Create a virtual network.
         az network vnet create --address-prefixes 10.0.0.0/16 --name MyVirtualNetwork --resource-group MyResourceGroup --subnet-name MyAseSubnet --subnet-prefixes 10.0.0.0/24
+
+    :example: Create virtual network with IPAM pool reference
+        az network vnet create -n vnet-name -g test-rg --address-prefixes [] --ipam-pool-prefix-allocations [{"NumberOfIpAddresses": "100", "Id": "/subscriptions/xxx/resourceGroups/test-rg/providers/Microsoft.Network/networkManagers/nm/ipamPools/target-pool"}]
     """
 
     _aaz_info = {
-        "version": "2024-03-01",
+        "version": "2024-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworks/{}", "2024-03-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworks/{}", "2024-05-01"],
         ]
     }
 
@@ -138,6 +141,19 @@ class Create(AAZCommand):
         tags = cls._args_schema.tags
         tags.Element = AAZStrArg()
 
+        # define Arg Group "AddressSpace"
+
+        _args_schema = cls._args_schema
+        _args_schema.ipam_pool_prefix_allocations = AAZListArg(
+            options=["--ipam-pool-prefix-allocations"],
+            arg_group="AddressSpace",
+            help="A list of IPAM Pools allocating IP address prefixes. Cannot mix this property with address-prefix as another parameter.",
+        )
+
+        ipam_pool_prefix_allocations = cls._args_schema.ipam_pool_prefix_allocations
+        ipam_pool_prefix_allocations.Element = AAZObjectArg()
+        cls._build_args_ipam_pool_prefix_allocation_create(ipam_pool_prefix_allocations.Element)
+
         # define Arg Group "Parameters"
 
         # define Arg Group "Properties"
@@ -178,6 +194,10 @@ class Create(AAZCommand):
         _element.delegations = AAZListArg(
             options=["delegations"],
             help="An array of references to the delegations on the subnet.",
+        )
+        _element.ipam_pool_prefix_allocations = AAZListArg(
+            options=["ipam-pool-prefix-allocations"],
+            help="A list of IPAM Pools for allocating IP address prefixes.",
         )
         _element.nat_gateway = AAZObjectArg(
             options=["nat-gateway"],
@@ -259,6 +279,10 @@ class Create(AAZCommand):
             options=["type"],
             help="Resource type.",
         )
+
+        ipam_pool_prefix_allocations = cls._args_schema.subnets.Element.ipam_pool_prefix_allocations
+        ipam_pool_prefix_allocations.Element = AAZObjectArg()
+        cls._build_args_ipam_pool_prefix_allocation_create(ipam_pool_prefix_allocations.Element)
 
         network_security_group = cls._args_schema.subnets.Element.network_security_group
         network_security_group.id = AAZResourceIdArg(
@@ -559,6 +583,7 @@ class Create(AAZCommand):
     def _build_args_address_space_create(cls, _schema):
         if cls._args_address_space_create is not None:
             _schema.address_prefixes = cls._args_address_space_create.address_prefixes
+            _schema.ipam_pool_prefix_allocations = cls._args_address_space_create.ipam_pool_prefix_allocations
             return
 
         cls._args_address_space_create = AAZObjectArg()
@@ -568,11 +593,20 @@ class Create(AAZCommand):
             options=["address-prefixes"],
             help="A list of address blocks reserved for this virtual network in CIDR notation.",
         )
+        address_space_create.ipam_pool_prefix_allocations = AAZListArg(
+            options=["ipam-pool-prefix-allocations"],
+            help="A list of IPAM Pools allocating IP address prefixes.",
+        )
 
         address_prefixes = cls._args_address_space_create.address_prefixes
         address_prefixes.Element = AAZStrArg()
 
+        ipam_pool_prefix_allocations = cls._args_address_space_create.ipam_pool_prefix_allocations
+        ipam_pool_prefix_allocations.Element = AAZObjectArg()
+        cls._build_args_ipam_pool_prefix_allocation_create(ipam_pool_prefix_allocations.Element)
+
         _schema.address_prefixes = cls._args_address_space_create.address_prefixes
+        _schema.ipam_pool_prefix_allocations = cls._args_address_space_create.ipam_pool_prefix_allocations
 
     _args_application_security_group_create = None
 
@@ -603,6 +637,30 @@ class Create(AAZCommand):
 
         _schema.location = cls._args_application_security_group_create.location
         _schema.tags = cls._args_application_security_group_create.tags
+
+    _args_ipam_pool_prefix_allocation_create = None
+
+    @classmethod
+    def _build_args_ipam_pool_prefix_allocation_create(cls, _schema):
+        if cls._args_ipam_pool_prefix_allocation_create is not None:
+            _schema.id = cls._args_ipam_pool_prefix_allocation_create.id
+            _schema.number_of_ip_addresses = cls._args_ipam_pool_prefix_allocation_create.number_of_ip_addresses
+            return
+
+        cls._args_ipam_pool_prefix_allocation_create = AAZObjectArg()
+
+        ipam_pool_prefix_allocation_create = cls._args_ipam_pool_prefix_allocation_create
+        ipam_pool_prefix_allocation_create.number_of_ip_addresses = AAZStrArg(
+            options=["number-of-ip-addresses"],
+            help="Number of IP addresses to allocate.",
+        )
+        ipam_pool_prefix_allocation_create.id = AAZResourceIdArg(
+            options=["id"],
+            help="Resource id of the associated Azure IpamPool resource.",
+        )
+
+        _schema.id = cls._args_ipam_pool_prefix_allocation_create.id
+        _schema.number_of_ip_addresses = cls._args_ipam_pool_prefix_allocation_create.number_of_ip_addresses
 
     _args_sub_resource_create = None
 
@@ -703,7 +761,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-03-01",
+                    "api-version", "2024-05-01",
                     required=True,
                 ),
             }
@@ -754,10 +812,15 @@ class Create(AAZCommand):
             address_space = _builder.get(".properties.addressSpace")
             if address_space is not None:
                 address_space.set_prop("addressPrefixes", AAZListType, ".address_prefixes")
+                address_space.set_prop("ipamPoolPrefixAllocations", AAZListType, ".ipam_pool_prefix_allocations")
 
             address_prefixes = _builder.get(".properties.addressSpace.addressPrefixes")
             if address_prefixes is not None:
                 address_prefixes.set_elements(AAZStrType, ".")
+
+            ipam_pool_prefix_allocations = _builder.get(".properties.addressSpace.ipamPoolPrefixAllocations")
+            if ipam_pool_prefix_allocations is not None:
+                _CreateHelper._build_schema_ipam_pool_prefix_allocation_create(ipam_pool_prefix_allocations.set_elements(AAZObjectType, "."))
 
             bgp_communities = _builder.get(".properties.bgpCommunities")
             if bgp_communities is not None:
@@ -796,6 +859,7 @@ class Create(AAZCommand):
                 properties.set_prop("applicationGatewayIPConfigurations", AAZListType, ".application_gateway_ip_configurations")
                 properties.set_prop("defaultOutboundAccess", AAZBoolType, ".default_outbound_access")
                 properties.set_prop("delegations", AAZListType, ".delegations")
+                properties.set_prop("ipamPoolPrefixAllocations", AAZListType, ".ipam_pool_prefix_allocations")
                 _CreateHelper._build_schema_sub_resource_create(properties.set_prop("natGateway", AAZObjectType, ".nat_gateway"))
                 properties.set_prop("networkSecurityGroup", AAZObjectType, ".network_security_group")
                 properties.set_prop("privateEndpointNetworkPolicies", AAZStrType, ".disable_private_endpoint_network_policies")
@@ -837,6 +901,10 @@ class Create(AAZCommand):
             properties = _builder.get(".properties.subnets[].properties.delegations[].properties")
             if properties is not None:
                 properties.set_prop("serviceName", AAZStrType, ".service_name")
+
+            ipam_pool_prefix_allocations = _builder.get(".properties.subnets[].properties.ipamPoolPrefixAllocations")
+            if ipam_pool_prefix_allocations is not None:
+                _CreateHelper._build_schema_ipam_pool_prefix_allocation_create(ipam_pool_prefix_allocations.set_elements(AAZObjectType, "."))
 
             network_security_group = _builder.get(".properties.subnets[].properties.networkSecurityGroup")
             if network_security_group is not None:
@@ -1249,10 +1317,15 @@ class _CreateHelper:
         if _builder is None:
             return
         _builder.set_prop("addressPrefixes", AAZListType, ".address_prefixes")
+        _builder.set_prop("ipamPoolPrefixAllocations", AAZListType, ".ipam_pool_prefix_allocations")
 
         address_prefixes = _builder.get(".addressPrefixes")
         if address_prefixes is not None:
             address_prefixes.set_elements(AAZStrType, ".")
+
+        ipam_pool_prefix_allocations = _builder.get(".ipamPoolPrefixAllocations")
+        if ipam_pool_prefix_allocations is not None:
+            cls._build_schema_ipam_pool_prefix_allocation_create(ipam_pool_prefix_allocations.set_elements(AAZObjectType, "."))
 
     @classmethod
     def _build_schema_application_security_group_create(cls, _builder):
@@ -1266,6 +1339,17 @@ class _CreateHelper:
             tags.set_elements(AAZStrType, ".")
 
     @classmethod
+    def _build_schema_ipam_pool_prefix_allocation_create(cls, _builder):
+        if _builder is None:
+            return
+        _builder.set_prop("numberOfIpAddresses", AAZStrType, ".number_of_ip_addresses")
+        _builder.set_prop("pool", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+
+        pool = _builder.get(".pool")
+        if pool is not None:
+            pool.set_prop("id", AAZStrType, ".id")
+
+    @classmethod
     def _build_schema_sub_resource_create(cls, _builder):
         if _builder is None:
             return
@@ -1277,6 +1361,7 @@ class _CreateHelper:
     def _build_schema_address_space_read(cls, _schema):
         if cls._schema_address_space_read is not None:
             _schema.address_prefixes = cls._schema_address_space_read.address_prefixes
+            _schema.ipam_pool_prefix_allocations = cls._schema_address_space_read.ipam_pool_prefix_allocations
             return
 
         cls._schema_address_space_read = _schema_address_space_read = AAZObjectType()
@@ -1285,11 +1370,19 @@ class _CreateHelper:
         address_space_read.address_prefixes = AAZListType(
             serialized_name="addressPrefixes",
         )
+        address_space_read.ipam_pool_prefix_allocations = AAZListType(
+            serialized_name="ipamPoolPrefixAllocations",
+        )
 
         address_prefixes = _schema_address_space_read.address_prefixes
         address_prefixes.Element = AAZStrType()
 
+        ipam_pool_prefix_allocations = _schema_address_space_read.ipam_pool_prefix_allocations
+        ipam_pool_prefix_allocations.Element = AAZObjectType()
+        cls._build_schema_ipam_pool_prefix_allocation_read(ipam_pool_prefix_allocations.Element)
+
         _schema.address_prefixes = cls._schema_address_space_read.address_prefixes
+        _schema.ipam_pool_prefix_allocations = cls._schema_address_space_read.ipam_pool_prefix_allocations
 
     _schema_application_security_group_read = None
 
@@ -1641,6 +1734,40 @@ class _CreateHelper:
         _schema.id = cls._schema_ip_configuration_read.id
         _schema.name = cls._schema_ip_configuration_read.name
         _schema.properties = cls._schema_ip_configuration_read.properties
+
+    _schema_ipam_pool_prefix_allocation_read = None
+
+    @classmethod
+    def _build_schema_ipam_pool_prefix_allocation_read(cls, _schema):
+        if cls._schema_ipam_pool_prefix_allocation_read is not None:
+            _schema.allocated_address_prefixes = cls._schema_ipam_pool_prefix_allocation_read.allocated_address_prefixes
+            _schema.number_of_ip_addresses = cls._schema_ipam_pool_prefix_allocation_read.number_of_ip_addresses
+            _schema.pool = cls._schema_ipam_pool_prefix_allocation_read.pool
+            return
+
+        cls._schema_ipam_pool_prefix_allocation_read = _schema_ipam_pool_prefix_allocation_read = AAZObjectType()
+
+        ipam_pool_prefix_allocation_read = _schema_ipam_pool_prefix_allocation_read
+        ipam_pool_prefix_allocation_read.allocated_address_prefixes = AAZListType(
+            serialized_name="allocatedAddressPrefixes",
+            flags={"read_only": True},
+        )
+        ipam_pool_prefix_allocation_read.number_of_ip_addresses = AAZStrType(
+            serialized_name="numberOfIpAddresses",
+        )
+        ipam_pool_prefix_allocation_read.pool = AAZObjectType(
+            flags={"client_flatten": True},
+        )
+
+        allocated_address_prefixes = _schema_ipam_pool_prefix_allocation_read.allocated_address_prefixes
+        allocated_address_prefixes.Element = AAZStrType()
+
+        pool = _schema_ipam_pool_prefix_allocation_read.pool
+        pool.id = AAZStrType()
+
+        _schema.allocated_address_prefixes = cls._schema_ipam_pool_prefix_allocation_read.allocated_address_prefixes
+        _schema.number_of_ip_addresses = cls._schema_ipam_pool_prefix_allocation_read.number_of_ip_addresses
+        _schema.pool = cls._schema_ipam_pool_prefix_allocation_read.pool
 
     _schema_network_interface_ip_configuration_read = None
 
@@ -2067,6 +2194,10 @@ class _CreateHelper:
         )
         properties.auxiliary_sku = AAZStrType(
             serialized_name="auxiliarySku",
+        )
+        properties.default_outbound_connectivity_enabled = AAZBoolType(
+            serialized_name="defaultOutboundConnectivityEnabled",
+            flags={"read_only": True},
         )
         properties.disable_tcp_state_tracking = AAZBoolType(
             serialized_name="disableTcpStateTracking",
@@ -3033,6 +3164,9 @@ class _CreateHelper:
             serialized_name="ipConfigurations",
             flags={"read_only": True},
         )
+        properties.ipam_pool_prefix_allocations = AAZListType(
+            serialized_name="ipamPoolPrefixAllocations",
+        )
         properties.nat_gateway = AAZObjectType(
             serialized_name="natGateway",
         )
@@ -3166,6 +3300,10 @@ class _CreateHelper:
         ip_configurations = _schema_subnet_read.properties.ip_configurations
         ip_configurations.Element = AAZObjectType()
         cls._build_schema_ip_configuration_read(ip_configurations.Element)
+
+        ipam_pool_prefix_allocations = _schema_subnet_read.properties.ipam_pool_prefix_allocations
+        ipam_pool_prefix_allocations.Element = AAZObjectType()
+        cls._build_schema_ipam_pool_prefix_allocation_read(ipam_pool_prefix_allocations.Element)
 
         private_endpoints = _schema_subnet_read.properties.private_endpoints
         private_endpoints.Element = AAZObjectType()
