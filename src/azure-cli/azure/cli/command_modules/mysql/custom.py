@@ -403,6 +403,8 @@ def flexible_server_create(cmd, client,
                            tier=tier,
                            sku_name=sku_name)
 
+    accelerated_logs = _determine_acceleratedLogs(accelerated_logs, tier)
+
     storage = mysql_flexibleservers.models.Storage(storage_size_gb=storage_gb,
                                                    iops=iops,
                                                    auto_grow=auto_grow,
@@ -1629,6 +1631,17 @@ def _determine_iops(storage_gb, iops_info, iops_input, tier, sku_name):
 
     logger.warning("IOPS is %d which is either your input or free(maximum) IOPS supported for your storage size and SKU.", iops)
     return iops
+
+
+def _determine_acceleratedLogs(accelerated_logs, tier):
+    if accelerated_logs is None:
+        if tier == "MemoryOptimized":
+            accelerated_logs = "Enabled"
+        else:
+            accelerated_logs = "Disabled"
+    if tier != "MemoryOptimized" and accelerated_logs.lower() == "enabled":
+        accelerated_logs = "Disabled"
+    return accelerated_logs
 
 
 def get_free_iops(storage_in_mb, iops_info, tier, sku_name):
