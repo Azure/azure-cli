@@ -11,6 +11,7 @@ import os
 import random
 import secrets
 import string
+import subprocess
 import yaml
 from time import sleep
 import datetime as dt
@@ -373,14 +374,12 @@ def _resolve_api_version(client, provider_namespace, resource_type, parent_path)
 
 def run_subprocess(command, stdout_show=None):
     if stdout_show:
-        process = run_cmd(command)
+        process = subprocess.Popen(command)
     else:
-        process = run_cmd(command, capture_output=True)
+        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    process.wait()
     if process.returncode:
-        if stdout_show:
-            logger.warning("Error in running cmd %s", " ".join(command))
-        else:
-            logger.warning(process.stderr.strip().decode('UTF-8'))
+        logger.warning(process.stderr.read().strip().decode('UTF-8'))
 
 
 def register_credential_secrets(cmd, database_engine, server, repository):
