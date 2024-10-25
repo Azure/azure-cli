@@ -1504,8 +1504,8 @@ class AKSAgentPoolContext(BaseAKSContext):
         """
         return self._get_disable_windows_outbound_nat()
 
-	def get_ignore_pod_disruption_budget(self) -> bool:
-            return self._get_ignore_pod_disruption_budget()
+    def get_ignore_pod_disruption_budget(self) -> bool:
+        return self._get_ignore_pod_disruption_budget()
 
     def _get_ignore_pod_disruption_budget(self) -> bool:
         """Obtain the value of ignore_pod_disruption_budget, default value is False.

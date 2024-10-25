@@ -933,7 +933,7 @@ def load_arguments(self, _):
         c.argument(
             "ignore_pod_disruption_budget",
             options_list=["--ignore-pod-disruption-budget"],
-            action='store_true'
+            action='store_true',
             help="delete an AKS nodepool by ignoring PodDisruptionBudget setting",
         )
 

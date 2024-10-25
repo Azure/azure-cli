@@ -11640,7 +11640,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(
-        random_name_length=17, name_prefix="clitest", location="eastus2"
+        random_name_length=17, name_prefix="clitest", location="westus2"
     )
     def test_aks_nodepool_delete_with_ignore_pod_disruption_budget(
         self, resource_group, resource_group_location
@@ -11682,25 +11682,10 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                 self.check("provisioningState", "Succeeded"),
             ],
         )
-        self.cmd(
-            "aks nodepool add "
-            "--resource-group={resource_group} "
-            "--cluster-name={name} "
-            "-c 1 "
-            "--name={node_pool_name_third}",
-            checks=[
-                self.check("provisioningState", "Succeeded"),
-            ],
-        )
 
-        # nodepool delete the third
-        self.cmd(
-            "aks nodepool delete --resource-group={resource_group} --cluster-name={name} --name={node_pool_name_third} --ignore-pod-disruption-budget=false --no-wait",
-            checks=[self.is_empty()],
-        )
         # nodepool delete the second
         self.cmd(
-            "aks nodepool delete --resource-group={resource_group} --cluster-name={name} --name={node_pool_name_second} --ignore-pod-disruption-budget=true",
+            "aks nodepool delete --resource-group={resource_group} --cluster-name={name} --name={node_pool_name_second} --ignore-pod-disruption-budget",
             checks=[self.is_empty()],
         )
 
@@ -11708,3 +11693,4 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(
             "aks delete -g {resource_group} -n {name} --yes --no-wait",
             checks=[self.is_empty()],
+        )
