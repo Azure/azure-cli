@@ -4186,7 +4186,7 @@ if __name__ == '__main__':
     unittest.main()
 
 class NetworkPrivateLinkMysqlFlexibleServerScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='westus2')
+    @ResourceGroupPreparer(location='eastus')
     def test_private_link_resource_mysql_flexible_server(self, resource_group):
         #At very first, we define some params
         self.kwargs.update({
