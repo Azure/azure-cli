@@ -253,7 +253,7 @@ def acr_connected_registry_delete(cmd,
     try:
         connected_registry = acr_connected_registry_show(
             cmd, client, connected_registry_name, registry_name, resource_group_name)
-        result = client.begin_delete(resource_group_name, registry_name, connected_registry_name)
+        result = client.begin_delete(resource_group_name, registry_name, connected_registry_name).result()
         sync_token = get_token_from_id(cmd, connected_registry.parent.sync_properties.token_id)
         sync_token_name = sync_token.name
         sync_scope_map_name = sync_token.scope_map_id.split('/scopeMaps/')[1]
