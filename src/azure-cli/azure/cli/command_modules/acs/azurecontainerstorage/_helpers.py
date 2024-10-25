@@ -458,7 +458,10 @@ def generate_vm_sku_cache_for_region(cli_ctx, location=None):
 
 
 def get_vm_sku_details(sku_name):
-    return vm_sku_details_cache.get(sku_name)
+    result = vm_sku_details_cache.get(sku_name)
+    if result is None:
+        return None, None
+    return result
 
 
 def _get_ephemeral_nvme_cpu_value_based_on_vm_size_perf_tier(nodepool_skus, perf_tier):
