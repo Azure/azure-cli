@@ -517,7 +517,7 @@ def _validate_nodepools(  # pylint: disable=too-many-branches,too-many-locals
             vm_size = agentpool.get("vm_size")
             if vm_size is not None:
                 cpu_value, nvme_enabled = get_vm_sku_details(vm_size.lower())
-                if cpu_value is None or nvme_enabled or None:
+                if cpu_value is None or nvme_enabled is None:
                     raise UnknownError(
                         f'Unable to find details for virtual machine size {vm_size}.'
                     )
