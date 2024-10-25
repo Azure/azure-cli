@@ -10,7 +10,7 @@ from azure.cli.testsdk import (
     ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, LiveScenarioTest)
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.core.profiles import ResourceType, get_sdk
-from .batch_preparers import BatchScenarioMixin
+from .batch_preparers import BatchScenarioMixin, BatchMgmtScenarioMixin
 
 from .recording_processors import BatchAccountKeyReplacer, StorageSASReplacer
 
@@ -332,3 +332,69 @@ class BatchMgmtApplicationScenarioTests(ScenarioTest):
         self.cmd('batch application delete -g {rg} -n {acc} --application-name {app} --yes')
         self.cmd('batch application list -g {rg} -n {acc}').assert_with_checks(self.is_empty())
 
+
+class BatchMgmtByosScenarioTests(BatchMgmtScenarioMixin,ScenarioTest):
+
+    def __init__(self, method_name):
+        super().__init__(method_name, recording_processors=[
+            BatchAccountKeyReplacer(),
+            StorageSASReplacer()
+        ])
+
+    # Note for this test to run you subscrition needs to give access to batch https://learn.microsoft.com/azure/batch/batch-account-create-portal#allow-batch-to-access-the-subscription
+    @ResourceGroupPreparer(location='eastus')
+    def test_batch_byos_account_cmd(self, resource_group):
+        account_name = self.create_random_name(prefix='clibatchtestacct', length=24)
+        kv_name = self.create_random_name('clibatchtestkv', 24)
+
+        
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'byos_n': account_name,
+            'byos_l': 'eastus',
+            'kv': kv_name,
+            'obj_id': 'f520d84c-3fd3-4cc8-88d4-2ed25b00d27a',  # object id for Microsoft Azure Batch
+            'perm_s': "get list set delete recover",
+        })
+
+        # test create keyvault for use with BYOS account
+        self.cmd(
+            'keyvault create -g {rg} -n {kv} -l {byos_l} --enabled-for-deployment true --enabled-for'
+            '-disk-encryption true --enabled-for-template-deployment true --enable-rbac-authorization false').assert_with_checks(
+            [
+                self.check('name', '{kv}'),
+                self.check('location', '{byos_l}'),
+                self.check('resourceGroup', '{rg}'),
+                self.check('length(properties.accessPolicies)', 1),
+                self.check('properties.sku.name', 'standard')])
+        self.cmd('keyvault set-policy -g {rg} -n {kv} --object-id {obj_id} '
+                 '--secret-permissions {perm_s}')
+
+        # test create account with BYOS
+        self.cmd(
+            'batch account create -g {rg} -n {byos_n} -l {byos_l} --keyvault {kv}').assert_with_checks(
+            [
+                self.check('name', '{byos_n}'),
+                self.check('location', '{byos_l}'),
+                self.check('resourceGroup', '{rg}')])
+
+        # test for resource tags
+
+        # test create certificate with default set
+        self.set_account_info(account_name, resource_group)
+
+        self.batch_cmd('batch pool create --id xplatCreatedPool --vm-size "standard_d2s_v3" '
+                        '--image "canonical:0001-com-ubuntu-server-focal:20_04-lts" '
+                        '--node-agent-sku-id "batch.node.ubuntu 20.04" '
+                        '--resource-tags "dept=finance env=prod"')
+
+
+        self.batch_cmd('batch pool show --pool-id xplatCreatedPool').assert_with_checks([
+            self.check('resourceTags.dept', 'finance'),
+            self.check('resourceTags.env', 'prod'),
+        ])
+
+        # test batch account delete
+        self.cmd('batch account delete -g {rg} -n {byos_n} --yes')
+        self.cmd('batch account list -g {rg}').assert_with_checks(self.is_empty())

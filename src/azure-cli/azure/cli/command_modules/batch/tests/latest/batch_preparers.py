@@ -70,3 +70,23 @@ class BatchScenarioMixin:
     def batch_cmd(self, cmd, **kwargs):
         cmd = cmd + ' --account-name {acc_n} --account-key "{acc_k}" --account-endpoint {acc_u}'
         return self.cmd(cmd, **kwargs)
+    
+
+class BatchMgmtScenarioMixin: 
+    def set_account_info(self, account_name, group_name):
+        """Returns the batch account name, key, and endpoint in a tuple."""
+        endpoint = self.get_account_endpoint(account_name, group_name)
+        self.kwargs.update({
+            'acc_u': endpoint,
+            'acc_n': account_name,
+        })
+
+  
+    def get_account_endpoint(self, *args):
+        endpoint = self.cmd('batch account show -n {} -g {}'.format(*args)).get_output_in_json()[
+            'accountEndpoint']
+        return 'https://' + endpoint
+
+    def batch_cmd(self, cmd, **kwargs):
+        cmd = cmd + ' --account-name {acc_n}  --account-endpoint {acc_u}'
+        return self.cmd(cmd, **kwargs)
