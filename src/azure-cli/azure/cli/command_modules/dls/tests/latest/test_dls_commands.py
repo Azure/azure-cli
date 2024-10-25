@@ -8,9 +8,9 @@ import datetime
 import os
 import time
 from shutil import rmtree
-from azure.core.exceptions import HttpResponseError, ResourceNotFoundError
+from azure.core.exceptions import HttpResponseError
 
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, LiveScenarioTest, VirtualNetworkPreparer
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, VirtualNetworkPreparer
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 from knack.util import CLIError
@@ -380,40 +380,6 @@ class DataLakeStoreAccountScenarioTest(ScenarioTest):
             self.check('length(@)', 0),
         ])
 
-        # test virtual network rule crud
-        '''
-        subnet_id = self.cmd('network vnet subnet show -g {rg} -n default --vnet-name {vnet}').get_output_in_json()['id']
-        updated_subnet_id = self.cmd('network vnet subnet create --resource-group {rg} --vnet-name {vnet} --name {updated_subnet} --address-prefixes 10.0.1.0/24').get_output_in_json()['id']
-
-        self.kwargs.update({
-            'subnet_id': subnet_id,
-            'updated_subnet_id': updated_subnet_id,
-            'network_rule': 'dlsVnetRule'
-        })
-        self.cmd('network vnet subnet update --service-endpoints Microsoft.AzureActiveDirectory --ids "{subnet_id}"')
-        self.cmd('network vnet subnet update --service-endpoints Microsoft.AzureActiveDirectory --ids "{updated_subnet_id}"')
-
-        self.cmd('dls account network-rule create -g {rg} --account-name {dls} --name {network_rule} --subnet {subnet_id}')
-        self.cmd('dls account network-rule show -g {rg} --account-name {dls} --name {network_rule}', checks=[
-            self.check('name', '{network_rule}'),
-        ])
-
-        #Update not working with the same rest request
-        self.cmd('dls account network-rule update -g {rg} --account-name {dls} --name {network_rule} --subnet {updated_subnet_id}')
-        self.cmd('dls account network-rule show -g {rg} --account-name {dls} --name {network_rule}', checks=[
-            self.check('name', '{network_rule}'),
-        ])
-
-        self.cmd('dls account network-rule list -g {rg} --account-name {dls}', checks=[
-            self.check('type(@)', 'array'),
-            self.check('length(@)', 1),
-        ])
-        self.cmd('dls account network-rule delete -g {rg} --account-name {dls} --name {network_rule}')
-        self.cmd('dls account network-rule list -g {rg} --account-name {dls}', checks=[
-            self.check('type(@)', 'array'),
-            self.check('length(@)', 0),
-        ])
-        '''
         # test trusted id provider CRUD
         self.kwargs.update({
             'trusted_provider': 'https://sts.windows.net/9d5b43a0-804c-4c82-8791-36aca2f72342',

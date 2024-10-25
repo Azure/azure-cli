@@ -25,7 +25,6 @@ from azure.cli.core.profiles import ResourceType
 from azure.mgmt.datalake.store.models import (
     CreateOrUpdateFirewallRuleParameters,
     UpdateFirewallRuleParameters,
-    CreateOrUpdateVirtualNetworkRuleParameters,
     CreateOrUpdateTrustedIdProviderParameters,
     UpdateTrustedIdProviderParameters)
 
@@ -120,7 +119,6 @@ def add_adls_firewall_rule(client,
                                        end_ip_address=end_ip_address))
 
 
-# check if this override is needed or there is a way to directly convert the endip address
 def update_adls_firewall_rule(client,
                               account_name,
                               firewall_rule_name,
@@ -133,32 +131,6 @@ def update_adls_firewall_rule(client,
                          UpdateFirewallRuleParameters(
                              start_ip_address=start_ip_address,
                              end_ip_address=end_ip_address))
-
-# endregion
-
-
-# region virtual network
-def add_adls_virtual_network_rule(client,
-                                  account_name,
-                                  virtual_network_rule_name,
-                                  subnet,
-                                  resource_group_name):
-    return client.create_or_update(resource_group_name=resource_group_name,
-                                   account_name=account_name,
-                                   virtual_network_rule_name=virtual_network_rule_name,
-                                   parameters=CreateOrUpdateVirtualNetworkRuleParameters(subnet_id=subnet))
-
-
-def update_adls_virtual_network_rule(client,
-                                     account_name,
-                                     virtual_network_rule_name,
-                                     subnet,
-                                     resource_group_name):
-    return client.create_or_update(resource_group_name=resource_group_name,
-                                   account_name=account_name,
-                                   virtual_network_rule_name=virtual_network_rule_name,
-                                   parameters=CreateOrUpdateVirtualNetworkRuleParameters(
-                                       subnet_id=subnet))
 
 # endregion
 

@@ -8,15 +8,11 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.command_modules.dls._client_factory import (
     cf_dls_account,
     cf_dls_account_firewall,
-    cf_dls_account_virtual_network,
     cf_dls_account_trusted_provider)
 
 
 # pylint: disable=too-many-statements
 def load_command_table(self, _):
-    from ._validators import (
-        validate_subnet
-    )
     adls_format_path = 'azure.mgmt.datalake.store.operations#{}.{{}}'
 
     dls_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.dls.custom#{}')
@@ -28,11 +24,6 @@ def load_command_table(self, _):
 
     dls_firewall_sdk = CliCommandType(
         operations_tmpl=adls_format_path.format('FirewallRulesOperations'),
-        client_factory=cf_dls_account
-    )
-
-    dls_virtual_network_sdk = CliCommandType(
-        operations_tmpl=adls_format_path.format('VirtualNetworkRulesOperations'),
         client_factory=cf_dls_account
     )
 
@@ -54,17 +45,6 @@ def load_command_table(self, _):
     with self.command_group('dls account firewall', dls_firewall_sdk, client_factory=cf_dls_account_firewall) as g:
         g.custom_command('create', 'add_adls_firewall_rule')
         g.custom_command('update', 'update_adls_firewall_rule')
-        g.command('list', 'list_by_account')
-        g.show_command('show', 'get')
-        g.command('delete', 'delete')
-
-    # account virtual network rule operations
-    with self.command_group('dls account network-rule',
-                            dls_virtual_network_sdk,
-                            client_factory=cf_dls_account_virtual_network) as g:
-        g.custom_command('create', 'add_adls_virtual_network_rule', validator=validate_subnet)
-        # TODO Figure out what does generic_update_command do. For now adding custom_function
-        g.custom_command('update', 'update_adls_virtual_network_rule', validator=validate_subnet)
         g.command('list', 'list_by_account')
         g.show_command('show', 'get')
         g.command('delete', 'delete')
