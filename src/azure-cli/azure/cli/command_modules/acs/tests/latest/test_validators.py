@@ -922,16 +922,7 @@ class TestValidateDisableAzureContainerStorage(unittest.TestCase):
 class TestValidateEnableAzureContainerStorage(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.mock_cache = {
-            ('standard_l8s_v3',): (8, True),
-            ('standard_d2s_v2',): (2, False),
-            ('standard_d2pds_v6',): (2, True),
-            ('standard_ds1_v2',): (1, False),
-            ('standard_m8-2ms',): (2, False),
-            ('standard_b2s',): (2, False),
-        }
-
-        def side_effect_fn(sku_name, cpu_val=None, nvme=None):
+        def side_effect_fn(sku_name):
             if sku_name == "standard_l8s_v3":
                 return 8, True
             elif sku_name == "standard_d2s_v2":
@@ -947,7 +938,7 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
 
             return None, None
 
-        cls.patcher = patch('azure.cli.command_modules.acs.azurecontainerstorage._validators.vm_sku_details')
+        cls.patcher = patch('azure.cli.command_modules.acs.azurecontainerstorage._validators.get_vm_sku_details')
         cls.mock_fn = cls.patcher.start()
         cls.mock_fn.side_effect = side_effect_fn
 

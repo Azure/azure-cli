@@ -22,7 +22,7 @@ from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
     CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK,
 )
 from azure.cli.command_modules.acs.azurecontainerstorage._helpers import (
-    vm_sku_details
+    get_vm_sku_details
 )
 from azure.cli.core.azclierror import (
     ArgumentUsageError,
@@ -516,7 +516,11 @@ def _validate_nodepools(  # pylint: disable=too-many-branches,too-many-locals
                     )
             vm_size = agentpool.get("vm_size")
             if vm_size is not None:
-                cpu_value, nvme_enabled = vm_sku_details(vm_size.lower())
+                cpu_value, nvme_enabled = get_vm_sku_details(vm_size.lower())
+                if cpu_value is None or nvme_enabled or None:
+                    raise UnknownError(
+                        f'Unable to find details for virtual machine size {vm_size}.'
+                    )
                 if cpu_value < 0:
                     raise UnknownError(
                         f'Unable to determine number of cores in node pool: {pool_name}, node size: {vm_size}'

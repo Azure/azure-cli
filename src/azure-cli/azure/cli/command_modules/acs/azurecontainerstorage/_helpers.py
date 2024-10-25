@@ -30,11 +30,12 @@ from azure.cli.command_modules.acs._roleassignments import (
     delete_role_assignments,
 )
 from azure.cli.core.azclierror import UnknownError
-from cachetools import cached
-from cachetools.keys import hashkey
 from knack.log import get_logger
 
 logger = get_logger(__name__)
+
+# Global cache to store VM SKU information.
+vm_sku_details_cache = {}
 
 
 def validate_storagepool_creation(
@@ -453,15 +454,11 @@ def generate_vm_sku_cache_for_region(cli_ctx, location=None):
             if entry.name == 'NvmeDiskSizeInMiB':
                 nvme_enabled = True
 
-        vm_sku_details(sku_name, cpu_value, nvme_enabled)
+            vm_sku_details_cache[sku_name] = (cpu_value, nvme_enabled)
 
 
-@cached(
-    cache={},
-    key=lambda sku_name, cpu_value=None, nvme_enabled=None: hashkey(sku_name)
-)
-def vm_sku_details(sku_name, cpu_value=None, nvme_enabled=None):  # pylint: disable=unused-argument
-    return cpu_value, nvme_enabled
+def get_vm_sku_details(sku_name):
+    return vm_sku_details_cache.get(sku_name)
 
 
 def _get_ephemeral_nvme_cpu_value_based_on_vm_size_perf_tier(nodepool_skus, perf_tier):
@@ -472,7 +469,11 @@ def _get_ephemeral_nvme_cpu_value_based_on_vm_size_perf_tier(nodepool_skus, perf
     elif perf_tier.lower() == CONST_EPHEMERAL_NVME_PERF_TIER_PREMIUM.lower():
         multiplication_factor = 0.5
     for vm_size in nodepool_skus:
-        number_of_cores, _ = vm_sku_details(vm_size.lower())
+        number_of_cores, _ = get_vm_sku_details(vm_size.lower())
+        if number_of_cores is None:
+            raise UnknownError(
+                f"Unable to find details for virtual machine size {vm_size}."
+            )
         if number_of_cores != -1:
             if cpu_value == -1:
                 cpu_value = number_of_cores * multiplication_factor
