@@ -39,8 +39,8 @@ class MigrationScenarioTest(ScenarioTest):
         self._test_server_migration('postgres')
 
     def test_postgres_flexible_server_onpremise_migration(self):
-        self._test_server_migration_onpremise('postgres', True, "1a50e116-8f35-4401-a573-6eda6f539e28")
-        self._test_server_migration_onpremise('postgres', False, "d703653c-3d00-4926-8d4f-4871fb7c7ff1")
+        self._test_server_migration_onpremise('postgres', True, "f31b6595-74d4-4d3c-91bd-fb93af61d8f9")
+        self._test_server_migration_onpremise('postgres', False, "c73c308e-1e4e-4cfd-bc1f-7db572422598")
 
     def _test_server_migration(self, database_engine):
         # Set this to True or False depending on whether we are in live mode or test mode
@@ -49,15 +49,15 @@ class MigrationScenarioTest(ScenarioTest):
 
         if livemode:
             # Live mode values
-            target_subscription_id = "5c5037e5-d3f1-4e7b-b3a9-f6bf94902b30"
+            target_subscription_id = "ac0271d6-426b-4b0d-b88d-0d0e4bd693ae"
             migration_name = str(uuid.uuid4())
         else:
             # Mock test mode values
             target_subscription_id = "00000000-0000-0000-0000-000000000000"
-            migration_name = "392a7b75-da70-4bb5-9a12-93c0ab771244"
+            migration_name = "d2419e1d-4e05-4149-95d9-1d1c094e5ac5"
 
-        target_resource_group_name = "Sterling2MeruRG"
-        target_server_name = "target-server-longhaul"
+        target_resource_group_name = "autobot-resourcegroup-pg-eastus2euap"
+        target_server_name = "autobot-e2e-pg-fs-eastus2euap"
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         properties_filepath = os.path.join(curr_dir, 'migrationPublic.json').replace('\\', '\\\\')
 
@@ -102,7 +102,7 @@ class MigrationScenarioTest(ScenarioTest):
 
         if livemode:
             # Live mode values
-            target_subscription_id = "5c5037e5-d3f1-4e7b-b3a9-f6bf94902b30"
+            target_subscription_id = "ac0271d6-426b-4b0d-b88d-0d0e4bd693ae"
             migration_name = str(uuid.uuid4())
         else:
             # Mock test mode values
@@ -112,8 +112,8 @@ class MigrationScenarioTest(ScenarioTest):
         if validateOnly:
             migration_option = "Validate"
 
-        target_resource_group_name = "Sterling2MeruRG"
-        target_server_name = "target-server-longhaul"
+        target_resource_group_name = "autobot-resourcegroup-pg-eastus2euap"
+        target_server_name = "autobot-e2e-pg-fs-eastus2euap"
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         properties_filepath = os.path.join(curr_dir, 'migrationOnPremise.json').replace('\\', '\\\\')
 
