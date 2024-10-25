@@ -56,7 +56,6 @@ parameters:
   - name: --service-principal
     type: string
     short-summary: Service principal used for authentication to Azure APIs.
-    long-summary: If not specified, a new service principal is created and cached at $HOME/.azure/aksServicePrincipal.json to be used by subsequent `az aks` commands.
   - name: --skip-subnet-role-assignment
     type: bool
     short-summary: Skip role assignment for subnet (advanced networking).
