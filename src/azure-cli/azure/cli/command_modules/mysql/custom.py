@@ -401,7 +401,7 @@ def flexible_server_create(cmd, client,
                            iops_input=iops,
                            tier=tier,
                            sku_name=sku_name)
-    
+
     accelerated_logs = _determine_acceleratedLogs(accelerated_logs, tier)
 
     storage = models.Storage(storage_size_gb=storage_gb,
