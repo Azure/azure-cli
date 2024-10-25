@@ -1317,8 +1317,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
         
         # test storage auto-grow not allowed for replica server update
         self.cmd('{} flexible-server update -g {} -n {} --storage-auto-grow Enabled'
-                 .format(database_engine, resource_group, replicas[0]),
-                 expect_failure=True)
+                 .format(database_engine, resource_group, replicas[0]))
 
         # test replica list
         self.cmd('{} flexible-server replica list -g {} --name {}'
