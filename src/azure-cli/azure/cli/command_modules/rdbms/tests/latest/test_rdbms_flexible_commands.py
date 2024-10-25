@@ -1267,7 +1267,8 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                      JMESPathCheck('sku.name', result['sku']['name']),
                      JMESPathCheck('replica.role', replica_role),
                      JMESPathCheck('sourceServerResourceId', result['id']),
-                     JMESPathCheck('replica.capacity', '0')])
+                     JMESPathCheck('replica.capacity', '0'),
+                     JMESPathCheck('storage.autoGrow', source_server_auto_grow)])
         
     def _test_flexible_server_replica_mgmt(self, database_engine, resource_group, vnet_enabled):
         location = self.postgres_location
