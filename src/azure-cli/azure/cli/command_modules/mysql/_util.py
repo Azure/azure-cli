@@ -12,6 +12,7 @@ import random
 import secrets
 import string
 import yaml
+import subprocess
 from time import sleep
 import datetime as dt
 from datetime import datetime
@@ -374,9 +375,9 @@ def _resolve_api_version(client, provider_namespace, resource_type, parent_path)
 
 def run_subprocess(command, stdout_show=None):
     if stdout_show:
-        process = subprocess.Popen(commands)
+        process = subprocess.Popen(command)
     else:
-        process = subprocess.Popen(commands, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     process.wait()
     if process.returncode:
         logger.warning(process.stderr.read().strip().decode('UTF-8'))
