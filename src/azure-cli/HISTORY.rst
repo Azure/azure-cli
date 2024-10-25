@@ -3,13 +3,6 @@
 Release History
 ===============
 
-2.66.00
-++++++
-
-**AKS**
-
-* `az aks nodepool delete`: Add `--ignore-pod-disruption-budget` option for ignoring PodDisruptionBudget. (#30196)
-
 2.65.0
 ++++++
 
