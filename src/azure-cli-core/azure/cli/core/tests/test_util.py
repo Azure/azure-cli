@@ -17,7 +17,7 @@ from azure.cli.core.util import \
     (get_file_json, truncate_text, shell_safe_json_parse, b64_to_hex, hash_string, random_string,
      open_page_in_browser, can_launch_browser, handle_exception, ConfiguredDefaultSetter, send_raw_request,
      should_disable_connection_verify, parse_proxy_resource_id, get_az_user_agent, get_az_rest_user_agent,
-     _get_parent_proc_name, is_wsl, run_cmd)
+     _get_parent_proc_name, is_wsl, run_cmd, run_az_cmd)
 from azure.cli.core.mock import DummyCli
 
 
@@ -442,6 +442,14 @@ class TestUtils(unittest.TestCase):
         with self.assertRaises(ArgumentUsageError):
             run_cmd(cmd, check=True)
 
+    def test_run_az_cmd(self):
+        cmd = ["az", "version"]
+        output = run_az_cmd(cmd)
+        self.assertEqual(output.exit_code, 0, "unexpected exit_code when run az version")
+        self.assertEqual(output.error, None, "unexpected error when run az cmd")
+        self.assertIsInstance(output.result, dict, "unexpected cmd execution result")
+        self.assertIn("azure-cli-core", output.result, "unexpected cmd execution result")
+
 
 class TestBase64ToHex(unittest.TestCase):
 
@@ -486,21 +494,19 @@ class TestHandleException(unittest.TestCase):
         self.assertEqual(ex_result, 1)
 
     @mock.patch('azure.cli.core.azclierror.logger.error', autospec=True)
-    def test_handle_exception_clouderror(self, mock_logger_error):
-        from msrestazure.azure_exceptions import CloudError
+    def test_handle_exception_httpresponseerror(self, mock_logger_error):
+        from azure.core.exceptions import HttpResponseError
 
-        # create test CloudError Exception
-        err_detail = "There was a Cloud Error."
-        err_msg = "CloudError"
-        mock_cloud_error = mock.MagicMock(spec=CloudError)
-        mock_cloud_error.args = (err_detail, err_msg)
+        # create test HttpResponseError Exception
+        mock_http_response_error = HttpResponseError(response=mock.MagicMock(status_code="xxx",
+                                                                             reason="There was a Http Response Error."))
 
         # call handle_exception
-        ex_result = handle_exception(mock_cloud_error)
+        ex_result = handle_exception(mock_http_response_error)
 
         # test behavior
         self.assertTrue(mock_logger_error.called)
-        self.assertIn(mock_cloud_error.args[0], mock_logger_error.call_args[0][0])
+        self.assertIn(mock_http_response_error.args[0], mock_logger_error.call_args[0][0])
         self.assertEqual(ex_result, 1)
 
     @mock.patch('azure.cli.core.azclierror.logger.error', autospec=True)

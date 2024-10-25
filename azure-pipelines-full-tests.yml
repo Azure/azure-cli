@@ -25,8 +25,6 @@ jobs:
     matrix:
       Python39:
         python.version: '3.9'
-      Python311:
-        python.version: '3.11'
       Python312:
         python.version: '3.12'
   steps:
@@ -46,8 +44,6 @@ jobs:
     matrix:
       Python39:
         python.version: '3.9'
-      Python311:
-        python.version: '3.11'
       Python312:
         python.version: '3.12'
   steps:
@@ -67,8 +63,6 @@ jobs:
     matrix:
       Python39:
         python.version: '3.9'
-      Python311:
-        python.version: '3.11'
       Python312:
         python.version: '3.12'
   steps:
@@ -107,40 +101,6 @@ jobs:
   - template: .azure-pipelines/templates/automation_test.yml
     parameters:
       pythonVersion: '3.9'
-      profile: 'latest'
-      instance_cnt: '8'
-      instance_idx: '$(Instance_idx)'
-      fullTest: true
-      jobName: 'FullTest'
-
-- job: AutomationFullTestPython311ProfileLatest
-  displayName: Automation Full Test Python311 Profile Latest
-  timeoutInMinutes: 9999
-  strategy:
-    maxParallel: 8
-    matrix:
-      instance1:
-        Instance_idx: 1
-      instance2:
-        Instance_idx: 2
-      instance3:
-        Instance_idx: 3
-      instance4:
-        Instance_idx: 4
-      instance5:
-        Instance_idx: 5
-      instance6:
-        Instance_idx: 6
-      instance7:
-        Instance_idx: 7
-      instance8:
-        Instance_idx: 8
-  pool:
-    name: ${{ variables.ubuntu_pool }}
-  steps:
-  - template: .azure-pipelines/templates/automation_test.yml
-    parameters:
-      pythonVersion: '3.11'
       profile: 'latest'
       instance_cnt: '8'
       instance_idx: '$(Instance_idx)'
@@ -187,16 +147,15 @@ jobs:
     - AutomationTest20190301
     - AutomationTest20180301
     - AutomationFullTestPython39ProfileLatest
-    - AutomationFullTestPython311ProfileLatest
   condition: and(failed(), in(variables['Build.Reason'], 'BatchedCI'))
   displayName: Notify CI Errors
   pool:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.11'
+    displayName: 'Use Python 3.12'
     inputs:
-      versionSpec: 3.11
+      versionSpec: 3.12
   - task: AzureCLI@2
     inputs:
       azureSubscription: 'Azure CLI'

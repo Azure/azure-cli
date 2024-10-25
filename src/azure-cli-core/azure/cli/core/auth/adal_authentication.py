@@ -24,7 +24,7 @@ class MSIAuthenticationWrapper(MSIAuthentication):
                 # Use MSAL to get VM SSH certificate
                 import msal
                 from .util import check_result, build_sdk_access_token
-                from .identity import AZURE_CLI_CLIENT_ID
+                from .constants import AZURE_CLI_CLIENT_ID
                 app = msal.PublicClientApplication(
                     AZURE_CLI_CLIENT_ID,  # Use a real client_id, so that cache would work
                     # TODO: This PoC does not currently maintain a token cache;

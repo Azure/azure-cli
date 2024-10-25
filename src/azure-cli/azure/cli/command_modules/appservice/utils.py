@@ -18,7 +18,7 @@ from azure.cli.core.commands.parameters import get_subscription_locations
 from azure.cli.core.util import should_disable_connection_verify, send_raw_request
 from azure.cli.core.commands.client_factory import get_subscription_id
 
-from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
+from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id, resource_id
 
 from ._client_factory import web_client_factory, providers_client_factory
 from ._constants import LOGICAPP_KIND, FUNCTIONAPP_KIND, LINUXAPP_KIND

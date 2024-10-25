@@ -30,62 +30,62 @@ from ._transformers import (
 def load_command_table(self, _):
     # Flexible server SDKs:
     mysql_flexible_servers_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms.mysql_flexibleservers.operations#ServersOperations.{}',
+        operations_tmpl='azure.mgmt.mysqlflexibleservers.operations#ServersOperations.{}',
         client_factory=cf_mysql_flexible_servers
     )
 
     mysql_advanced_threat_protection_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms.mysql_flexibleservers.operations#AdvancedThreatProtectionSettingsOperations.{}',
+        operations_tmpl='azure.mgmt.mysqlflexibleservers.operations#AdvancedThreatProtectionSettingsOperations.{}',
         client_factory=cf_mysql_advanced_threat_protection
     )
 
     mysql_flexible_firewall_rule_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms.mysql_flexibleservers.operations#FirewallRulesOperations.{}',
+        operations_tmpl='azure.mgmt.mysqlflexibleservers.operations#FirewallRulesOperations.{}',
         client_factory=cf_mysql_flexible_firewall_rules
     )
 
     mysql_flexible_config_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms.mysql_flexibleservers.operations#ConfigurationsOperations.{}',
+        operations_tmpl='azure.mgmt.mysqlflexibleservers.operations#ConfigurationsOperations.{}',
         client_factory=cf_mysql_flexible_config
     )
 
     mysql_flexible_db_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms.mysql_flexibleservers.operations#DatabasesOperations.{}',
+        operations_tmpl='azure.mgmt.mysqlflexibleservers.operations#DatabasesOperations.{}',
         client_factory=cf_mysql_flexible_db
     )
 
     mysql_flexible_replica_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms.mysql_flexibleservers.operations#ReplicasOperations.{}',
+        operations_tmpl='azure.mgmt.mysqlflexibleservers.operations#ReplicasOperations.{}',
         client_factory=cf_mysql_flexible_replica
     )
 
     mysql_flexible_location_capabilities_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms.mysql_flexibleservers.operations#LocationBasedCapabilitiesOperations.{}',
+        operations_tmpl='azure.mgmt.mysqlflexibleservers.operations#LocationBasedCapabilitiesOperations.{}',
         client_factory=cf_mysql_flexible_location_capabilities
     )
 
     mysql_flexible_log_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms.mysql_flexibleservers.operations#LogFilesOperations.{}',
+        operations_tmpl='azure.mgmt.mysqlflexibleservers.operations#LogFilesOperations.{}',
         client_factory=cf_mysql_flexible_log
     )
 
     mysql_flexible_backups_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms.mysql_flexibleservers.operations#BackupsOperations.{}',
+        operations_tmpl='azure.mgmt.mysqlflexibleservers.operations#BackupsOperations.{}',
         client_factory=cf_mysql_flexible_backups
     )
 
     mysql_flexible_export_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms.mysql_flexibleservers.operations#BackupAndExportOperations.{}',
+        operations_tmpl='azure.mgmt.mysqlflexibleservers.operations#BackupAndExportOperations.{}',
         client_factory=cf_mysql_flexible_export
     )
 
     mysql_flexible_adadmin_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms.mysql_flexibleservers.operations#AzureADAdministratorsOperations.{}',
+        operations_tmpl='azure.mgmt.mysqlflexibleservers.operations#AzureADAdministratorsOperations.{}',
         client_factory=cf_mysql_flexible_adadmin
     )
 
     mysql_flexible_maintenance_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms.mysql_flexibleservers.operations#MaintenancesOperations.{}',
+        operations_tmpl='azure.mgmt.mysqlflexibleservers.operations#MaintenancesOperations.{}',
         client_factory=cf_mysql_flexible_maintenances
     )
 

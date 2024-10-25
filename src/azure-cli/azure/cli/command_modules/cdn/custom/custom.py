@@ -43,6 +43,7 @@ from azure.mgmt.cdn.models import (Endpoint, SkuName, EndpointUpdateParameters, 
 
 from azure.mgmt.cdn.models._cdn_management_client_enums import CacheType
 from azure.mgmt.cdn.operations import (OriginsOperations, OriginGroupsOperations)
+from azure.mgmt.core.tools import is_valid_resource_id
 
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import (sdk_no_wait)
@@ -53,7 +54,6 @@ from knack.util import CLIError
 from knack.log import get_logger
 
 from msrest.polling import LROPoller, NoPolling
-from msrestazure.tools import is_valid_resource_id
 
 logger = get_logger(__name__)
 
