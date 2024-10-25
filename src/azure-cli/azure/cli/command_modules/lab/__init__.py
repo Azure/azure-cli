@@ -12,13 +12,22 @@ class DevTestLabCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
         from azure.cli.core.commands import CliCommandType
-        from azure.cli.core.profiles import ResourceType
         lab_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.lab.custom#{}')
-        super(DevTestLabCommandsLoader, self).__init__(cli_ctx=cli_ctx, custom_command_type=lab_custom,
-                                                       resource_type=ResourceType.MGMT_DEVTESTLABS)
+        super(DevTestLabCommandsLoader, self).__init__(cli_ctx=cli_ctx, custom_command_type=lab_custom)
 
     def load_command_table(self, args):
         from azure.cli.command_modules.lab.commands import load_command_table
+        from azure.cli.core.aaz import load_aaz_command_table
+        try:
+            from . import aaz
+        except ImportError:
+            aaz = None
+        if aaz:
+            load_aaz_command_table(
+                loader=self,
+                aaz_pkg_name=aaz.__name__,
+                args=args
+            )
         load_command_table(self, args)
         return self.command_table
 

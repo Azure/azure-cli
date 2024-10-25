@@ -860,7 +860,7 @@ class AzCliCommandInvoker(CommandInvoker):
         from ..credential_helper import distinguish_credential
         from ..telemetry import set_secrets_detected
         try:
-            containing_credential, secret_property_names = distinguish_credential(result)
+            containing_credential, secret_property_names, secret_names = distinguish_credential(result)
             if not containing_credential:
                 set_secrets_detected(False)
                 return
@@ -869,10 +869,10 @@ class AzCliCommandInvoker(CommandInvoker):
             if secret_property_names:
                 message = sensitive_data_detailed_warning_message.format(', '.join(secret_property_names))
             logger.warning(message)
-            set_secrets_detected(True, secret_property_names)
-        except Exception:  # pylint: disable=broad-except
+            set_secrets_detected(True, secret_property_names, secret_names)
+        except Exception as ex:  # pylint: disable=broad-except
             # ignore all exceptions, as this is just a warning
-            pass
+            logger.debug('Scan credentials failed with %s', str(ex))
 
     def resolve_confirmation(self, cmd, parsed_args):
         confirm = cmd.confirmation and not parsed_args.__dict__.pop('yes', None) \
@@ -1214,7 +1214,7 @@ def _is_paged(obj):
 
 def _is_poller(obj):
     # Since loading msrest is expensive, we avoid it until we have to
-    if obj.__class__.__name__ in ['AzureOperationPoller', 'LROPoller', 'AAZLROPoller']:
+    if obj.__class__.__name__ in ['LROPoller', 'AAZLROPoller']:
         return isinstance(obj, poller_classes())
     return False
 

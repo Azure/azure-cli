@@ -6487,6 +6487,79 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('replicationRole', 'Primary')
                  ])
 
+    def _test_failover_group_with_secondary_type(self, primary_server,
+                                                   secondary_server, failover_group_name, secondary_type):
+
+        # Add database with secondary type standby
+        database_name = "testdb"
+
+        # Create database on primary server
+        self.cmd('sql db create -g {} --server {} --name {}'
+                 .format(primary_server.group, primary_server.name, database_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', primary_server.group),
+                     JMESPathCheck('name', database_name)
+                 ])
+
+        # Update Failover Group
+        self.cmd('sql failover-group update -g {} -s {} -n {} --grace-period 3 --add-db {} --secondary-type {}'
+                 .format(primary_server.group, primary_server.name, failover_group_name, database_name, secondary_type),
+                 checks=[
+                     JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
+                     JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 180),
+                     JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled'),
+                     JMESPathCheck('length(databases)', 2)
+                 ])
+
+        # Check if properties got propagated to secondary server
+        self.cmd('sql failover-group show -g {} -s {} -n {}'
+                 .format(secondary_server.group, secondary_server.name, failover_group_name),
+                 checks=[
+                     JMESPathCheck('name', failover_group_name),
+                     JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
+                     JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 180),
+                     JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled'),
+                     JMESPathCheck('replicationRole', 'Secondary'),
+                     JMESPathCheck('length(databases)', 2)
+                 ])
+
+        # Check if database is created on partner side
+        self.cmd('sql db list -g {} -s {}'
+                 .format(secondary_server.group, secondary_server.name),
+                 checks=[
+                     JMESPathCheck('length(@)', 3)
+                 ])
+
+        # Check secondary_type
+        self.cmd('sql db replica list-links -g {} -s {} -n {}'
+                 .format(primary_server.group, primary_server.name, database_name),
+                 checks=[
+                     JMESPathCheck('length(@)', 1),
+                     JMESPathCheck('[0].role', 'Primary'),
+                     JMESPathCheck('[0].linkType', secondary_type.upper())])
+
+        # Remove database from failover group
+        self.cmd('sql failover-group update -g {} -s {} -n {} --remove-db {}'
+                 .format(primary_server.group, primary_server.name, failover_group_name, database_name),
+                 checks=[
+                     JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
+                     JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 180),
+                     JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled'),
+                     JMESPathCheck('length(databases)', 1)
+                 ])
+
+        # delete the database from both server
+        self.cmd('sql db delete -g {} --server {} --name {} --yes'
+                 .format(secondary_server.group, secondary_server.name, database_name),
+                 checks=[NoneCheck()])
+
+        self.cmd('sql db delete -g {} --server {} --name {} --yes'
+                 .format(primary_server.group, primary_server.name, database_name),
+                 checks=[NoneCheck()])
+
+        if self.in_recording:
+            time.sleep(60)
+
     # create 2 servers in the same resource group, and 1 server in a different resource group
     @ResourceGroupPreparer(parameter_name="resource_group_1",
                            parameter_name_for_location="resource_group_location_1")
@@ -6494,7 +6567,7 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                            parameter_name_for_location="resource_group_location_2")
     @SqlServerPreparer(parameter_name="server_name_1",
                        resource_group_parameter_name="resource_group_1",
-                       location='westeurope')
+                       location='northeurope')
     @SqlServerPreparer(parameter_name="server_name_2",
                        resource_group_parameter_name="resource_group_2", location='eastus')
     def test_sql_failover_group_mgmt(self,
@@ -6599,6 +6672,11 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
 
         if self.in_recording:
             time.sleep(60)
+
+        # Check secondary type parameter functionality
+        self._test_failover_group_with_secondary_type(s1, s2, failover_group_name, "Standby")
+
+        self._test_failover_group_with_secondary_type(s1, s2, failover_group_name, "Geo")
 
         # Update Failover Group failover policy to Manual
         self.cmd('sql failover-group update -g {} -s {} -n {} --failover-policy Manual'
@@ -7594,6 +7672,125 @@ class SqlManagedInstanceZoneRedundancyScenarioTest(ScenarioTest):
         self.cmd('sql mi delete --ids {} --yes'
                  .format(managed_instance['id']), checks=NoneCheck())
 
+class SqlManagedInstanceHermesCreateScenarioTest(ScenarioTest):
+    @AllowLargeResponse()
+    def test_sql_mi_hermes_create(self):
+
+        subscription_id = '62e48210-5e43-423e-889b-c277f3e08c39'
+        group = 'hermes-cli-testing-resourcegroup-wcus'
+        vnet_name = 'hermes-cli-testing-virtualnetwork-wcus'
+        subnet_name = 'hermes-cli-testing-subnet-wcus'
+        subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(subscription_id, group, vnet_name, subnet_name)
+
+        self.kwargs.update({
+            'rg': group,
+            'managed_instance_name': self.create_random_name(managed_instance_name_prefix,
+                                                             managed_instance_name_max_length),
+            'loc': 'westcentralus',
+            'username': 'admin123',
+            'admin_password': 'SecretPassword123SecretPassword',
+            'subnet': subnet,
+            'license_type': 'LicenseIncluded',
+            'v_cores': 4,
+            'storage_size_in_gb': '128',
+            'storage_iops': '1000',
+            'edition': 'GeneralPurpose',
+            'is_general_purpose_v2': 'True',
+            'family': 'Gen8IM'
+        })
+
+        # Create Hermes
+        self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
+                                    '-u {username} -p {admin_password} --subnet {subnet} --license-type {license_type} --capacity {v_cores} '
+                                    '--storage {storage_size_in_gb} --iops {storage_iops} --edition {edition} --gpv2 {is_general_purpose_v2} --family {family} ',
+                                    checks=[
+                                        self.check('name', '{managed_instance_name}'),
+                                        self.check('resourceGroup', '{rg}'),
+                                        self.check('administratorLogin', '{username}'),
+                                        self.check('isGeneralPurposeV2', '{is_general_purpose_v2}'),
+                                        self.check('vCores', '{v_cores}'),
+                                        self.check('storageSizeInGb', '{storage_size_in_gb}'),
+                                        self.check('storageIops', '{storage_iops}'),
+                                        self.check('licenseType', '{license_type}'),
+                                        self.check('sku.tier', '{edition}'),
+                                        self.check('sku.family', '{family}'),
+                                        self.check('sku.capacity', '{v_cores}')])
+
+        # Get the managed instance and check GPv2 flag
+        managed_instance = self.cmd('sql mi show -g {rg} -n {managed_instance_name}').get_output_in_json()
+        self.assertEqual(managed_instance['isGeneralPurposeV2'], True)
+        self.assertEqual(managed_instance['storageIops'], 1000)
+
+        # Delete the managed instance
+        self.cmd('sql mi delete --ids {} --yes'
+                 .format(managed_instance['id']), checks=NoneCheck())
+
+class SqlManagedInstanceHermesUpdateScenarioTest(ScenarioTest):
+    @AllowLargeResponse()
+    def test_sql_mi_hermes_update(self):
+
+        subscription_id = '62e48210-5e43-423e-889b-c277f3e08c39'
+        group = 'hermes-cli-testing-resourcegroup-wcus'
+        vnet_name = 'hermes-cli-testing-virtualnetwork-wcus'
+        subnet_name = 'hermes-cli-testing-subnet-wcus'
+        subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(subscription_id, group, vnet_name, subnet_name)
+
+        self.kwargs.update({
+            'rg': group,
+            'managed_instance_name': self.create_random_name(managed_instance_name_prefix,
+                                                             managed_instance_name_max_length),
+            'loc': 'westcentralus',
+            'username': 'admin123',
+            'admin_password': 'SecretPassword123SecretPassword',
+            'subnet': subnet,
+            'license_type': 'LicenseIncluded',
+            'v_cores': 4,
+            'storage_size_in_gb': '128',
+            'storage_iops': '1000',
+            'edition': 'GeneralPurpose',
+            'is_general_purpose_v2': 'False',
+            'family': 'Gen8IM'
+        })
+
+        # Create GPv1
+        self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
+                                    '-u {username} -p {admin_password} --subnet {subnet} --license-type {license_type} --capacity {v_cores} '
+                                    '--storage {storage_size_in_gb} --edition {edition} --gpv2 {is_general_purpose_v2} --family {family} ',
+                                    checks=[
+                                        self.check('name', '{managed_instance_name}'),
+                                        self.check('resourceGroup', '{rg}'),
+                                        self.check('administratorLogin', '{username}'),
+                                        self.check('isGeneralPurposeV2', '{is_general_purpose_v2}'),
+                                        self.check('vCores', '{v_cores}'),
+                                        self.check('storageSizeInGb', '{storage_size_in_gb}'),
+                                        self.check('licenseType', '{license_type}'),
+                                        self.check('sku.tier', '{edition}'),
+                                        self.check('sku.family', '{family}'),
+                                        self.check('sku.capacity', '{v_cores}')])
+
+        # Get the managed instance and check GPv2 flag
+        managed_instance = self.cmd('sql mi show -g {rg} -n {managed_instance_name}').get_output_in_json()
+        self.assertEqual(managed_instance['zoneRedundant'], False)
+
+        # Update to Hermes
+        self.kwargs.update({
+            'v_cores': 4,
+            'is_general_purpose_v2': 'True'
+        })
+
+        self.cmd('sql mi update -g {rg} -n {managed_instance_name} --gpv2 {is_general_purpose_v2} --capacity {v_cores} --iops {storage_iops} ',
+                 checks=[self.check('isGeneralPurposeV2', '{is_general_purpose_v2}'),
+                         self.check('storageIops', '{storage_iops}')])
+
+        # Get the managed instance and check GPv2 flag
+        managed_instance = self.cmd('sql mi show -g {rg} -n {managed_instance_name}').get_output_in_json()
+        self.assertEqual(managed_instance['isGeneralPurposeV2'], True)
+        self.assertEqual(managed_instance['storageIops'], 1000)
+
+        # Delete the managed instance
+        self.cmd('sql mi delete --ids {} --yes'
+                 .format(managed_instance['id']), checks=NoneCheck())
+
 class SqlManagedInstanceServerConfigurationOptionTest(ScenarioTest):
     @AllowLargeResponse()
     @ManagedInstancePreparer(parameter_name="mi")
@@ -7651,7 +7848,6 @@ class SqlManagedInstanceServerConfigurationOptionTest(ScenarioTest):
         # list 0 config options
         self.cmd('sql mi server-configuration-option list -g {rg} --instance-name {mi}',
                     checks=[JMESPathCheck('length(@)', 0)]).get_output_in_json
-
 
 class SqlManagedInstanceExternalGovernanceTest(ScenarioTest):
     @AllowLargeResponse()

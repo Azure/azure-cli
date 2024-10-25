@@ -23,7 +23,12 @@ exit_code=0
 # Disable arcappliance arcdata connectedk8s: https://github.com/Azure/azure-cli/pull/20436
 # Disable k8s-extension temporarily: https://github.com/Azure/azure-cli-extensions/pull/6702
 # Disable alias temporarily: https://github.com/Azure/azure-cli/pull/27717
-ignore_list='azure-cli-ml fzf arcappliance arcdata connectedk8s k8s-extension alias'
+# hybridaks is going to be deprecated: https://github.com/Azure/azure-cli/pull/29838
+# db-up is going to be deprecated: https://github.com/Azure/azure-cli/pull/29887
+ignore_list='azure-cli-ml fzf arcappliance arcdata connectedk8s k8s-extension alias hybridaks db-up'
+
+# Does not exit if az extension add fails until all extensions have been tested
+set +e
 
 for ext in $output; do
     echo

@@ -73,7 +73,7 @@ class MediaV2Client():
         self.access_token = self._get_v2_access_token()
 
     def _get_v2_api_endpoint(self, cli_ctx, resource_group_name, account_name):
-        from msrestazure.tools import resource_id
+        from azure.mgmt.core.tools import resource_id
         from azure.cli.command_modules.ams._sdk_utils import (get_media_namespace, get_media_type)
 
         access_token = self.profile.get_raw_token()[0][2].get('accessToken')

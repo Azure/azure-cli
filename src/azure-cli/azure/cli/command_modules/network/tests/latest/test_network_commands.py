@@ -21,7 +21,7 @@ from azure.cli.testsdk import (
 
 from knack.util import CLIError
 
-from msrestazure.tools import resource_id
+from azure.mgmt.core.tools import resource_id
 
 from .credential_replacer import ExpressRoutePortLOAContentReplacer
 
@@ -284,7 +284,6 @@ class NetworkPrivateEndpoints(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='fanqiu_cli_test_network_private_endpoints', location='CentralUSEuap')
     @StorageAccountPreparer(name_prefix='saplr', kind='StorageV2')
     def test_network_private_endpoint_private_dns_zone_group(self, resource_group, storage_account):
-        from msrestazure.azure_exceptions import CloudError
         self.kwargs.update({
             'sa': storage_account,
             'loc': 'CentralUSEuap',
@@ -372,6 +371,29 @@ class NetworkPrivateEndpoints(ScenarioTest):
 
 class NetworkPrivateLinkService(ScenarioTest):
 
+    @ResourceGroupPreparer(name_prefix='cli_test_pls_udr')
+    @AllowLargeResponse()
+    def test_network_private_link_service_udr(self, resource_group):
+
+        self.kwargs.update({
+            'sku': 'Standard',
+            'vnet': 'vnet1',
+            'vnet_prefix': '10.0.0.0/16',
+            'subnet1': 'subnet1',
+            'subnet_prefix': '10.0.0.0/24',
+            'location': 'westcentralus',
+            'lks1': 'lks1',
+            'destination_ip': '10.0.0.10'
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet} --address-prefixes {vnet_prefix} --subnet-name {subnet1} --subnet-prefixes {subnet_prefix} -l {location}')
+        self.cmd('az network vnet subnet update -n {subnet1} --vnet-name {vnet} -g {rg} --pls-network-policies disabled')
+        self.cmd('network private-link-service create -n {lks1} -g {rg} --vnet-name {vnet} --subnet {subnet1} --destination-ip-address {destination_ip} -l {location}', checks=[
+            self.check('type', 'Microsoft.Network/privateLinkServices'),
+            self.check('enableProxyProtocol', False),
+            self.check('destinationIPAddress', '{destination_ip}')
+        ])
+
     @ResourceGroupPreparer(name_prefix='cli_test_network_private_link_service')
     @AllowLargeResponse()
     def test_network_private_link_service(self, resource_group):
@@ -382,11 +404,12 @@ class NetworkPrivateLinkService(ScenarioTest):
             'vnet': 'vnet1',
             'subnet1': 'subnet1',
             'subnet2': 'subnet2',
-            'location': 'centralus',
+            'location': 'westcentralus',
             'ip': 'pubip1',
             'lks1': 'lks1',
             'lks2': 'lks2',
-            'sub1': '00000000-0000-0000-0000-000000000000'
+            'sub1': '00000000-0000-0000-0000-000000000000',
+            'destination_ip': '10.0.0.1'
         })
 
         self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet1} -l {location}')
@@ -394,6 +417,9 @@ class NetworkPrivateLinkService(ScenarioTest):
         self.cmd('network vnet subnet update -g {rg} -n {subnet1} --vnet-name {vnet} --disable-private-link-service-network-policies')
         self.cmd('network vnet subnet create -g {rg} -n {subnet2} --vnet-name {vnet} --address-prefixes 10.0.2.0/24 --default-outbound false')
         self.cmd('network vnet subnet update -g {rg} -n {subnet2} --vnet-name {vnet} --disable-private-endpoint-network-policies')
+
+        with self.assertRaises(HttpResponseError, msg=' either one LoadBalancerFrontendIpConfiguration if PLS with LB based scenario or DestinationIPAddress if PLS UDR and NSG scenario'):
+            self.cmd('network private-link-service create -g {rg} -n {lks1} --vnet-name {vnet} --subnet {subnet1} --lb-name {lb} --lb-frontend-ip-configs LoadBalancerFrontEnd -l {location} --destination-ip-address {destination_ip}')
         self.cmd('network private-link-service create -g {rg} -n {lks1} --vnet-name {vnet} --subnet {subnet1} --lb-name {lb} --lb-frontend-ip-configs LoadBalancerFrontEnd -l {location}  --enable-proxy-protocol', checks=[
             self.check('type', 'Microsoft.Network/privateLinkServices'),
             self.check('length(ipConfigurations)', 1),
@@ -2245,6 +2271,7 @@ class NetworkAppGatewayPublicIpScenarioTest(ScenarioTest):
 
 class NetworkAppGatewayWafConfigScenarioTest20170301(ScenarioTest):
 
+    @unittest.skip('SKU for this scenario is deprecated.')
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_config')
     def test_network_app_gateway_waf_config(self, resource_group):
@@ -2280,7 +2307,7 @@ class NetworkAppGatewayWafConfigScenarioTest20170301(ScenarioTest):
 
 class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy_')
+    @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy_', location='westcentralus')
     def test_network_app_gateway_waf_policy_with_application_gateway(self, resource_group):
         self.kwargs.update({
             'waf': 'agp1',
@@ -2352,6 +2379,13 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                      self.check('managedRules.managedRuleSets[1].ruleSetType', 'Microsoft_BotManagerRuleSet'),
                      self.check('managedRules.managedRuleSets[1].ruleSetVersion', '1.0')
                  ])
+        
+        self.cmd('network application-gateway waf-policy managed-rule rule-set update -g {rg} --policy-name {waf} '
+                 '--type Microsoft_BotManagerRuleSet --version 1.1',
+                 checks=[
+                     self.check('managedRules.managedRuleSets[1].ruleSetType', 'Microsoft_BotManagerRuleSet'),
+                     self.check('managedRules.managedRuleSets[1].ruleSetVersion', '1.1')
+                 ])
 
         # add one exclusion rule to the managed rules of this waf-policy
         self.cmd('network application-gateway waf-policy managed-rule exclusion add -g {rg} --policy-name {waf} '
@@ -2369,7 +2403,7 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
             self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[1].ruleGroupName', self.kwargs['csr_grp2']),
             self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[1].rules[0].ruleId', '913100'),
             self.check('managedRules.managedRuleSets[1].ruleSetType', 'Microsoft_BotManagerRuleSet'),
-            self.check('managedRules.managedRuleSets[1].ruleSetVersion', '1.0'),
+            self.check('managedRules.managedRuleSets[1].ruleSetVersion', '1.1'),
             self.check('policySettings.fileUploadLimitInMb', 64),
             self.check('policySettings.maxRequestBodySizeInKb', 128),
             self.check('policySettings.mode', 'Prevention'),
@@ -2410,6 +2444,7 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_custom_rule_')
     def test_network_app_gateway_waf_custom_rule(self, resource_group):
+        from azure.cli.core.azclierror import ArgumentUsageError
         self.kwargs.update({
             'waf': 'agp1',
             'rule': 'rule1',
@@ -2449,7 +2484,7 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                      self.check('matchConditions | length(@)', 1)
                  ])
         # validate match condition
-        with self.assertRaisesRegex(SystemExit, '2'):
+        with self.assertRaisesRegex(ArgumentUsageError, 'requires --values'):
             self.cmd("network application-gateway waf-policy custom-rule match-condition add -g {rg} "
                      "--policy-name {waf} -n {rule} "
                      "--match-variables RequestHeaders.value --operator Contains --transform lowercase")
@@ -2667,26 +2702,28 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
         # case 1: Initialize(add) managed rule set
         self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
                  '--type OWASP --version 3.0 '
-                 '--group-name {csr_grp1} --rule rule-id=921100 --rule rule-id=921110')
+                 '--group-name {csr_grp1} --rule rule-id=921100 --rule rule-id=921110 sensitivity=low')
         self.cmd('network application-gateway waf-policy show -g {rg} -n {waf}', checks=[
             self.check('managedRules.managedRuleSets[0].ruleSetType', 'OWASP'),
             self.check('managedRules.managedRuleSets[0].ruleSetVersion', '3.0'),
             self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules | length(@)', 2),
             self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].ruleGroupName', self.kwargs['csr_grp1']),
-            self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules[0].ruleId', '921100')
+            self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules[0].ruleId', '921100'),
+            self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules[1].sensitivity', 'Low')
         ])
 
         # case 2: Append(add) another managed rule set to same rule group
         self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
                  '--type OWASP --version 3.0 '
-                 '--group-name {csr_grp1} --rule rule-id=921150')
+                 '--group-name {csr_grp1} --rule rule-id=921150 sensitivity=medium')
         self.cmd('network application-gateway waf-policy managed-rule rule-set list -g {rg} --policy-name {waf}',
                  checks=[
                      self.check('managedRuleSets[0].ruleSetType', 'OWASP'),
                      self.check('managedRuleSets[0].ruleSetVersion', '3.0'),
                      self.check('managedRuleSets[0].ruleGroupOverrides[0].rules | length(@)', 3),
                      self.check('managedRuleSets[0].ruleGroupOverrides[0].ruleGroupName', self.kwargs['csr_grp1']),
-                     self.check('managedRuleSets[0].ruleGroupOverrides[0].rules[2].ruleId', '921150')
+                     self.check('managedRuleSets[0].ruleGroupOverrides[0].rules[2].ruleId', '921150'),
+                     self.check('managedRuleSets[0].ruleGroupOverrides[0].rules[2].sensitivity', 'Medium')
                  ])
 
         # case 3: Add another managed rule set of different rule group
@@ -3091,8 +3128,7 @@ class NetworkPublicIpScenarioTest(ScenarioTest):
 
         # test ddos protection status
         self.cmd('network application-gateway create -g {rg} -n testag --public-ip-address {ip1} --sku Standard_v2 --priority 1001')
-        self.cmd('network public-ip ddos-protection-statu show -g {rg} -n {ip1}', self.check('isWorkloadProtected', True))
-
+        self.cmd('network public-ip ddos-protection show -g {rg} -n {ip1}', self.check('isWorkloadProtected', True))
         self.cmd('network public-ip update -g {rg} -n {ip1} --protection-mode Disabled --ddos-protection-plan null',
                  checks=[
                      self.check('ddosSettings.protectionMode', 'Disabled'),
@@ -3481,7 +3517,6 @@ class NetworkExpressRouteGlobalReachScenarioTest(ScenarioTest):
     @record_only()  # record_only as the express route is extremely expensive, contact service team for an available ER
     @ResourceGroupPreparer(name_prefix='cli_test_express_route_peer_connection')
     def test_network_express_route_peer_connection(self, resource_group):
-        from msrestazure.azure_exceptions import CloudError
         from azure.core.exceptions import ResourceNotFoundError
         self.kwargs.update({
             'er1': 'er1',
@@ -5222,6 +5257,15 @@ class NetworkVNetPeeringScenarioTest(ScenarioTest):
             self.check('remoteSubnetNames[0]', 'Subnet1'),
             self.check('localSubnetNames[0]', 'Subnet2'),
         ])
+        self.cmd(
+            "network vnet peering update -n peering2 -g {rg} --vnet-name vnet2 --remote-vnet {vnet1_id} "
+            "--allow-vnet-access false --allow-forwarded-traffic false --allow-gateway-transit true",
+            checks=[
+                self.check("allowForwardedTraffic", False),
+                self.check("allowGatewayTransit", True),
+                self.check("allowVirtualNetworkAccess", False),
+            ]
+        )
 
 
 class NetworkVpnConnectionIpSecPolicy(ScenarioTest):
