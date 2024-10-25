@@ -279,19 +279,35 @@ class ServicePrincipalAuth:  # pylint: disable=too-many-instance-attributes
         self.__dict__.update(entry)
 
         if self.certificate:
-            from OpenSSL.crypto import load_certificate, FILETYPE_PEM, Error
+            from cryptography.x509 import load_pem_x509_certificate
+            from cryptography.hazmat.primitives import hashes
+
             try:
-                with open(self.certificate, 'r') as file_reader:
-                    self._certificate_string = file_reader.read()
-                    cert = load_certificate(FILETYPE_PEM, self._certificate_string)
-                    self._thumbprint = cert.digest("sha1").decode().replace(':', '')
+                with open(self.certificate, 'rb') as f:
+                    certificate_bytes = f.read()
+                    self._certificate_string = certificate_bytes.decode('utf-8')
+
+                    # Calculate SHA1 thumbprint of the PEM certificate.
+                    # The certificate should look like
+                    #   -----BEGIN CERTIFICATE-----
+                    #   ...
+                    #   -----END CERTIFICATE-----
+
+                    # For invalid certificate, load_pem_x509_certificate will raise:
+                    #   ValueError: Unable to load PEM file.
+                    x509_cert = load_pem_x509_certificate(certificate_bytes)
+
+                    # x509_cert.fingerprint(hashes.SHA1()) generates a thumbprint like
+                    #   b'\xd4S\x17\x08...'
+                    self._thumbprint = x509_cert.fingerprint(hashes.SHA1()).hex().upper()
+
                     if entry.get(_USE_CERT_SN_ISSUER):
                         # low-tech but safe parsing based on
                         # https://github.com/libressl-portable/openbsd/blob/master/src/lib/libcrypto/pem/pem.h
                         match = re.search(r'-----BEGIN CERTIFICATE-----(?P<cert_value>[^-]+)-----END CERTIFICATE-----',
                                           self._certificate_string, re.I)
                         self._public_certificate = match.group()
-            except (UnicodeDecodeError, Error) as ex:
+            except (UnicodeDecodeError, ValueError) as ex:
                 raise CLIError('Invalid certificate, please use a valid PEM file. Error detail: {}'.format(ex))
 
     @classmethod
