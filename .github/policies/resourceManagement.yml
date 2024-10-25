@@ -1,10 +1,10 @@
-id: 
+id:
 name: GitOps.PullRequestIssueManagement
 description: GitOps.PullRequestIssueManagement primitive
-owner: 
+owner:
 resource: repository
 disabled: false
-where: 
+where:
 configuration:
   resourceManagementConfiguration:
     scheduledSearches:
@@ -189,6 +189,11 @@ configuration:
           action: Labeled
       then:
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: AAD
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -200,6 +205,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: ACS
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -211,6 +221,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Advisor
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -223,6 +238,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: AKS
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -236,6 +256,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Alerts Management
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -248,6 +273,27 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Amg
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Amg
+        then:
+        - mentionUsers:
+            mentionees:
+            - ABZhang0
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Analysis Services
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -256,11 +302,15 @@ configuration:
         - mentionUsers:
             mentionees:
             - athipp
-            - taiwu
             - minghan
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: API Management
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -275,6 +325,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: App Configuration
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -287,6 +342,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: App Services
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -299,6 +359,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Application Insights
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -310,6 +375,45 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Appservice-kube
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Appservice-kube
+        then:
+        - mentionUsers:
+            mentionees:
+            - Juliehzl
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Arc enabled servers
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Arc enabled servers
+        then:
+        - mentionUsers:
+            mentionees:
+            - rpsqrd
+            - edyoung
+            - vedkale
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: ArcResourceBridge
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -322,6 +426,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: ARM
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -334,6 +443,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: ARM - Core
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -346,6 +460,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: ARM - Managed Applications
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -357,6 +476,28 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: ARM - Management Group
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: ARM - Management Group
+        then:
+        - mentionUsers:
+            mentionees:
+            - rthorn17
+            - daxfohl
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: ARM - RBAC
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -369,6 +510,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: ARM - Service Catalog
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -380,6 +526,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: ARM - Tags
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -391,13 +542,15 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: ARM - Templates
         - hasLabel:
             label: Service Attention
-        - or:
-          - hasLabel:
-              label: ARM - Templates
-          - hasLabel:
-              label: Azure Deployments
+        - hasLabel:
+            label: ARM - Templates
         then:
         - mentionUsers:
             mentionees:
@@ -405,6 +558,27 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: arm-bicep
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: arm-bicep
+        then:
+        - mentionUsers:
+            mentionees:
+            - Azure/deployments-owners
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: ARO
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -419,6 +593,29 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: ASTRO
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: ASTRO
+        then:
+        - mentionUsers:
+            mentionees:
+            - Reshmi-Sriram
+            - banggaurav
+            - charanjeet2008
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Attestation
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -430,6 +627,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Authorization
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -442,6 +644,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Automation
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -454,6 +661,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: AVS
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -467,18 +679,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: Azure Arc enabled servers
-        then:
-        - mentionUsers:
-            mentionees:
-            - rpsqrd
-            - edyoung
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Azure Data Explorer
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -494,6 +699,27 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Azure Deployments
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Azure Deployments
+        then:
+        - mentionUsers:
+            mentionees:
+            - Azure/deployments-owners
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Azure Stack
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -508,6 +734,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Azure.Spring - Cosmos
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -519,6 +750,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Batch
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -536,6 +772,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: BatchAI
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -543,10 +784,15 @@ configuration:
         then:
         - mentionUsers:
             mentionees:
-            - matthchr
+            - pradeepgunda
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Billing
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -555,9 +801,15 @@ configuration:
         - mentionUsers:
             mentionees:
             - cabbpt
+            - theelderwand
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Blueprint
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -570,6 +822,27 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Bootstrapper
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Bootstrapper
+        then:
+        - mentionUsers:
+            mentionees:
+            - bganapa
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Bot Service
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -581,6 +854,27 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Cloud Service (Ext)
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Cloud Service (Ext)
+        then:
+        - mentionUsers:
+            mentionees:
+            - hirenshah1
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Cloud Shell
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -588,10 +882,31 @@ configuration:
         then:
         - mentionUsers:
             mentionees:
-            - maertendMSFT
+            - mbifeld
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: CloudService
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: CloudService
+        then:
+        - mentionUsers:
+            mentionees:
+            - bberera
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Cognitive - Anomaly Detector
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -604,6 +919,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Cognitive - Bing
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -616,6 +936,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Cognitive - Computer Vision
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -629,6 +954,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Cognitive - Content Moderator
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -640,6 +970,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Cognitive - Custom Vision
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -652,6 +987,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Cognitive - Face
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -665,6 +1005,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Cognitive - Form Recognizer
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -674,9 +1019,15 @@ configuration:
             mentionees:
             - ctstone
             - anrothMSFT
+            - yungshinlintw
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Cognitive - Immersive Reader
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -688,6 +1039,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Cognitive - Ink Recognizer
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -699,6 +1055,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Cognitive - LUIS
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -711,6 +1072,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Cognitive - Mgmt
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -722,6 +1088,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Cognitive - Personalizer
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -733,6 +1104,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Cognitive - QnA Maker
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -745,6 +1121,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Cognitive - Speech
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -757,6 +1138,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Cognitive - Text Analytics
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -768,6 +1154,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Cognitive - Translator
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -779,6 +1170,30 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Cognitive Services
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Cognitive Services
+        then:
+        - mentionUsers:
+            mentionees:
+            - gxy001
+            - yangyuan
+            - tianxin-ms
+            - xiaomin-ms
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Commerce
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -791,6 +1206,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Communication
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -802,6 +1222,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Compute
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -820,6 +1245,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Compute - Extensions
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -832,6 +1262,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Compute - Images
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -844,6 +1279,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Compute - Managed Disks
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -857,6 +1297,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Compute - RDFE
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -869,6 +1314,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Compute - VM
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -885,6 +1335,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Compute - VMSS
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -897,6 +1352,27 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: confcom
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: confcom
+        then:
+        - mentionUsers:
+            mentionees:
+            - SethHollandsworth
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Confidential Ledger
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -908,6 +1384,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Connected Kubernetes
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -919,6 +1400,43 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: ConnectedMachine
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: ConnectedMachine
+        then:
+        - mentionUsers:
+            mentionees:
+            - raghushantha
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: connectedvmware
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: connectedvmware
+        then:
+        - mentionUsers:
+            mentionees:
+            - nascarsayan
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Consumption
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -930,6 +1448,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Consumption - Billing
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -941,6 +1464,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Consumption - Budget
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -952,6 +1480,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Consumption - Consumption
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -963,6 +1496,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Consumption - Query
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -974,6 +1512,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Consumption - RIandShowBack
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -985,6 +1528,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Consumption - UsageDetailsandExport
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -996,6 +1544,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Container Instances
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1007,6 +1560,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Container Registry
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1017,9 +1575,15 @@ configuration:
             - toddysm
             - luisdlp
             - northtyphoon
+            - terencet-dev
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Container Service
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1034,6 +1598,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: ContainerApp
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1041,10 +1610,16 @@ configuration:
         then:
         - mentionUsers:
             mentionees:
-            - calvinsID
+            - howang-ms
+            - Greedygre
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: CosmosDB
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1058,6 +1633,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Cost Management
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1070,6 +1650,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Cost Management - Billing
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1081,6 +1666,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Cost Management - Budget
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1092,6 +1682,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Cost Management - Query
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1103,6 +1698,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Cost Management - RIandShowBack
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1114,6 +1714,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Cost Management - UsageDetailsAndExport
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1125,6 +1730,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Custom Providers
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1137,6 +1747,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Customer Insights
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1148,6 +1763,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: CycleCloud
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1159,6 +1779,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Data Bricks
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1166,10 +1791,16 @@ configuration:
         then:
         - mentionUsers:
             mentionees:
-            - arindamc
+            - edwinc
+            - mvvsubbu
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Data Catalog
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1181,6 +1812,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Data Factory
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1194,6 +1830,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Data Lake
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1205,6 +1846,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Data Lake Analytics
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1212,10 +1858,15 @@ configuration:
         then:
         - mentionUsers:
             mentionees:
-            - idear1203
+            - MikeRys
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Data Lake Storage Gen1
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1227,6 +1878,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Data Lake Storage Gen2
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1238,6 +1894,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Data Lake Store
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1249,6 +1910,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Data Migration
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1260,6 +1926,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Data Share
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1272,6 +1943,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: DataBox
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1286,6 +1962,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: DataBox Edge
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1299,6 +1980,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: DataProtection
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1311,6 +1997,28 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: DesktopVirtualization
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: DesktopVirtualization
+        then:
+        - mentionUsers:
+            mentionees:
+            - alec-baird
+            - costinhagiu
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Dev Center
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1322,6 +2030,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Dev Spaces
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1335,6 +2048,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Device Provisioning Service
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1346,6 +2064,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: DevOps
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1358,6 +2081,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Devtestlab
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1369,6 +2097,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Digital Twins
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1381,6 +2114,44 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: DnsResolver
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: DnsResolver
+        then:
+        - mentionUsers:
+            mentionees:
+            - arpit-gagneja
+            - jotrivet
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: ElasticSan
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: ElasticSan
+        then:
+        - mentionUsers:
+            mentionees:
+            - blueww
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Event Grid
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1392,6 +2163,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Event Hubs
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1403,6 +2179,27 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: fleet
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: fleet
+        then:
+        - mentionUsers:
+            mentionees:
+            - Ealianis
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Functions
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1410,12 +2207,17 @@ configuration:
         then:
         - mentionUsers:
             mentionees:
-            - kamperiadis
-            - khkh-ms
+            - AnatoliB
+            - Francisco-Gamino
             - shreyabatra4
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Graph.Microsoft
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1428,6 +2230,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Guest Configuration
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1440,6 +2247,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: HDInsight
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1448,11 +2260,15 @@ configuration:
         - mentionUsers:
             mentionees:
             - aim-for-better
-            - idear1203
             - deshriva
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: HPC Cache
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1465,6 +2281,29 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: ImageBuilder
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: ImageBuilder
+        then:
+        - mentionUsers:
+            mentionees:
+            - adana-popescu
+            - KalpeshChavan12
+            - ralucaminea
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Import Export
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1476,6 +2315,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: IoT/CLI
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1487,6 +2331,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: IotCentral
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1499,6 +2348,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: IotDPS
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1511,6 +2365,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: IotHub
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1518,11 +2377,15 @@ configuration:
         then:
         - mentionUsers:
             mentionees:
-            - rkmanda
-            - chieftn
+            - Elsie4ever，MohinderAtwal
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: KeyVault
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1536,6 +2399,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Kubernetes Configuration
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1543,10 +2411,16 @@ configuration:
         then:
         - mentionUsers:
             mentionees:
-            - NarayanThiru
+            - bavneetsingh16
+            - ramyasreechakka
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Lab Services
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1558,6 +2432,27 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: load
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: load
+        then:
+        - mentionUsers:
+            mentionees:
+            - Himanshu49
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Logic App
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1569,6 +2464,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: LOUIS
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1580,6 +2480,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Machine Learning
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1591,6 +2496,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Machine Learning Compute
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1602,6 +2512,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Machine Learning Experimentation
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1613,6 +2528,46 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Machine Learning Services
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Machine Learning Services
+        then:
+        - mentionUsers:
+            mentionees:
+            - paulshealy1
+            - seanyao1
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Maintenance
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Maintenance
+        then:
+        - mentionUsers:
+            mentionees:
+            - adana-popescu
+            - KalpeshChavan12
+            - ralucaminea
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Managed Identity
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1620,10 +2575,15 @@ configuration:
         then:
         - mentionUsers:
             mentionees:
-            - varunkch
+            - RamyaElangovanP
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Managed Services
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1635,6 +2595,28 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Management Groups
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Management Groups
+        then:
+        - mentionUsers:
+            mentionees:
+            - rthorn17
+            - cemheren
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Management Partner
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1646,6 +2628,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: MariaDB
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1658,6 +2645,29 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Marketplace
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Marketplace
+        then:
+        - mentionUsers:
+            mentionees:
+            - saviesacov
+            - gupele
+            - mikamine
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Marketplace Ordering
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1669,6 +2679,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Media Services
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1680,6 +2695,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Migrate
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1691,6 +2711,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: ML-AutoML
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1702,6 +2727,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: ML-Compute
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1713,6 +2743,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: ML-Core UI
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1724,6 +2759,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: ML-Data Labeling
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1735,6 +2775,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: ML-Data4ML
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1746,6 +2791,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: ML-Designer
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1757,6 +2807,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: ML-Hyperdrive
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1768,6 +2823,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: ML-Inference
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1779,6 +2839,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: ML-MLOps
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1790,6 +2855,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: ML-Pipelines
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1801,6 +2871,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: ML-Reinforcement Learning
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1812,6 +2887,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: ML-Responsible AI
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1823,6 +2903,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: ML-Training
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1834,6 +2919,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: ML-Workspace Management
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1845,17 +2935,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: Mobile Engagement
-        then:
-        - mentionUsers:
-            mentionees:
-            - kpiteira
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Monitor
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1868,6 +2952,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Monitor - ActionGroups
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1879,6 +2968,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Monitor - ActivityLogs
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1890,6 +2984,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Monitor - Alerts
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1901,6 +3000,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Monitor - ApplicationInsights
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1912,6 +3016,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Monitor - Autoscale
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1923,6 +3032,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Monitor - Diagnostic Settings
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1934,6 +3048,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Monitor - Exporter
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1949,6 +3068,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Monitor - LogAnalytics
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1960,6 +3084,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Monitor - Metrics
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1971,6 +3100,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: MySQL
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1983,6 +3117,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: MySQL - Flexible
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -1995,6 +3134,27 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: NetApp Files
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: NetApp Files
+        then:
+        - mentionUsers:
+            mentionees:
+            - audunn
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Network
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2006,6 +3166,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Network - Application Gateway
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2017,6 +3182,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Network - Bastion
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2024,10 +3194,16 @@ configuration:
         then:
         - mentionUsers:
             mentionees:
+            - isamorris
             - bastionsuppgithub
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Network - CDN
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2041,6 +3217,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Network - DDOS Protection
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2052,6 +3233,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Network - DNS
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2063,6 +3249,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Network - ExpressRoutes
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2074,6 +3265,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Network - Firewall
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2081,10 +3277,17 @@ configuration:
         then:
         - mentionUsers:
             mentionees:
-            - fwsuppgithub
+            - gopimsft
+            - gimotwanMSFT
+            - avripintoms
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Network - Front Door
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2099,6 +3302,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Network - Load Balancer
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2110,6 +3318,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Network - Network Virtual Appliance
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2121,6 +3334,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Network - Network Watcher
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2133,6 +3351,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Network - Private Link
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2144,6 +3367,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Network - Traffic Manager
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2155,6 +3383,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Network - Virtual Network
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2166,6 +3399,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Network - Virtual Network NAT
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2177,6 +3415,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Network - Virtual WAN
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2188,6 +3431,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Network - VPN Gateway
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2199,6 +3447,27 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Nginx
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Nginx
+        then:
+        - mentionUsers:
+            mentionees:
+            - limingu
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Notification Hub
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2206,11 +3475,16 @@ configuration:
         then:
         - mentionUsers:
             mentionees:
-            - tjsomasundaram
-            - aimankhan
+            - sreehari-ms
+            - vivekkhare31
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Operational Insights
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2222,6 +3496,30 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Oracle
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Oracle
+        then:
+        - mentionUsers:
+            mentionees:
+            - v-rvilathurs
+            - v-jamcheung
+            - v-eelhomsi
+            - v-adhenry
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Policy
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2234,6 +3532,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Policy Insights
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2245,6 +3548,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: PostgreSQL
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2252,12 +3560,17 @@ configuration:
         then:
         - mentionUsers:
             mentionees:
-            - sunilagarwal
-            - sr-msft
-            - niklarin
+            - gbowerman
+            - jasomaning
+            - nachoalonsoportillo
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: PostgreSQL - Flexible
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2265,11 +3578,17 @@ configuration:
         then:
         - mentionUsers:
             mentionees:
-            - daeunyim
-            - rajsell
+            - gbowerman
+            - jasomaning
+            - nachoalonsoportillo
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: PowerBI
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2282,6 +3601,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Quantum
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2293,6 +3617,29 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Quota
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Quota
+        then:
+        - mentionUsers:
+            mentionees:
+            - gyprakas
+            - rahuls-microsoft
+            - devatula
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Recovery Services Backup
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2300,11 +3647,15 @@ configuration:
         then:
         - mentionUsers:
             mentionees:
-            - pvrk
-            - adityabalaji-msft
+            - Daya-Patil
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Recovery Services Site-Recovery
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2316,6 +3667,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Redis Cache
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2328,6 +3684,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Relay
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2339,6 +3700,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Reservations
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2350,6 +3716,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Resource Authorization
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2362,6 +3733,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Resource Graph
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2369,10 +3745,15 @@ configuration:
         then:
         - mentionUsers:
             mentionees:
-            - chiragg4u
+            - venu-l
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Resource Health
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2384,6 +3765,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Scheduler
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2395,6 +3781,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Schema Registry
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2407,6 +3798,27 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: scvmm
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: scvmm
+        then:
+        - mentionUsers:
+            mentionees:
+            - hsurana06
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Search
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2421,6 +3833,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Security
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2432,6 +3849,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: SecurityInsights
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2443,6 +3865,27 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: SelfHelp
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: SelfHelp
+        then:
+        - mentionUsers:
+            mentionees:
+            - kenabd
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Serial Console
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2454,6 +3897,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Service Bus
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2465,6 +3913,28 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Service Connector
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Service Connector
+        then:
+        - mentionUsers:
+            mentionees:
+            - yungezz
+            - houk-ms
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Service Fabric
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2479,6 +3949,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: SignalR
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2491,6 +3966,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Spring Cloud
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2504,6 +3984,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: SQL
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2515,6 +4000,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: SQL - Backup & Restore
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2526,6 +4016,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: SQL - Data Security
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2537,6 +4032,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: SQL - Elastic Jobs
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2548,6 +4048,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: SQL - Managed Instance
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2559,6 +4064,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: SQL - Replication & Failover
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2570,6 +4080,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: SQL - VM
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2581,6 +4096,43 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: SSH
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: SSH
+        then:
+        - mentionUsers:
+            mentionees:
+            - vthiebaut10
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: StackHCIVM
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: StackHCIVM
+        then:
+        - mentionUsers:
+            mentionees:
+            - arc-enabled-vms-on-hci Team
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Storage
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2592,6 +4144,28 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: StorageSync
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: StorageSync
+        then:
+        - mentionUsers:
+            mentionees:
+            - ankushbindlish2
+            - afedyashov
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Storsimple
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2606,6 +4180,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Stream Analytics
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2617,6 +4196,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Subscription
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2630,6 +4214,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Support
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2644,6 +4233,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Synapse
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2656,6 +4250,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Tables
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2663,10 +4262,15 @@ configuration:
         then:
         - mentionUsers:
             mentionees:
-            - klaaslanghout
+            - bberera
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: TimeseriesInsights
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2678,6 +4282,27 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Traffic Collector
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Traffic Collector
+        then:
+        - mentionUsers:
+            mentionees:
+            - rmodh
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: vFXT
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2689,6 +4314,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: Web Apps
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -2701,6 +4331,11 @@ configuration:
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
+        - or:
+          - labelAdded:
+              label: Service Attention
+          - labelAdded:
+              label: WebPubSub
         - hasLabel:
             label: Service Attention
         - hasLabel:
@@ -3032,28 +4667,28 @@ configuration:
       - payloadType: Issues
       - or:
         - titleContains:
-            pattern: 'az webapp connection'
+            pattern: az webapp connection
             isRegex: True
         - bodyContains:
-            pattern: 'az webapp connection'
+            pattern: az webapp connection
             isRegex: True
         - titleContains:
-            pattern: 'az functionapp connection'
+            pattern: az functionapp connection
             isRegex: True
         - bodyContains:
-            pattern: 'az functionapp connection'
+            pattern: az functionapp connection
             isRegex: True
         - titleContains:
-            pattern: 'az springapp connection'
+            pattern: az springapp connection
             isRegex: True
         - bodyContains:
-            pattern: 'az springapp connection'
+            pattern: az springapp connection
             isRegex: True
         - titleContains:
-            pattern: 'az containerapp connection'
+            pattern: az containerapp connection
             isRegex: True
         - bodyContains:
-            pattern: 'az containerapp connection'
+            pattern: az containerapp connection
             isRegex: True
       - or:
         - isAction:
@@ -3247,29 +4882,29 @@ configuration:
           label: question
       description: '[arm] auto assign labels and users based on issue description.'
     - if:
-        - payloadType: Issues
-        - or:
-            - titleContains:
-                pattern: '[Aa]z account\b(?!\s+(lock|management-group)\b)'
-                isRegex: True
-            - bodyContains:
-                pattern: '[Aa]z account\b(?!\s+(lock|management-group)\b)'
-                isRegex: True
-        - or:
-            - isAction:
-                action: Opened
+      - payloadType: Issues
+      - or:
+        - titleContains:
+            pattern: '[Aa]z account\b(?!\s+(lock|management-group)\b)'
+            isRegex: True
+        - bodyContains:
+            pattern: '[Aa]z account\b(?!\s+(lock|management-group)\b)'
+            isRegex: True
+      - or:
+        - isAction:
+            action: Opened
       then:
-        - addLabel:
-            label: Auto-Assign
-        - addLabel:
-            label: ARM
-        - assignTo:
-            users:
-              - jiasli
-        - addLabel:
-            label: Azure CLI Team
-        - addLabel:
-            label: question
+      - addLabel:
+          label: Auto-Assign
+      - addLabel:
+          label: ARM
+      - assignTo:
+          users:
+          - jiasli
+      - addLabel:
+          label: Azure CLI Team
+      - addLabel:
+          label: question
       description: '[arm] auto assign labels and users based on issue description. '
     - if:
       - payloadType: Issues
@@ -3481,10 +5116,10 @@ configuration:
       - payloadType: Issues
       - or:
         - titleContains:
-            pattern: 'az \b(devops|repos)\b'
+            pattern: az \b(devops|repos)\b
             isRegex: True
         - bodyContains:
-            pattern: 'az \b(devops|repos)\b'
+            pattern: az \b(devops|repos)\b
             isRegex: True
       - or:
         - isAction:
@@ -4471,10 +6106,10 @@ configuration:
           action: Opened
       - or:
         - titleContains:
-            pattern: 'az webapp'
+            pattern: az webapp
             isRegex: True
         - bodyContains:
-            pattern: 'az webapp'
+            pattern: az webapp
             isRegex: True
       then:
       - addLabel:
@@ -4523,27 +6158,6 @@ configuration:
       - requestReview:
           reviewer: calvinhzy
       description: '[graph] Auto assign labels and reviewers based on PR title/description.'
-#    - if:
-#      - payloadType: Issues
-#      - or:
-#        - titleContains:
-#            pattern: '\b([Ii][Nn][Ss][Tt][Aa][Ll][Ll])\b'
-#            isRegex: True
-#        - bodyContains:
-#            pattern: '\b([Ii][Nn][Ss][Tt][Aa][Ll][Ll])\b'
-#            isRegex: True
-#      - or:
-#        - isAction:
-#            action: Opened
-#      then:
-#      - addLabel:
-#          label: Auto-Assign
-#      - addLabel:
-#          label: Installation
-#      - assignTo:
-#          users:
-#          - jiasli
-#      description: '[install] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Pull_Request
       - isAction:
@@ -5995,5 +7609,5 @@ configuration:
           users:
           - ReaNAiveD
       description: '[SecurityInsights] Auto assign labels and reviewers based on PR title/description.'
-onFailure: 
-onSuccess: 
+onFailure:
+onSuccess:
