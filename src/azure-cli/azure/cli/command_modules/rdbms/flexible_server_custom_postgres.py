@@ -1303,6 +1303,28 @@ def virtual_endpoint_update_func(client, resource_group_name, server_name, virtu
         parameters)
 
 
+def backup_create_func(client, resource_group_name, server_name, backup_name):
+    validate_resource_group(resource_group_name)
+
+    return client.begin_create(
+        resource_group_name,
+        server_name,
+        backup_name)
+
+
+def backup_delete_func(client, resource_group_name, server_name, backup_name, yes=False):
+    validate_resource_group(resource_group_name)
+
+    if not yes:
+        user_confirmation(
+            "Are you sure you want to delete the backup '{0}' in resource group '{1}'".format(backup_name, resource_group_name), yes=yes)
+
+    return client.begin_delete(
+        resource_group_name,
+        server_name,
+        backup_name)
+
+
 def flexible_server_approve_private_endpoint_connection(cmd, client, resource_group_name, server_name, private_endpoint_connection_name,
                                                         description=None):
     """Approve a private endpoint connection request for a server."""

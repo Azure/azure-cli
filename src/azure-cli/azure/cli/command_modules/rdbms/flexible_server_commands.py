@@ -204,6 +204,8 @@ def load_flexibleserver_command_table(self, _):
                             client_factory=cf_postgres_flexible_backups) as g:
         g.command('list', 'list_by_server', transform=transform_backups_list)
         g.show_command('show', 'get', transform=transform_backup)
+        g.custom_command('create', 'backup_create_func', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_command('delete', 'backup_delete_func', custom_command_type=flexible_servers_custom_postgres)
 
     with self.command_group('postgres flexible-server replica', postgres_flexible_replica_sdk) as g:
         g.command('list', 'list_by_server')
