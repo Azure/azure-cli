@@ -71,14 +71,12 @@ class ServerPreparer(AbstractPreparer, SingleValueReplacer):
 
 class ServerMgmtScenarioTest(ScenarioTest):
 
-    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name='resource_group_1')
     @ResourceGroupPreparer(parameter_name='resource_group_2')
     def test_mariadb_server_mgmt(self, resource_group_1, resource_group_2):
         self._test_server_mgmt('mariadb', resource_group_1, resource_group_2)
 
-    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name='resource_group_1')
     @ResourceGroupPreparer(parameter_name='resource_group_2')
@@ -344,7 +342,6 @@ class ServerMgmtScenarioTest(ScenarioTest):
 
 class ProxyResourcesMgmtScenarioTest(ScenarioTest):
 
-    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer()
     @ServerPreparer(engine_type='mariadb')
@@ -357,7 +354,6 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         self._test_private_link_resource(resource_group, server, database_engine, 'mariadbServer')
         self._test_private_endpoint_connection(resource_group, server, database_engine)
 
-    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer()
     @ServerPreparer(engine_type='mysql')
