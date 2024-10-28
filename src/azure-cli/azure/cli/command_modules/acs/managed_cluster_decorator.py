@@ -2360,6 +2360,54 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         return self.raw_param.get("network_dataplane")
 
+    def get_acns_enablement(self) -> Tuple[
+        Union[bool, None],
+        Union[bool, None],
+        Union[bool, None],
+    ]:
+        """Get the enablement of acns
+
+        :return: Tuple of 3 elements which can be bool or None
+        """
+        enable_acns = self.raw_param.get("enable_acns")
+        disable_acns = self.raw_param.get("disable_acns")
+        if enable_acns is None and disable_acns is None:
+            return None, None, None
+        if enable_acns and disable_acns:
+            raise MutuallyExclusiveArgumentError(
+                "Cannot specify --enable-acns and "
+                "--disable-acns at the same time."
+            )
+        enable_acns = bool(enable_acns) if enable_acns is not None else False
+        disable_acns = bool(disable_acns) if disable_acns is not None else False
+        acns = enable_acns or not disable_acns
+        acns_observability = self.get_acns_observability()
+        acns_security = self.get_acns_security()
+        if acns and (acns_observability is False and acns_security is False):
+            raise MutuallyExclusiveArgumentError(
+                "Cannot disable both observability and security when enabling ACNS. "
+                "Please enable at least one of them or disable ACNS with --disable-acns."
+            )
+        if not acns and (acns_observability is not None or acns_security is not None):
+            raise MutuallyExclusiveArgumentError(
+                "--disable-acns does not use any additional acns arguments."
+            )
+        return acns, acns_observability, acns_security
+
+    def get_acns_observability(self) -> Union[bool, None]:
+        """Get the enablement of acns observability
+
+        :return: bool or None"""
+        disable_acns_observability = self.raw_param.get("disable_acns_observability")
+        return not bool(disable_acns_observability) if disable_acns_observability is not None else None
+
+    def get_acns_security(self) -> Union[bool, None]:
+        """Get the enablement of acns security
+
+        :return: bool or None"""
+        disable_acns_security = self.raw_param.get("disable_acns_security")
+        return not bool(disable_acns_security) if disable_acns_security is not None else None
+
     def _get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy(
         self, enable_validation: bool = False
     ) -> Tuple[
@@ -5651,6 +5699,19 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
 
         network_dataplane = self.context.get_network_dataplane()
 
+        acns = self.models.AdvancedNetworking()
+        (acns_enabled, acns_observability, acns_security) = self.context.get_acns_enablement()
+        if acns_enabled is not None:
+            acns.enabled = acns_enabled
+            if acns_observability is not None:
+                acns.observability = self.models.AdvancedNetworkingObservability(
+                    enabled=acns_observability,
+                )
+            if acns_security is not None:
+                acns.security = self.models.AdvancedNetworkingSecurity(
+                    enabled=acns_security,
+                )
+
         if any(
             [
                 network_plugin,
@@ -5710,6 +5771,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         load_balancer_sku = self.context.get_load_balancer_sku()
         if load_balancer_sku != CONST_LOAD_BALANCER_SKU_BASIC:
             network_profile.nat_gateway_profile = nat_gateway_profile
+        if acns_enabled is not None:
+            network_profile.advanced_networking=acns
         mc.network_profile = network_profile
         return mc
 

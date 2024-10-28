@@ -11448,7 +11448,131 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         noopDecorator3.context.attach_mc(normalCluster)
         normalClusterCalculated = noopDecorator3.update_k8s_support_plan(normalCluster)
         self.assertEqual(normalClusterCalculated, normalCluster)
+    
+    def test_mc_get_acns_enablement(self):
+        # Default, not set.
+        ctx_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({}),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1.get_acns_enablement(), (None, None, None))
 
+        # Flag set to True.
+        ctx_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_acns": True,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_2.get_acns_enablement(), (True, None, None))
+
+        # Flag set to True.
+        ctx_3 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_acns": True,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_3.get_acns_enablement(), (True, None, None))
+
+        # Flag set to True and False.
+        ctx_4 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_acns": True,
+                    "disable_acns": True,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        # fail on get_acns mutual exclusive error
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_4.get_acns_enablement()
+
+        # Flag set to False.
+        ctx_5 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "disable_acns": True,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_5.get_acns_enablement(), (False, None, None))
+
+        ctx_6 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_acns": True,
+                    "disable_acns_observability": True,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_6.get_acns_enablement(), (True, False, None))
+
+        ctx_7 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_acns": True,
+                    "disable_acns_security": True,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_7.get_acns_enablement(), (True, None, False))
+
+        # Illegal flags
+        ctx_8 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_acns": True,
+                    "disable_acns_security": True,
+                    "disable_acns_observability": True,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        # fail on get_acns mutual exclusive error
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_8.get_acns_enablement()
+        
+        # Illegal flags
+        ctx_9 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "disable_acns": True,
+                    "enable_acns_security": True,
+                    "disable_acns_observability": True,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        # fail on get_acns mutual exclusive error
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_9.get_acns_enablement()
 
 if __name__ == "__main__":
     unittest.main()
