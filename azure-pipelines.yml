@@ -324,83 +324,6 @@ jobs:
     inputs:
       filePath: build_scripts\windows\scripts\test_zip_installation.ps1
 
-- job: BuildDockerImageAlpine
-  continueOnError: true
-  displayName: Build Docker Image Alpine
-  strategy:
-    matrix:
-      ${{ each arch in parameters.architectures }}:
-        ${{ arch.name }}:
-          pool: ${{ arch.pool }}
-          artifactName: docker-${{ arch.value }}
-          dockerfile: alpine.dockerfile
-  pool:
-    name: $(pool)
-  steps:
-  - bash: ./scripts/ci/install_docker.sh
-    displayName: Install Docker
-  - task: Bash@3
-    displayName: 'Bash Script'
-    inputs:
-      targetType: 'filePath'
-      filePath: scripts/release/docker/pipeline.sh
-
-  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
-    displayName: 'SBOM'
-    inputs:
-      BuildDropPath: $(Build.ArtifactStagingDirectory)
-      DockerImagesToScan: 'clibuild$BUILD_BUILDNUMBER:latest'
-
-  - task: PublishPipelineArtifact@0
-    displayName: 'Publish Artifact: docker image'
-    inputs:
-      TargetPath: $(Build.ArtifactStagingDirectory)
-      ArtifactName: $(artifactName)
-
-- job: TestDockerImageAlpine
-  continueOnError: true
-  displayName: Test Docker Image Alpine
-  dependsOn:
-    - BuildDockerImageAlpine
-    - ExtractMetadata
-  condition: succeeded()
-  strategy:
-    matrix:
-      ${{ each arch in parameters.architectures }}:
-        ${{ arch.name }}:
-          pool: ${{ arch.pool }}
-          artifactName: docker-${{ arch.value }}
-  pool:
-    name: $(pool)
-  steps:
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Metadata'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
-      artifactName: metadata
-
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Docker Image'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/docker'
-      artifactName: $(artifactName)
-
-  - bash: ./scripts/ci/install_docker.sh
-    displayName: Install Docker
-
-  - bash: |
-      set -exv
-      
-      CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
-      IMAGE_NAME=clibuild$BUILD_BUILDNUMBER:latest
-      TAR_FILE=$SYSTEM_ARTIFACTSDIRECTORY/docker/docker-azure-cli-$CLI_VERSION.tar
-      
-      echo "== Test docker image =="
-      
-      docker load < $TAR_FILE
-      docker run $IMAGE_NAME /bin/bash -c "time az self-test && time az --version && sleep 5"
-    displayName: 'Bash Script'
-
 - job: BuildDockerImageAzureLinux
   displayName: Build Docker Image Azure Linux
   dependsOn: BuildRpmPackagesAzureLinux
@@ -412,6 +335,13 @@ jobs:
           artifactName: docker-mariner2.0-${{ arch.value }}
           dockerfile: azure-linux.dockerfile
           packageArtifactName: rpm-mariner2.0-${{ arch.value }}
+          image: mcr.microsoft.com/cbl-mariner/base/core:2.0
+        Azure Linux 3.0 ${{ arch.name }}:
+          pool: ${{ arch.pool }}
+          artifactName: docker-azurelinux3.0-${{ arch.value }}
+          dockerfile: azure-linux.dockerfile
+          packageArtifactName: rpm-azurelinux3.0-${{ arch.value }}
+          image: mcr.microsoft.com/azurelinux/base/core:3.0
   pool:
     name: $(pool)
   steps:
@@ -452,6 +382,9 @@ jobs:
         Mariner 2.0 ${{ arch.name }}:
           pool: ${{ arch.pool }}
           artifactName: docker-mariner2.0-${{ arch.value }}
+        Azure Linux 3.0 ${{ arch.name }}:
+          pool: ${{ arch.pool }}
+          artifactName: docker-azurelinux3.0-${{ arch.value }}
   pool:
     name: $(pool)
   steps:
@@ -978,12 +911,6 @@ jobs:
           pool: ${{ arch.pool }}
 
         # https://wiki.debian.org/DebianReleases
-        Buster ${{ arch.name }}:
-          # 10
-          deb_system: debian
-          distro: buster
-          arch: ${{ arch.value }}
-          pool: ${{ arch.pool }}
         Bullseye ${{ arch.name }}:
           # 11
           deb_system: debian
@@ -1040,11 +967,6 @@ jobs:
         Noble ${{ arch.name }}:
           deb_system: ubuntu
           distro: noble
-          arch: ${{ arch.value }}
-          pool: ${{ arch.pool }}
-        Buster ${{ arch.name }}:
-          deb_system: debian
-          distro: buster
           arch: ${{ arch.value }}
           pool: ${{ arch.pool }}
         Bullseye ${{ arch.name }}:
@@ -1242,8 +1164,6 @@ jobs:
     - TestMsiInstallation
     - BuildWindowsZIP
     - TestZipInstallation
-    - BuildDockerImageAlpine
-    - TestDockerImageAlpine
     - BuildDockerImageAzureLinux
     - TestDockerImageAzureLinux
     - BuildPythonWheel

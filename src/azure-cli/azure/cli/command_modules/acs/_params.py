@@ -913,6 +913,14 @@ def load_arguments(self, _):
         c.argument('dns_zone_resource_ids', options_list=['--ids'], required=True)
         c.argument('attach_zones')
 
+    with self.argument_context("aks nodepool delete-machines") as c:
+        c.argument(
+            "machine_names",
+            nargs="+",
+            required=True,
+            help="Space-separated machine names to delete.",
+        )
+
 
 def _get_default_install_location(exe_name):
     system = platform.system()

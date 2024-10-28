@@ -17,7 +17,7 @@ except ImportError:
     logging.warning("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.64.0"
+VERSION = "2.65.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -52,7 +52,7 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     "antlr4-python3-runtime~=4.13.1",
-    'azure-appconfiguration~=1.1.1',
+    'azure-appconfiguration~=1.7.0',
     'azure-batch~=14.2.0',
     'azure-cli-core=={}'.format(VERSION),
     'azure-cosmos~=3.0,>=3.0.2',
@@ -78,8 +78,8 @@ DEPENDENCIES = [
     'azure-mgmt-compute~=33.0.0',
     'azure-mgmt-containerinstance==10.1.0',
     'azure-mgmt-containerregistry==10.3.0',
-    'azure-mgmt-containerservice~=31.0.0',
-    'azure-mgmt-cosmosdb==9.5.1',
+    'azure-mgmt-containerservice~=32.0.0',
+    'azure-mgmt-cosmosdb==9.6.0',
     'azure-mgmt-databoxedge~=1.0.0',
     'azure-mgmt-datamigration~=10.0.0',
     'azure-mgmt-devtestlabs~=4.0',
@@ -95,7 +95,6 @@ DEPENDENCIES = [
     'azure-mgmt-keyvault==10.3.0',
     'azure-mgmt-kusto~=0.3.0',
     'azure-mgmt-loganalytics==13.0.0b4',
-    'azure-mgmt-managedservices~=1.0',
     'azure-mgmt-managementgroups~=1.0.0',
     'azure-mgmt-maps~=2.0.0',
     'azure-mgmt-marketplaceordering==1.1.0',
@@ -119,7 +118,7 @@ DEPENDENCIES = [
     'azure-mgmt-servicefabric~=2.1.0',
     'azure-mgmt-signalr==2.0.0b1',
     'azure-mgmt-sqlvirtualmachine==1.0.0b5',
-    'azure-mgmt-sql==4.0.0b17',
+    'azure-mgmt-sql==4.0.0b19',
     'azure-mgmt-storage==21.2.0',
     'azure-mgmt-synapse==2.1.0b5',
     'azure-mgmt-trafficmanager~=1.0.0',
@@ -144,6 +143,7 @@ DEPENDENCIES = [
     'PyNaCl~=1.5.0',
     'scp~=0.13.2',
     'semver==2.13.0',
+    'setuptools',
     'six>=1.10.0',  # six is still used by countless extensions
     'sshtunnel~=0.1.4',
     # Even though knack already depends on tabulate, profile module directly uses it for interactive subscription
