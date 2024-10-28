@@ -6487,6 +6487,79 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('replicationRole', 'Primary')
                  ])
 
+    def _test_failover_group_with_secondary_type(self, primary_server,
+                                                   secondary_server, failover_group_name, secondary_type):
+
+        # Add database with secondary type standby
+        database_name = "testdb"
+
+        # Create database on primary server
+        self.cmd('sql db create -g {} --server {} --name {}'
+                 .format(primary_server.group, primary_server.name, database_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', primary_server.group),
+                     JMESPathCheck('name', database_name)
+                 ])
+
+        # Update Failover Group
+        self.cmd('sql failover-group update -g {} -s {} -n {} --grace-period 3 --add-db {} --secondary-type {}'
+                 .format(primary_server.group, primary_server.name, failover_group_name, database_name, secondary_type),
+                 checks=[
+                     JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
+                     JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 180),
+                     JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled'),
+                     JMESPathCheck('length(databases)', 2)
+                 ])
+
+        # Check if properties got propagated to secondary server
+        self.cmd('sql failover-group show -g {} -s {} -n {}'
+                 .format(secondary_server.group, secondary_server.name, failover_group_name),
+                 checks=[
+                     JMESPathCheck('name', failover_group_name),
+                     JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
+                     JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 180),
+                     JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled'),
+                     JMESPathCheck('replicationRole', 'Secondary'),
+                     JMESPathCheck('length(databases)', 2)
+                 ])
+
+        # Check if database is created on partner side
+        self.cmd('sql db list -g {} -s {}'
+                 .format(secondary_server.group, secondary_server.name),
+                 checks=[
+                     JMESPathCheck('length(@)', 3)
+                 ])
+
+        # Check secondary_type
+        self.cmd('sql db replica list-links -g {} -s {} -n {}'
+                 .format(primary_server.group, primary_server.name, database_name),
+                 checks=[
+                     JMESPathCheck('length(@)', 1),
+                     JMESPathCheck('[0].role', 'Primary'),
+                     JMESPathCheck('[0].linkType', secondary_type.upper())])
+
+        # Remove database from failover group
+        self.cmd('sql failover-group update -g {} -s {} -n {} --remove-db {}'
+                 .format(primary_server.group, primary_server.name, failover_group_name, database_name),
+                 checks=[
+                     JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
+                     JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 180),
+                     JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled'),
+                     JMESPathCheck('length(databases)', 1)
+                 ])
+
+        # delete the database from both server
+        self.cmd('sql db delete -g {} --server {} --name {} --yes'
+                 .format(secondary_server.group, secondary_server.name, database_name),
+                 checks=[NoneCheck()])
+
+        self.cmd('sql db delete -g {} --server {} --name {} --yes'
+                 .format(primary_server.group, primary_server.name, database_name),
+                 checks=[NoneCheck()])
+
+        if self.in_recording:
+            time.sleep(60)
+
     # create 2 servers in the same resource group, and 1 server in a different resource group
     @ResourceGroupPreparer(parameter_name="resource_group_1",
                            parameter_name_for_location="resource_group_location_1")
@@ -6494,7 +6567,7 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                            parameter_name_for_location="resource_group_location_2")
     @SqlServerPreparer(parameter_name="server_name_1",
                        resource_group_parameter_name="resource_group_1",
-                       location='westeurope')
+                       location='northeurope')
     @SqlServerPreparer(parameter_name="server_name_2",
                        resource_group_parameter_name="resource_group_2", location='eastus')
     def test_sql_failover_group_mgmt(self,
@@ -6599,6 +6672,11 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
 
         if self.in_recording:
             time.sleep(60)
+
+        # Check secondary type parameter functionality
+        self._test_failover_group_with_secondary_type(s1, s2, failover_group_name, "Standby")
+
+        self._test_failover_group_with_secondary_type(s1, s2, failover_group_name, "Geo")
 
         # Update Failover Group failover policy to Manual
         self.cmd('sql failover-group update -g {} -s {} -n {} --failover-policy Manual'

@@ -9,10 +9,10 @@ from azure.cli.core.azclierror import (ResourceNotFoundError, ArgumentUsageError
                                        MutuallyExclusiveArgumentError)
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_subscription_id
+from azure.mgmt.core.tools import is_valid_resource_id, resource_id, parse_resource_id
 from azure.mgmt.web.models import IpSecurityRestriction
 from importlib import import_module
 from knack.log import get_logger
-from msrestazure.tools import is_valid_resource_id, resource_id, parse_resource_id
 
 from ._appservice_utils import _generic_site_operation
 from .custom import get_site_configs

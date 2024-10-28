@@ -9,9 +9,9 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.profiles import get_sdk
 from azure.cli.core.profiles import ResourceType
+from azure.mgmt.core.tools import resource_id
 from knack.log import get_logger
 from msrest.exceptions import ValidationError
-from msrestazure.tools import resource_id
 
 ROLE_NETWORK_CONTRIBUTOR = '4d97b98b-1d4f-4787-a291-c67834d212e7'
 ROLE_READER = 'acdd72a7-3385-48ef-bd42-f606fba81ae7'

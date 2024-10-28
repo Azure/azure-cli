@@ -19,7 +19,7 @@ import base64
 from urllib.request import urlopen
 from urllib.parse import urlparse, unquote
 
-from msrestazure.tools import is_valid_resource_id, parse_resource_id
+from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
 
 from azure.mgmt.resource.resources.models import GenericResource, DeploymentMode
 
@@ -66,7 +66,7 @@ RPAAS_APIS = {'microsoft.datadog': '/subscriptions/{subscriptionId}/providers/Mi
 
 
 def _build_resource_id(**kwargs):
-    from msrestazure.tools import resource_id as resource_id_from_dict
+    from azure.mgmt.core.tools import resource_id as resource_id_from_dict
     try:
         return resource_id_from_dict(**kwargs)
     except KeyError:
@@ -3257,7 +3257,7 @@ def create_policy_assignment(cmd, policy=None, policy_set_definition=None,
 
 
 def _get_resource_id(cli_ctx, val, resource_group, resource_type, resource_namespace):
-    from msrestazure.tools import resource_id
+    from azure.mgmt.core.tools import resource_id
     if is_valid_resource_id(val):
         return val
 
@@ -4522,7 +4522,9 @@ class _ResourceUtils:  # pylint: disable=too-many-instance-attributes
         """
         Formats Url if none provided and sends the POST request with the url and request-body.
         """
-        from msrestazure.azure_operation import AzureOperationPoller
+
+        from azure.core.polling import LROPoller
+        from azure.mgmt.core.polling.arm_polling import ARMPolling
 
         query_parameters = {}
         serialize = self.rcf.resources._serialize  # pylint: disable=protected-access
@@ -4564,28 +4566,14 @@ class _ResourceUtils:  # pylint: disable=too-many-instance-attributes
         body_content_kwargs = {}
         body_content_kwargs['content'] = json.loads(request_body) if request_body else None
 
-        # Construct and send request
-        def long_running_send():
-            request = client.post(url, query_parameters, header_parameters, **body_content_kwargs)
-            pipeline_response = client._pipeline.run(request, stream=False)
-            return pipeline_response.http_response.internal_response
+        def deserialization_cb(pipeline_response):
+            return json.loads(pipeline_response.http_response.text())
 
-        def get_long_running_status(status_link, headers=None):
-            request = client.get(status_link, query_parameters, header_parameters)
-            if headers:
-                request.headers.update(headers)
-            pipeline_response = client._pipeline.run(request, stream=False)
-            return pipeline_response.http_response.internal_response
+        request = client.post(url, query_parameters, header_parameters, **body_content_kwargs)
+        pipeline_response = client._pipeline.run(request, stream=False)
 
-        def get_long_running_output(response):
-            from azure.core.exceptions import HttpResponseError
-            if response.status_code not in [200, 202, 204]:
-                exp = HttpResponseError(response)
-                exp.request_id = response.headers.get('x-ms-request-id')
-                raise exp
-            return response.text
-
-        return AzureOperationPoller(long_running_send, get_long_running_output, get_long_running_status)
+        return LROPoller(client=client, initial_response=pipeline_response, deserialization_callback=deserialization_cb,
+                         polling_method=ARMPolling())
 
     @staticmethod
     def resolve_api_version(rcf, resource_provider_namespace, parent_resource_path, resource_type,
