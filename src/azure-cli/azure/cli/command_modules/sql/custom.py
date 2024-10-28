@@ -596,7 +596,7 @@ def _complete_maintenance_configuration_id(cli_ctx, argument_value=None):
     Completes maintenance configuration id from short to full type if needed
     '''
 
-    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
     if argument_value and not is_valid_resource_id(argument_value):
@@ -641,6 +641,11 @@ class ClientAuthenticationType(Enum):
 class FailoverPolicyType(Enum):
     automatic = 'Automatic'
     manual = 'Manual'
+
+
+class FailoverGroupDatabasesSecondaryType(Enum):
+    geo = 'Geo'
+    standby = 'Standby'
 
 
 class SqlServerMinimalTlsVersionType(Enum):
@@ -736,7 +741,7 @@ def _get_managed_db_resource_id(
     Gets the Managed db resource id in this Azure environment.
     '''
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import resource_id
+    from azure.mgmt.core.tools import resource_id
 
     return resource_id(
         subscription=subscription_id if subscription_id else get_subscription_id(cli_ctx),
@@ -780,7 +785,7 @@ def _get_managed_dropped_db_resource_id(
 
     from urllib.parse import quote
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import resource_id
+    from azure.mgmt.core.tools import resource_id
 
     return (resource_id(
         subscription=subscription_id if subscription_id else get_subscription_id(cli_ctx),
@@ -803,7 +808,7 @@ def _get_managed_instance_resource_id(
     '''
 
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import resource_id
+    from azure.mgmt.core.tools import resource_id
 
     return (resource_id(
         subscription=subscription_id if subscription_id else get_subscription_id(cli_ctx),
@@ -822,7 +827,7 @@ def _get_managed_instance_pool_resource_id(
     '''
 
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import resource_id
+    from azure.mgmt.core.tools import resource_id
 
     if instance_pool_name:
         return (resource_id(
@@ -1023,7 +1028,7 @@ def _validate_elastic_pool_id(
     Returns the elastic_pool_id, which may have been updated and may be None.
     '''
 
-    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
     if elastic_pool_id and not is_valid_resource_id(elastic_pool_id):
@@ -6425,6 +6430,7 @@ def failover_group_create(
         server_name,
         failover_group_name,
         partner_server,
+        secondary_type=None,
         partner_resource_group=None,
         failover_policy=FailoverPolicyType.automatic.value,
         grace_period=1,
@@ -6461,18 +6467,24 @@ def failover_group_create(
         add_db,
         [])
 
+    failover_group_params = FailoverGroup(
+        partner_servers=[partner_server],
+        databases=databases,
+        read_write_endpoint=FailoverGroupReadWriteEndpoint(
+            failover_policy=failover_policy,
+            failover_with_data_loss_grace_period_minutes=grace_period),
+        read_only_endpoint=FailoverGroupReadOnlyEndpoint(
+            failover_policy="Disabled")
+    )
+
+    if secondary_type is not None:
+        failover_group_params.secondary_type = secondary_type
+
     return client.begin_create_or_update(
         resource_group_name=resource_group_name,
         server_name=server_name,
         failover_group_name=failover_group_name,
-        parameters=FailoverGroup(
-            partner_servers=[partner_server],
-            databases=databases,
-            read_write_endpoint=FailoverGroupReadWriteEndpoint(
-                failover_policy=failover_policy,
-                failover_with_data_loss_grace_period_minutes=grace_period),
-            read_only_endpoint=FailoverGroupReadOnlyEndpoint(
-                failover_policy="Disabled")))
+        parameters=failover_group_params)
 
 
 def failover_group_update(
@@ -6480,6 +6492,7 @@ def failover_group_update(
         instance,
         resource_group_name,
         server_name,
+        secondary_type=None,
         failover_policy=None,
         grace_period=None,
         add_db=None,
@@ -6508,6 +6521,8 @@ def failover_group_update(
         remove_db)
 
     instance.databases = databases
+    if secondary_type is not None:
+        instance.secondary_type = secondary_type
 
     return instance
 

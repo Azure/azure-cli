@@ -18,7 +18,6 @@ class EHNetworkCURDScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_eh_network')
     def test_eh_privateendpoint(self, resource_group):
-        from msrestazure.azure_exceptions import CloudError
         self.kwargs.update({
             'namespacename': self.create_random_name(prefix='eventhubs-nscli', length=20),
             'loc': 'eastus',
