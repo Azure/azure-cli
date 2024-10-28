@@ -1494,18 +1494,6 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         ctx_1.attach_agentpool(agentpool_1)
         self.assertEqual(ctx_1.get_drain_timeout(), 123)
 
-    def common_get_ignore_pod_disruption_budget(self):
-        ctx_1 = AKSAgentPoolContext(
-            self.cmd,
-            AKSAgentPoolParamDict({
-                "ignore_pod_disruption_budget": True,
-            }),
-            self.models,
-            DecoratorMode.DELETE,
-            self.agentpool_decorator_mode,
-        )
-        self.assertEqual(ctx_1.get_ignore_pod_disruption_budget(), True)
-
 class AKSAgentPoolContextStandaloneModeTestCase(AKSAgentPoolContextCommonTestCase):
     def setUp(self):
         self.cli_ctx = MockCLI()

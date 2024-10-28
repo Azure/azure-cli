@@ -932,11 +932,10 @@ def load_arguments(self, _):
     with self.argument_context("aks nodepool delete") as c:
         c.argument(
             "ignore_pod_disruption_budget",
-            options_list=["--ignore-pod-disruption-budget"],
+            options_list=["--ignore-pod-disruption-budget, --ignore-pdb"],
             action='store_true',
             help="delete an AKS nodepool by ignoring PodDisruptionBudget setting",
         )
-
 
 def _get_default_install_location(exe_name):
     system = platform.system()
