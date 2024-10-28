@@ -20,7 +20,7 @@ class Wait(AAZWaitCommand):
 
     _aaz_info = {
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/privatednszones/{}/virtualnetworklinks/{}", "2018-09-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/privatednszones/{}/virtualnetworklinks/{}", "2024-06-01"],
         ]
     }
 
@@ -126,7 +126,7 @@ class Wait(AAZWaitCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2018-09-01",
+                    "api-version", "2024-06-01",
                     required=True,
                 ),
             }
@@ -182,6 +182,9 @@ class Wait(AAZWaitCommand):
             )
             properties.registration_enabled = AAZBoolType(
                 serialized_name="registrationEnabled",
+            )
+            properties.resolution_policy = AAZStrType(
+                serialized_name="resolutionPolicy",
             )
             properties.virtual_network = AAZObjectType(
                 serialized_name="virtualNetwork",

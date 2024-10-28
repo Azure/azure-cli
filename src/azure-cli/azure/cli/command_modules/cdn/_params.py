@@ -199,7 +199,7 @@ def configure_rule_parameters(c, is_afdx):
 
     c.argument('cache_duration', arg_group="Action",
                help='The duration for which the content needs to be cached. \
-               Allowed format is [d.]hh:mm:ss.')
+               Allowed format is hh:mm:ss.xxxxxx')
     c.argument('header_action', arg_group="Action",
                arg_type=get_enum_type(['Append', 'Overwrite', 'Delete']),
                help='Header action for the requests.')

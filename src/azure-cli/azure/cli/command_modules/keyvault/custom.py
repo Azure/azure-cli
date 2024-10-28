@@ -423,7 +423,7 @@ def _parse_network_acls(cmd, resource_group_name, network_acls_json, network_acl
 
     network_acls = _create_network_rule_set(cmd, bypass, default_action)
 
-    from msrestazure.tools import is_valid_resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id
 
     network_acls.virtual_network_rules = []
     for vnet_rule in network_acls_json.get('vnet', []):

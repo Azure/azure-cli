@@ -332,10 +332,10 @@ def _check_registry_health(cmd, registry_name, ignore_errors):
                 if not valid_identity and registry.identity.user_assigned_identities:
                     for k, v in registry.identity.user_assigned_identities.items():
                         if v.client_id == client_id:
-                            from msrestazure.azure_exceptions import CloudError
+                            from azure.core.exceptions import HttpResponseError
                             try:
                                 valid_identity = (resolve_identity_client_id(cmd.cli_ctx, k) == client_id)
-                            except CloudError:
+                            except HttpResponseError:
                                 pass
             if not valid_identity:
                 from ._errors import CMK_MANAGED_IDENTITY_ERROR
@@ -344,7 +344,7 @@ def _check_registry_health(cmd, registry_name, ignore_errors):
 
 def _check_private_endpoint(cmd, registry_name, vnet_of_private_endpoint):  # pylint: disable=too-many-locals, too-many-statements
     import socket
-    from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
+    from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id, resource_id
 
     if registry_name is None:
         raise CLIError("Registry name must be provided to verify DNS routings of its private endpoints")
