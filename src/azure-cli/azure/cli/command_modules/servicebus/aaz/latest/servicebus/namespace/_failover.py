@@ -12,19 +12,16 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "servicebus namespace delete",
+    "servicebus namespace failover",
 )
-class Delete(AAZCommand):
-    """Delete an existing namespace. This operation also removes all associated resources under the namespace.
-
-    :example: Deletes the Service Bus Namespace
-        az servicebus namespace delete --resource-group myresourcegroup --name mynamespace
+class Failover(AAZCommand):
+    """GeoDR Failover
     """
 
     _aaz_info = {
         "version": "2023-01-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.servicebus/namespaces/{}", "2023-01-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.servicebus/namespaces/{}/failover", "2023-01-01-preview"],
         ]
     }
 
@@ -32,7 +29,7 @@ class Delete(AAZCommand):
 
     def _handler(self, command_args):
         super()._handler(command_args)
-        return self.build_lro_poller(self._execute_operations, None)
+        return self.build_lro_poller(self._execute_operations, self._output)
 
     _args_schema = None
 
@@ -46,7 +43,7 @@ class Delete(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.namespace_name = AAZStrArg(
-            options=["-n", "--name", "--namespace-name"],
+            options=["--namespace-name"],
             help="The namespace name",
             required=True,
             id_part="name",
@@ -56,14 +53,27 @@ class Delete(AAZCommand):
             ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
-            help="The resourceGroup name",
             required=True,
+        )
+
+        # define Arg Group "Properties"
+
+        _args_schema = cls._args_schema
+        _args_schema.force = AAZBoolArg(
+            options=["--force"],
+            arg_group="Properties",
+            help="If Force is false then graceful failover is attempted after ensuring no data loss. If Force flag is set to true, Forced failover is attempted with possible data loss.",
+        )
+        _args_schema.primary_location = AAZStrArg(
+            options=["--primary-location"],
+            arg_group="Properties",
+            help="Query parameter for the new primary location after failover.",
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.NamespacesDelete(ctx=self.ctx)()
+        yield self.NamespacesFailover(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -74,7 +84,11 @@ class Delete(AAZCommand):
     def post_operations(self):
         pass
 
-    class NamespacesDelete(AAZHttpOperation):
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
+
+    class NamespacesFailover(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -84,25 +98,16 @@ class Delete(AAZCommand):
                 return self.client.build_lro_polling(
                     self.ctx.args.no_wait,
                     session,
-                    self.on_200,
+                    self.on_200_201,
                     self.on_error,
                     lro_options={"final-state-via": "azure-async-operation"},
                     path_format_arguments=self.url_parameters,
                 )
-            if session.http_response.status_code in [200]:
+            if session.http_response.status_code in [200, 201]:
                 return self.client.build_lro_polling(
                     self.ctx.args.no_wait,
                     session,
-                    self.on_200,
-                    self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
-                    path_format_arguments=self.url_parameters,
-                )
-            if session.http_response.status_code in [204]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_204,
+                    self.on_200_201,
                     self.on_error,
                     lro_options={"final-state-via": "azure-async-operation"},
                     path_format_arguments=self.url_parameters,
@@ -113,13 +118,13 @@ class Delete(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ServiceBus/namespaces/{namespaceName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ServiceBus/namespaces/{namespaceName}/failover",
                 **self.url_parameters
             )
 
         @property
         def method(self):
-            return "DELETE"
+            return "POST"
 
         @property
         def error_format(self):
@@ -153,15 +158,67 @@ class Delete(AAZCommand):
             }
             return parameters
 
-        def on_200(self, session):
-            pass
+        @property
+        def header_parameters(self):
+            parameters = {
+                **self.serialize_header_param(
+                    "Content-Type", "application/json",
+                ),
+                **self.serialize_header_param(
+                    "Accept", "application/json",
+                ),
+            }
+            return parameters
 
-        def on_204(self, session):
-            pass
+        @property
+        def content(self):
+            _content_value, _builder = self.new_content_builder(
+                self.ctx.args,
+                typ=AAZObjectType,
+                typ_kwargs={"flags": {"required": True, "client_flatten": True}}
+            )
+            _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+
+            properties = _builder.get(".properties")
+            if properties is not None:
+                properties.set_prop("force", AAZBoolType, ".force")
+                properties.set_prop("primaryLocation", AAZStrType, ".primary_location")
+
+            return self.serialize_content(_content_value)
+
+        def on_200_201(self, session):
+            data = self.deserialize_http_content(session)
+            self.ctx.set_var(
+                "instance",
+                data,
+                schema_builder=self._build_schema_on_200_201
+            )
+
+        _schema_on_200_201 = None
+
+        @classmethod
+        def _build_schema_on_200_201(cls):
+            if cls._schema_on_200_201 is not None:
+                return cls._schema_on_200_201
+
+            cls._schema_on_200_201 = AAZObjectType()
+
+            _schema_on_200_201 = cls._schema_on_200_201
+            _schema_on_200_201.properties = AAZObjectType(
+                flags={"client_flatten": True},
+            )
+
+            properties = cls._schema_on_200_201.properties
+            properties.force = AAZBoolType()
+            properties.primary_location = AAZStrType(
+                serialized_name="primaryLocation",
+            )
+
+            return cls._schema_on_200_201
 
 
-class _DeleteHelper:
-    """Helper class for Delete"""
+class _FailoverHelper:
+    """Helper class for Failover"""
 
 
-__all__ = ["Delete"]
+__all__ = ["Failover"]
