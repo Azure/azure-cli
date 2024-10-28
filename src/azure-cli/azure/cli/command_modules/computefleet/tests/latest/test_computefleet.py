@@ -152,6 +152,25 @@ class TestComputefleetScenario(ScenarioTest):
         except Exception as e:
             print(f"Failed to create fleet: {e}")
             raise
+    
+    def test_fleet_show(self, fleet=fleet_name, rg=resource_group):
+        self.kwargs.update({
+            'fleet_name': fleet,
+            'resource_group': rg
+        })
+
+        self.cmd('az computefleet show --name {fleet_name} --resource-group {resource_group} ', checks=[
+            self.check('fleet_name', '{fleet}')
+        ])
+        
+    def test_fleet_list(self, rg=resource_group):
+        self.kwargs.update({
+            'resource_group': rg
+        })
+        
+        self.cmd('az computefleet list  --resource-group {resource_group} ', checks=[
+            self.check('length(@)', 1)
+        ])
 
     def test_fleet_update(self, fleet=fleet_name, rg=resource_group):
         self.kwargs.update({
@@ -180,6 +199,7 @@ class TestComputefleetScenario(ScenarioTest):
             raise
 
     @AllowLargeResponse()
+   # @record_only()
     def test_all_fleet_operations(self):
         try:
             self.test_fleet_create()
