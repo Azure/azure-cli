@@ -20,7 +20,7 @@ class List(AAZCommand):
     List VirtualMachineScaleSet resources by Fleet
 
     :example: Fleets_ListVirtualMachineScaleSets
-        az azure-fleet fleet virtual-machine-scale-set list --resource-group rgazurefleet --name myFleet
+        az azure-fleet list-vmss --name myFleet --resource-group rgazurefleet 
     """
 
     _aaz_info = {
