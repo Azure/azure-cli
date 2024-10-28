@@ -168,10 +168,21 @@ class TestComputefleetScenario(ScenarioTest):
             'resource_group': rg
         })
         
-        self.cmd('az computefleet list  --resource-group {resource_group} ', checks=[
+        self.cmd('az computefleet list --resource-group {resource_group} ', checks=[
             self.check('length(@)', 1)
         ])
 
+    def test_fleet_vmss_list(self,  fleet=fleet_name, rg=resource_group):
+        self.kwargs.update({
+            'fleet_name': fleet,
+            'resource_group': rg
+        })
+        
+        self.cmd('az computefleet list-vmss  --name {fleet_name} --resource-group {resource_group} ', checks=[
+            self.check('fleet_name', '{fleet_name}'),
+            self.check('resourceGroup', '{resource_group}'),
+        ])
+        
     def test_fleet_update(self, fleet=fleet_name, rg=resource_group):
         self.kwargs.update({
             'fleet_name': fleet,
@@ -199,13 +210,14 @@ class TestComputefleetScenario(ScenarioTest):
             raise
 
     @AllowLargeResponse()
-   # @record_only()
+    @record_only()
     def test_all_fleet_operations(self):
         try:
             self.test_fleet_create()
             self.test_fleet_update()
             self.test_fleet_show()
             self.test_fleet_list()
+            self.test_fleet_vmss_list()
             self.test_fleet_scale()
             self.test_fleet_restart()
             self.test_fleet_delete()

@@ -26,5 +26,6 @@ class ComputeFleetCommandsLoader(AzCommandsLoader):
         g.command('list', 'list_computefleets')
         g.command('show', 'show_computefleet')
         g.command('delete', 'delete_computefleet')
+        g.command('list-vmss', 'list_vmss')
 
 COMMAND_LOADER_CLS = ComputeFleetCommandsLoader
