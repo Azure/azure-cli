@@ -1504,6 +1504,7 @@ class AKSAgentPoolContext(BaseAKSContext):
         """
         return self._get_disable_windows_outbound_nat()
 
+
 class AKSAgentPoolAddDecorator:
     def __init__(
         self,

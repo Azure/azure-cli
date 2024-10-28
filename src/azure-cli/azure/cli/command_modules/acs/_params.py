@@ -937,6 +937,7 @@ def load_arguments(self, _):
             help="delete an AKS nodepool by ignoring PodDisruptionBudget setting",
         )
 
+
 def _get_default_install_location(exe_name):
     system = platform.system()
     if system == 'Windows':
