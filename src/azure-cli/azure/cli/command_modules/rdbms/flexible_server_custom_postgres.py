@@ -34,6 +34,7 @@ from .flexible_server_virtual_network import prepare_private_network, prepare_pr
 from .validators import pg_arguments_validator, validate_server_name, validate_and_format_restore_point_in_time, \
     validate_postgres_replica, validate_georestore_network, pg_byok_validator, validate_migration_runtime_server, \
     validate_resource_group, check_resource_group
+from .randomname.generate import generate_username
 
 logger = get_logger(__name__)
 DEFAULT_DB_NAME = 'flexibleserverdb'
@@ -121,7 +122,8 @@ def flexible_server_create(cmd, client,
     high_availability = postgresql_flexibleservers.models.HighAvailability(mode=high_availability,
                                                                            standby_availability_zone=standby_availability_zone)
 
-    administrator_login_password = generate_password(administrator_login_password)
+    password_auth_enabled = password_auth.lower() == 'enabled'
+    administrator_login_password = generate_password(administrator_login_password) if password_auth_enabled else None
 
     identity, data_encryption = build_identity_and_data_encryption(db_engine='postgres',
                                                                    byok_identity=byok_identity,
@@ -384,14 +386,23 @@ def flexible_server_update_custom_func(cmd, client, instance,
                                                                    byok_key=byok_key)
 
     auth_config = instance.auth_config
+    administrator_login = None
     if active_directory_auth:
         auth_config.active_directory_auth = active_directory_auth
     if password_auth:
+        if auth_config.password_auth.lower() == 'disabled' and password_auth.lower() == 'enabled':
+            administrator_login = instance.administrator_login if instance.administrator_login else generate_username()
+            if not administrator_login_password:
+                administrator_login_password = generate_password(administrator_login_password)
+                logger.warning('Make a note of password "%s". You can '
+                    'reset your password with "az postgres flexible-server update -n %s -g %s -p <new-password>".',
+                    administrator_login_password, server_name, resource_group_name)
         auth_config.password_auth = password_auth
 
     params = ServerForUpdate(sku=instance.sku,
                              storage=instance.storage,
                              backup=instance.backup,
+                             administrator_login=administrator_login,
                              administrator_login_password=administrator_login_password,
                              maintenance_window=instance.maintenance_window,
                              network=instance.network,
