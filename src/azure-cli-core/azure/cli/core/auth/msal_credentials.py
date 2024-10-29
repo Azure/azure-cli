@@ -20,6 +20,7 @@ from knack.log import get_logger
 from knack.util import CLIError
 from msal import PublicClientApplication, ConfidentialClientApplication
 
+from .constants import AZURE_CLI_CLIENT_ID
 from .util import check_result, build_sdk_access_token
 
 logger = get_logger(__name__)
@@ -107,4 +108,26 @@ class ServicePrincipalCredential:  # pylint: disable=too-few-public-methods
 
         result = self._msal_app.acquire_token_for_client(list(scopes), **kwargs)
         check_result(result)
+        return build_sdk_access_token(result)
+
+
+class CloudShellCredential:  # pylint: disable=too-few-public-methods
+    # Cloud Shell acts as a "broker" to obtain access token for the user account, so even though it uses
+    # managed identity protocol, it returns a user token.
+    # That's why MSAL uses acquire_token_interactive to retrieve an access token in Cloud Shell.
+    # See https://github.com/Azure/azure-cli/pull/29637
+
+    def __init__(self):
+        self._msal_app = PublicClientApplication(
+            AZURE_CLI_CLIENT_ID,  # Use a real client_id, so that cache would work
+            # TODO: We currently don't maintain an MSAL token cache as Cloud Shell already has its own token cache.
+            #   Ideally we should also use an MSAL token cache.
+            #   token_cache=...
+        )
+
+    def get_token(self, *scopes, **kwargs):
+        logger.debug("CloudShellCredential.get_token: scopes=%r, kwargs=%r", scopes, kwargs)
+        # kwargs is already sanitized by CredentialAdaptor, so it can be safely passed to MSAL
+        result = self._msal_app.acquire_token_interactive(list(scopes), prompt="none", **kwargs)
+        check_result(result, scopes=scopes)
         return build_sdk_access_token(result)

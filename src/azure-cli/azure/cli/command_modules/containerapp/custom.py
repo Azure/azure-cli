@@ -899,6 +899,7 @@ def update_managed_environment(cmd,
                                max_nodes=None,
                                mtls_enabled=None,
                                p2p_encryption_enabled=None,
+                               dapr_connection_string=None,
                                no_wait=False):
     raw_parameters = locals()
     containerapp_env_update_decorator = ContainerAppEnvUpdateDecorator(

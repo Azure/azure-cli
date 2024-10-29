@@ -45,8 +45,7 @@ class SpotPlacementRecommender(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.location = AAZResourceLocationArg(
-            required=True,
-            id_part="name",
+            required=True
         )
 
         # define Arg Group "SpotPlacementScoresInput"
