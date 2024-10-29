@@ -892,6 +892,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         if command_group == 'postgres':
             with self.argument_context('{} flexible-server backup delete'.format(command_group)) as c:
                 c.argument('backup_name', options_list=['--backup-name', '-b'], help='The name of the new backup.')
+                c.argument('yes', arg_type=yes_arg_type)
 
         # identity
         with self.argument_context('{} flexible-server identity'.format(command_group)) as c:
