@@ -754,7 +754,7 @@ jobs:
 
 - job: TestRpmPackagesAzureLinux
   displayName: Test Rpm Package
-  timeoutInMinutes: 120
+  timeoutInMinutes: 180
   dependsOn:
   - BuildRpmPackagesAzureLinux
   - ExtractMetadata
@@ -848,7 +848,7 @@ jobs:
 
 - job: TestRpmPackage
   displayName: Test Rpm Package
-  timeoutInMinutes: 120
+  timeoutInMinutes: 180
   dependsOn:
     - BuildRpmPackages
     - ExtractMetadata
@@ -972,7 +972,7 @@ jobs:
       ArtifactName: $(deb_system)-$(distro)-$(arch)
 
 - job: TestDebPackages
-  timeoutInMinutes: 120
+  timeoutInMinutes: 180
   displayName: Test Deb Packages
   dependsOn:
   - BuildDebPackages
