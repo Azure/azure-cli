@@ -388,19 +388,12 @@ def flexible_server_update_custom_func(cmd, client, instance,
                                                                    byok_key=byok_key)
 
     auth_config = instance.auth_config
-    administrator_login = None
+    administrator_login = instance.administrator_login if instance.administrator_login else None
     if active_directory_auth:
         auth_config.active_directory_auth = active_directory_auth
     if password_auth:
-        if auth_config.password_auth.lower() == 'disabled' and password_auth.lower() == 'enabled':
-            administrator_login = instance.administrator_login if instance.administrator_login else prompt('Please enter administrator username for the server. Once set, it cannot be changed: ')
-            if not administrator_login:
-                raise CLIError('Administrator username is required for enabling password authentication.')
-            if not administrator_login_password:
-                administrator_login_password = generate_password(administrator_login_password)
-                logger.warning('Make a note of password "%s". You can '
-                    'reset your password with "az postgres flexible-server update -n %s -g %s -p <new-password>".',
-                    administrator_login_password, server_name, resource_group_name)
+        administrator_login, administrator_login_password = _update_login(server_name, resource_group_name, auth_config,
+                                                                          password_auth, administrator_login, administrator_login_password)
         auth_config.password_auth = password_auth
 
     params = ServerForUpdate(sku=instance.sku,
@@ -1528,6 +1521,20 @@ def _create_migration(cmd, logging_name, client, subscription_id, resource_group
         migration_instance_resource_id=migrationInstanceResourceId)
 
     return client.create(subscription_id, resource_group_name, target_db_server_name, migration_name, migration_parameters)
+
+
+def _update_login(server_name, resource_group_name, auth_config, password_auth, administrator_login, administrator_login_password):
+    if auth_config.password_auth.lower() == 'disabled' and password_auth.lower() == 'enabled':
+        administrator_login = administrator_login if administrator_login else prompt('Please enter administrator username for the server. Once set, it cannot be changed: ')
+        if not administrator_login:
+            raise CLIError('Administrator username is required for enabling password authentication.')
+        if not administrator_login_password:
+            administrator_login_password = generate_password(administrator_login_password)
+            logger.warning('Make a note of password "%s". You can '
+                'reset your password with "az postgres flexible-server update -n %s -g %s -p <new-password>".',
+                administrator_login_password, server_name, resource_group_name)
+
+    return administrator_login, administrator_login_password
 
 
 # pylint: disable=too-many-instance-attributes, too-few-public-methods, useless-object-inheritance
