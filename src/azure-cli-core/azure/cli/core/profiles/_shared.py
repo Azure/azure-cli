@@ -68,6 +68,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     DATA_KEYVAULT_CERTIFICATES = ('azure.keyvault.certificates', 'CertificateClient')
     DATA_KEYVAULT_KEYS = ('azure.keyvault.keys', 'KeyClient')
     DATA_KEYVAULT_SECRETS = ('azure.keyvault.secrets', 'SecretClient')
+    DATA_KEYVAULT_SECURITY_DOMAIN = ('azure.keyvault.securitydomain', 'SecurityDomainClient')
     DATA_KEYVAULT = ('azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1', 'KeyVaultClient')
     DATA_KEYVAULT_ADMINISTRATION_BACKUP = ('azure.keyvault.administration', 'KeyVaultBackupClient')
     DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL = ('azure.keyvault.administration', 'KeyVaultAccessControlClient')
@@ -207,6 +208,7 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_KEYVAULT_CERTIFICATES: None,
         ResourceType.DATA_KEYVAULT_KEYS: None,
         ResourceType.DATA_KEYVAULT_SECRETS: None,
+        ResourceType.DATA_KEYVAULT_SECURITY_DOMAIN: None,
         ResourceType.DATA_KEYVAULT_ADMINISTRATION_SETTING: None,
         ResourceType.DATA_KEYVAULT: '7.0',
         ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP: '7.5-preview.1',
