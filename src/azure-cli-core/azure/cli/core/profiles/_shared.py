@@ -83,7 +83,8 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_CUSTOMLOCATION = ('azure.mgmt.extendedlocation', 'CustomLocations')
     MGMT_CONTAINERSERVICE = ('azure.mgmt.containerservice', 'ContainerServiceClient')
     MGMT_APPCONTAINERS = ('azure.mgmt.appcontainers', 'ContainerAppsAPIClient')
-
+    MGMT_COMPUTEFLEET = ('azure.mgmt.computefleet', 'ComputeFleetManagementClient')
+	
     # the "None" below will stay till a command module fills in the type so "get_mgmt_service_client"
     # can be provided with "ResourceType.XXX" to initialize the client object. This usually happens
     # when related commands start to support Multi-API
@@ -121,6 +122,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     DATA_STORAGE_FILESHARE = ('azure.multiapi.storagev2.fileshare', None)
     DATA_STORAGE_QUEUE = ('azure.multiapi.storagev2.queue', None)
     DATA_STORAGE_TABLE = ('azure.data.tables', None)
+    MGMT_COMPUTEFLEET =  ('azure.mgmt.computefleet', None)
 
     def __init__(self, import_prefix, client_name):
         """Constructor.
@@ -202,6 +204,7 @@ AZURE_API_PROFILES = {
             'cache_rules': '2023-01-01-preview',
             'credential_sets': '2023-01-01-preview'
         }),
+        ResourceType.MGMT_COMPUTEFLEET: '2024-11-01',
         # The order does make things different.
         # Please keep ResourceType.DATA_KEYVAULT_KEYS before ResourceType.DATA_KEYVAULT
         ResourceType.DATA_KEYVAULT_CERTIFICATES: None,
