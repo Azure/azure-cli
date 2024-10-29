@@ -13,6 +13,9 @@ from urllib.request import urlretrieve
 from dateutil.tz import tzutc   # pylint: disable=import-error
 import uuid
 from knack.log import get_logger
+from knack.prompting import (
+    prompt
+)
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.local_context import ALL
 from azure.cli.core.util import CLIError, sdk_no_wait, user_confirmation
@@ -121,7 +124,8 @@ def flexible_server_create(cmd, client,
     high_availability = postgresql_flexibleservers.models.HighAvailability(mode=high_availability,
                                                                            standby_availability_zone=standby_availability_zone)
 
-    administrator_login_password = generate_password(administrator_login_password)
+    password_auth_enabled = password_auth.lower() == 'enabled'
+    administrator_login_password = generate_password(administrator_login_password) if password_auth_enabled else None
 
     identity, data_encryption = build_identity_and_data_encryption(db_engine='postgres',
                                                                    byok_identity=byok_identity,
@@ -383,14 +387,18 @@ def flexible_server_update_custom_func(cmd, client, instance,
                                                                    byok_key=byok_key)
 
     auth_config = instance.auth_config
+    administrator_login = instance.administrator_login if instance.administrator_login else None
     if active_directory_auth:
         auth_config.active_directory_auth = active_directory_auth
     if password_auth:
+        administrator_login, administrator_login_password = _update_login(server_name, resource_group_name, auth_config,
+                                                                          password_auth, administrator_login, administrator_login_password)
         auth_config.password_auth = password_auth
 
     params = ServerForUpdate(sku=instance.sku,
                              storage=instance.storage,
                              backup=instance.backup,
+                             administrator_login=administrator_login,
                              administrator_login_password=administrator_login_password,
                              maintenance_window=instance.maintenance_window,
                              network=instance.network,
@@ -1534,6 +1542,20 @@ def _create_migration(cmd, logging_name, client, subscription_id, resource_group
         migration_instance_resource_id=migrationInstanceResourceId)
 
     return client.create(subscription_id, resource_group_name, target_db_server_name, migration_name, migration_parameters)
+
+
+def _update_login(server_name, resource_group_name, auth_config, password_auth, administrator_login, administrator_login_password):
+    if auth_config.password_auth.lower() == 'disabled' and password_auth.lower() == 'enabled':
+        administrator_login = administrator_login if administrator_login else prompt('Please enter administrator username for the server. Once set, it cannot be changed: ')
+        if not administrator_login:
+            raise CLIError('Administrator username is required for enabling password authentication.')
+        if not administrator_login_password:
+            administrator_login_password = generate_password(administrator_login_password)
+            logger.warning('Make a note of password "%s". You can '
+                           'reset your password with "az postgres flexible-server update -n %s -g %s -p <new-password>".',
+                           administrator_login_password, server_name, resource_group_name)
+
+    return administrator_login, administrator_login_password
 
 
 # pylint: disable=too-many-instance-attributes, too-few-public-methods, useless-object-inheritance
