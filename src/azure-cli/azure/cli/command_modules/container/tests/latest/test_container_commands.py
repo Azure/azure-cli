@@ -830,6 +830,7 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
     # Test container with Confidential SKU
     @ResourceGroupPreparer()
     def test_container_create_with_confidential_sku(self, resource_group, resource_group_location):
+
         container_group_name = self.create_random_name('clicontainer', 16)
         image = 'alpine:latest'
         os_type = 'Linux'
@@ -916,3 +917,412 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
                              'containers[0].resources.requests.memoryInGb', memory),
                          self.check('sku', sku),
                          self.exists('confidentialComputeProperties.ccePolicy')])
+
+    # Test container reuse from standby pool with config maps
+    @ResourceGroupPreparer()
+    def test_container_reuse_from_standbypool(self, resource_group, resource_group_location):
+
+        container_group_name = self.create_random_name('clicontainer', 16)
+        container_group_profile_id = '/subscriptions/da28f5e5-aa45-46fe-90c8-053ca49ab4b5/resourceGroups/azcliresources/providers/Microsoft.ContainerInstance/containerGroupProfiles/testcg'
+        container_group_profile_revision = '1'
+        standby_pool_profile_id = '/subscriptions/da28f5e5-aa45-46fe-90c8-053ca49ab4b5/resourceGroups/azcliresources/providers/Microsoft.StandbyPool/standbyContainerGroupPools/testpool'
+        location = "eastus"
+        config_map = 'KEY1=VALUE1 KEY2=VALUE2'
+        cpu = 1
+        memory = 1
+        os_type = 'Linux'
+        image = 'mcr.microsoft.com/azuredocs/aci-helloworld:latest'
+        
+        self.kwargs.update({
+            'container_group_name': container_group_name,
+            'location': location,
+            'container_group_profile_id': container_group_profile_id,
+            'container_group_profile_revision': container_group_profile_revision,
+            'standby_pool_profile_id': standby_pool_profile_id,
+            'config_map': config_map,
+            'cpu': cpu,
+            'memory': memory,
+            'os_type': os_type,
+            'image': image
+        })
+
+        # Test create
+        self.cmd('container create -g {rg} -n {container_group_name} --config-map {config_map} '
+                 '--container-group-profile-id {container_group_profile_id} --container-group-profile-revision {container_group_profile_revision} '
+                 '--standby-pool-profile-id {standby_pool_profile_id} --location {location} ',
+                 checks=[self.check('name', '{container_group_name}'),
+                         self.check('location', '{location}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('isCreatedFromStandbyPool','True'),
+                         self.check('osType', '{os_type}'),
+                         self.check('containers[0].image', '{image}'),
+                         self.exists('containers[0].configMap'),
+                         self.check(
+                             'containers[0].resources.requests.cpu', cpu),
+                         self.check(
+                             'containers[0].resources.requests.memoryInGb', memory)])
+        
+        # Test show
+        self.cmd('container show -g {rg} -n {container_group_name}',
+                 checks=[self.check('name', '{container_group_name}'),
+                         self.check('location', '{location}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('isCreatedFromStandbyPool','True'),
+                         self.check('osType', '{os_type}'),
+                         self.check('containers[0].image', '{image}'),
+                         self.exists('containers[0].configMap'),
+                         self.check(
+                             'containers[0].resources.requests.cpu', cpu),
+                         self.check(
+                             'containers[0].resources.requests.memoryInGb', memory)])
+
+        # Test delete
+        self.cmd('container delete -g {rg} -n {container_group_name} -y',
+            checks=[self.check('name', '{container_group_name}'),
+                         self.check('location', '{location}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('isCreatedFromStandbyPool','True'),
+                         self.check('osType', '{os_type}'),
+                         self.check('containers[0].image', '{image}'),
+                         self.exists('containers[0].configMap'),
+                         self.check(
+                             'containers[0].resources.requests.cpu', cpu),
+                         self.check(
+                             'containers[0].resources.requests.memoryInGb', memory)])
+
+    # Test create container container-group-profile with image, os type, ip address type, port, cpu,
+    # memory, command line and environment variables specified.
+    @ResourceGroupPreparer()
+    def test_container_group_profile_create(self, resource_group, resource_group_location):
+        container_group_profile_name = self.create_random_name('clicgp', 16)
+        image = 'alpine:latest'
+        os_type = 'Linux'
+        ip_address_type = 'Public'
+        port1 = 8000
+        port2 = 8001
+        ports = '{} {}'.format(port1, port2)
+        cpu = 1
+        memory = 1
+        command = '"/bin/sh -c \'while true; do echo hello; sleep 20; done\'"'
+        env = 'KEY1=VALUE1 KEY2=FOO=BAR='
+        restart_policy = 'Never'
+        secrets = 'secret1=superawesomesecret secret2="nothing to see"'
+        secret_path = '/s'
+        self.kwargs.update({
+            'container_group_profile_name': container_group_profile_name,
+            'resource_group_location': resource_group_location,
+            'image': image,
+            'os_type': os_type,
+            'ip_address_type': ip_address_type,
+            'port1': port1,
+            'port2': port2,
+            'ports': ports,
+            'cpu': cpu,
+            'memory': memory,
+            'command': command,
+            'env': env,
+            'restart_policy': restart_policy,
+            'secrets': secrets,
+            'secrets_mount_path': secret_path
+        })
+
+        # Test create
+        self.cmd('container container-group-profile create -g {rg} -n {container_group_profile_name} --image {image} --os-type {os_type} '
+                 '--ip-address {ip_address_type} --ports {ports} --cpu {cpu} --memory {memory} '
+                 '--command-line {command} -e {env} --restart-policy {restart_policy} '
+                 '--secrets {secrets} --secrets-mount-path {secrets_mount_path}',
+                 checks=[self.check('name', '{container_group_profile_name}'),
+                         self.check('location', '{resource_group_location}'),
+                         self.check('revision', '1'),
+                         self.check('osType', '{os_type}'),
+                         self.check('restartPolicy', '{restart_policy}'),
+                         self.exists('ipAddress.ports'),
+                         self.check('ipAddress.ports[0].port', '{port1}'),
+                         self.check('ipAddress.ports[1].port', '{port2}'),
+                         self.check('containers[0].image', '{image}'),
+                         self.exists('containers[0].command'),
+                         self.exists('containers[0].environmentVariables'),
+                         self.check(
+                             'containers[0].resources.requests.cpu', cpu),
+                         self.check(
+                             'containers[0].resources.requests.memoryInGb', memory),
+                         self.exists('volumes'),
+                         self.check('volumes[0].secret', {})])
+
+        # Test show
+        self.cmd('container container-group-profile show -g {rg} -n {container_group_profile_name}',
+                 checks=[self.check('name', '{container_group_profile_name}'),
+                         self.check('location', '{resource_group_location}'),
+                         self.check('revision', '1'),
+                         self.check('osType', '{os_type}'),
+                         self.check('restartPolicy', '{restart_policy}'),
+                         self.exists('ipAddress.ports'),
+                         self.check('ipAddress.ports[0].port', '{port1}'),
+                         self.check('ipAddress.ports[1].port', '{port2}'),
+                         self.check('containers[0].image', '{image}'),
+                         self.exists('containers[0].command'),
+                         self.exists('containers[0].environmentVariables'),
+                         self.check(
+                             'containers[0].resources.requests.cpu', cpu),
+                         self.check('containers[0].resources.requests.memoryInGb', memory)])
+        
+        # Test show by revision number 
+        self.cmd('container container-group-profile show-revision -g {rg} -n {container_group_profile_name} -r 1',
+                 checks=[self.check('name', '{container_group_profile_name}'),
+                         self.check('location', '{resource_group_location}'),
+                         self.check('revision', '1'),
+                         self.check('osType', '{os_type}'),
+                         self.check('restartPolicy', '{restart_policy}'),
+                         self.exists('ipAddress.ports'),
+                         self.check('ipAddress.ports[0].port', '{port1}'),
+                         self.check('ipAddress.ports[1].port', '{port2}'),
+                         self.check('containers[0].image', '{image}'),
+                         self.exists('containers[0].command'),
+                         self.exists('containers[0].environmentVariables'),
+                         self.check(
+                             'containers[0].resources.requests.cpu', cpu),
+                         self.check('containers[0].resources.requests.memoryInGb', memory)])
+        
+        # Test delete
+        self.cmd('container container-group-profile delete -g {rg} -n {container_group_profile_name} -y')
+        
+    # Test create container container-group-profile with Confidential SKU
+    @ResourceGroupPreparer()
+    def test_container_group_profile_create_with_confidential_sku(self, resource_group, resource_group_location):
+
+        container_group_profile_name = self.create_random_name('clicgp', 16)
+        image = 'alpine:latest'
+        os_type = 'Linux'
+        ip_address_type = 'Public'
+        cpu = 1
+        memory = 1
+        restart_policy = 'Never'
+        location = "northeurope"
+        sku="Confidential"
+        env = 'KEY1=VALUE1 KEY2=FOO=BAR='
+        cce_policy = "eyJhbGxvd19hbGwiOiB0cnVlLCAiY29udGFpbmVycyI6IHsibGVuZ3RoIjogMCwgImVsZW1lbnRzIjogbnVsbH19"
+
+        self.kwargs.update({
+            'container_group_profile_name': container_group_profile_name,
+            'location': location,
+            'image': image,
+            'os_type': os_type,
+            'ip_address_type': ip_address_type,
+            'cpu': cpu,
+            'memory': memory,
+            'restart_policy': restart_policy,
+            'sku': sku,
+            'env': env,
+            'cce_policy': cce_policy
+        })
+
+        # Test create
+        self.cmd('container container-group-profile create -g {rg} -n {container_group_profile_name} --image {image} --os-type {os_type} '
+                 '--ip-address {ip_address_type} --cpu {cpu} --memory {memory} --sku {sku} '
+                 '--restart-policy {restart_policy} --location {location} -e {env} --cce-policy {cce_policy} '
+                 '--privileged --allow-escalation',
+                 checks=[self.check('name', '{container_group_profile_name}'),
+                         self.check('location', '{location}'),
+                         self.check('revision', '1'),
+                         self.check('osType', '{os_type}'),
+                         self.check('restartPolicy', '{restart_policy}'),
+                         self.check('containers[0].image', '{image}'),
+                         self.exists('containers[0].environmentVariables'),
+                         self.check(
+                             'containers[0].resources.requests.cpu', cpu),
+                         self.check(
+                             'containers[0].resources.requests.memoryInGb', memory),
+                         self.exists('containers[0].securityContext'),
+                         self.check('containers[0].securityContext.privileged', True),
+                         self.check('sku', sku),
+                         self.exists('confidentialComputeProperties.ccePolicy')])
+        
+        # Test show
+        self.cmd('container container-group-profile show -g {rg} -n {container_group_profile_name}',
+                 checks=[self.check('name', '{container_group_profile_name}'),
+                         self.check('location', '{location}'),
+                         self.check('revision', '1'),
+                         self.check('osType', '{os_type}'),
+                         self.check('restartPolicy', '{restart_policy}'),
+                         self.check('containers[0].image', '{image}'),
+                         self.exists('containers[0].environmentVariables'),
+                         self.check(
+                             'containers[0].resources.requests.cpu', cpu),
+                         self.check(
+                             'containers[0].resources.requests.memoryInGb', memory),
+                         self.exists('containers[0].securityContext'),
+                         self.check('containers[0].securityContext.privileged', True),
+                         self.check('containers[0].securityContext.allowPrivilegeEscalation', True),
+                         self.check('sku', sku),
+                         self.exists('confidentialComputeProperties.ccePolicy')])
+
+        # Test delete
+        self.cmd('container container-group-profile delete -g {rg} -n {container_group_profile_name} -y')
+        
+
+    # Test create container container-group-profile with Spot Priority
+    @ResourceGroupPreparer()
+    def test_container_group_profile_create_spot_priority(self, resource_group, resource_group_location):
+        container_group_profile_name = self.create_random_name('clicgp', 16)
+        image = 'alpine:latest'
+        os_type = 'Linux'
+        cpu = 1
+        memory = 1
+        env = 'KEY1=VALUE1 KEY2=FOO=BAR='
+        restart_policy = 'Never'
+        priority = 'Spot'
+        self.kwargs.update({
+            'container_group_profile_name': container_group_profile_name,
+            'resource_group_location': resource_group_location,
+            'image': image,
+            'os_type': os_type, 
+            'cpu': cpu,
+            'memory': memory,
+            'env': env,
+            'restart_policy': restart_policy,
+            'priority' : priority
+        })
+
+        # Test create
+        self.cmd('container container-group-profile create -g {rg} -n {container_group_profile_name} --image {image} --os-type {os_type} '
+                 '--cpu {cpu} --memory {memory} --priority {priority} '
+                 '-e {env} --restart-policy {restart_policy}  ',
+                 checks=[self.check('name', '{container_group_profile_name}'),
+                         self.check('location', '{resource_group_location}'),
+                         self.check('revision', '1'),
+                         self.check('osType', '{os_type}'),
+                         self.check('restartPolicy', '{restart_policy}'),
+                         self.check('priority', '{priority}'),
+                         self.check('containers[0].image', '{image}'),
+                         self.exists('containers[0].environmentVariables'),
+                         self.check(
+                             'containers[0].resources.requests.cpu', cpu),
+                         self.check(
+                             'containers[0].resources.requests.memoryInGb', memory)])
+
+        # Test show
+        self.cmd('container container-group-profile show -g {rg} -n {container_group_profile_name}',
+                 checks=[self.check('name', '{container_group_profile_name}'),
+                         self.check('location', '{resource_group_location}'),
+                         self.check('revision', '1'),
+                         self.check('osType', '{os_type}'),
+                         self.check('restartPolicy', '{restart_policy}'),
+                         self.check('priority', '{priority}'),
+                         self.check('containers[0].image', '{image}'),
+                         self.exists('containers[0].environmentVariables'),
+                         self.check(
+                             'containers[0].resources.requests.cpu', cpu),
+                         self.check(
+                             'containers[0].resources.requests.memoryInGb', memory)])
+
+        # Test delete
+        self.cmd('container container-group-profile delete -g {rg} -n {container_group_profile_name} -y')
+
+    @ResourceGroupPreparer()
+    # Test container container-group-profile create with varied restart policies
+    def test_container_group_profile_update(self, resource_group, resource_group_location):
+        container_group_profile_name = self.create_random_name('clicgp', 16)
+        image = 'alpine:latest'
+        os_type = 'Linux'
+        ip_address_type = 'Public'
+        port1 = 8000
+        port2 = 8001
+        ports = '{} {}'.format(port1, port2)
+        cpu = 1
+        memory = 1
+        command = '"/bin/sh -c \'while true; do echo hello; sleep 20; done\'"'
+        env = 'KEY1=VALUE1 KEY2=FOO=BAR='
+        restart_policy1 = 'Never'
+        restart_policy2 = 'OnFailure'
+        self.kwargs.update({
+            'container_group_profile_name': container_group_profile_name,
+            'resource_group_location': resource_group_location,
+            'image': image,
+            'os_type': os_type,
+            'ip_address_type': ip_address_type,
+            'port1': port1,
+            'port2': port2,
+            'ports': ports,
+            'cpu': cpu,
+            'memory': memory,
+            'command': command,
+            'env': env,
+            'restart_policy1': restart_policy1,
+            'restart_policy2': restart_policy2
+        })
+
+        # Test create with restart policy Never
+        self.cmd('container container-group-profile create -g {rg} -n {container_group_profile_name} --image {image} --os-type {os_type} '
+                 '--ip-address {ip_address_type} --ports {ports} --cpu {cpu} --memory {memory} '
+                 '--command-line {command} -e {env} --restart-policy {restart_policy1} ',
+                 checks=[self.check('name', '{container_group_profile_name}'),
+                         self.check('location', '{resource_group_location}'),
+                         self.check('revision', '1'),
+                         self.check('osType', '{os_type}'),
+                         self.check('restartPolicy', '{restart_policy1}'),
+                         self.exists('ipAddress.ports'),
+                         self.check('ipAddress.ports[0].port', '{port1}'),
+                         self.check('ipAddress.ports[1].port', '{port2}'),
+                         self.check('containers[0].image', '{image}'),
+                         self.exists('containers[0].command'),
+                         self.check(
+                             'containers[0].resources.requests.cpu', cpu),
+                         self.check(
+                             'containers[0].resources.requests.memoryInGb', memory)])
+        
+        # Test create with restart policy OnFailure
+        self.cmd('container container-group-profile create -g {rg} -n {container_group_profile_name} --image {image} --os-type {os_type} '
+                 '--ip-address {ip_address_type} --ports {ports} --cpu {cpu} --memory {memory} '
+                 '--command-line {command} -e {env} --restart-policy {restart_policy2} ',
+                 checks=[self.check('name', '{container_group_profile_name}'),
+                         self.check('location', '{resource_group_location}'),
+                         self.check('revision', '2'),
+                         self.check('osType', '{os_type}'),
+                         self.check('restartPolicy', '{restart_policy2}'),
+                         self.exists('ipAddress.ports'),
+                         self.check('ipAddress.ports[0].port', '{port1}'),
+                         self.check('ipAddress.ports[1].port', '{port2}'),
+                         self.check('containers[0].image', '{image}'),
+                         self.exists('containers[0].command'),
+                         self.check(
+                             'containers[0].resources.requests.cpu', cpu),
+                         self.check(
+                             'containers[0].resources.requests.memoryInGb', memory)])
+    
+        # Test show by revision number 
+        self.cmd('container container-group-profile show-revision -g {rg} -n {container_group_profile_name} -r 1',
+                 checks=[self.check('name', '{container_group_profile_name}'),
+                         self.check('location', '{resource_group_location}'),
+                         self.check('revision', '1'),
+                         self.check('osType', '{os_type}'),
+                         self.check('restartPolicy', '{restart_policy1}'),
+                         self.exists('ipAddress.ports'),
+                         self.check('ipAddress.ports[0].port', '{port1}'),
+                         self.check('ipAddress.ports[1].port', '{port2}'),
+                         self.check('containers[0].image', '{image}'),
+                         self.exists('containers[0].command'),
+                         self.check(
+                             'containers[0].resources.requests.cpu', cpu),
+                         self.check('containers[0].resources.requests.memoryInGb', memory)])
+        
+        self.cmd('container container-group-profile show-revision -g {rg} -n {container_group_profile_name} -r 2',
+                 checks=[self.check('name', '{container_group_profile_name}'),
+                         self.check('location', '{resource_group_location}'),
+                         self.check('revision', '2'),
+                         self.check('osType', '{os_type}'),
+                         self.check('restartPolicy', '{restart_policy2}'),
+                         self.exists('ipAddress.ports'),
+                         self.check('ipAddress.ports[0].port', '{port1}'),
+                         self.check('ipAddress.ports[1].port', '{port2}'),
+                         self.check('containers[0].image', '{image}'),
+                         self.exists('containers[0].command'),
+                         self.check(
+                             'containers[0].resources.requests.cpu', cpu),
+                         self.check('containers[0].resources.requests.memoryInGb', memory)])
+        
+        # Test delete
+        self.cmd('container container-group-profile delete -g {rg} -n {container_group_profile_name} -y')
+
+    
+        
+    

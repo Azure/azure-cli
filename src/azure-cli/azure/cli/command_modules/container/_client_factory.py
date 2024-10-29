@@ -55,3 +55,9 @@ def cf_msi(cli_ctx):
     from azure.mgmt.msi import ManagedServiceIdentityClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     return get_mgmt_service_client(cli_ctx, ManagedServiceIdentityClient)
+
+def cf_container_group_profiles(cli_ctx, *_):
+    return _container_instance_client_factory(cli_ctx).container_group_profiles
+
+def cf_container_group_profile(cli_ctx, *_):
+    return _container_instance_client_factory(cli_ctx).container_group_profile
