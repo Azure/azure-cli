@@ -13,6 +13,9 @@ from urllib.request import urlretrieve
 from dateutil.tz import tzutc   # pylint: disable=import-error
 import uuid
 from knack.log import get_logger
+from knack.prompting import (
+    prompt
+)
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.local_context import ALL
 from azure.cli.core.util import CLIError, sdk_no_wait, user_confirmation
@@ -34,7 +37,6 @@ from .flexible_server_virtual_network import prepare_private_network, prepare_pr
 from .validators import pg_arguments_validator, validate_server_name, validate_and_format_restore_point_in_time, \
     validate_postgres_replica, validate_georestore_network, pg_byok_validator, validate_migration_runtime_server, \
     validate_resource_group, check_resource_group
-from .randomname.generate import generate_username
 
 logger = get_logger(__name__)
 DEFAULT_DB_NAME = 'flexibleserverdb'
@@ -391,7 +393,9 @@ def flexible_server_update_custom_func(cmd, client, instance,
         auth_config.active_directory_auth = active_directory_auth
     if password_auth:
         if auth_config.password_auth.lower() == 'disabled' and password_auth.lower() == 'enabled':
-            administrator_login = instance.administrator_login if instance.administrator_login else generate_username()
+            administrator_login = instance.administrator_login if instance.administrator_login else prompt('Please enter administrator username for the server. Once set, it cannot be changed: ')
+            if not administrator_login:
+                raise CLIError('Administrator username is required for enabling password authentication.')
             if not administrator_login_password:
                 administrator_login_password = generate_password(administrator_login_password)
                 logger.warning('Make a note of password "%s". You can '
