@@ -53,3 +53,11 @@ helps['computefleet show'] = """
         - name: Show compute fleet details
           text: az computefleet show --name MyFleet --resource-group MyResourceGroup
 """
+
+helps['computefleet list-vmss'] = """
+    type: command
+    short-summary: List all VMSS for the compute fleets.
+    examples:
+        - name: List compute fleet vmss 
+          text: az computefleet list-vmss --name myFleetname --resource-group MyResourceGroup
+"""

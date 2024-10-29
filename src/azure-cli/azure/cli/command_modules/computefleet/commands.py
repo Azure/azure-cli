@@ -9,23 +9,22 @@
 # pylint: disable=too-many-statements
 
 from azure.cli.core.commands import CliCommandType
-from azure.cli.core import AzCommandsLoader
 from ._client_factory import cf_computefleet
-from azure.cli.command_modules.computefleet._help import helps  # pylint: disable=unused-import
+from .resource_type import CustomResourceType  # Import the custom ResourceType
 
-class ComputeFleetCommandsLoader(AzCommandsLoader):
 
-    def load_command_table(loader, args):
-    computefleet_custom = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.computefleet.custom#{}'
+def load_command_table(self, _):
+    computefleet_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.computefleet.operations#ComputeFleetManagementClient.{}',
+        client_factory=cf_computefleet
     )
-        
-    with self.command_group('computefleet', computefleet_custom, client_factory=cf_computefleet) as g:
-        g.command('create', 'create_computefleet')
-        g.command('update', 'update_computefleet')
-        g.command('list', 'list_computefleets')
-        g.command('show', 'show_computefleet')
-        g.command('delete', 'delete_computefleet')
-        g.command('list-vmss', 'list_vmss')
 
-COMMAND_LOADER_CLS = ComputeFleetCommandsLoader
+    with self.command_group('computefleet', computefleet_sdk, client_factory=cf_computefleet) as g:
+        g.command('create', 'create_or_update')  # Ensure this matches the actual method name
+        g.command('update', 'update')            # Ensure this matches the actual method name
+        g.command('list', 'list')                # Ensure this matches the actual method name
+        g.command('show', 'get')                 # Ensure this matches the actual method name
+        g.command('delete', 'delete')            # Ensure this matches the actual method name
+        g.command('list-vmss', 'list_vmss')      # Ensure this matches the actual method name
+
+    return self.command_table  # Ensure the command table is returned

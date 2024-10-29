@@ -18,7 +18,8 @@ setup(
     include_package_data=True,
     install_requires=[
         'azure-cli-core',
-        'azure-cli'
+        'azure-cli',
+        'azure-mgmt-computefleet',  # Ensure this package is installed
     ],
    entry_points={
         'azure.cli.command_modules': [

@@ -9,28 +9,23 @@ from azure.cli.core import AzCommandsLoader
 from azure.cli.core.commands import CliCommandType
 from azure.cli.command_modules.computefleet._help import helps  # pylint: disable=unused-import
 from azure.cli.core.profiles import ResourceType  # required when using python sdk
+from azure.cli.core.commands.client_factory import get_mgmt_service_client
+from ._client_factory import cf_computefleet  # Import the client factory
+from .resource_type import CustomResourceType 
 
 class ComputefleetCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
+        from azure.cli.core.profiles import ResourceType
+        MGMT_COMPUTEFLEET = CustomResourceType.MGMT_COMPUTEFLEET
         custom_command_type = CliCommandType(
             operations_tmpl='azure.cli.command_modules.computefleet.custom#{}')
-        super().__init__(cli_ctx=cli_ctx,
-                         resource_type=ResourceType.MGMT_COMPUTEFLEET,  # required when using python sdk
-                         custom_command_type=custom_command_type)
-
+        super(ComputefleetCommandsLoader, self).__init__(cli_ctx=cli_ctx,
+                         resource_type=MGMT_COMPUTEFLEET)
     def load_command_table(self, args):
-        computefleet_custom = CliCommandType(
-            operations_tmpl='azure.cli.command_modules.computefleet.custom#{}'
-        )
-
-        with self.command_group('computefleet', computefleet_custom) as g:
-            g.command('create', 'create_computefleet')
-            g.command('update', 'update_computefleet')
-            g.command('delete', 'delete_computefleet')
-            g.command('list', 'list_computefleets')
-            g.command('show', 'show_computefleet')
-            g.command('list-vmss', 'list_vmss')
+        from .commands import load_command_table
+        load_command_table(self, args)
+        return self.command_table  # Ensure the command table is returned
 
     def load_arguments(self, command):
         from azure.cli.command_modules.computefleet._params import load_arguments
