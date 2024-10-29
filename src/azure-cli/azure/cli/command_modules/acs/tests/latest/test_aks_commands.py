@@ -2102,7 +2102,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # create
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
                      '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
-                     '--service-principal={service_principal} --client-secret={client_secret} --uptime-sla '
+                     '--service-principal={service_principal} --client-secret={client_secret} --tier standard '
         self.cmd(create_cmd, checks=[
             self.exists('fqdn'),
             self.exists('nodeResourceGroup'),
@@ -5262,21 +5262,21 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # create
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
                      '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
-                     '--uptime-sla'
+                     '--tier standard'
         self.cmd(create_cmd, checks=[
             self.exists('fqdn'),
             self.exists('nodeResourceGroup'),
             self.check('provisioningState', 'Succeeded'),
             self.check('sku.tier', 'Standard')
         ])
-        # update to no uptime sla
-        no_uptime_sla_cmd = 'aks update --resource-group={resource_group} --name={name} --no-uptime-sla'
-        self.cmd(no_uptime_sla_cmd, checks=[
+        # update to free tier
+        free_tier_cmd = 'aks update --resource-group={resource_group} --name={name} --tier free'
+        self.cmd(free_tier_cmd, checks=[
             self.check('sku.tier', 'Free')
         ])
         # update to uptime sla again
-        uptime_sla_cmd = 'aks update --resource-group={resource_group} --name={name} --uptime-sla'
-        self.cmd(uptime_sla_cmd, checks=[
+        standard_tier_cmd = 'aks update --resource-group={resource_group} --name={name} --tier standard'
+        self.cmd(standard_tier_cmd, checks=[
             self.check('sku.tier', 'Standard')
         ])
         # delete

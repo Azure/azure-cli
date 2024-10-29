@@ -327,9 +327,6 @@ parameters:
   - name: --enable-high-log-scale-mode
     type: bool
     short-summary: Enable High Log Scale Mode for Container Logs.
-  - name: --uptime-sla
-    type: bool
-    short-summary: --uptime-sla is deprecated. Please use '--tier standard' instead.
   - name: --tier
     type: string
     short-summary: Specify SKU tier for managed clusters. '--tier standard' enables a standard managed cluster service with a financially backed SLA. '--tier free' does not have a financially backed SLA.
@@ -654,12 +651,6 @@ parameters:
   - name: --max-count
     type: int
     short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 1000]
-  - name: --uptime-sla
-    type: bool
-    short-summary: Enable a standard managed cluster service with a financially backed SLA. --uptime-sla is deprecated. Please use '--tier standard' instead.
-  - name: --no-uptime-sla
-    type: bool
-    short-summary: Change a standard managed cluster to a free one. --no-uptime-sla is deprecated. Please use '--tier free' instead.
   - name: --tier
     type: string
     short-summary: Specify SKU tier for managed clusters. '--tier standard' enables a standard managed cluster service with a financially backed SLA. '--tier free' changes a standard managed cluster to a free one.

@@ -4498,41 +4498,6 @@ class AKSManagedClusterContext(BaseAKSContext):
             return new_profile
         return self.mc.service_mesh_profile
 
-    def _get_uptime_sla(self, enable_validation: bool = False) -> bool:
-        """Internal function to obtain the value of uptime_sla.
-
-        This function supports the option of enable_validation. When enabled, if both uptime_sla and no_uptime_sla are
-        specified, raise a MutuallyExclusiveArgumentError.
-
-        :return: bool
-        """
-        # read the original value passed by the command
-        uptime_sla = self.raw_param.get("uptime_sla")
-
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
-        if self.decorator_mode == DecoratorMode.CREATE:
-            if (
-                self.mc and
-                self.mc.sku and
-                self.mc.sku.tier is not None
-            ):
-                uptime_sla = self.mc.sku.tier == "Standard"
-
-        # this parameter does not need dynamic completion
-        # validation
-        if enable_validation:
-            if uptime_sla and self._get_no_uptime_sla(enable_validation=False):
-                raise MutuallyExclusiveArgumentError(
-                    'Cannot specify "--uptime-sla" and "--no-uptime-sla" at the same time.'
-                )
-
-            if uptime_sla and self.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_FREE:
-                raise MutuallyExclusiveArgumentError(
-                    'Cannot specify "--uptime-sla" and "--tier free" at the same time.'
-                )
-
-        return uptime_sla
-
     def get_tier(self) -> str:
         """Obtain the value of tier.
 
@@ -4542,66 +4507,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         if not tier:
             return ""
 
-        tierStr = tier.lower()
-        if tierStr == CONST_MANAGED_CLUSTER_SKU_TIER_FREE and self._get_uptime_sla(enable_validation=False):
-            raise MutuallyExclusiveArgumentError(
-                'Cannot specify "--uptime-sla" and "--tier free" at the same time.'
-            )
-
-        if tierStr == CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD and self._get_no_uptime_sla(enable_validation=False):
-            raise MutuallyExclusiveArgumentError(
-                'Cannot specify "--no-uptime-sla" and "--tier standard" at the same time.'
-            )
-
-        return tierStr
-
-    def get_uptime_sla(self) -> bool:
-        """Obtain the value of uptime_sla.
-
-        This function will verify the parameter by default. If both uptime_sla and no_uptime_sla are specified, raise
-        a MutuallyExclusiveArgumentError.
-
-        :return: bool
-        """
-        return self._get_uptime_sla(enable_validation=True)
-
-    def _get_no_uptime_sla(self, enable_validation: bool = False) -> bool:
-        """Internal function to obtain the value of no_uptime_sla.
-
-        This function supports the option of enable_validation. When enabled, if both uptime_sla and no_uptime_sla are
-        specified, raise a MutuallyExclusiveArgumentError.
-
-        :return: bool
-        """
-        # read the original value passed by the command
-        no_uptime_sla = self.raw_param.get("no_uptime_sla")
-        # We do not support this option in create mode, therefore we do not read the value from `mc`.
-
-        # this parameter does not need dynamic completion
-        # validation
-        if enable_validation:
-            if no_uptime_sla and self._get_uptime_sla(enable_validation=False):
-                raise MutuallyExclusiveArgumentError(
-                    'Cannot specify "--uptime-sla" and "--no-uptime-sla" at the same time.'
-                )
-
-            if no_uptime_sla and self.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD:
-                raise MutuallyExclusiveArgumentError(
-                    'Cannot specify "--no-uptime-sla" and "--tier standard" at the same time.'
-                )
-
-        return no_uptime_sla
-
-    def get_no_uptime_sla(self) -> bool:
-        """Obtain the value of no_uptime_sla.
-
-        This function will verify the parameter by default. If both uptime_sla and no_uptime_sla are specified, raise
-        a MutuallyExclusiveArgumentError.
-
-        :return: bool
-        """
-
-        return self._get_no_uptime_sla(enable_validation=True)
+        return tier.lower()
 
     def get_defender_config(self) -> Union[ManagedClusterSecurityProfileDefender, None]:
         """Obtain the value of defender.
@@ -6516,7 +6422,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         """
         self._ensure_mc(mc)
 
-        if self.context.get_uptime_sla() or self.context.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD:
+        if self.context.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD:
             mc.sku = self.models.ManagedClusterSKU(
                 name="Base",
                 tier="Standard"
@@ -7255,13 +7161,13 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 tier="Premium"
             )
 
-        if self.context.get_uptime_sla() or self.context.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD:
+        if self.context.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD:
             mc.sku = self.models.ManagedClusterSKU(
                 name="Base",
                 tier="Standard"
             )
 
-        if self.context.get_no_uptime_sla() or self.context.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_FREE:
+        if self.context.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_FREE:
             mc.sku = self.models.ManagedClusterSKU(
                 name="Base",
                 tier="Free"
