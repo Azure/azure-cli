@@ -22,7 +22,7 @@ from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
     CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK,
 )
 from azure.cli.command_modules.acs.azurecontainerstorage._helpers import (
-    get_cores_from_sku
+    get_vm_sku_details
 )
 from azure.cli.core.azclierror import (
     ArgumentUsageError,
@@ -446,17 +446,17 @@ def _validate_nodepools(  # pylint: disable=too-many-branches,too-many-locals
     if is_extension_installed:
         if nodepool_list is not None:
             raise ArgumentUsageError(
-                'Cannot set --azure-container-storage-nodepools while using '
-                '--enable-azure-container-storage to enable a type of storage pool '
-                'in a cluster where Azure Container Storage is already installed.'
+                "Cannot set --azure-container-storage-nodepools while using "
+                "--enable-azure-container-storage to enable a type of storage pool "
+                "in a cluster where Azure Container Storage is already installed. "
+                "Use 'az aks nodepool' to label the node pool instead."
             )
 
         if agentpool_details is not None:
-            for agentpool in agentpool_details:
+            for nodepool_name, agentpool in agentpool_details.items():
                 node_labels = agentpool.get("node_labels")
                 if node_labels is not None and \
                    node_labels.get(CONST_ACSTOR_IO_ENGINE_LABEL_KEY) is not None:
-                    nodepool_name = agentpool.get("name")
                     nodepool_arr.append(nodepool_name)
 
         if len(nodepool_arr) == 0:
@@ -473,64 +473,82 @@ def _validate_nodepools(  # pylint: disable=too-many-branches,too-many-locals
             'from the node pool and use node pools which has nodes with 4 or more cores and try again.'
         )
     else:
-        agentpool_names = []
-        if agentpool_details is not None:
-            for details in agentpool_details:
-                agentpool_names.append(details.get("name"))
         if not nodepool_list:
-            agentpool_names_str = ', '.join(agentpool_names)
+            agentpool_names_str = ', '.join(agentpool_details.keys())
             raise RequiredArgumentMissingError(
                 'Multiple node pools present. Please define the node pools on which you want '
                 'to enable Azure Container Storage using --azure-container-storage-nodepools.'
                 f'\nNode pools available in the cluster are: {agentpool_names_str}.'
                 '\nAborting Azure Container Storage operation.'
             )
-        _validate_nodepool_names(nodepool_list, agentpool_names)
+        pattern = r'^[a-z][a-z0-9]*(?:,[a-z][a-z0-9]*)*$'
+        if re.fullmatch(pattern, nodepool_list) is None:
+            raise InvalidArgumentValueError(
+                'Invalid --azure-container-storage-nodepools value. '
+                'Accepted value is a comma separated string of valid node pool '
+                'names without any spaces.\nA valid node pool name may only contain lowercase '
+                'alphanumeric characters and must begin with a lowercase letter.'
+            )
         nodepool_arr = nodepool_list.split(',')
 
     nvme_nodepool_found = False
     available_node_count = 0
     multi_zoned_cluster = False
-    for nodepool in nodepool_arr:
-        for agentpool in agentpool_details:
-            pool_name = agentpool.get("name")
-            if nodepool == pool_name:
-                os_type = agentpool.get("os_type")
-                if os_type is not None and os_type.lower() != CONST_DEFAULT_NODE_OS_TYPE.lower():
+
+    for pool_name in nodepool_arr:
+        agentpool = agentpool_details.get(pool_name)
+        if agentpool is not None:
+            os_type = agentpool.get("os_type")
+            if os_type is not None and os_type.lower() != CONST_DEFAULT_NODE_OS_TYPE.lower():
+                raise InvalidArgumentValueError(
+                    f'Azure Container Storage can be enabled only on {CONST_DEFAULT_NODE_OS_TYPE} nodepools. '
+                    f'Node pool: {pool_name}, os type: {os_type} does not meet the criteria.'
+                )
+            mode = agentpool.get("mode")
+            node_taints = agentpool.get("node_taints")
+            if mode is not None and mode.lower() == "system" and node_taints is not None:
+                critical_taint = "CriticalAddonsOnly=true:NoSchedule"
+                if critical_taint.casefold() in (taint.casefold() for taint in node_taints):
                     raise InvalidArgumentValueError(
-                        f'Azure Container Storage can be enabled only on {CONST_DEFAULT_NODE_OS_TYPE} nodepools. '
-                        f'Node pool: {pool_name}, os type: {os_type} does not meet the criteria.'
+                        f'Unable to install Azure Container Storage on system nodepool: {pool_name} '
+                        f'since it has a taint {critical_taint}. Remove the taint from the node pool '
+                        'and retry the Azure Container Storage operation.'
                     )
-                mode = agentpool.get("mode")
-                node_taints = agentpool.get("node_taints")
-                if mode is not None and mode.lower() == "system" and node_taints is not None:
-                    critical_taint = "CriticalAddonsOnly=true:NoSchedule"
-                    if critical_taint.casefold() in (taint.casefold() for taint in node_taints):
-                        raise InvalidArgumentValueError(
-                            f'Unable to install Azure Container Storage on system nodepool: {pool_name} '
-                            f'since it has a taint {critical_taint}. Remove the taint from the node pool '
-                            'and retry the Azure Container Storage operation.'
-                        )
-                vm_size = agentpool.get("vm_size")
-                if vm_size is not None:
-                    cpu_value = get_cores_from_sku(vm_size)
-                    if cpu_value < 0:
-                        raise UnknownError(
-                            f'Unable to determine number of cores in node pool: {pool_name}, node size: {vm_size}'
-                        )
-                    if cpu_value < 4:
-                        raise InvalidArgumentValueError(insufficient_core_error.format(pool_name, vm_size, cpu_value))
+            vm_size = agentpool.get("vm_size")
+            if vm_size is not None:
+                cpu_value, nvme_enabled = get_vm_sku_details(vm_size.lower())
+                if cpu_value is None or nvme_enabled is None:
+                    raise UnknownError(
+                        f'Unable to find details for virtual machine size {vm_size}.'
+                    )
+                if cpu_value < 0:
+                    raise UnknownError(
+                        f'Unable to determine number of cores in node pool: {pool_name}, node size: {vm_size}'
+                    )
+                if cpu_value < 4:
+                    raise InvalidArgumentValueError(insufficient_core_error.format(pool_name, vm_size, cpu_value))
 
-                    if vm_size.lower().startswith('standard_l'):
-                        nvme_nodepool_found = True
+                nvme_nodepool_found = nvme_nodepool_found or nvme_enabled
 
-                node_count = agentpool.get("count")
-                if node_count is not None:
-                    available_node_count = available_node_count + node_count
+            node_count = agentpool.get("count")
+            if node_count is not None:
+                available_node_count = available_node_count + node_count
 
-                zoned_nodepool = agentpool.get("zoned")
-                if zoned_nodepool:
-                    multi_zoned_cluster = True
+            zoned_nodepool = agentpool.get("zoned")
+            if zoned_nodepool:
+                multi_zoned_cluster = True
+        else:
+            agentpool_names_str = ", ".join(agentpool_details.keys())
+            nodepool_str = "Node pool"
+            if len(agentpool_details.keys()) > 1:
+                nodepool_str = "Node pools"
+            raise InvalidArgumentValueError(
+                f'Node pool: {pool_name} not found. '
+                'Please provide a comma separated string of existing node pool names '
+                'in --azure-container-storage-nodepools.'
+                f'\n{nodepool_str} available in the cluster: {agentpool_names_str}.'
+                '\nAborting installation of Azure Container Storage.'
+            )
 
     if available_node_count < 3:
         raise UnknownError(
@@ -553,37 +571,3 @@ def _validate_nodepools(  # pylint: disable=too-many-branches,too-many-locals
             'as none of the node pools are zoned. Please add a zoned node pool and '
             'try again.'
         )
-
-
-# _validate_nodepool_names validates that the nodepool_list is a comma separated
-# string consisting of valid nodepool names i.e. a lower alphanumeric
-# characters and the first character should be lowercase letter.
-def _validate_nodepool_names(nodepool_names, agentpool_names):
-    pattern = r'^[a-z][a-z0-9]*(?:,[a-z][a-z0-9]*)*$'
-    if re.fullmatch(pattern, nodepool_names) is None:
-        raise InvalidArgumentValueError(
-            "Invalid --azure-container-storage-nodepools value. "
-            "Accepted value is a comma separated string of valid node pool "
-            "names without any spaces.\nA valid node pool name may only contain lowercase "
-            "alphanumeric characters and must begin with a lowercase letter."
-        )
-
-    nodepool_list = nodepool_names.split(',')
-    for nodepool in nodepool_list:
-        if nodepool not in agentpool_names:
-            if len(agentpool_names) > 1:
-                agentpool_names_str = ', '.join(agentpool_names)
-                raise InvalidArgumentValueError(
-                    f'Node pool: {nodepool} not found. '
-                    'Please provide a comma separated string of existing node pool names '
-                    'in --azure-container-storage-nodepools.'
-                    f'\nNode pools available in the cluster are: {agentpool_names_str}.'
-                    '\nAborting installation of Azure Container Storage.'
-                )
-            raise InvalidArgumentValueError(
-                f'Node pool: {nodepool} not found. '
-                'Please provide a comma separated string of existing node pool names '
-                'in --azure-container-storage-nodepools.'
-                f'\nNode pool available in the cluster is: {agentpool_names[0]}.'
-                '\nAborting installation of Azure Container Storage.'
-            )
