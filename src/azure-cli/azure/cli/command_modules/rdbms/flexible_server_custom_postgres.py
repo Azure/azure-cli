@@ -1531,8 +1531,8 @@ def _update_login(server_name, resource_group_name, auth_config, password_auth, 
         if not administrator_login_password:
             administrator_login_password = generate_password(administrator_login_password)
             logger.warning('Make a note of password "%s". You can '
-                'reset your password with "az postgres flexible-server update -n %s -g %s -p <new-password>".',
-                administrator_login_password, server_name, resource_group_name)
+                           'reset your password with "az postgres flexible-server update -n %s -g %s -p <new-password>".',
+                           administrator_login_password, server_name, resource_group_name)
 
     return administrator_login, administrator_login_password
 
