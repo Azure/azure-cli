@@ -7,7 +7,7 @@ import json
 from unittest import mock
 from knack.util import CLIError
 
-from azure.cli.testsdk import ResourceGroupPreparer, ScenarioTest, StorageAccountPreparer, live_only 
+from azure.cli.testsdk import ResourceGroupPreparer, ScenarioTest, StorageAccountPreparer, live_only
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.mgmt.iothub.models import RoutingSource
 from azure.cli.command_modules.iot.shared import IdentityType
