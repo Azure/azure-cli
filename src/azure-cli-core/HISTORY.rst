@@ -5,13 +5,12 @@ Release History
 
 2.66.0
 ++++++
-* : `aaz`: Support managed identity (#29953)
+* `aaz`: Support managed identity (#29953)
 * Resolve CVE-2024-6119 (#29887)
 * Resolve CVE-2024-5535 (#29887)
 * Resolve CVE-2024-4741 (#29887)
 * Resolve CVE-2024-4603 (#29887)
 * Resolve CVE-2024-2511 (#29887)
-* `az extension add/update` and `az upgrade`: Pre-announcement default value change from `true` to `false` for `--allow-preview` (#30162)
 * Use MSAL for Cloud Shell authentication (#29637)
 
 2.65.0

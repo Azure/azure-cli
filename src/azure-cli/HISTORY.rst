@@ -82,7 +82,7 @@ Release History
 
 **Service Bus**
 
-* `az servicebus namespace replica`: New command group to manage servicebus namespace replicas (#29987)
+* `az servicebus namespace replica`: Add new command group to manage servicebus namespace replicas (#29987)
 
 **Service Connector**
 
