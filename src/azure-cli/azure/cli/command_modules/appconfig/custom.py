@@ -190,7 +190,6 @@ def update_configstore(cmd,
         public_network_access = PublicNetworkAccess.ENABLED if enable_public_network else PublicNetworkAccess.DISABLED
 
     arm_private_link_delegation = None
-
     if enable_arm_private_network_access is not None:
         arm_private_link_delegation = PrivateLinkDelegation.ENABLED if enable_arm_private_network_access else PrivateLinkDelegation.DISABLED
 
