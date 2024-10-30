@@ -20,10 +20,15 @@ from azure.mgmt.appconfiguration.models import (ConfigurationStoreUpdateParamete
                                                 KeyVaultProperties,
                                                 RegenerateKeyParameters,
                                                 CreateMode,
-                                                Replica)
+                                                Replica,
+                                                AuthenticationMode,
+                                                PublicNetworkAccess,
+                                                PrivateLinkDelegation,
+                                                DataPlaneProxyProperties
+                                                )
 from knack.log import get_logger
 from ._utils import resolve_store_metadata, resolve_deleted_store_metadata
-from ._constants import ProvisioningStatus
+from ._constants import ARMAuthenticationMode, ProvisioningStatus
 
 logger = get_logger(__name__)
 
@@ -47,13 +52,23 @@ def create_configstore(cmd,
                        enable_purge_protection=None,
                        replica_name=None,
                        replica_location=None,
-                       no_replica=None):  # pylint: disable=unused-argument
+                       no_replica=None,  # pylint: disable=unused-argument
+                       arm_auth_mode=None,
+                       enable_arm_private_network_access=None):
     if assign_identity is not None and not assign_identity:
         assign_identity = [SYSTEM_ASSIGNED_IDENTITY]
 
     public_network_access = None
     if enable_public_network is not None:
-        public_network_access = 'Enabled' if enable_public_network else 'Disabled'
+        public_network_access = PublicNetworkAccess.ENABLED if enable_public_network else PublicNetworkAccess.DISABLED
+
+    arm_private_link_delegation = None
+    if enable_arm_private_network_access is not None:
+        arm_private_link_delegation = PrivateLinkDelegation.ENABLED if enable_arm_private_network_access else PrivateLinkDelegation.DISABLED
+
+    arm_authentication_mode = None
+    if arm_auth_mode is not None:
+        arm_authentication_mode = AuthenticationMode.LOCAL if arm_auth_mode == ARMAuthenticationMode.LOCAL else AuthenticationMode.PASS_THROUGH
 
     configstore_params = ConfigurationStore(location=location.lower(),
                                             identity=__get_resource_identity(assign_identity) if assign_identity else None,
@@ -63,7 +78,10 @@ def create_configstore(cmd,
                                             disable_local_auth=disable_local_auth,
                                             soft_delete_retention_in_days=retention_days,
                                             enable_purge_protection=enable_purge_protection,
-                                            create_mode=CreateMode.DEFAULT)
+                                            create_mode=CreateMode.DEFAULT,
+                                            data_plane_proxy=DataPlaneProxyProperties(
+                                                authentication_mode=arm_authentication_mode,
+                                                private_link_delegation=arm_private_link_delegation))
 
     progress = IndeterminateStandardOut()
 
@@ -161,19 +179,34 @@ def update_configstore(cmd,
                        identity_client_id=None,
                        enable_public_network=None,
                        disable_local_auth=None,
-                       enable_purge_protection=None):
+                       enable_purge_protection=None,
+                       arm_auth_mode=None,
+                       enable_arm_private_network_access=None):
     __validate_cmk(encryption_key_name, encryption_key_vault, encryption_key_version, identity_client_id)
     if resource_group_name is None:
         resource_group_name, _ = resolve_store_metadata(cmd, name)
 
     public_network_access = None
     if enable_public_network is not None:
-        public_network_access = 'Enabled' if enable_public_network else 'Disabled'
+        public_network_access = PublicNetworkAccess.ENABLED if enable_public_network else PublicNetworkAccess.DISABLED
+
+    arm_private_link_delegation = None
+
+    if enable_arm_private_network_access is not None:
+        arm_private_link_delegation = PrivateLinkDelegation.ENABLED if enable_arm_private_network_access else PrivateLinkDelegation.DISABLED
+
+    arm_authentication_mode = None
+    if arm_auth_mode is not None:
+        arm_authentication_mode = AuthenticationMode.LOCAL if arm_auth_mode == ARMAuthenticationMode.LOCAL else AuthenticationMode.PASS_THROUGH
+
     update_params = ConfigurationStoreUpdateParameters(tags=tags,
                                                        sku=Sku(name=sku) if sku else None,
                                                        public_network_access=public_network_access,
                                                        disable_local_auth=disable_local_auth,
-                                                       enable_purge_protection=enable_purge_protection)
+                                                       enable_purge_protection=enable_purge_protection,
+                                                       data_plane_proxy=DataPlaneProxyProperties(
+                                                           authentication_mode=arm_authentication_mode,
+                                                           private_link_delegation=arm_private_link_delegation))
 
     if encryption_key_name is not None:
         key_vault_properties = KeyVaultProperties()

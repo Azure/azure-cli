@@ -14,7 +14,7 @@ from azure.cli.core.commands.parameters import (get_enum_type,
                                                 resource_group_name_type)
 from azure.cli.core.commands.validators import \
     get_default_location_from_resource_group
-from ._constants import ImportExportProfiles, ImportMode, FeatureFlagConstants
+from ._constants import ImportExportProfiles, ImportMode, FeatureFlagConstants, ARMAuthenticationMode
 
 from ._validators import (validate_appservice_name_or_id, validate_sku, validate_snapshot_query_fields,
                           validate_connection_string, validate_datetime,
@@ -160,6 +160,8 @@ def load_arguments(self, _):
         c.argument('replica_name', arg_type=store_creation_replica_name_arg_type)
         c.argument('replica_location', arg_type=replica_location_arg_type)
         c.argument('no_replica', help='Proceed without replica creation for premium tier store.', arg_type=get_three_state_flag())
+        c.argument('arm_auth_mode', help="TODO", arg_type=get_enum_type([ARMAuthenticationMode.LOCAL, ARMAuthenticationMode.PASS_THROUGH]))
+        c.argument('enable_arm_private_network_access', help='TODO', arg_type=get_three_state_flag())
 
     with self.argument_context('appconfig update') as c:
         c.argument('sku', help='The sku of the App Configuration store', arg_type=get_enum_type(['Free', 'Premium', 'Standard']))
@@ -168,6 +170,8 @@ def load_arguments(self, _):
                    help='When true, requests coming from public networks have permission to access this store while private endpoint is enabled. When false, only requests made through Private Links can reach this store.')
         c.argument('disable_local_auth', arg_type=get_three_state_flag(), help='Disable all authentication methods other than AAD authentication.')
         c.argument('enable_purge_protection', options_list=['--enable-purge-protection', '-p'], arg_type=get_three_state_flag(), help='Property specifying whether protection against purge is enabled for this App Configuration store. Setting this property to true activates protection against purge for this App Configuration store and its contents. Enabling this functionality is irreversible.')
+        c.argument('arm_auth_mode', help="TODO", arg_type=get_enum_type([ARMAuthenticationMode.LOCAL, ARMAuthenticationMode.PASS_THROUGH]))
+        c.argument('enable_arm_private_network_access', help='TODO', arg_type=get_three_state_flag())
 
     with self.argument_context('appconfig recover') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), help='Location of the deleted App Configuration store. Can be viewed using command `az appconfig show-deleted`.')

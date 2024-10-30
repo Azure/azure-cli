@@ -18,7 +18,7 @@ from azure.cli.testsdk.checkers import NoneCheck
 from azure.cli.command_modules.appconfig._constants import FeatureFlagConstants, KeyVaultConstants, ImportExportProfiles, AppServiceConstants
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse, RecordingProcessor
 from azure.cli.testsdk.scenario_tests.utilities import is_json_payload
-from azure.core.exceptions import ResourceNotFoundError
+from azure.core.exceptions import ResourceNotFoundError, HttpResponseError
 from azure.cli.core.azclierror import ResourceNotFoundError as CliResourceNotFoundError, RequiredArgumentMissingError, MutuallyExclusiveArgumentError
 from azure.cli.core.util import shell_safe_json_parse
 
@@ -143,6 +143,48 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                     self.check('provisioningState', 'Succeeded'),
                     self.check('sku.name', premium_sku),
                     self.check('encryption.keyVaultProperties.keyIdentifier', keyvault_uri.strip('/') + "/keys/{}/".format(encryption_key))])
+        
+        # update private link delegation mode and private network access
+        pass_through_auth_mode = 'pass-through'
+        local_auth_mode = "local"
+
+        # update authentication mode to 'local'        
+        self.kwargs.update({
+            'data_plane_auth_mode': local_auth_mode,
+        })
+
+        self.cmd('appconfig update -n {config_store_name} -g {rg} --arm-auth-mode {data_plane_auth_mode}',
+                 checks=[self.check('name', '{config_store_name}'),
+                    self.check('location', '{rg_loc}'),
+                    self.check('resourceGroup', resource_group),
+                    self.check('tags', {}),
+                    self.check('provisioningState', 'Succeeded'),
+                    self.check('dataPlaneProxy.authenticationMode', 'Local')])
+        
+        # enabling private network access should fail
+        with self.assertRaisesRegex(HttpResponseError, 'Data plane proxy authentication mode must be set to Pass-through to enable private link delegation'):
+            self.cmd('appconfig update -n {config_store_name} -g {rg} --enable-arm-private-network-access')
+
+        # update authengication mode to 'pass-through'
+        self.kwargs.update({
+            'data_plane_auth_mode': pass_through_auth_mode,
+        })
+
+        self.cmd('appconfig update -n {config_store_name} -g {rg} --arm-auth-mode {data_plane_auth_mode}',
+                 checks=[self.check('name', '{config_store_name}'),
+                    self.check('location', '{rg_loc}'),
+                    self.check('resourceGroup', resource_group),
+                    self.check('tags', {}),
+                    self.check('provisioningState', 'Succeeded'),
+                    self.check('dataPlaneProxy.authenticationMode', 'Pass-through')])
+        
+        self.cmd('appconfig update -n {config_store_name} -g {rg} --enable-arm-private-network-access',
+                 checks=[self.check('name', '{config_store_name}'),
+                    self.check('location', '{rg_loc}'),
+                    self.check('resourceGroup', resource_group),
+                    self.check('tags', {}),
+                    self.check('provisioningState', 'Succeeded'),
+                    self.check('dataPlaneProxy.privateLinkDelegation', 'Enabled')])
 
         self.cmd('appconfig delete -n {config_store_name} -g {rg} -y')
 

@@ -127,3 +127,8 @@ class ProvisioningStatus:
     RUNNING = "Running"
     SUCCEEDED = "Succeeded"
     FAILED = "Failed"
+
+
+class ARMAuthenticationMode:
+    LOCAL = "local"
+    PASS_THROUGH = "pass-through"
