@@ -9,10 +9,12 @@ import time
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from knack.util import CLIError
+import pytest
 from .batch_preparers import BatchAccountPreparer, BatchScenarioMixin
 
 from .recording_processors import BatchAccountKeyReplacer, StorageSASReplacer
-
+import azure.batch.models as models
+import azure.mgmt.batch
 
 class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
 
@@ -296,6 +298,81 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         self.assertTrue(self.batch_cmd('batch pool show --pool-id {p_id}').get_output_in_json()['networkConfiguration']['enableAcceleratedNetworking'])
 
         self.batch_cmd('batch pool delete --pool-id {p_id} --yes')
+
+    @ResourceGroupPreparer()
+    @BatchAccountPreparer()
+    def test_batch_job_help_cmd(
+            self,
+            resource_group,
+            batch_account_name):
+        self.set_account_info(batch_account_name, resource_group)
+
+        self.kwargs.update({
+            'j_id': 'job1',
+            'p_id': 'testpool',
+            'j_file': self._get_test_data_file('batchCreateJob-simple.json'),
+            'json': self._get_test_data_file('batch-pool-create.json').replace('\\', '\\\\')
+        })
+
+
+        self.batch_cmd('batch pool create --json-file "{json}"')
+
+        #self.batch_cmd('batch pool autoscale enable --help')
+       
+        pool_list = self.batch_cmd('batch pool list')
+        pool_list = pool_list.get_output_in_json()
+        self.assertEqual(len(pool_list), 3)
+        pool_ids = sorted([p['id'] for p in pool_list])
+
+
+        self.batch_cmd('batch pool autoscale enable --pool-id {p_id} '
+                       '--auto-scale-formula "$TargetLowPriorityNodes=3"')
+      
+        # test create job
+        self.batch_cmd('batch job create --id {j_id} --metadata test=value '
+                       '--job-max-task-retry-count 5 '
+                       '--job-manager-task-id JobManager '
+                       '--job-manager-task-command-line "cmd /c set AZ_BATCH_TASK_ID" '
+                       '--job-manager-task-environment-settings '
+                       'CLI_TEST_VAR=CLI_TEST_VAR_VALUE --pool-id {p_id}')
+
+        
+        result = self.batch_cmd('batch job list') \
+            .assert_with_checks([self.check('length(@)', 1)]) \
+            .get_output_in_json()
+    
+
+       
+
+        # test get job
+        self.batch_cmd('batch job show --job-id {j_id}').assert_with_checks([
+            self.check('onAllTasksComplete', 'noaction'),
+            self.check('constraints.maxTaskRetryCount', 5),
+            self.check('jobManagerTask.id', 'JobManager'),
+            self.check('jobManagerTask.environmentSettings[0].name', 'CLI_TEST_VAR'),
+            self.check('jobManagerTask.environmentSettings[0].value', 'CLI_TEST_VAR_VALUE'),
+            self.check('metadata[0].name', 'test'),
+            self.check('metadata[0].value', 'value')])
+        
+
+        '''
+        self.batch_cmd('batch job create --json-file "{j_file}"')
+
+        result = self.batch_cmd('batch pool create --id pool_image1 --vm-size Standard_A1 '
+                                '--image canonical:ubuntuserver:18.04-lts --node-agent-sku-id "batch.node.ubuntu 18.04" '
+                                '--disk-encryption-targets "TemporaryDisk"')
+                      
+        pool = self.batch_cmd("batch pool show --pool-id testpool").get_output_in_json()
+        self.batch_cmd("batch pool show --pool-id testpool").assert_with_checks([
+            self.check('targetNodeCommunicationMode', 'default')
+        ])
+
+        result = self.batch_cmd("batch job list")
+        
+        result =  self.batch_cmd('az batch job create --id job1')
+        '''
+        
+
 
     @ResourceGroupPreparer()
     @BatchAccountPreparer()
@@ -584,6 +661,6 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         self.batch_cmd('batch pool create --id app_package_test --vm-size small --os-family 4 '
                        '--application-package-references does-not-exist', expect_failure=True)
         self.batch_cmd('batch pool set --pool-id {pool_p} --application-package-references does-not-exist',
-                       expect_failure=True)
+                       expect_failure=True)#
 
         # TODO: Test node commands

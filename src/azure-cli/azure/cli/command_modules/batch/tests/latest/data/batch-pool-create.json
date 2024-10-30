@@ -1,14 +1,12 @@
 {
-  "id": "azure-cli-test-json",
+  "id": "xplatCreatedPool",
   "vmSize": "STANDARD_D2S_V3",
   "virtualMachineConfiguration": {
     "imageReference": {
       "publisher": "microsoftwindowsserver",
       "offer": "windowsserver",
       "sku": "2022-datacenter",
-      "version": "latest",
-      "virtualMachineImageId": null,
-      "exactVersion": "latest"
+      "version": "latest"
     },
     "nodeAgentSKUId": "batch.node.windows amd64",
     "nodePlacementConfiguration": {
@@ -18,32 +16,18 @@
       "caching": "none",
       "managedDisk": {
         "storageAccountType": "premium_lrs"
-      },
-      "diskSizeGB": null,
-      "writeAcceleratorEnabled": null
+      }
     }
   },
-  "targetLowPriorityNodes": 2,
-  "taskSlotsPerNode": 3,
-  "resizeTimeout": "PT15M",
-  "environmentSettings": [
-    {
-      "name": "TEST_ENV",
-      "value": "TEST_VALUE"
-    }
-  ],
+  "targetDedicatedNodes": 0,
   "startTask": {
     "commandLine": "cmd /c echo test",
-    "waitForSuccess": true,
     "userIdentity": {
-      "username": "cliTestUser"
-    }
-  },
-  "userAccounts": [
-    {
-      "name": "cliTestUser",
-      "password": "SRYES@#%#_DSFH",
-      "elevationLevel": "admin"
-    }
-  ]
+      "autoUser": {
+        "scope": "task",
+        "elevationLevel": "admin"
+      }
+    },
+    "maxTaskRetryCount": 0
+  }
 }

@@ -4,10 +4,10 @@
 # --------------------------------------------------------------------------------------------
 
 import os
-import azure.batch.models
+#import azure.batch.models
 from azure.cli.core.util import get_file_json
 from urllib.parse import urlsplit
-
+from azure.batch.models import (DiskEncryptionTarget)
 
 # TYPES VALIDATORS
 
@@ -25,10 +25,10 @@ def datetime_format(value):
 
 def disk_encryption_target_format(value):
     """Space seperated target disks to be encrypted. Values can either be OsDisk or TemporaryDisk"""
-    if value == 'OsDisk':
-        return azure.batch.models.DiskEncryptionTarget.os_disk
-    if value == 'TemporaryDisk':
-        return azure.batch.models.DiskEncryptionTarget.temporary_disk
+    if value.lower() == 'osdisk':
+        return DiskEncryptionTarget.OS_DISK
+    if value.lower() == 'temporarydisk':
+        return DiskEncryptionTarget.TEMPORARY_DISK
     message = 'Argument {} is not a valid disk_encryption_target'
     raise ValueError(message.format(value))
 
@@ -92,7 +92,7 @@ def environment_setting_format(value):
     return {'name': env_name, 'value': env_value}
 
 
-def application_package_reference_format(value):
+def batch_application_package_reference_format(value):
     """Space-separated application IDs with optional version in 'id[#version]' format."""
     app_reference = value.split('#', 1)
     package = {'application_id': app_reference[0]}
@@ -103,13 +103,7 @@ def application_package_reference_format(value):
     return package
 
 
-def certificate_reference_format(value):
-    """Space-separated certificate thumbprints."""
-    cert = {'thumbprint': value, 'thumbprint_algorithm': 'sha1'}
-    return cert
-
-
-def task_id_ranges_format(value):
+def batch_task_id_ranges_format(value):
     """Space-separated number ranges in 'start-end' format."""
     try:
         start, end = [int(i) for i in value.split('-')]
