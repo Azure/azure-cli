@@ -109,7 +109,7 @@ Release History
 
 * `az storage blob copy start/start-batch`: Fix `--auth-mode login` (#29964)
 
-** Upgrade**
+**Upgrade**
 * `az upgrade`: Pre-announcement default value change from `true` to `false` for `--allow-preview` (#30162)
 
 2.65.0
