@@ -24,8 +24,7 @@ from azure.mgmt.appconfiguration.models import (ConfigurationStoreUpdateParamete
                                                 AuthenticationMode,
                                                 PublicNetworkAccess,
                                                 PrivateLinkDelegation,
-                                                DataPlaneProxyProperties
-                                                )
+                                                DataPlaneProxyProperties)
 from knack.log import get_logger
 from ._utils import resolve_store_metadata, resolve_deleted_store_metadata
 from ._constants import ARMAuthenticationMode, ProvisioningStatus

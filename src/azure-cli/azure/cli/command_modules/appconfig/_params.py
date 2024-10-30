@@ -119,6 +119,19 @@ def load_arguments(self, _):
         help='Filter snapshots by their status. If no status specified, return all snapshots by default.'
     )
 
+    arm_auth_mode_arg_type = CLIArgumentType(
+        options_list=['--arm-auth-mode'],
+        arg_type=get_enum_type([ARMAuthenticationMode.LOCAL, ARMAuthenticationMode.PASS_THROUGH]),
+        help="The authentication mode for accessing the App Configuration Store via ARM. 'pass-through' (Recommended) uses Microsoft Entra ID to access the store via ARM with proper authorization.'local' uses access keys for authentication. This requires access keys to be enabled."
+    )
+
+    enable_arm_private_network_access_arg_type = CLIArgumentType(
+        option_list=['--enable-arm-private-network-access'],
+        arg_type=get_three_state_flag(),
+        help="Enable access to the App Configuration store via ARM Private Link if resource is restricted to private network access. Requires Pass-through ARM authentication mode."
+
+    )
+
     # Used with data plane commands. These take either a store name or connection string argument.
     # We only read default values when neither connection string nor store name is provided so configured defaults are not supplied.
     data_plane_name_arg_type = CLIArgumentType(
@@ -160,8 +173,8 @@ def load_arguments(self, _):
         c.argument('replica_name', arg_type=store_creation_replica_name_arg_type)
         c.argument('replica_location', arg_type=replica_location_arg_type)
         c.argument('no_replica', help='Proceed without replica creation for premium tier store.', arg_type=get_three_state_flag())
-        c.argument('arm_auth_mode', help="TODO", arg_type=get_enum_type([ARMAuthenticationMode.LOCAL, ARMAuthenticationMode.PASS_THROUGH]))
-        c.argument('enable_arm_private_network_access', help='TODO', arg_type=get_three_state_flag())
+        c.argument('arm_auth_mode', arg_type=arm_auth_mode_arg_type)
+        c.argument('enable_arm_private_network_access', arg_type=enable_arm_private_network_access_arg_type)
 
     with self.argument_context('appconfig update') as c:
         c.argument('sku', help='The sku of the App Configuration store', arg_type=get_enum_type(['Free', 'Premium', 'Standard']))
@@ -170,8 +183,8 @@ def load_arguments(self, _):
                    help='When true, requests coming from public networks have permission to access this store while private endpoint is enabled. When false, only requests made through Private Links can reach this store.')
         c.argument('disable_local_auth', arg_type=get_three_state_flag(), help='Disable all authentication methods other than AAD authentication.')
         c.argument('enable_purge_protection', options_list=['--enable-purge-protection', '-p'], arg_type=get_three_state_flag(), help='Property specifying whether protection against purge is enabled for this App Configuration store. Setting this property to true activates protection against purge for this App Configuration store and its contents. Enabling this functionality is irreversible.')
-        c.argument('arm_auth_mode', help="TODO", arg_type=get_enum_type([ARMAuthenticationMode.LOCAL, ARMAuthenticationMode.PASS_THROUGH]))
-        c.argument('enable_arm_private_network_access', help='TODO', arg_type=get_three_state_flag())
+        c.argument('arm_auth_mode', arg_type=arm_auth_mode_arg_type)
+        c.argument('enable_arm_private_network_access', arg_type=enable_arm_private_network_access_arg_type)
 
     with self.argument_context('appconfig recover') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), help='Location of the deleted App Configuration store. Can be viewed using command `az appconfig show-deleted`.')
