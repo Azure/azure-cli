@@ -41,7 +41,7 @@ Release History
 * `az containerapp env create`: Hide `--dapr-instrumentation-key` parameter (#30117)
 * `az containerapp env update`: Support to update `--dapr-connection-string` (#30117)
 
-** Extension**
+**Extension**
 * `az extension add/update`: Pre-announcement default value change from `true` to `false` for `--allow-preview` (#30162)
 
 **MySQL**
