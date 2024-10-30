@@ -15,18 +15,16 @@ from azure.cli.core.aaz import *
     "sql mi link create",
 )
 class Create(AAZCommand):
-    """Creates a new instance link.
+    """Create a Managed Instance link between Sql On-Prem and Sql Managed Instance.
 
-    This command creates an Azure SQL Managed Instance link by joining distributed availability group on SQL Server based on the parameters passed.
-
-    :example: Creates an instance link.
-        az sql mi link create -g 'rg1' --instance-name 'mi1' --name 'link1' --primary-availability-group-name 'primaryag1' --secondary-availability-group-name 'secondaryag1' --source-endpoint '"tcp://server1:5022" --target-database 'db1' --no-wait')
+    :example: Create a Managed Instance link with minimal properties.
+        az sql mi link create -g testrg --instance-name testcl --name link1 --instance-ag-name instanceAg1 --partner-ag-name boxAg1 --partner-endpoint TCP://SERVER:7022 --databases "[{database-name:testdb}]"
     """
 
     _aaz_info = {
-        "version": "2022-08-01-preview",
+        "version": "2023-08-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.sql/managedinstances/{}/distributedavailabilitygroups/{}", "2022-08-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.sql/managedinstances/{}/distributedavailabilitygroups/{}", "2023-08-01-preview"],
         ]
     }
 
@@ -47,43 +45,70 @@ class Create(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.distributed_availability_group_name = AAZStrArg(
-            options=["-n", "--link", "--name", "--distributed-availability-group-name"],
-            help="Name of the instance link.",
+        _args_schema.link_name = AAZStrArg(
+            options=["-n", "--name", "--link-name"],
+            help="Managed Instance link name.",
             required=True,
         )
         _args_schema.managed_instance_name = AAZStrArg(
             options=["--mi", "--instance-name", "--managed-instance", "--managed-instance-name"],
-            help="Name of Azure SQL Managed Instance.",
+            help="Name of the managed instance.",
             required=True,
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
-            help="Name of the resource group.",
             required=True,
         )
 
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
-        _args_schema.primary_availability_group_name = AAZStrArg(
-            options=["--primary-ag", "--primary-availability-group-name"],
+        _args_schema.databases = AAZListArg(
+            options=["--databases"],
             arg_group="Properties",
-            help="Name of the primary availability group.",
+            help="Databases in the distributed availability group",
         )
-        _args_schema.secondary_availability_group_name = AAZStrArg(
-            options=["--secondary-ag", "--secondary-availability-group-name"],
+        _args_schema.failover_mode = AAZStrArg(
+            options=["--failover-mode"],
             arg_group="Properties",
-            help="Name of the secondary availability group.",
+            help="The link failover mode - can be Manual if intended to be used for two-way failover with a supported SQL Server, or None for one-way failover to Azure.",
+            enum={"Manual": "Manual", "None": "None"},
         )
-        _args_schema.source_endpoint = AAZStrArg(
-            options=["--source-endpoint"],
+        _args_schema.instance_availability_group_name = AAZStrArg(
+            options=["--instance-ag-name", "--instance-availability-group-name"],
             arg_group="Properties",
-            help="IP adress of the source endpoint.",
+            help="Managed instance side availability group name",
         )
-        _args_schema.target_database = AAZStrArg(
-            options=["--target-db", "--target-database"],
+        _args_schema.instance_link_role = AAZStrArg(
+            options=["--instance-link-role"],
             arg_group="Properties",
-            help="Name of the target database",
+            help="Managed instance side link role",
+            enum={"Primary": "Primary", "Secondary": "Secondary"},
+        )
+        _args_schema.partner_availability_group_name = AAZStrArg(
+            options=["--partner-ag-name", "--partner-availability-group-name"],
+            arg_group="Properties",
+            help="SQL server side availability group name",
+        )
+        _args_schema.partner_endpoint = AAZStrArg(
+            options=["--partner-endpoint"],
+            arg_group="Properties",
+            help="SQL server side endpoint - IP or DNS resolvable name",
+        )
+        _args_schema.seeding_mode = AAZStrArg(
+            options=["--seeding-mode"],
+            arg_group="Properties",
+            help="Database seeding mode – can be Automatic (default), or Manual for supported scenarios.",
+            default="Automatic",
+            enum={"Automatic": "Automatic", "Manual": "Manual"},
+        )
+
+        databases = cls._args_schema.databases
+        databases.Element = AAZObjectArg()
+
+        _element = cls._args_schema.databases.Element
+        _element.database_name = AAZStrArg(
+            options=["database-name"],
+            help="The name of the database in link",
         )
         return cls._args_schema
 
@@ -144,13 +169,13 @@ class Create(AAZCommand):
 
         @property
         def error_format(self):
-            return "ODataV4Format"
+            return "MgmtErrorFormat"
 
         @property
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "distributedAvailabilityGroupName", self.ctx.args.distributed_availability_group_name,
+                    "distributedAvailabilityGroupName", self.ctx.args.link_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -172,7 +197,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-08-01-preview",
+                    "api-version", "2023-08-01-preview",
                     required=True,
                 ),
             }
@@ -201,10 +226,21 @@ class Create(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
-                properties.set_prop("primaryAvailabilityGroupName", AAZStrType, ".primary_availability_group_name")
-                properties.set_prop("secondaryAvailabilityGroupName", AAZStrType, ".secondary_availability_group_name")
-                properties.set_prop("sourceEndpoint", AAZStrType, ".source_endpoint")
-                properties.set_prop("targetDatabase", AAZStrType, ".target_database")
+                properties.set_prop("databases", AAZListType, ".databases")
+                properties.set_prop("failoverMode", AAZStrType, ".failover_mode")
+                properties.set_prop("instanceAvailabilityGroupName", AAZStrType, ".instance_availability_group_name")
+                properties.set_prop("instanceLinkRole", AAZStrType, ".instance_link_role")
+                properties.set_prop("partnerAvailabilityGroupName", AAZStrType, ".partner_availability_group_name")
+                properties.set_prop("partnerEndpoint", AAZStrType, ".partner_endpoint")
+                properties.set_prop("seedingMode", AAZStrType, ".seeding_mode")
+
+            databases = _builder.get(".properties.databases")
+            if databases is not None:
+                databases.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.databases[]")
+            if _elements is not None:
+                _elements.set_prop("databaseName", AAZStrType, ".database_name")
 
             return self.serialize_content(_content_value)
 
@@ -240,43 +276,136 @@ class Create(AAZCommand):
             )
 
             properties = cls._schema_on_200_201.properties
+            properties.databases = AAZListType()
             properties.distributed_availability_group_id = AAZStrType(
                 serialized_name="distributedAvailabilityGroupId",
                 flags={"read_only": True},
             )
-            properties.instance_role = AAZStrType(
-                serialized_name="instanceRole",
+            properties.distributed_availability_group_name = AAZStrType(
+                serialized_name="distributedAvailabilityGroupName",
                 flags={"read_only": True},
             )
-            properties.last_hardened_lsn = AAZStrType(
-                serialized_name="lastHardenedLsn",
-                flags={"read_only": True},
+            properties.failover_mode = AAZStrType(
+                serialized_name="failoverMode",
             )
-            properties.link_state = AAZStrType(
-                serialized_name="linkState",
-                flags={"read_only": True},
+            properties.instance_availability_group_name = AAZStrType(
+                serialized_name="instanceAvailabilityGroupName",
             )
-            properties.primary_availability_group_name = AAZStrType(
-                serialized_name="primaryAvailabilityGroupName",
+            properties.instance_link_role = AAZStrType(
+                serialized_name="instanceLinkRole",
+            )
+            properties.partner_availability_group_name = AAZStrType(
+                serialized_name="partnerAvailabilityGroupName",
+            )
+            properties.partner_endpoint = AAZStrType(
+                serialized_name="partnerEndpoint",
+            )
+            properties.partner_link_role = AAZStrType(
+                serialized_name="partnerLinkRole",
+                flags={"read_only": True},
             )
             properties.replication_mode = AAZStrType(
                 serialized_name="replicationMode",
             )
-            properties.secondary_availability_group_name = AAZStrType(
-                serialized_name="secondaryAvailabilityGroupName",
+            properties.seeding_mode = AAZStrType(
+                serialized_name="seedingMode",
             )
-            properties.source_endpoint = AAZStrType(
-                serialized_name="sourceEndpoint",
-            )
-            properties.source_replica_id = AAZStrType(
-                serialized_name="sourceReplicaId",
+
+            databases = cls._schema_on_200_201.properties.databases
+            databases.Element = AAZObjectType()
+
+            _element = cls._schema_on_200_201.properties.databases.Element
+            _element.connected_state = AAZStrType(
+                serialized_name="connectedState",
                 flags={"read_only": True},
             )
-            properties.target_database = AAZStrType(
-                serialized_name="targetDatabase",
+            _element.database_name = AAZStrType(
+                serialized_name="databaseName",
             )
-            properties.target_replica_id = AAZStrType(
-                serialized_name="targetReplicaId",
+            _element.instance_redo_replication_lag_seconds = AAZIntType(
+                serialized_name="instanceRedoReplicationLagSeconds",
+                flags={"read_only": True},
+            )
+            _element.instance_replica_id = AAZStrType(
+                serialized_name="instanceReplicaId",
+                flags={"read_only": True},
+            )
+            _element.instance_send_replication_lag_seconds = AAZIntType(
+                serialized_name="instanceSendReplicationLagSeconds",
+                flags={"read_only": True},
+            )
+            _element.last_backup_lsn = AAZStrType(
+                serialized_name="lastBackupLsn",
+                flags={"read_only": True},
+            )
+            _element.last_backup_time = AAZStrType(
+                serialized_name="lastBackupTime",
+                flags={"read_only": True},
+            )
+            _element.last_commit_lsn = AAZStrType(
+                serialized_name="lastCommitLsn",
+                flags={"read_only": True},
+            )
+            _element.last_commit_time = AAZStrType(
+                serialized_name="lastCommitTime",
+                flags={"read_only": True},
+            )
+            _element.last_hardened_lsn = AAZStrType(
+                serialized_name="lastHardenedLsn",
+                flags={"read_only": True},
+            )
+            _element.last_hardened_time = AAZStrType(
+                serialized_name="lastHardenedTime",
+                flags={"read_only": True},
+            )
+            _element.last_received_lsn = AAZStrType(
+                serialized_name="lastReceivedLsn",
+                flags={"read_only": True},
+            )
+            _element.last_received_time = AAZStrType(
+                serialized_name="lastReceivedTime",
+                flags={"read_only": True},
+            )
+            _element.last_sent_lsn = AAZStrType(
+                serialized_name="lastSentLsn",
+                flags={"read_only": True},
+            )
+            _element.last_sent_time = AAZStrType(
+                serialized_name="lastSentTime",
+                flags={"read_only": True},
+            )
+            _element.most_recent_link_error = AAZStrType(
+                serialized_name="mostRecentLinkError",
+                flags={"read_only": True},
+            )
+            _element.partner_auth_cert_validity = AAZObjectType(
+                serialized_name="partnerAuthCertValidity",
+                flags={"read_only": True},
+            )
+            _element.partner_replica_id = AAZStrType(
+                serialized_name="partnerReplicaId",
+                flags={"read_only": True},
+            )
+            _element.replica_state = AAZStrType(
+                serialized_name="replicaState",
+                flags={"read_only": True},
+            )
+            _element.seeding_progress = AAZStrType(
+                serialized_name="seedingProgress",
+                flags={"read_only": True},
+            )
+            _element.synchronization_health = AAZStrType(
+                serialized_name="synchronizationHealth",
+                flags={"read_only": True},
+            )
+
+            partner_auth_cert_validity = cls._schema_on_200_201.properties.databases.Element.partner_auth_cert_validity
+            partner_auth_cert_validity.certificate_name = AAZStrType(
+                serialized_name="certificateName",
+                flags={"read_only": True},
+            )
+            partner_auth_cert_validity.expiry_date = AAZStrType(
+                serialized_name="expiryDate",
                 flags={"read_only": True},
             )
 

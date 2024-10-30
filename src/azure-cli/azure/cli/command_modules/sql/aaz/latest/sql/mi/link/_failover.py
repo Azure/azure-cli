@@ -12,26 +12,28 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "sql mi link show",
+    "sql mi link failover",
+    confirmation="This operation may cause data loss if the failover type is ForcedAllowDataLoss. Are you sure you want to proceed?",
 )
-class Show(AAZCommand):
-    """Get a Managed Instance link info.
+class Failover(AAZCommand):
+    """Performs requested failover type in this Managed Instance link.
 
-    :example: Gets the Managed Instance link info.
-        az sql mi link show --g testrg --instance-name testcl --name link1
+    :example: Failover a Managed Instance link.
+        az sql mi link failover -g testrg --instance-name testcl --name link1 --failover-type ForcedAllowDataLoss
     """
 
     _aaz_info = {
         "version": "2023-08-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.sql/managedinstances/{}/distributedavailabilitygroups/{}", "2023-08-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.sql/managedinstances/{}/distributedavailabilitygroups/{}/failover", "2023-08-01-preview"],
         ]
     }
 
+    AZ_SUPPORT_NO_WAIT = True
+
     def _handler(self, command_args):
         super()._handler(command_args)
-        self._execute_operations()
-        return self._output()
+        return self.build_lro_poller(self._execute_operations, self._output)
 
     _args_schema = None
 
@@ -46,24 +48,45 @@ class Show(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.link_name = AAZStrArg(
             options=["-n", "--name", "--link-name"],
-            help="Managed Instance link name.",
+            help="The Managed Instance link name.",
             required=True,
             id_part="child_name_1",
+            fmt=AAZStrArgFormat(
+                pattern="^[#a-zA-Z_][\\w@#$]*$",
+                max_length=128,
+                min_length=1,
+            ),
         )
         _args_schema.managed_instance_name = AAZStrArg(
             options=["--mi", "--instance-name", "--managed-instance", "--managed-instance-name"],
-            help="Name of the managed instance.",
+            help="The name of the managed instance.",
             required=True,
             id_part="name",
+            fmt=AAZStrArgFormat(
+                pattern="^[a-z0-9]+(?:-[a-z0-9]+)*$",
+                max_length=63,
+                min_length=1,
+            ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
+        )
+
+        # define Arg Group "Parameters"
+
+        _args_schema = cls._args_schema
+        _args_schema.failover_type = AAZStrArg(
+            options=["--failover-type"],
+            arg_group="Parameters",
+            help="The failover type, can be ForcedAllowDataLoss or Planned.",
+            required=True,
+            enum={"ForcedAllowDataLoss": "ForcedAllowDataLoss", "Planned": "Planned"},
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.DistributedAvailabilityGroupsGet(ctx=self.ctx)()
+        yield self.DistributedAvailabilityGroupsFailover(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -78,27 +101,43 @@ class Show(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class DistributedAvailabilityGroupsGet(AAZHttpOperation):
+    class DistributedAvailabilityGroupsFailover(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
             request = self.make_request()
             session = self.client.send_request(request=request, stream=False, **kwargs)
+            if session.http_response.status_code in [202]:
+                return self.client.build_lro_polling(
+                    self.ctx.args.no_wait,
+                    session,
+                    self.on_200,
+                    self.on_error,
+                    lro_options={"final-state-via": "location"},
+                    path_format_arguments=self.url_parameters,
+                )
             if session.http_response.status_code in [200]:
-                return self.on_200(session)
+                return self.client.build_lro_polling(
+                    self.ctx.args.no_wait,
+                    session,
+                    self.on_200,
+                    self.on_error,
+                    lro_options={"final-state-via": "location"},
+                    path_format_arguments=self.url_parameters,
+                )
 
             return self.on_error(session.http_response)
 
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/managedInstances/{managedInstanceName}/distributedAvailabilityGroups/{distributedAvailabilityGroupName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/managedInstances/{managedInstanceName}/distributedAvailabilityGroups/{distributedAvailabilityGroupName}/failover",
                 **self.url_parameters
             )
 
         @property
         def method(self):
-            return "GET"
+            return "POST"
 
         @property
         def error_format(self):
@@ -140,10 +179,24 @@ class Show(AAZCommand):
         def header_parameters(self):
             parameters = {
                 **self.serialize_header_param(
+                    "Content-Type", "application/json",
+                ),
+                **self.serialize_header_param(
                     "Accept", "application/json",
                 ),
             }
             return parameters
+
+        @property
+        def content(self):
+            _content_value, _builder = self.new_content_builder(
+                self.ctx.args,
+                typ=AAZObjectType,
+                typ_kwargs={"flags": {"required": True, "client_flatten": True}}
+            )
+            _builder.set_prop("failoverType", AAZStrType, ".failover_type", typ_kwargs={"flags": {"required": True}})
+
+            return self.serialize_content(_content_value)
 
         def on_200(self, session):
             data = self.deserialize_http_content(session)
@@ -313,8 +366,8 @@ class Show(AAZCommand):
             return cls._schema_on_200
 
 
-class _ShowHelper:
-    """Helper class for Show"""
+class _FailoverHelper:
+    """Helper class for Failover"""
 
 
-__all__ = ["Show"]
+__all__ = ["Failover"]

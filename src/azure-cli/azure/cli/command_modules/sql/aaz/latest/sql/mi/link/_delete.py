@@ -13,21 +13,19 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "sql mi link delete",
-    confirmation="This operation may cause data loss if replica's last hardened LSN is not in sync with the primary. Are you sure you want to proceed?",
+    confirmation="Are you sure you want to perform this operation?",
 )
 class Delete(AAZCommand):
-    """Removes an instance link.
+    """Drop a Managed Instance link between Sql On-Prem and Sql Managed Instance.
 
-    This command may cause data loss if the link is dropped and replica's LSNs are not synchronized with the primary, thus user must explicitly confirm the command when prompted, or use --yes parameter.
-
-    :example: Forcefully deletes an instance link.
-        az sql mi link delete -g 'rg1' --instance-name 'mi1' -n 'link1' --yes
+    :example: Initiate a Managed Instance link drop.
+        az sql mi link delete -g testrg --instance-name testcl --name link1
     """
 
     _aaz_info = {
-        "version": "2022-08-01-preview",
+        "version": "2023-08-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.sql/managedinstances/{}/distributedavailabilitygroups/{}", "2022-08-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.sql/managedinstances/{}/distributedavailabilitygroups/{}", "2023-08-01-preview"],
         ]
     }
 
@@ -48,20 +46,19 @@ class Delete(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.distributed_availability_group_name = AAZStrArg(
-            options=["-n", "--link", "--name", "--distributed-availability-group-name"],
-            help="Name of the instance link.",
+        _args_schema.link_name = AAZStrArg(
+            options=["-n", "--name", "--link-name"],
+            help="Managed Instance link name.",
             required=True,
             id_part="child_name_1",
         )
         _args_schema.managed_instance_name = AAZStrArg(
             options=["--mi", "--instance-name", "--managed-instance", "--managed-instance-name"],
-            help="Name of Azure SQL Managed Instance.",
+            help="Name of the managed instance.",
             required=True,
             id_part="name",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
-            help="Name of the resource group.",
             required=True,
         )
         return cls._args_schema
@@ -128,13 +125,13 @@ class Delete(AAZCommand):
 
         @property
         def error_format(self):
-            return "ODataV4Format"
+            return "MgmtErrorFormat"
 
         @property
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "distributedAvailabilityGroupName", self.ctx.args.distributed_availability_group_name,
+                    "distributedAvailabilityGroupName", self.ctx.args.link_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -156,7 +153,7 @@ class Delete(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-08-01-preview",
+                    "api-version", "2023-08-01-preview",
                     required=True,
                 ),
             }
