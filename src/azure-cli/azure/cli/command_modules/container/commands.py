@@ -37,7 +37,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_container_group_profiles',
                          table_transformer=transform_container_group_profile_list)
         g.custom_command('create', 'create_container_group_profile',
-                         supports_no_wait=True,table_transformer=transform_container_group_profile)
+                         supports_no_wait=True, table_transformer=transform_container_group_profile)
         g.custom_show_command('show', 'get_container_group_profile',
                               table_transformer=transform_container_group_profile)
         g.custom_command('delete', 'delete_container_group_profile', confirmation=True)

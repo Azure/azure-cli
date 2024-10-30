@@ -289,6 +289,7 @@ def create_container(cmd,
 
     return lro
 
+
 def list_container_group_profiles(client, resource_group_name=None):
     """List all container group profiles in a resource group. """
     if resource_group_name is None:
@@ -308,50 +309,50 @@ def delete_container_group_profile(client, resource_group_name, name, **kwargs):
 
 # pylint: disable=too-many-statements
 def create_container_group_profile(cmd,
-                     resource_group_name,
-                     name=None,
-                     image=None,
-                     location=None,
-                     cpu=1,
-                     memory=1.5,
-                     config_map=None,
-                     restart_policy=None,
-                     ports=None,
-                     protocol=None,
-                     os_type='Linux',
-                     ip_address=None,
-                     command_line=None,
-                     environment_variables=None,
-                     secure_environment_variables=None,
-                     registry_login_server=None,
-                     registry_username=None,
-                     registry_password=None,
-                     azure_file_volume_share_name=None,
-                     azure_file_volume_account_name=None,
-                     azure_file_volume_account_key=None,
-                     azure_file_volume_mount_path=None,
-                     log_analytics_workspace=None,
-                     log_analytics_workspace_key=None,
-                     gitrepo_url=None,
-                     gitrepo_dir='.',
-                     gitrepo_revision=None,
-                     gitrepo_mount_path=None,
-                     secrets=None,
-                     secrets_mount_path=None,
-                     file=None,
-                     no_wait=False,
-                     acr_identity=None,
-                     zone=None,
-                     priority=None,
-                     sku=None,
-                     cce_policy=None,
-                     add_capabilities=None,
-                     drop_capabilities=None,
-                     privileged=False,
-                     allow_privilege_escalation=False,
-                     run_as_group=None,
-                     run_as_user=None,
-                     seccomp_profile=None):
+                                   resource_group_name,
+                                   name=None,
+                                   image=None,
+                                   location=None,
+                                   cpu=1,
+                                   memory=1.5,
+                                   config_map=None,
+                                   restart_policy=None,
+                                   ports=None,
+                                   protocol=None,
+                                   os_type='Linux',
+                                   ip_address=None,
+                                   command_line=None,
+                                   environment_variables=None,
+                                   secure_environment_variables=None,
+                                   registry_login_server=None,
+                                   registry_username=None,
+                                   registry_password=None,
+                                   azure_file_volume_share_name=None,
+                                   azure_file_volume_account_name=None,
+                                   azure_file_volume_account_key=None,
+                                   azure_file_volume_mount_path=None,
+                                   log_analytics_workspace=None,
+                                   log_analytics_workspace_key=None,
+                                   gitrepo_url=None,
+                                   gitrepo_dir='.',
+                                   gitrepo_revision=None,
+                                   gitrepo_mount_path=None,
+                                   secrets=None,
+                                   secrets_mount_path=None,
+                                   file=None,
+                                   no_wait=False,
+                                   acr_identity=None,
+                                   zone=None,
+                                   priority=None,
+                                   sku=None,
+                                   cce_policy=None,
+                                   add_capabilities=None,
+                                   drop_capabilities=None,
+                                   privileged=False,
+                                   allow_privilege_escalation=False,
+                                   run_as_group=None,
+                                   run_as_user=None,
+                                   seccomp_profile=None):
     """Create a container group profile. """
     if file:
         return _create_update_from_file(cmd.cli_ctx, resource_group_name, name, location, file, no_wait)
@@ -468,24 +469,25 @@ def create_container_group_profile(cmd,
                           security_context=security_context)
 
     cgroupprofile = ContainerGroupProfile(location=location,
-                            containers=[container],
-                            os_type=os_type,
-                            restart_policy=restart_policy,
-                            ip_address=cgroup_ip_address,
-                            image_registry_credentials=image_registry_credentials,
-                            volumes=volumes or None,
-                            diagnostics=diagnostics,
-                            tags=tags,
-                            zones=zones,
-                            priority=priority,
-                            sku=sku,
-                            confidential_compute_properties=confidential_compute_properties)
+                                          containers=[container],
+                                          os_type=os_type,
+                                          restart_policy=restart_policy,
+                                          ip_address=cgroup_ip_address,
+                                          image_registry_credentials=image_registry_credentials,
+                                          volumes=volumes or None,
+                                          diagnostics=diagnostics,
+                                          tags=tags,
+                                          zones=zones,
+                                          priority=priority,
+                                          sku=sku,
+                                          confidential_compute_properties=confidential_compute_properties)
 
     container_group_profile_client = cf_container_group_profiles(cmd.cli_ctx)
 
     lro = sdk_no_wait(no_wait, container_group_profile_client.create_or_update, resource_group_name,
                       name, cgroupprofile)
     return lro
+
 
 def list_container_group_profile_revisions(client, resource_group_name, name):
     """List all revisions for a container group profile. """
@@ -495,6 +497,7 @@ def list_container_group_profile_revisions(client, resource_group_name, name):
 def get_container_group_profile_revision(client, resource_group_name, name, revision):
     """Show details of a container group profile revision. """
     return client.get_by_revision_number(resource_group_name, name, revision)
+
 
 def _build_identities_info(identities):
     identities = identities or []
@@ -698,15 +701,17 @@ def _create_resource_requirements(cpu, memory):
         container_resource_requests = ResourceRequests(memory_in_gb=memory, cpu=cpu)
         return ResourceRequirements(requests=container_resource_requests)
 
+
 def _create_config_map(key_value_pairs):
     """Create config map. """
-    config_map = ConfigMap(key_value_pairs = {})
+    config_map = ConfigMap(key_value_pairs={})
     if key_value_pairs:
         key_value_dict = {}
         for pair in key_value_pairs:
             key_value_dict[pair['key']] = pair['value']
-        config_map = ConfigMap(key_value_pairs = key_value_dict)
+        config_map = ConfigMap(key_value_pairs=key_value_dict)
     return config_map
+
 
 def _create_container_group_profile_reference(container_group_profile_id, container_group_profile_revision):
     """Create container group profile reference. """
@@ -714,11 +719,13 @@ def _create_container_group_profile_reference(container_group_profile_id, contai
         container_group_profile_reference = ContainerGroupProfileReferenceDefinition(id=container_group_profile_id, revision=container_group_profile_revision)
         return container_group_profile_reference
 
+
 def _create_standby_pool_profile_reference(standby_pool_profile_id, fail_container_group_create_on_reuse_failure):
     """Create standby pool profile reference. """
     if standby_pool_profile_id:
         standby_pool_profile_reference = StandbyPoolProfileDefinition(id=standby_pool_profile_id, fail_container_group_create_on_reuse_failure=fail_container_group_create_on_reuse_failure)
         return standby_pool_profile_reference
+
 
 def _create_image_registry_credentials(cmd, resource_group_name, registry_login_server, registry_username, registry_password, image, identity):
     from azure.mgmt.core.tools import is_valid_resource_id
@@ -856,6 +863,7 @@ def _create_ip_address(ip_address, ports, protocol, dns_name_label, subnet_id):
         return IpAddress(ports=[Port(protocol=protocol, port=p) for p in ports],
                          type=ContainerGroupIpAddressType.private)
 
+
 # pylint: disable=inconsistent-return-statements
 def _create_ip_address_cg_profile(ip_address, ports, protocol):
     """Create IP address. """
@@ -865,6 +873,7 @@ def _create_ip_address_cg_profile(ip_address, ports, protocol):
     if (ip_address and ip_address.lower() == 'private'):
         return IpAddress(ports=[Port(protocol=protocol, port=p) for p in ports],
                          type=ContainerGroupIpAddressType.private)
+
 
 # pylint: disable=inconsistent-return-statements
 def container_logs(cmd, resource_group_name, name, container_name=None, follow=False):

@@ -40,6 +40,7 @@ def _secure_environment_variables_type(value):
                    "Argument values should be in the format a=b c=d")
         raise CLIError(message)
 
+
 def _config_map_type(key_value_pair):
     """Space-separated values in 'key=value' format."""
     try:
@@ -49,6 +50,7 @@ def _config_map_type(key_value_pair):
         message = ("Incorrectly formatted config map key-value pairs. "
                    "Argument values should be in the format a=b c=d")
         raise CLIError(message)
+
 
 secrets_type = CLIArgumentType(
     validator=validate_secrets,
