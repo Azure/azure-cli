@@ -24,11 +24,11 @@ Release History
 * `az data-boundary show-tenant`: Add command to support getting the data boundary at a tenant level (#29961)
 * `az data-boundary create`: Add command to support creating tenant to data boundary (#29961)
 * `az bicep generate-params`: Fix the help message for `--include-params` parameter (#30034)
-* `az bicep\deployment\stack`: Conditionally enable invariant globalization for Bicep running inside the Azure CLI docker image (#29897)
+* `az bicep/deployment/stack`: Conditionally enable invariant globalization for Bicep running inside the Azure CLI docker image (#29897)
 
 **Backup**
 
-* Add support for enabling Disk access settings for managed VM restores (#29508)
+* `az backup restore restore-disks`: Add support for enabling Disk access settings for managed VM restores (#29508)
 
 **Compute**
 
@@ -95,9 +95,6 @@ Release History
 * `az signalr replica start/stop/restart`: Add signalr command start, stop or start an existing SignalR service (#30058)
 * `az signalr network-rule ip-rule add/remove`: Add signalr command add or remove ip-rule of an SignalR service (#30058)
 * `az signalr update client-cert-enabled/disable-local-auth/region-endpoint-enabled`: Toggle clientCertificate, disableLocalAuth, enableRegionEndpoint (#30116)
-
-**SingalR**
-
 * `az signalr replica update region-endpoint-enabled/unit-count`: Toggle enableRegionEndpoint and change unitCount (#30116)
 
 **SQL**
