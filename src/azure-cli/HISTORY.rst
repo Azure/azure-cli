@@ -42,6 +42,7 @@ Release History
 * `az containerapp env update`: Support to update `--dapr-connection-string` (#30117)
 
 **Extension**
+
 * `az extension add/update`: Pre-announcement default value change from `true` to `false` for `--allow-preview` (#30162)
 
 **MySQL**
@@ -110,6 +111,7 @@ Release History
 * `az storage blob copy start/start-batch`: Fix `--auth-mode login` (#29964)
 
 **Upgrade**
+
 * `az upgrade`: Pre-announcement default value change from `true` to `false` for `--allow-preview` (#30162)
 
 2.65.0
