@@ -93,4 +93,3 @@ def transform_container_group_profile(result):
 def transform_container_group_profile_list(result):
     """Transform a container group profile list to table output. """
     return [transform_container_group_profile(container_group_profile) for container_group_profile in result]
-

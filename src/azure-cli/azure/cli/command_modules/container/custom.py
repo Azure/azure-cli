@@ -42,7 +42,7 @@ from azure.mgmt.containerinstance.models import (AzureFileVolume, Container, Con
 from azure.cli.core.util import sdk_no_wait
 from azure.cli.core.azclierror import RequiredArgumentMissingError
 from ._client_factory import (cf_container_groups, cf_container, cf_log_analytics_workspace,
-                              cf_log_analytics_workspace_shared_keys, cf_resource, cf_msi, cf_container_group_profiles,cf_container_group_profile)
+                              cf_log_analytics_workspace_shared_keys, cf_resource, cf_msi, cf_container_group_profiles)
 
 logger = get_logger(__name__)
 WINDOWS_NAME = 'Windows'
@@ -137,11 +137,11 @@ def create_container(cmd,
     # Image is no longer a required parameter
     if not name:
         raise CLIError("error: the --name/-n argument is required unless specified with a passed in file.")
-    
+
     container_group_profile_reference = _create_container_group_profile_reference(container_group_profile_id=container_group_profile_id, container_group_profile_revision=container_group_profile_revision)
 
     standby_pool_profile_reference = _create_standby_pool_profile_reference(standby_pool_profile_id=standby_pool_profile_id, fail_container_group_create_on_reuse_failure=fail_container_group_create_on_reuse_failure)
-    
+
     ports = ports or [80]
     protocol = protocol or ContainerGroupNetworkProtocol.tcp
 
@@ -361,7 +361,6 @@ def create_container_group_profile(cmd,
 
     if not image:
         raise CLIError("error: the --image argument is required unless specified with a passed in file.")
-    
     ports = ports or [80]
     protocol = protocol or ContainerGroupNetworkProtocol.tcp
 
@@ -698,25 +697,23 @@ def _create_resource_requirements(cpu, memory):
     if cpu or memory:
         container_resource_requests = ResourceRequests(memory_in_gb=memory, cpu=cpu)
         return ResourceRequirements(requests=container_resource_requests)
-    
+
 def _create_config_map(key_value_pairs):
     """Create config map. """
+    config_map = ConfigMap(key_value_pairs = {})
     if key_value_pairs:
         key_value_dict = {}
         for pair in key_value_pairs:
-            key_value_dict[pair['key']] = pair['value']  
+            key_value_dict[pair['key']] = pair['value']
         config_map = ConfigMap(key_value_pairs = key_value_dict)
-        return config_map      
-    else:
-        config_map = ConfigMap(key_value_pairs = {})
-        return config_map
-    
+    return config_map
+
 def _create_container_group_profile_reference(container_group_profile_id, container_group_profile_revision):
     """Create container group profile reference. """
     if container_group_profile_id and container_group_profile_revision:
         container_group_profile_reference = ContainerGroupProfileReferenceDefinition(id=container_group_profile_id, revision=container_group_profile_revision)
         return container_group_profile_reference
-    
+
 def _create_standby_pool_profile_reference(standby_pool_profile_id, fail_container_group_create_on_reuse_failure):
     """Create standby pool profile reference. """
     if standby_pool_profile_id:
@@ -858,14 +855,14 @@ def _create_ip_address(ip_address, ports, protocol, dns_name_label, subnet_id):
     if subnet_id:
         return IpAddress(ports=[Port(protocol=protocol, port=p) for p in ports],
                          type=ContainerGroupIpAddressType.private)
-    
+
 # pylint: disable=inconsistent-return-statements
 def _create_ip_address_cg_profile(ip_address, ports, protocol):
     """Create IP address. """
     if (ip_address and ip_address.lower() == 'public'):
         return IpAddress(ports=[Port(protocol=protocol, port=p) for p in ports],
                          type=ContainerGroupIpAddressType.public)
-    elif (ip_address and ip_address.lower() == 'private'):
+    if (ip_address and ip_address.lower() == 'private'):
         return IpAddress(ports=[Port(protocol=protocol, port=p) for p in ports],
                          type=ContainerGroupIpAddressType.private)
 

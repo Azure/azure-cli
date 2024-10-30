@@ -5,7 +5,8 @@
 
 from azure.cli.core.commands import CliCommandType
 from ._client_factory import cf_container_groups, cf_container, cf_container_group_profiles, cf_container_group_profile
-from ._format import transform_container_group_list, transform_container_group, transform_container_group_profile_list, transform_container_group_profile
+from ._format import (transform_container_group_list, transform_container_group,
+                      transform_container_group_profile_list, transform_container_group_profile)
 
 
 container_group_sdk = CliCommandType(
@@ -31,13 +32,18 @@ def load_command_table(self, _):
         g.command('stop', 'stop')
         g.command('start', 'begin_start', supports_no_wait=True)
 
-    with self.command_group('container container-group-profile', client_factory=cf_container_group_profiles) as g:
-        g.custom_command('list', 'list_container_group_profiles', table_transformer=transform_container_group_profile_list)
-        g.custom_command('create', 'create_container_group_profile', supports_no_wait=True,
-                         table_transformer=transform_container_group_profile)
-        g.custom_show_command('show', 'get_container_group_profile', table_transformer=transform_container_group_profile)
+    with self.command_group('container container-group-profile',
+                            client_factory=cf_container_group_profiles) as g:
+        g.custom_command('list', 'list_container_group_profiles',
+                         table_transformer=transform_container_group_profile_list)
+        g.custom_command('create', 'create_container_group_profile',
+                         supports_no_wait=True,table_transformer=transform_container_group_profile)
+        g.custom_show_command('show', 'get_container_group_profile',
+                              table_transformer=transform_container_group_profile)
         g.custom_command('delete', 'delete_container_group_profile', confirmation=True)
-        
+
     with self.command_group('container container-group-profile', client_factory=cf_container_group_profile) as g:
-        g.custom_command('list-revisions', 'list_container_group_profile_revisions', table_transformer=transform_container_group_profile_list)
-        g.custom_show_command('show-revision', 'get_container_group_profile_revision', table_transformer=transform_container_group_profile)
+        g.custom_command('list-revisions', 'list_container_group_profile_revisions',
+                         table_transformer=transform_container_group_profile_list)
+        g.custom_show_command('show-revision', 'get_container_group_profile_revision',
+                              table_transformer=transform_container_group_profile)
