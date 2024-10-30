@@ -144,7 +144,7 @@ class TestComputefleetScenario(ScenarioTest):
         })
 
         try:
-            self.cmd('az computefleet create --name {fleet_name} --resource-group {resource_group} --spot-priority-profile {spot_profile} --compute-profile {compute_profile} --location {location} --tags {tags} ', checks=[
+            self.cmd('az compute-fleet create --name {fleet_name} --resource-group {resource_group} --spot-priority-profile {spot_profile} --compute-profile {compute_profile} --location {location} --tags {tags} ', checks=[
                 self.check('name', '{fleet_name}'),
                 self.check('resourceGroup', '{resource_group}'),
                 self.check('properties.provisioningState', 'Succeeded')
@@ -159,7 +159,7 @@ class TestComputefleetScenario(ScenarioTest):
             'resource_group': rg
         })
 
-        self.cmd('az computefleet show --name {fleet_name} --resource-group {resource_group} ', checks=[
+        self.cmd('az compute-fleet show --name {fleet_name} --resource-group {resource_group} ', checks=[
             self.check('fleet_name', '{fleet}')
         ])
         
@@ -168,7 +168,7 @@ class TestComputefleetScenario(ScenarioTest):
             'resource_group': rg
         })
         
-        self.cmd('az computefleet list --resource-group {resource_group} ', checks=[
+        self.cmd('az compute-fleet list --resource-group {resource_group} ', checks=[
             self.check('length(@)', 1)
         ])
 
@@ -178,7 +178,7 @@ class TestComputefleetScenario(ScenarioTest):
             'resource_group': rg
         })
         
-        self.cmd('az computefleet list-vmss  --name {fleet_name} --resource-group {resource_group} ', checks=[
+        self.cmd('az compute-fleet list-vmss  --name {fleet_name} --resource-group {resource_group} ', checks=[
             self.check('fleet_name', '{fleet_name}'),
             self.check('resourceGroup', '{resource_group}'),
         ])
@@ -191,7 +191,7 @@ class TestComputefleetScenario(ScenarioTest):
             'new_tag': 'newTag'
         })
 
-        self.cmd('az computefleet update --name {fleet_name} --resource-group {resource_group} --location {location} --set tags.key={new_tag}', checks=[
+        self.cmd('az compute-fleet update --name {fleet_name} --resource-group {resource_group} --location {location} --set tags.key={new_tag}', checks=[
             self.check('tags.key', '{new_tag}')
         ])
 
@@ -202,7 +202,7 @@ class TestComputefleetScenario(ScenarioTest):
         })
 
         try:
-            self.cmd('az computefleet delete --name {fleet_name} --resource-group {resource_group}', checks=[
+            self.cmd('az compute-fleet delete --name {fleet_name} --resource-group {resource_group}', checks=[
                 self.is_empty()
             ])
         except SystemExit as e:
