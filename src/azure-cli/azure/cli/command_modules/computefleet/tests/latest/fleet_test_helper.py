@@ -8,219 +8,222 @@
 
 # --------------------------------------------------------------------------------------------
 """
-Test suite for the Azure Compute Fleet CLI commands.
-This module contains tests for creating, updating, showing, deleting, listing, scaling, and restarting compute fleets using the Azure CLI.
+This module contains helper functions and test cases for managing Azure Compute Fleet resources.
 Classes:
-    TestComputefleetScenario: Contains test methods for various compute fleet operations.
+    FleetTestHelper: Provides methods to manage and test Azure Compute Fleet resources.
 Methods:
-    __init__(self, method_name): Initializes the test scenario.
-    test_fleet_create(self): Tests the creation of a compute fleet.
-    test_fleet_update(self): Tests updating a compute fleet's tags.
-    test_fleet_show(self): Tests showing details of a compute fleet.
-    test_fleet_delete(self): Tests deleting a compute fleet.
-    test_fleet_list(self): Tests listing all compute fleets in a resource group.
-    test_fleet_scale(self): Tests scaling a compute fleet's capacity.
-    test_fleet_restart(self): Tests restarting a compute fleet.
-    """
+    get_subnet_id(vnet): Extracts and returns the subnet ID from a given virtual network dictionary.
+    test_get_subnet_id(): Tests the get_subnet_id method.
+    generate_fleet_parameters(): Generates and returns parameters for creating a compute fleet.
+    create_network_security_groups(): Creates a network security group and returns its ID.
+    create_public_ip_address(): Creates a public IP address and returns its ID.
+    create_nat_gateway(public_ip): Creates a NAT gateway using the provided public IP address and returns its ID.
+"""
 # --------------------------------------------------------------------------------------------
-
-import os
-import unittest
 import json
-import random
-import string
 
-from azure.cli.testsdk import ScenarioTest
-from azure.cli.testsdk.scenario_tests import AllowLargeResponse, record_only
-from .fleet_test_helper import FleetTestHelper  # Ensure this import points to the correct module
+class FleetTestHelper: 
 
-defaultSubscription = 'ac302a10-6fb1-4308-baf6-ad855c4d7f3d'
-subscriptionId = os.getenv('AZURE_SUBSCRIPTION_ID')
-if not subscriptionId:
-    subscriptionId = defaultSubscription
+    @staticmethod
+    def generate_fleet_parameters(self, subscriptionId, resourceGroupName, location, public_ip_address_id):
+        nat_gateway_id = FleetTestHelper.create_nat_gateway(self, public_ip_address_id, subscriptionId, resourceGroupName, location)
+        network_security_groups_id = FleetTestHelper.create_network_security_groups(self, subscriptionId, resourceGroupName, location)
+        adminUsername = "adminuser"
+        
+        addressSpaces = { "addressPrefixes": ["10.0.0.0/16"] }
+        
+        subnet = {
+            "name": "subnetName",
+            "properties": {
+            "addressPrefix": "10.0.2.0/24",
+            "networkSecurityGroup": {
+                "id": network_security_groups_id
+            },
+            "natGateway": {
+                "id": nat_gateway_id
+            }
+            }
+        }
+        
+        subnets = [subnet]
+        addressSpaces = {"addressPrefixes": ["10.0.0.0/16"]}
 
-fleet_name = 'testFleet'
-fleet_name_regular = 'testFleet_rg'
-fleet_name_spot = 'testFleet_sp'
-def generate_random_rg_name(prefix='test_fleet_cli_rg_', length=8):
-    suffix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=length))
-    return prefix + suffix
+        input_data = {
+            "location": location,
+            "properties": {
+                "addressSpace": addressSpaces,
+                "subnets": subnets
+            }
+        }
 
-def generate_random_fleet_name(prefix='test_fleet_cli', length=8):
-    suffix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=length))
-    return prefix + suffix
+        virtual_network_name = self.create_random_name('testVNet-', 32)
+        virtual_network_id = f"/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworks/{virtual_network_name}"
+        input_data_json = json.dumps(input_data)
+        
+        self.kwargs.update({
+            'virtual_network_id':  virtual_network_id,
+            'input_data_json': input_data_json,
+            'location': location,
+            'resource_group': resourceGroupName,
+            'virtual_network_name': virtual_network_name
+        })
+        
+        self.cmd(f'az network vnet create --name {virtual_network_name} --resource-group {resourceGroupName} --location {location} --subnet-name "subnet-fleet" --address-prefixes "10.0.0.0/16"  --subnet-prefixes "10.0.0.0/24"')
+        
+        spot_priority_profile = {
+            "capacity": 3,
+            "min_capacity": 2,
+            "max_price_per_vm": 0.00865,
+            "eviction_policy": "Delete",
+            "allocation_strategy": "PriceCapacityOptimized",
+            "maintain": False
+        }
 
-fleet_name = generate_random_fleet_name(fleet_name)
-fleet_name_regular = generate_random_fleet_name(fleet_name_regular)
-fleet_name_spot = generate_random_fleet_name(fleet_name_spot)
-resource_group = generate_random_rg_name()
-location = "westus2"
+        regular_priority_profile = {
+            "capacity": 3,
+            "min_capacity": 2,
+            "allocation_strategy": "LowestPrice"
+        }
+        vm_sizes_profile = [
+            {"name": "Standard_D2s_v3", "rank": 19225},
+            {"name": "Standard_D4s_v3", "rank": 1180}
+        ]
+        
+        storageProfile = {
+            "osDisk": {
+                  "osType": "Linux",
+                  "createOption": "FromImage",
+                  "caching": "ReadWrite",
+                  "managedDisk": {
+                    "storageAccountType": "Standard_LRS"
+                  },
+                  "deleteOption": "Delete",
+                  "diskSizeGB": 30
+                },
+            "imageReference": {
+                  "publisher": "Canonical",
+                  "offer": "UbuntuServer",
+                  "sku": "16.04-LTS",
+                  "version": "latest"
+                }
+        }
+        
+        compute_os_profile = {
+                "osProfile": {
+                    "computerNamePrefix": "o",
+                    "adminUsername": adminUsername,
+                    "linuxConfiguration": {
+                        "disablePasswordAuthentication": True,
+                        "ssh": {
+                            "publicKeys": [
+                                {
+                                    "path": "home/{adminUsername}/.ssh/authorized_keys",
+                                    "keyData": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC+wWK73dCr+jgQOAxNsHAnNNNMEMWOHYEccp6wJm2gotpr9katuF/ZAdou5AaW1C61slRkHRkpRRX9FA9CYBiitZgvCCz+3nWNN7l/Up54Zps/pHWGZLHNJZRYyAB6j5yVLMVHIHriY49d/GZTZVNB8GoJv9Gakwc/fuEZYYl4YDFiGMBP///TzlI4jhiJzjKnEvqPFki5p2ZRJqcbCiF4pJrxUQR/RXqVFQdbRLZgYfJ8xGB878RENq3yQ39d8dVOkq4edbkzwcUmwwwkYVPIoDGsYLaRHnG+To7FvMeyO7xDVQkMKzopTQV8AuKpyvpqu0a9pWOMaiCyDytO7GGN you@me.com"
+                                }
+                            ]
+                        }
+                    }
+                },
+                "platformFaultDomainCount": 1,
+                "computeApiVersion": "2023-09-01"
+            }
+        
+        computeFleetVmssIPConfiguration = {
+            "name": "internalIpConfig",
+            "properties": {
+                "subnet": {
+                    "id": f"/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworks/{{virtualNetworkName}}/subnets/{{subnetName}}"
+                    }
+                    }
+                }
+        
+        networkInterfaceConfiguration = {
+                            "name": "exampleNic",
+                            "properties": [
+                                computeFleetVmssIPConfiguration
+                            ],
+                            "isPrimary": True,
+                            "isAcceleratedNetworkingEnabled": False
+        }
+        
+        networkProfile = {
+            "networkInterfaceConfigurations": [
+                networkInterfaceConfiguration
+            ],
+            "apiVersion": "2022-07-01"
+        }
+        
+        computeProfile= {
+            "apiVersion": "2023-09-01",
+            "platformFaultDomainCount": 1,
+            "baseVirtualMachineProfile": {
+                "storageProfile": storageProfile,
+                "networkProfile": networkProfile,
+                "computeOsProfile": compute_os_profile
+            }
+        }
+        
+        computeFleetData = {
+            "spot-priority-profile": spot_priority_profile,
+            "vm-sizes-profile": vm_sizes_profile,
+            "compute-profile": computeProfile,
+            "regular-priority-profile": regular_priority_profile,
+            "zones": ["1","2","3"],
+            "tags": {"key3518": "luvrnuvsgdpbuofdskkcoqhfh"}
+        }
+        return computeFleetData
 
-class TestComputefleetScenario(ScenarioTest):
+    @staticmethod
+    def get_subnet_id(self, vnet):
+        properties = vnet['properties']
+        subnets = properties['subnets']
+        subnet = subnets[0]
+        return subnet['id']  
+    
+    @staticmethod
+    def create_network_security_groups(self, subscriptionId, resourceGroupName, location):
+        network_security_groups = self.create_random_name('testVNetNSG-', 32)
+        network_security_groups_id = f"/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkSecurityGroups/{network_security_groups}"
+        input_data = {
+            "location": location
+        }
+        
+        input_data_json = json.dumps(input_data)
+        self.kwargs.update({
+            'location': location,
+            'input_data_json': input_data_json,
+            'network_security_groups_id': network_security_groups_id,
+            'resourceGroupName': resourceGroupName,
+            'network_security_groups': network_security_groups
+         })
+        
+        self.cmd(f'az network nsg create --resource-group {resourceGroupName} --name {network_security_groups} --location {location}')
+        
+        return network_security_groups_id
 
-    @classmethod
-    def setUpClass(cls):
-        super(TestComputefleetScenario, cls).setUpClass()
-        cls.resource_group = resource_group
-        cls.location = location
-        cls.create_resource_group()
-
-    @classmethod
-    def tearDownClass(cls):
-        cls.delete_resource_group()
-        super(TestComputefleetScenario, cls).tearDownClass()
-
-    @classmethod
-    def create_resource_group(cls):
-        instance = cls('test_fleet_create')
-        instance.cmd('az group create --name {} --location {}'.format(cls.resource_group, cls.location), checks= [
-            instance.check('name', cls.resource_group),
-            instance.check('properties.provisioningState', 'Succeeded')
-        ])
-
-    @classmethod
-    def delete_resource_group(cls):
-        instance = cls('test_fleet_create')
-        instance.cmd('az group delete --name {} --yes --no-wait'.format(cls.resource_group))
-
-    def generate_fleet_parameters(self, subscription_id = subscriptionId, resource_group=resource_group, location = location):
-        public_ip_address_id = self.create_public_ip_address(subscription_id, resource_group, location)
-        # Use the ComputefleetHelper to generate fleet parameters
-        return FleetTestHelper.generate_fleet_parameters(self, subscription_id, resource_group, location, public_ip_address_id)
-      
-    def create_public_ip_address(self,  subscriptionId, resourceGroupName, location):
-        public_ip_address_name = self.create_random_name('testFleetPublicIP-', 24)
-        public_ip_address_id = f"/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/publicIPAddresses/{public_ip_address_name}"
+    def create_nat_gateway(self, public_ip, subscription_id, resource_group_name, location):
+        nat_name = self.create_random_name('testFleetNatGW-', 34)
+        nat_id = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Network/natGateways/{nat_name}"
         input_data = {
             "location": location,
             "sku": {"name": "Standard"},
             "properties": {
-                "publicIPAllocationMethod": "Static"
+                "publicIpAddresses": [
+                    {"id": public_ip}
+                ]
             }
         }
-        
+          
         input_data_json = json.dumps(input_data)
-        properties = '"{input_data_json}"'
+        public_ip_json = json.dumps(public_ip)
         self.kwargs.update({
-            'public_ip_address_id': public_ip_address_id,
-            'input_data_json': input_data_json,
+            'nat_id': nat_id,
+            'input_data_json': input_data_json, # aupdate all jsons
             'location': location,
-            'ip_properties': properties,
-            'resource_group': resourceGroupName,
-            'public_ip_address_name': public_ip_address_name
+            'resource_group_name': resource_group_name,
+            'nat_name': nat_name,
+            'public_ip_json': public_ip_json
         })
         
-        self.cmd('az network public-ip create --name {public_ip_address_name} --resource-group {resource_group} --allocation-method Static --sku Standard --location {location} --sku Standard ')
-        return public_ip_address_id
-    
-    @AllowLargeResponse()
-    def test_fleet_create(self, fleet=fleet_name, rg=resource_group, loc=location):
-        fleetData = self.generate_fleet_parameters(subscriptionId, rg, loc)
-        compute_profile = fleetData['compute-profile']
-        spot_profile = fleetData['spot-priority-profile']
-        regular_profile = fleetData['regular-priority-profile']
-        vm_sizes_profile = fleetData['vm-sizes-profile']
-        zones = fleetData['zones']
-        tags = fleetData['tags']
-        
-        fleetData_json = json.dumps(fleetData)
-        print(fleetData_json)
-        tagsNew = {"multi": "mixed"}
-         
-        self.kwargs.update({
-            'fleet_name': fleet,
-            'fleet_name_reg': fleet_name_regular,
-            'fleet_name_spot': fleet_name_spot,
-            'resource_group': rg,
-            'location': loc,
-            'fleet_data_json': fleetData_json,
-            'compute_profile': json.dumps(compute_profile),
-            'spot_profile': json.dumps(spot_profile),
-            'regular_priority_profile': json.dumps(regular_profile),
-            'vm_sizes_profile': json.dumps(vm_sizes_profile),
-            'zones': json.dumps(zones),
-            'tags': json.dumps(tags),
-            'tagsNew': json.dumps(tagsNew)
-        })
-
-        try:
-            self.cmd('az computefleet create --name {fleet_name} --resource-group {resource_group} --spot-priority-profile {spot_profile} --compute-profile {compute_profile} --location {location} --tags {tags} ', checks=[
-                self.check('name', '{fleet_name}'),
-                self.check('resourceGroup', '{resource_group}'),
-                self.check('properties.provisioningState', 'Succeeded')
-            ])
-        except Exception as e:
-            print(f"Failed to create fleet: {e}")
-            raise
-    
-    def test_fleet_show(self, fleet=fleet_name, rg=resource_group):
-        self.kwargs.update({
-            'fleet_name': fleet,
-            'resource_group': rg
-        })
-
-        self.cmd('az computefleet show --name {fleet_name} --resource-group {resource_group} ', checks=[
-            self.check('fleet_name', '{fleet}')
-        ])
-        
-    def test_fleet_list(self, rg=resource_group):
-        self.kwargs.update({
-            'resource_group': rg
-        })
-        
-        self.cmd('az computefleet list --resource-group {resource_group} ', checks=[
-            self.check('length(@)', 1)
-        ])
-
-    def test_fleet_vmss_list(self,  fleet=fleet_name, rg=resource_group):
-        self.kwargs.update({
-            'fleet_name': fleet,
-            'resource_group': rg
-        })
-        
-        self.cmd('az computefleet list-vmss  --name {fleet_name} --resource-group {resource_group} ', checks=[
-            self.check('fleet_name', '{fleet_name}'),
-            self.check('resourceGroup', '{resource_group}'),
-        ])
-        
-    def test_fleet_update(self, fleet=fleet_name, rg=resource_group):
-        self.kwargs.update({
-            'fleet_name': fleet,
-            'resource_group': rg,
-            'location': location,
-            'new_tag': 'newTag'
-        })
-
-        self.cmd('az computefleet update --name {fleet_name} --resource-group {resource_group} --location {location} --set tags.key={new_tag}', checks=[
-            self.check('tags.key', '{new_tag}')
-        ])
-
-    def test_fleet_delete(self, fleet=fleet_name, rg=resource_group):
-        self.kwargs.update({
-            'fleet_name': fleet,
-            'resource_group': rg
-        })
-
-        try:
-            self.cmd('az computefleet delete --name {fleet_name} --resource-group {resource_group}', checks=[
-                self.is_empty()
-            ])
-        except SystemExit as e:
-            print(f"SystemExit occurred: {e}")
-            raise
-
-    @AllowLargeResponse()
-    @record_only()
-    def test_all_fleet_operations(self):
-        try:
-            self.test_fleet_create()
-            self.test_fleet_update()
-            self.test_fleet_show()
-            self.test_fleet_list()
-            self.test_fleet_vmss_list()
-            self.test_fleet_scale()
-            self.test_fleet_restart()
-            self.test_fleet_delete()
-        except Exception as e:
-            print(f"Test failed: {e}")
-            raise
+        self.cmd(f'az network nat gateway create --resource-group {resource_group_name} --name  {nat_name} --location {location} --public-ip-addresses  \'{public_ip_json}\' --idle-timeout 4')
+        return nat_id
