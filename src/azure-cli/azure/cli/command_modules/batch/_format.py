@@ -5,6 +5,10 @@
 
 import json
 
+from enum import Enum
+import time
+import datetime
+import re
 from collections import OrderedDict
 
 from urllib.parse import unquote
@@ -291,3 +295,34 @@ def list_supported_images_table_format(result):
         table_row['VerificationType'] = item['verificationType']
         table_output.append(table_row)
     return table_output
+
+
+def to_camel_case( s):
+        return re.sub(re.compile('(?!^)_([a-zA-Z])'), lambda x: x.group(1).upper(), s)
+
+def todict_track2( obj):  # pylint: disable=too-many-return-statements
+        """
+        Convert an object to a dictionary. Use 'post_processor(original_obj, dictionary)' to update the
+        dictionary in the process
+        """
+        if isinstance(obj, dict):
+            result = {k: todict_track2(v) for (k, v) in obj.items()}
+            return result
+        if isinstance(obj, list):
+           return [todict_track2(a) for a in obj]
+        if isinstance(obj, Enum):
+            return obj.value
+        if isinstance(obj, (datetime.date, datetime.time, datetime.datetime)):
+            return obj.isoformat()
+        if isinstance(obj, datetime.timedelta):
+            return str(obj)
+        if hasattr(obj, '_asdict'):
+            return todict_track2(obj._asdict())
+        if hasattr(obj, 'as_dict') and not hasattr(obj, '_attribute_map'):
+            return todict_track2(obj.as_dict())
+        if hasattr(obj, '__dict__'):
+            result = {to_camel_case(k): todict_track2(v)
+                  for k, v in obj.__dict__.items()
+                  if not callable(v) and not k.startswith('_')}
+            return result
+        return obj

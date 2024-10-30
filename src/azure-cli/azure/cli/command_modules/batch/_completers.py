@@ -5,11 +5,10 @@
 
 from azure.cli.core.decorators import Completer
 
-
 @Completer
 def load_supported_images(cmd, prefix, namespace):  # pylint: disable=unused-argument
     from msrest.exceptions import ClientRequestError
-    from azure.batch.models import BatchErrorException
+    from azure.core.exceptions import HttpResponseError
     from azure.cli.command_modules.batch._client_factory import account_client_factory
     all_images = []
     client_creds = {}
@@ -23,5 +22,6 @@ def load_supported_images(cmd, prefix, namespace):  # pylint: disable=unused-arg
             all_images.append(f"{sku.image_reference['publisher']}:{sku.image_reference['offer']}" +
                               f":{sku.image_reference['sku']}:{sku.image_reference['version']}")
         return all_images
-    except (ClientRequestError, BatchErrorException):
+    except (ClientRequestError, HttpResponseError):
         return []
+
