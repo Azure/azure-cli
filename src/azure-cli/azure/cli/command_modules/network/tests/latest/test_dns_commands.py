@@ -527,7 +527,7 @@ class DnsParseZoneFiles(unittest.TestCase):
             self.assertEqual(record['target'], records_to_check[i][4])
     
     def _check_naptr(self, zone, name, records_to_check):
-        self.assertEqual(len(records_to_check, len(zone[name]['naptr'])))
+        self.assertEqual(len(records_to_check), len(zone[name]['naptr']))
         for i, record in enumerate(zone[name]['naptr']):
             self.assertEqual(record['ttl'], records_to_check[i][0])
             self.assertEqual(int(record['order']), records_to_check[i][1])
