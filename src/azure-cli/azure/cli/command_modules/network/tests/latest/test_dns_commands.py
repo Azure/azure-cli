@@ -589,8 +589,8 @@ class DnsParseZoneFiles(unittest.TestCase):
             (60, 45, 'tag56', 'test test test')
         ])
         self._check_naptr(zone, 'mynaptr.' + zn, [
-            (10, 20, 'A', 'EAU+SIP', '', 'domain.com.'),
-            (20, 20, 'U', 'SIP+D2U', '!^(\\+441632960083)$!sip:\\1@example.com', '.')
+            (3600, 10, 20, 'A', 'EAU+SIP', '', 'domain.com.'),
+            (3600, 20, 20, 'U', 'SIP+D2U', '!^(\\+441632960083)$!sip:\\1@example.com', '.')
         ])
 
     def test_zone_file_2(self):
