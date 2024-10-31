@@ -3396,7 +3396,7 @@ class CredentialResponseSanitizer(RecordingProcessor):
                     response["body"]["string"] = json.dumps(json_data)
 
             except Exception:
-                raise
+                pass
 
         return response
 
