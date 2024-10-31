@@ -98,6 +98,7 @@ class Create(AAZCommand):
             options=["--seeding-mode"],
             arg_group="Properties",
             help="Database seeding mode – can be Automatic (default), or Manual for supported scenarios.",
+            default="Automatic",
             enum={"Automatic": "Automatic", "Manual": "Manual"},
         )
 
