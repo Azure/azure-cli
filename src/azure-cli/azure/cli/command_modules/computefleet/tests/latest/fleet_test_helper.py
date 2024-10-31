@@ -215,15 +215,15 @@ class FleetTestHelper:
         }
           
         input_data_json = json.dumps(input_data)
-        public_ip_json = json.dumps(public_ip)
+       
         self.kwargs.update({
             'nat_id': nat_id,
             'input_data_json': input_data_json, # aupdate all jsons
             'location': location,
             'resource_group_name': resource_group_name,
             'nat_name': nat_name,
-            'public_ip_json': public_ip_json
+            'public_ip': public_ip
         })
         
-        self.cmd(f'az network nat gateway create --resource-group {resource_group_name} --name  {nat_name} --location {location} --public-ip-addresses  \'{public_ip_json}\' --idle-timeout 4')
+        self.cmd(f'az network nat gateway create --resource-group {resource_group_name} --name  {nat_name} --location {location} --public-ip-addresses {public_ip} --idle-timeout 4')
         return nat_id

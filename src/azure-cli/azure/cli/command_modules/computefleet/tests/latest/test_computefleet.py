@@ -30,8 +30,8 @@ import json
 import random
 import string
 
-from azure.cli.testsdk import ScenarioTest
-from azure.cli.testsdk.scenario_tests import AllowLargeResponse, record_only
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from .fleet_test_helper import FleetTestHelper  # Ensure this import points to the correct module
 
 defaultSubscription = 'ac302a10-6fb1-4308-baf6-ad855c4d7f3d'
@@ -50,38 +50,13 @@ def generate_random_fleet_name(prefix='test_fleet_cli', length=8):
     suffix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=length))
     return prefix + suffix
 
-fleet_name = generate_random_fleet_name(fleet_name)
+
 fleet_name_regular = generate_random_fleet_name(fleet_name_regular)
 fleet_name_spot = generate_random_fleet_name(fleet_name_spot)
 resource_group = generate_random_rg_name()
 location = "westus2"
 
 class TestComputefleetScenario(ScenarioTest):
-
-    @classmethod
-    def setUpClass(cls):
-        super(TestComputefleetScenario, cls).setUpClass()
-        cls.resource_group = resource_group
-        cls.location = location
-        cls.create_resource_group()
-
-    @classmethod
-    def tearDownClass(cls):
-        cls.delete_resource_group()
-        super(TestComputefleetScenario, cls).tearDownClass()
-
-    @classmethod
-    def create_resource_group(cls):
-        instance = cls('test_fleet_create')
-        instance.cmd('az group create --name {} --location {}'.format(cls.resource_group, cls.location), checks= [
-            instance.check('name', cls.resource_group),
-            instance.check('properties.provisioningState', 'Succeeded')
-        ])
-
-    @classmethod
-    def delete_resource_group(cls):
-        instance = cls('test_fleet_create')
-        instance.cmd('az group delete --name {} --yes --no-wait'.format(cls.resource_group))
 
     def generate_fleet_parameters(self, subscription_id = subscriptionId, resource_group=resource_group, location = location):
         public_ip_address_id = self.create_public_ip_address(subscription_id, resource_group, location)
@@ -113,8 +88,7 @@ class TestComputefleetScenario(ScenarioTest):
         self.cmd('az network public-ip create --name {public_ip_address_name} --resource-group {resource_group} --allocation-method Static --sku Standard --location {location} --sku Standard ')
         return public_ip_address_id
     
-    @AllowLargeResponse()
-    def test_fleet_create(self, fleet=fleet_name, rg=resource_group, loc=location):
+    def _fleet_create(self, fleet=fleet_name, rg=resource_group, loc=location):
         fleetData = self.generate_fleet_parameters(subscriptionId, rg, loc)
         compute_profile = fleetData['compute-profile']
         spot_profile = fleetData['spot-priority-profile']
@@ -144,7 +118,7 @@ class TestComputefleetScenario(ScenarioTest):
         })
 
         try:
-            self.cmd('az compute-fleet create --name {fleet_name} --resource-group {resource_group} --spot-priority-profile {spot_profile} --compute-profile {compute_profile} --location {location} --tags {tags} ', checks=[
+            self.cmd('az compute-fleet fleet create  --name {fleet_name} --resource-group {resource_group} --spot-priority-profile \'{spot_profile}\' --compute-profile \'{compute_profile}\' --location {location} --tags \'{tags}\' ', checks=[
                 self.check('name', '{fleet_name}'),
                 self.check('resourceGroup', '{resource_group}'),
                 self.check('properties.provisioningState', 'Succeeded')
@@ -153,37 +127,37 @@ class TestComputefleetScenario(ScenarioTest):
             print(f"Failed to create fleet: {e}")
             raise
     
-    def test_fleet_show(self, fleet=fleet_name, rg=resource_group):
+    def _fleet_show(self, fleet=fleet_name, rg=resource_group):
         self.kwargs.update({
             'fleet_name': fleet,
             'resource_group': rg
         })
 
-        self.cmd('az compute-fleet show --name {fleet_name} --resource-group {resource_group} ', checks=[
-            self.check('fleet_name', '{fleet}')
+        self.cmd('az compute-fleet fleet show --name {fleet_name} --resource-group {resource_group} ', checks=[
+            self.check('fleet_name', '{fleet_name}')
         ])
         
-    def test_fleet_list(self, rg=resource_group):
+    def _fleet_list(self, rg=resource_group):
         self.kwargs.update({
             'resource_group': rg
         })
         
-        self.cmd('az compute-fleet list --resource-group {resource_group} ', checks=[
+        self.cmd('az compute-fleet fleet list --resource-group {resource_group} ', checks=[
             self.check('length(@)', 1)
         ])
 
-    def test_fleet_vmss_list(self,  fleet=fleet_name, rg=resource_group):
+    def _fleet_vmss_list(self,  fleet=fleet_name, rg=resource_group):
         self.kwargs.update({
             'fleet_name': fleet,
             'resource_group': rg
         })
         
-        self.cmd('az compute-fleet list-vmss  --name {fleet_name} --resource-group {resource_group} ', checks=[
+        self.cmd('az compute-fleet  fleet list-vmss  --name {fleet_name} --resource-group {resource_group} ', checks=[
             self.check('fleet_name', '{fleet_name}'),
             self.check('resourceGroup', '{resource_group}'),
         ])
         
-    def test_fleet_update(self, fleet=fleet_name, rg=resource_group):
+    def _fleet_update(self, fleet=fleet_name, rg=resource_group):
         self.kwargs.update({
             'fleet_name': fleet,
             'resource_group': rg,
@@ -191,36 +165,31 @@ class TestComputefleetScenario(ScenarioTest):
             'new_tag': 'newTag'
         })
 
-        self.cmd('az compute-fleet update --name {fleet_name} --resource-group {resource_group} --location {location} --set tags.key={new_tag}', checks=[
+        self.cmd('az compute-fleet fleet update --name {fleet_name} --resource-group {resource_group} --location {location} --set tags.key={new_tag}', checks=[
             self.check('tags.key', '{new_tag}')
         ])
 
-    def test_fleet_delete(self, fleet=fleet_name, rg=resource_group):
+    def _fleet_delete(self, fleet=fleet_name, rg=resource_group):
         self.kwargs.update({
             'fleet_name': fleet,
             'resource_group': rg
         })
 
         try:
-            self.cmd('az compute-fleet delete --name {fleet_name} --resource-group {resource_group}', checks=[
+            self.cmd('az compute-fleet fleet delete --name {fleet_name} --resource-group {resource_group}', checks=[
                 self.is_empty()
             ])
         except SystemExit as e:
             print(f"SystemExit occurred: {e}")
             raise
-
+    @ResourceGroupPreparer(name_prefix='fleet_test_', location='westus2')
     @AllowLargeResponse()
-    @record_only()
-    def test_all_fleet_operations(self):
-        try:
-            self.test_fleet_create()
-            self.test_fleet_update()
-            self.test_fleet_show()
-            self.test_fleet_list()
-            self.test_fleet_vmss_list()
-            self.test_fleet_scale()
-            self.test_fleet_restart()
-            self.test_fleet_delete()
-        except Exception as e:
-            print(f"Test failed: {e}")
-            raise
+    def test_all_fleet_operations(self, resource_group, resource_group_location):
+        fleet_name = generate_random_fleet_name('testFleet')
+        self._fleet_create(fleet_name, resource_group, resource_group_location)
+        self._fleet_update(fleet_name, resource_group)
+        self._fleet_show(fleet_name, resource_group)
+        self._fleet_list(resource_group)
+        self._fleet_vmss_list(fleet_name, resource_group)
+        self._fleet_delete(fleet_name, resource_group)
+       
