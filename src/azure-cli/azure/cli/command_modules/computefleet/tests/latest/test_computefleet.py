@@ -42,29 +42,30 @@ if not subscriptionId:
 fleet_name = 'testFleet'
 fleet_name_regular = 'testFleet_rg'
 fleet_name_spot = 'testFleet_sp'
-def generate_random_rg_name(prefix='test_fleet_cli_rg_', length=8):
+def generate_random_rg_name(prefix='fleet_cli_rg_', length=16):
     suffix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=length))
     return prefix + suffix
 
-def generate_random_fleet_name(prefix='test_fleet_cli', length=8):
+def generate_random_fleet_name(prefix='test_fleet_cli', length=16):
     suffix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=length))
     return prefix + suffix
-
 
 fleet_name_regular = generate_random_fleet_name(fleet_name_regular)
 fleet_name_spot = generate_random_fleet_name(fleet_name_spot)
 resource_group = generate_random_rg_name()
 location = "westus2"
+subnet_name = generate_random_fleet_name("subnet-", 12)
 
 class TestComputefleetScenario(ScenarioTest):
 
-    def generate_fleet_parameters(self, subscription_id = subscriptionId, resource_group=resource_group, location = location):
+    def generate_fleet_parameters(self, subscription_id = subscriptionId, resource_group=resource_group, location = location, subnetName = subnet_name):
         public_ip_address_id = self.create_public_ip_address(subscription_id, resource_group, location)
+        
         # Use the ComputefleetHelper to generate fleet parameters
-        return FleetTestHelper.generate_fleet_parameters(self, subscription_id, resource_group, location, public_ip_address_id)
+        return FleetTestHelper.generate_fleet_parameters(self, subscription_id, resource_group, location, public_ip_address_id, subnetName)
       
     def create_public_ip_address(self,  subscriptionId, resourceGroupName, location):
-        public_ip_address_name = self.create_random_name('testFleetPublicIP-', 24)
+        public_ip_address_name = self.create_random_name('FleetIP-', 16)
         public_ip_address_id = f"/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/publicIPAddresses/{public_ip_address_name}"
         input_data = {
             "location": location,
@@ -85,7 +86,9 @@ class TestComputefleetScenario(ScenarioTest):
             'public_ip_address_name': public_ip_address_name
         })
         
-        self.cmd('az network public-ip create --name {public_ip_address_name} --resource-group {resource_group} --allocation-method Static --sku Standard --location {location} --sku Standard ')
+        response = self.cmd('az network public-ip create --name {public_ip_address_name} --resource-group {resource_group} --allocation-method Static --sku Standard --location {location} --sku Standard ')
+        
+        print(response )
         return public_ip_address_id
     
     def _fleet_create(self, fleet=fleet_name, rg=resource_group, loc=location):
@@ -118,7 +121,7 @@ class TestComputefleetScenario(ScenarioTest):
         })
 
         try:
-            self.cmd('az compute-fleet fleet create  --name {fleet_name} --resource-group {resource_group} --spot-priority-profile \'{spot_profile}\' --compute-profile \'{compute_profile}\' --vm-sizes-profile \'{vm_sizes_profile}\' --location {location} --tags \'{tags}\' ', checks=[
+            response  = self.cmd('az compute-fleet fleet create  --name {fleet_name} --resource-group {resource_group} --spot-priority-profile \'{spot_profile}\' --compute-profile \'{compute_profile}\' --vm-sizes-profile \'{vm_sizes_profile}\' --location {location} --tags \'{tags}\' ', checks=[
                 self.check('name', '{fleet_name}'),
                 self.check('resourceGroup', '{resource_group}'),
                 self.check('properties.provisioningState', 'Succeeded')
@@ -126,7 +129,8 @@ class TestComputefleetScenario(ScenarioTest):
         except Exception as e:
             print(f"Failed to create fleet: {e}")
             raise
-    
+        print(response)
+        
     def _fleet_show(self, fleet=fleet_name, rg=resource_group):
         self.kwargs.update({
             'fleet_name': fleet,
