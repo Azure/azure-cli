@@ -182,6 +182,7 @@ class TestComputefleetScenario(ScenarioTest):
         except SystemExit as e:
             print(f"SystemExit occurred: {e}")
             raise
+    
     @ResourceGroupPreparer(name_prefix='fleet_test_', location='westus2')
     @AllowLargeResponse()
     def test_all_fleet_operations(self, resource_group, resource_group_location):
