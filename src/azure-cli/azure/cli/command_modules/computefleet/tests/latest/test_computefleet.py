@@ -118,7 +118,7 @@ class TestComputefleetScenario(ScenarioTest):
         })
 
         try:
-            self.cmd('az compute-fleet fleet create  --name {fleet_name} --resource-group {resource_group} --spot-priority-profile \'{spot_profile}\' --compute-profile \'{compute_profile}\' --location {location} --tags \'{tags}\' ', checks=[
+            self.cmd('az compute-fleet fleet create  --name {fleet_name} --resource-group {resource_group} --spot-priority-profile \'{spot_profile}\' --compute-profile \'{compute_profile}\' --vm-sizes-profile \'{vm_sizes_profile}\' --location {location} --tags \'{tags}\' ', checks=[
                 self.check('name', '{fleet_name}'),
                 self.check('resourceGroup', '{resource_group}'),
                 self.check('properties.provisioningState', 'Succeeded')

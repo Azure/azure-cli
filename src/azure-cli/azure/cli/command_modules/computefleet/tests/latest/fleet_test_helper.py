@@ -85,8 +85,8 @@ class FleetTestHelper:
             "allocation_strategy": "LowestPrice"
         }
         vm_sizes_profile = [
-            {"name": "Standard_D2s_v3", "rank": 19225},
-            {"name": "Standard_D4s_v3", "rank": 1180}
+            {"name": "Standard_D2s_v3"},
+            {"name": "Standard_D4s_v3"}
         ]
         
         storageProfile = {
@@ -109,7 +109,6 @@ class FleetTestHelper:
         }
         
         compute_os_profile = {
-                "osProfile": {
                     "computerNamePrefix": "o",
                     "adminUsername": adminUsername,
                     "linuxConfiguration": {
@@ -117,49 +116,40 @@ class FleetTestHelper:
                         "ssh": {
                             "publicKeys": [
                                 {
-                                    "path": "home/{adminUsername}/.ssh/authorized_keys",
+                                    "path": f"/home/{adminUsername}/.ssh/authorized_keys",
                                     "keyData": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC+wWK73dCr+jgQOAxNsHAnNNNMEMWOHYEccp6wJm2gotpr9katuF/ZAdou5AaW1C61slRkHRkpRRX9FA9CYBiitZgvCCz+3nWNN7l/Up54Zps/pHWGZLHNJZRYyAB6j5yVLMVHIHriY49d/GZTZVNB8GoJv9Gakwc/fuEZYYl4YDFiGMBP///TzlI4jhiJzjKnEvqPFki5p2ZRJqcbCiF4pJrxUQR/RXqVFQdbRLZgYfJ8xGB878RENq3yQ39d8dVOkq4edbkzwcUmwwwkYVPIoDGsYLaRHnG+To7FvMeyO7xDVQkMKzopTQV8AuKpyvpqu0a9pWOMaiCyDytO7GGN you@me.com"
                                 }
                             ]
                         }
                     }
-                },
-                "platformFaultDomainCount": 1,
-                "computeApiVersion": "2023-09-01"
-            }
-        
-        computeFleetVmssIPConfiguration = {
-            "name": "internalIpConfig",
-            "properties": {
-                "subnet": {
-                    "id": f"/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworks/{{virtualNetworkName}}/subnets/{{subnetName}}"
-                    }
-                    }
-                }
-        
-        networkInterfaceConfiguration = {
-                            "name": "exampleNic",
-                            "properties": [
-                                computeFleetVmssIPConfiguration
-                            ],
-                            "isPrimary": True,
-                            "isAcceleratedNetworkingEnabled": False
         }
         
         networkProfile = {
             "networkInterfaceConfigurations": [
-                networkInterfaceConfiguration
+                {
+                    "name": "exampleNic",
+                    "primary": True,
+                    "enableAcceleratedNetworking": False,
+                    "ipConfigurations": [
+                        {
+                            "name": "internalIpConfig",
+                            "subnet": {
+                                "id": f"/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworks/{virtual_network_name}/subnets/subnetName"
+                            }
+                        }
+                    ]
+                }
             ],
-            "networkApiVersion": "2022-07-01"
+            "networkApiVersion": "2020-11-01"
         }
         
         computeProfile= {
-            "compute-api-version": "2023-09-01",
+            "computeApiVersion": "2023-09-01",
             "platformFaultDomainCount": 1,
             "baseVirtualMachineProfile": {
                 "storageProfile": storageProfile,
                 "networkProfile": networkProfile,
-                "computeOsProfile": compute_os_profile
+                "osProfile": compute_os_profile
             }
         }
         
