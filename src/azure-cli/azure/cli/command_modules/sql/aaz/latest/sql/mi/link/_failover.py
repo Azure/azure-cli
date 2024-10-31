@@ -19,7 +19,7 @@ class Failover(AAZCommand):
     """Performs requested failover type in this Managed Instance link.
 
     :example: Failover a Managed Instance link.
-        az sql mi link failover -g testrg --instance-name testcl --name link1 --failover-type ForcedAllowDataLoss
+        az sql mi link failover -g testrg --mi testcl --name link1 --failover-type ForcedAllowDataLoss
     """
 
     _aaz_info = {
@@ -48,7 +48,7 @@ class Failover(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.link_name = AAZStrArg(
             options=["-n", "--name", "--link-name"],
-            help="The Managed Instance link name.",
+            help="Managed Instance link name.",
             required=True,
             id_part="child_name_1",
             fmt=AAZStrArgFormat(

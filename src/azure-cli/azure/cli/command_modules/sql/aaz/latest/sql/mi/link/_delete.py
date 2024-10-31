@@ -19,7 +19,7 @@ class Delete(AAZCommand):
     """Drop a Managed Instance link between Sql On-Prem and Sql Managed Instance.
 
     :example: Initiate a Managed Instance link drop.
-        az sql mi link delete -g testrg --instance-name testcl --name link1
+        az sql mi link delete -g testrg --mi testcl --name link1
     """
 
     _aaz_info = {

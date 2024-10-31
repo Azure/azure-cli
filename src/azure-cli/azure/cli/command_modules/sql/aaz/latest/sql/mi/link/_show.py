@@ -18,7 +18,7 @@ class Show(AAZCommand):
     """Get a Managed Instance link info.
 
     :example: Gets the Managed Instance link info.
-        az sql mi link show --g testrg --instance-name testcl --name link1
+        az sql mi link show -g testrg --mi testcl --name link1
     """
 
     _aaz_info = {

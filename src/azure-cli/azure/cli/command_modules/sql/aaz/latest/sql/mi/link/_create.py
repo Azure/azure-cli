@@ -18,7 +18,7 @@ class Create(AAZCommand):
     """Create a Managed Instance link between Sql On-Prem and Sql Managed Instance.
 
     :example: Create a Managed Instance link with minimal properties.
-        az sql mi link create -g testrg --instance-name testcl --name link1 --instance-ag-name instanceAg1 --partner-ag-name boxAg1 --partner-endpoint TCP://SERVER:7022 --databases "[{database-name:testdb}]"
+        az sql mi link create -g testrg --mi testcl --name link1 --instance-ag-name instanceAg --partner-ag-name partnerAg --partner-endpoint TCP://SERVER:7022 --databases "[{database-name:testdb}]"
     """
 
     _aaz_info = {
@@ -98,7 +98,6 @@ class Create(AAZCommand):
             options=["--seeding-mode"],
             arg_group="Properties",
             help="Database seeding mode – can be Automatic (default), or Manual for supported scenarios.",
-            default="Automatic",
             enum={"Automatic": "Automatic", "Manual": "Manual"},
         )
 

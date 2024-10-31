@@ -15,10 +15,10 @@ from azure.cli.core.aaz import *
     "sql mi link list",
 )
 class List(AAZCommand):
-    """Get a list of Managed Instance links in instance.
+    """Get a list of a Managed Instance links in instance.
 
     :example: Lists all Managed Instance links in instance.
-        az sql mi link list -g testrg --instance-name testcl
+        az sql mi link list -g testrg --mi testcl
     """
 
     _aaz_info = {
