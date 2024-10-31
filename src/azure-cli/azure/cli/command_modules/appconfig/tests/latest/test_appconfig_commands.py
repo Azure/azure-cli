@@ -3384,22 +3384,29 @@ class CredentialResponseSanitizer(RecordingProcessor):
             try:
                 json_data = shell_safe_json_parse(response["body"]["string"])
 
-                if isinstance(json_data["value"], list):
+                if isinstance(json_data.get("value"), list):
                     for idx, credential in enumerate(json_data["value"]):
-                        if "connectionString" in credential:
-                            credential["id"] = "sanitized_id{}".format(idx + 1)
-                            credential["value"] = "sanitized_secret{}".format(
-                                idx + 1)
+                        self._try_replace_secret(credential, idx)
 
-                            endpoint = next(
-                                filter(lambda x: x.startswith("Endpoint="), credential["connectionString"].split(";")))[len("Endpoint="):]
+                    response["body"]["string"] = json.dumps(json_data)
+                
+                elif isinstance(json_data, dict):
+                    self._try_replace_secret(json_data)
 
-                            credential["connectionString"] = "Endpoint={};Id={};Secret={}".format(
-                                endpoint, credential["id"], credential["value"])
-
-                response["body"]["string"] = json.dumps(json_data)
+                    response["body"]["string"] = json.dumps(json_data)
 
             except Exception:
-                pass
+                raise
 
         return response
+
+    def _try_replace_secret(self, credential, idx = 0):
+        if "connectionString" in credential:
+            credential["id"] = "sanitized_id{}".format(idx + 1)
+            credential["value"] = "sanitized_secret{}".format(idx + 1)
+
+            endpoint = next(
+                filter(lambda x: x.startswith("Endpoint="), credential["connectionString"].split(";")))[len("Endpoint="):]
+
+            credential["connectionString"] = "Endpoint={};Id={};Secret={}".format(
+                endpoint, credential["id"], credential["value"])
