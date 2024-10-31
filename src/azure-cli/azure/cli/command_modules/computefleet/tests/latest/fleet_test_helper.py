@@ -150,18 +150,16 @@ class FleetTestHelper:
             "networkInterfaceConfigurations": [
                 networkInterfaceConfiguration
             ],
-            "apiVersion": "2022-07-01"
+            "networkApiVersion": "2022-07-01"
         }
         
         computeProfile= {
-            "properties": {
             "compute-api-version": "2023-09-01",
             "platformFaultDomainCount": 1,
             "baseVirtualMachineProfile": {
                 "storageProfile": storageProfile,
                 "networkProfile": networkProfile,
                 "computeOsProfile": compute_os_profile
-            }
             }
         }
         
