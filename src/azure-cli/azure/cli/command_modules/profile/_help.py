@@ -21,6 +21,10 @@ long-summary: >-
     For more details, see https://go.microsoft.com/fwlink/?linkid=2276314
 
 
+    [WARNING] Passing the service principal certificate with `--password` is deprecated and will be removed
+    by version 2.74. Please use `--certificate` instead.
+
+
     To log in with a service principal, specify --service-principal.
 
 
@@ -35,8 +39,8 @@ examples:
       text: az login -u johndoe@contoso.com -p VerySecret
     - name: Log in with a service principal using client secret. Use -p=secret if the first character of the password is '-'.
       text: az login --service-principal -u http://azure-cli-2016-08-05-14-31-15 -p VerySecret --tenant contoso.onmicrosoft.com
-    - name: Log in with a service principal using client certificate.
-      text: az login --service-principal -u http://azure-cli-2016-08-05-14-31-15 -p ~/mycertfile.pem --tenant contoso.onmicrosoft.com
+    - name: Log in with a service principal using certificate.
+      text: az login --service-principal -u http://azure-cli-2016-08-05-14-31-15 --certificate ~/mycertfile.pem --tenant contoso.onmicrosoft.com
     - name: Log in with a system-assigned managed identity.
       text: az login --identity
     - name: Log in with a user-assigned managed identity. You must specify the client ID, object ID or resource ID of the user-assigned managed identity with --username.

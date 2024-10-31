@@ -6410,7 +6410,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc.auto_scaler_profile = cluster_autoscaler_profile
         return mc
 
-    def set_up_azure_container_storage(self, mc: ManagedCluster) -> ManagedCluster:
+    def set_up_azure_container_storage(self, mc: ManagedCluster) -> ManagedCluster:  # pylint: disable=too-many-locals
         """Set up azure container storage for the Managed Cluster object
         :return: ManagedCluster
         """
@@ -6441,16 +6441,15 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             if not mc.agent_pool_profiles:
                 raise UnknownError("Encountered an unexpected error while getting the agent pools from the cluster.")
             agentpool = mc.agent_pool_profiles[0]
-            agentpool_details = []
+            agentpool_details = {}
             pool_details = {}
-            pool_details["name"] = agentpool.name
             pool_details["vm_size"] = agentpool.vm_size
             pool_details["count"] = agentpool.count
             pool_details["os_type"] = agentpool.os_type
             pool_details["mode"] = agentpool.mode
             pool_details["node_taints"] = agentpool.node_taints
             pool_details["zoned"] = agentpool.availability_zones is not None
-            agentpool_details.append(pool_details)
+            agentpool_details[agentpool.name] = pool_details
             # Marking the only agentpool name as the valid nodepool for
             # installing Azure Container Storage during `az aks create`
             nodepool_list = agentpool.name
@@ -6464,6 +6463,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY,
                 CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD,
             )
+            from azure.cli.command_modules.acs.azurecontainerstorage._helpers import generate_vm_sku_cache_for_region
+            generate_vm_sku_cache_for_region(self.cmd.cli_ctx, self.context.get_location())
 
             default_ephemeral_disk_volume_type = CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY
             default_ephemeral_disk_nvme_perf_tier = CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
@@ -8199,7 +8200,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             pool_option = self.context.raw_param.get("storage_pool_option")
             pool_sku = self.context.raw_param.get("storage_pool_sku")
             pool_size = self.context.raw_param.get("storage_pool_size")
-            agentpool_details = []
+            agentpool_details = {}
             from azure.cli.command_modules.acs.azurecontainerstorage._helpers import get_extension_installed_and_cluster_configs
             (
                 is_extension_installed,
@@ -8217,6 +8218,9 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 mc.agent_pool_profiles,
             )
 
+            from azure.cli.command_modules.acs.azurecontainerstorage._helpers import generate_vm_sku_cache_for_region
+            generate_vm_sku_cache_for_region(self.cmd.cli_ctx, self.context.get_location())
+
             if enable_azure_container_storage:
                 from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
                     CONST_ACSTOR_IO_ENGINE_LABEL_KEY,
@@ -8225,10 +8229,9 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 labelled_nodepool_arr = []
                 for agentpool in mc.agent_pool_profiles:
                     pool_details = {}
+                    pool_name = agentpool.name
                     pool_details["vm_size"] = agentpool.vm_size
                     pool_details["count"] = agentpool.count
-                    node_name = agentpool.name
-                    pool_details["name"] = node_name
                     pool_details["os_type"] = agentpool.os_type
                     pool_details["mode"] = agentpool.mode
                     pool_details["node_taints"] = agentpool.node_taints
@@ -8237,10 +8240,10 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                         node_labels = agentpool.node_labels
                         if node_labels is not None and \
                            node_labels.get(CONST_ACSTOR_IO_ENGINE_LABEL_KEY) is not None and \
-                           node_name is not None:
-                            labelled_nodepool_arr.append(node_name)
+                           pool_name is not None:
+                            labelled_nodepool_arr.append(pool_name)
                         pool_details["node_labels"] = node_labels
-                    agentpool_details.append(pool_details)
+                    agentpool_details[pool_name] = pool_details
 
                 # Incase of a new installation, if the nodepool list is not defined
                 # then check for all the nodepools which are marked with acstor io-engine
@@ -8253,8 +8256,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                         if len(labelled_nodepool_arr) > 0:
                             nodepool_list = ','.join(labelled_nodepool_arr)
                         elif len(agentpool_details) == 1:
-                            pool_detail = agentpool_details[0]
-                            nodepool_list = pool_detail.get("name")
+                            nodepool_list = ','.join(agentpool_details.keys())
 
                 from azure.cli.command_modules.acs.azurecontainerstorage._validators import (
                     validate_enable_azure_container_storage_params

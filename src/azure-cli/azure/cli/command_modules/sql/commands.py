@@ -367,16 +367,14 @@ def load_command_table(self, _):
 
     with self.command_group('sql db geo-backup',
                             database_geo_backups_operations,
-                            client_factory=get_sql_database_recoverable_databases_operations,
-                            is_preview=True) as g:
+                            client_factory=get_sql_database_recoverable_databases_operations) as g:
 
         g.custom_show_command('show', 'recoverable_databases_get')
         g.custom_command('list', 'list_geo_backups')
 
     with self.command_group('sql db geo-backup',
                             database_operations,
-                            client_factory=get_sql_databases_operations,
-                            is_preview=True) as g:
+                            client_factory=get_sql_databases_operations) as g:
         g.custom_command(
             'restore',
             'restore_geo_backup')

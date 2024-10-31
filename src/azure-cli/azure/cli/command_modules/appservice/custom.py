@@ -2788,11 +2788,13 @@ has been deployed ".format(app_service_environment)
                        resource_group_name=resource_group_name, app_service_plan=plan_def)
 
 
-def update_app_service_plan(instance, sku=None, number_of_workers=None, elastic_scale=None,
+def update_app_service_plan(cmd, instance, sku=None, number_of_workers=None, elastic_scale=None,
                             max_elastic_worker_count=None):
     if number_of_workers is None and sku is None and elastic_scale is None and max_elastic_worker_count is None:
-        args = ["--number-of-workers", "--sku", "--elastic-scale", "--max-elastic-worker-count"]
-        logger.warning('Nothing to update. Set one of the following parameters to make an update: %s', str(args))
+        safe_params = cmd.cli_ctx.data['safe_params']
+        if '--set' not in safe_params:
+            args = ["--number-of-workers", "--sku", "--elastic-scale", "--max-elastic-worker-count"]
+            logger.warning('Nothing to update. Set one of the following parameters to make an update: %s', str(args))
     sku_def = instance.sku
     if sku is not None:
         sku = _normalize_sku(sku)
@@ -2843,7 +2845,7 @@ def show_plan(cmd, resource_group_name, name):
 
 
 def update_functionapp_app_service_plan(cmd, instance, sku=None, number_of_workers=None, max_burst=None):
-    instance = update_app_service_plan(instance, sku, number_of_workers)
+    instance = update_app_service_plan(cmd, instance, sku, number_of_workers)
     if max_burst is not None:
         if not is_plan_elastic_premium(cmd, instance):
             raise ValidationError("Usage error: --max-burst is only supported for Elastic Premium (EP) plans")
@@ -2852,7 +2854,7 @@ def update_functionapp_app_service_plan(cmd, instance, sku=None, number_of_worke
     if number_of_workers is not None:
         number_of_workers = validate_range_of_int_flag('--number-of-workers / --min-instances',
                                                        number_of_workers, min_val=0, max_val=20)
-    return update_app_service_plan(instance, sku, number_of_workers)
+    return update_app_service_plan(cmd, instance, sku, number_of_workers)
 
 
 def show_backup_configuration(cmd, resource_group_name, webapp_name, slot=None):
@@ -4581,7 +4583,7 @@ def get_app_insights_connection_string(cli_ctx, resource_group, name):
     return appinsights.connection_string
 
 
-def create_flex_app_service_plan(cmd, resource_group_name, name, location):
+def create_flex_app_service_plan(cmd, resource_group_name, name, location, zone_redundant):
     SkuDescription, AppServicePlan = cmd.get_models('SkuDescription', 'AppServicePlan')
     client = web_client_factory(cmd.cli_ctx)
     sku_def = SkuDescription(tier="FlexConsumption", name="FC1", size="FC", family="FC")
@@ -4592,6 +4594,10 @@ def create_flex_app_service_plan(cmd, resource_group_name, name, location):
         kind="functionapp",
         name=name
     )
+
+    if zone_redundant:
+        _enable_zone_redundant(plan_def, sku_def, None)
+
     poller = client.app_service_plans.begin_create_or_update(resource_group_name, name, plan_def)
     return LongRunningOperation(cmd.cli_ctx)(poller)
 
@@ -4757,6 +4763,13 @@ def is_exactly_one_true(*args):
     return found
 
 
+def list_flexconsumption_zone_redundant_locations(cmd):
+    client = web_client_factory(cmd.cli_ctx)
+    regions = client.list_geo_regions(sku="FlexConsumption")
+    regions = [x for x in regions if "FCZONEREDUNDANCY" in x.org_domain]
+    return [{'name': x.name.lower().replace(' ', '')} for x in regions]
+
+
 def create_functionapp(cmd, resource_group_name, name, storage_account, plan=None,
                        os_type=None, functions_version=None, runtime=None, runtime_version=None,
                        consumption_plan_location=None, app_insights=None, app_insights_key=None,
@@ -4772,8 +4785,9 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        always_ready_instances=None, maximum_instance_count=None, instance_memory=None,
                        flexconsumption_location=None, deployment_storage_name=None,
                        deployment_storage_container_name=None, deployment_storage_auth_type=None,
-                       deployment_storage_auth_value=None):
+                       deployment_storage_auth_value=None, zone_redundant=False):
     # pylint: disable=too-many-statements, too-many-branches
+
     if functions_version is None and flexconsumption_location is None:
         logger.warning("No functions version specified so defaulting to 4.")
         functions_version = '4'
@@ -4811,6 +4825,12 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     from azure.mgmt.web.models import Site
     SiteConfig, NameValuePair, DaprConfig, ResourceConfig = cmd.get_models('SiteConfig', 'NameValuePair',
                                                                            'DaprConfig', 'ResourceConfig')
+
+    if flexconsumption_location is None:
+        if zone_redundant:
+            raise ArgumentUsageError(
+                '--zone-redundant is only valid for the Flex Consumption plan. '
+                'Please try again without the --zone-redundant parameter.')
 
     if flexconsumption_location is not None:
         if image is not None:
@@ -5138,6 +5158,17 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         create_app_insights = True
 
     if flexconsumption_location is not None:
+        if zone_redundant:
+            zone_redundant_locations = list_flexconsumption_zone_redundant_locations(cmd)
+            zone_redundant_location = next((loc for loc in zone_redundant_locations
+                                            if loc['name'].lower() == flexconsumption_location.lower()), None)
+            if zone_redundant_location is None:
+                raise ValidationError("The specified location '{0}' "
+                                      "doesn't support zone redundancy in Flex Consumption. "
+                                      "Use: az functionapp list-flexconsumption-locations --zone-redundant "
+                                      "for the list of locations that support zone redundancy."
+                                      .format(flexconsumption_location))
+
         site_config.net_framework_version = None
         functionapp_def.reserved = None
         functionapp_def.is_xenon = None
@@ -5145,7 +5176,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         try:
             plan_name = generatePlanName(resource_group_name)
             plan_info = create_flex_app_service_plan(
-                cmd, resource_group_name, plan_name, flexconsumption_location)
+                cmd, resource_group_name, plan_name, flexconsumption_location, zone_redundant)
             functionapp_def.server_farm_id = plan_info.id
             functionapp_def.location = flexconsumption_location
 
@@ -5690,7 +5721,10 @@ def list_consumption_locations(cmd):
     return [{'name': x.name.lower().replace(' ', '')} for x in regions]
 
 
-def list_flexconsumption_locations(cmd):
+def list_flexconsumption_locations(cmd, zone_redundant=False):
+    if zone_redundant:
+        return list_flexconsumption_zone_redundant_locations(cmd)
+
     from azure.cli.core.commands.client_factory import get_subscription_id
     sub_id = get_subscription_id(cmd.cli_ctx)
     geo_regions_api = 'subscriptions/{}/providers/Microsoft.Web/geoRegions?sku=FlexConsumption&api-version=2023-01-01'

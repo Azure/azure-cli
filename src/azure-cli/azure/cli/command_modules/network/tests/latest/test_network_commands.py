@@ -2271,6 +2271,7 @@ class NetworkAppGatewayPublicIpScenarioTest(ScenarioTest):
 
 class NetworkAppGatewayWafConfigScenarioTest20170301(ScenarioTest):
 
+    @unittest.skip('SKU for this scenario is deprecated.')
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_config')
     def test_network_app_gateway_waf_config(self, resource_group):
@@ -2306,7 +2307,7 @@ class NetworkAppGatewayWafConfigScenarioTest20170301(ScenarioTest):
 
 class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy_')
+    @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy_', location='westcentralus')
     def test_network_app_gateway_waf_policy_with_application_gateway(self, resource_group):
         self.kwargs.update({
             'waf': 'agp1',
@@ -2378,6 +2379,13 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                      self.check('managedRules.managedRuleSets[1].ruleSetType', 'Microsoft_BotManagerRuleSet'),
                      self.check('managedRules.managedRuleSets[1].ruleSetVersion', '1.0')
                  ])
+        
+        self.cmd('network application-gateway waf-policy managed-rule rule-set update -g {rg} --policy-name {waf} '
+                 '--type Microsoft_BotManagerRuleSet --version 1.1',
+                 checks=[
+                     self.check('managedRules.managedRuleSets[1].ruleSetType', 'Microsoft_BotManagerRuleSet'),
+                     self.check('managedRules.managedRuleSets[1].ruleSetVersion', '1.1')
+                 ])
 
         # add one exclusion rule to the managed rules of this waf-policy
         self.cmd('network application-gateway waf-policy managed-rule exclusion add -g {rg} --policy-name {waf} '
@@ -2395,7 +2403,7 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
             self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[1].ruleGroupName', self.kwargs['csr_grp2']),
             self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[1].rules[0].ruleId', '913100'),
             self.check('managedRules.managedRuleSets[1].ruleSetType', 'Microsoft_BotManagerRuleSet'),
-            self.check('managedRules.managedRuleSets[1].ruleSetVersion', '1.0'),
+            self.check('managedRules.managedRuleSets[1].ruleSetVersion', '1.1'),
             self.check('policySettings.fileUploadLimitInMb', 64),
             self.check('policySettings.maxRequestBodySizeInKb', 128),
             self.check('policySettings.mode', 'Prevention'),
@@ -2436,6 +2444,7 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_custom_rule_')
     def test_network_app_gateway_waf_custom_rule(self, resource_group):
+        from azure.cli.core.azclierror import ArgumentUsageError
         self.kwargs.update({
             'waf': 'agp1',
             'rule': 'rule1',
@@ -2475,7 +2484,7 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                      self.check('matchConditions | length(@)', 1)
                  ])
         # validate match condition
-        with self.assertRaisesRegex(SystemExit, '2'):
+        with self.assertRaisesRegex(ArgumentUsageError, 'requires --values'):
             self.cmd("network application-gateway waf-policy custom-rule match-condition add -g {rg} "
                      "--policy-name {waf} -n {rule} "
                      "--match-variables RequestHeaders.value --operator Contains --transform lowercase")
@@ -2693,26 +2702,28 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
         # case 1: Initialize(add) managed rule set
         self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
                  '--type OWASP --version 3.0 '
-                 '--group-name {csr_grp1} --rule rule-id=921100 --rule rule-id=921110')
+                 '--group-name {csr_grp1} --rule rule-id=921100 --rule rule-id=921110 sensitivity=low')
         self.cmd('network application-gateway waf-policy show -g {rg} -n {waf}', checks=[
             self.check('managedRules.managedRuleSets[0].ruleSetType', 'OWASP'),
             self.check('managedRules.managedRuleSets[0].ruleSetVersion', '3.0'),
             self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules | length(@)', 2),
             self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].ruleGroupName', self.kwargs['csr_grp1']),
-            self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules[0].ruleId', '921100')
+            self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules[0].ruleId', '921100'),
+            self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules[1].sensitivity', 'Low')
         ])
 
         # case 2: Append(add) another managed rule set to same rule group
         self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
                  '--type OWASP --version 3.0 '
-                 '--group-name {csr_grp1} --rule rule-id=921150')
+                 '--group-name {csr_grp1} --rule rule-id=921150 sensitivity=medium')
         self.cmd('network application-gateway waf-policy managed-rule rule-set list -g {rg} --policy-name {waf}',
                  checks=[
                      self.check('managedRuleSets[0].ruleSetType', 'OWASP'),
                      self.check('managedRuleSets[0].ruleSetVersion', '3.0'),
                      self.check('managedRuleSets[0].ruleGroupOverrides[0].rules | length(@)', 3),
                      self.check('managedRuleSets[0].ruleGroupOverrides[0].ruleGroupName', self.kwargs['csr_grp1']),
-                     self.check('managedRuleSets[0].ruleGroupOverrides[0].rules[2].ruleId', '921150')
+                     self.check('managedRuleSets[0].ruleGroupOverrides[0].rules[2].ruleId', '921150'),
+                     self.check('managedRuleSets[0].ruleGroupOverrides[0].rules[2].sensitivity', 'Medium')
                  ])
 
         # case 3: Add another managed rule set of different rule group
@@ -3047,7 +3058,7 @@ class NetworkPublicIpScenarioTest(ScenarioTest):
         ])
         self.cmd('network public-ip create -g {rg} -n {ip2}', checks=[
             self.check('publicIp.provisioningState', 'Succeeded'),
-            self.check('publicIp.publicIPAllocationMethod', 'Dynamic'),
+            self.check('publicIp.publicIPAllocationMethod', 'Static'),
             self.check('publicIp.dnsSettings', None)
         ])
 
@@ -3117,8 +3128,7 @@ class NetworkPublicIpScenarioTest(ScenarioTest):
 
         # test ddos protection status
         self.cmd('network application-gateway create -g {rg} -n testag --public-ip-address {ip1} --sku Standard_v2 --priority 1001')
-        self.cmd('network public-ip ddos-protection-statu show -g {rg} -n {ip1}', self.check('isWorkloadProtected', True))
-
+        self.cmd('network public-ip ddos-protection show -g {rg} -n {ip1}', self.check('isWorkloadProtected', True))
         self.cmd('network public-ip update -g {rg} -n {ip1} --protection-mode Disabled --ddos-protection-plan null',
                  checks=[
                      self.check('ddosSettings.protectionMode', 'Disabled'),

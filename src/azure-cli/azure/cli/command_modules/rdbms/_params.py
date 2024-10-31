@@ -527,7 +527,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
         promote_mode_arg_type = CLIArgumentType(
             arg_type=get_enum_type(['standalone', 'switchover']),
-            help='Whether to promote read replica to an independent server or promite it as a primary server.'
+            help='Whether to promote read replica to an independent server or promote it as a primary server.'
         )
 
         promote_option_arg_type = CLIArgumentType(
@@ -879,7 +879,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('max_file_size', type=int, help='The file size limitation to filter files.')
 
         # backups
-        if command_group == 'mysql':
+        if command_group != 'mariadb':
             with self.argument_context('{} flexible-server backup create'.format(command_group)) as c:
                 c.argument('backup_name', options_list=['--backup-name', '-b'], help='The name of the new backup.')
 
@@ -888,6 +888,11 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
         with self.argument_context('{} flexible-server backup list'.format(command_group)) as c:
             c.argument('server_name', id_part=None, arg_type=server_name_arg_type)
+
+        if command_group == 'postgres':
+            with self.argument_context('{} flexible-server backup delete'.format(command_group)) as c:
+                c.argument('backup_name', options_list=['--backup-name', '-b'], help='The name of the new backup.')
+                c.argument('yes', arg_type=yes_arg_type)
 
         # identity
         with self.argument_context('{} flexible-server identity'.format(command_group)) as c:

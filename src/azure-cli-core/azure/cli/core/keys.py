@@ -35,8 +35,8 @@ def is_valid_ssh_rsa_public_key(openssh_pubkey):
 
 
 def generate_ssh_keys(private_key_filepath, public_key_filepath):
-    import paramiko
-    from paramiko.ssh_exception import PasswordRequiredException, SSHException
+    from cryptography.hazmat.primitives.asymmetric import rsa
+    from cryptography.hazmat.primitives import serialization
 
     if os.path.isfile(public_key_filepath):
         try:
@@ -57,24 +57,48 @@ def generate_ssh_keys(private_key_filepath, public_key_filepath):
         os.chmod(ssh_dir, 0o700)
 
     if os.path.isfile(private_key_filepath):
-        # try to use existing private key if it exists.
-        try:
-            key = paramiko.RSAKey(filename=private_key_filepath)
-            logger.warning("Private SSH key file '%s' was found in the directory: '%s'. "
-                           "A paired public key file '%s' will be generated.",
-                           private_key_filepath, ssh_dir, public_key_filepath)
-        except (PasswordRequiredException, SSHException, IOError) as e:
-            raise CLIError(e)
-
+        # Try to use existing private key if it exists.
+        # https://cryptography.io/en/latest/hazmat/primitives/asymmetric/rsa/#key-loading
+        with open(private_key_filepath, "rb") as f:
+            private_bytes = f.read()
+        private_key = serialization.load_pem_private_key(private_bytes, password=None)
+        logger.warning("Private SSH key file '%s' was found in the directory: '%s'. "
+                       "A paired public key file '%s' will be generated.",
+                       private_key_filepath, ssh_dir, public_key_filepath)
     else:
-        # otherwise generate new private key.
-        key = paramiko.RSAKey.generate(2048)
-        key.write_private_key_file(private_key_filepath)
-        os.chmod(private_key_filepath, 0o600)
+        # Otherwise generate new private key.
+        # https://cryptography.io/en/latest/hazmat/primitives/asymmetric/rsa/#generation
+        private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
 
-    with open(public_key_filepath, 'w') as public_key_file:
-        public_key = '{} {}'.format(key.get_name(), key.get_base64())
-        public_key_file.write(public_key)
-    os.chmod(public_key_filepath, 0o644)
+        # https://cryptography.io/en/latest/hazmat/primitives/asymmetric/rsa/#key-serialization
+        # The private key will look like:
+        # -----BEGIN RSA PRIVATE KEY-----
+        # ...
+        # -----END RSA PRIVATE KEY-----
+        private_bytes = private_key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.TraditionalOpenSSL,
+            encryption_algorithm=serialization.NoEncryption()
+        )
 
-    return public_key
+        # Creating the private key file with 600 permission makes sure only the current user can access it.
+        # Reference: paramiko.pkey.PKey._write_private_key_file
+        with os.fdopen(_open(private_key_filepath, 0o600), "wb") as f:
+            f.write(private_bytes)
+
+    # Write public key
+    # The public key will look like:
+    # ssh-rsa ...
+    public_key = private_key.public_key()
+    public_bytes = public_key.public_bytes(
+        encoding=serialization.Encoding.OpenSSH,
+        format=serialization.PublicFormat.OpenSSH
+    )
+    with os.fdopen(_open(public_key_filepath, 0o644), 'wb') as f:
+        f.write(public_bytes)
+
+    return public_bytes.decode()
+
+
+def _open(filename, mode):
+    return os.open(filename, flags=os.O_WRONLY | os.O_TRUNC | os.O_CREAT, mode=mode)

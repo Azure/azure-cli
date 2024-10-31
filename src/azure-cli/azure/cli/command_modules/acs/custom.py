@@ -640,6 +640,9 @@ def aks_create(
     node_public_ip_tags=None,
     # metrics profile
     enable_cost_analysis=False,
+    # trusted launch
+    enable_vtpm=False,
+    enable_secure_boot=False,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -1149,8 +1152,7 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                               rotation_poll_interval=rotation_poll_interval,
                               no_wait=no_wait,)
 
-    enable_monitoring = CONST_MONITORING_ADDON_NAME in instance.addon_profiles \
-        and instance.addon_profiles[CONST_MONITORING_ADDON_NAME].enabled
+    enable_monitoring = is_monitoring_addon_enabled(addons, instance)
     ingress_appgw_addon_enabled = CONST_INGRESS_APPGW_ADDON_NAME in instance.addon_profiles \
         and instance.addon_profiles[CONST_INGRESS_APPGW_ADDON_NAME].enabled
 
@@ -1870,7 +1872,7 @@ def k8s_install_kubectl(cmd, client_version='latest', install_location=None, sou
     """
 
     if not source_url:
-        source_url = "https://storage.googleapis.com/kubernetes-release/release"
+        source_url = "https://dl.k8s.io/release"
         cloud_name = cmd.cli_ctx.cloud.name
         if cloud_name.lower() == 'azurechinacloud':
             source_url = 'https://mirror.azure.cn/kubernetes/kubectl'
@@ -2340,6 +2342,9 @@ def aks_agentpool_add(
     asg_ids=None,
     node_public_ip_tags=None,
     disable_windows_outbound_nat=False,
+    # trusted launch
+    enable_vtpm=False,
+    enable_secure_boot=False,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -2390,6 +2395,11 @@ def aks_agentpool_update(
     os_sku=None,
     enable_fips_image=False,
     disable_fips_image=False,
+    # trusted launch
+    enable_vtpm=False,
+    disable_vtpm=False,
+    enable_secure_boot=False,
+    disable_secure_boot=False,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -3243,3 +3253,23 @@ def _aks_approuting_update(
         return None
 
     return aks_update_decorator.update_mc(mc)
+
+
+def is_monitoring_addon_enabled(addons, instance):
+    monitoring_addon_enabled = False
+    is_monitoring_addon = False
+    try:
+        addon_args = addons.split(',')
+        for addon_arg in addon_args:
+            if addon_arg in ADDONS:
+                addon = ADDONS[addon_arg]
+                if addon == CONST_MONITORING_ADDON_NAME:
+                    is_monitoring_addon = True
+                    break
+
+        addon_profiles = instance.addon_profiles or {}
+        monitoring_addon_enabled = is_monitoring_addon and CONST_MONITORING_ADDON_NAME in addon_profiles and addon_profiles[
+            CONST_MONITORING_ADDON_NAME].enabled
+    except Exception as ex:  # pylint: disable=broad-except
+        logger.debug("failed to check monitoring addon enabled: %s", ex)
+    return monitoring_addon_enabled

@@ -17,7 +17,7 @@ except ImportError:
     logging.warning("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.65.0"
+VERSION = "2.66.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -58,7 +58,6 @@ DEPENDENCIES = [
     'azure-cosmos~=3.0,>=3.0.2',
     'azure-data-tables==12.4.0',
     'azure-datalake-store~=0.0.53',
-    'azure-graphrbac~=0.60.0',
     'azure-keyvault-administration==4.4.0b2',
     'azure-keyvault-certificates==4.7.0',
     'azure-keyvault-keys==4.9.0b3',
@@ -78,7 +77,7 @@ DEPENDENCIES = [
     'azure-mgmt-compute~=33.0.0',
     'azure-mgmt-containerinstance==10.1.0',
     'azure-mgmt-containerregistry==10.3.0',
-    'azure-mgmt-containerservice~=32.0.0',
+    'azure-mgmt-containerservice~=32.1.0',
     'azure-mgmt-cosmosdb==9.6.0',
     'azure-mgmt-databoxedge~=1.0.0',
     'azure-mgmt-datamigration~=10.0.0',
@@ -103,8 +102,10 @@ DEPENDENCIES = [
     'azure-mgmt-msi~=7.0.0',
     'azure-mgmt-netapp~=10.1.0',
     'azure-mgmt-policyinsights==1.1.0b4',
+    'azure-mgmt-postgresqlflexibleservers==1.0.0',
     'azure-mgmt-privatedns~=1.0.0',
     'azure-mgmt-rdbms==10.2.0b17',
+    'azure-mgmt-mysqlflexibleservers==1.0.0b2',
     'azure-mgmt-recoveryservicesbackup~=9.1.0',
     'azure-mgmt-recoveryservices~=3.0.0',
     'azure-mgmt-redhatopenshift~=1.5.0',
@@ -114,7 +115,7 @@ DEPENDENCIES = [
     'azure-mgmt-security==6.0.0',
     'azure-mgmt-servicebus~=8.2.0',
     'azure-mgmt-servicefabricmanagedclusters==2.0.0b6',
-    'azure-mgmt-servicelinker==1.2.0b2',
+    'azure-mgmt-servicelinker==1.2.0b3',
     'azure-mgmt-servicefabric~=2.1.0',
     'azure-mgmt-signalr==2.0.0b2',
     'azure-mgmt-sqlvirtualmachine==1.0.0b5',
@@ -138,6 +139,7 @@ DEPENDENCIES = [
     'javaproperties~=0.5.1',
     'jsondiff~=2.0.0',
     'packaging>=20.9',
+    'paramiko>=2.0.8,<4.0.0',
     'pycomposefile>=0.0.29',
     'PyGithub~=1.38',
     'PyNaCl~=1.5.0',
