@@ -39,6 +39,8 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import sdk_no_wait
 
+from azure.cli.core.aaz import has_value
+
 from ._vm_utils import read_content_if_is_file, import_aaz_by_profile
 from ._vm_diagnostics_templates import get_default_diag_config
 
@@ -48,7 +50,7 @@ from ._client_factory import (_compute_client_factory, cf_vm_image_term, _dev_te
 from .aaz.latest.ppg import Show as _PPGShow
 from .aaz.latest.vmss import ListInstances as _VMSSListInstances
 from .aaz.latest.capacity.reservation.group import List as _CapacityReservationGroupList
-from .aaz.latest.image import Create as _ImageCreate
+from .aaz.latest.image import Update as _ImageUpdate
 
 from .generated.custom import *  # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
 try:
@@ -614,166 +616,91 @@ def create_image(cmd, resource_group_name, name, source, os_type=None, data_disk
                  os_snapshot=None, data_snapshots=None,
                  os_disk=None, os_disk_caching=None, data_disks=None, data_disk_caching=None,
                  tags=None, zone_resilient=None, edge_zone=None):
+    from .aaz.latest.image import Create
 
-    class ImageCreate(_ImageCreate):
-        # @classmethod
-        # def _build_arguments_schema(cls, *args, **kwargs):
-        #     args_schema = super()._build_arguments_schema(*args, **kwargs)
-        #     args_schema.extended_location._registered = False
-        #     args_schema.source_virtual_machine._registered = False
-        #     args_schema.storage_profile._registered = False
+    if source_virtual_machine:
+        location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
+        image_storage_profile = None if zone_resilient is None else {"zone_resilient": zone_resilient}
+        args = {
+            "location": location,
+            "source_virtual_machine": {"id": source_virtual_machine},
+            "storage_profile": image_storage_profile,
+            "tags": tags or {}
+        }
+    else:
+        os_disk = {
+            "os_type": os_type,
+            "os_state": "Generalized",
+            "caching": os_disk_caching,
+            "snapshot": {"id": os_snapshot} if os_snapshot else None,
+            "managed_disk": {"id": os_disk} if os_disk else None,
+            "blob_uri": os_blob_uri,
+            "storage_account_type": storage_sku
+        }
+        all_data_disks = []
+        lun = 0
+        if data_blob_uris:
+            for d in data_blob_uris:
+                all_data_disks.append({
+                    "lun": lun,
+                    "blob_uri": d,
+                    "caching": data_disk_caching
+                })
+                lun += 1
+        if data_snapshots:
+            for d in data_snapshots:
+                all_data_disks.append({
+                    "lun": lun,
+                    "snapshot": {"id": d},
+                    "caching": data_disk_caching
+                })
+                lun += 1
+        if data_disks:
+            for d in data_disks:
+                all_data_disks.append({
+                    "lun": lun,
+                    "managed_disk": {"id": d},
+                    "caching": data_disk_caching
+                })
+                lun += 1
 
-        def pre_operations(self):
-            args = self.ctx.args
+        image_storage_profile = {
+            "os_disk": os_disk,
+            "data_disks": all_data_disks
+        }
+        if zone_resilient is not None:
+            image_storage_profile["zone_resilient"] = zone_resilient
+        location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
+        # pylint disable=no-member
+        args = {
+            "location": location,
+            "storage_profile": image_storage_profile,
+            "tags": tags or {}
+        }
 
-            if source_virtual_machine:
-                # location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
-                # image_storage_profile = None if zone_resilient is None else ImageStorageProfile(
-                #     zone_resilient=zone_resilient)
-                args.location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
+    if hyper_v_generation:
+        args["hyper_v_generation"] = hyper_v_generation
 
-                if zone_resilient:
-                    args.storage_profile.zone_resilient = zone_resilient
+    if edge_zone:
+        args["extended_location"] = edge_zone
 
-                args.source_virtual_machine.id = source_virtual_machine
-                args.tags = tags or {}
+    args["image_name"] = name
+    args["resource_group"] = resource_group_name
 
-                # image = Image(location=location, source_virtual_machine=SubResource(id=source_virtual_machine),
-                #               storage_profile=image_storage_profile, tags=(tags or {}))
-            else:
-                # image_storage_profile = args.storage_profile
-
-                image_os_disk = {
-                    "os_type": os_type,
-                    "os_state": "Generalized",
-                    "caching": os_disk_caching,
-                    "blob_uri": os_blob_uri,
-                    "storage_account_type": storage_sku,
-                    "snapshot": {"id": os_snapshot} if os_snapshot else None,
-                    "managed_disk": {"id": os_disk} if os_disk else None
-                }
-
-                # image_os_disk = image_storage_profile.os_disk
-                # image_os_disk.os_type = os_type
-                # image_os_disk.os_state = "Generalized"
-                # image_os_disk.caching = os_disk_caching
-                # image_os_disk.blob_uri = os_blob_uri
-                # image_os_disk.storage_account_type = storage_sku
-                # if os_snapshot:
-                #     image_os_disk.snapshot.id = os_snapshot
-                # if os_disk:
-                #     image_os_disk.managed_disk.id = os_disk
-
-                all_data_disks = []
-                lun = 0
-                if data_blob_uris:
-                    for d in data_blob_uris:
-                        all_data_disks.append({"lun": lun, "blob_uri": d, "caching": data_disk_caching})
-                        lun += 1
-                if data_snapshots:
-                    for d in data_snapshots:
-                        all_data_disks.append(
-                            {"lun": lun, "snapshot": {"id": d}, "caching": data_disk_caching})
-                        lun += 1
-                if data_disks:
-                    for d in data_disks:
-                        all_data_disks.append(
-                            {"lun": lun, "managed_disk": {"id": d}, "caching": data_disk_caching})
-                        lun += 1
-
-                image_storage_profile = {"os_disk": image_os_disk, "data_disks": all_data_disks}
-
-                if zone_resilient is not None:
-                    image_storage_profile.zone_resilient = zone_resilient
-
-                args.location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
-                # pylint disable=no-member
-                # image = Image(location=location, storage_profile=image_storage_profile, tags=(tags or {}))
-
-                args.storage_profile = image_storage_profile
-                args.tags = tags or {}
-
-            if hyper_v_generation:
-                args.hyper_v_generation = hyper_v_generation
-
-            if edge_zone:
-                args.extended_location = edge_zone
-
-    return ImageCreate(cli_ctx=cmd.cli_ctx)(command_args={
-        "name": name,
-        "resource_group": resource_group_name,
-        "source": source,
-        "os_type": os_type,
-        "data_disk_sources": data_disk_sources,
-        "location": location,
-        "source_virtual_machine": source_virtual_machine,
-        "storage_sku": storage_sku,
-        "hyper_v_generation": hyper_v_generation,
-        "os_blob_uri": os_blob_uri,
-        "data_blob_uris": data_blob_uris,
-        "os_snapshot": os_snapshot,
-        "data_snapshots": data_snapshots,
-        "os_disk": os_disk,
-        "os_disk_caching": os_disk_caching,
-        "data_disks": data_disks,
-        "data_disk_caching": data_disk_caching,
-        "tags": tags,
-        "zone_resilient": zone_resilient,
-        "edge_zone": edge_zone
-    })
-
-    # ImageOSDisk, ImageDataDisk, ImageStorageProfile, Image, SubResource, OperatingSystemStateTypes = cmd.get_models(
-    #     'ImageOSDisk', 'ImageDataDisk', 'ImageStorageProfile', 'Image', 'SubResource', 'OperatingSystemStateTypes')
-
-    # if source_virtual_machine:
-    #     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
-    #     image_storage_profile = None if zone_resilient is None else ImageStorageProfile(zone_resilient=zone_resilient)
-    #     image = Image(location=location, source_virtual_machine=SubResource(id=source_virtual_machine),
-    #                   storage_profile=image_storage_profile, tags=(tags or {}))
-    # else:
-    #     os_disk = ImageOSDisk(os_type=os_type,
-    #                           os_state=OperatingSystemStateTypes.generalized,
-    #                           caching=os_disk_caching,
-    #                           snapshot=SubResource(id=os_snapshot) if os_snapshot else None,
-    #                           managed_disk=SubResource(id=os_disk) if os_disk else None,
-    #                           blob_uri=os_blob_uri,
-    #                           storage_account_type=storage_sku)
-    #     all_data_disks = []
-    #     lun = 0
-    #     if data_blob_uris:
-    #         for d in data_blob_uris:
-    #             all_data_disks.append(ImageDataDisk(lun=lun, blob_uri=d, caching=data_disk_caching))
-    #             lun += 1
-    #     if data_snapshots:
-    #         for d in data_snapshots:
-    #             all_data_disks.append(ImageDataDisk(lun=lun, snapshot=SubResource(id=d), caching=data_disk_caching))
-    #             lun += 1
-    #     if data_disks:
-    #         for d in data_disks:
-    #             all_data_disks.append(ImageDataDisk(lun=lun, managed_disk=SubResource(id=d), caching=data_disk_caching))
-    #             lun += 1
-    #
-    #     image_storage_profile = ImageStorageProfile(os_disk=os_disk, data_disks=all_data_disks)
-    #     if zone_resilient is not None:
-    #         image_storage_profile.zone_resilient = zone_resilient
-    #     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
-    #     # pylint disable=no-member
-    #     image = Image(location=location, storage_profile=image_storage_profile, tags=(tags or {}))
-    #
-    # if hyper_v_generation:
-    #     image.hyper_v_generation = hyper_v_generation
-    #
-    # if edge_zone:
-    #     image.extended_location = edge_zone
-    #
-    # client = _compute_client_factory(cmd.cli_ctx)
-    # return client.images.begin_create_or_update(resource_group_name, name, image)
+    return Create(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 
-def update_image(instance, tags=None):
-    if tags is not None:
-        instance.tags = tags
-    return instance
+class ImageUpdate(_ImageUpdate):
+    def pre_instance_update(self, instance):
+        args = self.ctx.args
+        if has_value(args.tags):
+            instance.tags = args.tags
+
+#
+# def update_image(instance, tags=None):
+#     if tags is not None:
+#         instance.tags = tags
+#     return instance
 
 
 # region Snapshots
@@ -6260,28 +6187,28 @@ class VMSSListInstances(_VMSSListInstances):
         return result, next_link
 
 
-class ImageCreate(_ImageCreate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.extended_location._registered = False
-        args_schema.source_virtual_machine._registered = False
-        args_schema.storage_profile._registered = False
-
-
-
-        # from azure.cli.core.aaz import AAZFileArg, AAZFileArgBase64EncodeFormat
-        # args_schema.cert_file = AAZFileArg(
-        #     options=["--cert-file"],
-        #     help="Path to the certificate file.",
-        #     required=True,
-        #     fmt=AAZFileArgBase64EncodeFormat(),
-        # )
-        # args_schema.data._registered = False
-        return args_schema
-
-    def pre_operations(self):
-        pass
+# class ImageCreate(_ImageCreate):
+#     @classmethod
+#     def _build_arguments_schema(cls, *args, **kwargs):
+#         args_schema = super()._build_arguments_schema(*args, **kwargs)
+#         args_schema.extended_location._registered = False
+#         args_schema.source_virtual_machine._registered = False
+#         args_schema.storage_profile._registered = False
+#
+#
+#
+#         # from azure.cli.core.aaz import AAZFileArg, AAZFileArgBase64EncodeFormat
+#         # args_schema.cert_file = AAZFileArg(
+#         #     options=["--cert-file"],
+#         #     help="Path to the certificate file.",
+#         #     required=True,
+#         #     fmt=AAZFileArgBase64EncodeFormat(),
+#         # )
+#         # args_schema.data._registered = False
+#         return args_schema
+#
+#     def pre_operations(self):
+#         pass
     # def pre_operations(self):
     #     args = self.ctx.args
     #     if has_value(args.cert_file):
