@@ -2439,12 +2439,11 @@ class AKSManagedClusterContext(BaseAKSContext):
                     raise RequiredArgumentMissingError(
                         "Please explicitly specify the network plugin type"
                     )
-        return pod_cidr, service_cidr, dns_service_ip, None, network_policy
+        return pod_cidr, service_cidr, dns_service_ip, network_policy
 
     def get_pod_cidr_and_service_cidr_and_dns_service_ip_and_and_network_policy(
         self,
     ) -> Tuple[
-        Union[str, None],
         Union[str, None],
         Union[str, None],
         Union[str, None],
