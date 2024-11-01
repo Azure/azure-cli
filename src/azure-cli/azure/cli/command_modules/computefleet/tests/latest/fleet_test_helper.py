@@ -67,23 +67,14 @@ class FleetTestHelper:
             "capacity": 3,
             "min_capacity": 2,
             "allocation_strategy": "LowestPrice"
-        }
+            }
+        
         vm_sizes_profile = [
-            {"name": "Standard_D2s_v3"},
-            {"name": "Standard_D4s_v3"}
+            {"name": "Standard_D2s_v3", 'rank': 1},
+            {"name": "Standard_D4s_v3", 'rank': 2},
         ]
         
         storageProfile = {
-            "osDisk": {
-                  "osType": "Linux",
-                  "createOption": "FromImage",
-                  "caching": "ReadWrite",
-                  "managedDisk": {
-                    "storageAccountType": "Standard_LRS"
-                  },
-                  "deleteOption": "Delete",
-                  "diskSizeGB": 30
-                },
             "imageReference": {
                   "publisher": "Canonical",
                   "offer": "UbuntuServer",
@@ -120,7 +111,7 @@ class FleetTestHelper:
                             "subnet": {
                                 "id": subnet_id
                             },
-                            "publicIpAddress": {
+                            "public_ip_address_configuration": {
                                 "id": public_ip_address_id
                             }
                         }
@@ -148,6 +139,8 @@ class FleetTestHelper:
             "zones": ["1","2","3"],
             "tags": {"key3518": "luvrnuvsgdpbuofdskkcoqhfh"}
         }
+        
+        print(computeFleetData)
         return computeFleetData
 
     @staticmethod

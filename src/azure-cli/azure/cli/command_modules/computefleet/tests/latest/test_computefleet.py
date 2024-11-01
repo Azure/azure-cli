@@ -42,7 +42,8 @@ if not subscriptionId:
 fleet_name = 'testFleet'
 fleet_name_regular = 'testFleet_rg'
 fleet_name_spot = 'testFleet_sp'
-def generate_random_rg_name(prefix='fleet_cli_rg_', length=16):
+fleet_rg_prefix= 'fleet_cli_rg_'
+def generate_random_rg_name(prefix=fleet_rg_prefix, length=16):
     suffix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=length))
     return prefix + suffix
 
@@ -189,7 +190,7 @@ class TestComputefleetScenario(ScenarioTest):
             print(f"SystemExit occurred: {e}")
             raise
     
-    @ResourceGroupPreparer(name_prefix='fleet_test_', location='westus2')
+    @ResourceGroupPreparer(name_prefix=fleet_rg_prefix, location=location)
     @AllowLargeResponse()
     def test_all_fleet_operations(self, resource_group, resource_group_location):
         fleet_name = generate_random_fleet_name('testFleet')
