@@ -26,8 +26,9 @@ class FleetTestHelper:
     
     @staticmethod
     def generate_fleet_parameters(self, subscriptionId, resourceGroupName, location, public_ip_address_id, subnetname):
-        addressPrefix = "10.0.2.0/24"
-        addressPrefixes = ["10.0.0.0/16"]
+        subnet_addressPrefixes = "10.0.0.0/24"
+        vnet_addressPrefixes = "10.0.0.0/16"
+        
         nat_gateway = FleetTestHelper.create_nat_gateway(self, public_ip_address_id, subscriptionId, resourceGroupName, location)
         network_security_groups = FleetTestHelper.create_network_security_groups(self, subscriptionId, resourceGroupName, location)
         natgw_id = nat_gateway['nat_id']
@@ -36,48 +37,23 @@ class FleetTestHelper:
         nsg_name = network_security_groups['nsg_name']
         virtual_network_name = self.create_random_name('testVNet-', 24)
         
-        subnetname = FleetTestHelper.create_subnet(self, subscriptionId, resourceGroupName, location, virtual_network_name, subnetname, nsg_name, natgw_name)
+        netResponse = FleetTestHelper.create_vnet_subnet(self, subscriptionId, resourceGroupName, location, virtual_network_name, subnetname, nsg_name, natgw_name, vnet_addressPrefixes, subnet_addressPrefixes)
         adminUsername = "adminuser"
-        subnet_name = subnetname
-        addressSpaces = { "addressPrefixes": ["10.0.0.0/16"] }
+        subnet_name = netResponse['subnetName']
+        subnet_details = netResponse['subnetResponse']
+        vnet_details = netResponse['vnetResponse']
         
-        subnet = {
-            "name": subnet_name,
-            "properties": {
-            "addressPrefix": {addressPrefix},
-            "networkSecurityGroup": {
-                "id": nsg_id
-            },
-            "natGateway": {
-                "id": natgw_id
-            }
-            }
-        }
+        subnet = subnet_details
         
         subnets = [subnet]
-        addressSpaces = {addressPrefixes}
-
         input_data = {
             "location": location,
             "properties": {
-                "addressSpace": addressSpaces,
+                "addressSpace": subnet_addressPrefixes,
                 "subnets": subnets
             }
         }
-        
-        virtual_network_id = f"/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworks/{virtual_network_name}"
-        input_data_json = json.dumps(input_data)
-        
-        self.kwargs.update({
-            'virtual_network_id':  virtual_network_id,
-            'input_data_json': input_data_json,
-            'location': location,
-            'resource_group': resourceGroupName,
-            'virtual_network_name': virtual_network_name
-        })
-        
-        self.cmd(f'az network vnet create --name {virtual_network_name} --resource-group {resourceGroupName} --location {location} --subnet-name {subnetname} --address-prefixes "10.0.0.0/16"  --subnet-prefixes "10.0.0.0/24"')
-        
+       
         spot_priority_profile = {
             "capacity": 3,
             "min_capacity": 2,
@@ -230,21 +206,24 @@ class FleetTestHelper:
         print(response)
         return {'nat_id': nat_id, 'nat_name': nat_name}
     
-    def create_subnet(self, subscriptionId, resourceGroupName, location, vnetName, subnetName, nsg_name, nat_gateway_name):
+    def create_vnet_subnet(self, subscriptionId, resourceGroupName, location, vnetName, subnetName, nsg_name, nat_gateway_name, vnet_addressprefix, subnet_addressprefixes):
         self.kwargs.update({    
              'subscriptionId': subscriptionId,
              'resourceGroupName': resourceGroupName,
              'vnetName': vnetName,
              'subnetName': subnetName,
-             'nsg': nsg_name,
-             'nat_gateway': nat_gateway_name             
+             'nsg_name': nsg_name,
+             'nat_gateway': nat_gateway_name,
+             'vnet_addressprefix': vnet_addressprefix,
+             'subnetprefixes': subnet_addressprefixes             
         })
         
-        vnetResponse = self.cmd('az network vnet create -g {resourceGroupName} -n {vnetName} --address-prefix \'10.0.0.0/16\' --subnet-name {subnetName} --subnet-prefixes \'10.0.0.0/24\'')
+        vnetResponse = self.cmd('az network vnet create -g {resourceGroupName} -n {vnetName} --address-prefix {vnet_addressprefix}        --subnet-name {subnetName} --subnet-prefixes {subnetprefixes} --location {location}')   
         print(vnetResponse)
                        
-        response  = self.cmd('az network vnet subnet create --name {subnetName} --vnet-name {vnetName}  --resource-group {resourceGroupName} --nat-gateway {nat_gateway} --network-security-group {nsg}')
+        subnetResponse  = self.cmd(f'az network vnet subnet create --name {subnetName} --vnet-name {vnetName}  --resource-group {resourceGroupName} --network-security-group {nsg_name} --address-prefixes "10.0.0.0/24"')
+        print(subnetResponse)
         
-        print(response)
-        return subnetName
-    
+        subnetResponse  = self.cmd('az network vnet subnet create --name {subnetName} --vnet-name {vnetName}  --resource-group {resourceGroupName} --network-security-group {nsg_name} --address-prefixes "10.0.0.0/24"')
+        
+        return {'subnetName': subnetName, 'vnetResponse': vnetResponse, 'subnetResponse': subnetResponse}
