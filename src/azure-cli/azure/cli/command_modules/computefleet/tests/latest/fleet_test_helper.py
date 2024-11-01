@@ -36,7 +36,7 @@ class FleetTestHelper:
         nsg_id= network_security_groups['nsg_id']
         nsg_name = network_security_groups['nsg_name']
         virtual_network_name = self.create_random_name('testVNet-', 24)
-        
+        public_ip_address_name = ip_address_properties['name']
         subnetResponse = FleetTestHelper.create_vnet_subnet(self, subscriptionId, resourceGroupName, location, virtual_network_name, subnetname, nsg_name, natgw_name, vnet_addressPrefixes, subnet_addressPrefixes)
         adminUsername = "adminuser"
         subnet_name = subnetResponse['subnetName']
@@ -56,8 +56,8 @@ class FleetTestHelper:
        
         spot_priority_profile = {
             "capacity": 3,
-            "min_capacity": 2,
-            "max_price_per_vm": 0.00865,
+            "min_capacity": 1,
+            "max_price_per_vm": 1.00865,
             "eviction_policy": "Delete",
             "allocation_strategy": "PriceCapacityOptimized",
             "maintain": False
@@ -65,26 +65,35 @@ class FleetTestHelper:
 
         regular_priority_profile = {
             "capacity": 3,
-            "min_capacity": 2,
+            "min_capacity": 1,
             "allocation_strategy": "LowestPrice"
             }
         
         vm_sizes_profile = [
-            {"name": "Standard_D2s_v3", 'rank': 1},
-            {"name": "Standard_D4s_v3", 'rank': 2},
+            {"name": "Standard_Ds1_v2"},
+            {"name": "Standard_D2s_v3"},
+            {"name": "Standard_D4s_v3"}
         ]
         
         storageProfile = {
             "imageReference": {
                   "publisher": "Canonical",
-                  "offer": "UbuntuServer",
-                  "sku": "16.04-LTS",
+                  "offer": "ubuntu-24_04-lts",
+                  "sku": "server",
                   "version": "latest"
-                }
+                },
+            "osDisk": {
+                "createOption": "fromImage",
+                        "caching": "ReadWrite",
+                        "osType": "Linux",
+                        "managedDisk": {
+                            "storageAccountType": "Premium_LRS"
+                        }
+            }
         }
         
         compute_os_profile = {
-                    "computerNamePrefix": "o",
+                    "computerNamePrefix": "fleet",
                     "adminUsername": adminUsername,
                     "linuxConfiguration": {
                         "disablePasswordAuthentication": True,
@@ -100,25 +109,30 @@ class FleetTestHelper:
         }
         
         networkProfile = {
+            "networkApiVersion": "2020-11-01",
             "networkInterfaceConfigurations": [
                 {
-                    "name": "exampleNic",
+                    "name": "exampleNic-1",
                     "primary": True,
                     "enableAcceleratedNetworking": False,
+                    "networkSecurityGroup": {
+                        "id": nsg_id
+                    },
                     "ipConfigurations": [
                         {
                             "name": "internalIpConfig",
-                            "subnet": {
-                                "id": subnet_id
-                            },
-                            "public_ip_address_configuration": {
-                                "id": public_ip_address_id
-                            }
+                                "primary": True,
+                                "subnet": {
+                                    "id": subnet_id
+                                },
+                                "publicIPAddressConfiguration": {
+                                    "name": public_ip_address_name
+                                }
                         }
                     ]
+                
                 }
-            ],
-            "networkApiVersion": "2020-11-01"
+            ]
         }
         
         computeProfile= {
@@ -127,7 +141,8 @@ class FleetTestHelper:
             "baseVirtualMachineProfile": {
                 "storageProfile": storageProfile,
                 "networkProfile": networkProfile,
-                "osProfile": compute_os_profile
+                "osProfile": compute_os_profile,
+                "licenseType": "None"
             }
         }
         

@@ -63,9 +63,9 @@ class TestComputefleetScenario(ScenarioTest):
         public_ip_address = self.create_public_ip_address(subscription_id, resource_group, location)
         
         public_ip_address_id = public_ip_address['ipadddress']
-        public_ip_address_properties = public_ip_address['ip_properties']
+        
         # Use the ComputefleetHelper to generate fleet parameters
-        return FleetTestHelper.generate_fleet_parameters(self, subscription_id, resource_group, location, public_ip_address_id, subnetName, public_ip_address_properties)
+        return FleetTestHelper.generate_fleet_parameters(self, subscription_id, resource_group, location, public_ip_address_id, subnetName, public_ip_address)
       
     def create_public_ip_address(self,  subscriptionId, resourceGroupName, location):
         public_ip_address_name = self.create_random_name('FleetIP-', 16)
@@ -92,7 +92,7 @@ class TestComputefleetScenario(ScenarioTest):
         response = self.cmd('az network public-ip create --name {public_ip_address_name} --resource-group {resource_group} --allocation-method Static --sku Standard --location {location} --sku Standard ')
         
         print(response )
-        return {'ipadddress':public_ip_address_id , 'ip_properties': response}
+        return {'ipadddress':public_ip_address_id , 'ip_properties': response, 'name': public_ip_address_name}
     
     def _fleet_create(self, fleet=fleet_name, rg=resource_group, loc=location):
         fleetData = self.generate_fleet_parameters(subscriptionId, rg, loc, subnet_name)    
