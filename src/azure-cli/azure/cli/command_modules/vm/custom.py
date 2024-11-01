@@ -45,9 +45,11 @@ from ._vm_diagnostics_templates import get_default_diag_config
 from ._actions import (load_images_from_aliases_doc, load_extension_images_thru_services,
                        load_images_thru_services, _get_latest_image_version)
 from ._client_factory import (_compute_client_factory, cf_vm_image_term, _dev_test_labs_client_factory)
+
 from .aaz.latest.ppg import Show as _PPGShow
 from .aaz.latest.vmss import ListInstances as _VMSSListInstances
 from .aaz.latest.capacity.reservation.group import List as _CapacityReservationGroupList
+from .aaz.latest.vm.disk import AttachDetachDataDisk
 
 from .generated.custom import *  # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
 try:
@@ -2036,35 +2038,67 @@ def show_default_diagnostics_configuration(is_windows_os=False):
 
 # region VirtualMachines Disks (Managed)
 def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=None, disks=None, new=False, sku=None,
-                             size_gb=1023, lun=None, caching=None, enable_write_accelerator=False):
-    '''attach multiple managed disks'''
-    from azure.mgmt.core.tools import parse_resource_id
+                             size_gb=None, lun=None, caching=None, enable_write_accelerator=False, disk_ids=None):
+    # attach multiple managed disks using disk attach API
     vm = get_vm_to_update(cmd, resource_group_name, vm_name)
-    DataDisk, ManagedDiskParameters, DiskCreateOption = cmd.get_models(
-        'DataDisk', 'ManagedDiskParameters', 'DiskCreateOptionTypes')
+    if not new and not sku and not size_gb:
+        if disk_ids is not None:
+            disks = disk_ids
 
-    for disk_item in disks:
         if lun:
             disk_lun = lun
         else:
             disk_lun = _get_disk_lun(vm.storage_profile.data_disks)
 
-        if new:
-            data_disk = DataDisk(lun=disk_lun, create_option=DiskCreateOption.empty,
-                                 name=parse_resource_id(disk_item)['name'],
-                                 disk_size_gb=size_gb, caching=caching,
-                                 managed_disk=ManagedDiskParameters(storage_account_type=sku))
-        else:
-            params = ManagedDiskParameters(id=disk_item, storage_account_type=sku)
-            data_disk = DataDisk(lun=disk_lun, create_option=DiskCreateOption.attach, managed_disk=params,
-                                 caching=caching)
+        data_disks = []
+        for disk_item in disks:
+            disk = {
+                'diskId': disk_item,
+                'caching': caching,
+                'lun': disk_lun,
+                'writeAcceleratorEnabled': enable_write_accelerator
+            }
+            data_disks.append(disk)
+            disk_lun += 1
+        result = AttachDetachDataDisk(cli_ctx=cmd.cli_ctx)(command_args={
+            'vm_name': vm_name,
+            'resource_group': resource_group_name,
+            'data_disks_to_attach': data_disks
+        })
+        return result
+    else:
+        # attach multiple managed disks using vm PUT API
+        from azure.mgmt.core.tools import parse_resource_id
+        DataDisk, ManagedDiskParameters, DiskCreateOption = cmd.get_models(
+            'DataDisk', 'ManagedDiskParameters', 'DiskCreateOptionTypes')
+        if size_gb is None:
+            size_gb = 1023
 
-        if enable_write_accelerator:
-            data_disk.write_accelerator_enabled = enable_write_accelerator
+        if disk_ids is not None:
+            disks = disk_ids
 
-        vm.storage_profile.data_disks.append(data_disk)
+        for disk_item in disks:
+            if lun:
+                disk_lun = lun
+            else:
+                disk_lun = _get_disk_lun(vm.storage_profile.data_disks)
 
-    set_vm(cmd, vm)
+            if new:
+                data_disk = DataDisk(lun=disk_lun, create_option=DiskCreateOption.empty,
+                                     name=parse_resource_id(disk_item)['name'],
+                                     disk_size_gb=size_gb, caching=caching,
+                                     managed_disk=ManagedDiskParameters(storage_account_type=sku))
+            else:
+                params = ManagedDiskParameters(id=disk_item, storage_account_type=sku)
+                data_disk = DataDisk(lun=disk_lun, create_option=DiskCreateOption.attach, managed_disk=params,
+                                     caching=caching)
+
+            if enable_write_accelerator:
+                data_disk.write_accelerator_enabled = enable_write_accelerator
+
+            vm.storage_profile.data_disks.append(data_disk)
+
+        set_vm(cmd, vm)
 
 
 def detach_unmanaged_data_disk(cmd, resource_group_name, vm_name, disk_name):
@@ -2079,29 +2113,41 @@ def detach_unmanaged_data_disk(cmd, resource_group_name, vm_name, disk_name):
 # endregion
 
 
-def detach_managed_data_disk(cmd, resource_group_name, vm_name, disk_name, force_detach=None):
-    # here we handle managed disk
-    vm = get_vm_to_update(cmd, resource_group_name, vm_name)
-    if not force_detach:
-        # pylint: disable=no-member
-        leftovers = [d for d in vm.storage_profile.data_disks if d.name.lower() != disk_name.lower()]
-        if len(vm.storage_profile.data_disks) == len(leftovers):
-            raise ResourceNotFoundError("No disk with the name '{}' was found".format(disk_name))
+def detach_managed_data_disk(cmd, resource_group_name, vm_name, disk_name=None, force_detach=None, disk_ids=None):
+    if disk_ids is not None:
+        data_disks = []
+        for disk_item in disk_ids:
+            disk = {'diskId': disk_item, 'detachOption': 'ForceDetach' if force_detach else None}
+            data_disks.append(disk)
+        result = AttachDetachDataDisk(cli_ctx=cmd.cli_ctx)(command_args={
+            'vm_name': vm_name,
+            'resource_group': resource_group_name,
+            'data_disks_to_detach': data_disks
+        })
+        return result
     else:
-        DiskDetachOptionTypes = cmd.get_models('DiskDetachOptionTypes', resource_type=ResourceType.MGMT_COMPUTE,
-                                               operation_group='virtual_machines')
-        leftovers = vm.storage_profile.data_disks
-        is_contains = False
-        for d in leftovers:
-            if d.name.lower() == disk_name.lower():
-                d.to_be_detached = True
-                d.detach_option = DiskDetachOptionTypes.FORCE_DETACH
-                is_contains = True
-                break
-        if not is_contains:
-            raise ResourceNotFoundError("No disk with the name '{}' was found".format(disk_name))
-    vm.storage_profile.data_disks = leftovers
-    set_vm(cmd, vm)
+        # here we handle managed disk
+        vm = get_vm_to_update(cmd, resource_group_name, vm_name)
+        if not force_detach:
+            # pylint: disable=no-member
+            leftovers = [d for d in vm.storage_profile.data_disks if d.name.lower() != disk_name.lower()]
+            if len(vm.storage_profile.data_disks) == len(leftovers):
+                raise ResourceNotFoundError("No disk with the name '{}' was found".format(disk_name))
+        else:
+            DiskDetachOptionTypes = cmd.get_models('DiskDetachOptionTypes', resource_type=ResourceType.MGMT_COMPUTE,
+                                                   operation_group='virtual_machines')
+            leftovers = vm.storage_profile.data_disks
+            is_contains = False
+            for d in leftovers:
+                if d.name.lower() == disk_name.lower():
+                    d.to_be_detached = True
+                    d.detach_option = DiskDetachOptionTypes.FORCE_DETACH
+                    is_contains = True
+                    break
+            if not is_contains:
+                raise ResourceNotFoundError("No disk with the name '{}' was found".format(disk_name))
+        vm.storage_profile.data_disks = leftovers
+        set_vm(cmd, vm)
 # endregion
 
 
