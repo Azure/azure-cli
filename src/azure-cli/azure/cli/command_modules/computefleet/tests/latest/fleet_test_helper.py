@@ -25,11 +25,11 @@ import json
 class FleetTestHelper: 
     
     @staticmethod
-    def generate_fleet_parameters(self, subscriptionId, resourceGroupName, location, public_ip_address_id, subnetname):
+    def generate_fleet_parameters(self, subscriptionId, resourceGroupName, location, public_ip_address_id, subnetname, ip_address_properties):
         subnet_addressPrefixes = "10.0.0.0/24"
         vnet_addressPrefixes = "10.0.0.0/16"
         
-        nat_gateway = FleetTestHelper.create_nat_gateway(self, public_ip_address_id, subscriptionId, resourceGroupName, location)
+        nat_gateway = FleetTestHelper.create_nat_gateway(self, public_ip_address_id, subscriptionId, resourceGroupName, location, ip_address_properties)
         network_security_groups = FleetTestHelper.create_network_security_groups(self, subscriptionId, resourceGroupName, location)
         natgw_id = nat_gateway['nat_id']
         natgw_name = nat_gateway['nat_name']
@@ -37,12 +37,12 @@ class FleetTestHelper:
         nsg_name = network_security_groups['nsg_name']
         virtual_network_name = self.create_random_name('testVNet-', 24)
         
-        netResponse = FleetTestHelper.create_vnet_subnet(self, subscriptionId, resourceGroupName, location, virtual_network_name, subnetname, nsg_name, natgw_name, vnet_addressPrefixes, subnet_addressPrefixes)
+        subnetResponse = FleetTestHelper.create_vnet_subnet(self, subscriptionId, resourceGroupName, location, virtual_network_name, subnetname, nsg_name, natgw_name, vnet_addressPrefixes, subnet_addressPrefixes)
         adminUsername = "adminuser"
-        subnet_name = netResponse['subnetName']
-        subnet_details = netResponse['subnetResponse']
-        vnet_details = netResponse['vnetResponse']
-        
+        subnet_name = subnetResponse['subnetName']
+        subnet_details = subnetResponse['subnetResponse']
+        vnet_details = subnetResponse['vnetResponse']
+        subnet_id = f'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworks/{virtual_network_name}/subnets/{subnet_name}'
         subnet = subnet_details
         
         subnets = [subnet]
@@ -118,7 +118,10 @@ class FleetTestHelper:
                         {
                             "name": "internalIpConfig",
                             "subnet": {
-                                "id": f"/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworks/{virtual_network_name}/subnets/{subnetname}"
+                                "id": subnet_id
+                            },
+                            "publicIpAddress": {
+                                "id": public_ip_address_id
                             }
                         }
                     ]
@@ -177,7 +180,7 @@ class FleetTestHelper:
         return {'nsg_id': network_security_groups_id, 'nsg_name': network_security_groups}
 
     @staticmethod
-    def create_nat_gateway(self, public_ip, subscription_id, resource_group_name, location):
+    def create_nat_gateway(self, public_ip, subscription_id, resource_group_name, location, ip_address_properties):
         nat_name = self.create_random_name('testFleetNatGW-', 24)
         nat_id = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Network/natGateways/{nat_name}"
         input_data = {
