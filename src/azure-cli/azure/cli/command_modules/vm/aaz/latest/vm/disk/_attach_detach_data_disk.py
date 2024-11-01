@@ -69,17 +69,17 @@ class AttachDetachDataDisk(AAZCommand):
         _element = cls._args_schema.data_disks_to_attach.Element
         _element.caching = AAZStrArg(
             options=["caching"],
-            help="Specifies the caching requirements. Possible values are: **None,** **ReadOnly,** **ReadWrite.** The defaulting behavior is: **None for Standard storage. ReadOnly for Premium storage.**",
+            help="Specify the caching requirements. Possible values are: **None,** **ReadOnly,** **ReadWrite.** The defaulting behavior is: **None for Standard storage. ReadOnly for Premium storage.**",
             enum={"None": "None", "ReadOnly": "ReadOnly", "ReadWrite": "ReadWrite"},
         )
         _element.delete_option = AAZStrArg(
             options=["delete-option"],
-            help="Specifies whether data disk should be deleted or detached upon VM deletion. Possible values are: **Delete.** If this value is used, the data disk is deleted when VM is deleted. **Detach.** If this value is used, the data disk is retained after VM is deleted. The default value is set to **Detach**.",
+            help="Specify whether data disk should be deleted or detached upon VM deletion. Possible values are: **Delete.** If this value is used, the data disk is deleted when VM is deleted. **Detach.** If this value is used, the data disk is retained after VM is deleted. The default value is set to **Detach**.",
             enum={"Delete": "Delete", "Detach": "Detach"},
         )
         _element.disk_encryption_set = AAZObjectArg(
             options=["disk-encryption-set"],
-            help="Specifies the customer managed disk encryption set resource id for the managed disk.",
+            help="Specify the customer managed disk encryption set resource id for the managed disk.",
         )
         _element.disk_id = AAZStrArg(
             options=["disk-id"],
@@ -92,7 +92,7 @@ class AttachDetachDataDisk(AAZCommand):
         )
         _element.write_accelerator_enabled = AAZBoolArg(
             options=["write-accelerator-enabled"],
-            help="Specifies whether writeAccelerator should be enabled or disabled on the disk.",
+            help="Specify whether writeAccelerator should be enabled or disabled on the disk.",
         )
 
         disk_encryption_set = cls._args_schema.data_disks_to_attach.Element.disk_encryption_set
