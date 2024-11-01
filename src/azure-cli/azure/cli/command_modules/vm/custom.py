@@ -2041,17 +2041,14 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
                              size_gb=None, lun=None, caching=None, enable_write_accelerator=False, disk_ids=None):
     # attach multiple managed disks using disk attach API
     vm = get_vm_to_update(cmd, resource_group_name, vm_name)
-    if not new and not sku and not size_gb:
-        if disk_ids is not None:
-            disks = disk_ids
-
+    if not new and not sku and not size_gb and disk_ids is not None:
         if lun:
             disk_lun = lun
         else:
             disk_lun = _get_disk_lun(vm.storage_profile.data_disks)
 
         data_disks = []
-        for disk_item in disks:
+        for disk_item in disk_ids:
             disk = {
                 'diskId': disk_item,
                 'caching': caching,
