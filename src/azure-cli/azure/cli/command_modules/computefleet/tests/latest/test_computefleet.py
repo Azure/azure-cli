@@ -36,8 +36,9 @@ from .fleet_test_helper import (
     FleetTestHelper,
 )  # Ensure this import points to the correct module
 
-defaultSubscription = "ac302a10-6fb1-4308-baf6-ad855c4d7f3d"
-subscriptionId = os.getenv("AZURE_SUBSCRIPTION_ID")
+#defaultSubscription = "ac302a10-6fb1-4308-baf6-ad855c4d7f3d"
+defaultSubscription = "0000000-0000-0000-0000-000000000000"
+subscriptionId = os.getenv("SUBSCRIPTION_ID")
 if not subscriptionId:
     subscriptionId = defaultSubscription
 
