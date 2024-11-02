@@ -208,6 +208,8 @@ def _serialize(tokens):
     for tok in tokens:
         if tok is None:
             continue
+        elif tok == '':
+            tok = 'EMPTY'
         elif " " in tok:
             tok = '"%s"' % tok
 
@@ -393,6 +395,10 @@ def _post_process_caa_record(record):
     if record['val'].startswith('"') and record['val'].endswith('"'):
         record['val'] = record['val'][1:-1]
 
+def _post_process_naptr_record(record):
+    # strip EMPTY part of regexp
+    if record['regexp'] == 'EMPTY':
+        record['regexp'] = ''
 
 def _post_check_names(zone):
 
@@ -480,6 +486,9 @@ def parse_zone_file(text, zone_name, ignore_invalid=False):
             elif record_type == 'txt':
                 # handle TXT concatenation and splitting separately
                 _post_process_txt_record(record)
+            elif record_type == 'naptr':
+                # handle NAPTR empty regexp separately
+                _post_process_naptr_record(record)
 
             if record_name not in zone_obj:
                 zone_obj[record_name] = OrderedDict()
