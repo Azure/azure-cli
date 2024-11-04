@@ -30,6 +30,7 @@ def load_arguments(self, _):
                    help='list all entities, expect long delay if under a big organization')
 
     with self.argument_context('ad app') as c:
+        # https://learn.microsoft.com/en-us/graph/api/resources/application?view=graph-rest-1.0
         c.argument('app_id', help='application id')
         c.argument('application_object_id', options_list=('--object-id',))
         c.argument('display_name', help='the display name of the application')
@@ -55,7 +56,15 @@ def load_arguments(self, _):
                                            'PersonalMicrosoftAccount']),
                    help='Specifies the Microsoft accounts that are supported for the current application.')
 
+        # api
+        # https://learn.microsoft.com/en-us/graph/api/resources/apiapplication?view=graph-rest-1.0
+        c.argument('requested_access_token_version', arg_group='api', type=int,
+                   help='Specifies the access token version expected by this resource. This changes the version and '
+                        'format of the JWT produced independent of the endpoint or client used to request the access '
+                        'token.')
+
         # web
+        # https://learn.microsoft.com/en-us/graph/api/resources/webapplication?view=graph-rest-1.0
         c.argument('web_home_page_url', arg_group='web', help='Home page or landing page of the application.')
         c.argument('web_redirect_uris', arg_group='web', nargs='+',
                    help='Space-separated values. '
@@ -71,12 +80,14 @@ def load_arguments(self, _):
                         'implicit flow.')
 
         # publicClient
+        # https://learn.microsoft.com/en-us/graph/api/resources/publicclientapplication?view=graph-rest-1.0
         c.argument('public_client_redirect_uris', arg_group='publicClient', nargs='+',
                    help='Space-separated values. '
                         'Specifies the URLs where user tokens are sent for sign-in, or the redirect URIs '
                         'where OAuth 2.0 authorization codes and access tokens are sent.')
 
         # keyCredential
+        # https://learn.microsoft.com/en-us/graph/api/resources/keycredential?view=graph-rest-1.0
         c.argument('start_date', arg_group='keyCredential',
                    help="Date or datetime at which credentials become valid (e.g. '2017-01-01T01:00:00+00:00' or "
                         "'2017-01-01'). Default value is current time")
