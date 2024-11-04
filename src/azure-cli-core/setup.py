@@ -8,7 +8,7 @@
 from codecs import open
 from setuptools import setup, find_packages
 
-VERSION = "2.65.0"
+VERSION = "2.66.0"
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
@@ -57,7 +57,6 @@ DEPENDENCIES = [
     'msal[broker]==1.31.0',
     'msrestazure~=0.6.4',
     'packaging>=20.9',
-    'paramiko>=2.0.8,<4.0.0',
     'pkginfo>=1.5.0.1',
     # psutil can't install on cygwin: https://github.com/Azure/azure-cli/issues/9399
     'psutil>=5.9; sys_platform != "cygwin"',

@@ -4160,127 +4160,6 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             },
         )
 
-    def test_get_uptime_sla(self):
-        # default
-        ctx_1 = AKSManagedClusterContext(
-            self.cmd,
-            AKSManagedClusterParamDict(
-                {
-                    "uptime_sla": False,
-                }
-            ),
-            self.models,
-            DecoratorMode.CREATE,
-        )
-        self.assertEqual(ctx_1.get_uptime_sla(), False)
-        sku = self.models.ManagedClusterSKU(
-            name="Base",
-            tier="Standard",
-        )
-        mc = self.models.ManagedCluster(
-            location="test_location",
-            sku=sku,
-        )
-        ctx_1.attach_mc(mc)
-        self.assertEqual(ctx_1.get_uptime_sla(), True)
-
-        # custom value
-        ctx_2 = AKSManagedClusterContext(
-            self.cmd,
-            AKSManagedClusterParamDict(
-                {
-                    "uptime_sla": False,
-                }
-            ),
-            self.models,
-            DecoratorMode.UPDATE,
-        )
-        sku_2 = self.models.ManagedClusterSKU(
-            name="Base",
-            tier="Standard",
-        )
-        mc_2 = self.models.ManagedCluster(
-            location="test_location",
-            sku=sku_2,
-        )
-        ctx_2.attach_mc(mc_2)
-        self.assertEqual(ctx_2.get_uptime_sla(), False)
-
-        # custom value
-        ctx_3 = AKSManagedClusterContext(
-            self.cmd,
-            AKSManagedClusterParamDict(
-                {
-                    "uptime_sla": True,
-                    "no_uptime_sla": True,
-                }
-            ),
-            self.models,
-            DecoratorMode.CREATE,
-        )
-        sku_3 = self.models.ManagedClusterSKU(
-            name="Base",
-            tier="Free",
-        )
-        mc_3 = self.models.ManagedCluster(
-            location="test_location",
-            sku=sku_3,
-        )
-        ctx_3.attach_mc(mc_3)
-        self.assertEqual(ctx_3.get_uptime_sla(), False)
-
-    def test_get_no_uptime_sla(self):
-        # default
-        ctx_1 = AKSManagedClusterContext(
-            self.cmd,
-            AKSManagedClusterParamDict(
-                {
-                    "no_uptime_sla": False,
-                }
-            ),
-            self.models,
-            DecoratorMode.UPDATE,
-        )
-        self.assertEqual(ctx_1.get_no_uptime_sla(), False)
-        sku = self.models.ManagedClusterSKU(
-            name="Base",
-            tier="Standard",
-        )
-        mc = self.models.ManagedCluster(
-            location="test_location",
-            sku=sku,
-        )
-        ctx_1.attach_mc(mc)
-        self.assertEqual(ctx_1.get_no_uptime_sla(), False)
-
-        # custom value
-        ctx_2 = AKSManagedClusterContext(
-            self.cmd,
-            AKSManagedClusterParamDict(
-                {
-                    "uptime_sla": True,
-                    "no_uptime_sla": True,
-                }
-            ),
-            self.models,
-            DecoratorMode.UPDATE,
-        )
-        sku_2 = self.models.ManagedClusterSKU(
-            name="Base",
-            tier="Free",
-        )
-        mc_2 = self.models.ManagedCluster(
-            location="test_location",
-            sku=sku_2,
-        )
-        ctx_2.attach_mc(mc_2)
-        # fail on mutually exclusive uptime_sla and no_uptime_sla
-        with self.assertRaises(MutuallyExclusiveArgumentError):
-            ctx_2.get_uptime_sla()
-        # fail on mutually exclusive uptime_sla and no_uptime_sla
-        with self.assertRaises(MutuallyExclusiveArgumentError):
-            ctx_2.get_no_uptime_sla()
-
     def test_get_disable_local_accounts(self):
         # default
         ctx_1 = AKSManagedClusterContext(
@@ -7364,7 +7243,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             self.cmd,
             self.client,
             {
-                "uptime_sla": False,
+                "tier": "free",
             },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
@@ -7385,7 +7264,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             self.cmd,
             self.client,
             {
-                "uptime_sla": True,
+                "tier": "standard",
             },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
@@ -8596,8 +8475,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             self.cmd,
             self.client,
             {
-                "uptime_sla": False,
-                "no_uptime_sla": False,
+                "tier": "free",
             },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
@@ -8623,34 +8501,11 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
 
         # custom value
-        dec_2 = AKSManagedClusterUpdateDecorator(
-            self.cmd,
-            self.client,
-            {
-                "uptime_sla": True,
-                "no_uptime_sla": True,
-            },
-            ResourceType.MGMT_CONTAINERSERVICE,
-        )
-        mc_2 = self.models.ManagedCluster(
-            location="test_location",
-            sku=self.models.ManagedClusterSKU(
-                name="Base",
-                tier="Free",
-            ),
-        )
-        dec_2.context.attach_mc(mc_2)
-        # fail on mutually exclusive uptime_sla and no_uptime_sla
-        with self.assertRaises(MutuallyExclusiveArgumentError):
-            dec_2.update_sku(mc_2)
-
-        # custom value
         dec_3 = AKSManagedClusterUpdateDecorator(
             self.cmd,
             self.client,
             {
-                "uptime_sla": False,
-                "no_uptime_sla": True,
+                "tier": "free",
             },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
@@ -8677,8 +8532,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             self.cmd,
             self.client,
             {
-                "uptime_sla": True,
-                "no_uptime_sla": False,
+                "tier": "standard",
             },
             ResourceType.MGMT_CONTAINERSERVICE,
         )

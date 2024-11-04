@@ -19,14 +19,17 @@ from azure.cli.core.commands.parameters import (
     get_three_state_flag
 )
 from ._actions import (
-    UpstreamTemplateAddAction
+    UpstreamTemplateAddAction,
+    IPRuleTemplateUpdateAction
 )
 from ._constants import (
     SIGNALR_RESOURCE_TYPE,
     SIGNALR_KEY_TYPE,
     SIGNALR_SERVICE_MODE_TYPE
 )
-
+from ._validator import (
+    validate_ip_rule
+)
 
 logger = get_logger(__name__)
 
@@ -51,20 +54,33 @@ def load_arguments(self, _):
     with self.argument_context('signalr create') as c:
         c.argument('sku', help='The sku name of the signalr service. Allowed values: Premium_P1, Standard_S1, Free_F1')
         c.argument('unit_count', help='The number of signalr service unit count', type=int)
-        c.argument('service_mode', help='The service mode which signalr service will be working on', choices=SIGNALR_SERVICE_MODE_TYPE)
-        c.argument('enable_message_logs', help='The switch for messaging logs which signalr service will generate or not', arg_type=get_three_state_flag())
-        c.argument('allowed_origins', options_list=['--allowed-origins', '-a'], nargs='*', help='space separated origins that should be allowed to make cross-origin calls (for example: http://example.com:12345). To allow all, use "*"')
+        c.argument('service_mode', help='The service mode which signalr service will be working on',
+                   choices=SIGNALR_SERVICE_MODE_TYPE)
+        c.argument('enable_message_logs', help='The switch for messaging logs which signalr service will generate or not',
+                   arg_type=get_three_state_flag())
+        c.argument('allowed_origins', options_list=['--allowed-origins', '-a'], nargs='*',
+                   help='space separated origins that should be allowed to make cross-origin calls (for example: http://example.com:12345). To allow all, use "*"')
 
     with self.argument_context('signalr update') as c:
         c.argument('sku', help='The sku name of the signalr service. E.g. Standard_S1')
         c.argument('unit_count', help='The number of signalr service unit count', type=int)
-        c.argument('service_mode', help='The service mode which signalr service will be working on', choices=SIGNALR_SERVICE_MODE_TYPE)
-        c.argument('enable_message_logs', help='The switch for messaging logs which signalr service will generate or not', arg_type=get_three_state_flag())
-        c.argument('allowed_origins', options_list=['--allowed-origins', '-a'], nargs='*', help='space separated origins that should be allowed to make cross-origin calls (for example: http://example.com:12345). To allow all, use "*"')
+        c.argument('service_mode', help='The service mode which signalr service will be working on',
+                   choices=SIGNALR_SERVICE_MODE_TYPE)
+        c.argument('enable_message_logs', help='The switch for messaging logs which signalr service will generate or not',
+                   arg_type=get_three_state_flag())
+        c.argument('allowed_origins', options_list=['--allowed-origins', '-a'], nargs='*',
+                   help='space separated origins that should be allowed to make cross-origin calls (for example: http://example.com:12345). To allow all, use "*"')
+        c.argument('client_cert_enabled',
+                   help='Enable or disable client certificate authentication for a SignalR Service', arg_type=get_three_state_flag())
+        c.argument('disable_local_auth',
+                   help='Enable or disable local auth for a SignalR Service', arg_type=get_three_state_flag())
+        c.argument('region_endpoint_enabled',
+                   help='Enable or disable region endpoint for a SignalR Service', arg_type=get_three_state_flag())
 
     for scope in ['signalr create', 'signalr update']:
         with self.argument_context(scope, arg_group='Network Rule') as c:
-            c.argument('default_action', arg_type=get_enum_type(['Allow', 'Deny']), help='Default action to apply when no rule matches.', required=False)
+            c.argument('default_action', arg_type=get_enum_type(
+                ['Allow', 'Deny']), help='Default action to apply when no rule matches.', required=False)
 
     with self.argument_context('signalr key renew') as c:
         c.argument('key_type', help='The name of access key to regenerate', choices=SIGNALR_KEY_TYPE)
@@ -73,37 +89,51 @@ def load_arguments(self, _):
         c.argument('signalr_name', id_part=None)
 
     with self.argument_context('signalr cors add') as c:
-        c.argument('allowed_origins', options_list=['--allowed-origins', '-a'], nargs='*', help='space separated origins that should be allowed to make cross-origin calls (for example: http://example.com:12345). To allow all, use "*"')
+        c.argument('allowed_origins', options_list=['--allowed-origins', '-a'], nargs='*',
+                   help='space separated origins that should be allowed to make cross-origin calls (for example: http://example.com:12345). To allow all, use "*"')
 
     with self.argument_context('signalr cors remove') as c:
-        c.argument('allowed_origins', options_list=['--allowed-origins', '-a'], nargs='*', help='space separated origins that should be allowed to make cross-origin calls (for example: http://example.com:12345). To allow all, use "*"')
+        c.argument('allowed_origins', options_list=['--allowed-origins', '-a'], nargs='*',
+                   help='space separated origins that should be allowed to make cross-origin calls (for example: http://example.com:12345). To allow all, use "*"')
 
     with self.argument_context('signalr cors update') as c:
-        c.argument('allowed_origins', options_list=['--allowed-origins', '-a'], nargs='*', help='space separated origins that should be allowed to make cross-origin calls (for example: http://example.com:12345). To allow all, use "*"')
+        c.argument('allowed_origins', options_list=['--allowed-origins', '-a'], nargs='*',
+                   help='space separated origins that should be allowed to make cross-origin calls (for example: http://example.com:12345). To allow all, use "*"')
 
     with self.argument_context('signalr cors list') as c:
         c.argument('signalr_name', id_part=None)
 
     # Network Rule
     with self.argument_context('signalr network-rule update') as c:
-        c.argument('connection_name', nargs='*', help='Space-separeted list of private endpoint connection name.', required=False, arg_group='Private Endpoint Connection')
-        c.argument('public_network', arg_type=get_three_state_flag(), help='Set rules for public network.', required=False, arg_group='Public Network')
-        c.argument('allow', nargs='*', help='The allowed virtual network rule. Space-separeted list of scope to assign. Allowed values: ClientConnection, ServerConnection, RESTAPI', type=SignalRRequestType, required=False)
-        c.argument('deny', nargs='*', help='The denied virtual network rule. Space-separeted list of scope to assign. Allowed values: ClientConnection, ServerConnection, RESTAPI', type=SignalRRequestType, required=False)
+        c.argument('connection_name', nargs='*', help='Space-separeted list of private endpoint connection name.',
+                   required=False, arg_group='Private Endpoint Connection')
+        c.argument('public_network', arg_type=get_three_state_flag(),
+                   help='Set rules for public network.', required=False, arg_group='Public Network')
+        c.argument('allow', nargs='*', help='The allowed virtual network rule. Space-separeted list of scope to assign. Allowed values: ClientConnection, ServerConnection, RESTAPI',
+                   type=SignalRRequestType, required=False)
+        c.argument('deny', nargs='*', help='The denied virtual network rule. Space-separeted list of scope to assign. Allowed values: ClientConnection, ServerConnection, RESTAPI',
+                   type=SignalRRequestType, required=False)
+
+    for scope in ['signalr network-rule ip-rule add', 'signalr network-rule ip-rule remove']:
+        with self.argument_context(scope, validator=validate_ip_rule) as c:
+            c.argument('ip_rule', action=IPRuleTemplateUpdateAction, nargs='*',
+                       help='The IP rule for the hub.', required=True)
 
     with self.argument_context('signalr network-rule list') as c:
         c.argument('signalr_name', id_part=None)
 
     # Upstream Settings
     with self.argument_context('signalr upstream update') as c:
-        c.argument('template', action=UpstreamTemplateAddAction, nargs='+', help='Template item for upstream settings. Use key=value pattern to set properties. Supported keys are "url-template", "hub-pattern", "event-pattern", "category-pattern".')
+        c.argument('template', action=UpstreamTemplateAddAction, nargs='+',
+                   help='Template item for upstream settings. Use key=value pattern to set properties. Supported keys are "url-template", "hub-pattern", "event-pattern", "category-pattern".')
 
     with self.argument_context('signalr upstream list') as c:
         c.argument('signalr_name', id_part=None)
 
     # Managed Identity
     with self.argument_context('signalr identity assign') as c:
-        c.argument('identity', help="Assigns managed identities to the service. Use '[system]' to refer to the system-assigned identity or a resource ID to refer to a user-assigned identity. You can only assign either on of them.")
+        c.argument(
+            'identity', help="Assigns managed identities to the service. Use '[system]' to refer to the system-assigned identity or a resource ID to refer to a user-assigned identity. You can only assign either on of them.")
 
     # Custom Domain
     for scope in ['signalr custom-domain update',
@@ -143,18 +173,31 @@ def load_arguments(self, _):
     for scope in ['signalr replica create',
                   'signalr replica list',
                   'signalr replica delete',
-                  'signalr replica show']:
+                  'signalr replica show',
+                  'signalr replica start',
+                  'signalr replica stop',
+                  'signalr replica restart']:
         with self.argument_context(scope) as c:
             c.argument('sku', help='The sku name of the replica. Currently allowed values: Premium_P1')
             c.argument('unit_count', help='The number of signalr service unit count', type=int)
             c.argument('replica_name', signalr_replica_name_type)
 
     for scope in ['signalr replica create',
-                  'signalr replica list']:
+                  'signalr replica list',
+                  'signalr replica update']:
         with self.argument_context(scope) as c:
             c.argument('signalr_name', signalr_name_type, id_part=None)
 
     for scope in ['signalr replica show',
+                  'signalr replica start',
+                  'signalr replica stop',
+                  'signalr replica restart',
                   'signalr replica delete']:
         with self.argument_context(scope) as c:
             c.argument('signalr_name', signalr_name_type)
+
+    with self.argument_context('signalr replica update') as c:
+        c.argument('replica_name', signalr_replica_name_type)
+        c.argument('unit_count', help='The number of signalr service unit count', type=int)
+        c.argument('region_endpoint_enabled',
+                   help='Enable or disable region endpoint for a SignalR Service', arg_type=get_three_state_flag())

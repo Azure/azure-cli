@@ -22,9 +22,9 @@ class Show(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2018-09-01",
+        "version": "2024-06-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/privatednszones/{}/virtualnetworklinks/{}", "2018-09-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/privatednszones/{}/virtualnetworklinks/{}", "2024-06-01"],
         ]
     }
 
@@ -130,7 +130,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2018-09-01",
+                    "api-version", "2024-06-01",
                     required=True,
                 ),
             }
@@ -186,6 +186,9 @@ class Show(AAZCommand):
             )
             properties.registration_enabled = AAZBoolType(
                 serialized_name="registrationEnabled",
+            )
+            properties.resolution_policy = AAZStrType(
+                serialized_name="resolutionPolicy",
             )
             properties.virtual_network = AAZObjectType(
                 serialized_name="virtualNetwork",

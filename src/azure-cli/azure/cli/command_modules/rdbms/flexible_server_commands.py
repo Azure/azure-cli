@@ -39,22 +39,22 @@ from ._transformers import (
 def load_flexibleserver_command_table(self, _):
     # Flexible server SDKs:
     postgres_flexible_servers_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms.postgresql_flexibleservers.operations#ServersOperations.{}',
+        operations_tmpl='azure.mgmt.postgresqlflexibleservers.operations#ServersOperations.{}',
         client_factory=cf_postgres_flexible_servers
     )
 
     postgres_flexible_firewall_rule_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms.postgresql_flexibleservers.operations#FirewallRulesOperations.{}',
+        operations_tmpl='azure.mgmt.postgresqlflexibleservers.operations#FirewallRulesOperations.{}',
         client_factory=cf_postgres_flexible_firewall_rules
     )
 
     postgres_flexible_config_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms.postgresql_flexibleservers.operations#ConfigurationsOperations.{}',
+        operations_tmpl='azure.mgmt.postgresqlflexibleservers.operations#ConfigurationsOperations.{}',
         client_factory=cf_postgres_flexible_config
     )
 
     postgres_flexible_db_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms.postgresql_flexibleservers.operations#DatabasesOperations.{}',
+        operations_tmpl='azure.mgmt.postgresqlflexibleservers.operations#DatabasesOperations.{}',
         client_factory=cf_postgres_flexible_db
     )
 
@@ -64,52 +64,52 @@ def load_flexibleserver_command_table(self, _):
     )
 
     postgres_flexible_backups_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms.postgresql_flexibleservers.operations#BackupsOperations.{}',
+        operations_tmpl='azure.mgmt.postgresqlflexibleservers.operations#BackupsOperations.{}',
         client_factory=cf_postgres_flexible_backups
     )
 
     postgres_flexible_replica_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms.postgresql_flexibleservers.operations#ReplicasOperations.{}',
+        operations_tmpl='azure.mgmt.postgresqlflexibleservers.operations#ReplicasOperations.{}',
         client_factory=cf_postgres_flexible_replica
     )
 
     postgres_flexible_adadmin_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms.postgresql_flexibleservers.operations#AdministratorsOperations.{}',
+        operations_tmpl='azure.mgmt.postgresqlflexibleservers.operations#AdministratorsOperations.{}',
         client_factory=cf_postgres_flexible_adadmin
     )
 
     postgres_flexible_migrations_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms.postgresql_flexibleservers.operations#MigrationsOperations.{}',
+        operations_tmpl='azure.mgmt.postgresqlflexibleservers.operations#MigrationsOperations.{}',
         client_factory=cf_postgres_flexible_migrations
     )
 
     postgres_flexible_virtual_endpoints_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms.postgresql_flexibleservers.operations#VirtualEndpointsOperations.{}',
+        operations_tmpl='azure.mgmt.postgresqlflexibleservers.operations#VirtualEndpointsOperations.{}',
         client_factory=cf_postgres_flexible_virtual_endpoints
     )
 
     postgres_flexible_server_threat_protection_settings_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms.postgresql_flexibleservers.operations#ServerThreatProtectionSettingsOperations.{}',
+        operations_tmpl='azure.mgmt.postgresqlflexibleservers.operations#ServerThreatProtectionSettingsOperations.{}',
         client_factory=cf_postgres_flexible_server_threat_protection_settings
     )
 
     postgres_flexible_server_log_files_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms.postgresql_flexibleservers.operations#LogFilesOperations.{}',
+        operations_tmpl='azure.mgmt.postgresqlflexibleservers.operations#LogFilesOperations.{}',
         client_factory=cf_postgres_flexible_server_log_files
     )
 
     postgres_flexible_server_private_endpoint_connection_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms.postgresql_flexibleservers.operations#PrivateEndpointConnectionOperations.{}',
+        operations_tmpl='azure.mgmt.postgresqlflexibleservers.operations#PrivateEndpointConnectionOperations.{}',
         client_factory=cf_postgres_flexible_private_endpoint_connection
     )
 
     postgres_flexible_server_private_endpoint_connections_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms.postgresql_flexibleservers.operations#PrivateEndpointConnectionsOperations.{}',
+        operations_tmpl='azure.mgmt.postgresqlflexibleservers.operations#PrivateEndpointConnectionsOperations.{}',
         client_factory=cf_postgres_flexible_private_endpoint_connections
     )
 
     postgres_flexible_server_private_link_resources_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms.postgresql_flexibleservers.operations#PrivateLinkResourcesOperations.{}',
+        operations_tmpl='azure.mgmt.postgresqlflexibleservers.operations#PrivateLinkResourcesOperations.{}',
         client_factory=cf_postgres_flexible_private_link_resources
     )
 
@@ -204,6 +204,8 @@ def load_flexibleserver_command_table(self, _):
                             client_factory=cf_postgres_flexible_backups) as g:
         g.command('list', 'list_by_server', transform=transform_backups_list)
         g.show_command('show', 'get', transform=transform_backup)
+        g.custom_command('create', 'backup_create_func', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_command('delete', 'backup_delete_func', custom_command_type=flexible_servers_custom_postgres)
 
     with self.command_group('postgres flexible-server replica', postgres_flexible_replica_sdk) as g:
         g.command('list', 'list_by_server')

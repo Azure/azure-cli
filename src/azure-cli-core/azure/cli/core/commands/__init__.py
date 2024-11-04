@@ -1214,7 +1214,7 @@ def _is_paged(obj):
 
 def _is_poller(obj):
     # Since loading msrest is expensive, we avoid it until we have to
-    if obj.__class__.__name__ in ['AzureOperationPoller', 'LROPoller', 'AAZLROPoller']:
+    if obj.__class__.__name__ in ['LROPoller', 'AAZLROPoller']:
         return isinstance(obj, poller_classes())
     return False
 

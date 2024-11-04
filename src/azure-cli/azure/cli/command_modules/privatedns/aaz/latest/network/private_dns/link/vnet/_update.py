@@ -22,9 +22,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2018-09-01",
+        "version": "2024-06-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/privatednszones/{}/virtualnetworklinks/{}", "2018-09-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/privatednszones/{}/virtualnetworklinks/{}", "2024-06-01"],
         ]
     }
 
@@ -85,6 +85,15 @@ class Update(AAZCommand):
         # define Arg Group "Parameters"
 
         # define Arg Group "Properties"
+
+        _args_schema = cls._args_schema
+        _args_schema.resolution_policy = AAZStrArg(
+            options=["--resolution-policy"],
+            arg_group="Properties",
+            help="The resolution policy on the virtual network link. Only applicable for virtual network links to privatelink zones, and for A,AAAA,CNAME queries. When set to 'NxDomainRedirect', Azure DNS resolver falls back to public resolution if private dns query resolution results in non-existent domain response.",
+            nullable=True,
+            enum={"Default": "Default", "NxDomainRedirect": "NxDomainRedirect"},
+        )
         return cls._args_schema
 
     def _execute_operations(self):
@@ -169,7 +178,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2018-09-01",
+                    "api-version", "2024-06-01",
                     required=True,
                 ),
             }
@@ -272,7 +281,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2018-09-01",
+                    "api-version", "2024-06-01",
                     required=True,
                 ),
             }
@@ -339,6 +348,7 @@ class Update(AAZCommand):
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("registrationEnabled", AAZBoolType, ".registration_enabled")
+                properties.set_prop("resolutionPolicy", AAZStrType, ".resolution_policy")
 
             tags = _builder.get(".tags")
             if tags is not None:
@@ -398,6 +408,9 @@ class _UpdateHelper:
         )
         properties.registration_enabled = AAZBoolType(
             serialized_name="registrationEnabled",
+        )
+        properties.resolution_policy = AAZStrType(
+            serialized_name="resolutionPolicy",
         )
         properties.virtual_network = AAZObjectType(
             serialized_name="virtualNetwork",

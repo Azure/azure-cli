@@ -22,9 +22,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-03-01",
+        "version": "2024-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}", "2024-03-01", "properties.activeDirectories[]"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}", "2024-07-01", "properties.activeDirectories[]"],
         ]
     }
 
@@ -64,6 +64,14 @@ class Update(AAZCommand):
             help="Id of the Active Directory",
             required=True,
             nullable=True,
+        )
+        _args_schema.kdc_ip = AAZStrArg(
+            options=["--kdc-ip"],
+            help="kdc server IP address for the active directory machine. This optional parameter is used only while creating kerberos volume.",
+            nullable=True,
+            fmt=AAZStrArgFormat(
+                pattern="^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$",
+            ),
         )
 
         # define Arg Group "Body.properties.activeDirectories[]"
@@ -123,15 +131,6 @@ class Update(AAZCommand):
             arg_group="Body.properties.activeDirectories[]",
             help="If enabled, Traffic between the SMB server to Domain Controller (DC) will be encrypted.",
             nullable=True,
-        )
-        _args_schema.kdc_ip = AAZStrArg(
-            options=["--kdc-ip"],
-            arg_group="Body.properties.activeDirectories[]",
-            help="kdc server IP addresses for the active directory machine. This optional parameter is used only while creating kerberos volume.",
-            nullable=True,
-            fmt=AAZStrArgFormat(
-                pattern="^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)((, ?)(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))*$",
-            ),
         )
         _args_schema.ldap_over_tls = AAZBoolArg(
             options=["--ldap-over-tls"],
@@ -368,7 +367,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-03-01",
+                    "api-version", "2024-07-01",
                     required=True,
                 ),
             }
@@ -467,7 +466,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-03-01",
+                    "api-version", "2024-07-01",
                     required=True,
                 ),
             }

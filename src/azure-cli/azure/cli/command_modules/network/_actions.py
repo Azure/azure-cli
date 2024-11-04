@@ -183,6 +183,8 @@ class WAFRulesCreate(argparse._AppendAction):
                 d['action'] = v[0]
             elif kl == 'state':
                 d['state'] = v[0]
+            elif kl == 'sensitivity':
+                d['sensitivity'] = v[0]
             else:
                 raise UnrecognizedArgumentError('key error: key must be one of rule-id, action and state.')
         return d

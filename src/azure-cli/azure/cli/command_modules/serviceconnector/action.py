@@ -24,6 +24,22 @@ class AddCustomizedKeys(argparse.Action):
             raise ValidationError('Usage error: {} [KEY=VALUE ...]'.format(option_string))
 
 
+class AddAdditionalConnectionStringProperties(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        action = self.get_action(values, option_string)
+        namespace.connstr_props = action
+
+    def get_action(self, values, option_string):  # pylint: disable=no-self-use
+        try:
+            properties = defaultdict(list)
+            for (k, v) in (x.split('=', 1) for x in values):
+                properties[k] = v
+            properties = dict(properties)
+            return properties
+        except ValueError:
+            raise ValidationError('Usage error: {} [KEY=VALUE ...]'.format(option_string))
+
+
 def is_k8s_source(command_name):
     source_name = command_name.split(' ')[0]
     return source_name.lower() == "aks"

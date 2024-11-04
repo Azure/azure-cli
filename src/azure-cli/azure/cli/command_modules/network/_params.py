@@ -226,7 +226,7 @@ def load_arguments(self, _):
                    options_list='--version',
                    arg_type=get_enum_type(RULESET_VERSION.values()),
                    help='The version of the web application firewall rule set type. '
-                        '0.1 and 1.0 are used for Microsoft_BotManagerRuleSet.')
+                        '0.1, 1.0, and 1.1 are used for Microsoft_BotManagerRuleSet.')
 
     with self.argument_context('network application-gateway waf-policy policy-setting') as c:
         c.argument('policy_name', options_list='--policy-name', id_part=None,

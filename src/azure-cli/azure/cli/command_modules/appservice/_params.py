@@ -194,6 +194,10 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('location', arg_type=get_location_type(self.cli_ctx), help="limit the output to just the runtimes available in the specified location")
         c.argument('runtime', help="limit the output to just the specified runtime")
 
+    with self.argument_context('functionapp list-flexconsumption-locations') as c:
+        c.argument('zone_redundant', arg_type=get_three_state_flag(),
+                   help='Filter the list to return only locations which support zone redundancy.', is_preview=True)
+
     with self.argument_context('webapp deleted list') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
         c.argument('slot', options_list=['--slot', '-s'], help='Name of the deleted web app slot.')
@@ -822,6 +826,8 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('deployment_storage_auth_value', options_list=['--deployment-storage-auth-value', '--dsav'], help="The deployment storage account authentication value. For the user-assigned managed identity authentication type, "
                    "this should be the user assigned identity resource id. For the storage account connection string authentication type, this should be the name of the app setting that will contain the storage account connection "
                    "string. For the system assigned managed-identity authentication type, this parameter is not applicable and should be left empty.", is_preview=True)
+        c.argument('zone_redundant', arg_type=get_three_state_flag(),
+                   help='Enable zone redundancy for high availability. Applies to Flex Consumption SKU only.', is_preview=True)
 
     with self.argument_context('functionapp deployment config set') as c:
         c.argument('deployment_storage_name', options_list=['--deployment-storage-name', '--dsn'], help="The deployment storage account name.", is_preview=True)

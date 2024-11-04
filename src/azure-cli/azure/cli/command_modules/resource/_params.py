@@ -836,7 +836,7 @@ def load_arguments(self, _):
         c.argument('stdout', arg_type=bicep_stdout_type)
         c.argument('no_restore', arg_type=bicep_no_restore_type, help="When set, generates the parameters file without restoring external modules.")
         c.argument('output_format', help="Set output format. Valid values are ( json | bicepparam ).")
-        c.argument('include_params', help="Set include params. Valid values are ( all | required-only ).")
+        c.argument('include_params', help="Set include params. Valid values are ( all | RequiredOnly ).")
 
     with self.argument_context('bicep lint') as c:
         c.argument('file', arg_type=bicep_file_type, help="The path to the Bicep module file to lint in the file system.")

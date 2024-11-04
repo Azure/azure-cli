@@ -79,8 +79,9 @@ class AAZContentBuilder:
                             value[prop_name] = {}
                     else:
                         raise NotImplementedError()
-                sub_values.append(value[prop_name])
-                sub_args.append(sub_arg)
+                if value != None:  # noqa: E711, pylint: disable=singleton-comparison
+                    sub_values.append(value[prop_name])
+                    sub_args.append(sub_arg)
 
         if sub_values:
             self._sub_prop_builders[prop_name] = AAZContentBuilder(sub_values, sub_args)
