@@ -42,7 +42,6 @@ CLASSIFIERS = [
     'Intended Audience :: System Administrators',
     'Programming Language :: Python',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: 3.11',
@@ -179,7 +178,7 @@ setup(
     ],
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests", "azure", "azure.cli"]),
     install_requires=DEPENDENCIES,
-    python_requires='>=3.8.0',
+    python_requires='>=3.9.0',
     package_data={
         'azure.cli.command_modules.acr': ['*.json'],
         'azure.cli.command_modules.botservice': ['*.json', '*.config'],
