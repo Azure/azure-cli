@@ -366,7 +366,7 @@ def load_arguments(self, _):
     with self.argument_context('network dns record-set mx') as c:
         c.argument('exchange', options_list=['--exchange', '-e'], help='Exchange metric.')
         c.argument('preference', options_list=['--preference', '-p'], help='Preference metric.')
-    
+
     with self.argument_context('network dns record-set naptr') as c:
         c.argument('order', help='The order in which the NAPTR records MUST be processed in order to accurately represent the ordered list of rules. The ordering is from lowest to highest. Valid values: 0-65535.', type=int)
         c.argument('preference', help='The preference specifies the order in which NAPTR records with equal "order" values should be processed, low numbers being processed before high numbers. Valid values: 0-65535.', type=int)

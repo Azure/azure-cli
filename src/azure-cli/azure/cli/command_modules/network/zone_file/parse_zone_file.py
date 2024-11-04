@@ -395,10 +395,12 @@ def _post_process_caa_record(record):
     if record['val'].startswith('"') and record['val'].endswith('"'):
         record['val'] = record['val'][1:-1]
 
+
 def _post_process_naptr_record(record):
     # strip EMPTY part of regexp
     if record['regexp'] == 'EMPTY':
         record['regexp'] = ''
+
 
 def _post_check_names(zone):
 

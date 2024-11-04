@@ -114,28 +114,28 @@ from .aaz.latest.network.vpn_connection.shared_key import Update as _VpnConnShar
 from .operations.dns import (RecordSetAShow as DNSRecordSetAShow, RecordSetAAAAShow as DNSRecordSetAAAAShow,  # pylint: disable=unused-import
                              RecordSetDSShow as DNSRecordSetDSShow, RecordSetMXShow as DNSRecordSetMXShow,
                              RecordSetNAPTRShow as DNSRecordSetNAPTRShow, RecordSetNSShow as DNSRecordSetNSShow,
-                             RecordSetPTRShow as DNSRecordSetPTRShow, RecordSetSRVShow as DNSRecordSetSRVShow, 
-                             RecordSetTLSAShow as DNSRecordSetTLSAShow, RecordSetTXTShow as DNSRecordSetTXTShow, 
-                             RecordSetCAAShow as DNSRecordSetCAAShow, RecordSetCNAMEShow as DNSRecordSetCNAMEShow, 
+                             RecordSetPTRShow as DNSRecordSetPTRShow, RecordSetSRVShow as DNSRecordSetSRVShow,
+                             RecordSetTLSAShow as DNSRecordSetTLSAShow, RecordSetTXTShow as DNSRecordSetTXTShow,
+                             RecordSetCAAShow as DNSRecordSetCAAShow, RecordSetCNAMEShow as DNSRecordSetCNAMEShow,
                              RecordSetSOAShow as DNSRecordSetSOAShow)
 from .operations.dns import (RecordSetACreate as DNSRecordSetACreate, RecordSetAAAACreate as DNSRecordSetAAAACreate,  # pylint: disable=unused-import
                              RecordSetDSCreate as DNSRecordSetDSCreate, RecordSetMXCreate as DNSRecordSetMXCreate,
-                             RecordSetNAPTRCreate as DNSRecordSetNAPTRCreate, RecordSetNSCreate as DNSRecordSetNSCreate, 
-                             RecordSetPTRCreate as DNSRecordSetPTRCreate, RecordSetSRVCreate as DNSRecordSetSRVCreate, 
-                             RecordSetTLSACreate as DNSRecordSetTLSACreate, RecordSetTXTCreate as DNSRecordSetTXTCreate, 
-                             RecordSetCAACreate as DNSRecordSetCAACreate, RecordSetCNAMECreate as DNSRecordSetCNAMECreate, 
+                             RecordSetNAPTRCreate as DNSRecordSetNAPTRCreate, RecordSetNSCreate as DNSRecordSetNSCreate,
+                             RecordSetPTRCreate as DNSRecordSetPTRCreate, RecordSetSRVCreate as DNSRecordSetSRVCreate,
+                             RecordSetTLSACreate as DNSRecordSetTLSACreate, RecordSetTXTCreate as DNSRecordSetTXTCreate,
+                             RecordSetCAACreate as DNSRecordSetCAACreate, RecordSetCNAMECreate as DNSRecordSetCNAMECreate,
                              RecordSetSOACreate as DNSRecordSetSOACreate)
 from .operations.dns import (RecordSetAUpdate as DNSRecordSetAUpdate, RecordSetAAAAUpdate as DNSRecordSetAAAAUpdate,  # pylint: disable=unused-import
                              RecordSetDSUpdate as DNSRecordSetDSUpdate, RecordSetMXUpdate as DNSRecordSetMXUpdate,
-                             RecordSetNAPTRUpdate as DNSRecordSetNAPTRSUpdate, RecordSetNSUpdate as DNSRecordSetNSUpdate, 
-                             RecordSetPTRUpdate as DNSRecordSetPTRUpdate, RecordSetSRVUpdate as DNSRecordSetSRVUpdate, 
-                             RecordSetTLSAUpdate as DNSRecordSetTLSAUpdate, RecordSetTXTUpdate as DNSRecordSetTXTUpdate, 
+                             RecordSetNAPTRUpdate as DNSRecordSetNAPTRSUpdate, RecordSetNSUpdate as DNSRecordSetNSUpdate,
+                             RecordSetPTRUpdate as DNSRecordSetPTRUpdate, RecordSetSRVUpdate as DNSRecordSetSRVUpdate,
+                             RecordSetTLSAUpdate as DNSRecordSetTLSAUpdate, RecordSetTXTUpdate as DNSRecordSetTXTUpdate,
                              RecordSetCAAUpdate as DNSRecordSetCAAUpdate, RecordSetCNAMEUpdate as DNSRecordSetCNAMEUpdate)
 from .operations.dns import (RecordSetADelete as DNSRecordSetADelete, RecordSetAAAADelete as DNSRecordSetAAAADelete,  # pylint: disable=unused-import
                              RecordSetDSDelete as DNSRecordSetDSDelete, RecordSetMXDelete as DNSRecordSetMXDelete,
-                             RecordSetNAPTRDelete as DNSRecordSetNAPTRDelete, RecordSetNSDelete as DNSRecordSetNSDelete, 
-                             RecordSetPTRDelete as DNSRecordSetPTRDelete, RecordSetSRVDelete as DNSRecordSetSRVDelete, 
-                             RecordSetTLSADelete as DNSRecordSetTLSADelete, RecordSetTXTDelete as DNSRecordSetTXTDelete, 
+                             RecordSetNAPTRDelete as DNSRecordSetNAPTRDelete, RecordSetNSDelete as DNSRecordSetNSDelete,
+                             RecordSetPTRDelete as DNSRecordSetPTRDelete, RecordSetSRVDelete as DNSRecordSetSRVDelete,
+                             RecordSetTLSADelete as DNSRecordSetTLSADelete, RecordSetTXTDelete as DNSRecordSetTXTDelete,
                              RecordSetCAADelete as DNSRecordSetCAADelete, RecordSetCNAMEDelete as DNSRecordSetCNAMEDelete)
 
 logger = get_logger(__name__)

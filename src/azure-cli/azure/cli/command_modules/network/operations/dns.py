@@ -125,6 +125,7 @@ class RecordSetMXUpdate(RecordSetUpdate):
         args = self.ctx.args
         args.record_type = "MX"
 
+
 @register_command("network dns record-set naptr update")
 class RecordSetNAPTRUpdate(RecordSetUpdate):
     """ Update an NAPTR record set.
@@ -135,6 +136,7 @@ class RecordSetNAPTRUpdate(RecordSetUpdate):
     def pre_operations(self):
         args = self.ctx.args
         args.record_type = "NAPTR"
+
 
 @register_command("network dns record-set ns update")
 class RecordSetNSUpdate(RecordSetUpdate):
