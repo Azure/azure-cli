@@ -270,7 +270,7 @@ def data_plane_azure_keyvault_security_domain_client(cli_ctx, command_args):
     command_args.pop('hsm_name', None)
     command_args.pop('vault_base_url', None)
     command_args.pop('identifier', None)
-    return SecurityDomainClient(vault_url=vault_url, credential=credential, verify_challenge_resource=False)
+    return SecurityDomainClient(vault_url=vault_url, credential=credential)
 
 
 def _prepare_data_plane_azure_keyvault_client(cli_ctx, command_args, resource_type):
