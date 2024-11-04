@@ -32,12 +32,13 @@ import string
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk import live_only
 from .fleet_test_helper import (
     FleetTestHelper,
 )  # Ensure this import points to the correct module
 
-#defaultSubscription = "ac302a10-6fb1-4308-baf6-ad855c4d7f3d"
-defaultSubscription = "0000000-0000-0000-0000-000000000000"
+defaultSubscription = "ac302a10-6fb1-4308-baf6-ad855c4d7f3d"
+#defaultSubscription = "0000000-0000-0000-0000-000000000000"
 subscriptionId = os.getenv("SUBSCRIPTION_ID")
 if not subscriptionId:
     subscriptionId = defaultSubscription
@@ -240,6 +241,7 @@ class TestComputefleetScenario(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix=fleet_rg_prefix, location=location)
     @AllowLargeResponse()
+    @live_only()
     def test_all_fleet_operations(self, resource_group, resource_group_location):
         fleet_name = generate_random_fleet_name("testFleet")
         self._fleet_create(fleet_name, resource_group, resource_group_location)
