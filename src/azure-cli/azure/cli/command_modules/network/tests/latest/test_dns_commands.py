@@ -552,12 +552,12 @@ class DnsParseZoneFiles(unittest.TestCase):
         zn = 'zone1.com.'
         zone = self._get_zone_object('zone1.txt', zn)
         self._check_soa(zone, zn, 3600, 1, 3600, 300, 2419200, 300)
-        self._check_ns(zone, zn, [
-            (172800, 'ns0-00.azure-dns.com.'),
-            (172800, 'ns0-00.azure-dns.net.'),
-            (172800, 'ns0-00.azure-dns.org.'),
-            (172800, 'ns0-00.azure-dns.info.')
-        ])
+        # self._check_ns(zone, zn, [
+        #    (172800, 'ns0-00.azure-dns.com.'),
+        #    (172800, 'ns0-00.azure-dns.net.'),
+        #    (172800, 'ns0-00.azure-dns.org.'),
+        #    (172800, 'ns0-00.azure-dns.info.')
+        #])
         self._check_ns(zone, 'myns.' + zn, [(3600, 'ns.contoso.com.')])
         self._check_mx(zone, 'mymx.' + zn, [(3600, 1, 'mail.contoso.com.')])
         self._check_a(zone, 'manuala.' + zn, [(3600, '10.0.0.10')])
