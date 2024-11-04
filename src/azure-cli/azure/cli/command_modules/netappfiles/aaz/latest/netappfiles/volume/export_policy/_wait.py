@@ -20,7 +20,7 @@ class Wait(AAZWaitCommand):
 
     _aaz_info = {
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2024-03-01", "properties.exportPolicy.rules[]"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2024-07-01", "properties.exportPolicy.rules[]"],
         ]
     }
 
@@ -149,7 +149,7 @@ class Wait(AAZWaitCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-03-01",
+                    "api-version", "2024-07-01",
                     required=True,
                 ),
             }
@@ -284,6 +284,9 @@ class _WaitHelper:
         )
         properties.delete_base_snapshot = AAZBoolType(
             serialized_name="deleteBaseSnapshot",
+        )
+        properties.effective_network_features = AAZStrType(
+            serialized_name="effectiveNetworkFeatures",
         )
         properties.enable_subvolumes = AAZStrType(
             serialized_name="enableSubvolumes",
@@ -445,12 +448,14 @@ class _WaitHelper:
         replication.endpoint_type = AAZStrType(
             serialized_name="endpointType",
         )
+        replication.remote_path = AAZObjectType(
+            serialized_name="remotePath",
+        )
         replication.remote_volume_region = AAZStrType(
             serialized_name="remoteVolumeRegion",
         )
         replication.remote_volume_resource_id = AAZStrType(
             serialized_name="remoteVolumeResourceId",
-            flags={"required": True},
         )
         replication.replication_id = AAZStrType(
             serialized_name="replicationId",
@@ -458,6 +463,20 @@ class _WaitHelper:
         )
         replication.replication_schedule = AAZStrType(
             serialized_name="replicationSchedule",
+        )
+
+        remote_path = _schema_volume_read.properties.data_protection.replication.remote_path
+        remote_path.external_host_name = AAZStrType(
+            serialized_name="externalHostName",
+            flags={"required": True},
+        )
+        remote_path.server_name = AAZStrType(
+            serialized_name="serverName",
+            flags={"required": True},
+        )
+        remote_path.volume_name = AAZStrType(
+            serialized_name="volumeName",
+            flags={"required": True},
         )
 
         snapshot = _schema_volume_read.properties.data_protection.snapshot

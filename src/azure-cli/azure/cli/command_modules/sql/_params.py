@@ -64,7 +64,8 @@ from .custom import (
     SqlServerMinimalTlsVersionType,
     SqlManagedInstanceMinimalTlsVersionType,
     AuthenticationType,
-    FreeLimitExhaustionBehavior
+    FreeLimitExhaustionBehavior,
+    FailoverGroupDatabasesSecondaryType
 )
 
 from ._validators import (
@@ -1719,6 +1720,8 @@ def load_arguments(self, _):
                    arg_type=allow_data_loss_param_type)
         c.argument('try_planned_before_forced_failover',
                    arg_type=try_planned_before_forced_failover_param_type)
+        c.argument('secondary_type', help="Databases secondary type on partner server",
+                   arg_type=get_enum_type(FailoverGroupDatabasesSecondaryType))
 
     ###############################################
     #             sql instance pool               #

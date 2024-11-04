@@ -519,7 +519,6 @@ def aks_create(
     auto_upgrade_channel=None,
     node_os_upgrade_channel=None,
     cluster_autoscaler_profile=None,
-    uptime_sla=False,
     tier=None,
     fqdn_subdomain=None,
     api_server_authorized_ip_ranges=None,
@@ -705,8 +704,6 @@ def aks_update(
     auto_upgrade_channel=None,
     node_os_upgrade_channel=None,
     cluster_autoscaler_profile=None,
-    uptime_sla=False,
-    no_uptime_sla=False,
     tier=None,
     api_server_authorized_ip_ranges=None,
     enable_public_fqdn=False,
@@ -1872,7 +1869,7 @@ def k8s_install_kubectl(cmd, client_version='latest', install_location=None, sou
     """
 
     if not source_url:
-        source_url = "https://storage.googleapis.com/kubernetes-release/release"
+        source_url = "https://dl.k8s.io/release"
         cloud_name = cmd.cli_ctx.cloud.name
         if cloud_name.lower() == 'azurechinacloud':
             source_url = 'https://mirror.azure.cn/kubernetes/kubectl'
