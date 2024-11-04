@@ -2100,10 +2100,11 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'client_secret': sp_password,
             'resource_type': 'Microsoft.ContainerService/ManagedClusters'
         })
+
         # create
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
                      '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
-                     '--service-principal={service_principal} --client-secret={client_secret} --uptime-sla '
+                     '--service-principal={service_principal} --client-secret={client_secret} --tier standard '
         self.cmd(create_cmd, checks=[
             self.exists('fqdn'),
             self.exists('nodeResourceGroup'),
@@ -5263,21 +5264,21 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # create
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
                      '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
-                     '--uptime-sla'
+                     '--tier standard'
         self.cmd(create_cmd, checks=[
             self.exists('fqdn'),
             self.exists('nodeResourceGroup'),
             self.check('provisioningState', 'Succeeded'),
             self.check('sku.tier', 'Standard')
         ])
-        # update to no uptime sla
-        no_uptime_sla_cmd = 'aks update --resource-group={resource_group} --name={name} --no-uptime-sla'
-        self.cmd(no_uptime_sla_cmd, checks=[
+        # update to free tier
+        free_tier_cmd = 'aks update --resource-group={resource_group} --name={name} --tier free'
+        self.cmd(free_tier_cmd, checks=[
             self.check('sku.tier', 'Free')
         ])
         # update to uptime sla again
-        uptime_sla_cmd = 'aks update --resource-group={resource_group} --name={name} --uptime-sla'
-        self.cmd(uptime_sla_cmd, checks=[
+        standard_tier_cmd = 'aks update --resource-group={resource_group} --name={name} --tier standard'
+        self.cmd(standard_tier_cmd, checks=[
             self.check('sku.tier', 'Standard')
         ])
         # delete
@@ -8216,14 +8217,14 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         create_cmd += f'--ampls-resource-id {ampls_resource_id} ' if use_ampls else ''
         create_cmd += f'--enable-high-log-scale-mode ' if highlogscale_mode_enabled else ''
 
-        if enableOtherAddon:
-            # enable other addon such azure-policy to verify the monitoring addon and DCRs etc.. remainins intact.
-            self.cmd(f'aks enable-addons -a azure-policy -g={resource_group} -n={aks_name}')
-
         response = self.cmd(create_cmd, checks=[
             self.check('addonProfiles.omsagent.enabled', True),
             self.check('addonProfiles.omsagent.config.useAADAuth', 'true')
         ]).get_output_in_json()
+
+        if enableOtherAddon:
+            # enable other addon such azure-policy to verify the monitoring addon and DCRs etc.. remaining intact.
+            self.cmd(f'aks enable-addons -a azure-policy -g={resource_group} -n={aks_name}')
 
         cluster_resource_id = response["id"]
         subscription = cluster_resource_id.split("/")[2]
