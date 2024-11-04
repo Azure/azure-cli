@@ -732,7 +732,7 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
         setattr(trigger_restore_properties, 'should_use_alternate_target_location', True)
         setattr(trigger_restore_properties, 'is_non_recoverable', False)
 
-    if recovery_mode == 'SnapshotAttachAndRecover':
+    if recovery_mode == 'SnapshotAttachAndRecover' or recovery_mode == 'SnapshotAttach':
         trigger_restore_properties.recovery_mode = recovery_mode
 
         target_resource_group_name = container_id.split('/')[4]
@@ -891,7 +891,10 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
         recovery_mode = 'FileRecovery'
         container_id = target_container.id
     if workload_type == 'SAPHanaDBInstance':
-        recovery_mode = 'SnapshotAttachAndRecover'
+        if attach_and_mount is not None:
+            recovery_mode = 'SnapshotAttachAndRecover'
+        else:
+            recovery_mode = 'SnapshotAttach'
 
     return {
         'restore_mode': restore_mode_map[restore_mode],
