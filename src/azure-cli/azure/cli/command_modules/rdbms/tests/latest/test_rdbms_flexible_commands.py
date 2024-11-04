@@ -2174,7 +2174,7 @@ class FlexibleServerUpgradeMgmtScenarioTest(ScenarioTest):
 
 
 class FlexibleServerBackupsMgmtScenarioTest(ScenarioTest):
-    postgres_location = 'eastus'
+    postgres_location = 'southcentralus'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -2185,7 +2185,7 @@ class FlexibleServerBackupsMgmtScenarioTest(ScenarioTest):
 
     def _test_backups_mgmt(self, database_engine, resource_group, server):
         # Wait until snapshot is created
-        # os.environ.get(ENV_LIVE_TEST, False) and sleep(1800)
+        os.environ.get(ENV_LIVE_TEST, False) and sleep(1800)
         attempts = 0
         while attempts < 10:
             backups = self.cmd('{} flexible-server backup list -g {} -n {}'
@@ -2195,12 +2195,34 @@ class FlexibleServerBackupsMgmtScenarioTest(ScenarioTest):
                 break
             os.environ.get(ENV_LIVE_TEST, False) and sleep(60)
 
-        self.assertTrue(len(backups) > 0)
+        backups_length = len(backups)
+        self.assertTrue(backups_length > 0)
 
         automatic_backup = self.cmd('{} flexible-server backup show -g {} -n {} --backup-name {}'
                                     .format(database_engine, resource_group, server, backups[0]['name'])).get_output_in_json()
 
         self.assertDictEqual(automatic_backup, backups[0])
+
+        # test on-demand backup create
+        backup_name = self.create_random_name(F'backup', 16)
+
+        self.cmd('{} flexible-server backup create -g {} -n {} --backup-name {}'
+                .format(database_engine, resource_group, server, backup_name),
+                checks=[JMESPathCheck('name', backup_name)])
+
+        backups_update = self.cmd('{} flexible-server backup list -g {} -n {}'
+                        .format(database_engine, resource_group, server)).get_output_in_json()
+
+        self.assertTrue(backups_length < len(backups_update))
+
+        # test on-demand backup delete
+        self.cmd('{} flexible-server backup delete -g {} -n {} --backup-name {} --yes'
+                .format(database_engine, resource_group, server, backup_name))
+
+        backups_update = self.cmd('{} flexible-server backup list -g {} -n {}'
+                        .format(database_engine, resource_group, server)).get_output_in_json()
+
+        self.assertTrue(backups_length == len(backups_update))
 
 
 class FlexibleServerIdentityAADAdminMgmtScenarioTest(ScenarioTest):
