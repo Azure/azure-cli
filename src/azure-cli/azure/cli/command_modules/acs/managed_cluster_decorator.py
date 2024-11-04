@@ -8102,7 +8102,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                     "Encounter an unexpected error while getting agent pool profiles from the cluster "
                     "in the process of updating agentpool profile."
                 )
-            pool_name = self.context.raw_param.get("storage_pool_name")
+            storagepool_name = self.context.raw_param.get("storage_pool_name")
             pool_option = self.context.raw_param.get("storage_pool_option")
             pool_sku = self.context.raw_param.get("storage_pool_sku")
             pool_size = self.context.raw_param.get("storage_pool_size")
@@ -8135,7 +8135,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 labelled_nodepool_arr = []
                 for agentpool in mc.agent_pool_profiles:
                     pool_details = {}
-                    pool_name = agentpool.name
+                    nodepool_name = agentpool.name
                     pool_details["vm_size"] = agentpool.vm_size
                     pool_details["count"] = agentpool.count
                     pool_details["os_type"] = agentpool.os_type
@@ -8146,10 +8146,10 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                         node_labels = agentpool.node_labels
                         if node_labels is not None and \
                            node_labels.get(CONST_ACSTOR_IO_ENGINE_LABEL_KEY) is not None and \
-                           pool_name is not None:
-                            labelled_nodepool_arr.append(pool_name)
+                           nodepool_name is not None:
+                            labelled_nodepool_arr.append(nodepool_name)
                         pool_details["node_labels"] = node_labels
-                    agentpool_details[pool_name] = pool_details
+                    agentpool_details[nodepool_name] = pool_details
 
                 # Incase of a new installation, if the nodepool list is not defined
                 # then check for all the nodepools which are marked with acstor io-engine
@@ -8169,7 +8169,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 )
                 validate_enable_azure_container_storage_params(
                     enable_pool_type,
-                    pool_name,
+                    storagepool_name,
                     pool_sku,
                     pool_option,
                     pool_size,
@@ -8226,7 +8226,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 )
                 validate_disable_azure_container_storage_params(
                     disable_pool_type,
-                    pool_name,
+                    storagepool_name,
                     pool_sku,
                     pool_option,
                     pool_size,
