@@ -203,7 +203,7 @@ class TestComputefleetScenario(ScenarioTest):
 
         try:
             response = self.cmd(
-                "az compute-fleet fleet create  -n {fleet_name_test} -g {resource_group} --spp '{spot_profile}' --cp '{compute_profile}' --vmsizeprof '{vm_sizes_profile}' -l{location} -t '{tags}' ",
+                "az compute-fleet fleet create  -n {fleet_name_test} -g {resource_group} --spp '{spot_profile}' --cp '{compute_profile}' --vmsizeprof '{vm_sizes_profile}' -l {location} -t '{tags}' ",
                 checks=[
                     self.check("name", "{fleet_name_test}"),
                     self.check("resourceGroup", "{resource_group}"),
@@ -292,7 +292,7 @@ class TestComputefleetScenario(ScenarioTest):
         #add tests for alias.
         print("Start Tests for Aliases")
         self._fleet_create_using_alias( fleet_name_spot_alias , resource_group, resource_group_location)
-        self._fleet_fleet_show( fleet_name_spot_alias , resource_group, resource_group_location)
+        self._fleet_show( fleet_name_spot_alias , resource_group)
         self._fleet_delete( fleet_name_spot_alias , resource_group, subscriptionId)
     
     @ResourceGroupPreparer(name_prefix=fleet_rg_prefix, location=location)
