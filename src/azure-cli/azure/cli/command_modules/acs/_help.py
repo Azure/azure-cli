@@ -128,18 +128,6 @@ parameters:
   - name: --aad-admin-group-object-ids
     type: string
     short-summary: Comma-separated list of aad group object IDs that will be set as cluster admin.
-  - name: --aad-client-app-id
-    type: string
-    short-summary: The ID of an Azure Active Directory client application of type "Native". This application is for user login via kubectl.
-    long-summary: --aad-client-app-id is deprecated. See https://aka.ms/aks/aad-legacy for details.
-  - name: --aad-server-app-id
-    type: string
-    short-summary: The ID of an Azure Active Directory server application of type "Web app/API". This application represents the managed cluster's apiserver (Server application).
-    long-summary: --aad-server-app-id is deprecated. See https://aka.ms/aks/aad-legacy for details.
-  - name: --aad-server-app-secret
-    type: string
-    short-summary: The secret of an Azure Active Directory server application.
-    long-summary: --aad-server-app-secret is deprecated. See https://aka.ms/aks/aad-legacy for details.
   - name: --aad-tenant-id
     type: string
     short-summary: The ID of an Azure Active Directory tenant.

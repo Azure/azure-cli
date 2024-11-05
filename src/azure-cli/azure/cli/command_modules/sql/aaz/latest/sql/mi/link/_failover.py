@@ -12,19 +12,20 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "sql mi link create",
+    "sql mi link failover",
+    confirmation="This operation may cause data loss if the failover type is ForcedAllowDataLoss. Are you sure you want to proceed?",
 )
-class Create(AAZCommand):
-    """Create a Managed Instance link between Sql On-Prem and Sql Managed Instance.
+class Failover(AAZCommand):
+    """Performs requested failover type in this Managed Instance link.
 
-    :example: Create a Managed Instance link with minimal properties.
-        az sql mi link create -g testrg --mi testcl --name link1 --instance-ag-name instanceAg --partner-ag-name partnerAg --partner-endpoint TCP://SERVER:7022 --databases "[{database-name:testdb}]"
+    :example: Failover a Managed Instance link.
+        az sql mi link failover -g testrg --mi testcl --name link1 --failover-type ForcedAllowDataLoss
     """
 
     _aaz_info = {
         "version": "2023-08-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.sql/managedinstances/{}/distributedavailabilitygroups/{}", "2023-08-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.sql/managedinstances/{}/distributedavailabilitygroups/{}/failover", "2023-08-01-preview"],
         ]
     }
 
@@ -49,72 +50,43 @@ class Create(AAZCommand):
             options=["-n", "--name", "--link-name"],
             help="Managed Instance link name.",
             required=True,
+            id_part="child_name_1",
+            fmt=AAZStrArgFormat(
+                pattern="^[#a-zA-Z_][\\w@#$]*$",
+                max_length=128,
+                min_length=1,
+            ),
         )
         _args_schema.managed_instance_name = AAZStrArg(
             options=["--mi", "--instance-name", "--managed-instance", "--managed-instance-name"],
-            help="Name of the managed instance.",
+            help="The name of the managed instance.",
             required=True,
+            id_part="name",
+            fmt=AAZStrArgFormat(
+                pattern="^[a-z0-9]+(?:-[a-z0-9]+)*$",
+                max_length=63,
+                min_length=1,
+            ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
 
-        # define Arg Group "Properties"
+        # define Arg Group "Parameters"
 
         _args_schema = cls._args_schema
-        _args_schema.databases = AAZListArg(
-            options=["--databases"],
-            arg_group="Properties",
-            help="Databases in the distributed availability group",
-        )
-        _args_schema.failover_mode = AAZStrArg(
-            options=["--failover-mode"],
-            arg_group="Properties",
-            help="The link failover mode - can be Manual if intended to be used for two-way failover with a supported SQL Server, or None for one-way failover to Azure.",
-            enum={"Manual": "Manual", "None": "None"},
-        )
-        _args_schema.instance_availability_group_name = AAZStrArg(
-            options=["--instance-ag-name", "--instance-availability-group-name"],
-            arg_group="Properties",
-            help="Managed instance side availability group name",
-        )
-        _args_schema.instance_link_role = AAZStrArg(
-            options=["--instance-link-role"],
-            arg_group="Properties",
-            help="Managed instance side link role",
-            enum={"Primary": "Primary", "Secondary": "Secondary"},
-        )
-        _args_schema.partner_availability_group_name = AAZStrArg(
-            options=["--partner-ag-name", "--partner-availability-group-name"],
-            arg_group="Properties",
-            help="SQL server side availability group name",
-        )
-        _args_schema.partner_endpoint = AAZStrArg(
-            options=["--partner-endpoint"],
-            arg_group="Properties",
-            help="SQL server side endpoint - IP or DNS resolvable name",
-        )
-        _args_schema.seeding_mode = AAZStrArg(
-            options=["--seeding-mode"],
-            arg_group="Properties",
-            help="Database seeding mode – can be Automatic (default), or Manual for supported scenarios.",
-            default="Automatic",
-            enum={"Automatic": "Automatic", "Manual": "Manual"},
-        )
-
-        databases = cls._args_schema.databases
-        databases.Element = AAZObjectArg()
-
-        _element = cls._args_schema.databases.Element
-        _element.database_name = AAZStrArg(
-            options=["database-name"],
-            help="The name of the database in link",
+        _args_schema.failover_type = AAZStrArg(
+            options=["--failover-type"],
+            arg_group="Parameters",
+            help="The failover type, can be ForcedAllowDataLoss or Planned.",
+            required=True,
+            enum={"ForcedAllowDataLoss": "ForcedAllowDataLoss", "Planned": "Planned"},
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.DistributedAvailabilityGroupsCreateOrUpdate(ctx=self.ctx)()
+        yield self.DistributedAvailabilityGroupsFailover(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -129,7 +101,7 @@ class Create(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class DistributedAvailabilityGroupsCreateOrUpdate(AAZHttpOperation):
+    class DistributedAvailabilityGroupsFailover(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -139,18 +111,18 @@ class Create(AAZCommand):
                 return self.client.build_lro_polling(
                     self.ctx.args.no_wait,
                     session,
-                    self.on_200_201,
+                    self.on_200,
                     self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
+                    lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
-            if session.http_response.status_code in [200, 201]:
+            if session.http_response.status_code in [200]:
                 return self.client.build_lro_polling(
                     self.ctx.args.no_wait,
                     session,
-                    self.on_200_201,
+                    self.on_200,
                     self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
+                    lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
 
@@ -159,13 +131,13 @@ class Create(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/managedInstances/{managedInstanceName}/distributedAvailabilityGroups/{distributedAvailabilityGroupName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/managedInstances/{managedInstanceName}/distributedAvailabilityGroups/{distributedAvailabilityGroupName}/failover",
                 **self.url_parameters
             )
 
         @property
         def method(self):
-            return "PUT"
+            return "POST"
 
         @property
         def error_format(self):
@@ -222,60 +194,42 @@ class Create(AAZCommand):
                 typ=AAZObjectType,
                 typ_kwargs={"flags": {"required": True, "client_flatten": True}}
             )
-            _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
-
-            properties = _builder.get(".properties")
-            if properties is not None:
-                properties.set_prop("databases", AAZListType, ".databases")
-                properties.set_prop("failoverMode", AAZStrType, ".failover_mode")
-                properties.set_prop("instanceAvailabilityGroupName", AAZStrType, ".instance_availability_group_name")
-                properties.set_prop("instanceLinkRole", AAZStrType, ".instance_link_role")
-                properties.set_prop("partnerAvailabilityGroupName", AAZStrType, ".partner_availability_group_name")
-                properties.set_prop("partnerEndpoint", AAZStrType, ".partner_endpoint")
-                properties.set_prop("seedingMode", AAZStrType, ".seeding_mode")
-
-            databases = _builder.get(".properties.databases")
-            if databases is not None:
-                databases.set_elements(AAZObjectType, ".")
-
-            _elements = _builder.get(".properties.databases[]")
-            if _elements is not None:
-                _elements.set_prop("databaseName", AAZStrType, ".database_name")
+            _builder.set_prop("failoverType", AAZStrType, ".failover_type", typ_kwargs={"flags": {"required": True}})
 
             return self.serialize_content(_content_value)
 
-        def on_200_201(self, session):
+        def on_200(self, session):
             data = self.deserialize_http_content(session)
             self.ctx.set_var(
                 "instance",
                 data,
-                schema_builder=self._build_schema_on_200_201
+                schema_builder=self._build_schema_on_200
             )
 
-        _schema_on_200_201 = None
+        _schema_on_200 = None
 
         @classmethod
-        def _build_schema_on_200_201(cls):
-            if cls._schema_on_200_201 is not None:
-                return cls._schema_on_200_201
+        def _build_schema_on_200(cls):
+            if cls._schema_on_200 is not None:
+                return cls._schema_on_200
 
-            cls._schema_on_200_201 = AAZObjectType()
+            cls._schema_on_200 = AAZObjectType()
 
-            _schema_on_200_201 = cls._schema_on_200_201
-            _schema_on_200_201.id = AAZStrType(
+            _schema_on_200 = cls._schema_on_200
+            _schema_on_200.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200_201.name = AAZStrType(
+            _schema_on_200.name = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200_201.properties = AAZObjectType(
+            _schema_on_200.properties = AAZObjectType(
                 flags={"client_flatten": True},
             )
-            _schema_on_200_201.type = AAZStrType(
+            _schema_on_200.type = AAZStrType(
                 flags={"read_only": True},
             )
 
-            properties = cls._schema_on_200_201.properties
+            properties = cls._schema_on_200.properties
             properties.databases = AAZListType()
             properties.distributed_availability_group_id = AAZStrType(
                 serialized_name="distributedAvailabilityGroupId",
@@ -311,10 +265,10 @@ class Create(AAZCommand):
                 serialized_name="seedingMode",
             )
 
-            databases = cls._schema_on_200_201.properties.databases
+            databases = cls._schema_on_200.properties.databases
             databases.Element = AAZObjectType()
 
-            _element = cls._schema_on_200_201.properties.databases.Element
+            _element = cls._schema_on_200.properties.databases.Element
             _element.connected_state = AAZStrType(
                 serialized_name="connectedState",
                 flags={"read_only": True},
@@ -399,7 +353,7 @@ class Create(AAZCommand):
                 flags={"read_only": True},
             )
 
-            partner_auth_cert_validity = cls._schema_on_200_201.properties.databases.Element.partner_auth_cert_validity
+            partner_auth_cert_validity = cls._schema_on_200.properties.databases.Element.partner_auth_cert_validity
             partner_auth_cert_validity.certificate_name = AAZStrType(
                 serialized_name="certificateName",
                 flags={"read_only": True},
@@ -409,11 +363,11 @@ class Create(AAZCommand):
                 flags={"read_only": True},
             )
 
-            return cls._schema_on_200_201
+            return cls._schema_on_200
 
 
-class _CreateHelper:
-    """Helper class for Create"""
+class _FailoverHelper:
+    """Helper class for Failover"""
 
 
-__all__ = ["Create"]
+__all__ = ["Failover"]

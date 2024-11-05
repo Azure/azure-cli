@@ -3225,9 +3225,7 @@ class AKSManagedClusterContext(BaseAKSContext):
     def _get_enable_aad(self, enable_validation: bool = False) -> bool:
         """Internal function to obtain the value of enable_aad.
 
-        This function supports the option of enable_validation. When enabled, in create mode, if the value of
-        enable_aad is True and any of aad_client_app_id, aad_server_app_id or aad_server_app_secret is asssigned, a
-        MutuallyExclusiveArgumentError will be raised. If the value of enable_aad is False and the value of
+        This function supports the option of enable_validation. If the value of enable_aad is False and the value of
         enable_azure_rbac is True, a RequiredArgumentMissingError will be raised. In update mode, if enable_aad is
         specified and managed aad has been enabled, an InvalidArgumentValueError will be raised.
 
@@ -3248,25 +3246,6 @@ class AKSManagedClusterContext(BaseAKSContext):
         # validation
         if enable_validation:
             if self.decorator_mode == DecoratorMode.CREATE:
-                (
-                    aad_client_app_id,
-                    aad_server_app_id,
-                    aad_server_app_secret,
-                ) = self._get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret(
-                    enable_validation=False
-                )
-                if enable_aad:
-                    if any(
-                        [
-                            aad_client_app_id,
-                            aad_server_app_id,
-                            aad_server_app_secret,
-                        ]
-                    ):
-                        raise MutuallyExclusiveArgumentError(
-                            "--enable-aad cannot be used together with --aad-client-app-id, --aad-server-app-id or "
-                            "--aad-server-app-secret"
-                        )
                 if not enable_aad and self._get_enable_azure_rbac(enable_validation=False):
                     raise RequiredArgumentMissingError(
                         "--enable-azure-rbac can only be used together with --enable-aad"
@@ -3282,9 +3261,7 @@ class AKSManagedClusterContext(BaseAKSContext):
     def get_enable_aad(self) -> bool:
         """Obtain the value of enable_aad.
 
-        This function will verify the parameter by default. In create mode, if the value of enable_aad is True and
-        any of aad_client_app_id, aad_server_app_id or aad_server_app_secret is asssigned, a
-        MutuallyExclusiveArgumentError will be raised. If the value of enable_aad is False and the value of
+        This function will verify the parameter by default. If the value of enable_aad is False and the value of
         enable_azure_rbac is True, a RequiredArgumentMissingError will be raised. In update mode, if enable_aad is
         specified and managed aad has been enabled, an InvalidArgumentValueError will be raised.
 
@@ -3293,82 +3270,10 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         return self._get_enable_aad(enable_validation=True)
 
-    def _get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret(
-        self, enable_validation: bool = False
-    ) -> Tuple[Union[str, None], Union[str, None], Union[str, None]]:
-        """Internal function to obtain the value of aad_client_app_id, aad_server_app_id and aad_server_app_secret.
-
-        This function supports the option of enable_validation. When enabled, if the value of enable_aad is True and any
-        of aad_client_app_id, aad_server_app_id or aad_server_app_secret is asssigned, a MutuallyExclusiveArgumentError
-        will be raised.
-
-        :return: a tuple of three elements: aad_client_app_id of string type or None, aad_server_app_id of string type
-        or None and aad_server_app_secret of string type or None.
-        """
-        # get aad profile from `mc`
-        aad_profile = None
-        if self.mc:
-            aad_profile = self.mc.aad_profile
-
-        # read the original value passed by the command
-        aad_client_app_id = self.raw_param.get("aad_client_app_id")
-        # try to read the property value corresponding to the parameter from the `mc` object
-        if aad_profile and aad_profile.client_app_id is not None:
-            aad_client_app_id = aad_profile.client_app_id
-
-        # read the original value passed by the command
-        aad_server_app_id = self.raw_param.get("aad_server_app_id")
-        # try to read the property value corresponding to the parameter from the `mc` object
-        if aad_profile and aad_profile.server_app_id is not None:
-            aad_server_app_id = aad_profile.server_app_id
-
-        # read the original value passed by the command
-        aad_server_app_secret = self.raw_param.get("aad_server_app_secret")
-        # try to read the property value corresponding to the parameter from the `mc` object
-        if aad_profile and aad_profile.server_app_secret is not None:
-            aad_server_app_secret = aad_profile.server_app_secret
-
-        # these parameters do not need dynamic completion
-
-        # validation
-        if enable_validation:
-            enable_aad = self._get_enable_aad(enable_validation=False)
-            if enable_aad:
-                if any(
-                    [
-                        aad_client_app_id,
-                        aad_server_app_id,
-                        aad_server_app_secret,
-                    ]
-                ):
-                    raise MutuallyExclusiveArgumentError(
-                        "--enable-aad cannot be used together with --aad-client-app-id, --aad-server-app-id or "
-                        "--aad-server-app-secret"
-                    )
-        return aad_client_app_id, aad_server_app_id, aad_server_app_secret
-
-    def get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret(
-        self,
-    ) -> Tuple[Union[str, None], Union[str, None], Union[str, None]]:
-        """Obtain the value of aad_client_app_id, aad_server_app_id and aad_server_app_secret.
-
-        This function will verify the parameters by default. If the value of enable_aad is True and any of
-        aad_client_app_id, aad_server_app_id or aad_server_app_secret is asssigned, a MutuallyExclusiveArgumentError
-        will be raised.
-
-        :return: a tuple of three elements: aad_client_app_id of string type or None, aad_server_app_id of string type
-        or None and aad_server_app_secret of string type or None.
-        """
-        return self._get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret(enable_validation=True)
-
     def _get_aad_tenant_id(
         self, enable_validation: bool = False, read_only: bool = False
     ) -> Union[str, None]:
-        """Internal function to dynamically obtain the value of aad_server_app_secret according to the context.
-        When both aad_tenant_id and enable_aad are not assigned, and any of aad_client_app_id, aad_server_app_id or
-        aad_server_app_secret is asssigned, dynamic completion will be triggerd. Class
-        "azure.cli.core._profile.Profile" will be instantiated, and then call its "get_login_credentials" method to
-        get the tenant of the deployment subscription.
+        """Internal function to obtain the value of aad_tenant_id according to the context.
 
         This function supports the option of enable_validation. When enabled in update mode, if aad_tenant_id
         is specified, while aad_profile is not set or managed aad is not enabled, raise an InvalidArgumentValueError.
@@ -3379,7 +3284,6 @@ class AKSManagedClusterContext(BaseAKSContext):
         # read the original value passed by the command
         aad_tenant_id = self.raw_param.get("aad_tenant_id")
         # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
-        read_from_mc = False
         if self.decorator_mode == DecoratorMode.CREATE:
             if (
                 self.mc and
@@ -3387,22 +3291,10 @@ class AKSManagedClusterContext(BaseAKSContext):
                 self.mc.aad_profile.tenant_id is not None
             ):
                 aad_tenant_id = self.mc.aad_profile.tenant_id
-                read_from_mc = True
 
-        # skip dynamic completion & validation if option read_only is specified
+        # skip validation if option read_only is specified
         if read_only:
             return aad_tenant_id
-
-        # dynamic completion for create mode only
-        if self.decorator_mode == DecoratorMode.CREATE:
-            if not read_from_mc and not self._get_enable_aad(
-                enable_validation=False
-            ):
-                if aad_tenant_id is None and any(
-                    self._get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret(enable_validation=False)
-                ):
-                    profile = Profile(cli_ctx=self.cmd.cli_ctx)
-                    _, _, aad_tenant_id = profile.get_login_credentials()
 
         # validation
         if enable_validation:
@@ -3415,11 +3307,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         return aad_tenant_id
 
     def get_aad_tenant_id(self) -> Union[str, None]:
-        """Dynamically obtain the value of aad_server_app_secret according to the context.
-        When both aad_tenant_id and enable_aad are not assigned, and any of aad_client_app_id, aad_server_app_id or
-        aad_server_app_secret is asssigned, dynamic completion will be triggerd. Class
-        "azure.cli.core._profile.Profile" will be instantiated, and then call its "get_login_credentials" method to
-        get the tenant of the deployment subscription.
+        """Obtain the value of aad_tenant_id according to the context.
 
         This function will verify the parameter by default. In update mode, if aad_tenant_id is specified,
         while aad_profile is not set or managed aad is not enabled, raise an InvalidArgumentValueError.
@@ -6130,22 +6018,6 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 admin_group_object_i_ds=self.context.get_aad_admin_group_object_ids(),
                 tenant_id=self.context.get_aad_tenant_id()
             )
-        else:
-            (
-                aad_client_app_id,
-                aad_server_app_id,
-                aad_server_app_secret,
-            ) = (
-                self.context.get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret()
-            )
-            aad_tenant_id = self.context.get_aad_tenant_id()
-            if any([aad_client_app_id, aad_server_app_id, aad_server_app_secret, aad_tenant_id]):
-                aad_profile = self.models.ManagedClusterAADProfile(
-                    client_app_id=aad_client_app_id,
-                    server_app_id=aad_server_app_id,
-                    server_app_secret=aad_server_app_secret,
-                    tenant_id=aad_tenant_id
-                )
         mc.aad_profile = aad_profile
         return mc
 
@@ -8102,7 +7974,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                     "Encounter an unexpected error while getting agent pool profiles from the cluster "
                     "in the process of updating agentpool profile."
                 )
-            pool_name = self.context.raw_param.get("storage_pool_name")
+            storagepool_name = self.context.raw_param.get("storage_pool_name")
             pool_option = self.context.raw_param.get("storage_pool_option")
             pool_sku = self.context.raw_param.get("storage_pool_sku")
             pool_size = self.context.raw_param.get("storage_pool_size")
@@ -8135,7 +8007,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 labelled_nodepool_arr = []
                 for agentpool in mc.agent_pool_profiles:
                     pool_details = {}
-                    pool_name = agentpool.name
+                    nodepool_name = agentpool.name
                     pool_details["vm_size"] = agentpool.vm_size
                     pool_details["count"] = agentpool.count
                     pool_details["os_type"] = agentpool.os_type
@@ -8146,10 +8018,10 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                         node_labels = agentpool.node_labels
                         if node_labels is not None and \
                            node_labels.get(CONST_ACSTOR_IO_ENGINE_LABEL_KEY) is not None and \
-                           pool_name is not None:
-                            labelled_nodepool_arr.append(pool_name)
+                           nodepool_name is not None:
+                            labelled_nodepool_arr.append(nodepool_name)
                         pool_details["node_labels"] = node_labels
-                    agentpool_details[pool_name] = pool_details
+                    agentpool_details[nodepool_name] = pool_details
 
                 # Incase of a new installation, if the nodepool list is not defined
                 # then check for all the nodepools which are marked with acstor io-engine
@@ -8169,7 +8041,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 )
                 validate_enable_azure_container_storage_params(
                     enable_pool_type,
-                    pool_name,
+                    storagepool_name,
                     pool_sku,
                     pool_option,
                     pool_size,
@@ -8226,7 +8098,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 )
                 validate_disable_azure_container_storage_params(
                     disable_pool_type,
-                    pool_name,
+                    storagepool_name,
                     pool_sku,
                     pool_option,
                     pool_size,
