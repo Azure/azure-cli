@@ -906,7 +906,9 @@ class Create(AAZCommand):
         os_profile.admin_password = AAZPasswordArg(
             options=["admin-password"],
             help="Specifies the password of the administrator account. <br><br> **Minimum-length (Windows):** 8 characters <br><br> **Minimum-length (Linux):** 6 characters <br><br> **Max-length (Windows):** 123 characters <br><br> **Max-length (Linux):** 72 characters <br><br> **Complexity requirements:** 3 out of 4 conditions below need to be fulfilled <br> Has lower characters <br>Has upper characters <br> Has a digit <br> Has a special character (Regex match [\\W_]) <br><br> **Disallowed values:** \"abc@123\", \"P@$$w0rd\", \"P@ssw0rd\", \"P@ssword123\", \"Pa$$word\", \"pass@word1\", \"Password!\", \"Password1\", \"Password22\", \"iloveyou!\" <br><br> For resetting the password, see [How to reset the Remote Desktop service or its login password in a Windows VM](https://docs.microsoft.com/troubleshoot/azure/virtual-machines/reset-rdp) <br><br> For resetting root password, see [Manage users, SSH, and check or repair disks on Azure Linux VMs using the VMAccess Extension](https://docs.microsoft.com/troubleshoot/azure/virtual-machines/troubleshoot-ssh-connection)",
-            prompt={"cls": "AAZPromptPasswordInput", "kwargs": {"msg": "Please provide VMSS password:", "confirm": True}},
+            blank=AAZPromptPasswordInput(
+               msg="VM Admin Password",
+               confirm=True),
         )
         os_profile.admin_username = AAZStrArg(
             options=["admin-username"],
@@ -923,7 +925,9 @@ class Create(AAZCommand):
         os_profile.custom_data = AAZPasswordArg(
             options=["custom-data"],
             help="Specifies a base-64 encoded string of custom data. The base-64 encoded string is decoded to a binary array that is saved as a file on the Virtual Machine. The maximum length of the binary array is 65535 bytes. For using cloud-init for your VM, see [Using cloud-init to customize a Linux VM during creation](https://docs.microsoft.com/azure/virtual-machines/linux/using-cloud-init)",
-            prompt={"cls": "AAZPromptPasswordInput", "kwargs": {"msg": "Please enter VM Password:", "confirm": True}},
+            blank=AAZPromptPasswordInput(
+               msg="VM Admin Password",
+               confirm=True),
         )
         os_profile.linux_configuration = AAZObjectArg(
             options=["linux-configuration"],
@@ -1079,7 +1083,9 @@ class Create(AAZCommand):
         _element.content = AAZPasswordArg(
             options=["content"],
             help="Specifies the XML formatted content that is added to the unattend.xml file for the specified path and component. The XML must be less than 4KB and must include the root element for the setting or feature that is being inserted.",
-            prompt={"cls": "AAZPromptPasswordInput", "kwargs": {"msg": "Password:"}},
+             blank=AAZPromptPasswordInput(
+               msg="VM Admin Password",
+               confirm=True),
         )
         _element.pass_name = AAZStrArg(
             options=["pass-name"],
