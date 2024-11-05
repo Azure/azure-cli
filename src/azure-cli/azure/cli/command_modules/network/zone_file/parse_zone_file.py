@@ -400,6 +400,8 @@ def _post_process_naptr_record(record):
     # strip EMPTY part of regexp
     if record['regexp'] == 'EMPTY':
         record['regexp'] = ''
+    if '\\\\' in record['regexp']:
+        record['regexp'] = record['regexp'].replace('\\\\','\\')
 
 
 def _post_check_names(zone):
