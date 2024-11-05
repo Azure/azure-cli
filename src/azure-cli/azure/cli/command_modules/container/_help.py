@@ -106,6 +106,7 @@ examples:
     text: az container show --name MyContainerGroup --resource-group MyResourceGroup
     crafted: true
 """
+
 helps['container container-group-profile create'] = """
 type: command
 short-summary: Create a container group profile.
