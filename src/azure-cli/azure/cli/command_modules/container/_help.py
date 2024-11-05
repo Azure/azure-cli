@@ -122,7 +122,7 @@ examples:
 
 helps['container container-group-profile show'] = """
 type: command
-short-summary: Gets a container group profile.
+short-summary: Get a container group profile.
 examples:
   - name: Creates a container group profile.
     text: az container container-group-profile show --resource-group MyResourceGroup --name mycgprofile
