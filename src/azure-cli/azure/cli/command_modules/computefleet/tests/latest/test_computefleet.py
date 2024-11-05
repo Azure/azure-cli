@@ -63,6 +63,7 @@ fleet_name_regular = generate_random_fleet_name(fleet_name_regular)
 fleet_name_spot = generate_random_fleet_name(fleet_name_spot)
 resource_group = generate_random_rg_name()
 location = "westus3"
+location2 = "westus2"
 subnet_name = generate_random_fleet_name("subnet-", 12)
 
 
@@ -169,6 +170,50 @@ class TestComputefleetScenario(ScenarioTest):
             raise
         print(response)
 
+    def _fleet_create_using_alias(self, fleet=fleet_name_spot, rg=resource_group, loc=location2):
+        fleetData = self.generate_fleet_parameters(subscriptionId, rg, loc, subnet_name)
+        compute_profile = fleetData["compute-profile"]
+        spot_profile = fleetData["spot-priority-profile"]
+        regular_profile = fleetData["regular-priority-profile"]
+        vm_sizes_profile = fleetData["vm-sizes-profile"]
+        zones = fleetData["zones"]
+        tags = fleetData["tags"]
+
+        fleetData_json = json.dumps(fleetData)
+        print(fleetData_json)
+        tagsNew = {"multi": "mixed"}
+
+        self.kwargs.update(
+            {
+                "fleet_name_test": fleet,
+                "fleet_name_reg": fleet_name_regular,
+                "fleet_name_spot": fleet_name_spot,
+                "resource_group": rg,
+                "location": loc,
+                "fleet_data_json": fleetData_json,
+                "compute_profile": json.dumps(compute_profile),
+                "spot_profile": json.dumps(spot_profile),
+                "regular_priority_profile": json.dumps(regular_profile),
+                "vm_sizes_profile": json.dumps(vm_sizes_profile),
+                "zones": json.dumps(zones),
+                "tags": json.dumps(tags),
+                "tagsNew": json.dumps(tagsNew),
+            }
+        )
+
+        try:
+            response = self.cmd(
+                "az compute-fleet fleet create  -n {fleet_name_test} -g {resource_group} --spp '{spot_profile}' --cp '{compute_profile}' --vmsizeprof '{vm_sizes_profile}' -l{location} -t '{tags}' ",
+                checks=[
+                    self.check("name", "{fleet_name_test}"),
+                    self.check("resourceGroup", "{resource_group}"),
+                ],
+            )
+        except Exception as e:
+            print(f"Failed to create fleet: {e}")
+            raise
+        print(response)
+        
     def _fleet_show(self, fleet=fleet_name, rg=resource_group):
         self.kwargs.update({"fleet_name_test": fleet, "resource_group": rg})
 
@@ -238,7 +283,18 @@ class TestComputefleetScenario(ScenarioTest):
         except SystemExit as e:
             print(f"SystemExit occurred: {e}")
             raise
-
+   
+    @ResourceGroupPreparer(name_prefix="fleet-cli_alias", location=location2)
+    @AllowLargeResponse()
+    @live_only()
+    def test_all_fleet_operations_using_alias(self, resource_group, resource_group_location):
+        fleet_name_spot_alias = generate_random_fleet_name("testFleet-alias")
+        #add tests for alias.
+        print("Start Tests for Aliases")
+        self._fleet_create_using_alias( fleet_name_spot_alias , resource_group, resource_group_location)
+        self._fleet_fleet_show( fleet_name_spot_alias , resource_group, resource_group_location)
+        self._fleet_delete( fleet_name_spot_alias , resource_group, subscriptionId)
+    
     @ResourceGroupPreparer(name_prefix=fleet_rg_prefix, location=location)
     @AllowLargeResponse()
     @live_only()
@@ -249,4 +305,5 @@ class TestComputefleetScenario(ScenarioTest):
         self._fleet_show(fleet_name, resource_group)
         self._fleet_list(resource_group)
         self._fleet_vmss_list(fleet_name, resource_group)
-        self._fleet_delete(fleet_name, resource_group)
+        self._fleet_delete(fleet_name, resource_group, subscriptionId)
+     

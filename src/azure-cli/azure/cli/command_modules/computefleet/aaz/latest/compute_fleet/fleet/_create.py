@@ -63,32 +63,32 @@ class Create(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.additional_locations_profile = AAZObjectArg(
-            options=["--additional-locations-profile"],
+            options=["--alp", "--additional-locations-profile"],
             arg_group="Properties",
             help="Represents the configuration for additional locations where Fleet resources may be deployed.",
         )
         _args_schema.compute_profile = AAZObjectArg(
-            options=["--compute-profile"],
+            options=["--cp", "--compute-profile"],
             arg_group="Properties",
             help="Compute Profile to use for running user's workloads.",
         )
         _args_schema.regular_priority_profile = AAZObjectArg(
-            options=["--regular-priority-profile"],
+            options=["--rpp", "--regular-priority-profile"],
             arg_group="Properties",
             help="Configuration Options for Regular instances in Compute Fleet.",
         )
         _args_schema.spot_priority_profile = AAZObjectArg(
-            options=["--spot-priority-profile"],
+            options=["--spp", "--spot-priority-profile"],
             arg_group="Properties",
             help="Configuration Options for Spot instances in Compute Fleet.",
         )
         _args_schema.vm_attributes = AAZObjectArg(
-            options=["--vm-attributes"],
+            options=["--vma", "--vm-attributes"],
             arg_group="Properties",
             help="Attribute based Fleet.",
         )
         _args_schema.vm_sizes_profile = AAZListArg(
-            options=["--vm-sizes-profile"],
+            options=["--vmsizeprof", "--vm-sizes-profile"],
             arg_group="Properties",
             help="List of VM sizes supported for Compute Fleet",
         )
@@ -352,7 +352,7 @@ class Create(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.identity = AAZObjectArg(
-            options=["--identity"],
+            options=["-i", "--identity"],
             arg_group="Resource",
             help="The managed service identities assigned to this resource.",
         )
@@ -365,17 +365,17 @@ class Create(AAZCommand):
             ),
         )
         _args_schema.plan = AAZObjectArg(
-            options=["--plan"],
+            options=["-p", "--plan"],
             arg_group="Resource",
             help="Details of the resource plan.",
         )
         _args_schema.tags = AAZDictArg(
-            options=["--tags"],
+            options=["-t", "--tags"],
             arg_group="Resource",
             help="Resource tags.",
         )
         _args_schema.zones = AAZListArg(
-            options=["--zones"],
+            options=["-z", "--zones"],
             arg_group="Resource",
             help="Zones in which the Compute Fleet is available",
         )
@@ -905,9 +905,6 @@ class Create(AAZCommand):
         os_profile.admin_password = AAZPasswordArg(
             options=["admin-password"],
             help="Specifies the password of the administrator account. <br><br> **Minimum-length (Windows):** 8 characters <br><br> **Minimum-length (Linux):** 6 characters <br><br> **Max-length (Windows):** 123 characters <br><br> **Max-length (Linux):** 72 characters <br><br> **Complexity requirements:** 3 out of 4 conditions below need to be fulfilled <br> Has lower characters <br>Has upper characters <br> Has a digit <br> Has a special character (Regex match [\\W_]) <br><br> **Disallowed values:** \"abc@123\", \"P@$$w0rd\", \"P@ssw0rd\", \"P@ssword123\", \"Pa$$word\", \"pass@word1\", \"Password!\", \"Password1\", \"Password22\", \"iloveyou!\" <br><br> For resetting the password, see [How to reset the Remote Desktop service or its login password in a Windows VM](https://docs.microsoft.com/troubleshoot/azure/virtual-machines/reset-rdp) <br><br> For resetting root password, see [Manage users, SSH, and check or repair disks on Azure Linux VMs using the VMAccess Extension](https://docs.microsoft.com/troubleshoot/azure/virtual-machines/troubleshoot-ssh-connection)",
-            blank=AAZPromptPasswordInput(
-               msg="VM Admin Password",
-               confirm=True),
         )
         os_profile.admin_username = AAZStrArg(
             options=["admin-username"],
@@ -924,7 +921,7 @@ class Create(AAZCommand):
         os_profile.custom_data = AAZPasswordArg(
             options=["custom-data"],
             help="Specifies a base-64 encoded string of custom data. The base-64 encoded string is decoded to a binary array that is saved as a file on the Virtual Machine. The maximum length of the binary array is 65535 bytes. For using cloud-init for your VM, see [Using cloud-init to customize a Linux VM during creation](https://docs.microsoft.com/azure/virtual-machines/linux/using-cloud-init)",
-            blank=AAZPromptPasswordInput(
+           blank=AAZPromptPasswordInput(
                msg="VM Admin Password",
                confirm=True),
         )
