@@ -138,8 +138,8 @@ examples:
 
 helps['container container-group-profile delete'] = """
 type: command
-short-summary: Deletes a container group profile.
+short-summary: Delete a container group profile.
 examples:
-  - name: Deletes a container group profile.
-    text: az container container-group-profile delete  --resource-group MyResourceGroup --name mycgprofile
+  - name: Delete a container group profile.
+    text: az container container-group-profile delete --resource-group MyResourceGroup --name mycgprofile
 """
