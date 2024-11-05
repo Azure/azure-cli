@@ -13,9 +13,10 @@ from azure.cli.core.aaz import *
 
 @register_command_group(
     "compute-fleet",
+    is_preview=True,
 )
 class __CMDGroup(AAZCommandGroup):
-    """Operations for Azure Compute Fleet
+    """Manage for Azure Compute Fleet
 
     Operations for Azure Compute Fleet
     """

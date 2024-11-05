@@ -12,7 +12,8 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "compute-fleet fleet delete",
+    "compute-fleet delete",
+    is_preview=True,
     confirmation="Are you sure you want to perform this operation?",
 )
 class Delete(AAZCommand):
@@ -21,7 +22,7 @@ class Delete(AAZCommand):
     Delete an Azure Compute  Fleet
 
     :example: Fleets_Delete
-        az azure-fleet fleet delete --resource-group rgazurefleet --fleet-name testFleet
+        az azure-fleet delete --resource-group rgazurefleet --fleet-name testFleet
     """
 
     _aaz_info = {

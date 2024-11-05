@@ -12,13 +12,20 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "compute-fleet fleet wait",
+    "compute-fleet show",
+    is_preview=True,
 )
-class Wait(AAZWaitCommand):
-    """Place the CLI in a waiting state until a condition is met.
+class Show(AAZCommand):
+    """Get a Fleet
+
+    Get a Fleet by fleet name
+
+    :example: Fleets_Get
+        az azure-fleet show --resource-group rgazurefleet --fleet-name testFleet
     """
 
     _aaz_info = {
+        "version": "2024-11-01",
         "resources": [
             ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.azurefleet/fleets/{}", "2024-11-01"],
         ]
@@ -68,7 +75,7 @@ class Wait(AAZWaitCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=False)
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
     class FleetsGet(AAZHttpOperation):
@@ -272,7 +279,7 @@ class Wait(AAZWaitCommand):
             _element.virtual_machine_profile_override = AAZObjectType(
                 serialized_name="virtualMachineProfileOverride",
             )
-            _WaitHelper._build_schema_base_virtual_machine_profile_read(_element.virtual_machine_profile_override)
+            _ShowHelper._build_schema_base_virtual_machine_profile_read(_element.virtual_machine_profile_override)
 
             compute_profile = cls._schema_on_200.properties.compute_profile
             compute_profile.additional_virtual_machine_capabilities = AAZObjectType(
@@ -282,7 +289,7 @@ class Wait(AAZWaitCommand):
                 serialized_name="baseVirtualMachineProfile",
                 flags={"required": True},
             )
-            _WaitHelper._build_schema_base_virtual_machine_profile_read(compute_profile.base_virtual_machine_profile)
+            _ShowHelper._build_schema_base_virtual_machine_profile_read(compute_profile.base_virtual_machine_profile)
             compute_profile.compute_api_version = AAZStrType(
                 serialized_name="computeApiVersion",
             )
@@ -327,7 +334,7 @@ class Wait(AAZWaitCommand):
             vm_attributes.accelerator_count = AAZObjectType(
                 serialized_name="acceleratorCount",
             )
-            _WaitHelper._build_schema_vm_attribute_min_max_integer_read(vm_attributes.accelerator_count)
+            _ShowHelper._build_schema_vm_attribute_min_max_integer_read(vm_attributes.accelerator_count)
             vm_attributes.accelerator_manufacturers = AAZListType(
                 serialized_name="acceleratorManufacturers",
             )
@@ -349,7 +356,7 @@ class Wait(AAZWaitCommand):
             vm_attributes.data_disk_count = AAZObjectType(
                 serialized_name="dataDiskCount",
             )
-            _WaitHelper._build_schema_vm_attribute_min_max_integer_read(vm_attributes.data_disk_count)
+            _ShowHelper._build_schema_vm_attribute_min_max_integer_read(vm_attributes.data_disk_count)
             vm_attributes.excluded_vm_sizes = AAZListType(
                 serialized_name="excludedVMSizes",
             )
@@ -359,7 +366,7 @@ class Wait(AAZWaitCommand):
             vm_attributes.local_storage_in_gi_b = AAZObjectType(
                 serialized_name="localStorageInGiB",
             )
-            _WaitHelper._build_schema_vm_attribute_min_max_double_read(vm_attributes.local_storage_in_gi_b)
+            _ShowHelper._build_schema_vm_attribute_min_max_double_read(vm_attributes.local_storage_in_gi_b)
             vm_attributes.local_storage_support = AAZStrType(
                 serialized_name="localStorageSupport",
             )
@@ -367,23 +374,23 @@ class Wait(AAZWaitCommand):
                 serialized_name="memoryInGiB",
                 flags={"required": True},
             )
-            _WaitHelper._build_schema_vm_attribute_min_max_double_read(vm_attributes.memory_in_gi_b)
+            _ShowHelper._build_schema_vm_attribute_min_max_double_read(vm_attributes.memory_in_gi_b)
             vm_attributes.memory_in_gi_b_per_v_cpu = AAZObjectType(
                 serialized_name="memoryInGiBPerVCpu",
             )
-            _WaitHelper._build_schema_vm_attribute_min_max_double_read(vm_attributes.memory_in_gi_b_per_v_cpu)
+            _ShowHelper._build_schema_vm_attribute_min_max_double_read(vm_attributes.memory_in_gi_b_per_v_cpu)
             vm_attributes.network_bandwidth_in_mbps = AAZObjectType(
                 serialized_name="networkBandwidthInMbps",
             )
-            _WaitHelper._build_schema_vm_attribute_min_max_double_read(vm_attributes.network_bandwidth_in_mbps)
+            _ShowHelper._build_schema_vm_attribute_min_max_double_read(vm_attributes.network_bandwidth_in_mbps)
             vm_attributes.network_interface_count = AAZObjectType(
                 serialized_name="networkInterfaceCount",
             )
-            _WaitHelper._build_schema_vm_attribute_min_max_integer_read(vm_attributes.network_interface_count)
+            _ShowHelper._build_schema_vm_attribute_min_max_integer_read(vm_attributes.network_interface_count)
             vm_attributes.rdma_network_interface_count = AAZObjectType(
                 serialized_name="rdmaNetworkInterfaceCount",
             )
-            _WaitHelper._build_schema_vm_attribute_min_max_integer_read(vm_attributes.rdma_network_interface_count)
+            _ShowHelper._build_schema_vm_attribute_min_max_integer_read(vm_attributes.rdma_network_interface_count)
             vm_attributes.rdma_support = AAZStrType(
                 serialized_name="rdmaSupport",
             )
@@ -391,7 +398,7 @@ class Wait(AAZWaitCommand):
                 serialized_name="vCpuCount",
                 flags={"required": True},
             )
-            _WaitHelper._build_schema_vm_attribute_min_max_integer_read(vm_attributes.v_cpu_count)
+            _ShowHelper._build_schema_vm_attribute_min_max_integer_read(vm_attributes.v_cpu_count)
             vm_attributes.vm_categories = AAZListType(
                 serialized_name="vmCategories",
             )
@@ -455,8 +462,8 @@ class Wait(AAZWaitCommand):
             return cls._schema_on_200
 
 
-class _WaitHelper:
-    """Helper class for Wait"""
+class _ShowHelper:
+    """Helper class for Show"""
 
     _schema_api_entity_reference_read = None
 
@@ -1285,4 +1292,4 @@ class _WaitHelper:
         _schema.storage_account_type = cls._schema_virtual_machine_scale_set_managed_disk_parameters_read.storage_account_type
 
 
-__all__ = ["Wait"]
+__all__ = ["Show"]

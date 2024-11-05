@@ -13,6 +13,7 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "compute-fleet list-vmss",
+    is_preview=True,
 )
 class ListVmss(AAZCommand):
     """List VirtualMachineScaleSet resources by Fleet
@@ -20,7 +21,7 @@ class ListVmss(AAZCommand):
     List VirtualMachineScaleSet resources by Fleet
 
     :example: Fleets_ListVirtualMachineScaleSets
-        az azure-fleet fleet virtual-machine-scale-set list --resource-group rgazurefleet --name myFleet
+        az azure-fleet virtual-machine-scale-set list --resource-group rgazurefleet --name myFleet
     """
 
     _aaz_info = {

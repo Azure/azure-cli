@@ -159,7 +159,7 @@ class TestComputefleetScenario(ScenarioTest):
 
         try:
             response = self.cmd(
-                "az compute-fleet fleet create  --name {fleet_name_test} --resource-group {resource_group} --spot-priority-profile '{spot_profile}' --compute-profile '{compute_profile}' --vm-sizes-profile '{vm_sizes_profile}' --location {location} --tags '{tags}' ",
+                "az compute-fleet create  --name {fleet_name_test} --resource-group {resource_group} --spot-priority-profile '{spot_profile}' --compute-profile '{compute_profile}' --vm-sizes-profile '{vm_sizes_profile}' --location {location} --tags '{tags}' ",
                 checks=[
                     self.check("name", "{fleet_name_test}"),
                     self.check("resourceGroup", "{resource_group}"),
@@ -203,7 +203,7 @@ class TestComputefleetScenario(ScenarioTest):
 
         try:
             response = self.cmd(
-                "az compute-fleet fleet create  -n {fleet_name_test} -g {resource_group} --spp '{spot_profile}' --cp '{compute_profile}' --vmsizeprof '{vm_sizes_profile}' -l {location} -t '{tags}' ",
+                "az compute-fleet create  -n {fleet_name_test} -g {resource_group} --spp '{spot_profile}' --cp '{compute_profile}' --vmsizeprof '{vm_sizes_profile}' -l {location} -t '{tags}' ",
                 checks=[
                     self.check("name", "{fleet_name_test}"),
                     self.check("resourceGroup", "{resource_group}"),
@@ -218,7 +218,7 @@ class TestComputefleetScenario(ScenarioTest):
         self.kwargs.update({"fleet_name_test": fleet, "resource_group": rg})
 
         self.cmd(
-            "az compute-fleet fleet show --name {fleet_name_test} --resource-group {resource_group} ",
+            "az compute-fleet show --name {fleet_name_test} --resource-group {resource_group} ",
             checks=[self.check("name", "{fleet_name_test}")],
         )
 
@@ -226,7 +226,7 @@ class TestComputefleetScenario(ScenarioTest):
         self.kwargs.update({"resource_group": rg})
 
         self.cmd(
-            "az compute-fleet fleet list --resource-group {resource_group} ",
+            "az compute-fleet list --resource-group {resource_group} ",
             checks=[self.check("length(@)", 1)],
         )
 
@@ -257,7 +257,7 @@ class TestComputefleetScenario(ScenarioTest):
         )
 
         self.cmd(
-            "az compute-fleet fleet update --name {fleet_name_test} --resource-group {resource_group} --set tags.key={new_tag}",
+            "az compute-fleet update --name {fleet_name_test} --resource-group {resource_group} --set tags.key={new_tag}",
             checks=[
                 self.check("name", "{fleet_name_test}"),
                 self.check("resourceGroup", "{resource_group}"),
@@ -277,7 +277,7 @@ class TestComputefleetScenario(ScenarioTest):
 
         try:
             self.cmd(
-                "az compute-fleet fleet delete --name {fleet_name_test} --resource-group {resource_group} --subscription {subscriptionId} --yes",
+                "az compute-fleet delete --name {fleet_name_test} --resource-group {resource_group} --subscription {subscriptionId} --yes",
                 checks=[self.is_empty()],
             )
         except SystemExit as e:
@@ -293,6 +293,7 @@ class TestComputefleetScenario(ScenarioTest):
         print("Start Tests for Aliases")
         self._fleet_create_using_alias( fleet_name_spot_alias , resource_group, resource_group_location)
         self._fleet_show( fleet_name_spot_alias , resource_group)
+        self._fleet_update(fleet_name_spot_alias, resource_group)
         self._fleet_delete( fleet_name_spot_alias , resource_group, subscriptionId)
     
     @ResourceGroupPreparer(name_prefix=fleet_rg_prefix, location=location)

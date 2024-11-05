@@ -12,7 +12,8 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "compute-fleet fleet list",
+    "compute-fleet list",
+    is_preview=True,
 )
 class List(AAZCommand):
     """List Fleet resources by subscription ID and resource group
@@ -20,7 +21,7 @@ class List(AAZCommand):
     List Fleet resources by subscription ID and resource group
 
     :example: Fleets_ListBySubscription
-        az azure-fleet fleet list
+        az azure-fleet list
     """
 
     _aaz_info = {
