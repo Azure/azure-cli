@@ -116,7 +116,7 @@ helps['container container-group-profile create'] = """
 type: command
 short-summary: Create a container group profile.
 examples:
-  - name: Creates a container group profile.
+  - name: Create a container group profile.
     text: az container container-group-profile create --resource-group MyResourceGroup --name myapp --image myimage:latest --cpu 1 --memory 1
 """
 
