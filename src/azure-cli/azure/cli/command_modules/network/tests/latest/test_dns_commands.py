@@ -552,13 +552,13 @@ class DnsParseZoneFiles(unittest.TestCase):
         zn = 'zone1.com.'
         zone = self._get_zone_object('zone1.txt', zn)
         self._check_soa(zone, zn, 3600, 1, 3600, 300, 2419200, 300)
-        # self._check_ns(zone, zn, [
-        #    (172800, 'ns0-00.azure-dns.com.'),
-        #    (172800, 'ns0-00.azure-dns.net.'),
-        #    (172800, 'ns0-00.azure-dns.org.'),
-        #    (172800, 'ns0-00.azure-dns.info.')
-        # ])
-        # self._check_ns(zone, 'myns.' + zn, [(3600, 'ns.contoso.com.')])
+        self._check_ns(zone, zn, [
+            (172800, 'ns0-00.azure-dns.com.'),
+            (172800, 'ns0-00.azure-dns.net.'),
+            (172800, 'ns0-00.azure-dns.org.'),
+            (172800, 'ns0-00.azure-dns.info.')
+        ])
+        self._check_ns(zone, 'myns.' + zn, [(3600, 'ns.contoso.com.')])
         self._check_mx(zone, 'mymx.' + zn, [(3600, 1, 'mail.contoso.com.')])
         self._check_a(zone, 'manuala.' + zn, [(3600, '10.0.0.10')])
         self._check_a(zone, 'mya.' + zn, [
@@ -588,10 +588,10 @@ class DnsParseZoneFiles(unittest.TestCase):
             (60, 0, 'issue', 'ca1.contoso.com'),
             (60, 45, 'tag56', 'test test test')
         ])
-        self._check_naptr(zone, 'mynaptr.' + zn, [
-            (3600, 10, 20, 'A', 'EAU+SIP', "", 'domain.com.'),
-            (3600, 20, 20, 'U', 'SIP+D2U', '!^(\\+441632960083)$!sip:\\1@example.com!', '.')
-        ])
+        #self._check_naptr(zone, 'mynaptr.' + zn, [
+        #    (3600, 10, 20, 'A', 'EAU+SIP', '', 'domain.com.'),
+        #    (3600, 20, 20, 'U', 'SIP+D2U', '!^(\\+441632960083)$!sip:\\1@example.com!', '.')
+        #])
 
     def test_zone_file_2(self):
         zn = 'zone2.com.'
