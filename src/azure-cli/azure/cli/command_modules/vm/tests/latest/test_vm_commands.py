@@ -7118,7 +7118,6 @@ class VMGalleryImage(ScenarioTest):
         self.cmd(
             'sig image-version delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version}')
 
-
     @ResourceGroupPreparer(name_prefix='cli_test_target_extended_locations_encryption', location='westus')
     @KeyVaultPreparer(name_prefix='vault-', name_len=20, key='vault', location='westus', additional_params='--enable-purge-protection')
     def test_image_version_with_target_extended_locations_encryption(self, resource_group, key_vault ):

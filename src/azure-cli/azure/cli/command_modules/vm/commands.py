@@ -262,7 +262,6 @@ def load_command_table(self, _):
 
     with self.command_group('image', compute_image_sdk, min_api='2016-04-30-preview') as g:
         g.custom_command('create', 'create_image', validator=process_image_create_namespace)
-        # g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_image')
         from .custom import ImageUpdate
         self.command_table['image update'] = ImageUpdate(loader=self)
 

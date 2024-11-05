@@ -366,26 +366,26 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
     from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
-    Disk, CreationData, DiskCreateOption, Encryption = cmd.get_models(
-        'Disk', 'CreationData', 'DiskCreateOption', 'Encryption')
+    # Disk, CreationData, DiskCreateOption, Encryption = cmd.get_models(
+    #     'Disk', 'CreationData', 'DiskCreateOption', 'Encryption')
 
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     if security_data_uri:
-        option = getattr(DiskCreateOption, 'import_secure')
+        option = 'ImportSecure'
     elif source_blob_uri:
-        option = getattr(DiskCreateOption, 'import_enum')
+        option = 'Import'
     elif source_disk or source_snapshot:
-        option = getattr(DiskCreateOption, 'copy')
+        option = 'Copy'
     elif source_restore_point:
-        option = getattr(DiskCreateOption, 'restore')
+        option = 'Restore'
     elif upload_type == 'Upload':
-        option = getattr(DiskCreateOption, 'upload')
+        option = 'Upload'
     elif upload_type == 'UploadWithSecurityData':
-        option = getattr(DiskCreateOption, 'upload_prepared_secure')
+        option = 'UploadPreparedSecure'
     elif image_reference or gallery_image_reference:
-        option = getattr(DiskCreateOption, 'from_image')
+        option = 'FromImage'
     else:
-        option = getattr(DiskCreateOption, 'empty')
+        option = 'Empty'
 
     if source_storage_account_id is None and source_blob_uri is not None:
         subscription_id = get_subscription_id(cmd.cli_ctx)
@@ -449,16 +449,28 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         if gallery_image_reference_lun is not None:
             gallery_image_reference['lun'] = gallery_image_reference_lun
 
-    creation_data = CreationData(create_option=option, source_uri=source_blob_uri,
-                                 image_reference=image_reference, gallery_image_reference=gallery_image_reference,
-                                 source_resource_id=source_disk or source_snapshot or source_restore_point,
-                                 storage_account_id=source_storage_account_id,
-                                 upload_size_bytes=upload_size_bytes,
-                                 logical_sector_size=logical_sector_size,
-                                 security_data_uri=security_data_uri,
-                                 performance_plus=performance_plus)
+    # creation_data = CreationData(create_option=option, source_uri=source_blob_uri,
+    #                              image_reference=image_reference, gallery_image_reference=gallery_image_reference,
+    #                              source_resource_id=source_disk or source_snapshot or source_restore_point,
+    #                              storage_account_id=source_storage_account_id,
+    #                              upload_size_bytes=upload_size_bytes,
+    #                              logical_sector_size=logical_sector_size,
+    #                              security_data_uri=security_data_uri,
+    #                              performance_plus=performance_plus)
+    creation_data = {
+        "create_option": option,
+        "source_uri": source_blob_uri,
+        "image_reference": image_reference,
+        "gallery_image_reference": gallery_image_reference,
+        "source_resource_id": source_disk or source_snapshot or source_restore_point,
+        "storage_account_id": source_storage_account_id,
+        "upload_size_bytes": upload_size_bytes,
+        "logical_sector_size": logical_sector_size,
+        "security_data_uri": security_data_uri,
+        "performance_plus": performance_plus
+    }
 
-    if size_gb is None and option == DiskCreateOption.empty:
+    if size_gb is None and option == "Empty":
         raise RequiredArgumentMissingError(
             'usage error: --size-gb is required to create an empty disk')
     if upload_size_bytes is None and upload_type:
@@ -482,61 +494,86 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
 
     encryption = None
     if disk_encryption_set or encryption_type:
-        encryption = Encryption(type=encryption_type, disk_encryption_set_id=disk_encryption_set)
+        # encryption = Encryption(type=encryption_type, disk_encryption_set_id=disk_encryption_set)
+        encryption = {
+            "type": encryption_type,
+            "disk_encryption_set_id": disk_encryption_set
+        }
 
-    disk = Disk(location=location, creation_data=creation_data, tags=(tags or {}),
-                sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb, os_type=os_type, encryption=encryption)
+    # disk = Disk(location=location, creation_data=creation_data, tags=(tags or {}),
+    #             sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb, os_type=os_type, encryption=encryption)
+    if cmd.supported_api_version(min_api='2017-03-30'):
+        sku = {"name": sku}
+
+    args = {
+        "location": location,
+        "creation_data": creation_data,
+        "tags": tags or {},
+        "sku": sku,
+        "disk_size_gb": size_gb,
+        "os_type": os_type,
+        "encryption": encryption
+    }
 
     if hyper_v_generation:
-        disk.hyper_v_generation = hyper_v_generation
+        args["hyper_v_generation"] = hyper_v_generation
 
     if zone:
-        disk.zones = zone
+        args["zones"] = zone
     if disk_iops_read_write is not None:
-        disk.disk_iops_read_write = disk_iops_read_write
+        args["disk_iops_read_write"] = disk_iops_read_write
     if disk_mbps_read_write is not None:
-        disk.disk_m_bps_read_write = disk_mbps_read_write
+        args["disk_m_bps_read_write"] = disk_mbps_read_write
     if max_shares is not None:
-        disk.max_shares = max_shares
+        args["max_shares"] = max_shares
     if disk_iops_read_only is not None:
-        disk.disk_iops_read_only = disk_iops_read_only
+        args["disk_iops_read_only"] = disk_iops_read_only
     if disk_mbps_read_only is not None:
-        disk.disk_m_bps_read_only = disk_mbps_read_only
+        args["disk_m_bps_read_only"] = disk_mbps_read_only
     if network_access_policy is not None:
-        disk.network_access_policy = network_access_policy
+        args["network_access_policy"] = network_access_policy
     if disk_access is not None:
-        disk.disk_access_id = disk_access
+        args["disk_access_id"] = disk_access
     if tier is not None:
-        disk.tier = tier
+        args["tier"] = tier
     if enable_bursting is not None:
-        disk.bursting_enabled = enable_bursting
+        args["bursting_enabled"] = enable_bursting
     if edge_zone is not None:
-        disk.extended_location = edge_zone
+        args["extended_location"] = edge_zone
     # The `Standard` is used for backward compatibility to allow customers to keep their current behavior
     # after changing the default values to Trusted Launch VMs in the future.
     if security_type and security_type != COMPATIBLE_SECURITY_TYPE_VALUE:
-        disk.security_profile = {'securityType': security_type}
+        args["security_profile"] = {'securityType': security_type}
         if secure_vm_disk_encryption_set:
-            disk.security_profile['secure_vm_disk_encryption_set_id'] = secure_vm_disk_encryption_set
+            args["security_profile"]["secure_vm_disk_encryption_set_id"] = secure_vm_disk_encryption_set
     if support_hibernation is not None:
-        disk.supports_hibernation = support_hibernation
+        args["supports_hibernation"] = support_hibernation
     if public_network_access is not None:
-        disk.public_network_access = public_network_access
+        args["public_network_access"] = public_network_access
     if accelerated_network is not None or architecture is not None:
-        if disk.supported_capabilities is None:
-            supportedCapabilities = cmd.get_models('SupportedCapabilities')(accelerated_network=accelerated_network,
-                                                                            architecture=architecture)
-            disk.supported_capabilities = supportedCapabilities
+        if args.get("supported_capabilities", None) is None:
+            # supportedCapabilities = cmd.get_models('SupportedCapabilities')(accelerated_network=accelerated_network,
+            #                                                                 architecture=architecture)
+            supported_capabilities = {
+                "accelerated_network": accelerated_network,
+                "architecture": architecture
+            }
+            args["supported_capabilities"] = supported_capabilities
         else:
-            disk.supported_capabilities.accelerated_network = accelerated_network
-            disk.supported_capabilities.architecture = architecture
+            args["supported_capabilities"]["accelerated_network"] = accelerated_network
+            args["supported_capabilities"]["architecture"] = architecture
     if data_access_auth_mode is not None:
-        disk.data_access_auth_mode = data_access_auth_mode
+        args["data_access_auth_mode"] = data_access_auth_mode
     if optimized_for_frequent_attach is not None:
-        disk.optimized_for_frequent_attach = optimized_for_frequent_attach
+        args["optimized_for_frequent_attach"] = optimized_for_frequent_attach
 
-    client = _compute_client_factory(cmd.cli_ctx)
-    return sdk_no_wait(no_wait, client.disks.begin_create_or_update, resource_group_name, disk_name, disk)
+    args["no_wait"] = no_wait
+    args["disk_name"] = disk_name
+    args["resource_group"] = resource_group_name
+
+    from .aaz.latest.disk import Create
+    return Create(cli_ctx=cmd.cli_ctx)(command_args=args)
+    # return sdk_no_wait(no_wait, client.disks.begin_create_or_update, resource_group_name, disk_name, args)
 
 
 def grant_disk_access(cmd, resource_group_name, disk_name, duration_in_seconds, access_level=None,
@@ -616,8 +653,6 @@ def create_image(cmd, resource_group_name, name, source, os_type=None, data_disk
                  os_snapshot=None, data_snapshots=None,
                  os_disk=None, os_disk_caching=None, data_disks=None, data_disk_caching=None,
                  tags=None, zone_resilient=None, edge_zone=None):
-    from .aaz.latest.image import Create
-
     if source_virtual_machine:
         location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
         image_storage_profile = None if zone_resilient is None else {"zone_resilient": zone_resilient}
@@ -687,6 +722,7 @@ def create_image(cmd, resource_group_name, name, source, os_type=None, data_disk
     args["image_name"] = name
     args["resource_group"] = resource_group_name
 
+    from .aaz.latest.image import Create
     return Create(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 
@@ -695,12 +731,6 @@ class ImageUpdate(_ImageUpdate):
         args = self.ctx.args
         if has_value(args.tags):
             instance.tags = args.tags
-
-#
-# def update_image(instance, tags=None):
-#     if tags is not None:
-#         instance.tags = tags
-#     return instance
 
 
 # region Snapshots
