@@ -107,6 +107,11 @@ examples:
     crafted: true
 """
 
+helps['container container-group-profile'] = """
+type: group
+short-summary: Manage Azure Container Instance Container Group Profile.
+"""
+
 helps['container container-group-profile create'] = """
 type: command
 short-summary: Create a container group profile.
