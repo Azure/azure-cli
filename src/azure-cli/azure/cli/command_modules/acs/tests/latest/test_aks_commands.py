@@ -2100,7 +2100,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'client_secret': sp_password,
             'resource_type': 'Microsoft.ContainerService/ManagedClusters'
         })
-        
+
         # create
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
                      '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
@@ -8217,14 +8217,14 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         create_cmd += f'--ampls-resource-id {ampls_resource_id} ' if use_ampls else ''
         create_cmd += f'--enable-high-log-scale-mode ' if highlogscale_mode_enabled else ''
 
-        if enableOtherAddon:
-            # enable other addon such azure-policy to verify the monitoring addon and DCRs etc.. remainins intact.
-            self.cmd(f'aks enable-addons -a azure-policy -g={resource_group} -n={aks_name}')
-
         response = self.cmd(create_cmd, checks=[
             self.check('addonProfiles.omsagent.enabled', True),
             self.check('addonProfiles.omsagent.config.useAADAuth', 'true')
         ]).get_output_in_json()
+
+        if enableOtherAddon:
+            # enable other addon such azure-policy to verify the monitoring addon and DCRs etc.. remaining intact.
+            self.cmd(f'aks enable-addons -a azure-policy -g={resource_group} -n={aks_name}')
 
         cluster_resource_id = response["id"]
         subscription = cluster_resource_id.split("/")[2]
