@@ -106,3 +106,34 @@ examples:
     text: az container show --name MyContainerGroup --resource-group MyResourceGroup
     crafted: true
 """
+helps['container container-group-profile create'] = """
+type: command
+short-summary: Create a container group profile.
+examples:
+  - name: Creates a container group profile.
+    text: az container container-group-profile create --resource-group MyResourceGroup --name myapp --image myimage:latest --cpu 1 --memory 1
+"""
+
+helps['container container-group-profile show'] = """
+type: command
+short-summary: Gets a container group profile.
+examples:
+  - name: Creates a container group profile.
+    text: az container container-group-profile show --resource-group MyResourceGroup --name mycgprofile
+"""
+
+helps['container container-group-profile show-revision'] = """
+type: command
+short-summary: Shows a container group profile revision.
+examples:
+  - name: Creates a container group profile.
+    text: az container container-group-profile show-revision --resource-group MyResourceGroup --name mycgprofile --revision 1
+"""
+
+helps['container container-group-profile delete'] = """
+type: command
+short-summary: Deletes a container group profile.
+examples:
+  - name: Deletes a container group profile.
+    text: az container container-group-profile delete  --resource-group MyResourceGroup --name mycgprofile
+"""
