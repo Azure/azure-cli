@@ -128,7 +128,7 @@ type: command
 short-summary: Shows a container group profile revision.
 examples:
   - name: Creates a container group profile.
-    text: az container container-group-profile show-revision --resource-group MyResourceGroup --name mycgprofile --revision 1
+    text: az container container-group-profile show-revision --resource-group MyResourceGroup --name mycgprofile -r 1
 """
 
 helps['container container-group-profile delete'] = """
