@@ -734,10 +734,14 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
 
     if recovery_mode == 'SnapshotAttachAndRecover' or recovery_mode == 'SnapshotAttach':
         trigger_restore_properties.recovery_mode = recovery_mode
-
         target_resource_group_name = container_id.split('/')[4]
 
-        snapshot_restore_parameters = SnapshotRestoreParameters(skip_attach_and_mount=(not attach_and_mount),
+        # For SnapshotAttach (--attach-and-mount was not provided), skip_attach_and_mount should be False
+        skip_attach_and_mount = False
+        if recovery_mode == 'SnapshotAttachAndMount':
+            skip_attach_and_mount = not attach_and_mount
+
+        snapshot_restore_parameters = SnapshotRestoreParameters(skip_attach_and_mount=skip_attach_and_mount,
                                                                 log_point_in_time_for_db_recovery='')
 
         # Fetching UAMI details
