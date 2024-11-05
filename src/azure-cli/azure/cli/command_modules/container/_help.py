@@ -124,7 +124,7 @@ helps['container container-group-profile show'] = """
 type: command
 short-summary: Get a container group profile.
 examples:
-  - name: Creates a container group profile.
+  - name: Get a container group profile.
     text: az container container-group-profile show --resource-group MyResourceGroup --name mycgprofile
 """
 
@@ -132,7 +132,7 @@ helps['container container-group-profile show-revision'] = """
 type: command
 short-summary: Show a container group profile revision.
 examples:
-  - name: Creates a container group profile.
+  - name: Show a container group profile.
     text: az container container-group-profile show-revision --resource-group MyResourceGroup --name mycgprofile -r 1
 """
 
