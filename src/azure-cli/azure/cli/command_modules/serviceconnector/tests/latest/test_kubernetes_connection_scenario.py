@@ -505,7 +505,8 @@ class KubernetesConnectionScenarioTest(ScenarioTest):
         # delete connection
         self.cmd('aks connection delete --id {} --yes'.format(connection_id))
 
-    @record_only()
+    @live_only()
+    # --secret will request app config API and cause test failure when app config api version updated
     def test_kubernetes_appconfig_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),

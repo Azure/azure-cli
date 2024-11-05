@@ -3225,9 +3225,7 @@ class AKSManagedClusterContext(BaseAKSContext):
     def _get_enable_aad(self, enable_validation: bool = False) -> bool:
         """Internal function to obtain the value of enable_aad.
 
-        This function supports the option of enable_validation. When enabled, in create mode, if the value of
-        enable_aad is True and any of aad_client_app_id, aad_server_app_id or aad_server_app_secret is asssigned, a
-        MutuallyExclusiveArgumentError will be raised. If the value of enable_aad is False and the value of
+        This function supports the option of enable_validation. If the value of enable_aad is False and the value of
         enable_azure_rbac is True, a RequiredArgumentMissingError will be raised. In update mode, if enable_aad is
         specified and managed aad has been enabled, an InvalidArgumentValueError will be raised.
 
@@ -3248,25 +3246,6 @@ class AKSManagedClusterContext(BaseAKSContext):
         # validation
         if enable_validation:
             if self.decorator_mode == DecoratorMode.CREATE:
-                (
-                    aad_client_app_id,
-                    aad_server_app_id,
-                    aad_server_app_secret,
-                ) = self._get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret(
-                    enable_validation=False
-                )
-                if enable_aad:
-                    if any(
-                        [
-                            aad_client_app_id,
-                            aad_server_app_id,
-                            aad_server_app_secret,
-                        ]
-                    ):
-                        raise MutuallyExclusiveArgumentError(
-                            "--enable-aad cannot be used together with --aad-client-app-id, --aad-server-app-id or "
-                            "--aad-server-app-secret"
-                        )
                 if not enable_aad and self._get_enable_azure_rbac(enable_validation=False):
                     raise RequiredArgumentMissingError(
                         "--enable-azure-rbac can only be used together with --enable-aad"
@@ -3282,9 +3261,7 @@ class AKSManagedClusterContext(BaseAKSContext):
     def get_enable_aad(self) -> bool:
         """Obtain the value of enable_aad.
 
-        This function will verify the parameter by default. In create mode, if the value of enable_aad is True and
-        any of aad_client_app_id, aad_server_app_id or aad_server_app_secret is asssigned, a
-        MutuallyExclusiveArgumentError will be raised. If the value of enable_aad is False and the value of
+        This function will verify the parameter by default. If the value of enable_aad is False and the value of
         enable_azure_rbac is True, a RequiredArgumentMissingError will be raised. In update mode, if enable_aad is
         specified and managed aad has been enabled, an InvalidArgumentValueError will be raised.
 
@@ -3293,82 +3270,10 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         return self._get_enable_aad(enable_validation=True)
 
-    def _get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret(
-        self, enable_validation: bool = False
-    ) -> Tuple[Union[str, None], Union[str, None], Union[str, None]]:
-        """Internal function to obtain the value of aad_client_app_id, aad_server_app_id and aad_server_app_secret.
-
-        This function supports the option of enable_validation. When enabled, if the value of enable_aad is True and any
-        of aad_client_app_id, aad_server_app_id or aad_server_app_secret is asssigned, a MutuallyExclusiveArgumentError
-        will be raised.
-
-        :return: a tuple of three elements: aad_client_app_id of string type or None, aad_server_app_id of string type
-        or None and aad_server_app_secret of string type or None.
-        """
-        # get aad profile from `mc`
-        aad_profile = None
-        if self.mc:
-            aad_profile = self.mc.aad_profile
-
-        # read the original value passed by the command
-        aad_client_app_id = self.raw_param.get("aad_client_app_id")
-        # try to read the property value corresponding to the parameter from the `mc` object
-        if aad_profile and aad_profile.client_app_id is not None:
-            aad_client_app_id = aad_profile.client_app_id
-
-        # read the original value passed by the command
-        aad_server_app_id = self.raw_param.get("aad_server_app_id")
-        # try to read the property value corresponding to the parameter from the `mc` object
-        if aad_profile and aad_profile.server_app_id is not None:
-            aad_server_app_id = aad_profile.server_app_id
-
-        # read the original value passed by the command
-        aad_server_app_secret = self.raw_param.get("aad_server_app_secret")
-        # try to read the property value corresponding to the parameter from the `mc` object
-        if aad_profile and aad_profile.server_app_secret is not None:
-            aad_server_app_secret = aad_profile.server_app_secret
-
-        # these parameters do not need dynamic completion
-
-        # validation
-        if enable_validation:
-            enable_aad = self._get_enable_aad(enable_validation=False)
-            if enable_aad:
-                if any(
-                    [
-                        aad_client_app_id,
-                        aad_server_app_id,
-                        aad_server_app_secret,
-                    ]
-                ):
-                    raise MutuallyExclusiveArgumentError(
-                        "--enable-aad cannot be used together with --aad-client-app-id, --aad-server-app-id or "
-                        "--aad-server-app-secret"
-                    )
-        return aad_client_app_id, aad_server_app_id, aad_server_app_secret
-
-    def get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret(
-        self,
-    ) -> Tuple[Union[str, None], Union[str, None], Union[str, None]]:
-        """Obtain the value of aad_client_app_id, aad_server_app_id and aad_server_app_secret.
-
-        This function will verify the parameters by default. If the value of enable_aad is True and any of
-        aad_client_app_id, aad_server_app_id or aad_server_app_secret is asssigned, a MutuallyExclusiveArgumentError
-        will be raised.
-
-        :return: a tuple of three elements: aad_client_app_id of string type or None, aad_server_app_id of string type
-        or None and aad_server_app_secret of string type or None.
-        """
-        return self._get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret(enable_validation=True)
-
     def _get_aad_tenant_id(
         self, enable_validation: bool = False, read_only: bool = False
     ) -> Union[str, None]:
-        """Internal function to dynamically obtain the value of aad_server_app_secret according to the context.
-        When both aad_tenant_id and enable_aad are not assigned, and any of aad_client_app_id, aad_server_app_id or
-        aad_server_app_secret is asssigned, dynamic completion will be triggerd. Class
-        "azure.cli.core._profile.Profile" will be instantiated, and then call its "get_login_credentials" method to
-        get the tenant of the deployment subscription.
+        """Internal function to obtain the value of aad_tenant_id according to the context.
 
         This function supports the option of enable_validation. When enabled in update mode, if aad_tenant_id
         is specified, while aad_profile is not set or managed aad is not enabled, raise an InvalidArgumentValueError.
@@ -3379,7 +3284,6 @@ class AKSManagedClusterContext(BaseAKSContext):
         # read the original value passed by the command
         aad_tenant_id = self.raw_param.get("aad_tenant_id")
         # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
-        read_from_mc = False
         if self.decorator_mode == DecoratorMode.CREATE:
             if (
                 self.mc and
@@ -3387,22 +3291,10 @@ class AKSManagedClusterContext(BaseAKSContext):
                 self.mc.aad_profile.tenant_id is not None
             ):
                 aad_tenant_id = self.mc.aad_profile.tenant_id
-                read_from_mc = True
 
-        # skip dynamic completion & validation if option read_only is specified
+        # skip validation if option read_only is specified
         if read_only:
             return aad_tenant_id
-
-        # dynamic completion for create mode only
-        if self.decorator_mode == DecoratorMode.CREATE:
-            if not read_from_mc and not self._get_enable_aad(
-                enable_validation=False
-            ):
-                if aad_tenant_id is None and any(
-                    self._get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret(enable_validation=False)
-                ):
-                    profile = Profile(cli_ctx=self.cmd.cli_ctx)
-                    _, _, aad_tenant_id = profile.get_login_credentials()
 
         # validation
         if enable_validation:
@@ -3415,11 +3307,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         return aad_tenant_id
 
     def get_aad_tenant_id(self) -> Union[str, None]:
-        """Dynamically obtain the value of aad_server_app_secret according to the context.
-        When both aad_tenant_id and enable_aad are not assigned, and any of aad_client_app_id, aad_server_app_id or
-        aad_server_app_secret is asssigned, dynamic completion will be triggerd. Class
-        "azure.cli.core._profile.Profile" will be instantiated, and then call its "get_login_credentials" method to
-        get the tenant of the deployment subscription.
+        """Obtain the value of aad_tenant_id according to the context.
 
         This function will verify the parameter by default. In update mode, if aad_tenant_id is specified,
         while aad_profile is not set or managed aad is not enabled, raise an InvalidArgumentValueError.
@@ -4498,41 +4386,6 @@ class AKSManagedClusterContext(BaseAKSContext):
             return new_profile
         return self.mc.service_mesh_profile
 
-    def _get_uptime_sla(self, enable_validation: bool = False) -> bool:
-        """Internal function to obtain the value of uptime_sla.
-
-        This function supports the option of enable_validation. When enabled, if both uptime_sla and no_uptime_sla are
-        specified, raise a MutuallyExclusiveArgumentError.
-
-        :return: bool
-        """
-        # read the original value passed by the command
-        uptime_sla = self.raw_param.get("uptime_sla")
-
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
-        if self.decorator_mode == DecoratorMode.CREATE:
-            if (
-                self.mc and
-                self.mc.sku and
-                self.mc.sku.tier is not None
-            ):
-                uptime_sla = self.mc.sku.tier == "Standard"
-
-        # this parameter does not need dynamic completion
-        # validation
-        if enable_validation:
-            if uptime_sla and self._get_no_uptime_sla(enable_validation=False):
-                raise MutuallyExclusiveArgumentError(
-                    'Cannot specify "--uptime-sla" and "--no-uptime-sla" at the same time.'
-                )
-
-            if uptime_sla and self.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_FREE:
-                raise MutuallyExclusiveArgumentError(
-                    'Cannot specify "--uptime-sla" and "--tier free" at the same time.'
-                )
-
-        return uptime_sla
-
     def get_tier(self) -> str:
         """Obtain the value of tier.
 
@@ -4542,66 +4395,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         if not tier:
             return ""
 
-        tierStr = tier.lower()
-        if tierStr == CONST_MANAGED_CLUSTER_SKU_TIER_FREE and self._get_uptime_sla(enable_validation=False):
-            raise MutuallyExclusiveArgumentError(
-                'Cannot specify "--uptime-sla" and "--tier free" at the same time.'
-            )
-
-        if tierStr == CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD and self._get_no_uptime_sla(enable_validation=False):
-            raise MutuallyExclusiveArgumentError(
-                'Cannot specify "--no-uptime-sla" and "--tier standard" at the same time.'
-            )
-
-        return tierStr
-
-    def get_uptime_sla(self) -> bool:
-        """Obtain the value of uptime_sla.
-
-        This function will verify the parameter by default. If both uptime_sla and no_uptime_sla are specified, raise
-        a MutuallyExclusiveArgumentError.
-
-        :return: bool
-        """
-        return self._get_uptime_sla(enable_validation=True)
-
-    def _get_no_uptime_sla(self, enable_validation: bool = False) -> bool:
-        """Internal function to obtain the value of no_uptime_sla.
-
-        This function supports the option of enable_validation. When enabled, if both uptime_sla and no_uptime_sla are
-        specified, raise a MutuallyExclusiveArgumentError.
-
-        :return: bool
-        """
-        # read the original value passed by the command
-        no_uptime_sla = self.raw_param.get("no_uptime_sla")
-        # We do not support this option in create mode, therefore we do not read the value from `mc`.
-
-        # this parameter does not need dynamic completion
-        # validation
-        if enable_validation:
-            if no_uptime_sla and self._get_uptime_sla(enable_validation=False):
-                raise MutuallyExclusiveArgumentError(
-                    'Cannot specify "--uptime-sla" and "--no-uptime-sla" at the same time.'
-                )
-
-            if no_uptime_sla and self.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD:
-                raise MutuallyExclusiveArgumentError(
-                    'Cannot specify "--no-uptime-sla" and "--tier standard" at the same time.'
-                )
-
-        return no_uptime_sla
-
-    def get_no_uptime_sla(self) -> bool:
-        """Obtain the value of no_uptime_sla.
-
-        This function will verify the parameter by default. If both uptime_sla and no_uptime_sla are specified, raise
-        a MutuallyExclusiveArgumentError.
-
-        :return: bool
-        """
-
-        return self._get_no_uptime_sla(enable_validation=True)
+        return tier.lower()
 
     def get_defender_config(self) -> Union[ManagedClusterSecurityProfileDefender, None]:
         """Obtain the value of defender.
@@ -6224,22 +6018,6 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 admin_group_object_i_ds=self.context.get_aad_admin_group_object_ids(),
                 tenant_id=self.context.get_aad_tenant_id()
             )
-        else:
-            (
-                aad_client_app_id,
-                aad_server_app_id,
-                aad_server_app_secret,
-            ) = (
-                self.context.get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret()
-            )
-            aad_tenant_id = self.context.get_aad_tenant_id()
-            if any([aad_client_app_id, aad_server_app_id, aad_server_app_secret, aad_tenant_id]):
-                aad_profile = self.models.ManagedClusterAADProfile(
-                    client_app_id=aad_client_app_id,
-                    server_app_id=aad_server_app_id,
-                    server_app_secret=aad_server_app_secret,
-                    tenant_id=aad_tenant_id
-                )
         mc.aad_profile = aad_profile
         return mc
 
@@ -6517,7 +6295,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         """
         self._ensure_mc(mc)
 
-        if self.context.get_uptime_sla() or self.context.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD:
+        if self.context.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD:
             mc.sku = self.models.ManagedClusterSKU(
                 name="Base",
                 tier="Standard"
@@ -7256,13 +7034,13 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 tier="Premium"
             )
 
-        if self.context.get_uptime_sla() or self.context.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD:
+        if self.context.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD:
             mc.sku = self.models.ManagedClusterSKU(
                 name="Base",
                 tier="Standard"
             )
 
-        if self.context.get_no_uptime_sla() or self.context.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_FREE:
+        if self.context.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_FREE:
             mc.sku = self.models.ManagedClusterSKU(
                 name="Base",
                 tier="Free"
