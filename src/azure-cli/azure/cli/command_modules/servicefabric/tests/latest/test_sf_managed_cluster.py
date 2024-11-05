@@ -46,7 +46,6 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
         with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('az sf managed-cluster show -g {rg} -c {cluster_name}')
 
-
     @ResourceGroupPreparer()
     def test_network_security_rule(self):
         self.kwargs.update({

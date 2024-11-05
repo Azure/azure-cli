@@ -196,15 +196,15 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='Specify the maximum time, in seconds, that Service Fabric takes to upgrade a single upgrade domain. After this period, the upgrade fails.')
         c.argument('upgrade_timeout',
                    help='Specify the maximum time, in seconds, that Service Fabric takes for the entire upgrade. After this period, the upgrade fails.')
-        c.argument('consider_warning_as_error', options_list=['--warning-as-error', '--consider-warning-as-error'], arg_type=get_three_state_flag(),
+        c.argument('consider_warning_as_error', options_list=['--warning-as-error'], arg_type=get_three_state_flag(),
                    help='Indicates whether to treat a warning health event as an error event during health evaluation.')
-        c.argument('default_service_type_max_percent_unhealthy_partitions_per_service', options_list=['--max-porcent-unhealthy-partitions', '--max-unhealthy-parts'],
+        c.argument('default_service_type_max_percent_unhealthy_partitions_per_service', options_list=['--max-unhealthy-parts'],
                    help='Specify the maximum percent of unhelthy partitions per service allowed by the health policy for the default service type to use for the monitored upgrade. Allowed values are form 0 to 100.')
-        c.argument('default_service_type_max_percent_unhealthy_replicas_per_partition', options_list=['--max-porcent-unhealthy-replicas', '--max-unhealthy-reps'],
+        c.argument('default_service_type_max_percent_unhealthy_replicas_per_partition', options_list=['--max-unhealthy-reps'],
                    help='Specify the maximum percent of unhelthy replicas per service allowed by the health policy for the default service type to use for the monitored upgrade. Allowed values are form 0 to 100.')
-        c.argument('default_service_type_max_percent_unhealthy_services', options_list=['--max-porcent-unhealthy-services', '--max-unhealthy-servs'],
+        c.argument('default_service_type_max_percent_unhealthy_services', options_list=['--max-unhealthy-servs'],
                    help='Specify the maximum percent of unhelthy services allowed by the health policy for the default service type to use for the monitored upgrade. Allowed values are form 0 to 100.')
-        c.argument('max_percent_unhealthy_deployed_applications', options_list=['--max-porcent-unhealthy-apps', '--max-unhealthy-apps'],
+        c.argument('max_percent_unhealthy_deployed_applications', options_list=['--max-unhealthy-apps'],
                    help='Specify the maximum percentage of the application instances deployed on the nodes in the cluster that have a health state of error before the application health state for the cluster is error. Allowed values are form 0 to 100.')
 
     with self.argument_context('sf application create', validator=validate_create_application) as c:
