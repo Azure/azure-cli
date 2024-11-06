@@ -8,5 +8,16 @@
 # pylint: skip-file
 # flake8: noqa
 
-from .__cmd_group import *
-from ._show import *
+from azure.cli.core.aaz import *
+
+
+@register_command_group(
+    "network firewall",
+)
+class __CMDGroup(AAZCommandGroup):
+    """Manage and configure Azure Firewalls.
+    """
+    pass
+
+
+__all__ = ["__CMDGroup"]
