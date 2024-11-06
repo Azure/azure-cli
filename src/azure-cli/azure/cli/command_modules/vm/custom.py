@@ -51,6 +51,7 @@ from .aaz.latest.ppg import Show as _PPGShow
 from .aaz.latest.vmss import ListInstances as _VMSSListInstances
 from .aaz.latest.capacity.reservation.group import List as _CapacityReservationGroupList
 from .aaz.latest.image import Update as _ImageUpdate
+from .aaz.latest.disk import Update as _DiskUpdate
 
 from .generated.custom import *  # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
 try:
@@ -581,6 +582,39 @@ def grant_disk_access(cmd, resource_group_name, disk_name, duration_in_seconds, 
 
     return _grant_access(cmd, resource_group_name, disk_name, duration_in_seconds, is_disk=True,
                          access_level=access_level, secure_vm_guest_state_sas=secure_vm_guest_state_sas)
+
+
+class DiskUpdate(_DiskUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+
+        args_schema.disk_access_id._registered = False
+        args_schema.disk_encryption_set_id._registered = False
+
+        # need to define:
+        # --disk-access, --disk-encryption-set,
+
+        # args_schema.rule_set_type = AAZStrArg(
+        #     options=["--type"],
+        #     help="Type of the web application firewall rule set.",
+        #     default="Microsoft_DefaultRuleSet",
+        #     enum={"Microsoft_BotManagerRuleSet": "Microsoft_BotManagerRuleSet", "Microsoft_DefaultRuleSet": "Microsoft_DefaultRuleSet", "OWASP": "OWASP"},
+        # )
+        # args_schema.rule_set_version = AAZStrArg(
+        #     options=["--version"],
+        #     help="Version of the web application firewall rule set type. "
+        #          "0.1, 1.0, and 1.1 are used for Microsoft_BotManagerRuleSet",
+        #     default="2.1",
+        #     enum=RULESET_VERSION
+        # )
+        return args_schema
+
+    def pre_instance_update(self, instance):
+        args = self.ctx.args
+        if has_value(args.tags):
+            instance.tags = args.tags
 
 
 def update_managed_disk(cmd, resource_group_name, instance, size_gb=None, sku=None, disk_iops_read_write=None,  # pylint: disable=too-many-branches

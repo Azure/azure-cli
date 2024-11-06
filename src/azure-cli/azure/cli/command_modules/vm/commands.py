@@ -240,7 +240,9 @@ def load_command_table(self, _):
     with self.command_group('disk', compute_disk_sdk, operation_group='disks', min_api='2017-03-30') as g:
         g.custom_command('create', 'create_managed_disk', supports_no_wait=True, table_transformer=transform_disk_create_table_output, validator=process_disk_create_namespace)
         g.custom_command('grant-access', 'grant_disk_access')
-        g.generic_update_command('update', custom_func_name='update_managed_disk', setter_name='begin_create_or_update', setter_arg_name='disk', supports_no_wait=True)
+        from .custom import DiskUpdate
+        self.command_table["disk update"] = DiskUpdate(loader=self)
+        # g.generic_update_command('update', custom_func_name='update_managed_disk', setter_name='begin_create_or_update', setter_arg_name='disk', supports_no_wait=True)
 
         from azure.cli.command_modules.vm._vm_utils import import_aaz_by_profile
         Disk = import_aaz_by_profile(self.cli_ctx.cloud.profile, "disk")

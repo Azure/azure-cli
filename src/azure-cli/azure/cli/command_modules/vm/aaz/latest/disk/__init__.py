@@ -14,4 +14,5 @@ from ._delete import *
 from ._list import *
 from ._revoke_access import *
 from ._show import *
+from ._update import *
 from ._wait import *
