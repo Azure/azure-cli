@@ -2328,10 +2328,9 @@ def _security_domain_restore_blob(sd_file, sd_exchange_key, sd_wrapping_keys, pa
 
 def _security_domain_upload_blob(client, restore_blob_value, no_wait=False):
     security_domain = {'value': restore_blob_value}
-    return sdk_no_wait(
-        no_wait, client.begin_upload,
-        security_domain=security_domain
-    )
+    poller = client.begin_upload(security_domain=security_domain, polling=not no_wait)
+    if not no_wait:
+        return poller.result()
 
 
 def security_domain_upload(client, sd_file, restore_blob=False, sd_exchange_key=None,
@@ -2410,14 +2409,13 @@ def security_domain_download(client, sd_wrapping_keys, security_domain_file, sd_
             from azure.cli.core.azclierror import FileOperationError
             raise FileOperationError(str(ex))
 
-    ret = client.begin_download(
-                      certificate_info_object={'certificates': certificates, 'required': sd_quorum})
-
-    security_domain = ret.result()
-    # Due to service defect, status could be 'Success' or 'Succeeded' when it succeeded
-    if ret and ret.status() != 'Failed':
+    certificate_info = {'certificates': certificates, 'required': sd_quorum}
+    poller = client.begin_download(certificate_info_object=certificate_info, polling=not no_wait)
+    security_domain = poller.result()
+    if poller.status() != 'Failed':
         _save_to_local_file(security_domain_file, security_domain)
-    return ret
+    if not no_wait:
+        return _wait_security_domain_operation(client, 'download')
 
 
 def check_name_availability(cmd, client, name, resource_type='hsm'):

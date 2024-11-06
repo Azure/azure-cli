@@ -147,7 +147,8 @@ def load_command_table(self, _):
             g.keyvault_custom('restore-blob', 'security_domain_restore_blob')
             g.keyvault_custom('upload', 'security_domain_upload', supports_no_wait=True,
                               transform=transform_security_domain_output)
-            g.keyvault_custom('download', 'security_domain_download', supports_no_wait=True)
+            g.keyvault_custom('download', 'security_domain_download', supports_no_wait=True,
+                              transform=transform_security_domain_output)
             g.keyvault_custom('wait', '_wait_security_domain_operation', transform=transform_security_domain_output)
 
     with self.command_group('keyvault key', data_key_entity.command_type) as g:
