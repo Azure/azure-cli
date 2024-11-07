@@ -386,15 +386,6 @@ def create_app_config_connection_if_not_exist(cmd, client, source_id, app_config
                          parameters=parameters)
 
 
-def is_packaged_installed(package_name):
-    import pkg_resources
-    installed_packages = pkg_resources.working_set
-    # pylint: disable=not-an-iterable
-    pkg_installed = any((package_name) in d.key.lower()
-                        for d in installed_packages)
-    return pkg_installed
-
-
 def get_object_id_of_current_user():
     signed_in_user_info = run_cli_cmd('az account show -o json')
     if not isinstance(signed_in_user_info, dict):
