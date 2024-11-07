@@ -310,7 +310,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
         version = '15'
         storage_size = 200
-        location = self.postgres_location
+        location = 'southcentralus'
         sku_name = 'Standard_D2s_v3'
         tier = 'GeneralPurpose'
         storage_type = 'PremiumV2_LRS'
@@ -374,7 +374,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
     def _test_flexible_server_restore_mgmt(self, database_engine, resource_group):
 
         private_dns_param = 'privateDnsZoneArmResourceId'
-        location = self.postgres_location
+        location = 'southcentralus'
 
         source_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         target_server_default = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
@@ -522,7 +522,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
     def _test_flexible_server_ssdv2_restore_mgmt(self, database_engine, resource_group):
 
-        location = self.postgres_location
+        location = 'southcentralus'
         source_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         source_ssdv2_server = self.create_random_name(SERVER_NAME_PREFIX + 'ssdv2-', 40)
         target_server_ssdv2_migration = self.create_random_name(SERVER_NAME_PREFIX + 'ssdv2-migrate-', 40)
