@@ -239,8 +239,9 @@ def load_command_table(self, _):
 
     with self.command_group('disk', compute_disk_sdk, operation_group='disks', min_api='2017-03-30') as g:
         g.custom_command('create', 'create_managed_disk', supports_no_wait=True, table_transformer=transform_disk_create_table_output, validator=process_disk_create_namespace)
-        g.custom_command('grant-access', 'grant_disk_access')
-        from .custom import DiskUpdate
+        # g.custom_command('grant-access', 'grant_disk_access')
+        from .custom import DiskUpdate, DiskGrantAccess
+        self.command_table["disk grant-access"] = DiskGrantAccess(loader=self)
         self.command_table["disk update"] = DiskUpdate(loader=self)
 
         from azure.cli.command_modules.vm._vm_utils import import_aaz_by_profile

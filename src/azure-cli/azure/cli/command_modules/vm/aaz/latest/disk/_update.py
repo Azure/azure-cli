@@ -119,14 +119,14 @@ class Update(AAZCommand):
             help="The number of IOPS allowed for this disk; only settable for UltraSSD disks. One operation can transfer between 4k and 256k bytes.",
             nullable=True,
         )
-        _args_schema.disk_m_bps_read_only = AAZIntArg(
-            options=["--disk-m-bps-read-only"],
+        _args_schema.disk_mbps_read_only = AAZIntArg(
+            options=["--disk-mbps-read-only"],
             arg_group="Properties",
             help="The total throughput (MBps) that will be allowed across all VMs mounting the shared disk as ReadOnly. MBps means millions of bytes per second - MB here uses the ISO notation, of powers of 10.",
             nullable=True,
         )
-        _args_schema.disk_m_bps_read_write = AAZIntArg(
-            options=["--disk-m-bps-read-write"],
+        _args_schema.disk_mbps_read_write = AAZIntArg(
+            options=["--disk-mbps-read-write"],
             arg_group="Properties",
             help="The bandwidth allowed for this disk; only settable for UltraSSD disks. MBps means millions of bytes per second - MB here uses the ISO notation, of powers of 10.",
             nullable=True,
@@ -484,8 +484,8 @@ class Update(AAZCommand):
                 properties.set_prop("diskAccessId", AAZStrType, ".disk_access_id")
                 properties.set_prop("diskIOPSReadOnly", AAZIntType, ".disk_iops_read_only")
                 properties.set_prop("diskIOPSReadWrite", AAZIntType, ".disk_iops_read_write")
-                properties.set_prop("diskMBpsReadOnly", AAZIntType, ".disk_m_bps_read_only")
-                properties.set_prop("diskMBpsReadWrite", AAZIntType, ".disk_m_bps_read_write")
+                properties.set_prop("diskMBpsReadOnly", AAZIntType, ".disk_mbps_read_only")
+                properties.set_prop("diskMBpsReadWrite", AAZIntType, ".disk_mbps_read_write")
                 properties.set_prop("diskSizeGB", AAZIntType, ".disk_size_gb")
                 properties.set_prop("encryption", AAZObjectType)
                 properties.set_prop("maxShares", AAZIntType, ".max_shares")

@@ -50,8 +50,7 @@ from ._client_factory import (_compute_client_factory, cf_vm_image_term, _dev_te
 from .aaz.latest.ppg import Show as _PPGShow
 from .aaz.latest.vmss import ListInstances as _VMSSListInstances
 from .aaz.latest.capacity.reservation.group import List as _CapacityReservationGroupList
-from .aaz.latest.image import Update as _ImageUpdate
-from .aaz.latest.disk import Update as _DiskUpdate
+from .aaz.latest.disk import Update as _DiskUpdate, GrantAccess as _DiskGrantAccess
 
 from .generated.custom import *  # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
 try:
@@ -559,12 +558,27 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
     from .aaz.latest.disk import Create
     return Create(cli_ctx=cmd.cli_ctx)(command_args=args)
 
+#
+# def grant_disk_access(cmd, resource_group_name, disk_name, duration_in_seconds, access_level=None,
+#                       secure_vm_guest_state_sas=None):
+#
+#     return _grant_access(cmd, resource_group_name, disk_name, duration_in_seconds, is_disk=True,
+#                          access_level=access_level, secure_vm_guest_state_sas=secure_vm_guest_state_sas)
+#
 
-def grant_disk_access(cmd, resource_group_name, disk_name, duration_in_seconds, access_level=None,
-                      secure_vm_guest_state_sas=None):
+class DiskGrantAccess(_DiskGrantAccess):
+    def pre_operations(self):
+        args = self.ctx.args
 
-    return _grant_access(cmd, resource_group_name, disk_name, duration_in_seconds, is_disk=True,
-                         access_level=access_level, secure_vm_guest_state_sas=secure_vm_guest_state_sas)
+        from .aaz.latest.disk import Show
+        disk_info = Show(cli_ctx=self.cli_ctx)(command_args={
+            "disk_name": args.disk_name,
+            "resource_group": args.resource_group
+        })
+
+        if disk_info.get("creation_data", None) and \
+                disk_info["creation_data"].get("create_option", None) == "UploadPreparedSecure":
+            args.secure_vm_guest_state_sas = True
 
 
 class DiskUpdate(_DiskUpdate):

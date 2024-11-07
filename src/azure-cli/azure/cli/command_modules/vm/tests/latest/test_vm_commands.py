@@ -1196,17 +1196,17 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         # create a disk and update
         data_disk = self.cmd('disk create -g {rg} -n {disk1} --size-gb 1 --tags tag1=d1', checks=[
             self.check('sku.name', 'Premium_LRS'),
-            self.check('diskSizeGb', 1),
+            self.check('diskSizeGB', 1),
             self.check('tags.tag1', 'd1')
         ]).get_output_in_json()
         self.cmd('disk update -g {rg} -n {disk1} --size-gb 10 --sku Standard_LRS', checks=[
             self.check('sku.name', 'Standard_LRS'),
-            self.check('diskSizeGb', 10)
+            self.check('diskSizeGB', 10)
         ])
 
         # get SAS token
         result = self.cmd('disk grant-access -g {rg} -n {disk1} --duration-in-seconds 10').get_output_in_json()
-        self.assertTrue('sv=' in result['accessSas'])
+        self.assertTrue('sv=' in result['accessSAS'])
 
         # create another disk by importing from the disk1
         self.kwargs['disk1_id'] = data_disk['id']
@@ -1284,7 +1284,7 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         # create a disk and update
         data_disk = self.cmd('disk create -g {rg} -n {disk_name1} --size-gb 1', checks=[
             self.check('sku.name', 'Premium_LRS'),
-            self.check('diskSizeGb', 1)
+            self.check('diskSizeGB', 1)
         ]).get_output_in_json()
         # create a vm
         vm = self.cmd('vm create -n {vm_name} -g {rg} --image {vm_image} --attach-data-disks {disk_name1} '
@@ -1316,7 +1316,7 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         self.cmd('disk create --resource-group {rg} --name {disk_name2} --sku {disk_sku} --size-gb {disk_size2} --source {disk_restore_point_id}',
                  checks=[
                      self.check('sku.name', 'Premium_LRS'),
-                     self.check('diskSizeGb', 2),
+                     self.check('diskSizeGB', 2),
                      self.check('creationData.createOption', 'Restore'),
                      self.check('creationData.sourceResourceId', '{disk_restore_point_id}')
                  ])
@@ -1471,12 +1471,12 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         })
 
         self.cmd('disk create -g {rg} -n {disk1} --size-gb 10 --sku UltraSSD_LRS --disk-iops-read-only 200 --disk-mbps-read-only 30', checks=[
-            self.check('diskIopsReadOnly', 200),
+            self.check('diskIOPSReadOnly', 200),
             self.check('diskMBpsReadOnly', 30)
         ])
 
         self.cmd('disk update -g {rg} -n {disk1} --disk-iops-read-only 250 --disk-mbps-read-only 40', checks=[
-            self.check('diskIopsReadOnly', 250),
+            self.check('diskIOPSReadOnly', 250),
             self.check('diskMBpsReadOnly', 40)
         ])
 
@@ -10492,8 +10492,8 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('creationData.createOption', 'UploadPreparedSecure'),
         ])
         self.cmd('disk grant-access -n {disk} -g {rg} --access-level Write --duration-in-seconds 86400', checks=[
-            self.exists('accessSas'),
-            self.exists('securityDataAccessSas')
+            self.exists('accessSAS'),
+            self.exists('securityDataAccessSAS')
         ])
 
         self.cmd('disk create -n {disk1} -g {rg} --os-type Windows --hyper-v-generation v2 --security-type TrustedLaunch --upload-type UploadWithSecurityData --upload-size-bytes 34359738880 --sku standard_lrs', checks=[
@@ -10501,15 +10501,15 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('creationData.createOption', 'UploadPreparedSecure')
         ])
         self.cmd('disk grant-access -n {disk1} -g {rg} --access-level Write --duration-in-seconds 86400 --secure-vm-guest-state-sas', checks=[
-            self.exists('accessSas'),
-            self.exists('securityDataAccessSas')
+            self.exists('accessSAS'),
+            self.exists('securityDataAccessSAS')
         ])
 
         self.cmd('disk create -n {disk2} -g {rg} --os-type Windows --hyper-v-generation v2 --upload-type Upload --upload-size-bytes 34359738880 --sku standard_lrs', checks=[
             self.check('creationData.createOption', 'Upload'),
         ])
         self.cmd('disk grant-access -n {disk2} -g {rg} --access-level Write --duration-in-seconds 86400', checks=[
-            self.exists('accessSas'),
+            self.exists('accessSAS'),
         ])
 
         message = "Please specify --security-type when the value of --upload-type is 'UploadWithSecurityData'"
