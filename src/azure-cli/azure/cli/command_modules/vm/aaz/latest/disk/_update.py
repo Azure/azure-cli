@@ -154,6 +154,7 @@ class Update(AAZCommand):
             options=["--public-network-access"],
             arg_group="Properties",
             help="Customers can set on Managed Disks or Snapshots to control the export policy on the disk.",
+            is_preview=True,
             nullable=True,
             enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
@@ -165,6 +166,7 @@ class Update(AAZCommand):
             options=["--accelerated-network"],
             arg_group="SupportedCapabilities",
             help="Customers can set on Managed Disks or Snapshots to enable the accelerated networking if the OS disk image support.",
+            is_preview=True,
             nullable=True,
         )
         _args_schema.architecture = AAZStrArg(

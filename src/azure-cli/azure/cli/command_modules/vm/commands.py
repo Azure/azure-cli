@@ -242,7 +242,6 @@ def load_command_table(self, _):
         g.custom_command('grant-access', 'grant_disk_access')
         from .custom import DiskUpdate
         self.command_table["disk update"] = DiskUpdate(loader=self)
-        # g.generic_update_command('update', custom_func_name='update_managed_disk', setter_name='begin_create_or_update', setter_arg_name='disk', supports_no_wait=True)
 
         from azure.cli.command_modules.vm._vm_utils import import_aaz_by_profile
         Disk = import_aaz_by_profile(self.cli_ctx.cloud.profile, "disk")
@@ -264,8 +263,6 @@ def load_command_table(self, _):
 
     with self.command_group('image', compute_image_sdk, min_api='2016-04-30-preview') as g:
         g.custom_command('create', 'create_image', validator=process_image_create_namespace)
-        from .custom import ImageUpdate
-        self.command_table['image update'] = ImageUpdate(loader=self)
 
     with self.command_group('image builder', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
         g.custom_command('create', 'create_image_template', supports_no_wait=True, supports_local_cache=True, validator=process_image_template_create_namespace)

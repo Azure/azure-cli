@@ -367,9 +367,6 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
     from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
-    # Disk, CreationData, DiskCreateOption, Encryption = cmd.get_models(
-    #     'Disk', 'CreationData', 'DiskCreateOption', 'Encryption')
-
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     if security_data_uri:
         option = 'ImportSecure'
@@ -450,14 +447,6 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         if gallery_image_reference_lun is not None:
             gallery_image_reference['lun'] = gallery_image_reference_lun
 
-    # creation_data = CreationData(create_option=option, source_uri=source_blob_uri,
-    #                              image_reference=image_reference, gallery_image_reference=gallery_image_reference,
-    #                              source_resource_id=source_disk or source_snapshot or source_restore_point,
-    #                              storage_account_id=source_storage_account_id,
-    #                              upload_size_bytes=upload_size_bytes,
-    #                              logical_sector_size=logical_sector_size,
-    #                              security_data_uri=security_data_uri,
-    #                              performance_plus=performance_plus)
     creation_data = {
         "create_option": option,
         "source_uri": source_blob_uri,
@@ -495,14 +484,11 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
 
     encryption = None
     if disk_encryption_set or encryption_type:
-        # encryption = Encryption(type=encryption_type, disk_encryption_set_id=disk_encryption_set)
         encryption = {
             "type": encryption_type,
             "disk_encryption_set_id": disk_encryption_set
         }
 
-    # disk = Disk(location=location, creation_data=creation_data, tags=(tags or {}),
-    #             sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb, os_type=os_type, encryption=encryption)
     if cmd.supported_api_version(min_api='2017-03-30'):
         sku = {"name": sku}
 
@@ -553,8 +539,6 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         args["public_network_access"] = public_network_access
     if accelerated_network is not None or architecture is not None:
         if args.get("supported_capabilities", None) is None:
-            # supportedCapabilities = cmd.get_models('SupportedCapabilities')(accelerated_network=accelerated_network,
-            #                                                                 architecture=architecture)
             supported_capabilities = {
                 "accelerated_network": accelerated_network,
                 "architecture": architecture
@@ -574,7 +558,6 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
 
     from .aaz.latest.disk import Create
     return Create(cli_ctx=cmd.cli_ctx)(command_args=args)
-    # return sdk_no_wait(no_wait, client.disks.begin_create_or_update, resource_group_name, disk_name, args)
 
 
 def grant_disk_access(cmd, resource_group_name, disk_name, duration_in_seconds, access_level=None,
@@ -593,90 +576,58 @@ class DiskUpdate(_DiskUpdate):
         args_schema.disk_access_id._registered = False
         args_schema.disk_encryption_set_id._registered = False
 
-        # need to define:
-        # --disk-access, --disk-encryption-set,
+        args_schema.disk_access = AAZStrArg(
+            options=["--disk-access"],
+            help="Name or ID of the disk access resource for using private endpoints on disks.",
+        )
+        args_schema.disk_encryption_set = AAZStrArg(
+            options=["--disk-encryption-set"],
+            help="Name or ID of disk encryption set that is used to encrypt the disk."
+        )
 
-        # args_schema.rule_set_type = AAZStrArg(
-        #     options=["--type"],
-        #     help="Type of the web application firewall rule set.",
-        #     default="Microsoft_DefaultRuleSet",
-        #     enum={"Microsoft_BotManagerRuleSet": "Microsoft_BotManagerRuleSet", "Microsoft_DefaultRuleSet": "Microsoft_DefaultRuleSet", "OWASP": "OWASP"},
-        # )
-        # args_schema.rule_set_version = AAZStrArg(
-        #     options=["--version"],
-        #     help="Version of the web application firewall rule set type. "
-        #          "0.1, 1.0, and 1.1 are used for Microsoft_BotManagerRuleSet",
-        #     default="2.1",
-        #     enum=RULESET_VERSION
-        # )
         return args_schema
 
     def pre_instance_update(self, instance):
+        from azure.mgmt.core.tools import resource_id, is_valid_resource_id
+        from azure.cli.core.commands.client_factory import get_subscription_id
+
         args = self.ctx.args
-        if has_value(args.tags):
-            instance.tags = args.tags
+        if has_value(args.disk_encryption_set):
+            if instance.properties.encryption.type != 'EncryptionAtRestWithCustomerKey' and \
+                    has_value(args.encryption_type) and \
+                    args.encryption_type != 'EncryptionAtRestWithCustomerKey':
+                raise CLIError('usage error: Please set --encryption-type to EncryptionAtRestWithCustomerKey')
 
+            disk_encryption_set = args.disk_encryption_set
+            if not is_valid_resource_id(disk_encryption_set.to_serialized_data()):
+                disk_encryption_set = resource_id(
+                    subscription=get_subscription_id(self.cli_ctx), resource_group=args.resource_group,
+                    namespace='Microsoft.Compute', type='diskEncryptionSets', name=disk_encryption_set)
 
-def update_managed_disk(cmd, resource_group_name, instance, size_gb=None, sku=None, disk_iops_read_write=None,  # pylint: disable=too-many-branches
-                        disk_mbps_read_write=None, encryption_type=None, disk_encryption_set=None,
-                        network_access_policy=None, disk_access=None, max_shares=None, disk_iops_read_only=None,
-                        disk_mbps_read_only=None, enable_bursting=None, public_network_access=None,
-                        accelerated_network=None, architecture=None, data_access_auth_mode=None):
-    from azure.mgmt.core.tools import resource_id, is_valid_resource_id
-    from azure.cli.core.commands.client_factory import get_subscription_id
+            instance.properties.encryption.disk_encryption_set_id = disk_encryption_set
 
-    if size_gb is not None:
-        instance.disk_size_gb = size_gb
-    if sku is not None:
-        _set_sku(cmd, instance, sku)
-    if disk_iops_read_write is not None:
-        instance.disk_iops_read_write = disk_iops_read_write
-    if disk_mbps_read_write is not None:
-        instance.disk_m_bps_read_write = disk_mbps_read_write
-    if disk_iops_read_only is not None:
-        instance.disk_iops_read_only = disk_iops_read_only
-    if disk_mbps_read_only is not None:
-        instance.disk_m_bps_read_only = disk_mbps_read_only
-    if max_shares is not None:
-        instance.max_shares = max_shares
-    if disk_encryption_set is not None:
-        if instance.encryption.type != 'EncryptionAtRestWithCustomerKey' and \
-                encryption_type != 'EncryptionAtRestWithCustomerKey':
-            raise CLIError('usage error: Please set --encryption-type to EncryptionAtRestWithCustomerKey')
-        if not is_valid_resource_id(disk_encryption_set):
-            disk_encryption_set = resource_id(
-                subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
-                namespace='Microsoft.Compute', type='diskEncryptionSets', name=disk_encryption_set)
-        instance.encryption.disk_encryption_set_id = disk_encryption_set
-    if encryption_type is not None:
-        instance.encryption.type = encryption_type
-        if encryption_type != 'EncryptionAtRestWithCustomerKey':
-            instance.encryption.disk_encryption_set_id = None
-    if network_access_policy is not None:
-        instance.network_access_policy = network_access_policy
-    if disk_access is not None:
-        if not is_valid_resource_id(disk_access):
-            disk_access = resource_id(
-                subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
-                namespace='Microsoft.Compute', type='diskAccesses', name=disk_access)
-        instance.disk_access_id = disk_access
-    if enable_bursting is not None:
-        instance.bursting_enabled = enable_bursting
-    if public_network_access is not None:
-        instance.public_network_access = public_network_access
-    if accelerated_network is not None or architecture is not None:
-        if instance.supported_capabilities is None:
-            supportedCapabilities = cmd.get_models('SupportedCapabilities')(accelerated_network=accelerated_network,
-                                                                            architecture=architecture)
-            instance.supported_capabilities = supportedCapabilities
-        else:
-            instance.supported_capabilities.accelerated_network = accelerated_network
-            instance.supported_capabilities.architecture = architecture
-    if data_access_auth_mode is not None:
-        instance.data_access_auth_mode = data_access_auth_mode
+        if has_value(args.encryption_type):
+            if args.encryption_type != 'EncryptionAtRestWithCustomerKey':
+                instance.properties.encryption.disk_encryption_set_id = None
 
-    return instance
-# endregion
+        if has_value(args.disk_access):
+            disk_access = args.disk_access
+            if not is_valid_resource_id(disk_access.to_serialized_data()):
+                disk_access = resource_id(
+                    subscription=get_subscription_id(self.cli_ctx), resource_group=args.resource_group,
+                    namespace='Microsoft.Compute', type='diskAccesses', name=disk_access)
+            instance.properties.disk_access_id = disk_access
+
+        if has_value(args.accelerated_network) or has_value(args.architecture):
+            if has_value(instance.properties.supported_capabilities):
+                supported_capabilities = {
+                    "accelerated_network": args.accelerated_network,
+                    "architecture": args.architecture
+                }
+                instance.properties.supported_capabilities = supported_capabilities
+            else:
+                instance.properties.supported_capabilities.accelerated_network = args.accelerated_network
+                instance.properties.supported_capabilities.architecture = args.architecture
 
 
 # region Images (Managed)
@@ -759,12 +710,13 @@ def create_image(cmd, resource_group_name, name, source, os_type=None, data_disk
     from .aaz.latest.image import Create
     return Create(cli_ctx=cmd.cli_ctx)(command_args=args)
 
-
-class ImageUpdate(_ImageUpdate):
-    def pre_instance_update(self, instance):
-        args = self.ctx.args
-        if has_value(args.tags):
-            instance.tags = args.tags
+#
+# class ImageUpdate(_ImageUpdate):
+#     def pre_instance_update(self, instance):
+#         pass
+#         # args = self.ctx.args
+#         # if has_value(args.tags):
+#         #     instance.tags = args.tags
 
 
 # region Snapshots
