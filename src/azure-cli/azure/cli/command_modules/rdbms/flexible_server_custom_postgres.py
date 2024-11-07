@@ -124,8 +124,7 @@ def flexible_server_create(cmd, client,
     high_availability = postgresql_flexibleservers.models.HighAvailability(mode=high_availability,
                                                                            standby_availability_zone=standby_availability_zone)
 
-    password_auth_enabled = password_auth.lower() == 'enabled'
-    administrator_login_password = generate_password(administrator_login_password) if password_auth_enabled else None
+    administrator_login_password = generate_password(administrator_login_password)
 
     identity, data_encryption = build_identity_and_data_encryption(db_engine='postgres',
                                                                    byok_identity=byok_identity,
@@ -1016,10 +1015,9 @@ def flexible_server_provision_network_resource(cmd, resource_group_name, server_
 
     start_ip = -1
     end_ip = -1
-    network = None
+    network = postgresql_flexibleservers.models.Network()
 
     if subnet is not None or vnet is not None:
-        network = postgresql_flexibleservers.models.Network()
         subnet_id = prepare_private_network(cmd,
                                             resource_group_name,
                                             server_name,
@@ -1043,6 +1041,7 @@ def flexible_server_provision_network_resource(cmd, resource_group_name, server_
         raise RequiredArgumentMissingError("Private DNS zone can only be used with private access setting. Use vnet or/and subnet parameters.")
     else:
         start_ip, end_ip = prepare_public_network(public_access, yes=yes)
+        network.public_network_access = public_access if str(public_access).lower() in ['disabled', 'enabled'] else 'Enabled'
 
     return network, start_ip, end_ip
 

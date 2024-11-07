@@ -5,7 +5,7 @@
 import os
 import time
 
-from datetime import datetime, timezone
+from datetime import datetime
 from time import sleep
 from azure.cli.core.util import parse_proxy_resource_id
 from dateutil import parser
@@ -110,8 +110,8 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
-    @KeyVaultPreparer(name_prefix='rdbmsvault', parameter_name='vault_name', location=postgres_location, additional_params='--enable-purge-protection true --retention-days 90')
-    @KeyVaultPreparer(name_prefix='rdbmsvault', parameter_name='backup_vault_name', location=postgres_backup_location, additional_params='--enable-purge-protection true --retention-days 90')
+    @KeyVaultPreparer(name_prefix='rdbmsvault', parameter_name='vault_name', location=postgres_location, additional_params='--enable-purge-protection true --retention-days 90 --no-self-perms')
+    @KeyVaultPreparer(name_prefix='rdbmsvault', parameter_name='backup_vault_name', location=postgres_backup_location, additional_params='--enable-purge-protection true --retention-days 90 --no-self-perms')
     def test_postgres_flexible_server_byok_mgmt(self, resource_group, vault_name, backup_vault_name):
         self._test_flexible_server_byok_mgmt(resource_group, vault_name, backup_vault_name)
 
@@ -452,49 +452,45 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         location = self.postgres_location
         target_location = self.postgres_backup_location
 
-        source_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        source_server_2 = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        target_server_default = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        target_server_diff_vnet = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        target_server_diff_vnet_2 = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        source_server_vnet = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        source_server_public = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         target_server_public_access = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        target_server_public_access_2 = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        target_server_config = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        target_server_diff_vnet = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        target_server_vnet_fail = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
 
         source_vnet = self.create_random_name('VNET', SERVER_NAME_MAX_LENGTH)
         source_subnet = self.create_random_name('SUBNET', SERVER_NAME_MAX_LENGTH)
         new_vnet = self.create_random_name('VNET', SERVER_NAME_MAX_LENGTH)
         new_subnet = self.create_random_name('SUBNET', SERVER_NAME_MAX_LENGTH)
-        new_vnet_2 = self.create_random_name('VNET', SERVER_NAME_MAX_LENGTH)
-        new_subnet_2 = self.create_random_name('SUBNET', SERVER_NAME_MAX_LENGTH)
 
         self.cmd('{} flexible-server create -g {} -n {} --vnet {} --subnet {} -l {} --geo-redundant-backup Enabled --yes'.format(
-                 database_engine, resource_group, source_server, source_vnet, source_subnet, location))
-        result = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, source_server)).get_output_in_json()
-        self.assertEqual(result['backup']['geoRedundantBackup'], 'Enabled')
+                 database_engine, resource_group, source_server_vnet, source_vnet, source_subnet, location))
+        result_vnet = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, source_server_vnet)).get_output_in_json()
+        self.assertEqual(result_vnet['backup']['geoRedundantBackup'], 'Enabled')
 
-        self.cmd('{} flexible-server create -g {} -n {} --public-access None -l {} --geo-redundant-backup Enabled'.format(
-                 database_engine, resource_group, source_server_2, location))
-        result = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, source_server_2)).get_output_in_json()
+        self.cmd('{} flexible-server create -g {} -n {} --public-access Enabled -l {} --geo-redundant-backup Enabled --yes'.format(
+                 database_engine, resource_group, source_server_public, location))
+        result = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, source_server_public)).get_output_in_json()
         self.assertEqual(result['backup']['geoRedundantBackup'], 'Enabled')
         self.assertEqual(result['network']['publicNetworkAccess'], 'Enabled')
 
-        # vnet -> vnet without network parameters fail
-        self.cmd('{} flexible-server geo-restore -g {} -l {} --name {} --source-server {} '
-                 .format(database_engine, resource_group, target_location, target_server_default, source_server), expect_failure=True)
-
-        # vnet to different vnet
+        # default vnet resources
         self.cmd('network vnet create -g {} -l {} -n {} --address-prefixes 172.1.0.0/16'.format(
                  resource_group, target_location, new_vnet))
 
         subnet = self.cmd('network vnet subnet create -g {} -n {} --vnet-name {} --address-prefixes 172.1.0.0/24 --default-outbound false'.format(
                           resource_group, new_subnet, new_vnet)).get_output_in_json()
 
-        restore_result = retryable_method(retries=10, interval_sec=360 if os.environ.get(ENV_LIVE_TEST, False) else 0, exception_type=HttpResponseError,
-                                          condition=lambda ex: 'GeoBackupsNotAvailable' in ex.message)(self.cmd)(
-                                              '{} flexible-server geo-restore -g {} -l {} -n {} --source-server {} --subnet {} --yes'.format(
-                                              database_engine, resource_group, target_location, target_server_diff_vnet, source_server, subnet["id"])
-                                          ).get_output_in_json()
+        # Wait until snapshot is created
+        os.environ.get(ENV_LIVE_TEST, False) and sleep(1800)
+
+        # vnet -> vnet without network parameters fail
+        self.cmd('{} flexible-server geo-restore -g {} -l {} --name {} --source-server {} '
+                 .format(database_engine, resource_group, target_location, target_server_vnet_fail, source_server_vnet), expect_failure=True)
+
+        # vnet to different vnet
+        restore_result = self.cmd('{} flexible-server geo-restore -g {} -l {} -n {} --source-server {} --subnet {} --yes'.format(
+                                  database_engine, resource_group, target_location, target_server_diff_vnet, source_server_vnet, subnet["id"])).get_output_in_json()
 
         self.assertEqual(restore_result['network']['delegatedSubnetResourceId'],
                          '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
@@ -505,30 +501,23 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                              self.get_subscription_id(), resource_group, '{}.private.{}.database.azure.com'.format(target_server_diff_vnet, database_engine)))
 
         # public to public
-        restore_result = retryable_method(retries=10, interval_sec=360 if os.environ.get(ENV_LIVE_TEST, False) else 0, exception_type=HttpResponseError,
-                                          condition=lambda ex: 'GeoBackupsNotAvailable' in ex.message)(self.cmd)(
-                                              '{} flexible-server geo-restore -g {} -l {} --name {} --source-server {}'.format(
-                                              database_engine, resource_group, target_location, target_server_public_access_2, source_server_2)
-                                         ).get_output_in_json()
+        restore_result = self.cmd('{} flexible-server geo-restore -g {} -l {} --name {} --source-server {}'.format(
+                                  database_engine, resource_group, target_location, target_server_public_access, source_server_public)).get_output_in_json()
 
-        #self.assertEqual(restore_result['network']['publicNetworkAccess'], 'Enabled')
         self.assertEqual(str(restore_result['location']).replace(' ', '').lower(), target_location)
 
         # Delete servers
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
-                 database_engine, resource_group, source_server), checks=NoneCheck())
+                 database_engine, resource_group, source_server_vnet), checks=NoneCheck())
+
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
+                 database_engine, resource_group, source_server_public), checks=NoneCheck())
 
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
                  database_engine, resource_group, target_server_diff_vnet), checks=NoneCheck())
 
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
-                 database_engine, resource_group, target_server_diff_vnet_2), checks=NoneCheck())
-
-        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
                  database_engine, resource_group, target_server_public_access), checks=NoneCheck())
-
-        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
-                 database_engine, resource_group, target_server_config), checks=NoneCheck())
 
 
     def _test_flexible_server_ssdv2_restore_mgmt(self, database_engine, resource_group):
@@ -870,7 +859,6 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         server_with_geo_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         backup_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        backup_name_with_geo = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         tier = 'GeneralPurpose'
         sku_name = 'Standard_D2s_v3'
         location = self.postgres_location
@@ -1005,6 +993,10 @@ class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
         firewall_rule_checks = [JMESPathCheck('name', firewall_rule_name),
                                 JMESPathCheck('endIpAddress', end_ip_address),
                                 JMESPathCheck('startIpAddress', start_ip_address)]
+
+        self.cmd('{} flexible-server update -g {} -n {} --public-access Enabled'
+                 .format(database_engine, resource_group, server),
+                 checks=[JMESPathCheck('network.publicNetworkAccess', "Enabled")])
 
         self.cmd('{} flexible-server firewall-rule create -g {} --name {} --rule-name {} '
                  '--start-ip-address {} --end-ip-address {} '
