@@ -3705,7 +3705,7 @@ class VMDiskAttachDetachTest(ScenarioTest):
         })
         self.cmd('disk create -g {rg} -n {disk1} --size-gb 4 --sku UltraSSD_LRS --disk-iops-read-write 500 --disk-mbps-read-write 8 --zone 2')
         self.cmd('disk update -g {rg} -n {disk1} --disk-iops-read-write 510 --disk-mbps-read-write 10', checks=[
-            self.check('diskIopsReadWrite', 510),
+            self.check('diskIOPSReadWrite', 510),
             self.check('diskMBpsReadWrite', 10)
         ])
 
