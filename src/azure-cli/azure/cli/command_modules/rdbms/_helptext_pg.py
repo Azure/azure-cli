@@ -765,17 +765,17 @@ short-summary: Manage flexible server long-term-retention backups.
 
 helps['postgres flexible-server long-term-retention pre-check'] = """
 type: command
-short-summary: performs all the checks that are needed for the subsequent long-term-retention backup operation to succeed.
+short-summary: Performs all the checks that are needed for the subsequent long-term-retention backup operation to succeed.
 examples:
-  - name: Precheck command.
+  - name: Precheck if we can perform long-term-retention command on server 'server-name' on resource group 'resource-group-name' with backup name 'backup-name'.
     text: az postgres flexible-server long-term-retention pre-check -g resource-group-name -b backup-name -n server-name
 """
 
 helps['postgres flexible-server long-term-retention start'] = """
 type: command
-short-summary: Start long-term-retention backup for a flexible server.
+short-summary: Start long-term-retention backup for a flexible server. SAS URL parameter refers to the container SAS URL, inside the storage account, where the backups will be uploaded.
 examples:
-  - name: Create a backup.
+  - name: Create a backup with name 'backup-name' of server 'server-name' in resource group 'resource-group-name', using container with SAS URL '<sas-url>'.
     text: az postgres flexible-server long-term-retention pre-check -g resource-group-name -b backup-name -n server-name --sas-url <sas-url>
 """
 
