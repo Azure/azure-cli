@@ -71,7 +71,7 @@ class CreateForRbacScenarioTest(RoleScenarioTestBase):
     @ResourceGroupPreparer(name_prefix='cli_test_sp_with_kv_new_cert')
     @KeyVaultPreparer(name_prefix='test-rbac-new-kv')
     def test_create_for_rbac_create_cert_keyvault(self, resource_group, key_vault):
-        KeyVaultErrorException = get_sdk(self.cli_ctx, ResourceType.DATA_KEYVAULT, 'models.key_vault_error#KeyVaultErrorException')
+        from azure.core.exceptions import HttpResponseError
         subscription_id = self.get_subscription_id()
 
         self.kwargs.update({
@@ -88,7 +88,7 @@ class CreateForRbacScenarioTest(RoleScenarioTestBase):
                 result = self.cmd('ad sp create-for-rbac --create-cert '
                                   '--keyvault {kv} --cert {cert} -n {display_name}').get_output_in_json()
                 self.kwargs['app_id'] = result['appId']
-            except KeyVaultErrorException:
+            except HttpResponseError:
                 if not self.is_live and not self.in_recording:
                     pass  # temporary workaround for keyvault challenge handling was ignored under playback
                 else:
