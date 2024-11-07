@@ -806,6 +806,22 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('server_name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
                 c.argument('virtual_endpoint_name', options_list=['--name', '-n'], arg_type=virtual_endpoint_arg_type, validator=virtual_endpoint_name_validator)
 
+        with self.argument_context('{} flexible-server long-term-retention list'.format(command_group)) as c:
+            c.argument('server_name', id_part=None, arg_type=server_name_arg_type)
+
+        with self.argument_context('{} flexible-server long-term-retention show'.format(command_group)) as c:
+            c.argument('backup_name', options_list=['--backup-name', '-b'], help='The name of the new backup.')
+            c.argument('server_name', id_part=None, arg_type=server_name_arg_type)
+
+        with self.argument_context('{} flexible-server long-term-retention start'.format(command_group)) as c:
+            c.argument('backup_name', options_list=['--backup-name', '-b'], help='The name of the new backup.')
+            c.argument('server_name', id_part=None, arg_type=server_name_arg_type)
+            c.argument('sas_url', options_list=['--sas-url', '-u'], help='Blob service SAS URL.')
+
+        with self.argument_context('{} flexible-server long-term-retention pre-check'.format(command_group)) as c:
+            c.argument('backup_name', options_list=['--backup-name', '-b'], help='The name of the new backup.') 
+            c.argument('server_name', id_part=None, arg_type=server_name_arg_type)
+
         for scope in ['create', 'update']:
             argument_context_string = '{} flexible-server virtual-endpoint {}'.format(command_group, scope)
             with self.argument_context(argument_context_string) as c:
