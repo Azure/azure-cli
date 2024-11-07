@@ -2103,7 +2103,19 @@ def aks_runcommand(cmd, client, resource_group_name, name, command_string="", co
         _aks_command_result_in_progess_helper(client, resource_group_name, name, command_id)
         return
 
-    return LongRunningOperation(cmd.cli_ctx, progress_bar=PollerProgressBar(cmd.cli_ctx, command_result_poller))(command_result_poller)
+    progress_bar = PollerProgressBar(cmd.cli_ctx, command_result_poller)
+    progress_bar.begin()
+
+    now = datetime.datetime.now()
+    while not command_result_poller.done():
+        if datetime.datetime.now() - now >= datetime.timedelta(seconds=300):
+            break
+
+        progress_bar.update_progress()
+        time.sleep(0.5)
+
+    progress_bar.end()
+    return _print_command_result(cmd.cli_ctx, command_result_poller.result())
 
 
 def aks_command_result(cmd, client, resource_group_name, name, command_id=""):
