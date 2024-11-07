@@ -297,21 +297,34 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         database_name = 'testdb'
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         ha_value = 'ZoneRedundant'
+        backup_name = "testbackup"
 
         self.cmd('{} flexible-server create -g {} -n {} --backup-retention {} --sku-name {} --tier {} \
                   --storage-size {} -u {} --version {} --tags keys=3 --database-name {} --high-availability {} \
                   --public-access None'.format(database_engine, resource_group, server_name, backup_retention,
                                                sku_name, tier, storage_size, 'dbadmin', version, database_name, ha_value))
 
-        # create LTR
-        backup_name = "testbackup"
-        self.cmd('{} flexible-server long-term-retention start -g {} \
-                 -n {} -u {} -b {}'.format(database_engine, resource_group, server_name, sas_url,
-                                           backup_name))
+        # precheck LTR
+        precheck_result = self.cmd('{} flexible-server long-term-retention pre-check -g {} \
+                 -n {} -b {}'.format(database_engine, resource_group, server_name, backup_name)).get_output_in_json()
+        self.assertGreaterEqual(precheck_result['numberOfContainers'], 0)
+
+        # start LTR
+        self.cmd('{} flexible-server long-term-retention start -g {} -n {} -u {} -b {}'
+                 .format(database_engine, resource_group, server_name, sas_url, backup_name),
+                 checks=[JMESPathCheck('backupName', backup_name)])
 
         # show LTR
-        self.cmd('{} flexible-server long-term-retention show -g {} \
-                 -n {} -b {}'.format(database_engine, resource_group, server_name, backup_name))
+        self.cmd('{} flexible-server long-term-retention show -g {} -n {} -b {}'
+                 .format(database_engine, resource_group, server_name, backup_name),
+                 checks=[JMESPathCheck('backupName', backup_name)])
+
+        # list LTR
+        list_result = self.cmd('{} flexible-server long-term-retention list -g {} \
+                 -n {}'.format(database_engine, resource_group, server_name)).get_output_in_json()
+        self.assertEqual(len(list_result), 1)
+        self.assertEqual(list_result[0]['backupName'], backup_name)
+
 
 
     def _test_flexible_server_mgmt_case_insensitive(self, database_engine, resource_group):

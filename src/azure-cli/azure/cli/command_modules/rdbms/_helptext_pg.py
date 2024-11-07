@@ -768,7 +768,7 @@ type: command
 short-summary: performs all the checks that are needed for the subsequent long-term-retention backup operation to succeed.
 examples:
   - name: Precheck command.
-    text: az postgres flexible-server long-term-retention pre-check
+    text: az postgres flexible-server long-term-retention pre-check -g resource-group-name -b backup-name -n server-name 
 """
 
 helps['postgres flexible-server long-term-retention start'] = """
@@ -776,7 +776,7 @@ type: command
 short-summary: Start long-term-retention backup for a flexible server.
 examples:
   - name: Create a backup.
-    text: az postgres flexible-server long-term-retention start
+    text: az postgres flexible-server long-term-retention pre-check -g resource-group-name -b backup-name -n server-name -u 'www.sas-link.com'
 """
 
 helps['postgres flexible-server long-term-retention show'] = """
@@ -784,7 +784,7 @@ type: command
 short-summary: Show the details of a specific long-term-retention backup for a given server.
 examples:
   - name: Show the details of long-term-retention backup 'testbackup' for 'testsvr'.
-    text: az postgres flexible-server long-term-retention show -g testgroup -n testsvr --backup-name testbackup
+    text: az postgres flexible-server long-term-retention show -g resource-group-name -n server-name -b backup-name
 """
 
 helps['postgres flexible-server long-term-retention list'] = """
@@ -792,7 +792,7 @@ type: command
 short-summary: List all the long-term-retention backups for a given server.
 examples:
   - name: List all long-term-retention backups for 'testsvr'.
-    text: az postgres flexible-server long-term-retention list -g testgroup -n testsvr
+    text: az postgres flexible-server long-term-retention list -g resource-group-name -n server-name
 """
 
 helps['postgres flexible-server replica'] = """
