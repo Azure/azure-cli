@@ -768,7 +768,7 @@ type: command
 short-summary: performs all the checks that are needed for the subsequent long-term-retention backup operation to succeed.
 examples:
   - name: Precheck command.
-    text: az postgres flexible-server long-term-retention pre-check -g resource-group-name -b backup-name -n server-name 
+    text: az postgres flexible-server long-term-retention pre-check -g resource-group-name -b backup-name -n server-name
 """
 
 helps['postgres flexible-server long-term-retention start'] = """
@@ -776,7 +776,7 @@ type: command
 short-summary: Start long-term-retention backup for a flexible server.
 examples:
   - name: Create a backup.
-    text: az postgres flexible-server long-term-retention pre-check -g resource-group-name -b backup-name -n server-name -u 'www.sas-link.com'
+    text: az postgres flexible-server long-term-retention pre-check -g resource-group-name -b backup-name -n server-name --sas-url <sas-url>
 """
 
 helps['postgres flexible-server long-term-retention show'] = """
