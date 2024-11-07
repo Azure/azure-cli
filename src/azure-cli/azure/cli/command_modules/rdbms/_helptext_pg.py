@@ -776,7 +776,7 @@ type: command
 short-summary: Start long-term-retention backup for a flexible server. SAS URL parameter refers to the container SAS URL, inside the storage account, where the backups will be uploaded.
 examples:
   - name: Create a backup with name 'backup-name' of server 'server-name' in resource group 'resource-group-name', using container with SAS URL '<sas-url>'.
-    text: az postgres flexible-server long-term-retention pre-check -g resource-group-name -b backup-name -n server-name --sas-url <sas-url>
+    text: az postgres flexible-server long-term-retention start -g resource-group-name -b backup-name -n server-name -u <sas-url>
 """
 
 helps['postgres flexible-server long-term-retention show'] = """
