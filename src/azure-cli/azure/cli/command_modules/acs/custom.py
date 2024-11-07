@@ -19,6 +19,7 @@ import ssl
 import stat
 import subprocess
 import sys
+from typing import Optional
 import tempfile
 import threading
 import time
@@ -94,7 +95,10 @@ from azure.cli.core.azclierror import (
 )
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_subscription_id
+from azure.cli.core.commands.progress import PollerProgressBar
+from azure.core.polling.base_polling import LocationPolling, _is_empty, BadResponse, _as_json
 from azure.cli.core.profiles import ResourceType
+from azure.mgmt.core.polling.arm_polling import ARMPolling
 from azure.cli.core.util import in_cloud_console, sdk_no_wait
 from azure.core.exceptions import ResourceNotFoundError as ResourceNotFoundErrorAzCore
 from azure.mgmt.containerservice.models import KubernetesSupportPlan
@@ -2027,6 +2031,38 @@ def aks_get_versions(cmd, client, location):
     return client.list_kubernetes_versions(location)
 
 
+class RunCommandLocationPolling(LocationPolling):
+    """Extends LocationPolling but uses the body content instead of the status code for the status"""
+
+    @staticmethod
+    def _get_provisioning_state(response: Optional[str]):
+        """Attempt to get provisioning state from resource.
+
+        :param azure.core.pipeline.transport.HttpResponse response: latest REST call response.
+        :returns: Status if found, else 'None'.
+        """
+        if _is_empty(response):
+            return None
+        body = _as_json(response)
+        return body.get("properties", {}).get("provisioningState")
+
+    def get_status(self, pipeline_response):
+        """Process the latest status update retrieved from the same URL as
+        the previous request.
+
+        :param azure.core.pipeline.PipelineResponse response: latest REST call response.
+        :raises: BadResponse if status not 200 or 204.
+        """
+        response = pipeline_response.http_response
+        if _is_empty(response):
+            raise BadResponse(
+                "The response from long running operation does not contain a body."
+            )
+
+        status = self._get_provisioning_state(response)
+        return status or "Succeeded"
+
+
 def aks_runcommand(cmd, client, resource_group_name, name, command_string="", command_files=None, no_wait=False):
     colorama.init()
 
@@ -2034,6 +2070,7 @@ def aks_runcommand(cmd, client, resource_group_name, name, command_string="", co
 
     if not command_string:
         raise ValidationError('Command cannot be empty.')
+
     RunCommandRequest = cmd.get_models('RunCommandRequest', resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                        operation_group='managed_clusters')
     request_payload = RunCommandRequest(command=command_string)
@@ -2046,8 +2083,15 @@ def aks_runcommand(cmd, client, resource_group_name, name, command_string="", co
         request_payload.cluster_token = _get_dataplane_aad_token(
             cmd.cli_ctx, "6dae42f8-4368-4678-94ff-3960e28e3630")
 
+    polling_interval = 5
+    retry_total = 0
+
     command_result_poller = sdk_no_wait(
-        no_wait, client.begin_run_command, resource_group_name, name, request_payload, polling_interval=5, retry_total=0
+        no_wait, client.begin_run_command, resource_group_name, name, request_payload,
+        # NOTE: Note sure if retry_total is used in ARMPolling
+        polling=ARMPolling(polling_interval, lro_options={"final-state-via": "location"}, lro_algorithms=[RunCommandLocationPolling()], retry_total=retry_total),
+        polling_interval=polling_interval,
+        retry_total=retry_total
     )
     if no_wait:
         # pylint: disable=protected-access
@@ -2058,7 +2102,8 @@ def aks_runcommand(cmd, client, resource_group_name, name, command_string="", co
         command_id = command_id_regex.findall(command_result_polling_url)[0]
         _aks_command_result_in_progess_helper(client, resource_group_name, name, command_id)
         return
-    return _print_command_result(cmd.cli_ctx, command_result_poller.result(300))
+
+    return LongRunningOperation(cmd.cli_ctx, progress_bar=PollerProgressBar(cmd.cli_ctx, command_result_poller))(command_result_poller)
 
 
 def aks_command_result(cmd, client, resource_group_name, name, command_id=""):

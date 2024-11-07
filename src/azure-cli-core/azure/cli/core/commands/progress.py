@@ -195,3 +195,12 @@ class IndeterminateProgressBar:
 
     def end(self):
         self.hook.end()
+
+class PollerProgressBar(IndeterminateProgressBar):
+    def __init__(self, cli_ctx, poller, message="Running"):
+        super().__init__(cli_ctx, message)
+        self.poller = poller
+
+    def update_progress(self):
+        self.message = self.poller.status()
+        super().update_progress()
