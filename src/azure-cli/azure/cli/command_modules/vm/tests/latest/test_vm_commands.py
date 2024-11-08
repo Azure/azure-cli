@@ -9129,13 +9129,13 @@ class DiskEncryptionSetTest(ScenarioTest):
         
         # create disk with des name
         self.cmd('disk create -g {rg} -n {disk1} --security-type ConfidentialVM_DiskEncryptedWithCustomerKey --hyper-v-generation V2 --secure-vm-disk-encryption-set {des} --image-reference "{image}"', checks=[
-            self.check_pattern('securityProfile.secureVmDiskEncryptionSetId', self.kwargs['des_pattern']),
+            self.check_pattern('securityProfile.secureVMDiskEncryptionSetId', self.kwargs['des_pattern']),
             self.check('securityProfile.securityType', 'ConfidentialVM_DiskEncryptedWithCustomerKey')
         ])
 
         # create disk with des id
         self.cmd('disk create -g {rg} -n {disk2} --security-type ConfidentialVM_DiskEncryptedWithCustomerKey --hyper-v-generation V2 --secure-vm-disk-encryption-set {des} --image-reference "{image}"', checks=[
-            self.check_pattern('securityProfile.secureVmDiskEncryptionSetId', self.kwargs['des_pattern']),
+            self.check_pattern('securityProfile.secureVMDiskEncryptionSetId', self.kwargs['des_pattern']),
             self.check('securityProfile.securityType', 'ConfidentialVM_DiskEncryptedWithCustomerKey')
         ])
 
