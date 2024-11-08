@@ -5,7 +5,8 @@
 from packaging.version import parse
 from typing import Callable, List, NamedTuple, Union
 
-from azure.cli.core.extension import ext_compat_with_cli, WHEEL_INFO_RE, is_stable_from_metadata
+from azure.cli.core.extension import (ext_compat_with_cli, WHEEL_INFO_RE,
+                                      is_stable_from_metadata, is_preview_from_metadata)
 from azure.cli.core.extension._index import get_index_extensions
 
 from knack.log import get_logger
@@ -104,11 +105,29 @@ def resolve_from_index(extension_name, cur_version=None, index_url=None, target_
     if not candidates:
         raise NoExtensionCandidatesError(f"No extension found with name '{extension_name}'")
 
-    if not allow_preview:
+    if allow_preview is None:
+        """
+        default value of allow-preview changed from true to false
+        and the following part deals with two influenced scenariors if user does not specify allow-preview
+        1. if extension module does not have any stable version, set allow-preview=True and display warning message to 
+           unblock those extension module user
+        2. if extension module has a later preview version than stable one, dispaly a warning message to user 
+           indicating how to try the newer preview one, but allow-preview is still set to be False by default
+        """
+        allow_preview = False
         stable_candidates = list(filter(is_stable_from_metadata, candidates))
+        preview_candidates = list(filter(is_preview_from_metadata, candidates))
         if len(stable_candidates) == 0:
             logger.warning("No stable version of '%s' to install. Preview versions allowed", extension_name)
             allow_preview = True
+        elif len(preview_candidates) != 0:
+            max_preview_item = max(preview_candidates, key=lambda x: parse(x['metadata']['version']))
+            max_stable_item = max(stable_candidates, key=lambda x: parse(x['metadata']['version']))
+            if parse(max_preview_item['metadata']['version']) > parse(max_stable_item['metadata']['version']):
+                logger.warning("Extension '%s' has a later preview version to install, add `--allow-preview True` "
+                               "to try preview version", extension_name)
+        else:
+            logger.info("No preview versions need to be tried.")
 
     # Helper to curry predicate functions
     def list_filter(f):
@@ -126,7 +145,7 @@ def resolve_from_index(extension_name, cur_version=None, index_url=None, target_
             _ExtensionFilter(
                 filter=list_filter(is_stable_from_metadata),
                 on_empty_results_message=f"No suitable stable version of '{extension_name}' to install. "
-                                         f"Add `--allow-preview` to try preview versions"
+                                         f"Add `--allow-preview True` to try preview versions"
             )]
 
     if target_version:

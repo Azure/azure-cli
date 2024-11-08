@@ -323,7 +323,7 @@ class TestExtensions(TestExtensionsBase):
         self.assertEqual(ext["version"], "2.0.0a1")
         remove_extension("ml")
 
-    def test_add_preview_extension_by_default(self):
+    def test_add_stable_extension_by_default(self):
         test_ext_source = _get_test_data_file('extension_test_pkg-1.2.3-py3-none-any.whl')
         with mock.patch('azure.cli.core.extension.operations.logger') as mock_logger:
             add_extension(cmd=self.cmd, source=test_ext_source)
@@ -375,7 +375,6 @@ class TestExtensions(TestExtensionsBase):
             self.assertEqual(ext['version'], '1.4.1a1')
             remove_extension(extension_name)
 
-    @unittest.skip("No break in preview only modules")
     def test_add_extension_preview_inavailable(self):
         extension_name = "extension-test-pkg"
         extension1 = 'extension_test_pkg-1.0.0b1-py3-none-any.whl'
@@ -391,8 +390,46 @@ class TestExtensions(TestExtensionsBase):
         from knack.util import CLIError
         with mock.patch('azure.cli.core.extension._resolve.get_index_extensions',
                         return_value=mocked_index_data):
-            with self.assertRaisesRegex(CLIError, "No suitable stable version of 'extension-test-pkg' to install. Add `--allow-preview` to try preview versions"):
+            with self.assertRaisesRegex(CLIError, "No suitable stable version of 'extension-test-pkg' to install. Add `--allow-preview True` to try preview versions"):
                 add_extension(cmd=self.cmd, extension_name=extension_name, allow_preview=False)
+
+            with mock.patch('azure.cli.core.extension._resolve.logger') as mock_logger:
+                add_extension(cmd=self.cmd, extension_name=extension_name)
+                call_args = mock_logger.warning.call_args
+                self.assertEqual("No stable version of '%s' to install. Preview versions allowed", call_args[0][0])
+                self.assertEqual(extension_name, call_args[0][1])
+                self.assertEqual(mock_logger.warning.call_count, 1)
+            ext = show_extension(extension_name)
+            self.assertEqual(ext["name"], extension_name)
+            self.assertEqual(ext["version"], "1.4.1a1")
+            remove_extension(extension_name)
+
+    def test_add_extension_with_later_preview(self):
+        extension_name = "extension-test-pkg"
+        extension1 = 'extension_test_pkg-1.0.0b1-py3-none-any.whl'
+        extension2 = 'extension_test_pkg-1.2.3-py3-none-any.whl'
+        extension3 = 'extension_test_pkg-1.4.1a1-py3-none-any.whl'
+
+        mocked_index_data = {
+            extension_name: [
+                mock_ext(extension1, version='1.0.0b1', download_url=_get_test_data_file(extension1)),
+                mock_ext(extension2, version='1.2.3', download_url=_get_test_data_file(extension2)),
+                mock_ext(extension3, version='1.4.1a1', download_url=_get_test_data_file(extension3))
+            ]
+        }
+        from knack.util import CLIError
+        with mock.patch('azure.cli.core.extension._resolve.get_index_extensions',
+                        return_value=mocked_index_data):
+            with mock.patch('azure.cli.core.extension._resolve.logger') as mock_logger:
+                add_extension(cmd=self.cmd, extension_name=extension_name)
+                call_args = mock_logger.warning.call_args
+                self.assertEqual("Extension '%s' has a later preview version to install, add `--allow-preview True` to try preview version", call_args[0][0])
+                self.assertEqual(extension_name, call_args[0][1])
+                self.assertEqual(mock_logger.warning.call_count, 1)
+            ext = show_extension(extension_name)
+            self.assertEqual(ext["name"], extension_name)
+            self.assertEqual(ext["version"], "1.2.3")
+            remove_extension(extension_name)
 
     def test_update_extension_with_preview(self):
         extension_name = "extension-test-pkg"
