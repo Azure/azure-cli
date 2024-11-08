@@ -106,14 +106,12 @@ def resolve_from_index(extension_name, cur_version=None, index_url=None, target_
         raise NoExtensionCandidatesError(f"No extension found with name '{extension_name}'")
 
     if allow_preview is None:
-        """
-        default value of allow-preview changed from true to false
-        and the following part deals with two influenced scenariors if user does not specify allow-preview
-        1. if extension module does not have any stable version, set allow-preview=True and display warning message to 
-           unblock those extension module user
-        2. if extension module has a later preview version than stable one, dispaly a warning message to user 
-           indicating how to try the newer preview one, but allow-preview is still set to be False by default
-        """
+        # default value of allow-preview changed from true to false
+        # and the following part deals with two influenced scenariors if user does not specify allow-preview
+        # 1. if extension module does not have any stable version, set allow-preview=True and display warning message to
+        #   unblock those extension module user
+        # 2. if extension module has a later preview version than stable one, dispaly a warning message to user
+        #   indicating how to try the newer preview one, but allow-preview is still set to be False by default
         allow_preview = False
         stable_candidates = list(filter(is_stable_from_metadata, candidates))
         preview_candidates = list(filter(is_preview_from_metadata, candidates))
