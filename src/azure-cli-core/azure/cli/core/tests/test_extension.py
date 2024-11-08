@@ -325,8 +325,7 @@ class TestExtensions(TestExtensionsBase):
 
     def test_add_stable_extension_by_default(self):
         test_ext_source = _get_test_data_file('extension_test_pkg-1.2.3-py3-none-any.whl')
-        with mock.patch('azure.cli.core.extension.operations.logger') as mock_logger:
-            add_extension(cmd=self.cmd, source=test_ext_source)
+        add_extension(cmd=self.cmd, source=test_ext_source)
         ext = show_extension("extension-test-pkg")
         self.assertEqual(ext["name"], "extension-test-pkg")
         self.assertEqual(ext["version"], "1.2.3")
@@ -396,7 +395,7 @@ class TestExtensions(TestExtensionsBase):
             with mock.patch('azure.cli.core.extension._resolve.logger') as mock_logger:
                 add_extension(cmd=self.cmd, extension_name=extension_name)
                 call_args = mock_logger.warning.call_args
-                self.assertEqual("No stable version of '%s' to install. Preview versions allowed", call_args[0][0])
+                self.assertEqual("No stable version of '%s' to install. Preview versions allowed.", call_args[0][0])
                 self.assertEqual(extension_name, call_args[0][1])
                 self.assertEqual(mock_logger.warning.call_count, 1)
             ext = show_extension(extension_name)
@@ -423,7 +422,7 @@ class TestExtensions(TestExtensionsBase):
             with mock.patch('azure.cli.core.extension._resolve.logger') as mock_logger:
                 add_extension(cmd=self.cmd, extension_name=extension_name)
                 call_args = mock_logger.warning.call_args
-                self.assertEqual("Extension '%s' has a later preview version to install, add `--allow-preview True` to try preview version", call_args[0][0])
+                self.assertEqual("Extension '%s' has a later preview version to install, add `--allow-preview True` to try preview version.", call_args[0][0])
                 self.assertEqual(extension_name, call_args[0][1])
                 self.assertEqual(mock_logger.warning.call_count, 1)
             ext = show_extension(extension_name)

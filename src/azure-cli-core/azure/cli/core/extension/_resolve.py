@@ -116,14 +116,14 @@ def resolve_from_index(extension_name, cur_version=None, index_url=None, target_
         stable_candidates = list(filter(is_stable_from_metadata, candidates))
         preview_candidates = list(filter(is_preview_from_metadata, candidates))
         if len(stable_candidates) == 0:
-            logger.warning("No stable version of '%s' to install. Preview versions allowed", extension_name)
+            logger.warning("No stable version of '%s' to install. Preview versions allowed.", extension_name)
             allow_preview = True
         elif len(preview_candidates) != 0:
             max_preview_item = max(preview_candidates, key=lambda x: parse(x['metadata']['version']))
             max_stable_item = max(stable_candidates, key=lambda x: parse(x['metadata']['version']))
             if parse(max_preview_item['metadata']['version']) > parse(max_stable_item['metadata']['version']):
                 logger.warning("Extension '%s' has a later preview version to install, add `--allow-preview True` "
-                               "to try preview version", extension_name)
+                               "to try preview version.", extension_name)
         else:
             logger.info("No preview versions need to be tried.")
 
