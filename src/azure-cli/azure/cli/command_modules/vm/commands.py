@@ -40,6 +40,8 @@ from azure.cli.command_modules.vm._image_builder import (
     process_image_template_create_namespace, process_img_tmpl_output_add_namespace,
     process_img_tmpl_customizer_add_namespace, image_builder_client_factory, cf_img_bldr_image_templates)
 
+from azure.cli.command_modules.vm._vm_utils import import_aaz_by_profile
+
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation, CliCommandType
 from azure.cli.core.commands.arm import deployment_validate_table_format, handle_template_based_exception
 
@@ -239,15 +241,13 @@ def load_command_table(self, _):
 
     with self.command_group('disk', compute_disk_sdk, operation_group='disks', min_api='2017-03-30') as g:
         g.custom_command('create', 'create_managed_disk', supports_no_wait=True, table_transformer=transform_disk_create_table_output, validator=process_disk_create_namespace)
-        # g.custom_command('grant-access', 'grant_disk_access')
         from .custom import DiskUpdate, DiskGrantAccess
         self.command_table["disk grant-access"] = DiskGrantAccess(loader=self)
         self.command_table["disk update"] = DiskUpdate(loader=self)
 
-        from azure.cli.command_modules.vm._vm_utils import import_aaz_by_profile
-        Disk = import_aaz_by_profile(self.cli_ctx.cloud.profile, "disk")
-        self.command_table['disk list'] = Disk.List(loader=self, table_transformer='[].' + transform_disk_show_table_output)
-        self.command_table['disk show'] = Disk.Show(loader=self, table_transformer=transform_disk_show_table_output)
+        _Disk = import_aaz_by_profile(self.cli_ctx.cloud.profile, "disk")
+        self.command_table['disk list'] = _Disk.List(loader=self, table_transformer='[].' + transform_disk_show_table_output)
+        self.command_table['disk show'] = _Disk.Show(loader=self, table_transformer=transform_disk_show_table_output)
 
     with self.command_group('disk-encryption-set', compute_disk_encryption_set_sdk, operation_group='disk_encryption_sets', client_factory=cf_disk_encryption_set, min_api='2019-07-01') as g:
         g.custom_command('create', 'create_disk_encryption_set', supports_no_wait=True)
@@ -460,7 +460,6 @@ def load_command_table(self, _):
         g.wait_command('wait', getter_name='get_vmss', getter_type=compute_custom)
         g.custom_command('set-orchestration-service-state', 'set_orchestration_service_state', supports_no_wait=True)
 
-        from azure.cli.command_modules.vm._vm_utils import import_aaz_by_profile
         VMSS = import_aaz_by_profile(self.cli_ctx.cloud.profile, "vmss")
         if self.supported_api_version(min_api='2017-03-30'):
             self.command_table['vmss list'] = VMSS.List(loader=self,

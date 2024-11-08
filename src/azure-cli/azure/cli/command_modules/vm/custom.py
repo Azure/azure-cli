@@ -558,13 +558,6 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
     from .aaz.latest.disk import Create
     return Create(cli_ctx=cmd.cli_ctx)(command_args=args)
 
-#
-# def grant_disk_access(cmd, resource_group_name, disk_name, duration_in_seconds, access_level=None,
-#                       secure_vm_guest_state_sas=None):
-#
-#     return _grant_access(cmd, resource_group_name, disk_name, duration_in_seconds, is_disk=True,
-#                          access_level=access_level, secure_vm_guest_state_sas=secure_vm_guest_state_sas)
-#
 
 class DiskGrantAccess(_DiskGrantAccess):
     def pre_operations(self):
@@ -721,16 +714,8 @@ def create_image(cmd, resource_group_name, name, source, os_type=None, data_disk
     args["image_name"] = name
     args["resource_group"] = resource_group_name
 
-    from .aaz.latest.image import Create
-    return Create(cli_ctx=cmd.cli_ctx)(command_args=args)
-
-#
-# class ImageUpdate(_ImageUpdate):
-#     def pre_instance_update(self, instance):
-#         pass
-#         # args = self.ctx.args
-#         # if has_value(args.tags):
-#         #     instance.tags = args.tags
+    _Image = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "image")
+    return _Image.Create(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 
 # region Snapshots
@@ -6215,31 +6200,3 @@ class VMSSListInstances(_VMSSListInstances):
         result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
         next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
         return result, next_link
-
-
-# class ImageCreate(_ImageCreate):
-#     @classmethod
-#     def _build_arguments_schema(cls, *args, **kwargs):
-#         args_schema = super()._build_arguments_schema(*args, **kwargs)
-#         args_schema.extended_location._registered = False
-#         args_schema.source_virtual_machine._registered = False
-#         args_schema.storage_profile._registered = False
-#
-#
-#
-#         # from azure.cli.core.aaz import AAZFileArg, AAZFileArgBase64EncodeFormat
-#         # args_schema.cert_file = AAZFileArg(
-#         #     options=["--cert-file"],
-#         #     help="Path to the certificate file.",
-#         #     required=True,
-#         #     fmt=AAZFileArgBase64EncodeFormat(),
-#         # )
-#         # args_schema.data._registered = False
-#         return args_schema
-#
-#     def pre_operations(self):
-#         pass
-    # def pre_operations(self):
-    #     args = self.ctx.args
-    #     if has_value(args.cert_file):
-    #         args.data = args.cert_file

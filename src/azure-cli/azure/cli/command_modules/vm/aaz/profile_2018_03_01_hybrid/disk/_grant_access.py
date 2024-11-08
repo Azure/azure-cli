@@ -12,20 +12,22 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "disk delete",
-    confirmation="Are you sure you want to perform this operation?",
+    "disk grant-access",
 )
-class Delete(AAZCommand):
-    """Delete a managed disk.
+class GrantAccess(AAZCommand):
+    """Grant a resource access to a managed disk.
 
-    :example: Delete a managed disk.
-        az disk delete --name MyManagedDisk --resource-group MyResourceGroup
+    :example: Grant a resource read access to a managed disk.
+        az disk grant-access --access-level Read --duration-in-seconds 3600 --name MyManagedDisk --resource-group MyResourceGroup
+
+    :example: Grant a resource read access to a disk to generate access SAS and security data access SAS
+        az disk grant-access --access-level Read --duration-in-seconds 3600 --name MyDisk --resource-group MyResourceGroup --secure-vm-guest-state-sas
     """
 
     _aaz_info = {
         "version": "2017-03-30",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/disks/{}", "2017-03-30"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/disks/{}/begingetaccess", "2017-03-30"],
         ]
     }
 
@@ -55,11 +57,29 @@ class Delete(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
+
+        # define Arg Group "GrantAccessData"
+
+        _args_schema = cls._args_schema
+        _args_schema.access_level = AAZStrArg(
+            options=["--access", "--access-level"],
+            arg_group="GrantAccessData",
+            help="Access level.",
+            required=True,
+            default="Read",
+            enum={"None": "None", "Read": "Read"},
+        )
+        _args_schema.duration_in_seconds = AAZIntArg(
+            options=["--duration-in-seconds"],
+            arg_group="GrantAccessData",
+            help="Time duration in seconds until the SAS access expires.",
+            required=True,
+        )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.DisksDelete(ctx=self.ctx)()
+        yield self.DisksGrantAccess(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -74,7 +94,7 @@ class Delete(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class DisksDelete(AAZHttpOperation):
+    class DisksGrantAccess(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -98,28 +118,19 @@ class Delete(AAZCommand):
                     lro_options={"final-state-via": "azure-async-operation"},
                     path_format_arguments=self.url_parameters,
                 )
-            if session.http_response.status_code in [204]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_204,
-                    self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
-                    path_format_arguments=self.url_parameters,
-                )
 
             return self.on_error(session.http_response)
 
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/disks/{diskName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/disks/{diskName}/beginGetAccess",
                 **self.url_parameters
             )
 
         @property
         def method(self):
-            return "DELETE"
+            return "POST"
 
         @property
         def error_format(self):
@@ -157,10 +168,25 @@ class Delete(AAZCommand):
         def header_parameters(self):
             parameters = {
                 **self.serialize_header_param(
+                    "Content-Type", "application/json",
+                ),
+                **self.serialize_header_param(
                     "Accept", "application/json",
                 ),
             }
             return parameters
+
+        @property
+        def content(self):
+            _content_value, _builder = self.new_content_builder(
+                self.ctx.args,
+                typ=AAZObjectType,
+                typ_kwargs={"flags": {"required": True, "client_flatten": True}}
+            )
+            _builder.set_prop("access", AAZStrType, ".access_level", typ_kwargs={"flags": {"required": True}})
+            _builder.set_prop("durationInSeconds", AAZIntType, ".duration_in_seconds", typ_kwargs={"flags": {"required": True}})
+
+            return self.serialize_content(_content_value)
 
         def on_200(self, session):
             data = self.deserialize_http_content(session)
@@ -180,51 +206,26 @@ class Delete(AAZCommand):
             cls._schema_on_200 = AAZObjectType()
 
             _schema_on_200 = cls._schema_on_200
-            _schema_on_200.end_time = AAZStrType(
-                serialized_name="endTime",
-                flags={"read_only": True},
-            )
-            _schema_on_200.error = AAZObjectType(
-                flags={"read_only": True},
-            )
-            _schema_on_200.name = AAZStrType(
-                flags={"read_only": True},
-            )
-            _schema_on_200.start_time = AAZStrType(
-                serialized_name="startTime",
-                flags={"read_only": True},
-            )
-            _schema_on_200.status = AAZStrType(
-                flags={"read_only": True},
+            _schema_on_200.properties = AAZObjectType(
+                flags={"client_flatten": True},
             )
 
-            error = cls._schema_on_200.error
-            error.code = AAZStrType()
-            error.details = AAZListType()
-            error.innererror = AAZObjectType()
-            error.message = AAZStrType()
-            error.target = AAZStrType()
+            properties = cls._schema_on_200.properties
+            properties.output = AAZObjectType(
+                flags={"client_flatten": True},
+            )
 
-            details = cls._schema_on_200.error.details
-            details.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.error.details.Element
-            _element.code = AAZStrType()
-            _element.message = AAZStrType()
-            _element.target = AAZStrType()
-
-            innererror = cls._schema_on_200.error.innererror
-            innererror.errordetail = AAZStrType()
-            innererror.exceptiontype = AAZStrType()
+            output = cls._schema_on_200.properties.output
+            output.access_sas = AAZStrType(
+                serialized_name="accessSAS",
+                flags={"read_only": True},
+            )
 
             return cls._schema_on_200
 
-        def on_204(self, session):
-            pass
+
+class _GrantAccessHelper:
+    """Helper class for GrantAccess"""
 
 
-class _DeleteHelper:
-    """Helper class for Delete"""
-
-
-__all__ = ["Delete"]
+__all__ = ["GrantAccess"]
