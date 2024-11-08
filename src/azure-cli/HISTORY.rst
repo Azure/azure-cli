@@ -76,7 +76,7 @@ Release History
 
 **Profile**
 
-* `az login`: Passing the service principal certificate with `--password` is deprecated and will be removed by version 2.74. Please use `--certificate` instead. (#30091)
+* `az login`: Passing the service principal certificate with `--password` is deprecated and will be removed in version 2.67.0. Please use `--certificate` instead. (#30091)
 
 **RDBMS**
 
