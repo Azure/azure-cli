@@ -94,12 +94,12 @@ from azure.cli.core.azclierror import (
 )
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_subscription_id
-from azure.cli.core.commands.progress import PollerProgressBar
 from azure.cli.core.profiles import ResourceType
 from azure.mgmt.core.polling.arm_polling import ARMPolling
 from azure.cli.core.util import in_cloud_console, sdk_no_wait
 from azure.core.exceptions import ResourceNotFoundError as ResourceNotFoundErrorAzCore
 from azure.mgmt.containerservice.models import KubernetesSupportPlan
+from humanfriendly.terminal.spinners import Spinner
 from knack.log import get_logger
 from knack.prompting import NoTTYException, prompt_y_n
 from knack.util import CLIError
@@ -2069,18 +2069,20 @@ def aks_runcommand(cmd, client, resource_group_name, name, command_string="", co
         _aks_command_result_in_progess_helper(client, resource_group_name, name, command_id)
         return
 
-    progress_bar = PollerProgressBar(cmd.cli_ctx, command_result_poller)
-    progress_bar.begin()
+    spinner = Spinner(label='Running', stream=sys.stderr, hide_cursor=False)
+    progress_controller = cmd.cli_ctx.get_progress_controller(det=False, spinner=spinner)
 
     now = datetime.datetime.now()
+    progress_controller.begin()
     while not command_result_poller.done():
         if datetime.datetime.now() - now >= datetime.timedelta(seconds=300):
             break
 
-        progress_bar.update_progress()
+        progress_controller.add(message=command_result_poller.status())
+        progress_controller.update()
         time.sleep(0.5)
 
-    progress_bar.end()
+    progress_controller.end()
     return _print_command_result(cmd.cli_ctx, command_result_poller.result())
 
 
