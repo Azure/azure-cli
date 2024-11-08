@@ -133,7 +133,7 @@ type: command
 short-summary: Add a CORS rule for a storage account.
 examples:
   - name: Add a CORS rule for a storage account
-    text: |.
+    text: |
         az storage account blob-service-properties cors-rule add --account-name mystorageaccount --resource-group myresourcegroup --allowed-origins "http://*.contoso.com" --allowed-methods PUT GET --max-age 200
 """
 
