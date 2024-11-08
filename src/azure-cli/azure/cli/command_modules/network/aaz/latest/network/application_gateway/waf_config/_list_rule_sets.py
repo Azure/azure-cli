@@ -31,9 +31,9 @@ class ListRuleSets(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-11-01",
+        "version": "2024-03-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.network/applicationgatewayavailablewafrulesets", "2023-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.network/applicationgatewayavailablewafrulesets", "2024-03-01"],
         ]
     }
 
@@ -110,7 +110,7 @@ class ListRuleSets(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-11-01",
+                    "api-version", "2024-03-01",
                     required=True,
                 ),
             }
@@ -207,6 +207,7 @@ class ListRuleSets(AAZCommand):
             _element.rule_id_string = AAZStrType(
                 serialized_name="ruleIdString",
             )
+            _element.sensitivity = AAZStrType()
             _element.state = AAZStrType()
 
             tiers = cls._schema_on_200.value.Element.properties.tiers

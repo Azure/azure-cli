@@ -10,9 +10,9 @@ from azure.cli.core.azclierror import (InvalidArgumentValueError, ArgumentUsageE
                                        ResourceNotFoundError, ValidationError, MutuallyExclusiveArgumentError)
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.commands.validators import validate_tags
+from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
 
 from knack.log import get_logger
-from msrestazure.tools import is_valid_resource_id, parse_resource_id
 
 from ._appservice_utils import _generic_site_operation
 from ._client_factory import web_client_factory
@@ -348,17 +348,18 @@ def _validate_service_tag_format(cmd, namespace):
         service_tag_full_list = ListServiceTags(cli_ctx=cmd.cli_ctx)(command_args={
             "location": webapp.location
         })
-        if service_tag_full_list is None:
-            logger.warning('Not able to get full Service Tag list. Cannot validate Service Tag.')
-            return
-        for tag in input_tags:
-            valid_tag = False
-            for tag_full_list in service_tag_full_list["values"]:
-                if tag.lower() == tag_full_list["name"].lower():
-                    valid_tag = True
-                    continue
-            if not valid_tag:
-                raise InvalidArgumentValueError('Unknown Service Tag: ' + tag)
+        if namespace.skip_service_tag_validation is None:
+            if service_tag_full_list is None or "values" not in service_tag_full_list:
+                logger.warning('Not able to get full Service Tag list. Cannot validate Service Tag.')
+                return
+            for tag in input_tags:
+                valid_tag = False
+                for tag_full_list in service_tag_full_list["values"]:
+                    if tag.lower() == tag_full_list["name"].lower():
+                        valid_tag = True
+                        continue
+                if not valid_tag:
+                    raise InvalidArgumentValueError('Unknown Service Tag: ' + tag)
 
 
 def _validate_service_tag_existence(cmd, namespace):

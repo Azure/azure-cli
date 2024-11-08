@@ -24,6 +24,22 @@ class AddCustomizedKeys(argparse.Action):
             raise ValidationError('Usage error: {} [KEY=VALUE ...]'.format(option_string))
 
 
+class AddAdditionalConnectionStringProperties(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        action = self.get_action(values, option_string)
+        namespace.connstr_props = action
+
+    def get_action(self, values, option_string):  # pylint: disable=no-self-use
+        try:
+            properties = defaultdict(list)
+            for (k, v) in (x.split('=', 1) for x in values):
+                properties[k] = v
+            properties = dict(properties)
+            return properties
+        except ValueError:
+            raise ValidationError('Usage error: {} [KEY=VALUE ...]'.format(option_string))
+
+
 def is_k8s_source(command_name):
     source_name = command_name.split(' ')[0]
     return source_name.lower() == "aks"
@@ -225,7 +241,7 @@ class AddServicePrincipalAuthInfo(argparse.Action):
                                   'Required keys are: client-id, secret')
         if 'principal_id' not in d:
             from ._utils import run_cli_cmd
-            output = run_cli_cmd('az ad sp show --id {}'.format(d['client_id']))
+            output = run_cli_cmd('az ad sp show --id "{}"'.format(d['client_id']))
             if output:
                 d['principal_id'] = output.get('id')
             else:
@@ -258,7 +274,7 @@ class AddWorkloadIdentityAuthInfo(argparse.Action):
         d = {}
         if 'user-identity-resource-id' in properties:
             from ._utils import run_cli_cmd
-            output = run_cli_cmd('az identity show --ids {}'.format(properties['user-identity-resource-id']))
+            output = run_cli_cmd('az identity show --ids "{}"'.format(properties['user-identity-resource-id']))
             if output:
                 d['client_id'] = output.get('clientId')
                 d['subscription_id'] = properties['user-identity-resource-id'].split('/')[2]

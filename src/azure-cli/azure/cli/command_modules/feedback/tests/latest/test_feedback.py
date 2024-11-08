@@ -29,6 +29,7 @@ from azure.cli.testsdk.reverse_dependency import get_dummy_cli
 logger = logging.getLogger(__name__)
 
 
+@unittest.skip('alias extension is not working: https://github.com/Azure/azure-cli/issues/29422')
 class TestCommandLogFile(ScenarioTest):
 
     def __init__(self, *args, **kwargs):

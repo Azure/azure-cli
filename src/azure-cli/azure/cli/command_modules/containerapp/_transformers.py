@@ -72,3 +72,16 @@ def transform_job_execution_show_output(execution):
 
 def transform_job_execution_list_output(executions):
     return [transform_job_execution_show_output(e) for e in executions]
+
+
+def transform_usages_output(result):
+    table_result = []
+    for item in result["value"]:
+        value = {
+            "Name": item["name"]["value"],
+            "Usage": item["usage"],
+            "Limit": item["limit"]
+        }
+        table_result.append(value)
+
+    return table_result

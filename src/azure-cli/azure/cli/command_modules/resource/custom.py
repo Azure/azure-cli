@@ -19,7 +19,7 @@ import base64
 from urllib.request import urlopen
 from urllib.parse import urlparse, unquote
 
-from msrestazure.tools import is_valid_resource_id, parse_resource_id
+from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
 
 from azure.mgmt.resource.resources.models import GenericResource, DeploymentMode
 
@@ -66,7 +66,7 @@ RPAAS_APIS = {'microsoft.datadog': '/subscriptions/{subscriptionId}/providers/Mi
 
 
 def _build_resource_id(**kwargs):
-    from msrestazure.tools import resource_id as resource_id_from_dict
+    from azure.mgmt.core.tools import resource_id as resource_id_from_dict
     try:
         return resource_id_from_dict(**kwargs)
     except KeyError:
@@ -1278,14 +1278,14 @@ def _prepare_stacks_excluded_actions(deny_settings_excluded_actions):
     return excluded_actions_array
 
 
-def _build_stacks_confirmation_string(rcf, yes, name, delete_resources_enum, delete_resource_groups_enum, delete_management_groups_enum):
+def _build_stacks_confirmation_string(rcf, yes, name, stack_scope, delete_resources_enum, delete_resource_groups_enum, delete_management_groups_enum):
     detach_model = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Detach
 
     if not yes:
         from knack.prompting import prompt_y_n
-        build_confirmation_string = "The DeploymentStack {} you're trying to create already exists in the current subscription.\n".format(
-            name)
-        build_confirmation_string += "The following actions will be applied to any resources that are no longer managed by the deployment stack after the template is applied:\n"
+
+        build_confirmation_string = f"The Deployment stack '{name}' you're trying to create already exists in the current {stack_scope}.\n"
+        build_confirmation_string += "The following actions will be applied to any resources that are no longer managed by the Deployment stack after the template is applied:\n"
 
         detaching_entities = []
         deleting_entities = []
@@ -1306,11 +1306,13 @@ def _build_stacks_confirmation_string(rcf, yes, name, delete_resources_enum, del
             deleting_entities.append("management groups")
 
         if len(detaching_entities) > 0:
-            build_confirmation_string += f"\nDetach: {', '.join(detaching_entities)}\n"
+            build_confirmation_string += f"\nDetachment: {', '.join(detaching_entities)}\n"
         if len(deleting_entities) > 0:
-            build_confirmation_string += f"\nDeleting: {', '.join(deleting_entities)}\n"
+            build_confirmation_string += f"\nDeletion: {', '.join(deleting_entities)}\n"
 
-        confirmation = prompt_y_n(build_confirmation_string + "\n")
+        build_confirmation_string += "\nAre you sure you want to continue?"
+
+        confirmation = prompt_y_n(build_confirmation_string)
         if not confirmation:
             return None
 
@@ -2483,7 +2485,7 @@ def create_deployment_stack_at_subscription(
                 raise CLIError("Cannot change location of an already existing stack at subscription scope.")
             # bypass if yes flag is true
             built_string = _build_stacks_confirmation_string(
-                rcf, yes, name, aou_resources_action_enum, aou_resource_groups_action_enum, aou_management_groups_action_enum)
+                rcf, yes, name, "subscription", aou_resources_action_enum, aou_resource_groups_action_enum, aou_management_groups_action_enum)
             if not built_string:
                 return
     except:  # pylint: disable=bare-except
@@ -2628,7 +2630,7 @@ def create_deployment_stack_at_resource_group(
     try:
         if rcf.deployment_stacks.get_at_resource_group(resource_group, name):
             built_string = _build_stacks_confirmation_string(
-                rcf, yes, name, aou_resources_action_enum, aou_resource_groups_action_enum, aou_management_groups_action_enum)
+                rcf, yes, name, "resource group", aou_resources_action_enum, aou_resource_groups_action_enum, aou_management_groups_action_enum)
             if not built_string:
                 return
     except:  # pylint: disable=bare-except
@@ -2924,7 +2926,7 @@ def create_deployment_stack_at_management_group(
         get_mg_response = rcf.deployment_stacks.get_at_management_group(management_group_id, name)
         if get_mg_response:
             built_string = _build_stacks_confirmation_string(
-                rcf, yes, name, aou_resources_action_enum, aou_resource_groups_action_enum, aou_management_groups_action_enum)
+                rcf, yes, name, "management group", aou_resources_action_enum, aou_resource_groups_action_enum, aou_management_groups_action_enum)
             if not built_string:
                 return
     except:  # pylint: disable=bare-except
@@ -2950,20 +2952,19 @@ def create_deployment_stack_at_management_group(
         cmd, rcf, deployment_scope, deployment_stack_model, template_file, template_spec, template_uri, parameters, query_string)
 
     # run validate
-    # TODO: renable once ARM bug with POST requests on MG location mapped resources is fixed. A race condition on the backend will cause the create after validate to fail.
-    # from azure.core.exceptions import HttpResponseError
-    # try:
-    #     validation_poller = rcf.deployment_stacks.begin_validate_stack_at_management_group(
-    #         management_group_id, name, deployment_stack_model)
-    # except HttpResponseError as err:
-    #     err_message = _build_http_response_error_message(err)
-    #     raise_subdivision_deployment_error(err_message, err.error.code if err.error else None)
-    #
-    # validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
-    #
-    # if validation_result and validation_result.error:
-    #     err_message = _build_preflight_error_message(validation_result.error)
-    #     raise_subdivision_deployment_error(err_message)
+    from azure.core.exceptions import HttpResponseError
+    try:
+        validation_poller = rcf.deployment_stacks.begin_validate_stack_at_management_group(
+            management_group_id, name, deployment_stack_model)
+    except HttpResponseError as err:
+        err_message = _build_http_response_error_message(err)
+        raise_subdivision_deployment_error(err_message, err.error.code if err.error else None)
+
+    validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
+
+    if validation_result and validation_result.error:
+        err_message = _build_preflight_error_message(validation_result.error)
+        raise_subdivision_deployment_error(err_message)
 
     # run create
     return sdk_no_wait(no_wait, rcf.deployment_stacks.begin_create_or_update_at_management_group, management_group_id, name, deployment_stack_model)
@@ -3256,7 +3257,7 @@ def create_policy_assignment(cmd, policy=None, policy_set_definition=None,
 
 
 def _get_resource_id(cli_ctx, val, resource_group, resource_type, resource_namespace):
-    from msrestazure.tools import resource_id
+    from azure.mgmt.core.tools import resource_id
     if is_valid_resource_id(val):
         return val
 
@@ -4521,7 +4522,9 @@ class _ResourceUtils:  # pylint: disable=too-many-instance-attributes
         """
         Formats Url if none provided and sends the POST request with the url and request-body.
         """
-        from msrestazure.azure_operation import AzureOperationPoller
+
+        from azure.core.polling import LROPoller
+        from azure.mgmt.core.polling.arm_polling import ARMPolling
 
         query_parameters = {}
         serialize = self.rcf.resources._serialize  # pylint: disable=protected-access
@@ -4563,28 +4566,14 @@ class _ResourceUtils:  # pylint: disable=too-many-instance-attributes
         body_content_kwargs = {}
         body_content_kwargs['content'] = json.loads(request_body) if request_body else None
 
-        # Construct and send request
-        def long_running_send():
-            request = client.post(url, query_parameters, header_parameters, **body_content_kwargs)
-            pipeline_response = client._pipeline.run(request, stream=False)
-            return pipeline_response.http_response.internal_response
+        def deserialization_cb(pipeline_response):
+            return json.loads(pipeline_response.http_response.text())
 
-        def get_long_running_status(status_link, headers=None):
-            request = client.get(status_link, query_parameters, header_parameters)
-            if headers:
-                request.headers.update(headers)
-            pipeline_response = client._pipeline.run(request, stream=False)
-            return pipeline_response.http_response.internal_response
+        request = client.post(url, query_parameters, header_parameters, **body_content_kwargs)
+        pipeline_response = client._pipeline.run(request, stream=False)
 
-        def get_long_running_output(response):
-            from azure.core.exceptions import HttpResponseError
-            if response.status_code not in [200, 202, 204]:
-                exp = HttpResponseError(response)
-                exp.request_id = response.headers.get('x-ms-request-id')
-                raise exp
-            return response.text
-
-        return AzureOperationPoller(long_running_send, get_long_running_output, get_long_running_status)
+        return LROPoller(client=client, initial_response=pipeline_response, deserialization_callback=deserialization_cb,
+                         polling_method=ARMPolling())
 
     @staticmethod
     def resolve_api_version(rcf, resource_provider_namespace, parent_resource_path, resource_type,

@@ -37,9 +37,9 @@ from azure.cli.core.profiles import ResourceType
 from azure.mgmt.containerregistry import ContainerRegistryManagementClient
 from azure.mgmt.resource import ResourceManagementClient
 from azure.mgmt.servicelinker import ServiceLinkerManagementClient
+from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id, resource_id
 
 from knack.log import get_logger
-from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
 
 from ._clients import ContainerAppClient, ManagedEnvironmentClient, WorkloadProfileClient, ContainerAppsJobClient
 from ._client_factory import handle_raw_exception, providers_client_factory, cf_resource_groups, log_analytics_client_factory, log_analytics_shared_key_client_factory
@@ -1395,7 +1395,7 @@ def create_new_acr(cmd, registry_name, resource_group_name, location=None, sku="
 
 def set_field_in_auth_settings(auth_settings, set_string):
     if set_string is not None:
-        split1 = set_string.split("=")
+        split1 = set_string.split("=", 1)
         fieldName = split1[0]
         fieldValue = split1[1]
         split2 = fieldName.split(".")

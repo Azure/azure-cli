@@ -12,9 +12,8 @@ from knack.prompting import (
     prompt,
     prompt_pass
 )
-from msrestazure.tools import (
+from azure.mgmt.core.tools import (
     parse_resource_id,
-    is_valid_resource_id
 )
 from azure.cli.core import telemetry
 from azure.cli.core.commands.client_factory import get_subscription_id
@@ -26,9 +25,11 @@ from azure.cli.core.azclierror import (
 
 from ._utils import (
     run_cli_cmd,
-    get_object_id_of_current_user
+    get_object_id_of_current_user,
+    is_valid_resource_id
 )
 from ._resource_config import (
+    AUTH_TYPE,
     CLIENT_TYPE,
     RESOURCE,
     SOURCE_RESOURCES,
@@ -147,7 +148,7 @@ def get_client_type(cmd, namespace):
 
         client_type = None
         try:
-            output = run_cli_cmd('az webapp show --id {} -o json'.format(source_id))
+            output = run_cli_cmd('az webapp show --id "{}" -o json'.format(source_id))
             prop = output.get('siteConfig').get('linuxFxVersion', None) or\
                 output.get('siteConfig').get('windowsFxVersion', None)
             # use 'linuxFxVersion' and 'windowsFxVersion' property to decide
@@ -169,7 +170,7 @@ def get_client_type(cmd, namespace):
         client_type = CLIENT_TYPE.SpringBoot
         try:
             segments = parse_resource_id(source_id)
-            output = run_cli_cmd('az spring app show -g {} -s {} -n {}'
+            output = run_cli_cmd('az spring app show -g "{}" -s "{}" -n "{}"'
                                  ' -o json'.format(segments.get('resource_group'), segments.get('name'),
                                                    segments.get('child_name_1')))
             prop_val = output.get('properties')\
@@ -421,12 +422,11 @@ def validate_target_resource_id(cmd, namespace):
     '''Validate resource id of a target resource
     '''
     if getattr(namespace, 'target_id', None):
-        if not is_valid_resource_id(namespace.target_id):
+        target = get_target_resource_name(cmd)
+        if not (target == RESOURCE.FabricSql) and not is_valid_resource_id(namespace.target_id):
             e = InvalidArgumentValueError('Resource id is invalid: {}'.format(namespace.target_id))
             telemetry.set_exception(e, 'target-id-invalid')
             raise e
-
-        target = get_target_resource_name(cmd)
         pattern = TARGET_RESOURCES.get(target)
         matched = re.match(get_resource_regex(pattern), namespace.target_id, re.IGNORECASE)
         if matched:
@@ -490,8 +490,9 @@ def get_missing_target_args(cmd):
     target = get_target_resource_name(cmd)
     missing_args = dict()
 
-    for arg, content in TARGET_RESOURCES_PARAMS.get(target).items():
-        missing_args[arg] = content
+    if target in TARGET_RESOURCES_PARAMS:
+        for arg, content in TARGET_RESOURCES_PARAMS.get(target).items():
+            missing_args[arg] = content
 
     return missing_args
 
@@ -511,6 +512,8 @@ def get_missing_auth_args(cmd, namespace):
                 auth_param_exist = True
                 break
 
+    if target == RESOURCE.ConfluentKafka:
+        return missing_args
     # when keyvault csi is enabled, auth_type is userIdentity without subs_id and client_id
     if source == RESOURCE.KubernetesCluster and target == RESOURCE.KeyVault:
         if getattr(namespace, 'enable_csi', None):
@@ -530,6 +533,10 @@ def get_missing_auth_args(cmd, namespace):
             })
             logger.warning('Auth info is not specified, use secrets store csi driver as default: --enable-csi')
             return missing_args
+
+    # ACA as target use null auth
+    if target == RESOURCE.ContainerApp:
+        return missing_args
 
     if source and target and not auth_param_exist:
         default_auth_type = SUPPORTED_AUTH_TYPE.get(source, {}).get(target, {})[0]
@@ -657,7 +664,7 @@ def validate_update_params(cmd, namespace):
     '''Get missing args of update command
     '''
     missing_args = dict()
-    if not validate_connection_id(namespace):
+    if not validate_connection_id(namespace) and not validate_source_resource_id(cmd, namespace):
         missing_args.update(get_missing_source_args(cmd, namespace))
     # missing_args.update(get_missing_auth_args(cmd, namespace))
     missing_args.update(get_missing_connection_name(namespace))
@@ -755,6 +762,8 @@ def apply_auth_args(cmd, namespace, arg_values):
     if source and target:
         auth_types = SUPPORTED_AUTH_TYPE.get(source, {}).get(target, {})
         for auth_type in auth_types:
+            if auth_type == AUTH_TYPE.Null:
+                continue
             for arg in AUTH_TYPE_PARAMS.get(auth_type):
                 if arg in arg_values:
                     setattr(namespace, arg, arg_values.get(arg, None))
@@ -763,7 +772,7 @@ def apply_auth_args(cmd, namespace, arg_values):
 
 
 def apply_workload_identity(namespace, arg_values):
-    output = run_cli_cmd('az identity show --ids {}'.format(
+    output = run_cli_cmd('az identity show --ids "{}"'.format(
         arg_values.get('workload_identity_auth_info')
     ))
     if output:
@@ -898,7 +907,7 @@ def validate_params(cmd, namespace):
             namespace.connection_name = generate_connection_name(cmd)
         else:
             validate_connection_name(namespace.connection_name)
-        if getattr(namespace, 'new_addon'):
+        if getattr(namespace, 'new_addon', None):
             _validate_and_apply(validate_addon_params, apply_addon_params)
         else:
             _validate_and_apply(validate_create_params, apply_create_params)
@@ -936,8 +945,14 @@ def validate_kafka_params(cmd, namespace):
 def validate_service_state(linker_parameters):
     '''Validate whether user provided params are applicable to service state
     '''
-    target_type = None
-    target_id = linker_parameters.get('target_service', dict()).get('id')
+    target_type = linker_parameters.get('target_service', dict()).get('type')
+
+    # AzureResource and other types (e.g., FabricResource, SelfHostedResource)
+    if target_type == "AzureResource":
+        target_id = linker_parameters.get('target_service', dict()).get('id')
+    else:
+        target_id = linker_parameters.get('target_service', dict()).get('endpoint')
+
     for target, resource_id in TARGET_RESOURCES.items():
         matched = re.match(get_resource_regex(resource_id), target_id, re.IGNORECASE)
         if matched:
@@ -950,7 +965,7 @@ def validate_service_state(linker_parameters):
         if not rg or not name:
             return
 
-        output = run_cli_cmd('az appconfig show -g {} -n {}'.format(rg, name))
+        output = run_cli_cmd('az appconfig show -g "{}" -n "{}"'.format(rg, name))
         if output and output.get('disableLocalAuth') is True:
             raise ValidationError('Secret as auth type is not allowed when local auth is disabled for the '
                                   'specified appconfig, you may use service principal or managed identity.')

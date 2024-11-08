@@ -25,7 +25,7 @@ class StorageShareScenarioTests(StorageScenarioMixin, ScenarioTest):
 
         # Test create with fail-on-exist
         from azure.core.exceptions import ResourceExistsError
-        with self.assertRaisesRegexp(ResourceExistsError, 'The specified share already exists.'):
+        with self.assertRaisesRegex(ResourceExistsError, 'The specified share already exists.'):
             self.cmd(
                 'storage share create -n {} --fail-on-exist --connection-string {} --quota 3'
                 .format(share_name, connection_string))
@@ -51,8 +51,8 @@ class StorageShareScenarioTests(StorageScenarioMixin, ScenarioTest):
                                account_info, share_name, start, expiry).output
         self.assertIn('sig', sas, 'The sig segment is not in the sas {}'.format(sas))
         # Test generate-sas with ip and https-only
-        sas2 = self.cmd('storage share generate-sas -n {} --ip 172.20.34.0-172.20.34.255 --permissions r '
-                        '--https-only --connection-string {}'.format(share_name, connection_string)).output
+        sas2 = self.cmd('storage share generate-sas -n {} --ip 172.20.34.0-172.20.34.255 --permissions r --expiry {} '
+                        '--https-only --connection-string {}'.format(share_name, expiry, connection_string)).output
         self.assertIn('sig', sas2, 'The sig segment is not in the sas {}'.format(sas2))
 
         # Test delete
@@ -66,7 +66,7 @@ class StorageShareScenarioTests(StorageScenarioMixin, ScenarioTest):
         # Test delete with fail-not-exist
         share_not_exist = self.create_random_name('share', 24)
         from azure.core.exceptions import ResourceNotFoundError
-        with self.assertRaisesRegexp(ResourceNotFoundError, 'The specified share does not exist.'):
+        with self.assertRaisesRegex(ResourceNotFoundError, 'The specified share does not exist.'):
             self.storage_cmd('storage share delete -n {} --fail-not-exist', account_info, share_not_exist)
 
         self.storage_cmd('storage share update --name {} --quota 3', account_info, share)

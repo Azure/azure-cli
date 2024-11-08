@@ -3,6 +3,38 @@
 Release History
 ===============
 
+2.66.0
+++++++
+* `aaz`: Support managed identity (#29953)
+* Resolve CVE-2024-6119 (#29887)
+* Resolve CVE-2024-5535 (#29887)
+* Resolve CVE-2024-4741 (#29887)
+* Resolve CVE-2024-4603 (#29887)
+* Resolve CVE-2024-2511 (#29887)
+* Use MSAL for Cloud Shell authentication (#29637)
+
+2.65.0
+++++++
+* Minor fixes
+
+2.64.0
+++++++
+* Minor fixes
+
+2.63.0
+++++++
+* Resolve CVE-2024-39689 (#29320)
+* Support `az config set extension.dynamic_install_allow_preview` for extension dynamic installation configuration (#29413)
+* Resolve CVE-2024-6345 (#29433)
+* `az logout`: Remove service principal access tokens from token cache (#29441)
+
+2.62.0
+++++++
+* Fix #28997: Fix error "User cancelled the Accounts Control Operation" when logging in with WAM as Administrator (#29088)
+* Resolve CVE-2024-37891 (#29194)
+* Resolve CVE-2024-35195 (#29186)
+* `aaz`: Add argument completer support (#29204)
+
 2.61.0
 ++++++
 * Resolve CVE-2024-34064 (#28895)

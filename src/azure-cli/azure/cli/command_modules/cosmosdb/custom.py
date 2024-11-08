@@ -68,6 +68,9 @@ from azure.mgmt.cosmosdb.models import (
     DataCenterResourceProperties,
     ManagedCassandraManagedServiceIdentity,
     ServiceResourceCreateUpdateParameters,
+    SqlDedicatedGatewayServiceResourceCreateUpdateProperties,
+    DedicatedGatewayType,
+    ServiceType,
     MongoRoleDefinitionCreateUpdateParameters,
     MongoUserDefinitionCreateUpdateParameters
 )
@@ -238,7 +241,8 @@ def _create_database_account(client,
                              arm_location=None,
                              enable_partition_merge=None,
                              enable_burst_capacity=None,
-                             minimal_tls_version=None):
+                             minimal_tls_version=None,
+                             disable_ttl=None):
 
     consistency_policy = None
     if default_consistency_level is not None:
@@ -344,6 +348,9 @@ def _create_database_account(client,
         if tables_to_restore is not None:
             restore_parameters.tables_to_restore = tables_to_restore
 
+        if disable_ttl is not None:
+            restore_parameters.restore_with_ttl_disabled = disable_ttl
+
     params = DatabaseAccountCreateUpdateParameters(
         location=arm_location,
         locations=locations,
@@ -423,7 +430,7 @@ def cli_cosmosdb_update(client,
         update_consistency_policy = True
 
     if network_acl_bypass_resource_ids is not None:
-        from msrestazure.tools import is_valid_resource_id
+        from azure.mgmt.core.tools import is_valid_resource_id
         from azure.cli.core.azclierror import InvalidArgumentValueError
         for resource_id in network_acl_bypass_resource_ids:
             if not is_valid_resource_id(resource_id):
@@ -515,6 +522,11 @@ def cli_cosmosdb_update(client,
     docdb_account = async_docdb_update.result()
     docdb_account = client.get(resource_group_name, account_name)  # Workaround
     return docdb_account
+
+
+def cli_cosmosdb_delete(client, resource_group_name, account_name, no_wait=False):
+    return sdk_no_wait(no_wait, client.begin_delete,
+                       resource_group_name=resource_group_name, account_name=account_name)
 
 
 def cli_cosmosdb_list(client, resource_group_name=None):
@@ -1656,7 +1668,7 @@ def cli_cosmosdb_identity_remove(client,
 
 def _get_virtual_network_id(cmd, resource_group_name, subnet, virtual_network):
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import is_valid_resource_id, resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id, resource_id
     if not is_valid_resource_id(subnet):
         if virtual_network is None:
             raise CLIError("usage error: --subnet ID | --subnet NAME --vnet-name NAME")
@@ -1792,7 +1804,8 @@ def cli_cosmosdb_restore(cmd,
                          databases_to_restore=None,
                          gremlin_databases_to_restore=None,
                          tables_to_restore=None,
-                         public_network_access=None):
+                         public_network_access=None,
+                         disable_ttl=None):
     from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_database_accounts
     restorable_database_accounts_client = cf_restorable_database_accounts(cmd.cli_ctx, [])
     restorable_database_accounts = restorable_database_accounts_client.list()
@@ -1898,7 +1911,8 @@ def cli_cosmosdb_restore(cmd,
                                     gremlin_databases_to_restore=gremlin_databases_to_restore,
                                     tables_to_restore=tables_to_restore,
                                     arm_location=target_restorable_account.location,
-                                    public_network_access=public_network_access)
+                                    public_network_access=public_network_access,
+                                    disable_ttl=disable_ttl)
 
 
 def _convert_to_utc_timestamp(timestamp_string):
@@ -2798,7 +2812,8 @@ def cli_cosmosdb_sql_database_restore(cmd,
                                       resource_group_name,
                                       account_name,
                                       database_name,
-                                      restore_timestamp=None):
+                                      restore_timestamp=None,
+                                      disable_ttl=None):
 
     from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_database_accounts
     restorable_database_accounts_client = cf_restorable_database_accounts(cmd.cli_ctx, [])
@@ -2861,6 +2876,9 @@ def cli_cosmosdb_sql_database_restore(cmd,
         restore_timestamp_in_utc=restore_timestamp
     )
 
+    if disable_ttl is not None:
+        restore_parameters.restore_with_ttl_disabled = disable_ttl
+
     sql_database_resource = SqlDatabaseCreateUpdateParameters(
         resource=SqlDatabaseResource(
             id=database_name,
@@ -2880,7 +2898,8 @@ def cli_cosmosdb_sql_container_restore(cmd,
                                        account_name,
                                        database_name,
                                        container_name,
-                                       restore_timestamp=None):
+                                       restore_timestamp=None,
+                                       disable_ttl=None):
 
     from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_database_accounts
     # """Restores the deleted Azure Cosmos DB SQL container """
@@ -2960,6 +2979,9 @@ def cli_cosmosdb_sql_container_restore(cmd,
         restore_timestamp_in_utc=restore_timestamp
     )
 
+    if disable_ttl is not None:
+        restore_parameters.restore_with_ttl_disabled = disable_ttl
+
     sql_container_resource = SqlContainerResource(
         id=container_name,
         create_mode=create_mode,
@@ -2981,7 +3003,8 @@ def cli_cosmosdb_mongodb_database_restore(cmd,
                                           resource_group_name,
                                           account_name,
                                           database_name,
-                                          restore_timestamp=None):
+                                          restore_timestamp=None,
+                                          disable_ttl=None):
 
     from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_database_accounts
     # """Restores the deleted Azure Cosmos DB MongoDB database"""
@@ -3045,6 +3068,9 @@ def cli_cosmosdb_mongodb_database_restore(cmd,
         restore_timestamp_in_utc=restore_timestamp
     )
 
+    if disable_ttl is not None:
+        restore_parameters.restore_with_ttl_disabled = disable_ttl
+
     mongodb_database_resource = MongoDBDatabaseCreateUpdateParameters(
         resource=MongoDBDatabaseResource(id=database_name,
                                          create_mode=create_mode,
@@ -3063,7 +3089,8 @@ def cli_cosmosdb_mongodb_collection_restore(cmd,
                                             account_name,
                                             database_name,
                                             collection_name,
-                                            restore_timestamp=None):
+                                            restore_timestamp=None,
+                                            disable_ttl=None):
 
     from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_database_accounts
     # """Restores the Azure Cosmos DB MongoDB collection """
@@ -3143,6 +3170,9 @@ def cli_cosmosdb_mongodb_collection_restore(cmd,
         restore_timestamp_in_utc=restore_timestamp
     )
 
+    if disable_ttl is not None:
+        restore_parameters.restore_with_ttl_disabled = disable_ttl
+
     mongodb_collection_resource = MongoDBCollectionResource(id=collection_name,
                                                             create_mode=create_mode,
                                                             restore_parameters=restore_parameters
@@ -3164,7 +3194,8 @@ def cli_cosmosdb_gremlin_database_restore(cmd,
                                           resource_group_name,
                                           account_name,
                                           database_name,
-                                          restore_timestamp=None):
+                                          restore_timestamp=None,
+                                          disable_ttl=None):
 
     from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_database_accounts
     restorable_database_accounts_client = cf_restorable_database_accounts(cmd.cli_ctx, [])
@@ -3227,6 +3258,9 @@ def cli_cosmosdb_gremlin_database_restore(cmd,
         restore_timestamp_in_utc=restore_timestamp
     )
 
+    if disable_ttl is not None:
+        restore_parameters.restore_with_ttl_disabled = disable_ttl
+
     gremlin_database_resource = GremlinDatabaseCreateUpdateParameters(
         resource=SqlDatabaseResource(
             id=database_name,
@@ -3246,7 +3280,8 @@ def cli_cosmosdb_gremlin_graph_restore(cmd,
                                        account_name,
                                        database_name,
                                        graph_name,
-                                       restore_timestamp=None):
+                                       restore_timestamp=None,
+                                       disable_ttl=None):
 
     from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_database_accounts
     # """Restores the deleted Azure Cosmos DB Gremlin graph """
@@ -3326,6 +3361,9 @@ def cli_cosmosdb_gremlin_graph_restore(cmd,
         restore_timestamp_in_utc=restore_timestamp
     )
 
+    if disable_ttl is not None:
+        restore_parameters.restore_with_ttl_disabled = disable_ttl
+
     gremlin_graph_resource = GremlinGraphResource(
         id=graph_name,
         create_mode=create_mode,
@@ -3347,7 +3385,8 @@ def cli_cosmosdb_table_restore(cmd,
                                resource_group_name,
                                account_name,
                                table_name,
-                               restore_timestamp=None):
+                               restore_timestamp=None,
+                               disable_ttl=None):
 
     from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_database_accounts
     # """Restores the deleted Azure Cosmos DB Table"""
@@ -3411,6 +3450,9 @@ def cli_cosmosdb_table_restore(cmd,
         restore_timestamp_in_utc=restore_timestamp
     )
 
+    if disable_ttl is not None:
+        restore_parameters.restore_with_ttl_disabled = disable_ttl
+
     table_resource = TableCreateUpdateParameters(
         resource=TableResource(id=table_name,
                                create_mode=create_mode,
@@ -3429,12 +3471,17 @@ def cli_cosmosdb_service_create(client,
                                 resource_group_name,
                                 service_name,
                                 instance_count=1,
-                                instance_size="Cosmos.D4s"):
+                                instance_size="Cosmos.D4s",
+                                dedicated_gateway_type=DedicatedGatewayType.INTEGRATED_CACHE.value):
 
-    service_kind = "SqlDedicatedGateway"
-    params = ServiceResourceCreateUpdateParameters(service_type=service_kind,
-                                                   instance_count=instance_count,
-                                                   instance_size=instance_size)
+    properties = SqlDedicatedGatewayServiceResourceCreateUpdateProperties(instance_count=instance_count,
+                                                                          instance_size=instance_size,
+                                                                          dedicated_gateway_type=dedicated_gateway_type)
+
+    properties.service_type = ServiceType.SQL_DEDICATED_GATEWAY.value
+    params = ServiceResourceCreateUpdateParameters(
+        properties=properties
+    )
 
     return client.begin_create(resource_group_name, account_name, service_name, create_update_parameters=params)
 
@@ -3446,9 +3493,12 @@ def cli_cosmosdb_service_update(client,
                                 instance_count,
                                 instance_size=None):
 
-    service_kind = "SqlDedicatedGateway"
-    params = ServiceResourceCreateUpdateParameters(service_type=service_kind,
-                                                   instance_count=instance_count,
-                                                   instance_size=instance_size)
+    properties = SqlDedicatedGatewayServiceResourceCreateUpdateProperties(instance_count=instance_count,
+                                                                          instance_size=instance_size)
+
+    properties.service_type = ServiceType.SQL_DEDICATED_GATEWAY.value
+    params = ServiceResourceCreateUpdateParameters(
+        properties=properties
+    )
 
     return client.begin_create(resource_group_name, account_name, service_name, create_update_parameters=params)

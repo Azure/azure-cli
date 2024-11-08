@@ -30,7 +30,7 @@ if "%ARCH%"=="x86" (
     echo Please set ARCH to "x86" or "x64"
     goto ERROR
 )
-set PYTHON_VERSION=3.11.8
+set PYTHON_VERSION=3.12.7
 
 set WIX_DOWNLOAD_URL="https://azurecliprod.blob.core.windows.net/msi/wix310-binaries-mirror.zip"
 set PYTHON_DOWNLOAD_URL="https://www.python.org/ftp/python/%PYTHON_VERSION%/python-%PYTHON_VERSION%-embed-%PYTHON_ARCH%.zip"
@@ -121,32 +121,42 @@ if not exist %PYTHON_DIR% (
     del get-pip.py
     echo Pip set up successful
 
-    dir .
+    REM setuptools is not installed by default in Python 3.12, but it is required by some dependencys
+    REM See https://github.com/Azure/azure-cli/pull/27196
+    REM Install wheel to force pip install azure-cli in legacy mode
+    REM see https://github.com/Azure/azure-cli/pull/29887
+    echo Installing setuptools wheel
+    %PYTHON_DIR%\python.exe -Im pip install setuptools wheel
+
     popd
 )
 set PYTHON_EXE=%PYTHON_DIR%\python.exe
+
 
 robocopy %PYTHON_DIR% %BUILDING_DIR% /s /NFL /NDL
 
 set CLI_SRC=%REPO_ROOT%\src
 for %%a in (%CLI_SRC%\azure-cli %CLI_SRC%\azure-cli-core %CLI_SRC%\azure-cli-telemetry) do (
    pushd %%a
-   %BUILDING_DIR%\python.exe -m pip install --no-warn-script-location --no-cache-dir --no-deps .
+   %BUILDING_DIR%\python.exe -Im pip install --no-warn-script-location --no-cache-dir --no-deps .
+   if %errorlevel% neq 0 goto ERROR
    popd
 )
-%BUILDING_DIR%\python.exe -m pip install --no-warn-script-location --requirement %CLI_SRC%\azure-cli\requirements.py3.windows.txt
+
+%BUILDING_DIR%\python.exe -Im pip install --no-warn-script-location --requirement %CLI_SRC%\azure-cli\requirements.py3.windows.txt
+if %errorlevel% neq 0 goto ERROR
 
 REM Check azure.cli can be executed. This also prints the Python version.
-%BUILDING_DIR%\python.exe -m azure.cli --version
-
+%BUILDING_DIR%\python.exe -Im azure.cli --version
 if %errorlevel% neq 0 goto ERROR
+
 
 pushd %BUILDING_DIR%
-%BUILDING_DIR%\python.exe %REPO_ROOT%\scripts\compact_aaz.py
+%BUILDING_DIR%\python.exe -I %REPO_ROOT%\scripts\compact_aaz.py
 if %errorlevel% neq 0 goto ERROR
-%BUILDING_DIR%\python.exe %~dp0\patch_models_v2.py
+%BUILDING_DIR%\python.exe -I %~dp0\patch_models_v2.py
 if %errorlevel% neq 0 goto ERROR
-%BUILDING_DIR%\python.exe %REPO_ROOT%\scripts\trim_sdk.py
+%BUILDING_DIR%\python.exe -I %REPO_ROOT%\scripts\trim_sdk.py
 if %errorlevel% neq 0 goto ERROR
 popd
 

@@ -34,7 +34,7 @@ from azure.cli.command_modules.vm._validators import (
     process_remove_identity_namespace, process_vm_secret_format, process_vm_vmss_stop, validate_vmss_update_namespace,
     process_vm_update_namespace, process_set_applications_namespace, process_vm_disk_attach_namespace,
     process_image_version_create_namespace, process_image_version_update_namespace,
-    process_image_version_undelete_namespace, process_ppg_create_namespace)
+    process_image_version_undelete_namespace, process_ppg_create_namespace, process_vm_disk_detach_namespace)
 
 from azure.cli.command_modules.vm._image_builder import (
     process_image_template_create_namespace, process_img_tmpl_output_add_namespace,
@@ -362,7 +362,7 @@ def load_command_table(self, _):
 
     with self.command_group('vm disk', compute_vm_sdk, min_api='2017-03-30') as g:
         g.custom_command('attach', 'attach_managed_data_disk', validator=process_vm_disk_attach_namespace)
-        g.custom_command('detach', 'detach_managed_data_disk')
+        g.custom_command('detach', 'detach_managed_data_disk', validator=process_vm_disk_detach_namespace)
 
     with self.command_group('vm encryption', custom_command_type=compute_disk_encryption_custom) as g:
         g.custom_command('enable', 'encrypt_vm', validator=process_disk_encryption_namespace)
@@ -600,7 +600,7 @@ def load_command_table(self, _):
             pass
 
     with self.command_group('capacity reservation group', capacity_reservation_groups_sdk, min_api='2021-04-01',
-                            client_factory=cf_capacity_reservation_groups, is_preview=True) as g:
+                            client_factory=cf_capacity_reservation_groups) as g:
         g.custom_command('create', 'create_capacity_reservation_group')
         g.custom_command('update', 'update_capacity_reservation_group')
         g.custom_show_command('show', 'show_capacity_reservation_group')
@@ -610,7 +610,7 @@ def load_command_table(self, _):
         self.command_table['capacity reservation group list'] = CapacityReservationGroupList(loader=self)
 
     with self.command_group('capacity reservation', capacity_reservations_sdk, min_api='2021-04-01',
-                            client_factory=cf_capacity_reservations, is_preview=True) as g:
+                            client_factory=cf_capacity_reservations) as g:
         g.custom_command('create', 'create_capacity_reservation', supports_no_wait=True)
         g.custom_command('update', 'update_capacity_reservation', supports_no_wait=True)
         g.custom_show_command('show', 'show_capacity_reservation')

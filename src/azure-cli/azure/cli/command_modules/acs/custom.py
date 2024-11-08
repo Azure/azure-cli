@@ -25,7 +25,7 @@ import time
 import uuid
 import webbrowser
 import zipfile
-from distutils.version import StrictVersion  # pylint: disable=deprecated-module
+from packaging.version import Version
 from urllib.error import URLError
 from urllib.request import urlopen
 from azure.cli.command_modules.acs.maintenanceconfiguration import aks_maintenanceconfiguration_update_internal
@@ -65,6 +65,8 @@ from azure.cli.command_modules.acs._consts import (
     CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_START,
     CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_COMPLETE,
     CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_ROLLBACK,
+    CONST_AZURE_SERVICE_MESH_MODE_ISTIO,
+    CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM,
 )
 
 from azure.cli.command_modules.acs._helpers import get_snapshot_by_snapshot_id, check_is_private_link_cluster
@@ -88,12 +90,14 @@ from azure.cli.core.azclierror import (
     ResourceNotFoundError,
     UnknownError,
     ValidationError,
+    RequiredArgumentMissingError,
 )
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import in_cloud_console, sdk_no_wait
 from azure.core.exceptions import ResourceNotFoundError as ResourceNotFoundErrorAzCore
+from azure.mgmt.containerservice.models import KubernetesSupportPlan
 from knack.log import get_logger
 from knack.prompting import NoTTYException, prompt_y_n
 from knack.util import CLIError
@@ -159,7 +163,7 @@ def _aks_browse(
 
     return_msg = None
     # open portal view if addon is not enabled or k8s version >= 1.19.0
-    if StrictVersion(instance.kubernetes_version) >= StrictVersion('1.19.0') or (not addon_profile.enabled):
+    if Version(instance.kubernetes_version) >= Version('1.19.0') or (not addon_profile.enabled):
         subscription_id = get_subscription_id(cmd.cli_ctx)
         dashboardURL = (
             # Azure Portal URL (https://portal.azure.com for public cloud)
@@ -515,7 +519,6 @@ def aks_create(
     auto_upgrade_channel=None,
     node_os_upgrade_channel=None,
     cluster_autoscaler_profile=None,
-    uptime_sla=False,
     tier=None,
     fqdn_subdomain=None,
     api_server_authorized_ip_ranges=None,
@@ -524,15 +527,12 @@ def aks_create(
     disable_public_fqdn=False,
     service_principal=None,
     client_secret=None,
-    enable_managed_identity=False,
+    enable_managed_identity=None,
     assign_identity=None,
     assign_kubelet_identity=None,
     enable_aad=False,
     enable_azure_rbac=False,
     aad_admin_group_object_ids=None,
-    aad_client_app_id=None,
-    aad_server_app_id=None,
-    aad_server_app_secret=None,
     aad_tenant_id=None,
     enable_oidc_issuer=False,
     windows_admin_username=None,
@@ -627,6 +627,8 @@ def aks_create(
     storage_pool_size=None,
     storage_pool_sku=None,
     storage_pool_option=None,
+    ephemeral_disk_volume_type=None,
+    ephemeral_disk_nvme_perf_tier=None,
     # misc
     yes=False,
     no_wait=False,
@@ -634,6 +636,9 @@ def aks_create(
     node_public_ip_tags=None,
     # metrics profile
     enable_cost_analysis=False,
+    # trusted launch
+    enable_vtpm=False,
+    enable_secure_boot=False,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -696,8 +701,6 @@ def aks_update(
     auto_upgrade_channel=None,
     node_os_upgrade_channel=None,
     cluster_autoscaler_profile=None,
-    uptime_sla=False,
-    no_uptime_sla=False,
     tier=None,
     api_server_authorized_ip_ranges=None,
     enable_public_fqdn=False,
@@ -779,6 +782,8 @@ def aks_update(
     storage_pool_sku=None,
     storage_pool_option=None,
     azure_container_storage_nodepools=None,
+    ephemeral_disk_volume_type=None,
+    ephemeral_disk_nvme_perf_tier=None,
     # misc
     yes=False,
     no_wait=False,
@@ -819,6 +824,8 @@ def aks_upgrade(cmd,
                 enable_force_upgrade=False,
                 disable_force_upgrade=False,
                 upgrade_override_until=None,
+                tier=None,
+                k8s_support_plan=None,
                 yes=False):
     msg = 'Kubernetes may be unavailable during cluster upgrades.\n Are you sure you want to perform this operation?'
     if not yes and not prompt_y_n(msg, default="n"):
@@ -853,6 +860,15 @@ def aks_upgrade(cmd,
                                                    resource_group_name, name, agent_pool_profile.name)
         mc = client.get(resource_group_name, name)
         return _remove_nulls([mc])[0]
+
+    if tier is not None:
+        instance.sku.tier = tier
+
+    if k8s_support_plan is not None:
+        instance.support_plan = k8s_support_plan
+
+    if (instance.support_plan == KubernetesSupportPlan.AKS_LONG_TERM_SUPPORT and instance.sku.tier is not None and instance.sku.tier.lower() != CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM.lower()):
+        raise CLIError("AKS Long Term Support is only available for Premium tier clusters.")
 
     instance = _update_upgrade_settings(
         cmd,
@@ -1128,14 +1144,9 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                               enable_sgxquotehelper=enable_sgxquotehelper,
                               enable_secret_rotation=enable_secret_rotation,
                               rotation_poll_interval=rotation_poll_interval,
-                              no_wait=no_wait,
-                              enable_syslog=enable_syslog,
-                              data_collection_settings=data_collection_settings,
-                              ampls_resource_id=ampls_resource_id,
-                              enable_high_log_scale_mode=enable_high_log_scale_mode)
+                              no_wait=no_wait,)
 
-    enable_monitoring = CONST_MONITORING_ADDON_NAME in instance.addon_profiles \
-        and instance.addon_profiles[CONST_MONITORING_ADDON_NAME].enabled
+    enable_monitoring = is_monitoring_addon_enabled(addons, instance)
     ingress_appgw_addon_enabled = CONST_INGRESS_APPGW_ADDON_NAME in instance.addon_profiles \
         and instance.addon_profiles[CONST_INGRESS_APPGW_ADDON_NAME].enabled
 
@@ -1219,11 +1230,7 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, name, ad
                    enable_secret_rotation=False,
                    disable_secret_rotation=False,
                    rotation_poll_interval=None,
-                   no_wait=False,
-                   enable_syslog=False,
-                   data_collection_settings=None,
-                   ampls_resource_id=None,
-                   enable_high_log_scale_mode=False):
+                   no_wait=False,):
     ManagedClusterAddonProfile = cmd.get_models('ManagedClusterAddonProfile',
                                                 resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                                 operation_group='managed_clusters')
@@ -1859,7 +1866,7 @@ def k8s_install_kubectl(cmd, client_version='latest', install_location=None, sou
     """
 
     if not source_url:
-        source_url = "https://storage.googleapis.com/kubernetes-release/release"
+        source_url = "https://dl.k8s.io/release"
         cloud_name = cmd.cli_ctx.cloud.name
         if cloud_name.lower() == 'azurechinacloud':
             source_url = 'https://mirror.azure.cn/kubernetes/kubectl'
@@ -2329,6 +2336,9 @@ def aks_agentpool_add(
     asg_ids=None,
     node_public_ip_tags=None,
     disable_windows_outbound_nat=False,
+    # trusted launch
+    enable_vtpm=False,
+    enable_secure_boot=False,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -2377,6 +2387,13 @@ def aks_agentpool_update(
     allowed_host_ports=None,
     asg_ids=None,
     os_sku=None,
+    enable_fips_image=False,
+    disable_fips_image=False,
+    # trusted launch
+    enable_vtpm=False,
+    disable_vtpm=False,
+    enable_secure_boot=False,
+    disable_secure_boot=False,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -2463,7 +2480,7 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
 
     instance = client.get(resource_group_name, cluster_name, nodepool_name)
 
-    if kubernetes_version != '' or instance.orchestrator_version == kubernetes_version:
+    if kubernetes_version == '' or instance.orchestrator_version == kubernetes_version:
         msg = "The new kubernetes version is the same as the current kubernetes version."
         if instance.provisioning_state == "Succeeded":
             msg = "The cluster is already on version {} and is not in a failed state. No operations will occur when upgrading to the same version if the cluster is not in a failed state.".format(instance.orchestrator_version)
@@ -2634,6 +2651,49 @@ def aks_operation_abort(cmd,   # pylint: disable=unused-argument
         raise InvalidArgumentValueError("Cluster {} doesnt exist, use 'aks list' to get current cluster list".format(name))
     instance.power_state = power_state
     return sdk_no_wait(no_wait, client.begin_abort_latest_operation, resource_group_name, name)
+
+
+def aks_agentpool_delete_machines(cmd,   # pylint: disable=unused-argument
+                                  client,
+                                  resource_group_name,
+                                  cluster_name,
+                                  nodepool_name,
+                                  machine_names,
+                                  no_wait=False):
+    agentpool_exists = False
+    instances = client.list(resource_group_name, cluster_name)
+    for agentpool_profile in instances:
+        if agentpool_profile.name.lower() == nodepool_name.lower():
+            agentpool_exists = True
+            break
+
+    if not agentpool_exists:
+        raise ResourceNotFoundError(
+            f"Node pool {nodepool_name} doesn't exist, "
+            "use 'az aks nodepool list' to get current node pool list"
+        )
+
+    if len(machine_names) == 0:
+        raise RequiredArgumentMissingError(
+            "--machine-names doesn't provide, "
+            "use 'az aks machine list' to get current machine list"
+        )
+
+    AgentPoolDeleteMachinesParameter = cmd.get_models(
+        "AgentPoolDeleteMachinesParameter",
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+        operation_group="agent_pools",
+    )
+
+    machines = AgentPoolDeleteMachinesParameter(machine_names=machine_names)
+    return sdk_no_wait(
+        no_wait,
+        client.begin_delete_machines,
+        resource_group_name,
+        cluster_name,
+        nodepool_name,
+        machines,
+    )
 
 
 def aks_agentpool_show(cmd, client, resource_group_name, cluster_name, nodepool_name):
@@ -2955,6 +3015,16 @@ def aks_mesh_upgrade_rollback(
         mesh_upgrade_command=CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_ROLLBACK)
 
 
+def _aks_mesh_get_supported_revisions(
+        cmd,
+        client,
+        location):
+
+    revisions = aks_mesh_get_revisions(cmd, client, location)
+    supported_revisions = [r.revision for r in revisions.mesh_revisions]
+    return supported_revisions
+
+
 def _aks_mesh_update(
         cmd,
         client,
@@ -2988,6 +3058,28 @@ def _aks_mesh_update(
     try:
         mc = aks_update_decorator.fetch_mc()
         mc = aks_update_decorator.update_azure_service_mesh_profile(mc)
+
+        # check for unsupported asm revision once the smp in mc object has been updated
+        # skip the warning incase upgrade is in progress
+        service_mesh_profile = mc.service_mesh_profile
+        if (
+            service_mesh_profile and
+            service_mesh_profile.mode == CONST_AZURE_SERVICE_MESH_MODE_ISTIO and
+            service_mesh_profile.istio and
+            service_mesh_profile.istio.revisions and
+            len(service_mesh_profile.istio.revisions) == 1
+        ):
+            revision = service_mesh_profile.istio.revisions[0]
+            supported_revisions = _aks_mesh_get_supported_revisions(cmd, client, mc.location)
+            if revision not in supported_revisions:
+                msg = (
+                    f"Istio mesh revision {revision} currently in use in your cluster is no longer supported.\n"
+                    "Please upgrade for continued support. Use `az aks mesh get-upgrades` to check for available "
+                    "upgrades.\nMore information about mesh upgrades and version support can be found here:"
+                    " https://aka.ms/asm-aks-upgrade-docs"
+                )
+                logger.warning(msg)
+
     except DecoratorEarlyExitException:
         return None
 
@@ -3101,7 +3193,7 @@ def aks_approuting_zone_list(
         resource_group_name,
         name
 ):
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
     mc = client.get(resource_group_name, name)
 
     if mc.ingress_profile and mc.ingress_profile.web_app_routing and mc.ingress_profile.web_app_routing.enabled:
@@ -3155,3 +3247,23 @@ def _aks_approuting_update(
         return None
 
     return aks_update_decorator.update_mc(mc)
+
+
+def is_monitoring_addon_enabled(addons, instance):
+    monitoring_addon_enabled = False
+    is_monitoring_addon = False
+    try:
+        addon_args = addons.split(',')
+        for addon_arg in addon_args:
+            if addon_arg in ADDONS:
+                addon = ADDONS[addon_arg]
+                if addon == CONST_MONITORING_ADDON_NAME:
+                    is_monitoring_addon = True
+                    break
+
+        addon_profiles = instance.addon_profiles or {}
+        monitoring_addon_enabled = is_monitoring_addon and CONST_MONITORING_ADDON_NAME in addon_profiles and addon_profiles[
+            CONST_MONITORING_ADDON_NAME].enabled
+    except Exception as ex:  # pylint: disable=broad-except
+        logger.debug("failed to check monitoring addon enabled: %s", ex)
+    return monitoring_addon_enabled

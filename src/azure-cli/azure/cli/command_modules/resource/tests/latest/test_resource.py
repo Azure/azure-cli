@@ -453,10 +453,13 @@ class TagScenarioTest(ScenarioTest):
         # Test Microsoft.ContainerInstance/containerGroups
         self.kwargs.update({
             'container_group_name': self.create_random_name('clicontainer', 16),
-            'image': 'nginx:latest',
+            'image': 'mcr.microsoft.com/azuredocs/aci-helloworld:latest',
+            'cpu': 1,
+            'memory': 1,
+            'os_type': 'Linux',
         })
 
-        container = self.cmd('container create -g {rg} -n {container_group_name} --image {image}',
+        container = self.cmd('container create -g {rg} -n {container_group_name} --image {image} --cpu {cpu} --memory {memory} --os-type {os_type}',
                              checks=self.check('name', '{container_group_name}')).get_output_in_json()
         self.kwargs['container_id'] = container['id']
         self.cmd('resource tag --ids {container_id} --tags {tag}', checks=self.check('tags', {'cli-test': 'test'}))
@@ -4577,7 +4580,7 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             role_assignment = self.cmd(
                 'role assignment create --assignee {upn} --role contributor --scope "/subscriptions/{sub}" ').get_output_in_json()
-        from msrestazure.tools import parse_resource_id
+        from azure.mgmt.core.tools import parse_resource_id
         role_definition_id = parse_resource_id(role_assignment['roleDefinitionId'])['name']
 
         self.kwargs.update({
@@ -4656,7 +4659,7 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             role_assignment = self.cmd(
                 'role assignment create --assignee {upn} --role contributor --scope "/subscriptions/{sub}" ').get_output_in_json()
-        from msrestazure.tools import parse_resource_id
+        from azure.mgmt.core.tools import parse_resource_id
         role_definition_id = parse_resource_id(role_assignment['roleDefinitionId'])['name']
 
         self.kwargs.update({
@@ -4717,7 +4720,7 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             role_assignment = self.cmd(
                 'role assignment create --assignee {upn} --role contributor --scope "/subscriptions/{sub}" ').get_output_in_json()
-        from msrestazure.tools import parse_resource_id
+        from azure.mgmt.core.tools import parse_resource_id
         role_definition_id = parse_resource_id(role_assignment['roleDefinitionId'])['name']
         self.kwargs.update({
             'app_def': self.create_random_name('def', 10),
@@ -4750,7 +4753,7 @@ class ManagedAppScenarioTest(ScenarioTest):
 
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             role_assignment = self.cmd('role assignment create --assignee {upn} --role contributor --scope "/subscriptions/{sub}" ').get_output_in_json()
-        from msrestazure.tools import parse_resource_id
+        from azure.mgmt.core.tools import parse_resource_id
         role_definition_id = parse_resource_id(role_assignment['roleDefinitionId'])['name']
 
         self.kwargs.update({

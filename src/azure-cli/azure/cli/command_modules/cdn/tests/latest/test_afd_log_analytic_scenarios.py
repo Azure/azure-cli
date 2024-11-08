@@ -9,7 +9,7 @@ import datetime
 
 
 class CdnAfdLogAnalyticScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
     def test_afd_log_analytic(self, resource_group):
         profile_name = 'profile123'
         self.afd_profile_create_cmd(resource_group, profile_name)
@@ -48,7 +48,7 @@ class CdnAfdLogAnalyticScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
 
         self.afd_endpoint_delete_cmd(resource_group, endpoint_name, profile_name)
 
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
     def test_afd_waf_log_analytic(self, resource_group):
         profile_name = 'profile123'
         self.afd_profile_create_cmd(resource_group, profile_name, sku="Premium_AzureFrontDoor")

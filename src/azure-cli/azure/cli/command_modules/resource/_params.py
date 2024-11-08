@@ -819,7 +819,7 @@ def load_arguments(self, _):
         c.argument('target', arg_type=CLIArgumentType(options_list=['--target', '-t'], help="The target location where the Bicep module will be published."))
         c.argument('documentationUri', arg_type=CLIArgumentType(options_list=['--documentationUri'], help="The documentation uri of the Bicep module."), deprecate_info=c.deprecate(target='--documentationUri', redirect='--documentation-uri'))
         c.argument('documentation_uri', arg_type=CLIArgumentType(options_list=['--documentation-uri', '-d'], help="The documentation uri of the Bicep module."))
-        c.argument('with_source', options_list=['--with-source'], action='store_true', help="Publish source code with the module.", is_preview=True)
+        c.argument('with_source', options_list=['--with-source'], action='store_true', help="Publish source code with the module.")
         c.argument('force', arg_type=bicep_force_type, help="Allow overwriting an existing Bicep module version.")
 
     with self.argument_context('bicep install') as c:
@@ -836,7 +836,7 @@ def load_arguments(self, _):
         c.argument('stdout', arg_type=bicep_stdout_type)
         c.argument('no_restore', arg_type=bicep_no_restore_type, help="When set, generates the parameters file without restoring external modules.")
         c.argument('output_format', help="Set output format. Valid values are ( json | bicepparam ).")
-        c.argument('include_params', help="Set include params. Valid values are ( all | required-only ).")
+        c.argument('include_params', help="Set include params. Valid values are ( all | RequiredOnly ).")
 
     with self.argument_context('bicep lint') as c:
         c.argument('file', arg_type=bicep_file_type, help="The path to the Bicep module file to lint in the file system.")

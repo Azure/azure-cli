@@ -13,16 +13,15 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "netappfiles volume migrate-backup",
-    is_preview=True,
 )
 class MigrateBackup(AAZCommand):
     """Migrate the backups under volume to backup vault
     """
 
     _aaz_info = {
-        "version": "2023-11-01",
+        "version": "2024-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/migratebackups", "2023-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/migratebackups", "2024-07-01"],
         ]
     }
 
@@ -49,7 +48,7 @@ class MigrateBackup(AAZCommand):
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,127}$",
+                pattern="^[a-zA-Z0-9][a-zA-Z0-9\\-_]{0,127}$",
             ),
         )
         _args_schema.pool_name = AAZStrArg(
@@ -58,7 +57,7 @@ class MigrateBackup(AAZCommand):
             required=True,
             id_part="child_name_1",
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,63}$",
+                pattern="^[a-zA-Z0-9][a-zA-Z0-9\\-_]{0,63}$",
                 max_length=64,
                 min_length=1,
             ),
@@ -72,7 +71,7 @@ class MigrateBackup(AAZCommand):
             required=True,
             id_part="child_name_2",
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z][a-zA-Z0-9\-_]{0,63}$",
+                pattern="^[a-zA-Z][a-zA-Z0-9\\-_]{0,63}$",
                 max_length=64,
                 min_length=1,
             ),
@@ -81,7 +80,7 @@ class MigrateBackup(AAZCommand):
         # define Arg Group "Body"
 
         _args_schema = cls._args_schema
-        _args_schema.backup_vault_id = AAZStrArg(
+        _args_schema.backup_vault_id = AAZResourceIdArg(
             options=["--backup-vault-id"],
             arg_group="Body",
             help="The ResourceId of the Backup Vault",
@@ -112,16 +111,7 @@ class MigrateBackup(AAZCommand):
                 return self.client.build_lro_polling(
                     self.ctx.args.no_wait,
                     session,
-                    self.on_200_201,
-                    self.on_error,
-                    lro_options={"final-state-via": "location"},
-                    path_format_arguments=self.url_parameters,
-                )
-            if session.http_response.status_code in [200, 201]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_200_201,
+                    None,
                     self.on_error,
                     lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
@@ -174,7 +164,7 @@ class MigrateBackup(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-11-01",
+                    "api-version", "2024-07-01",
                     required=True,
                 ),
             }
@@ -199,9 +189,6 @@ class MigrateBackup(AAZCommand):
             _builder.set_prop("backupVaultId", AAZStrType, ".backup_vault_id", typ_kwargs={"flags": {"required": True}})
 
             return self.serialize_content(_content_value)
-
-        def on_200_201(self, session):
-            pass
 
 
 class _MigrateBackupHelper:

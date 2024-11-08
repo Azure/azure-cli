@@ -1435,6 +1435,20 @@ class TestAAZArg(unittest.TestCase):
         arg = schema.count.to_cmd_arg("count")
         self.assertEqual(arg.type.settings['configured_default'], 'specialcount')
 
+    def test_aaz_generic_update_arg(self):
+        from azure.cli.core.aaz._arg import (AAZGenericUpdateAddArg, AAZGenericUpdateSetArg, AAZGenericUpdateRemoveArg,
+                                             AAZArgumentsSchema)
+        schema = AAZArgumentsSchema()
+        schema.generic_update_add = AAZGenericUpdateAddArg()
+        schema.generic_update_set = AAZGenericUpdateSetArg()
+        schema.generic_update_remove = AAZGenericUpdateRemoveArg()
+        arg = schema.generic_update_add.to_cmd_arg("add")
+        self.assertEqual(arg.type.settings['help'], 'Add an object to a list of objects by specifying a path and key value pairs.  Example: `--add property.listProperty <key=value, string or JSON string>`')
+        arg = schema.generic_update_set.to_cmd_arg("set")
+        self.assertEqual(arg.type.settings['help'], 'Update an object by specifying a property path and value to set.  Example: `--set property1.property2=<value>`')
+        arg = schema.generic_update_remove.to_cmd_arg("remove")
+        self.assertEqual(arg.type.settings['help'], 'Remove a property or an element from a list.  Example: `--remove property.list <indexToRemove>` OR `--remove propertyToRemove`')
+
 
 class TestAAZArgUtils(unittest.TestCase):
 
@@ -1613,3 +1627,72 @@ class TestAAZArgUtils(unittest.TestCase):
         v.items = assign_aaz_dict_arg(v.items, v.names, element_transformer=lambda _, name: {"name": name})
         self.assertTrue(v.items._is_patch)
         self.assertEqual(v.items, {'a': {"name": '1'}, 'b': {"name": '2'}, 'c': {"name": "3"}})
+
+
+class TestAazArgCompleter(unittest.TestCase):
+    from azure.cli.core.decorators import Completer
+
+    @staticmethod
+    @Completer
+    def custom_completer(cmd, prefix, namespace):
+        return ['a', 'b']
+
+    def test_custom_completer(self):
+        from azure.cli.core.aaz._arg import AAZStrArg, AAZArgumentsSchema, AAZUnregisteredArg
+
+        schema = AAZArgumentsSchema()
+        v = schema()
+
+        schema.foo = AAZStrArg(
+            options=['foo'],
+            nullable=True,
+            completer=self.custom_completer
+        )
+        args = {}
+        for name, field in schema._fields.items():
+            # generate command arguments from argument schema.
+            try:
+                args[name] = field.to_cmd_arg(name)
+            except AAZUnregisteredArg:
+                continue
+        self.assertEqual(args['foo'].completer, schema.foo._completer)
+        self.assertEqual(args['foo'].completer, self.custom_completer)
+
+    def test_completer_override(self):
+        from azure.cli.core.aaz._arg import (AAZResourceLocationArg, AAZArgumentsSchema, AAZUnregisteredArg,
+                                             AAZSubscriptionIdArg)
+        from azure.cli.core.commands.parameters import get_location_completion_list
+        from azure.cli.core._completers import get_subscription_id_list
+
+        schema = AAZArgumentsSchema()
+        v = schema()
+
+        schema.foo = AAZResourceLocationArg(
+            options=['foo'],
+            completer=self.custom_completer
+        )
+        schema.bar = AAZResourceLocationArg(
+            options=['bar']
+        )
+        schema.sub = AAZSubscriptionIdArg(
+            options=["--subscription-id"],
+            help="subscription id",
+            required=True,
+            id_part="subscription")
+        self.assertEqual(schema.foo._completer, self.custom_completer)
+        self.assertEqual(schema.bar._completer, get_location_completion_list)
+        self.assertEqual(schema.sub._completer, get_subscription_id_list)
+
+        args = {}
+        for name, field in schema._fields.items():
+            # generate command arguments from argument schema.
+            try:
+                args[name] = field.to_cmd_arg(name)
+            except AAZUnregisteredArg:
+                continue
+        self.assertEqual(args['foo'].completer, self.custom_completer)
+        self.assertEqual(args['bar'].completer, get_location_completion_list)
+        self.assertEqual(args['sub'].completer, get_subscription_id_list)
+        schema.bar._completer = self.custom_completer
+        new_arg = schema.bar.to_cmd_arg('bar')
+        self.assertEqual(new_arg.completer, self.custom_completer)

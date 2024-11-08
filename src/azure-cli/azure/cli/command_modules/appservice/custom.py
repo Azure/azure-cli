@@ -31,8 +31,8 @@ from knack.prompting import prompt_pass, NoTTYException, prompt_y_n
 from knack.util import CLIError
 from knack.log import get_logger
 
-from msrestazure.azure_exceptions import CloudError
-from msrestazure.tools import is_valid_resource_id, parse_resource_id, resource_id
+from azure.core.exceptions import HttpResponseError
+from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id, resource_id
 
 from azure.mgmt.storage import StorageManagementClient
 from azure.mgmt.applicationinsights import ApplicationInsightsManagementClient
@@ -55,6 +55,7 @@ from ._params import AUTH_TYPES, MULTI_CONTAINER_TYPES
 from ._client_factory import (web_client_factory, ex_handler_factory, providers_client_factory,
                               appcontainers_client_factory)
 from ._appservice_utils import _generic_site_operation, _generic_settings_operation
+from ._appservice_utils import MSI_LOCAL_ID
 from .utils import (_normalize_sku,
                     get_sku_tier,
                     retryable_method,
@@ -112,7 +113,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                   multicontainer_config_type=None, multicontainer_config_file=None, tags=None,
                   using_webapp_up=False, language=None, assign_identities=None,
                   role='Contributor', scope=None, vnet=None, subnet=None, https_only=False,
-                  public_network_access=None, acr_use_identity=False, basic_auth=""):
+                  public_network_access=None, acr_use_identity=False, acr_identity=None, basic_auth=""):
     from azure.mgmt.web.models import Site
     from azure.core.exceptions import ResourceNotFoundError as _ResourceNotFoundError
     SiteConfig, SkuDescription, NameValuePair = cmd.get_models(
@@ -321,6 +322,9 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         identity = assign_identity(cmd, resource_group_name, name, assign_identities,
                                    role, None, scope)
         webapp.identity = identity
+
+    if acr_identity:
+        update_site_configs(cmd, resource_group_name, name, acr_identity=acr_identity)
 
     _enable_basic_auth(cmd, name, None, resource_group_name, basic_auth.lower())
     return webapp
@@ -785,11 +789,16 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     import os
     import requests
     from azure.cli.core.util import should_disable_connection_verify
-    # Read file content
+    # check if the app is a linux web app
+    app_is_linux_webapp = is_linux_webapp(app)
 
+    # Read file content
     with open(os.path.realpath(os.path.expanduser(src)), 'rb') as fs:
         zip_content = fs.read()
         logger.warning("Starting zip deployment. This operation can take a while to complete ...")
+        if app_is_linux_webapp and track_status is not None and track_status:
+            headers["x-ms-artifact-checksum"] = _compute_checksum(zip_content)
+
         res = requests.post(zip_url, data=zip_content, headers=headers, verify=not should_disable_connection_verify())
         logger.warning("Deployment endpoint responded with status code %d", res.status_code)
 
@@ -973,7 +982,7 @@ def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
             client.web_apps.sync_function_triggers_slot(resource_group_name, name, slot)
         else:
             client.web_apps.sync_function_triggers(resource_group_name, name)
-    except CloudError as ex:
+    except HttpResponseError as ex:
         # This SDK function throws an error if Status Code is 200
         if ex.status_code != 200:
             raise ex
@@ -1224,7 +1233,6 @@ def _list_deleted_app(cli_ctx, resource_group_name=None, name=None, slot=None):
 
 
 def _build_identities_info(identities):
-    from ._appservice_utils import MSI_LOCAL_ID
     identities = identities or []
     identity_types = []
     if not identities or MSI_LOCAL_ID in identities:
@@ -1401,7 +1409,7 @@ def list_instances(cmd, resource_group_name, name, slot=None):
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_instance_identifiers', slot)
 
 
-def list_runtimes(cmd, os_type=None, linux=False):
+def list_runtimes(cmd, os_type=None, linux=False, show_runtime_details=False):
     if os_type is not None and linux:
         raise MutuallyExclusiveArgumentError("Cannot use both --os-type and --linux")
 
@@ -1418,7 +1426,7 @@ def list_runtimes(cmd, os_type=None, linux=False):
             windows = False
 
     runtime_helper = _StackRuntimeHelper(cmd=cmd, linux=linux, windows=windows)
-    return runtime_helper.get_stack_names_only(delimiter=":")
+    return runtime_helper.get_stack_names_only(delimiter=":", show_runtime_details=show_runtime_details)
 
 
 def list_function_app_runtimes(cmd, os_type=None):
@@ -1766,7 +1774,10 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
                         vnet_route_all_enabled=None,
                         generic_configurations=None,
                         min_replicas=None,
-                        max_replicas=None):
+                        max_replicas=None,
+                        acr_use_identity=None,
+                        acr_identity=None,
+                        min_tls_cipher_suite=None):
     configs = get_site_configs(cmd, resource_group_name, name, slot)
     app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
                                            'list_application_settings', slot)
@@ -1803,7 +1814,8 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
             version_used_create = '|'.join(runtime.split('|')[1:])
             runtime_version = "{}|{}".format(language, version_used_create) if \
                 version_used_create != "-" else version_used_create
-            current_stack = get_current_stack_from_runtime(runtime_version)
+            current_stack = get_current_stack_from_runtime(runtime_version) if \
+                get_current_stack_from_runtime(runtime_version) != "tomcat" else "java"
             _update_webapp_current_stack_property_if_needed(cmd, resource_group_name, name, current_stack)
 
     if number_of_workers is not None:
@@ -1819,6 +1831,7 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
     if pre_warmed_instance_count is not None:
         pre_warmed_instance_count = validate_range_of_int_flag('--prewarmed-instance-count', pre_warmed_instance_count,
                                                                min_val=0, max_val=20)
+
     import inspect
     frame = inspect.currentframe()
     bool_flags = ['remote_debugging_enabled', 'web_sockets_enabled', 'always_on',
@@ -1857,6 +1870,37 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
     if not updating_ip_security_restrictions:
         setattr(configs, 'ip_security_restrictions', None)
         setattr(configs, 'scm_ip_security_restrictions', None)
+
+    if acr_identity:
+        if not configs.acr_use_managed_identity_creds:
+            setattr(configs, 'acr_use_managed_identity_creds', True)
+        acr_user_managed_identity_id = ''
+        if acr_identity.casefold() != MSI_LOCAL_ID:
+            if acr_identity.endswith('/'):
+                acr_identity = acr_identity[:len(acr_identity) - 1]
+            web_app = get_webapp(cmd, resource_group_name, name, slot)
+            webapp_identity = web_app.identity
+            matched_key = None
+            for key in webapp_identity.user_assigned_identities.keys():
+                if key.casefold() == acr_identity.casefold():
+                    matched_key = key
+            matched_identity = None if matched_key is None else webapp_identity.user_assigned_identities[matched_key]
+            if not matched_identity:
+                raise ResourceNotFoundError("Unable to retrieve identity {}, "
+                                            "please make sure the identity resource id you provide is correct "
+                                            "and it is assigned to this webapp. "
+                                            "When seeing this error while creating webapp "
+                                            "please remove created webapp before trying again "
+                                            "or set up user managed identity used for acr manually"
+                                            .format(acr_identity))
+            acr_user_managed_identity_id = matched_identity.client_id
+        setattr(configs, 'acr_user_managed_identity_id', acr_user_managed_identity_id)
+
+    if acr_use_identity is not None:
+        acr_use_identity = values['acr_use_identity'].casefold() == 'true'
+        if not acr_use_identity:
+            setattr(configs, 'acr_user_managed_identity_id', "")
+        setattr(configs, 'acr_use_managed_identity_creds', acr_use_identity)
 
     if is_centauri_functionapp(cmd, resource_group_name, name):
         if min_replicas is not None:
@@ -2258,15 +2302,20 @@ def update_site_configs_functionapp(cmd, resource_group_name, name, slot=None, n
                                     vnet_route_all_enabled=None, generic_configurations=None, min_replicas=None,
                                     max_replicas=None):
     check_language_runtime(cmd, resource_group_name, name)
-    return update_site_configs(cmd, resource_group_name, name, slot, number_of_workers, linux_fx_version,
-                               windows_fx_version, pre_warmed_instance_count, php_version,
-                               python_version, net_framework_version, power_shell_version,
-                               java_version, java_container, java_container_version,
-                               remote_debugging_enabled, web_sockets_enabled,
-                               always_on, auto_heal_enabled,
-                               use32_bit_worker_process, min_tls_version, http20_enabled, app_command_line,
-                               ftps_state, vnet_route_all_enabled, generic_configurations, min_replicas,
-                               max_replicas)
+    return update_site_configs(cmd, resource_group_name, name, slot, number_of_workers=number_of_workers,
+                               linux_fx_version=linux_fx_version, windows_fx_version=windows_fx_version,
+                               pre_warmed_instance_count=pre_warmed_instance_count, php_version=php_version,
+                               python_version=python_version, net_framework_version=net_framework_version,
+                               power_shell_version=power_shell_version, java_version=java_version,
+                               java_container=java_container, java_container_version=java_container_version,
+                               remote_debugging_enabled=remote_debugging_enabled,
+                               web_sockets_enabled=web_sockets_enabled, always_on=always_on,
+                               auto_heal_enabled=auto_heal_enabled, use32_bit_worker_process=use32_bit_worker_process,
+                               min_tls_version=min_tls_version, http20_enabled=http20_enabled,
+                               app_command_line=app_command_line, ftps_state=ftps_state,
+                               vnet_route_all_enabled=vnet_route_all_enabled,
+                               generic_configurations=generic_configurations, min_replicas=min_replicas,
+                               max_replicas=max_replicas)
 
 
 def update_container_settings_functionapp(cmd, resource_group_name, name, registry_server=None,
@@ -2651,7 +2700,7 @@ def enable_local_git(cmd, resource_group_name, name, slot=None):
 def sync_site_repo(cmd, resource_group_name, name, slot=None):
     try:
         return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'sync_repository', slot)
-    except CloudError as ex:  # Because of bad spec, sdk throws on 200. We capture it here
+    except HttpResponseError as ex:  # Because of bad spec, sdk throws on 200. We capture it here
         if ex.status_code not in [200, 204]:
             raise ex
 
@@ -2739,11 +2788,13 @@ has been deployed ".format(app_service_environment)
                        resource_group_name=resource_group_name, app_service_plan=plan_def)
 
 
-def update_app_service_plan(instance, sku=None, number_of_workers=None, elastic_scale=None,
+def update_app_service_plan(cmd, instance, sku=None, number_of_workers=None, elastic_scale=None,
                             max_elastic_worker_count=None):
     if number_of_workers is None and sku is None and elastic_scale is None and max_elastic_worker_count is None:
-        args = ["--number-of-workers", "--sku", "--elastic-scale", "--max-elastic-worker-count"]
-        logger.warning('Nothing to update. Set one of the following parameters to make an update: %s', str(args))
+        safe_params = cmd.cli_ctx.data['safe_params']
+        if '--set' not in safe_params:
+            args = ["--number-of-workers", "--sku", "--elastic-scale", "--max-elastic-worker-count"]
+            logger.warning('Nothing to update. Set one of the following parameters to make an update: %s', str(args))
     sku_def = instance.sku
     if sku is not None:
         sku = _normalize_sku(sku)
@@ -2794,7 +2845,7 @@ def show_plan(cmd, resource_group_name, name):
 
 
 def update_functionapp_app_service_plan(cmd, instance, sku=None, number_of_workers=None, max_burst=None):
-    instance = update_app_service_plan(instance, sku, number_of_workers)
+    instance = update_app_service_plan(cmd, instance, sku, number_of_workers)
     if max_burst is not None:
         if not is_plan_elastic_premium(cmd, instance):
             raise ValidationError("Usage error: --max-burst is only supported for Elastic Premium (EP) plans")
@@ -2803,7 +2854,7 @@ def update_functionapp_app_service_plan(cmd, instance, sku=None, number_of_worke
     if number_of_workers is not None:
         number_of_workers = validate_range_of_int_flag('--number-of-workers / --min-instances',
                                                        number_of_workers, min_val=0, max_val=20)
-    return update_app_service_plan(instance, sku, number_of_workers)
+    return update_app_service_plan(cmd, instance, sku, number_of_workers)
 
 
 def show_backup_configuration(cmd, resource_group_name, webapp_name, slot=None):
@@ -3812,11 +3863,17 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
 
     # pylint: disable=too-few-public-methods
     class Runtime:
-        def __init__(self, display_name=None, configs=None, github_actions_properties=None, linux=False):
+        def __init__(self,
+                     display_name=None,
+                     configs=None,
+                     github_actions_properties=None,
+                     linux=False,
+                     is_auto_update=None):
             self.display_name = display_name
             self.configs = configs if configs is not None else dict()
             self.github_actions_properties = github_actions_properties
             self.linux = linux
+            self.is_auto_update = is_auto_update
 
     def __init__(self, cmd, linux=False, windows=False):
         # TODO try and get API support for this so it isn't hardcoded
@@ -3830,12 +3887,23 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         }
         super().__init__(cmd, linux=linux, windows=windows)
 
-    def get_stack_names_only(self, delimiter=None):
-        windows_stacks = [s.display_name for s in self.stacks if not s.linux]
-        linux_stacks = [s.display_name for s in self.stacks if s.linux]
+    def get_stack_names_only(self, delimiter=None, show_runtime_details=False):
+        windows_stacks = [s.display_name for s in self.stacks if not s.linux and not s.is_auto_update]
+        linux_stacks = [s.display_name for s in self.stacks if s.linux and not s.is_auto_update]
+        windows_auto_updates = [
+            s.display_name for s in self.stacks if not
+            s.linux and ('java' not in s.display_name.casefold() or s.is_auto_update)]
+        linux_auto_updates = [
+            s.display_name for s in self.stacks if
+            s.linux and ('java' not in s.display_name.casefold() or s.is_auto_update)]
         if delimiter is not None:
             windows_stacks = [n.replace(self.DEFAULT_DELIMETER, delimiter) for n in windows_stacks]
             linux_stacks = [n.replace(self.DEFAULT_DELIMETER, delimiter) for n in linux_stacks]
+            windows_auto_updates = [n.replace(self.DEFAULT_DELIMETER, delimiter) for n in windows_auto_updates]
+            linux_auto_updates = [n.replace(self.DEFAULT_DELIMETER, delimiter) for n in linux_auto_updates]
+        if not show_runtime_details:
+            linux_stacks = linux_auto_updates
+            windows_stacks = windows_auto_updates
         if self._linux and not self._windows:
             return linux_stacks
         if self._windows and not self._linux:
@@ -3847,10 +3915,10 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
 
     def _parse_raw_stacks(self, stacks):
         for lang in stacks:
-            if lang.display_text.lower() == "java":
-                continue  # info on java stacks is taken from the "java containers" stacks
             for major_version in lang.major_versions:
                 if self._linux:
+                    if lang.display_text.lower() == "java":
+                        continue
                     self._parse_major_version_linux(major_version, self._stacks)
                 if self._windows:
                     self._parse_major_version_windows(major_version, self._stacks, self.windows_config_mappings)
@@ -3969,74 +4037,109 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         return [m for m in major_version.minor_versions if _filter(m)]
 
     def _parse_major_version_windows(self, major_version, parsed_results, config_mappings):
-        minor_java_versions = self._get_valid_minor_versions(major_version, linux=False, java=True)
-        default_java_version = next(iter(minor_java_versions), None)
-        if default_java_version:
-            container_settings = default_java_version.stack_settings.windows_container_settings
-            # TODO get the API to return java versions in a more parseable way
-            for java_version in ["1.8", "11", "17", "21"]:
+        java_container_minor_versions = self._get_valid_minor_versions(major_version, linux=False, java=True)
+        if java_container_minor_versions:
+            javas = ["21", "17", "11", "1.8"]
+            if len(java_container_minor_versions) > 0:
+                leng = len(java_container_minor_versions) if len(java_container_minor_versions) < 3 else 3
+                java_container_minor_versions = java_container_minor_versions[:leng]
+            for container in java_container_minor_versions:
+                container_settings = container.stack_settings.windows_container_settings
                 java_container = container_settings.java_container
                 container_version = container_settings.java_container_version
-                if container_version.upper() == "SE":
-                    java_container = "Java SE"
-                    if java_version == "1.8":
-                        container_version = "8"
-                    else:
-                        container_version = java_version
-                runtime_name = "{}|{}|{}|{}".format("java",
-                                                    java_version,
-                                                    java_container,
-                                                    container_version)
-                gh_actions_version = "8" if java_version == "1.8" else java_version
-                gh_actions_runtime = "{}, {}, {}".format(java_version,
-                                                         java_container.lower().replace(" se", ""),
-                                                         container_settings.java_container_version.lower())
-                if java_container == "Java SE":  # once runtime name is set, reset configs to correct values
-                    java_container = "JAVA"
-                    container_version = "SE"
-                runtime = self.Runtime(display_name=runtime_name,
-                                       configs={"java_version": java_version,
-                                                "java_container": java_container,
-                                                "java_container_version": container_version},
-                                       github_actions_properties={"github_actions_version": gh_actions_version,
-                                                                  "app_runtime": "java",
-                                                                  "app_runtime_version": gh_actions_runtime},
-                                       linux=False)
-                parsed_results.append(runtime)
+                for java in javas:
+                    runtime = self.get_windows_java_runtime(
+                        java,
+                        java_container,
+                        container_version,
+                        container_settings.is_auto_update)
+                    parsed_results.append(runtime)
         else:
             minor_versions = self._get_valid_minor_versions(major_version, linux=False, java=False)
+            if "Java" in major_version.display_text:
+                if len(minor_versions) > 0:
+                    leng = len(minor_versions) if len(minor_versions) < 3 else 3
+                    minor_versions = minor_versions[1:leng]
             for minor_version in minor_versions:
                 settings = minor_version.stack_settings.windows_runtime_settings
-                runtime_name = self._format_windows_display_text(minor_version.display_text)
+                if "Java" not in minor_version.display_text:
+                    runtime_name = self._format_windows_display_text(minor_version.display_text)
 
-                runtime = self.Runtime(display_name=runtime_name, linux=False)
-                lang_name = runtime_name.split("|")[0].lower()
-                config_key = config_mappings.get(lang_name)
+                    runtime = self.Runtime(display_name=runtime_name, linux=False)
+                    lang_name = runtime_name.split("|")[0].lower()
+                    config_key = config_mappings.get(lang_name)
 
-                if config_key:
-                    runtime.configs[config_key] = settings.runtime_version
-                gh_properties = settings.git_hub_action_settings
-                if gh_properties.is_supported:
-                    runtime.github_actions_properties = {"github_actions_version": gh_properties.supported_version}
+                    if config_key:
+                        runtime.configs[config_key] = settings.runtime_version
+                    gh_properties = settings.git_hub_action_settings
+                    if gh_properties.is_supported:
+                        runtime.github_actions_properties = {"github_actions_version": gh_properties.supported_version}
+                else:
+                    runtime = self.get_windows_java_runtime(settings.runtime_version, "JAVA", "SE", False)
 
                 parsed_results.append(runtime)
+
+    def get_windows_java_runtime(self, java_version=None,
+                                 java_container=None, container_version=None,
+                                 is_auto_update=False):
+        github_action_container_version = container_version
+        if container_version.upper() == "SE":
+            java_container = "JAVA SE"
+            if java_version.startswith("1.8"):
+                container_version = "8"
+            else:
+                container_version = java_version.split('.')[0]
+        runtime_name = "{}|{}-{}{}".format(
+            java_container,
+            container_version,
+            "java",
+            java_version if not java_version.startswith("1.8") else "8") \
+            if java_container != "JAVA SE" else "{}|{}".format(
+                "JAVA",
+                java_version if not java_version.startswith("1.8") or not is_auto_update else "8")
+        gh_actions_version = "8" if java_version == "1.8" else java_version
+        gh_actions_runtime = "{}, {}, {}".format(java_version,
+                                                 java_container.lower().replace(" se", ""),
+                                                 github_action_container_version.lower())
+        if java_container == "JAVA SE":  # once runtime name is set, reset configs to correct values
+            java_container = "JAVA"
+            container_version = "SE"
+        return self.Runtime(display_name=runtime_name,
+                            configs={"java_version": java_version,
+                                     "java_container": java_container,
+                                     "java_container_version": container_version},
+                            github_actions_properties={"github_actions_version": gh_actions_version,
+                                                       "app_runtime": "java",
+                                                       "app_runtime_version": gh_actions_runtime},
+                            linux=False,
+                            is_auto_update=is_auto_update)
 
     def _parse_major_version_linux(self, major_version, parsed_results):
-        minor_java_versions = self._get_valid_minor_versions(major_version, linux=True, java=True)
-        default_java_version_linux = next(iter(minor_java_versions), None)
-        if default_java_version_linux:
-            linux_container_settings = default_java_version_linux.stack_settings.linux_container_settings
-            runtimes = [(linux_container_settings.additional_properties.get("java21Runtime"), "21"),
-                        (linux_container_settings.additional_properties.get("java17Runtime"), "17"),
-                        (linux_container_settings.java11_runtime, "11"),
-                        (linux_container_settings.java8_runtime, "8")]
-            for runtime_name, version in [(r, v) for (r, v) in runtimes if r is not None]:
-                runtime = self.Runtime(display_name=runtime_name,
-                                       configs={"linux_fx_version": runtime_name},
-                                       github_actions_properties={"github_actions_version": version},
-                                       linux=True,
-                                       )
-                parsed_results.append(runtime)
+        minor_java_container_versions = self._get_valid_minor_versions(major_version, linux=True, java=True)
+        if "SE" in major_version.display_text:
+            se_containers = [minor_java_container_versions[0]]
+            for java in ["21", "17", "11", "1.8"]:
+                se_java_containers = [c for c in minor_java_container_versions if c.value.startswith(java)]
+                se_containers = se_containers + se_java_containers[:len(se_java_containers) if len(se_java_containers) < 2 else 2]    # pylint: disable=line-too-long
+            minor_java_container_versions = se_containers
+        if minor_java_container_versions:
+            leng = len(minor_java_container_versions) if \
+                len(minor_java_container_versions) < 3 else 3 if \
+                "SE" not in major_version.display_text else len(minor_java_container_versions)
+            for minor in minor_java_container_versions[:leng]:
+                linux_container_settings = minor.stack_settings.linux_container_settings
+                runtimes = [
+                    (linux_container_settings.additional_properties.get("java21Runtime"), "21", linux_container_settings.is_auto_update),    # pylint: disable=line-too-long
+                    (linux_container_settings.additional_properties.get("java17Runtime"), "17", linux_container_settings.is_auto_update),    # pylint: disable=line-too-long
+                    (linux_container_settings.java11_runtime, "11", linux_container_settings.is_auto_update),
+                    (linux_container_settings.java8_runtime, "8", linux_container_settings.is_auto_update)]
+                for runtime_name, version, auto_update in [(r, v, au) for (r, v, au) in runtimes if r is not None]:
+                    runtime = self.Runtime(display_name=runtime_name,
+                                           configs={"linux_fx_version": runtime_name},
+                                           github_actions_properties={"github_actions_version": version},
+                                           linux=True,
+                                           is_auto_update=auto_update)
+                    parsed_results.append(runtime)
         else:
             minor_versions = self._get_valid_minor_versions(major_version, linux=True, java=False)
             for minor_version in minor_versions:
@@ -4161,7 +4264,7 @@ class _FlexFunctionAppStackRuntimeHelper:
                             'isDefault': runtime_settings.get('isDefault', False),
                             'sku': sku,
                             'applicationInsights': runtime_settings['appInsightsSettings']['isSupported'],
-                            'endOfLifeDate': runtime_settings['endOfLifeDate'],
+                            'endOfLifeDate': runtime_settings.get('endOfLifeDate'),
                             'github_actions_properties': self.GithubActionsProperties(**github_actions_properties)
                         }
 
@@ -4480,7 +4583,7 @@ def get_app_insights_connection_string(cli_ctx, resource_group, name):
     return appinsights.connection_string
 
 
-def create_flex_app_service_plan(cmd, resource_group_name, name, location):
+def create_flex_app_service_plan(cmd, resource_group_name, name, location, zone_redundant):
     SkuDescription, AppServicePlan = cmd.get_models('SkuDescription', 'AppServicePlan')
     client = web_client_factory(cmd.cli_ctx)
     sku_def = SkuDescription(tier="FlexConsumption", name="FC1", size="FC", family="FC")
@@ -4491,6 +4594,10 @@ def create_flex_app_service_plan(cmd, resource_group_name, name, location):
         kind="functionapp",
         name=name
     )
+
+    if zone_redundant:
+        _enable_zone_redundant(plan_def, sku_def, None)
+
     poller = client.app_service_plans.begin_create_or_update(resource_group_name, name, plan_def)
     return LongRunningOperation(cmd.cli_ctx)(poller)
 
@@ -4656,6 +4763,13 @@ def is_exactly_one_true(*args):
     return found
 
 
+def list_flexconsumption_zone_redundant_locations(cmd):
+    client = web_client_factory(cmd.cli_ctx)
+    regions = client.list_geo_regions(sku="FlexConsumption")
+    regions = [x for x in regions if "FCZONEREDUNDANCY" in x.org_domain]
+    return [{'name': x.name.lower().replace(' ', '')} for x in regions]
+
+
 def create_functionapp(cmd, resource_group_name, name, storage_account, plan=None,
                        os_type=None, functions_version=None, runtime=None, runtime_version=None,
                        consumption_plan_location=None, app_insights=None, app_insights_key=None,
@@ -4671,8 +4785,9 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        always_ready_instances=None, maximum_instance_count=None, instance_memory=None,
                        flexconsumption_location=None, deployment_storage_name=None,
                        deployment_storage_container_name=None, deployment_storage_auth_type=None,
-                       deployment_storage_auth_value=None):
+                       deployment_storage_auth_value=None, zone_redundant=False):
     # pylint: disable=too-many-statements, too-many-branches
+
     if functions_version is None and flexconsumption_location is None:
         logger.warning("No functions version specified so defaulting to 4.")
         functions_version = '4'
@@ -4710,6 +4825,12 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     from azure.mgmt.web.models import Site
     SiteConfig, NameValuePair, DaprConfig, ResourceConfig = cmd.get_models('SiteConfig', 'NameValuePair',
                                                                            'DaprConfig', 'ResourceConfig')
+
+    if flexconsumption_location is None:
+        if zone_redundant:
+            raise ArgumentUsageError(
+                '--zone-redundant is only valid for the Flex Consumption plan. '
+                'Please try again without the --zone-redundant parameter.')
 
     if flexconsumption_location is not None:
         if image is not None:
@@ -5037,6 +5158,17 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         create_app_insights = True
 
     if flexconsumption_location is not None:
+        if zone_redundant:
+            zone_redundant_locations = list_flexconsumption_zone_redundant_locations(cmd)
+            zone_redundant_location = next((loc for loc in zone_redundant_locations
+                                            if loc['name'].lower() == flexconsumption_location.lower()), None)
+            if zone_redundant_location is None:
+                raise ValidationError("The specified location '{0}' "
+                                      "doesn't support zone redundancy in Flex Consumption. "
+                                      "Use: az functionapp list-flexconsumption-locations --zone-redundant "
+                                      "for the list of locations that support zone redundancy."
+                                      .format(flexconsumption_location))
+
         site_config.net_framework_version = None
         functionapp_def.reserved = None
         functionapp_def.is_xenon = None
@@ -5044,7 +5176,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         try:
             plan_name = generatePlanName(resource_group_name)
             plan_info = create_flex_app_service_plan(
-                cmd, resource_group_name, plan_name, flexconsumption_location)
+                cmd, resource_group_name, plan_name, flexconsumption_location, zone_redundant)
             functionapp_def.server_farm_id = plan_info.id
             functionapp_def.location = flexconsumption_location
 
@@ -5453,7 +5585,9 @@ def _get_or_create_user_assigned_identity(cmd, resource_group_name, functionapp_
     msi_client = get_mgmt_service_client(cmd.cli_ctx, ManagedServiceIdentityClient)
     if user_assigned_identity:
         if is_valid_resource_id(user_assigned_identity):
-            user_assigned_identity = parse_resource_id(user_assigned_identity)['name']
+            parse_result = parse_resource_id(user_assigned_identity)
+            user_assigned_identity = parse_result['name']
+            resource_group_name = parse_result['resource_group']
         identity = msi_client.user_assigned_identities.get(resource_group_name=resource_group_name,
                                                            resource_name=user_assigned_identity)
     else:
@@ -5587,7 +5721,10 @@ def list_consumption_locations(cmd):
     return [{'name': x.name.lower().replace(' ', '')} for x in regions]
 
 
-def list_flexconsumption_locations(cmd):
+def list_flexconsumption_locations(cmd, zone_redundant=False):
+    if zone_redundant:
+        return list_flexconsumption_zone_redundant_locations(cmd)
+
     from azure.cli.core.commands.client_factory import get_subscription_id
     sub_id = get_subscription_id(cmd.cli_ctx)
     geo_regions_api = 'subscriptions/{}/providers/Microsoft.Web/geoRegions?sku=FlexConsumption&api-version=2023-01-01'
@@ -5688,7 +5825,8 @@ def _check_runtimestatus_with_deploymentstatusapi(cmd, resource_group_name, name
     client = web_client_factory(cmd.cli_ctx)
     app = client.web_apps.get(resource_group_name, name)
     app_is_linux_webapp = is_linux_webapp(app)
-    if not app_is_linux_webapp:
+    # TODO: enable tracking for slot deployments again once site warmup is fixed for slots
+    if not app_is_linux_webapp or slot is not None:
         response_body = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
                                                      slot, timeout)
     else:
@@ -6898,12 +7036,22 @@ def _get_onedeploy_status_url(params):
 
 def _get_onedeploy_request_body(params):
     import os
+    file_hash = None
+    app_is_linux_webapp = False
 
     if params.src_path:
         logger.warning('Deploying from local path: %s', params.src_path)
+
+        if params.track_status is not None and params.track_status:
+            client = web_client_factory(params.cmd.cli_ctx)
+            app = client.web_apps.get(params.resource_group_name, params.webapp_name)
+            app_is_linux_webapp = is_linux_webapp(app)
+
         try:
             with open(os.path.realpath(os.path.expanduser(params.src_path)), 'rb') as fs:
                 body = fs.read()
+                if app_is_linux_webapp:
+                    file_hash = _compute_checksum(body)
         except Exception as e:  # pylint: disable=broad-except
             raise ResourceNotFoundError("Either '{}' is not a valid local file path or you do not have permissions to "
                                         "access it".format(params.src_path)) from e
@@ -6924,7 +7072,7 @@ def _get_onedeploy_request_body(params):
     else:
         raise ResourceNotFoundError('Unable to determine source location of the artifact being deployed')
 
-    return body
+    return body, file_hash
 
 
 def _update_artifact_type(params):
@@ -6951,10 +7099,13 @@ def _make_onedeploy_request(params):
     from azure.cli.core.util import should_disable_connection_verify
 
     # Build the request body, headers, API URL and status URL
-    body = _get_onedeploy_request_body(params)
+    body, file_hash = _get_onedeploy_request_body(params)
     deploy_url = _build_onedeploy_url(params)
     deployment_status_url = _get_onedeploy_status_url(params)
     headers = _get_ondeploy_headers(params)
+
+    if file_hash:
+        headers["x-ms-artifact-checksum"] = file_hash
 
     # For debugging purposes only, you can change the async deployment into a sync deployment by polling the API status
     # For that, set poll_async_deployment_for_debugging=True
@@ -8230,3 +8381,16 @@ def _encrypt_github_actions_secret(public_key, secret_value):
 
 def show_webapp(cmd, resource_group_name, name, slot=None):  # adding this to not break extensions
     return show_app(cmd, resource_group_name, name, slot)
+
+
+def _compute_checksum(input_bytes):
+    file_hash = None
+    try:
+        import hashlib
+        logger.info("Computing checksum of the file ...")
+        file_hash = hashlib.sha256(input_bytes).hexdigest()
+        logger.info("Computed checksum for deployment request header x-ms-artifact-checksum '%s'", file_hash)
+    except Exception as ex:  # pylint: disable=broad-except
+        logger.info("Computing the checksum of the file failed with exception:'%s'", ex)
+
+    return file_hash

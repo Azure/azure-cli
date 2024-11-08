@@ -56,10 +56,9 @@ DISALLOWED_USER_NAMES = [
 def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statements, too-many-branches
     # For error code, follow guidelines at https://docs.python.org/2/library/sys.html#sys.exit,
     from jmespath.exceptions import JMESPathError
-    from msrestazure.azure_exceptions import CloudError
     from msrest.exceptions import HttpOperationError, ValidationError, ClientRequestError
     from azure.common import AzureException
-    from azure.core.exceptions import AzureError, ServiceRequestError
+    from azure.core.exceptions import AzureError, ServiceRequestError, HttpResponseError
     from requests.exceptions import SSLError, HTTPError
     from azure.cli.core import azclierror
     from msal_extensions.persistence import PersistenceError
@@ -83,7 +82,7 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
         az_error = azclierror.AzureConnectionError(error_msg)
         az_error.set_recommendation(SSLERROR_TEMPLATE)
 
-    elif isinstance(ex, CloudError):
+    elif isinstance(ex, HttpResponseError):
         if extract_common_error_message(ex):
             error_msg = extract_common_error_message(ex)
         status_code = str(getattr(ex, 'status_code', 'Unknown Code'))
@@ -676,11 +675,10 @@ def should_disable_connection_verify():
 
 
 def poller_classes():
-    from msrestazure.azure_operation import AzureOperationPoller
     from msrest.polling.poller import LROPoller
     from azure.core.polling import LROPoller as AzureCoreLROPoller
     from azure.cli.core.aaz._poller import AAZLROPoller
-    return (AzureOperationPoller, LROPoller, AzureCoreLROPoller, AAZLROPoller)
+    return (LROPoller, AzureCoreLROPoller, AAZLROPoller)
 
 
 def augment_no_wait_handler_args(no_wait_enabled, handler, handler_args):
@@ -752,6 +750,11 @@ def is_wsl():
 def is_windows():
     platform_name, _ = _get_platform_info()
     return platform_name == 'windows'
+
+
+def is_github_codespaces():
+    # https://docs.github.com/en/codespaces/developing-in-a-codespace/default-environment-variables-for-your-codespace
+    return os.environ.get('CODESPACES') == 'true'
 
 
 def can_launch_browser():
@@ -1356,3 +1359,36 @@ def should_encrypt_token_cache(cli_ctx):
     encrypt = cli_ctx.config.getboolean('core', 'encrypt_token_cache', fallback=fallback)
 
     return encrypt
+
+
+def run_cmd(args, *, capture_output=False, timeout=None, check=False, encoding=None, env=None):
+    """Run command in a subprocess. It reduces (not eliminates) shell injection by forcing args to be a list
+    and shell=False. Other arguments are keyword-only. For their documentation, see
+    https://docs.python.org/3/library/subprocess.html#subprocess.run
+    """
+    if not isinstance(args, list):
+        from azure.cli.core.azclierror import ArgumentUsageError
+        raise ArgumentUsageError("Invalid args. run_cmd args must be a list")
+
+    import subprocess
+    return subprocess.run(args, capture_output=capture_output, timeout=timeout, check=check,
+                          encoding=encoding, env=env)
+
+
+def run_az_cmd(args, out_file=None):
+    """
+    run_az_cmd would run az related cmds during command execution
+    :param args: cmd to be executed, array of string, like `["az", "version"]`, "az" is optional
+    :param out_file: The file to send output to. file-like object
+    :return: cmd execution result object, containing `result`, `error`, `exit_code`
+    """
+    from azure.cli.core.azclierror import ArgumentUsageError
+    if not isinstance(args, list):
+        raise ArgumentUsageError("Invalid args. run_az_cmd args must be a list")
+    if args[0] == "az":
+        args = args[1:]
+
+    from azure.cli.core import get_default_cli
+    cli = get_default_cli()
+    cli.invoke(args, out_file=out_file)
+    return cli.result
