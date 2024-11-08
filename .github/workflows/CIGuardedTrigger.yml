@@ -1,0 +1,53 @@
+name: PR File Check and Conditional CI Trigger
+
+on:
+  pull_request_target:
+    types: [opened, synchronize]
+    branches:
+      - dev
+
+permissions: {}
+
+jobs:
+  check-files:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Check changed files and conditionally trigger CI
+      env:
+        base_repo: ${{ github.event.pull_request.base.repo.clone_url }}
+        base_branch: ${{ github.event.pull_request.base.ref }}
+        base_branch_pre: "upstream"
+        diff_branch: ${{ github.event.pull_request.head.ref }}
+        REPO_TOKEN: ${{ secrets.CLI_BOT }}
+      run: |
+        set -x
+        git fetch "$base_repo" "$base_branch":"$base_branch_pre"/"$base_branch"
+        git checkout "$base_branch_pre"/"$base_branch"
+        git checkout "$diff_branch"
+
+        FILES=$(git --no-pager diff --name-only --diff-filter=ACMRT "$base_branch_pre"/"$base_branch"..."$diff_branch")
+        echo "Changed files:"
+        echo "$FILES"
+        
+        SHOULD_RUN_CI=true
+
+        # Check if any of the modified files are .yml or in scripts/ directory
+        for FILE in $FILES; do
+          if [[ "$FILE" == *.yml || "$FILE" == scripts/* ]]; then
+            SHOULD_RUN_CI=false
+            break
+          fi
+        done
+
+        # If SHOULD_RUN_CI is true, trigger CI by commenting /azp run
+        if [ "$SHOULD_RUN_CI" = true ]; then
+          curl -s -H "Authorization: token $REPO_TOKEN" \
+            -X POST -d '{"body":"/azp run"}' \
+            "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments"
+        fi
