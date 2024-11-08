@@ -6432,7 +6432,7 @@ def failover_group_create(
         partner_server,
         secondary_type=None,
         partner_resource_group=None,
-        failover_policy=FailoverPolicyType.automatic.value,
+        failover_policy=FailoverPolicyType.manual.value,
         grace_period=1,
         add_db=None):
     '''
