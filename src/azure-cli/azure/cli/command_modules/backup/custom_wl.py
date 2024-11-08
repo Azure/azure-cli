@@ -10,6 +10,7 @@ from datetime import datetime, timedelta, timezone
 # pylint: disable=broad-except
 # pylint: disable=too-many-locals
 # pylint: disable=too-many-statements
+# pylint: disable=too-many-branches
 
 from knack.log import get_logger
 
