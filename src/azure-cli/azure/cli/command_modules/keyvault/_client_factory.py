@@ -53,7 +53,8 @@ KEYVAULT_TEMPLATE_STRINGS = {
     ResourceType.DATA_KEYVAULT_SECRETS:
         'azure.keyvault.secrets._client#SecretClient{obj_name}',
     ResourceType.DATA_KEYVAULT_SECURITY_DOMAIN:
-        'azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_securitydomain._patch#SecurityDomainClient{obj_name}',
+        'azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_securitydomain.'
+        '_patch#SecurityDomainClient{obj_name}',
 }
 
 

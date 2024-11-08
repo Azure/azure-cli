@@ -12,9 +12,9 @@ from azure.cli.command_modules.keyvault._client_factory import (
     get_client, get_client_factory, Clients, is_azure_stack_profile)
 
 from azure.cli.command_modules.keyvault._transformers import (
-    filter_out_managed_resources,
+    filter_out_managed_resources, transform_security_domain_output,
     multi_transformers, transform_key_decryption_output, keep_max_results, transform_key_list_output,
-    transform_key_output, transform_key_encryption_output, transform_key_random_output, transform_security_domain_output,
+    transform_key_output, transform_key_encryption_output, transform_key_random_output,
     transform_secret_list, transform_deleted_secret_list, transform_secret_set,
     transform_secret_set_attributes, transform_secret_show_deleted, transform_secret_delete, transform_secret_recover,
     transform_certificate_create, transform_certificate_list, transform_certificate_list_deleted,
