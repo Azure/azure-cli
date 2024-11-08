@@ -133,7 +133,7 @@ type: command
 short-summary: Add a CORS rule for a storage account.
 examples:
   - name: Add a CORS rule for a storage account
-    text: |
+    text: |.
         az storage account blob-service-properties cors-rule add --account-name mystorageaccount --resource-group myresourcegroup --allowed-origins "http://*.contoso.com" --allowed-methods PUT GET --max-age 200
 """
 
@@ -928,8 +928,6 @@ parameters:
   - name: --dryrun
     type: bool
     short-summary: Show the summary of the operations to be taken instead of actually deleting the file(s).
-    long-summary: If this is specified, it will ignore all the Precondition Arguments that include --if-modified-since and --if-unmodified-since. So the file(s) will be deleted with the command without --dryrun may be different from the result list with --dryrun flag on.
-  - name: --if-match
     type: string
     short-summary: An ETag value, or the wildcard character (*). Specify this header to perform the operation only if the resource's ETag matches the value specified.
   - name: --if-none-match
