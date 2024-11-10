@@ -109,14 +109,15 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
             self.check('targetLowPriorityNodes', 3),
             self.check('id', 'xplatCreatedPool')])
 
+        self.batch_cmd('batch pool resize --pool-id {p_id} --abort')
+
+        if self.is_live or self.in_recording:
+            time.sleep(30)
+        
         self.batch_cmd('batch pool node-counts list').assert_with_checks([
             self.check('length(@)', 2),
-            self.check('[1].poolId', 'xplatCreatedPool'),
-            self.check('[1].lowPriority.total', 0)])
+            self.check('[1].poolId', 'xplatCreatedPool')])
 
-        self.batch_cmd('batch pool resize --pool-id {p_id} --abort')
-        if self.is_live or self.in_recording:
-            time.sleep(120)
 
         self.batch_cmd('batch pool show --pool-id {p_id}').assert_with_checks([
             self.check('allocationState', 'steady'),
@@ -385,7 +386,9 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         })
 
         # test create paas pool using parameters
-        self.batch_cmd('batch pool create --id {p_id} --vm-size small --os-family 4')
+        self.batch_cmd('batch pool create --id {p_id} --vm-size Standard_A1 '
+                                '--image canonical:ubuntuserver:18.04-lts --node-agent-sku-id "batch.node.ubuntu 18.04" '
+                                '--disk-encryption-targets "TemporaryDisk"')
 
         # test create job with missing parameters
         self.kwargs['start'] = datetime.datetime.utcnow().isoformat()
@@ -459,7 +462,9 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         })
 
         # test create paas pool using parameters
-        self.batch_cmd('batch pool create --id {pool_p} --vm-size small --os-family 4')
+        self.batch_cmd('batch pool create --id {pool_p} --vm-size Standard_A1 '
+                                '--image canonical:ubuntuserver:18.04-lts --node-agent-sku-id "batch.node.ubuntu 18.04" '
+                                '--disk-encryption-targets "TemporaryDisk"')
 
         # test create iaas pool using parameters
         self.batch_cmd('batch pool create --id {pool_i} --vm-size Standard_A1 '

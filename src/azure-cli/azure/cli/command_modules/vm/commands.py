@@ -34,7 +34,7 @@ from azure.cli.command_modules.vm._validators import (
     process_remove_identity_namespace, process_vm_secret_format, process_vm_vmss_stop, validate_vmss_update_namespace,
     process_vm_update_namespace, process_set_applications_namespace, process_vm_disk_attach_namespace,
     process_image_version_create_namespace, process_image_version_update_namespace,
-    process_image_version_undelete_namespace, process_ppg_create_namespace)
+    process_image_version_undelete_namespace, process_ppg_create_namespace, process_vm_disk_detach_namespace)
 
 from azure.cli.command_modules.vm._image_builder import (
     process_image_template_create_namespace, process_img_tmpl_output_add_namespace,
@@ -362,7 +362,7 @@ def load_command_table(self, _):
 
     with self.command_group('vm disk', compute_vm_sdk, min_api='2017-03-30') as g:
         g.custom_command('attach', 'attach_managed_data_disk', validator=process_vm_disk_attach_namespace)
-        g.custom_command('detach', 'detach_managed_data_disk')
+        g.custom_command('detach', 'detach_managed_data_disk', validator=process_vm_disk_detach_namespace)
 
     with self.command_group('vm encryption', custom_command_type=compute_disk_encryption_custom) as g:
         g.custom_command('enable', 'encrypt_vm', validator=process_disk_encryption_namespace)

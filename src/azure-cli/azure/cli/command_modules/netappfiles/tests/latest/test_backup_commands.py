@@ -337,9 +337,9 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
             time.sleep(60)
         #self.wait_for_backup_created(account_name, vault_name, backup_name)
         # There is an issue in generated code with deserializing this singleton GET, it will try to deserialize as list, remove comment when fixed
-        #self.wait_for_restore(account_name, pool_name, volume2_name)
+        # self.wait_for_restore(account_name, pool_name, volume2_name)
         if self.is_live or self.in_recording:
-            time.sleep(60)
+            time.sleep(120)
 
         self.delete_backup(account_name, vault_name, backup_name)
 

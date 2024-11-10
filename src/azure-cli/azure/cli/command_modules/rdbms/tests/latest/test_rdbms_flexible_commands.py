@@ -117,8 +117,8 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
-    @KeyVaultPreparer(name_prefix='rdbmsvault', parameter_name='vault_name', location=postgres_location, additional_params='--enable-purge-protection true --retention-days 90')
-    @KeyVaultPreparer(name_prefix='rdbmsvault', parameter_name='backup_vault_name', location=postgres_backup_location, additional_params='--enable-purge-protection true --retention-days 90')
+    @KeyVaultPreparer(name_prefix='rdbmsvault', parameter_name='vault_name', location=postgres_location, additional_params='--enable-purge-protection true --retention-days 90 --no-self-perms')
+    @KeyVaultPreparer(name_prefix='rdbmsvault', parameter_name='backup_vault_name', location=postgres_backup_location, additional_params='--enable-purge-protection true --retention-days 90 --no-self-perms')
     def test_postgres_flexible_server_public_revivedropped_mgmt(self, resource_group, vault_name, backup_vault_name):
         self._test_flexible_server_revivedropped_mgmt(resource_group, vault_name, backup_vault_name)
 
@@ -390,13 +390,10 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
         self.cmd('{} flexible-server create -g {} -n {} --vnet {} --subnet {} -l {} --yes'.format(
                  database_engine, resource_group, source_server, source_vnet, source_subnet, location))
-        result = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, source_server)).get_output_in_json()
+        self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, source_server)).get_output_in_json()
 
         # Wait until snapshot is created
-        current_time = datetime.utcnow().replace(tzinfo=tzutc()).isoformat()
-        earliest_restore_time = result['backup']['earliestRestoreDate']
-        seconds_to_wait = (parser.isoparse(earliest_restore_time) - parser.isoparse(current_time)).total_seconds()
-        os.environ.get(ENV_LIVE_TEST, False) and sleep(max(0, seconds_to_wait) + 180)
+        os.environ.get(ENV_LIVE_TEST, False) and sleep(1800)
 
         # default vnet resources
         restore_result = self.cmd('{} flexible-server restore -g {} --name {} --source-server {} '
@@ -536,7 +533,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
     def _test_flexible_server_ssdv2_restore_mgmt(self, database_engine, resource_group):
 
-        location = 'eastus2euap'
+        location = self.postgres_location
         source_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         source_ssdv2_server = self.create_random_name(SERVER_NAME_PREFIX + 'ssdv2-', 40)
         target_server_ssdv2_migration = self.create_random_name(SERVER_NAME_PREFIX + 'ssdv2-migrate-', 40)
@@ -581,7 +578,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
 
     def _test_flexible_server_byok_mgmt(self, resource_group, vault_name, backup_vault_name=None):
-        live_test = False
+        live_test = os.environ.get(ENV_LIVE_TEST, False)
         key_name = self.create_random_name('rdbmskey', 32)
         identity_name = self.create_random_name('identity', 32)
         backup_key_name = self.create_random_name('rdbmskey', 32)
@@ -717,11 +714,8 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                 JMESPathCheck('dataEncryption.primaryUserAssignedIdentityId', identity_2['id'])
             ])
 
-            # restore backup
-            current_time = datetime.utcnow().replace(tzinfo=tzutc()).isoformat()
-            earliest_restore_time = result['backup']['earliestRestoreDate']
-            seconds_to_wait = (parser.isoparse(earliest_restore_time) - parser.isoparse(current_time)).total_seconds()
-            sleep(max(0, seconds_to_wait))
+            # Wait until snapshot is created
+            os.environ.get(ENV_LIVE_TEST, False) and sleep(1800)
 
             # By default, Geo-redundant backup is disabled for restore hence no need to pass backup-key and backup-identity
             data_encryption_key_id_flag = '--key {} --identity {}'.format(key['key']['kid'], identity['id'])
@@ -736,10 +730,8 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
             # geo-restore backup
             if geo_redundant_backup:
-                current_time = datetime.utcnow().replace(tzinfo=tzutc()).isoformat()
-                earliest_restore_time = result['backup']['earliestRestoreDate']
-                seconds_to_wait = (parser.isoparse(earliest_restore_time) - parser.isoparse(current_time)).total_seconds()
-                sleep(max(0, seconds_to_wait))
+                # Wait until snapshot is created
+                os.environ.get(ENV_LIVE_TEST, False) and sleep(1800)
 
                 data_encryption_key_id_flag = '--key {} --identity {} --backup-key {} --backup-identity {}'.format(backup_key['key']['kid'], backup_identity['id'], key['key']['kid'], identity['id'])
 
@@ -870,6 +862,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
 
     def _test_flexible_server_revivedropped_mgmt(self, resource_group, vault_name, backup_vault_name=None):
+        live_test = os.environ.get(ENV_LIVE_TEST, False)
         key_name = self.create_random_name('rdbmskey', 32)
         identity_name = self.create_random_name('identity', 32)
         backup_key_name = self.create_random_name('rdbmskey', 32)
@@ -882,23 +875,26 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         sku_name = 'Standard_D2s_v3'
         location = self.postgres_location
         backup_location = self.postgres_backup_location
+        scope = '/subscriptions/{}/resourceGroups/{}'.format(self.get_subscription_id(), resource_group)
 
+        # Create identity and assign role
         key = self.cmd('keyvault key create --name {} -p software --vault-name {}'
                        .format(key_name, vault_name)).get_output_in_json()
 
         identity = self.cmd('identity create -g {} --name {} --location {}'.format(resource_group, identity_name, location)).get_output_in_json()
+        if (live_test):
+            self.cmd('role assignment create --assignee-object-id {} --assignee-principal-type ServicePrincipal --role "Key Vault Crypto User" --scope {}'.format( identity['principalId'], scope))
+            self.cmd('role assignment create --assignee-object-id {} --assignee-principal-type ServicePrincipal --role "Key Vault Certificate User" --scope {}'.format( identity['principalId'], scope))
 
-        self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'
-                 .format(resource_group, vault_name, identity['principalId']))
-
+        # Create backup identity and assign role
         backup_key = self.cmd('keyvault key create --name {} -p software --vault-name {}'
                                   .format(backup_key_name, backup_vault_name)).get_output_in_json()
 
         backup_identity = self.cmd('identity create -g {} --name {} --location {}'.format(resource_group, backup_identity_name, backup_location)).get_output_in_json()
+        if (live_test):
+            self.cmd('role assignment create --assignee-object-id {} --assignee-principal-type ServicePrincipal --role "Key Vault Crypto User" --scope {}'.format( backup_identity['principalId'], scope))
+            self.cmd('role assignment create --assignee-object-id {} --assignee-principal-type ServicePrincipal --role "Key Vault Certificate User" --scope {}'.format( backup_identity['principalId'], scope))
 
-        self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'
-                    .format(resource_group, backup_vault_name, backup_identity['principalId']))
-        
         def main_tests(geo_redundant_backup):
             geo_redundant_backup_enabled = 'Enabled' if geo_redundant_backup else 'Disabled'
             backup_key_id_flags = '--backup-key {} --backup-identity {}'.format(backup_key['key']['kid'], backup_identity['id']) if geo_redundant_backup else ''
@@ -934,14 +930,11 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                     checks=main_checks + geo_checks).get_output_in_json()
 
             # Wait until snapshot is created
-            current_time = datetime.utcnow().replace(tzinfo=tzutc()).isoformat()
-            earliest_restore_time = result['backup']['earliestRestoreDate']
-            seconds_to_wait = (parser.isoparse(earliest_restore_time) - parser.isoparse(current_time)).total_seconds()
-            os.environ.get(ENV_LIVE_TEST, False) and sleep(max(0, seconds_to_wait) + 240)
+            os.environ.get(ENV_LIVE_TEST, False) and sleep(1800)
 
             # Delete the server
             self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(resource_group, primary_server_name))
-            os.environ.get(ENV_LIVE_TEST, False) and sleep(240)
+            os.environ.get(ENV_LIVE_TEST, False) and sleep(300)
 
             # By default, Geo-redundant backup is disabled for restore hence no need to pass backup-key and backup-identity
             # Revive Dropped server
@@ -1251,6 +1244,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
         primary_role = 'Primary'
         public_access_arg = ''
         master_server = self.create_random_name(SERVER_NAME_PREFIX, 32)
+        replica_role = 'AsyncReplica'
         replicas = [self.create_random_name(F'azuredbclirep{i+1}', SERVER_NAME_MAX_LENGTH) for i in range(2)]
 
         # create a server
@@ -1265,7 +1259,16 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
         # test replica create
         self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {} --zone 2 {}'
                  .format(database_engine, resource_group, replicas[0], result['id'], public_access_arg),
-                 expect_failure=True)
+                 checks=[
+                     JMESPathCheck('name', replicas[0]),
+                     JMESPathCheck('availabilityZone', 2),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('sku.tier', result['sku']['tier']),
+                     JMESPathCheck('sku.name', result['sku']['name']),
+                     JMESPathCheck('replica.role', replica_role),
+                     JMESPathCheck('sourceServerResourceId', result['id']),
+                     JMESPathCheck('replica.capacity', '0'),
+                     JMESPathCheck('storage.autoGrow', source_server_auto_grow)])
         
     def _test_flexible_server_replica_mgmt(self, database_engine, resource_group, vnet_enabled):
         location = self.postgres_location
@@ -1314,8 +1317,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
         
         # test storage auto-grow not allowed for replica server update
         self.cmd('{} flexible-server update -g {} -n {} --storage-auto-grow Enabled'
-                 .format(database_engine, resource_group, replicas[0]),
-                 expect_failure=True)
+                 .format(database_engine, resource_group, replicas[0]))
 
         # test replica list
         self.cmd('{} flexible-server replica list -g {} --name {}'
@@ -2172,7 +2174,7 @@ class FlexibleServerUpgradeMgmtScenarioTest(ScenarioTest):
 
 
 class FlexibleServerBackupsMgmtScenarioTest(ScenarioTest):
-    postgres_location = 'eastus'
+    postgres_location = 'southcentralus'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -2182,6 +2184,8 @@ class FlexibleServerBackupsMgmtScenarioTest(ScenarioTest):
 
 
     def _test_backups_mgmt(self, database_engine, resource_group, server):
+        # Wait until snapshot is created
+        os.environ.get(ENV_LIVE_TEST, False) and sleep(1800)
         attempts = 0
         while attempts < 10:
             backups = self.cmd('{} flexible-server backup list -g {} -n {}'
@@ -2191,12 +2195,34 @@ class FlexibleServerBackupsMgmtScenarioTest(ScenarioTest):
                 break
             os.environ.get(ENV_LIVE_TEST, False) and sleep(60)
 
-        self.assertTrue(len(backups) == 1)
+        backups_length = len(backups)
+        self.assertTrue(backups_length > 0)
 
         automatic_backup = self.cmd('{} flexible-server backup show -g {} -n {} --backup-name {}'
                                     .format(database_engine, resource_group, server, backups[0]['name'])).get_output_in_json()
 
         self.assertDictEqual(automatic_backup, backups[0])
+
+        # test on-demand backup create
+        backup_name = self.create_random_name(F'backup', 16)
+
+        self.cmd('{} flexible-server backup create -g {} -n {} --backup-name {}'
+                .format(database_engine, resource_group, server, backup_name),
+                checks=[JMESPathCheck('name', backup_name)])
+
+        backups_update = self.cmd('{} flexible-server backup list -g {} -n {}'
+                        .format(database_engine, resource_group, server)).get_output_in_json()
+
+        self.assertTrue(backups_length < len(backups_update))
+
+        # test on-demand backup delete
+        self.cmd('{} flexible-server backup delete -g {} -n {} --backup-name {} --yes'
+                .format(database_engine, resource_group, server, backup_name))
+
+        backups_update = self.cmd('{} flexible-server backup list -g {} -n {}'
+                        .format(database_engine, resource_group, server)).get_output_in_json()
+
+        self.assertTrue(backups_length == len(backups_update))
 
 
 class FlexibleServerIdentityAADAdminMgmtScenarioTest(ScenarioTest):

@@ -111,7 +111,7 @@ def get_postgresql_management_client(cli_ctx, **_):
 
 def get_postgresql_flexible_management_client(cli_ctx, subscription_id=None, **_):
     from os import getenv
-    from azure.mgmt.rdbms.postgresql_flexibleservers import PostgreSQLManagementClient
+    from azure.mgmt.postgresqlflexibleservers import PostgreSQLManagementClient
     # Allow overriding resource manager URI using environment variable
     # for testing purposes. Subscription id is also determined by environment
     # variable.

@@ -22,9 +22,9 @@ class Show(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-03-01",
+        "version": "2024-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/volumegroups/{}", "2024-03-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/volumegroups/{}", "2024-07-01"],
         ]
     }
 
@@ -138,7 +138,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-03-01",
+                    "api-version", "2024-07-01",
                     required=True,
                 ),
             }
@@ -286,6 +286,9 @@ class Show(AAZCommand):
             )
             properties.delete_base_snapshot = AAZBoolType(
                 serialized_name="deleteBaseSnapshot",
+            )
+            properties.effective_network_features = AAZStrType(
+                serialized_name="effectiveNetworkFeatures",
             )
             properties.enable_subvolumes = AAZStrType(
                 serialized_name="enableSubvolumes",
@@ -447,12 +450,14 @@ class Show(AAZCommand):
             replication.endpoint_type = AAZStrType(
                 serialized_name="endpointType",
             )
+            replication.remote_path = AAZObjectType(
+                serialized_name="remotePath",
+            )
             replication.remote_volume_region = AAZStrType(
                 serialized_name="remoteVolumeRegion",
             )
             replication.remote_volume_resource_id = AAZStrType(
                 serialized_name="remoteVolumeResourceId",
-                flags={"required": True},
             )
             replication.replication_id = AAZStrType(
                 serialized_name="replicationId",
@@ -460,6 +465,20 @@ class Show(AAZCommand):
             )
             replication.replication_schedule = AAZStrType(
                 serialized_name="replicationSchedule",
+            )
+
+            remote_path = cls._schema_on_200.properties.volumes.Element.properties.data_protection.replication.remote_path
+            remote_path.external_host_name = AAZStrType(
+                serialized_name="externalHostName",
+                flags={"required": True},
+            )
+            remote_path.server_name = AAZStrType(
+                serialized_name="serverName",
+                flags={"required": True},
+            )
+            remote_path.volume_name = AAZStrType(
+                serialized_name="volumeName",
+                flags={"required": True},
             )
 
             snapshot = cls._schema_on_200.properties.volumes.Element.properties.data_protection.snapshot

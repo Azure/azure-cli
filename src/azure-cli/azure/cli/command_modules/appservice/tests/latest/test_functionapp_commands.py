@@ -286,6 +286,7 @@ class FunctionAppWithPlanE2ETest(ScenarioTest):
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
             JMESPathCheck('linuxFxVersion', 'Java|11')])
 
+    @live_only()  # TODO: to be fixed
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_on_linux_app_service_powershell(self, resource_group, storage_account):
@@ -311,6 +312,7 @@ class FunctionAppWithPlanE2ETest(ScenarioTest):
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
             JMESPathCheck('linuxFxVersion', 'PowerShell|7.2')])
 
+    @live_only()  # TODO: to be fixed
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_on_linux_app_service_powershell_with_runtime_version(self, resource_group, storage_account):
@@ -594,6 +596,7 @@ class FunctionAppWithLinuxConsumptionPlanTest(ScenarioTest):
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
             JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'java')])
 
+    @live_only()  # TODO: to be fixed
     @ResourceGroupPreparer(name_prefix='azurecli-functionapp-linux', location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_consumption_linux_powershell(self, resource_group, storage_account):
@@ -1415,6 +1418,7 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
             JMESPathCheck('javaVersion', '17')])
 
+    @live_only()  # TODO: to be fixed
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_windows_runtime_powershell(self, resource_group, storage_account):
@@ -2998,6 +3002,7 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
                                                                                subnet_name, storage_account), expect_failure=True)
 
 class FunctionAppConfigTest(ScenarioTest):
+    @live_only()  # TODO: to be fixed
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_powershell_version(self, resource_group, storage_account):

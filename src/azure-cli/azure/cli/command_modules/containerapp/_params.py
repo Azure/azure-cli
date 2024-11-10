@@ -157,8 +157,11 @@ def load_arguments(self, _):
         c.argument('storage_account', validator=validate_storage_name_or_id, help="Name or resource ID of the storage account used for Azure Monitor. If this value is provided, Azure Monitor Diagnostic Settings will be created automatically.")
 
     with self.argument_context('containerapp env', arg_group='Dapr') as c:
-        c.argument('instrumentation_key', options_list=['--dapr-instrumentation-key'], help='Application Insights instrumentation key used by Dapr to export Service to Service communication telemetry')
+        c.argument('instrumentation_key', options_list=['--dapr-instrumentation-key'], help='Application Insights instrumentation key used by Dapr to export Service to Service communication telemetry', deprecate_info=c.deprecate(hide=True))
         c.argument('dapr_connection_string', options_list=['--dapr-connection-string', '-d'], help='Application Insights connection string used by Dapr to export service to service communication telemetry.')
+
+    with self.argument_context('containerapp env update', arg_group='Dapr') as c:
+        c.argument('dapr_connection_string', options_list=['--dapr-connection-string', '-d'], help='Application Insights connection string used by Dapr to export service to service communication telemetry. Use "none" to remove it.')
 
     with self.argument_context('containerapp env', arg_group='Virtual Network') as c:
         c.argument('infrastructure_subnet_resource_id', options_list=['--infrastructure-subnet-resource-id', '-s'], help='Resource ID of a subnet for infrastructure components and user app containers.')

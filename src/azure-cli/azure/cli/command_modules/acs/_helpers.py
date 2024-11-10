@@ -231,7 +231,11 @@ def _get_test_sp_client_id() -> str:
 
 
 def _get_test_sp_object_id(sp_client_id: str) -> str:
-    if sp_client_id.replace("-", "").lower() == _get_test_sp_client_id().replace("-", "").lower():
+    test_sp_client_id = _get_test_sp_client_id()
+    if (
+        test_sp_client_id is not None and
+        sp_client_id.replace("-", "").lower() == test_sp_client_id.replace("-", "").lower()
+    ):
         return os.getenv("AZURE_CLI_TEST_DEV_SP_OBJECT_ID")
     return None
 

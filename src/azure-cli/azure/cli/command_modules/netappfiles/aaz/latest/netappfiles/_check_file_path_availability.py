@@ -21,9 +21,9 @@ class CheckFilePathAvailability(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-03-01",
+        "version": "2024-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.netapp/locations/{}/checkfilepathavailability", "2024-03-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.netapp/locations/{}/checkfilepathavailability", "2024-07-01"],
         ]
     }
 
@@ -51,6 +51,12 @@ class CheckFilePathAvailability(AAZCommand):
         # define Arg Group "Body"
 
         _args_schema = cls._args_schema
+        _args_schema.availability_zone = AAZStrArg(
+            options=["--availability-zone"],
+            arg_group="Body",
+            help="The Azure Resource logical availability zone which is used within zone mapping lookup for the subscription and region. The lookup will retrieve the physical zone where volume is placed.",
+            nullable=True,
+        )
         _args_schema.name = AAZStrArg(
             options=["--name"],
             arg_group="Body",
@@ -126,7 +132,7 @@ class CheckFilePathAvailability(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-03-01",
+                    "api-version", "2024-07-01",
                     required=True,
                 ),
             }
@@ -151,6 +157,7 @@ class CheckFilePathAvailability(AAZCommand):
                 typ=AAZObjectType,
                 typ_kwargs={"flags": {"required": True, "client_flatten": True}}
             )
+            _builder.set_prop("availabilityZone", AAZStrType, ".availability_zone", typ_kwargs={"nullable": True})
             _builder.set_prop("name", AAZStrType, ".name", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("subnetId", AAZStrType, ".subnet_id", typ_kwargs={"flags": {"required": True}})
 

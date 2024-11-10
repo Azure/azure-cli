@@ -3058,7 +3058,7 @@ class NetworkPublicIpScenarioTest(ScenarioTest):
         ])
         self.cmd('network public-ip create -g {rg} -n {ip2}', checks=[
             self.check('publicIp.provisioningState', 'Succeeded'),
-            self.check('publicIp.publicIPAllocationMethod', 'Dynamic'),
+            self.check('publicIp.publicIPAllocationMethod', 'Static'),
             self.check('publicIp.dnsSettings', None)
         ])
 

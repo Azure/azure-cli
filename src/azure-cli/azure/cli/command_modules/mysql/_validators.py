@@ -311,14 +311,8 @@ def _mysql_iops_validator(iops, auto_io_scaling, instance):
 
 
 def mysql_accelerated_logs_validator(accelerated_logs, tier):
-    if accelerated_logs is None:
-        if tier == "MemoryOptimized":
-            accelerated_logs = "Enabled"
-        else:
-            accelerated_logs = "Disabled"
-    if tier != "MemoryOptimized" and accelerated_logs.lower() == "enabled":
-        accelerated_logs = "Disabled"
-        logger.warning("Accelerated logs are only supported for Memory Optimized tier. "
+    if tier != "MemoryOptimized" and accelerated_logs is not None and accelerated_logs.lower() == "enabled":
+        logger.warning("Accelerated logs is only supported for Memory Optimized tier. "
                        "So the accelerated logs will be disabled.")
 
 

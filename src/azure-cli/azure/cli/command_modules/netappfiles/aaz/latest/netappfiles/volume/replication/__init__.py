@@ -10,7 +10,12 @@
 
 from .__cmd_group import *
 from ._approve import *
+from ._authorize_external_replication import *
+from ._finalize_external_replication import *
 from ._list import *
+from ._peer_external_cluster import *
+from ._perform_replication_transfer import *
+from ._populate_availability_zone import *
 from ._re_initialize import *
 from ._reestablish import *
 from ._remove import *

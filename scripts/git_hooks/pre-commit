@@ -1,0 +1,28 @@
+#!/bin/sh
+
+# Instructions:
+# Put this file into your .git/hooks folder and set as executable 
+#- for Windows (attrib +x pre-commit)
+#- for ubuntu (chmod +x pre-commit)
+# Make sure that your environment has executable `azdev` and `python`
+# If you want to skip the hook just add the --no-verify: git commit --no-verify
+
+if git rev-parse --verify HEAD >/dev/null 2>&1
+then
+	against=HEAD
+else
+	# Initial commit: diff against an empty tree object
+	against=$(git hash-object -t tree /dev/null)
+fi
+
+for FILE in `git diff --cached --name-only --diff-filter=AM $against` ; do
+    # Check if the file contains secrets
+    detected=$(azdev scan -f $FILE | python -c "import sys, json; print(json.load(sys.stdin)['secrets_detected'])")
+    if [ $detected == 'True' ]; then
+      echo "Detected secrets from "$FILE", You can run '"azdev mask"' to remove secrets before commit. "
+      echo "If you want to skip that, run git commit -m '"your comment"' --no-verify"
+      exit 1
+    fi
+done
+exit
+

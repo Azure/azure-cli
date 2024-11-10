@@ -35,7 +35,7 @@ def register_providers():
     _register_one_provider("Microsoft.DesktopVirtualization/hostpools", '2022-10-14-preview', True)
     _register_one_provider("Microsoft.DesktopVirtualization/workspaces", '2022-10-14-preview', True)
     _register_one_provider('Microsoft.Devices/IotHubs', '2020-03-01', True)
-    _register_one_provider('Microsoft.DeviceUpdate/accounts', '2020-03-01-preview', True)
+    _register_one_provider('Microsoft.DeviceUpdate/accounts', '2023-07-01', True)
     _register_one_provider('Microsoft.DocumentDB/databaseAccounts', '2019-08-01-preview', False, '2020-03-01')
     _register_one_provider('Microsoft.DigitalTwins/digitalTwinsInstances', '2020-12-01', True)
     _register_one_provider('Microsoft.ElasticSan/elasticSans', '2022-12-01-preview', True)

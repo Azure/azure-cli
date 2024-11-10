@@ -666,8 +666,8 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                  database_engine, resource_group, target_server_config), checks=NoneCheck())
 
     def _test_flexible_server_georestore_update_mgmt(self, database_engine, resource_group):
-        location = 'eastus'
-        target_location = 'westus'
+        location = 'northeurope'
+        target_location = 'westeurope'
 
         source_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         target_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
@@ -686,7 +686,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         current_time = datetime.utcnow().replace(tzinfo=tzutc()).isoformat()
         earliest_restore_time = result['backup']['earliestRestoreDate']
         seconds_to_wait = (parser.isoparse(earliest_restore_time) - parser.isoparse(current_time)).total_seconds()
-        os.environ.get(ENV_LIVE_TEST, False) and sleep(max(0, seconds_to_wait) + 180)
+        os.environ.get(ENV_LIVE_TEST, False) and sleep(max(0, seconds_to_wait) + 1200)
 
         self.cmd('{} flexible-server geo-restore -g {} -l {} -n {} --source-server {}'
                  .format(database_engine, resource_group, target_location, target_server, source_server),
@@ -1893,14 +1893,14 @@ class FlexibleServerPublicAccessMgmtScenarioTest(ScenarioTest):
                    self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH),
                    self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)]
 
-        # Case 1 : Provision a server with public access all
+        # Case 1 : Provision a server with public access with 0.0.0.1-255.255.255.254
         result = self.cmd('{} flexible-server create -g {} -n {} --public-access {} -l {}'
-                          .format(database_engine, resource_group, servers[0], 'all', location)).get_output_in_json()
+                          .format(database_engine, resource_group, servers[0], '0.0.0.1-255.255.255.254', location)).get_output_in_json()
 
         self.cmd('{} flexible-server firewall-rule show -g {} -n {} -r {}'
                  .format(database_engine, resource_group, servers[0], result["firewallName"]),
-                 checks=[JMESPathCheck('startIpAddress', '0.0.0.0'),
-                         JMESPathCheck('endIpAddress', '255.255.255.255')])
+                 checks=[JMESPathCheck('startIpAddress', '0.0.0.1'),
+                         JMESPathCheck('endIpAddress', '255.255.255.254')])
 
         # Case 2 : Provision a server with public access allowing all azure services
         result = self.cmd('{} flexible-server create -g {} -n {} --public-access {} -l {}'
@@ -2253,7 +2253,6 @@ class FlexibleServerMaintenanceMgmtScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(location='northeurope')
     @record_only() # this test need a manually configured server.
-
     def test_mysql_flexible_server_maintenance_mgmt(self, resource_group):
         self._test_maintenance_mgmt('mysql', resource_group)
     
@@ -2270,7 +2269,7 @@ class FlexibleServerMaintenanceMgmtScenarioTest(ScenarioTest):
                  .format(database_engine, resource_group, server_name, maintenance_name)).get_output_in_json()
         self.assertEqual(maintenance_id, maintenance_read_response['id'])
 
-        reschedule_start_time = "2024-11-06T03:41Z"
+        reschedule_start_time = "2024-10-23T03:41Z"
         maintenance_reschedule_response = self.cmd('{} flexible-server maintenance reschedule --resource-group {} --server-name {} --maintenance-name {} --start-time {}'
                  .format(database_engine, resource_group, server_name, maintenance_name, reschedule_start_time)).get_output_in_json()
         maintenance_rescheduled_time = parser.parse(maintenance_reschedule_response['maintenanceStartTime']).strftime('%Y-%m-%dT%H:%MZ')

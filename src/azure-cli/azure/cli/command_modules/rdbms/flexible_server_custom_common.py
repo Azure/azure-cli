@@ -11,11 +11,10 @@ from dateutil.tz import tzutc
 from knack.log import get_logger
 from knack.util import CLIError
 from urllib.request import urlretrieve
-from azure.cli.core.util import sdk_no_wait
-from azure.cli.core.util import user_confirmation
+from azure.cli.core.util import sdk_no_wait, user_confirmation, run_cmd
 from azure.cli.core.azclierror import ClientRequestError, RequiredArgumentMissingError
 from ._client_factory import cf_postgres_flexible_replica
-from ._flexible_server_util import run_subprocess, run_subprocess_get_output, \
+from ._flexible_server_util import run_subprocess, \
     fill_action_template, get_git_root_dir, resolve_poller, GITHUB_ACTION_PATH
 from .validators import validate_public_access_server, validate_resource_group, check_resource_group
 
@@ -228,11 +227,11 @@ def github_actions_run(action_name, branch):
 
 
 def gitcli_check_and_login():
-    output = run_subprocess_get_output("gh")
+    output = run_cmd(["gh"], capture_output=True)
     if output.returncode:
         raise ClientRequestError('Please install "Github CLI" to run this command.')
 
-    output = run_subprocess_get_output("gh auth status")
+    output = run_cmd(["gh", "auth", "status"], capture_output=True)
     if output.returncode:
         run_subprocess("gh auth login", stdout_show=True)
 

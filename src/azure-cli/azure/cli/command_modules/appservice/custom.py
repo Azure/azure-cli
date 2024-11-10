@@ -2788,11 +2788,13 @@ has been deployed ".format(app_service_environment)
                        resource_group_name=resource_group_name, app_service_plan=plan_def)
 
 
-def update_app_service_plan(instance, sku=None, number_of_workers=None, elastic_scale=None,
+def update_app_service_plan(cmd, instance, sku=None, number_of_workers=None, elastic_scale=None,
                             max_elastic_worker_count=None):
     if number_of_workers is None and sku is None and elastic_scale is None and max_elastic_worker_count is None:
-        args = ["--number-of-workers", "--sku", "--elastic-scale", "--max-elastic-worker-count"]
-        logger.warning('Nothing to update. Set one of the following parameters to make an update: %s', str(args))
+        safe_params = cmd.cli_ctx.data['safe_params']
+        if '--set' not in safe_params:
+            args = ["--number-of-workers", "--sku", "--elastic-scale", "--max-elastic-worker-count"]
+            logger.warning('Nothing to update. Set one of the following parameters to make an update: %s', str(args))
     sku_def = instance.sku
     if sku is not None:
         sku = _normalize_sku(sku)
@@ -2843,7 +2845,7 @@ def show_plan(cmd, resource_group_name, name):
 
 
 def update_functionapp_app_service_plan(cmd, instance, sku=None, number_of_workers=None, max_burst=None):
-    instance = update_app_service_plan(instance, sku, number_of_workers)
+    instance = update_app_service_plan(cmd, instance, sku, number_of_workers)
     if max_burst is not None:
         if not is_plan_elastic_premium(cmd, instance):
             raise ValidationError("Usage error: --max-burst is only supported for Elastic Premium (EP) plans")
@@ -2852,7 +2854,7 @@ def update_functionapp_app_service_plan(cmd, instance, sku=None, number_of_worke
     if number_of_workers is not None:
         number_of_workers = validate_range_of_int_flag('--number-of-workers / --min-instances',
                                                        number_of_workers, min_val=0, max_val=20)
-    return update_app_service_plan(instance, sku, number_of_workers)
+    return update_app_service_plan(cmd, instance, sku, number_of_workers)
 
 
 def show_backup_configuration(cmd, resource_group_name, webapp_name, slot=None):
