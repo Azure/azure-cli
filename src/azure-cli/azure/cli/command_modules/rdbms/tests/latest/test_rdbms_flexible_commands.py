@@ -887,18 +887,6 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
             geo_redundant_backup_enabled = 'Enabled' if geo_redundant_backup else 'Disabled'
             backup_key_id_flags = '--backup-key {} --backup-identity {}'.format(backup_key['key']['kid'], backup_identity['id']) if geo_redundant_backup else ''
             primary_server_name = server_with_geo_name if geo_redundant_backup else server_name
-            # create primary flexible server with data encryption
-            self.cmd('postgres flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --key {} --identity {} {} --location {} --geo-redundant-backup {}'.format(
-                        resource_group,
-                        primary_server_name,
-                        tier,
-                        sku_name,
-                        key['key']['kid'],
-                        identity['id'],
-                        backup_key_id_flags,
-                        location,
-                        geo_redundant_backup_enabled
-                    ))
 
             main_checks = [
                 JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(identity['id'])),
@@ -914,11 +902,24 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                     JMESPathCheck('dataEncryption.geoBackupUserAssignedIdentityId', backup_identity['id'])
                 ]
 
-            result = self.cmd('postgres flexible-server show -g {} -n {}'.format(resource_group, primary_server_name),
-                    checks=main_checks + geo_checks).get_output_in_json()
+            # create primary flexible server with data encryption
+            self.cmd('postgres flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --key {} --identity {} {} --location {} --geo-redundant-backup {}'.format(
+                        resource_group,
+                        primary_server_name,
+                        tier,
+                        sku_name,
+                        key['key']['kid'],
+                        identity['id'],
+                        backup_key_id_flags,
+                        location,
+                        geo_redundant_backup_enabled
+                    ))
 
             # Wait until snapshot is created
             os.environ.get(ENV_LIVE_TEST, False) and sleep(1800)
+
+            result = self.cmd('postgres flexible-server show -g {} -n {}'.format(resource_group, primary_server_name),
+                              checks=main_checks + geo_checks).get_output_in_json()
 
             # Delete the server
             self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(resource_group, primary_server_name))
@@ -941,28 +942,6 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                                                 identity['id'],
                                         ), checks=main_checks).get_output_in_json()
             self.assertEqual(str(revive_dropped_server_1['location']).replace(' ', '').lower(), location)
-
-            """ # Revive dropped server with geo-redundant backup enabled. Since operation is revive dropped, it has to be done in same location as the source server
-            if geo_redundant_backup:
-                # By default, Geo-redundant backup is disabled for restore hence explicitly need to set geo-redundant backup Enabled
-                revive_dropped_server_2 = self.cmd('postgres \
-                                                        flexible-server {} \
-                                                        -g {} --name {} \
-                                                        --source-server {} \
-                                                        --geo-redundant-backup Enabled \
-                                                        --key {} --identity {} \
-                                                        {}'.format(
-                                                        'revive-dropped --location {}'.format(location),
-                                                        resource_group,
-                                                        backup_name_with_geo,
-                                                        result['id'],
-                                                        key['key']['kid'],
-                                                        identity['id'],
-                                                        backup_key_id_flags
-                                                    ), checks=main_checks + geo_checks).get_output_in_json()
-                self.assertEqual(str(revive_dropped_server_2['location']).replace(' ', '').lower(), location)
-
-                self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(resource_group, backup_name_with_geo)) """
 
             # delete all servers
             self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(resource_group, backup_name))

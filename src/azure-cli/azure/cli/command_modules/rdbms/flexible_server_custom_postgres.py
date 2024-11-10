@@ -702,12 +702,15 @@ def flexible_server_revivedropped(cmd, client, resource_group_name, server_name,
 
     pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup)
 
+    storage = postgresql_flexibleservers.models.Storage(type=None)
+
     parameters = postgresql_flexibleservers.models.Server(
         point_in_time_utc=get_current_time(),
         location=location,
         source_server_resource_id=source_server_id,
         create_mode="ReviveDropped",
-        availability_zone=zone
+        availability_zone=zone,
+        storage=storage
     )
 
     if vnet is not None or vnet_address_prefix is not None or subnet is not None or \
