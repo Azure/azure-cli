@@ -2614,15 +2614,14 @@ def aks_agentpool_delete(cmd, client, resource_group_name, cluster_name,
             cluster_name,
             nodepool_name,
         )
-    else:
-        return sdk_no_wait(
-            no_wait,
-            client.begin_delete,
-            resource_group_name,
-            cluster_name,
-            nodepool_name,
-            ignore_pod_disruption_budget=ignore_pod_disruption_budget,
-        )
+    return sdk_no_wait(
+        no_wait,
+        client.begin_delete,
+        resource_group_name,
+        cluster_name,
+        nodepool_name,
+        ignore_pod_disruption_budget=ignore_pod_disruption_budget,
+    )
 
 
 def aks_agentpool_operation_abort(cmd,

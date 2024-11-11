@@ -922,7 +922,7 @@ def load_arguments(self, _):
     with self.argument_context("aks nodepool delete") as c:
         c.argument(
             "ignore_pod_disruption_budget",
-            options_list=["--ignore-pod-disruption-budget, --ignore-pdb"],
+            options_list=["--ignore-pdb"],
             action='store_true',
             help="delete an AKS nodepool by ignoring PodDisruptionBudget setting",
         )

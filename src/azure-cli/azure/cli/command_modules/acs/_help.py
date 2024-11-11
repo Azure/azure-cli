@@ -1621,7 +1621,7 @@ parameters:
 
 examples:
     - name: Delete an agent pool with ignore-pod-disruption-budget
-      text: az aks nodepool delete --resource-group MyResourceGroup --cluster-name MyManagedCluster --name nodepool1 --ignore-pod-disruption-budget
+      text: az aks nodepool delete --resource-group MyResourceGroup --cluster-name MyManagedCluster --name nodepool1 --ignore-pdb
 """
 
 helps['aks nodepool get-upgrades'] = """
