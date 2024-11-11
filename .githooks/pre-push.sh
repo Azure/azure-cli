@@ -92,5 +92,21 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "\033[0;32mPre-push hook passed.\033[0m"
+
+if [ "$MERGE_BASE" != "$UPSTREAM_HEAD" ]; then
+    echo ""
+    echo "\033[1;33mYour branch is not up to date with upstream/dev. Please run the following commands to rebase and setup:\033[0m"
+    echo "\033[1;33m+++++++++++++++++++++++++++++++++++++++++++++++++++++++\033[0m"
+    echo "\033[1;33mgit rebase upstream/dev\033[0m"
+    
+    # Get extension repo paths
+    EXTENSIONS=$(azdev extension repo list -o tsv | tr '\n' ' ')
+    if [ -n "$EXTENSIONS" ]; then
+        echo "\033[1;33mazdev setup -c $AZURE_CLI_FOLDER -r $EXTENSIONS\033[0m"
+    else
+        echo "\033[1;33mazdev setup -c $AZURE_CLI_FOLDER\033[0m"
+    fi
+    echo "\033[1;33m+++++++++++++++++++++++++++++++++++++++++++++++++++++++\033[0m"
+fi
 exit 0
 
