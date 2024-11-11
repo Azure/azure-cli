@@ -543,7 +543,7 @@ parameters:
     short-summary: Enable vTPM on all node pools in the cluster. Must use VMSS agent pool type.
   - name: --enable-acns
     type: bool
-    short-summary: Enable advanced network functionalities on a cluster. Enabling this will incur additional costs.
+    short-summary: Enable advanced network functionalities on a cluster. Enabling this will incur additional costs. For non-cilium clusters, acns security will be disabled by default until further notice.
   - name: --disable-acns-observability
     type: bool
     short-summary: Used to disable advanced networking observability features on a clusters when enabling advanced networking features with "--enable-acns".
@@ -954,7 +954,7 @@ parameters:
     short-summary: Disable exporting Kubernetes Namespace and Deployment details to the Cost Analysis views in the Azure portal.
   - name: --enable-acns
     type: bool
-    short-summary: Enable advanced network functionalities on a cluster. Enabling this will incur additional costs.
+    short-summary: Enable advanced network functionalities on a cluster. Enabling this will incur additional costs. For non-cilium clusters, acns security will be disabled by default until further notice.
   - name: --disable-acns
     type: bool
     short-summary: Disable all advanced networking functionalities on a cluster.
