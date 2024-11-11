@@ -32,12 +32,12 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 # Check if current branch needs rebasing
-Write-Host "Checking if branch needs rebasing..." -ForegroundColor Green
 $mergeBase = git merge-base HEAD upstream/dev
 $upstreamHead = git rev-parse upstream/dev
 if ($mergeBase -ne $upstreamHead) {
     $response = Read-Host "Your branch is not up to date with upstream/dev. Do you want to rebase? (Y/N)"
     if ($response -eq 'Y' -or $response -eq 'y') {
+        Write-Host "Rebasing branch to upstream/dev..." -ForegroundColor Green
         git rebase upstream/dev
         if ($LASTEXITCODE -ne 0) {
             Write-Host "Error: Rebase failed. Please resolve conflicts manually." -ForegroundColor Red
@@ -45,6 +45,8 @@ if ($mergeBase -ne $upstreamHead) {
         }
         Write-Host "Running azdev setup -c $AZURE_CLI_FOLDER " -ForegroundColor Green
         azdev setup -c $AZURE_CLI_FOLDER
+        Write-Host "Rebase completed. Please push with 'git push --force' again." -ForegroundColor Green
+        exit 1
     } else {
         Write-Host "Continuing without rebase..." -ForegroundColor Yellow
     }

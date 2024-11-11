@@ -29,23 +29,18 @@ if [ $? -ne 0 ]; then
 fi
 
 # Check if current branch needs rebasing
-echo "\033[0;32mChecking if branch needs rebasing...\033[0m"
 MERGE_BASE=$(git merge-base HEAD upstream/dev)
 UPSTREAM_HEAD=$(git rev-parse upstream/dev)
 
 if [ "$MERGE_BASE" != "$UPSTREAM_HEAD" ]; then
-    read -p "Your branch is not up to date with upstream/dev. Do you want to rebase? (Y/N) " response
-    if [[ "$response" =~ ^[Yy]$ ]]; then
-        git rebase upstream/dev
-        if [ $? -ne 0 ]; then
-            echo "\033[0;31mError: Rebase failed. Please resolve conflicts manually.\033[0m"
-            exit 1
-        fi
-        echo "\033[0;32mRunning azdev setup -c $AZURE_CLI_FOLDER\033[0m"
-        azdev setup -c "$AZURE_CLI_FOLDER"
-    else
-        echo "\033[0;33mContinuing without rebase...\033[0m"
+    echo "\033[0;32mRebasing branch to upstream/dev...\033[0m"
+    git rebase upstream/dev
+    if [ $? -ne 0 ]; then
+        echo "\033[0;31mError: Rebase failed. Please resolve conflicts manually.\033[0m"
+        exit 1
     fi
+    echo "\033[0;32mRunning azdev setup -c $AZURE_CLI_FOLDER\033[0m"
+    azdev setup -c "$AZURE_CLI_FOLDER"
 fi
 
 # get the current branch name
