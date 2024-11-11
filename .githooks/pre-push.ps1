@@ -23,6 +23,9 @@ if ($editableLocation) {
     exit 1
 }
 
+# Get extension repo paths and join them with spaces
+$Extensions = (azdev extension repo list -o tsv) -join ' '
+
 # Fetch upstream/dev branch
 Write-Host "Fetching upstream/dev branch..." -ForegroundColor Green
 git fetch upstream dev
@@ -35,21 +38,23 @@ if ($LASTEXITCODE -ne 0) {
 $mergeBase = git merge-base HEAD upstream/dev
 $upstreamHead = git rev-parse upstream/dev
 if ($mergeBase -ne $upstreamHead) {
-    $response = Read-Host "Your branch is not up to date with upstream/dev. Do you want to rebase? (Y/N)"
-    if ($response -eq 'Y' -or $response -eq 'y') {
-        Write-Host "Rebasing branch to upstream/dev..." -ForegroundColor Green
-        git rebase upstream/dev
-        if ($LASTEXITCODE -ne 0) {
-            Write-Host "Error: Rebase failed. Please resolve conflicts manually." -ForegroundColor Red
-            exit 1
-        }
-        Write-Host "Running azdev setup -c $AZURE_CLI_FOLDER " -ForegroundColor Green
-        azdev setup -c $AZURE_CLI_FOLDER
-        Write-Host "Rebase completed. Please push with 'git push --force' again." -ForegroundColor Green
-        exit 1
+    Write-Host ""
+    Write-Host "Your branch is not up to date with upstream/dev. Please run the following commands to rebase and setup:" -ForegroundColor Yellow
+    Write-Host "+++++++++++++++++++++++++++++++++++++++++++++++++++++++" -ForegroundColor Yellow
+    Write-Host "git rebase upstream/dev" -ForegroundColor Yellow
+    if ($Extensions) {
+        Write-Host "azdev setup -c $AZURE_CLI_FOLDER -r $Extensions" -ForegroundColor Yellow
     } else {
-        Write-Host "Continuing without rebase..." -ForegroundColor Yellow
+        Write-Host "azdev setup -c $AZURE_CLI_FOLDER" -ForegroundColor Yellow
     }
+    Write-Host "+++++++++++++++++++++++++++++++++++++++++++++++++++++++" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "You have 5 seconds to stop the push (Ctrl+C)..." -ForegroundColor Yellow
+    for ($i = 5; $i -gt 0; $i--) {
+        Write-Host "`rTime remaining: $i seconds..." -NoNewline -ForegroundColor Yellow
+        Start-Sleep -Seconds 1
+    }
+    Write-Host "`rContinuing without rebase..."
 }
 
 # get the current branch name

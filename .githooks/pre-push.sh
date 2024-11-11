@@ -20,6 +20,9 @@ else
     exit 1
 fi
 
+# Get extension repo paths and join them with spaces
+EXTENSIONS=$(azdev extension repo list -o tsv | tr '\n' ' ')
+
 # Fetch upstream/dev branch
 echo "\033[0;32mFetching upstream/dev branch...\033[0m"
 git fetch upstream dev
@@ -33,14 +36,27 @@ MERGE_BASE=$(git merge-base HEAD upstream/dev)
 UPSTREAM_HEAD=$(git rev-parse upstream/dev)
 
 if [ "$MERGE_BASE" != "$UPSTREAM_HEAD" ]; then
-    echo "\033[0;32mRebasing branch to upstream/dev...\033[0m"
-    git rebase upstream/dev
-    if [ $? -ne 0 ]; then
-        echo "\033[0;31mError: Rebase failed. Please resolve conflicts manually.\033[0m"
-        exit 1
+    echo ""
+    echo "\033[1;33mYour branch is not up to date with upstream/dev. Please run the following commands to rebase and setup:\033[0m"
+    echo "\033[1;33m+++++++++++++++++++++++++++++++++++++++++++++++++++++++\033[0m"
+    echo "\033[1;33mgit rebase upstream/dev\033[0m"
+    
+    # Get extension repo paths
+    EXTENSIONS=$(azdev extension repo list -o tsv | tr '\n' ' ')
+    if [ -n "$EXTENSIONS" ]; then
+        echo "\033[1;33mazdev setup -c $AZURE_CLI_FOLDER -r $EXTENSIONS\033[0m"
+    else
+        echo "\033[1;33mazdev setup -c $AZURE_CLI_FOLDER\033[0m"
     fi
-    echo "\033[0;32mRunning azdev setup -c $AZURE_CLI_FOLDER\033[0m"
-    azdev setup -c "$AZURE_CLI_FOLDER"
+    echo "\033[1;33m+++++++++++++++++++++++++++++++++++++++++++++++++++++++\033[0m"
+    echo ""
+    echo "\033[1;33mYou have 5 seconds to stop the push (Ctrl+C)...\033[0m"
+    
+    for i in {5..1}; do
+        echo -ne "\r\033[1;33mTime remaining: $i seconds...\033[0m"
+        sleep 1
+    done
+    echo -e "\r\033[1;33mContinuing without rebase...\033[0m"
 fi
 
 # get the current branch name
