@@ -9,6 +9,7 @@ from knack.util import CLIError
 
 from azure.cli.core.azclierror import RequiredArgumentMissingError
 from azure.cli.core.commands import CliCommandType
+from azure.cli.core.commands.client_factory import prepare_client_kwargs_track2
 from azure.cli.core.profiles import get_api_version, ResourceType
 from azure.cli.core._profile import Profile
 
@@ -39,9 +40,6 @@ OPERATIONS_NAME = {
 KEYVAULT_TEMPLATE_STRINGS = {
     ResourceType.MGMT_KEYVAULT:
         'azure.mgmt.keyvault{api_version}.{module_name}#{class_name}{obj_name}',
-    ResourceType.DATA_KEYVAULT:
-        'azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1{api_version}.'
-        'key_vault_client#{class_name}{obj_name}',
     ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP:
         'azure.keyvault.administration._backup_client#KeyVaultBackupClient{obj_name}',
     ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL:
@@ -54,6 +52,9 @@ KEYVAULT_TEMPLATE_STRINGS = {
         'azure.keyvault.keys._client#KeyClient{obj_name}',
     ResourceType.DATA_KEYVAULT_SECRETS:
         'azure.keyvault.secrets._client#SecretClient{obj_name}',
+    ResourceType.DATA_KEYVAULT_SECURITY_DOMAIN:
+        'azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_securitydomain.'
+        '_patch#SecurityDomainClient{obj_name}',
 }
 
 
@@ -67,6 +68,7 @@ def get_operations_tmpl(resource_type, client_name):
                          ResourceType.DATA_KEYVAULT_CERTIFICATES,
                          ResourceType.DATA_KEYVAULT_KEYS,
                          ResourceType.DATA_KEYVAULT_SECRETS,
+                         ResourceType.DATA_KEYVAULT_SECURITY_DOMAIN,
                          ResourceType.DATA_KEYVAULT_ADMINISTRATION_SETTING]:
         return KEYVAULT_TEMPLATE_STRINGS[resource_type].format(obj_name='.{}')
 
@@ -84,6 +86,7 @@ def get_docs_tmpl(cli_ctx, resource_type, client_name, module_name='operations')
                          ResourceType.DATA_KEYVAULT_CERTIFICATES,
                          ResourceType.DATA_KEYVAULT_KEYS,
                          ResourceType.DATA_KEYVAULT_SECRETS,
+                         ResourceType.DATA_KEYVAULT_SECURITY_DOMAIN,
                          ResourceType.DATA_KEYVAULT_ADMINISTRATION_SETTING]:
         return KEYVAULT_TEMPLATE_STRINGS[resource_type].format(obj_name='.{}')
 
@@ -108,8 +111,6 @@ def get_docs_tmpl(cli_ctx, resource_type, client_name, module_name='operations')
 def get_client_factory(resource_type, client_name=''):
     if is_mgmt_plane(resource_type):
         return keyvault_mgmt_client_factory(resource_type, client_name)
-    if resource_type == ResourceType.DATA_KEYVAULT:
-        return keyvault_private_data_plane_factory_v7_2_preview
     if resource_type == ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP:
         return data_plane_azure_keyvault_administration_backup_client
     if resource_type == ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL:
@@ -122,6 +123,8 @@ def get_client_factory(resource_type, client_name=''):
         return data_plane_azure_keyvault_key_client
     if resource_type == ResourceType.DATA_KEYVAULT_SECRETS:
         return data_plane_azure_keyvault_secret_client
+    if resource_type == ResourceType.DATA_KEYVAULT_SECURITY_DOMAIN:
+        return data_plane_azure_keyvault_security_domain_client
     raise CLIError('Unsupported resource type: {}'.format(resource_type))
 
 
@@ -165,29 +168,6 @@ def keyvault_mgmt_client_factory(resource_type, client_name):
     return _keyvault_mgmt_client_factory
 
 
-def keyvault_private_data_plane_factory_v7_2_preview(cli_ctx, _):
-    from azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1 import (
-        KeyVaultAuthentication, KeyVaultClient)
-    from azure.cli.core.util import should_disable_connection_verify
-
-    def get_token(server, resource, scope):  # pylint: disable=unused-argument
-        return Profile(cli_ctx=cli_ctx).get_raw_token(resource=resource,
-                                                      subscription=cli_ctx.data.get('subscription_id'))[0]
-
-    client = KeyVaultClient(KeyVaultAuthentication(get_token), api_version='7.2')
-
-    # HACK, work around the fact that KeyVault library does't take confiuration object on constructor
-    # which could be used to turn off the verifiaction. Remove this once we migrate to new data plane library
-    # pylint: disable=protected-access
-    if hasattr(client, '_client') and hasattr(client._client, 'config'):
-        verify = not should_disable_connection_verify()
-        client._client.config.connection.verify = verify
-    else:
-        logger.info('Could not find the configuration object to turn off the verification if needed')
-
-    return client
-
-
 def data_plane_azure_keyvault_administration_backup_client(cli_ctx, command_args):
     from azure.keyvault.administration import KeyVaultBackupClient
 
@@ -202,8 +182,10 @@ def data_plane_azure_keyvault_administration_access_control_client(cli_ctx, comm
 
     vault_url, credential, version = _prepare_data_plane_azure_keyvault_client(
         cli_ctx, command_args, ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL)
+    client_kwargs = prepare_client_kwargs_track2(cli_ctx)
+    client_kwargs.pop('http_logging_policy')
     return KeyVaultAccessControlClient(
-        vault_url=vault_url, credential=credential, api_version=version, verify_challenge_resource=False)
+        vault_url=vault_url, credential=credential, api_version=version, **client_kwargs)
 
 
 def data_plane_azure_keyvault_administration_setting_client(cli_ctx, command_args):
@@ -214,8 +196,10 @@ def data_plane_azure_keyvault_administration_setting_client(cli_ctx, command_arg
     command_args.pop('hsm_name', None)
     command_args.pop('vault_base_url', None)
     command_args.pop('identifier', None)
+    client_kwargs = prepare_client_kwargs_track2(cli_ctx)
+    client_kwargs.pop('http_logging_policy')
     return KeyVaultSettingsClient(
-        vault_url=vault_url, credential=credential, api_version='7.4', verify_challenge_resource=False)
+        vault_url=vault_url, credential=credential, api_version='7.4', **client_kwargs)
 
 
 def data_plane_azure_keyvault_certificate_client(cli_ctx, command_args):
@@ -227,8 +211,10 @@ def data_plane_azure_keyvault_certificate_client(cli_ctx, command_args):
     command_args.pop('vault_base_url', None)
     command_args.pop('identifier', None)
     api_version = '7.4' if not is_azure_stack_profile(cmd=None, cli_ctx=cli_ctx) else '2016-10-01'
+    client_kwargs = prepare_client_kwargs_track2(cli_ctx)
+    client_kwargs.pop('http_logging_policy')
     return CertificateClient(
-        vault_url=vault_url, credential=credential, api_version=api_version or version, verify_challenge_resource=False)
+        vault_url=vault_url, credential=credential, api_version=api_version or version, **client_kwargs)
 
 
 def data_plane_azure_keyvault_key_client(cli_ctx, command_args):
@@ -240,8 +226,10 @@ def data_plane_azure_keyvault_key_client(cli_ctx, command_args):
     command_args.pop('vault_base_url', None)
     command_args.pop('identifier', None)
     api_version = '7.5-preview.1' if not is_azure_stack_profile(cmd=None, cli_ctx=cli_ctx) else '2016-10-01'
+    client_kwargs = prepare_client_kwargs_track2(cli_ctx)
+    client_kwargs.pop('http_logging_policy')
     return KeyClient(
-        vault_url=vault_url, credential=credential, api_version=api_version or version, verify_challenge_resource=False)
+        vault_url=vault_url, credential=credential, api_version=api_version or version, **client_kwargs)
 
 
 def data_plane_azure_keyvault_secret_client(cli_ctx, command_args):
@@ -253,8 +241,22 @@ def data_plane_azure_keyvault_secret_client(cli_ctx, command_args):
     command_args.pop('vault_base_url', None)
     command_args.pop('identifier', None)
     api_version = '7.4' if not is_azure_stack_profile(cmd=None, cli_ctx=cli_ctx) else '2016-10-01'
+    client_kwargs = prepare_client_kwargs_track2(cli_ctx)
+    client_kwargs.pop('http_logging_policy')
     return SecretClient(
-        vault_url=vault_url, credential=credential, api_version=api_version or version, verify_challenge_resource=False)
+        vault_url=vault_url, credential=credential, api_version=api_version or version, **client_kwargs)
+
+
+def data_plane_azure_keyvault_security_domain_client(cli_ctx, command_args):
+    from azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_securitydomain import SecurityDomainClient
+    vault_url, credential, _ = _prepare_data_plane_azure_keyvault_client(
+        cli_ctx, command_args, ResourceType.DATA_KEYVAULT_SECURITY_DOMAIN)
+    command_args.pop('hsm_name', None)
+    command_args.pop('vault_base_url', None)
+    command_args.pop('identifier', None)
+    client_kwargs = prepare_client_kwargs_track2(cli_ctx)
+    client_kwargs.pop('http_logging_policy')
+    return SecurityDomainClient(vault_url=vault_url, credential=credential, **client_kwargs)
 
 
 def _prepare_data_plane_azure_keyvault_client(cli_ctx, command_args, resource_type):
