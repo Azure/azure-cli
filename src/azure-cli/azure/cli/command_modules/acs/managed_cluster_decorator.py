@@ -7381,6 +7381,28 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             mc.network_profile.network_policy = network_policy
 
         return mc
+    
+    def update_network_profile_advanced_networking(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update advanced networking settings of network profile for the ManagedCluster object.
+        
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+        acns = self.models.AdvancedNetworking()
+        (acns_enabled, acns_observability, acns_security) = self.context.get_acns_enablement()
+        if acns_enabled is not None:
+            acns.enabled = acns_enabled
+            if acns_observability is not None:
+                acns.observability = self.models.AdvancedNetworkingObservability(
+                    enabled=acns_observability,
+                )
+            if acns_security is not None:
+                acns.security = self.models.AdvancedNetworkingSecurity(
+                    enabled=acns_security,
+                )
+        if acns_enabled is not None:
+            mc.network_profile.advanced_networking=acns
+        return mc
 
     def update_http_proxy_config(self, mc: ManagedCluster) -> ManagedCluster:
         """Set up http proxy config for the ManagedCluster object.
@@ -8305,6 +8327,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_windows_profile(mc)
         # update network plugin settings
         mc = self.update_network_plugin_settings(mc)
+        # update network profile with acns
+        mc = self.update_network_profile_advanced_networking(mc)
         # update aad profile
         mc = self.update_aad_profile(mc)
         # update oidc issuer profile
