@@ -12,7 +12,7 @@ from azure.cli.command_modules.keyvault._client_factory import (
     get_client, get_client_factory, Clients, is_azure_stack_profile)
 
 from azure.cli.command_modules.keyvault._transformers import (
-    filter_out_managed_resources,
+    filter_out_managed_resources, transform_security_domain_output,
     multi_transformers, transform_key_decryption_output, keep_max_results, transform_key_list_output,
     transform_key_output, transform_key_encryption_output, transform_key_random_output,
     transform_secret_list, transform_deleted_secret_list, transform_secret_set,
@@ -25,7 +25,8 @@ from azure.cli.command_modules.keyvault._transformers import (
 from azure.cli.command_modules.keyvault._format import transform_secret_list_table
 
 from azure.cli.command_modules.keyvault._validators import (
-    process_secret_set_namespace, validate_private_endpoint_connection_id, validate_role_assignment_args)
+    process_secret_set_namespace, validate_key_create,
+    validate_private_endpoint_connection_id, validate_role_assignment_args)
 
 
 def transform_assignment_list(result):
@@ -52,12 +53,12 @@ def load_command_table(self, _):
     if not is_azure_stack_profile(self):
         mgmt_hsms_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)
         mgmt_hsms_regions_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT, Clients.mhsm_regions)
-        private_data_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT, Clients.private_7_2)
+        data_security_domain_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_SECURITY_DOMAIN)
         data_backup_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP)
         data_access_control_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL)
         data_setting_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_ADMINISTRATION_SETTING)
     else:
-        mgmt_hsms_entity = mgmt_hsms_regions_entity = private_data_entity = data_backup_entity = \
+        mgmt_hsms_entity = mgmt_hsms_regions_entity = data_security_domain_entity = data_backup_entity = \
             data_access_control_entity = data_setting_entity = None
 
     kv_vaults_custom = CliCommandType(
@@ -141,15 +142,17 @@ def load_command_table(self, _):
         with self.command_group('keyvault restore', data_backup_entity.command_type) as g:
             g.keyvault_custom('start', 'full_restore')
 
-        with self.command_group('keyvault security-domain', private_data_entity.command_type) as g:
+        with self.command_group('keyvault security-domain', data_security_domain_entity.command_type) as g:
             g.keyvault_custom('init-recovery', 'security_domain_init_recovery')
             g.keyvault_custom('restore-blob', 'security_domain_restore_blob')
-            g.keyvault_custom('upload', 'security_domain_upload', supports_no_wait=True)
-            g.keyvault_custom('download', 'security_domain_download', supports_no_wait=True)
-            g.keyvault_custom('wait', '_wait_security_domain_operation')
+            g.keyvault_custom('upload', 'security_domain_upload', supports_no_wait=True,
+                              transform=transform_security_domain_output)
+            g.keyvault_custom('download', 'security_domain_download', supports_no_wait=True,
+                              transform=transform_security_domain_output)
+            g.keyvault_custom('wait', '_wait_security_domain_operation', transform=transform_security_domain_output)
 
     with self.command_group('keyvault key', data_key_entity.command_type) as g:
-        g.keyvault_custom('create', 'create_key', transform=transform_key_output)
+        g.keyvault_custom('create', 'create_key', transform=transform_key_output, validator=validate_key_create)
         g.keyvault_command('set-attributes', 'update_key_properties', transform=transform_key_output)
         g.keyvault_command('show', 'get_key', transform=transform_key_output)
         g.keyvault_custom('import', 'import_key', transform=transform_key_output)

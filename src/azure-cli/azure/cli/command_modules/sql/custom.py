@@ -596,7 +596,7 @@ def _complete_maintenance_configuration_id(cli_ctx, argument_value=None):
     Completes maintenance configuration id from short to full type if needed
     '''
 
-    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
     if argument_value and not is_valid_resource_id(argument_value):
@@ -643,10 +643,16 @@ class FailoverPolicyType(Enum):
     manual = 'Manual'
 
 
+class FailoverGroupDatabasesSecondaryType(Enum):
+    geo = 'Geo'
+    standby = 'Standby'
+
+
 class SqlServerMinimalTlsVersionType(Enum):
     tls_1_0 = "1.0"
     tls_1_1 = "1.1"
     tls_1_2 = "1.2"
+    tls_1_3 = "1.3"
 
 
 class ResourceIdType(Enum):
@@ -735,7 +741,7 @@ def _get_managed_db_resource_id(
     Gets the Managed db resource id in this Azure environment.
     '''
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import resource_id
+    from azure.mgmt.core.tools import resource_id
 
     return resource_id(
         subscription=subscription_id if subscription_id else get_subscription_id(cli_ctx),
@@ -779,7 +785,7 @@ def _get_managed_dropped_db_resource_id(
 
     from urllib.parse import quote
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import resource_id
+    from azure.mgmt.core.tools import resource_id
 
     return (resource_id(
         subscription=subscription_id if subscription_id else get_subscription_id(cli_ctx),
@@ -802,7 +808,7 @@ def _get_managed_instance_resource_id(
     '''
 
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import resource_id
+    from azure.mgmt.core.tools import resource_id
 
     return (resource_id(
         subscription=subscription_id if subscription_id else get_subscription_id(cli_ctx),
@@ -821,7 +827,7 @@ def _get_managed_instance_pool_resource_id(
     '''
 
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import resource_id
+    from azure.mgmt.core.tools import resource_id
 
     if instance_pool_name:
         return (resource_id(
@@ -1022,7 +1028,7 @@ def _validate_elastic_pool_id(
     Returns the elastic_pool_id, which may have been updated and may be None.
     '''
 
-    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
     if elastic_pool_id and not is_valid_resource_id(elastic_pool_id):
@@ -1733,7 +1739,7 @@ def db_list(
     return client.list_by_server(resource_group_name=resource_group_name, server_name=server_name)
 
 
-def db_update(  # pylint: disable=too-many-locals
+def db_update(  # pylint: disable=too-many-locals, too-many-branches
         cmd,
         instance,
         server_name,
@@ -1761,7 +1767,9 @@ def db_update(  # pylint: disable=too-many-locals
         keys_to_remove=None,
         encryption_protector_auto_rotation=None,
         use_free_limit=None,
-        free_limit_exhaustion_behavior=None):
+        free_limit_exhaustion_behavior=None,
+        manual_cutover=None,
+        perform_cutover=None):
     '''
     Applies requested parameters to a db resource instance for a DB update.
     '''
@@ -1844,6 +1852,12 @@ def db_update(  # pylint: disable=too-many-locals
 
     if preferred_enclave_type is not None:
         instance.preferred_enclave_type = preferred_enclave_type
+
+    if manual_cutover is not None:
+        instance.manual_cutover = manual_cutover
+
+    if perform_cutover is not None:
+        instance.perform_cutover = perform_cutover
 
     # Set storage_account_type even if storage_acount_type is None
     # Otherwise, empty value defaults to current storage_account_type
@@ -3766,6 +3780,11 @@ def elastic_pool_create(
     # using capabilities.
     kwargs['sku'] = _find_elastic_pool_sku_from_capabilities(cmd.cli_ctx, kwargs['location'], sku)
 
+    # The min_capacity property is only applicable to serverless SKUs.
+    #
+    if kwargs['sku'] is not None and not _is_serverless_slo(kwargs['sku'].name):
+        kwargs['min_capacity'] = None
+
     # Expand maintenance configuration id if needed
     kwargs['maintenance_configuration_id'] = _complete_maintenance_configuration_id(
         cmd.cli_ctx,
@@ -4049,6 +4068,7 @@ def server_create(
         client,
         resource_group_name,
         server_name,
+        minimal_tls_version=None,
         assign_identity=False,
         no_wait=False,
         enable_public_network=None,
@@ -4081,6 +4101,11 @@ def server_create(
         kwargs['restrict_outbound_network_access'] = (
             ServerNetworkAccessFlag.ENABLED if restrict_outbound_network_access
             else ServerNetworkAccessFlag.DISABLED)
+
+    if minimal_tls_version is not None:
+        kwargs['minimal_tls_version'] = minimal_tls_version
+    else:
+        kwargs['minimal_tls_version'] = SqlServerMinimalTlsVersionType.tls_1_2
 
     kwargs['key_id'] = key_id
     kwargs['federated_client_id'] = federated_client_id
@@ -4175,6 +4200,7 @@ def server_update(
     # Apply params to instance
     instance.administrator_login_password = (
         administrator_login_password or instance.administrator_login_password)
+
     instance.minimal_tls_version = (
         minimal_tls_version or instance.minimal_tls_version)
 
@@ -4940,6 +4966,8 @@ def managed_instance_create(
         service_principal_type=None,
         zone_redundant=None,
         instance_pool_name=None,
+        dns_zone_partner=None,
+        authentication_metadata=None,
         **kwargs):
     '''
     Creates a managed instance.
@@ -4978,6 +5006,9 @@ def managed_instance_create(
     kwargs['primary_user_assigned_identity_id'] = primary_user_assigned_identity_id
 
     kwargs['zone_redundant'] = zone_redundant
+    kwargs['authentication_metadata'] = authentication_metadata
+
+    kwargs['dns_zone_partner'] = dns_zone_partner
 
     ad_only = None
     if enable_ad_only_auth:
@@ -5044,10 +5075,12 @@ def managed_instance_update(  # pylint: disable=too-many-locals
         cmd,
         instance,
         resource_group_name,
+        is_general_purpose_v2=None,
         administrator_login_password=None,
         license_type=None,
         vcores=None,
         storage_size_in_gb=None,
+        storage_iops=None,
         assign_identity=False,
         proxy_override=None,
         public_data_endpoint_enabled=None,
@@ -5067,7 +5100,8 @@ def managed_instance_update(  # pylint: disable=too-many-locals
         zone_redundant=None,
         instance_pool_name=None,
         database_format=None,
-        pricing_model=None):
+        pricing_model=None,
+        authentication_metadata=None):
     '''
     Updates a managed instance. Custom update function to apply parameters to instance.
     '''
@@ -5083,6 +5117,18 @@ def managed_instance_update(  # pylint: disable=too-many-locals
     instance.service_principal = _get_service_principal_object_from_type(service_principal_type)
 
     # Apply params to instance
+    #   Note on is_general_purpose_v2
+    #     If this parameter was not set by the user, we do not want to pick up its current value.
+    #     This is due to the fact that this update might have a target edition that does not use this parameter.
+    #   Note on storage_iops
+    #     If this parameter was not set by the user, we do not want to pick up its current value.
+    #     This is due to the fact that this update might have a target edition that does not use this parameter.
+    #     If the target edition uses the parameter, the current value will get picked up later in the update process.
+    #   Note on storage_throughput_mbps
+    #     If this parameter was not set by the user, we do not want to pick up its current value.
+    #     This is due to the fact that this update might have a target edition that does not use this parameter.
+    #     If the target edition uses the parameter, the current value will get picked up later in the update process.
+    instance.is_general_purpose_v2 = is_general_purpose_v2
     instance.administrator_login_password = (
         administrator_login_password or instance.administrator_login_password)
     instance.license_type = (
@@ -5091,6 +5137,8 @@ def managed_instance_update(  # pylint: disable=too-many-locals
         vcores or instance.v_cores)
     instance.storage_size_in_gb = (
         storage_size_in_gb or instance.storage_size_in_gb)
+    instance.storage_iops = storage_iops
+    instance.storage_throughput_mbps = None
     instance.proxy_override = (
         proxy_override or instance.proxy_override)
     instance.minimal_tls_version = (
@@ -5145,6 +5193,9 @@ def managed_instance_update(  # pylint: disable=too-many-locals
 
     if pricing_model is not None:
         instance.pricing_model = pricing_model
+
+    if authentication_metadata is not None:
+        instance.authentication_metadata = authentication_metadata
 
     return instance
 
@@ -6142,6 +6193,7 @@ def managed_db_move_start(
         resource_group_name,
         managed_instance_name,
         database_name,
+        dest_subscription_id,
         dest_resource_group_name,
         dest_instance_name,
         **kwargs):
@@ -6155,6 +6207,7 @@ def managed_db_move_start(
         resource_group_name,
         managed_instance_name,
         database_name,
+        dest_subscription_id,
         dest_resource_group_name,
         dest_instance_name,
         'Move',
@@ -6167,6 +6220,7 @@ def managed_db_copy_start(
         resource_group_name,
         managed_instance_name,
         database_name,
+        dest_subscription_id,
         dest_resource_group_name,
         dest_instance_name,
         **kwargs):
@@ -6180,6 +6234,7 @@ def managed_db_copy_start(
         resource_group_name,
         managed_instance_name,
         database_name,
+        dest_subscription_id,
         dest_resource_group_name,
         dest_instance_name,
         'Copy',
@@ -6192,6 +6247,7 @@ def managed_db_move_copy_start(
         resource_group_name,
         managed_instance_name,
         database_name,
+        destination_subscription_id,
         dest_resource_group_name,
         dest_instance_name,
         operation_mode,
@@ -6205,7 +6261,8 @@ def managed_db_move_copy_start(
         cmd.cli_ctx,
         dest_resource_group_name or resource_group_name,
         dest_instance_name,
-        database_name)
+        database_name,
+        destination_subscription_id)
 
     return client.begin_start_move(
         resource_group_name=resource_group_name,
@@ -6222,6 +6279,7 @@ def managed_db_move_copy_complete(
         database_name,
         dest_resource_group_name,
         dest_instance_name,
+        dest_subscription_id,
         **kwargs):
     '''
     Completes managed database move/copy operation
@@ -6231,7 +6289,8 @@ def managed_db_move_copy_complete(
         cmd.cli_ctx,
         dest_resource_group_name or resource_group_name,
         dest_instance_name,
-        database_name)
+        database_name,
+        dest_subscription_id)
 
     return client.begin_complete_move(
         resource_group_name=resource_group_name,
@@ -6248,6 +6307,7 @@ def managed_db_move_copy_cancel(
         database_name,
         dest_resource_group_name,
         dest_instance_name,
+        dest_subscription_id,
         **kwargs):
     '''
     Cancels managed database move/copy operation
@@ -6257,7 +6317,8 @@ def managed_db_move_copy_cancel(
         cmd.cli_ctx,
         dest_resource_group_name or resource_group_name,
         dest_instance_name,
-        database_name)
+        database_name,
+        dest_subscription_id)
 
     return client.begin_cancel_move(
         resource_group_name=resource_group_name,
@@ -6369,8 +6430,9 @@ def failover_group_create(
         server_name,
         failover_group_name,
         partner_server,
+        secondary_type=None,
         partner_resource_group=None,
-        failover_policy=FailoverPolicyType.automatic.value,
+        failover_policy=FailoverPolicyType.manual.value,
         grace_period=1,
         add_db=None):
     '''
@@ -6405,18 +6467,24 @@ def failover_group_create(
         add_db,
         [])
 
+    failover_group_params = FailoverGroup(
+        partner_servers=[partner_server],
+        databases=databases,
+        read_write_endpoint=FailoverGroupReadWriteEndpoint(
+            failover_policy=failover_policy,
+            failover_with_data_loss_grace_period_minutes=grace_period),
+        read_only_endpoint=FailoverGroupReadOnlyEndpoint(
+            failover_policy="Disabled")
+    )
+
+    if secondary_type is not None:
+        failover_group_params.secondary_type = secondary_type
+
     return client.begin_create_or_update(
         resource_group_name=resource_group_name,
         server_name=server_name,
         failover_group_name=failover_group_name,
-        parameters=FailoverGroup(
-            partner_servers=[partner_server],
-            databases=databases,
-            read_write_endpoint=FailoverGroupReadWriteEndpoint(
-                failover_policy=failover_policy,
-                failover_with_data_loss_grace_period_minutes=grace_period),
-            read_only_endpoint=FailoverGroupReadOnlyEndpoint(
-                failover_policy="Disabled")))
+        parameters=failover_group_params)
 
 
 def failover_group_update(
@@ -6424,6 +6492,7 @@ def failover_group_update(
         instance,
         resource_group_name,
         server_name,
+        secondary_type=None,
         failover_policy=None,
         grace_period=None,
         add_db=None,
@@ -6452,6 +6521,8 @@ def failover_group_update(
         remove_db)
 
     instance.databases = databases
+    if secondary_type is not None:
+        instance.secondary_type = secondary_type
 
     return instance
 

@@ -15,7 +15,7 @@ SUB_ID_OVERRIDE = 'AZURE_CLI_RDBMS_SUB_ID'
 
 def get_mysql_flexible_management_client(cli_ctx, **_):
     from os import getenv
-    from azure.mgmt.rdbms.mysql_flexibleservers import MySQLManagementClient
+    from azure.mgmt.mysqlflexibleservers import MySQLManagementClient
 
     # Allow overriding resource manager URI using environment variable
     # for testing purposes. Subscription id is also determined by environment
@@ -100,6 +100,14 @@ def cf_mysql_flexible_export(cli_ctx, _):
 
 def cf_mysql_flexible_adadmin(cli_ctx, _):
     return get_mysql_flexible_management_client(cli_ctx).azure_ad_administrators
+
+
+def cf_mysql_advanced_threat_protection(cli_ctx, _):
+    return get_mysql_flexible_management_client(cli_ctx).advanced_threat_protection_settings
+
+
+def cf_mysql_flexible_maintenances(cli_ctx, _):
+    return get_mysql_flexible_management_client(cli_ctx).maintenances
 
 
 def cf_mysql_check_resource_availability(cli_ctx, _):

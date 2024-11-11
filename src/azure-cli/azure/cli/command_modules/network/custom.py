@@ -10,9 +10,10 @@ from collections import Counter, OrderedDict
 
 import socket
 from knack.log import get_logger
-from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
+from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id, resource_id
 
-from azure.cli.core.aaz import has_value
+from azure.cli.core.aaz import AAZClientConfiguration, has_value, register_client
+from azure.cli.core.aaz._client import AAZMgmtClient
 from azure.cli.core.aaz.utils import assign_aaz_list_arg
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
 
@@ -59,7 +60,7 @@ from .aaz.latest.network.application_gateway.waf_policy import Create as _WAFCre
 from .aaz.latest.network.application_gateway.waf_policy.custom_rule.match_condition import \
     Add as _WAFCustomRuleMatchConditionAdd
 from .aaz.latest.network.application_gateway.waf_policy.policy_setting import Update as _WAFPolicySettingUpdate
-from .aaz.latest.network.custom_ip.prefix import Update as _CustomIpPrefixUpdate
+from .aaz.latest.network.custom_ip.prefix import Create as _CustomIpPrefixCreate, Update as _CustomIpPrefixUpdate
 from .aaz.latest.network.dns.record_set import List as _DNSRecordSetListByZone
 from .aaz.latest.network.dns.zone import Create as _DNSZoneCreate
 from .aaz.latest.network.express_route import Create as _ExpressRouteCreate, Update as _ExpressRouteUpdate
@@ -136,7 +137,7 @@ from .operations.dns import (RecordSetADelete as DNSRecordSetADelete, RecordSetA
                              RecordSetCNAMEDelete as DNSRecordSetCNAMEDelete)
 
 logger = get_logger(__name__)
-RULESET_VERSION = {"0.1": "0.1", "1.0": "1.0", "2.2.9": "2.2.9", "3.0": "3.0", "3.1": "3.1", "3.2": "3.2"}
+RULESET_VERSION = {"0.1": "0.1", "1.0": "1.0", "1.1": "1.1", "2.1": "2.1", "2.2.9": "2.2.9", "3.0": "3.0", "3.1": "3.1", "3.2": "3.2"}
 
 remove_basic_option_msg = "It's recommended to create with `%s`. " \
                           "Please be aware that Basic option will be removed in the future."
@@ -148,6 +149,24 @@ subnet_disable_ple_msg = ("`--disable-private-endpoint-network-policies` will be
 subnet_disable_pls_msg = ("`--disable-private-link-service-network-policies` will be deprecated in the future, if you "
                           "wanna disable network policy for private link service, please use "
                           "`--private-link-service-network-policies Disabled` instead.")
+
+
+@register_client("NonRetryableClient")
+class AAZNonRetryableClient(AAZMgmtClient):
+    @classmethod
+    def _build_configuration(cls, ctx, credential, **kwargs):
+        from azure.cli.core.auth.util import resource_to_scopes
+        from azure.core.pipeline.policies import RetryPolicy
+
+        retry_policy = RetryPolicy(**kwargs)
+        retry_policy._retry_on_status_codes.discard(429)
+        kwargs["retry_policy"] = retry_policy
+
+        return AAZClientConfiguration(
+            credential=credential,
+            credential_scopes=resource_to_scopes(ctx.cli_ctx.cloud.endpoints.active_directory_resource_id),
+            **kwargs
+        )
 
 
 # region Utility methods
@@ -436,6 +455,19 @@ class AddressPoolUpdate(_AddressPoolUpdate):
         )
         args_schema.backend_addresses._registered = False
         return args_schema
+
+    class NonRetryableCreateOrUpdate(_AddressPoolUpdate.ApplicationGatewaysCreateOrUpdate):
+        CLIENT_TYPE = "NonRetryableClient"
+
+    def _execute_operations(self):
+        self.pre_operations()
+        self.ApplicationGatewaysGet(ctx=self.ctx)()
+        self.pre_instance_update(self.ctx.selectors.subresource.required())
+        self.InstanceUpdateByJson(ctx=self.ctx)()
+        self.InstanceUpdateByGeneric(ctx=self.ctx)()
+        self.post_instance_update(self.ctx.selectors.subresource.required())
+        yield self.NonRetryableCreateOrUpdate(ctx=self.ctx)()
+        self.post_operations()
 
     def pre_operations(self):
         args = self.ctx.args
@@ -1314,8 +1346,6 @@ class AGRewriteRuleCreate(_AGRewriteRuleCreate):
                  "Values from: `az network application-gateway rewrite-rule list-response-headers`.",
         )
         args_schema.response_headers.Element = AAZStrArg()
-        args_schema.request_header_configurations._registered = False
-        args_schema.response_header_configurations._registered = False
         return args_schema
 
     def pre_operations(self):
@@ -1355,8 +1385,6 @@ class AGRewriteRuleUpdate(_AGRewriteRuleUpdate):
         args_schema.response_headers.Element = AAZStrArg(
             nullable=True,
         )
-        args_schema.request_header_configurations._registered = False
-        args_schema.response_header_configurations._registered = False
         return args_schema
 
     def pre_operations(self):
@@ -1832,8 +1860,7 @@ def set_ag_waf_config(cmd, resource_group_name, application_gateway_name, enable
         def pre_instance_update(self, instance):
             def _flatten(collection, expand_property_fn):
                 for each in collection:
-                    for value in expand_property_fn(each):
-                        yield value
+                    yield from expand_property_fn(each)
 
             if disabled_rule_groups or disabled_rules:
                 disabled_groups = []
@@ -1912,14 +1939,14 @@ class WAFCreate(_WAFCreate):
         args_schema.rule_set_type = AAZStrArg(
             options=["--type"],
             help="Type of the web application firewall rule set.",
-            default="OWASP",
-            enum={"Microsoft_BotManagerRuleSet": "Microsoft_BotManagerRuleSet", "OWASP": "OWASP"},
+            default="Microsoft_DefaultRuleSet",
+            enum={"Microsoft_BotManagerRuleSet": "Microsoft_BotManagerRuleSet", "Microsoft_DefaultRuleSet": "Microsoft_DefaultRuleSet", "OWASP": "OWASP"},
         )
         args_schema.rule_set_version = AAZStrArg(
             options=["--version"],
             help="Version of the web application firewall rule set type. "
-                 "0.1 and 1.0 are used for Microsoft_BotManagerRuleSet",
-            default="3.0",
+                 "0.1, 1.0, and 1.1 are used for Microsoft_BotManagerRuleSet",
+            default="2.1",
             enum=RULESET_VERSION
         )
         return args_schema
@@ -1980,9 +2007,9 @@ class WAFCustomRuleMatchConditionAdd(_WAFCustomRuleMatchConditionAdd):
         args.variables = variables
         # validate
         if str(args.operator).lower() == "any" and has_value(args.values):
-            raise ArgumentUsageError("Any operator does not require --match-values.")
+            raise ArgumentUsageError("\"Any\" operator does not require --values.")
         if str(args.operator).lower() != "any" and not has_value(args.values):
-            raise ArgumentUsageError("Non-any operator requires --match-values.")
+            raise ArgumentUsageError("Non-any operator requires --values.")
 
 
 class WAFPolicySettingUpdate(_WAFPolicySettingUpdate):
@@ -2459,54 +2486,19 @@ def add_dns_delegation(cmd, child_zone, parent_zone, child_rg, child_zone_name):
             print('Could not add delegation in \'{}\'\n'.format(parent_zone_name), file=sys.stderr)
 
 
-def create_dns_zone(cmd, resource_group_name, zone_name, parent_zone_name=None, tags=None,
-                    if_none_match=False, zone_type='Public', resolution_vnets=None, registration_vnets=None):
-
-    resolution_vnets_dict = []
-    if resolution_vnets:
-        for resolution_vnet in resolution_vnets:
-            resolution_vnets_dict.append({"id": resolution_vnet.id})
-
-    registration_vnets_dict = []
-    if registration_vnets:
-        for registration_vnet in registration_vnets:
-            registration_vnets_dict.append({"id": registration_vnet.id})
-
+def create_dns_zone(cmd, resource_group_name, zone_name, parent_zone_name=None, tags=None, if_none_match=False):
     created_zone = _DNSZoneCreate(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "zone_name": zone_name,
         "if_none_match": '*' if if_none_match else None,
         "location": 'global',
-        "tags": tags,
-        "zone_type": zone_type,
-        "resolution_virtual_networks": resolution_vnets_dict if resolution_vnets else None,
-        "registration_virtual_networks": registration_vnets_dict if registration_vnets else None
+        "tags": tags
     })
 
-    if cmd.supported_api_version(min_api='2016-04-01', resource_type=ResourceType.MGMT_NETWORK_DNS) and parent_zone_name is not None:
+    if parent_zone_name is not None:
         logger.info('Attempting to add delegation in the parent zone')
         add_dns_delegation(cmd, created_zone, parent_zone_name, resource_group_name, zone_name)
     return created_zone
-
-
-def update_dns_zone(instance, tags=None, zone_type=None, resolution_vnets=None, registration_vnets=None):
-
-    if tags is not None:
-        instance.tags = tags
-
-    if zone_type:
-        instance.zone_type = zone_type
-
-    if resolution_vnets == ['']:
-        instance.resolution_virtual_networks = None
-    elif resolution_vnets:
-        instance.resolution_virtual_networks = resolution_vnets
-
-    if registration_vnets == ['']:
-        instance.registration_virtual_networks = None
-    elif registration_vnets:
-        instance.registration_virtual_networks = registration_vnets
-    return instance
 
 
 def show_dns_soa_record_set(cmd, resource_group_name, zone_name, record_type):
@@ -2638,7 +2630,7 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):  # pylint:
             if record_type not in zone_obj[record_set_name]:
                 zone_obj[record_set_name][record_type] = []
             # Checking for alias record
-            if (record_type == 'a' or record_type == 'aaaa' or record_type == 'cname') and record_set["target_resource"]["id"]:
+            if (record_type == 'a' or record_type == 'aaaa' or record_type == 'cname') and record_set["target_resource"].get("id", ""):
                 target_resource_id = record_set["target_resource"]["id"]
                 record_obj.update({'target-resource-id': record_type.upper() + " " + target_resource_id})
                 record_type = 'alias'
@@ -3880,7 +3872,7 @@ class PrivateLinkServiceCreate(_PrivateLinkServiceCreate):
         args_schema.private_ip_allocation_method = AAZStrArg(options=['--private-ip-allocation-method'], arg_group="IP Configuration", help="Private IP address allocation method.",
                                                              enum={"Dynamic": "Dynamic", "Static": "Static"})
         args_schema.lb_name = AAZStrArg(options=['--lb-name'], help="Name of the load balancer to retrieve frontend IP configs from. Ignored if a frontend IP configuration ID is supplied.")
-        args_schema.lb_frontend_ip_configs = AAZListArg(options=['--lb-frontend-ip-configs'], help="Space-separated list of names or IDs of load balancer frontend IP configurations to link to. If names are used, also supply `--lb-name`.", required=True)
+        args_schema.lb_frontend_ip_configs = AAZListArg(options=['--lb-frontend-ip-configs'], help="Space-separated list of names or IDs of load balancer frontend IP configurations to link to. If names are used, also supply `--lb-name`.")
         args_schema.lb_frontend_ip_configs.Element = AAZResourceIdArg(
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/frontendIpConfigurations/{}"
@@ -3910,6 +3902,8 @@ class PrivateLinkServiceCreate(_PrivateLinkServiceCreate):
 
         if has_value(args.edge_zone):
             args.edge_zone_type = 'EdgeZone'
+        if not has_value(args.lb_frontend_ip_configs) and not has_value(args.destination_ip_address):
+            raise CLIError("usage error: either --lb-frontend-ip-configs or --destination-ip-address is required")
 
 
 class PrivateLinkServiceUpdate(_PrivateLinkServiceUpdate):
@@ -5255,7 +5249,7 @@ class PublicIPUpdate(_PublicIPUpdate):
     def pre_operations(self):
         args = self.ctx.args
         if has_value(args.ip_tags):
-            if ip_tags := args.ip_tags.to_serialized_data() is None:
+            if (ip_tags := args.ip_tags.to_serialized_data()) is None:
                 args.ip_tags_list = []
             else:
                 args.ip_tags_list = [{"ip_tag_type": k, "tag": v} for k, v in ip_tags.items()]
@@ -5601,7 +5595,6 @@ class VNetSubnetCreate(_VNetSubnetCreate):
         )
         # filter arguments
         args_schema.policies._registered = False
-        args_schema.endpoints._registered = False
         args_schema.delegated_services._registered = False
         args_schema.address_prefix._registered = False
         return args_schema
@@ -5621,6 +5614,8 @@ class VNetSubnetCreate(_VNetSubnetCreate):
                 "service_name": service_name,
             }
 
+        if has_value(args.endpoints) and has_value(args.service_endpoints):
+            raise ArgumentUsageError("usage error: `--endpoints` and `--service-endpoints` cannot be used together, we prefer to use `endpoints` instead")
         args.delegated_services = assign_aaz_list_arg(
             args.delegated_services,
             args.delegations,
@@ -5704,7 +5699,6 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
         # filter arguments
         args_schema.address_prefix._registered = False
         args_schema.delegated_services._registered = False
-        args_schema.endpoints._registered = False
         args_schema.policies._registered = False
         # handle detach logic
         args_schema.nat_gateway._fmt = AAZResourceIdArgFormat(
@@ -5736,6 +5730,8 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
                 "service_name": service_name,
             }
 
+        if has_value(args.endpoints) and has_value(args.service_endpoints):
+            raise ArgumentUsageError("usage error: `--endpoints` and `--service-endpoints` cannot be used together, we prefer to use `endpoints` instead")
         args.delegated_services = assign_aaz_list_arg(
             args.delegated_services,
             args.delegations,
@@ -6594,6 +6590,26 @@ class VirtualApplianceUpdate(_VirtualApplianceUpdate):
         )
 
         return args_schema
+
+
+class CustomIpPrefixCreate(_CustomIpPrefixCreate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZBoolArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.is_parent = AAZBoolArg(
+            options=["--is-parent"],
+            help="Denotes that resource is being created as a Parent CustomIpPrefix",
+        )
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if args.is_parent:
+            args.prefix_type = "Parent"
+        elif has_value(args.cip_prefix_parent):
+            args.prefix_type = "Child"
 
 
 class CustomIpPrefixUpdate(_CustomIpPrefixUpdate):

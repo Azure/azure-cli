@@ -11,7 +11,7 @@ from io import open
 import requests
 from knack.log import get_logger
 from knack.util import CLIError
-from msrestazure.azure_exceptions import CloudError
+from azure.core.exceptions import HttpResponseError
 from azure.cli.core.profiles import ResourceType, get_sdk
 from ._constants import TASK_VALID_VSTS_URLS
 
@@ -46,7 +46,7 @@ def upload_source_code(cmd, client,
             resource_group_name, registry_name)
         upload_url = source_upload_location.upload_url
         relative_path = source_upload_location.relative_path
-    except (AttributeError, CloudError) as e:
+    except (AttributeError, HttpResponseError) as e:
         raise CLIError("Failed to get a SAS URL to upload context. Error: {}".format(e.message))
 
     if not upload_url:
@@ -142,8 +142,8 @@ class IgnoreRule:  # pylint: disable=too-few-public-methods
                 # . matches dot character
                 self.pattern += token.replace(
                     "*", "[^/]*").replace("?", "[^/]").replace(".", "\\.")
-                if index < token_length:
-                    self.pattern += "/"  # add back / if it's not the last
+            if index < token_length:
+                self.pattern += "/"  # add back / if it's not the last
         self.pattern += "$"
 
 

@@ -7,10 +7,10 @@
 import re
 from azure.cli.core.azclierror import (ValidationError, ResourceNotFoundError, InvalidArgumentValueError,
                                        MutuallyExclusiveArgumentError)
-from msrestazure.tools import is_valid_resource_id
+from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
 from knack.log import get_logger
 
-from ._clients import ContainerAppClient
+from ._clients import ContainerAppClient, ManagedEnvironmentClient
 from ._ssh_utils import ping_container_app
 from ._utils import safe_get, is_registry_msi_system
 from ._constants import ACR_IMAGE_SUFFIX, LOG_TYPE_SYSTEM
@@ -75,7 +75,7 @@ def validate_cpu(namespace):
 
 def validate_managed_env_name_or_id(cmd, namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import resource_id
+    from azure.mgmt.core.tools import resource_id
 
     if namespace.managed_env:
         if not is_valid_resource_id(namespace.managed_env):
@@ -90,7 +90,7 @@ def validate_managed_env_name_or_id(cmd, namespace):
 
 def validate_storage_name_or_id(cmd, namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import resource_id
+    from azure.mgmt.core.tools import resource_id
 
     if namespace.storage_account:
         if not is_valid_resource_id(namespace.storage_account):
@@ -132,20 +132,38 @@ def validate_target_port(namespace):
                 raise ValidationError("Usage error: must specify --ingress with --target-port")
 
 
-def validate_ingress(namespace):
-    if "create" in namespace.command.lower():
-        if namespace.ingress:
-            if not namespace.target_port:
-                raise ValidationError("Usage error: must specify --target-port with --ingress")
-
-
 def validate_allow_insecure(namespace):
     if "create" in namespace.command.lower():
         if namespace.allow_insecure:
-            if not namespace.ingress or not namespace.target_port:
-                raise ValidationError("Usage error: must specify --ingress and --target-port with --allow-insecure")
+            if not namespace.ingress:
+                raise ValidationError("Usage error: must specify --ingress with --allow-insecure")
             if namespace.transport == "tcp":
                 raise ValidationError("Usage error: --allow-insecure is not supported for TCP ingress")
+
+
+def _ping_containerapp_if_need(cmd, app) -> (bool, str):
+    # if container app has no ingress or is internal, not need to ping
+    if safe_get(app, "properties", "configuration", "ingress") is None or safe_get(app, "properties", "configuration", "ingress", "external") is False:
+        return False, None
+
+    parsed_env = parse_resource_id(safe_get(app, "properties", "environmentId"))
+    env_name = parsed_env['name']
+    env_rg = parsed_env['resource_group']
+    env = ManagedEnvironmentClient.show(cmd, env_rg, env_name)
+    # if environment is internal, not need to ping
+    if safe_get(env, "properties", "vnetConfiguration", "internal") is True:
+        return False, None
+
+    try:
+        # ping containerapp to activate its replica
+        ping_container_app(app)  # needed to get an alive replica
+    except Exception as ex:  # pylint: disable=broad-except
+        warning_message = f"Error encountered while attempting to ping container app.\n" \
+                          f"Error message: '{str(ex)}'\n" \
+                          f"Please ensure there is an alive replica. "
+        return True, warning_message
+
+    return False, None
 
 
 def _set_ssh_defaults(cmd, namespace):
@@ -158,16 +176,14 @@ def _set_ssh_defaults(cmd, namespace):
         if not namespace.revision:
             raise ResourceNotFoundError("Could not find a revision")
     if not namespace.replica:
-        # VVV this may not be necessary according to Anthony Chu
-        try:
-            ping_container_app(app)  # needed to get an alive replica
-        except Exception as e:  # pylint: disable=broad-except
-            logger.warning("Failed to ping container app with error '%s' \nPlease ensure there is an alive replica. ", str(e))
+        failed_to_ping, warning_message = _ping_containerapp_if_need(cmd, app)
         replicas = ContainerAppClient.list_replicas(cmd=cmd,
                                                     resource_group_name=namespace.resource_group_name,
                                                     container_app_name=namespace.name,
                                                     revision_name=namespace.revision)
         if not replicas:
+            if failed_to_ping:
+                logger.warning(warning_message)
             raise ResourceNotFoundError("Could not find a replica for this app")
         namespace.replica = replicas[0]["name"]
     if not namespace.container:

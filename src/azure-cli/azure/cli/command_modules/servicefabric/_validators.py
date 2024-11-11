@@ -3,9 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from msrestazure.azure_exceptions import CloudError
 from knack.log import get_logger
 from knack.util import CLIError
+from azure.core.exceptions import HttpResponseError
 from azure.cli.core.azclierror import ValidationError
 from azure.cli.core.commands.validators import validate_tags
 from azure.cli.command_modules.servicefabric._sf_utils import _get_resource_group_by_name
@@ -120,7 +120,7 @@ def validate_create_managed_cluster(cmd, namespace):
             raise CLIError("--upgrade-cadence should only be used whe --upgrade-mode is set to 'Automatic'.")
 
 
-def validate_add_network_security_rule(cmd, namespace):
+def validate_network_security_rule(cmd, namespace):
     client = servicefabric_managed_client_factory(cmd.cli_ctx)
     cluster = _safe_get_resource(client.managed_clusters.get,
                                  (namespace.resource_group_name, namespace.cluster_name))
@@ -332,8 +332,8 @@ def validate_create_managed_application(cmd, namespace):
 def _safe_get_resource(getResourceAction, params):
     try:
         return getResourceAction(*params)
-    except CloudError as ex:
-        if ex.error.error == 'ResourceNotFound':
+    except HttpResponseError as ex:
+        if ex.status_code == '404':
             return None
         logger.warning("Unable to get resource, exception: %s", ex)
         raise

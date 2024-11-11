@@ -62,13 +62,21 @@ class ContainerAppAuthTest(ScenarioTest):
             JMESPathCheck('identityProviders.azureActiveDirectory.registration.openIdIssuer', issuer),
         ])
 
-        self.cmd('containerapp auth update -g {} -n {} --unauthenticated-client-action AllowAnonymous'.format(resource_group, app), checks=[
+        sas_url = "sasurl"
+        self.cmd('containerapp auth update  -g {} -n {} --unauthenticated-client-action AllowAnonymous --token-store true --sas-url-secret {} --yes'.format(resource_group, app, sas_url), checks=[
             JMESPathCheck('name', "current"),
             JMESPathCheck('properties.globalValidation.unauthenticatedClientAction', "AllowAnonymous"),
             JMESPathCheck('properties.identityProviders.azureActiveDirectory.registration.clientId', client_id),
             JMESPathCheck('properties.identityProviders.azureActiveDirectory.registration.clientSecretSettingName',
                           "microsoft-provider-authentication-secret"),
             JMESPathCheck('properties.identityProviders.azureActiveDirectory.registration.openIdIssuer', issuer),
+            JMESPathCheck('properties.login.tokenStore.enabled', True),
+            JMESPathCheck('properties.login.tokenStore.azureBlobStorage.sasUrlSettingName',
+                          "blob-storage-token-store-sasurl-secret"),
+        ])
+
+        self.cmd("az containerapp secret list --resource-group {} --name {}".format(resource_group, app), checks=[
+            JMESPathCheck('length(@)', 2),
         ])
 
         self.cmd('containerapp auth show -g {} -n {}'.format(resource_group, app), checks=[
@@ -77,10 +85,13 @@ class ContainerAppAuthTest(ScenarioTest):
             JMESPathCheck('identityProviders.azureActiveDirectory.registration.clientSecretSettingName',
                           "microsoft-provider-authentication-secret"),
             JMESPathCheck('identityProviders.azureActiveDirectory.registration.openIdIssuer', issuer),
+            JMESPathCheck('login.tokenStore.enabled', True),
+            JMESPathCheck('login.tokenStore.azureBlobStorage.sasUrlSettingName',
+                          "blob-storage-token-store-sasurl-secret"),
         ])
-
-        self.cmd('containerapp auth update -g {} -n {} --proxy-convention Standard --redirect-provider Facebook --unauthenticated-client-action AllowAnonymous'.format(
-                resource_group, app), checks=[
+        login_paramters = 'identityProviders.azureActiveDirectory.login.loginParameters=[a,scope=openid offline_access api://<back-end-client-id>/user_impersonation]'
+        self.cmd("containerapp auth update -g {} -n {} --proxy-convention Standard --redirect-provider Facebook --unauthenticated-client-action AllowAnonymous --set '{}'".format(
+                resource_group, app, login_paramters), checks=[
                 JMESPathCheck('name', 'current'),
                 JMESPathCheck('properties.httpSettings.forwardProxy.convention', 'Standard'),
                 JMESPathCheck('properties.globalValidation.redirectToProvider', 'Facebook'),
@@ -88,7 +99,10 @@ class ContainerAppAuthTest(ScenarioTest):
                 JMESPathCheck('properties.identityProviders.azureActiveDirectory.registration.clientId', client_id),
                 JMESPathCheck('properties.identityProviders.azureActiveDirectory.registration.clientSecretSettingName', "microsoft-provider-authentication-secret"),
                 JMESPathCheck('properties.identityProviders.azureActiveDirectory.registration.openIdIssuer', issuer),
-            ])
+                JMESPathCheck('length(properties.identityProviders.azureActiveDirectory.login.loginParameters)', 2),
+                JMESPathCheck('properties.identityProviders.azureActiveDirectory.login.loginParameters[0]', "a"),
+                JMESPathCheck('properties.identityProviders.azureActiveDirectory.login.loginParameters[1]', "scope=openid offline_access api://<back-end-client-id>/user_impersonation"),
+        ])
 
         self.cmd('containerapp show  -g {} -n {}'.format(resource_group, app), checks=[
             JMESPathCheck('properties.provisioningState', "Succeeded")

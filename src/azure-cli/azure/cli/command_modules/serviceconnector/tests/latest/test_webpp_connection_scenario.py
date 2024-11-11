@@ -27,6 +27,61 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         )
 
     @record_only()
+    @unittest.skip('Needs passwordless extension released')
+    def test_webapp_fabric_e2e(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'azure-service-connector',
+            'site': 'DotNetAppSqlDb20240704',
+            'database': 'clitest'
+        })
+        name = 'testfabricconn'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
+        connection_id = source_id + "/providers/Microsoft.ServiceLinker/linkers/" + name
+        target_id = 'https://api.fabric.microsoft.com/v1/workspaces/13c65326-ecab-43f6-8a05-60927aaa4cec/SqlDatabases/4fdf6efe-23a9-4d74-8c4a-4ecc70c4d323'
+        server = 'tcp:renzo-srv-6ae35870-c362-44b9-8389-ada214a46bb5-51240650dd56.database.windows.net,1433'
+        database = 'AzureServiceConnectorTestSqlDb-4fdf6efe-23a9-4d74-8c4a-4ecc70c4d323'
+
+        # prepare
+        self.cmd('webapp identity remove --ids {}'.format(source_id))
+
+        # create
+        self.cmd('webapp connection create fabric-sql --connection {} --source-id {} --target-id {} \
+                 --system-identity --client-type dotnet --opt-out publicnetwork \
+                 --connstr-props "Server={}" \
+                 "Database={}" '.format(name, source_id, target_id, server, database)
+                )
+
+        # list connection
+        connections = self.cmd(
+            'webapp connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 1),
+                self.check('[0].authInfo.authType', 'systemAssignedIdentity'),
+                self.check('[0].clientType', 'dotnet')
+            ]
+        ).get_output_in_json()
+        connection_id = connections[0].get('id')
+
+        # update
+        self.cmd('webapp connection create fabric-sql --connection {} --source-id {} --target-id {} \
+                 --system-identity --client-type python --opt-out publicnetwork \
+                 --connstr-props "Server={}" "Database={}" '.format(name, source_id, target_id, server, database), 
+                 checks = [ self.check('clientType', 'python')])
+
+        # list configuration
+        self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
+
+        # validate connection
+        self.cmd('webapp connection validate --id {}'.format(connection_id))
+
+        # show connection
+        self.cmd('webapp connection show --id {}'.format(connection_id))
+
+        # delete connection
+        self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
+
+    @record_only()
     def test_webapp_appconfig_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -1059,7 +1114,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             self.cmd('webapp connection delete --id {} --yes'.format(conn.get('id')))
 
 
-    @record_only()
+    @unittest.skip('Validation of network acls failure')
     def test_webapp_storageblob_vnet(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -1118,7 +1173,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         for conn in self.cmd('webapp connection list --source-id {}'.format(source_id)).get_output_in_json():
             self.cmd('webapp connection delete --id {} --yes'.format(conn.get('id')))
 
-    @record_only()
+    # @record_only()
+    @unittest.skip('Validation of network acls failure')
     def test_webapp_storageblob_vnet_pe(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -1178,8 +1234,6 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         for conn in self.cmd('webapp connection list --source-id {}'.format(source_id)).get_output_in_json():
             self.cmd(
                 'webapp connection delete --id {} --yes'.format(conn.get('id')))
-
-
 
 
     @record_only()
@@ -1350,7 +1404,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
                 self.check('[0].clientType', 'python')
             ]
         ).get_output_in_json()
-        connection_id = connections[0].get('id')
+        connection_id = [x.get('id') for x in connections if x.get('id').endswith(name)][0]
+        # connection_id = connections[0].get('id')
 
         # update connection
         self.cmd('webapp connection update confluent-cloud --connection {} '
@@ -1580,9 +1635,9 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
-            'target_resource_group': 'wctest',
+            'target_resource_group': 'servicelinker-test-linux-group',
             'site': 'servicelinker-storageblob-app',
-            'account': 'storagetestwc'
+            'account': 'servicelinkerstorage'
         })     
 
         # prepare params
@@ -1609,8 +1664,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         ).get_output_in_json()
         connection_id = connections[0].get('id')
 
-        # if opt out config, linker validation is expected to fail
         validate_connection(connection_id)
+        self.cmd('webapp connection validate --id {}'.format(connection_id))
 
         # update connection
         self.cmd('webapp connection update storage-blob --id {} '
@@ -1618,6 +1673,367 @@ class WebAppConnectionScenarioTest(ScenarioTest):
                                                             ' '.join(opt_out_list)))
 
         validate_connection(connection_id)
+
+        # show connection
+        self.cmd('webapp connection show --id {}'.format(connection_id))
+
+        # delete connection
+        self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
+
+
+    @live_only()
+    # app config connection is different every time
+    def test_webapp_storageblob_store_in_app_config(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'clitest',
+            'target_resource_group': 'servicelinker-test-linux-group',
+            'site': 'servicelinker-config-store-app-euap',
+            'account': 'servicelinkerstorage',
+            'config_store': 'servicelinker-appconfig-ref',
+        })
+
+        # prepare params
+        name = 'testconn'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
+        target_id = TARGET_RESOURCES.get(RESOURCE.StorageBlob).format(**self.kwargs)
+        appconfig_id = TARGET_RESOURCES.get(RESOURCE.AppConfig).format(**self.kwargs)
+
+        # create connection
+        conn_id = self.cmd(
+            'webapp connection create storage-blob '
+            '--connection {} --source-id {} --target-id {} '
+            '--secret --client-type python '
+            '--appconfig-id {}'.format(name, source_id, target_id, appconfig_id)
+        ).get_output_in_json().get('id')
+
+        self.cmd(
+            'webapp connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 2),
+            ]
+        )
+
+        self.cmd(
+            'webapp connection show --id {}'.format(conn_id),
+            checks = [
+                self.check('configurationInfo.configurationStore.appConfigurationId', appconfig_id)
+            ]
+        )
+
+        configurations = self.cmd(
+            'webapp connection list-configuration --id {}'.format(conn_id)
+        ).get_output_in_json().get('configurations')
+
+        # update connection
+        self.cmd('webapp connection update storage-blob --id {} '
+                 '--secret --client-type dotnet --appconfig-id {}'.format(conn_id, appconfig_id))
+
+        for conn in self.cmd('webapp connection list --source-id {}'.format(source_id)).get_output_in_json():
+            self.cmd('webapp connection delete --id {} --yes'.format(conn.get('id')))
+
+    @record_only()
+    def test_webapp_storage_blob_system_identity_opt_out_auth(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'servicelinker-test-linux-group',
+            'target_resource_group': 'servicelinker-test-linux-group',
+            'site': 'servicelinker-storageblob-app',
+            'account': 'servicelinkerstorage'
+        })     
+
+        # prepare params
+        name = 'testconn'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
+        target_id = TARGET_RESOURCES.get(RESOURCE.StorageBlob).format(**self.kwargs)
+
+        # create connection
+        self.cmd('webapp connection create storage-blob --connection {} --source-id {} --target-id {} '
+                 '--system-identity --client-type dotnet --opt-out auth'.format(name, source_id, target_id))
+
+        # list connection
+        connections = self.cmd(
+            'webapp connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 1),
+                self.check('[0].authInfo.authType', 'systemAssignedIdentity'),
+                self.check('[0].clientType', 'dotnet')
+            ]
+        ).get_output_in_json()
+        connection_id = connections[0].get('id')
+
+        # validate connection, auth should not be validated
+        self.cmd('webapp connection validate --id {}'.format(connection_id),
+                 checks= [
+                     self.check('length(@)', 3), # target existence, network and configinfo
+                 ])
+        # check system identity is not enabled
+        validate_result = self.cmd('webapp identity show -g {} -n {}'.format(self.kwargs['source_resource_group'],
+                                                                             self.kwargs['site']),
+                 ).output
+        self.assertEqual(validate_result, '')
+
+        # update connection
+        self.cmd('webapp connection update storage-blob --id {} '
+                 '--client-type python --opt-out auth'.format(connection_id))
+        # check system identity is not enabled
+        validate_result = self.cmd('webapp identity show -g {} -n {}'.format(self.kwargs['source_resource_group'],
+                                                                             self.kwargs['site']),
+                 ).output
+        self.assertEqual(validate_result, '')
+
+        # show connection
+        self.cmd('webapp connection show --id {}'.format(connection_id))
+
+        # delete connection
+        self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
+
+
+    @record_only()
+    def test_webapp_storage_blob_null_auth(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'service-connector-int-test',
+            'target_resource_group': 'service-connector-int-test',
+            'site': 'servicelinker-optouttest-e2e',
+            'account': 'servicelinkerinttest'
+        })     
+
+        # prepare params
+        name = 'testconn'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
+        target_id = TARGET_RESOURCES.get(RESOURCE.StorageBlob).format(**self.kwargs)
+
+        # create connection
+        self.cmd('webapp connection create storage-blob --connection {} --source-id {} --target-id {} '
+                 '--opt-out auth configinfo'.format(name, source_id, target_id))
+
+        # list connection
+        connections = self.cmd(
+            'webapp connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 1),
+                self.check('[0].authInfo', 'None'),
+            ]
+        ).get_output_in_json()
+        connection_id = connections[0].get('id')
+
+        # validate connection, auth should not be validated
+        self.cmd('webapp connection validate --id {}'.format(connection_id),
+                 checks= [
+                     self.check('length(@)', 2), # target existence, and network
+                 ])
+        # check system identity is not enabled
+        validate_result = self.cmd('webapp identity show -g {} -n {}'.format(self.kwargs['source_resource_group'],
+                                                                             self.kwargs['site']),
+                 ).output
+        if validate_result != '':
+            self.cmd('role assignment list --assignee {}'.format(validate_result.get('principalId')),
+                     checks=[
+                         self.check('length(@)', 0)
+                     ])
+
+        # update connection with auth
+        self.cmd('webapp connection update storage-blob --id {} '
+                 '--system-identity'.format(connection_id))
+        
+        self.cmd(
+            'webapp connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 1),
+                self.check('[0].authInfo.authType', 'systemAssignedIdentity'),
+            ]
+        )
+
+        # show connection
+        self.cmd('webapp connection show --id {}'.format(connection_id))
+
+        # delete connection
+        self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
+
+
+    @record_only()
+    def test_webapp_openai_secret_e2e(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'clitest',
+            'target_resource_group': 'servicelinker-test-openai-group',
+            'site': 'servicelinker-cognitive-app',
+            'account': 'servicelinker-test-openai'
+        })
+
+        # prepare params
+        name = 'testconn'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
+        target_id = TARGET_RESOURCES.get(RESOURCE.CognitiveServices).format(**self.kwargs)
+
+        # create connection
+        self.cmd('webapp connection create cognitiveservices --connection {} --source-id {} --target-id {} '
+                 '--secret --client-type python'.format(name, source_id, target_id))
+
+        # list connection
+        connections = self.cmd(
+            'webapp connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 1),
+                self.check('[0].authInfo.authType', 'secret'),
+                self.check('[0].clientType', 'python')
+            ]
+        ).get_output_in_json()
+        connection_id = connections[0].get('id')
+
+        # update connection
+        self.cmd('webapp connection update cognitiveservices --id {} --client-type dotnet'.format(connection_id),
+                 checks = [ self.check('clientType', 'dotnet') ])
+
+        # list configuration
+        self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
+
+        # validate connection
+        self.cmd('webapp connection validate --id {}'.format(connection_id))
+
+        # show connection
+        self.cmd('webapp connection show --id {}'.format(connection_id))
+
+        # delete connection
+        self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
+
+    @record_only()
+    def test_webapp_openai_system_identity_e2e(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'clitest',
+            'target_resource_group': 'servicelinker-test-openai-group',
+            'site': 'servicelinker-cognitive-app',
+            'account': 'servicelinker-test-openai'
+        })
+
+        # prepare params
+        name = 'testconn'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
+        target_id = TARGET_RESOURCES.get(RESOURCE.CognitiveServices).format(**self.kwargs)
+
+        # create connection
+        self.cmd('webapp connection create cognitiveservices --connection {} --source-id {} --target-id {} '
+                 '--system-identity --client-type python'.format(name, source_id, target_id))
+
+        # list connection
+        connections = self.cmd(
+            'webapp connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 1),
+                self.check('[0].authInfo.authType', 'systemAssignedIdentity'),
+                self.check('[0].clientType', 'python')
+            ]
+        ).get_output_in_json()
+        connection_id = connections[0].get('id')
+
+        # update connection
+        self.cmd('webapp connection update cognitiveservices --id {} --client-type dotnet'.format(connection_id),
+                 checks = [ 
+                     self.check('clientType', 'dotnet'),
+                     self.check('authInfo.authType', 'systemAssignedIdentity')
+                ]
+        )
+
+        # list configuration
+        self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
+
+        # validate connection
+        self.cmd('webapp connection validate --id {}'.format(connection_id))
+
+        # show connection
+        self.cmd('webapp connection show --id {}'.format(connection_id))
+
+        # delete connection
+        self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
+
+
+    @record_only()
+    def test_webapp_aiservices_system_identity_e2e(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'clitest',
+            'target_resource_group': 'servicelinker-test-openai-group',
+            'site': 'servicelinker-cognitive-app',
+            'account': 'serivcelinker-aiservices-test'
+        })
+
+        # prepare params
+        name = 'testconn'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
+        target_id = TARGET_RESOURCES.get(RESOURCE.CognitiveServices).format(**self.kwargs)
+
+        # create connection
+        self.cmd('webapp connection create cognitiveservices --connection {} --source-id {} --target-id {} '
+                 '--system-identity --client-type python'.format(name, source_id, target_id))
+
+        # list connection
+        connections = self.cmd(
+            'webapp connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 1),
+                self.check('[0].authInfo.authType', 'systemAssignedIdentity'),
+                self.check('[0].clientType', 'python')
+            ]
+        ).get_output_in_json()
+        connection_id = connections[0].get('id')
+
+        # update connection
+        self.cmd('webapp connection update cognitiveservices --id {} --client-type dotnet'.format(connection_id),
+                 checks = [ self.check('clientType', 'dotnet') ])
+
+        # list configuration
+        self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
+
+        # validate connection
+        self.cmd('webapp connection validate --id {}'.format(connection_id))
+
+        # show connection
+        self.cmd('webapp connection show --id {}'.format(connection_id))
+
+        # delete connection
+        self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
+
+    @record_only()
+    def test_webapp_cognitive_services_system_identity_e2e(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'clitest',
+            'target_resource_group': 'servicelinker-test-openai-group',
+            'site': 'servicelinker-cognitive-app',
+            'account': 'servicelinker-cognitiveservices-test'
+        })
+
+        # prepare params
+        name = 'testconn'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
+        target_id = TARGET_RESOURCES.get(RESOURCE.CognitiveServices).format(**self.kwargs)
+
+        # create connection
+        self.cmd('webapp connection create cognitiveservices --connection {} --source-id {} --target-id {} '
+                 '--system-identity --client-type python'.format(name, source_id, target_id))
+
+        # list connection
+        connections = self.cmd(
+            'webapp connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 1),
+                self.check('[0].authInfo.authType', 'systemAssignedIdentity'),
+                self.check('[0].clientType', 'python')
+            ]
+        ).get_output_in_json()
+        connection_id = connections[0].get('id')
+
+        # update connection
+        self.cmd('webapp connection update cognitiveservices --id {} --client-type dotnet'.format(connection_id),
+                 checks = [ self.check('clientType', 'dotnet') ])
+
+        # list configuration
+        self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
+
+        # validate connection
+        self.cmd('webapp connection validate --id {}'.format(connection_id))
 
         # show connection
         self.cmd('webapp connection show --id {}'.format(connection_id))

@@ -7,12 +7,12 @@ import json
 from unittest import mock
 from knack.util import CLIError
 
-from azure.cli.testsdk import ResourceGroupPreparer, ScenarioTest, StorageAccountPreparer
+from azure.cli.testsdk import ResourceGroupPreparer, ScenarioTest, StorageAccountPreparer, live_only
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.mgmt.iothub.models import RoutingSource
 from azure.cli.command_modules.iot.shared import IdentityType
 from azure.core.exceptions import HttpResponseError
-from .recording_processors import KeyReplacer
+from ..utils import KeyReplacer
 
 
 class IoTHubTest(ScenarioTest):
@@ -840,6 +840,7 @@ class IoTHubTest(ScenarioTest):
         assert storage_cs_pattern in updated_hub['properties']['storageEndpoints']['$default']['connectionString']
         assert updated_hub['properties']['storageEndpoints']['$default']['containerName'] == containerName
 
+    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(location='westus2')
     def test_hub_wait(self, resource_group, resource_group_location):

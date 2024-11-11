@@ -14,8 +14,10 @@ import re
 import sys
 import time
 import copy
+from collections import OrderedDict
 from importlib import import_module
 
+from azure.cli.core.breaking_change import UpcomingBreakingChangeTag, MergedStatusTag
 # pylint: disable=unused-import
 from azure.cli.core.commands.constants import (
     BLOCKED_MODS, DEFAULT_QUERY_TIME_RANGE, CLI_COMMON_KWARGS, CLI_COMMAND_KWARGS, CLI_PARAM_KWARGS,
@@ -31,7 +33,7 @@ from azure.cli.core.commands.progress import IndeterminateProgressBar
 
 from knack.arguments import CLICommandArgument
 from knack.commands import CLICommand, CommandGroup, PREVIEW_EXPERIMENTAL_CONFLICT_ERROR
-from knack.deprecation import ImplicitDeprecated, resolve_deprecate_info
+from knack.deprecation import ImplicitDeprecated, resolve_deprecate_info, Deprecated
 from knack.invocation import CommandInvoker
 from knack.preview import ImplicitPreviewItem, PreviewItem, resolve_preview_info
 from knack.experimental import ImplicitExperimentalItem, ExperimentalItem, resolve_experimental_info
@@ -675,6 +677,9 @@ class AzCliCommandInvoker(CommandInvoker):
         event_data = {'result': results}
         self.cli_ctx.raise_event(EVENT_INVOKER_FILTER_RESULT, event_data=event_data)
 
+        if not self.data['output'] or self.data['output'] != 'none':
+            self._resolve_output_sensitive_data_warning(cmd, event_data['result'])
+
         # save to local context if it is turned on after command executed successfully
         if self.cli_ctx.local_context.is_on and command and command in self.commands_loader.command_table and \
                 command in self.parser.subparser_map and self.parser.subparser_map[command].specified_arguments:
@@ -711,7 +716,6 @@ class AzCliCommandInvoker(CommandInvoker):
                 result = list(result)
 
             result = todict(result, AzCliCommandInvoker.remove_additional_prop_layer)
-            self._resolve_output_sensitive_data_warning(cmd_copy, result)
 
             event_data = {'result': result}
             cmd_copy.cli_ctx.raise_event(EVENT_INVOKER_TRANSFORM_RESULT, event_data=event_data)
@@ -749,15 +753,36 @@ class AzCliCommandInvoker(CommandInvoker):
         self._resolve_extension_override_warning(cmd)
 
     def _resolve_preview_and_deprecation_warnings(self, cmd, parsed_args):
-        deprecations = [] + getattr(parsed_args, '_argument_deprecations', [])
+        deprecations = getattr(parsed_args, '_argument_deprecations', [])
+        # Handle `always_display` argument breaking changes
+        for _, argument in parsed_args.func.arguments.items():
+            # Some arguments have breaking changes that must always be displayed.
+            # Iterate through them and show the warnings.
+            if isinstance(argument.deprecate_info, UpcomingBreakingChangeTag):
+                if argument.deprecate_info.always_display:
+                    deprecations.append(argument.deprecate_info)
+            elif isinstance(argument.deprecate_info, MergedStatusTag):
+                for deprecation in argument.deprecate_info.tags:
+                    if isinstance(deprecation, UpcomingBreakingChangeTag) and deprecation.always_display:
+                        deprecations.append(deprecation)
+        # Dedup the deprecations
+        # If an argument has multiple breaking changes or deprecations,
+        # duplicated deprecations would be produced due to the inherent logic of action
+        deprecations = list(OrderedDict.fromkeys(deprecations))
         if cmd.deprecate_info:
             deprecations.append(cmd.deprecate_info)
 
         # search for implicit deprecation
         path_comps = cmd.name.split()[:-1]
         implicit_deprecate_info = None
-        while path_comps and not implicit_deprecate_info:
-            implicit_deprecate_info = resolve_deprecate_info(self.cli_ctx, ' '.join(path_comps))
+        while path_comps:
+            deprecate_info = resolve_deprecate_info(self.cli_ctx, ' '.join(path_comps))
+            if isinstance(deprecate_info, Deprecated) and implicit_deprecate_info is None:
+                implicit_deprecate_info = deprecate_info
+            elif isinstance(deprecate_info, UpcomingBreakingChangeTag):
+                deprecations.append(deprecate_info)
+            elif isinstance(deprecate_info, MergedStatusTag):
+                deprecations.extend(deprecate_info.tags)
             del path_comps[-1]
 
         if implicit_deprecate_info:
@@ -819,6 +844,10 @@ class AzCliCommandInvoker(CommandInvoker):
         if not cmd.cli_ctx.config.getboolean('clients', 'show_secrets_warning', False):
             return
 
+        from .constants import CREDENTIAL_WARNING_EXCLUSIVE_COMMANDS
+        if cmd.name in CREDENTIAL_WARNING_EXCLUSIVE_COMMANDS:
+            return
+
         from ..credential_helper import sensitive_data_detailed_warning_message, sensitive_data_warning_message
         sensitive_info = cmd.sensitive_info if hasattr(cmd, 'sensitive_info') else None
         if sensitive_info:
@@ -831,7 +860,7 @@ class AzCliCommandInvoker(CommandInvoker):
         from ..credential_helper import distinguish_credential
         from ..telemetry import set_secrets_detected
         try:
-            containing_credential, secret_property_names = distinguish_credential(result)
+            containing_credential, secret_property_names, secret_names = distinguish_credential(result)
             if not containing_credential:
                 set_secrets_detected(False)
                 return
@@ -840,10 +869,10 @@ class AzCliCommandInvoker(CommandInvoker):
             if secret_property_names:
                 message = sensitive_data_detailed_warning_message.format(', '.join(secret_property_names))
             logger.warning(message)
-            set_secrets_detected(True)
-        except Exception:  # pylint: disable=broad-except
+            set_secrets_detected(True, secret_property_names, secret_names)
+        except Exception as ex:  # pylint: disable=broad-except
             # ignore all exceptions, as this is just a warning
-            pass
+            logger.debug('Scan credentials failed with %s', str(ex))
 
     def resolve_confirmation(self, cmd, parsed_args):
         confirm = cmd.confirmation and not parsed_args.__dict__.pop('yes', None) \
@@ -1185,7 +1214,7 @@ def _is_paged(obj):
 
 def _is_poller(obj):
     # Since loading msrest is expensive, we avoid it until we have to
-    if obj.__class__.__name__ in ['AzureOperationPoller', 'LROPoller', 'AAZLROPoller']:
+    if obj.__class__.__name__ in ['LROPoller', 'AAZLROPoller']:
         return isinstance(obj, poller_classes())
     return False
 

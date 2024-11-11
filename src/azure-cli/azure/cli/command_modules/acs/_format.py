@@ -105,8 +105,10 @@ def aks_versions_table_format(result):
     parsed = compile_jmes("""[].{
         kubernetesVersion: version,
         isPreview: isPreview,
-        upgrades: upgrades || [`None available`] | sort_versions(@) | join(`, `, @)
+        upgrades: upgrades || [`None available`] | sort_versions(@) | join(`, `, @),
+        supportPlan: supportPlan | join(`, `, @)
     }""")
+
     # use ordered dicts so headers are predictable
     results = parsed.search(version_table, Options(
         dict_cls=OrderedDict, custom_functions=_custom_functions({})))
@@ -149,8 +151,9 @@ def flatten_version_table(release_info):
     flattened = []
     for release in release_info:
         isPreview = release.get("isPreview", False)
+        supportPlan = release.get("capabilities", {}).get("supportPlan", {})
         for k, v in release.get("patchVersions", {}).items():
-            item = {"version": k, "upgrades": v.get("upgrades", []), "isPreview": isPreview}
+            item = {"version": k, "upgrades": v.get("upgrades", []), "isPreview": isPreview, "supportPlan": supportPlan}
             flattened.append(item)
     return flattened
 

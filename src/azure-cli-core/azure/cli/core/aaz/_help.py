@@ -22,8 +22,7 @@ except ImportError:
 shorthand_help_messages = {
     "show-help": 'Try "??" to show more.',
     "short-summary": 'Support shorthand-syntax, json-file and yaml-file.',
-    "long-summary": 'See https://github.com/Azure/azure-cli/tree/dev/doc/shorthand_syntax.md '
-                    'for more about shorthand syntax.'
+    "long-summary": 'See https://aka.ms/cli-shorthand for more about shorthand syntax.'
 }
 
 
@@ -120,8 +119,7 @@ class AAZShowHelp(BaseException):
 
             prop_group_name = prop_schema._arg_group or ""
             header_len = len(prop_name) + len(prop_tags) + (1 if prop_tags else 0)
-            if header_len > max_header_len:
-                max_header_len = header_len
+            max_header_len = max(max_header_len, header_len)
             layouts.append({
                 "name": prop_name,
                 "tags": prop_tags,

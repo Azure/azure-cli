@@ -9,21 +9,20 @@ import os
 import time
 
 from OpenSSL import crypto
+from cryptography.hazmat.primitives.serialization import pkcs12
+from cryptography.hazmat.primitives import hashes
 
 try:
     from urllib.parse import urlparse
 except ImportError:
     from urlparse import urlparse  # pylint: disable=import-error
 
-from msrestazure.azure_exceptions import CloudError
-
 from azure.cli.core.util import CLIError, get_file_json, b64_to_hex, sdk_no_wait
 from azure.cli.core.commands import LongRunningOperation
-from azure.graphrbac import GraphRbacManagementClient
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.command_modules.servicefabric._arm_deployment_utils import validate_and_deploy_arm_template
 from azure.cli.command_modules.servicefabric._sf_utils import _get_resource_group_by_name, _create_resource_group_name
-from azure.core.exceptions import ResourceNotFoundError
+from azure.core.exceptions import ResourceNotFoundError, HttpResponseError
 
 from azure.mgmt.servicefabric.models import (ClusterUpdateParameters,
                                              ClientCertificateThumbprint,
@@ -1358,8 +1357,8 @@ def _safe_get_vault(cli_ctx, resource_group_name, vault_name):
         return vault
     except ResourceNotFoundError:
         return None
-    except CloudError as ex:
-        if ex.error.error == 'ResourceNotFound':
+    except HttpResponseError as ex:
+        if ex.status_code == '404':
             return None
         raise
 
@@ -1383,20 +1382,19 @@ def _get_thumbprint_from_secret_identifier(cli_ctx, vault, secret_identifier):
     secret = client_not_arm.get_secret(secret_name, secret_version)
     cert_bytes = secret.value
     x509 = None
+    thumbprint = None
     import base64
     decoded = base64.b64decode(cert_bytes)
     try:
-        x509 = crypto.load_pkcs12(decoded).get_certificate()
+        p12 = pkcs12.load_pkcs12(decoded, None)
     except (ValueError, crypto.Error):
         pass
 
-    if not x509:
-        x509 = crypto.load_certificate(crypto.FILETYPE_PEM, cert_bytes)
+    if p12.cert is None:
+        raise Exception("certificate is None")  # pylint: disable=broad-exception-raised
 
-    if not x509:
-        raise Exception('invalid certificate')  # pylint: disable=broad-exception-raised
-
-    thumbprint = x509.digest("sha1").decode("utf-8").replace(':', '')
+    x509 = p12.cert.certificate
+    thumbprint = x509.fingerprint(hashes.SHA1()).hex().upper()
     return thumbprint
 
 
@@ -1453,12 +1451,12 @@ def _download_secret(cli_ctx, vault_base_url, secret_name, pem_path, pfx_path, s
         try:
             import base64
             decoded = base64.b64decode(secret_value)
-            p12 = crypto.load_pkcs12(decoded)
+            p12 = pkcs12.load_pkcs12(decoded, None)
             f_pem = open(pem_path, 'wb')
             f_pem.write(crypto.dump_privatekey(
-                crypto.FILETYPE_PEM, p12.get_privatekey()))
+                crypto.FILETYPE_PEM, p12.key))
             f_pem.write(crypto.dump_certificate(
-                crypto.FILETYPE_PEM, p12.get_certificate()))
+                crypto.FILETYPE_PEM, p12.cert))
             ca = p12.get_ca_certificates()
             if ca is not None:
                 for cert in ca:
@@ -1474,7 +1472,7 @@ def _download_secret(cli_ctx, vault_base_url, secret_name, pem_path, pfx_path, s
         try:
             import base64
             decoded = base64.b64decode(secret_value)
-            p12 = crypto.load_pkcs12(decoded)
+            p12 = pkcs12.load_pkcs12(decoded, None)
             with open(pfx_path, 'wb') as f:
                 f.write(decoded)
         except Exception as ex:  # pylint: disable=broad-except
@@ -1564,16 +1562,6 @@ def _create_keyvault(cmd,
                      enabled_for_disk_encryption=None,
                      enabled_for_template_deployment=None,
                      no_self_perms=None, tags=None):
-
-    from azure.cli.core._profile import Profile
-    from azure.graphrbac.models import GraphErrorException
-    profile = Profile(cli_ctx=cli_ctx)
-    cred, _, tenant_id = profile.get_login_credentials(
-        resource=cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
-    graph_client = GraphRbacManagementClient(cred,
-                                             tenant_id,
-                                             base_url=cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
-    subscription = profile.get_subscription()
     VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters', resource_type=ResourceType.MGMT_KEYVAULT, operation_group='vaults')
     VaultProperties = cmd.get_models('VaultProperties', resource_type=ResourceType.MGMT_KEYVAULT, operation_group='vaults')
     KeyVaultSku = cmd.get_models('Sku', resource_type=ResourceType.MGMT_KEYVAULT, operation_group='vaults')
@@ -1583,6 +1571,11 @@ def _create_keyvault(cmd,
     KeyPermissions = get_sdk(cli_ctx, ResourceType.MGMT_KEYVAULT, 'models#KeyPermissions', operation_group='vaults')
     SecretPermissions = get_sdk(cli_ctx, ResourceType.MGMT_KEYVAULT, 'models#SecretPermissions', operation_group='vaults')
     KeyVaultSkuName = cmd.get_models('SkuName', resource_type=ResourceType.MGMT_KEYVAULT, operation_group='vaults')
+
+    from azure.cli.core._profile import Profile, _TENANT_ID
+    profile = Profile(cli_ctx=cmd.cli_ctx)
+    subscription = profile.get_subscription(subscription=cmd.cli_ctx.data.get('subscription_id', None))
+    tenant_id = subscription[_TENANT_ID]
 
     if not sku:
         sku = KeyVaultSkuName.standard.value
@@ -1618,10 +1611,9 @@ def _create_keyvault(cmd,
                                                 CertificatePermissions.deleteissuers,
                                                 CertificatePermissions.manageissuers,
                                                 CertificatePermissions.recover])
-        try:
-            object_id = _get_current_user_object_id(graph_client)
-        except GraphErrorException:
-            object_id = _get_object_id(graph_client, subscription=subscription)
+
+        from azure.cli.command_modules.role.util import get_current_identity_object_id
+        object_id = get_current_identity_object_id(cli_ctx)
         if not object_id:
             raise CLIError('Cannot create vault.\n'
                            'Unable to query active directory for information '
@@ -1658,7 +1650,7 @@ def _get_current_user_object_id(graph_client):
         current_user = graph_client.signed_in_user.get()
         if current_user and current_user.object_id:  # pylint:disable=no-member
             return current_user.object_id  # pylint:disable=no-member
-    except CloudError:
+    except HttpResponseError:
         pass
 
 

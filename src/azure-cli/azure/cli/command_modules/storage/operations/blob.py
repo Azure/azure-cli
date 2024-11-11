@@ -752,13 +752,17 @@ def show_blob(cmd, client, container_name, blob_name, snapshot=None, lease_id=No
         if_modified_since=if_modified_since, if_unmodified_since=if_unmodified_since, if_match=if_match,
         if_none_match=if_none_match, timeout=timeout)
 
-    page_ranges = None
-    if blob.properties.blob_type == cmd.get_models('blob.models#_BlobTypes').PageBlob:
-        page_ranges = client.get_page_ranges(
-            container_name, blob_name, snapshot=snapshot, lease_id=lease_id, if_modified_since=if_modified_since,
-            if_unmodified_since=if_unmodified_since, if_match=if_match, if_none_match=if_none_match, timeout=timeout)
+    try:
+        page_ranges = None
+        if blob.properties.blob_type == cmd.get_models('blob.models#_BlobTypes').PageBlob:
+            page_ranges = client.get_page_ranges(
+                container_name, blob_name, snapshot=snapshot, lease_id=lease_id, if_modified_since=if_modified_since,
+                if_unmodified_since=if_unmodified_since, if_match=if_match, if_none_match=if_none_match,
+                timeout=timeout)
 
-    blob.properties.page_ranges = page_ranges
+        blob.properties.page_ranges = page_ranges
+    except HttpResponseError as ex:
+        logger.warning("GetPageRanges failed with status code: %d, message: %s", ex.status_code, ex.message)
 
     return blob
 
@@ -895,7 +899,7 @@ def create_blob_url(client, container_name, blob_name, snapshot, protocol='https
         url = blob_client.url
     else:
         container_client = client.get_container_client(container=container_name)
-        url = container_client.url + '/'
+        url = container_client.url if '?' in container_client.url else container_client.url + '/'
     if protocol == 'http':
         return url.replace('https', 'http', 1)
     return url
@@ -904,6 +908,14 @@ def create_blob_url(client, container_name, blob_name, snapshot, protocol='https
 def _copy_blob_to_blob_container(cmd, blob_service, source_blob_service, destination_container, destination_path,
                                  source_container, source_blob_name, source_sas, **kwargs):
     t_blob_client = cmd.get_models('_blob_client#BlobClient')
+    # generate sas for oauth copy source
+    if not source_sas:
+        from ..util import create_short_lived_blob_sas_v2
+        start = datetime.utcnow()
+        expiry = datetime.utcnow() + timedelta(hours=1)
+        source_user_delegation_key = source_blob_service.get_user_delegation_key(start, expiry)
+        source_sas = create_short_lived_blob_sas_v2(cmd, source_blob_service.account_name, source_container,
+                                                    source_blob_name, user_delegation_key=source_user_delegation_key)
     source_client = t_blob_client(account_url=source_blob_service.url, container_name=source_container,
                                   blob_name=source_blob_name, credential=source_sas)
     source_blob_url = source_client.url
@@ -927,7 +939,10 @@ def _copy_file_to_blob_container(blob_service, source_file_service, destination_
                                  source_share, source_sas, source_file_dir, source_file_name):
     t_share_client = source_file_service.get_share_client(source_share)
     t_file_client = t_share_client.get_file_client(os.path.join(source_file_dir, source_file_name))
-    source_file_url = '{}?{}'.format(t_file_client.url, source_sas)
+    if '?' not in t_file_client.url:
+        source_file_url = '{}?{}'.format(t_file_client.url, source_sas)
+    else:
+        source_file_url = t_file_client.url
 
     source_path = os.path.join(source_file_dir, source_file_name) if source_file_dir else source_file_name
     destination_blob_name = normalize_blob_file_path(destination_path, source_path)
@@ -943,11 +958,14 @@ def _copy_file_to_blob_container(blob_service, source_file_service, destination_
 def show_blob_v2(cmd, client, **kwargs):
     blob = client.get_blob_properties(**kwargs)
 
-    page_ranges = None
-    if blob.blob_type == cmd.get_models('_models#BlobType', resource_type=ResourceType.DATA_STORAGE_BLOB).PageBlob:
-        page_ranges = client.get_page_ranges(**kwargs)
+    try:
+        page_ranges = None
+        if blob.blob_type == cmd.get_models('_models#BlobType', resource_type=ResourceType.DATA_STORAGE_BLOB).PageBlob:
+            page_ranges = client.get_page_ranges(**kwargs)
 
-    blob.page_ranges = page_ranges
+        blob.page_ranges = page_ranges
+    except HttpResponseError as ex:
+        logger.warning("GetPageRanges failed with status code: %d, message: %s", ex.status_code, ex.message)
 
     return blob
 

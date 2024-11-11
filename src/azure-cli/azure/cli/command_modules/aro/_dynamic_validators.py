@@ -17,10 +17,9 @@ from azure.cli.core.commands.validators import get_default_location_from_resourc
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.azclierror import CLIInternalError, InvalidArgumentValueError, \
     RequiredArgumentMissingError
-from azure.core.exceptions import ResourceNotFoundError
+from azure.core.exceptions import ResourceNotFoundError, HttpResponseError
+from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
 from knack.log import get_logger
-from msrestazure.tools import is_valid_resource_id, parse_resource_id
-from msrestazure.azure_exceptions import CloudError
 import azure.cli.command_modules.aro.custom
 
 
@@ -30,18 +29,29 @@ log_entry_type = {'warn': 'Warning', 'error': 'Error'}
 
 def can_do_action(perms, action):
     for perm in perms:
-        for not_action in perm.not_actions:
-            match = re.escape(not_action)
-            match = re.match("(?i)^" + match.replace(r"\*", ".*") + "$", action)
-            if match:
-                return f"{action} permission is disabled"
+        matched = False
+
         for perm_action in perm.actions:
             match = re.escape(perm_action)
             match = re.match("(?i)^" + match.replace(r"\*", ".*") + "$", action)
             if match:
-                return None
+                matched = True
+                break
 
-    return f"{action} permission is missing"
+        if not matched:
+            continue
+
+        for not_action in perm.not_actions:
+            match = re.escape(not_action)
+            match = re.match("(?i)^" + match.replace(r"\*", ".*") + "$", action)
+            if match:
+                matched = False
+                break
+
+        if matched:
+            return True
+
+    return False
 
 
 def validate_resource(client, key, resource, actions):
@@ -54,9 +64,8 @@ def validate_resource(client, key, resource, actions):
     for action in actions:
         perms, perms_copy = tee(perms)
         perms_list = list(perms_copy)
-        error = can_do_action(perms_list, action)
-        if error is not None:
-            row = [key, resource['name'], log_entry_type["error"], error]
+        if not can_do_action(perms_list, action):
+            row = [key, resource['name'], log_entry_type["error"], f"{action} permission is missing"]
             errors.append(row)
 
     return errors
@@ -304,7 +313,7 @@ def dyn_validate_resource_permissions(service_principle_ids, resources):
                                            f"Resource {parts['name']} is missing role assignment " +
                                            f"{role} for service principal {sp_id} " +
                                            "(These roles will be automatically added during cluster creation)"])
-                    except CloudError as e:
+                    except HttpResponseError as e:
                         logger.error(e.message)
                         raise
         return errors

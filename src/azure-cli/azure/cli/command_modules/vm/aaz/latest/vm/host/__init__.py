@@ -12,6 +12,7 @@ from .__cmd_group import *
 from ._delete import *
 from ._list import *
 from ._list_resize_options import *
+from ._redeploy import *
 from ._resize import *
 from ._restart import *
 from ._show import *

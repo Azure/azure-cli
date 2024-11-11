@@ -23,9 +23,9 @@ class Show(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-05-01",
+        "version": "2023-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networkvirtualappliances/{}", "2023-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networkvirtualappliances/{}", "2023-11-01"],
         ]
     }
 
@@ -128,7 +128,7 @@ class Show(AAZCommand):
                     "$expand", self.ctx.args.expand,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2023-05-01",
+                    "api-version", "2023-11-01",
                     required=True,
                 ),
             }
@@ -231,6 +231,12 @@ class Show(AAZCommand):
                 serialized_name="inboundSecurityRules",
                 flags={"read_only": True},
             )
+            properties.internet_ingress_public_ips = AAZListType(
+                serialized_name="internetIngressPublicIps",
+            )
+            properties.network_profile = AAZObjectType(
+                serialized_name="networkProfile",
+            )
             properties.nva_sku = AAZObjectType(
                 serialized_name="nvaSku",
             )
@@ -292,6 +298,39 @@ class Show(AAZCommand):
             inbound_security_rules.Element = AAZObjectType()
             _ShowHelper._build_schema_sub_resource_read(inbound_security_rules.Element)
 
+            internet_ingress_public_ips = cls._schema_on_200.properties.internet_ingress_public_ips
+            internet_ingress_public_ips.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.properties.internet_ingress_public_ips.Element
+            _element.id = AAZStrType()
+
+            network_profile = cls._schema_on_200.properties.network_profile
+            network_profile.network_interface_configurations = AAZListType(
+                serialized_name="networkInterfaceConfigurations",
+            )
+
+            network_interface_configurations = cls._schema_on_200.properties.network_profile.network_interface_configurations
+            network_interface_configurations.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.properties.network_profile.network_interface_configurations.Element
+            _element.properties = AAZObjectType()
+            _element.type = AAZStrType()
+
+            properties = cls._schema_on_200.properties.network_profile.network_interface_configurations.Element.properties
+            properties.ip_configurations = AAZListType(
+                serialized_name="ipConfigurations",
+            )
+
+            ip_configurations = cls._schema_on_200.properties.network_profile.network_interface_configurations.Element.properties.ip_configurations
+            ip_configurations.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.properties.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element
+            _element.name = AAZStrType()
+            _element.properties = AAZObjectType()
+
+            properties = cls._schema_on_200.properties.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties
+            properties.primary = AAZBoolType()
+
             nva_sku = cls._schema_on_200.properties.nva_sku
             nva_sku.bundled_scale_unit = AAZStrType(
                 serialized_name="bundledScaleUnit",
@@ -327,6 +366,10 @@ class Show(AAZCommand):
                 flags={"read_only": True},
             )
             _element.name = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.nic_type = AAZStrType(
+                serialized_name="nicType",
                 flags={"read_only": True},
             )
             _element.private_ip_address = AAZStrType(

@@ -16,6 +16,8 @@ from azure.cli.core.aaz import *
 )
 class Show(AAZCommand):
     """Get the specified network interface in a virtual machine scale set.
+
+    This command is Uniform-specific and will not work for Flexible VMSS. If you want to get information about Flexible VMSS, please use "az network nic" command instead.
     """
 
     _aaz_info = {

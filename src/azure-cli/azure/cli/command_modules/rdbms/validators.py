@@ -8,7 +8,7 @@ from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
 from knack.log import get_logger
 import math
-from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id, is_valid_resource_name
+from azure.mgmt.core.tools import parse_resource_id, resource_id, is_valid_resource_id, is_valid_resource_name
 from azure.cli.core.azclierror import ValidationError, ArgumentUsageError
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.commands.validators import (
@@ -300,7 +300,7 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
                            standby_availability_zone=None, high_availability=None, subnet=None, public_access=None,
                            version=None, instance=None, geo_redundant_backup=None,
                            byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None,
-                           auto_grow=None, replication_role=None, performance_tier=None,
+                           auto_grow=None, performance_tier=None,
                            storage_type=None, iops=None, throughput=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
     if not instance:
@@ -313,14 +313,15 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
             resource_group=parse_resource_id(instance.id)["resource_group"],
             server_name=instance.name)
     sku_info = list_location_capability_info['sku_info']
+    sku_info = {k.lower(): v for k, v in sku_info.items()}
     single_az = list_location_capability_info['single_az']
     geo_backup_supported = list_location_capability_info['geo_backup_supported']
     _network_arg_validator(subnet, public_access)
     _pg_tier_validator(tier, sku_info)  # need to be validated first
     if tier is None and instance is not None:
-        tier = instance.sku.tier
-    if "supported_storageV2_size" in sku_info[tier]:
-        supported_storageV2_size = sku_info[tier]["supported_storageV2_size"]
+        tier = instance.sku.tier.lower()
+    if "supported_storageV2_size" in sku_info[tier.lower()]:
+        supported_storageV2_size = sku_info[tier.lower()]["supported_storageV2_size"]
     else:
         supported_storageV2_size = None
     _pg_storage_type_validator(storage_type, auto_grow, high_availability, geo_redundant_backup, performance_tier,
@@ -333,7 +334,6 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
         geo_redundant_backup = instance.backup.geo_redundant_backup
     _pg_georedundant_backup_validator(geo_redundant_backup, geo_backup_supported)
     _pg_storage_validator(storage_gb, sku_info, tier, storage_type, iops, throughput, instance)
-    pg_auto_grow_validator(auto_grow, replication_role, high_availability, instance)
     _pg_sku_name_validator(sku_name, sku_info, tier, instance)
     _pg_high_availability_validator(high_availability, standby_availability_zone, zone, tier, single_az, instance)
     _pg_version_validator(version, list_location_capability_info['server_versions'])
@@ -367,18 +367,19 @@ def _valid_ssdv2_range(storage_gb, sku_info, tier, iops, throughput, instance):
     storage_throughput = throughput if throughput is not None else instance.storage.throughput
 
     # find min and max values for storage
-    supported_storageV2_size = sku_info[tier]["supported_storageV2_size"]
+    sku_tier = tier.lower()
+    supported_storageV2_size = sku_info[sku_tier]["supported_storageV2_size"]
     min_storage = instance.storage.storage_size_gb if instance is not None else supported_storageV2_size
-    max_storage = sku_info[tier]["supported_storageV2_size_max"]
+    max_storage = sku_info[sku_tier]["supported_storageV2_size_max"]
     if not (min_storage <= storage_gib <= max_storage):
         raise CLIError('The requested value for storage size does not fall between {} and {} GiB.'
                        .format(min_storage, max_storage))
 
     storage = storage_gib * 1.07374182
     # find min and max values for IOPS
-    min_iops = sku_info[tier]["supported_storageV2_iops"]
-    if sku_info[tier]["supported_storageV2_iops"] < math.floor(max(0, storage - 6) * 500 + min_iops):
-        max_iops = sku_info[tier]["supported_storageV2_iops_max"]
+    min_iops = sku_info[sku_tier]["supported_storageV2_iops"]
+    if sku_info[sku_tier]["supported_storageV2_iops"] < math.floor(max(0, storage - 6) * 500 + min_iops):
+        max_iops = sku_info[sku_tier]["supported_storageV2_iops_max"]
     else:
         max_iops = math.floor(max(0, storage - 6) * 500 + min_iops)
 
@@ -387,13 +388,13 @@ def _valid_ssdv2_range(storage_gb, sku_info, tier, iops, throughput, instance):
                        .format(min_iops, max_iops))
 
     # find min and max values for throughout
-    min_throughout = sku_info[tier]["supported_storageV2_throughput"]
+    min_throughout = sku_info[sku_tier]["supported_storageV2_throughput"]
     if storage > 6:
         max_storage_throughout = math.floor(max(0.25 * storage_iops, min_throughout))
     else:
         max_storage_throughout = min_throughout
-    if sku_info[tier]["supported_storageV2_throughput_max"] < max_storage_throughout:
-        max_throughout = sku_info[tier]["supported_storageV2_throughput_max"]
+    if sku_info[sku_tier]["supported_storageV2_throughput_max"] < max_storage_throughout:
+        max_throughout = sku_info[sku_tier]["supported_storageV2_throughput_max"]
     else:
         max_throughout = max_storage_throughout
 
@@ -404,8 +405,8 @@ def _valid_ssdv2_range(storage_gb, sku_info, tier, iops, throughput, instance):
 
 def _pg_tier_validator(tier, sku_info):
     if tier:
-        tiers = get_postgres_tiers(sku_info)
-        if tier not in tiers:
+        tiers = [item.lower() for item in get_postgres_tiers(sku_info)]
+        if tier.lower() not in tiers:
             raise CLIError('Incorrect value for --tier. Allowed values : {}'.format(tiers))
 
 
@@ -413,8 +414,8 @@ def _pg_sku_name_validator(sku_name, sku_info, tier, instance):
     if instance is not None:
         tier = instance.sku.tier if tier is None else tier
     if sku_name:
-        skus = get_postgres_skus(sku_info, tier)
-        if sku_name not in skus:
+        skus = [item.lower() for item in get_postgres_skus(sku_info, tier.lower())]
+        if sku_name.lower() not in skus:
             raise CLIError('Incorrect value for --sku-name. The SKU name does not match {} tier. '
                            'Specify --tier if you did not. Or CLI will set GeneralPurpose as the default tier. '
                            'Allowed values : {}'.format(tier, skus))
@@ -423,13 +424,16 @@ def _pg_sku_name_validator(sku_name, sku_info, tier, instance):
 def _pg_storage_performance_tier_validator(performance_tier, sku_info, tier=None, storage_size=None):
     if performance_tier:
         tiers = get_postgres_tiers(sku_info)
-        if tier in tiers:
+        if tier.lower() in [item.lower() for item in tiers]:
             if storage_size is None:
-                performance_tiers = get_performance_tiers(sku_info[tier]["storage_edition"])
+                performance_tiers = [item.lower() for item in
+                                     get_performance_tiers(sku_info[tier.lower()]["storage_edition"])]
             else:
-                performance_tiers = get_performance_tiers_for_storage(sku_info[tier]["storage_edition"],
-                                                                      storage_size=storage_size)
-            if performance_tier not in performance_tiers:
+                performance_tiers = [item.lower() for item in
+                                     get_performance_tiers_for_storage(sku_info[tier.lower()]["storage_edition"],
+                                     storage_size=storage_size)]
+
+            if performance_tier.lower() not in performance_tiers:
                 raise CLIError('Incorrect value for --performance-tier for storage-size: {}.'
                                ' Allowed values : {}'.format(storage_size, performance_tiers))
 
@@ -500,13 +504,13 @@ def _network_arg_validator(subnet, public_access):
 
 
 def maintenance_window_validator(ns):
-    options = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Disabled", "disabled"]
+    options = ["sun", "mon", "tue", "wed", "thu", "fri", "sat", "disabled"]
     if ns.maintenance_window:
         parsed_input = ns.maintenance_window.split(':')
         if not parsed_input or len(parsed_input) > 3:
             raise CLIError('Incorrect value for --maintenance-window. '
                            'Enter <Day>:<Hour>:<Minute>. Example: "Mon:8:30" to schedule on Monday, 8:30 UTC')
-        if len(parsed_input) >= 1 and parsed_input[0] not in options:
+        if len(parsed_input) >= 1 and parsed_input[0].lower() not in options:
             raise CLIError('Incorrect value for --maintenance-window. '
                            'The first value means the scheduled day in a week or '
                            'can be "Disabled" to reset maintenance window. '
@@ -576,14 +580,14 @@ def _validate_ip(ips):
 
 def _validate_ranges_in_ip(ip):
     parsed_ip = ip.split('.')
-    if len(parsed_ip) == 4 and _valid_range(int(parsed_ip[0])) and _valid_range(int(parsed_ip[1])) \
-       and _valid_range(int(parsed_ip[2])) and _valid_range(int(parsed_ip[3])):
+    if len(parsed_ip) == 4 and _valid_range(parsed_ip[0]) and _valid_range(parsed_ip[1]) \
+       and _valid_range(parsed_ip[2]) and _valid_range(parsed_ip[3]):
         return True
     return False
 
 
 def _valid_range(addr_range):
-    if 0 <= addr_range <= 255:
+    if addr_range.isdigit() and 0 <= int(addr_range) <= 255:
         return True
     return False
 
@@ -597,6 +601,8 @@ def virtual_endpoint_name_validator(ns):
 
 
 def firewall_rule_name_validator(ns):
+    if not ns.firewall_rule_name:
+        return
     if not re.search(r'^[a-zA-Z0-9][-_a-zA-Z0-9]{1,126}[_a-zA-Z0-9]$', ns.firewall_rule_name):
         raise ValidationError("The firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'. "
                               "Additionally, the name of the firewall rule must be at least 3 characters "
@@ -625,6 +631,19 @@ def validate_server_name(db_context, server_name, type_):
 
     if not result.name_available:
         raise ValidationError(result.message)
+
+
+def validate_migration_runtime_server(cmd, migrationInstanceResourceId, target_resource_group_name, target_server_name):
+    id_comps = parse_resource_id(migrationInstanceResourceId)
+    runtime_server_resource_resource_type = id_comps['resource_type'].lower()
+    if "flexibleservers" != runtime_server_resource_resource_type:
+        raise ValidationError("Migration Runtime Resource ID provided should be Flexible server.")
+
+    server_operations_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
+    target_server = server_operations_client.get(target_resource_group_name, target_server_name)
+    if target_server.id.lower() == migrationInstanceResourceId.lower():
+        raise ValidationError("Migration Runtime server is same as Target Flexible server. "
+                              "Please change the values accordingly.")
 
 
 def validate_private_dns_zone(db_context, server_name, private_dns_zone, private_dns_zone_suffix):
@@ -667,9 +686,6 @@ def validate_postgres_replica(cmd, tier, location, instance, sku_name,
     if tier == 'Burstable':
         raise ValidationError("Read replica is not supported for the Burstable pricing tier. "
                               "Scale up the source server to General Purpose or Memory Optimized. ")
-
-    if instance is not None and instance.storage.auto_grow.lower() == 'enabled':
-        raise ValidationError("Read replica is not supported for servers with Storage Auto-grow enabled")
 
     if not list_location_capability_info:
         list_location_capability_info = get_postgres_location_capability_info(cmd, location)
@@ -766,17 +782,6 @@ def validate_identities(cmd, namespace):
         namespace.identities = [_validate_identity(cmd, namespace, identity) for identity in namespace.identities]
 
 
-def pg_auto_grow_validator(auto_grow, replication_role, high_availability, instance):
-    if auto_grow is None:
-        return
-    if instance is not None:
-        replication_role = instance.replication_role if replication_role is None else replication_role
-        high_availability = instance.high_availability.mode if high_availability is None else high_availability
-    # if replica, cannot be disabled
-    if replication_role not in ('None', None, 'Primary'):
-        raise ValidationError("Storage Auto grow is not supported for replica servers.")
-
-
 def _pg_storage_type_validator(storage_type, auto_grow, high_availability, geo_redundant_backup, performance_tier,
                                supported_storageV2_size, iops, throughput, instance):
     is_create_ssdv2 = storage_type == "PremiumV2_LRS"
@@ -805,3 +810,16 @@ def _pg_storage_type_validator(storage_type, auto_grow, high_availability, geo_r
             raise CLIError('Updating throughput is only capable for server created with Premium SSD v2.')
         if iops is not None:
             raise CLIError('Updating storage iops is only capable for server created with Premium SSD v2.')
+
+
+def check_resource_group(resource_group_name):
+    resource_group_name = resource_group_name.replace("'", '')
+    resource_group_name = resource_group_name.replace('"', '')
+    if (not resource_group_name):
+        return False
+    return True
+
+
+def validate_resource_group(resource_group_name):
+    if (not check_resource_group(resource_group_name)):
+        raise CLIError('Resource group name cannot be empty.')
