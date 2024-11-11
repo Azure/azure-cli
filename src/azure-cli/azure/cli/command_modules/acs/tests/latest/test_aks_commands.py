@@ -11661,7 +11661,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
     @AKSCustomResourceGroupPreparer(
         random_name_length=17,
         name_prefix="clitest",
-        location="eastus2euap",
+        location="westcentralus",
     )
     def test_aks_create_with_enable_acns_complex(
         self, resource_group, resource_group_location
