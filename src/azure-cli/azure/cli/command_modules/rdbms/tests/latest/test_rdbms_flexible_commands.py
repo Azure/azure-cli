@@ -268,7 +268,6 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         if self.cli_ctx.local_context.is_on:
             self.cmd('config param-persist off')
 
-
         storage_account_name = self.create_random_name('teststorage', 24)
         container_account_name = self.create_random_name('testcontainer', 24)
         start_time = (datetime.utcnow() - timedelta(minutes=60)).strftime(f"%Y-%m-%dT%H:%MZ")
@@ -324,7 +323,6 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                  -n {}'.format(database_engine, resource_group, server_name)).get_output_in_json()
         self.assertEqual(len(list_result), 1)
         self.assertEqual(list_result[0]['backupName'], backup_name)
-
 
 
     def _test_flexible_server_mgmt_case_insensitive(self, database_engine, resource_group):
