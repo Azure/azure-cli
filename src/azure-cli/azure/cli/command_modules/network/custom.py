@@ -2400,7 +2400,7 @@ def update_ddos_plan(cmd, resource_group_name, ddos_plan_name, tags=None, vnets=
         Show_Ddos_Protection = Show(cli_ctx=cmd.cli_ctx)
         show_args = Show_Ddos_Protection(show_args)
         logger.info('Attempting to update the VNets attached to the DDoS protection plan.')
-        vnet_ids = set([])
+        vnet_ids = set()
         if len(vnets) == 1 and not vnets[0]:
             pass
         else:
@@ -2408,7 +2408,7 @@ def update_ddos_plan(cmd, resource_group_name, ddos_plan_name, tags=None, vnets=
         if 'virtualNetworks' in show_args:
             existing_vnet_ids = {x['id'] for x in show_args['virtualNetworks']}
         else:
-            existing_vnet_ids = set([])
+            existing_vnet_ids = set()
         from azure.cli.core.commands import LongRunningOperation
         for vnet_id in vnet_ids.difference(existing_vnet_ids):
             logger.info("Adding VNet '%s' to plan.", vnet_id)
@@ -2443,7 +2443,7 @@ def _to_snake(s):
 
 def _convert_to_snake_case(element):
     if isinstance(element, dict):
-        ret = dict()
+        ret = {}
         for k, v in element.items():
             ret[_to_snake(k)] = _convert_to_snake_case(v)
 
@@ -2520,7 +2520,7 @@ def update_dns_soa_record(cmd, resource_group_name, zone_name, host=None, email=
     })
 
     record_camal = record_set["SOARecord"]
-    record = dict()
+    record = {}
     record["host"] = host or record_camal.get("host", None)
     record["email"] = email or record_camal.get("email", None)
     record["serial_number"] = serial_number or record_camal.get("serialNumber", None)
@@ -3137,7 +3137,7 @@ def _add_save_record(cmd, record, record_type, record_set_name, resource_group_n
             "subscription": subscription_id,
             "resource_group": resource_group_name
         })
-        record_set = dict()
+        record_set = {}
         record_set["ttl"] = ret.get("TTL", None)
         record_set[record_snake] = ret.get(record_camel, None)
         record_set = _convert_to_snake_case(record_set)
@@ -3172,7 +3172,7 @@ def _remove_record(cli_ctx, record, record_type, record_set_name, resource_group
         "resource_group": resource_group_name,
         "record_type": record_type
     })
-    record_set = dict()
+    record_set = {}
     record_set["ttl"] = ret.get("TTL", None)
     record_set[record_snake] = ret.get(record_camel, None)
     record_set = _convert_to_snake_case(record_set)

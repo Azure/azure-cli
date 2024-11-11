@@ -420,7 +420,7 @@ class AzArgumentContext(ArgumentsContext):
             return
 
         if not patches:
-            patches = dict()
+            patches = {}
 
         # fetch the documentation for model parameters first. for models, which are the classes
         # derive from msrest.serialization.Model and used in the SDK API to carry parameters, the

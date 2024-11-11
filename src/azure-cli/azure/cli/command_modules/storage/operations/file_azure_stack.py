@@ -193,7 +193,7 @@ def storage_file_copy_batch(cmd, client, source_client, destination_share=None, 
 
         # the cache of existing directories in the destination file share. the cache helps to avoid
         # repeatedly create existing directory so as to optimize the performance.
-        existing_dirs = set([])
+        existing_dirs = set()
 
         if not source_sas:
             source_sas = create_short_lived_container_sas(cmd, source_client.account_name, source_client.account_key,
@@ -221,7 +221,7 @@ def storage_file_copy_batch(cmd, client, source_client, destination_share=None, 
 
         # the cache of existing directories in the destination file share. the cache helps to avoid
         # repeatedly create existing directory so as to optimize the performance.
-        existing_dirs = set([])
+        existing_dirs = set()
 
         if not source_sas:
             source_sas = create_short_lived_share_sas(cmd, source_client.account_name, source_client.account_key,

@@ -315,7 +315,7 @@ def storage_file_copy_batch(cmd, client, source_client, share_name=None, destina
 
         # the cache of existing directories in the destination file share. the cache helps to avoid
         # repeatedly create existing directory so as to optimize the performance.
-        existing_dirs = set([])
+        existing_dirs = set()
 
         # pylint: disable=inconsistent-return-statements
         def action_blob_copy(blob_name):
@@ -335,7 +335,7 @@ def storage_file_copy_batch(cmd, client, source_client, share_name=None, destina
 
         # the cache of existing directories in the destination file share. the cache helps to avoid
         # repeatedly create existing directory so as to optimize the performance.
-        existing_dirs = set([])
+        existing_dirs = set()
 
         # pylint: disable=inconsistent-return-statements
         def action_file_copy(file_info):

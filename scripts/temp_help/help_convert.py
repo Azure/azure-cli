@@ -189,7 +189,7 @@ def _get_new_yaml_dict(help_dict):
         if "parameters" in help_dict:
             parameters = []
             for param in help_dict["parameters"]:
-                new_param = dict()
+                new_param = {}
                 if "name" in param:
                     options = param["name"].split()
                     new_param["name"] = max(options, key=lambda x: len(x))
@@ -205,7 +205,7 @@ def _get_new_yaml_dict(help_dict):
         if "examples" in help_dict:
             elem_examples = []
             for ex in help_dict["examples"]:
-                new_ex = dict()
+                new_ex = {}
                 if "name" in ex:
                     new_ex["summary"] = ex["name"]
                 if "text" in ex:

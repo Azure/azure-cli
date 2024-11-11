@@ -42,7 +42,7 @@ class WebAppAddonScenarioTest(ScenarioTest):
         connection_name = 'testconn_postgres'
         connection = self.cmd('webapp connection create postgres --source-id {} '
                               '--connection {} --new'.format(source_id, connection_name)).get_output_in_json()
-        target_id = connection.get('targetService', dict()).get('id')
+        target_id = connection.get('targetService', {}).get('id')
         connection_id = connection.get('id')
 
         # validate the created postgres
@@ -72,7 +72,7 @@ class WebAppAddonScenarioTest(ScenarioTest):
         connection_name = 'testconn_keyvault'
         connection = self.cmd('webapp connection create keyvault --source-id {} '
                               '--connection {} --new'.format(source_id, connection_name)).get_output_in_json()
-        target_id = connection.get('targetService', dict()).get('id')
+        target_id = connection.get('targetService', {}).get('id')
         connection_id = connection.get('id')
 
         # validate the created postgres
@@ -101,7 +101,7 @@ class WebAppAddonScenarioTest(ScenarioTest):
         connection_name = 'testconn_storageblob'
         connection = self.cmd('webapp connection create storage-blob --source-id {} '
                               '--connection {} --new'.format(source_id, connection_name)).get_output_in_json()
-        target_id = connection.get('targetService', dict()).get('id')
+        target_id = connection.get('targetService', {}).get('id')
         connection_id = connection.get('id')
 
         # validate the created postgres
