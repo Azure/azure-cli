@@ -64,7 +64,7 @@ currentBranch=$(git branch --show-current)
 
 # Run command azdev lint
 echo "\033[0;32mRunning azdev lint...\033[0m"
-azdev linter --repo ./ --src $currentBranch --tgt upstream/dev
+azdev linter --repo ./ --src $currentBranch --tgt $MERGE_BASE
 if [ $? -ne 0 ]; then
     echo "\033[0;31mError: azdev lint check failed.\033[0m"
     exit 1
@@ -72,9 +72,9 @@ fi
 
 # Run command azdev style
 echo "\033[0;32mRunning azdev style...\033[0m"
-azdev style --repo ./ --src $currentBranch --tgt upstream/dev
+azdev style --repo ./ --src $currentBranch --tgt $MERGE_BASE
 if [ $? -ne 0 ]; then
-    error_msg=$(azdev style --repo ./ --src $currentBranch --tgt upstream/dev 2>&1)
+    error_msg=$(azdev style --repo ./ --src $currentBranch --tgt $MERGE_BASE 2>&1)
     if echo "$error_msg" | grep -q "No modules"; then
         echo "\033[0;32mPre-push hook passed.\033[0m"
         exit 0
@@ -85,7 +85,7 @@ fi
 
 # Run command azdev test
 echo "\033[0;32mRunning azdev test...\033[0m"
-azdev test --repo ./ --src $currentBranch --tgt upstream/dev
+azdev test --repo ./ --src $currentBranch --tgt $MERGE_BASE
 if [ $? -ne 0 ]; then
     echo "\033[0;31mError: azdev test check failed.\033[0m"
     exit 1
