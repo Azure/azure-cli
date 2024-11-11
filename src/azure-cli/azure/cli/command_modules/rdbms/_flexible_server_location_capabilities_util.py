@@ -48,7 +48,7 @@ def _postgres_parse_list_capability(result):
 
     offer_restricted = [feature for feature in result[0].supported_features if feature.name == "OfferRestricted"]
 
-    if offer_restricted[0].status == "Enabled": 
+    if offer_restricted[0].status == "Enabled":
         raise InvalidArgumentValueError("The location is restricted for provisioning of flexible servers. Please try using another region.")
 
     if offer_restricted[0].status != "Disabled":
