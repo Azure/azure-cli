@@ -192,10 +192,10 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"name": "test", "name@odata.type": "Edm.String", "value": "something",
-      "value@odata.type": "Edm.String", "sizeInBytes": "86222504922", "sizeInBytes@odata.type":
-      "Edm.Int64", "RowKey": "001", "RowKey@odata.type": "Edm.String", "PartitionKey":
-      "001", "PartitionKey@odata.type": "Edm.String"}'
+    body: '{"name": "test", "aaa@foo.com": "Edm.String", "value": "something",
+      "aaa@foo.com": "Edm.String", "sizeInBytes": "86222504922", "aaa@foo.com":
+      "Edm.Int64", "RowKey": "001", "aaa@foo.com": "Edm.String", "PartitionKey":
+      "001", "aaa@foo.com": "Edm.String"}'
     headers:
       Accept:
       - application/json;odata=minimalmetadata
@@ -225,7 +225,7 @@ interactions:
     uri: https://clitest000002.table.core.windows.net/table000003
   response:
     body:
-      string: '{"odata.metadata":"https://clitest000002.table.core.windows.net/$metadata#table000003/@Element","odata.etag":"W/\"datetime''2024-06-20T04%3A32%3A18.881974Z''\"","PartitionKey":"001","RowKey":"001","Timestamp":"2024-06-20T04:32:18.881974Z","name":"test","value":"something","sizeInBytes@odata.type":"Edm.Int64","sizeInBytes":"86222504922"}'
+      string: '{"odata.metadata":"https://clitest000002.table.core.windows.net/$metadata#table000003/@Element","odata.etag":"W/\"datetime''2024-06-20T04%3A32%3A18.881974Z''\"","PartitionKey":"001","RowKey":"001","Timestamp":"2024-06-20T04:32:18.881974Z","name":"test","value":"something","aaa@foo.com":"Edm.Int64","sizeInBytes":"86222504922"}'
     headers:
       cache-control:
       - no-cache
@@ -275,7 +275,7 @@ interactions:
     uri: https://clitest000002.table.core.windows.net/table000003(PartitionKey='001',RowKey='001')
   response:
     body:
-      string: '{"odata.metadata":"https://clitest000002.table.core.windows.net/$metadata#table000003/@Element","odata.etag":"W/\"datetime''2024-06-20T04%3A32%3A18.881974Z''\"","PartitionKey":"001","RowKey":"001","Timestamp":"2024-06-20T04:32:18.881974Z","name":"test","value":"something","sizeInBytes@odata.type":"Edm.Int64","sizeInBytes":"86222504922"}'
+      string: '{"odata.metadata":"https://clitest000002.table.core.windows.net/$metadata#table000003/@Element","odata.etag":"W/\"datetime''2024-06-20T04%3A32%3A18.881974Z''\"","PartitionKey":"001","RowKey":"001","Timestamp":"2024-06-20T04:32:18.881974Z","name":"test","value":"something","aaa@foo.com":"Edm.Int64","sizeInBytes":"86222504922"}'
     headers:
       cache-control:
       - no-cache
@@ -345,9 +345,9 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"name": "test", "name@odata.type": "Edm.String", "value": "newval", "value@odata.type":
-      "Edm.String", "RowKey": "001", "RowKey@odata.type": "Edm.String", "PartitionKey":
-      "001", "PartitionKey@odata.type": "Edm.String"}'
+    body: '{"name": "test", "aaa@foo.com": "Edm.String", "value": "newval", "aaa@foo.com":
+      "Edm.String", "RowKey": "001", "aaa@foo.com": "Edm.String", "PartitionKey":
+      "001", "aaa@foo.com": "Edm.String"}'
     headers:
       Accept:
       - application/json
@@ -425,7 +425,7 @@ interactions:
     uri: https://clitest000002.table.core.windows.net/table000003(PartitionKey='001',RowKey='001')
   response:
     body:
-      string: '{"odata.metadata":"https://clitest000002.table.core.windows.net/$metadata#table000003/@Element","odata.etag":"W/\"datetime''2024-06-20T04%3A32%3A23.2911933Z''\"","PartitionKey":"001","RowKey":"001","Timestamp":"2024-06-20T04:32:23.2911933Z","name":"test","sizeInBytes@odata.type":"Edm.Int64","sizeInBytes":"86222504922","value":"newval"}'
+      string: '{"odata.metadata":"https://clitest000002.table.core.windows.net/$metadata#table000003/@Element","odata.etag":"W/\"datetime''2024-06-20T04%3A32%3A23.2911933Z''\"","PartitionKey":"001","RowKey":"001","Timestamp":"2024-06-20T04:32:23.2911933Z","name":"test","aaa@foo.com":"Edm.Int64","sizeInBytes":"86222504922","value":"newval"}'
     headers:
       cache-control:
       - no-cache
@@ -447,8 +447,8 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"cat": "hat", "cat@odata.type": "Edm.String", "RowKey": "001", "RowKey@odata.type":
-      "Edm.String", "PartitionKey": "001", "PartitionKey@odata.type": "Edm.String"}'
+    body: '{"cat": "hat", "aaa@foo.com": "Edm.String", "RowKey": "001", "aaa@foo.com":
+      "Edm.String", "PartitionKey": "001", "aaa@foo.com": "Edm.String"}'
     headers:
       Accept:
       - application/json
@@ -643,9 +643,9 @@ interactions:
       code: 404
       message: Not Found
 - request:
-    body: '{"name": "test", "name@odata.type": "Edm.String", "value": "something",
-      "value@odata.type": "Edm.String", "RowKey": "001", "RowKey@odata.type": "Edm.String",
-      "PartitionKey": "001", "PartitionKey@odata.type": "Edm.String"}'
+    body: '{"name": "test", "aaa@foo.com": "Edm.String", "value": "something",
+      "aaa@foo.com": "Edm.String", "RowKey": "001", "aaa@foo.com": "Edm.String",
+      "PartitionKey": "001", "aaa@foo.com": "Edm.String"}'
     headers:
       Accept:
       - application/json;odata=minimalmetadata
@@ -699,9 +699,9 @@ interactions:
       code: 201
       message: Created
 - request:
-    body: '{"name": "test2", "name@odata.type": "Edm.String", "value": "something2",
-      "value@odata.type": "Edm.String", "RowKey": "002", "RowKey@odata.type": "Edm.String",
-      "PartitionKey": "002", "PartitionKey@odata.type": "Edm.String"}'
+    body: '{"name": "test2", "aaa@foo.com": "Edm.String", "value": "something2",
+      "aaa@foo.com": "Edm.String", "RowKey": "002", "aaa@foo.com": "Edm.String",
+      "PartitionKey": "002", "aaa@foo.com": "Edm.String"}'
     headers:
       Accept:
       - application/json;odata=minimalmetadata

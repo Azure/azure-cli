@@ -717,7 +717,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_autoscale_refine000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_refine000001","name":"cli_test_monitor_autoscale_refine000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","test":"test_monitor_autoscale_refined","date":"2024-08-26T08:10:24Z","module":"monitor","DateCreated":"2024-08-26T08:10:28Z","Creator":"v-jingszhang@microsoft.com"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_refine000001","name":"cli_test_monitor_autoscale_refine000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","test":"test_monitor_autoscale_refined","date":"2024-08-26T08:10:24Z","module":"monitor","DateCreated":"2024-08-26T08:10:28Z","Creator":"aaa@foo.com"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -746,8 +746,8 @@ interactions:
       message: OK
 - request:
     body: '{"location": "westus", "properties": {"enabled": true, "name": "vmss1",
-      "notifications": [{"email": {"customEmails": ["abc@example.com", "efg@example.com",
-      "opq@example.com"]}, "operation": "scale", "webhooks": [{"properties": {"apiKey":
+      "notifications": [{"email": {"customEmails": ["aaa@foo.com", "aaa@foo.com",
+      "aaa@foo.com"]}, "operation": "scale", "webhooks": [{"properties": {"apiKey":
       "value"}, "serviceUri": "https://www.contoso.com/alert"}]}], "profiles": [{"capacity":
       {"default": "3", "maximum": "3", "minimum": "3"}, "name": "default", "rules":
       []}], "targetResourceUri": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_refine000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1"}}'
@@ -772,7 +772,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_autoscale_refine000001/providers/Microsoft.Insights/autoscalesettings/vmss1?api-version=2022-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_refine000001/providers/microsoft.insights/autoscalesettings/vmss1","name":"vmss1","type":"Microsoft.Insights/autoscaleSettings","location":"westus","tags":{},"properties":{"profiles":[{"name":"default","capacity":{"minimum":"3","maximum":"3","default":"3"},"rules":[]}],"enabled":true,"name":"vmss1","targetResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_refine000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1","notifications":[{"operation":"Scale","email":{"sendToSubscriptionAdministrator":false,"sendToSubscriptionCoAdministrators":false,"customEmails":["abc@example.com","efg@example.com","opq@example.com"]},"webhooks":[{"serviceUri":"https://www.contoso.com/alert","properties":{"apiKey":"value"}}]}],"predictiveAutoscalePolicy":{"scaleMode":"Disabled","scaleLookAheadTime":null}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_refine000001/providers/microsoft.insights/autoscalesettings/vmss1","name":"vmss1","type":"Microsoft.Insights/autoscaleSettings","location":"westus","tags":{},"properties":{"profiles":[{"name":"default","capacity":{"minimum":"3","maximum":"3","default":"3"},"rules":[]}],"enabled":true,"name":"vmss1","targetResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_refine000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1","notifications":[{"operation":"Scale","email":{"sendToSubscriptionAdministrator":false,"sendToSubscriptionCoAdministrators":false,"customEmails":["aaa@foo.com","aaa@foo.com","aaa@foo.com"]},"webhooks":[{"serviceUri":"https://www.contoso.com/alert","properties":{"apiKey":"value"}}]}],"predictiveAutoscalePolicy":{"scaleMode":"Disabled","scaleLookAheadTime":null}}}'
     headers:
       cache-control:
       - no-cache
@@ -820,7 +820,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_autoscale_refine000001/providers/Microsoft.Insights/autoscalesettings?api-version=2022-10-01
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_refine000001/providers/microsoft.insights/autoscalesettings/vmss1","name":"vmss1","type":"Microsoft.Insights/autoscaleSettings","location":"westus","tags":{},"properties":{"profiles":[{"name":"default","capacity":{"minimum":"3","maximum":"3","default":"3"},"rules":[]}],"enabled":true,"name":"vmss1","targetResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_refine000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1","notifications":[{"operation":"Scale","email":{"sendToSubscriptionAdministrator":false,"sendToSubscriptionCoAdministrators":false,"customEmails":["abc@example.com","efg@example.com","opq@example.com"]},"webhooks":[{"serviceUri":"https://www.contoso.com/alert","properties":{"apiKey":"value"}}]}],"predictiveAutoscalePolicy":{"scaleMode":"Disabled","scaleLookAheadTime":null}}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_refine000001/providers/microsoft.insights/autoscalesettings/vmss1","name":"vmss1","type":"Microsoft.Insights/autoscaleSettings","location":"westus","tags":{},"properties":{"profiles":[{"name":"default","capacity":{"minimum":"3","maximum":"3","default":"3"},"rules":[]}],"enabled":true,"name":"vmss1","targetResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_refine000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1","notifications":[{"operation":"Scale","email":{"sendToSubscriptionAdministrator":false,"sendToSubscriptionCoAdministrators":false,"customEmails":["aaa@foo.com","aaa@foo.com","aaa@foo.com"]},"webhooks":[{"serviceUri":"https://www.contoso.com/alert","properties":{"apiKey":"value"}}]}],"predictiveAutoscalePolicy":{"scaleMode":"Disabled","scaleLookAheadTime":null}}}]}'
     headers:
       cache-control:
       - no-cache
@@ -866,7 +866,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_autoscale_refine000001/providers/Microsoft.Insights/autoscalesettings/vmss1?api-version=2022-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_refine000001/providers/microsoft.insights/autoscalesettings/vmss1","name":"vmss1","type":"Microsoft.Insights/autoscaleSettings","location":"westus","tags":{},"properties":{"profiles":[{"name":"default","capacity":{"minimum":"3","maximum":"3","default":"3"},"rules":[]}],"enabled":true,"name":"vmss1","targetResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_refine000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1","notifications":[{"operation":"Scale","email":{"sendToSubscriptionAdministrator":false,"sendToSubscriptionCoAdministrators":false,"customEmails":["abc@example.com","efg@example.com","opq@example.com"]},"webhooks":[{"serviceUri":"https://www.contoso.com/alert","properties":{"apiKey":"value"}}]}],"predictiveAutoscalePolicy":{"scaleMode":"Disabled","scaleLookAheadTime":null}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_refine000001/providers/microsoft.insights/autoscalesettings/vmss1","name":"vmss1","type":"Microsoft.Insights/autoscaleSettings","location":"westus","tags":{},"properties":{"profiles":[{"name":"default","capacity":{"minimum":"3","maximum":"3","default":"3"},"rules":[]}],"enabled":true,"name":"vmss1","targetResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_refine000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1","notifications":[{"operation":"Scale","email":{"sendToSubscriptionAdministrator":false,"sendToSubscriptionCoAdministrators":false,"customEmails":["aaa@foo.com","aaa@foo.com","aaa@foo.com"]},"webhooks":[{"serviceUri":"https://www.contoso.com/alert","properties":{"apiKey":"value"}}]}],"predictiveAutoscalePolicy":{"scaleMode":"Disabled","scaleLookAheadTime":null}}}'
     headers:
       cache-control:
       - no-cache
@@ -912,7 +912,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_autoscale_refine000001/providers/Microsoft.Insights/autoscalesettings/vmss1?api-version=2022-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_refine000001/providers/microsoft.insights/autoscalesettings/vmss1","name":"vmss1","type":"Microsoft.Insights/autoscaleSettings","location":"westus","tags":{},"properties":{"profiles":[{"name":"default","capacity":{"minimum":"3","maximum":"3","default":"3"},"rules":[]}],"enabled":true,"name":"vmss1","targetResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_refine000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1","notifications":[{"operation":"Scale","email":{"sendToSubscriptionAdministrator":false,"sendToSubscriptionCoAdministrators":false,"customEmails":["abc@example.com","efg@example.com","opq@example.com"]},"webhooks":[{"serviceUri":"https://www.contoso.com/alert","properties":{"apiKey":"value"}}]}],"predictiveAutoscalePolicy":{"scaleMode":"Disabled","scaleLookAheadTime":null}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_refine000001/providers/microsoft.insights/autoscalesettings/vmss1","name":"vmss1","type":"Microsoft.Insights/autoscaleSettings","location":"westus","tags":{},"properties":{"profiles":[{"name":"default","capacity":{"minimum":"3","maximum":"3","default":"3"},"rules":[]}],"enabled":true,"name":"vmss1","targetResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_refine000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1","notifications":[{"operation":"Scale","email":{"sendToSubscriptionAdministrator":false,"sendToSubscriptionCoAdministrators":false,"customEmails":["aaa@foo.com","aaa@foo.com","aaa@foo.com"]},"webhooks":[{"serviceUri":"https://www.contoso.com/alert","properties":{"apiKey":"value"}}]}],"predictiveAutoscalePolicy":{"scaleMode":"Disabled","scaleLookAheadTime":null}}}'
     headers:
       cache-control:
       - no-cache
@@ -941,8 +941,8 @@ interactions:
       message: OK
 - request:
     body: '{"location": "westus", "properties": {"enabled": true, "name": "vmss1",
-      "notifications": [{"email": {"customEmails": ["abc@example.com", "efg@example.com",
-      "opq@example.com"], "sendToSubscriptionAdministrator": false, "sendToSubscriptionCoAdministrators":
+      "notifications": [{"email": {"customEmails": ["aaa@foo.com", "aaa@foo.com",
+      "aaa@foo.com"], "sendToSubscriptionAdministrator": false, "sendToSubscriptionCoAdministrators":
       false}, "operation": "Scale", "webhooks": [{"properties": {"apiKey": "value"},
       "serviceUri": "https://www.contoso.com/alert"}]}], "predictiveAutoscalePolicy":
       {"scaleMode": "Disabled"}, "profiles": [{"capacity": {"default": "2", "maximum":
@@ -970,7 +970,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_autoscale_refine000001/providers/Microsoft.Insights/autoscalesettings/vmss1?api-version=2022-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_refine000001/providers/microsoft.insights/autoscalesettings/vmss1","name":"vmss1","type":"Microsoft.Insights/autoscaleSettings","location":"westus","tags":{},"properties":{"profiles":[{"name":"default","capacity":{"minimum":"2","maximum":"2","default":"2"},"rules":[]}],"enabled":true,"name":"vmss1","targetResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_refine000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1","notifications":[{"operation":"Scale","email":{"sendToSubscriptionAdministrator":false,"sendToSubscriptionCoAdministrators":false,"customEmails":["abc@example.com","efg@example.com","opq@example.com"]},"webhooks":[{"serviceUri":"https://www.contoso.com/alert","properties":{"apiKey":"value"}}]}],"predictiveAutoscalePolicy":{"scaleMode":"Disabled","scaleLookAheadTime":null}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_refine000001/providers/microsoft.insights/autoscalesettings/vmss1","name":"vmss1","type":"Microsoft.Insights/autoscaleSettings","location":"westus","tags":{},"properties":{"profiles":[{"name":"default","capacity":{"minimum":"2","maximum":"2","default":"2"},"rules":[]}],"enabled":true,"name":"vmss1","targetResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_refine000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1","notifications":[{"operation":"Scale","email":{"sendToSubscriptionAdministrator":false,"sendToSubscriptionCoAdministrators":false,"customEmails":["aaa@foo.com","aaa@foo.com","aaa@foo.com"]},"webhooks":[{"serviceUri":"https://www.contoso.com/alert","properties":{"apiKey":"value"}}]}],"predictiveAutoscalePolicy":{"scaleMode":"Disabled","scaleLookAheadTime":null}}}'
     headers:
       cache-control:
       - no-cache
@@ -1018,7 +1018,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_autoscale_refine000001/providers/Microsoft.Insights/autoscalesettings/vmss1?api-version=2022-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_refine000001/providers/microsoft.insights/autoscalesettings/vmss1","name":"vmss1","type":"Microsoft.Insights/autoscaleSettings","location":"westus","tags":{},"properties":{"profiles":[{"name":"default","capacity":{"minimum":"2","maximum":"2","default":"2"},"rules":[]}],"enabled":true,"name":"vmss1","targetResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_refine000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1","notifications":[{"operation":"Scale","email":{"sendToSubscriptionAdministrator":false,"sendToSubscriptionCoAdministrators":false,"customEmails":["abc@example.com","efg@example.com","opq@example.com"]},"webhooks":[{"serviceUri":"https://www.contoso.com/alert","properties":{"apiKey":"value"}}]}],"predictiveAutoscalePolicy":{"scaleMode":"Disabled","scaleLookAheadTime":null}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_refine000001/providers/microsoft.insights/autoscalesettings/vmss1","name":"vmss1","type":"Microsoft.Insights/autoscaleSettings","location":"westus","tags":{},"properties":{"profiles":[{"name":"default","capacity":{"minimum":"2","maximum":"2","default":"2"},"rules":[]}],"enabled":true,"name":"vmss1","targetResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_refine000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1","notifications":[{"operation":"Scale","email":{"sendToSubscriptionAdministrator":false,"sendToSubscriptionCoAdministrators":false,"customEmails":["aaa@foo.com","aaa@foo.com","aaa@foo.com"]},"webhooks":[{"serviceUri":"https://www.contoso.com/alert","properties":{"apiKey":"value"}}]}],"predictiveAutoscalePolicy":{"scaleMode":"Disabled","scaleLookAheadTime":null}}}'
     headers:
       cache-control:
       - no-cache
@@ -1047,8 +1047,8 @@ interactions:
       message: OK
 - request:
     body: '{"location": "westus", "properties": {"enabled": true, "name": "vmss1",
-      "notifications": [{"email": {"customEmails": ["abc@example.com", "efg@example.com",
-      "opq@example.com"], "sendToSubscriptionAdministrator": false, "sendToSubscriptionCoAdministrators":
+      "notifications": [{"email": {"customEmails": ["aaa@foo.com", "aaa@foo.com",
+      "aaa@foo.com"], "sendToSubscriptionAdministrator": false, "sendToSubscriptionCoAdministrators":
       false}, "operation": "Scale", "webhooks": [{"properties": {"apiKey": "value"},
       "serviceUri": "https://www.contoso.com/alert"}]}], "predictiveAutoscalePolicy":
       {"scaleMode": "Disabled"}, "profiles": [{"capacity": {"default": "2", "maximum":
@@ -1076,7 +1076,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_autoscale_refine000001/providers/Microsoft.Insights/autoscalesettings/vmss1?api-version=2022-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_refine000001/providers/microsoft.insights/autoscalesettings/vmss1","name":"vmss1","type":"Microsoft.Insights/autoscaleSettings","location":"westus","tags":{},"properties":{"profiles":[{"name":"default","capacity":{"minimum":"1","maximum":"4","default":"2"},"rules":[]}],"enabled":true,"name":"vmss1","targetResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_refine000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1","notifications":[{"operation":"Scale","email":{"sendToSubscriptionAdministrator":false,"sendToSubscriptionCoAdministrators":false,"customEmails":["abc@example.com","efg@example.com","opq@example.com"]},"webhooks":[{"serviceUri":"https://www.contoso.com/alert","properties":{"apiKey":"value"}}]}],"predictiveAutoscalePolicy":{"scaleMode":"Disabled","scaleLookAheadTime":null}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_refine000001/providers/microsoft.insights/autoscalesettings/vmss1","name":"vmss1","type":"Microsoft.Insights/autoscaleSettings","location":"westus","tags":{},"properties":{"profiles":[{"name":"default","capacity":{"minimum":"1","maximum":"4","default":"2"},"rules":[]}],"enabled":true,"name":"vmss1","targetResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_refine000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1","notifications":[{"operation":"Scale","email":{"sendToSubscriptionAdministrator":false,"sendToSubscriptionCoAdministrators":false,"customEmails":["aaa@foo.com","aaa@foo.com","aaa@foo.com"]},"webhooks":[{"serviceUri":"https://www.contoso.com/alert","properties":{"apiKey":"value"}}]}],"predictiveAutoscalePolicy":{"scaleMode":"Disabled","scaleLookAheadTime":null}}}'
     headers:
       cache-control:
       - no-cache
@@ -1124,7 +1124,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_autoscale_refine000001/providers/Microsoft.Insights/autoscalesettings/vmss1?api-version=2022-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_refine000001/providers/microsoft.insights/autoscalesettings/vmss1","name":"vmss1","type":"Microsoft.Insights/autoscaleSettings","location":"westus","tags":{},"properties":{"profiles":[{"name":"default","capacity":{"minimum":"3","maximum":"3","default":"3"},"rules":[]}],"enabled":true,"name":"vmss1","targetResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_refine000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1","notifications":[{"operation":"Scale","email":{"sendToSubscriptionAdministrator":false,"sendToSubscriptionCoAdministrators":false,"customEmails":["abc@example.com","efg@example.com","opq@example.com"]},"webhooks":[{"serviceUri":"https://www.contoso.com/alert","properties":{"apiKey":"value"}}]}],"predictiveAutoscalePolicy":{"scaleMode":"Disabled","scaleLookAheadTime":null}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_refine000001/providers/microsoft.insights/autoscalesettings/vmss1","name":"vmss1","type":"Microsoft.Insights/autoscaleSettings","location":"westus","tags":{},"properties":{"profiles":[{"name":"default","capacity":{"minimum":"3","maximum":"3","default":"3"},"rules":[]}],"enabled":true,"name":"vmss1","targetResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_refine000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1","notifications":[{"operation":"Scale","email":{"sendToSubscriptionAdministrator":false,"sendToSubscriptionCoAdministrators":false,"customEmails":["aaa@foo.com","aaa@foo.com","aaa@foo.com"]},"webhooks":[{"serviceUri":"https://www.contoso.com/alert","properties":{"apiKey":"value"}}]}],"predictiveAutoscalePolicy":{"scaleMode":"Disabled","scaleLookAheadTime":null}}}'
     headers:
       cache-control:
       - no-cache
@@ -1153,7 +1153,7 @@ interactions:
       message: OK
 - request:
     body: '{"location": "westus", "properties": {"enabled": true, "name": "vmss1",
-      "notifications": [{"email": {"customEmails": ["abc@example.com", "opq@example.com"],
+      "notifications": [{"email": {"customEmails": ["aaa@foo.com", "aaa@foo.com"],
       "sendToSubscriptionAdministrator": false, "sendToSubscriptionCoAdministrators":
       false}, "operation": "Scale", "webhooks": []}], "predictiveAutoscalePolicy":
       {"scaleMode": "Disabled"}, "profiles": [{"capacity": {"default": "3", "maximum":
@@ -1181,7 +1181,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_autoscale_refine000001/providers/Microsoft.Insights/autoscalesettings/vmss1?api-version=2022-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_refine000001/providers/microsoft.insights/autoscalesettings/vmss1","name":"vmss1","type":"Microsoft.Insights/autoscaleSettings","location":"westus","tags":{},"properties":{"profiles":[{"name":"default","capacity":{"minimum":"3","maximum":"3","default":"3"},"rules":[]}],"enabled":true,"name":"vmss1","targetResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_refine000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1","notifications":[{"operation":"Scale","email":{"sendToSubscriptionAdministrator":false,"sendToSubscriptionCoAdministrators":false,"customEmails":["abc@example.com","opq@example.com"]},"webhooks":[]}],"predictiveAutoscalePolicy":{"scaleMode":"Disabled","scaleLookAheadTime":null}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_refine000001/providers/microsoft.insights/autoscalesettings/vmss1","name":"vmss1","type":"Microsoft.Insights/autoscaleSettings","location":"westus","tags":{},"properties":{"profiles":[{"name":"default","capacity":{"minimum":"3","maximum":"3","default":"3"},"rules":[]}],"enabled":true,"name":"vmss1","targetResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_refine000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1","notifications":[{"operation":"Scale","email":{"sendToSubscriptionAdministrator":false,"sendToSubscriptionCoAdministrators":false,"customEmails":["aaa@foo.com","aaa@foo.com"]},"webhooks":[]}],"predictiveAutoscalePolicy":{"scaleMode":"Disabled","scaleLookAheadTime":null}}}'
     headers:
       cache-control:
       - no-cache
@@ -1229,7 +1229,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_autoscale_refine000001/providers/Microsoft.Insights/autoscalesettings/vmss1?api-version=2022-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_refine000001/providers/microsoft.insights/autoscalesettings/vmss1","name":"vmss1","type":"Microsoft.Insights/autoscaleSettings","location":"westus","tags":{},"properties":{"profiles":[{"name":"default","capacity":{"minimum":"3","maximum":"3","default":"3"},"rules":[]}],"enabled":true,"name":"vmss1","targetResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_refine000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1","notifications":[{"operation":"Scale","email":{"sendToSubscriptionAdministrator":false,"sendToSubscriptionCoAdministrators":false,"customEmails":["abc@example.com","opq@example.com"]},"webhooks":[]}],"predictiveAutoscalePolicy":{"scaleMode":"Disabled","scaleLookAheadTime":null}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_refine000001/providers/microsoft.insights/autoscalesettings/vmss1","name":"vmss1","type":"Microsoft.Insights/autoscaleSettings","location":"westus","tags":{},"properties":{"profiles":[{"name":"default","capacity":{"minimum":"3","maximum":"3","default":"3"},"rules":[]}],"enabled":true,"name":"vmss1","targetResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_refine000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1","notifications":[{"operation":"Scale","email":{"sendToSubscriptionAdministrator":false,"sendToSubscriptionCoAdministrators":false,"customEmails":["aaa@foo.com","aaa@foo.com"]},"webhooks":[]}],"predictiveAutoscalePolicy":{"scaleMode":"Disabled","scaleLookAheadTime":null}}}'
     headers:
       cache-control:
       - no-cache
@@ -1258,8 +1258,8 @@ interactions:
       message: OK
 - request:
     body: '{"location": "westus", "properties": {"enabled": true, "name": "vmss1",
-      "notifications": [{"email": {"customEmails": ["abc@example.com", "opq@example.com",
-      "1@example.com"], "sendToSubscriptionAdministrator": false, "sendToSubscriptionCoAdministrators":
+      "notifications": [{"email": {"customEmails": ["aaa@foo.com", "aaa@foo.com",
+      "aaa@foo.com"], "sendToSubscriptionAdministrator": false, "sendToSubscriptionCoAdministrators":
       false}, "operation": "Scale", "webhooks": []}], "predictiveAutoscalePolicy":
       {"scaleMode": "Disabled"}, "profiles": [{"capacity": {"default": "3", "maximum":
       "3", "minimum": "3"}, "name": "default", "rules": []}], "targetResourceUri":
@@ -1286,7 +1286,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_autoscale_refine000001/providers/Microsoft.Insights/autoscalesettings/vmss1?api-version=2022-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_refine000001/providers/microsoft.insights/autoscalesettings/vmss1","name":"vmss1","type":"Microsoft.Insights/autoscaleSettings","location":"westus","tags":{},"properties":{"profiles":[{"name":"default","capacity":{"minimum":"3","maximum":"3","default":"3"},"rules":[]}],"enabled":true,"name":"vmss1","targetResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_refine000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1","notifications":[{"operation":"Scale","email":{"sendToSubscriptionAdministrator":false,"sendToSubscriptionCoAdministrators":false,"customEmails":["abc@example.com","opq@example.com","1@example.com"]},"webhooks":[]}],"predictiveAutoscalePolicy":{"scaleMode":"Disabled","scaleLookAheadTime":null}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_refine000001/providers/microsoft.insights/autoscalesettings/vmss1","name":"vmss1","type":"Microsoft.Insights/autoscaleSettings","location":"westus","tags":{},"properties":{"profiles":[{"name":"default","capacity":{"minimum":"3","maximum":"3","default":"3"},"rules":[]}],"enabled":true,"name":"vmss1","targetResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_refine000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1","notifications":[{"operation":"Scale","email":{"sendToSubscriptionAdministrator":false,"sendToSubscriptionCoAdministrators":false,"customEmails":["aaa@foo.com","aaa@foo.com","aaa@foo.com"]},"webhooks":[]}],"predictiveAutoscalePolicy":{"scaleMode":"Disabled","scaleLookAheadTime":null}}}'
     headers:
       cache-control:
       - no-cache
