@@ -478,7 +478,7 @@ class AAZIdentityObject(AAZObject):  # pylint: disable=too-few-public-methods
 
         result = self._build_identity(calculate_data, result)
 
-        if not result:
+        if not result and calculate_data.get("action", None) == "remove":
             result = {"type": "None"}  # empty identity
 
         if not result and self._is_patch:

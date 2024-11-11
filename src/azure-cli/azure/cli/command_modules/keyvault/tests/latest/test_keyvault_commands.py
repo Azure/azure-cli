@@ -565,7 +565,8 @@ class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
 
         # download SD
         self.cmd('az keyvault security-domain download --hsm-name {hsm_name} --security-domain-file "{sdfile}" '
-                 '--sd-quorum 2 --sd-wrapping-keys "{cer1_path}" "{cer2_path}" "{cer3_path}"')
+                 '--sd-quorum 2 --sd-wrapping-keys "{cer1_path}" "{cer2_path}" "{cer3_path}"',
+                 checks=[self.check('status', 'Success')])
         time.sleep(180)
         with mock.patch('azure.cli.command_modules.keyvault.custom._gen_guid', side_effect=self.create_guid):
             self.cmd('az keyvault role assignment create --assignee {init_admin} --hsm-name {hsm_name} '
@@ -592,8 +593,9 @@ class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
         # upload the blob
         self.cmd('az keyvault security-domain upload --hsm-name {next_hsm_name} --sd-file "{sdfile}" '
                  '--sd-exchange-key "{exchange_key}" '
-                 '--sd-wrapping-keys "{key1_path}" "{key2_path}"')
-
+                 '--sd-wrapping-keys "{key1_path}" "{key2_path}"',
+                 checks=[self.check('status', 'Success')])
+        time.sleep(180)
         with mock.patch('azure.cli.command_modules.keyvault.custom._gen_guid', side_effect=self.create_guid):
             self.cmd('az keyvault role assignment create --assignee {init_admin} --hsm-name {next_hsm_name} '
                      '--role "Managed HSM Crypto User" --scope "/"')

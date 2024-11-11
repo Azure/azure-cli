@@ -564,10 +564,10 @@ def load_arguments(self, _):
     # endregion
 
     # region keyvault security-domain
-    for scope in ['init-recovery', 'download', 'upload']:
+    for scope in ['init-recovery', 'download', 'upload', 'wait']:
         with self.argument_context('keyvault security-domain {}'.format(scope), arg_group='HSM Id') as c:
-            c.argument('hsm_name', hsm_url_type, required=False,
-                       help='Name of the HSM. Can be omitted if --id is specified.')
+            c.extra('hsm_name', hsm_url_type, required=False,
+                    help='Name of the HSM. Can be omitted if --id is specified.')
             c.extra('identifier', options_list=['--id'], validator=validate_vault_or_hsm, help='Full URI of the HSM.')
             c.ignore('vault_base_url')
 
@@ -605,14 +605,8 @@ def load_arguments(self, _):
                                                'for recovery.')
 
     with self.argument_context('keyvault security-domain wait') as c:
-        c.argument('hsm_name', hsm_url_type, help='Name of the HSM. Can be omitted if --id is specified.',
-                   required=False)
-        c.argument('identifier', options_list=['--id'], validator=validate_vault_or_hsm, help='Full URI of the HSM.')
-        c.argument('resource_group_name', options_list=['--resource-group', '-g'],
-                   help='Proceed only if HSM belongs to the specified resource group.')
         c.argument('target_operation', arg_type=get_enum_type(CLISecurityDomainOperation),
                    help='Target operation that needs waiting.')
-        c.ignore('vault_base_url')
     # endregion
 
     # region keyvault backup/restore
