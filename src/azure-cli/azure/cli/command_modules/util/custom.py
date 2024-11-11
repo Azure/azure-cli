@@ -176,10 +176,8 @@ def upgrade_version(cmd, update_all=None, yes=None, allow_preview=None):  # pyli
         try:
             logger.warning("Checking update for %s", ext_name)
             cmds = ['az', 'extension', 'update', '-n', ext_name]
-            if allow_preview:
-                cmds += ["--allow-preview", "true"]
-            else:
-                cmds += ["--allow-preview", "false"]
+            if allow_preview is not None:
+                cmds += ["--allow-preview", allow_preview]
             subprocess.call(cmds, shell=platform.system() == 'Windows')
         except Exception as ex:  # pylint: disable=broad-except
             msg = "Extension {} update failed during az upgrade. {}".format(ext_name, str(ex))
