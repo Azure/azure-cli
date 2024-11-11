@@ -10,7 +10,6 @@ import json
 from itertools import chain
 from json import JSONDecodeError
 from urllib.parse import urlparse
-from ._snapshot_custom_client import AppConfigSnapshotClient
 from ._constants import HttpHeaders
 
 import chardet
@@ -293,10 +292,8 @@ def __read_kv_from_config_store(azconfig_client,
 
     if snapshot:
         try:
-            configsetting_iterable = AppConfigSnapshotClient(
-                azconfig_client
-            ).list_snapshot_kv(
-                name=snapshot,
+            configsetting_iterable = azconfig_client.list_configuration_settings(
+                snapshot_name=snapshot,
                 fields=query_fields,
                 headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id}
             )
@@ -356,7 +353,7 @@ def __read_kv_from_config_store(azconfig_client,
     # We first check if the snapshot exists before returning an empty result.
     if snapshot and len(retrieved_kvs) == 0:
         try:
-            _ = AppConfigSnapshotClient(azconfig_client).get_snapshot(name=snapshot, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
+            _ = azconfig_client.get_snapshot(name=snapshot, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
 
         except HttpResponseError as exception:
             if exception.status_code == StatusCodes.NOT_FOUND:
@@ -444,7 +441,7 @@ def __read_kv_from_app_service(cmd, appservice_account, prefix_to_add="", conten
                             # this throws an exception for invalid format of secret identifier
                             parse_key_vault_id(source_id=secret_identifier)
                             kv = KeyValue(key=key,
-                                          value=json.dumps({"uri": secret_identifier}, ensure_ascii=False, separators=(',', ':')),
+                                          value=json.dumps({"uri": secret_identifier}, ensure_ascii=False),
                                           tags=tags,
                                           content_type=KeyVaultConstants.KEYVAULT_CONTENT_TYPE)
                             key_values.append(kv)
@@ -909,12 +906,12 @@ def __validate_import_feature_flag(kv):
     if kv and validate_import_feature_key(kv.key):
         try:
             ff = json.loads(kv.value)
-            if FEATURE_FLAG_PROPERTIES == ff.keys():
+            if FEATURE_FLAG_PROPERTIES.intersection(ff.keys()) == FEATURE_FLAG_PROPERTIES:
                 return validate_import_feature(ff[FeatureFlagConstants.ID])
 
-            logger.warning("The feature flag with key '{%s}' is not a valid feature flag. It will not be imported.", kv.key)
+            logger.warning("The feature flag with key '%s' is not a valid feature flag. It will not be imported.", kv.key)
         except JSONDecodeError as exception:
-            logger.warning("The feature flag with key '{%s}' is not in a valid JSON format. It will not be imported.\n{%s}", kv.id, str(exception))
+            logger.warning("The feature flag with key '%s' is not in a valid JSON format. It will not be imported.\n%s", kv.key, str(exception))
     return False
 
 

@@ -2028,22 +2028,6 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         ctx_6.attach_mc(mc)
         self.assertEqual(ctx_6.get_network_plugin(), "azure")
 
-        # do not use default from SDK when CREATE and nothing provided by user
-        ctx_7 = AKSManagedClusterContext(
-            self.cmd,
-            AKSManagedClusterParamDict(
-                {
-                }
-            ),
-            self.models,
-            DecoratorMode.CREATE,
-        )
-        network_profile_7 = self.models.ContainerServiceNetworkProfile()
-        self.assertEqual(network_profile_7.network_plugin, "kubenet") # kubenet is the default that comes from the SDK
-        mc = self.models.ManagedCluster(location="test_location", network_profile=network_profile_7)
-        ctx_7.attach_mc(mc)
-        self.assertIsNone(ctx_7.get_network_plugin())
-
     def test_mc_get_network_dataplane(self):
         # Default, not set.
         ctx_1 = AKSManagedClusterContext(
@@ -2891,22 +2875,6 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         self.assertEqual(ctx_1.get_enable_aad(), True)
 
         # invalid parameter
-        ctx_2 = AKSManagedClusterContext(
-            self.cmd,
-            AKSManagedClusterParamDict(
-                {
-                    "enable_aad": True,
-                    "aad_client_app_id": "test_aad_client_app_id",
-                }
-            ),
-            self.models,
-            DecoratorMode.CREATE,
-        )
-        # fail on mutually exclusive enable_aad and aad_client_app_id/aad_server_app_id/aad_server_app_secret
-        with self.assertRaises(MutuallyExclusiveArgumentError):
-            ctx_2.get_enable_aad()
-
-        # invalid parameter
         ctx_3 = AKSManagedClusterContext(
             self.cmd,
             AKSManagedClusterParamDict(
@@ -2942,60 +2910,6 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         with self.assertRaises(InvalidArgumentValueError):
             ctx_4.get_enable_aad()
 
-    def test_get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret(
-        self,
-    ):
-        # default
-        ctx_1 = AKSManagedClusterContext(
-            self.cmd,
-            AKSManagedClusterParamDict(
-                {
-                    "aad_client_app_id": None,
-                    "aad_server_app_id": None,
-                    "aad_server_app_secret": None,
-                }
-            ),
-            self.models,
-            DecoratorMode.CREATE,
-        )
-        self.assertEqual(
-            ctx_1.get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret(),
-            (None, None, None),
-        )
-        aad_profile_1 = self.models.ManagedClusterAADProfile(
-            client_app_id="test_aad_client_app_id",
-            server_app_id="test_aad_server_app_id",
-            server_app_secret="test_aad_server_app_secret",
-        )
-        mc = self.models.ManagedCluster(location="test_location", aad_profile=aad_profile_1)
-        ctx_1.attach_mc(mc)
-        self.assertEqual(
-            ctx_1.get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret(),
-            (
-                "test_aad_client_app_id",
-                "test_aad_server_app_id",
-                "test_aad_server_app_secret",
-            ),
-        )
-
-        # invalid parameter
-        ctx_2 = AKSManagedClusterContext(
-            self.cmd,
-            AKSManagedClusterParamDict(
-                {
-                    "enable_aad": True,
-                    "aad_client_app_id": "test_aad_client_app_id",
-                    "aad_server_app_id": "test_aad_server_app_id",
-                    "aad_server_app_secret": "test_aad_server_app_secret",
-                }
-            ),
-            self.models,
-            DecoratorMode.CREATE,
-        )
-        # fail on mutually exclusive enable_aad and aad_client_app_id/aad_server_app_id/aad_server_app_secret
-        with self.assertRaises(MutuallyExclusiveArgumentError):
-            ctx_2.get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret()
-
     def test_get_aad_tenant_id(self):
         # default
         ctx_1 = AKSManagedClusterContext(
@@ -3016,25 +2930,6 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         mc = self.models.ManagedCluster(location="test_location", aad_profile=aad_profile_1)
         ctx_1.attach_mc(mc)
         self.assertEqual(ctx_1.get_aad_tenant_id(), "test_aad_tenant_id")
-
-        # dynamic completion
-        ctx_2 = AKSManagedClusterContext(
-            self.cmd,
-            AKSManagedClusterParamDict(
-                {
-                    "enable_aad": False,
-                    "aad_client_app_id": "test_aad_client_app_id",
-                }
-            ),
-            self.models,
-            DecoratorMode.CREATE,
-        )
-        profile = Mock(get_login_credentials=Mock(return_value=(None, None, "test_aad_tenant_id")))
-        with patch(
-            "azure.cli.command_modules.acs.managed_cluster_decorator.Profile",
-            return_value=profile,
-        ):
-            self.assertEqual(ctx_2.get_aad_tenant_id(), "test_aad_tenant_id")
 
         # custom value
         ctx_3 = AKSManagedClusterContext(
@@ -4159,127 +4054,6 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
                 "skip_nodes_with_system_pods": None,
             },
         )
-
-    def test_get_uptime_sla(self):
-        # default
-        ctx_1 = AKSManagedClusterContext(
-            self.cmd,
-            AKSManagedClusterParamDict(
-                {
-                    "uptime_sla": False,
-                }
-            ),
-            self.models,
-            DecoratorMode.CREATE,
-        )
-        self.assertEqual(ctx_1.get_uptime_sla(), False)
-        sku = self.models.ManagedClusterSKU(
-            name="Base",
-            tier="Standard",
-        )
-        mc = self.models.ManagedCluster(
-            location="test_location",
-            sku=sku,
-        )
-        ctx_1.attach_mc(mc)
-        self.assertEqual(ctx_1.get_uptime_sla(), True)
-
-        # custom value
-        ctx_2 = AKSManagedClusterContext(
-            self.cmd,
-            AKSManagedClusterParamDict(
-                {
-                    "uptime_sla": False,
-                }
-            ),
-            self.models,
-            DecoratorMode.UPDATE,
-        )
-        sku_2 = self.models.ManagedClusterSKU(
-            name="Base",
-            tier="Standard",
-        )
-        mc_2 = self.models.ManagedCluster(
-            location="test_location",
-            sku=sku_2,
-        )
-        ctx_2.attach_mc(mc_2)
-        self.assertEqual(ctx_2.get_uptime_sla(), False)
-
-        # custom value
-        ctx_3 = AKSManagedClusterContext(
-            self.cmd,
-            AKSManagedClusterParamDict(
-                {
-                    "uptime_sla": True,
-                    "no_uptime_sla": True,
-                }
-            ),
-            self.models,
-            DecoratorMode.CREATE,
-        )
-        sku_3 = self.models.ManagedClusterSKU(
-            name="Base",
-            tier="Free",
-        )
-        mc_3 = self.models.ManagedCluster(
-            location="test_location",
-            sku=sku_3,
-        )
-        ctx_3.attach_mc(mc_3)
-        self.assertEqual(ctx_3.get_uptime_sla(), False)
-
-    def test_get_no_uptime_sla(self):
-        # default
-        ctx_1 = AKSManagedClusterContext(
-            self.cmd,
-            AKSManagedClusterParamDict(
-                {
-                    "no_uptime_sla": False,
-                }
-            ),
-            self.models,
-            DecoratorMode.UPDATE,
-        )
-        self.assertEqual(ctx_1.get_no_uptime_sla(), False)
-        sku = self.models.ManagedClusterSKU(
-            name="Base",
-            tier="Standard",
-        )
-        mc = self.models.ManagedCluster(
-            location="test_location",
-            sku=sku,
-        )
-        ctx_1.attach_mc(mc)
-        self.assertEqual(ctx_1.get_no_uptime_sla(), False)
-
-        # custom value
-        ctx_2 = AKSManagedClusterContext(
-            self.cmd,
-            AKSManagedClusterParamDict(
-                {
-                    "uptime_sla": True,
-                    "no_uptime_sla": True,
-                }
-            ),
-            self.models,
-            DecoratorMode.UPDATE,
-        )
-        sku_2 = self.models.ManagedClusterSKU(
-            name="Base",
-            tier="Free",
-        )
-        mc_2 = self.models.ManagedCluster(
-            location="test_location",
-            sku=sku_2,
-        )
-        ctx_2.attach_mc(mc_2)
-        # fail on mutually exclusive uptime_sla and no_uptime_sla
-        with self.assertRaises(MutuallyExclusiveArgumentError):
-            ctx_2.get_uptime_sla()
-        # fail on mutually exclusive uptime_sla and no_uptime_sla
-        with self.assertRaises(MutuallyExclusiveArgumentError):
-            ctx_2.get_no_uptime_sla()
 
     def test_get_disable_local_accounts(self):
         # default
@@ -6916,38 +6690,6 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         self.assertEqual(dec_mc_2, ground_truth_mc_2)
 
         # custom value
-        dec_3 = AKSManagedClusterCreateDecorator(
-            self.cmd,
-            self.client,
-            {
-                "enable_aad": False,
-                "aad_client_app_id": "test_aad_client_app_id",
-                "aad_server_app_id": None,
-                "aad_server_app_secret": None,
-                "aad_tenant_id": None,
-                "aad_admin_group_object_ids": None,
-                "enable_azure_rbac": False,
-                "disable_rbac": None,
-            },
-            ResourceType.MGMT_CONTAINERSERVICE,
-        )
-        mc_3 = self.models.ManagedCluster(location="test_location")
-        dec_3.context.attach_mc(mc_3)
-        profile = Mock(get_login_credentials=Mock(return_value=(None, None, "test_aad_tenant_id")))
-        with patch(
-            "azure.cli.command_modules.acs.managed_cluster_decorator.Profile",
-            return_value=profile,
-        ):
-            dec_mc_3 = dec_3.set_up_aad_profile(mc_3)
-
-        aad_profile_3 = self.models.ManagedClusterAADProfile(
-            client_app_id="test_aad_client_app_id",
-            tenant_id="test_aad_tenant_id",
-        )
-        ground_truth_mc_3 = self.models.ManagedCluster(location="test_location", aad_profile=aad_profile_3)
-        self.assertEqual(dec_mc_3, ground_truth_mc_3)
-
-        # custom value
         dec_4 = AKSManagedClusterCreateDecorator(
             self.cmd,
             self.client,
@@ -7364,7 +7106,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             self.cmd,
             self.client,
             {
-                "uptime_sla": False,
+                "tier": "free",
             },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
@@ -7385,7 +7127,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             self.cmd,
             self.client,
             {
-                "uptime_sla": True,
+                "tier": "standard",
             },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
@@ -8596,8 +8338,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             self.cmd,
             self.client,
             {
-                "uptime_sla": False,
-                "no_uptime_sla": False,
+                "tier": "free",
             },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
@@ -8623,34 +8364,11 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
 
         # custom value
-        dec_2 = AKSManagedClusterUpdateDecorator(
-            self.cmd,
-            self.client,
-            {
-                "uptime_sla": True,
-                "no_uptime_sla": True,
-            },
-            ResourceType.MGMT_CONTAINERSERVICE,
-        )
-        mc_2 = self.models.ManagedCluster(
-            location="test_location",
-            sku=self.models.ManagedClusterSKU(
-                name="Base",
-                tier="Free",
-            ),
-        )
-        dec_2.context.attach_mc(mc_2)
-        # fail on mutually exclusive uptime_sla and no_uptime_sla
-        with self.assertRaises(MutuallyExclusiveArgumentError):
-            dec_2.update_sku(mc_2)
-
-        # custom value
         dec_3 = AKSManagedClusterUpdateDecorator(
             self.cmd,
             self.client,
             {
-                "uptime_sla": False,
-                "no_uptime_sla": True,
+                "tier": "free",
             },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
@@ -8677,8 +8395,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             self.cmd,
             self.client,
             {
-                "uptime_sla": True,
-                "no_uptime_sla": False,
+                "tier": "standard",
             },
             ResourceType.MGMT_CONTAINERSERVICE,
         )

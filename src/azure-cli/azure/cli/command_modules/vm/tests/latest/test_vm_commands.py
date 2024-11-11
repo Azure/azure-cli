@@ -119,7 +119,7 @@ class VMImageListThruServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     def test_vm_images_list_thru_services_edge_zone(self):
-        result = self.cmd('vm image list --edge-zone microsoftlosangeles1 --offer CentOs --publisher OpenLogic --sku 7.7 -o tsv --all').output
+        result = self.cmd('vm image list --edge-zone losangeles --offer CentOs --publisher OpenLogic --sku 7.7 -o tsv --all').output
         assert result.index('7.7') >= 0
 
     @AllowLargeResponse()
@@ -129,8 +129,21 @@ class VMImageListThruServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     def test_vm_image_list_thru_services_edge_zone_by_arch(self):
-        result = self.cmd('vm image list --edge-zone microsoftlosangeles1 --offer CentOs --publisher OpenLogic --sku 7.7 --architecture x64 -o tsv --all').output
+        result = self.cmd('vm image list --edge-zone losangeles --offer CentOs --publisher OpenLogic --sku 7.7 --architecture x64 -o tsv --all').output
         assert result.index('x64') >= 0
+
+    @AllowLargeResponse()
+    def test_vm_image_list_thru_services_deprecation_status(self):
+        self.cmd('vm image list --offer CentOs --publisher OpenLogic --sku 7.7 --architecture x64 --all ', checks=[
+            self.check('[0].imageDeprecationStatus.imageState', 'Active'),
+            self.check('[0].imageDeprecationStatus.scheduledDeprecationTime', None),
+            self.check('[5].imageDeprecationStatus.imageState', 'ScheduledForDeprecation'),
+            self.check('[5].imageDeprecationStatus.scheduledDeprecationTime', '2024-10-09T00:00:00+00:00'),
+        ])
+        self.cmd('vm image list --offer CentOs --publisher OpenLogic --sku 7.7 --architecture x64 --edge-zone losangeles', checks=[
+            self.check('[0].imageDeprecationStatus.imageState', 'Active'),
+            self.check('[0].imageDeprecationStatus.scheduledDeprecationTime', None)
+        ])
 
 
 class VMOpenPortTest(ScenarioTest):
@@ -3301,7 +3314,7 @@ class VMCreateExistingIdsOptions(ScenarioTest):
     @StorageAccountPreparer()
     def test_vm_create_existing_ids_options(self, resource_group, storage_account):
         from azure.cli.core.commands.client_factory import get_subscription_id
-        from msrestazure.tools import resource_id, is_valid_resource_id
+        from azure.mgmt.core.tools import resource_id, is_valid_resource_id
 
         subscription_id = self.get_subscription_id()
 
@@ -3513,6 +3526,63 @@ class VMDiskAttachDetachTest(ScenarioTest):
         ])
 
     @AllowLargeResponse(size_kb=99999)
+    @ResourceGroupPreparer(name_prefix='cli-test-disk-attach-detach')
+    def test_vm_disk_attach_detach_api(self, resource_group):
+        self.kwargs.update({
+            'loc': 'westus',
+            'vm': self.create_random_name('vm', 10),
+            'disk1': self.create_random_name('disk', 10),
+            'disk2': self.create_random_name('disk', 10),
+            'subnet': self.create_random_name('subnet', 15),
+            'vnet': self.create_random_name('vnet', 15)
+        })
+
+        self.cmd('vm create -g {rg} --location {loc} -n {vm} --admin-username admin123 --image OpenLogic:CentOS:7.5:latest --admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk1} --new --size-gb 1 --caching ReadOnly')
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk2} --new --size-gb 2 --lun 2 --sku standard_lrs')
+        disks = self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('length(storageProfile.dataDisks)', 2),
+            self.check('storageProfile.dataDisks[0].name', '{disk1}'),
+            self.check('storageProfile.dataDisks[0].caching', 'ReadOnly'),
+            self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Premium_LRS'),
+            self.check('storageProfile.dataDisks[1].name', '{disk2}'),
+            self.check('storageProfile.dataDisks[1].lun', 2),
+            self.check('storageProfile.dataDisks[1].managedDisk.storageAccountType', 'Standard_LRS'),
+            self.check('storageProfile.dataDisks[1].caching', 'None')
+        ]).get_output_in_json()['storageProfile']['dataDisks']
+        self.kwargs.update({
+            'disk1_id': disks[0]['managedDisk']['id'],
+            'disk2_id': disks[1]['managedDisk']['id']
+        })
+
+        self.cmd('vm disk detach -g {rg} --vm-name {vm} --disk-ids {disk1_id}')
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            # self.check('length(storageProfile.dataDisks)', 1),
+            # self.check('storageProfile.dataDisks[0].name', '{disk2}'),
+            # self.check('storageProfile.dataDisks[0].lun', 2)
+        ])
+
+        self.cmd('vm disk detach -g {rg} --vm-name {vm} --disk-ids {disk2_id} --force-detach')
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            # self.check('length(storageProfile.dataDisks)', 0)
+        ])
+
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --disk-ids {disk1_id} {disk2_id}')
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            # self.check('storageProfile.dataDisks[0].caching', 'ReadWrite'),
+            # self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Standard_LRS'),
+            # self.check('storageProfile.dataDisks[0].lun', 0)
+        ])
+
+        # force detach a disk
+        self.cmd('vm disk detach -g {rg} --vm-name {vm} --disk-ids {disk1_id} {disk2_id} --force-detach')
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            # self.check('length(storageProfile.dataDisks)', 0)
+        ])
+
+    @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli-test-disk-attach-multiple-disks')
     def test_vm_disk_attach_multiple_disks(self, resource_group):
 
@@ -3533,14 +3603,23 @@ class VMDiskAttachDetachTest(ScenarioTest):
         self.cmd(
             'network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
-        with self.assertRaisesRegex(RequiredArgumentMissingError, 'Please use --name or --disks to specify the disk names'):
+        with self.assertRaisesRegex(RequiredArgumentMissingError, 'Please use at least one of --name, --disks and --disk-ids'):
             self.cmd('vm disk attach -g {rg} --vm-name {vm} --new --size-gb 1 ')
 
         with self.assertRaisesRegex(MutuallyExclusiveArgumentError, 'You can only specify one of --name and --disks'):
             self.cmd('vm disk attach -g {rg} --name {disk1} --disks {disk1} {disk2} {disk3} --vm-name {vm} --new --size-gb 1 ')
 
+        with self.assertRaisesRegex(MutuallyExclusiveArgumentError, 'You can only specify one of --name and --disk-ids'):
+            self.cmd('vm disk attach -g {rg} --name {disk1} --disk-ids {disk1} {disk2} {disk3} --vm-name {vm} --new --size-gb 1 ')
+
+        with self.assertRaisesRegex(MutuallyExclusiveArgumentError, 'You can only specify one of --disks and --disk-ids'):
+            self.cmd('vm disk attach -g {rg} --disk-ids {disk1} --disks {disk1} {disk2} {disk3} --vm-name {vm} --new --size-gb 1 ')
+
         with self.assertRaisesRegex(MutuallyExclusiveArgumentError, 'You cannot specify the --lun for multiple disks'):
             self.cmd('vm disk attach -g {rg} --disks {disk1} {disk2} {disk3} --vm-name {vm} --new --size-gb 1 --lun 2')
+
+        with self.assertRaisesRegex(MutuallyExclusiveArgumentError, 'You cannot specify the --lun for multiple disk IDs'):
+            self.cmd('vm disk attach -g {rg} --disk-ids {disk1} {disk2} {disk3} --vm-name {vm} --lun 2')
 
         self.cmd('vm disk attach -g {rg} --vm-name {vm} --disks {disk1} {disk2} {disk3} --new --size-gb 1 ')
 
@@ -4710,6 +4789,7 @@ class VMSSUpdateTests(ScenarioTest):
             self.check('upgradePolicy.automaticOsUpgradePolicy.enableAutomaticOsUpgrade', True)
         ])
 
+    @live_only()
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_image_', location='westus')
     def test_vmss_update_image(self):
@@ -5101,7 +5181,7 @@ class VMSSCreateExistingIdsOptions(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_existing_ids')
     def test_vmss_create_existing_ids_options(self, resource_group):
 
-        from msrestazure.tools import resource_id, is_valid_resource_id
+        from azure.mgmt.core.tools import resource_id, is_valid_resource_id
         subscription_id = self.get_subscription_id()
 
         self.kwargs.update({
@@ -6883,7 +6963,7 @@ class VMGalleryImage(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_image_version_create_os_vhd')
     def test_image_version_create_os_vhd(self, resource_group):
-        from msrestazure.tools import resource_id
+        from azure.mgmt.core.tools import resource_id
 
         self.kwargs.update({
             'vm': 'myvm',
@@ -7950,7 +8030,7 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
     #
     # however, the CLI does not replace resource group values in payloads in the recordings.
     def _assert_ids_equal(self, id_1, id_2, rg_prefix=None):
-        from msrestazure.tools import parse_resource_id
+        from azure.mgmt.core.tools import parse_resource_id
 
         id_1, id_2, rg_prefix = id_1.lower(), id_2.lower(), rg_prefix.lower() if rg_prefix else rg_prefix
 
@@ -9592,6 +9672,39 @@ class VMSSAutomaticRepairsScenarioTest(ScenarioTest):
                      self.check('automaticRepairsPolicy.gracePeriod', 'PT30M')
                  ])
 
+class SkuProfileTest(ScenarioTest):
+        
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_sku_profile', location='eastus2')
+    def test_vmss_create_sku_profile(self, resource_group):
+        self.kwargs.update({
+            'vmss': self.create_random_name('vmss', 10),
+        })
+        self.cmd('vmss create -n {vmss} -g {rg} --image ubuntu2204 --vm-sku Mix ' + 
+                ' --skuprofile-vmsizes Standard_DS1_v2 Standard_D2s_v4', checks=[
+            self.check('vmss.orchestrationMode', 'Flexible'),
+            self.check('vmss.skuProfile.allocationStrategy', 'LowestPrice'),
+            self.check('vmss.skuProfile.vmSizes[0].name', 'Standard_DS1_v2'),
+            self.check('vmss.skuProfile.vmSizes[1].name', 'Standard_D2s_v4')
+        ])
+    
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_sku_profile_update', location='eastus2')
+    def test_vmss_create_sku_profile_update(self, resource_group):
+        self.kwargs.update({
+            'vmss': self.create_random_name('vmss', 10),
+        })
+        self.cmd('vmss create -n {vmss} -g {rg} --image ubuntu2204 --vm-sku Mix ' + 
+                ' --skuprofile-vmsizes Standard_DS1_v2 --skuprofile-allocation-strategy CapacityOptimized', checks=[
+            self.check('vmss.orchestrationMode', 'Flexible'),
+            self.check('vmss.skuProfile.allocationStrategy', 'CapacityOptimized'),
+            self.check('vmss.skuProfile.vmSizes[0].name', 'Standard_DS1_v2'),
+        ])
+        self.cmd('vmss update -n {vmss} -g {rg} ' + 
+                ' --skuprofile-vmsizes Standard_DS1_v2 Standard_D2s_v4 --skuprofile-allocation-strategy CapacityOptimized', checks=[
+            self.check('skuProfile.allocationStrategy', 'CapacityOptimized'),
+            self.check('skuProfile.vmSizes[0].name', 'Standard_DS1_v2'),
+            self.check('skuProfile.vmSizes[1].name', 'Standard_D2s_v4')
+        ])
+
 
 class VMCreateNSGRule(ScenarioTest):
 
@@ -9921,7 +10034,6 @@ class VMSSOrchestrationModeScenarioTest(ScenarioTest):
             self.check('length(@)', 1),
             self.check('[0].type', 'Microsoft.Network/loadBalancers/inboundNatRules')
         ])
-
 
 class VMCrossTenantUpdateScenarioTest(LiveScenarioTest):
 
@@ -10269,6 +10381,7 @@ class VMSSHKeyScenarioTest(ScenarioTest):
             "ssh_key": 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE+N4unGvv6pXPYebWiQ6Ak618DjYm5g6d2ECnq/1F0x generated-by-azure',
             'vm1': 'vm1',
             'vm2': 'vm2',
+            'vm3': 'vm3',
             'subnet': 'subnet1',
             'vnet': 'vnet1'
         })
@@ -10280,7 +10393,9 @@ class VMSSHKeyScenarioTest(ScenarioTest):
         # Disable default outbound access
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
-        self.cmd('vm create -g {rg} -n {vm2} --image OpenLogic:CentOS:7.5:latest --nsg-rule None  --ssh-key-value \'{ssh_key}\' --admin-username vmtest2 --subnet {subnet} --vnet-name {vnet}')
+        self.cmd('vm create -g {rg} -n {vm2} --image OpenLogic:CentOS:7.5:latest --nsg-rule None --ssh-key-value \'{ssh_key}\' --admin-username vmtest2 --subnet {subnet} --vnet-name {vnet}')
+
+        self.cmd('vm create -g {rg} -n {vm3} --image OpenLogic:CentOS:7.5:latest --nsg-rule None --generate-ssh-keys --ssh-key-type ed25519 --admin-username vmtest3 --subnet {subnet} --vnet-name {vnet}')
 
 
 class VMInstallPatchesScenarioTest(ScenarioTest):

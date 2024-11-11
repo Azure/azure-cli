@@ -30,7 +30,7 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
     }
 
     if public_ip_prefix:
-        from msrestazure.tools import parse_resource_id
+        from azure.mgmt.core.tools import parse_resource_id
         metadata = parse_resource_id(public_ip_prefix)
         resource_group_name = metadata["resource_group"]
         public_ip_prefix_name = metadata["resource_name"]

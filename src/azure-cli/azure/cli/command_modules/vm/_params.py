@@ -559,10 +559,12 @@ def load_arguments(self, _):
         c.argument('disks', nargs='*', help="One or more names or IDs of the managed disk (space-delimited).",
                    completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
         c.argument('ids', deprecate_info=c.deprecate(target='--ids', redirect='--disks', hide=True))
+        c.argument('disk_ids', nargs='+', min_api='2024-03-01', help='The disk IDs of the managed disk (space-delimited).')
 
     with self.argument_context('vm disk detach') as c:
         c.argument('disk_name', arg_type=name_arg_type, help='The data disk name.')
         c.argument('force_detach', action='store_true', min_api='2020-12-01', help='Force detach managed data disks from a VM.')
+        c.argument('disk_ids', nargs='+', min_api='2024-03-01', help='The disk IDs of the managed disk (space-delimited).')
 
     with self.argument_context('vm encryption enable') as c:
         c.argument('encrypt_format_all', action='store_true', help='Encrypts-formats data disks instead of encrypting them. Encrypt-formatting is a lot faster than in-place encryption but wipes out the partition getting encrypt-formatted. (Only supported for Linux virtual machines.)')
@@ -783,6 +785,8 @@ def load_arguments(self, _):
                    options_list=['--security-posture-reference-exclude-extensions', '--exclude-extensions'],
                    help='List of virtual machine extensions to exclude when applying the Security Posture. Either a Json string or a file path is acceptable. '
                         'Please refer to https://docs.microsoft.com/rest/api/compute/virtualmachinescalesets/get#virtualmachineextension for the data format.')
+        c.argument('skuprofile_vmsizes', nargs='+', min_api='2024-07-01', help='A list of VM sizes in the scale set. See https://azure.microsoft.com/pricing/details/virtual-machines/ for size info.')
+        c.argument('skuprofile_allostrat', options_list=['--skuprofile-allocation-strategy', '--sku-allocat-strat'], arg_type=get_enum_type(['LowestPrice', 'CapacityOptimized']), min_api='2024-07-01', help='Allocation strategy for vm sizes in SKU profile.')
 
     with self.argument_context('vmss create', arg_group='Network Balancer') as c:
         c.argument('application_gateway', help='Name to use when creating a new application gateway (default) or referencing an existing one. Can also reference an existing application gateway by ID or specify "" for none.', options_list=['--app-gateway'])
@@ -838,6 +842,8 @@ def load_arguments(self, _):
         c.argument('ephemeral_os_disk', arg_type=get_three_state_flag(), min_api='2024-03-01', help='Allow you to specify the ephemeral disk settings for the operating system disk. Specify it to false to set ephemeral disk setting as empty and migrate it to non ephemeral')
         c.argument('ephemeral_os_disk_option', options_list=['--ephemeral-os-disk-option', '--ephemeral-option'], arg_type=get_enum_type(self.get_models('DiffDiskOptions')), min_api='2024-03-01', help='Specify the ephemeral disk settings for operating system disk.')
         c.argument('zones', zones_type, min_api='2023-03-01')
+        c.argument('skuprofile_vmsizes', nargs='+', min_api='2024-07-01', help='A list of VM sizes in the scale set. See https://azure.microsoft.com/pricing/details/virtual-machines/ for size info.')
+        c.argument('skuprofile_allostrat', options_list=['--skuprofile-allocation-strategy', '--sku-allocat-strat'], arg_type=get_enum_type(['LowestPrice', 'CapacityOptimized']), min_api='2024-07-01', help='Allocation strategy for vm sizes in SKU profile.')
 
     with self.argument_context('vmss update', min_api='2018-10-01', arg_group='Automatic Repairs') as c:
 
@@ -1078,7 +1084,8 @@ def load_arguments(self, _):
             c.argument('disable_integrity_monitoring_autoupgrade', action='store_true', min_api='2020-12-01', help='Disable auto upgrade of guest attestation extension for Trusted Launch enabled VMs and VMSS.')
 
         with self.argument_context(scope, arg_group='Authentication') as c:
-            c.argument('generate_ssh_keys', action='store_true', help='Generate SSH public and private RSA key files if missing. The keys will be stored in the ~/.ssh directory')
+            c.argument('generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing. The keys will be stored in the ~/.ssh directory')
+            c.argument('ssh_key_type', arg_type=get_enum_type(['RSA', 'Ed25519']), default='RSA', min_api='2023-09-01', help='Specify the type of SSH public and private key files to be generated if missing.')
             c.argument('admin_username', help='Username for the VM. Default value is current username of OS. If the default value is system reserved, then default value will be set to azureuser. Please refer to https://docs.microsoft.com/rest/api/compute/virtualmachines/createorupdate#osprofile to get a full list of reserved values.')
             c.argument('admin_password', help="Password for the VM if authentication type is 'Password'.")
             c.argument('ssh_key_value', options_list=['--ssh-key-values'], completer=FilesCompleter(), type=file_type, nargs='+')

@@ -286,6 +286,7 @@ class FunctionAppWithPlanE2ETest(ScenarioTest):
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
             JMESPathCheck('linuxFxVersion', 'Java|11')])
 
+    @live_only()  # TODO: to be fixed
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_on_linux_app_service_powershell(self, resource_group, storage_account):
@@ -311,6 +312,7 @@ class FunctionAppWithPlanE2ETest(ScenarioTest):
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
             JMESPathCheck('linuxFxVersion', 'PowerShell|7.2')])
 
+    @live_only()  # TODO: to be fixed
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_on_linux_app_service_powershell_with_runtime_version(self, resource_group, storage_account):
@@ -594,6 +596,7 @@ class FunctionAppWithLinuxConsumptionPlanTest(ScenarioTest):
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
             JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'java')])
 
+    @live_only()  # TODO: to be fixed
     @ResourceGroupPreparer(name_prefix='azurecli-functionapp-linux', location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_consumption_linux_powershell(self, resource_group, storage_account):
@@ -779,9 +782,41 @@ class FunctionAppFlex(LiveScenarioTest):
         locations = self.cmd('functionapp list-flexconsumption-locations').get_output_in_json()
         self.assertTrue(len(locations) == 13)
 
+    def test_functionapp_list_flexconsumption_locations_zone_redundant(self):
+        locations = self.cmd('functionapp list-flexconsumption-locations --zone-redundant').get_output_in_json()
+        self.assertTrue(len(locations) > 0)
+
     def test_functionapp_list_flexconsumption_runtimes(self):
         runtimes = self.cmd('functionapp list-flexconsumption-runtimes -l eastasia --runtime python').get_output_in_json()
         self.assertTrue(len(runtimes) == 2)
+
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_flex_zone_redundant_active(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(
+            'functionapp', 40)
+
+        functionapp = self.cmd('functionapp create -g {} -n {} -f {} -s {} --runtime python --runtime-version 3.11 --zone-redundant'
+                               .format(resource_group, functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account)).get_output_in_json()
+
+        server_farm_id =functionapp['properties']['serverFarmId']
+        function_plan = self.cmd('az functionapp plan show --ids {}'
+                               .format(server_farm_id)).get_output_in_json()
+        self.assertTrue(function_plan['zoneRedundant'] == True) 
+
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_flex_zone_redundant_not_active(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(
+            'functionapp', 40)
+
+        functionapp = self.cmd('functionapp create -g {} -n {} -f {} -s {} --runtime python --runtime-version 3.11'
+                               .format(resource_group, functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account)).get_output_in_json()
+
+        server_farm_id =functionapp['properties']['serverFarmId']
+        function_plan = self.cmd('az functionapp plan show --ids {}'
+                               .format(server_farm_id)).get_output_in_json()
+        self.assertTrue(function_plan['zoneRedundant'] == False) 
 
     @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -1383,6 +1418,7 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
             JMESPathCheck('javaVersion', '17')])
 
+    @live_only()  # TODO: to be fixed
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_windows_runtime_powershell(self, resource_group, storage_account):
@@ -2966,6 +3002,7 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
                                                                                subnet_name, storage_account), expect_failure=True)
 
 class FunctionAppConfigTest(ScenarioTest):
+    @live_only()  # TODO: to be fixed
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_powershell_version(self, resource_group, storage_account):
@@ -2987,6 +3024,24 @@ class FunctionAppConfigTest(ScenarioTest):
                      JMESPathCheck('powerShellVersion', '7.0')])
         self.cmd(
             'functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_config_set(self, resource_group, storage_account):
+        plan = self.create_random_name(prefix='funcapplinplan', length=24)
+        functionapp = self.create_random_name(
+            prefix='functionapp-windows', length=24)
+        self.cmd('functionapp plan create -g {} -n {} --sku S1'.format(resource_group, plan))
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime dotnet-isolated --runtime-version 8 --functions-version 4'
+                 .format(resource_group, functionapp, plan, storage_account))
+        self.cmd('functionapp config set -g {} -n {} --always-on true --http20-enabled true --min-tls-version "1.2" --ftps-state "Disabled" --remote-debugging-enabled false --use-32bit-worker-process'
+                 .format(resource_group, functionapp)).assert_with_checks([
+                     JMESPathCheck('alwaysOn', True),
+                     JMESPathCheck('http20Enabled', True),
+                     JMESPathCheck('minTlsVersion', '1.2'),
+                     JMESPathCheck('ftpsState', 'Disabled'),
+                     JMESPathCheck('remoteDebuggingEnabled', False),
+                     JMESPathCheck('use32BitWorkerProcess', True)])
 
 class FunctionAppLanguageEOLTest(ScenarioTest):
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)

@@ -45,9 +45,11 @@ from ._vm_diagnostics_templates import get_default_diag_config
 from ._actions import (load_images_from_aliases_doc, load_extension_images_thru_services,
                        load_images_thru_services, _get_latest_image_version)
 from ._client_factory import (_compute_client_factory, cf_vm_image_term, _dev_test_labs_client_factory)
+
 from .aaz.latest.ppg import Show as _PPGShow
 from .aaz.latest.vmss import ListInstances as _VMSSListInstances
 from .aaz.latest.capacity.reservation.group import List as _CapacityReservationGroupList
+from .aaz.latest.vm.disk import AttachDetachDataDisk
 
 from .generated.custom import *  # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
 try:
@@ -306,7 +308,7 @@ def _normalize_extension_version(cli_ctx, publisher, vm_extension_name, version,
 
 def _parse_rg_name(strid):
     '''From an ID, extract the contained (resource group, name) tuple.'''
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
     parts = parse_resource_id(strid)
     return (parts['resource_group'], parts['name'])
 
@@ -328,7 +330,7 @@ def _show_missing_access_warning(resource_group, name, command):
 
 
 def _parse_aux_subscriptions(resource_id):
-    from msrestazure.tools import is_valid_resource_id, parse_resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
     if is_valid_resource_id(resource_id):
         res = parse_resource_id(resource_id)
         return [res['subscription']]
@@ -360,7 +362,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                         upload_type=None, secure_vm_disk_encryption_set=None, performance_plus=None,
                         optimized_for_frequent_attach=None):
 
-    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
     Disk, CreationData, DiskCreateOption, Encryption = cmd.get_models(
@@ -408,7 +410,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
             else:  # error
                 raise CLIError('usage error: --image-reference should be ID or URN (publisher:offer:sku:version).')
         else:
-            from msrestazure.tools import parse_resource_id
+            from azure.mgmt.core.tools import parse_resource_id
             terms = parse_resource_id(image_reference)
             disk_publisher, disk_offer, disk_sku, disk_version = \
                 terms['child_name_1'], terms['child_name_3'], terms['child_name_4'], terms['child_name_5']
@@ -548,7 +550,7 @@ def update_managed_disk(cmd, resource_group_name, instance, size_gb=None, sku=No
                         network_access_policy=None, disk_access=None, max_shares=None, disk_iops_read_only=None,
                         disk_mbps_read_only=None, enable_bursting=None, public_network_access=None,
                         accelerated_network=None, architecture=None, data_access_auth_mode=None):
-    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
     if size_gb is not None:
@@ -677,7 +679,7 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
                     encryption_type=None, network_access_policy=None, disk_access=None, edge_zone=None,
                     public_network_access=None, accelerated_network=None, architecture=None,
                     elastic_san_resource_id=None, bandwidth_copy_speed=None):
-    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
     Snapshot, CreationData, DiskCreateOption, Encryption = cmd.get_models(
@@ -759,7 +761,7 @@ def grant_snapshot_access(cmd, resource_group_name, snapshot_name, duration_in_s
 def update_snapshot(cmd, resource_group_name, instance, sku=None, disk_encryption_set=None,
                     encryption_type=None, network_access_policy=None, disk_access=None, public_network_access=None,
                     accelerated_network=None, architecture=None):
-    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
     if sku is not None:
@@ -900,7 +902,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               os_disk_security_encryption_type=None, os_disk_secure_vm_disk_encryption_set=None,
               disk_controller_type=None, disable_integrity_monitoring_autoupgrade=False, enable_proxy_agent=None,
               proxy_agent_mode=None, source_snapshots_or_disks=None, source_snapshots_or_disks_size_gb=None,
-              source_disk_restore_point=None, source_disk_restore_point_size_gb=None):
+              source_disk_restore_point=None, source_disk_restore_point_size_gb=None, ssh_key_type=None):
 
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
@@ -913,7 +915,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                                                                 build_vm_linux_log_analytics_workspace_agent,
                                                                 build_vm_windows_log_analytics_workspace_agent)
     from azure.cli.command_modules.vm._vm_utils import ArmTemplateBuilder20190401
-    from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id
+    from azure.mgmt.core.tools import resource_id, is_valid_resource_id, parse_resource_id
 
     # In the latest profile, the default public IP will be expected to be changed from Basic to Standard,
     # and Basic option will be removed.
@@ -1241,7 +1243,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
 
 def auto_shutdown_vm(cmd, resource_group_name, vm_name, off=None, email=None, webhook=None, time=None,
                      location=None):
-    from msrestazure.tools import resource_id
+    from azure.mgmt.core.tools import resource_id
     from azure.mgmt.devtestlabs.models import Schedule
     from azure.cli.core.commands.client_factory import get_subscription_id
     subscription_id = get_subscription_id(cmd.cli_ctx)
@@ -1300,7 +1302,7 @@ def get_vm_to_update(cmd, resource_group_name, vm_name):
 
 
 def get_vm_details(cmd, resource_group_name, vm_name, include_user_data=False):
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
 
     NicShow = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.nic").Show
     PublicIPShow = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.public_ip").Show
@@ -1364,7 +1366,7 @@ def list_skus(cmd, location=None, size=None, zone=None, show_all=None, resource_
 
 # pylint: disable=redefined-builtin
 def list_vm(cmd, resource_group_name=None, show_details=False, vmss=None):
-    from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id
+    from azure.mgmt.core.tools import resource_id, is_valid_resource_id, parse_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
     ccf = _compute_client_factory(cmd.cli_ctx)
     if vmss is not None:
@@ -1453,7 +1455,7 @@ def list_vm_ip_addresses(cmd, resource_group_name=None, vm_name=None):
 
 def open_vm_port(cmd, resource_group_name, vm_name, port, priority=900, network_security_group_name=None,
                  apply_to_subnet=False):
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
     _nic = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.nic")
     NicShow, NicUpdate = _nic.Show, _nic.Update
     _subnet = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.vnet.subnet")
@@ -1618,7 +1620,7 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
               dedicated_host=None, dedicated_host_group=None, size=None, ephemeral_os_disk_placement=None,
               enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None, disk_controller_type=None,
               security_type=None, enable_proxy_agent=None, proxy_agent_mode=None, **kwargs):
-    from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import parse_resource_id, resource_id, is_valid_resource_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching
     SecurityProfile, UefiSettings = cmd.get_models('SecurityProfile', 'UefiSettings')
     vm = kwargs['parameters']
@@ -2036,35 +2038,64 @@ def show_default_diagnostics_configuration(is_windows_os=False):
 
 # region VirtualMachines Disks (Managed)
 def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=None, disks=None, new=False, sku=None,
-                             size_gb=1023, lun=None, caching=None, enable_write_accelerator=False):
-    '''attach multiple managed disks'''
-    from msrestazure.tools import parse_resource_id
+                             size_gb=None, lun=None, caching=None, enable_write_accelerator=False, disk_ids=None):
+    # attach multiple managed disks using disk attach API
     vm = get_vm_to_update(cmd, resource_group_name, vm_name)
-    DataDisk, ManagedDiskParameters, DiskCreateOption = cmd.get_models(
-        'DataDisk', 'ManagedDiskParameters', 'DiskCreateOptionTypes')
-
-    for disk_item in disks:
+    if not new and not sku and not size_gb and disk_ids is not None:
         if lun:
             disk_lun = lun
         else:
             disk_lun = _get_disk_lun(vm.storage_profile.data_disks)
 
-        if new:
-            data_disk = DataDisk(lun=disk_lun, create_option=DiskCreateOption.empty,
-                                 name=parse_resource_id(disk_item)['name'],
-                                 disk_size_gb=size_gb, caching=caching,
-                                 managed_disk=ManagedDiskParameters(storage_account_type=sku))
-        else:
-            params = ManagedDiskParameters(id=disk_item, storage_account_type=sku)
-            data_disk = DataDisk(lun=disk_lun, create_option=DiskCreateOption.attach, managed_disk=params,
-                                 caching=caching)
+        data_disks = []
+        for disk_item in disk_ids:
+            disk = {
+                'diskId': disk_item,
+                'caching': caching,
+                'lun': disk_lun,
+                'writeAcceleratorEnabled': enable_write_accelerator
+            }
+            data_disks.append(disk)
+            disk_lun += 1
+        result = AttachDetachDataDisk(cli_ctx=cmd.cli_ctx)(command_args={
+            'vm_name': vm_name,
+            'resource_group': resource_group_name,
+            'data_disks_to_attach': data_disks
+        })
+        return result
+    else:
+        # attach multiple managed disks using vm PUT API
+        from azure.mgmt.core.tools import parse_resource_id
+        DataDisk, ManagedDiskParameters, DiskCreateOption = cmd.get_models(
+            'DataDisk', 'ManagedDiskParameters', 'DiskCreateOptionTypes')
+        if size_gb is None:
+            size_gb = 1023
 
-        if enable_write_accelerator:
-            data_disk.write_accelerator_enabled = enable_write_accelerator
+        if disk_ids is not None:
+            disks = disk_ids
 
-        vm.storage_profile.data_disks.append(data_disk)
+        for disk_item in disks:
+            if lun:
+                disk_lun = lun
+            else:
+                disk_lun = _get_disk_lun(vm.storage_profile.data_disks)
 
-    set_vm(cmd, vm)
+            if new:
+                data_disk = DataDisk(lun=disk_lun, create_option=DiskCreateOption.empty,
+                                     name=parse_resource_id(disk_item)['name'],
+                                     disk_size_gb=size_gb, caching=caching,
+                                     managed_disk=ManagedDiskParameters(storage_account_type=sku))
+            else:
+                params = ManagedDiskParameters(id=disk_item, storage_account_type=sku)
+                data_disk = DataDisk(lun=disk_lun, create_option=DiskCreateOption.attach, managed_disk=params,
+                                     caching=caching)
+
+            if enable_write_accelerator:
+                data_disk.write_accelerator_enabled = enable_write_accelerator
+
+            vm.storage_profile.data_disks.append(data_disk)
+
+        set_vm(cmd, vm)
 
 
 def detach_unmanaged_data_disk(cmd, resource_group_name, vm_name, disk_name):
@@ -2079,29 +2110,41 @@ def detach_unmanaged_data_disk(cmd, resource_group_name, vm_name, disk_name):
 # endregion
 
 
-def detach_managed_data_disk(cmd, resource_group_name, vm_name, disk_name, force_detach=None):
-    # here we handle managed disk
-    vm = get_vm_to_update(cmd, resource_group_name, vm_name)
-    if not force_detach:
-        # pylint: disable=no-member
-        leftovers = [d for d in vm.storage_profile.data_disks if d.name.lower() != disk_name.lower()]
-        if len(vm.storage_profile.data_disks) == len(leftovers):
-            raise ResourceNotFoundError("No disk with the name '{}' was found".format(disk_name))
+def detach_managed_data_disk(cmd, resource_group_name, vm_name, disk_name=None, force_detach=None, disk_ids=None):
+    if disk_ids is not None:
+        data_disks = []
+        for disk_item in disk_ids:
+            disk = {'diskId': disk_item, 'detachOption': 'ForceDetach' if force_detach else None}
+            data_disks.append(disk)
+        result = AttachDetachDataDisk(cli_ctx=cmd.cli_ctx)(command_args={
+            'vm_name': vm_name,
+            'resource_group': resource_group_name,
+            'data_disks_to_detach': data_disks
+        })
+        return result
     else:
-        DiskDetachOptionTypes = cmd.get_models('DiskDetachOptionTypes', resource_type=ResourceType.MGMT_COMPUTE,
-                                               operation_group='virtual_machines')
-        leftovers = vm.storage_profile.data_disks
-        is_contains = False
-        for d in leftovers:
-            if d.name.lower() == disk_name.lower():
-                d.to_be_detached = True
-                d.detach_option = DiskDetachOptionTypes.FORCE_DETACH
-                is_contains = True
-                break
-        if not is_contains:
-            raise ResourceNotFoundError("No disk with the name '{}' was found".format(disk_name))
-    vm.storage_profile.data_disks = leftovers
-    set_vm(cmd, vm)
+        # here we handle managed disk
+        vm = get_vm_to_update(cmd, resource_group_name, vm_name)
+        if not force_detach:
+            # pylint: disable=no-member
+            leftovers = [d for d in vm.storage_profile.data_disks if d.name.lower() != disk_name.lower()]
+            if len(vm.storage_profile.data_disks) == len(leftovers):
+                raise ResourceNotFoundError("No disk with the name '{}' was found".format(disk_name))
+        else:
+            DiskDetachOptionTypes = cmd.get_models('DiskDetachOptionTypes', resource_type=ResourceType.MGMT_COMPUTE,
+                                                   operation_group='virtual_machines')
+            leftovers = vm.storage_profile.data_disks
+            is_contains = False
+            for d in leftovers:
+                if d.name.lower() == disk_name.lower():
+                    d.to_be_detached = True
+                    d.detach_option = DiskDetachOptionTypes.FORCE_DETACH
+                    is_contains = True
+                    break
+            if not is_contains:
+                raise ResourceNotFoundError("No disk with the name '{}' was found".format(disk_name))
+        vm.storage_profile.data_disks = leftovers
+        set_vm(cmd, vm)
 # endregion
 
 
@@ -2486,7 +2529,7 @@ def get_terms(cmd, urn=None, publisher=None, offer=None, plan=None):
 
 # region VirtualMachines NetworkInterfaces (NICs)
 def show_vm_nic(cmd, resource_group_name, vm_name, nic):
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
 
     NicShow = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.nic").Show
 
@@ -2870,7 +2913,7 @@ def get_vm_format_secret(cmd, secrets, certificate_store=None, keyvault=None, re
 
 
 def add_vm_secret(cmd, resource_group_name, vm_name, keyvault, certificate, certificate_store=None):
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
     from ._vm_utils import create_data_plane_keyvault_certificate_client, get_key_vault_base_url
     VaultSecretGroup, SubResource, VaultCertificate = cmd.get_models(
         'VaultSecretGroup', 'SubResource', 'VaultCertificate')
@@ -3138,7 +3181,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 location=None, tags=None, upgrade_policy_mode='manual', validate=False,
                 admin_username=None, admin_password=None, authentication_type=None,
                 vm_sku=None, no_wait=False,
-                ssh_dest_key_path=None, ssh_key_value=None, generate_ssh_keys=False,
+                ssh_dest_key_path=None, ssh_key_value=None, generate_ssh_keys=False, ssh_key_type=None,
                 load_balancer=None, load_balancer_sku=None, application_gateway=None,
                 app_gateway_subnet_address_prefix=None,
                 app_gateway_sku='Standard_Large', app_gateway_capacity=10,
@@ -3182,7 +3225,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 security_posture_reference_id=None, security_posture_reference_exclude_extensions=None,
                 enable_resilient_creation=None, enable_resilient_deletion=None,
                 additional_scheduled_events=None, enable_user_reboot_scheduled_events=None,
-                enable_user_redeploy_scheduled_events=None):
+                enable_user_redeploy_scheduled_events=None,
+                skuprofile_vmsizes=None, skuprofile_allostrat=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -3206,7 +3250,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
     uniform_str = 'Uniform'
     flexible_str = 'Flexible'
     if orchestration_mode:
-        from msrestazure.tools import resource_id, is_valid_resource_id
+        from azure.mgmt.core.tools import resource_id, is_valid_resource_id
 
         if disk_info:
             storage_sku = disk_info['os'].get('storageAccountType')
@@ -3495,7 +3539,9 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             enable_resilient_vm_deletion=enable_resilient_deletion,
             additional_scheduled_events=additional_scheduled_events,
             enable_user_reboot_scheduled_events=enable_user_reboot_scheduled_events,
-            enable_user_redeploy_scheduled_events=enable_user_redeploy_scheduled_events)
+            enable_user_redeploy_scheduled_events=enable_user_redeploy_scheduled_events,
+            skuprofile_vmsizes=skuprofile_vmsizes,
+            skuprofile_allostrat=skuprofile_allostrat)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -3737,7 +3783,7 @@ def get_vmss_instance_view(cmd, resource_group_name, vm_scale_set_name, instance
 
 
 def list_vmss_instance_connection_info(cmd, resource_group_name, vm_scale_set_name):
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
 
     LBShow = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.lb").Show
     PublicIPAddress = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.public_ip").Show
@@ -3934,7 +3980,8 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 max_surge=None, enable_resilient_creation=None, enable_resilient_deletion=None,
                 ephemeral_os_disk=None, ephemeral_os_disk_option=None, zones=None, additional_scheduled_events=None,
                 enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None,
-                upgrade_policy_mode=None, enable_auto_os_upgrade=None, **kwargs):
+                upgrade_policy_mode=None, enable_auto_os_upgrade=None,
+                skuprofile_vmsizes=None, skuprofile_allostrat=None, **kwargs):
     vmss = kwargs['parameters']
     aux_subscriptions = None
     # pylint: disable=too-many-boolean-expressions
@@ -4169,6 +4216,20 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             logger.warning("VMSS sku is already %s", vm_sku)
         else:
             vmss.sku.name = vm_sku
+
+    sku_profile = dict()
+    if skuprofile_vmsizes is not None or skuprofile_allostrat is not None:
+        if skuprofile_vmsizes is not None:
+            sku_profile_vmsizes_list = []
+            for vm_size in skuprofile_vmsizes:
+                vmsize_obj = {
+                    'name': vm_size
+                }
+                sku_profile_vmsizes_list.append(vmsize_obj)
+            sku_profile['vmSizes'] = sku_profile_vmsizes_list
+        if skuprofile_allostrat is not None:
+            sku_profile['allocationStrategy'] = skuprofile_allostrat
+        vmss.sku_profile = sku_profile
 
     if ephemeral_os_disk_placement is not None or ephemeral_os_disk_option is not None:
         if vmss.virtual_machine_profile.storage_profile.os_disk.diff_disk_settings is not None:
@@ -4838,7 +4899,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                          replication_mode=None, target_region_cvm_encryption=None, virtual_machine=None,
                          image_version=None, target_zone_encryption=None, target_edge_zones=None,
                          allow_replicated_location_deletion=None):
-    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
     ImageVersionPublishingProfile, GalleryArtifactSource, ManagedArtifact, ImageVersion, TargetRegion = cmd.get_models(
@@ -5137,7 +5198,7 @@ def _get_log_analytics_client(cmd):
 
 
 def _prepare_workspace(cmd, resource_group_name, workspace):
-    from msrestazure.tools import is_valid_resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id
 
     from azure.core.exceptions import HttpResponseError
 
@@ -5242,7 +5303,7 @@ def create_disk_encryption_set(
         cmd, client, resource_group_name, disk_encryption_set_name, key_url, source_vault=None, encryption_type=None,
         location=None, tags=None, no_wait=False, enable_auto_key_rotation=None, federated_client_id=None,
         mi_system_assigned=None, mi_user_assigned=None):
-    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
     DiskEncryptionSet, EncryptionSetIdentity, KeyForDiskEncryptionSet, SourceVault = cmd.get_models(
         'DiskEncryptionSet', 'EncryptionSetIdentity', 'KeyForDiskEncryptionSet', 'SourceVault')
@@ -5275,7 +5336,7 @@ def create_disk_encryption_set(
 
 def update_disk_encryption_set(cmd, instance, client, resource_group_name, key_url=None, source_vault=None,
                                enable_auto_key_rotation=None, federated_client_id=None):
-    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
     if key_url:
         instance.active_key.key_url = key_url

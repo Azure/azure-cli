@@ -724,6 +724,16 @@ type: group
 short-summary: Manage flexible server backups.
 """
 
+helps['postgres flexible-server backup create'] = """
+type: command
+short-summary: Create a new backup for a flexible server.
+examples:
+  - name: >
+      Create a backup.
+    text: >
+      az postgres flexible-server backup create -g testgroup -n testsvr --backup-name testbackup
+"""
+
 helps['postgres flexible-server backup list'] = """
 type: command
 short-summary: List all the backups for a given server.
@@ -738,6 +748,14 @@ short-summary: Show the details of a specific backup for a given server.
 examples:
   - name: Show the details of backup 'testbackup' for 'testsvr'.
     text: az postgres flexible-server backup show -g testgroup -n testsvr --backup-name testbackup
+"""
+
+helps['postgres flexible-server backup delete'] = """
+type: command
+short-summary: Delete a specific backup.
+examples:
+  - name: Delete a backup.
+    text: az postgres flexible-server backup delete -g testgroup -n testsvr --backup-name testbackup
 """
 
 helps['postgres flexible-server replica'] = """
@@ -757,7 +775,8 @@ examples:
         --source-server testserver --zone 3 --location testLocation \\
         --vnet newVnet --subnet newSubnet \\
         --address-prefixes 172.0.0.0/16 --subnet-prefixes 172.0.0.0/24 \\
-        --private-dns-zone testDNS.postgres.database.azure.com
+        --private-dns-zone testDNS.postgres.database.azure.com \\
+        --tags "key=value"
   - name: >
       Create a read replica 'testreplicaserver' for 'testserver' with public or private access \
       in the specified location if available. Since zone is not passed, it will automatically pick up zone in the \
