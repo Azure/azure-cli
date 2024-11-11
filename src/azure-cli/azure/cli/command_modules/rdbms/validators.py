@@ -444,11 +444,15 @@ def _pg_version_validator(version, versions, is_create):
         if version not in versions:
             raise CLIError('Incorrect value for --version. Allowed values : {}'.format(versions))
         if version == '12':
-            logger.warning('Support for PostgreSQL 12 has officially ended. As a result, the option to select PG12 will be removed in the near future. We recommend selecting PostgreSQL 13 or a later version for all future operations.')
+            logger.warning("Support for PostgreSQL 12 has officially ended. As a result, "
+                           "the option to select version 12 will be removed in the near future. "
+                           "We recommend selecting PostgreSQL 13 or a later version for "
+                           "all future operations.")
 
     if is_create:
         # Warning for upcoming breaking change to default value of pg version
-        logger.warning('The default value for the PostgreSQL server major version will be updating to 17 in the near future.')
+        logger.warning("The default value for the PostgreSQL server major version "
+                       "will be updating to 17 in the near future.")
 
 
 def _pg_high_availability_validator(high_availability, standby_availability_zone, zone, tier, single_az, instance):
