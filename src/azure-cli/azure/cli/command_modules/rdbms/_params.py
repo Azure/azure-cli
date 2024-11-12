@@ -989,7 +989,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
         # index tuning
         if command_group == 'postgres':
-            with self.argument_context('{} flexible-server index-tuning update'.format(command_group)) as c:
+            with self.argument_context('{} flexible-server update-index-tuning'.format(command_group)) as c:
                 c.argument('server_name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
                 c.argument('state', options_list=['--state'], arg_type=get_enum_type(['Enabled', 'Disabled']),
                            help='Whether index tuning is enabled.')

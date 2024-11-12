@@ -1132,12 +1132,12 @@ type: group
 short-summary: Set index tuning to allow for analyzing read queries captured in Query Store.
 """
 
-helps['postgres flexible-server index-tuning update'] = """
+helps['postgres flexible-server update-index-tuning'] = """
 type: command
 short-summary: Update index tuning to be enabled/disabled on PostgreSQL flexible server.
 examples:
   - name: Update index tuning to be enabled/disabled on PostgreSQL flexible server.
-    text: az postgres flexible-server index-tuning update -g testgroup -s testsvr --state Enabled
+    text: az postgres flexible-server update-index-tuning -g testgroup -s testsvr --state Enabled
 """
 
 helps['postgres flexible-server tuning-options'] = """

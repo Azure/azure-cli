@@ -2762,7 +2762,7 @@ class FlexibleServerTuningOptionsResourceMgmtScenarioTest(ScenarioTest):
         sku_name = 'Standard_D4s_v3'
         tier = 'GeneralPurpose'
 
-        self.cmd('{} flexible-server create -g {} -n {} --sku-name {} --tier {} --storage-size {} --version {} -l {} --yes'.format(
+        self.cmd('{} flexible-server create -g {} -n {} --sku-name {} --tier {} --storage-size {} --version {} -l {} --public-access none --yes'.format(
                  database_engine, resource_group, server_name, sku_name, tier, storage_size, version, location))
 
         # Get tuning options for server
@@ -2770,7 +2770,7 @@ class FlexibleServerTuningOptionsResourceMgmtScenarioTest(ScenarioTest):
                  checks=[JMESPathCheck('name', 'index')])
 
         # Enable index tuning for server
-        self.cmd('{} flexible-server index-tuning update -g {} -s {} --state Enabled'.format(database_engine, resource_group, server_name))
+        self.cmd('{} flexible-server update-index-tuning -g {} -s {} --state Enabled'.format(database_engine, resource_group, server_name))
 
         # Check for updated parameters
         self.cmd('{} flexible-server parameter show --name {} -g {} -s {}'.format(database_engine, 'index_tuning.mode', resource_group, server_name),
@@ -2779,7 +2779,7 @@ class FlexibleServerTuningOptionsResourceMgmtScenarioTest(ScenarioTest):
                  checks=[JMESPathCheck('value', 'all')])
 
         # Disable index tuning for server
-        self.cmd('{} flexible-server index-tuning update -g {} -s {} --state Disabled'.format(database_engine, resource_group, server_name))
+        self.cmd('{} flexible-server update-index-tuning -g {} -s {} --state Disabled'.format(database_engine, resource_group, server_name))
 
         # Check for updated parameters
         self.cmd('{} flexible-server parameter show --name {} -g {} -s {}'.format(database_engine, 'index_tuning.mode', resource_group, server_name),
