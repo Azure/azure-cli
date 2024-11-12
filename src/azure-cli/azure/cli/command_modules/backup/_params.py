@@ -453,7 +453,8 @@ def load_arguments(self, _):
         c.argument('target_vault_name', options_list=['--target-vault-name'], help="""Specify the vault name of target item for Cross Region Restore. Default value will be same as --vault-name if not specified.""")
         c.argument('target_subscription_id', help="""Specify the subscription of the target item for Cross Subscription Restore. Defaulted to source subscription if not specified.""")
         c.argument('attach_and_mount', type=bool, help='Specify attach and mount value for HANA Snapshot restores.')
-        c.argument('identity_arm_id', type=bool, help='Set Identity ARM ID for HANA Snapshot restores.')
+        c.argument('identity_arm_id', help='Set Identity ARM ID for HANA Snapshot restores.')
+        c.argument('snapshot_instance_resource_group', options_list=['--snapshot-rg'], help="""Specify the resource group for HANA Snapshot Instance restores. If not provided, the default value will be fetched from the target container details.""")
 
     # Job
     with self.argument_context('backup job') as c:

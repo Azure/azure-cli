@@ -658,6 +658,7 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
     filepath = recovery_config_object['filepath']
     attach_and_mount = recovery_config_object['attach_and_mount']
     identity_arm_id = recovery_config_object['identity_arm_id']
+    snapshot_instance_resource_group = recovery_config_object['snapshot_instance_resource_group']
 
     item = common.show_item(cmd, backup_protected_items_cf(cmd.cli_ctx), resource_group_name, vault_name,
                             container_uri, item_uri, "AzureWorkload")
@@ -735,7 +736,10 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
 
     if recovery_mode == 'SnapshotAttachAndRecover' or recovery_mode == 'SnapshotAttach':
         trigger_restore_properties.recovery_mode = recovery_mode
-        target_resource_group_name = container_id.split('/')[4]
+        if snapshot_instance_resource_group is None:
+            target_resource_group_name = container_id.split('/')[4]
+        else:
+            target_resource_group_name = snapshot_instance_resource_group
 
         # For SnapshotAttach (--attach-and-mount was not provided), skip_attach_and_mount should be False
         skip_attach_and_mount = False
@@ -807,7 +811,7 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
 def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_mode, container_name, item_name,
                          rp_name, target_item, target_item_name, log_point_in_time, from_full_rp_name,
                          filepath, target_container, target_resource_group, target_vault_name, target_subscription,
-                         workload_type, attach_and_mount, identity_arm_id):
+                         workload_type, attach_and_mount, identity_arm_id, snapshot_instance_resource_group):
     if log_point_in_time is not None:
         datetime_type(log_point_in_time)
 
@@ -916,7 +920,8 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
         'filepath': filepath,
         'alternate_directory_paths': alternate_directory_paths,
         'attach_and_mount': attach_and_mount,
-        'identity_arm_id': identity_arm_id}
+        'identity_arm_id': identity_arm_id,
+        'snapshot_instance_resource_group': snapshot_instance_resource_group}
 
 
 def _fetch_nodes_list_and_auto_protection_policy(cmd, paged_items, resource_group_name, vault_name,
