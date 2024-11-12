@@ -180,7 +180,7 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"name": "test", "value": "something", "binaryProperty": "AAECAwQF", "aaa@foo.com":
+    body: '{"name": "test", "value": "something", "binaryProperty": "AAECAwQF", "binaryProperty@odata.type":
       "Edm.Binary", "RowKey": "001", "PartitionKey": "001"}'
     headers:
       Accept:
@@ -253,7 +253,7 @@ interactions:
     uri: https://clitest000002.table.core.windows.net/table000003(PartitionKey='001',RowKey='001')
   response:
     body:
-      string: '{"odata.metadata":"https://clitest000002.table.core.windows.net/$metadata#table000003/@Element","odata.etag":"W/\"datetime''2020-11-09T05%3A47%3A15.2410855Z''\"","PartitionKey":"001","RowKey":"001","Timestamp":"2020-11-09T05:47:15.2410855Z","name":"test","value":"something","aaa@foo.com":"Edm.Binary","binaryProperty":"AAECAwQF"}'
+      string: '{"odata.metadata":"https://clitest000002.table.core.windows.net/$metadata#table000003/@Element","odata.etag":"W/\"datetime''2020-11-09T05%3A47%3A15.2410855Z''\"","PartitionKey":"001","RowKey":"001","Timestamp":"2020-11-09T05:47:15.2410855Z","name":"test","value":"something","binaryProperty@odata.type":"Edm.Binary","binaryProperty":"AAECAwQF"}'
     headers:
       cache-control:
       - no-cache
@@ -383,7 +383,7 @@ interactions:
     uri: https://clitest000002.table.core.windows.net/table000003(PartitionKey='001',RowKey='001')
   response:
     body:
-      string: '{"odata.metadata":"https://clitest000002.table.core.windows.net/$metadata#table000003/@Element","odata.etag":"W/\"datetime''2020-11-09T05%3A47%3A22.9539488Z''\"","PartitionKey":"001","RowKey":"001","Timestamp":"2020-11-09T05:47:22.9539488Z","aaa@foo.com":"Edm.Binary","binaryProperty":"AAECAwQF","name":"test","value":"newval"}'
+      string: '{"odata.metadata":"https://clitest000002.table.core.windows.net/$metadata#table000003/@Element","odata.etag":"W/\"datetime''2020-11-09T05%3A47%3A22.9539488Z''\"","PartitionKey":"001","RowKey":"001","Timestamp":"2020-11-09T05:47:22.9539488Z","binaryProperty@odata.type":"Edm.Binary","binaryProperty":"AAECAwQF","name":"test","value":"newval"}'
     headers:
       cache-control:
       - no-cache
@@ -576,7 +576,7 @@ interactions:
       code: 404
       message: Not Found
 - request:
-    body: '{"name": "test", "value": "something", "binaryProperty": "AAECAwQF", "aaa@foo.com":
+    body: '{"name": "test", "value": "something", "binaryProperty": "AAECAwQF", "binaryProperty@odata.type":
       "Edm.Binary", "RowKey": "001", "PartitionKey": "001"}'
     headers:
       Accept:
@@ -702,7 +702,7 @@ interactions:
     uri: https://clitest000002.table.core.windows.net/table000003()?%24top=1
   response:
     body:
-      string: '{"odata.metadata":"https://clitest000002.table.core.windows.net/$metadata#table000003","value":[{"odata.etag":"W/\"datetime''2020-11-09T05%3A47%3A39.4667899Z''\"","PartitionKey":"001","RowKey":"001","Timestamp":"2020-11-09T05:47:39.4667899Z","name":"test","value":"something","aaa@foo.com":"Edm.Binary","binaryProperty":"AAECAwQF"}]}'
+      string: '{"odata.metadata":"https://clitest000002.table.core.windows.net/$metadata#table000003","value":[{"odata.etag":"W/\"datetime''2020-11-09T05%3A47%3A39.4667899Z''\"","PartitionKey":"001","RowKey":"001","Timestamp":"2020-11-09T05:47:39.4667899Z","name":"test","value":"something","binaryProperty@odata.type":"Edm.Binary","binaryProperty":"AAECAwQF"}]}'
     headers:
       cache-control:
       - no-cache
