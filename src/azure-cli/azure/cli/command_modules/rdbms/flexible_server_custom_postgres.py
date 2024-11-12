@@ -916,8 +916,7 @@ def flexible_server_identity_assign(cmd, client, resource_group_name, server_nam
 
 def flexible_server_identity_remove(cmd, client, resource_group_name, server_name, identities):
     validate_resource_group(resource_group_name)
-    if server_name == "postgres":
-        validate_citus_cluster(cmd, resource_group_name, server_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
 
     instance = client.get(resource_group_name, server_name)
 
