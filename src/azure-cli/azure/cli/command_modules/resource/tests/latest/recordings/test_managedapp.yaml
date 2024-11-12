@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: '{"userPrincipalName": "aaa@foo.com", "displayName":
+    body: '{"userPrincipalName": "testuser000002@azuresdkteam.onmicrosoft.com", "displayName":
       "tester123", "passwordProfile": {"password": "Test123456789", "forceChangePasswordNextSignIn":
       false}, "mailNickname": "testuser000002", "accountEnabled": true}'
     headers:
@@ -25,7 +25,7 @@ interactions:
     uri: https://graph.microsoft.com/v1.0/users
   response:
     body:
-      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#users/$entity","id":"e09df4a1-42e8-4d41-8b7f-c38413ecf62a","businessPhones":[],"displayName":"tester123","givenName":null,"jobTitle":null,"mail":null,"mobilePhone":null,"officeLocation":null,"preferredLanguage":null,"surname":null,"userPrincipalName":"aaa@foo.com"}'
+      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#users/$entity","id":"e09df4a1-42e8-4d41-8b7f-c38413ecf62a","businessPhones":[],"displayName":"tester123","givenName":null,"jobTitle":null,"mail":null,"mobilePhone":null,"officeLocation":null,"preferredLanguage":null,"surname":null,"userPrincipalName":"testuser000002@azuresdkteam.onmicrosoft.com"}'
     headers:
       cache-control:
       - no-cache
@@ -71,10 +71,10 @@ interactions:
       - python/3.10.12 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.35)
         AZURECLI/2.51.0
     method: GET
-    uri: https://graph.microsoft.com/v1.0/users?$filter=aaa@foo.com%27
+    uri: https://graph.microsoft.com/v1.0/users?$filter=userPrincipalName%20eq%20%27testuser000002%40azuresdkteam.onmicrosoft.com%27
   response:
     body:
-      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#users","value":[{"businessPhones":[],"displayName":"tester123","givenName":null,"jobTitle":null,"mail":null,"mobilePhone":null,"officeLocation":null,"preferredLanguage":null,"surname":null,"userPrincipalName":"aaa@foo.com","id":"e09df4a1-42e8-4d41-8b7f-c38413ecf62a"}]}'
+      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#users","value":[{"businessPhones":[],"displayName":"tester123","givenName":null,"jobTitle":null,"mail":null,"mobilePhone":null,"officeLocation":null,"preferredLanguage":null,"surname":null,"userPrincipalName":"testuser000002@azuresdkteam.onmicrosoft.com","id":"e09df4a1-42e8-4d41-8b7f-c38413ecf62a"}]}'
     headers:
       cache-control:
       - no-cache
@@ -226,7 +226,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applicationDefinitions/testappdefname?api-version=2019-07-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applicationDefinitions/testappdefname","name":"testappdefname","type":"microsoft.solutions/applicationdefinitions","location":"westcentralus","systemData":{"createdBy":"aaa@foo.com","createdByType":"User","createdAt":"2023-08-23T12:39:43.0781665Z","lastModifiedBy":"aaa@foo.com","lastModifiedByType":"User","lastModifiedAt":"2023-08-23T12:39:43.0781665Z"},"properties":{"authorizations":[{"principalId":"e09df4a1-42e8-4d41-8b7f-c38413ecf62a","roleDefinitionId":"b24988ac-6180-42a0-ab88-20f7382dd24c"}],"isEnabled":true,"lockLevel":"None","displayName":"test_appdef_123","description":"test_appdef_123","artifacts":[{"name":"ApplicationResourceTemplate","type":"Template","uri":"https://amastorageprodus.blob.core.windows.net/applicationdefinitions/8C96E_0B1F64711BF04DDAAEC3CB9272F09590_55ED45A9B50B92EC93A96A9AACF019F1BB7AB702606FEC20E9BB3E2875BF3056/14040c2b26b8462c836bf015ba087223/applicationResourceTemplate.json"},{"name":"CreateUiDefinition","type":"Custom","uri":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applicationDefinitions/testappdefname/applicationArtifacts/CreateUiDefinition?api-version=2017-09-01"},{"name":"MainTemplateParameters","type":"Custom","uri":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applicationDefinitions/testappdefname/applicationArtifacts/MainTemplateParameters?api-version=2017-09-01"}],"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applicationDefinitions/testappdefname","name":"testappdefname","type":"microsoft.solutions/applicationdefinitions","location":"westcentralus","systemData":{"createdBy":"rolelivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2023-08-23T12:39:43.0781665Z","lastModifiedBy":"rolelivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-08-23T12:39:43.0781665Z"},"properties":{"authorizations":[{"principalId":"e09df4a1-42e8-4d41-8b7f-c38413ecf62a","roleDefinitionId":"b24988ac-6180-42a0-ab88-20f7382dd24c"}],"isEnabled":true,"lockLevel":"None","displayName":"test_appdef_123","description":"test_appdef_123","artifacts":[{"name":"ApplicationResourceTemplate","type":"Template","uri":"https://amastorageprodus.blob.core.windows.net/applicationdefinitions/8C96E_0B1F64711BF04DDAAEC3CB9272F09590_55ED45A9B50B92EC93A96A9AACF019F1BB7AB702606FEC20E9BB3E2875BF3056/14040c2b26b8462c836bf015ba087223/applicationResourceTemplate.json"},{"name":"CreateUiDefinition","type":"Custom","uri":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applicationDefinitions/testappdefname/applicationArtifacts/CreateUiDefinition?api-version=2017-09-01"},{"name":"MainTemplateParameters","type":"Custom","uri":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applicationDefinitions/testappdefname/applicationArtifacts/MainTemplateParameters?api-version=2017-09-01"}],"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -282,7 +282,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applications/mymanagedapp?api-version=2019-07-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applications/mymanagedapp","name":"mymanagedapp","type":"microsoft.solutions/applications","kind":"servicecatalog","location":"westcentralus","tags":{"key":"val"},"systemData":{"createdBy":"aaa@foo.com","createdByType":"User","createdAt":"2023-08-23T12:39:52.456021Z","lastModifiedBy":"aaa@foo.com","lastModifiedByType":"User","lastModifiedAt":"2023-08-23T12:39:52.456021Z"},"properties":{"managedResourceGroupId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/climanagedapp000003","applicationDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applicationDefinitions/testappdefname","provisioningState":"Accepted","createdBy":{"oid":"6d97229a-391f-473a-893f-f0608b592d7b","puid":"10032000DA41F889","applicationId":"04b07795-8ddb-461a-bbee-02f9e1bf7b46"},"updatedBy":{"oid":"6d97229a-391f-473a-893f-f0608b592d7b","puid":"10032000DA41F889","applicationId":"04b07795-8ddb-461a-bbee-02f9e1bf7b46"}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applications/mymanagedapp","name":"mymanagedapp","type":"microsoft.solutions/applications","kind":"servicecatalog","location":"westcentralus","tags":{"key":"val"},"systemData":{"createdBy":"rolelivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2023-08-23T12:39:52.456021Z","lastModifiedBy":"rolelivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-08-23T12:39:52.456021Z"},"properties":{"managedResourceGroupId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/climanagedapp000003","applicationDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applicationDefinitions/testappdefname","provisioningState":"Accepted","createdBy":{"oid":"6d97229a-391f-473a-893f-f0608b592d7b","puid":"10032000DA41F889","applicationId":"04b07795-8ddb-461a-bbee-02f9e1bf7b46"},"updatedBy":{"oid":"6d97229a-391f-473a-893f-f0608b592d7b","puid":"10032000DA41F889","applicationId":"04b07795-8ddb-461a-bbee-02f9e1bf7b46"}}}'
     headers:
       azure-asyncoperation:
       - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Solutions/locations/WESTCENTRALUS/operationStatuses/73c1b2bb-0e87-4400-9ad1-d647e20d7898*733D9F37E12A293E60373FAA1E90326A8A7BF53F0DBACA9DBFC475C2C1DD45FC?api-version=2019-07-01
@@ -1074,10 +1074,10 @@ interactions:
       - python/3.10.12 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.35)
         AZURECLI/2.51.0
     method: GET
-    uri: https://graph.microsoft.com/v1.0/users?$filter=aaa@foo.com%27
+    uri: https://graph.microsoft.com/v1.0/users?$filter=userPrincipalName%20eq%20%27testuser000002%40azuresdkteam.onmicrosoft.com%27
   response:
     body:
-      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#users","value":[{"businessPhones":[],"displayName":"tester123","givenName":null,"jobTitle":null,"mail":null,"mobilePhone":null,"officeLocation":null,"preferredLanguage":null,"surname":null,"userPrincipalName":"aaa@foo.com","id":"e09df4a1-42e8-4d41-8b7f-c38413ecf62a"}]}'
+      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#users","value":[{"businessPhones":[],"displayName":"tester123","givenName":null,"jobTitle":null,"mail":null,"mobilePhone":null,"officeLocation":null,"preferredLanguage":null,"surname":null,"userPrincipalName":"testuser000002@azuresdkteam.onmicrosoft.com","id":"e09df4a1-42e8-4d41-8b7f-c38413ecf62a"}]}'
     headers:
       cache-control:
       - no-cache
@@ -1270,7 +1270,7 @@ interactions:
       - python/3.10.12 (Linux-5.10.102.1-microsoft-standard-WSL2-x86_64-with-glibc2.35)
         AZURECLI/2.51.0
     method: DELETE
-    uri: https://graph.microsoft.com/v1.0/users/aaa@foo.com
+    uri: https://graph.microsoft.com/v1.0/users/testuser000002@azuresdkteam.onmicrosoft.com
   response:
     body:
       string: ''
