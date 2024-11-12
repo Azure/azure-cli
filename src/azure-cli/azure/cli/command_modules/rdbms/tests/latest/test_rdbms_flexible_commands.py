@@ -1018,7 +1018,6 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         main_tests(True)
 
 
-
 class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
 
     postgres_location = 'eastus'
@@ -2541,7 +2540,6 @@ class FlexibleServerLogsMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name))
 
 
-
 class FlexibleServerPrivateEndpointsMgmtScenarioTest(ScenarioTest):
 
     postgres_location = 'eastus'
@@ -2743,3 +2741,46 @@ class FlexibleServerPrivateEndpointsMgmtScenarioTest(ScenarioTest):
         result = self.cmd('{} flexible-server private-link-resource show -g {} -s {}'
                           .format(database_engine, resource_group, server)).get_output_in_json()
         self.assertEqual(result['groupId'], group_id)
+
+
+class FlexibleServerTuningOptionsResourceMgmtScenarioTest(ScenarioTest):
+
+    postgres_location = 'eastus2euap'
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    def test_postgres_flexible_server_tuning_options_resource(self, resource_group):
+        self._test_tuning_options_mgmt('postgres', resource_group)
+
+    def _test_tuning_options_mgmt(self, database_engine, resource_group):
+        
+        # Create server with at least 4 vCores and running PostgreSQL major version of 13 or later
+        location = self.postgres_location
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        version = '16'
+        storage_size = 128
+        sku_name = 'Standard_D4s_v3'
+        tier = 'GeneralPurpose'
+
+        self.cmd('{} flexible-server create -g {} -n {} --sku-name {} --tier {} --storage-size {} --version {} -l {} --yes'.format(
+                 database_engine, resource_group, server_name, sku_name, tier, storage_size, version, location))
+
+        # Get tuning options for server
+        self.cmd('{} flexible-server tuning-options show -g {} -s {}'.format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('name', 'index')])
+
+        # Enable index tuning for server
+        self.cmd('{} flexible-server index-tuning update -g {} -s {} --state Enabled'.format(database_engine, resource_group, server_name))
+
+        # Check for updated parameters
+        self.cmd('{} flexible-server parameter show --name {} -g {} -s {}'.format(database_engine, 'index_tuning.mode', resource_group, server_name),
+                 checks=[JMESPathCheck('value', 'report')])
+        self.cmd('{} flexible-server parameter show --name {} -g {} -s {}'.format(database_engine, 'pg_qs.query_capture_mode', resource_group, server_name),
+                 checks=[JMESPathCheck('value', 'all')])
+
+        # Disable index tuning for server
+        self.cmd('{} flexible-server index-tuning update -g {} -s {} --state Disabled'.format(database_engine, resource_group, server_name))
+
+        # Check for updated parameters
+        self.cmd('{} flexible-server parameter show --name {} -g {} -s {}'.format(database_engine, 'index_tuning.mode', resource_group, server_name),
+                 checks=[JMESPathCheck('value', 'off')])

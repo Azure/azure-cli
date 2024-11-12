@@ -507,10 +507,10 @@ def index_tuning_update(cmd, client, resource_group_name, server_name, state):
 
         configuration_name = "index_tuning.mode"
         value = "report"
-        flexible_parameter_update(client, server_name, configuration_name, resource_group_name, source, value)
+        _index_tuning_parameter_update(cmd, client, server_name, configuration_name, resource_group_name, source, value)
         configuration_name = "pg_qs.query_capture_mode"
         value = "all"
-        flexible_parameter_update(client, server_name, configuration_name, resource_group_name, source, value)
+        _index_tuning_parameter_update(cmd, client, server_name, configuration_name, resource_group_name, source, value)
     else:
         configuration_name = "index_tuning.mode"
         parameters = postgresql_flexibleservers.models.Configuration(
@@ -518,6 +518,16 @@ def index_tuning_update(cmd, client, resource_group_name, server_name, state):
             source=source
         )
         return client.begin_update(resource_group_name, server_name, configuration_name, parameters)
+
+
+def _index_tuning_parameter_update(cmd, client, server_name, configuration_name, resource_group_name, source, value):
+    parameters = postgresql_flexibleservers.models.Configuration(
+        value=value,
+        source=source
+    )
+
+    return resolve_poller(
+        client.begin_update(resource_group_name, server_name, configuration_name, parameters), cmd.cli_ctx, 'PostgreSQL Parameter update')
 
 
 def flexible_list_skus(cmd, client, location):
