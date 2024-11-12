@@ -824,8 +824,15 @@ def _pg_storage_type_validator(storage_type, auto_grow, high_availability, geo_r
 
 
 def check_resource_group(resource_group_name):
+    # check if rg is already null originally
+    if (not resource_group_name):
+        return False
+
+    # replace single and double quotes with empty string
     resource_group_name = resource_group_name.replace("'", '')
     resource_group_name = resource_group_name.replace('"', '')
+
+    # check if rg is empty after removing quotes
     if (not resource_group_name):
         return False
     return True
