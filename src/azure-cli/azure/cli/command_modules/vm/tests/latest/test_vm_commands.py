@@ -10208,8 +10208,30 @@ class VMSSPatchModeScenarioTest(ScenarioTest):
 
 class VMSSSecurityPostureScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_vmss_security_posture_reference_', location='eastus')
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_security_posture_reference_', location='eastus2euap')
     def test_vmss_security_posture_reference(self, resource_group):
+        self.kwargs.update({
+            'vmss1': self.create_random_name('clitestvmss1', 20),
+            'security_posture_reference_id': '/CommunityGalleries/SecurityPosturesBVTGallery/securityPostures/VMSSUniformWindows/versions/latest',
+            'nsg': 'testnsg',
+            'ssh_key': TEST_SSH_KEY_PUB,
+            'dns_label': self.create_random_name('clivmss', 20)
+        })
+        self.cmd('network nsg create -g {rg} -n {nsg}')
+        self.cmd(
+            "vmss create -n {vmss1} -g {rg} --image Win2022Datacenter --admin-username clittester --lb-sku Standard "
+            "--vm-domain-name {dns_label} --public-ip-per-vm --dns-servers 10.0.0.6 10.0.0.5 --nsg {nsg} --admin-username vmtest --admin-password Test123456789# --orchestration-mode Uniform "
+            "--security-posture-reference-id {security_posture_reference_id} --exclude-extensions SecurityPostureSecurityAgent --is-overridable True")
+
+        self.cmd('vmss show -g {rg} -n {vmss1}', checks=[
+            self.check('virtualMachineProfile.securityPostureReference.id', '{security_posture_reference_id}'),
+            self.check('virtualMachineProfile.securityPostureReference.isOverridable', True),
+            self.check('virtualMachineProfile.securityPostureReference.excludeExtensions[0]',
+                       'SecurityPostureSecurityAgent')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_security_posture_reference_overridable_', location='eastus2euap')
+    def test_vmss_security_posture_reference_overridable(self, resource_group):
         self.kwargs.update({
             'vmss1': self.create_random_name('clitestvmss1', 20),
             'security_posture_reference_id': '/CommunityGalleries/SecurityPosturesBVTGallery/securityPostures/VMSSUniformWindows/versions/latest',
@@ -10220,15 +10242,11 @@ class VMSSSecurityPostureScenarioTest(ScenarioTest):
         self.cmd('network nsg create -g {rg} -n {nsg}')
         self.cmd("vmss create -n {vmss1} -g {rg} --image Win2022Datacenter --admin-username clittester --lb-sku Standard "
                  "--vm-domain-name {dns_label} --public-ip-per-vm --dns-servers 10.0.0.6 10.0.0.5 --nsg {nsg} --admin-username vmtest --admin-password Test123456789# --orchestration-mode Uniform "
-                 "--security-posture-reference-id {security_posture_reference_id} --exclude-extensions SecurityPostureSecurityAgent --is-overridable True")
+                 "--security-posture-reference-id {security_posture_reference_id} --is-overridable False")
 
         self.cmd('vmss show -g {rg} -n {vmss1}', checks=[
             self.check('virtualMachineProfile.securityPostureReference.id', '{security_posture_reference_id}'),
-            self.check('virtualMachineProfile.securityPostureReference.isOverridable', True),
-            self.check('virtualMachineProfile.securityPostureReference.excludeExtensions[0]', 'SecurityPostureSecurityAgent')
-        ])
-        self.cmd('vmss update -g {rg} -n {vmss1} --is-overridable False', checks=[
-            self.check('virtualMachineProfile.securityPostureReference.isOverridable', False)
+            self.check('virtualMachineProfile.securityPostureReference.isOverridable', False),
         ])
 
 
