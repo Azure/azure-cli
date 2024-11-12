@@ -303,7 +303,8 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
                            auto_grow=None, performance_tier=None,
                            storage_type=None, iops=None, throughput=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
-    if not instance:
+    is_create = not instance
+    if is_create:
         list_location_capability_info = get_postgres_location_capability_info(
             db_context.cmd,
             location)
@@ -336,7 +337,7 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
     _pg_storage_validator(storage_gb, sku_info, tier, storage_type, iops, throughput, instance)
     _pg_sku_name_validator(sku_name, sku_info, tier, instance)
     _pg_high_availability_validator(high_availability, standby_availability_zone, zone, tier, single_az, instance)
-    _pg_version_validator(version, list_location_capability_info['server_versions'])
+    _pg_version_validator(version, list_location_capability_info['server_versions'], is_create)
     pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup, instance)
 
 
@@ -438,10 +439,20 @@ def _pg_storage_performance_tier_validator(performance_tier, sku_info, tier=None
                                ' Allowed values : {}'.format(storage_size, performance_tiers))
 
 
-def _pg_version_validator(version, versions):
+def _pg_version_validator(version, versions, is_create):
     if version:
         if version not in versions:
             raise CLIError('Incorrect value for --version. Allowed values : {}'.format(versions))
+        if version == '12':
+            logger.warning("Support for PostgreSQL 12 has officially ended. As a result, "
+                           "the option to select version 12 will be removed in the near future. "
+                           "We recommend selecting PostgreSQL 13 or a later version for "
+                           "all future operations.")
+
+    if is_create:
+        # Warning for upcoming breaking change to default value of pg version
+        logger.warning("The default value for the PostgreSQL server major version "
+                       "will be updating to 17 in the near future.")
 
 
 def _pg_high_availability_validator(high_availability, standby_availability_zone, zone, tier, single_az, instance):
