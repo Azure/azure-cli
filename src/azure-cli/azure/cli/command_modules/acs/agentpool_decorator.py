@@ -1504,6 +1504,19 @@ class AKSAgentPoolContext(BaseAKSContext):
         """
         return self._get_disable_windows_outbound_nat()
 
+    def get_if_match(self) -> str:
+        """Obtain the value of if_match.
+
+        :return: string
+        """
+        return self.raw_param.get("if_match")
+
+    def get_if_none_match(self) -> str:
+        """Obtain the value of if_none_match.
+
+        :return: string
+        """
+        return self.raw_param.get("if_none_match")
 
 class AKSAgentPoolAddDecorator:
     def __init__(
@@ -1924,6 +1937,8 @@ class AKSAgentPoolAddDecorator:
             # validated in "init_agentpool", skip to avoid duplicate api calls
             self.context._get_nodepool_name(enable_validation=False),
             agentpool,
+            if_match=self.context.get_if_match(),
+            if_none_match=self.context.get_if_none_match(),
             headers=self.context.get_aks_custom_headers(),
         )
 
@@ -2228,5 +2243,7 @@ class AKSAgentPoolUpdateDecorator:
             self.context.get_cluster_name(),
             self.context.get_nodepool_name(),
             agentpool,
+            if_match=self.context.get_if_match(),
+            if_none_match=self.context.get_if_none_match(),
             headers=self.context.get_aks_custom_headers(),
         )

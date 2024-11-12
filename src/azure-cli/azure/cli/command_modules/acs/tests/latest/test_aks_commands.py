@@ -1787,12 +1787,14 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'new_tags': new_tags,
             'labels': labels,
             'nodepool1_name': nodepool1_name,
-            'nodepool2_name': nodepool2_name
+            'nodepool2_name': nodepool2_name,
+            'if_match': '*',
+            'if_none_match': '*', 
         })
 
         # create
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
-                     '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
+                     '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} --if-none_match={if_none_match}' \
                      '--service-principal={service_principal} --client-secret={client_secret}'
         self.cmd(create_cmd, checks=[
             self.exists('fqdn'),
@@ -1826,7 +1828,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             os.remove(temp_path)
 
         # nodepool add
-        self.cmd('aks nodepool add --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --labels {labels} --node-count=1 --tags {tags}', checks=[
+        self.cmd('aks nodepool add --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --labels {labels} --node-count=1 --tags {tags} --if-match={if_match}', checks=[
             self.check('provisioningState', 'Succeeded')
         ])
 
@@ -1873,17 +1875,23 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         # nodepool update
-        self.cmd('aks nodepool update --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --tags {new_tags}', checks=[
+        self.cmd('aks nodepool update --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --tags {new_tags} --if-match={if_match}', checks=[
             self.check('tags.key2', 'value2')
         ])
 
+        self.kwargs.update(
+            {
+                "if_match": "",
+            }
+        )
+
         # #nodepool delete
         self.cmd(
-            'aks nodepool delete --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --no-wait', checks=[self.is_empty()])
+            'aks nodepool delete --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --no-wait --if-match={if_match}', checks=[self.is_empty()])
 
         # delete
         self.cmd(
-            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+            'aks delete -g {resource_group} -n {name} --yes --no-wait --if-match={if_match}', checks=[self.is_empty()])
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
@@ -10424,19 +10432,21 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'name': aks_name,
             'location': resource_group_location,
             'ssh_key_value': self.generate_ssh_keys(),
+            'if_match': '*',
+            'if_none_match': '*',
         })
 
         # create
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
                      '--enable-managed-identity ' \
-                     '--ssh-key-value={ssh_key_value}'
+                     '--ssh-key-value={ssh_key_value} --if_match={if_match}'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.not_exists('upgradeSettings')
         ])
 
         # upgrade upgrade settings
-        self.cmd('aks upgrade --resource-group={resource_group} --name={name} --upgrade-override-until 2020-01-01T22:30:17+00:00 --yes', checks=[
+        self.cmd('aks upgrade --resource-group={resource_group} --name={name} --upgrade-override-until 2020-01-01T22:30:17+00:00 --yes --if_match={if_match}', checks=[
             self.check('provisioningState', 'Succeeded'),
             self.not_exists('upgradeSettings.overrideSettings.forceUpgrade'),
             self.exists('upgradeSettings.overrideSettings.until')
@@ -10457,9 +10467,15 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('upgradeSettings.overrideSettings.until', '2020-02-22T22:30:17+00:00')
         ])
 
+        self.kwargs.update(
+            {
+                "if_match": "",
+            }
+        )
+
         # delete
         self.cmd(
-            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+            'aks delete -g {resource_group} -n {name} --yes --no-wait --if_match={if_match}', checks=[self.is_empty()])
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
