@@ -892,6 +892,7 @@ def flexible_server_connection_string(
 # Custom functions for identity
 def flexible_server_identity_assign(cmd, client, resource_group_name, server_name, identities):
     validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
 
     identities_map = {}
     for identity in identities:
@@ -915,6 +916,8 @@ def flexible_server_identity_assign(cmd, client, resource_group_name, server_nam
 
 def flexible_server_identity_remove(cmd, client, resource_group_name, server_name, identities):
     validate_resource_group(resource_group_name)
+    if server_name == "postgres":
+        validate_citus_cluster(cmd, resource_group_name, server_name)
 
     instance = client.get(resource_group_name, server_name)
 
@@ -950,15 +953,17 @@ def flexible_server_identity_remove(cmd, client, resource_group_name, server_nam
     return result.identity or postgresql_flexibleservers.models.UserAssignedIdentity(type="SystemAssigned")
 
 
-def flexible_server_identity_list(client, resource_group_name, server_name):
+def flexible_server_identity_list(cmd, client, resource_group_name, server_name):
     validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
 
     server = client.get(resource_group_name, server_name)
     return server.identity or postgresql_flexibleservers.models.UserAssignedIdentity(type="SystemAssigned")
 
 
-def flexible_server_identity_show(client, resource_group_name, server_name, identity):
+def flexible_server_identity_show(cmd, client, resource_group_name, server_name, identity):
     validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
 
     server = client.get(resource_group_name, server_name)
 
