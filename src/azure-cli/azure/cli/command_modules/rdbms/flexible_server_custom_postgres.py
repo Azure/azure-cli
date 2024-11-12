@@ -600,6 +600,7 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
                                private_dns_zone_arguments=None, geo_redundant_backup=None, no_wait=False, yes=False,
                                byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None):
     validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
 
     server_name = server_name.lower()
 
