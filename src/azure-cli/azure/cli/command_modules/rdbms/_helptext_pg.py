@@ -1108,28 +1108,10 @@ type: group
 short-summary: Get tuning options for a PostgreSQL flexible server.
 """
 
-helps['postgres flexible-server tuning-options list'] = """
-type: command
-short-summary: List of available tuning options associated with a PostgreSQL flexible server.
-examples:
-  - name: List of available tuning options associated with a PostgreSQL flexible server.
-    text: az postgres flexible-server tuning-options list -g testgroup -s testsvr
-"""
-
 helps['postgres flexible-server tuning-options show'] = """
 type: command
 short-summary: Get a tuning option associated with a PostgreSQL flexible server.
 examples:
   - name: Get tuning option associated with a PostgreSQL flexible server.
-    text: az postgres flexible-server tuning-options list -g testgroup -s testsvr --tuning-option-name Index
-"""
-
-helps['postgres flexible-server tuning-options recomendation-list'] = """
-type: command
-short-summary: List of available tuning index recommendations for a PostgreSQL flexible server.
-examples:
-  - name: Get the list of available tuning index recommendations for a flexible server.
-    text: az postgres flexible-server recomendation-list --resource-group testGroup --server-name testserver
-  - name: Get the list of available tuning index recommendations for a flexible server with type specified.
-    text: az postgres flexible-server recomendation-list --resource-group testGroup --server-name testserver --recommendation-type CreateIndex
+    text: az postgres flexible-server tuning-options show -g testgroup -s testsvr
 """

@@ -278,6 +278,4 @@ def load_flexibleserver_command_table(self, _):
 
     with self.command_group('postgres flexible-server tuning-options', postgres_flexible_tuning_options_sdk,
                             client_factory=cf_postgres_flexible_tuning_options) as g:
-        g.custom_command('list', 'tuning_options_list', custom_command_type=flexible_servers_custom_postgres)
         g.custom_command('show', 'tuning_options_get', custom_command_type=flexible_servers_custom_postgres)
-        g.custom_command('recomendation-list', 'recomendation_list', custom_command_type=flexible_servers_custom_postgres)

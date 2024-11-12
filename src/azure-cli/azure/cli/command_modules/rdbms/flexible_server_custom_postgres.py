@@ -1400,15 +1400,6 @@ def flexible_server_private_link_resource_get(
         group_name="postgresqlServer")
 
 
-def tuning_options_list(client, resource_group_name, server_name):
-    validate_resource_group(resource_group_name)
-
-    return client.list_by_server(
-        resource_group_name=resource_group_name,
-        server_name=server_name
-    )
-
-
 def tuning_options_get(client, resource_group_name, server_name, tuning_option_name="index"):
     validate_resource_group(resource_group_name)
 
@@ -1418,19 +1409,6 @@ def tuning_options_get(client, resource_group_name, server_name, tuning_option_n
         resource_group_name=resource_group_name,
         server_name=server_name,
         tuning_option=tuning_option,
-    )
-
-
-def recomendation_list(client, resource_group_name, server_name, tuning_option_name="index", recommendation_type=None):
-    validate_resource_group(resource_group_name)
-
-    tuning_option = tuning_option_name.lower()
-
-    return client.list_recommendations(
-        resource_group_name=resource_group_name,
-        server_name=server_name,
-        tuning_option=tuning_option,
-        recommendation_type=recommendation_type,
     )
 
 
