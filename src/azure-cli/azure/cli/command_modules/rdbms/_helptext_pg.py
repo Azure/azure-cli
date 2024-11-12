@@ -1127,11 +1127,6 @@ examples:
     text: az postgres flexible-server private-link-resource show --ids /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/testGroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/testServer
 """
 
-helps['postgres flexible-server index-tuning'] = """
-type: group
-short-summary: Set index tuning to allow for analyzing read queries captured in Query Store.
-"""
-
 helps['postgres flexible-server update-index-tuning'] = """
 type: command
 short-summary: Update index tuning to be enabled/disabled on PostgreSQL flexible server.
