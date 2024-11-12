@@ -8573,6 +8573,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 resource_name=self.context.get_name(),
                 parameters=mc,
                 headers=self.context.get_aks_custom_headers(),
+                if_match=self.context.get_if_match(),
+                if_none_match=self.context.get_if_none_match(),
             )
             self.immediate_processing_after_request(mc)
             # poll until the result is returned
@@ -8586,6 +8588,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 resource_name=self.context.get_name(),
                 parameters=mc,
                 headers=self.context.get_aks_custom_headers(),
+                if_match=self.context.get_if_match(),
+                if_none_match=self.context.get_if_none_match(),
             )
         return cluster
 
