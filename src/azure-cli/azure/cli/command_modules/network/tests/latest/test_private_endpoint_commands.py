@@ -3726,7 +3726,7 @@ class NetworkPrivateLinkManagedGrafanaScenarioTest(ScenarioTest):
 
 class NetworkPrivateLinkDeviceUpdateScenarioTest(ScenarioTest):
     @live_only()
-    @AllowLargeResponse(4096)
+    @AllowLargeResponse(8192)
     @ResourceGroupPreparer(name_prefix='test_deviceupdate_private_endpoint', random_name_length=40, location="westus2")
     def test_private_link_endpoint_deviceupdate(self, resource_group):
         self.kwargs.update({
