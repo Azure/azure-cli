@@ -742,7 +742,7 @@ def validate_citus_cluster(cmd, resource_group_name, server_name):
     server_operations_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
     server = server_operations_client.get(resource_group_name, server_name)
 
-    if server.cluster and server.cluster.cluster_size > 1:
+    if server.cluster and server.cluster.cluster_size > 0:
         raise ValidationError("Citus cluster is not supported for this operation.")
 
 

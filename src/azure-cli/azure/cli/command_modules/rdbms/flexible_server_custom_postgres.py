@@ -823,6 +823,7 @@ def _create_server(db_context, cmd, resource_group_name, server_name, tags, loca
 
 def _create_database(db_context, cmd, resource_group_name, server_name, database_name):
     validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
 
     # check for existing database, create if not
     cf_db, logging_name = db_context.cf_db, db_context.logging_name
