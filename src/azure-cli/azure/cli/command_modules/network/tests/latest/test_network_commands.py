@@ -1240,7 +1240,7 @@ class NetworkAppGatewayNoWaitScenarioTest(ScenarioTest):
     def test_network_app_gateway_no_wait(self, resource_group):
 
         self.kwargs.update({
-            'tags': {u'a': u'b', u'c': u'd'}
+            'tags': {'a': 'b', 'c': 'd'}
         })
 
         self.cmd('network application-gateway create -g {rg} -n ag1 --no-wait --connection-draining-timeout 180 --priority 1001', checks=self.is_empty())
