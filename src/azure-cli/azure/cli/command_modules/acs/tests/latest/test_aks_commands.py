@@ -10439,7 +10439,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # create
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
                      '--enable-managed-identity ' \
-                     '--ssh-key-value={ssh_key_value} --if_match={if_match}'
+                     '--ssh-key-value={ssh_key_value} --if-match={if_match}'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.not_exists('upgradeSettings')
