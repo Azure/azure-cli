@@ -83,10 +83,13 @@ if ($LASTEXITCODE -ne 0) {
 
 # Run command azdev test
 Write-Host "Running azdev test..." -ForegroundColor Green
-azdev test --repo ./ --src $currentBranch --tgt $mergeBase
+azdev test --repo ./ --src $currentBranch --tgt $mergeBase --discover --no-exitfirst --xml-path test_results.xml 2>$null
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Error: azdev test check failed." -ForegroundColor Red
     exit 1
+} else {
+    # remove test_results.xml file
+    Remove-Item test_results.xml
 }
 
 Write-Host "Pre-push hook passed." -ForegroundColor Green

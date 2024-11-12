@@ -63,11 +63,11 @@ if [ "$MERGE_BASE" != "$UPSTREAM_HEAD" ]; then
 fi
 
 # get the current branch name
-currentBranch=$(git branch --show-current)
+CURRENT_BRANCH=$(git branch --show-current)
 
 # Run command azdev lint
 printf "\033[0;32mRunning azdev lint...\033[0m\n"
-azdev linter --repo ./ --src $currentBranch --tgt $MERGE_BASE
+azdev linter --repo ./ --src $CURRENT_BRANCH --tgt $MERGE_BASE
 if [ $? -ne 0 ]; then
     printf "\033[0;31mError: azdev lint check failed.\033[0m\n"
     exit 1
@@ -75,9 +75,9 @@ fi
 
 # Run command azdev style
 printf "\033[0;32mRunning azdev style...\033[0m\n"
-azdev style --repo ./ --src $currentBranch --tgt $MERGE_BASE
+azdev style --repo ./ --src $CURRENT_BRANCH --tgt $MERGE_BASE
 if [ $? -ne 0 ]; then
-    error_msg=$(azdev style --repo ./ --src $currentBranch --tgt $MERGE_BASE 2>&1)
+    error_msg=$(azdev style --repo ./ --src $CURRENT_BRANCH --tgt $MERGE_BASE 2>&1)
     if echo "$error_msg" | grep -q "No modules"; then
         printf "\033[0;32mPre-push hook passed.\033[0m\n"
         exit 0
@@ -88,10 +88,13 @@ fi
 
 # Run command azdev test
 printf "\033[0;32mRunning azdev test...\033[0m\n"
-azdev test --repo ./ --src $currentBranch --tgt $MERGE_BASE
+azdev test --repo ./ --src $CURRENT_BRANCH --tgt $MERGE_BASE --discover --no-exitfirst --xml-path test_results.xml 2>/dev/null
 if [ $? -ne 0 ]; then
     printf "\033[0;31mError: azdev test check failed.\033[0m\n"
     exit 1
+else
+    # remove the test_results.xml file
+    rm -f test_results.xml
 fi
 
 printf "\033[0;32mPre-push hook passed.\033[0m\n"
