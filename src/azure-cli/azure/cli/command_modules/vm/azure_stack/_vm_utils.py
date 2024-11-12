@@ -690,6 +690,7 @@ def display_region_recommendation(cmd, namespace):
     if identified_region and cmd.cli_ctx.config.getboolean('core', 'display_region_identified', True):
         from azure.cli.core.style import Style, print_styled_text
         import sys
+        # pylint: disable=line-too-long
         recommend_region = 'Selecting "' + identified_region + '" may reduce your costs. ' \
                                                                'The region you\'ve selected may cost more for the same services. ' \
                                                                'You can disable this message in the future with the command '

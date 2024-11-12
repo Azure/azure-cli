@@ -901,6 +901,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
+    # pylint: disable=line-too-long
     from azure.cli.command_modules.vm.azure_stack._template_builder import (build_vm_resource,
                                                                             build_storage_account_resource,
                                                                             build_nic_resource,
@@ -1187,7 +1188,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
 
     # Guest Attestation Extension and enable System Assigned MSI by default
     is_trusted_launch = security_type and security_type.lower() == 'trustedlaunch' and \
-                        enable_vtpm and enable_secure_boot
+        enable_vtpm and enable_secure_boot
     if is_trusted_launch and enable_integrity_monitoring:
         vm = get_vm(cmd, resource_group_name, vm_name, 'instanceView')
         client = _compute_client_factory(cmd.cli_ctx)
@@ -2010,7 +2011,7 @@ def set_diagnostics_extension(
         exts = vm.instance_view.extensions or []
         major_ver = extension_mappings[_LINUX_DIAG_EXT]['version'].split('.')[0]
         if next((e for e in exts if e.name == vm_extension_name and
-                                    not e.type_handler_version.startswith(major_ver + '.')), None):
+                not e.type_handler_version.startswith(major_ver + '.')), None):
             logger.warning('There is an incompatible version of diagnostics extension installed. '
                            'We will update it with a new version')
             poller = client.virtual_machine_extensions.begin_delete(resource_group_name, vm_name, vm_extension_name)
@@ -3638,7 +3639,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                                                                          vmss_info.identity.user_assigned_identities)
     # Guest Attestation Extension and enable System Assigned MSI by default
     is_trusted_launch = security_type and security_type.lower() == 'trustedlaunch' and \
-                        enable_vtpm and enable_secure_boot
+        enable_vtpm and enable_secure_boot
     if is_trusted_launch and enable_integrity_monitoring:
         client = _compute_client_factory(cmd.cli_ctx)
         vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
@@ -4332,7 +4333,7 @@ def set_vmss_diagnostics_extension(
         # For VMSS, we don't do auto-removal like VM because there is no reliable API to wait for
         # the removal done before we can install the newer one
         if next((e for e in exts if e.name == _LINUX_DIAG_EXT and
-                                    not e.type_handler_version.startswith(major_ver + '.')), None):
+                not e.type_handler_version.startswith(major_ver + '.')), None):
             delete_cmd = 'az vmss extension delete -g {} --vmss-name {} -n {}'.format(
                 resource_group_name, vmss_name, vm_extension_name)
             raise CLIError("There is an incompatible version of diagnostics extension installed. "
@@ -5284,10 +5285,10 @@ def _set_data_source_for_workspace(cmd, os_type, resource_group_name, workspace_
 
     default_data_sources = None
     if os_type.lower() == 'linux':
-        from ._workspace_data_source_settings import default_linux_data_sources
+        from .._workspace_data_source_settings import default_linux_data_sources
         default_data_sources = default_linux_data_sources
     elif os_type.lower() == 'windows':
-        from ._workspace_data_source_settings import default_windows_data_sources
+        from .._workspace_data_source_settings import default_windows_data_sources
         default_data_sources = default_windows_data_sources
 
     if default_data_sources is not None:
@@ -6148,7 +6149,7 @@ def restore_point_collection_update(client,
 
 # region Community gallery
 def sig_community_gallery_list(cmd, location=None, marker=None, show_next_marker=None):
-    from ._arg_client import ARGClient, QueryBody
+    from .._arg_client import ARGClient, QueryBody
 
     query_table = 'communitygalleryresources'
     query_type = 'microsoft.compute/locations/communitygalleries'

@@ -173,8 +173,7 @@ def _validate_location(location, location_names, location_display_names):
     return location
 
 
-def process_image_template_create_namespace(cmd,
-                                            namespace):  # pylint: disable=too-many-locals, too-many-branches, too-many-statements
+def process_image_template_create_namespace(cmd, namespace):  # pylint: disable=too-many-locals, too-many-branches, too-many-statements
     if namespace.image_template is not None:
         return
 

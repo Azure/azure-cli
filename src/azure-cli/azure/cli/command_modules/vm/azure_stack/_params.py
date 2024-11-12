@@ -63,8 +63,7 @@ def load_arguments(self, _):
                                              id_part='name')
     vmss_name_type = CLIArgumentType(name_arg_type,
                                      configured_default='vmss',
-                                     completer=get_resource_name_completion_list(
-                                         'Microsoft.Compute/virtualMachineScaleSets'),
+                                     completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'),
                                      help="Scale set name. You can configure the default using `az configure --defaults vmss=<name>`",
                                      id_part='name')
 
@@ -1487,9 +1486,8 @@ def load_arguments(self, _):
                        help='space-separated empty managed data disk sizes in GB to create')
             c.ignore('disk_info', 'storage_account_type', 'public_ip_address_type', 'nsg_type', 'nic_type', 'vnet_type',
                      'load_balancer_type', 'app_gateway_type')
-            c.argument('os_caching', options_list=[
-                self.deprecate(target='--storage-caching', redirect='--os-disk-caching', hide=True),
-                '--os-disk-caching'], help='Storage caching type for the VM OS disk. Default: ReadWrite',
+            c.argument('os_caching', options_list=[self.deprecate(target='--storage-caching', redirect='--os-disk-caching', hide=True), '--os-disk-caching'],
+                       help='Storage caching type for the VM OS disk. Default: ReadWrite',
                        arg_type=get_enum_type(CachingTypes))
             c.argument('data_caching', options_list=['--data-disk-caching'], nargs='+',
                        help="storage caching type for data disk(s), including 'None', 'ReadOnly', 'ReadWrite', etc. Use a singular value to apply on all disks, or use `<lun>=<vaule1> <lun>=<value2>` to configure individual disk")
@@ -1749,8 +1747,7 @@ def load_arguments(self, _):
                        min_api='2020-09-30',
                        help='This property allows you to specify the permission of sharing gallery.')
             c.argument('soft_delete', arg_type=get_three_state_flag(), min_api='2021-03-01',
-                       deprecate_info=Deprecated(self.cli_ctx, hide=True, message_func=lambda
-                           x: "Argument '--soft-delete' is in preview and under development. Reference and support levels: https://aka.ms/CLI_refstatus"),
+                       deprecate_info=Deprecated(self.cli_ctx, hide=True, message_func=lambda x: "Argument '--soft-delete' is in preview and under development. Reference and support levels: https://aka.ms/CLI_refstatus"),
                        help='Enable soft-deletion for resources in this gallery, '
                             'allowing them to be recovered within retention time.')
             c.argument('publisher_uri', help='Community gallery publisher uri.')
@@ -2026,9 +2023,7 @@ def load_arguments(self, _):
         c.argument('disk_encryption_set_name', disk_encryption_set_name)
         c.argument('key_url', help='URL pointing to a key or secret in KeyVault.')
         c.argument('source_vault', help='Name or ID of the KeyVault containing the key or secret.')
-        c.argument('encryption_type', arg_type=get_enum_type(
-            ['EncryptionAtRestWithPlatformKey', 'EncryptionAtRestWithCustomerKey',
-             'EncryptionAtRestWithPlatformAndCustomerKeys', 'ConfidentialVmEncryptedWithCustomerKey']),
+        c.argument('encryption_type', arg_type=get_enum_type(['EncryptionAtRestWithPlatformKey', 'EncryptionAtRestWithCustomerKey', 'EncryptionAtRestWithPlatformAndCustomerKeys', 'ConfidentialVmEncryptedWithCustomerKey']),
                    help='The type of key used to encrypt the data of the disk. EncryptionAtRestWithPlatformKey: Disk is encrypted at rest with Platform managed key. It is the default encryption type. EncryptionAtRestWithCustomerKey: Disk is encrypted at rest with Customer managed key that can be changed and revoked by a customer. EncryptionAtRestWithPlatformAndCustomerKeys: Disk is encrypted at rest with 2 layers of encryption. One of the keys is Customer managed and the other key is Platform managed. ConfidentialVmEncryptedWithCustomerKey: An additional encryption type accepted for confidential VM. Disk is encrypted at rest with Customer managed key.')
         c.argument('location', validator=get_default_location_from_resource_group)
         c.argument('tags', tags_type)

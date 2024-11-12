@@ -508,7 +508,7 @@ def _show_post_action_message(resource_group_name, vmss_name, maunal_mode, enabl
                "--instance-ids \"*\"' to propagate the change.\n".format(resource_group_name, vmss_name))
     msg += ("Note, {} encryption will take a while to finish. Please query the status using "
             "'az vmss encryption show -g {} -n {}'. For Linux VM, you will lose the access during the period".format(
-        'enabling' if enable else 'disabling', resource_group_name, vmss_name))
+                'enabling' if enable else 'disabling', resource_group_name, vmss_name))
     logger.warning(msg)
 
 

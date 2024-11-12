@@ -63,7 +63,7 @@ def validate_nsg_name(cmd, namespace):
                         namespace='Microsoft.Compute', type='virtualMachines',
                         subscription=get_subscription_id(cmd.cli_ctx))
     namespace.network_security_group_name = namespace.network_security_group_name \
-                                            or '{}_NSG_{}'.format(namespace.vm_name, hash_string(vm_id, length=8))
+        or '{}_NSG_{}'.format(namespace.vm_name, hash_string(vm_id, length=8))
 
 
 def validate_keyvault(cmd, namespace):
@@ -1366,7 +1366,7 @@ def _validate_vm_vmss_msi(cmd, namespace, is_identity_assign=False):
 def _enable_msi_for_trusted_launch(namespace):
     # Enable system assigned msi by default when Trusted Launch configuration is met
     is_trusted_launch = namespace.security_type and namespace.security_type.lower() == 'trustedlaunch' \
-                        and namespace.enable_vtpm and namespace.enable_secure_boot
+        and namespace.enable_vtpm and namespace.enable_secure_boot
     if is_trusted_launch and namespace.enable_integrity_monitoring:
         from ._vm_utils import MSI_LOCAL_ID
         logger.info('The MSI is enabled by default when Trusted Launch configuration is met')
@@ -1646,8 +1646,7 @@ def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
                 })
                 namespace.app_gateway_type = 'existing'
                 namespace.backend_pool_name = namespace.backend_pool_name or \
-                                              _get_default_address_pool(cmd.cli_ctx, rg, ag_name,
-                                                                        'application_gateways')
+                    _get_default_address_pool(cmd.cli_ctx, rg, ag_name, 'application_gateways')
                 logger.debug("using specified existing application gateway '%s'", namespace.application_gateway)
             except HttpResponseError:
                 namespace.app_gateway_type = 'new'
@@ -1685,7 +1684,7 @@ def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
             if lb:
                 namespace.load_balancer_type = 'existing'
                 namespace.backend_pool_name = namespace.backend_pool_name or \
-                                              _get_default_address_pool(cmd.cli_ctx, rg, lb_name, 'load_balancers')
+                    _get_default_address_pool(cmd.cli_ctx, rg, lb_name, 'load_balancers')
                 if not namespace.nat_pool_name:
                     if len(lb['inboundNatPools']) > 1:
                         raise CLIError(
@@ -1986,8 +1985,8 @@ def process_disk_create_namespace(cmd, namespace):
                       '--source VHD_BLOB_URI [--source-storage-account-id ID]'
         try:
             namespace.source_blob_uri, namespace.source_disk, namespace.source_snapshot, \
-            namespace.source_restore_point, _ = _figure_out_storage_source(
-                cmd.cli_ctx, namespace.resource_group_name, namespace.source)
+                namespace.source_restore_point, _ = _figure_out_storage_source(
+                    cmd.cli_ctx, namespace.resource_group_name, namespace.source)
             if not namespace.source_blob_uri and namespace.source_storage_account_id:
                 raise ArgumentUsageError(usage_error)
         except HttpResponseError:
@@ -2118,9 +2117,10 @@ def process_image_create_namespace(cmd, namespace):
             raise CLIError("'--data-disk-sources' is not allowed when capturing "
                            "images from virtual machines")
     else:
+        # pylint: disable=line-too-long
         namespace.os_blob_uri, namespace.os_disk, namespace.os_snapshot, _, _ = _figure_out_storage_source(cmd.cli_ctx,
                                                                                                            namespace.resource_group_name,
-                                                                                                           namespace.source)  # pylint: disable=line-too-long
+                                                                                                           namespace.source)
         namespace.data_blob_uris = []
         namespace.data_disks = []
         namespace.data_snapshots = []
@@ -2212,9 +2212,9 @@ def process_set_applications_namespace(cmd, namespace):  # pylint: disable=unuse
 def process_gallery_image_version_namespace(cmd, namespace):
     from azure.cli.core.azclierror import InvalidArgumentValueError
     TargetRegion, EncryptionImages, OSDiskImageEncryption, DataDiskImageEncryption, \
-    ConfidentialVMEncryptionType, GalleryTargetExtendedLocation, GalleryExtendedLocation = cmd.get_models(
-        'TargetRegion', 'EncryptionImages', 'OSDiskImageEncryption', 'DataDiskImageEncryption',
-        'ConfidentialVMEncryptionType', 'GalleryTargetExtendedLocation', 'GalleryExtendedLocation')
+        ConfidentialVMEncryptionType, GalleryTargetExtendedLocation, GalleryExtendedLocation = cmd.get_models(
+            'TargetRegion', 'EncryptionImages', 'OSDiskImageEncryption', 'DataDiskImageEncryption',
+            'ConfidentialVMEncryptionType', 'GalleryTargetExtendedLocation', 'GalleryExtendedLocation')
 
     if namespace.target_regions:
         if hasattr(namespace, 'target_region_encryption') and namespace.target_region_encryption:

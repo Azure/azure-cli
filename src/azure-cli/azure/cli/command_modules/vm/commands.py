@@ -26,7 +26,7 @@ from azure.cli.command_modules.vm._format import (
     transform_disk_create_table_output, transform_sku_for_table_output, transform_disk_show_table_output,
     transform_extension_show_table_output, get_vmss_table_output_transformer,
     transform_vm_encryption_show_table_output, transform_log_analytics_query_output,
-    transform_vmss_list_with_zones_table_output, transform_vmss_list_without_zones_table_output)
+    transform_vmss_list_with_zones_table_output)
 from azure.cli.command_modules.vm._validators import (
     process_vm_create_namespace, process_vmss_create_namespace, process_image_create_namespace,
     process_disk_create_namespace, process_snapshot_create_namespace,
