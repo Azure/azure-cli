@@ -1362,8 +1362,8 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                  .format(database_engine, resource_group, master_server),
                  checks=[JMESPathCheck('length(@)', 1)])
 
-        # test replica stop-replication
-        self.cmd('{} flexible-server replica stop-replication -g {} --name {} --yes'
+        # test replica promote
+        self.cmd('{} flexible-server replica promote -g {} --name {} --yes'
                  .format(database_engine, resource_group, replicas[0]),
                  checks=[
                      JMESPathCheck('name', replicas[0]),
