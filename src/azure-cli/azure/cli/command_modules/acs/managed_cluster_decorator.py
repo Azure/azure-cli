@@ -5772,7 +5772,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         if load_balancer_sku != CONST_LOAD_BALANCER_SKU_BASIC:
             network_profile.nat_gateway_profile = nat_gateway_profile
         if acns_enabled is not None:
-            network_profile.advanced_networking=acns
+            network_profile.advanced_networking = acns
         mc.network_profile = network_profile
         return mc
 
@@ -7381,10 +7381,10 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             mc.network_profile.network_policy = network_policy
 
         return mc
-    
+
     def update_network_profile_advanced_networking(self, mc: ManagedCluster) -> ManagedCluster:
         """Update advanced networking settings of network profile for the ManagedCluster object.
-        
+
         :return: the ManagedCluster object
         """
         self._ensure_mc(mc)
@@ -7401,7 +7401,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                     enabled=acns_security,
                 )
         if acns_enabled is not None:
-            mc.network_profile.advanced_networking=acns
+            mc.network_profile.advanced_networking = acns
         return mc
 
     def update_http_proxy_config(self, mc: ManagedCluster) -> ManagedCluster:
