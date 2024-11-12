@@ -286,33 +286,6 @@ class Profile:
         self._set_subscriptions(consolidated)
         return deepcopy(consolidated)
 
-    def login_with_managed_identity_azure_arc_windows(self, identity_id=None, allow_no_subscriptions=None):
-        import jwt
-        identity_type = MsiAccountTypes.system_assigned
-        from .auth.msal_credentials import ManagedIdentityCredential
-
-        cred = ManagedIdentityCredential()
-        token = cred.get_token(*self._arm_scope).token
-        logger.info('Managed identity: token was retrieved. Now trying to initialize local accounts...')
-        decode = jwt.decode(token, algorithms=['RS256'], options={"verify_signature": False})
-        tenant = decode['tid']
-
-        subscription_finder = SubscriptionFinder(self.cli_ctx)
-        subscriptions = subscription_finder.find_using_specific_tenant(tenant, cred)
-        base_name = ('{}-{}'.format(identity_type, identity_id) if identity_id else identity_type)
-        user = _USER_ASSIGNED_IDENTITY if identity_id else _SYSTEM_ASSIGNED_IDENTITY
-        if not subscriptions:
-            if allow_no_subscriptions:
-                subscriptions = self._build_tenant_level_accounts([tenant])
-            else:
-                raise CLIError('No access was configured for the managed identity, hence no subscriptions were found. '
-                               "If this is expected, use '--allow-no-subscriptions' to have tenant level access.")
-
-        consolidated = self._normalize_properties(user, subscriptions, is_service_principal=True,
-                                                  user_assigned_identity_id=base_name)
-        self._set_subscriptions(consolidated)
-        return deepcopy(consolidated)
-
     def login_in_cloud_shell(self):
         import jwt
         from .auth.msal_credentials import CloudShellCredential
@@ -390,13 +363,10 @@ class Profile:
 
         elif managed_identity_type:
             # managed identity
-            if _on_azure_arc_windows():
-                from .auth.msal_credentials import ManagedIdentityCredential
-                from azure.cli.core.auth.credential_adaptor import CredentialAdaptor
-                # The credential must be wrapped by CredentialAdaptor so that it can work with Track 1 SDKs.
-                cred = CredentialAdaptor(ManagedIdentityCredential(), resource=resource)
-            else:
-                cred = MsiAccountTypes.msi_auth_factory(managed_identity_type, managed_identity_id, resource)
+            from .auth.msal_credentials import ManagedIdentityCredential
+            from azure.cli.core.auth.credential_adaptor import CredentialAdaptor
+            # The credential must be wrapped by CredentialAdaptor so that it can work with Track 1 SDKs.
+            cred = CredentialAdaptor(ManagedIdentityCredential(), resource=resource)
 
         else:
             # user and service principal
@@ -451,13 +421,8 @@ class Profile:
             # managed identity
             if tenant:
                 raise CLIError("Tenant shouldn't be specified for managed identity account")
-            if _on_azure_arc_windows():
-                from .auth.msal_credentials import ManagedIdentityCredential
-                cred = ManagedIdentityCredential()
-            else:
-                from .auth.util import scopes_to_resource
-                cred = MsiAccountTypes.msi_auth_factory(managed_identity_type, managed_identity_id,
-                                                        scopes_to_resource(scopes))
+            from .auth.msal_credentials import ManagedIdentityCredential
+            cred = ManagedIdentityCredential()
 
         else:
             cred = self._create_credential(account, tenant)
