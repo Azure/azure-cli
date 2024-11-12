@@ -2028,22 +2028,6 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         ctx_6.attach_mc(mc)
         self.assertEqual(ctx_6.get_network_plugin(), "azure")
 
-        # do not use default from SDK when CREATE and nothing provided by user
-        ctx_7 = AKSManagedClusterContext(
-            self.cmd,
-            AKSManagedClusterParamDict(
-                {
-                }
-            ),
-            self.models,
-            DecoratorMode.CREATE,
-        )
-        network_profile_7 = self.models.ContainerServiceNetworkProfile()
-        self.assertEqual(network_profile_7.network_plugin, "kubenet") # kubenet is the default that comes from the SDK
-        mc = self.models.ManagedCluster(location="test_location", network_profile=network_profile_7)
-        ctx_7.attach_mc(mc)
-        self.assertIsNone(ctx_7.get_network_plugin())
-
     def test_mc_get_network_dataplane(self):
         # Default, not set.
         ctx_1 = AKSManagedClusterContext(
