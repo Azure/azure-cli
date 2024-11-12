@@ -426,6 +426,7 @@ def flexible_server_restart(cmd, client, resource_group_name, server_name, fail_
         raise ArgumentUsageError("Failing over can only be triggered for zone redundant or same zone servers.")
 
     if fail_over is not None:
+        validate_citus_cluster(cmd, resource_group_name, server_name)
         if fail_over.lower() not in ['planned', 'forced']:
             raise InvalidArgumentValueError("Allowed failover parameters are 'Planned' and 'Forced'.")
         if fail_over.lower() == 'planned':
@@ -525,6 +526,8 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
     except Exception as e:
         raise ResourceNotFoundError(e)
 
+    # IF CLUSTER: Need to check if source_server_object already has replica/is primary. If true, block operation
+
     if not location:
         location = source_server_object.location
     location = ''.join(location.lower().split())
@@ -597,6 +600,7 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
                                private_dns_zone_arguments=None, geo_redundant_backup=None, no_wait=False, yes=False,
                                byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None):
     validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
 
     server_name = server_name.lower()
 
@@ -739,7 +743,7 @@ def flexible_server_revivedropped(cmd, client, resource_group_name, server_name,
     return sdk_no_wait(no_wait, client.begin_create, resource_group_name, server_name, parameters)
 
 
-def flexible_replica_stop(client, resource_group_name, server_name):
+def flexible_replica_stop(cmd, client, resource_group_name, server_name):
     validate_resource_group(resource_group_name)
 
     try:
@@ -761,7 +765,7 @@ def flexible_replica_stop(client, resource_group_name, server_name):
     return client.begin_update(resource_group_name, server_name, params)
 
 
-def flexible_replica_promote(client, resource_group_name, server_name, promote_mode='standalone', promote_option='planned'):
+def flexible_replica_promote(cmd, client, resource_group_name, server_name, promote_mode='standalone', promote_option='planned'):
     validate_resource_group(resource_group_name)
 
     try:
@@ -828,6 +832,7 @@ def _create_server(db_context, cmd, resource_group_name, server_name, tags, loca
 
 def _create_database(db_context, cmd, resource_group_name, server_name, database_name):
     validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
 
     # check for existing database, create if not
     cf_db, logging_name = db_context.cf_db, db_context.logging_name
