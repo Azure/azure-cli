@@ -28,6 +28,10 @@ examples:
     text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Standard --assign-identity /subscriptions/<SUBSCRIPTON ID>/resourcegroups/<RESOURCEGROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentity
   - name: Create an App Configuration store with name, location and resource group with public network access enabled and local auth disabled.
     text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --enable-public-network --disable-local-auth
+  - name: Create an App Configuration store with name, location and resource group with ARM authentication mode set to Pass-through.
+    text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --arm-auth-mode pass-through
+  - name: Create an App Configuration store with name, location and resource group with ARM authentication mode set to Pass-through and private network access via ARM Private Link enabled.
+    text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --arm-auth-mode pass-through --enable-arm-private-network-access true
 """
 
 helps['appconfig list-deleted'] = """
@@ -369,6 +373,10 @@ examples:
     text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --encryption-key-name ""
   - name: Update an App Configuration store to enable public network access and disable local auth.
     text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --enable-public-network true --disable-local-auth true
+  - name: Update an App Configuration store to set ARM authentication mode set to Pass-through.
+    text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --arm-auth-mode pass-through
+  - name: Update an App Configuration store to set ARM authentication mode set to Pass-through and enable private network access via ARM Private Link.
+    text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --arm-auth-mode pass-through --enable-arm-private-network-access true
 """
 
 helps['appconfig feature'] = """

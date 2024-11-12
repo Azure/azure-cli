@@ -5,7 +5,7 @@
 import os
 import time
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from time import sleep
 from azure.cli.core.util import parse_proxy_resource_id
 from dateutil import parser
@@ -107,6 +107,11 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='eastus2euap')
     def test_flexible_server_ssdv2_restore_mgmt(self, resource_group):
         self._test_flexible_server_ssdv2_restore_mgmt('postgres', resource_group)
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location='southcentralus')
+    def test_postgres_flexible_server_ltr(self, resource_group):
+        self._test_flexible_server_ltr('postgres', resource_group)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -256,6 +261,68 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                  .format(database_engine, server_name), expect_failure=True)
         self.cmd('{} flexible-server update -g \'\' -n {} -p randompw321##@!'
                  .format(database_engine, server_name), expect_failure=True)
+
+
+    def _test_flexible_server_ltr(self, database_engine, resource_group):
+
+        if self.cli_ctx.local_context.is_on:
+            self.cmd('config param-persist off')
+
+        storage_account_name = self.create_random_name('teststorage', 24)
+        container_account_name = self.create_random_name('testcontainer', 24)
+        start_time = (datetime.utcnow() - timedelta(minutes=60)).strftime(f"%Y-%m-%dT%H:%MZ")
+        expiry_time = (datetime.utcnow() + timedelta(minutes=200)).strftime(f"%Y-%m-%dT%H:%MZ")
+
+        # create storage account
+        storage_account = self.cmd('az storage account create -n {} -g {} --encryption-services \
+                                   blob'.format(storage_account_name, resource_group)).get_output_in_json()
+
+        # create storage container inside storage account
+        self.cmd('az storage container create -n {} --account-name {}'.format(container_account_name, storage_account_name))
+
+        # generate SAS URL for storage account
+        container_sas_token = self.cmd('az storage container generate-sas -n {} --account-name {} \
+                                       --permissions dlrw --expiry {} \
+                                       --start {}'.format(container_account_name, storage_account_name,
+                                                          expiry_time, start_time)).output
+        sas_url = storage_account['primaryEndpoints']['blob'] + container_account_name + "?" + container_sas_token[1:-2]
+
+        # create server
+        version = '16'
+        storage_size = 128
+        sku_name = 'Standard_D2s_v3'
+        tier = 'GeneralPurpose'
+        backup_retention = 7
+        database_name = 'testdb'
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        ha_value = 'ZoneRedundant'
+        backup_name = "testbackup"
+
+        self.cmd('{} flexible-server create -g {} -n {} --backup-retention {} --sku-name {} --tier {} \
+                  --storage-size {} -u {} --version {} --tags keys=3 --database-name {} --high-availability {} \
+                  --public-access None'.format(database_engine, resource_group, server_name, backup_retention,
+                                               sku_name, tier, storage_size, 'dbadmin', version, database_name, ha_value))
+
+        # precheck LTR
+        precheck_result = self.cmd('{} flexible-server long-term-retention pre-check -g {} \
+                 -n {} -b {}'.format(database_engine, resource_group, server_name, backup_name)).get_output_in_json()
+        self.assertGreaterEqual(precheck_result['numberOfContainers'], 0)
+
+        # start LTR
+        self.cmd('{} flexible-server long-term-retention start -g {} -n {} -u {} -b {}'
+                 .format(database_engine, resource_group, server_name, sas_url, backup_name),
+                 checks=[JMESPathCheck('backupName', backup_name)])
+
+        # show LTR
+        self.cmd('{} flexible-server long-term-retention show -g {} -n {} -b {}'
+                 .format(database_engine, resource_group, server_name, backup_name),
+                 checks=[JMESPathCheck('backupName', backup_name)])
+
+        # list LTR
+        list_result = self.cmd('{} flexible-server long-term-retention list -g {} \
+                 -n {}'.format(database_engine, resource_group, server_name)).get_output_in_json()
+        self.assertEqual(len(list_result), 1)
+        self.assertEqual(list_result[0]['backupName'], backup_name)
 
 
     def _test_flexible_server_mgmt_case_insensitive(self, database_engine, resource_group):

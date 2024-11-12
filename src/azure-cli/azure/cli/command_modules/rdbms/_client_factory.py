@@ -362,6 +362,14 @@ def cf_postgres_flexible_backups(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).backups
 
 
+def cf_postgres_flexible_ltr_backups(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).ltr_backup_operations
+
+
+def cf_postgres_flexible_operations(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).flexible_server
+
+
 def cf_postgres_flexible_adadmin(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).administrators
 

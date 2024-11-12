@@ -19,9 +19,9 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-01-01-preview",
+        "version": "2024-05-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/eventhubs", "2023-01-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/eventhubs", "2024-05-01-preview"],
         ]
     }
 
@@ -145,7 +145,7 @@ class List(AAZCommand):
                     "$top", self.ctx.args.top,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2023-01-01-preview",
+                    "api-version", "2024-05-01-preview",
                     required=True,
                 ),
             }
@@ -215,8 +215,14 @@ class List(AAZCommand):
                 serialized_name="createdAt",
                 flags={"read_only": True},
             )
+            properties.identifier = AAZStrType(
+                flags={"read_only": True},
+            )
             properties.message_retention_in_days = AAZIntType(
                 serialized_name="messageRetentionInDays",
+            )
+            properties.message_timestamp_description = AAZObjectType(
+                serialized_name="messageTimestampDescription",
             )
             properties.partition_count = AAZIntType(
                 serialized_name="partitionCount",
@@ -232,6 +238,9 @@ class List(AAZCommand):
             properties.updated_at = AAZStrType(
                 serialized_name="updatedAt",
                 flags={"read_only": True},
+            )
+            properties.user_metadata = AAZStrType(
+                serialized_name="userMetadata",
             )
 
             capture_description = cls._schema_on_200.value.Element.properties.capture_description
@@ -281,12 +290,20 @@ class List(AAZCommand):
                 serialized_name="storageAccountResourceId",
             )
 
+            message_timestamp_description = cls._schema_on_200.value.Element.properties.message_timestamp_description
+            message_timestamp_description.timestamp_type = AAZStrType(
+                serialized_name="timestampType",
+            )
+
             partition_ids = cls._schema_on_200.value.Element.properties.partition_ids
             partition_ids.Element = AAZStrType()
 
             retention_description = cls._schema_on_200.value.Element.properties.retention_description
             retention_description.cleanup_policy = AAZStrType(
                 serialized_name="cleanupPolicy",
+            )
+            retention_description.min_compaction_lag_in_mins = AAZIntType(
+                serialized_name="minCompactionLagInMins",
             )
             retention_description.retention_time_in_hours = AAZIntType(
                 serialized_name="retentionTimeInHours",
