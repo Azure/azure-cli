@@ -55,7 +55,7 @@ if [ "$MERGE_BASE" != "$UPSTREAM_HEAD" ]; then
     # Using a C-style for loop instead of seq
     i=5
     while [ $i -ge 1 ]; do
-        printf "\r\033[K\033[1;33mTime remaining: %d seconds...\033[0m\n" $i
+        printf "\r\033[K\033[1;33mTime remaining: %d seconds...\033[0m" $i
         sleep 1
         i=$((i-1))
     done
