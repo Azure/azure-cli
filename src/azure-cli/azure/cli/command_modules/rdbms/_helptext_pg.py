@@ -758,6 +758,43 @@ examples:
     text: az postgres flexible-server backup delete -g testgroup -n testsvr --backup-name testbackup
 """
 
+helps['postgres flexible-server long-term-retention'] = """
+type: group
+short-summary: Manage flexible server long-term-retention backups.
+"""
+
+helps['postgres flexible-server long-term-retention pre-check'] = """
+type: command
+short-summary: Performs all the checks that are needed for the subsequent long-term-retention backup operation to succeed.
+examples:
+  - name: Precheck if we can perform long-term-retention command on server 'server-name' on resource group 'resource-group-name' with backup name 'backup-name'.
+    text: az postgres flexible-server long-term-retention pre-check -g resource-group-name -b backup-name -n server-name
+"""
+
+helps['postgres flexible-server long-term-retention start'] = """
+type: command
+short-summary: Start long-term-retention backup for a flexible server. SAS URL parameter refers to the container SAS URL, inside the storage account, where the backups will be uploaded.
+examples:
+  - name: Create a backup with name 'backup-name' of server 'server-name' in resource group 'resource-group-name', using container with SAS URL '<sas-url>'.
+    text: az postgres flexible-server long-term-retention start -g resource-group-name -b backup-name -n server-name -u <sas-url>
+"""
+
+helps['postgres flexible-server long-term-retention show'] = """
+type: command
+short-summary: Show the details of a specific long-term-retention backup for a given server.
+examples:
+  - name: Show the details of long-term-retention backup 'testbackup' for 'testsvr'.
+    text: az postgres flexible-server long-term-retention show -g resource-group-name -n server-name -b backup-name
+"""
+
+helps['postgres flexible-server long-term-retention list'] = """
+type: command
+short-summary: List all the long-term-retention backups for a given server.
+examples:
+  - name: List all long-term-retention backups for 'testsvr'.
+    text: az postgres flexible-server long-term-retention list -g resource-group-name -n server-name
+"""
+
 helps['postgres flexible-server replica'] = """
 type: group
 short-summary: Manage read replicas.
