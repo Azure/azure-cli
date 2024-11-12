@@ -47,6 +47,7 @@ def _postgres_parse_list_capability(result):
         raise InvalidArgumentValueError("No available SKUs in this location")
 
     offer_restricted = [feature for feature in result[0].supported_features if feature.name == "OfferRestricted"]
+    index_tuning = [feature for feature in result[0].supported_features if feature.name == "IndexTuning"]
 
     if offer_restricted[0].status == "Enabled":
         raise InvalidArgumentValueError("The location is restricted for provisioning of flexible servers. Please try using another region.")
@@ -56,6 +57,7 @@ def _postgres_parse_list_capability(result):
 
     single_az = result[0].zone_redundant_ha_supported != "Enabled"
     geo_backup_supported = result[0].geo_backup_supported == "Enabled"
+    index_tuning_supported = index_tuning[0].status == "Enabled" if index_tuning else False
 
     tiers = result[0].supported_server_editions
     tiers_dict = {}
@@ -98,7 +100,8 @@ def _postgres_parse_list_capability(result):
         'single_az': single_az,
         'geo_backup_supported': geo_backup_supported,
         'zones': zones,
-        'server_versions': versions
+        'server_versions': versions,
+        'index_tuning_supported': index_tuning_supported
     }
 
 

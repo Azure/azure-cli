@@ -971,6 +971,34 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('resource_group_name', arg_type=resource_group_name_type)
                 c.argument('server_name', options_list=['--server-name', '-s'], id_part='name', arg_type=server_name_arg_type, required=False)
 
+        # index tuning
+        if command_group == 'postgres':
+            for scope in ['update']:
+                argument_context_string = '{} flexible-server index-tuning {}'.format(command_group, scope)
+                with self.argument_context(argument_context_string) as c:
+                    c.argument('server_name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
+
+            with self.argument_context('{} flexible-server index-tuning update'.format(command_group)) as c:
+                c.argument('state', options_list=['--state'], arg_type=get_enum_type(['Enabled', 'Disabled']),
+                            help='Whether index tuning is enabled.')
+                c.argument('yes', arg_type=yes_arg_type)
+
+            for scope in ['list', 'show', 'recomendation-list']:
+                argument_context_string = '{} flexible-server tuning-options {}'.format(command_group, scope)
+                with self.argument_context(argument_context_string) as c:
+                    c.argument('server_name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
+
+            for scope in ['show', 'recomendation-list']:
+                with self.argument_context('{} flexible-server tuning-options {}'.format(command_group, scope)) as c:
+                    c.argument('tuning_option_name', options_list=['--tuning-option-name', '-n'], help='The name of the tuning option.',
+                               arg_type=get_enum_type(['Index']), required=False)
+
+            with self.argument_context('{} flexible-server tuning-options recomendation-list'.format(command_group)) as c:
+                c.argument('server_name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
+                c.argument('recommendation_type', options_list=['--recommendation-type', '-t'],
+                           help='Indicate whether to filter the list of recommendations returned based on type. Valid values are: CreateIndex and DropIndex.',
+                           arg_type=get_enum_type(['CreateIndex', 'DropIndex']), required=False)
+
         # GTID
         if command_group == 'mysql':
             with self.argument_context('{} flexible-server gtid reset'.format(command_group)) as c:

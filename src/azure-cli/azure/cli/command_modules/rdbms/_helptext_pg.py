@@ -1089,3 +1089,47 @@ examples:
   - name: Get the private link resource for a flexible server using --ids parameter.
     text: az postgres flexible-server private-link-resource show --ids /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/testGroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/testServer
 """
+
+helps['postgres flexible-server index-tuning'] = """
+type: group
+short-summary: Set index tuning to allow for analyzing read queries captured in Query Store.
+"""
+
+helps['postgres flexible-server index-tuning update'] = """
+type: command
+short-summary: Update index tuning to be enabled/disabled on PostgreSQL flexible server.
+examples:
+  - name: Update index tuning to be enabled/disabled on PostgreSQL flexible server.
+    text: az postgres flexible-server index-tuning update -g testgroup -s testsvr --state Enabled
+"""
+
+helps['postgres flexible-server tuning-options'] = """
+type: group
+short-summary: Get tuning options for a PostgreSQL flexible server.
+"""
+
+helps['postgres flexible-server tuning-options list'] = """
+type: command
+short-summary: List of available tuning options associated with a PostgreSQL flexible server.
+examples:
+  - name: List of available tuning options associated with a PostgreSQL flexible server.
+    text: az postgres flexible-server tuning-options list -g testgroup -s testsvr
+"""
+
+helps['postgres flexible-server tuning-options show'] = """
+type: command
+short-summary: Get a tuning option associated with a PostgreSQL flexible server.
+examples:
+  - name: Get tuning option associated with a PostgreSQL flexible server.
+    text: az postgres flexible-server tuning-options list -g testgroup -s testsvr --tuning-option-name Index
+"""
+
+helps['postgres flexible-server tuning-options recomendation-list'] = """
+type: command
+short-summary: List of available tuning index recommendations for a PostgreSQL flexible server.
+examples:
+  - name: Get the list of available tuning index recommendations for a flexible server.
+    text: az postgres flexible-server recomendation-list --resource-group testGroup --server-name testserver
+  - name: Get the list of available tuning index recommendations for a flexible server with type specified.
+    text: az postgres flexible-server recomendation-list --resource-group testGroup --server-name testserver --recommendation-type CreateIndex
+"""
