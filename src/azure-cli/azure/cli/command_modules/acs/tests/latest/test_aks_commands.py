@@ -10446,7 +10446,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         # upgrade upgrade settings
-        self.cmd('aks upgrade --resource-group={resource_group} --name={name} --upgrade-override-until 2020-01-01T22:30:17+00:00 --yes --if_match={if_match}', checks=[
+        self.cmd('aks upgrade --resource-group={resource_group} --name={name} --upgrade-override-until 2020-01-01T22:30:17+00:00 --yes --if-match={if_match}', checks=[
             self.check('provisioningState', 'Succeeded'),
             self.not_exists('upgradeSettings.overrideSettings.forceUpgrade'),
             self.exists('upgradeSettings.overrideSettings.until')
