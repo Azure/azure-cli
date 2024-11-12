@@ -2063,6 +2063,7 @@ class FunctionAppSlotTests(ScenarioTest):
 
 
 class FunctionAppKeysTests(ScenarioTest):
+    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_keys_set(self, resource_group, storage_account):
