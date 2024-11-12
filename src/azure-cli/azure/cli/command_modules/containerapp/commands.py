@@ -49,6 +49,13 @@ def load_command_table(self, _):
         g.custom_command('update', 'update_managed_environment', supports_no_wait=True, exception_handler=ex_handler_factory())
         g.custom_command('list-usages', 'list_environment_usages', table_transformer=transform_usages_output)
 
+    with self.command_group('containerapp env httprouteconfig') as g:
+        g.custom_show_command('show', 'show_httprouteconfig')
+        g.custom_command('list', 'list_httprouteconfigs')
+        g.custom_command('create', 'update_httprouteconfig', exception_handler=ex_handler_factory())
+        g.custom_command('update', 'update_httprouteconfig', exception_handler=ex_handler_factory())
+        g.custom_command('delete', 'delete_httprouteconfig', confirmation=True, exception_handler=ex_handler_factory())
+
     with self.command_group('containerapp job') as g:
         g.custom_show_command('show', 'show_containerappsjob')
         g.custom_command('list', 'list_containerappsjob')

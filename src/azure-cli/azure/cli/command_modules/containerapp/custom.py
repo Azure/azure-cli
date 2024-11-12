@@ -955,6 +955,46 @@ def delete_managed_environment(cmd, name, resource_group_name, no_wait=False):
     return containerapp_env_decorator.delete()
 
 
+def update_httprouteconfig(cmd, resource_group_name, name, httprouteconfig_name, yaml):
+    yaml_httprouteconfig = load_yaml_file(yaml)
+    # check if the type is dict
+    if not isinstance(yaml_httprouteconfig, dict):
+        raise ValidationError('Invalid YAML provided. Please see https://aka.ms/azure-container-apps-job-yaml for a valid YAML spec.')
+
+    httprouteconfig_envelope = {}
+
+    httprouteconfig_envelope["properties"] = yaml_httprouteconfig
+
+    try:
+        return ManagedEnvironmentClient.update_httprouteconfig(cmd, resource_group_name, name, httprouteconfig_name, httprouteconfig_envelope)
+    except Exception as e:
+        handle_raw_exception(e)
+
+
+def list_httprouteconfigs(cmd, resource_group_name, name):
+    _validate_subscription_registered(cmd, CONTAINER_APPS_RP)
+    try:
+        return ManagedEnvironmentClient.list_httprouteconfigs(cmd, resource_group_name, name)
+    except Exception as e:
+        handle_raw_exception(e)
+
+
+def show_httprouteconfig(cmd, resource_group_name, name, httprouteconfig_name):
+    _validate_subscription_registered(cmd, CONTAINER_APPS_RP)
+    try:
+        return ManagedEnvironmentClient.show_httprouteconfig(cmd, resource_group_name, name, httprouteconfig_name)
+    except Exception as e:
+        handle_raw_exception(e)
+
+
+def delete_httprouteconfig(cmd, resource_group_name, name, httprouteconfig_name):
+    _validate_subscription_registered(cmd, CONTAINER_APPS_RP)
+    try:
+        return ManagedEnvironmentClient.delete_httprouteconfig(cmd, resource_group_name, name, httprouteconfig_name)
+    except Exception as e:
+        handle_raw_exception(e)
+
+
 def create_containerappsjob(cmd,
                             name,
                             resource_group_name,

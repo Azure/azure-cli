@@ -498,6 +498,56 @@ helps['containerapp env dapr-component remove'] = """
           az containerapp env dapr-component remove -g MyResourceGroup --dapr-component-name MyDaprComponentName --name MyEnvironment
 """
 
+helps['containerapp env httprouteconfig'] = """
+    type: group
+    short-summary: Commands to manage environment level http routing.
+"""
+
+helps['containerapp env httprouteconfig list'] = """
+    type: command
+    short-summary: List the http route configs in the environment.
+    examples:
+    - name: List the http route configs in the environment.
+      text: |
+          az containerapp env httprouteconfig list -g MyResourceGroup -n MyEnvironment
+"""
+
+helps['containerapp env httprouteconfig create'] = """
+    type: command
+    short-summary: Create a new http route config.
+    examples:
+    - name: Create a new route from a yaml file.
+      text: |
+          az containerapp env httprouteconfig create -g MyResourceGroup -n MyEnvironment --httprouteconfig-name configname --yaml config.yaml
+"""
+
+helps['containerapp env httprouteconfig update'] = """
+    type: command
+    short-summary: Update a http route config.
+    examples:
+    - name: Updates a route in the environment from a yaml file.
+      text: |
+          az containerapp env httprouteconfig update -g MyResourceGroup -n MyEnvironment --httprouteconfig-name configname --yaml config.yaml
+"""
+
+helps['containerapp env httprouteconfig show'] = """
+    type: command
+    short-summary: Show a http route config.
+    examples:
+    - name: Shows a route from the environment.
+      text: |
+          az containerapp env httprouteconfig show -g MyResourceGroup -n MyEnvironment --httprouteconfig-name configname
+"""
+
+helps['containerapp env httprouteconfig delete'] = """
+    type: command
+    short-summary: Delete a http route config.
+    examples:
+    - name: Deletes a route from the environment.
+      text: |
+          az containerapp env httprouteconfig delete -g MyResourceGroup -n MyEnvironment --httprouteconfig-name configname
+"""
+
 helps['containerapp env storage'] = """
     type: group
     short-summary: Commands to manage storage for the Container Apps environment.
