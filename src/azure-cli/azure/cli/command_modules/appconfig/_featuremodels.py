@@ -7,7 +7,7 @@ from enum import Enum
 import json
 from knack.log import get_logger
 from azure.cli.core.util import shell_safe_json_parse
-from azure.cli.core.azclierror import InvalidArgumentValueError
+from azure.cli.core.azclierror import InvalidArgumentValueError, ValidationError
 from collections import namedtuple
 from ._models import KeyValue
 from ._constants import FeatureFlagConstants
@@ -50,6 +50,12 @@ class FeatureFlagValue:
         Represents if the Feature flag is On/Off/Conditionally On
     :ivar dict {string, FeatureFilter[]} conditions:
         Dictionary that contains client_filters List (and server_filters List in future)
+    :ivar FeatureAllocation allocation:
+        Determines how variants should be allocated for the feature to various users.
+    :ivar list FeatureVariant[] variants:
+        The list of variants defined for this feature. A variant represents a configuration value of a feature flag that can be a string, a number, a boolean, or a JSON object.
+    :ivar dict telemetry:
+        The declaration of options used to configure telemetry for this feature.
     '''
 
     def __init__(self,
@@ -57,14 +63,24 @@ class FeatureFlagValue:
                  description=None,
                  enabled=None,
                  conditions=None,
-                 display_name=None):
+                 display_name=None,
+                 variants=None,
+                 allocation=None,
+                 telemetry=None):
         default_conditions = {FeatureFlagConstants.CLIENT_FILTERS: []}
 
         self.id = id_
         self.description = "" if description is None else description
         self.enabled = enabled if enabled else False
         self.conditions = conditions if conditions else default_conditions
-        self.display_name = display_name
+        if allocation is not None:
+            self.allocation = allocation
+        if variants is not None:
+            self.variants = variants
+        if telemetry is not None:
+            self.telemetry = telemetry
+        if display_name is not None:
+            self.display_name = display_name
 
     def __repr__(self):
         featureflagvalue = {
@@ -72,7 +88,10 @@ class FeatureFlagValue:
             FeatureFlagConstants.DESCRIPTION: self.description,
             FeatureFlagConstants.ENABLED: self.enabled,
             FeatureFlagConstants.CONDITIONS: custom_serialize_conditions(self.conditions),
-            FeatureFlagConstants.DISPLAY_NAME: self.display_name
+            FeatureFlagConstants.DISPLAY_NAME: self.display_name,
+            FeatureFlagConstants.ALLOCATION: custom_serialize_allocation(self.allocation),
+            FeatureFlagConstants.VARIANTS: custom_serialize_variants(self.variants),
+            FeatureFlagConstants.TELEMETRY: self.telemetry
         }
 
         return json.dumps(featureflagvalue, indent=2, ensure_ascii=False)
@@ -94,12 +113,20 @@ class FeatureFlag:
         Description of Feature Flag
     :ivar bool locked:
         Represents whether the feature flag is locked.
+    :ivar str display_name:
+        Display name of the feature flag.
     :ivar str last_modified:
         A str representation of the datetime object representing the last time the feature flag was modified.
     :ivar str etag:
         The ETag contains a value that you can use to perform operations.
     :ivar dict {string, FeatureFilter[]} conditions:
         Dictionary that contains client_filters List (and server_filters List in future)
+    :ivar dict allocation:
+        Determines how variants should be allocated for the feature to various users.
+    :ivar list FeatureVariant[] variants:
+        The list of variants defined for this feature. A variant represents a configuration value of a feature flag that can be a string, a number, a boolean, or a JSON object.
+    :ivar dict {string, bool} telemetry:
+        The declaration of options used to configure telemetry for this feature.
     '''
 
     def __init__(self,
@@ -110,7 +137,11 @@ class FeatureFlag:
                  description=None,
                  conditions=None,
                  locked=None,
-                 last_modified=None):
+                 display_name=None,
+                 last_modified=None,
+                 allocation=None,
+                 variants=None,
+                 telemetry=None):
         self.name = name
         self.key = key
         self.label = label
@@ -119,6 +150,14 @@ class FeatureFlag:
         self.conditions = conditions
         self.last_modified = last_modified
         self.locked = locked
+        if allocation is not None:
+            self.allocation = allocation
+        if variants is not None:
+            self.variants = variants
+        if telemetry is not None:
+            self.telemetry = telemetry
+        if display_name is not None:
+            self.display_name = display_name
 
     def __repr__(self):
         featureflag = {
@@ -127,9 +166,13 @@ class FeatureFlag:
             "Label": self.label,
             "State": self.state,
             "Locked": self.locked,
+            "Display Name": self.display_name,
             "Description": self.description,
             "Last Modified": self.last_modified,
-            "Conditions": custom_serialize_conditions(self.conditions)
+            "Conditions": custom_serialize_conditions(self.conditions),
+            "Allocation": custom_serialize_allocation(self.allocation),
+            "Variants": custom_serialize_variants(self.variants),
+            "Telemetry": self.telemetry
         }
 
         return json.dumps(featureflag, indent=2, ensure_ascii=False)
@@ -153,14 +196,376 @@ class FeatureFilter:
 
     def __repr__(self):
         featurefilter = {
-            FeatureFlagConstants.FILTER_NAME: self.name,
+            FeatureFlagConstants.NAME: self.name,
             FeatureFlagConstants.FILTER_PARAMETERS: self.parameters
         }
         return json.dumps(featurefilter, indent=2, ensure_ascii=False)
 
+class FeatureConditions:
+    '''
+    Feature conditions class.
+
+    :ivar list FeatureFilter[] client_filters:
+        Collection of filters.
+    :ivar RequirementType requirement_type:
+        The requirement type of the feature flag. Default is set to "Any"
+    '''
+
+    def __init__(self,
+                 client_filters=None,
+                 requirement_type=None):
+        self.client_filters = client_filters
+        if requirement_type is not None:
+            self.requirement_type = requirement_type
+
+    @classmethod
+    def convert_from_json(cls, feature_id, json_string):
+        '''
+        Convert JSON string to FeatureConditions object
+        
+        Args:
+            json_string - JSON string
+
+        Return:
+
+        FeatureConditions object
+        '''
+        conditions = json.loads(json_string)
+        feature_conditions = cls()
+
+        if conditions:
+            client_filters = conditions.get(FeatureFlagConstants.CLIENT_FILTERS, [])
+
+            # Convert all filters to FeatureFilter objects
+            client_filters_list = []
+            for client_filter in client_filters:
+                # If there is a filter, it should always have a name
+                # In case it doesn't, ignore this filter
+                lowercase_filter = {k.lower(): v for k, v in client_filter.items()}        
+                name = lowercase_filter.get(FeatureFlagConstants.NAME)
+                if name:
+                    params = lowercase_filter.get(FeatureFlagConstants.FILTER_PARAMETERS, {})
+                    client_filters_list.append(FeatureFilter(name, params))
+                else:
+                    raise ValidationError("Feature filter must contain the %s attribute:\n%s",
+                                   FeatureFlagConstants.NAME,
+                                   json.dumps(client_filter, indent=2, ensure_ascii=False))
+
+            feature_conditions.client_filters = client_filters_list
+
+            requirement_type = conditions.get(FeatureFlagConstants.REQUIREMENT_TYPE, None)
+            if requirement_type:
+                if requirement_type.lower() not in (FeatureFlagConstants.REQUIREMENT_TYPE_ALL, FeatureFlagConstants.REQUIREMENT_TYPE_ANY):
+                    raise ValidationError(f"Feature '{feature_id}' must have an any/all requirement type.")
+                else:
+                    feature_conditions.requirement_type = requirement_type
+            
+            return feature_conditions
+
+    def __repr__(self):
+        featureconditions = {
+            FeatureFlagConstants.CLIENT_FILTERS: self.client_filters,
+            FeatureFlagConstants.REQUIREMENT_TYPE: self.requirement_type 
+        }
+        return json.dumps(featureconditions, indent=2, ensure_ascii=False)
+
+class FeatureVariant:
+    '''
+    Feature variants class.
+
+    :ivar str Name:
+        Name of the variant
+    :ivar str Configuration_Value:
+        The configuration value of the variant
+    :ivar str Status_Overide:
+        Overrides the enabled state of the feature if the given variant is assigned. Does not override the state if value is None
+    '''
+
+    def __init__(self,
+                 name,
+                 configuration_value=None,
+                 status_override=None):
+        self.name = name
+        if configuration_value is not None:
+            self.configuration_value = configuration_value
+        if status_override is not None:
+            self.status_override = status_override
+
+    @classmethod
+    def convert_from_json(cls, json_string):
+        '''
+        Convert JSON string to FeatureVariant object
+
+        Args:
+            json_string - JSON string
+
+        Return:
+            FeatureVariant object
+        '''
+        variant = json.loads(json_string)
+        name = variant.get(FeatureFlagConstants.NAME, None)
+        if not name:
+            raise ValidationError("Feature variant must contain required 'name' attribute: \n%s",
+                            json.dumps(variant, indent=2, ensure_ascii=False))
+
+        configuration_value = variant.get(FeatureFlagConstants.VARIANT_CONFIGURATION_VALUE, None)
+        status_override = variant.get(FeatureFlagConstants.VARIANT_STATUS_OVERRIDE, None)
+        return cls(name=name, configuration_value=configuration_value, status_override=status_override)
+    
+    def __repr__(self):
+        featurevariant = {
+            FeatureFlagConstants.NAME: self.name,
+            FeatureFlagConstants.VARIANT_CONFIGURATION_VALUE: self.configuration_value,
+            FeatureFlagConstants.VARIANT_STATUS_OVERRIDE: self.status_override
+        }
+        return json.dumps(featurevariant, indent=2, ensure_ascii=False)
+
+
+class FeatureUserAllocation:
+    '''
+    Feature user allocation class.
+
+    :ivar str Variant:
+        The name of the variant to use if the user allocation matches the current user.
+    :ivar list Users:
+        Collection of users where if any match the current user, the variant specified in the user allocation is used.
+    '''
+    def __init__(self,
+                 variant,
+                 users):
+        self.variant = variant
+        self.users = users
+
+    @classmethod
+    def convert_from_json(cls, json_string):
+        '''
+        Convert JSON string to FeatureUserAllocation object
+
+        Args:
+            json_string - JSON string
+
+        Return:
+            FeatureUserAllocation object
+        '''
+        user_allocation = json.loads(json_string)
+        variant = user_allocation.get(FeatureFlagConstants.VARIANT, None)
+        users = user_allocation.get(FeatureFlagConstants.USERS, None)
+        if not variant or not users:
+            raise ValidationError("User variant allocation must contain required 'variant' and 'users' attributes: \n%s",
+                            json.dumps(user_allocation, indent=2, ensure_ascii=False))
+        
+        return cls(variant=variant, users=users)
+    
+
+    def __repr__(self):
+        featureallocationuser = {
+            FeatureFlagConstants.VARIANT: self.variant,
+            FeatureFlagConstants.USERS: self.users
+        }
+
+        return json.dumps(featureallocationuser, indent=2, ensure_ascii=False)
+
+
+class FeatureGroupAllocation:
+    '''
+    Feature group allocation class.
+
+    :ivar str Variant:
+        The name of the variant to use if the group allocation matches a group the current user is in..
+    :ivar list Groups:
+        Collection of groups where if the current user is in any of these groups, the variant specified in the group allocation is used.
+    '''
+    def __init__(self,
+                 variant,
+                 groups):
+        self.variant = variant
+        self.groups = groups
+
+
+    @classmethod
+    def convert_from_json(cls, json_string):
+        '''
+        Convert JSON string to FeatureGroupAllocation object
+
+        Args:
+            json_string - JSON string
+
+        Return:
+            FeatureGroupAllocation object
+        '''
+        group_allocation = json.loads(json_string)
+        variant = group_allocation.get(FeatureFlagConstants.VARIANT, None)
+        groups = group_allocation.get(FeatureFlagConstants.GROUPS, None)
+        if not variant or not groups:
+            raise ValidationError("Group variant allocation must contain required 'variant' and 'groups' attributes: \n%s",
+                            json.dumps(group_allocation, indent=2, ensure_ascii=False))
+            
+        return cls(variant=variant, groups=groups)
+
+    def __repr__(self):
+        featureallocationgroup = {
+            FeatureFlagConstants.VARIANT: self.variant,
+            FeatureFlagConstants.GROUPS: self.groups
+        }
+
+        return json.dumps(featureallocationgroup, indent=2, ensure_ascii=False)
+
+
+class FeaturePercentileAllocation:
+    '''
+    Feature percentile allocation class.
+
+    :ivar str Variant:
+        The name of the variant to use if the calculated percentile for the current user falls in the provided range.
+    :ivar number From:
+        The lower end of the percentage range for which this variant will be used.
+    :ivar number To:
+        The upper end of the percentage range for which this variant will be used.
+    '''
+    def __init__(self,
+                 variant,
+                 From,
+                 to):
+        self.variant = variant
+        self.From = From
+        self.to = to
+    
+    @classmethod
+    def convert_from_json(cls, json_string):
+        '''
+        Convert JSON string to FeaturePercentileAllocation object
+
+        Args:
+            json_string - JSON string
+
+        Return:
+            FeaturePercentileAllocation object
+        '''
+        percentile_allocation = json.loads(json_string)
+        variant = percentile_allocation.get(FeatureFlagConstants.VARIANT, None)
+        percentileFrom = percentile_allocation.get(FeatureFlagConstants.FROM, None)
+        perecentileTo = percentile_allocation.get(FeatureFlagConstants.TO, None)
+        if not variant or not percentileFrom or not perecentileTo:
+            raise ValidationError("Percentile allocation must contain required 'variant', 'to' and 'from' attributes: \n%s" %
+                      json.dumps(percentile_allocation, indent=2, ensure_ascii=False))
+
+        if not isinstance(percentileFrom, int) or not isinstance(perecentileTo, int):
+            raise ValidationError("Percentile allocation 'from' and 'to' must be integers: \n%s" %
+                      json.dumps(percentile_allocation, indent=2, ensure_ascii=False))
+
+        if percentileFrom < 0 or percentileFrom > 100 or perecentileTo < 0 or perecentileTo > 100:
+            raise ValidationError("Percentile allocation 'from' and 'to' must be between 0 and 100: \n%s" %
+                      json.dumps(percentile_allocation, indent=2, ensure_ascii=False))
+
+        if percentileFrom >= perecentileTo:
+            raise ValidationError("Percentile allocation 'from' must be less than 'to': \n%s" %
+                      json.dumps(percentile_allocation, indent=2, ensure_ascii=False))
+        
+        return cls(variant=variant, From=percentileFrom, to=perecentileTo)            
+
+    def __repr__(self):
+        featureallocationpercentile = {
+            FeatureFlagConstants.VARIANT: self.variant,
+            FeatureFlagConstants.FROM: self.From,
+            FeatureFlagConstants.TO: self.to
+        }
+    
+        return json.dumps(featureallocationpercentile, indent=2, ensure_ascii=False)
+
+
+class FeatureAllocation:
+    '''
+    Feature allocation class.
+
+    :ivar list FeatureUserAllocation[] user:
+        Determines how variants should be allocated for the feature to various users.
+    :ivar list FeatureGroupAllocation[] group:
+        Determines how variants should be allocated for the feature to various groups.
+    :ivar list FeaturePercentileAllocation[] percentile:
+        Determines how variants should be allocated for the feature to various users based on percentile.
+    '''
+    def __init__(self,
+                 user=None,
+                 group=None,
+                 percentile=None,
+                 default_when_enabled=None,
+                 default_when_disabled=None):
+        if user is not None:
+            self.user = user
+        if group is not None:
+            self.group = group
+        if percentile is not None:
+            self.percentile = percentile
+        if default_when_enabled is not None:
+            self.default_when_enabled = default_when_enabled
+        if default_when_disabled is not None:
+            self.default_when_disabled = default_when_disabled
+
+    @classmethod
+    def convert_from_json(cls, json_string):
+        '''
+        Convert JSON string to FeatureAllocation object
+
+        Args:
+            json_string - JSON string
+
+        Return:
+            FeatureAllocation object
+        '''
+        allocation_json = json.loads(json_string)
+        default_when_disabled = allocation_json.get(FeatureFlagConstants.DEFAULT_WHEN_DISABLED, None)
+        default_when_enabled = allocation_json.get(FeatureFlagConstants.DEFAULT_WHEN_ENABLED, None)
+
+        allocation = cls(default_when_enabled=default_when_enabled, default_when_disabled=default_when_disabled)
+
+        allocation_user = allocation_json.get(FeatureFlagConstants.USER, None)
+
+        # Convert all users to FeatureUserAllocation object
+        if allocation_user:
+            allocation_user_list = []
+            for user in allocation_user:
+                feature_user_allocation = FeatureUserAllocation.convert_from_json(json.dumps(user))
+                if (feature_user_allocation):
+                    allocation_user_list.append(feature_user_allocation)
+            
+            allocation.user = allocation_user_list
+
+        # Convert all groups to FeatureGroupAllocation object
+        allocation_group = allocation_json.get(FeatureFlagConstants.GROUP, None)
+        if allocation_group:
+            allocation_group_list = []
+            for group in allocation_group:
+                feature_group_allocation = FeatureGroupAllocation.convert_from_json(json.dumps(group))
+                if (feature_group_allocation): 
+                    allocation_group_list.append(feature_group_allocation)
+
+            allocation.group = allocation_group_list
+
+        # Convert all percentile to FeatureAllocationPercentile object
+        allocation_percentile = allocation_json.get(FeatureFlagConstants.PERCENTILE, None)
+        if allocation_percentile:
+            allocation_percentile_list = []
+            for percentile in allocation_percentile:
+                feature_percentile_allocation = FeaturePercentileAllocation.convert_from_json(json.dumps(percentile))
+                if (feature_percentile_allocation):
+                    allocation_percentile_list.append(feature_percentile_allocation)
+
+            allocation.percentile = allocation_percentile_list
+
+        return allocation
+
+    def __repr__(self):
+        featureallocation = {
+            FeatureFlagConstants.USER: self.user,
+            FeatureFlagConstants.GROUP: self.group,
+            FeatureFlagConstants.PERCENTILE: self.percentile,
+            FeatureFlagConstants.DEFAULT_WHEN_ENABLED: self.default_when_enabled,
+            FeatureFlagConstants.DEFAULT_WHEN_DISABLED: self.default_when_disabled
+        }
+
+        return json.dumps(featureallocation, indent=2, ensure_ascii=False)
+  
 # Feature Flag Helper Functions #
-
-
 def custom_serialize_conditions(conditions_dict):
     '''
         Helper Function to serialize Conditions
@@ -175,11 +580,57 @@ def custom_serialize_conditions(conditions_dict):
 
     for key, value in conditions_dict.items():
         if key == FeatureFlagConstants.CLIENT_FILTERS:
-            featurefilterdict[key] = [feature_filter.__dict__ for feature_filter in value]
-        else:
+            featurefilterdict[key] = [feature_filter for feature_filter in value]
+        
+        if key == FeatureFlagConstants.REQUIREMENT_TYPE:
             featurefilterdict[key] = value
 
     return featurefilterdict
+
+
+def custom_serialize_allocation(allocation_dict):
+    '''
+        Helper Function to serialize Allocation
+
+        Args:
+            allocation_dict - Dictionary of {str, Any}
+
+        Return:
+            JSON serializable Dictionary
+    '''
+    featureallocationdict = {}
+
+    for key, value in allocation_dict.items():
+        if key == FeatureFlagConstants.USER or key == FeatureFlagConstants.GROUP or key == FeatureFlagConstants.PERCENTILE:
+            featureallocationdict[key] = [feature_allocation for feature_allocation in value]
+
+        if key == FeatureFlagConstants.DEFAULT_WHEN_ENABLED or key == FeatureFlagConstants.DEFAULT_WHEN_DISABLED:
+            featureallocationdict[key] = value
+
+    return featureallocationdict
+
+def custom_serialize_variants(variants_list):
+    '''
+        Helper Function to serialize Variants
+
+        Args:
+            variants_list - List of FeatureVariant objects
+
+        Return:
+            JSON serializable List
+    '''
+    featurevariants = []
+    for variant in variants_list:
+        variant_dict = {}
+        for key,value in variant.items():
+            if key == FeatureFlagConstants.NAME:
+                variant_dict[key] = value
+            if key == FeatureFlagConstants.VARIANT_CONFIGURATION_VALUE:
+                variant_dict[key] = value
+            if key == FeatureFlagConstants.VARIANT_STATUS_OVERRIDE:
+                variant_dict[key] = value
+            featurevariants.append(variant_dict)
+    return featurevariants
 
 
 def map_featureflag_to_keyvalue(featureflag):
@@ -197,10 +648,31 @@ def map_featureflag_to_keyvalue(featureflag):
         if featureflag.state in ("on", "conditional"):
             enabled = True
 
+        allocation = None
+        variants = None
+        telemetry = None
+        display_name = None
+
+        if hasattr(featureflag, FeatureFlagConstants.ALLOCATION):
+            allocation = featureflag.allocation
+        
+        if hasattr(featureflag,  FeatureFlagConstants.VARIANTS):
+            variants = featureflag.variants
+        
+        if hasattr(featureflag, FeatureFlagConstants.TELEMETRY):
+            telemetry = featureflag.telemetry
+
+        if hasattr(featureflag, FeatureFlagConstants.DISPLAY_NAME):
+            display_name = featureflag.display_name
+
         feature_flag_value = FeatureFlagValue(id_=featureflag.name,
                                               description=featureflag.description,
                                               enabled=enabled,
-                                              conditions=featureflag.conditions)
+                                              conditions=featureflag.conditions,
+                                              display_name=display_name,
+                                              allocation=allocation,
+                                              variants=variants,
+                                              telemetry=telemetry)
 
         set_kv = KeyValue(key=featureflag.key,
                           label=featureflag.label,
@@ -235,6 +707,7 @@ def map_keyvalue_to_featureflag(keyvalue, show_conditions=True):
         Return:
             FeatureFlag object
     '''
+
     feature_flag_value = map_keyvalue_to_featureflagvalue(keyvalue)
     feature_name = feature_flag_value.id
     state = FeatureState.OFF
@@ -248,16 +721,37 @@ def map_keyvalue_to_featureflag(keyvalue, show_conditions=True):
 
     if filters and state == FeatureState.ON:
         state = FeatureState.CONDITIONAL
+    
+    allocation = None
+    variants = None
+    telemetry = None
+    display_name = None
 
-    feature_flag = FeatureFlag(feature_name,
-                               keyvalue.key,
-                               keyvalue.label,
-                               state,
-                               feature_flag_value.description,
-                               conditions,
-                               keyvalue.locked,
-                               keyvalue.last_modified)
+    if hasattr(feature_flag_value, FeatureFlagConstants.ALLOCATION):
+        allocation = feature_flag_value.allocation
+    
+    if hasattr(feature_flag_value,  FeatureFlagConstants.VARIANTS):
+        variants = feature_flag_value.variants
+    
+    if hasattr(feature_flag_value, FeatureFlagConstants.TELEMETRY):
+        telemetry = feature_flag_value.telemetry
 
+    if hasattr(feature_flag_value, FeatureFlagConstants.DISPLAY_NAME):
+        display_name = feature_flag_value.display_name
+
+    feature_flag = FeatureFlag(name=feature_name,
+                               key=keyvalue.key,
+                               label=keyvalue.label,
+                               state=state,
+                               description=feature_flag_value.description,
+                               conditions=conditions,
+                               locked=keyvalue.locked,
+                               display_name=display_name,
+                               last_modified=keyvalue.last_modified,
+                               allocation=allocation,
+                               variants=variants,
+                               telemetry=telemetry)
+    
     # By Default, we will try to show conditions unless the user has
     # specifically filtered them using --fields arg.
     # But in some operations like 'Delete feature', we don't want
@@ -288,7 +782,10 @@ def map_keyvalue_to_featureflagvalue(keyvalue):
             FeatureFlagConstants.ID,
             FeatureFlagConstants.DESCRIPTION,
             FeatureFlagConstants.ENABLED,
-            FeatureFlagConstants.CONDITIONS}
+            FeatureFlagConstants.CONDITIONS,
+            FeatureFlagConstants.ALLOCATION,
+            FeatureFlagConstants.VARIANTS,
+            FeatureFlagConstants.TELEMETRY}
         if valid_fields != feature_flag_dict.keys():
             logger.debug("'%s' feature flag is missing required values or it contains ", keyvalue.key +
                          "unsupported values. Setting missing value to defaults and ignoring unsupported values\n")
@@ -299,27 +796,32 @@ def map_keyvalue_to_featureflagvalue(keyvalue):
 
         conditions = feature_flag_dict.get(FeatureFlagConstants.CONDITIONS, None)
         if conditions:
-            client_filters = conditions.get(FeatureFlagConstants.CLIENT_FILTERS, [])
+            feature_conditions = FeatureConditions.convert_from_json(feature_name, json.dumps(conditions))
+            feature_flag_dict[FeatureFlagConstants.CONDITIONS] = feature_conditions
 
-            # Convert all filters to FeatureFilter objects
-            client_filters_list = []
-            for client_filter in client_filters:
-                # If there is a filter, it should always have a name
-                # In case it doesn't, ignore this filter
-                name = client_filter.get(FeatureFlagConstants.FILTER_NAME)
-                if name:
-                    params = client_filter.get(FeatureFlagConstants.FILTER_PARAMETERS, {})
-                    client_filters_list.append(FeatureFilter(name, params))
-                else:
-                    logger.warning("Ignoring this filter without the %s attribute:\n%s",
-                                   FeatureFlagConstants.FILTER_NAME,
-                                   json.dumps(client_filter, indent=2, ensure_ascii=False))
-            conditions[FeatureFlagConstants.CLIENT_FILTERS] = client_filters_list
+        # Allocation
+        allocation = feature_flag_dict.get(FeatureFlagConstants.ALLOCATION, None)
+        if allocation:
+            feature_flag_dict[FeatureFlagConstants.ALLOCATION] = FeatureAllocation.convert_from_json(json.dumps(allocation))
+
+        # Variants
+        variants = feature_flag_dict.get(FeatureFlagConstants.VARIANTS, None)
+        variant_list = []
+        if variants:
+            for variant in variants:
+                feature_variant = FeatureVariant.convert_from_json(json.dumps(variant))
+                if (feature_variant):
+                    variant_list.append(feature_variant)
+            
+            feature_flag_dict[FeatureFlagConstants.VARIANTS] = variant_list
 
         feature_flag_value = FeatureFlagValue(id_=feature_name,
                                               description=feature_flag_dict.get(FeatureFlagConstants.DESCRIPTION, ''),
                                               enabled=feature_flag_dict.get(FeatureFlagConstants.ENABLED, False),
-                                              conditions=conditions)
+                                              conditions=conditions,
+                                              allocation=allocation,
+                                              variants=variants,
+                                              telemetry=feature_flag_dict.get(FeatureFlagConstants.TELEMETRY, None))
 
     except (InvalidArgumentValueError, TypeError, ValueError) as exception:
         error_msg = "Invalid value. Unable to decode the following JSON value: \n" +\
@@ -347,7 +849,7 @@ class FeatureManagementReservedKeywords:
     '''
     Feature management keywords used in files in different naming conventions.
     '''
-    FeatureFlagKeywords = namedtuple("FeatureFlagKeywords", ["feature_management", "enabled_for", "requirement_type"])
+    FeatureFlagKeywords = namedtuple("FeatureFlagKeywords", ["feature_management", "enabled_for", "requirement_type",])
 
     PASCAL = FeatureFlagKeywords(feature_management="FeatureManagement", enabled_for="EnabledFor",
                                  requirement_type="RequirementType")

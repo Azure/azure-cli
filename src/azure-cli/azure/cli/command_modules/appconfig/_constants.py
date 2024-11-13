@@ -21,12 +21,42 @@ class FeatureFlagConstants:
     CLIENT_FILTERS = "client_filters"
     REQUIREMENT_TYPE = "requirement_type"
     DISPLAY_NAME = "display_name"
-    FILTER_NAME = "name"
+    NAME = "name"
     FILTER_PARAMETERS = "parameters"
+    ALLOCATION = "allocation"
+    TELEMETRY = "telemetry"
+    VARIANTS = "variants"
+
+    # allocation properties
+    GROUP = "group"
+    USER = "user"
+    PERCENTILE = "percentile"
+    DEFAULT_WHEN_ENABLED = "default_when_enabled"
+    DEFAULT_WHEN_DISABLED = "default_when_disabled"
+    SEED = "seed"
+
+    # variant properties
+    VARIANT = "variant"
+    VARIANT_CONFIGURATION_VALUE = "configuration_value"
+    VARIANT_STATUS_OVERRIDE = "status_override"
+
+    # percentile properties
+    FROM = "from"
+    TO = "to"
+
+    # allocation user/group properties
+    USERS = "users"
+    GROUPS = "groups"
 
     # Requirement type options
     REQUIREMENT_TYPE_ALL = "all"
     REQUIREMENT_TYPE_ANY = "any"
+
+    # Telemetry properties
+    METADATA = "metadata"
+
+    #feature flags key
+    FEATURE_FLAGS_KEY = "feature_flags"
 
 
 class KeyVaultConstants:

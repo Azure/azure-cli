@@ -910,6 +910,7 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
             exported_kvs = json.load(json_file)
         assert imported_kvs == exported_kvs
 
+
         # skip features while exporting
         self.cmd(
             'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} --skip-features -y')
@@ -1021,6 +1022,28 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         with self.assertRaisesRegex(CLIError, "Feature 'Timestamp' must have an any/all requirement type"):
             self.cmd(
             'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} -y')
+
+        
+        # Feature flags test with new ms fm schema
+        imported_new_fm_schema_file_path = os.path.join(TEST_DIR, 'import_features_new_fm_schema.json')
+        exported_new_fm_schema_file_path = os.path.join(TEST_DIR, 'export_features_new_fm_schema.json')
+
+        self.kwargs.update({
+            'label': 'KeyValuesWithFeaturesFFV2',
+            'imported_file_new_fm_path': imported_new_fm_schema_file_path,
+            'exported_file_new_fm_path': exported_new_fm_schema_file_path
+        })
+        self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_new_fm_path}" --format {imported_format} --label {label} -y')
+        self.cmd(
+            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_new_fm_path}" --format {imported_format} --label {label} -y')
+        with open(imported_new_fm_schema_file_path) as json_file:
+            imported_kvs = json.load(json_file)
+        with open(exported_new_fm_schema_file_path) as json_file:
+            exported_kvs = json.load(json_file)
+        assert imported_kvs == exported_kvs
+        os.remove(exported_new_fm_schema_file_path)
+
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
@@ -1453,6 +1476,116 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
                 exported_hyphen_yaml_file.update(yaml_data)
         assert exported_yaml_file == exported_hyphen_yaml_file
         os.remove(exported_yaml_file_path)
+
+        # Respect both fm schemas in file
+
+        # # Camel case naming convention
+        imported_both_schemas_camel_case_file_path = os.path.join(TEST_DIR, 'respectBothFmSchemaCamelCase.json')
+        exported_both_schemas_camel_case_file_path = os.path.join(TEST_DIR, 'export_features_both_schema_camel_case_file_path.json')
+
+        self.kwargs.update({
+            'label': 'RespectBothFmSchemas',
+            'imported_file_both_schemas_fm_path': imported_both_schemas_camel_case_file_path,
+            'exported_file_both_schemas_fm_path': exported_both_schemas_camel_case_file_path
+        })
+        self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_both_schemas_fm_path}" --format {imported_format} --label {label} -y')
+        self.cmd(
+            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_both_schemas_fm_path}" --format {imported_format} --label {label} -y')
+        with open(imported_both_schemas_camel_case_file_path) as json_file:
+            imported_kvs = json.load(json_file)
+        with open(exported_both_schemas_camel_case_file_path) as json_file:
+            exported_kvs = json.load(json_file)
+        assert imported_kvs == exported_kvs
+        os.remove(exported_both_schemas_camel_case_file_path)
+
+        # # Pascal case naming convention
+        imported_both_schemas_pascal_case_file_path = os.path.join(TEST_DIR, 'respectBothFmSchemaPascalCase.json')
+        exported_both_schemas_pascal_case_file_path = os.path.join(TEST_DIR, 'export_features_both_schema_pascal_case_file_path.json')
+
+        self.kwargs.update({
+            'label': 'RespectBothFmSchemas',
+            'imported_file_both_schemas_fm_path': imported_both_schemas_pascal_case_file_path,
+            'exported_file_both_schemas_fm_path': exported_both_schemas_pascal_case_file_path
+        })
+        self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_both_schemas_fm_path}" --format {imported_format} --label {label} -y')
+        self.cmd(
+            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_both_schemas_fm_path}" --format {imported_format} --label {label} -y')
+        with open(imported_both_schemas_pascal_case_file_path) as json_file:
+            imported_kvs = json.load(json_file)
+        with open(exported_both_schemas_pascal_case_file_path) as json_file:
+            exported_kvs = json.load(json_file)
+        assert imported_kvs == exported_kvs
+        os.remove(exported_both_schemas_pascal_case_file_path)
+
+        # # Hyphen case naming convention
+        imported_both_schemas_hyphen_case_file_path = os.path.join(TEST_DIR, 'respectBothFmSchemaHyphenCase.json')
+        exported_both_schemas_hyphen_case_file_path = os.path.join(TEST_DIR, 'export_features_both_schema_hyphen_case_file_path.json')
+
+        self.kwargs.update({
+            'label': 'RespectBothFmSchemas',
+            'imported_file_both_schemas_fm_path': imported_both_schemas_hyphen_case_file_path,
+            'exported_file_both_schemas_fm_path': exported_both_schemas_hyphen_case_file_path
+        })
+        self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_both_schemas_fm_path}" --format {imported_format} --label {label} -y')
+        self.cmd(
+            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_both_schemas_fm_path}" --format {imported_format} --label {label} -y')
+        with open(imported_both_schemas_hyphen_case_file_path) as json_file:
+            imported_kvs = json.load(json_file)
+        with open(exported_both_schemas_hyphen_case_file_path) as json_file:
+            exported_kvs = json.load(json_file)
+        assert imported_kvs == exported_kvs
+        os.remove(exported_both_schemas_hyphen_case_file_path)
+
+
+        # # Underscore case naming convention
+        imported_both_schemas_underscore_case_file_path = os.path.join(TEST_DIR, 'respectBothFmSchemaUnderscoreCase.json')
+        exported_both_schemas_underscore_case_file_path = os.path.join(TEST_DIR, 'export_features_both_schema_underscore_case_file_path.json')
+
+        self.kwargs.update({
+            'label': 'RespectBothFmSchemas',
+            'imported_file_both_schemas_fm_path': imported_both_schemas_underscore_case_file_path,
+            'exported_file_both_schemas_fm_path': exported_both_schemas_underscore_case_file_path
+        })
+        self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_both_schemas_fm_path}" --format {imported_format} --label {label} -y')
+        self.cmd(
+            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_both_schemas_fm_path}" --format {imported_format} --label {label} -y')
+        with open(imported_both_schemas_underscore_case_file_path) as json_file:
+            imported_kvs = json.load(json_file)
+        with open(exported_both_schemas_underscore_case_file_path) as json_file:
+            exported_kvs = json.load(json_file)
+        assert imported_kvs == exported_kvs
+        os.remove(exported_both_schemas_underscore_case_file_path)
+
+        # Import/Export new fm yaml file
+        imported_new_fm_schema_yaml_file_path = os.path.join(TEST_DIR, 'import_features_new_fm_schema_yaml.json')
+        exported_new_fm_schema_yaml_file_path = os.path.join(TEST_DIR, 'export_features_new_fm_schema_yaml.json')
+        exported_new_fm_schema_as_yaml_file_path = os.path.join(TEST_DIR, 'export_features_new_fm_schema_as_yaml.json')
+
+        self.kwargs.update({
+            'label': 'YamlTests',
+            'imported_format': 'yaml',
+            'naming_convention': 'hyphen',
+            'imported_ffv2_file_path': imported_new_fm_schema_yaml_file_path,
+            'exported_ffv2_file_path': exported_new_fm_schema_yaml_file_path
+        })
+        self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_ffv2_file_path}" --format {imported_format} --label {label} -y')
+        self.cmd(
+            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_ffv2_file_path}" --format {imported_format} --label {label} --naming-convention {naming_convention} -y')
+        exported_new_fm_yaml_file = {}
+        exported_new_fm_as_yaml_file = {}
+        with open(exported_new_fm_schema_yaml_file_path) as yaml_file:
+            for yaml_data in list(yaml.safe_load_all(yaml_file)):
+                exported_new_fm_yaml_file.update(yaml_data)
+        with open(exported_new_fm_schema_as_yaml_file_path) as yaml_file:
+            for yaml_data in list(yaml.safe_load_all(yaml_file)):
+                exported_new_fm_as_yaml_file.update(yaml_data)
+        assert exported_new_fm_yaml_file == exported_new_fm_as_yaml_file
+        os.remove(exported_new_fm_schema_yaml_file_path)
 
         # Import/Export properties file
         imported_prop_file_path = os.path.join(TEST_DIR, 'import_features_prop.json')

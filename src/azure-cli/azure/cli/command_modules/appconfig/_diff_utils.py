@@ -11,7 +11,7 @@ from knack.util import CLIError
 from knack.log import get_logger
 
 from ._constants import CompareFields, JsonDiff, AppServiceConstants
-from ._featuremodels import (map_keyvalue_to_featureflag, custom_serialize_conditions, is_feature_flag)
+from ._featuremodels import (custom_serialize_allocation, custom_serialize_variants, map_keyvalue_to_featureflag, custom_serialize_conditions, is_feature_flag)
 from ._utils import is_json_content_type
 
 logger = get_logger(__name__)
@@ -162,6 +162,15 @@ def get_serializer(level):
             feature_json['description'] = feature.description
             # conditions
             feature_json['conditions'] = custom_serialize_conditions(feature.conditions)
+            # allocation
+            if hasattr(feature, 'allocation'):
+                feature_json['allocation'] = custom_serialize_allocation(feature.allocation)
+            # variants
+            if hasattr(feature, 'variants'):
+                feature_json['variants'] = custom_serialize_variants(feature.variants)
+            # telemetry
+            if hasattr(feature, 'telemetry'):
+                feature_json['telemetry'] = feature.telemetry
 
             return feature_json
 
