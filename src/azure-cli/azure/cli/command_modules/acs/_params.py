@@ -464,6 +464,10 @@ def load_arguments(self, _):
         c.argument('enable_cost_analysis', action='store_true')
         c.argument('enable_vtpm', action="store_true")
         c.argument('enable_secure_boot', action="store_true")
+        # advanced networking
+        c.argument('enable_acns', action='store_true')
+        c.argument('disable_acns_observability', action='store_true')
+        c.argument('disable_acns_security', action='store_true')
 
     with self.argument_context('aks update') as c:
         # managed cluster paramerters
@@ -487,6 +491,11 @@ def load_arguments(self, _):
                    help="Comma-separated list of key=value pairs for configuring cluster autoscaler. Pass an empty string to clear the profile.")
         c.argument('tier', arg_type=get_enum_type(sku_tiers), validator=validate_sku_tier)
         c.argument('api_server_authorized_ip_ranges', validator=validate_ip_ranges)
+        # advanced networking
+        c.argument('enable_acns', action='store_true')
+        c.argument('disable_acns', action='store_true')
+        c.argument('disable_acns_observability', action='store_true')
+        c.argument('disable_acns_security', action='store_true')
         # private cluster parameters
         c.argument('enable_public_fqdn', action='store_true')
         c.argument('disable_public_fqdn', action='store_true')

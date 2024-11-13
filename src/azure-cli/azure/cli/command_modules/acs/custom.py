@@ -562,6 +562,10 @@ def aks_create(
     image_cleaner_interval_hours=None,
     enable_keda=False,
     enable_vpa=False,
+    # advanced networking
+    enable_acns=None,
+    disable_acns_observability=None,
+    disable_acns_security=None,
     # addons
     enable_addons=None,
     workspace_resource_id=None,
@@ -756,6 +760,11 @@ def aks_update(
     enable_force_upgrade=False,
     disable_force_upgrade=False,
     upgrade_override_until=None,
+    # advanced networking
+    disable_acns=None,
+    enable_acns=None,
+    disable_acns_observability=None,
+    disable_acns_security=None,
     # addons
     enable_secret_rotation=False,
     disable_secret_rotation=False,
