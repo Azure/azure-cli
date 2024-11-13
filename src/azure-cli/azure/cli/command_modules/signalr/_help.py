@@ -189,6 +189,15 @@ examples:
   - name: Update for enabling messaging logs in the service.
     text: >
         az signalr update -n MySignalR -g MyResourceGroup --enable-message-logs True
+  - name: Enable or disable client certificate authentication for a SignalR Service
+    text: >
+        az signalr update -n MySignalR -g MyResourceGroup --client-cert-enabled False
+  - name: Enable or disable local auth for a SignalR Service
+    text: >
+        az signalr update -n MySignalR -g MyResourceGroup --disable-local-auth True
+  - name: Enable or disable region endpoint for a SignalR Service
+    text: >
+        az signalr update -n MySignalR -g MyResourceGroup --region-endpoint-enabled False
 """
 
 helps['signalr upstream list'] = """
@@ -384,4 +393,16 @@ examples:
   - name: Get the detail of a replica
     text: >
         az signalr replica create --sku Premium_P1 -l eastus --replica-name MyReplica --signalr-name MySignalR -g MyResourceGroup
+"""
+
+helps['signalr replica update'] = """
+type: command
+short-summary: Update a replica of SignalR Service.
+examples:
+  - name: Enable or disable region endpoint for the replica of SignalR Service
+    text: >
+        az signalr replica update --replica-name MyReplica --signalr-name MySignalR -g MyResourceGroup --region-endpoint-enabled true
+  - name: Update the unit count of the replica of SignalR Service
+    text: >
+        az signalr replica update --replica-name MyReplica --signalr-name MySignalR -g MyResourceGroup --unit-count 2
 """

@@ -166,7 +166,7 @@ class EHNamespaceEntityCURDScenarioTest(ScenarioTest):
         self.cmd(
             'eventhubs namespace create --resource-group {rg} --name {namespacename2} --location {loc} --tags {tags} --sku Premium '
             '--mi-user-assigned {id2}').get_output_in_json()
-        time.sleep(120)
+        time.sleep(200)
 
         eh6 = self.cmd(
             'eventhubs eventhub create -g {rg} -n {eventhubname6} --namespace-name {namespacename2} --partition-count 15 --enable-capture true --capture-interval 100 --capture-size-limit 314572799 '

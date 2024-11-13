@@ -68,7 +68,8 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     DATA_KEYVAULT_CERTIFICATES = ('azure.keyvault.certificates', 'CertificateClient')
     DATA_KEYVAULT_KEYS = ('azure.keyvault.keys', 'KeyClient')
     DATA_KEYVAULT_SECRETS = ('azure.keyvault.secrets', 'SecretClient')
-    DATA_KEYVAULT = ('azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1', 'KeyVaultClient')
+    DATA_KEYVAULT_SECURITY_DOMAIN = ('azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_securitydomain',
+                                     'SecurityDomainClient')
     DATA_KEYVAULT_ADMINISTRATION_BACKUP = ('azure.keyvault.administration', 'KeyVaultBackupClient')
     DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL = ('azure.keyvault.administration', 'KeyVaultAccessControlClient')
     DATA_KEYVAULT_ADMINISTRATION_SETTING = ('azure.keyvault.administration', 'KeyVaultSettingsClient')
@@ -101,7 +102,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_CONTAINERINSTANCE = ('azure.mgmt.containerinstance', None)
     MGMT_COSMOSDB = ('azure.mgmt.cosmosdb', None)
     MGMT_DATALAKE_ANALYTICS = ('azure.cli.command_modules.dla.vendored_sdks.azure_mgmt_datalake_analytics', None)
-    MGMT_DATALAKE_STORE = ('azure.cli.command_modules.dls.vendored_sdks.azure_mgmt_datalake_store', None)
+    MGMT_DATALAKE_STORE = ('azure.mgmt.datalake.store', None)
     MGMT_DATAMIGRATION = ('azure.mgmt.datamigration', None)
     MGMT_EVENTGRID = ('azure.mgmt.eventgrid', None)
     MGMT_MAPS = ('azure.mgmt.maps', None)
@@ -207,8 +208,8 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_KEYVAULT_CERTIFICATES: None,
         ResourceType.DATA_KEYVAULT_KEYS: None,
         ResourceType.DATA_KEYVAULT_SECRETS: None,
+        ResourceType.DATA_KEYVAULT_SECURITY_DOMAIN: None,
         ResourceType.DATA_KEYVAULT_ADMINISTRATION_SETTING: None,
-        ResourceType.DATA_KEYVAULT: '7.0',
         ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP: '7.5-preview.1',
         ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL: '7.4',
         ResourceType.DATA_STORAGE: '2018-11-09',
@@ -260,7 +261,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_ARO: '2023-11-22',
         ResourceType.MGMT_DATABOXEDGE: '2021-02-01-preview',
         ResourceType.MGMT_CUSTOMLOCATION: '2021-03-15-preview',
-        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2024-08-01'),
+        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2024-09-01'),
         ResourceType.MGMT_APPCONTAINERS: '2022-10-01',
     },
     '2020-09-01-hybrid': {
@@ -299,7 +300,6 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_KEYVAULT_CERTIFICATES: None,
         ResourceType.DATA_KEYVAULT_KEYS: None,
         ResourceType.DATA_KEYVAULT_SECRETS: None,
-        ResourceType.DATA_KEYVAULT: '2016-10-01',
         ResourceType.DATA_STORAGE: '2018-11-09',
         ResourceType.DATA_STORAGE_BLOB: '2019-07-07',
         ResourceType.DATA_STORAGE_FILEDATALAKE: '2019-07-07',
@@ -346,7 +346,6 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_KEYVAULT_CERTIFICATES: None,
         ResourceType.DATA_KEYVAULT_KEYS: None,
         ResourceType.DATA_KEYVAULT_SECRETS: None,
-        ResourceType.DATA_KEYVAULT: '2016-10-01',
         ResourceType.DATA_STORAGE: '2017-11-09',
         ResourceType.DATA_STORAGE_BLOB: '2017-11-09',
         ResourceType.DATA_STORAGE_FILEDATALAKE: '2017-11-09',
@@ -385,7 +384,6 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_KEYVAULT_CERTIFICATES: None,
         ResourceType.DATA_KEYVAULT_KEYS: None,
         ResourceType.DATA_KEYVAULT_SECRETS: None,
-        ResourceType.DATA_KEYVAULT: '2016-10-01',
         ResourceType.DATA_STORAGE: '2017-04-17',
         ResourceType.DATA_STORAGE_BLOB: '2017-04-17',
         ResourceType.DATA_STORAGE_FILEDATALAKE: '2017-04-17',
@@ -416,7 +414,6 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_KEYVAULT_CERTIFICATES: None,
         ResourceType.DATA_KEYVAULT_KEYS: None,
         ResourceType.DATA_KEYVAULT_SECRETS: None,
-        ResourceType.DATA_KEYVAULT: '2016-10-01',
         ResourceType.DATA_STORAGE: '2015-04-05',
         ResourceType.DATA_STORAGE_BLOB: '2015-04-05',
         ResourceType.DATA_STORAGE_FILEDATALAKE: '2015-04-05',

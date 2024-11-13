@@ -3,31 +3,14 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import os
-import time
-import pathlib
-import getopt
 import uuid
-import sys
 from knack.log import get_logger
 
-from datetime import datetime
-from time import sleep
-from dateutil.tz import tzutc  # pylint: disable=import-error
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.core.util import CLIError
-from azure.cli.core.util import parse_proxy_resource_id
-from azure.cli.testsdk.base import execute
-from azure.cli.testsdk.exceptions import CliTestError  # pylint: disable=unused-import
+from azure.cli.testsdk.scenario_tests.const import ENV_LIVE_TEST
 from azure.cli.testsdk import (
     JMESPathCheck,
-    NoneCheck,
-    ResourceGroupPreparer,
-    ScenarioTest,
-    StringContainCheck,
-    live_only)
-from azure.cli.testsdk.preparers import (
-    AbstractPreparer,
-    SingleValueReplacer)
+    ScenarioTest)
 
 logger = get_logger(__name__)
 
@@ -39,25 +22,25 @@ class MigrationScenarioTest(ScenarioTest):
         self._test_server_migration('postgres')
 
     def test_postgres_flexible_server_onpremise_migration(self):
-        self._test_server_migration_onpremise('postgres', True, "1a50e116-8f35-4401-a573-6eda6f539e28")
-        self._test_server_migration_onpremise('postgres', False, "d703653c-3d00-4926-8d4f-4871fb7c7ff1")
+        self._test_server_migration_onpremise('postgres', True, "ddf073d8-7efe-49da-a201-078d8d312581")
+        self._test_server_migration_onpremise('postgres', False, "09d5e9a8-45c5-4e95-a60f-003e0e26efcd")
 
     def _test_server_migration(self, database_engine):
         # Set this to True or False depending on whether we are in live mode or test mode
         # livemode = True
-        livemode = False
+        livemode = os.environ.get(ENV_LIVE_TEST, False)
 
         if livemode:
             # Live mode values
-            target_subscription_id = "5c5037e5-d3f1-4e7b-b3a9-f6bf94902b30"
+            target_subscription_id = "ac0271d6-426b-4b0d-b88d-0d0e4bd693ae"
             migration_name = str(uuid.uuid4())
         else:
             # Mock test mode values
             target_subscription_id = "00000000-0000-0000-0000-000000000000"
-            migration_name = "392a7b75-da70-4bb5-9a12-93c0ab771244"
+            migration_name = "c6396bb5-ab46-432f-884d-b11e013ec6e8"
 
-        target_resource_group_name = "Sterling2MeruRG"
-        target_server_name = "target-server-longhaul"
+        target_resource_group_name = "autobot-resourcegroup-pg-eastus2euap"
+        target_server_name = "autobot-e2e-pg-fs-eastus2euap"
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         properties_filepath = os.path.join(curr_dir, 'migrationPublic.json').replace('\\', '\\\\')
 
@@ -98,11 +81,11 @@ class MigrationScenarioTest(ScenarioTest):
     def _test_server_migration_onpremise(self, database_engine, validateOnly=False, migration_name=None):
         # Set this to True or False depending on whether we are in live mode or test mode
         # livemode = True
-        livemode = False
+        livemode = os.environ.get(ENV_LIVE_TEST, False)
 
         if livemode:
             # Live mode values
-            target_subscription_id = "5c5037e5-d3f1-4e7b-b3a9-f6bf94902b30"
+            target_subscription_id = "ac0271d6-426b-4b0d-b88d-0d0e4bd693ae"
             migration_name = str(uuid.uuid4())
         else:
             # Mock test mode values
@@ -112,8 +95,8 @@ class MigrationScenarioTest(ScenarioTest):
         if validateOnly:
             migration_option = "Validate"
 
-        target_resource_group_name = "Sterling2MeruRG"
-        target_server_name = "target-server-longhaul"
+        target_resource_group_name = "autobot-resourcegroup-pg-eastus2euap"
+        target_server_name = "autobot-e2e-pg-fs-eastus2euap"
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         properties_filepath = os.path.join(curr_dir, 'migrationOnPremise.json').replace('\\', '\\\\')
 
