@@ -9,7 +9,7 @@ Release History
 **AKS**
 
 * [BREAKING CHANGE] `az aks create/update`: Remove `--uptime-sla` and `--no-uptime-sla` parameters (#30221)
-* [BREAKING CHANGE] `--aad-client-app-id`, `--aad-server-app-id` and `--aad-server-app-secret`: Will be removed (#30251)
+* [BREAKING CHANGE] `az aks create`: Remove `--aad-client-app-id`, `--aad-server-app-id` and `--aad-server-app-secret` parameters (#30251)
 * [BREAKING CHANGE] `az aks trustedaccess rolebinding create`: Remove deprecated '-r' options (#30253)
 * `az aks create/update`: Fix storage pool name validation for Azure Container Storage (#30258)
 * `az aks enable-addon`: Update AGIC addon to use Network Contributor instead of Contributor (#29989)
