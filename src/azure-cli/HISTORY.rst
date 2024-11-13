@@ -8,7 +8,7 @@ Release History
 
 **AKS**
 
-* [BREAKING CHANGE] `--uptime-sla` and `--no-uptime-sla `: Will be removed (#30221)
+* [BREAKING CHANGE] `az aks create/update`: Remove `--uptime-sla` and `--no-uptime-sla` parameters (#30221)
 * [BREAKING CHANGE] `--aad-client-app-id`, `--aad-server-app-id` and `--aad-server-app-secret`: Will be removed (#30251)
 * [BREAKING CHANGE] `az aks trustedaccess rolebinding create`: Remove deprecated '-r' options (#30253)
 * `az aks create/update`: Fix storage pool name validation for Azure Container Storage (#30258)
