@@ -1439,15 +1439,13 @@ def flexible_server_private_link_resource_get(
         group_name="postgresqlServer")
 
 
-def tuning_options_get(client, resource_group_name, server_name, tuning_option_name="index"):
+def tuning_options_get(client, resource_group_name, server_name):
     validate_resource_group(resource_group_name)
-
-    tuning_option = tuning_option_name.lower()
 
     return client.get(
         resource_group_name=resource_group_name,
         server_name=server_name,
-        tuning_option=tuning_option,
+        tuning_option="index",
     )
 
 
