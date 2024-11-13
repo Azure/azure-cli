@@ -56,6 +56,10 @@ from typing import (
 from urllib.parse import quote
 import xml.etree.ElementTree as ET
 
+from datetime import timezone as _FixedOffset  # type: ignore
+from datetime import timezone
+
+
 import isodate  # type: ignore
 
 from azure.core.exceptions import DeserializationError, SerializationError
@@ -112,14 +116,6 @@ class RawDeserializer:
                 raise DeserializationError("JSON is invalid: {}".format(err), err) from err
         elif "xml" in (content_type or []):
             try:
-
-                try:
-                    if isinstance(data, unicode):  # type: ignore
-                        # If I'm Python 2.7 and unicode XML will scream if I try a "fromstring" on unicode string
-                        data_as_str = data_as_str.encode(encoding="utf-8")  # type: ignore
-                except NameError:
-                    pass
-
                 return ET.fromstring(data_as_str)  # nosec
             except ET.ParseError as err:
                 # It might be because the server has an issue, and returned JSON with
@@ -176,10 +172,7 @@ class RawDeserializer:
 
 _LOGGER = logging.getLogger(__name__)
 
-try:
-    _long_type = long  # type: ignore
-except NameError:
-    _long_type = int
+_long_type = int
 
 
 class UTC(datetime.tzinfo):
@@ -213,41 +206,10 @@ class UTC(datetime.tzinfo):
         return datetime.timedelta(hours=1)
 
 
-try:
-    from datetime import timezone as _FixedOffset  # type: ignore
-except ImportError:  # Python 2.7
-
-    class _FixedOffset(datetime.tzinfo):  # type: ignore
-        """Fixed offset in minutes east from UTC.
-        Copy/pasted from Python doc
-        :param datetime.timedelta offset: offset in timedelta format
-        """
-
-        def __init__(self, offset) -> None:
-            self.__offset = offset
-
-        def utcoffset(self, dt):
-            return self.__offset
-
-        def tzname(self, dt):
-            return str(self.__offset.total_seconds() / 3600)
-
-        def __repr__(self):
-            return "<FixedOffset {}>".format(self.tzname(None))
-
-        def dst(self, dt):
-            return datetime.timedelta(0)
-
-        def __getinitargs__(self):
-            return (self.__offset,)
 
 
-try:
-    from datetime import timezone
 
-    TZ_UTC = timezone.utc
-except ImportError:
-    TZ_UTC = UTC()  # type: ignore
+TZ_UTC = timezone.utc
 
 _FLATTEN = re.compile(r"(?<!\\)\.")
 
