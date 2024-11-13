@@ -35,10 +35,7 @@ FEATURE_FLAG_PROPERTIES = {
     FeatureFlagConstants.ID,
     FeatureFlagConstants.DESCRIPTION,
     FeatureFlagConstants.ENABLED,
-    FeatureFlagConstants.CONDITIONS,
-    FeatureFlagConstants.ALLOCATION,
-    FeatureFlagConstants.VARIANTS,
-    FeatureFlagConstants.TELEMETRY}
+    FeatureFlagConstants.CONDITIONS}
 
 def __read_with_appropriate_encoding(file_path, format_):
     config_data = {}

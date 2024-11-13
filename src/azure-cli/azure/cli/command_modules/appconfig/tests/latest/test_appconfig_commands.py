@@ -1026,9 +1026,9 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
 
         
         # Feature flags test with new ms fm schema
+        os.environ['AZURE_APPCONFIG_FM_COMPATIBILITY_MODE'] = 'False'
         imported_new_fm_schema_file_path = os.path.join(TEST_DIR, 'import_features_new_fm_schema.json')
         exported_new_fm_schema_file_path = os.path.join(TEST_DIR, 'export_features_new_fm_schema.json')
-        os.environ['AZURE_APPCONFIG_FM_COMPATIBILITY_MODE'] = 'False'
 
         self.kwargs.update({
             'label': 'KeyValuesWithFeaturesFFV2',
@@ -1413,6 +1413,7 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
         })
         _create_config_store(self, self.kwargs)
 
+        os.environ['AZURE_APPCONFIG_FM_COMPATIBILITY_MODE'] = 'True'
         import_hyphen_path = os.path.join(TEST_DIR, 'import_features_hyphen.json')
         exported_file_path = os.path.join(TEST_DIR, 'export_features_naming.json')
         export_underscore_path = os.path.join(TEST_DIR, 'export_features_underscore.json')
@@ -2188,6 +2189,7 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
             - Delete all settings from both stores
         """
 
+        os.environ['AZURE_APPCONFIG_FM_COMPATIBILITY_MODE'] = 'True'
         imported_file_path = os.path.join(TEST_DIR, 'json_import.json')
         exported_file_path = os.path.join(TEST_DIR, 'json_export.json')
         self.kwargs.update({
