@@ -2083,7 +2083,7 @@ def aks_runcommand(cmd, client, resource_group_name, name, command_string="", co
         time.sleep(0.5)
 
     progress_controller.end()
-    return _print_command_result(cmd.cli_ctx, command_result_poller.result())
+    return _print_command_result(cmd.cli_ctx, command_result_poller.result(timeout=0))
 
 
 def aks_command_result(cmd, client, resource_group_name, name, command_id=""):
@@ -2140,7 +2140,7 @@ def _print_command_result(cli_ctx, commandResult):
         return
 
     # *-ing state
-    print(f"{colorama.Fore.BLUE}command is in {commandResult.provisioning_state} state{colorama.Style.RESET_ALL}")
+    print(f"{colorama.Fore.BLUE}command (id: {commandResult.id}) is in {commandResult.provisioning_state} state{colorama.Style.RESET_ALL}")
     return
 
 
