@@ -948,13 +948,12 @@ def show_filter(cmd,
         # detailed message
         feature_flag_value = map_keyvalue_to_featureflagvalue(retrieved_kv)
         feature_filters = feature_flag_value.conditions[FeatureFlagConstants.CLIENT_FILTERS]
-
         display_filters = []
 
         # If user has specified index, we use it as secondary check to display
         # a unique filter
         if 0 <= index < len(feature_filters):
-            if feature_filters[index].name == filter_name:
+            if feature_filters[index]['name'] == filter_name:
                 return feature_filters[index]
         if index != float("-inf"):
             logger.warning(
@@ -962,7 +961,7 @@ def show_filter(cmd,
 
         # get all filters where name matches filter_name provided by user
         display_filters = [
-            featurefilter for featurefilter in feature_filters if featurefilter.name == filter_name]
+            featurefilter for featurefilter in feature_filters if featurefilter['name'] == filter_name]
 
         if not display_filters:
             raise CLIError(

@@ -894,6 +894,7 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         import_features_alt_syntax_file_path = os.path.join(TEST_DIR, 'import_features_alt_syntax.json')
         import_features_random_conditions_file_path = os.path.join(TEST_DIR, 'import_features_random_conditions.json')
         import_features_invalid_requirement_type_file_path = os.path.join(TEST_DIR, 'import_features_invalid_requirement_type.json')
+        os.environ['AZURE_APPCONFIG_FM_COMPATIBILITY_MODE'] = 'True'
 
         self.kwargs.update({
             'label': 'KeyValuesWithFeatures',
@@ -1027,6 +1028,7 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         # Feature flags test with new ms fm schema
         imported_new_fm_schema_file_path = os.path.join(TEST_DIR, 'import_features_new_fm_schema.json')
         exported_new_fm_schema_file_path = os.path.join(TEST_DIR, 'export_features_new_fm_schema.json')
+        os.environ['AZURE_APPCONFIG_FM_COMPATIBILITY_MODE'] = 'False'
 
         self.kwargs.update({
             'label': 'KeyValuesWithFeaturesFFV2',
@@ -1478,6 +1480,7 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
         os.remove(exported_yaml_file_path)
 
         # Respect both fm schemas in file
+        os.environ['AZURE_APPCONFIG_FM_COMPATIBILITY_MODE'] = 'True'
 
         # # Camel case naming convention
         imported_both_schemas_camel_case_file_path = os.path.join(TEST_DIR, 'respectBothFmSchemaCamelCase.json')
@@ -1561,6 +1564,7 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
         os.remove(exported_both_schemas_underscore_case_file_path)
 
         # Import/Export new fm yaml file
+        os.environ['AZURE_APPCONFIG_FM_COMPATIBILITY_MODE'] = 'False'
         imported_new_fm_schema_yaml_file_path = os.path.join(TEST_DIR, 'import_features_new_fm_schema_yaml.json')
         exported_new_fm_schema_yaml_file_path = os.path.join(TEST_DIR, 'export_features_new_fm_schema_yaml.json')
         exported_new_fm_schema_as_yaml_file_path = os.path.join(TEST_DIR, 'export_features_new_fm_schema_as_yaml.json')
