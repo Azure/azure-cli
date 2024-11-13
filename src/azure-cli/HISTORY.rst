@@ -22,7 +22,7 @@ Release History
 
 * `az vm disk attach/detach`: Add new parameter `--disk-ids` to support setting multiple disks by disk ids (#30236)
 
-**compute-fleet**
+**Compute Fleet**
 
 * `az compute-fleet`: Add `create/update/show/delete/list/list-vmss` commands for manage Azure Compute Fleet (#30223)
 
@@ -30,7 +30,7 @@ Release History
 
 * Update container cmdlets to use 2024-05-01-preview version API (#30260)
 
-**dla**
+**DataLake**
 
 * [BREAKING CHANGE] `az dla`: Remove dla module since it has been deprecated (#30249)
 
