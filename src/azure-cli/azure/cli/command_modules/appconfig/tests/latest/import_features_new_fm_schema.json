@@ -2,6 +2,41 @@
     "feature_management": {
         "feature_flags": [
             {
+                "id": "TestVariants",
+                "description": "",
+                "enabled": "true",
+                "conditions": {
+                    "client_filters": []
+                },
+                "allocation": {
+                    "user": [
+                        {
+                            "variant": "Alpha",
+                            "users": [
+                                "Adam"
+                            ]
+                        },
+                        {
+                            "variant": "Beta",
+                            "users": [
+                                "Britney"
+                            ]
+                        }
+                    ]
+                },
+                "variants": [
+                    {
+                        "name": "Alpha",
+                        "configuration_value": "The Variant Alpha."
+                    },
+                    {
+                        "name": "Beta",
+                        "configuration_value": "The Variant Beta."
+                    }
+                ]
+        
+            },
+            {
                 "id": "Variant_Override_True",
                 "description": "",
                 "enabled": "true",
@@ -35,38 +70,6 @@
                         "name": "False_Override",
                         "status_override": "Enabled",
                         "configuration_value": "default"
-                    }
-                ]
-        
-            },
-            {
-                "id": "TestVariants",
-                "description": "",
-                "enabled": "true",
-                "allocation": {
-                    "user": [
-                        {
-                            "variant": "Alpha",
-                            "users": [
-                                "Adam"
-                            ]
-                        },
-                        {
-                            "variant": "Beta",
-                            "users": [
-                                "Britney"
-                            ]
-                        }
-                    ]
-                },
-                "variants": [
-                    {
-                        "name": "Alpha",
-                        "configuration_value": "The Variant Alpha."
-                    },
-                    {
-                        "name": "Beta",
-                        "configuration_value": "The Variant Beta."
                     }
                 ]
         

@@ -35,7 +35,10 @@ FEATURE_FLAG_PROPERTIES = {
     FeatureFlagConstants.ID,
     FeatureFlagConstants.DESCRIPTION,
     FeatureFlagConstants.ENABLED,
-    FeatureFlagConstants.CONDITIONS}
+    FeatureFlagConstants.CONDITIONS,
+    FeatureFlagConstants.ALLOCATION,
+    FeatureFlagConstants.VARIANTS,
+    FeatureFlagConstants.TELEMETRY}
 
 def __read_with_appropriate_encoding(file_path, format_):
     config_data = {}
@@ -94,7 +97,7 @@ def __read_features_from_file(file_path, format_):
             # find the occurrences of feature management section in file.
             if keywordset.feature_management in config_data:
                 if foundLegacySchema:
-                    raise FileOperationError('Multiple %s sections found in the file. Please ensure that the file contains only one feature management section.' % (keywordset.feature_management))
+                    raise FileOperationError('Unable to proceed because file contains multiple sections corresponding to "Feature Management".')
                 features_dict[keywordset.feature_management] = config_data[keywordset.feature_management]
                 legacySchemaKeyWord = keywordset.feature_management
                 del config_data[keywordset.feature_management]
@@ -490,7 +493,7 @@ def __validate_import_feature_flag(kv):
     if kv and validate_import_feature_key(kv.key):
         try:
             ff = json.loads(kv.value)
-            if FEATURE_FLAG_PROPERTIES.intersection(ff.keys()) == FEATURE_FLAG_PROPERTIES:
+            if FEATURE_FLAG_PROPERTIES.union(ff.keys()) == FEATURE_FLAG_PROPERTIES:
                 return validate_import_feature(ff[FeatureFlagConstants.ID])
 
             logger.warning("The feature flag with key '%s' is not a valid feature flag. It will not be imported.", kv.key)
