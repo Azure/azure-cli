@@ -5699,10 +5699,9 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
 
         network_dataplane = self.context.get_network_dataplane()
 
-        acns = None
         (acns_enabled, acns_observability, acns_security) = self.context.get_acns_enablement()
         if acns_enabled is not None:
-            acns.enabled = self.models.AdvancedNetworking(
+            acns = self.models.AdvancedNetworking(
                 enabled=acns_enabled,
             )
             if acns_observability is not None:
@@ -7390,10 +7389,9 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         :return: the ManagedCluster object
         """
         self._ensure_mc(mc)
-        acns = None
         (acns_enabled, acns_observability, acns_security) = self.context.get_acns_enablement()
         if acns_enabled is not None:
-            acns.enabled = self.models.AdvancedNetworking(
+            acns = self.models.AdvancedNetworking(
                 enabled=acns_enabled,
             )
             if acns_observability is not None:
