@@ -49,7 +49,7 @@ Release History
 
 **Kusto**
 
-* [BREAKING CHANGE] `az kusto`: Remove kusto from cli as it has been moved to cli extensions (#30250)
+* [BREAKING CHANGE] `az kusto`: Remove kusto from CLI as it has been moved to CLI extensions (#30250)
 
 **Network**
 
