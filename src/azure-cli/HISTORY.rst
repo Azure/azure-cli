@@ -28,7 +28,7 @@ Release History
 
 **Container**
 
-* Update container cmdlets to use 2024-05-01-preview version API (#30260)
+* `az container container-group-profile`: Add new command group to manage Azure Container Instance Container Group Profile(#30260)
 
 **DataLake**
 
