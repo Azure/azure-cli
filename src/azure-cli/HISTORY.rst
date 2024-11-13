@@ -3,6 +3,86 @@
 Release History
 ===============
 
+2.67.0
+++++++
+
+**AKS**
+
+* [BREAKING CHANGE] `--uptime-sla` and `--no-uptime-sla `: Will be removed (#30221)
+* [BREAKING CHANGE] `--aad-client-app-id`, `--aad-server-app-id` and `--aad-server-app-secret`: Will be removed (#30251)
+* [BREAKING CHANGE] `az aks trustedaccess rolebinding create`: Remove deprecated '-r' options (#30253)
+* `az aks create/update`: Fix storage pool name validation for Azure Container Storage (#30258)
+* `az aks enable-addon`: Update AGIC addon to use Network Contributor instead of Contributor (#29989)
+
+**App Config**
+
+* `az appconfig create/update`: Add new parameters `--arm-auth-mode` and `--enable-arm-private-network-access` to support data plane proxy settings (#30228)
+
+**Compute**
+
+* `az vm disk attach/detach`: Add new parameter `--disk-ids` to support setting multiple disks by disk ids (#30236)
+
+**compute-fleet**
+
+* `az compute-fleet`: Add `create/update/show/delete/list/list-vmss` commands for manage Azure Compute Fleet (#30223)
+
+**Container**
+
+* Update container cmdlets to use 2024-05-01-preview version API (#30260)
+
+**dla**
+
+* [BREAKING CHANGE] `az dla`: Remove dla module since it has been deprecated (#30249)
+
+**DLS**
+
+* [BREAKING CHANGE] `az dls account network-rule`: Remove this command group as no server support anymore (#30094)
+
+**Eventhub**
+
+* `az eventhubs eventhub`: Add new parameters `--timestamp-type` and `--min-compaction-lag-in-mins` (#29957)
+* `az eventhubs namespace replica`: Add new commands to support adding/removing replicas (#29957)
+
+**Extension**
+
+* [BREAKING CHANGE] `az extension add/update`: Set default `--allow-preview` value from `True` to be `False` for extensions installation and remain `True` for extensions without stable releases (#30163)
+
+**Kusto**
+
+* [BREAKING CHANGE] `az kusto`: Remove kusto from cli as it has been moved to cli extensions (#30250)
+
+**Network**
+
+* [BREAKING CHANGE] `az network public-ip ddos-protection-statu`: Remove misspelled command group (#30265)
+
+**Packaging**
+
+* Drop Python 3.8 support (#30225)
+
+**Profile**
+
+* [BREAKING CHANGE] `az login`: `--password` no longer accepts a service principal certificate. Use `--certificate` to pass a service principal certificate (#30092)
+
+**RDBMS**
+
+* `az postgres flexible-server long-term-retention start/pre-check/list/show`: New commands to support long-term-retention backups on PostgreSql Flex Server (#30272)
+* `az postgres flexible-server create`: Support provisioning postgres flexible servers with version 17 (#30298)
+
+**Service Connector**
+
+* `az connection create mysql-flexible`: Add `--private-endpoint` parameter (#30287)
+
+**SQL**
+
+* [BREAKING CHANGE] `az sql mi link create`: Rename input from `--source-endpoint` to `--partner-endpoint`, `--primary-availability-group-name` to `--partner-availability-group-name`, `--secondary-availability-group-name` to `--instance-availability-group-name`, `--target-database` to `--databases` (#30234)
+* [BREAKING CHANGE] `az sql mi link create/show/list/update`: Rename output from `targetDatabase`, `primaryAvailabilityGroupName`, `secondaryAvailabilityGroupNamesourceEndpoint`, `sourceReplicaId`, `targetReplicaId`, `linkState`, `lastHardenedLsn` to `databases`, `partnerAvailabilityGroupName`, `instanceAvailabilityGroupName`, `partnerEndpoint`, `distributedAvailabilityGroupName`, `instanceLinkRole`, `partnerLinkRole`, `failoverMode`, `seedingMode` (#30234)
+* [BREAKING CHANGE] `az sql failover-group create`: Change default failover policy to manual (#30177)
+* `az sql mi link failover`: Support performing requested failover type in this Managed Instance link (#30234)
+
+**Upgrade**
+
+* [BREAKING CHANGE] `az upgrade`: Set default `--allow-preview` value from `True` to be `False` for extensions installation and remain `True` for extensions without stable releases (#30163)
+
 2.66.0
 ++++++
 
