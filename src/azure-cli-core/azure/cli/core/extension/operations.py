@@ -76,9 +76,8 @@ def _whl_download_from_url(url_parse_result, ext_file):
 
 def _validate_whl_extension(ext_file):
     tmp_dir = tempfile.mkdtemp()
-    zip_ref = zipfile.ZipFile(ext_file, 'r')
-    zip_ref.extractall(tmp_dir)
-    zip_ref.close()
+    with zipfile.ZipFile(ext_file, 'r') as zip_ref:
+        zip_ref.extractall(tmp_dir)
     azext_metadata = WheelExtension.get_azext_metadata(tmp_dir)
     rmtree_with_retry(tmp_dir)
     check_version_compatibility(azext_metadata)

@@ -3,21 +3,21 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import filecmp
 import os
 import json
+import pathlib
 import shutil
 import uuid
 import unittest
 
 from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
 
-from unittest import mock
 import requests
 from azure.cli.command_modules.botservice.custom import prepare_webapp_deploy
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, LiveScenarioTest, live_only
 from azure.cli.testsdk.decorators import serial_test
 from knack.util import CLIError
+
 
 class DirectLineClient:
     """Shared methods for the parsed result objects."""
@@ -844,7 +844,7 @@ class BotLocalErrorsTests(unittest.TestCase):
             # clean up the folder
             shutil.rmtree(code_dir)
         os.mkdir(code_dir)
-        open(os.path.join(code_dir, proj_file_path), 'w')
+        pathlib.Path(os.path.join(code_dir, proj_file_path)).touch(mode=644)
 
         prepare_webapp_deploy(language, code_dir, proj_file_path)
         assert os.path.exists(os.path.join(code_dir, '.deployment'))
@@ -862,7 +862,7 @@ class BotLocalErrorsTests(unittest.TestCase):
             # clean up the folder
             shutil.rmtree(code_dir)
         os.mkdir(code_dir)
-        open(os.path.join(code_dir, proj_file_path), 'w')
+        pathlib.Path(os.path.join(code_dir, proj_file_path)).touch(mode=644)
 
         prepare_webapp_deploy(language, code_dir, proj_file_path)
         assert os.path.exists(os.path.join(code_dir, '.deployment'))
@@ -891,8 +891,10 @@ class BotLocalErrorsTests(unittest.TestCase):
             # clean up the folder
             shutil.rmtree(code_dir)
         os.mkdir(code_dir)
-        open(os.path.join(code_dir, proj_file_path), 'w')
-        open(os.path.join(code_dir, '.deployment'), 'w')
+        with open(os.path.join(code_dir, proj_file_path), 'w') as _:
+            pass
+        with open(os.path.join(code_dir, '.deployment'), 'w') as _:
+            pass
 
         try:
             prepare_webapp_deploy(language, code_dir, proj_file_path)
@@ -914,7 +916,7 @@ class BotLocalErrorsTests(unittest.TestCase):
             # clean up the folder
             shutil.rmtree(code_dir)
         os.mkdir(code_dir)
-        open(os.path.join(code_dir, 'web.config'), 'w')
+        pathlib.Path(os.path.join(code_dir, 'web.config')).touch(mode=644)
 
         try:
             prepare_webapp_deploy(language, code_dir, proj_file_path)

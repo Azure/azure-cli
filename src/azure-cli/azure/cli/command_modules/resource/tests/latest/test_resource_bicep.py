@@ -64,7 +64,7 @@ class TestBicep(unittest.TestCase):
 
         ensure_bicep_installation(self.cli_ctx, release_tag="v0.14.85", stdout=False)
 
-        self.assertTrue(self.cli_ctx.config.get("bicep", "use_binary_from_path") == "false")
+        self.assertEqual(self.cli_ctx.config.get("bicep", "use_binary_from_path"), "false")
 
     @mock.patch("shutil.which")
     def test_run_bicep_command_raise_error_if_bicep_cli_not_found_when_use_binary_from_path_is_true(self, which_stub):

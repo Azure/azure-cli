@@ -32,8 +32,8 @@ class WebAppUpE2ETests(ScenarioTest):
         import zipfile
         import tempfile
         temp_dir = tempfile.mkdtemp()
-        zip_ref = zipfile.ZipFile(zip_file_name, 'r')
-        zip_ref.extractall(temp_dir)
+        with zipfile.ZipFile(zip_file_name, 'r') as zip_ref:
+            zip_ref.extractall(temp_dir)
         current_working_dir = os.getcwd()
 
         # change the working dir to the dir where the code has been extracted to
@@ -82,8 +82,8 @@ class WebAppUpE2ETests(ScenarioTest):
         import zipfile
         import tempfile
         temp_dir = tempfile.mkdtemp()
-        zip_ref = zipfile.ZipFile(zip_file_name, 'r')
-        zip_ref.extractall(temp_dir)
+        with zipfile.ZipFile(zip_file_name, 'r') as zip_ref:
+            zip_ref.extractall(temp_dir)
         current_working_dir = os.getcwd()
 
         # change the working dir to the dir where the code has been extracted to
@@ -124,8 +124,8 @@ class WebAppUpE2ETests(ScenarioTest):
         import zipfile
         import tempfile
         temp_dir = tempfile.mkdtemp()
-        zip_ref = zipfile.ZipFile(zip_file_name, 'r')
-        zip_ref.extractall(temp_dir)
+        with zipfile.ZipFile(zip_file_name, 'r') as zip_ref:
+            zip_ref.extractall(temp_dir)
         current_working_dir = os.getcwd()
 
         # change the working dir to the dir where the code has been extracted to
@@ -191,8 +191,8 @@ class WebAppUpE2ETests(ScenarioTest):
         import zipfile
         import tempfile
         temp_dir = tempfile.mkdtemp()
-        zip_ref = zipfile.ZipFile(zip_file_name, 'r')
-        zip_ref.extractall(temp_dir)
+        with zipfile.ZipFile(zip_file_name, 'r') as zip_ref:
+            zip_ref.extractall(temp_dir)
         current_working_dir = os.getcwd()
 
         # change the working dir to the dir where the code has been extracted to
@@ -259,8 +259,8 @@ class WebAppUpE2ETests(ScenarioTest):
         import zipfile
         import tempfile
         temp_dir = tempfile.mkdtemp()
-        zip_ref = zipfile.ZipFile(zip_file_name, 'r')
-        zip_ref.extractall(temp_dir)
+        with zipfile.ZipFile(zip_file_name, 'r') as zip_ref:
+            zip_ref.extractall(temp_dir)
         current_working_dir = os.getcwd()
 
         # change the working dir to the dir where the code has been extracted to
@@ -329,8 +329,8 @@ class WebAppUpE2ETests(ScenarioTest):
         import zipfile
         import tempfile
         temp_dir = tempfile.mkdtemp()
-        zip_ref = zipfile.ZipFile(zip_file_name, 'r')
-        zip_ref.extractall(temp_dir)
+        with zipfile.ZipFile(zip_file_name, 'r') as zip_ref:
+            zip_ref.extractall(temp_dir)
         current_working_dir = os.getcwd()
 
         # change the working dir to the dir where the code has been extracted to
@@ -399,8 +399,8 @@ class WebAppUpE2ETests(ScenarioTest):
         import zipfile
         import tempfile
         temp_dir = tempfile.mkdtemp()
-        zip_ref = zipfile.ZipFile(zip_file_name, 'r')
-        zip_ref.extractall(temp_dir)
+        with zipfile.ZipFile(zip_file_name, 'r') as zip_ref:
+            zip_ref.extractall(temp_dir)
         current_working_dir = os.getcwd()
 
         # change the working dir to the dir where the code has been extracted to
@@ -469,8 +469,8 @@ class WebAppUpE2ETests(ScenarioTest):
         import zipfile
         import tempfile
         temp_dir = tempfile.mkdtemp()
-        zip_ref = zipfile.ZipFile(zip_file_name, 'r')
-        zip_ref.extractall(temp_dir)
+        with zipfile.ZipFile(zip_file_name, 'r') as zip_ref:
+            zip_ref.extractall(temp_dir)
         current_working_dir = os.getcwd()
 
         # change the working dir to the dir where the WebApplication has been extracted to.
@@ -542,8 +542,8 @@ class WebAppUpE2ETests(ScenarioTest):
         import zipfile
         import tempfile
         temp_dir = tempfile.mkdtemp()
-        zip_ref = zipfile.ZipFile(zip_file_name, 'r')
-        zip_ref.extractall(temp_dir)
+        with zipfile.ZipFile(zip_file_name, 'r') as zip_ref:
+            zip_ref.extractall(temp_dir)
         current_working_dir = os.getcwd()
 
         # change the working dir to the dir where the code has been extracted to
@@ -609,8 +609,8 @@ class WebAppUpE2ETests(ScenarioTest):
         import zipfile
         import tempfile
         temp_dir = tempfile.mkdtemp()
-        zip_ref = zipfile.ZipFile(zip_file_name, 'r')
-        zip_ref.extractall(temp_dir)
+        with zipfile.ZipFile(zip_file_name, 'r') as zip_ref:
+            zip_ref.extractall(temp_dir)
         current_working_dir = os.getcwd()
 
         # change the working dir to the dir where the code has been extracted to
@@ -642,8 +642,8 @@ class WebAppUpE2ETests(ScenarioTest):
         import zipfile
         import tempfile
         temp_dir = tempfile.mkdtemp()
-        zip_ref = zipfile.ZipFile(zip_file_name, 'r')
-        zip_ref.extractall(temp_dir)
+        with zipfile.ZipFile(zip_file_name, 'r') as zip_ref:
+            zip_ref.extractall(temp_dir)
         current_working_dir = os.getcwd()
 
         # change the working dir to the dir where the code has been extracted to
@@ -675,8 +675,8 @@ class WebAppUpE2ETests(ScenarioTest):
         import zipfile
         import tempfile
         temp_dir = tempfile.mkdtemp()
-        zip_ref = zipfile.ZipFile(zip_file_name, 'r')
-        zip_ref.extractall(temp_dir)
+        with zipfile.ZipFile(zip_file_name, 'r') as zip_ref:
+            zip_ref.extractall(temp_dir)
         current_working_dir = os.getcwd()
 
         # change the working dir to the dir where the code has been extracted to
@@ -730,8 +730,8 @@ class WebAppUpE2ETests(ScenarioTest):
         import zipfile
         import tempfile
         temp_dir = tempfile.mkdtemp()
-        zip_ref = zipfile.ZipFile(zip_file_name, 'r')
-        zip_ref.extractall(temp_dir)
+        with zipfile.ZipFile(zip_file_name, 'r') as zip_ref:
+            zip_ref.extractall(temp_dir)
         current_working_dir = os.getcwd()
 
         # change the working dir to the dir where the code has been extracted to
@@ -795,8 +795,8 @@ class WebAppUpE2ETests(ScenarioTest):
         import zipfile
         import tempfile
         temp_dir = tempfile.mkdtemp()
-        zip_ref = zipfile.ZipFile(zip_file_name, 'r')
-        zip_ref.extractall(temp_dir)
+        with zipfile.ZipFile(zip_file_name, 'r') as zip_ref:
+            zip_ref.extractall(temp_dir)
         current_working_dir = os.getcwd()
 
         # change the working dir to the dir where the code has been extracted to
@@ -862,8 +862,8 @@ class WebAppUpE2ETests(ScenarioTest):
         import zipfile
         import tempfile
         temp_dir = tempfile.mkdtemp()
-        zip_ref = zipfile.ZipFile(zip_file_name, 'r')
-        zip_ref.extractall(temp_dir)
+        with zipfile.ZipFile(zip_file_name, 'r') as zip_ref:
+            zip_ref.extractall(temp_dir)
         current_working_dir = os.getcwd()
 
         # change the working dir to the dir where the code has been extracted to
@@ -927,8 +927,8 @@ class WebAppUpE2ETests(ScenarioTest):
         import zipfile
         import tempfile
         temp_dir = tempfile.mkdtemp()
-        zip_ref = zipfile.ZipFile(zip_file_name, 'r')
-        zip_ref.extractall(temp_dir)
+        with zipfile.ZipFile(zip_file_name, 'r') as zip_ref:
+            zip_ref.extractall(temp_dir)
         current_working_dir = os.getcwd()
 
         # change the working dir to the dir where the code has been extracted to
@@ -972,8 +972,8 @@ class WebAppUpE2ETests(ScenarioTest):
         import zipfile
         import tempfile
         temp_dir = tempfile.mkdtemp()
-        zip_ref = zipfile.ZipFile(zip_file_name, 'r')
-        zip_ref.extractall(temp_dir)
+        with zipfile.ZipFile(zip_file_name, 'r') as zip_ref:
+            zip_ref.extractall(temp_dir)
         current_working_dir = os.getcwd()
 
         # change the working dir to the dir where the code has been extracted to
@@ -1029,8 +1029,8 @@ class WebAppUpE2ETests(ScenarioTest):
         import zipfile
         import tempfile
         temp_dir = tempfile.mkdtemp()
-        zip_ref = zipfile.ZipFile(zip_file_name, 'r')
-        zip_ref.extractall(temp_dir)
+        with zipfile.ZipFile(zip_file_name, 'r') as zip_ref:
+            zip_ref.extractall(temp_dir)
         current_working_dir = os.getcwd()
 
         # change the working dir to the dir where the code has been extracted to
@@ -1085,8 +1085,8 @@ class WebAppUpE2ETests(ScenarioTest):
         import zipfile
         import tempfile
         temp_dir = tempfile.mkdtemp()
-        zip_ref = zipfile.ZipFile(zip_file_name, 'r')
-        zip_ref.extractall(temp_dir)
+        with zipfile.ZipFile(zip_file_name, 'r') as zip_ref:
+            zip_ref.extractall(temp_dir)
         current_working_dir = os.getcwd()
 
         # change the working dir to the dir where the code has been extracted to
@@ -1135,8 +1135,8 @@ class WebAppUpE2ETests(ScenarioTest):
         import zipfile
         import tempfile
         temp_dir = tempfile.mkdtemp()
-        zip_ref = zipfile.ZipFile(zip_file_name, 'r')
-        zip_ref.extractall(temp_dir)
+        with zipfile.ZipFile(zip_file_name, 'r') as zip_ref:
+            zip_ref.extractall(temp_dir)
         current_working_dir = os.getcwd()
 
         # change the working dir to the dir where the code has been extracted to
@@ -1202,8 +1202,8 @@ class WebAppUpE2ETests(ScenarioTest):
         import zipfile
         import tempfile
         temp_dir = tempfile.mkdtemp()
-        zip_ref = zipfile.ZipFile(zip_file_name, 'r')
-        zip_ref.extractall(temp_dir)
+        with zipfile.ZipFile(zip_file_name, 'r') as zip_ref:
+            zip_ref.extractall(temp_dir)
         current_working_dir = os.getcwd()
 
         # change the working dir to the dir where the code has been extracted to
@@ -1293,8 +1293,8 @@ class WebAppUpE2ETests(ScenarioTest):
         import zipfile
         import tempfile
         temp_dir = tempfile.mkdtemp()
-        zip_ref = zipfile.ZipFile(zip_file_name, 'r')
-        zip_ref.extractall(temp_dir)
+        with zipfile.ZipFile(zip_file_name, 'r') as zip_ref:
+            zip_ref.extractall(temp_dir)
         current_working_dir = os.getcwd()
 
         # change the working dir to the dir where the code has been extracted to
@@ -1324,8 +1324,8 @@ class WebAppUpE2ETests(ScenarioTest):
         import zipfile
         import tempfile
         temp_dir = tempfile.mkdtemp()
-        zip_ref = zipfile.ZipFile(zip_file_name, 'r')
-        zip_ref.extractall(temp_dir)
+        with zipfile.ZipFile(zip_file_name, 'r') as zip_ref:
+            zip_ref.extractall(temp_dir)
         current_working_dir = os.getcwd()
 
         # change the working dir to the dir where the code has been extracted to
@@ -1352,8 +1352,8 @@ class WebAppUpE2ETests(ScenarioTest):
         import zipfile
         import tempfile
         temp_dir = tempfile.mkdtemp()
-        zip_ref = zipfile.ZipFile(zip_file_name, 'r')
-        zip_ref.extractall(temp_dir)
+        with zipfile.ZipFile(zip_file_name, 'r') as zip_ref:
+            zip_ref.extractall(temp_dir)
         current_working_dir = os.getcwd()
 
         # change the working dir to the dir where the code has been extracted to
