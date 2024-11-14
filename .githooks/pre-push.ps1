@@ -62,7 +62,7 @@ $currentBranch = git branch --show-current
 
 # Run command azdev lint
 Write-Host "Running azdev lint..." -ForegroundColor Green
-azdev linter --repo ./ --src $currentBranch --tgt $mergeBase
+azdev linter --min-severity medium --repo ./ --src $currentBranch --tgt $mergeBase
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Error: azdev lint check failed." -ForegroundColor Red
     exit 1

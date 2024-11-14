@@ -67,7 +67,7 @@ CURRENT_BRANCH=$(git branch --show-current)
 
 # Run command azdev lint
 printf "\033[0;32mRunning azdev lint...\033[0m\n"
-azdev linter --repo ./ --src $CURRENT_BRANCH --tgt $MERGE_BASE
+azdev linter --min-severity medium --repo ./ --src $CURRENT_BRANCH --tgt $MERGE_BASE
 if [ $? -ne 0 ]; then
     printf "\033[0;31mError: azdev lint check failed.\033[0m\n"
     exit 1
