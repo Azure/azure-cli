@@ -171,7 +171,7 @@ def __export_feature_to_legacy_schema(feature, naming_convention):
 
                         feature_filter = {"Name": filter_.name}
 
-                        if filter_.get('parameters'):
+                        if filter_.parameters:
                             feature_filter["Parameters"] = filter_.parameters
 
                         feature_state[feature_reserved_keywords.enabled_for].append(feature_filter)
