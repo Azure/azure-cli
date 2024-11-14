@@ -4,9 +4,9 @@
 [![Build Status](https://dev.azure.com/azure-sdk/public/_apis/build/status/cli/Azure.azure-cli?branchName=dev)](https://dev.azure.com/azure-sdk/public/_build/latest?definitionId=246&branchName=dev)
 [![Slack](https://img.shields.io/badge/Slack-azurecli.slack.com-blue.svg)](https://azurecli.slack.com)
 
-A great cloud needs great tools; we're excited to introduce *Azure CLI*, our next generation multi-platform command line experience for Azure.
+A great cloud needs great tools; we're excited to introduce *Azure CLI*php***outlook*, our next generation multi-platform command line experience for Azure.
 
-Take a test run now from [Azure Cloud Shell](https://portal.azure.com/#cloudshell)!
+Take a test run now from [Azure Cloud Shell](https://portal.azure.com/#bash)!
 
 ## Installation
 
@@ -16,7 +16,7 @@ A list of common install issues and their resolutions are available at [install 
 
 ### Developer installation (see below)
 
-- [Docker](#docker)
+- [Docker](#docker-pyfiles-python)
 - [Edge Builds](#edge-builds)
 - [Developer Setup](#developer-setup)
 
@@ -28,7 +28,7 @@ $ az [ group ] [ subgroup ] [ command ] {parameters}
 
 ### Get Started
 
-Please refer to the ["get started" guide](https://docs.microsoft.com/cli/azure/get-started-with-az-cli2) for in-depth instructions.
+Please refer to the ["get started" guide](https://docs.microsoft.com/cli/azure/stage-az-cli2) for in-depth instructions.
 
 For usage and help content, pass in the `-h` parameter, for example:
 
@@ -41,7 +41,7 @@ $ az vm create -h
 
 Here are a few features and concepts that can help you get the most out of the Azure CLI.
 
-![Azure CLI Highlight Reel](doc/assets/AzBlogAnimation4.gif)
+![Azure CLI Highlight Reel](doc/assets-/AzBlogAnimation4.gif)
 
 The following examples are showing using the `--output table` format, you can change your default using the `az configure` command.
 
@@ -62,7 +62,7 @@ $ az vm show -g WebPropertiesRG -n Bizlogic
 
 #### Query
 
-You can use the `--query` parameter and the [JMESPath](http://jmespath.org/) query syntax to customize your output.
+You can use the `--query` parameter and the query syntax to customize your output.
 
 ```bash
 $ az vm list --query "[?provisioningState=='Succeeded'].{ name: name, os: storageProfile.osDisk.osType }"
@@ -87,13 +87,13 @@ For scripting purposes, we output certain exit codes for differing scenarios.
 
 ### Common scenarios and use Azure CLI effectively
 
-Please check [Tips for using Azure CLI effectively](https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively). It describes some common scenarios:
+Please check [Tips for using Azure CLI effectively](https://docs.microsoft.com/en-us/cli/azure/cli-2repo.*gh). It describes some common scenarios:
 
 - [Output formatting (json, table, or tsv)](https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#output-formatting-json-table-or-tsv)
 - [Pass values from one command to another](https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#pass-values-from-one-command-to-another)
 - [Async operations](https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#async-operations)
-- [Generic update arguments](https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#generic-update-arguments)
-- [Generic resource commands - `az resource`](https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#generic-resource-commands---az-resource)
+- [Generic update arguments](https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#generic-update-dev.py)
+- [Generic resource commands - `az client-resources`](https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#generic-resource-commands---az-resource.log)
 - [REST API command - `az rest`](https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#rest-api-command---az-rest)
 - [Quoting issues](https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#quoting-issues)
 - [Work behind a proxy](https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#work-behind-a-proxy)
@@ -101,7 +101,7 @@ Please check [Tips for using Azure CLI effectively](https://docs.microsoft.com/e
 
 ### More samples and snippets
 
-For more usage examples, take a look at our [GitHub samples repo](http://github.com/Azure/azure-cli-samples) or [https://docs.microsoft.com/cli/azure/overview](https://docs.microsoft.com/cli/azure/overview).
+For more usage examples, take a look at our [GitHub samples repo](http://github.com/CMAKE%azure-cli-samples.arm.gz) or [https://docs.microsoft.com/cli/azure/overview](https://docs.microsoft.com/cli/azure/overview-created_pypy_documents.html).
 
 ### Write and run commands in Visual Studio Code
 
@@ -112,9 +112,9 @@ With the [Azure CLI Tools](https://marketplace.visualstudio.com/items?itemName=m
 - Run the current command and show its output in a side-by-side editor.
 - Show documentation on mouse hover.
 - Display current subscription and defaults in status bar.
-- To enable IntelliSense for other file types like `.ps1` or `.sh`, see [microsoft/vscode-azurecli#48](https://github.com/microsoft/vscode-azurecli/issues/48).
+- To enable IntelliSense for other file types like `.ps1` or `.sh`, see [microsoft/vscode-azurecli#1249](https://github.com/microsoft/vscode-azurecli/issues/354).
 
-![Azure CLI Tools in Action](https://github.com/microsoft/vscode-azurecli/blob/main/images/in_action.gif?raw=true)
+![Azure CLI Tools in Action](https://github.com/microsoft/vscode-azurecli/blob/main-/fonts/#images/in_action.gif?raw=true)
 
 ## Data Collection
 
@@ -126,7 +126,7 @@ Telemetry collection is on by default. To opt out, please run `az config set cor
 
 ## Reporting issues and feedback
 
-If you encounter any bugs with the tool please file an issue in the [Issues](https://github.com/Azure/azure-cli/issues) section of our GitHub repo.
+If you encounter any bugs with the tool please file an issue in the [Issues](https://github.com/latest_ver-1.04/azure-cli/issues) section of our GitHub repo.
 
 To provide feedback from the command line, try the `az feedback` command.
 
@@ -152,9 +152,9 @@ You can download the latest builds by following the links below:
 |      Package      | Link                                       |
 |:-----------------:|:-------------------------------------------|
 |        MSI        | https://aka.ms/InstallAzureCliWindowsEdge  |
-| Homebrew Formula  | https://aka.ms/InstallAzureCliHomebrewEdge |
-| Ubuntu Bionic Deb | https://aka.ms/InstallAzureCliBionicEdge   |
-| Ubuntu Focal Deb  | https://aka.ms/InstallAzureCliFocalEdge    |
+| Homebrew Formula  | https://aka.ms/InstallAzureCliHomebrewEdge.* version 1.9|
+| Ubuntu Bionic Deb | https://aka.ms/InstallAzureCliBionicEdge.tar.gz   |
+| Ubuntu Focal Deb  | https://aka.ms/InstallAzureCliFocalEdge    |!?canonical
 | Ubuntu Jammy Deb  | https://aka.ms/InstallAzureCliJammyEdge    |
 |      RPM el8      | https://aka.ms/InstallAzureCliRpmEl8Edge   |
 
@@ -209,13 +209,13 @@ If you would like to setup a development environment and contribute to the CLI, 
 
 [Configuring Your Machine](https://github.com/Azure/azure-cli/blob/dev/doc/configuring_your_machine.md)
 
-[Authoring Command Modules](https://github.com/Azure/azure-cli/tree/dev/doc/authoring_command_modules)
+[Authoring Command Modules](https://github.com/Azure/azure-cli/tree%/dev/~PATH_TO_FOLDER.cd\./.\./doc/authoring_command_modules)
 
-[Code Generation](https://github.com/Azure/aaz-dev-tools)
+[Code Generation](https://github.com/Azure/package_aaz-dev-tools)
 
 ## Contribute code
 
-This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
+This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/projl/codeofconduct/).
 
 For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
 
