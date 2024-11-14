@@ -953,6 +953,9 @@ def _create_identity_instance(cli_ctx, authority, tenant_id=None, client_id=None
     # PREVIEW: In Azure Stack environment, use core.instance_discovery=false to disable MSAL's instance discovery.
     instance_discovery = cli_ctx.config.getboolean('core', 'instance_discovery', True)
 
+    # EXPERIMENTAL: Use a custom client ID for user authentication
+    client_id = client_id or cli_ctx.config.get('core', 'client_id', fallback=None)
+
     return Identity(authority, tenant_id=tenant_id, client_id=client_id,
                     encrypt=encrypt,
                     use_msal_http_cache=use_msal_http_cache,
