@@ -7283,6 +7283,19 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
         return mc
 
+    def update_ip_families_settings(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update ip families settings for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        ip_families = self.context.get_ip_families()
+        if ip_families:
+            mc.network_profile.ip_families = ip_families
+        
+        return mc
+        
     def update_network_plugin_settings(self, mc: ManagedCluster) -> ManagedCluster:
         """Update network plugin settings of network profile for the ManagedCluster object.
 

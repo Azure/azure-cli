@@ -2167,6 +2167,14 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
+
+        # test update
+        ctx_4 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({"ip_families": "IPv4,IPv6"}),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+
         self.assertEqual(ctx_3.get_ip_families(), ["IPv4", "IPv6"])
 
     def test_get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy(

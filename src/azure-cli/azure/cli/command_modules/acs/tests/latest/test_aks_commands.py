@@ -9384,6 +9384,27 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('networkProfile.ipFamilies', ['IPv4', 'IPv6'])
         ])
 
+        # update
+        update_cmd = 'aks update -g {resource_group} -n {name} --ip-families ipv4,ipv6 --load-balancer-managed-outbound-ipv6-count 4'
+
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('networkProfile.podCidr', '172.126.0.0/16'),
+            self.check('networkProfile.podCidrs', [
+                       '172.126.0.0/16', '2001:abcd:1234::/64']),
+            self.check('networkProfile.serviceCidr', '172.56.0.0/16'),
+            self.check('networkProfile.serviceCidrs', [
+                       '172.56.0.0/16', '2001:ffff::/108']),
+            self.check('networkProfile.ipFamilies', ['IPv4', 'IPv6']),
+            self.check(
+                'networkProfile.loadBalancerProfile.managedOutboundIPs.countIpv6', 4),
+            self.check(
+                'networkProfile.loadBalancerProfile.managedOutboundIPs.count', 1),
+            self.check(
+                'networkProfile.loadBalancerProfile.effectiveOutboundIPs[] | length(@)', 5)
+        ])
+
+
         # delete
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
