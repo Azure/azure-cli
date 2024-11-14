@@ -236,7 +236,7 @@ class RuleError(Exception):
     pass
 
 
-class LinterScope():
+class LinterScope:
     def __init__(self, linter_manager, linter_callable):
         self.linter_manager = linter_manager
         self.linter = linter_callable()
