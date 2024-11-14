@@ -499,6 +499,12 @@ def flexible_list_skus(cmd, client, location):
     return result
 
 
+def flexible_replica_list_by_server(cmd, client, resource_group_name, server_name):
+    validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
+    return client.list_by_server(resource_group_name, server_name)
+
+
 def flexible_replica_create(cmd, client, resource_group_name, source_server, replica_name, zone=None,
                             location=None, vnet=None, vnet_address_prefix=None, subnet=None,
                             subnet_address_prefix=None, private_dns_zone_arguments=None, no_wait=False,
@@ -506,6 +512,7 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
                             sku_name=None, tier=None,
                             storage_gb=None, performance_tier=None, yes=False, tags=None):
     validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, source_server)
     replica_name = replica_name.lower()
 
     if not is_valid_resource_id(source_server):
@@ -525,8 +532,6 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
         source_server_object = client.get(source_server_id_parts['resource_group'], source_server_id_parts['name'])
     except Exception as e:
         raise ResourceNotFoundError(e)
-
-    # IF CLUSTER: Need to check if source_server_object already has replica/is primary. If true, block operation
 
     if not location:
         location = source_server_object.location
@@ -745,6 +750,7 @@ def flexible_server_revivedropped(cmd, client, resource_group_name, server_name,
 
 def flexible_replica_stop(cmd, client, resource_group_name, server_name):
     validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
 
     try:
         server_object = client.get(resource_group_name, server_name)
@@ -767,6 +773,7 @@ def flexible_replica_stop(cmd, client, resource_group_name, server_name):
 
 def flexible_replica_promote(cmd, client, resource_group_name, server_name, promote_mode='standalone', promote_option='planned'):
     validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
 
     try:
         server_object = client.get(resource_group_name, server_name)
@@ -1266,8 +1273,9 @@ def migration_check_name_availability(cmd, client, resource_group_name, server_n
     return get_postgresql_flexible_management_client(cmd.cli_ctx).check_migration_name_availability(subscription_id, resource_group_name, server_name, migration_name_availability_parammeters)
 
 
-def virtual_endpoint_create_func(client, resource_group_name, server_name, virtual_endpoint_name, endpoint_type, members):
+def virtual_endpoint_create_func(cmd, client, resource_group_name, server_name, virtual_endpoint_name, endpoint_type, members):
     validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
 
     parameters = {
         'name': virtual_endpoint_name,
@@ -1282,8 +1290,9 @@ def virtual_endpoint_create_func(client, resource_group_name, server_name, virtu
         parameters)
 
 
-def virtual_endpoint_show_func(client, resource_group_name, server_name, virtual_endpoint_name):
+def virtual_endpoint_show_func(cmd, client, resource_group_name, server_name, virtual_endpoint_name):
     validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
 
     return client.get(
         resource_group_name,
@@ -1291,16 +1300,18 @@ def virtual_endpoint_show_func(client, resource_group_name, server_name, virtual
         virtual_endpoint_name)
 
 
-def virtual_endpoint_list_func(client, resource_group_name, server_name):
+def virtual_endpoint_list_func(cmd, client, resource_group_name, server_name):
     validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
 
     return client.list_by_server(
         resource_group_name,
         server_name)
 
 
-def virtual_endpoint_delete_func(client, resource_group_name, server_name, virtual_endpoint_name, yes=False):
+def virtual_endpoint_delete_func(cmd, client, resource_group_name, server_name, virtual_endpoint_name, yes=False):
     validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
 
     if not yes:
         user_confirmation(
@@ -1313,8 +1324,9 @@ def virtual_endpoint_delete_func(client, resource_group_name, server_name, virtu
         virtual_endpoint_name)
 
 
-def virtual_endpoint_update_func(client, resource_group_name, server_name, virtual_endpoint_name, endpoint_type, members):
+def virtual_endpoint_update_func(cmd, client, resource_group_name, server_name, virtual_endpoint_name, endpoint_type, members):
     validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
 
     parameters = {
         'name': virtual_endpoint_name,
