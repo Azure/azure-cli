@@ -19,6 +19,7 @@ jobs:
           if [ -z $message ]; then
               echo "message=$(echo 'Thank you for your contribution! We will review the pull request and get back to you soon.')" >> $GITHUB_ENV
           fi
+      - run: echo $GITHUB_ENV
       - name: comment on the pull request
         uses: mshick/add-pr-comment@v2
         with:
