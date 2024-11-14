@@ -715,6 +715,10 @@ class AzCliCommandInvoker(CommandInvoker):
             elif _is_paged(result):
                 result = list(result)
 
+            # This is added for new models from typespec generated SDKs
+            # These models store data in `__dict__['_data']` instead of in `__dict__`
+            if result and hasattr(result, 'as_dict'):
+                result = result.as_dict()
             result = todict(result, AzCliCommandInvoker.remove_additional_prop_layer)
 
             event_data = {'result': result}
