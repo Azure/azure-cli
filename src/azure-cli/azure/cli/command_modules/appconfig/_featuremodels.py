@@ -88,11 +88,19 @@ class FeatureFlagValue:
             FeatureFlagConstants.DESCRIPTION: self.description,
             FeatureFlagConstants.ENABLED: self.enabled,
             FeatureFlagConstants.CONDITIONS: custom_serialize_conditions(self.conditions),
-            FeatureFlagConstants.DISPLAY_NAME: self.display_name,
-            FeatureFlagConstants.ALLOCATION: custom_serialize_allocation(self.allocation),
-            FeatureFlagConstants.VARIANTS: custom_serialize_variants(self.variants),
-            FeatureFlagConstants.TELEMETRY: self.telemetry
         }
+
+        if self.display_name is not None:
+            featureflagvalue[FeatureFlagConstants.DISPLAY_NAME] = self.display_name
+        
+        if self.allocation is not None:
+            featureflagvalue[FeatureFlagConstants.ALLOCATION] = custom_serialize_allocation(self.allocation)
+
+        if self.variants is not None:
+            featureflagvalue[FeatureFlagConstants.VARIANTS] = custom_serialize_variants(self.variants)
+
+        if self.telemetry is not None:
+            featureflagvalue[FeatureFlagConstants.TELEMETRY] = self.telemetry
 
         return json.dumps(featureflagvalue, indent=2, ensure_ascii=False)
 
@@ -166,14 +174,22 @@ class FeatureFlag:
             "Label": self.label,
             "State": self.state,
             "Locked": self.locked,
-            "Display Name": self.display_name,
             "Description": self.description,
             "Last Modified": self.last_modified,
             "Conditions": custom_serialize_conditions(self.conditions),
-            "Allocation": custom_serialize_allocation(self.allocation),
-            "Variants": custom_serialize_variants(self.variants),
-            "Telemetry": self.telemetry
         }
+
+        if self.allocation is not None:
+            featureflag["Allocation"] = custom_serialize_allocation(self.allocation)
+        
+        if self.variants is not None:
+            featureflag["Variants"] = custom_serialize_variants(self.variants)
+
+        if self.display_name is not None:
+            featureflag["Display Name"] = self.display_name
+
+        if self.telemetry is not None:
+            featureflag["Telemetry"] = self.telemetry
 
         return json.dumps(featureflag, indent=2, ensure_ascii=False)
 
@@ -265,8 +281,11 @@ class FeatureConditions:
     def __repr__(self):
         featureconditions = {
             FeatureFlagConstants.CLIENT_FILTERS: self.client_filters,
-            FeatureFlagConstants.REQUIREMENT_TYPE: self.requirement_type 
         }
+
+        if self.requirement_type is not None:
+            featureconditions[FeatureFlagConstants.REQUIREMENT_TYPE] = self.requirement_type
+
         return json.dumps(featureconditions, indent=2, ensure_ascii=False)
 
 class FeatureVariant:
@@ -315,9 +334,14 @@ class FeatureVariant:
     def __repr__(self):
         featurevariant = {
             FeatureFlagConstants.NAME: self.name,
-            FeatureFlagConstants.VARIANT_CONFIGURATION_VALUE: self.configuration_value,
-            FeatureFlagConstants.VARIANT_STATUS_OVERRIDE: self.status_override
         }
+
+        if self.configuration_value is not None:
+            featurevariant[FeatureFlagConstants.VARIANT_CONFIGURATION_VALUE] = self.configuration_value
+
+        if self.status_override is not None:
+            featurevariant[FeatureFlagConstants.VARIANT_STATUS_OVERRIDE] = self.status_override
+
         return json.dumps(featurevariant, indent=2, ensure_ascii=False)
 
 
@@ -555,57 +579,73 @@ class FeatureAllocation:
         return allocation
 
     def __repr__(self):
-        featureallocation = {
-            FeatureFlagConstants.USER: self.user,
-            FeatureFlagConstants.GROUP: self.group,
-            FeatureFlagConstants.PERCENTILE: self.percentile,
-            FeatureFlagConstants.DEFAULT_WHEN_ENABLED: self.default_when_enabled,
-            FeatureFlagConstants.DEFAULT_WHEN_DISABLED: self.default_when_disabled
-        }
+        featureallocation = {}
+
+        if self.user is not None:
+            featureallocation[FeatureFlagConstants.USER] = [user for user in self.user]
+
+        if self.group is not None:
+            featureallocation[FeatureFlagConstants.GROUP] = [group for group in self.group]
+
+        if self.percentile is not None:
+            featureallocation[FeatureFlagConstants.PERCENTILE] = [percentile for percentile in self.percentile]
+
+        if self.default_when_enabled is not None:
+            featureallocation[FeatureFlagConstants.DEFAULT_WHEN_ENABLED] = self.default_when_enabled
+        
+        if self.default_when_disabled is not None:
+            featureallocation[FeatureFlagConstants.DEFAULT_WHEN_DISABLED] = self.default_when_disabled
 
         return json.dumps(featureallocation, indent=2, ensure_ascii=False)
   
 # Feature Flag Helper Functions #
-def custom_serialize_conditions(conditions_dict):
+def custom_serialize_conditions(conditions):
     '''
         Helper Function to serialize Conditions
 
         Args:
-            conditions_dict - Dictionary of {str, Any}
+            conditions - FeatureConditions object
 
         Return:
             JSON serializable Dictionary
     '''
     featurefilterdict = {}
 
-    for key, value in conditions_dict.items():
-        if key == FeatureFlagConstants.CLIENT_FILTERS:
-            featurefilterdict[key] = [feature_filter for feature_filter in value]
-        
-        if key == FeatureFlagConstants.REQUIREMENT_TYPE:
-            featurefilterdict[key] = value
+    if hasattr(conditions, FeatureFlagConstants.CLIENT_FILTERS):
+        featurefilterdict[FeatureFlagConstants.CLIENT_FILTERS] = [feature_filter.__dict__ for feature_filter in conditions.client_filters]
+
+    if hasattr(conditions, FeatureFlagConstants.REQUIREMENT_TYPE):
+        featurefilterdict[FeatureFlagConstants.REQUIREMENT_TYPE] = conditions.requirement_type
 
     return featurefilterdict
 
 
-def custom_serialize_allocation(allocation_dict):
+def custom_serialize_allocation(allocation):
     '''
         Helper Function to serialize Allocation
 
         Args:
-            allocation_dict - Dictionary of {str, Any}
+            allocation_dict - FeatureAllocation object
 
         Return:
             JSON serializable Dictionary
     '''
     featureallocationdict = {}
 
-    for key, value in allocation_dict.items():
-        if key == FeatureFlagConstants.USER or key == FeatureFlagConstants.GROUP or key == FeatureFlagConstants.PERCENTILE:
-            featureallocationdict[key] = [feature_allocation for feature_allocation in value]
+    if hasattr(allocation, FeatureFlagConstants.USER):
+        featureallocationdict[FeatureFlagConstants.USER] = [user.__dict__ for user in allocation.user]
 
-        if key == FeatureFlagConstants.DEFAULT_WHEN_ENABLED or key == FeatureFlagConstants.DEFAULT_WHEN_DISABLED:
-            featureallocationdict[key] = value
+    if hasattr(allocation, FeatureFlagConstants.GROUP):
+        featureallocationdict[FeatureFlagConstants.GROUP] = [group.__dict__ for group in allocation.group]
+
+    if hasattr(allocation, FeatureFlagConstants.PERCENTILE):
+        featureallocationdict[FeatureFlagConstants.PERCENTILE] = [percentile.__dict__ for percentile in allocation.percentile]
+
+    if hasattr(allocation, FeatureFlagConstants.DEFAULT_WHEN_ENABLED):
+        featureallocationdict[FeatureFlagConstants.DEFAULT_WHEN_ENABLED] = allocation.default_when_enabled
+
+    if hasattr(allocation, FeatureFlagConstants.DEFAULT_WHEN_DISABLED):
+        featureallocationdict[FeatureFlagConstants.DEFAULT_WHEN_DISABLED] = allocation.default_when_disabled
 
     return featureallocationdict
 
@@ -622,14 +662,15 @@ def custom_serialize_variants(variants_list):
     featurevariants = []
     for variant in variants_list:
         variant_dict = {}
-        for key,value in variant.items():
-            if key == FeatureFlagConstants.NAME:
-                variant_dict[key] = value
-            if key == FeatureFlagConstants.VARIANT_CONFIGURATION_VALUE:
-                variant_dict[key] = value
-            if key == FeatureFlagConstants.VARIANT_STATUS_OVERRIDE:
-                variant_dict[key] = value
-            featurevariants.append(variant_dict)
+        variant_dict[FeatureFlagConstants.NAME] = variant.name
+
+        if hasattr(variant, FeatureFlagConstants.VARIANT_CONFIGURATION_VALUE):
+            variant_dict[FeatureFlagConstants.VARIANT_CONFIGURATION_VALUE] = variant.configuration_value
+
+        if hasattr(variant, FeatureFlagConstants.VARIANT_STATUS_OVERRIDE):
+            variant_dict[FeatureFlagConstants.VARIANT_STATUS_OVERRIDE] = variant.status_override
+
+        featurevariants.append(variant_dict)
     return featurevariants
 
 
@@ -717,7 +758,7 @@ def map_keyvalue_to_featureflag(keyvalue, show_conditions=True):
     conditions = feature_flag_value.conditions
 
     # if conditions["client_filters"] list is not empty, make state conditional
-    filters = conditions[FeatureFlagConstants.CLIENT_FILTERS]
+    filters = conditions.client_filters
 
     if filters and state == FeatureState.ON:
         state = FeatureState.CONDITIONAL
@@ -818,9 +859,9 @@ def map_keyvalue_to_featureflagvalue(keyvalue):
         feature_flag_value = FeatureFlagValue(id_=feature_name,
                                               description=feature_flag_dict.get(FeatureFlagConstants.DESCRIPTION, ''),
                                               enabled=feature_flag_dict.get(FeatureFlagConstants.ENABLED, False),
-                                              conditions=conditions,
-                                              allocation=allocation,
-                                              variants=variants,
+                                              conditions=feature_flag_dict.get(FeatureFlagConstants.CONDITIONS, None),
+                                              allocation=feature_flag_dict.get(FeatureFlagConstants.ALLOCATION, None),
+                                              variants=feature_flag_dict.get(FeatureFlagConstants.VARIANTS, None),
                                               telemetry=feature_flag_dict.get(FeatureFlagConstants.TELEMETRY, None))
 
     except (InvalidArgumentValueError, TypeError, ValueError) as exception:

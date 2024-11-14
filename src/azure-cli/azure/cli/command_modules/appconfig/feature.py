@@ -125,7 +125,7 @@ def set_feature(cmd,
                     feature_flag_value.description = description
 
                 if requirement_type is not None:
-                    feature_flag_value.conditions[FeatureFlagConstants.REQUIREMENT_TYPE] = requirement_type
+                    feature_flag_value.conditions.requirement_type = requirement_type
 
                 set_kv = KeyValue(key=key,
                                   label=label,
@@ -608,7 +608,7 @@ def add_filter(cmd,
             # if it's invalid, we catch appropriate exception that contains
             # detailed message
             feature_flag_value = map_keyvalue_to_featureflagvalue(retrieved_kv)
-            feature_filters = feature_flag_value.conditions[FeatureFlagConstants.CLIENT_FILTERS]
+            feature_filters = feature_flag_value.conditions.client_filters
 
             entry = json.dumps(new_filter.__dict__, indent=2, ensure_ascii=False)
             confirmation_message = "Are you sure you want to add this filter?\n" + entry
@@ -708,7 +708,7 @@ def update_filter(cmd,
             # if it's invalid, we catch appropriate exception that contains
             # detailed message
             feature_flag_value = map_keyvalue_to_featureflagvalue(retrieved_kv)
-            feature_filters = feature_flag_value.conditions[FeatureFlagConstants.CLIENT_FILTERS]
+            feature_filters = feature_flag_value.conditions.client_filters
 
             entry = json.dumps(new_filter.__dict__,
                                indent=2, ensure_ascii=False)
@@ -837,7 +837,7 @@ def delete_filter(cmd,
             # if it's invalid, we catch appropriate exception that contains
             # detailed message
             feature_flag_value = map_keyvalue_to_featureflagvalue(retrieved_kv)
-            feature_filters = feature_flag_value.conditions[FeatureFlagConstants.CLIENT_FILTERS]
+            feature_filters = feature_flag_value.conditions.client_filters
 
             display_filter = {}
             match_index = []
@@ -947,13 +947,13 @@ def show_filter(cmd,
         # if it's invalid, we catch appropriate exception that contains
         # detailed message
         feature_flag_value = map_keyvalue_to_featureflagvalue(retrieved_kv)
-        feature_filters = feature_flag_value.conditions[FeatureFlagConstants.CLIENT_FILTERS]
+        feature_filters = feature_flag_value.conditions.client_filters
         display_filters = []
 
         # If user has specified index, we use it as secondary check to display
         # a unique filter
         if 0 <= index < len(feature_filters):
-            if feature_filters[index]['name'] == filter_name:
+            if feature_filters[index].name == filter_name:
                 return feature_filters[index]
         if index != float("-inf"):
             logger.warning(
@@ -961,7 +961,7 @@ def show_filter(cmd,
 
         # get all filters where name matches filter_name provided by user
         display_filters = [
-            featurefilter for featurefilter in feature_filters if featurefilter['name'] == filter_name]
+            featurefilter for featurefilter in feature_filters if featurefilter.name == filter_name]
 
         if not display_filters:
             raise CLIError(
@@ -1009,7 +1009,7 @@ def list_filter(cmd,
         # if it's invalid, we catch appropriate exception that contains
         # detailed message
         feature_flag_value = map_keyvalue_to_featureflagvalue(retrieved_kv)
-        feature_filters = feature_flag_value.conditions[FeatureFlagConstants.CLIENT_FILTERS]
+        feature_filters = feature_flag_value.conditions.client_filters
 
         if all_:
             top = len(feature_filters)
@@ -1150,9 +1150,7 @@ def __clear_filter(azconfig_client, feature, label=None, yes=False):
 
             # These fields will never be missing because we validate that
             # in map_keyvalue_to_featureflagvalue
-            feature_filters = feature_flag_value.conditions[
-                FeatureFlagConstants.CLIENT_FILTERS
-            ]
+            feature_filters = feature_flag_value.conditions.client_filters
 
             # create a deep copy of the filters to display to the user
             # after deletion
