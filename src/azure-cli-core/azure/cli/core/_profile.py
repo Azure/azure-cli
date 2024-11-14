@@ -656,9 +656,9 @@ class Profile:
     def _create_credential(self, account, tenant_id=None, client_id=None):
         """Create a credential object driven by MSAL
 
-        :param account:
+        :param account: The CLI account to create credential for
         :param tenant_id: If not None, override tenantId from 'account'
-        :param client_id:
+        :param client_id: Client ID of another public client application
         :return:
         """
         user_type = account[_USER_ENTITY][_USER_TYPE]
