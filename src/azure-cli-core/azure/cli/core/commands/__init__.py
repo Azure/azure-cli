@@ -38,7 +38,7 @@ from knack.invocation import CommandInvoker
 from knack.preview import ImplicitPreviewItem, PreviewItem, resolve_preview_info
 from knack.experimental import ImplicitExperimentalItem, ExperimentalItem, resolve_experimental_info
 from knack.log import get_logger, CLILogging
-from knack.util import CLIError, CommandResultItem, todict
+from knack.util import CLIError, CommandResultItem, todict, to_camel_case
 from knack.events import EVENT_INVOKER_TRANSFORM_RESULT
 from knack.validators import DefaultStr
 
@@ -116,6 +116,14 @@ def _pre_command_table_create(cli_ctx, args):
     cli_ctx.refresh_request_id()
     return _expand_file_prefixed_files(args)
 
+
+def _convert_camel_case(obj):
+    if isinstance(obj, dict):
+        result = {to_camel_case(k): _convert_camel_case(v) for (k, v) in obj.items()}
+        return result
+    if isinstance(obj, list):
+        return [_convert_camel_case(a) for a in obj]
+    return obj
 
 # pylint: disable=too-many-instance-attributes
 class CacheObject:
@@ -718,7 +726,7 @@ class AzCliCommandInvoker(CommandInvoker):
             # This is added for new models from typespec generated SDKs
             # These models store data in `__dict__['_data']` instead of in `__dict__`
             if result and hasattr(result, 'as_dict'):
-                result = result.as_dict()
+                result = _convert_camel_case(result.as_dict())
             result = todict(result, AzCliCommandInvoker.remove_additional_prop_layer)
 
             event_data = {'result': result}
