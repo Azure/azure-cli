@@ -8,7 +8,7 @@ from knack.util import CLIError
 
 from ._constants import AppServiceConstants, FeatureFlagConstants, JsonDiff, KVSetConstants
 from ._diff_utils import get_serializer, print_preview
-from ._featuremodels import FeatureFlagValue, FeatureManagementReservedKeywords
+from ._featuremodels import FeatureFlagValue, FeatureManagementReservedKeywords, custom_serialize_allocation, custom_serialize_conditions, custom_serialize_variants
 from ._kv_helpers import __is_key_vault_ref
 from ._models import KeyValue
 from ._utils import is_json_content_type
@@ -194,36 +194,26 @@ def __export_feature_to_new_ms_schema(feature):
         enabled = False
         if feature.state in ("on", "conditional"):
             enabled = True
- 
-        allocation = None
-        variants = None
-        telemetry = None
-        display_name = None
+
+        feature_dict = {}
+        feature_dict[FeatureFlagConstants.ID] = feature.name
+        feature_dict[FeatureFlagConstants.DESCRIPTION] = feature.description
+        feature_dict[FeatureFlagConstants.ENABLED] = enabled
+        feature_dict[FeatureFlagConstants.CONDITIONS] = custom_serialize_conditions(feature.conditions)
 
         if hasattr(feature, FeatureFlagConstants.ALLOCATION):
-            allocation = feature.allocation
+            feature_dict[FeatureFlagConstants.ALLOCATION] = custom_serialize_allocation(feature.allocation)
         
         if hasattr(feature,  FeatureFlagConstants.VARIANTS):
-            variants = feature.variants
+            feature_dict[FeatureFlagConstants.VARIANTS] = custom_serialize_variants(feature.variants)
         
         if hasattr(feature, FeatureFlagConstants.TELEMETRY):
-            telemetry = feature.telemetry
+            feature_dict[FeatureFlagConstants.TELEMETRY] = feature.telemetry
 
         if hasattr(feature, FeatureFlagConstants.DISPLAY_NAME):
-            display_name = feature.display_name
+            feature_dict[FeatureFlagConstants.DISPLAY_NAME] = feature.display_name
 
-        feature = FeatureFlagValue(
-            id_=feature.name,
-            description=feature.description,
-            enabled=enabled,
-            conditions=feature.conditions,
-            display_name=display_name,
-            allocation=allocation,
-            variants=variants,
-            telemetry=telemetry,
-        )
-
-        return feature.__dict__
+        return feature_dict
 
     except Exception as exception:
         raise CLIError("Failed to export feature flags. " + str(exception))
