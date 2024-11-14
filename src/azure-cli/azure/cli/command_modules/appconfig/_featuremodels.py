@@ -217,77 +217,6 @@ class FeatureFilter:
         }
         return json.dumps(featurefilter, indent=2, ensure_ascii=False)
 
-class FeatureConditions:
-    '''
-    Feature conditions class.
-
-    :ivar list FeatureFilter[] client_filters:
-        Collection of filters.
-    :ivar RequirementType requirement_type:
-        The requirement type of the feature flag. Default is set to "Any"
-    '''
-
-    def __init__(self,
-                 client_filters=None,
-                 requirement_type=None):
-        self.client_filters = client_filters
-        if requirement_type is not None:
-            self.requirement_type = requirement_type
-
-    @classmethod
-    def convert_from_json(cls, feature_id, json_string):
-        '''
-        Convert JSON string to FeatureConditions object
-        
-        Args:
-            json_string - JSON string
-
-        Return:
-
-        FeatureConditions object
-        '''
-        conditions = json.loads(json_string)
-        feature_conditions = cls()
-
-        if conditions:
-            client_filters = conditions.get(FeatureFlagConstants.CLIENT_FILTERS, [])
-
-            # Convert all filters to FeatureFilter objects
-            client_filters_list = []
-            for client_filter in client_filters:
-                # If there is a filter, it should always have a name
-                # In case it doesn't, ignore this filter
-                lowercase_filter = {k.lower(): v for k, v in client_filter.items()}        
-                name = lowercase_filter.get(FeatureFlagConstants.NAME)
-                if name:
-                    params = lowercase_filter.get(FeatureFlagConstants.FILTER_PARAMETERS, {})
-                    client_filters_list.append(FeatureFilter(name, params))
-                else:
-                    raise ValidationError("Feature filter must contain the %s attribute:\n%s",
-                                   FeatureFlagConstants.NAME,
-                                   json.dumps(client_filter, indent=2, ensure_ascii=False))
-
-            feature_conditions.client_filters = client_filters_list
-
-            requirement_type = conditions.get(FeatureFlagConstants.REQUIREMENT_TYPE, None)
-            if requirement_type:
-                if requirement_type.lower() not in (FeatureFlagConstants.REQUIREMENT_TYPE_ALL, FeatureFlagConstants.REQUIREMENT_TYPE_ANY):
-                    raise ValidationError(f"Feature '{feature_id}' must have an any/all requirement type.")
-                else:
-                    feature_conditions.requirement_type = requirement_type
-            
-            return feature_conditions
-
-    def __repr__(self):
-        featureconditions = {
-            FeatureFlagConstants.CLIENT_FILTERS: self.client_filters,
-        }
-
-        if self.requirement_type is not None:
-            featureconditions[FeatureFlagConstants.REQUIREMENT_TYPE] = self.requirement_type
-
-        return json.dumps(featureconditions, indent=2, ensure_ascii=False)
-
 class FeatureVariant:
     '''
     Feature variants class.
@@ -599,23 +528,23 @@ class FeatureAllocation:
         return json.dumps(featureallocation, indent=2, ensure_ascii=False)
   
 # Feature Flag Helper Functions #
-def custom_serialize_conditions(conditions):
+def custom_serialize_conditions(conditions_dict):
     '''
         Helper Function to serialize Conditions
 
         Args:
-            conditions - FeatureConditions object
+            conditions_dict - Dictionary of {str, Any}
 
         Return:
             JSON serializable Dictionary
     '''
     featurefilterdict = {}
 
-    if hasattr(conditions, FeatureFlagConstants.CLIENT_FILTERS):
-        featurefilterdict[FeatureFlagConstants.CLIENT_FILTERS] = [feature_filter.__dict__ for feature_filter in conditions.client_filters]
-
-    if hasattr(conditions, FeatureFlagConstants.REQUIREMENT_TYPE):
-        featurefilterdict[FeatureFlagConstants.REQUIREMENT_TYPE] = conditions.requirement_type
+    for key, value in conditions_dict.items():
+        if key == FeatureFlagConstants.CLIENT_FILTERS:
+            featurefilterdict[key] = [feature_filter.__dict__ for feature_filter in value]
+        else:
+            featurefilterdict[key] = value
 
     return featurefilterdict
 
@@ -758,7 +687,7 @@ def map_keyvalue_to_featureflag(keyvalue, show_conditions=True):
     conditions = feature_flag_value.conditions
 
     # if conditions["client_filters"] list is not empty, make state conditional
-    filters = conditions.client_filters
+    filters = conditions[FeatureFlagConstants.CLIENT_FILTERS]
 
     if filters and state == FeatureState.ON:
         state = FeatureState.CONDITIONAL
@@ -837,8 +766,31 @@ def map_keyvalue_to_featureflagvalue(keyvalue):
 
         conditions = feature_flag_dict.get(FeatureFlagConstants.CONDITIONS, None)
         if conditions:
-            feature_conditions = FeatureConditions.convert_from_json(feature_name, json.dumps(conditions))
-            feature_flag_dict[FeatureFlagConstants.CONDITIONS] = feature_conditions
+            client_filters = conditions.get(FeatureFlagConstants.CLIENT_FILTERS, [])
+
+            # Convert all filters to FeatureFilter objects
+            client_filters_list = []
+            for client_filter in client_filters:
+                # If there is a filter, it should always have a name
+                # In case it doesn't, ignore this filter
+                lowercase_filter = {k.lower(): v for k, v in client_filter.items()}        
+                name = lowercase_filter.get(FeatureFlagConstants.NAME)
+                if name:
+                    params = lowercase_filter.get(FeatureFlagConstants.FILTER_PARAMETERS, {})
+                    client_filters_list.append(FeatureFilter(name, params))
+                else:
+                    raise ValidationError("Feature filter must contain the %s attribute:\n%s",
+                                   FeatureFlagConstants.NAME,
+                                   json.dumps(client_filter, indent=2, ensure_ascii=False))
+
+            conditions[FeatureFlagConstants.CLIENT_FILTERS] = client_filters_list
+
+            requirement_type = conditions.get(FeatureFlagConstants.REQUIREMENT_TYPE, None)
+            if requirement_type:
+                if requirement_type.lower() not in (FeatureFlagConstants.REQUIREMENT_TYPE_ALL, FeatureFlagConstants.REQUIREMENT_TYPE_ANY):
+                    raise ValidationError(f"Feature '{feature_name}' must have an any/all requirement type.")
+                else:
+                    conditions[FeatureFlagConstants.REQUIREMENT_TYPE] = requirement_type
 
         # Allocation
         allocation = feature_flag_dict.get(FeatureFlagConstants.ALLOCATION, None)

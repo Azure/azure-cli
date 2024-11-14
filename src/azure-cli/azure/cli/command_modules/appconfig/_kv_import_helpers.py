@@ -1,4 +1,3 @@
-
 import io
 import json
 from itertools import chain
@@ -24,7 +23,7 @@ from ._constants import (FeatureFlagConstants, KeyVaultConstants, SearchFilterOp
 from ._diff_utils import KVComparer, print_preview
 from ._utils import is_json_content_type, validate_feature_flag_name, validate_feature_flag_key
 from ._models import (KeyValue)
-from ._featuremodels import (FeatureAllocation, FeatureConditions, FeatureVariant, is_feature_flag, FeatureFlagValue, FeatureManagementReservedKeywords)
+from ._featuremodels import (FeatureAllocation, FeatureFilter, FeatureVariant, is_feature_flag, FeatureFlagValue, FeatureManagementReservedKeywords)
 
 from azure.core.exceptions import HttpResponseError
 
@@ -38,6 +37,7 @@ FEATURE_FLAG_PROPERTIES = {
     FeatureFlagConstants.CONDITIONS,
     FeatureFlagConstants.ALLOCATION,
     FeatureFlagConstants.VARIANTS,
+    FeatureFlagConstants.DISPLAY_NAME,
     FeatureFlagConstants.TELEMETRY}
 
 def __read_with_appropriate_encoding(file_path, format_):
@@ -189,7 +189,7 @@ def __get_legacy_feature_management_schema(legacySchemaFeatureManagementKeyWord,
            if key != FeatureFlagConstants.FEATURE_FLAGS_KEY)
     else:
         return feature_management_section
-    
+
 def  __read_features_from_msfm_schema(feature_flags_list):
     feature_flags = []
     for feature in feature_flags_list:
@@ -205,8 +205,41 @@ def  __read_features_from_msfm_schema(feature_flags_list):
                 description=feature.get(FeatureFlagConstants.DESCRIPTION, None)
             )
 
-            if conditions :=feature.get(FeatureFlagConstants.CONDITIONS, None):
-                new_feature.conditions = FeatureConditions.convert_from_json(feature_id, json.dumps(conditions))
+            if conditions := feature.get(FeatureFlagConstants.CONDITIONS, None):
+                client_filters = conditions.get(FeatureFlagConstants.CLIENT_FILTERS, [])
+
+                # Convert all filters to FeatureFilter objects
+                client_filters_list = []
+                for client_filter in client_filters:
+                    # If there is a filter, it should always have a name
+                    # In case it doesn't, ignore this filter
+                    lowercase_filter = {k.lower(): v for k, v in client_filter.items()}
+                    name = lowercase_filter.get(FeatureFlagConstants.NAME)
+                    if name:
+                        params = lowercase_filter.get(
+                            FeatureFlagConstants.FILTER_PARAMETERS, {}
+                        )
+                        client_filters_list.append(FeatureFilter(name, params))
+                    else:
+                        raise ValidationError(
+                            "Feature filter must contain the %s attribute:\n%s",
+                            FeatureFlagConstants.NAME,
+                            json.dumps(client_filter, indent=2, ensure_ascii=False),
+                        )
+
+                new_feature.conditions[FeatureFlagConstants.CLIENT_FILTERS] = client_filters_list
+
+                requirement_type = conditions.get(
+                    FeatureFlagConstants.REQUIREMENT_TYPE, None
+                )
+                if requirement_type:
+                    if requirement_type.lower() not in (
+                        FeatureFlagConstants.REQUIREMENT_TYPE_ALL,
+                        FeatureFlagConstants.REQUIREMENT_TYPE_ANY,
+                    ):
+                        raise ValidationError(f"Feature '{feature_id}' must have an any/all requirement type.")
+                    else:
+                        new_feature.conditions[FeatureFlagConstants.REQUIREMENT_TYPE] = requirement_type
 
             if allocation := feature.get(FeatureFlagConstants.ALLOCATION, None):
                 new_feature.allocation = FeatureAllocation.convert_from_json(json.dumps(allocation))
@@ -217,7 +250,7 @@ def  __read_features_from_msfm_schema(feature_flags_list):
                     new_variant = FeatureVariant.convert_from_json(json.dumps(variant))
                     if new_variant:
                         new_feature.variants.append(new_variant)
-                
+
             if telemetry := feature.get(FeatureFlagConstants.TELEMETRY, None):
                 new_feature.telemetry = telemetry
 
@@ -466,7 +499,7 @@ def __read_kv_from_app_service(cmd, appservice_account, prefix_to_add="", conten
         return key_values
     except Exception as exception:
         raise CLIError("Failed to read key-values from appservice.\n" + str(exception))
-    
+
 def __validate_import_keyvault_ref(kv):
     if kv and validate_import_key(kv.key):
         try:
@@ -592,7 +625,7 @@ def __delete_configuration_setting_from_config_store(azconfig_client, configurat
             configuration_setting.key, configuration_setting.label, str(exception))
     except Exception as exception:
         raise AzureInternalError(str(exception))
-    
+
 
 def __flatten_key_value(key, value, flattened_data, depth, separator):
     if depth > 1:
