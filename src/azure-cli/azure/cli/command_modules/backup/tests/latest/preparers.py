@@ -21,7 +21,7 @@ class VaultPreparer(AbstractPreparer, SingleValueReplacer):  # pylint: disable=t
                  resource_group_location_parameter_name='resource_group_location',
                  resource_group_parameter_name='resource_group',
                  dev_setting_name='AZURE_CLI_TEST_DEV_BACKUP_ACCT_NAME', soft_delete=True):
-        super(VaultPreparer, self).__init__(name_prefix, 24)
+        super().__init__(name_prefix, 24)
         from azure.cli.core.mock import DummyCli
         self.cli_ctx = DummyCli()
         self.parameter_name = parameter_name
@@ -90,7 +90,7 @@ class VMPreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix='clitest-vm', parameter_name='vm_name',
                  resource_group_location_parameter_name='resource_group_location',
                  resource_group_parameter_name='resource_group', dev_setting_name='AZURE_CLI_TEST_DEV_BACKUP_VM_NAME'):
-        super(VMPreparer, self).__init__(name_prefix, 15)
+        super().__init__(name_prefix, 15)
         from azure.cli.core.mock import DummyCli
         self.cli_ctx = DummyCli()
         self.parameter_name = parameter_name
@@ -201,7 +201,7 @@ class PolicyPreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix='clitest-item', parameter_name='policy_name', vault_parameter_name='vault_name',
                  resource_group_parameter_name='resource_group',
                  instant_rp_days=None):
-        super(PolicyPreparer, self).__init__(name_prefix, 24)
+        super().__init__(name_prefix, 24)
         from azure.cli.core.mock import DummyCli
         self.cli_ctx = DummyCli()
         self.parameter_name = parameter_name
@@ -256,7 +256,7 @@ class RPPreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix='clitest-rp', parameter_name='rp_name', vm_parameter_name='vm_name',
                  vault_parameter_name='vault_name',
                  resource_group_parameter_name='resource_group', dev_setting_name='AZURE_CLI_TEST_DEV_BACKUP_RP_NAME'):
-        super(RPPreparer, self).__init__(name_prefix, 24)
+        super().__init__(name_prefix, 24)
         from azure.cli.core.mock import DummyCli
         self.cli_ctx = DummyCli()
         self.parameter_name = parameter_name
@@ -708,13 +708,13 @@ class AFSRPPreparer(AbstractPreparer, SingleValueReplacer):
 
 class FilePreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix='clitest-file', parameter_name='file_name'):
-        super(FilePreparer, self).__init__(name_prefix, 24)
+        super().__init__(name_prefix, 24)
         self.parameter_name = parameter_name
 
     def create_resource(self, name, **kwargs):
         if not os.environ.get('AZURE_CLI_TEST_DEV_BACKUP_RP_NAME', None):
-            f = open(name, "a")
-            f.close()
+            with open(name, "a") as f:
+                pass
             return {self.parameter_name: name}
         return {self.parameter_name: os.environ.get('AZURE_CLI_TEST_DEV_BACKUP_RP_NAME', None)}
 

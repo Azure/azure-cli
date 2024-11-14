@@ -4,16 +4,15 @@
 # --------------------------------------------------------------------------------------------
 
 import os
-from azure.cli.testsdk import (ScenarioTest)
+from azure.cli.testsdk import ScenarioTest
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 TEST_LOCATION = os.getenv("CLITestLocation") if os.getenv("CLITestLocation") else "eastus"
 
 
 def write_test_file(filename, content):
-    test_file = open(filename, "w", encoding='utf-8')
-    _ = test_file.write(content)
-    test_file.close()
+    with open(filename, "w", encoding='utf-8') as test_file:
+        test_file.write(content)
 
 
 def clean_up_test_file(filename):
