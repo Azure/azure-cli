@@ -2124,7 +2124,12 @@ class AKSManagedClusterContext(BaseAKSContext):
         # normalize
         ip_families = extract_comma_separated_string(ip_families, keep_none=True, default_value=[])
         # try to read the property value corresponding to the parameter from the `mc` object
-        if self.mc and self.mc.network_profile and self.mc.network_profile.ip_families is not None:
+        if (
+            not ip_families and
+            self.mc and
+            self.mc.network_profile and
+            self.mc.network_profile.ip_families is not None
+        ):
             ip_families = self.mc.network_profile.ip_families
 
         # this parameter does not need dynamic completion
@@ -7283,7 +7288,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
         return mc
 
-    def update_ip_families_settings(self, mc: ManagedCluster) -> ManagedCluster:
+    def update_network_profile(self, mc: ManagedCluster) -> ManagedCluster:
         """Update ip families settings for the ManagedCluster object.
 
         :return: the ManagedCluster object
@@ -7293,6 +7298,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         ip_families = self.context.get_ip_families()
         if ip_families:
             mc.network_profile.ip_families = ip_families
+
+        self.update_network_plugin_settings(mc)
         
         return mc
         
@@ -8255,6 +8262,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_windows_profile(mc)
         # update network plugin settings
         mc = self.update_network_plugin_settings(mc)
+        # update network profile settings
+        mc = self.update_network_profile(mc)
         # update aad profile
         mc = self.update_aad_profile(mc)
         # update oidc issuer profile
