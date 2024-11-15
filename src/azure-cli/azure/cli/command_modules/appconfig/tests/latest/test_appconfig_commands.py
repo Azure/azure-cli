@@ -1498,7 +1498,7 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
         self.cmd(
             'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_both_schemas_fm_path}" --format {imported_format} --label {label} -y')
         self.cmd(
-            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_both_schemas_fm_path}" --format {imported_format} --naming-convention {naming_convention} --label {label} -y')
+            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_both_schemas_fm_path}" --format {imported_format} --label {label} -y')
         with open(exported_both_schemas_camel_case_file_path) as json_file:
             exported_camel_case_kvs = json.load(json_file)
         with open(expected_exported_both_schemas_file_path) as json_file:
@@ -1520,7 +1520,7 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
         self.cmd(
             'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_both_schemas_fm_path}" --format {imported_format} --label {label} -y')
         self.cmd(
-            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_both_schemas_fm_path}" --format {imported_format} --naming-convention {naming_convention} --label {label} -y')
+            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_both_schemas_fm_path}" --format {imported_format} --label {label} -y')
         with open(exported_both_schemas_pascal_case_file_path) as json_file:
             exported_pascal_case_kvs = json.load(json_file)
         with open(expected_exported_both_schemas_file_path) as json_file:
@@ -1542,7 +1542,7 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
         self.cmd(
             'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_both_schemas_fm_path}" --format {imported_format} --label {label} -y')
         self.cmd(
-            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_both_schemas_fm_path}" --format {imported_format} --naming-convention {naming_convention} --label {label} -y')
+            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_both_schemas_fm_path}" --format {imported_format} --label {label} -y')
         with open(exported_both_schemas_hyphen_case_file_path) as json_file:
             exported_hyphen_case_kvs = json.load(json_file)
         with open(expected_exported_both_schemas_file_path) as json_file:

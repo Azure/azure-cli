@@ -117,6 +117,7 @@ def __export_features(retrieved_features, naming_convention, compatibility_mode)
     new_ms_featuremanagement_keyword = FeatureManagementReservedKeywords.UNDERSCORE.feature_management
     feature_flags_keyword = FeatureFlagConstants.FEATURE_FLAGS_KEY
     try:
+        compatibility_mode = str(compatibility_mode).lower() in ['true']
         if compatibility_mode:
             feature_reserved_keywords = FeatureManagementReservedKeywords.get_keywords(naming_convention)
             exported_dict = {}
