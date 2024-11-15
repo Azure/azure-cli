@@ -14,7 +14,7 @@ class EventGridCommandsLoader(AzCommandsLoader):
         from azure.cli.core.commands import CliCommandType
         from azure.cli.core.profiles import ResourceType
         eventgrid_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.eventgrid.custom#{}')
-        super(EventGridCommandsLoader, self).__init__(cli_ctx=cli_ctx,
+        super().__init__(cli_ctx=cli_ctx,
                                                       custom_command_type=eventgrid_custom,
                                                       resource_type=ResourceType.MGMT_EVENTGRID)
 

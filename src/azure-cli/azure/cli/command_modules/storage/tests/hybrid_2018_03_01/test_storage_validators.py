@@ -23,7 +23,7 @@ from azure.cli.command_modules.storage._validators import get_source_file_or_blo
 
 class MockCLI(CLI):
     def __init__(self):
-        super(MockCLI, self).__init__(cli_name='mock_cli', config_dir=GLOBAL_CONFIG_DIR,
+        super().__init__(cli_name='mock_cli', config_dir=GLOBAL_CONFIG_DIR,
                                       config_env_var_prefix=ENV_VAR_PREFIX, commands_loader_cls=MockLoader)
         self.cloud = get_active_cloud(self)
 

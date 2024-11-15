@@ -18,7 +18,7 @@ class BatchCommandsLoader(AzCommandsLoader):
         batch_custom = CliCommandType(
             operations_tmpl='azure.cli.command_modules.batch.custom#{}',
             exception_handler=batch_exception_handler)
-        super(BatchCommandsLoader, self).__init__(cli_ctx=cli_ctx,
+        super().__init__(cli_ctx=cli_ctx,
                                                   custom_command_type=batch_custom,
                                                   command_group_cls=BatchCommandGroup,
                                                   resource_type=ResourceType.MGMT_BATCH)

@@ -50,7 +50,7 @@ Here are the base commands:
 # Most of these methods override print methods in CLIHelp
 class CLIPrintMixin(CLIHelp):
     def _print_header(self, cli_name, help_file):
-        super(CLIPrintMixin, self)._print_header(cli_name, help_file)
+        super()._print_header(cli_name, help_file)
 
         links = help_file.links
         if links:
@@ -61,7 +61,7 @@ class CLIPrintMixin(CLIHelp):
 
     def _print_detailed_help(self, cli_name, help_file):
         CLIPrintMixin._print_extensions_msg(help_file)
-        super(CLIPrintMixin, self)._print_detailed_help(cli_name, help_file)
+        super()._print_detailed_help(cli_name, help_file)
         self._print_az_find_message(help_file.command)
 
     @staticmethod
@@ -131,12 +131,11 @@ class CLIPrintMixin(CLIHelp):
 class AzCliHelp(CLIPrintMixin, CLIHelp):
 
     def __init__(self, cli_ctx):
-        super(AzCliHelp, self).__init__(cli_ctx,
-                                        privacy_statement=PRIVACY_STATEMENT,
-                                        welcome_message=WELCOME_MESSAGE,
-                                        command_help_cls=CliCommandHelpFile,
-                                        group_help_cls=CliGroupHelpFile,
-                                        help_cls=CliHelpFile)
+        super().__init__(cli_ctx, privacy_statement=PRIVACY_STATEMENT,
+                         welcome_message=WELCOME_MESSAGE,
+                         command_help_cls=CliCommandHelpFile,
+                         group_help_cls=CliGroupHelpFile,
+                         help_cls=CliHelpFile)
         from knack.help import HelpObject
 
         # TODO: This workaround is used to avoid a bizarre bug in Python 2.7. It
@@ -247,7 +246,7 @@ class CliHelpFile(KnackHelpFile):
 
     def __init__(self, help_ctx, delimiters):
         # Each help file (for a command or group) has a version denoting the source of its data.
-        super(CliHelpFile, self).__init__(help_ctx, delimiters)
+        super().__init__(help_ctx, delimiters)
         self.links = []
 
         from knack.deprecation import resolve_deprecate_info, ImplicitDeprecated, Deprecated
@@ -376,7 +375,7 @@ class CliGroupHelpFile(KnackGroupHelpFile, CliHelpFile):
 class CliCommandHelpFile(KnackCommandHelpFile, CliHelpFile):
 
     def __init__(self, help_ctx, delimiters, parser):
-        super(CliCommandHelpFile, self).__init__(help_ctx, delimiters, parser)
+        super().__init__(help_ctx, delimiters, parser)
         self.type = 'command'
         self.command_source = getattr(parser, 'command_source', None)
 
@@ -409,7 +408,7 @@ class CliCommandHelpFile(KnackCommandHelpFile, CliHelpFile):
             param.__class__ = HelpParameter
 
     def _load_from_data(self, data):
-        super(CliCommandHelpFile, self)._load_from_data(data)
+        super()._load_from_data(data)
 
         if isinstance(data, str) or not self.parameters or not data.get('parameters'):
             return
@@ -433,7 +432,7 @@ class ArgumentGroupRegistry(KnackArgumentGroupRegistry):  # pylint: disable=too-
 
     def __init__(self, group_list):
 
-        super(ArgumentGroupRegistry, self).__init__(group_list)
+        super().__init__(group_list)
         self.priorities = {
             None: 0,
             'Resource Id Arguments': 1,
@@ -454,7 +453,7 @@ class HelpExample(KnackHelpExample):  # pylint: disable=too-few-public-methods
         # Old attributes
         _data['name'] = _data.get('name', '')
         _data['text'] = _data.get('text', '')
-        super(HelpExample, self).__init__(_data)
+        super().__init__(_data)
 
         self.name = _data.get('summary', '') if _data.get('summary', '') else self.name
         self.text = _data.get('command', '') if _data.get('command', '') else self.text
@@ -484,10 +483,10 @@ class HelpExample(KnackHelpExample):  # pylint: disable=too-few-public-methods
 class HelpParameter(KnackHelpParameter):  # pylint: disable=too-many-instance-attributes
 
     def __init__(self, **kwargs):
-        super(HelpParameter, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
     def update_from_data(self, data):
-        super(HelpParameter, self).update_from_data(data)
+        super().update_from_data(data)
         # original help.py value_sources are strings, update command strings to value-source dict
         if self.value_sources:
             self.value_sources = [str_or_dict if isinstance(str_or_dict, dict) else {"link": {"command": str_or_dict}}

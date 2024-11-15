@@ -17,7 +17,7 @@ class BotServiceCommandsLoader(AzCommandsLoader):
         custom_type = CliCommandType(
             operations_tmpl='azure.cli.command_modules.botservice.custom#{}',
             client_factory=get_botservice_management_client)
-        super(BotServiceCommandsLoader, self).__init__(cli_ctx=cli_ctx,
+        super().__init__(cli_ctx=cli_ctx,
                                                        custom_command_type=custom_type,
                                                        resource_type=ResourceType.MGMT_BOTSERVICE,
                                                        suppress_extension=ModExtensionSuppress(

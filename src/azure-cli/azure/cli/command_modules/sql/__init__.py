@@ -14,7 +14,7 @@ class SqlCommandsLoader(AzCommandsLoader):
         from azure.cli.core.commands import CliCommandType
         from azure.cli.core.profiles import ResourceType
         sql_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.sql.custom#{}')
-        super(SqlCommandsLoader, self).__init__(cli_ctx=cli_ctx,
+        super().__init__(cli_ctx=cli_ctx,
                                                 custom_command_type=sql_custom,
                                                 resource_type=ResourceType.MGMT_SQL)
 

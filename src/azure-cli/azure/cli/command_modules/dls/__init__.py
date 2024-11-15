@@ -15,7 +15,7 @@ class DataLakeStoreCommandsLoader(AzCommandsLoader):
         from azure.cli.core.commands import CliCommandType
         from azure.cli.core.profiles import ResourceType
         dls_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.dls.custom#{}')
-        super(DataLakeStoreCommandsLoader, self).__init__(cli_ctx=cli_ctx,
+        super().__init__(cli_ctx=cli_ctx,
                                                           resource_type=ResourceType.MGMT_DATALAKE_STORE,
                                                           custom_command_type=dls_custom)
 

@@ -17,7 +17,7 @@ class MapsCommandsLoader(AzCommandsLoader):
         custom_type = CliCommandType(
             operations_tmpl='azure.cli.command_modules.maps.custom#{}',
             client_factory=cf_accounts)
-        super(MapsCommandsLoader, self).__init__(cli_ctx=cli_ctx,
+        super().__init__(cli_ctx=cli_ctx,
                                                  custom_command_type=custom_type,
                                                  resource_type=ResourceType.MGMT_MAPS)
 

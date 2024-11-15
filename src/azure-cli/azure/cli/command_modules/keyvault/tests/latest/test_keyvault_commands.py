@@ -900,7 +900,7 @@ class RoleDefinitionNameReplacer(RecordingProcessor):
 class KeyVaultHSMRoleDefintionTest(ScenarioTest):
 
     def __init__(self, method_name):
-        super(KeyVaultHSMRoleDefintionTest, self).__init__(
+        super().__init__(
             method_name,
             recording_processors=[RoleDefinitionNameReplacer()],
             replay_processors=[RoleDefinitionNameReplacer()]

@@ -12,7 +12,7 @@ class ACRCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
         from azure.cli.core.profiles import ResourceType
-        super(ACRCommandsLoader, self).__init__(cli_ctx=cli_ctx,
+        super().__init__(cli_ctx=cli_ctx,
                                                 resource_type=ResourceType.MGMT_CONTAINERREGISTRY,
                                                 operation_group='webhooks')
 

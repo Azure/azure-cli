@@ -17,7 +17,7 @@ class ServicebusCommandsLoader(AzCommandsLoader):
         from azure.cli.core.commands import CliCommandType
         from azure.cli.core.profiles import ResourceType
         servicebus_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.servicebus.custom#{}')
-        super(ServicebusCommandsLoader, self).__init__(cli_ctx=cli_ctx, custom_command_type=servicebus_custom,
+        super().__init__(cli_ctx=cli_ctx, custom_command_type=servicebus_custom,
                                                        resource_type=ResourceType.MGMT_SERVICEBUS,
                                                        suppress_extension=ModExtensionSuppress(__name__, 'servicebus', '0.0.1',
                                                                                                reason='These commands are now in the CLI.',

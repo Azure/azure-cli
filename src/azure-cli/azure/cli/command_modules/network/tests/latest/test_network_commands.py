@@ -5907,7 +5907,7 @@ class NetworkActiveActiveVnetScenarioTest(ScenarioTest):  # pylint: disable=too-
 
     def __init__(self, method_name):
         self.sas_replacer = StorageAccountSASReplacer()
-        super(NetworkActiveActiveVnetScenarioTest, self).__init__(method_name, recording_processors=[
+        super().__init__(method_name, recording_processors=[
             self.sas_replacer
         ])
 
@@ -5981,7 +5981,7 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
 
     def __init__(self, method_name):
         self.sas_replacer = StorageAccountSASReplacer()
-        super(NetworkVpnGatewayScenarioTest, self).__init__(method_name, recording_processors=[
+        super().__init__(method_name, recording_processors=[
             self.sas_replacer
         ])
 
@@ -6672,7 +6672,7 @@ class NetworkVirtualNetworkGatewayNatRule(ScenarioTest):
 class NetworkSecurityPartnerProviderScenarioTest(ScenarioTest):
     def __init__(self, method_name, config_file=None, recording_dir=None, recording_name=None, recording_processors=None,
                  replay_processors=None, recording_patches=None, replay_patches=None):
-        super(NetworkSecurityPartnerProviderScenarioTest, self).__init__(method_name)
+        super().__init__(method_name)
         self.cmd('extension add -n virtual-wan')
 
     @unittest.skip('Decouple with virtual-wan bump API version')
@@ -6712,13 +6712,13 @@ class NetworkSecurityPartnerProviderScenarioTest(ScenarioTest):
 
 class NetworkVirtualApplianceScenarioTest(ScenarioTest):
     def setUp(self):
-        super(NetworkVirtualApplianceScenarioTest, self).setUp()
+        super().setUp()
         self.cmd('extension add -n virtual-wan')
 
     def tearDown(self):
         # avoid influence other test when parallel run
         # self.cmd('extension remove -n virtual-wan')
-        super(NetworkVirtualApplianceScenarioTest, self).tearDown()
+        super().tearDown()
 
     @unittest.skip('GatewayError')
     @ResourceGroupPreparer(location='westcentralus', name_prefix='test_network_virtual_appliance')

@@ -14,7 +14,7 @@ class BatchAiCommandsLoader(AzCommandsLoader):
         from azure.cli.core.commands import CliCommandType
         from azure.cli.core.profiles import ResourceType
         batchai_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.batchai.custom#{}')
-        super(BatchAiCommandsLoader, self).__init__(cli_ctx=cli_ctx,
+        super().__init__(cli_ctx=cli_ctx,
                                                     resource_type=ResourceType.MGMT_BATCHAI,
                                                     custom_command_type=batchai_custom)
 

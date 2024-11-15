@@ -12,7 +12,7 @@ class ManagedServicesCommandsLoader(AzCommandsLoader):
     def __init__(self, cli_ctx=None):
         from azure.cli.core.commands import CliCommandType
         managedservices_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.managedservices.custom#{}')
-        super(ManagedServicesCommandsLoader, self).__init__(cli_ctx=cli_ctx,
+        super().__init__(cli_ctx=cli_ctx,
                                                             custom_command_type=managedservices_custom)
 
     def load_command_table(self, args):

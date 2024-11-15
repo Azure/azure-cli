@@ -15,7 +15,7 @@ class ResourceCommandsLoader(AzCommandsLoader):
         from azure.cli.core import ModExtensionSuppress
         from azure.cli.core.profiles import ResourceType
         resource_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.resource.custom#{}')
-        super(ResourceCommandsLoader, self).__init__(cli_ctx=cli_ctx,
+        super().__init__(cli_ctx=cli_ctx,
                                                      resource_type=ResourceType.MGMT_RESOURCE_RESOURCES,
                                                      custom_command_type=resource_custom,
                                                      suppress_extension=ModExtensionSuppress(

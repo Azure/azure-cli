@@ -98,7 +98,7 @@ class CommandOperation(BaseCommandOperation):
     def __init__(self, command_loader, op_path, **merged_kwargs):
         if not isinstance(op_path, str):
             raise TypeError("Operation must be a string. Got '{}'".format(op_path))
-        super(CommandOperation, self).__init__(command_loader, **merged_kwargs)
+        super().__init__(command_loader, **merged_kwargs)
         self.op_path = op_path
 
     def handler(self, command_args):
@@ -151,7 +151,7 @@ class GenericUpdateCommandOperation(BaseCommandOperation):     # pylint: disable
             raise TypeError("Setter operation must be a string. Got '{}'".format(setter_op_path))
         if custom_function_op_path and not isinstance(custom_function_op_path, str):
             raise TypeError("Custom function operation must be a string. Got '{}'".format(custom_function_op_path))
-        super(GenericUpdateCommandOperation, self).__init__(command_loader, **merged_kwargs)
+        super().__init__(command_loader, **merged_kwargs)
 
         self.getter_op_path = getter_op_path
         self.setter_op_path = setter_op_path
@@ -335,7 +335,7 @@ class ShowCommandOperation(BaseCommandOperation):
     def __init__(self, command_loader, op_path, **merged_kwargs):
         if not isinstance(op_path, str):
             raise TypeError("operation must be a string. Got '{}'".format(op_path))
-        super(ShowCommandOperation, self).__init__(command_loader, **merged_kwargs)
+        super().__init__(command_loader, **merged_kwargs)
         self.op_path = op_path
 
     def handler(self, command_args):
@@ -378,7 +378,7 @@ class WaitCommandOperation(BaseCommandOperation):
     def __init__(self, command_loader, op_path, **merged_kwargs):
         if not isinstance(op_path, str):
             raise TypeError("operation must be a string. Got '{}'".format(op_path))
-        super(WaitCommandOperation, self).__init__(command_loader, **merged_kwargs)
+        super().__init__(command_loader, **merged_kwargs)
         self.op_path = op_path
 
     def handler(self, command_args):    # pylint: disable=too-many-statements, too-many-locals

@@ -713,7 +713,7 @@ def parse_error_message(error_message, response):
 
 class RegistryException(CLIError):
     def __init__(self, message, status_code):
-        super(RegistryException, self).__init__(message)
+        super().__init__(message)
         self.status_code = status_code
 
 

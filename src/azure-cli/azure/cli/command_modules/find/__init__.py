@@ -13,7 +13,7 @@ class FindCommandsLoader(AzCommandsLoader):
         from azure.cli.core.commands import CliCommandType
         from azure.cli.core import ModExtensionSuppress
         find_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.find.custom#{}')
-        super(FindCommandsLoader, self).__init__(cli_ctx=cli_ctx,
+        super().__init__(cli_ctx=cli_ctx,
                                                  custom_command_type=find_custom,
                                                  suppress_extension=ModExtensionSuppress(
                                                      __name__, 'find', '0.3.0',

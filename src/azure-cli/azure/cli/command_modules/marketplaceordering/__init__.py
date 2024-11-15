@@ -20,7 +20,7 @@ class MarketplaceOrderingAgreementsCommandsLoader(AzCommandsLoader):
         marketplaceordering_custom = CliCommandType(
             operations_tmpl='azure.cli.command_modules.marketplaceordering.custom#{}',
             client_factory=cf_marketplaceordering_cl)
-        parent = super(MarketplaceOrderingAgreementsCommandsLoader, self)
+        parent = super()
         parent.__init__(cli_ctx=cli_ctx, custom_command_type=marketplaceordering_custom)
 
     def load_command_table(self, args):

@@ -17,7 +17,7 @@ class PrivateDnsCommandsLoader(AzCommandsLoader):
         from azure.cli.core import ModExtensionSuppress
         from azure.cli.core.commands import CliCommandType
         privatedns_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.privatedns.custom#{}')
-        super(PrivateDnsCommandsLoader, self).__init__(cli_ctx=cli_ctx,
+        super().__init__(cli_ctx=cli_ctx,
                                                        resource_type=ResourceType.MGMT_NETWORK_PRIVATEDNS,
                                                        custom_command_type=privatedns_custom,
                                                        suppress_extension=[

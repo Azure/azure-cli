@@ -245,7 +245,7 @@ class TestVMSSCreateDefaultVnet(unittest.TestCase):
 
 class TestVMCreateDefaultStorageAccount(unittest.TestCase):
     def __init__(self, methodName):
-        super(TestVMCreateDefaultStorageAccount, self).__init__(methodName)
+        super().__init__(methodName)
         self.ns = None
 
     def _set_ns(self, rg, location=None, tier='Standard'):

@@ -15,7 +15,7 @@ class AppserviceCommandsLoader(AzCommandsLoader):
         from azure.cli.core.commands import CliCommandType
         from azure.cli.core.profiles import ResourceType
         appservice_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.appservice.custom#{}')
-        super(AppserviceCommandsLoader, self).__init__(cli_ctx=cli_ctx,
+        super().__init__(cli_ctx=cli_ctx,
                                                        custom_command_type=appservice_custom,
                                                        resource_type=ResourceType.MGMT_APPSERVICE)
 

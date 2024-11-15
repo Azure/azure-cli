@@ -16,7 +16,7 @@ class ContainerappCommandsLoader(AzCommandsLoader):
         containerapp_custom = CliCommandType(
             operations_tmpl='azure.cli.command_modules.containerapp.custom#{}',
             client_factory=None)
-        super(ContainerappCommandsLoader, self).__init__(cli_ctx=cli_ctx,
+        super().__init__(cli_ctx=cli_ctx,
                                                          custom_command_type=containerapp_custom)
 
     def load_command_table(self, args):

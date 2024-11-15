@@ -14,7 +14,7 @@ class ContainerCommandsLoader(AzCommandsLoader):
         from azure.cli.core.commands import CliCommandType
         from azure.cli.core.profiles import ResourceType
         custom_type = CliCommandType(operations_tmpl='azure.cli.command_modules.container.custom#{}')
-        super(ContainerCommandsLoader, self).__init__(cli_ctx=cli_ctx,
+        super().__init__(cli_ctx=cli_ctx,
                                                       custom_command_type=custom_type,
                                                       resource_type=ResourceType.MGMT_CONTAINERINSTANCE)
 

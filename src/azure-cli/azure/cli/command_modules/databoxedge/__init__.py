@@ -23,7 +23,7 @@ class DataBoxEdgeManagementClientCommandsLoader(AzCommandsLoader):
         from azure.cli.core.profiles import ResourceType
         databoxedge_custom = CliCommandType(
             operations_tmpl='azure.cli.command_modules.databoxedge.custom#{}')
-        parent = super(DataBoxEdgeManagementClientCommandsLoader, self)
+        parent = super()
         parent.__init__(cli_ctx=cli_ctx, custom_command_type=databoxedge_custom,
                         resource_type=ResourceType.MGMT_DATABOXEDGE)
 

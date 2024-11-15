@@ -17,7 +17,7 @@ class SqlVmCommandsLoader(AzCommandsLoader):
         from azure.cli.core.profiles import ResourceType
 
         sqlvm_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.sqlvm.custom#{}')
-        super(SqlVmCommandsLoader, self).__init__(cli_ctx=cli_ctx,
+        super().__init__(cli_ctx=cli_ctx,
                                                   custom_command_type=sqlvm_custom,
                                                   resource_type=ResourceType.MGMT_SQLVM,
                                                   suppress_extension=ModExtensionSuppress(__name__, 'sqlvm-preview', '0.1.0',

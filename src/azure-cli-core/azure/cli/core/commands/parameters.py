@@ -335,7 +335,7 @@ class AzArgumentContext(ArgumentsContext):
 
     def __init__(self, command_loader, scope, **kwargs):
         from azure.cli.core.commands import _merge_kwargs as merge_kwargs
-        super(AzArgumentContext, self).__init__(command_loader, scope)
+        super().__init__(command_loader, scope)
         self.scope = scope  # this is called "command" in knack, but that is not an accurate name
         self.group_kwargs = merge_kwargs(kwargs, command_loader.module_kwargs, CLI_PARAM_KWARGS)
 
@@ -363,7 +363,7 @@ class AzArgumentContext(ArgumentsContext):
         arg_registry = self.command_loader.argument_registry
         match = arg_registry.arguments[scope].get(dest, {})
         if not match:
-            super(AzArgumentContext, self).argument(dest, arg_type=ignore_type)
+            super().argument(dest, arg_type=ignore_type)
 
     # pylint: disable=arguments-differ
     def argument(self, dest, arg_type=None, **kwargs):
@@ -384,7 +384,7 @@ class AzArgumentContext(ArgumentsContext):
                                                      min_api=min_api,
                                                      max_api=max_api,
                                                      operation_group=operation_group):
-            super(AzArgumentContext, self).argument(dest, **merged_kwargs)
+            super().argument(dest, **merged_kwargs)
         else:
             self._ignore_if_not_registered(dest)
 
@@ -405,7 +405,7 @@ class AzArgumentContext(ArgumentsContext):
                                                      min_api=min_api,
                                                      max_api=max_api,
                                                      operation_group=operation_group):
-            super(AzArgumentContext, self).positional(dest, **merged_kwargs)
+            super().positional(dest, **merged_kwargs)
         else:
             self._ignore_if_not_registered(dest)
 
@@ -473,7 +473,7 @@ class AzArgumentContext(ArgumentsContext):
             return
 
         for arg in args:
-            super(AzArgumentContext, self).ignore(arg)
+            super().ignore(arg)
 
     def extra(self, dest, arg_type=None, **kwargs):
 

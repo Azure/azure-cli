@@ -18,7 +18,7 @@ class EventhubCommandsLoader(AzCommandsLoader):
         from azure.cli.core.commands import CliCommandType
         from azure.cli.core.profiles import ResourceType
         eventhub_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.eventhubs.custom#{}')
-        super(EventhubCommandsLoader, self).__init__(cli_ctx=cli_ctx,
+        super().__init__(cli_ctx=cli_ctx,
                                                      custom_command_type=eventhub_custom,
                                                      resource_type=ResourceType.MGMT_EVENTHUB,
                                                      suppress_extension=ModExtensionSuppress(__name__, 'eventhubs', '0.0.1',
