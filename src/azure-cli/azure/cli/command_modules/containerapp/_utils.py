@@ -1584,7 +1584,7 @@ def set_managed_identity(cmd, resource_group_name, containerapp_def, system_assi
         containerapp_def["identity"] = {}
         containerapp_def["identity"]["type"] = "None"
 
-    if assign_system_identity and containerapp_def["identity"]["type"].__contains__("SystemAssigned"):
+    if assign_system_identity and (containerapp_def["identity"]["type"] in "SystemAssigned"):
         logger.warning("System identity is already assigned to containerapp")
 
     # Assign correct type

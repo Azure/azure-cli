@@ -229,7 +229,7 @@ class UtilsTest(unittest.TestCase):
         try:
             blob, thumbprint = load_cert_file(pfx_file, testpassword)
         except CLIInternalError as e:
-            self.assertTrue(e.error_msg.error_msg.__contains__('Invalid password or PKCS12 data'))
+            self.assertTrue(e.error_msg.error_msg in 'Invalid password or PKCS12 data')
         self.assertEqual('', thumbprint)
 
         pfx_file = os.path.join(TEST_DIR, 'data', 'cert2.pfx')

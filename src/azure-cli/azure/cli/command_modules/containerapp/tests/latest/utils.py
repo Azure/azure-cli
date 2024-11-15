@@ -17,7 +17,7 @@ def prepare_containerapp_env_for_app_e2e_tests(test_cls):
     try:
         managed_env = test_cls.cmd('containerapp env show -g {} -n {}'.format(rg_name, env_name)).get_output_in_json()
     except CLIInternalError as e:
-        if e.error_msg.__contains__('ResourceGroupNotFound') or e.error_msg.__contains__('ResourceNotFound'):
+        if (e.error_msg in 'ResourceGroupNotFound') or (e.error_msg in 'ResourceNotFound'):
             test_cls.cmd(f'group create -n {rg_name}')
             test_cls.cmd(f'containerapp env create -g {rg_name} -n {env_name} --logs-destination none')
             managed_env = test_cls.cmd('containerapp env show -g {} -n {}'.format(rg_name, env_name)).get_output_in_json()

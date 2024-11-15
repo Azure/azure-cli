@@ -177,7 +177,7 @@ def render(data, container, container_url, testdata, USER_REPO, USER_BRANCH, COM
                 # elif 'sequential' in name:
                 #     display_name = 'sequential'
                 try:
-                    html = requests.get(url).content.__str__()
+                    html = str(requests.get(url).content)
                     pattern = re.compile('\\d+ tests ran in')
                     match = pattern.search(html)
                     number = match.group().split()[0]
