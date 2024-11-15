@@ -19,8 +19,8 @@ class CognitiveServicesCommandsLoader(AzCommandsLoader):
             operations_tmpl='azure.cli.command_modules.cognitiveservices.custom#{}',
             client_factory=cf_accounts)
         super().__init__(cli_ctx=cli_ctx,
-                                                              custom_command_type=custom_type,
-                                                              resource_type=ResourceType.MGMT_COGNITIVESERVICES)
+                         custom_command_type=custom_type,
+                         resource_type=ResourceType.MGMT_COGNITIVESERVICES)
 
     def load_command_table(self, args):
         from azure.cli.command_modules.cognitiveservices.commands import load_command_table

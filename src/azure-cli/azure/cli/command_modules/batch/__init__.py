@@ -19,9 +19,9 @@ class BatchCommandsLoader(AzCommandsLoader):
             operations_tmpl='azure.cli.command_modules.batch.custom#{}',
             exception_handler=batch_exception_handler)
         super().__init__(cli_ctx=cli_ctx,
-                                                  custom_command_type=batch_custom,
-                                                  command_group_cls=BatchCommandGroup,
-                                                  resource_type=ResourceType.MGMT_BATCH)
+                         custom_command_type=batch_custom,
+                         command_group_cls=BatchCommandGroup,
+                         resource_type=ResourceType.MGMT_BATCH)
         self.module_name = __name__
 
     def load_command_table(self, args):

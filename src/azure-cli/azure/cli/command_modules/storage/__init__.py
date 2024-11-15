@@ -16,10 +16,10 @@ class StorageCommandsLoader(AzCommandsLoader):
         from azure.cli.core.commands import CliCommandType
         storage_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.storage.custom#{}')
         super().__init__(cli_ctx=cli_ctx,
-                                                    resource_type=ResourceType.DATA_STORAGE,
-                                                    custom_command_type=storage_custom,
-                                                    command_group_cls=StorageCommandGroup,
-                                                    argument_context_cls=StorageArgumentContext)
+                         resource_type=ResourceType.DATA_STORAGE,
+                         custom_command_type=storage_custom,
+                         command_group_cls=StorageCommandGroup,
+                         argument_context_cls=StorageArgumentContext)
 
     def load_command_table(self, args):
         from azure.cli.command_modules.storage.commands import load_command_table
@@ -48,10 +48,10 @@ class AzureStackStorageCommandsLoader(AzCommandsLoader):
 
         storage_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.storage.custom#{}')
         super().__init__(cli_ctx=cli_ctx,
-                                                              resource_type=ResourceType.DATA_STORAGE,
-                                                              custom_command_type=storage_custom,
-                                                              command_group_cls=AzureStackStorageCommandGroup,
-                                                              argument_context_cls=StorageArgumentContext)
+                         resource_type=ResourceType.DATA_STORAGE,
+                         custom_command_type=storage_custom,
+                         command_group_cls=AzureStackStorageCommandGroup,
+                         argument_context_cls=StorageArgumentContext)
 
     def load_command_table(self, args):
         super().load_command_table(args)

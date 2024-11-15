@@ -15,8 +15,8 @@ class IoTCommandsLoader(AzCommandsLoader):
         from azure.cli.core.profiles import ResourceType
         iot_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.iot.custom#{}')
         super().__init__(cli_ctx=cli_ctx,
-                                                custom_command_type=iot_custom,
-                                                resource_type=ResourceType.MGMT_IOTHUB)
+                         custom_command_type=iot_custom,
+                         resource_type=ResourceType.MGMT_IOTHUB)
 
     def load_command_table(self, args):
         from azure.cli.command_modules.iot.commands import load_command_table

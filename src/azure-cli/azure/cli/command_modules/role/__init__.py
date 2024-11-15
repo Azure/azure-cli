@@ -16,9 +16,9 @@ class RoleCommandsLoader(AzCommandsLoader):
         from azure.cli.core.commands import CliCommandType
         role_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.role.custom#{}')
         super().__init__(cli_ctx=cli_ctx,
-                                                 resource_type=ResourceType.MGMT_AUTHORIZATION,
-                                                 operation_group='role_assignments',
-                                                 custom_command_type=role_custom)
+                         resource_type=ResourceType.MGMT_AUTHORIZATION,
+                         operation_group='role_assignments',
+                         custom_command_type=role_custom)
 
     def load_command_table(self, args):
         from azure.cli.command_modules.role.commands import load_command_table

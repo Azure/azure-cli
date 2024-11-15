@@ -16,12 +16,12 @@ class ResourceCommandsLoader(AzCommandsLoader):
         from azure.cli.core.profiles import ResourceType
         resource_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.resource.custom#{}')
         super().__init__(cli_ctx=cli_ctx,
-                                                     resource_type=ResourceType.MGMT_RESOURCE_RESOURCES,
-                                                     custom_command_type=resource_custom,
-                                                     suppress_extension=ModExtensionSuppress(
-                                                         __name__, 'managementgroups', '0.1.0',
-                                                         reason='The management groups commands are now in CLI.',
-                                                         recommend_remove=True))
+                         resource_type=ResourceType.MGMT_RESOURCE_RESOURCES,
+                         custom_command_type=resource_custom,
+                         suppress_extension=ModExtensionSuppress(
+                             __name__, 'managementgroups', '0.1.0',
+                             reason='The management groups commands are now in CLI.',
+                             recommend_remove=True))
 
     def load_command_table(self, args):
         from azure.cli.command_modules.resource.commands import load_command_table
