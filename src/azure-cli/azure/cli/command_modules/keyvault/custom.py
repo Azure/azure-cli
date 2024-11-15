@@ -1592,7 +1592,7 @@ def add_certificate_contact(cmd, client, email, name=None, phone=None):
     except ResourceNotFoundError:
         contacts = []
     contact = CertificateContact(email=email, name=name, phone=phone)
-    if any((x for x in contacts if x.email == email)):
+    if any(x for x in contacts if x.email == email):
         raise CLIError("contact '{}' already exists".format(email))
     contacts.append(contact)
     return client.set_contacts(contacts)
@@ -1646,7 +1646,7 @@ def add_certificate_issuer_admin(cmd, client, issuer_name, email, first_name=Non
                                               mod='_models')
     issuer = client.get_issuer(issuer_name)
     admins = issuer.admin_contacts
-    if any((x for x in admins if x.email == email)):
+    if any(x for x in admins if x.email == email):
         raise CLIError("admin '{}' already exists".format(email))
     new_admin = AdministratorContact(first_name=first_name, last_name=last_name, email=email, phone=phone)
     admins.append(new_admin)

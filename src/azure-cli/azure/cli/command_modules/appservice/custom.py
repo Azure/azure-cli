@@ -929,9 +929,9 @@ def validate_zip_deploy_app_setting_exists(cmd, resource_group_name, name, slot=
             storage_connection = str(keyval['value'])
 
     if storage_connection is None:
-        raise ValidationError(('The Azure CLI does not support this deployment path. Please '
+        raise ValidationError('The Azure CLI does not support this deployment path. Please '
                                'configure the app to deploy from a remote package using the steps here: '
-                               'https://aka.ms/deployfromurl'))
+                               'https://aka.ms/deployfromurl')
 
 
 def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):

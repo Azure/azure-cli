@@ -27,7 +27,7 @@ def _bytes_to_friendly_string(b):
     unit = next(u for u in _units if (b % u[0]) == 0)
 
     # Format the value with the chosen unit
-    return str((b // unit[0])) + unit[1]
+    return str(b // unit[0]) + unit[1]
 
 
 class LongRunningOperationResultTransform(LongRunningOperation):  # pylint: disable=too-few-public-methods

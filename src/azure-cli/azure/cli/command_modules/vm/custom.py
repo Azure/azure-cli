@@ -1504,7 +1504,7 @@ def open_vm_port(cmd, resource_group_name, vm_name, port, priority=900, network_
 
     # update the NSG with the new rule to allow inbound traffic
 
-    rule_name = 'open-port-all' if port == '*' else 'open-port-{}'.format((port.replace(',', '_')))
+    rule_name = 'open-port-all' if port == '*' else 'open-port-{}'.format(port.replace(',', '_'))
 
     # use portranges if multiple ports are entered
     if "," not in port:
@@ -2590,7 +2590,7 @@ def _build_nic_list(cmd, nic_ids):
                 'name': name,
                 'resource_group': rg
             })
-            nic_list.append((NetworkInterfaceReference(id=nic['id'], primary=False)))
+            nic_list.append(NetworkInterfaceReference(id=nic['id'], primary=False))
     return nic_list
 
 

@@ -1112,7 +1112,7 @@ def _validate_vm_nic_delete_option(namespace):
     if not namespace.nics and namespace.nic_delete_option:
         if len(namespace.nic_delete_option) == 1 and len(namespace.nic_delete_option[0].split('=')) == 1:  # pylint: disable=line-too-long
             namespace.nic_delete_option = namespace.nic_delete_option[0]
-        elif len(namespace.nic_delete_option) > 1 or any((len(delete_option.split('=')) > 1 for delete_option in namespace.nic_delete_option)):  # pylint: disable=line-too-long
+        elif len(namespace.nic_delete_option) > 1 or any(len(delete_option.split('=')) > 1 for delete_option in namespace.nic_delete_option):  # pylint: disable=line-too-long
             from azure.cli.core.parser import InvalidArgumentValueError
             raise InvalidArgumentValueError("incorrect usage: Cannot specify individual delete option when no nic is "
                                             "specified. Either specify a list of nics and their delete option like: "
