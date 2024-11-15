@@ -21,11 +21,11 @@ class BotServiceCommandsLoader(AzCommandsLoader):
                          custom_command_type=custom_type,
                          resource_type=ResourceType.MGMT_BOTSERVICE,
                          suppress_extension=ModExtensionSuppress(
-                            __name__,
-                            'botservice',
-                            '0.4.3',
-                            reason='These commands and functionality are now in the core CLI.',
-                            recommend_remove=True))
+                                __name__,
+                                'botservice',
+                                '0.4.3',
+                                reason='These commands and functionality are now in the core CLI.',
+                                recommend_remove=True))
 
     def load_command_table(self, args):
         from azure.cli.command_modules.botservice.commands import load_command_table
