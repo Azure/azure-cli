@@ -91,7 +91,7 @@ def load_arguments(self, _):
             c.argument('sql_admin_login_password', options_list=['--sql-admin-login-password', '-p'],
                        help='The sql administrator login password.')
             c.argument('tags', arg_type=tags_type)
-            c.argument('allowed_aad_tenant_ids', options_list=['--allowed-tenant-ids'], nargs='+', help="The approved Azure AD tenants which outbound data traffic allowed to. The Azure AD tenant of the current user will be included by default. Use ""(\'""\' in PowerShell) to disable all allowed tenant ids.")
+            c.argument('allowed_aad_tenant_ids', options_list=['--allowed-tenant-ids'], nargs='+', help="The approved Azure AD tenants which outbound data traffic allowed to. The Azure AD tenant of the current user will be included by default. Use (\'\' in PowerShell) to disable all allowed tenant ids.")
             c.argument('key_name', help='The workspace customer-managed key display name. All existing keys can be found using "az synapse workspace key list" cmdlet.')
             c.argument('repository_type', arg_group=repository_arg_group, arg_type=get_enum_type(['AzureDevOpsGit', 'GitHub']), validator=validate_repository_type, help='The repository configuration type.')
             c.argument('host_name', arg_group=repository_arg_group, help='If using github Enterprise Server, provide sever URL. Do not use this option with GitHub Enterprise Cloud.')
