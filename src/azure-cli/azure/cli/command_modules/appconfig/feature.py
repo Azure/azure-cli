@@ -718,7 +718,7 @@ def update_filter(cmd,
 
             # get all filters where name matches filter_name provided by user
             for idx, feature_filter in enumerate(feature_filters):
-                if feature_filter.get('name') == filter_name:
+                if feature_filter.name == filter_name:
                     if idx == index:
                         current_filter = copy.deepcopy(feature_filters[index])
 
@@ -844,7 +844,7 @@ def delete_filter(cmd,
 
             # get all filters where name matches filter_name provided by user
             for idx, feature_filter in enumerate(feature_filters):
-                if feature_filter.get('name') == filter_name:
+                if feature_filter.name == filter_name:
                     if idx == index:
                         # name and index both match this filter - delete it.
                         # create a deep copy of the filter to display to the

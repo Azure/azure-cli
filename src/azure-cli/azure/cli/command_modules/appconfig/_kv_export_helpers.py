@@ -61,7 +61,7 @@ def __write_kv_and_features_to_file(file_path, key_values=None, features=None, f
     try:
         exported_keyvalues = __export_keyvalues(key_values, format_, separator, None)
         if features and not skip_features:
-            compatibility_mode = os.environ.get('AZURE_APPCONFIG_FM_COMPATIBILITY_MODE', default=False)
+            compatibility_mode = os.environ.get('AZURE_APPCONFIG_FM_COMPATIBILITY_MODE', False)
             exported_features = __export_features(features, naming_convention, compatibility_mode)
             exported_keyvalues.update(exported_features)
 

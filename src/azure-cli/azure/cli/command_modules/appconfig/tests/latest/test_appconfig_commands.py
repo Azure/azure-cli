@@ -1481,15 +1481,15 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
         os.remove(exported_yaml_file_path)
 
         # Respect both fm schemas in file
-        os.environ['AZURE_APPCONFIG_FM_COMPATIBILITY_MODE'] = 'False'
 
         # # Camel case naming convention
+        os.environ['AZURE_APPCONFIG_FM_COMPATIBILITY_MODE'] = 'False'
         imported_both_schemas_camel_case_file_path = os.path.join(TEST_DIR, 'respectBothFmSchemaCamelCase.json')
         exported_both_schemas_camel_case_file_path = os.path.join(TEST_DIR, 'export_features_both_schema_camel_case_file_path.json')
         expected_exported_both_schemas_file_path = os.path.join(TEST_DIR, 'expected_export_features_both_schema_file_path.json')
 
         self.kwargs.update({
-            'label': 'RespectBothFmSchemas',
+            'label': 'RespectBothFmSchemasCamelCase',
             'imported_format': 'json',
             'naming_convention': 'camel',
             'imported_file_both_schemas_fm_path': imported_both_schemas_camel_case_file_path,
@@ -1511,7 +1511,7 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
         exported_both_schemas_pascal_case_file_path = os.path.join(TEST_DIR, 'export_features_both_schema_pascal_case_file_path.json')
 
         self.kwargs.update({
-            'label': 'RespectBothFmSchemas',
+            'label': 'RespectBothFmSchemasPascalCase',
             'imported_format': 'json',
             'naming_convention': 'pascal',
             'imported_file_both_schemas_fm_path': imported_both_schemas_pascal_case_file_path,
@@ -1533,7 +1533,7 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
         exported_both_schemas_hyphen_case_file_path = os.path.join(TEST_DIR, 'export_features_both_schema_hyphen_case_file_path.json')
 
         self.kwargs.update({
-            'label': 'RespectBothFmSchemas',
+            'label': 'RespectBothFmSchemasHyphenCase',
             'imported_format': 'json',
             'naming_convention': 'hyphen',
             'imported_file_both_schemas_fm_path': imported_both_schemas_hyphen_case_file_path,
@@ -1556,7 +1556,7 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
         exported_both_schemas_underscore_case_file_path = os.path.join(TEST_DIR, 'export_features_both_schema_underscore_case_file_path.json')
 
         self.kwargs.update({
-            'label': 'RespectBothFmSchemas',
+            'label': 'RespectBothFmSchemasUnderscoreCase',
             'imported_format': 'json',
             'naming_convention': 'underscore',
             'imported_file_both_schemas_fm_path': imported_both_schemas_underscore_case_file_path,
