@@ -2984,11 +2984,9 @@ def restore_snapshot(cmd, resource_group_name, name, time, slot=None, restore_co
     if all([source_resource_group, source_name]):
         # Restore from source app to target app
         sub_id = get_subscription_id(cmd.cli_ctx)
-        source_id = "/subscriptions/" + sub_id + "/resourceGroups/" + source_resource_group + \
-            "/providers/Microsoft.Web/sites/" + source_name
-        if source_slot:
-            source_id = source_id + "/slots/" + source_slot
-        source = SnapshotRecoverySource(id=source_id)
+        webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
+
+        source = SnapshotRecoverySource(id=webapp.id, location= webapp.location)
         request = SnapshotRestoreRequest(overwrite=False, snapshot_time=time, recovery_source=source,
                                          recover_configuration=recover_config)
         if slot:
