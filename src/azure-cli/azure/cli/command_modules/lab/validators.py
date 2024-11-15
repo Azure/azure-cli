@@ -499,7 +499,7 @@ def _is_valid_ssh_rsa_public_key(openssh_pubkey):
     # http://stackoverflow.com/questions/2494450/ssh-rsa-public-key-validation-using-a-regular-expression
     # A "good enough" check is to see if the key starts with the correct header.
     import struct
-    from base64 import decodestring as base64_decode
+    from base64 import decodebytes as base64_decode
     parts = openssh_pubkey.split()
     if len(parts) < 2:
         return False
