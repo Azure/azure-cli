@@ -83,7 +83,7 @@ def validate_ip_ranges(namespace):
 
     if restrict_traffic_to_agentnodes in ip_ranges and len(ip_ranges) > 1:
         raise CLIError("Setting --api-server-authorized-ip-ranges to 0.0.0.0/32 is not allowed with other IP ranges."
-                        "Refer to https://aka.ms/aks/whitelist for more details")
+                       "Refer to https://aka.ms/aks/whitelist for more details")
 
     if allow_all_traffic in ip_ranges and len(ip_ranges) > 1:
         raise CLIError("--api-server-authorized-ip-ranges cannot be disabled and simultaneously enabled")

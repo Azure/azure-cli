@@ -749,11 +749,11 @@ class AzureBatchDataPlaneCommand:
                     choices = [enum_value(c) for c in choices if enum_value(c) != "'unmapped'"]
                     docstring = docstring[0:values_index]
                 args.append((arg[0], CLICommandArgument(arg[0],
-                                                         options_list=[arg_name(arg[0])],
-                                                         required=False,
-                                                         default=None,
-                                                         choices=choices,
-                                                         help=docstring)))
+                                                        options_list=[arg_name(arg[0])],
+                                                        required=False,
+                                                        default=None,
+                                                        choices=choices,
+                                                        help=docstring)))
             elif arg_type.startswith("~"):  # TODO: could add handling for enums
                 param_type = class_name(arg_type)
                 self.parser.set_request_param(arg[0], param_type)

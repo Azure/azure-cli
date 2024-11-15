@@ -20,7 +20,7 @@ def _get_group_count_and_id(namespace, group_filter):
 def validate_group(namespace):
     # For AD auto-commands, here we resolve logic names to object ids needed by SDK methods
     attr, value = next((x, getattr(namespace, x)) for x in VARIANT_GROUP_ID_ARGS
-                        if hasattr(namespace, x))
+                       if hasattr(namespace, x))
     try:
         uuid.UUID(value)
     except ValueError:
