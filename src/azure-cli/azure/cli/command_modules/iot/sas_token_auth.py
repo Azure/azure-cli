@@ -7,7 +7,7 @@ from base64 import b64encode, b64decode
 from hashlib import sha256
 from hmac import HMAC
 from time import time
-from urllib import urlencode, quote
+from urllib.parse import urlencode, quote
 from msrest.authentication import Authentication
 
 
