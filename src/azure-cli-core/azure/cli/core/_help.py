@@ -482,9 +482,6 @@ class HelpExample(KnackHelpExample):  # pylint: disable=too-few-public-methods
 
 class HelpParameter(KnackHelpParameter):  # pylint: disable=too-many-instance-attributes
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
     def update_from_data(self, data):
         super().update_from_data(data)
         # original help.py value_sources are strings, update command strings to value-source dict
