@@ -86,7 +86,7 @@ def _validate_whl_extension(ext_file):
 
 def _get_extension_info_from_source(source):
     url_parse_result = urlparse(source)
-    is_url = (url_parse_result.scheme == 'http' or url_parse_result.scheme == 'https')
+    is_url = (url_parse_result.scheme in ('http', 'https'))
     whl_filename = os.path.basename(url_parse_result.path) if is_url else os.path.basename(source)
     parsed_filename = WHEEL_INFO_RE(whl_filename)
     # Extension names can have - but .whl format changes it to _ (PEP 0427). Undo this.
@@ -100,7 +100,7 @@ def _add_whl_ext(cli_ctx, source, ext_sha256=None, pip_extra_index_urls=None, pi
     if not source.endswith('.whl'):
         raise ValueError('Unknown extension type. Only Python wheels are supported.')
     url_parse_result = urlparse(source)
-    is_url = (url_parse_result.scheme == 'http' or url_parse_result.scheme == 'https')
+    is_url = (url_parse_result.scheme in ('http', 'https'))
     logger.debug('Extension source is url? %s', is_url)
     whl_filename = os.path.basename(url_parse_result.path) if is_url else os.path.basename(source)
     parsed_filename = WHEEL_INFO_RE(whl_filename)
@@ -110,7 +110,7 @@ def _add_whl_ext(cli_ctx, source, ext_sha256=None, pip_extra_index_urls=None, pi
         raise CLIError('Unable to determine extension name from {}. Is the file name correct?'.format(source))
     if extension_exists(extension_name, ext_type=WheelExtension):
         raise CLIError('The extension {} already exists.'.format(extension_name))
-    if extension_name == 'rdbms-connect' or extension_name == 'serviceconnector-passwordless':
+    if extension_name in ('rdbms-connect', 'serviceconnector-passwordless'):
         _install_deps_for_psycopg2()
     ext_file = None
     if is_url:

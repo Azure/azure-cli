@@ -1135,7 +1135,7 @@ class CdnMigrateToAfd(_Migrate):
         user_assigned_identities = {}
         for identity in args.user_assigned_identities:
             user_assigned_identities[identity.to_serialized_data()] = {}
-        if args.identity_type == 'UserAssigned' or args.identity_type == 'SystemAssigned, UserAssigned':
+        if args.identity_type in ("UserAssigned", "SystemAssigned, UserAssigned"):
             identity = {
                 'type': args.identity_type,
                 'userAssignedIdentities': user_assigned_identities

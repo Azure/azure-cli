@@ -25,7 +25,7 @@ class StorageResourceIdentifier:
         from urllib.parse import urlparse
         url = urlparse(moniker)
 
-        self._is_url = (url.scheme == 'http' or url.scheme == 'https')
+        self._is_url = (url.scheme in ('http', 'https'))
         if not self._is_url:
             return
 

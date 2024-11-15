@@ -138,7 +138,7 @@ def _extract_commands_from_example(example_text):
     for line in lines:
         for ch in line:
             if quote is None:
-                if ch == '"' or ch == "'":
+                if ch in ('"', "'"):
                     quote = ch
             elif ch == quote:
                 quote = None

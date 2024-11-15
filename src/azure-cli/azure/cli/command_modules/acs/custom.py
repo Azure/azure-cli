@@ -879,7 +879,7 @@ def aks_upgrade(cmd,
         disable_force_upgrade=disable_force_upgrade,
         upgrade_override_until=upgrade_override_until)
 
-    if instance.kubernetes_version == kubernetes_version or kubernetes_version == '':
+    if kubernetes_version in (instance.kubernetes_version, ''):
         # don't prompt here because there is another prompt below?
         if instance.provisioning_state == "Succeeded":
             logger.warning("The cluster is already on version %s and is not in a failed state. No operations "
@@ -2505,7 +2505,7 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
 
     instance = client.get(resource_group_name, cluster_name, nodepool_name)
 
-    if kubernetes_version == '' or instance.orchestrator_version == kubernetes_version:
+    if kubernetes_version in ('', instance.orchestrator_version):
         msg = "The new kubernetes version is the same as the current kubernetes version."
         if instance.provisioning_state == "Succeeded":
             msg = "The cluster is already on version {} and is not in a failed state. No operations will occur when upgrading to the same version if the cluster is not in a failed state.".format(instance.orchestrator_version)

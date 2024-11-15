@@ -51,7 +51,7 @@ def validate_import_key(key):
         if not isinstance(key, str):
             logger.warning("Ignoring invalid key '%s'. Key must be a string.", key)
             return False
-        if key == '.' or key == '..' or '%' in key:
+        if key in (".", "..") or "%" in key:
             logger.warning("Ignoring invalid key '%s'. Key cannot be a '.' or '..', or contain the '%%' character.", key)
             return False
         if key.startswith(FeatureFlagConstants.FEATURE_FLAG_PREFIX):

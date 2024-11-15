@@ -1506,7 +1506,7 @@ def _update_local_contexts(cmd, server_name, resource_group_name, database_name,
 def _get_pg_replica_zone(availabilityZones, sourceServerZone, replicaZone):
     preferredZone = 'none'
     for _index, zone in enumerate(availabilityZones):
-        if zone != sourceServerZone and zone != 'none':
+        if zone not in (sourceServerZone, 'none'):
             preferredZone = zone
 
     if not preferredZone:

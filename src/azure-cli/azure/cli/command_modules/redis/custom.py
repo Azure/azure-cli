@@ -252,8 +252,7 @@ def cli_redis_identity_remove(client, resource_group_name, cache_name, mi_system
         type=ManagedServiceIdentityType.NONE.value)
     if identity is None:
         return none_identity
-    if (identity.type == ManagedServiceIdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value or
-            identity.type == ManagedServiceIdentityType.SYSTEM_ASSIGNED.value):
+    if (identity.type in (ManagedServiceIdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value, ManagedServiceIdentityType.SYSTEM_ASSIGNED.value)):
         system_assigned = True
     if mi_system_assigned is not None:
         system_assigned = None

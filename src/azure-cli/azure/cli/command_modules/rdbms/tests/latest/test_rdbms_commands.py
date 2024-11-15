@@ -557,7 +557,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
                  checks=JMESPathCheck('type(@)', 'array'))
 
     def _test_configuration_mgmt(self, resource_group, server, database_engine):
-        if database_engine == 'mysql' or database_engine == 'mariadb':
+        if database_engine in ('mysql', 'mariadb'):
             config_name = 'log_slow_admin_statements'
             default_value = 'OFF'
             new_value = 'ON'
@@ -594,7 +594,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
                  checks=[JMESPathCheck('type(@)', 'array')])
 
     def _test_log_file_mgmt(self, resource_group, server, database_engine):
-        if database_engine == 'mysql' or database_engine == 'mariadb':
+        if database_engine in ('mysql', 'mariadb'):
             config_name = 'slow_query_log'
             new_value = 'ON'
 

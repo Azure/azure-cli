@@ -1572,7 +1572,7 @@ def _load_file_string_or_uri(file_or_string_or_uri, name, required=True):
             raise CLIError('--{} is required'.format(name))
         return None
     url = urlparse(file_or_string_or_uri)
-    if url.scheme == 'http' or url.scheme == 'https' or url.scheme == 'file':
+    if url.scheme in ('http', 'https', 'file'):
         response = urlopen(file_or_string_or_uri)
         reader = codecs.getreader('utf-8')
         result = json.load(reader(response))

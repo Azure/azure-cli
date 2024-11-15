@@ -442,8 +442,7 @@ def _get_service_principal_object_from_type(servicePrincipalType):
     servicePrincipalResult = None
 
     if (servicePrincipalType is not None and
-        (servicePrincipalType == ServicePrincipalType.system_assigned.value or
-         servicePrincipalType == ServicePrincipalType.none.value)):
+        (servicePrincipalType in (ServicePrincipalType.system_assigned.value, ServicePrincipalType.none.value))):
         servicePrincipalResult = ServicePrincipal(type=servicePrincipalType)
 
     return servicePrincipalResult

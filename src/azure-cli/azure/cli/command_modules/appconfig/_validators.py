@@ -244,7 +244,7 @@ def validate_key(namespace):
         raise RequiredArgumentMissingError("Key cannot be empty.")
 
     input_key = str(namespace.key).lower()
-    if input_key == '.' or input_key == '..' or '%' in input_key:
+    if input_key in ('.', '..') or '%' in input_key:
         raise InvalidArgumentValueError("Key is invalid. Key cannot be a '.' or '..', or contain the '%' character.")
 
 
