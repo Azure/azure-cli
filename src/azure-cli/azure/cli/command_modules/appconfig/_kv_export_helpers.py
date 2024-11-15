@@ -219,7 +219,6 @@ def __export_feature_to_new_ms_schema(feature):
         raise CLIError("Failed to export feature flags. " + str(exception))
 
 
-
 def __compact_key_values(key_values):
     if isinstance(key_values, list):
         compacted = []
