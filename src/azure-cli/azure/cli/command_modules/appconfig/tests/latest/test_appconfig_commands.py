@@ -1481,9 +1481,9 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
         os.remove(exported_yaml_file_path)
 
         # Respect both fm schemas in file
-
         # # Camel case naming convention
         os.environ['AZURE_APPCONFIG_FM_COMPATIBILITY_MODE'] = 'False'
+        
         imported_both_schemas_camel_case_file_path = os.path.join(TEST_DIR, 'respectBothFmSchemaCamelCase.json')
         exported_both_schemas_camel_case_file_path = os.path.join(TEST_DIR, 'export_features_both_schema_camel_case_file_path.json')
         expected_exported_both_schemas_file_path = os.path.join(TEST_DIR, 'expected_export_features_both_schema_file_path.json')
@@ -3102,6 +3102,7 @@ class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
             self.cmd('appconfig kv set --endpoint {endpoint} --auth-mode login --key {key} --value {value} -y')
 
         # Export from appconfig to file should succeed
+        os.environ['AZURE_APPCONFIG_FM_COMPATIBILITY_MODE'] = 'True'
         exported_file_path = os.path.join(TEST_DIR, 'export_aad_1.json')
         expected_exported_file_path = os.path.join(TEST_DIR, 'expected_export_aad_1.json')
         self.kwargs.update({
