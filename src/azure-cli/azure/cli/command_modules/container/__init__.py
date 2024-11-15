@@ -40,4 +40,3 @@ class ContainerCommandsLoader(AzCommandsLoader):
 
 
 COMMAND_LOADER_CLS = ContainerCommandsLoader
-ContainerappCommandsLoader
