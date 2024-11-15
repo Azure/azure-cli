@@ -365,7 +365,7 @@ class TestWebappMocked(unittest.TestCase):
 
         SnapshotRecoverySource, SnapshotRestoreRequest = \
             cmd_mock.get_models('SnapshotRecoverySource', 'SnapshotRestoreRequest')
-        source = SnapshotRecoverySource(id='/subscriptions/sub1/resourceGroups/src_rg/providers/Microsoft.Web/sites/src_web/slots/src_slot')
+        source = SnapshotRecoverySource(id='/subscriptions/sub1/resourceGroups/src_rg/providers/Microsoft.Web/sites/src_web/slots/src_slot', location = 'location')
         request = SnapshotRestoreRequest(overwrite=False, snapshot_time='2018-12-07T02:01:31.4708832Z',
                                          recovery_source=source, recover_configuration=False)
         overwrite_request = SnapshotRestoreRequest(overwrite=True, snapshot_time='2018-12-07T02:01:31.4708832Z', recover_configuration=True)
