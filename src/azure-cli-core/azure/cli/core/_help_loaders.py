@@ -15,14 +15,9 @@ import yaml
 
 logger = get_logger(__name__)
 
-try:
-    ABC = abc.ABC
-except AttributeError:  # Python 2.7, abc exists, but not ABC
-    ABC = abc.ABCMeta('ABC', (object,), {'__slots__': ()})
-
 
 # BaseHelpLoader defining versioned loader interface. Also contains some helper methods.
-class BaseHelpLoader(ABC):
+class BaseHelpLoader(abc.ABC):
     def __init__(self, help_ctx=None):
         self.help_ctx = help_ctx
         self._entry_data = None

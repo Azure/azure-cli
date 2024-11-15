@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 import os
 import unittest
-import mock
+from unittest import mock
 from azure.cli.testsdk.scenario_tests.utilities import (
     create_random_name, get_sha1_hash, is_text_payload, is_json_payload)
 

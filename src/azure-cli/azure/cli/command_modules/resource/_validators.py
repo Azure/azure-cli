@@ -9,10 +9,7 @@ import argparse
 from azure.cli.core.azclierror import ArgumentUsageError
 
 from knack.util import CLIError
-try:
-    from urllib.parse import urlparse, urlsplit
-except ImportError:
-    from urlparse import urlparse, urlsplit  # pylint: disable=import-error
+from urllib.parse import urlparse, urlsplit
 
 MSI_LOCAL_ID = '[system]'
 

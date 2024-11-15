@@ -7,10 +7,7 @@ import json
 import random
 
 import unittest
-try:
-    import mock
-except ImportError:
-    from unittest import mock
+from unittest import mock
 
 from azure.cli.core import azclierror
 from azure.cli.core.aaz import exceptions as aazerror

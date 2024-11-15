@@ -42,10 +42,7 @@ from knack.util import CLIError, CommandResultItem, todict
 from knack.events import EVENT_INVOKER_TRANSFORM_RESULT
 from knack.validators import DefaultStr
 
-try:
-    t_JSONDecodeError = json.JSONDecodeError
-except AttributeError:  # in Python 2.7
-    t_JSONDecodeError = ValueError
+t_JSONDecodeError = json.JSONDecodeError
 
 logger = get_logger(__name__)
 DEFAULT_CACHE_TTL = '10'
@@ -471,7 +468,7 @@ def cached_put(cmd_obj, operation, parameters, *args, setter_arg_name='parameter
     obj_path = os.path.join(obj_dir, obj_file)
     try:
         os.remove(obj_path)
-    except (OSError, IOError):  # FileNotFoundError introduced in Python 3
+    except FileNotFoundError:
         pass
     return result
 

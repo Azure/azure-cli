@@ -8,16 +8,10 @@ from unittest import mock
 import os
 import unittest
 
-from applicationinsights.channel import SynchronousSender
+import urllib.request as http_client_t
+from urllib.error import HTTPError
 
-try:
-    # Python 2.x
-    import urllib2 as http_client_t
-    from urllib2 import HTTPError
-except ImportError:
-    # Python 3.x
-    import urllib.request as http_client_t
-    from urllib.error import HTTPError
+from applicationinsights.channel import SynchronousSender
 
 from azure.cli.telemetry.components.telemetry_client import (CliTelemetryClient, _NoRetrySender, http_client_t)
 
