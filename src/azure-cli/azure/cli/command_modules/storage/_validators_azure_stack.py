@@ -404,6 +404,7 @@ def get_content_setting_validator(settings_class, update, guess_from_file=None):
         clear_content_settings = ns.pop('clear_content_settings', False)
 
         # retrieve the existing object properties for an update
+        props = None
         if update and not clear_content_settings:
             account = ns.get('account_name')
             key = ns.get('account_key')
@@ -438,7 +439,7 @@ def get_content_setting_validator(settings_class, update, guess_from_file=None):
         )
 
         # if update, fill in any None values with existing
-        if update:
+        if update and props:
             if not clear_content_settings:
                 for attr in ['content_type', 'content_disposition', 'content_encoding', 'content_language',
                              'content_md5', 'cache_control']:
