@@ -725,7 +725,7 @@ class AzCliCommandInvoker(CommandInvoker):
 
             # This is added for new models from typespec generated SDKs
             # These models store data in `__dict__['_data']` instead of in `__dict__`
-            if result and hasattr(result, 'as_dict'):
+            if result and hasattr(result, 'as_dict') and not hasattr(obj, '_attribute_map'):
                 result = _convert_camel_case(result.as_dict())
             result = todict(result, AzCliCommandInvoker.remove_additional_prop_layer)
 
