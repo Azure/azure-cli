@@ -20,8 +20,8 @@ class SqlVmCommandsLoader(AzCommandsLoader):
                          custom_command_type=sqlvm_custom,
                          resource_type=ResourceType.MGMT_SQLVM,
                          suppress_extension=ModExtensionSuppress(__name__, 'sqlvm-preview', '0.1.0',
-                              reason='These commands are now in the CLI.',
-                              recommend_remove=True))
+                                                                 reason='These commands are now in the CLI.',
+                                                                 recommend_remove=True))
 
     def load_command_table(self, args):
         from azure.cli.command_modules.sqlvm.commands import load_command_table

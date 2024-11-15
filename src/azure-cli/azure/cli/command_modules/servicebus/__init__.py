@@ -19,8 +19,8 @@ class ServicebusCommandsLoader(AzCommandsLoader):
         super().__init__(cli_ctx=cli_ctx, custom_command_type=servicebus_custom,
                          resource_type=ResourceType.MGMT_SERVICEBUS,
                          suppress_extension=ModExtensionSuppress(__name__, 'servicebus', '0.0.1',
-                               reason='These commands are now in the CLI.',
-                               recommend_remove=True))
+                                                                 reason='These commands are now in the CLI.',
+                                                                 recommend_remove=True))
 
     def load_command_table(self, args):
         from azure.cli.command_modules.servicebus.commands import load_command_table

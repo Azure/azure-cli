@@ -411,9 +411,9 @@ class MultiObjectsDeserializeAction(argparse._AppendAction):  # pylint: disable=
 
         try:
             super().__call__(parser,
-                                                                namespace,
-                                                                self.deserialize_object(type_name, type_properties),
-                                                                option_string)
+                             namespace,
+                             self.deserialize_object(type_name, type_properties),
+                             option_string)
         except KeyError:
             raise InvalidArgumentValueError('the type "{}" is not recognizable.'.format(type_name))
         except TypeError:

@@ -20,15 +20,13 @@ class NetworkCommandsLoader(AzCommandsLoader):
         super().__init__(cli_ctx=cli_ctx,
                          custom_command_type=network_custom,
                          suppress_extension=[
-                            ModExtensionSuppress(
-                                __name__, 'dns', '0.0.2',
-                                reason='These commands are now in the CLI.',
-                                recommend_remove=True),
-                            ModExtensionSuppress(
-                                 __name__, 'express-route', '0.1.3',
-                                 reason='These commands are now in the CLI.',
-                                 recommend_remove=True)
-                             ]
+                             ModExtensionSuppress(__name__, 'dns', '0.0.2',
+                                                  reason='These commands are now in the CLI.',
+                                                  recommend_remove=True),
+                             ModExtensionSuppress(__name__, 'express-route', '0.1.3',
+                                                  reason='These commands are now in the CLI.',
+                                                  recommend_remove=True)
+                            ]
                          )
 
     def load_command_table(self, args):

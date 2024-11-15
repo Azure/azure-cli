@@ -14,8 +14,7 @@ class CliExecutionError(Exception):
     def __init__(self, exception):
         self.exception = exception
         message = 'The CLI throws exception {} during execution and fails the command.'
-        super().__init__(message.format(exception.__class__.__name__,
-                                                               exception))
+        super().__init__(message.format(exception.__class__.__name__, exception))
 
 
 class JMESPathCheckAssertionError(AssertionError):
