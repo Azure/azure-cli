@@ -2277,7 +2277,7 @@ class FlexibleServerIdentityAADAdminMgmtScenarioTest(ScenarioTest):
         self._test_identity_aad_admin_mgmt('postgres', resource_group, 'disabled')
 
     def _test_identity_aad_admin_mgmt(self, database_engine, resource_group, password_auth, location=postgres_location):
-        login = 'alanenriqueo@microsoft.com'
+        login = 'aaa@foo.com'
         sid = '894ef8da-7971-4f68-972c-f561441eb329'
         auth_args = '--password-auth {} --active-directory-auth enabled'.format(password_auth)
         admin_id_arg = '-i {}'.format(sid) if database_engine == 'postgres' else ''
