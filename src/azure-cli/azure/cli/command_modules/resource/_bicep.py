@@ -140,8 +140,7 @@ def ensure_bicep_installation(cli_ctx, release_tag=None, target_platform=None, s
             download_url, system, machine, release_tag, target_platform,
         )
 
-        request = urlopen(download_url)
-        with open(installation_path, "wb") as f:
+        with urlopen(download_url) as request, open(installation_path, "wb") as f:
             f.write(request.read())
 
         os.chmod(installation_path, os.stat(installation_path).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)

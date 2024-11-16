@@ -264,7 +264,7 @@ def get_yaml_template(cmd_value, timeout, file):
         else:
             if os.path.exists(file):
                 with open(file, 'r') as f:
-                    for line in f.readlines():
+                    for line in f:
                         yaml_template += line
             else:
                 raise CLIError(f"{file} does not exist.")

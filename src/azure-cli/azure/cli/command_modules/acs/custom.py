@@ -1942,7 +1942,8 @@ def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, s
         if cloud_name.lower() == 'azurechinacloud':
             latest_release_url = 'https://mirror.azure.cn/kubernetes/kubelogin/latest'
         logger.warning('No version specified, will get the latest version of kubelogin from "%s"', latest_release_url)
-        latest_release = urlopen(latest_release_url, context=_ssl_context()).read()
+        with urlopen(latest_release_url, context=_ssl_context()) as f:
+            latest_release = f.read()
         client_version = json.loads(latest_release)['tag_name'].strip()
     else:
         client_version = "v%s" % client_version
@@ -2006,8 +2007,7 @@ def _ssl_context():
 
 
 def _urlretrieve(url, filename):
-    req = urlopen(url, context=_ssl_context())
-    with open(filename, "wb") as f:
+    with urlopen(url, context=_ssl_context()) as req, open(filename, "wb") as f:
         f.write(req.read())
 
 
