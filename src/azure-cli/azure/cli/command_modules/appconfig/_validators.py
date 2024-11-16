@@ -6,10 +6,9 @@
 # pylint: disable=line-too-long
 
 import json
-import re
 import azure.cli.core.azclierror as CLIErrors
-from dateutil.parser import isoparse
 
+from datetime import datetime
 from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.azclierror import (InvalidArgumentValueError,
@@ -32,11 +31,21 @@ logger = get_logger(__name__)
 
 def validate_datetime(namespace):
     ''' valid datetime format: YYYY-MM-DDThh:mm:ss["Z"/±hh:mm]'''
+    supported_formats = ["%Y-%m-%dT%H:%M:%S", "%Y-%m-%dT%H:%M:%Sz", "%Y-%m-%dT%H:%M:%S%z"]
     if namespace.datetime is not None:
-        try:
-            isoparse(namespace.datetime)
-        except ValueError:
-            raise CLIError('The input datetime is invalid. Value should be in ISO-8601 format: YYYY-MM-DDThh:mm:ss["Z"/±hh:mm].')
+        for supported_format in supported_formats:
+            if __tryparse_datetime(namespace.datetime, supported_format):
+                return
+
+        raise CLIError('The input datetime is invalid. Correct format should be YYYY-MM-DDThh:mm:ss["Z"/±hh:mm].')
+
+
+def __tryparse_datetime(datetime_string, format):
+    try:
+        datetime.strptime(datetime_string, format)
+        return True
+    except ValueError:
+        return False
 
 
 def validate_connection_string(cmd, namespace):
