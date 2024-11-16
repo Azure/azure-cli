@@ -22,7 +22,6 @@ from ._field_value import AAZList, AAZObject, AAZBaseDictValue
 from .exceptions import AAZInvalidValueError
 
 
-
 class AAZOperation:
 
     def __init__(self, ctx):
