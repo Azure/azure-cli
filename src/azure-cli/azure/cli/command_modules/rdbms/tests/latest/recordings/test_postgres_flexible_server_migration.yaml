@@ -1,6 +1,53 @@
 interactions:
 - request:
-    body: '{"name": "c6396bb5-ab46-432f-884d-b11e013ec6e8", "type": "Microsoft.DBforPostgreSQL/flexibleServers/migrations"}'
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server migration check-name-availability
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription --resource-group --name --migration-name
+      User-Agent:
+      - AZURECLI/2.66.0 azsdk-python-core/1.31.0 Python/3.12.7 (Windows-11-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap?api-version=2024-11-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_D4s_v3","tier":"GeneralPurpose"},"systemData":{"createdAt":"2023-06-15T13:30:19.1651160Z"},"properties":{"replica":{"role":"Primary","capacity":5},"storage":{"type":"","iops":120,"tier":"P4","storageSizeGB":32,"autoGrow":"Disabled"},"network":{"publicNetworkAccess":"Enabled"},"dataEncryption":{"type":"SystemManaged"},"authConfig":{"activeDirectoryAuth":"Disabled","passwordAuth":"Enabled"},"fullyQualifiedDomainName":"autobot-e2e-pg-fs-eastus2euap.postgres.database.azure.com","version":"13","minorVersion":"16","administratorLogin":"portaltestuser","state":"Ready","availabilityZone":"2","backup":{"backupRetentionDays":7,"geoRedundantBackup":"Enabled","earliestRestoreDate":"2024-11-09T15:27:35.827186+00:00"},"highAvailability":{"mode":"Disabled","state":"NotEnabled"},"maintenanceWindow":{"customWindow":"Disabled","dayOfWeek":0,"startHour":0,"startMinute":0},"replicationRole":"Primary","replicaCapacity":5},"location":"East
+        US 2 EUAP","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap","name":"autobot-e2e-pg-fs-eastus2euap","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1251'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 16 Nov 2024 01:49:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 3F3FFF1FE54549D89A9AC7FE4733FA7D Ref B: CO6AA3150218035 Ref C: 2024-11-16T01:49:11Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"name": "7b3b7057-b636-4a3d-921b-664cbda66804", "type": "Microsoft.DBforPostgreSQL/flexibleServers/migrations"}'
     headers:
       Accept:
       - application/json
@@ -17,12 +64,12 @@ interactions:
       ParameterSetName:
       - --subscription --resource-group --name --migration-name
       User-Agent:
-      - AZURECLI/2.66.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.66.0 azsdk-python-core/1.31.0 Python/3.12.7 (Windows-11-10.0.26100-SP0)
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap/checkMigrationNameAvailability?api-version=2024-11-01-preview
   response:
     body:
-      string: '{"name":"c6396bb5-ab46-432f-884d-b11e013ec6e8","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations","nameAvailable":true}'
+      string: '{"name":"7b3b7057-b636-4a3d-921b-664cbda66804","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations","nameAvailable":true}'
     headers:
       cache-control:
       - no-cache
@@ -31,7 +78,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 05 Nov 2024 18:45:13 GMT
+      - Sat, 16 Nov 2024 01:49:12 GMT
       expires:
       - '-1'
       pragma:
@@ -47,7 +94,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-writes:
       - '799'
       x-msedge-ref:
-      - 'Ref A: 5C241B33BC784EB0A2784627982AFF22 Ref B: BN1AA2051015025 Ref C: 2024-11-05T18:45:14Z'
+      - 'Ref A: ADA420564ABF4B79B0DEC0F4D8C5B894 Ref B: CO6AA3150219009 Ref C: 2024-11-16T01:49:12Z'
     status:
       code: 200
       message: OK
@@ -65,19 +112,22 @@ interactions:
       ParameterSetName:
       - --subscription --resource-group --name --migration-name --properties
       User-Agent:
-      - AZURECLI/2.66.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
-    method: HEAD
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/autobot-resourcegroup-pg-eastus2euap?api-version=2022-09-01
+      - AZURECLI/2.66.0 azsdk-python-core/1.31.0 Python/3.12.7 (Windows-11-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap?api-version=2024-11-01-preview
   response:
     body:
-      string: ''
+      string: '{"sku":{"name":"Standard_D4s_v3","tier":"GeneralPurpose"},"systemData":{"createdAt":"2023-06-15T13:30:19.1651160Z"},"properties":{"replica":{"role":"Primary","capacity":5},"storage":{"type":"","iops":120,"tier":"P4","storageSizeGB":32,"autoGrow":"Disabled"},"network":{"publicNetworkAccess":"Enabled"},"dataEncryption":{"type":"SystemManaged"},"authConfig":{"activeDirectoryAuth":"Disabled","passwordAuth":"Enabled"},"fullyQualifiedDomainName":"autobot-e2e-pg-fs-eastus2euap.postgres.database.azure.com","version":"13","minorVersion":"16","administratorLogin":"portaltestuser","state":"Ready","availabilityZone":"2","backup":{"backupRetentionDays":7,"geoRedundantBackup":"Enabled","earliestRestoreDate":"2024-11-09T15:27:35.827186+00:00"},"highAvailability":{"mode":"Disabled","state":"NotEnabled"},"maintenanceWindow":{"customWindow":"Disabled","dayOfWeek":0,"startHour":0,"startMinute":0},"replicationRole":"Primary","replicaCapacity":5},"location":"East
+        US 2 EUAP","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap","name":"autobot-e2e-pg-fs-eastus2euap","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '0'
+      - '1251'
+      content-type:
+      - application/json; charset=utf-8
       date:
-      - Tue, 05 Nov 2024 18:45:14 GMT
+      - Sat, 16 Nov 2024 01:49:13 GMT
       expires:
       - '-1'
       pragma:
@@ -91,7 +141,51 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: CCC7AE2092324943841A7D5022037DBD Ref B: BN1AA2051013053 Ref C: 2024-11-05T18:45:14Z'
+      - 'Ref A: 2B41A934BB384B9DB2D22A996DD9A0D7 Ref B: CO6AA3150220025 Ref C: 2024-11-16T01:49:12Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server migration create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription --resource-group --name --migration-name --properties
+      User-Agent:
+      - AZURECLI/2.66.0 azsdk-python-core/1.31.0 Python/3.12.7 (Windows-11-10.0.26100-SP0)
+    method: HEAD
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/autobot-resourcegroup-pg-eastus2euap?api-version=2022-09-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Sat, 16 Nov 2024 01:49:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 231C560C37CE4209901570D4CED50FF1 Ref B: CO6AA3150218025 Ref C: 2024-11-16T01:49:13Z'
     status:
       code: 204
       message: No Content
@@ -109,7 +203,7 @@ interactions:
       ParameterSetName:
       - --subscription --resource-group --name --migration-name --properties
       User-Agent:
-      - AZURECLI/2.66.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.66.0 azsdk-python-core/1.31.0 Python/3.12.7 (Windows-11-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/autobot-resourcegroup-pg-eastus2euap?api-version=2022-09-01
   response:
@@ -123,7 +217,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 05 Nov 2024 18:45:14 GMT
+      - Sat, 16 Nov 2024 01:49:13 GMT
       expires:
       - '-1'
       pragma:
@@ -137,7 +231,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: B1918DB92FBF42689AC2DA55DD3C4881 Ref B: BN1AA2051012049 Ref C: 2024-11-05T18:45:15Z'
+      - 'Ref A: DDF12C8063804DDE80B9547C2C699022 Ref B: CO6AA3150219037 Ref C: 2024-11-16T01:49:13Z'
     status:
       code: 200
       message: OK
@@ -164,12 +258,12 @@ interactions:
       ParameterSetName:
       - --subscription --resource-group --name --migration-name --properties
       User-Agent:
-      - AZURECLI/2.66.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.66.0 azsdk-python-core/1.31.0 Python/3.12.7 (Windows-11-10.0.26100-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap/migrations/c6396bb5-ab46-432f-884d-b11e013ec6e8?api-version=2024-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap/migrations/7b3b7057-b636-4a3d-921b-664cbda66804?api-version=2024-11-01-preview
   response:
     body:
-      string: '{"properties":{"migrationId":"f2d62b82-098e-4d64-afe5-c079b77f7042","currentStatus":{"state":"InProgress"},"migrationMode":"Offline","sourceDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-singleserver-resourcegroup/providers/Microsoft.DBforPostgreSQL/servers/autobot-orcas-postgresql-ss","targetDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap","dbsToMigrate":["postgres"],"setupLogicalReplicationOnSourceDbIfNeeded":"False","overwriteDbsInTarget":"True","migrationWindowStartTimeInUtc":"2024-11-05T18:45:15.9858268Z","triggerCutover":"True","migrationOption":"ValidateAndMigrate","sourceType":"PostgreSQLSingleServer","sslMode":"VerifyFull"},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap/migrations/c6396bb5-ab46-432f-884d-b11e013ec6e8","name":"c6396bb5-ab46-432f-884d-b11e013ec6e8","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations"}'
+      string: '{"properties":{"migrationId":"86da31ee-938f-471e-a2d0-b3ff3433dc04","currentStatus":{"state":"InProgress"},"migrationMode":"Offline","sourceDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-singleserver-resourcegroup/providers/Microsoft.DBforPostgreSQL/servers/autobot-orcas-postgresql-ss","targetDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap","dbsToMigrate":["postgres"],"setupLogicalReplicationOnSourceDbIfNeeded":"False","overwriteDbsInTarget":"True","migrationWindowStartTimeInUtc":"2024-11-16T01:49:14.4693303Z","triggerCutover":"True","migrationOption":"ValidateAndMigrate","sourceType":"PostgreSQLSingleServer","sslMode":"VerifyFull"},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap/migrations/7b3b7057-b636-4a3d-921b-664cbda66804","name":"7b3b7057-b636-4a3d-921b-664cbda66804","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations"}'
     headers:
       cache-control:
       - no-cache
@@ -178,7 +272,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 05 Nov 2024 18:45:16 GMT
+      - Sat, 16 Nov 2024 01:49:14 GMT
       expires:
       - '-1'
       pragma:
@@ -194,7 +288,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-writes:
       - '799'
       x-msedge-ref:
-      - 'Ref A: 92AD6FA96CC44F31A73624EFDD0AD115 Ref B: BN1AA2051012009 Ref C: 2024-11-05T18:45:15Z'
+      - 'Ref A: EF108A757DAB4752B8675CDD1A05BA29 Ref B: CO6AA3150218011 Ref C: 2024-11-16T01:49:13Z'
     status:
       code: 201
       message: Created
@@ -212,24 +306,22 @@ interactions:
       ParameterSetName:
       - --subscription --resource-group --name --filter
       User-Agent:
-      - AZURECLI/2.66.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.66.0 azsdk-python-core/1.31.0 Python/3.12.7 (Windows-11-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap/migrations?api-version=2024-11-01-preview&migrationListFilter=Active
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap?api-version=2024-11-01-preview
   response:
     body:
-      string: '{"value":[{"properties":{"migrationId":"f2d62b82-098e-4d64-afe5-c079b77f7042","currentStatus":{"state":"InProgress","currentSubStateDetails":{"currentSubState":"PerformingPreRequisiteSteps","dbDetails":{}}},"migrationMode":"Offline","sourceDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-singleserver-resourcegroup/providers/Microsoft.DBforPostgreSQL/servers/autobot-orcas-postgresql-ss","targetDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap","dbsToMigrate":["postgres"],"setupLogicalReplicationOnSourceDbIfNeeded":"False","overwriteDbsInTarget":"True","migrationWindowStartTimeInUtc":"2024-11-05T18:45:15.9858268Z","triggerCutover":"True","migrateRoles":"False","migrationOption":"ValidateAndMigrate","sourceType":"PostgreSQLSingleServer","sslMode":"VerifyFull"},"location":"East
-        US 2 EUAP","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap/migrations/c6396bb5-ab46-432f-884d-b11e013ec6e8","name":"c6396bb5-ab46-432f-884d-b11e013ec6e8","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations"},{"properties":{"migrationId":"4c3bff71-4ba5-4b62-b0cf-df5303dfd815","currentStatus":{"state":"InProgress","currentSubStateDetails":{"currentSubState":"PerformingPreRequisiteSteps","dbDetails":{}}},"migrationMode":"Offline","sourceDbServerResourceId":"20.66.25.58:5432@postgres","targetDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap","dbsToMigrate":["postgres"],"setupLogicalReplicationOnSourceDbIfNeeded":"False","overwriteDbsInTarget":"True","migrationWindowStartTimeInUtc":"2024-11-05T18:45:16.409147Z","triggerCutover":"True","migrateRoles":"False","targetDbServerMetadata":{"location":"East
-        US 2 EUAP","version":"13","storageMb":32768,"sku":{"name":"Standard_D4s_v3","tier":"GeneralPurpose"}},"migrationOption":"Validate","sourceType":"OnPremises","sslMode":"Prefer"},"location":"East
-        US 2 EUAP","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap/migrations/ddf073d8-7efe-49da-a201-078d8d312581","name":"ddf073d8-7efe-49da-a201-078d8d312581","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations"}]}'
+      string: '{"sku":{"name":"Standard_D4s_v3","tier":"GeneralPurpose"},"systemData":{"createdAt":"2023-06-15T13:30:19.1651160Z"},"properties":{"replica":{"role":"Primary","capacity":5},"storage":{"type":"","iops":120,"tier":"P4","storageSizeGB":32,"autoGrow":"Disabled"},"network":{"publicNetworkAccess":"Enabled"},"dataEncryption":{"type":"SystemManaged"},"authConfig":{"activeDirectoryAuth":"Disabled","passwordAuth":"Enabled"},"fullyQualifiedDomainName":"autobot-e2e-pg-fs-eastus2euap.postgres.database.azure.com","version":"13","minorVersion":"16","administratorLogin":"portaltestuser","state":"Ready","availabilityZone":"2","backup":{"backupRetentionDays":7,"geoRedundantBackup":"Enabled","earliestRestoreDate":"2024-11-09T15:27:35.827186+00:00"},"highAvailability":{"mode":"Disabled","state":"NotEnabled"},"maintenanceWindow":{"customWindow":"Disabled","dayOfWeek":0,"startHour":0,"startMinute":0},"replicationRole":"Primary","replicaCapacity":5},"location":"East
+        US 2 EUAP","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap","name":"autobot-e2e-pg-fs-eastus2euap","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2661'
+      - '1251'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 05 Nov 2024 18:45:16 GMT
+      - Sat, 16 Nov 2024 01:49:15 GMT
       expires:
       - '-1'
       pragma:
@@ -243,7 +335,54 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: A95242BBC4984022BEA20BA5283E6839 Ref B: BN1AA2051014039 Ref C: 2024-11-05T18:45:16Z'
+      - 'Ref A: 67DB29DE5CDC444E8E8199201AB1B1EE Ref B: CO6AA3150218023 Ref C: 2024-11-16T01:49:15Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server migration list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription --resource-group --name --filter
+      User-Agent:
+      - AZURECLI/2.66.0 azsdk-python-core/1.31.0 Python/3.12.7 (Windows-11-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap/migrations?api-version=2024-11-01-preview&migrationListFilter=Active
+  response:
+    body:
+      string: '{"value":[{"properties":{"migrationId":"86da31ee-938f-471e-a2d0-b3ff3433dc04","currentStatus":{"state":"InProgress","currentSubStateDetails":{"currentSubState":"PerformingPreRequisiteSteps","dbDetails":{}}},"migrationMode":"Offline","sourceDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-singleserver-resourcegroup/providers/Microsoft.DBforPostgreSQL/servers/autobot-orcas-postgresql-ss","targetDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap","dbsToMigrate":["postgres"],"setupLogicalReplicationOnSourceDbIfNeeded":"False","overwriteDbsInTarget":"True","migrationWindowStartTimeInUtc":"2024-11-16T01:49:14.4693303Z","triggerCutover":"True","migrateRoles":"False","migrationOption":"ValidateAndMigrate","sourceType":"PostgreSQLSingleServer","sslMode":"VerifyFull"},"location":"East
+        US 2 EUAP","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap/migrations/7b3b7057-b636-4a3d-921b-664cbda66804","name":"7b3b7057-b636-4a3d-921b-664cbda66804","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1351'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 16 Nov 2024 01:49:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 53F8CE492CE74507B8E43EAC29FF9C19 Ref B: CO6AA3150219053 Ref C: 2024-11-16T01:49:15Z'
     status:
       code: 200
       message: OK
@@ -261,25 +400,22 @@ interactions:
       ParameterSetName:
       - --subscription --resource-group --name
       User-Agent:
-      - AZURECLI/2.66.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.66.0 azsdk-python-core/1.31.0 Python/3.12.7 (Windows-11-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap/migrations?api-version=2024-11-01-preview&migrationListFilter=Active
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap?api-version=2024-11-01-preview
   response:
     body:
-      string: '{"value":[{"properties":{"migrationId":"f2d62b82-098e-4d64-afe5-c079b77f7042","currentStatus":{"state":"InProgress","currentSubStateDetails":{"currentSubState":"PerformingPreRequisiteSteps","dbDetails":{}}},"migrationMode":"Offline","sourceDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-singleserver-resourcegroup/providers/Microsoft.DBforPostgreSQL/servers/autobot-orcas-postgresql-ss","targetDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap","dbsToMigrate":["postgres"],"setupLogicalReplicationOnSourceDbIfNeeded":"False","overwriteDbsInTarget":"True","migrationWindowStartTimeInUtc":"2024-11-05T18:45:15.9858268Z","triggerCutover":"True","migrateRoles":"False","migrationOption":"ValidateAndMigrate","sourceType":"PostgreSQLSingleServer","sslMode":"VerifyFull"},"location":"East
-        US 2 EUAP","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap/migrations/c6396bb5-ab46-432f-884d-b11e013ec6e8","name":"c6396bb5-ab46-432f-884d-b11e013ec6e8","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations"},{"properties":{"migrationId":"4c3bff71-4ba5-4b62-b0cf-df5303dfd815","currentStatus":{"state":"CleaningUp","error":"There
-        is already an active Migration Running on this target.","currentSubStateDetails":{"currentSubState":"CompletingMigration","dbDetails":{}}},"migrationMode":"Offline","sourceDbServerResourceId":"20.66.25.58:5432@postgres","targetDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap","dbsToMigrate":["postgres"],"setupLogicalReplicationOnSourceDbIfNeeded":"False","overwriteDbsInTarget":"True","migrationWindowStartTimeInUtc":"2024-11-05T18:45:16.409147Z","triggerCutover":"True","migrateRoles":"False","targetDbServerMetadata":{"location":"East
-        US 2 EUAP","version":"13","storageMb":32768,"sku":{"name":"Standard_D4s_v3","tier":"GeneralPurpose"}},"migrationOption":"Validate","sourceType":"OnPremises","sslMode":"Prefer"},"location":"East
-        US 2 EUAP","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap/migrations/ddf073d8-7efe-49da-a201-078d8d312581","name":"ddf073d8-7efe-49da-a201-078d8d312581","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations"}]}'
+      string: '{"sku":{"name":"Standard_D4s_v3","tier":"GeneralPurpose"},"systemData":{"createdAt":"2023-06-15T13:30:19.1651160Z"},"properties":{"replica":{"role":"Primary","capacity":5},"storage":{"type":"","iops":120,"tier":"P4","storageSizeGB":32,"autoGrow":"Disabled"},"network":{"publicNetworkAccess":"Enabled"},"dataEncryption":{"type":"SystemManaged"},"authConfig":{"activeDirectoryAuth":"Disabled","passwordAuth":"Enabled"},"fullyQualifiedDomainName":"autobot-e2e-pg-fs-eastus2euap.postgres.database.azure.com","version":"13","minorVersion":"16","administratorLogin":"portaltestuser","state":"Ready","availabilityZone":"2","backup":{"backupRetentionDays":7,"geoRedundantBackup":"Enabled","earliestRestoreDate":"2024-11-09T15:27:35.827186+00:00"},"highAvailability":{"mode":"Disabled","state":"NotEnabled"},"maintenanceWindow":{"customWindow":"Disabled","dayOfWeek":0,"startHour":0,"startMinute":0},"replicationRole":"Primary","replicaCapacity":5},"location":"East
+        US 2 EUAP","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap","name":"autobot-e2e-pg-fs-eastus2euap","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2724'
+      - '1251'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 05 Nov 2024 18:45:17 GMT
+      - Sat, 16 Nov 2024 01:49:16 GMT
       expires:
       - '-1'
       pragma:
@@ -293,7 +429,55 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: D2314CBD63FA4D4982F83867868628CA Ref B: BN1AA2051015051 Ref C: 2024-11-05T18:45:17Z'
+      - 'Ref A: E44CC02470A641178980797EE00DEFD9 Ref B: CO6AA3150219045 Ref C: 2024-11-16T01:49:16Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server migration list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription --resource-group --name
+      User-Agent:
+      - AZURECLI/2.66.0 azsdk-python-core/1.31.0 Python/3.12.7 (Windows-11-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap/migrations?api-version=2024-11-01-preview&migrationListFilter=Active
+  response:
+    body:
+      string: '{"value":[{"properties":{"migrationId":"86da31ee-938f-471e-a2d0-b3ff3433dc04","currentStatus":{"state":"InProgress","currentSubStateDetails":{"currentSubState":"PerformingPreRequisiteSteps","dbDetails":{}}},"migrationMode":"Offline","sourceDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-singleserver-resourcegroup/providers/Microsoft.DBforPostgreSQL/servers/autobot-orcas-postgresql-ss","targetDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap","dbsToMigrate":["postgres"],"setupLogicalReplicationOnSourceDbIfNeeded":"False","overwriteDbsInTarget":"True","migrationWindowStartTimeInUtc":"2024-11-16T01:49:14.4693303Z","triggerCutover":"True","migrateRoles":"False","sourceDbServerMetadata":{"location":"eastus2euap","version":"10","storageMb":102400,"sku":{"name":"PGSQL_GP_Gen5_4","tier":"GeneralPurpose"}},"targetDbServerMetadata":{"location":"East
+        US 2 EUAP","version":"13","storageMb":32768,"sku":{"name":"Standard_D4s_v3","tier":"GeneralPurpose"}},"migrationOption":"ValidateAndMigrate","sourceType":"PostgreSQLSingleServer","sslMode":"VerifyFull"},"location":"East
+        US 2 EUAP","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap/migrations/7b3b7057-b636-4a3d-921b-664cbda66804","name":"7b3b7057-b636-4a3d-921b-664cbda66804","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1639'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 16 Nov 2024 01:49:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 569739A6551B4FDABABCBAF60678872D Ref B: CO6AA3150217009 Ref C: 2024-11-16T01:49:17Z'
     status:
       code: 200
       message: OK
@@ -311,22 +495,22 @@ interactions:
       ParameterSetName:
       - --subscription --resource-group --name --migration-name
       User-Agent:
-      - AZURECLI/2.66.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.66.0 azsdk-python-core/1.31.0 Python/3.12.7 (Windows-11-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap/migrations/c6396bb5-ab46-432f-884d-b11e013ec6e8?api-version=2024-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap?api-version=2024-11-01-preview
   response:
     body:
-      string: '{"properties":{"migrationId":"f2d62b82-098e-4d64-afe5-c079b77f7042","currentStatus":{"state":"InProgress","currentSubStateDetails":{"currentSubState":"PerformingPreRequisiteSteps","dbDetails":{}}},"migrationMode":"Offline","sourceDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-singleserver-resourcegroup/providers/Microsoft.DBforPostgreSQL/servers/autobot-orcas-postgresql-ss","targetDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap","dbsToMigrate":["postgres"],"setupLogicalReplicationOnSourceDbIfNeeded":"False","overwriteDbsInTarget":"True","migrationWindowStartTimeInUtc":"2024-11-05T18:45:15.9858268Z","triggerCutover":"True","migrateRoles":"False","migrationOption":"ValidateAndMigrate","sourceType":"PostgreSQLSingleServer","sslMode":"VerifyFull"},"location":"East
-        US 2 EUAP","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap/migrations/c6396bb5-ab46-432f-884d-b11e013ec6e8","name":"c6396bb5-ab46-432f-884d-b11e013ec6e8","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations"}'
+      string: '{"sku":{"name":"Standard_D4s_v3","tier":"GeneralPurpose"},"systemData":{"createdAt":"2023-06-15T13:30:19.1651160Z"},"properties":{"replica":{"role":"Primary","capacity":5},"storage":{"type":"","iops":120,"tier":"P4","storageSizeGB":32,"autoGrow":"Disabled"},"network":{"publicNetworkAccess":"Enabled"},"dataEncryption":{"type":"SystemManaged"},"authConfig":{"activeDirectoryAuth":"Disabled","passwordAuth":"Enabled"},"fullyQualifiedDomainName":"autobot-e2e-pg-fs-eastus2euap.postgres.database.azure.com","version":"13","minorVersion":"16","administratorLogin":"portaltestuser","state":"Ready","availabilityZone":"2","backup":{"backupRetentionDays":7,"geoRedundantBackup":"Enabled","earliestRestoreDate":"2024-11-09T15:27:35.827186+00:00"},"highAvailability":{"mode":"Disabled","state":"NotEnabled"},"maintenanceWindow":{"customWindow":"Disabled","dayOfWeek":0,"startHour":0,"startMinute":0},"replicationRole":"Primary","replicaCapacity":5},"location":"East
+        US 2 EUAP","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap","name":"autobot-e2e-pg-fs-eastus2euap","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1339'
+      - '1251'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 05 Nov 2024 18:45:17 GMT
+      - Sat, 16 Nov 2024 01:49:17 GMT
       expires:
       - '-1'
       pragma:
@@ -340,7 +524,102 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: F50028A6D73B47BCB9FD6A037EB9BB9B Ref B: BN1AA2051014053 Ref C: 2024-11-05T18:45:17Z'
+      - 'Ref A: 0413561E55864D3396FB81AD1A82984B Ref B: CO6AA3150218053 Ref C: 2024-11-16T01:49:18Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server migration show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription --resource-group --name --migration-name
+      User-Agent:
+      - AZURECLI/2.66.0 azsdk-python-core/1.31.0 Python/3.12.7 (Windows-11-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap/migrations/7b3b7057-b636-4a3d-921b-664cbda66804?api-version=2024-11-01-preview
+  response:
+    body:
+      string: '{"properties":{"migrationId":"86da31ee-938f-471e-a2d0-b3ff3433dc04","currentStatus":{"state":"InProgress","currentSubStateDetails":{"currentSubState":"PerformingPreRequisiteSteps","dbDetails":{}}},"migrationMode":"Offline","sourceDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-singleserver-resourcegroup/providers/Microsoft.DBforPostgreSQL/servers/autobot-orcas-postgresql-ss","targetDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap","dbsToMigrate":["postgres"],"setupLogicalReplicationOnSourceDbIfNeeded":"False","overwriteDbsInTarget":"True","migrationWindowStartTimeInUtc":"2024-11-16T01:49:14.4693303Z","triggerCutover":"True","migrateRoles":"False","sourceDbServerMetadata":{"location":"eastus2euap","version":"10","storageMb":102400,"sku":{"name":"PGSQL_GP_Gen5_4","tier":"GeneralPurpose"}},"targetDbServerMetadata":{"location":"East
+        US 2 EUAP","version":"13","storageMb":32768,"sku":{"name":"Standard_D4s_v3","tier":"GeneralPurpose"}},"migrationOption":"ValidateAndMigrate","sourceType":"PostgreSQLSingleServer","sslMode":"VerifyFull"},"location":"East
+        US 2 EUAP","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap/migrations/7b3b7057-b636-4a3d-921b-664cbda66804","name":"7b3b7057-b636-4a3d-921b-664cbda66804","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1627'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 16 Nov 2024 01:49:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 28232C8ED37E46A1B1C2D06ADB1D665A Ref B: CO6AA3150219039 Ref C: 2024-11-16T01:49:18Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server migration update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription --resource-group --name --migration-name
+      User-Agent:
+      - AZURECLI/2.66.0 azsdk-python-core/1.31.0 Python/3.12.7 (Windows-11-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap?api-version=2024-11-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_D4s_v3","tier":"GeneralPurpose"},"systemData":{"createdAt":"2023-06-15T13:30:19.1651160Z"},"properties":{"replica":{"role":"Primary","capacity":5},"storage":{"type":"","iops":120,"tier":"P4","storageSizeGB":32,"autoGrow":"Disabled"},"network":{"publicNetworkAccess":"Enabled"},"dataEncryption":{"type":"SystemManaged"},"authConfig":{"activeDirectoryAuth":"Disabled","passwordAuth":"Enabled"},"fullyQualifiedDomainName":"autobot-e2e-pg-fs-eastus2euap.postgres.database.azure.com","version":"13","minorVersion":"16","administratorLogin":"portaltestuser","state":"Ready","availabilityZone":"2","backup":{"backupRetentionDays":7,"geoRedundantBackup":"Enabled","earliestRestoreDate":"2024-11-09T15:27:35.827186+00:00"},"highAvailability":{"mode":"Disabled","state":"NotEnabled"},"maintenanceWindow":{"customWindow":"Disabled","dayOfWeek":0,"startHour":0,"startMinute":0},"replicationRole":"Primary","replicaCapacity":5},"location":"East
+        US 2 EUAP","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap","name":"autobot-e2e-pg-fs-eastus2euap","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1251'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 16 Nov 2024 01:49:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: ED5956B7080E4FDA9BB1389F91549E0A Ref B: CO6AA3150219025 Ref C: 2024-11-16T01:49:19Z'
     status:
       code: 200
       message: OK
