@@ -40,9 +40,9 @@ def validate_datetime(namespace):
         raise CLIError('The input datetime is invalid. Correct format should be YYYY-MM-DDThh:mm:ss["Z"/±hh:mm].')
 
 
-def __tryparse_datetime(datetime_string, format):
+def __tryparse_datetime(datetime_string, dt_format):
     try:
-        datetime.strptime(datetime_string, format)
+        datetime.strptime(datetime_string, dt_format)
         return True
     except ValueError:
         return False
