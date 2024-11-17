@@ -615,7 +615,7 @@ class AcsCustomCommandTest(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.acs.custom._urlretrieve')
     @mock.patch('azure.cli.command_modules.acs.custom.logger')
     def test_k8s_install_kubectl_emit_warnings(self, logger_mock, mock_url_retrieve):
-        mock_url_retrieve.side_effect = lambda _, install_location: open(install_location, 'a').close()
+        moc_url_retrieve.side_effect = lambda _, install_location: open(install_location, 'a').close()
         try:
             temp_dir = tempfile.mkdtemp()  # tempfile.TemporaryDirectory() is no available on 2.7
             test_location = os.path.join(temp_dir, 'kubectl')
@@ -719,7 +719,6 @@ def create_kubelogin_zip(file_url, download_path):
             bin_dir += '/darwin_amd64'
         os.makedirs(bin_dir)
         bin_location = os.path.join(bin_dir, 'kubelogin')
-        open(bin_location, 'a').close()
         with zipfile.ZipFile(download_path, 'w', zipfile.ZIP_DEFLATED) as outZipFile:
             outZipFile.write(bin_location)
     finally:

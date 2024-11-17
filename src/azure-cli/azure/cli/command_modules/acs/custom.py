@@ -2176,11 +2176,10 @@ def _get_command_context(command_files):
         return ""
 
     zipStream = io.BytesIO()
-    zipFile = zipfile.ZipFile(zipStream, "w")
-    for _, (osfile, zipEntry) in enumerate(filesToAttach.items()):
-        zipFile.write(osfile, zipEntry)
-    # zipFile.printdir() // use this to debug
-    zipFile.close()
+    with zipfile.ZipFile(zipStream, "w") as zipFile:
+        for _, (osfile, zipEntry) in enumerate(filesToAttach.items()):
+            zipFile.write(osfile, zipEntry)
+        # zipFile.printdir() // use this to debug
 
     return str(base64.encodebytes(zipStream.getbuffer()), "utf-8")
 

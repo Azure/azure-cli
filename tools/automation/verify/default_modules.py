@@ -25,9 +25,8 @@ def get_cli_dependencies(build_folder):
 
     tmp_dir = tempfile.mkdtemp()
 
-    zip_ref = zipfile.ZipFile(azure_cli_wheel, 'r')
-    zip_ref.extractall(tmp_dir)
-    zip_ref.close()
+    with zipfile.ZipFile(azure_cli_wheel, 'r') as zip_ref:
+        zip_ref.extractall(tmp_dir)
 
     dist_info_dir = [f for f in os.listdir(tmp_dir) if f.endswith('.dist-info')][0]
     whl_metadata_filepath = os.path.join(tmp_dir, dist_info_dir, 'metadata.json')
