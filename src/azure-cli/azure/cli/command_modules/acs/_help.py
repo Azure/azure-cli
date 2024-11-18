@@ -641,6 +641,10 @@ parameters:
   - name: --tier
     type: string
     short-summary: Specify SKU tier for managed clusters. '--tier standard' enables a standard managed cluster service with a financially backed SLA. '--tier free' changes a standard managed cluster to a free one.
+  - name: --ip-families
+    type: string
+    short-summary: A comma-separated list of IP versions to use for cluster networking.
+    long-summary: Each IP version should be in the format IPvN. For example, IPv4.
   - name: --network-plugin
     type: string
     short-summary: The Kubernetes network plugin to use.

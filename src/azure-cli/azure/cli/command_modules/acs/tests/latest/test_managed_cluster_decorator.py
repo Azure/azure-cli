@@ -2174,6 +2174,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             AKSManagedClusterParamDict({"ip_families": "IPv4,IPv6"}),
             self.models,
             decorator_mode=DecoratorMode.UPDATE,
+        )
 
         self.assertEqual(ctx_3.get_ip_families(), ["IPv4", "IPv6"])
 
