@@ -1483,7 +1483,7 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
         # Respect both fm schemas in file
         # # Camel case naming convention
         os.environ['AZURE_APPCONFIG_FM_COMPATIBILITY_MODE'] = 'False'
-        
+
         imported_both_schemas_camel_case_file_path = os.path.join(TEST_DIR, 'respectBothFmSchemaCamelCase.json')
         exported_both_schemas_camel_case_file_path = os.path.join(TEST_DIR, 'export_features_both_schema_camel_case_file_path.json')
         expected_exported_both_schemas_file_path = os.path.join(TEST_DIR, 'expected_export_features_both_schema_file_path.json')
@@ -1548,7 +1548,7 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
         with open(expected_exported_both_schemas_file_path) as json_file:
             exported_kvs = json.load(json_file)
         assert exported_hyphen_case_kvs == exported_kvs
-        os.remove(exported_both_schemas_pascal_case_file_path)
+        os.remove(exported_both_schemas_hyphen_case_file_path)
 
 
         # # Underscore case naming convention
@@ -1565,13 +1565,13 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
         self.cmd(
             'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_both_schemas_fm_path}" --format {imported_format} --label {label} -y')
         self.cmd(
-            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_both_schemas_fm_path}" --format {imported_format} --naming-convention {naming_convention} --label {label} -y')
+            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_both_schemas_fm_path}" --format {imported_format} --label {label} -y')
         with open(exported_both_schemas_underscore_case_file_path) as json_file:
             exported_underscore_case_kvs = json.load(json_file)
         with open(expected_exported_both_schemas_file_path) as json_file:
             exported_kvs = json.load(json_file)
         assert exported_underscore_case_kvs == exported_kvs
-        os.remove(exported_both_schemas_pascal_case_file_path)
+        os.remove(exported_both_schemas_underscore_case_file_path)
 
         # Import/Export new fm yaml file
         os.environ['AZURE_APPCONFIG_FM_COMPATIBILITY_MODE'] = 'False'
@@ -1580,7 +1580,7 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
         exported_new_fm_schema_as_yaml_file_path = os.path.join(TEST_DIR, 'export_features_new_fm_schema_as_yaml.json')
 
         self.kwargs.update({
-            'label': 'YamlTests',
+            'label': 'NewFmSchemaYamlTests',
             'imported_format': 'yaml',
             'naming_convention': 'hyphen',
             'imported_ffv2_file_path': imported_new_fm_schema_yaml_file_path,
@@ -1607,7 +1607,7 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
         exported_as_kv_prop_file_path = os.path.join(TEST_DIR, 'export_as_kv_prop.json')
 
         self.kwargs.update({
-            'label': 'PropertiesTests',
+            'label': 'NewFmSchemaPropertiesTests',
             'imported_format': 'properties',
             'imported_file_path': imported_prop_file_path,
             'exported_file_path': exported_prop_file_path

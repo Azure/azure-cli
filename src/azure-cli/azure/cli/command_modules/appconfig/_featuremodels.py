@@ -283,6 +283,7 @@ class FeatureUserAllocation:
     :ivar list Users:
         Collection of users where if any match the current user, the variant specified in the user allocation is used.
     '''
+
     def __init__(self,
                  variant,
                  users):
@@ -477,7 +478,7 @@ class FeatureAllocation:
         if allocation_user:
             allocation_user_list = []
             for user in allocation_user:
-                feature_user_allocation = FeatureUserAllocation.convert_from_json(json.dumps(user))
+                feature_user_allocation = FeatureUserAllocation.convert_from_json(json.dumps(user, ensure_ascii=False))
                 if (feature_user_allocation):
                     allocation_user_list.append(feature_user_allocation)
             
@@ -488,7 +489,7 @@ class FeatureAllocation:
         if allocation_group:
             allocation_group_list = []
             for group in allocation_group:
-                feature_group_allocation = FeatureGroupAllocation.convert_from_json(json.dumps(group))
+                feature_group_allocation = FeatureGroupAllocation.convert_from_json(json.dumps(group, ensure_ascii=False))
                 if (feature_group_allocation): 
                     allocation_group_list.append(feature_group_allocation)
 
@@ -499,7 +500,7 @@ class FeatureAllocation:
         if allocation_percentile:
             allocation_percentile_list = []
             for percentile in allocation_percentile:
-                feature_percentile_allocation = FeaturePercentileAllocation.convert_from_json(json.dumps(percentile))
+                feature_percentile_allocation = FeaturePercentileAllocation.convert_from_json(json.dumps(percentile, ensure_ascii=False))
                 if (feature_percentile_allocation):
                     allocation_percentile_list.append(feature_percentile_allocation)
 
@@ -752,10 +753,7 @@ def map_keyvalue_to_featureflagvalue(keyvalue):
             FeatureFlagConstants.ID,
             FeatureFlagConstants.DESCRIPTION,
             FeatureFlagConstants.ENABLED,
-            FeatureFlagConstants.CONDITIONS,
-            FeatureFlagConstants.ALLOCATION,
-            FeatureFlagConstants.VARIANTS,
-            FeatureFlagConstants.TELEMETRY}
+            FeatureFlagConstants.CONDITIONS}
         if valid_fields != feature_flag_dict.keys():
             logger.debug("'%s' feature flag is missing required values or it contains ", keyvalue.key +
                          "unsupported values. Setting missing value to defaults and ignoring unsupported values\n")
@@ -795,14 +793,14 @@ def map_keyvalue_to_featureflagvalue(keyvalue):
         # Allocation
         allocation = feature_flag_dict.get(FeatureFlagConstants.ALLOCATION, None)
         if allocation:
-            feature_flag_dict[FeatureFlagConstants.ALLOCATION] = FeatureAllocation.convert_from_json(json.dumps(allocation))
+            feature_flag_dict[FeatureFlagConstants.ALLOCATION] = FeatureAllocation.convert_from_json(json.dumps(allocation, ensure_ascii=False))
 
         # Variants
         variants = feature_flag_dict.get(FeatureFlagConstants.VARIANTS, None)
         variant_list = []
         if variants:
             for variant in variants:
-                feature_variant = FeatureVariant.convert_from_json(json.dumps(variant))
+                feature_variant = FeatureVariant.convert_from_json(json.dumps(variant, ensure_ascii=False))
                 if (feature_variant):
                     variant_list.append(feature_variant)
             

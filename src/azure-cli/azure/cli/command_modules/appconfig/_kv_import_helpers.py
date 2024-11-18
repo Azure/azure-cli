@@ -242,12 +242,12 @@ def  __read_features_from_msfm_schema(feature_flags_list):
                         new_feature.conditions[FeatureFlagConstants.REQUIREMENT_TYPE] = requirement_type
 
             if allocation := feature.get(FeatureFlagConstants.ALLOCATION, None):
-                new_feature.allocation = FeatureAllocation.convert_from_json(json.dumps(allocation))
+                new_feature.allocation = FeatureAllocation.convert_from_json(json.dumps(allocation, ensure_ascii=False))
 
             if variants := feature.get(FeatureFlagConstants.VARIANTS, None):
                 new_feature.variants = []
                 for variant in variants:
-                    new_variant = FeatureVariant.convert_from_json(json.dumps(variant))
+                    new_variant = FeatureVariant.convert_from_json(json.dumps(variant, ensure_ascii=False))
                     if new_variant:
                         new_feature.variants.append(new_variant)
 
