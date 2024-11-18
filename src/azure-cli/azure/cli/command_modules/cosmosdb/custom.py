@@ -430,7 +430,7 @@ def cli_cosmosdb_update(client,
         update_consistency_policy = True
 
     if network_acl_bypass_resource_ids is not None:
-        from msrestazure.tools import is_valid_resource_id
+        from azure.mgmt.core.tools import is_valid_resource_id
         from azure.cli.core.azclierror import InvalidArgumentValueError
         for resource_id in network_acl_bypass_resource_ids:
             if not is_valid_resource_id(resource_id):
@@ -1668,7 +1668,7 @@ def cli_cosmosdb_identity_remove(client,
 
 def _get_virtual_network_id(cmd, resource_group_name, subnet, virtual_network):
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import is_valid_resource_id, resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id, resource_id
     if not is_valid_resource_id(subnet):
         if virtual_network is None:
             raise CLIError("usage error: --subnet ID | --subnet NAME --vnet-name NAME")

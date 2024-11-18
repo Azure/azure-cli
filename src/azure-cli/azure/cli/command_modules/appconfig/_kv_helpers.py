@@ -6,7 +6,9 @@
 # pylint: disable=line-too-long,too-many-nested-blocks,too-many-lines,too-many-return-statements
 
 import json
-from ._snapshot_custom_client import AppConfigSnapshotClient
+from itertools import chain
+from json import JSONDecodeError
+from urllib.parse import urlparse
 from ._constants import HttpHeaders
 
 
@@ -72,10 +74,8 @@ def __read_kv_from_config_store(
 
     if snapshot:
         try:
-            configsetting_iterable = AppConfigSnapshotClient(
-                azconfig_client
-            ).list_snapshot_kv(
-                name=snapshot,
+            configsetting_iterable = azconfig_client.list_configuration_settings(
+                snapshot_name=snapshot,
                 fields=query_fields,
                 headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id},
             )
@@ -142,10 +142,7 @@ def __read_kv_from_config_store(
     # We first check if the snapshot exists before returning an empty result.
     if snapshot and len(retrieved_kvs) == 0:
         try:
-            _ = AppConfigSnapshotClient(azconfig_client).get_snapshot(
-                name=snapshot,
-                headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id},
-            )
+            _ = azconfig_client.get_snapshot(name=snapshot, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
 
         except HttpResponseError as exception:
             if exception.status_code == StatusCodes.NOT_FOUND:

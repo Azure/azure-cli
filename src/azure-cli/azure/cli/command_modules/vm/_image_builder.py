@@ -21,7 +21,7 @@ except ImportError:
 from knack.util import CLIError
 from knack.log import get_logger
 
-from msrestazure.tools import is_valid_resource_id, resource_id, parse_resource_id
+from azure.mgmt.core.tools import is_valid_resource_id, resource_id, parse_resource_id
 
 from azure.core.exceptions import HttpResponseError
 

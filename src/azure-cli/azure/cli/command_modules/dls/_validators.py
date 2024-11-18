@@ -17,7 +17,7 @@ def _get_resource_group_from_account_name(client, account_name):
     :return: resource group name or None
     :rtype: str
     """
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
     for acct in client.list():
         id_comps = parse_resource_id(acct.id)
         if id_comps['name'] == account_name:
@@ -29,7 +29,7 @@ def _get_resource_group_from_account_name(client, account_name):
 
 # COMMAND NAMESPACE VALIDATORS
 def validate_resource_group_name(cmd, ns):
-    from .vendored_sdks.azure_mgmt_datalake_store import DataLakeStoreAccountManagementClient
+    from azure.mgmt.datalake.store import DataLakeStoreAccountManagementClient
     if not ns.resource_group_name:
         try:
             account_name = ns.name
@@ -42,7 +42,7 @@ def validate_resource_group_name(cmd, ns):
 
 # Validates if a subnet id or name have been given by the user. If subnet id is given, vnet-name should not be provided.
 def validate_subnet(cmd, namespace):
-    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
     subnet = namespace.subnet
