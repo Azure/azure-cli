@@ -2977,16 +2977,14 @@ def list_snapshots(cmd, resource_group_name, name, slot=None):
 
 def restore_snapshot(cmd, resource_group_name, name, time, slot=None, restore_content_only=False,  # pylint: disable=redefined-outer-name
                      source_resource_group=None, source_name=None, source_slot=None):
-    from azure.cli.core.commands.client_factory import get_subscription_id
     SnapshotRecoverySource, SnapshotRestoreRequest = cmd.get_models('SnapshotRecoverySource', 'SnapshotRestoreRequest')
     client = web_client_factory(cmd.cli_ctx)
     recover_config = not restore_content_only
     if all([source_resource_group, source_name]):
         # Restore from source app to target app
-        sub_id = get_subscription_id(cmd.cli_ctx)
         webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
 
-        source = SnapshotRecoverySource(id=webapp.id, location= webapp.location)
+        source = SnapshotRecoverySource(id=webapp.id, location=webapp.location)
         request = SnapshotRestoreRequest(overwrite=False, snapshot_time=time, recovery_source=source,
                                          recover_configuration=recover_config)
         if slot:
