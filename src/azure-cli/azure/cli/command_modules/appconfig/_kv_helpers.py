@@ -6,12 +6,8 @@
 # pylint: disable=line-too-long,too-many-nested-blocks,too-many-lines,too-many-return-statements
 
 import json
-from itertools import chain
-from json import JSONDecodeError
-from urllib.parse import urlparse
+
 from ._constants import HttpHeaders
-
-
 from knack.log import get_logger
 from knack.util import CLIError
 
