@@ -2982,9 +2982,9 @@ def restore_snapshot(cmd, resource_group_name, name, time, slot=None, restore_co
     recover_config = not restore_content_only
     if all([source_resource_group, source_name]):
         # Restore from source app to target app
-        webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
+        src_webapp = _generic_site_operation(cmd.cli_ctx, source_resource_group, source_name, 'get', source_slot)
 
-        source = SnapshotRecoverySource(id=webapp.id, location=webapp.location)
+        source = SnapshotRecoverySource(id=src_webapp.id, location=src_webapp.location)
         request = SnapshotRestoreRequest(overwrite=False, snapshot_time=time, recovery_source=source,
                                          recover_configuration=recover_config)
         if slot:
