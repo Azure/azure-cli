@@ -688,7 +688,7 @@ class Profile:
             if user_name in refreshed_list:
                 continue
             refreshed_list.add(user_name)
-            is_service_principal = (s[_USER_ENTITY][_USER_TYPE] == _SERVICE_PRINCIPAL)
+            is_service_principal = s[_USER_ENTITY][_USER_TYPE] == _SERVICE_PRINCIPAL
             tenant = s[_TENANT_ID]
             subscriptions = []
             try:

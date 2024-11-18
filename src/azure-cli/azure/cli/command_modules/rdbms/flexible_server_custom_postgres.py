@@ -62,7 +62,7 @@ def flexible_server_create(cmd, client,
                            active_directory_auth=None, password_auth=None, auto_grow=None, performance_tier=None,
                            storage_type=None, iops=None, throughput=None, create_default_db='Enabled', yes=False):
 
-    if (not check_resource_group(resource_group_name)):
+    if not check_resource_group(resource_group_name):
         resource_group_name = None
 
     # Generate missing parameters

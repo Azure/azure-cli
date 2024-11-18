@@ -32,7 +32,7 @@ EXTENSION_REFERENCE = ("If the command is from an extension, "
                        "To learn more about extensions, please visit "
                        "'https://docs.microsoft.com/cli/azure/azure-cli-extensions-overview'")
 
-OVERVIEW_REFERENCE = ("https://aka.ms/cli_ref")
+OVERVIEW_REFERENCE = "https://aka.ms/cli_ref"
 
 
 class IncorrectUsageError(CLIError):

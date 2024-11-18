@@ -1194,7 +1194,7 @@ def _validate_admin_username(username, os_type):
     import re
     if not username:
         raise CLIError("admin user name can not be empty")
-    is_linux = (os_type.lower() == 'linux')
+    is_linux = os_type.lower() == 'linux'
     # pylint: disable=line-too-long
     pattern = (r'[\\\/"\[\]:|<>+=;,?*@#()!A-Z]+' if is_linux else r'[\\\/"\[\]:|<>+=;,?*@]+')
     linux_err = r'admin user name cannot contain upper case character A-Z, special characters \/"[]:|<>+=;,?*@#()! or start with $ or -'
@@ -1212,7 +1212,7 @@ def _validate_admin_username(username, os_type):
 
 def _validate_admin_password(password, os_type):
     import re
-    is_linux = (os_type.lower() == 'linux')
+    is_linux = os_type.lower() == 'linux'
     max_length = 72 if is_linux else 123
     min_length = 12
 
