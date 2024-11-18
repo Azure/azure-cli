@@ -55,7 +55,7 @@ class FeatureFlagConstants:
     # Telemetry properties
     METADATA = "metadata"
 
-    #feature flags key
+    # feature flags key
     FEATURE_FLAGS_KEY = "feature_flags"
 
 
