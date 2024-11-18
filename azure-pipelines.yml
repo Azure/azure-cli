@@ -1174,17 +1174,8 @@ jobs:
       azdev statistics list-command-table CLI --statistics-only
       # CLI + EXT repos
       azdev statistics list-command-table --statistics-only > /tmp/codegen_report.json
-      # azure-kusto is not compatible with azure-cli
-      # so we need run azdev statistics before installing azure-kusto to avoid the error `No module named azure.cli`
-      pip install azure-kusto-data azure-kusto-ingest
       python s/scripts/ci/codegen_report.py
     env:
       BUILD_ID: $(Build.BuildId)
       BUILD_BRANCH: $(Build.SourceBranchName)
-      KUSTO_CLIENT_ID: $(KUSTO_CLIENT_ID)
-      KUSTO_CLIENT_SECRET: $(KUSTO_CLIENT_SECRET)
-      KUSTO_CLUSTER: $(KUSTO_CLUSTER)
-      KUSTO_DATABASE: $(KUSTO_DATABASE)
-      KUSTO_TABLE: $(KUSTO_TABLE)
-      KUSTO_TENANT_ID: $(KUSTO_TENANT_ID)
-    enabled: false
+    enabled: true
