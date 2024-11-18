@@ -267,10 +267,10 @@ def __convert_feature_dict_to_keyvalue_list(
 def __get_ms_feature_management_schema(features_dict):
     ms_fm_keyword = FeatureManagementReservedKeywords.UNDERSCORE.feature_management
     feature_management_section = features_dict.get(ms_fm_keyword, None)
-    if feature_management_section and isinstance(feature_management_section, dict):
+    if feature_management_section and not isinstance(feature_management_section, dict):
         raise ValidationError("Feature management section must be a dictionary.")
 
-    if isinstance(feature_management_section[FeatureFlagConstants.FEATURE_FLAGS_KEY], list):
+    if not isinstance(feature_management_section[FeatureFlagConstants.FEATURE_FLAGS_KEY], list):
         raise ValidationError("Feature flags must be a list.")
 
     return feature_management_section
@@ -284,7 +284,7 @@ def __get_legacy_feature_management_schema(
         legacySchemaFeatureManagementKeyWord, None
     )
 
-    if feature_management_section and isinstance(feature_management_section, dict):
+    if feature_management_section and not isinstance(feature_management_section, dict):
         raise ValidationError("Feature management section must be a dictionary.")
 
     if legacySchemaFeatureManagementKeyWord == ms_fm_keyword:
