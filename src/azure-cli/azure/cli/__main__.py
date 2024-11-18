@@ -97,7 +97,7 @@ finally:
                             upgrade_exit_code = subprocess.call(cmd, shell=platform.system() == 'Windows')
                     else:
                         cmd.append('-y')
-                        upgrade_exit_code = subprocess.Popen(
+                        upgrade_exit_code = subprocess.call(
                             args=cmd,
                             shell=platform.system() == 'Windows',
                             stdout=subprocess.DEVNULL,
