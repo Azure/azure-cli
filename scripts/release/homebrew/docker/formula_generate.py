@@ -134,7 +134,8 @@ def update_formula() -> str:
 
     # update python version
     text = re.sub('depends_on "python@.*"', f'depends_on "python@{PYTHON_VERSION}"', text, 1)
-    text = re.sub(r'virtualenv_create\(libexec, "python.*"', f'virtualenv_create(libexec, "python{PYTHON_VERSION}"', text, 1)  # pylint: disable=line-too-long
+    venv_str = f'venv = virtualenv_create(libexec, "python{PYTHON_VERSION}", system_site_packages: false)'
+    text = re.sub(r'venv = virtualenv_create.*', venv_str, text, 1)
 
     # update url and sha256 of azure-cli
     text = re.sub('url ".*"', 'url "{}"'.format(HOMEBREW_UPSTREAM_URL), text, 1)

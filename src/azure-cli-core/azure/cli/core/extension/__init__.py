@@ -380,3 +380,9 @@ def is_stable_from_metadata(item):
     return not (item["metadata"].get(EXT_METADATA_ISPREVIEW, False) or
                 item["metadata"].get(EXT_METADATA_ISEXPERIMENTAL, False) or
                 is_preview_from_semantic_version(item["metadata"]['version']))
+
+
+def is_preview_from_metadata(item):
+    return bool(item["metadata"].get(EXT_METADATA_ISPREVIEW, False) or
+                item["metadata"].get(EXT_METADATA_ISEXPERIMENTAL, False) or
+                is_preview_from_semantic_version(item["metadata"]['version']))

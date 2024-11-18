@@ -192,7 +192,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         """
         sp_auth = ServicePrincipalAuth.build_from_credential(self.tenant_id, client_id, credential)
         client_credential = sp_auth.get_msal_client_credential()
-        cca = ConfidentialClientApplication(client_id, client_credential, **self._msal_app_kwargs)
+        cca = ConfidentialClientApplication(client_id, client_credential=client_credential, **self._msal_app_kwargs)
         result = cca.acquire_token_for_client(scopes)
         check_result(result)
 
@@ -303,7 +303,9 @@ class ServicePrincipalAuth:  # pylint: disable=too-many-instance-attributes
         return ServicePrincipalAuth(entry)
 
     @classmethod
-    def build_credential(cls, secret_or_certificate=None, client_assertion=None, use_cert_sn_issuer=None):
+    def build_credential(cls, client_secret=None,
+                         certificate=None, use_cert_sn_issuer=None,
+                         client_assertion=None):
         """Build credential from user input. The credential looks like below, but only one key can exist.
         {
             'client_secret': 'my_secret',
@@ -312,14 +314,12 @@ class ServicePrincipalAuth:  # pylint: disable=too-many-instance-attributes
         }
         """
         entry = {}
-        if secret_or_certificate:
-            user_expanded = os.path.expanduser(secret_or_certificate)
-            if os.path.isfile(user_expanded):
-                entry[_CERTIFICATE] = user_expanded
-                if use_cert_sn_issuer:
-                    entry[_USE_CERT_SN_ISSUER] = use_cert_sn_issuer
-            else:
-                entry[_CLIENT_SECRET] = secret_or_certificate
+        if client_secret:
+            entry[_CLIENT_SECRET] = client_secret
+        elif certificate:
+            entry[_CERTIFICATE] = os.path.expanduser(certificate)
+            if use_cert_sn_issuer:
+                entry[_USE_CERT_SN_ISSUER] = use_cert_sn_issuer
         elif client_assertion:
             entry[_CLIENT_ASSERTION] = client_assertion
         return entry

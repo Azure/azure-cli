@@ -119,7 +119,7 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
           # Device code flow
           use_device_code=False,
           # Service principal
-          service_principal=None, use_cert_sn_issuer=None, client_assertion=None,
+          service_principal=None, certificate=None, use_cert_sn_issuer=None, client_assertion=None,
           # Managed identity
           identity=False):
     """Log in to access Azure subscriptions"""
@@ -148,7 +148,7 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
         logger.warning(_CLOUD_CONSOLE_LOGIN_WARNING)
 
     if username:
-        if not (password or client_assertion):
+        if not (password or client_assertion or certificate):
             try:
                 password = prompt_pass('Password: ')
             except NoTTYException:
@@ -158,7 +158,10 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
 
     if service_principal:
         from azure.cli.core.auth.identity import ServicePrincipalAuth
-        password = ServicePrincipalAuth.build_credential(password, client_assertion, use_cert_sn_issuer)
+        password = ServicePrincipalAuth.build_credential(
+            client_secret=password,
+            certificate=certificate, use_cert_sn_issuer=use_cert_sn_issuer,
+            client_assertion=client_assertion)
 
     login_experience_v2 = cmd.cli_ctx.config.getboolean('core', 'login_experience_v2', fallback=True)
     # Send login_experience_v2 config to telemetry

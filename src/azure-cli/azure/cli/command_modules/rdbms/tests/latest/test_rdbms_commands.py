@@ -894,6 +894,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
 
 class ReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-public-methods
 
+    @live_only()
     @ResourceGroupPreparer(parameter_name='resource_group')
     def test_mysql_replica_mgmt(self, resource_group):
         self._test_replica_mgmt(resource_group, 'mysql')
