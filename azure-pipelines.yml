@@ -1150,7 +1150,6 @@ jobs:
 
 
 - job: CodegenCoverage
-  condition: and(succeededOrFailed(), in(variables['Build.Reason'], 'BatchedCI'))
   displayName: "Codegen Coverage"
   pool:
     name: ${{ variables.ubuntu_pool }}
