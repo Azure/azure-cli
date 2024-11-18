@@ -90,7 +90,7 @@ def acr_create(cmd,
     lro_poller = client.begin_create(resource_group_name, registry_name, registry)
 
     if workspace:
-        from msrestazure.tools import is_valid_resource_id, resource_id
+        from azure.mgmt.core.tools import is_valid_resource_id, resource_id
         from azure.cli.core.commands import LongRunningOperation
         from azure.cli.core.commands.client_factory import get_subscription_id
         acr = LongRunningOperation(cmd.cli_ctx)(lro_poller)
@@ -609,7 +609,7 @@ def _analyze_identities(identities):
 
 
 def _ensure_identity_resource_id(subscription_id, resource_group, resource):
-    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     if is_valid_resource_id(resource):
         return resource
     return resource_id(subscription=subscription_id,

@@ -389,6 +389,124 @@ class AKSAgentPoolContext(BaseAKSContext):
             crg_id = raw_value
         return crg_id
 
+    def get_enable_vtpm(self) -> bool:
+        return self._get_enable_vtpm(enable_validation=True)
+
+    def _get_enable_vtpm(self, enable_validation: bool = False) -> bool:
+        """Obtain the value of enable_vtpm, default value is False.
+
+        :return: bool
+        """
+        # read the original value passed by the command
+        enable_vtpm = self.raw_param.get("enable_vtpm", False)
+
+        # In create mode, try and read the property value corresponding to the parameter from the `agentpool` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            # try to read the property value corresponding to the parameter from the `agentpool` object
+            if (
+                self.agentpool and
+                hasattr(self.agentpool, "security_profile") and
+                self.agentpool.security_profile is not None and
+                self.agentpool.security_profile.enable_vtpm is not None
+            ):
+                enable_vtpm = self.agentpool.security_profile.enable_vtpm
+
+        # This parameter does not need dynamic completion.
+        if enable_validation:
+            if enable_vtpm and self._get_disable_vtpm(enable_validation=False):
+                raise MutuallyExclusiveArgumentError(
+                    "Cannot specify --enable-vtpm and --disable-vtpm at the same time."
+                )
+
+        return enable_vtpm
+
+    def _get_disable_vtpm(self, enable_validation: bool = False) -> bool:
+        """Internal function to obtain the value of disable_vtpm.
+        This function supports the option of enable_vtpm.
+        When enabled, if both enable_vtpm and disable_vtpm are specified,
+        raise a MutuallyExclusiveArgumentError.
+        :return: bool
+        """
+        # Read the original value passed by the command.
+        disable_vtpm = self.raw_param.get("disable_vtpm")
+
+        # This option is not supported in create mode, hence we do not read the property value from the `mc` object.
+        # This parameter does not need dynamic completion.
+        if enable_validation:
+            if disable_vtpm and self._get_enable_vtpm(enable_validation=False):
+                raise MutuallyExclusiveArgumentError(
+                    "Cannot specify --enable-vtpm and --disable-vtpm at the same time."
+                )
+
+        return disable_vtpm
+
+    def get_disable_vtpm(self) -> bool:
+        """Obtain the value of disable_vtpm.
+        This function will verify the parameter by default.
+        If both enable_vtpm and disable_vtpm are specified, raise a MutuallyExclusiveArgumentError.
+        :return: bool
+        """
+        return self._get_disable_vtpm(enable_validation=True)
+
+    def get_enable_secure_boot(self) -> bool:
+        return self._get_enable_secure_boot(enable_validation=True)
+
+    def _get_enable_secure_boot(self, enable_validation: bool = False) -> bool:
+        """Obtain the value of enable_secure_boot, default value is False.
+
+        :return: bool
+        """
+        # read the original value passed by the command
+        enable_secure_boot = self.raw_param.get("enable_secure_boot", False)
+
+        # In create mode, try and read the property value corresponding to the parameter from the `agentpool` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            # try to read the property value corresponding to the parameter from the `agentpool` object
+            if (
+                self.agentpool and
+                hasattr(self.agentpool, "security_profile") and
+                self.agentpool.security_profile is not None and
+                self.agentpool.security_profile.enable_secure_boot is not None
+            ):
+                enable_secure_boot = self.agentpool.security_profile.enable_secure_boot
+
+        # This parameter does not need dynamic completion.
+        if enable_validation:
+            if enable_secure_boot and self._get_disable_secure_boot(enable_validation=False):
+                raise MutuallyExclusiveArgumentError(
+                    "Cannot specify --enable-secure-boot and --disable-secure-boot at the same time."
+                )
+
+        return enable_secure_boot
+
+    def _get_disable_secure_boot(self, enable_validation: bool = False) -> bool:
+        """Internal function to obtain the value of disable_secure_boot.
+        This function supports the option of enable_secure_boot.
+        When enabled, if both enable_secure_boot and disable_secure_boot are specified,
+        raise a MutuallyExclusiveArgumentError.
+        :return: bool
+        """
+        # Read the original value passed by the command.
+        disable_secure_boot = self.raw_param.get("disable_secure_boot")
+
+        # This option is not supported in create mode, hence we do not read the property value from the `mc` object.
+        # This parameter does not need dynamic completion.
+        if enable_validation:
+            if disable_secure_boot and self._get_enable_secure_boot(enable_validation=False):
+                raise MutuallyExclusiveArgumentError(
+                    "Cannot specify --enable-secure-boot and --disable-secure-boot at the same time."
+                )
+
+        return disable_secure_boot
+
+    def get_disable_secure_boot(self) -> bool:
+        """Obtain the value of disable_secure_boot.
+        This function will verify the parameter by default.
+        If both enable_secure_boot and disable_secure_boot are specified, raise a MutuallyExclusiveArgumentError.
+        :return: bool
+        """
+        return self._get_disable_secure_boot(enable_validation=True)
+
     def _get_kubernetes_version(self, read_only: bool = False) -> str:
         """Internal function to dynamically obtain the value of kubernetes_version according to the context.
 
@@ -1683,6 +1801,28 @@ class AKSAgentPoolAddDecorator:
         agentpool.capacity_reservation_group_id = self.context.get_crg_id()
         return agentpool
 
+    def set_up_agentpool_security_profile(self, agentpool: AgentPool) -> AgentPool:
+        """Set up security profile for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        enable_vtpm = self.context.get_enable_vtpm()
+        enable_secure_boot = self.context.get_enable_secure_boot()
+
+        # Construct AgentPoolSecurityProfile if one of the fields has been set
+        if enable_vtpm:
+            agentpool.security_profile = self.models.AgentPoolSecurityProfile()  # pylint: disable=no-member
+            agentpool.security_profile.enable_vtpm = enable_vtpm
+
+        if enable_secure_boot:
+            if not agentpool.security_profile:
+                agentpool.security_profile = self.models.AgentPoolSecurityProfile()  # pylint: disable=no-member
+            agentpool.security_profile.enable_secure_boot = enable_secure_boot
+
+        return agentpool
+
     def set_up_agentpool_network_profile(self, agentpool: AgentPool) -> AgentPool:
         self._ensure_agentpool(agentpool)
 
@@ -1758,6 +1898,8 @@ class AKSAgentPoolAddDecorator:
         agentpool = self.set_up_agentpool_windows_profile(agentpool)
         # set up crg id
         agentpool = self.set_up_crg_id(agentpool)
+        # set up agentpool security profile
+        agentpool = self.set_up_agentpool_security_profile(agentpool)
         # restore defaults
         if not bypass_restore_defaults:
             agentpool = self._restore_defaults_in_agentpool(agentpool)
@@ -2002,6 +2144,42 @@ class AKSAgentPoolUpdateDecorator:
 
         return agentpool
 
+    def update_secure_boot(self, agentpool: AgentPool) -> AgentPool:
+        """Update secure boot property for the AgentPool object.
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        if self.context.get_enable_secure_boot():
+            if agentpool.security_profile is None:
+                agentpool.secure_boot = self.models.AgentPoolSecurityProfile()  # pylint: disable=no-member
+            agentpool.security_profile.enable_secure_boot = True
+
+        if self.context.get_disable_secure_boot():
+            if agentpool.security_profile is None:
+                agentpool.security_profile = self.models.AgentPoolSecurityProfile()  # pylint: disable=no-member
+            agentpool.security_profile.enable_secure_boot = False
+
+        return agentpool
+
+    def update_vtpm(self, agentpool: AgentPool) -> AgentPool:
+        """Update vtpm property for the AgentPool object.
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        if self.context.get_enable_vtpm():
+            if agentpool.security_profile is None:
+                agentpool.security_profile = self.models.AgentPoolSecurityProfile()  # pylint: disable=no-member
+            agentpool.security_profile.enable_vtpm = True
+
+        if self.context.get_disable_vtpm():
+            if agentpool.security_profile is None:
+                agentpool.security_profile = self.models.AgentPoolSecurityProfile()  # pylint: disable=no-member
+            agentpool.security_profile.enable_vtpm = False
+
+        return agentpool
+
     def update_agentpool_profile_default(self, agentpools: List[AgentPool] = None) -> AgentPool:
         """The overall controller used to update AgentPool profile by default.
 
@@ -2027,6 +2205,10 @@ class AKSAgentPoolUpdateDecorator:
         # update fips image
         agentpool = self.update_fips_image(agentpool)
 
+        # update vtpm
+        agentpool = self.update_vtpm(agentpool)
+        # update secure boot
+        agentpool = self.update_secure_boot(agentpool)
         return agentpool
 
     def update_agentpool(self, agentpool: AgentPool) -> AgentPool:

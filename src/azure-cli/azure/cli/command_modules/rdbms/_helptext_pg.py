@@ -35,7 +35,7 @@ examples:
         az postgres flexible-server create --location northeurope --resource-group testGroup \\
           --name testserver --admin-user username --admin-password password \\
           --sku-name Standard_D2s_v3 --tier GeneralPurpose --public-access 153.24.26.117 --storage-size 128 \\
-          --tags "key=value" --version 16 --high-availability ZoneRedundant --zone 1 \\
+          --tags "key=value" --version 17 --high-availability ZoneRedundant --zone 1 \\
           --standby-zone 3
   - name: >
       Create a PostgreSQL flexible server using Premium SSD v2 Disks.
@@ -724,6 +724,16 @@ type: group
 short-summary: Manage flexible server backups.
 """
 
+helps['postgres flexible-server backup create'] = """
+type: command
+short-summary: Create a new backup for a flexible server.
+examples:
+  - name: >
+      Create a backup.
+    text: >
+      az postgres flexible-server backup create -g testgroup -n testsvr --backup-name testbackup
+"""
+
 helps['postgres flexible-server backup list'] = """
 type: command
 short-summary: List all the backups for a given server.
@@ -738,6 +748,51 @@ short-summary: Show the details of a specific backup for a given server.
 examples:
   - name: Show the details of backup 'testbackup' for 'testsvr'.
     text: az postgres flexible-server backup show -g testgroup -n testsvr --backup-name testbackup
+"""
+
+helps['postgres flexible-server backup delete'] = """
+type: command
+short-summary: Delete a specific backup.
+examples:
+  - name: Delete a backup.
+    text: az postgres flexible-server backup delete -g testgroup -n testsvr --backup-name testbackup
+"""
+
+helps['postgres flexible-server long-term-retention'] = """
+type: group
+short-summary: Manage flexible server long-term-retention backups.
+"""
+
+helps['postgres flexible-server long-term-retention pre-check'] = """
+type: command
+short-summary: Performs all the checks that are needed for the subsequent long-term-retention backup operation to succeed.
+examples:
+  - name: Precheck if we can perform long-term-retention command on server 'server-name' on resource group 'resource-group-name' with backup name 'backup-name'.
+    text: az postgres flexible-server long-term-retention pre-check -g resource-group-name -b backup-name -n server-name
+"""
+
+helps['postgres flexible-server long-term-retention start'] = """
+type: command
+short-summary: Start long-term-retention backup for a flexible server. SAS URL parameter refers to the container SAS URL, inside the storage account, where the backups will be uploaded.
+examples:
+  - name: Create a backup with name 'backup-name' of server 'server-name' in resource group 'resource-group-name', using container with SAS URL '<sas-url>'.
+    text: az postgres flexible-server long-term-retention start -g resource-group-name -b backup-name -n server-name -u <sas-url>
+"""
+
+helps['postgres flexible-server long-term-retention show'] = """
+type: command
+short-summary: Show the details of a specific long-term-retention backup for a given server.
+examples:
+  - name: Show the details of long-term-retention backup 'testbackup' for 'testsvr'.
+    text: az postgres flexible-server long-term-retention show -g resource-group-name -n server-name -b backup-name
+"""
+
+helps['postgres flexible-server long-term-retention list'] = """
+type: command
+short-summary: List all the long-term-retention backups for a given server.
+examples:
+  - name: List all long-term-retention backups for 'testsvr'.
+    text: az postgres flexible-server long-term-retention list -g resource-group-name -n server-name
 """
 
 helps['postgres flexible-server replica'] = """
@@ -757,7 +812,8 @@ examples:
         --source-server testserver --zone 3 --location testLocation \\
         --vnet newVnet --subnet newSubnet \\
         --address-prefixes 172.0.0.0/16 --subnet-prefixes 172.0.0.0/24 \\
-        --private-dns-zone testDNS.postgres.database.azure.com
+        --private-dns-zone testDNS.postgres.database.azure.com \\
+        --tags "key=value"
   - name: >
       Create a read replica 'testreplicaserver' for 'testserver' with public or private access \
       in the specified location if available. Since zone is not passed, it will automatically pick up zone in the \

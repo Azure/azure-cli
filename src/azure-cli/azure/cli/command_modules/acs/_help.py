@@ -56,7 +56,6 @@ parameters:
   - name: --service-principal
     type: string
     short-summary: Service principal used for authentication to Azure APIs.
-    long-summary: If not specified, a new service principal is created and cached at $HOME/.azure/aksServicePrincipal.json to be used by subsequent `az aks` commands.
   - name: --skip-subnet-role-assignment
     type: bool
     short-summary: Skip role assignment for subnet (advanced networking).
@@ -129,18 +128,6 @@ parameters:
   - name: --aad-admin-group-object-ids
     type: string
     short-summary: Comma-separated list of aad group object IDs that will be set as cluster admin.
-  - name: --aad-client-app-id
-    type: string
-    short-summary: The ID of an Azure Active Directory client application of type "Native". This application is for user login via kubectl.
-    long-summary: --aad-client-app-id is deprecated. See https://aka.ms/aks/aad-legacy for details.
-  - name: --aad-server-app-id
-    type: string
-    short-summary: The ID of an Azure Active Directory server application of type "Web app/API". This application represents the managed cluster's apiserver (Server application).
-    long-summary: --aad-server-app-id is deprecated. See https://aka.ms/aks/aad-legacy for details.
-  - name: --aad-server-app-secret
-    type: string
-    short-summary: The secret of an Azure Active Directory server application.
-    long-summary: --aad-server-app-secret is deprecated. See https://aka.ms/aks/aad-legacy for details.
   - name: --aad-tenant-id
     type: string
     short-summary: The ID of an Azure Active Directory tenant.
@@ -327,9 +314,6 @@ parameters:
   - name: --enable-high-log-scale-mode
     type: bool
     short-summary: Enable High Log Scale Mode for Container Logs.
-  - name: --uptime-sla
-    type: bool
-    short-summary: --uptime-sla is deprecated. Please use '--tier standard' instead.
   - name: --tier
     type: string
     short-summary: Specify SKU tier for managed clusters. '--tier standard' enables a standard managed cluster service with a financially backed SLA. '--tier free' does not have a financially backed SLA.
@@ -551,6 +535,12 @@ parameters:
   - name: --enable-cost-analysis
     type: bool
     short-summary: Enable exporting Kubernetes Namespace and Deployment details to the Cost Analysis views in the Azure portal. For more information see aka.ms/aks/docs/cost-analysis.
+  - name: --enable-secure-boot
+    type: bool
+    short-summary: Enable Secure Boot on all node pools in the cluster. Must use VMSS agent pool type.
+  - name: --enable-vtpm
+    type: bool
+    short-summary: Enable vTPM on all node pools in the cluster. Must use VMSS agent pool type.
 
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
@@ -648,12 +638,6 @@ parameters:
   - name: --max-count
     type: int
     short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 1000]
-  - name: --uptime-sla
-    type: bool
-    short-summary: Enable a standard managed cluster service with a financially backed SLA. --uptime-sla is deprecated. Please use '--tier standard' instead.
-  - name: --no-uptime-sla
-    type: bool
-    short-summary: Change a standard managed cluster to a free one. --no-uptime-sla is deprecated. Please use '--tier free' instead.
   - name: --tier
     type: string
     short-summary: Specify SKU tier for managed clusters. '--tier standard' enables a standard managed cluster service with a financially backed SLA. '--tier free' changes a standard managed cluster to a free one.
@@ -1601,6 +1585,12 @@ parameters:
   - name: --disable-windows-outbound-nat
     type: bool
     short-summary: Disable Windows OutboundNAT on Windows agent node pool.
+  - name: --enable-secure-boot
+    type: bool
+    short-summary: Enable Secure Boot on agent node pool. Must use VMSS agent pool type.
+  - name: --enable-vtpm
+    type: bool
+    short-summary: Enable vTPM on agent node pool. Must use VMSS agent pool type.
 
 examples:
   - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.
@@ -1713,6 +1703,18 @@ parameters:
   - name: --disable-fips-image
     type: bool
     short-summary: Switch to use non-FIPS-enabled OS on agent nodes.
+  - name: --enable-secure-boot
+    type: bool
+    short-summary: Enable Secure Boot on an existing Trusted Launch enabled agent node pool. Must use VMSS agent pool type.
+  - name: --disable-secure-boot
+    type: bool
+    short-summary: Disable Secure Boot on on an existing Trusted Launch enabled agent node pool.
+  - name: --enable-vtpm
+    type: bool
+    short-summary: Enable vTPM on an existing Trusted Launch enabled agent node pool. Must use VMSS agent pool type.
+  - name: --disable-vtpm
+    type: bool
+    short-summary: Disable vTPM on an existing Trusted Launch enabled agent node pool.
 examples:
   - name: Reconcile the nodepool back to its current state.
     text: az aks nodepool update -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster

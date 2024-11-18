@@ -23,9 +23,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-10-01-preview",
+        "version": "2023-01-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.servicebus/namespaces/{}", "2022-10-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.servicebus/namespaces/{}", "2023-01-01-preview"],
         ]
     }
 
@@ -59,8 +59,46 @@ class Update(AAZCommand):
             ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
-            help="The resourceGroup name",
             required=True,
+        )
+
+        # define Arg Group "GeoDataReplication"
+
+        _args_schema = cls._args_schema
+        _args_schema.locations = AAZListArg(
+            options=["--locations"],
+            arg_group="GeoDataReplication",
+            help="A list of regions where replicas of the namespace are maintained.",
+            nullable=True,
+        )
+        _args_schema.max_replication_lag_duration_in_seconds = AAZIntArg(
+            options=["--max-lag", "--max-replication-lag-duration-in-seconds"],
+            arg_group="GeoDataReplication",
+            help="The maximum acceptable lag for data replication operations from the primary replica to a quorum of secondary replicas.  When the lag exceeds the configured amount, operations on the primary replica will be failed. The allowed values are 0 and 5 minutes to 1 day.",
+            nullable=True,
+        )
+
+        locations = cls._args_schema.locations
+        locations.Element = AAZObjectArg(
+            nullable=True,
+        )
+
+        _element = cls._args_schema.locations.Element
+        _element.cluster_arm_id = AAZStrArg(
+            options=["cluster-arm-id"],
+            help="Optional property that denotes the ARM ID of the Cluster. This is required, if a namespace replica should be placed in a Dedicated Event Hub Cluster",
+            nullable=True,
+        )
+        _element.location_name = AAZStrArg(
+            options=["location-name"],
+            help="Azure regions where a replica of the namespace is maintained",
+            nullable=True,
+        )
+        _element.role_type = AAZStrArg(
+            options=["role-type"],
+            help="GeoDR Role Types",
+            nullable=True,
+            enum={"Primary": "Primary", "Secondary": "Secondary"},
         )
 
         # define Arg Group "Parameters"
@@ -341,7 +379,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-10-01-preview",
+                    "api-version", "2023-01-01-preview",
                     required=True,
                 ),
             }
@@ -440,7 +478,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-10-01-preview",
+                    "api-version", "2023-01-01-preview",
                     required=True,
                 ),
             }
@@ -517,6 +555,7 @@ class Update(AAZCommand):
                 properties.set_prop("alternateName", AAZStrType, ".alternate_name")
                 properties.set_prop("disableLocalAuth", AAZBoolType, ".disable_local_auth")
                 properties.set_prop("encryption", AAZObjectType, ".encryption")
+                properties.set_prop("geoDataReplication", AAZObjectType)
                 properties.set_prop("minimumTlsVersion", AAZStrType, ".minimum_tls_version")
                 properties.set_prop("premiumMessagingPartitions", AAZIntType, ".premium_messaging_partitions")
                 properties.set_prop("privateEndpointConnections", AAZListType, ".private_endpoint_connections")
@@ -542,6 +581,21 @@ class Update(AAZCommand):
             identity = _builder.get(".properties.encryption.keyVaultProperties[].identity")
             if identity is not None:
                 identity.set_prop("userAssignedIdentity", AAZStrType, ".user_assigned_identity")
+
+            geo_data_replication = _builder.get(".properties.geoDataReplication")
+            if geo_data_replication is not None:
+                geo_data_replication.set_prop("locations", AAZListType, ".locations")
+                geo_data_replication.set_prop("maxReplicationLagDurationInSeconds", AAZIntType, ".max_replication_lag_duration_in_seconds")
+
+            locations = _builder.get(".properties.geoDataReplication.locations")
+            if locations is not None:
+                locations.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.geoDataReplication.locations[]")
+            if _elements is not None:
+                _elements.set_prop("clusterArmId", AAZStrType, ".cluster_arm_id")
+                _elements.set_prop("locationName", AAZStrType, ".location_name")
+                _elements.set_prop("roleType", AAZStrType, ".role_type")
 
             private_endpoint_connections = _builder.get(".properties.privateEndpointConnections")
             if private_endpoint_connections is not None:
@@ -672,6 +726,9 @@ class _UpdateHelper:
             serialized_name="disableLocalAuth",
         )
         properties.encryption = AAZObjectType()
+        properties.geo_data_replication = AAZObjectType(
+            serialized_name="geoDataReplication",
+        )
         properties.metric_id = AAZStrType(
             serialized_name="metricId",
             flags={"read_only": True},
@@ -722,7 +779,9 @@ class _UpdateHelper:
         key_vault_properties.Element = AAZObjectType()
 
         _element = _schema_sb_namespace_read.properties.encryption.key_vault_properties.Element
-        _element.identity = AAZObjectType()
+        _element.identity = AAZObjectType(
+            flags={"client_flatten": True},
+        )
         _element.key_name = AAZStrType(
             serialized_name="keyName",
         )
@@ -736,6 +795,26 @@ class _UpdateHelper:
         identity = _schema_sb_namespace_read.properties.encryption.key_vault_properties.Element.identity
         identity.user_assigned_identity = AAZStrType(
             serialized_name="userAssignedIdentity",
+        )
+
+        geo_data_replication = _schema_sb_namespace_read.properties.geo_data_replication
+        geo_data_replication.locations = AAZListType()
+        geo_data_replication.max_replication_lag_duration_in_seconds = AAZIntType(
+            serialized_name="maxReplicationLagDurationInSeconds",
+        )
+
+        locations = _schema_sb_namespace_read.properties.geo_data_replication.locations
+        locations.Element = AAZObjectType()
+
+        _element = _schema_sb_namespace_read.properties.geo_data_replication.locations.Element
+        _element.cluster_arm_id = AAZStrType(
+            serialized_name="clusterArmId",
+        )
+        _element.location_name = AAZStrType(
+            serialized_name="locationName",
+        )
+        _element.role_type = AAZStrType(
+            serialized_name="roleType",
         )
 
         private_endpoint_connections = _schema_sb_namespace_read.properties.private_endpoint_connections

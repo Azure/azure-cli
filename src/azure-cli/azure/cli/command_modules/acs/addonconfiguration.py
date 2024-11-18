@@ -23,8 +23,8 @@ from azure.cli.core.azclierror import AzCLIError, CLIError, InvalidArgumentValue
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import send_raw_request
 from azure.core.exceptions import HttpResponseError
+from azure.mgmt.core.tools import parse_resource_id, resource_id
 from knack.log import get_logger
-from msrestazure.tools import parse_resource_id, resource_id
 
 logger = get_logger(__name__)
 # mapping for azure public cloud
@@ -901,7 +901,7 @@ def add_ingress_appgw_addon_role_assignment(result, cmd):
             )
             if not add_role_assignment(
                 cmd,
-                "Contributor",
+                "Network Contributor",
                 service_principal_msi_id,
                 is_service_principal,
                 scope=appgw_group_id,
@@ -943,7 +943,7 @@ def add_ingress_appgw_addon_role_assignment(result, cmd):
                 )
                 if not add_role_assignment(
                     cmd,
-                    "Contributor",
+                    "Network Contributor",
                     service_principal_msi_id,
                     is_service_principal,
                     scope=vnet_id,
