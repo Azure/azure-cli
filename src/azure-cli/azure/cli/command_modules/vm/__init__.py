@@ -93,6 +93,14 @@ class AzureStackComputeCommandsLoader(AzCommandsLoader):
                 args=args
             )
         load_command_table(self, args)
+        try:
+            # When generated commands are required uncomment the following two lines.
+            from .generated.commands import load_command_table as load_command_table_generated
+            load_command_table_generated(self, args)
+            from .manual.commands import load_command_table as load_command_table_manual
+            load_command_table_manual(self, args)
+        except ImportError:
+            pass
 
         profile = self.get_module_by_profile("commands")
         if profile and hasattr(profile, 'load_command_table'):
@@ -103,6 +111,13 @@ class AzureStackComputeCommandsLoader(AzCommandsLoader):
     def load_arguments(self, command):
         from azure.cli.command_modules.vm.azure_stack._params import load_arguments
         load_arguments(self, command)
+        try:
+            from .generated._params import load_arguments as load_arguments_generated
+            load_arguments_generated(self, command)
+            from .manual._params import load_arguments as load_arguments_manual
+            load_arguments_manual(self, command)
+        except ImportError:
+            pass
 
         profile = self.get_module_by_profile("_params")
         if profile and hasattr(profile, 'load_arguments'):

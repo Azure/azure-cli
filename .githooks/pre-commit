@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+":" //; if command -v pwsh >/dev/null 2>&1; then pwsh -ExecutionPolicy Bypass -File .githooks/pre-commit.ps1; else sh .githooks/pre-commit.sh; fi; exit $?     # Try PowerShell Core first, then sh on Unix
+":" //; exit                         # Skip rest on Unix
+
+@echo off
+powershell -NoProfile -Command "if (Get-Command powershell -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }"
+if %errorlevel% equ 0 (
+    powershell -ExecutionPolicy Bypass -File .githooks\pre-commit.ps1
+) else (
+    echo Error: PowerShell is not available. Please install PowerShell.
+    exit /b 1
+)
+exit /b %errorlevel%

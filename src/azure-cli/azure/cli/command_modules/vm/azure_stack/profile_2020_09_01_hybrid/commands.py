@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-# pylint: disable=line-too-long, too-many-statements, too-many-locals
+# pylint: disable=unused-argument, too-many-locals, too-many-branches, too-many-statements
 from azure.cli.command_modules.vm.azure_stack._format import (
     transform_disk_show_table_output,
     transform_vmss_list_with_zones_table_output)

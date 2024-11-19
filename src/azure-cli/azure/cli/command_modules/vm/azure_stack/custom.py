@@ -42,8 +42,9 @@ from ._vm_diagnostics_templates import get_default_diag_config
 from ._vm_utils import read_content_if_is_file, import_aaz_by_profile
 from ..aaz.latest.vm.disk import AttachDetachDataDisk
 
+from ..generated.custom import *  # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
 try:
-    from .manual.custom import *  # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
+    from ..manual.custom import *  # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
 except ImportError:
     pass
 

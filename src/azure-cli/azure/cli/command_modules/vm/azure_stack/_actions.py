@@ -21,7 +21,7 @@ from azure.cli.core.commands.parameters import get_one_of_subscription_locations
 from ._client_factory import _compute_client_factory
 
 try:
-    from .manual.action import *  # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
+    from ..manual.action import *  # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
 except ImportError:
     pass
 
