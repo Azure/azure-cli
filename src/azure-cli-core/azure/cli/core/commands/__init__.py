@@ -125,6 +125,7 @@ def _convert_camel_case(obj):
         return [_convert_camel_case(a) for a in obj]
     return obj
 
+
 # pylint: disable=too-many-instance-attributes
 class CacheObject:
 
