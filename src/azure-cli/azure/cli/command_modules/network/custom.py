@@ -2811,8 +2811,9 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
             rs = _convert_to_snake_case(root_ns)
         try:
             rs["target_resource"] = rs.get("target_resource").get("id") if rs.get("target_resource") else None
-
             _record_create = _record_create_func(rs_type)
+            if 'traffic_management_profile' in rs:
+                del rs['traffic_management_profile']
             _record_create(cli_ctx=cmd.cli_ctx)(command_args={
                 'resource_group': resource_group_name,
                 'zone_name': zone_name,
