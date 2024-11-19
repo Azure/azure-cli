@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.67.0
+++++++
+* PREVIEW: Support managed identity on Azure Arc-enabled Windows server (#29187)
+
 2.66.0
 ++++++
 * `aaz`: Support managed identity (#29953)
