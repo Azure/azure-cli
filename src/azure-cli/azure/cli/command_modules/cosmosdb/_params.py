@@ -90,7 +90,7 @@ def load_arguments(self, _):
         c.argument('tables_to_restore', nargs='+', action=CreateTableRestoreResource, arg_group='Restore')
         c.argument('enable_partition_merge', arg_type=get_three_state_flag(), help="Flag to enable partition merge on the account.")
         c.argument('enable_burst_capacity', arg_type=get_three_state_flag(), help="Flag to enable burst capacity on the account.")
-        c.argument('enable-prpp-autoscale', arg_type=get_three_state_flag(), help="Enable or disable PerRegionPerPartitionAutoscale.")
+        c.argument('enable_prpp_autoscale', arg_type=get_three_state_flag(), help="Enable or disable PerRegionPerPartitionAutoscale.")
         c.argument('key_uri', help="The URI of the key vault")
 
     for scope in ['cosmosdb create', 'cosmosdb update']:
@@ -122,7 +122,7 @@ def load_arguments(self, _):
             c.argument('backup_policy_type', arg_type=get_enum_type(BackupPolicyType), help="The type of backup policy of the account to create", arg_group='Backup Policy')
             c.argument('enable_partition_merge', arg_type=get_three_state_flag(), help="Flag to enable partition merge on the account.")
             c.argument('enable_burst_capacity', arg_type=get_three_state_flag(), help="Flag to enable burst capacity on the account.")
-            c.argument('enable-prpp-autoscale', arg_type=get_three_state_flag(), help="Enable or disable PerRegionPerPartitionAutoscale.")
+            c.argument('enable_prpp_autoscale', arg_type=get_three_state_flag(), help="Enable or disable PerRegionPerPartitionAutoscale.")
             c.argument('continuous_tier', arg_type=get_enum_type(ContinuousTier), help="The tier of Continuous backup", arg_group='Backup Policy')
             c.argument('minimal_tls_version', arg_type=get_enum_type(MinimalTlsVersion), help="Indicates the minimum allowed TLS version")
 

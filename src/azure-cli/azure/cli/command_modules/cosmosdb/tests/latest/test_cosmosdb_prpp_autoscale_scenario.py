@@ -14,13 +14,12 @@ class Cosmosdb_EnablePerRegionPerPartitionAutoscaleScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_enable_per_region_per_partition_autoscale', location='australiaeast')
-    def test_cosmosdb_enable_per_region_per_partition_autoscale(self):
+    def test_cosmosdb_enable_per_region_per_partition_autoscale(self, resource_group):
         col = self.create_random_name(prefix='cli', length=15)
         db_name = self.create_random_name(prefix='cli', length=15)
         # Assumption: There exists a cosmosTest rg.
         self.kwargs.update({
-            'rg' : 'cosmosTest',
-            'acc': 'prpp-test-38129749818',
+            'acc': self.create_random_name(prefix='prpp-test-', length=20),
             'loc': 'australiaeast',
             'tar': '0=1200 1=1200',
             'src': '2'
