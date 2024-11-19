@@ -704,6 +704,12 @@ examples:
     text: az acr manifest list-metadata -r myregistry -n hello-world
   - name: List the metadata of the manifests in the repository 'hello-world'.
     text: az acr manifest list-metadata myregistry.azurecr.io/hello-world
+  - name: List the metadata of all manifests (tagged/untagged) in the repository 'hello-world'.
+    text: az acr manifest list-metadata -r myregistry -n hello-world --query "[]"
+  - name: List the metadata of untagged manifests in the repository 'hello-world'.
+    text: az acr manifest list-metadata -r myregistry -n hello-world --query "[?tags==null]"
+  - name: List the metadata of untagged manifests by digests for the repository 'hello-world'.
+    text: az acr manifest list-metadata -r myregistry -n hello-world --query "[?tags==null].digests"
 """
 
 helps['acr manifest update-metadata'] = """
