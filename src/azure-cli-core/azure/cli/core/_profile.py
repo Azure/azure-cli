@@ -377,7 +377,7 @@ class Profile:
 
         account = self.get_subscription(subscription_id)
 
-        managed_identity_type, managed_identity_id = Profile._try_parse_msi_account_name(account)
+        managed_identity_type, managed_identity_id = Profile._parse_managed_identity_account(account)
 
         if in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
             # Cloud Shell
@@ -436,7 +436,7 @@ class Profile:
 
         account = self.get_subscription(subscription)
 
-        managed_identity_type, managed_identity_id = Profile._try_parse_msi_account_name(account)
+        managed_identity_type, managed_identity_id = Profile._parse_managed_identity_account(account)
 
         if in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
             # Cloud Shell
@@ -642,15 +642,18 @@ class Profile:
         return self.get_subscription(subscription)[_SUBSCRIPTION_ID]
 
     @staticmethod
-    def _try_parse_msi_account_name(account):
-        msi_info, user = account[_USER_ENTITY].get(_ASSIGNED_IDENTITY_INFO), account[_USER_ENTITY].get(_USER_NAME)
-
-        if user in [_SYSTEM_ASSIGNED_IDENTITY, _USER_ASSIGNED_IDENTITY]:
-            if not msi_info:
-                msi_info = account[_SUBSCRIPTION_NAME]  # fall back to old persisting way
-            parts = msi_info.split('-', 1)
-            if parts[0] in MsiAccountTypes.valid_msi_account_types():
-                return parts[0], (None if len(parts) <= 1 else parts[1])
+    def _parse_managed_identity_account(account):
+        user_name = account[_USER_ENTITY][_USER_NAME]
+        if user_name == _SYSTEM_ASSIGNED_IDENTITY:
+            # The account contains:
+            #   "assignedIdentityInfo": "MSI",
+            #   "name": "systemAssignedIdentity",
+            return MsiAccountTypes.system_assigned, None
+        if user_name == _USER_ASSIGNED_IDENTITY:
+            # The account contains:
+            #   "assignedIdentityInfo": "MSIClient-xxx"/"MSIObject-xxx"/"MSIResource-xxx",
+            #   "name": "userAssignedIdentity",
+            return tuple(account[_USER_ENTITY][_ASSIGNED_IDENTITY_INFO].split('-', maxsplit=1))
         return None, None
 
     def _create_credential(self, account, tenant_id=None, client_id=None):
