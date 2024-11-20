@@ -47,7 +47,6 @@ from ._clients import (
 )
 from ._github_oauth import get_github_access_token
 from ._models import (
-    Ingress as IngressModel,
     JobExecutionTemplate as JobExecutionTemplateModel,
     RegistryCredentials as RegistryCredentialsModel,
     ContainerResources as ContainerResourcesModel,
