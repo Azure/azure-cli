@@ -390,7 +390,7 @@ class TestVMBootLog(unittest.TestCase):
             get_sdk_mock.assert_called_with(cli_ctx_mock, ResourceType.DATA_STORAGE, 'blob.blockblobservice#BlockBlobService')
 
 
-class FakedVM(object):  # pylint: disable=too-few-public-methods
+class FakedVM:  # pylint: disable=too-few-public-methods
     def __init__(self, nics=None, disks=None, os_disk=None):
         self.network_profile = NetworkProfile(network_interfaces=nics)
         self.storage_profile = StorageProfile(data_disks=disks, os_disk=os_disk)
@@ -402,7 +402,7 @@ class FakedVM(object):  # pylint: disable=too-few-public-methods
         self.instance_view.extensions = [ext]
 
 
-class FakedAccessExtensionEntity(object):  # pylint: disable=too-few-public-methods
+class FakedAccessExtensionEntity:  # pylint: disable=too-few-public-methods
     def __init__(self, is_linux, version):
         self.name = 'VMAccessForLinux' if is_linux else 'VMAccessAgent'
         self.type_handler_version = version
