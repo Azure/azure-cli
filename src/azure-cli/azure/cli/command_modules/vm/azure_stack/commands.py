@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.command_modules.monitor._client_factory import cf_metric_def
-from azure.cli.command_modules.monitor._exception_handler import exception_handler as monitor_exception_handler
 from azure.cli.command_modules.vm.azure_stack._client_factory import (cf_vm, cf_avail_set,
                                                                       cf_vm_ext, cf_vm_ext_image,
                                                                       cf_vm_image, cf_vm_image_term, cf_usage,
@@ -28,12 +26,9 @@ from azure.cli.command_modules.vm.azure_stack._client_factory import (cf_vm, cf_
                                                                       cf_community_gallery_image_version)
 from azure.cli.command_modules.vm.azure_stack._format import (
     transform_ip_addresses, transform_vm, transform_vm_create_output, transform_vm_usage_list, transform_vm_list,
-    transform_disk_create_table_output, transform_sku_for_table_output, transform_extension_show_table_output,
-    get_vmss_table_output_transformer,
+    transform_disk_create_table_output, transform_sku_for_table_output,
+    transform_extension_show_table_output, get_vmss_table_output_transformer,
     transform_vm_encryption_show_table_output, transform_log_analytics_query_output)
-from azure.cli.command_modules.vm.azure_stack._image_builder import (
-    process_image_template_create_namespace, process_img_tmpl_output_add_namespace,
-    process_img_tmpl_customizer_add_namespace, image_builder_client_factory, cf_img_bldr_image_templates)
 from azure.cli.command_modules.vm.azure_stack._validators import (
     process_vm_create_namespace, process_vmss_create_namespace, process_image_create_namespace,
     process_disk_create_namespace, process_snapshot_create_namespace,
@@ -42,8 +37,16 @@ from azure.cli.command_modules.vm.azure_stack._validators import (
     process_vm_update_namespace, process_set_applications_namespace, process_vm_disk_attach_namespace,
     process_image_version_create_namespace, process_image_version_update_namespace,
     process_image_version_undelete_namespace, process_ppg_create_namespace, process_vm_disk_detach_namespace)
+
+from azure.cli.command_modules.vm.azure_stack._image_builder import (
+    process_image_template_create_namespace, process_img_tmpl_output_add_namespace,
+    process_img_tmpl_customizer_add_namespace, image_builder_client_factory, cf_img_bldr_image_templates)
+
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation, CliCommandType
 from azure.cli.core.commands.arm import deployment_validate_table_format, handle_template_based_exception
+
+from azure.cli.command_modules.monitor._exception_handler import exception_handler as monitor_exception_handler
+from azure.cli.command_modules.monitor._client_factory import cf_metric_def
 from azure.cli.core.profiles import ResourceType
 
 
@@ -232,134 +235,101 @@ def load_command_table(self, _):
         client_factory=cf_community_gallery_image_version)
 
     with self.command_group('disk', compute_disk_sdk, operation_group='disks', min_api='2017-03-30') as g:
-        g.custom_command('create', 'create_managed_disk', supports_no_wait=True,
-                         table_transformer=transform_disk_create_table_output, validator=process_disk_create_namespace)
+        g.custom_command('create', 'create_managed_disk', supports_no_wait=True, table_transformer=transform_disk_create_table_output, validator=process_disk_create_namespace)
         g.custom_command('grant-access', 'grant_disk_access')
-        g.generic_update_command('update', custom_func_name='update_managed_disk', setter_name='begin_create_or_update',
-                                 setter_arg_name='disk', supports_no_wait=True)
+        g.generic_update_command('update', custom_func_name='update_managed_disk', setter_name='begin_create_or_update', setter_arg_name='disk', supports_no_wait=True)
 
-    with self.command_group('disk-encryption-set', compute_disk_encryption_set_sdk,
-                            operation_group='disk_encryption_sets', client_factory=cf_disk_encryption_set,
-                            min_api='2019-07-01') as g:
+    with self.command_group('disk-encryption-set', compute_disk_encryption_set_sdk, operation_group='disk_encryption_sets', client_factory=cf_disk_encryption_set, min_api='2019-07-01') as g:
         g.custom_command('create', 'create_disk_encryption_set', supports_no_wait=True)
-        g.generic_update_command('update', custom_func_name='update_disk_encryption_set',
-                                 setter_arg_name='disk_encryption_set', setter_name='begin_create_or_update')
+        g.generic_update_command('update', custom_func_name='update_disk_encryption_set', setter_arg_name='disk_encryption_set', setter_name='begin_create_or_update')
 
-    with self.command_group('disk-encryption-set identity', compute_disk_encryption_set_sdk,
-                            operation_group='disk_encryption_sets', client_factory=cf_disk_encryption_set,
-                            min_api='2022-03-02') as g:
+    with self.command_group('disk-encryption-set identity', compute_disk_encryption_set_sdk, operation_group='disk_encryption_sets', client_factory=cf_disk_encryption_set, min_api='2022-03-02') as g:
         g.custom_command('assign', 'assign_disk_encryption_set_identity')
         g.custom_command('remove', 'remove_disk_encryption_set_identity', confirmation=True)
         g.custom_show_command('show', 'show_disk_encryption_set_identity')
 
-    with self.command_group('disk-access', compute_disk_access_sdk, operation_group='disk_accesses',
-                            client_factory=cf_disk_accesses, min_api='2020-05-01') as g:
+    with self.command_group('disk-access', compute_disk_access_sdk, operation_group='disk_accesses', client_factory=cf_disk_accesses, min_api='2020-05-01') as g:
         g.custom_command('create', 'create_disk_access', supports_no_wait=True)
-        g.generic_update_command('update', setter_name='set_disk_access', setter_type=compute_custom,
-                                 supports_no_wait=True)
+        g.generic_update_command('update', setter_name='set_disk_access', setter_type=compute_custom, supports_no_wait=True)
 
     with self.command_group('image', compute_image_sdk, min_api='2016-04-30-preview') as g:
         g.custom_command('create', 'create_image', validator=process_image_create_namespace)
         g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_image')
 
-    with self.command_group('image builder', image_builder_image_templates_sdk,
-                            custom_command_type=image_builder_custom) as g:
-        g.custom_command('create', 'create_image_template', supports_no_wait=True, supports_local_cache=True,
-                         validator=process_image_template_create_namespace)
+    with self.command_group('image builder', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
+        g.custom_command('create', 'create_image_template', supports_no_wait=True, supports_local_cache=True, validator=process_image_template_create_namespace)
         g.custom_command('list', 'list_image_templates')
         g.show_command('show', 'get')
         g.command('delete', 'begin_delete')
-        g.generic_update_command('update', setter_name='begin_create_or_update',
-                                 supports_local_cache=True)  # todo Update fails for now as service does not support updates
+        g.generic_update_command('update', setter_name='begin_create_or_update', supports_local_cache=True)  # todo Update fails for now as service does not support updates
         g.wait_command('wait')
         g.command('run', 'begin_run', supports_no_wait=True)
         g.custom_command('show-runs', 'show_build_output')
         g.command('cancel', 'begin_cancel')
 
-    with self.command_group('image builder identity', image_builder_image_templates_sdk,
-                            custom_command_type=image_builder_custom) as g:
+    with self.command_group('image builder identity', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
         g.custom_command('assign', 'assign_template_identity', supports_local_cache=True)
         g.custom_command('remove', 'remove_template_identity', supports_local_cache=True, confirmation=True)
         g.custom_show_command('show', 'show_template_identity', supports_local_cache=True)
 
-    with self.command_group('image builder customizer', image_builder_image_templates_sdk,
-                            custom_command_type=image_builder_custom) as g:
-        g.custom_command('add', 'add_template_customizer', supports_local_cache=True,
-                         validator=process_img_tmpl_customizer_add_namespace)
+    with self.command_group('image builder customizer', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
+        g.custom_command('add', 'add_template_customizer', supports_local_cache=True, validator=process_img_tmpl_customizer_add_namespace)
         g.custom_command('remove', 'remove_template_customizer', supports_local_cache=True)
         g.custom_command('clear', 'clear_template_customizer', supports_local_cache=True)
 
-    with self.command_group('image builder output', image_builder_image_templates_sdk,
-                            custom_command_type=image_builder_custom) as g:
-        g.custom_command('add', 'add_template_output', supports_local_cache=True,
-                         validator=process_img_tmpl_output_add_namespace)
+    with self.command_group('image builder output', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
+        g.custom_command('add', 'add_template_output', supports_local_cache=True, validator=process_img_tmpl_output_add_namespace)
         g.custom_command('remove', 'remove_template_output', supports_local_cache=True)
         g.custom_command('clear', 'clear_template_output', supports_local_cache=True)
 
-    with self.command_group('image builder output versioning', image_builder_image_templates_sdk,
-                            custom_command_type=image_builder_custom) as g:
+    with self.command_group('image builder output versioning', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
         g.custom_command('set', 'set_template_output_versioning', supports_local_cache=True)
         g.custom_command('remove', 'remove_template_output_versioning', supports_local_cache=True)
         g.custom_show_command('show', 'show_template_output_versioning', supports_local_cache=True)
 
-    with self.command_group('image builder validator', image_builder_image_templates_sdk,
-                            custom_command_type=image_builder_custom) as g:
+    with self.command_group('image builder validator', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
         g.custom_command('add', 'add_template_validator', supports_local_cache=True)
         g.custom_command('remove', 'remove_template_validator', supports_local_cache=True)
         g.custom_show_command('show', 'show_template_validator', supports_local_cache=True)
 
-    with self.command_group('image builder optimizer', image_builder_image_templates_sdk,
-                            custom_command_type=image_builder_custom) as g:
+    with self.command_group('image builder optimizer', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
         g.custom_command('add', 'add_or_update_template_optimizer', supports_local_cache=True)
         g.custom_command('update', 'add_or_update_template_optimizer', supports_local_cache=True)
         g.custom_command('remove', 'remove_template_optimizer', supports_local_cache=True)
         g.custom_show_command('show', 'show_template_optimizer', supports_local_cache=True)
 
-    with self.command_group('image builder error-handler', image_builder_image_templates_sdk,
-                            custom_command_type=image_builder_custom) as g:
+    with self.command_group('image builder error-handler', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
         g.custom_command('add', 'add_template_error_handler', supports_local_cache=True)
         g.custom_command('remove', 'remove_template_error_handler', supports_local_cache=True)
         g.custom_show_command('show', 'show_template_error_handler', supports_local_cache=True)
 
-    with self.command_group('snapshot', compute_snapshot_sdk, operation_group='snapshots',
-                            min_api='2016-04-30-preview') as g:
-        g.custom_command('create', 'create_snapshot', validator=process_snapshot_create_namespace,
-                         supports_no_wait=True)
+    with self.command_group('snapshot', compute_snapshot_sdk, operation_group='snapshots', min_api='2016-04-30-preview') as g:
+        g.custom_command('create', 'create_snapshot', validator=process_snapshot_create_namespace, supports_no_wait=True)
         g.custom_command('grant-access', 'grant_snapshot_access')
-        g.generic_update_command('update', custom_func_name='update_snapshot', setter_name='begin_create_or_update',
-                                 setter_arg_name='snapshot', supports_no_wait=True)
+        g.generic_update_command('update', custom_func_name='update_snapshot', setter_name='begin_create_or_update', setter_arg_name='snapshot', supports_no_wait=True)
 
     with self.command_group('vm', compute_vm_sdk) as g:
         g.custom_command('identity assign', 'assign_vm_identity', validator=process_assign_identity_namespace)
-        g.custom_command('identity remove', 'remove_vm_identity', validator=process_remove_identity_namespace,
-                         min_api='2017-12-01')
+        g.custom_command('identity remove', 'remove_vm_identity', validator=process_remove_identity_namespace, min_api='2017-12-01')
         g.custom_show_command('identity show', 'show_vm_identity')
 
-        g.custom_command('application set', 'set_vm_applications', validator=process_set_applications_namespace,
-                         min_api='2021-07-01')
+        g.custom_command('application set', 'set_vm_applications', validator=process_set_applications_namespace, min_api='2021-07-01')
         g.custom_command('application list', 'list_vm_applications', min_api='2021-07-01')
 
         g.custom_command('capture', 'capture_vm')
-        g.custom_command('create', 'create_vm', transform=transform_vm_create_output, supports_no_wait=True,
-                         table_transformer=deployment_validate_table_format, validator=process_vm_create_namespace,
-                         exception_handler=handle_template_based_exception)
+        g.custom_command('create', 'create_vm', transform=transform_vm_create_output, supports_no_wait=True, table_transformer=deployment_validate_table_format, validator=process_vm_create_namespace, exception_handler=handle_template_based_exception)
         g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
-        g.custom_command('get-instance-view', 'get_instance_view',
-                         table_transformer='{Name:name, ResourceGroup:resourceGroup, Location:location, ProvisioningState:provisioningState, PowerState:instanceView.statuses[1].displayStatus}')
+        g.custom_command('get-instance-view', 'get_instance_view', table_transformer='{Name:name, ResourceGroup:resourceGroup, Location:location, ProvisioningState:provisioningState, PowerState:instanceView.statuses[1].displayStatus}')
         g.custom_command('list', 'list_vm', table_transformer=transform_vm_list)
         g.custom_command('list-ip-addresses', 'list_vm_ip_addresses', table_transformer=transform_ip_addresses)
-        g.custom_command('list-skus', 'list_skus', table_transformer=transform_sku_for_table_output,
-                         min_api='2017-03-30')
-        g.command('list-usage', 'list', command_type=compute_vm_usage_sdk, transform=transform_vm_usage_list,
-                  table_transformer='[].{Name:localName, CurrentValue:currentValue, Limit:limit}')
+        g.custom_command('list-skus', 'list_skus', table_transformer=transform_sku_for_table_output, min_api='2017-03-30')
+        g.command('list-usage', 'list', command_type=compute_vm_usage_sdk, transform=transform_vm_usage_list, table_transformer='[].{Name:localName, CurrentValue:currentValue, Limit:limit}')
         g.custom_command('open-port', 'open_vm_port')
         g.custom_command('resize', 'resize_vm', supports_no_wait=True)
         g.custom_command('restart', 'restart_vm', supports_no_wait=True)
         g.custom_show_command('show', 'show_vm', table_transformer=transform_vm)
         g.command('stop', 'begin_power_off', supports_no_wait=True, validator=process_vm_vmss_stop)
-        g.generic_update_command('update', getter_name='get_vm_to_update', setter_name='update_vm',
-                                 setter_type=compute_custom, command_type=compute_custom, supports_no_wait=True,
-                                 validator=process_vm_update_namespace)
+        g.generic_update_command('update', getter_name='get_vm_to_update', setter_name='update_vm', setter_type=compute_custom, command_type=compute_custom, supports_no_wait=True, validator=process_vm_update_namespace)
         g.wait_command('wait', getter_name='get_instance_view', getter_type=compute_custom)
         g.custom_command('auto-shutdown', 'auto_shutdown_vm')
 
@@ -368,8 +338,7 @@ def load_command_table(self, _):
 
     with self.command_group('vm availability-set', compute_availset_sdk) as g:
         g.custom_command('convert', 'convert_av_set_to_managed_disk', min_api='2016-04-30-preview')
-        g.custom_command('create', 'create_av_set', table_transformer=deployment_validate_table_format,
-                         supports_no_wait=True, exception_handler=handle_template_based_exception)
+        g.custom_command('create', 'create_av_set', table_transformer=deployment_validate_table_format, supports_no_wait=True, exception_handler=handle_template_based_exception)
         g.custom_command('list', 'list_av_sets')
         g.generic_update_command('update', custom_func_name='update_av_set')
 
@@ -390,8 +359,7 @@ def load_command_table(self, _):
     with self.command_group('vm encryption', custom_command_type=compute_disk_encryption_custom) as g:
         g.custom_command('enable', 'encrypt_vm', validator=process_disk_encryption_namespace)
         g.custom_command('disable', 'decrypt_vm')
-        g.custom_show_command('show', 'show_vm_encryption_status',
-                              table_transformer=transform_vm_encryption_show_table_output)
+        g.custom_show_command('show', 'show_vm_encryption_status', table_transformer=transform_vm_encryption_show_table_output)
 
     with self.command_group('vm extension', compute_vm_extension_sdk) as g:
         g.custom_show_command('show', 'show_extensions', table_transformer=transform_extension_show_table_output)
@@ -423,8 +391,7 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'show_vm_nic')
         g.custom_command('list', 'list_vm_nics')
 
-    with self.command_group('vm run-command', compute_vm_run_sdk, client_factory=cf_run_commands,
-                            operation_group='virtual_machine_run_commands', min_api='2017-03-30') as g:
+    with self.command_group('vm run-command', compute_vm_run_sdk, client_factory=cf_run_commands, operation_group='virtual_machine_run_commands', min_api='2017-03-30') as g:
         g.custom_command('invoke', 'vm_run_command_invoke', supports_no_wait=True)
         g.custom_command('list', 'vm_run_command_list')
         g.custom_show_command('show', 'vm_run_command_show')
@@ -463,20 +430,14 @@ def load_command_table(self, _):
 
     with self.command_group('vmss', compute_vmss_sdk, operation_group='virtual_machine_scale_sets') as g:
         g.custom_command('identity assign', 'assign_vmss_identity', validator=process_assign_identity_namespace)
-        g.custom_command('identity remove', 'remove_vmss_identity', validator=process_remove_identity_namespace,
-                         min_api='2017-12-01', is_preview=True)
+        g.custom_command('identity remove', 'remove_vmss_identity', validator=process_remove_identity_namespace, min_api='2017-12-01', is_preview=True)
         g.custom_show_command('identity show', 'show_vmss_identity')
-        g.custom_command('application set', 'set_vmss_applications', validator=process_set_applications_namespace,
-                         min_api='2021-07-01')
+        g.custom_command('application set', 'set_vmss_applications', validator=process_set_applications_namespace, min_api='2021-07-01')
         g.custom_command('application list', 'list_vmss_applications', min_api='2021-07-01')
-        g.custom_command('create', 'create_vmss',
-                         transform=DeploymentOutputLongRunningOperation(self.cli_ctx, 'Starting vmss create'),
-                         supports_no_wait=True, table_transformer=deployment_validate_table_format,
-                         validator=process_vmss_create_namespace, exception_handler=handle_template_based_exception)
+        g.custom_command('create', 'create_vmss', transform=DeploymentOutputLongRunningOperation(self.cli_ctx, 'Starting vmss create'), supports_no_wait=True, table_transformer=deployment_validate_table_format, validator=process_vmss_create_namespace, exception_handler=handle_template_based_exception)
         g.custom_command('deallocate', 'deallocate_vmss', supports_no_wait=True)
         g.custom_command('delete-instances', 'delete_vmss_instances', supports_no_wait=True)
-        g.custom_command('get-instance-view', 'get_vmss_instance_view',
-                         table_transformer='{ProvisioningState:statuses[0].displayStatus, PowerState:statuses[1].displayStatus}')
+        g.custom_command('get-instance-view', 'get_vmss_instance_view', table_transformer='{ProvisioningState:statuses[0].displayStatus, PowerState:statuses[1].displayStatus}')
         g.custom_command('list-instance-connection-info', 'list_vmss_instance_connection_info')
         g.custom_command('list-instance-public-ips', 'list_vmss_instance_public_ips')
         g.custom_command('reimage', 'reimage_vmss', supports_no_wait=True, min_api='2017-03-30')
@@ -485,9 +446,7 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'get_vmss', table_transformer=get_vmss_table_output_transformer(self, False))
         g.custom_command('start', 'start_vmss', supports_no_wait=True)
         g.custom_command('stop', 'stop_vmss', supports_no_wait=True, validator=process_vm_vmss_stop)
-        g.generic_update_command('update', getter_name='get_vmss_modified', setter_name='update_vmss',
-                                 supports_no_wait=True, command_type=compute_custom,
-                                 validator=validate_vmss_update_namespace)
+        g.generic_update_command('update', getter_name='get_vmss_modified', setter_name='update_vmss', supports_no_wait=True, command_type=compute_custom, validator=validate_vmss_update_namespace)
         g.custom_command('update-instances', 'update_vmss_instances', supports_no_wait=True)
         g.wait_command('wait', getter_name='get_vmss', getter_type=compute_custom)
         g.custom_command('set-orchestration-service-state', 'set_orchestration_service_state', supports_no_wait=True)
@@ -500,8 +459,7 @@ def load_command_table(self, _):
         g.custom_command('attach', 'attach_managed_data_disk_to_vmss')
         g.custom_command('detach', 'detach_disk_from_vmss')
 
-    with self.command_group('vmss encryption', custom_command_type=compute_disk_encryption_custom,
-                            min_api='2017-03-30') as g:
+    with self.command_group('vmss encryption', custom_command_type=compute_disk_encryption_custom, min_api='2017-03-30') as g:
         g.custom_command('enable', 'encrypt_vmss', validator=process_disk_encryption_namespace)
         g.custom_command('disable', 'decrypt_vmss')
         g.custom_show_command('show', 'show_vmss_encryption_status')
@@ -516,8 +474,7 @@ def load_command_table(self, _):
     with self.command_group('vmss extension image', compute_vm_extension_image_sdk) as g:
         g.custom_command('list', 'list_vm_extension_images')
 
-    with self.command_group('vmss run-command', compute_vmss_run_sdk, client_factory=cf_vmss_run_commands,
-                            min_api='2018-04-01') as g:
+    with self.command_group('vmss run-command', compute_vmss_run_sdk, client_factory=cf_vmss_run_commands, min_api='2018-04-01') as g:
         g.custom_command('invoke', 'vmss_run_command_invoke')
         g.custom_command('list', 'vmss_run_command_list')
         g.custom_show_command('show', 'vmss_run_command_show')
@@ -528,41 +485,27 @@ def load_command_table(self, _):
     with self.command_group('sig', compute_galleries_sdk, operation_group='galleries', min_api='2018-06-01') as g:
         g.custom_command('create', 'create_image_gallery')
         g.custom_show_command('show', 'show_image_gallery')
-        g.generic_update_command('update', setter_type=compute_custom, setter_name='update_image_galleries',
-                                 setter_arg_name='gallery')
+        g.generic_update_command('update', setter_type=compute_custom, setter_name='update_image_galleries', setter_arg_name='gallery')
 
-    with self.command_group('sig', community_gallery_sdk, client_factory=cf_community_gallery,
-                            operation_group='shared_galleries', min_api='2022-01-03') as g:
+    with self.command_group('sig', community_gallery_sdk, client_factory=cf_community_gallery, operation_group='shared_galleries', min_api='2022-01-03') as g:
         g.custom_command('list-community', 'sig_community_gallery_list')
 
-    with self.command_group('sig image-definition', community_gallery_image_sdk,
-                            client_factory=cf_community_gallery_image, operation_group='shared_galleries',
-                            min_api='2022-01-03') as g:
+    with self.command_group('sig image-definition', community_gallery_image_sdk, client_factory=cf_community_gallery_image, operation_group='shared_galleries', min_api='2022-01-03') as g:
         g.command('show-community', 'get')
         g.custom_command('list-community', 'sig_community_image_definition_list')
 
-    with self.command_group('sig image-version', community_gallery_image_version_sdk,
-                            client_factory=cf_community_gallery_image_version, operation_group='shared_galleries',
-                            min_api='2022-01-03') as g:
+    with self.command_group('sig image-version', community_gallery_image_version_sdk, client_factory=cf_community_gallery_image_version, operation_group='shared_galleries', min_api='2022-01-03') as g:
         g.custom_command('list-community', 'sig_community_image_version_list')
 
-    with self.command_group('sig image-definition', compute_gallery_images_sdk, operation_group='gallery_images',
-                            min_api='2018-06-01') as g:
+    with self.command_group('sig image-definition', compute_gallery_images_sdk, operation_group='gallery_images', min_api='2018-06-01') as g:
         g.custom_command('create', 'create_gallery_image')
         g.generic_update_command('update', setter_name='begin_create_or_update', setter_arg_name='gallery_image')
 
-    with self.command_group('sig image-version', compute_gallery_image_versions_sdk,
-                            operation_group='gallery_image_versions', min_api='2018-06-01') as g:
-        g.show_command('show', 'get',
-                       table_transformer='{Name:name, ResourceGroup:resourceGroup, ProvisioningState:provisioningState, TargetRegions: publishingProfile.targetRegions && join(`, `, publishingProfile.targetRegions[*].name), EdgeZones: publishingProfile.targetExtendedLocations && join(`, `, publishingProfile.targetExtendedLocations[*].name), ReplicationState:replicationStatus.aggregatedState}')
-        g.custom_command('create', 'create_image_version', supports_no_wait=True,
-                         validator=process_image_version_create_namespace)
-        g.custom_command('undelete', 'undelete_image_version', supports_no_wait=True, min_api='2021-07-01',
-                         validator=process_image_version_undelete_namespace, is_preview=True)
-        g.generic_update_command('update', getter_name='get_image_version_to_update',
-                                 setter_arg_name='gallery_image_version', setter_name='update_image_version',
-                                 setter_type=compute_custom, command_type=compute_custom, supports_no_wait=True,
-                                 validator=process_image_version_update_namespace)
+    with self.command_group('sig image-version', compute_gallery_image_versions_sdk, operation_group='gallery_image_versions', min_api='2018-06-01') as g:
+        g.show_command('show', 'get', table_transformer='{Name:name, ResourceGroup:resourceGroup, ProvisioningState:provisioningState, TargetRegions: publishingProfile.targetRegions && join(`, `, publishingProfile.targetRegions[*].name), EdgeZones: publishingProfile.targetExtendedLocations && join(`, `, publishingProfile.targetExtendedLocations[*].name), ReplicationState:replicationStatus.aggregatedState}')
+        g.custom_command('create', 'create_image_version', supports_no_wait=True, validator=process_image_version_create_namespace)
+        g.custom_command('undelete', 'undelete_image_version', supports_no_wait=True, min_api='2021-07-01', validator=process_image_version_undelete_namespace, is_preview=True)
+        g.generic_update_command('update', getter_name='get_image_version_to_update', setter_arg_name='gallery_image_version', setter_name='update_image_version', setter_type=compute_custom, command_type=compute_custom, supports_no_wait=True, validator=process_image_version_update_namespace)
         g.wait_command('wait')
 
     vm_shared_gallery = CliCommandType(
@@ -593,11 +536,10 @@ def load_command_table(self, _):
 
     vm_shared_gallery_image = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations._shared_gallery_images_operations#SharedGalleryImagesOperations.'
-                        '{}',
+        '{}',
         client_factory=cf_shared_gallery_image,
         operation_group='shared_galleries')
-    with self.command_group('sig image-definition', vm_shared_gallery_image, min_api='2020-09-30',
-                            operation_group='shared_galleries',
+    with self.command_group('sig image-definition', vm_shared_gallery_image, min_api='2020-09-30', operation_group='shared_galleries',
                             client_factory=cf_shared_gallery_image) as g:
         g.custom_command('list-shared', 'sig_shared_image_definition_list')
 
@@ -610,32 +552,24 @@ def load_command_table(self, _):
                             client_factory=cf_shared_gallery_image_version) as g:
         g.custom_command('list-shared', 'sig_shared_image_version_list')
 
-    with self.command_group('sig gallery-application', compute_gallery_application_sdk,
-                            client_factory=cf_gallery_application, min_api='2021-07-01',
-                            operation_group='gallery_applications') as g:
+    with self.command_group('sig gallery-application', compute_gallery_application_sdk, client_factory=cf_gallery_application, min_api='2021-07-01', operation_group='gallery_applications') as g:
         g.custom_command('create', 'gallery_application_create', supports_no_wait=True)
         g.custom_command('update', 'gallery_application_update', supports_no_wait=True)
         g.wait_command('wait')
 
-    with self.command_group('sig gallery-application version', compute_gallery_application_version_sdk,
-                            client_factory=cf_gallery_application_version, min_api='2021-07-01',
-                            operation_group='gallery_application_versions') as g:
+    with self.command_group('sig gallery-application version', compute_gallery_application_version_sdk, client_factory=cf_gallery_application_version, min_api='2021-07-01', operation_group='gallery_application_versions') as g:
         g.custom_command('create', 'gallery_application_version_create', supports_no_wait=True)
         g.custom_command('update', 'gallery_application_version_update', supports_no_wait=True)
 
-    with self.command_group('ppg', compute_proximity_placement_groups_sdk, min_api='2018-04-01',
-                            client_factory=cf_proximity_placement_groups) as g:
+    with self.command_group('ppg', compute_proximity_placement_groups_sdk, min_api='2018-04-01', client_factory=cf_proximity_placement_groups) as g:
         g.custom_command('create', 'create_proximity_placement_group', validator=process_ppg_create_namespace)
         g.custom_command('list', 'list_proximity_placement_groups')
         g.generic_update_command('update', setter_name='create_or_update', custom_func_name='update_ppg')
 
     with self.command_group('vm monitor log', client_factory=cf_log_analytics_data_plane) as g:
-        g.custom_command('show', 'execute_query_for_vm',
-                         transform=transform_log_analytics_query_output)  # pylint: disable=show-command
+        g.custom_command('show', 'execute_query_for_vm', transform=transform_log_analytics_query_output)  # pylint: disable=show-command
 
-    with self.command_group('vm monitor metrics', custom_command_type=monitor_custom,
-                            command_type=metric_definitions_sdk, resource_type=ResourceType.MGMT_MONITOR,
-                            operation_group='metric_definitions', min_api='2018-01-01', is_preview=True) as g:
+    with self.command_group('vm monitor metrics', custom_command_type=monitor_custom, command_type=metric_definitions_sdk, resource_type=ResourceType.MGMT_MONITOR, operation_group='metric_definitions', min_api='2018-01-01', is_preview=True) as g:
         from azure.cli.command_modules.monitor.transformers import metrics_table, metrics_definitions_table
         from azure.cli.core.profiles._shared import APIVersionException
         try:
