@@ -1707,6 +1707,14 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
             self.cmd(
             'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} -y')
 
+        # invalid variants import
+        invalid_variants_file_path = os.path.join(TEST_DIR, 'import_invalid_variants.json')
+        self.kwargs.update({
+            'imported_file_path': invalid_variants_file_path
+        })
+        with self.assertRaisesRegex(CLIError, "Feature variant must contain required 'name' attribute:"):
+            self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} -y')
 
 class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
 

@@ -261,8 +261,8 @@ class FeatureVariant:
         name = variant.get(FeatureFlagConstants.NAME, None)
         if not name:
             raise ValidationError(
-                "Feature variant must contain required 'name' attribute: \n%s"
-                % (json.dumps(variant, indent=2, ensure_ascii=False))
+                "Feature variant must contain required '%s' attribute: \n%s"
+                % (FeatureFlagConstants.NAME, json.dumps(variant, indent=2, ensure_ascii=False))
             )
 
         configuration_value = variant.get(
@@ -325,8 +325,8 @@ class FeatureUserAllocation:
         users = user_allocation.get(FeatureFlagConstants.USERS, None)
         if not variant or not users:
             raise ValidationError(
-                "User variant allocation must contain required 'variant' and 'users' attributes: \n%s"
-                % (json.dumps(user_allocation, indent=2, ensure_ascii=False))
+                "User variant allocation must contain required '%s' and '%s' attributes: \n%s"
+                % (FeatureFlagConstants.VARIANT, FeatureFlagConstants.USERS, json.dumps(user_allocation, indent=2, ensure_ascii=False))
             )
 
         return cls(variant=variant, users=users)
@@ -372,8 +372,8 @@ class FeatureGroupAllocation:
         groups = group_allocation.get(FeatureFlagConstants.GROUPS, None)
         if not variant or not groups:
             raise ValidationError(
-                "Group variant allocation must contain required 'variant' and 'groups' attributes: \n%s"
-                % (json.dumps(group_allocation, indent=2, ensure_ascii=False))
+                "Group variant allocation must contain required '%s' and '%s' attributes: \n%s"
+                % (FeatureFlagConstants.VARIANT, FeatureFlagConstants.GROUPS, json.dumps(group_allocation, indent=2, ensure_ascii=False))
             )
 
         return cls(variant=variant, groups=groups)
@@ -421,14 +421,14 @@ class FeaturePercentileAllocation:
         perecentileTo = percentile_allocation.get(FeatureFlagConstants.TO, None)
         if not variant or not percentileFrom or not perecentileTo:
             raise ValidationError(
-                "Percentile allocation must contain required 'variant', 'to' and 'from' attributes: \n%s"
-                % json.dumps(percentile_allocation, indent=2, ensure_ascii=False)
+                "Percentile allocation must contain required '%s', '%s' and '%s' attributes: \n%s"
+                % (FeatureFlagConstants.VARIANT, FeatureFlagConstants.TO, FeatureFlagConstants.FROM, json.dumps(percentile_allocation, indent=2, ensure_ascii=False))
             )
 
         if not isinstance(percentileFrom, int) or not isinstance(perecentileTo, int):
             raise ValidationError(
-                "Percentile allocation 'from' and 'to' must be integers: \n%s"
-                % json.dumps(percentile_allocation, indent=2, ensure_ascii=False)
+                "Percentile allocation '%s' and '%s' must be integers: \n%s"
+                % (FeatureFlagConstants.FROM, FeatureFlagConstants.TO, json.dumps(percentile_allocation, indent=2, ensure_ascii=False))
             )
 
         if (
@@ -438,14 +438,14 @@ class FeaturePercentileAllocation:
             perecentileTo > 100
         ):
             raise ValidationError(
-                "Percentile allocation 'from' and 'to' must be between 0 and 100: \n%s"
-                % json.dumps(percentile_allocation, indent=2, ensure_ascii=False)
+                "Percentile allocation '%s' and '%s' must be between 0 and 100: \n%s"
+                % (FeatureFlagConstants.TO, FeatureFlagConstants.FROM, json.dumps(percentile_allocation, indent=2, ensure_ascii=False))
             )
 
         if percentileFrom >= perecentileTo:
             raise ValidationError(
-                "Percentile allocation 'from' must be less than 'to': \n%s"
-                % json.dumps(percentile_allocation, indent=2, ensure_ascii=False)
+                "Percentile allocation '%s' must be less than '%s': \n%s"
+                % (FeatureFlagConstants.FROM, FeatureFlagConstants.TO, json.dumps(percentile_allocation, indent=2, ensure_ascii=False))
             )
 
         return cls(variant=variant, From=percentileFrom, to=perecentileTo)
