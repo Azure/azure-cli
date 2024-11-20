@@ -92,7 +92,7 @@ class AddLabels(argparse.Action):
             properties = defaultdict(list)
             for (k, v) in (x.split('=', 1) for x in values):
                 properties[k].append(v)
-            properties = {**properties}
+            properties = dict(properties)
         except ValueError:
             raise CLIError('usage error: {} [KEY=VALUE ...]'.format(option_string))
         d = {}

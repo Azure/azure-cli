@@ -203,7 +203,7 @@ def acr_connected_registry_update(cmd,  # pylint: disable=too-many-locals, too-m
         errors = sorted(duplicate_notifications)
         raise ArgumentUsageError(
             'Update ambiguity. Duplicate notifications list were provided with ' +
-            f'--add-notifications and --remove-notifications arguments.\n{errors}')
+            '--add-notifications and --remove-notifications arguments.\n{}'.format(errors))
 
     current_notifications_set = set(current_connected_registry.notifications_list) \
         if current_connected_registry.notifications_list else set()
