@@ -121,7 +121,7 @@ def storage_file_upload_batch(cmd, client, destination, source, destination_path
 
         return client.make_file_url(destination, dir_name, file_name)
 
-    return list(_upload_action(src, dst) for src, dst in source_files)
+    return [_upload_action(src, dst) for src, dst in source_files]
 
 
 def storage_file_download_batch(cmd, client, source, destination, pattern=None, dryrun=False, validate_content=False,
@@ -164,7 +164,7 @@ def storage_file_download_batch(cmd, client, source, destination, pattern=None, 
         client.get_file_to_path(**get_file_args)
         return client.make_file_url(source, *pair)
 
-    return list(_download_action(f) for f in source_files)
+    return [_download_action(f) for f in source_files]
 
 
 def storage_file_copy_batch(cmd, client, source_client, destination_share=None, destination_path=None,

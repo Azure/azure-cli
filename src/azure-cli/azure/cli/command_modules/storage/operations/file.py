@@ -133,7 +133,7 @@ def list_share_files(cmd, client, directory_name=None, timeout=None, exclude_dir
 
     if exclude_dir:
         t_file_properties = cmd.get_models('_models#FileProperties', resource_type=ResourceType.DATA_STORAGE_FILESHARE)
-        return list(f for f in results if isinstance(f, t_file_properties))
+        return [f for f in results if isinstance(f, t_file_properties)]
     return results
 
 
