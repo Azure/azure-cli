@@ -1086,6 +1086,14 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
             self.cmd(
             'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} -y')
 
+        # Invalid variants import
+        invalid_variants_file_path = os.path.join(TEST_DIR, 'import_invalid_variants.json')
+        self.kwargs.update({
+            'imported_file_path': invalid_variants_file_path
+        })
+        with self.assertRaisesRegex(CLIError, "Feature variant must contain required 'name' attribute:"):
+            self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} -y')
         
         # Feature flags test with new ms fm schema
         os.environ['AZURE_APPCONFIG_FM_COMPATIBILITY_MODE'] = 'False'
@@ -1703,18 +1711,10 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
         self.kwargs.update({
             'imported_file_path': invalid_fm_sections_file_path
         })
-        with self.assertRaisesRegex(CLIError, "Unable to proceed because file contains multiple sections corresponding to Feature Management."):
+        with self.assertRaisesRegex(CLIError, 'Unable to proceed because file contains multiple sections corresponding to "Feature Management".'):
             self.cmd(
             'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} -y')
 
-        # invalid variants import
-        invalid_variants_file_path = os.path.join(TEST_DIR, 'import_invalid_variants.json')
-        self.kwargs.update({
-            'imported_file_path': invalid_variants_file_path
-        })
-        with self.assertRaisesRegex(CLIError, "Feature variant must contain required 'name' attribute:"):
-            self.cmd(
-            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} -y')
 
 class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
 
