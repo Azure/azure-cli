@@ -1535,7 +1535,8 @@ parameters:
   - name: --rule
     short-summary: The rule that will be disabled. If none specified, all rules in the group will be disabled. If provided, --group-name must be provided too.
     long-summary: |
-        Usage: --rule rule-id=MyID state=MyState action=MyAction
+        Usage: --rule rule-id=MyID state=MyState action=MyAction sensitivity=MySensitivity
+        Allowed values for sensitivity: High, Medium, Low, None
         Multiple rules can be specified by using more than one `--rule` argument.
 examples:
   - name: Disable an attack protection rule
@@ -1557,7 +1558,8 @@ parameters:
   - name: --rule
     short-summary: The rule that will be disabled. If none specified, all rules in the group will be disabled. If provided, --group-name must be provided too.
     long-summary: |
-        Usage: --rule rule-id=MyID state=MyState action=MyAction
+        Usage: --rule rule-id=MyID state=MyState action=MyAction sensitivity=MySensitivity
+        Allowed values for sensitivity: High, Medium, Low, None
         Multiple rules can be specified by using more than one `--rule` argument.
 examples:
   - name: Override rules under rule group EQUEST-921-PROTOCOL-ATTACK

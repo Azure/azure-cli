@@ -65,7 +65,7 @@ def register_rps(cmd, subscription_id, rp_namespaces, user_agent):
 
 
 def rp_registrations(cmd, cluster_subscription_id, raw_parameters):
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
     cluster_rp_namespaces = {
         "microsoft.insights": False,
         "microsoft.alertsmanagement": False

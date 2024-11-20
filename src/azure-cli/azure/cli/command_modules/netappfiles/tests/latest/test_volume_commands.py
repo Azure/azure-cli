@@ -477,6 +477,25 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
 
     @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_', additional_tags={'owner': 'cli_test'})
+    def test_nfsv3_with_abn_export_policy_provided_is_successful(self):
+        vnet_name = self.create_random_name(prefix='cli-vnet-', length=24)
+        subnet_name = self.create_random_name(prefix='cli-subnet-', length=16)
+        account_name = self.create_random_name(prefix='cli-acc-', length=24)
+        pool_name = self.create_random_name(prefix='cli-pool-', length=24)
+        volume_name = self.create_random_name(prefix='cli-vol-', length=24)
+        allowed_clients = "1.2.3.0/24"
+        self.prepare_for_volume_creation('{rg}', account_name, pool_name, vnet_name, subnet_name)
+        volume = self.cmd("az netappfiles volume create --resource-group {rg} --account-name %s --pool-name %s "
+                          "--volume-name %s -l %s %s --file-path %s --vnet %s --subnet %s --protocol-types NFSv3 --allowed-clients %s --rule-index 1 --unix-read-write true" %
+                          (account_name, pool_name, volume_name, RG_LOCATION, VOLUME_DEFAULT, volume_name, vnet_name,
+                           subnet_name,allowed_clients)).get_output_in_json()
+        assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
+        assert len(volume['exportPolicy']['rules']) == 1
+        assert volume['exportPolicy']['rules'][0]['nfsv3']
+        assert volume['exportPolicy']['rules'][0]['allowedClients'] == allowed_clients
+
+    @serial_test()
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_', additional_tags={'owner': 'cli_test'})
     def test_add_export_policy_with_no_rule_index(self):
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
         pool_name = self.create_random_name(prefix='cli-pool-', length=24)
@@ -602,3 +621,63 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         # check the specified volume properties
         # assert volume['usageThreshold'] == 8192 * GIB_SCALE
         assert volume['serviceLevel'] == "Standard"
+
+    @serial_test()
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_', additional_tags={'owner': 'cli_test'})
+    def test_exernal_migration_volume_fails(self):
+        # create source volume
+        account_name = self.create_random_name(prefix='cli-acc-', length=24)
+        pool_name = self.create_random_name(prefix='cli-pool-', length=24)        
+        volume_name = self.create_random_name(prefix='cli-vol-', length=24)        
+        rg = '{rg}'
+        external_host_name = "externalHostName"
+        external_server_name = "externalServerName"
+        external_volume_name = "externalVolumeName"
+        # create destination volume in other region/rg and with its own vnet
+        vnet_name = self.create_random_name(prefix='cli-vnet-', length=24)
+        file_path = volume_name  # creation_token
+        subnet_name = self.create_random_name(prefix='cli-subnet-', length=16)
+        # rg_r = self.create_random_name(prefix='cli-rg-', length=24)        
+        subs_id = self.current_subscription()
+        volumeType = "Migration"
+        self.setup_vnet(rg, vnet_name, subnet_name, '10.1.0.0', DP_RG_LOCATION)
+        self.cmd("az netappfiles account create -g %s -a %s -l %s" % (rg, account_name, DP_RG_LOCATION)).get_output_in_json()
+        self.cmd("az netappfiles pool create -g %s -a %s -p %s -l %s %s" % (rg, account_name, pool_name, DP_RG_LOCATION, POOL_DEFAULT)).get_output_in_json()
+
+        subnet_id = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/virtualNetworks/%s/subnets/%s" % (subs_id, rg, vnet_name, subnet_name)        
+        dst_volume = self.cmd("az netappfiles volume create --resource-group %s --account-name %s --pool-name %s --volume-name %s -l %s %s --volume-type %s --file-path %s --vnet %s --subnet %s --external-host-name %s --external-server-name %s --external-volume-name %s" % (rg, account_name, pool_name, volume_name, DP_RG_LOCATION, VOLUME_DEFAULT, volumeType, file_path, vnet_name, subnet_id, external_host_name, external_server_name, external_volume_name)).get_output_in_json()
+        assert dst_volume['dataProtection'] is not None
+        assert dst_volume['id'] is not None
+
+        if self.is_live or self.in_recording:
+            time.sleep(90)
+
+        # Peer external cluster
+        peerIpAddresses = ["0.0.0.1","0.0.0.2","0.0.0.3","0.0.0.4","0.0.0.5","0.0.0.6"]
+        with self.assertRaises(HttpResponseError) as cm:
+            self.cmd("az netappfiles volume replication peer-external-cluster -g %s -a %s -p %s -v %s --peer-ip-addresses %s" % (rg, account_name, pool_name, volume_name, peerIpAddresses))  
+        # self.assertIn('GroupIdListForLDAPUserNotSupportedVolumes', str(
+        #     cm.exception))
+
+        # Authorize external cluster
+        with self.assertRaises(HttpResponseError) as cm:
+            self.cmd("az netappfiles volume replication authorize-external-replication -g %s -a %s -p %s -v %s " % (rg, account_name, pool_name, volume_name))        
+        self.assertIn('peer targeting', str(
+           cm.exception))
+
+        # Perform external cluster transfer
+        with self.assertRaises(HttpResponseError) as cm:
+            self.cmd("az netappfiles volume replication perform-replication-transfer -g %s -a %s -p %s -v %s " % (rg, account_name, pool_name, volume_name))        
+        self.assertIn('VolumeReplicationHasNotBeenCreated', str(
+            cm.exception))
+
+        # Finalize external cluster transfer
+        with self.assertRaises(HttpResponseError) as cm:
+            self.cmd("az netappfiles volume replication finalize-external-replication -g %s -a %s -p %s -v %s " % (rg, account_name, pool_name, volume_name))        
+        self.assertIn('VolumeReplicationMissingFor', str(
+            cm.exception))
+
+
+        self.cmd("az netappfiles volume delete -g {rg} -a %s -p %s -v %s --yes" % (account_name, pool_name, volume_name))
+        
+        

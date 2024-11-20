@@ -42,7 +42,6 @@ class BaseAKSModels:
         self.__cmd = cmd
         self.__model_module = None
         self.__model_dict = None
-        self.__serializer = None
         self.resource_type = resource_type
         self.__set_up_base_aks_models()
 

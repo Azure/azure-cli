@@ -19,9 +19,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-03-01",
+        "version": "2024-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/volumegroups/{}", "2024-03-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/volumegroups/{}", "2024-07-01"],
         ]
     }
 
@@ -352,12 +352,12 @@ class Update(AAZCommand):
         )
 
         backup = cls._args_schema.volumes.Element.data_protection.backup
-        backup.backup_policy_id = AAZStrArg(
+        backup.backup_policy_id = AAZResourceIdArg(
             options=["backup-policy-id"],
             help="Backup Policy Resource ID",
             nullable=True,
         )
-        backup.backup_vault_id = AAZStrArg(
+        backup.backup_vault_id = AAZResourceIdArg(
             options=["backup-vault-id"],
             help="Backup Vault Resource ID",
             nullable=True,
@@ -383,6 +383,7 @@ class Update(AAZCommand):
         replication.remote_volume_resource_id = AAZStrArg(
             options=["remote-volume-resource-id"],
             help="The resource ID of the remote volume.",
+            nullable=True,
         )
         replication.replication_schedule = AAZStrArg(
             options=["replication-schedule"],
@@ -620,7 +621,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-03-01",
+                    "api-version", "2024-07-01",
                     required=True,
                 ),
             }
@@ -723,7 +724,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-03-01",
+                    "api-version", "2024-07-01",
                     required=True,
                 ),
             }
@@ -864,7 +865,7 @@ class Update(AAZCommand):
             if replication is not None:
                 replication.set_prop("endpointType", AAZStrType, ".endpoint_type")
                 replication.set_prop("remoteVolumeRegion", AAZStrType, ".remote_volume_region")
-                replication.set_prop("remoteVolumeResourceId", AAZStrType, ".remote_volume_resource_id", typ_kwargs={"flags": {"required": True}})
+                replication.set_prop("remoteVolumeResourceId", AAZStrType, ".remote_volume_resource_id")
                 replication.set_prop("replicationSchedule", AAZStrType, ".replication_schedule")
 
             snapshot = _builder.get(".properties.volumes[].properties.dataProtection.snapshot")
@@ -1087,6 +1088,9 @@ class _UpdateHelper:
         properties.delete_base_snapshot = AAZBoolType(
             serialized_name="deleteBaseSnapshot",
         )
+        properties.effective_network_features = AAZStrType(
+            serialized_name="effectiveNetworkFeatures",
+        )
         properties.enable_subvolumes = AAZStrType(
             serialized_name="enableSubvolumes",
         )
@@ -1247,12 +1251,14 @@ class _UpdateHelper:
         replication.endpoint_type = AAZStrType(
             serialized_name="endpointType",
         )
+        replication.remote_path = AAZObjectType(
+            serialized_name="remotePath",
+        )
         replication.remote_volume_region = AAZStrType(
             serialized_name="remoteVolumeRegion",
         )
         replication.remote_volume_resource_id = AAZStrType(
             serialized_name="remoteVolumeResourceId",
-            flags={"required": True},
         )
         replication.replication_id = AAZStrType(
             serialized_name="replicationId",
@@ -1260,6 +1266,20 @@ class _UpdateHelper:
         )
         replication.replication_schedule = AAZStrType(
             serialized_name="replicationSchedule",
+        )
+
+        remote_path = _schema_volume_group_details_read.properties.volumes.Element.properties.data_protection.replication.remote_path
+        remote_path.external_host_name = AAZStrType(
+            serialized_name="externalHostName",
+            flags={"required": True},
+        )
+        remote_path.server_name = AAZStrType(
+            serialized_name="serverName",
+            flags={"required": True},
+        )
+        remote_path.volume_name = AAZStrType(
+            serialized_name="volumeName",
+            flags={"required": True},
         )
 
         snapshot = _schema_volume_group_details_read.properties.volumes.Element.properties.data_protection.snapshot

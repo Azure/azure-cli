@@ -90,8 +90,10 @@ class ImportExportProfiles:
     DEFAULT = "appconfig/default"
 
 
-class SnapshotConstants:
-    API_VERSION = "2023-10-01"
+class SnapshotFilterFields:
+    KEY = "key"
+    LABEL = "label"
+    TAGS = "tags"
 
 
 class JsonDiff:
@@ -127,3 +129,8 @@ class ProvisioningStatus:
     RUNNING = "Running"
     SUCCEEDED = "Succeeded"
     FAILED = "Failed"
+
+
+class ARMAuthenticationMode:
+    LOCAL = "local"
+    PASS_THROUGH = "pass-through"

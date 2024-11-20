@@ -527,7 +527,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
         promote_mode_arg_type = CLIArgumentType(
             arg_type=get_enum_type(['standalone', 'switchover']),
-            help='Whether to promote read replica to an independent server or promite it as a primary server.'
+            help='Whether to promote read replica to an independent server or promote it as a primary server.'
         )
 
         promote_option_arg_type = CLIArgumentType(
@@ -806,6 +806,22 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('server_name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
                 c.argument('virtual_endpoint_name', options_list=['--name', '-n'], arg_type=virtual_endpoint_arg_type, validator=virtual_endpoint_name_validator)
 
+        with self.argument_context('{} flexible-server long-term-retention list'.format(command_group)) as c:
+            c.argument('server_name', id_part=None, arg_type=server_name_arg_type)
+
+        with self.argument_context('{} flexible-server long-term-retention show'.format(command_group)) as c:
+            c.argument('backup_name', options_list=['--backup-name', '-b'], help='Backup name.')
+            c.argument('server_name', id_part=None, arg_type=server_name_arg_type)
+
+        with self.argument_context('{} flexible-server long-term-retention start'.format(command_group)) as c:
+            c.argument('backup_name', options_list=['--backup-name', '-b'], help='The name of the new long-term-retention backup.')
+            c.argument('server_name', id_part=None, arg_type=server_name_arg_type)
+            c.argument('sas_url', options_list=['--sas-url', '-u'], help='Container SAS URL.')
+
+        with self.argument_context('{} flexible-server long-term-retention pre-check'.format(command_group)) as c:
+            c.argument('backup_name', options_list=['--backup-name', '-b'], help='The name of the new long-term-retention backup.')
+            c.argument('server_name', id_part=None, arg_type=server_name_arg_type)
+
         for scope in ['create', 'update']:
             argument_context_string = '{} flexible-server virtual-endpoint {}'.format(command_group, scope)
             with self.argument_context(argument_context_string) as c:
@@ -839,6 +855,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('storage_gb', arg_type=storage_gb_arg_type)
                 c.argument('performance_tier', default=None, arg_type=performance_tier_arg_type)
                 c.argument('yes', arg_type=yes_arg_type)
+                c.argument('tags', arg_type=tags_type)
             if command_group == 'mysql':
                 c.argument('public_access', options_list=['--public-access'], arg_type=get_enum_type(['Enabled', 'Disabled']),
                            help='Determines the public access. ')
@@ -878,7 +895,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('max_file_size', type=int, help='The file size limitation to filter files.')
 
         # backups
-        if command_group == 'mysql':
+        if command_group != 'mariadb':
             with self.argument_context('{} flexible-server backup create'.format(command_group)) as c:
                 c.argument('backup_name', options_list=['--backup-name', '-b'], help='The name of the new backup.')
 
@@ -887,6 +904,11 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
         with self.argument_context('{} flexible-server backup list'.format(command_group)) as c:
             c.argument('server_name', id_part=None, arg_type=server_name_arg_type)
+
+        if command_group == 'postgres':
+            with self.argument_context('{} flexible-server backup delete'.format(command_group)) as c:
+                c.argument('backup_name', options_list=['--backup-name', '-b'], help='The name of the new backup.')
+                c.argument('yes', arg_type=yes_arg_type)
 
         # identity
         with self.argument_context('{} flexible-server identity'.format(command_group)) as c:

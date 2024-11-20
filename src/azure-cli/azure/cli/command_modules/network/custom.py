@@ -10,7 +10,7 @@ from collections import Counter, OrderedDict
 
 import socket
 from knack.log import get_logger
-from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
+from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id, resource_id
 
 from azure.cli.core.aaz import AAZClientConfiguration, has_value, register_client
 from azure.cli.core.aaz._client import AAZMgmtClient
@@ -139,7 +139,7 @@ from .operations.dns import (RecordSetADelete as DNSRecordSetADelete, RecordSetA
                              RecordSetCAADelete as DNSRecordSetCAADelete, RecordSetCNAMEDelete as DNSRecordSetCNAMEDelete)
 
 logger = get_logger(__name__)
-RULESET_VERSION = {"0.1": "0.1", "1.0": "1.0", "2.1": "2.1", "2.2.9": "2.2.9", "3.0": "3.0", "3.1": "3.1", "3.2": "3.2"}
+RULESET_VERSION = {"0.1": "0.1", "1.0": "1.0", "1.1": "1.1", "2.1": "2.1", "2.2.9": "2.2.9", "3.0": "3.0", "3.1": "3.1", "3.2": "3.2"}
 
 remove_basic_option_msg = "It's recommended to create with `%s`. " \
                           "Please be aware that Basic option will be removed in the future."
@@ -1947,7 +1947,7 @@ class WAFCreate(_WAFCreate):
         args_schema.rule_set_version = AAZStrArg(
             options=["--version"],
             help="Version of the web application firewall rule set type. "
-                 "0.1 and 1.0 are used for Microsoft_BotManagerRuleSet",
+                 "0.1, 1.0, and 1.1 are used for Microsoft_BotManagerRuleSet",
             default="2.1",
             enum=RULESET_VERSION
         )
@@ -2009,9 +2009,9 @@ class WAFCustomRuleMatchConditionAdd(_WAFCustomRuleMatchConditionAdd):
         args.variables = variables
         # validate
         if str(args.operator).lower() == "any" and has_value(args.values):
-            raise ArgumentUsageError("Any operator does not require --match-values.")
+            raise ArgumentUsageError("\"Any\" operator does not require --values.")
         if str(args.operator).lower() != "any" and not has_value(args.values):
-            raise ArgumentUsageError("Non-any operator requires --match-values.")
+            raise ArgumentUsageError("Non-any operator requires --values.")
 
 
 class WAFPolicySettingUpdate(_WAFPolicySettingUpdate):
@@ -2819,8 +2819,9 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
             rs = _convert_to_snake_case(root_ns)
         try:
             rs["target_resource"] = rs.get("target_resource").get("id") if rs.get("target_resource") else None
-
             _record_create = _record_create_func(rs_type)
+            if 'traffic_management_profile' in rs:
+                del rs['traffic_management_profile']
             _record_create(cli_ctx=cmd.cli_ctx)(command_args={
                 'resource_group': resource_group_name,
                 'zone_name': zone_name,
@@ -3902,7 +3903,7 @@ class PrivateLinkServiceCreate(_PrivateLinkServiceCreate):
         args_schema.private_ip_allocation_method = AAZStrArg(options=['--private-ip-allocation-method'], arg_group="IP Configuration", help="Private IP address allocation method.",
                                                              enum={"Dynamic": "Dynamic", "Static": "Static"})
         args_schema.lb_name = AAZStrArg(options=['--lb-name'], help="Name of the load balancer to retrieve frontend IP configs from. Ignored if a frontend IP configuration ID is supplied.")
-        args_schema.lb_frontend_ip_configs = AAZListArg(options=['--lb-frontend-ip-configs'], help="Space-separated list of names or IDs of load balancer frontend IP configurations to link to. If names are used, also supply `--lb-name`.", required=True)
+        args_schema.lb_frontend_ip_configs = AAZListArg(options=['--lb-frontend-ip-configs'], help="Space-separated list of names or IDs of load balancer frontend IP configurations to link to. If names are used, also supply `--lb-name`.")
         args_schema.lb_frontend_ip_configs.Element = AAZResourceIdArg(
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/frontendIpConfigurations/{}"
@@ -3932,6 +3933,8 @@ class PrivateLinkServiceCreate(_PrivateLinkServiceCreate):
 
         if has_value(args.edge_zone):
             args.edge_zone_type = 'EdgeZone'
+        if not has_value(args.lb_frontend_ip_configs) and not has_value(args.destination_ip_address):
+            raise CLIError("usage error: either --lb-frontend-ip-configs or --destination-ip-address is required")
 
 
 class PrivateLinkServiceUpdate(_PrivateLinkServiceUpdate):
@@ -5277,7 +5280,7 @@ class PublicIPUpdate(_PublicIPUpdate):
     def pre_operations(self):
         args = self.ctx.args
         if has_value(args.ip_tags):
-            if ip_tags := args.ip_tags.to_serialized_data() is None:
+            if (ip_tags := args.ip_tags.to_serialized_data()) is None:
                 args.ip_tags_list = []
             else:
                 args.ip_tags_list = [{"ip_tag_type": k, "tag": v} for k, v in ip_tags.items()]

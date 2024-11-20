@@ -113,7 +113,7 @@ def validate_export(namespace):
 
 def validate_appservice_name_or_id(cmd, namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import is_valid_resource_id, parse_resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
     if namespace.appservice_account:
         if not is_valid_resource_id(namespace.appservice_account):
             config_store_name = ""
@@ -219,7 +219,7 @@ def validate_identity(namespace):
         return
 
     for identity in identities:
-        from msrestazure.tools import is_valid_resource_id
+        from azure.mgmt.core.tools import is_valid_resource_id
         if identity == '[all]' and subcommand == 'remove':
             continue
 
@@ -377,13 +377,14 @@ def validate_snapshot_import(namespace):
 
 def validate_sku(namespace):
     if namespace.sku.lower() == 'free':
-        if (namespace.enable_purge_protection or namespace.retention_days or namespace.replica_name or namespace.replica_location or namespace.no_replica):
+        if (namespace.enable_purge_protection or namespace.retention_days or namespace.replica_name or namespace.replica_location or namespace.no_replica or namespace.enable_arm_private_network_access):  # pylint: disable=too-many-boolean-expressions
             logger.warning("Options '--enable-purge-protection', '--replica-name', '--replica-location' , '--no-replica' and '--retention-days' will be ignored when creating a free store.")
             namespace.retention_days = None
             namespace.enable_purge_protection = None
             namespace.replica_name = None
             namespace.replica_location = None
             namespace.no_replica = None
+            namespace.enable_arm_private_network_access = None
             return
 
     if namespace.sku.lower() == 'premium' and not namespace.no_replica:
