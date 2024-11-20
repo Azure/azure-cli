@@ -1493,7 +1493,7 @@ class TestProfile(unittest.TestCase):
         self.assertEqual('very_secret', extended_info['clientSecret'])
 
 
-class FileHandleStub(object):  # pylint: disable=too-few-public-methods
+class FileHandleStub:  # pylint: disable=too-few-public-methods
 
     def write(self, content):
         pass
@@ -1538,7 +1538,7 @@ class ManagedByTenantStub(ManagedByTenant):  # pylint: disable=too-few-public-me
         self.tenant_id = tenant_id
 
 
-class TenantStub(object):  # pylint: disable=too-few-public-methods
+class TenantStub:  # pylint: disable=too-few-public-methods
 
     def __init__(self, tenant_id, display_name=MOCK_TENANT_DISPLAY_NAME, default_domain=MOCK_TENANT_DEFAULT_DOMAIN):
         self.tenant_id = tenant_id

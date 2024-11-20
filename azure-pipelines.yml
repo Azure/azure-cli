@@ -425,7 +425,7 @@ jobs:
         echo "== Test docker image =="
         
         docker load < $TAR_FILE
-        docker run $IMAGE_NAME /bin/bash -c "time az self-test && time az --version && sleep 5"
+        docker run $IMAGE_NAME /bin/bash -c "time az self-test && time az --version && tdnf list --installed && sleep 5"
       displayName: 'Bash Script'
 
 - job: BuildPythonWheel
@@ -747,7 +747,7 @@ jobs:
       BuildDropPath: $(Build.ArtifactStagingDirectory)
 
   - task: PublishPipelineArtifact@0
-    displayName: 'Publish Artifact: rpm-mariner'
+    displayName: 'Publish Artifact: rpm-azurelinux'
     inputs:
       TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: $(artifact)
@@ -798,7 +798,7 @@ jobs:
       docker pull $IMAGE
       docker run --rm -e RPM_NAME=$RPM_NAME -v $SYSTEM_ARTIFACTSDIRECTORY/rpm:/mnt/rpm -v $(pwd):/azure-cli $IMAGE /bin/bash "/azure-cli/scripts/release/rpm/test_azurelinux_in_docker.sh"
 
-    displayName: 'Test Rpm Package Mariner'
+    displayName: 'Test Rpm Package Azure Linux'
 
 # TODO: rpmbuild on Red Hat UBI 8 is slow for unknown reason. Still working with Red Hat to investigate.
 - job: BuildRpmPackages
