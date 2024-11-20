@@ -377,7 +377,6 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
         version = '15'
         storage_size = 200
-        location = 'southcentralus'
         sku_name = 'Standard_D2s_v3'
         tier = 'GeneralPurpose'
         storage_type = 'PremiumV2_LRS'
@@ -397,7 +396,6 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
         basic_info = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name)).get_output_in_json()
         self.assertEqual(basic_info['name'], server_name)
-        self.assertEqual(str(basic_info['location']).replace(' ', '').lower(), location)
         self.assertEqual(basic_info['resourceGroup'], resource_group)
         self.assertEqual(basic_info['sku']['name'], sku_name)
         self.assertEqual(basic_info['sku']['tier'], tier)

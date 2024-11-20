@@ -512,7 +512,6 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
                             sku_name=None, tier=None,
                             storage_gb=None, performance_tier=None, yes=False, tags=None):
     validate_resource_group(resource_group_name)
-    validate_citus_cluster(cmd, resource_group_name, source_server)
     replica_name = replica_name.lower()
 
     if not is_valid_resource_id(source_server):
@@ -528,6 +527,7 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
         source_server_id = source_server
 
     source_server_id_parts = parse_resource_id(source_server_id)
+    validate_citus_cluster(cmd, resource_group_name, source_server_id_parts['name'])
     try:
         source_server_object = client.get(source_server_id_parts['resource_group'], source_server_id_parts['name'])
     except Exception as e:
@@ -605,7 +605,6 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
                                private_dns_zone_arguments=None, geo_redundant_backup=None, no_wait=False, yes=False,
                                byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None):
     validate_resource_group(resource_group_name)
-    validate_citus_cluster(cmd, resource_group_name, server_name)
 
     server_name = server_name.lower()
 
@@ -623,6 +622,7 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
 
     try:
         id_parts = parse_resource_id(source_server_id)
+        validate_citus_cluster(cmd, id_parts['resource_group'], id_parts['name'])
         source_subscription_id = id_parts['subscription']
         postgres_source_client = get_postgresql_flexible_management_client(cmd.cli_ctx, source_subscription_id)
         source_server_object = postgres_source_client.servers.get(id_parts['resource_group'], id_parts['name'])
