@@ -440,7 +440,7 @@ class AzArgumentContext(ArgumentsContext):
                 :return: The argument of specific type.
                 """
                 ns = vars(namespace)
-                kwargs = dict((k, ns[k]) for k in ns if k in set(expanded_arguments))
+                kwargs = {k: ns[k] for k in ns if k in set(expanded_arguments)}
 
                 setattr(namespace, assigned_arg, model_type(**kwargs))
 

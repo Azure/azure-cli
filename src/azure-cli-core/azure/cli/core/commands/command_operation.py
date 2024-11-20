@@ -68,8 +68,7 @@ class BaseCommandOperation:
     def load_getter_op_arguments(self, getter_op_path, cmd_args=None):
         """ Load arguments from function signature of getter command op """
         op = self.get_op_handler(getter_op_path)
-        getter_args = dict(
-            extract_args_from_signature(op, excluded_params=EXCLUDED_PARAMS))
+        getter_args = {**extract_args_from_signature(op, excluded_params=EXCLUDED_PARAMS)}
         cmd_args = cmd_args or {}
         cmd_args.update(getter_args)
         # The cmd argument is required when calling self.handler function.
@@ -386,7 +385,7 @@ class WaitCommandOperation(BaseCommandOperation):
         from azure.cli.core.commands.arm import EXCLUDED_NON_CLIENT_PARAMS
 
         op = self.get_op_handler(self.op_path)
-        getter_args = dict(extract_args_from_signature(op, excluded_params=EXCLUDED_NON_CLIENT_PARAMS))
+        getter_args = {**extract_args_from_signature(op, excluded_params=EXCLUDED_NON_CLIENT_PARAMS)}
         self.cmd = command_args.get('cmd') if 'cmd' in getter_args else command_args.pop('cmd')
 
         client_arg_name = self.resolve_client_arg_name(self.op_path)
