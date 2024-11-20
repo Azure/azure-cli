@@ -32,7 +32,7 @@ class MockCLI(CLI):
         self.data = {"headers": [], "completer_active": False, "command": ""}
 
 
-class MockLoader(object):
+class MockLoader:
     def __init__(self, ctx):
         self.ctx = ctx
 
@@ -41,7 +41,7 @@ class MockLoader(object):
         return get_sdk(self.ctx, ResourceType.DATA_STORAGE, *attr_args, mod='models')
 
 
-class MockCmd(object):
+class MockCmd:
     def __init__(self, ctx, arguments={}):
         self.cli_ctx = ctx
         self.loader = MockLoader(self.cli_ctx)
