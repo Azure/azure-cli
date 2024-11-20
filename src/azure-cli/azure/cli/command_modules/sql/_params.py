@@ -296,7 +296,7 @@ storage_param_type = CLIArgumentType(
                                                                 "kB": 1.0 / (1024 * 1024),
                                                                 "MB": 1.0 / 1024,
                                                                 "GB": 1,
-                                                                "TB": 1024},
+                                                                "TB": 1024}),
     help='The storage size. If no unit is specified, defaults to gigabytes (GB).',
     validator=validate_managed_instance_storage_size)
 
