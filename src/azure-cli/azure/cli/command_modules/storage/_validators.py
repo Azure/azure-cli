@@ -678,7 +678,7 @@ def get_content_setting_validator(settings_class, update, guess_from_file=None, 
                 for attr in ['content_type', 'content_disposition', 'content_encoding', 'content_language',
                              'content_md5', 'cache_control']:
                     if getattr(new_props, attr) is None:
-                        setattr(new_props, attr, getattr(props, attr))  # pylint: disable=used-before-assignment
+                        setattr(new_props, attr, getattr(props, attr))
         else:
             if guess_from_file:
                 new_props = guess_content_type(ns[guess_from_file], new_props, settings_class)
