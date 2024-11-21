@@ -148,7 +148,7 @@ def __read_features_from_file(file_path, format_):
             if keywordset.feature_management in config_data:
                 if foundLegacySchema:
                     raise FileOperationError(
-                        "Unable to proceed because file contains multiple sections corresponding to Feature Management."
+                        'Unable to proceed because file contains multiple sections corresponding to "Feature Management".'
                     )
                 features_dict[keywordset.feature_management] = config_data[
                     keywordset.feature_management

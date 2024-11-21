@@ -54,7 +54,6 @@ from ._featuremodels import map_keyvalue_to_featureflag
 from ._models import (convert_configurationsetting_to_keyvalue, convert_keyvalue_to_configurationsetting)
 from ._utils import get_appconfig_data_client, prep_label_filter_for_url_encoding, resolve_store_metadata, get_store_endpoint_from_connection_string, is_json_content_type
 
-
 from ._diff_utils import print_preview, KVComparer
 from .feature import __list_features
 
