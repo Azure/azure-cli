@@ -11592,3 +11592,216 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             "aks delete -g {resource_group} -n {name} --yes --no-wait",
             checks=[self.is_empty()],
         )
+
+    # ACNS related tests
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(
+        random_name_length=17,
+        name_prefix="clitest",
+        location="westcentralus",
+    )
+    def test_aks_update_enable_acns(
+        self, resource_group, resource_group_location
+    ):
+        aks_name = self.create_random_name("cliakstest", 16)
+        self.kwargs.update(
+            {
+                "resource_group": resource_group,
+                "name": aks_name,
+                "ssh_key_value": self.generate_ssh_keys(),
+                "location": resource_group_location,
+            }
+        )
+
+        create_cmd = (
+            "aks create --resource-group={resource_group} --name={name} --location={location} "
+            "--ssh-key-value={ssh_key_value} --node-count=1 --tier standard "
+            "--network-plugin azure --network-dataplane=cilium --network-plugin-mode overlay "
+        )
+        self.cmd(create_cmd, checks=[self.check("provisioningState", "Succeeded")])
+
+        # update to enable acns
+        update_cmd = (
+            "aks update --resource-group={resource_group} --name={name} "
+            "--enable-acns "
+        )
+        self.cmd(
+            update_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("networkProfile.advancedNetworking.enabled", True),
+                self.check("networkProfile.advancedNetworking.security.enabled", True),
+                self.check("networkProfile.advancedNetworking.observability.enabled", True),
+            ],
+        )
+
+        # update to disable acns
+        update_cmd_two = (
+            "aks update --resource-group={resource_group} --name={name} --disable-acns "
+        )
+        self.cmd(
+            update_cmd_two,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("networkProfile.advancedNetworking.enabled", False),
+                self.check("networkProfile.advancedNetworking.security.enabled", False),
+                self.check("networkProfile.advancedNetworking.observability.enabled", False),
+            ],
+        )
+
+        # delete
+        self.cmd(
+            "aks delete -g {resource_group} -n {name} --yes --no-wait",
+            checks=[self.is_empty()],
+        )
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(
+        random_name_length=17,
+        name_prefix="clitest",
+        location="westcentralus",
+    )
+    def test_aks_create_with_enable_acns(
+        self, resource_group, resource_group_location
+    ):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+
+        aks_name = self.create_random_name("cliakstest", 16)
+        self.kwargs.update(
+            {
+                "resource_group": resource_group,
+                "name": aks_name,
+                "ssh_key_value": self.generate_ssh_keys(),
+                "location": resource_group_location,
+            }
+        )
+
+        # create
+        create_cmd = (
+            "aks create --resource-group={resource_group} --name={name} --location={location} "
+            "--ssh-key-value={ssh_key_value} --node-count=1 --tier standard "
+            "--network-plugin azure --network-plugin-mode overlay --enable-acns "
+        )
+        self.cmd(
+            create_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("networkProfile.advancedNetworking.enabled", True),
+                self.check("networkProfile.advancedNetworking.security.enabled", False),
+                self.check("networkProfile.advancedNetworking.observability.enabled", True),
+            ],
+        )
+
+        # delete
+        self.cmd(
+            "aks delete -g {resource_group} -n {name} --yes --no-wait",
+            checks=[self.is_empty()],
+        )
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(
+        random_name_length=17,
+        name_prefix="clitest",
+        location="westcentralus",
+    )
+    def test_aks_create_with_enable_acns_complex(
+        self, resource_group, resource_group_location
+    ):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+
+        aks_name = self.create_random_name("cliakstest", 16)
+        self.kwargs.update(
+            {
+                "resource_group": resource_group,
+                "name": aks_name,
+                "ssh_key_value": self.generate_ssh_keys(),
+                "location": resource_group_location,
+            }
+        )
+
+        # create: enable acns
+        create_cmd = (
+            "aks create --resource-group={resource_group} --name={name} --location={location} "
+            "--ssh-key-value={ssh_key_value} --node-count=1 --tier standard "
+            "--network-plugin azure --network-dataplane=cilium --network-plugin-mode overlay "
+            "--enable-acns --disable-acns-security "
+        )
+        self.cmd(
+            create_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("networkProfile.advancedNetworking.enabled", True),
+                self.check("networkProfile.advancedNetworking.security.enabled", False),
+                self.check("networkProfile.advancedNetworking.observability.enabled", True),
+            ],
+        )
+
+        # update: enable security and observability
+        update_cmd = (
+            "aks update --resource-group={resource_group} --name={name} "
+            "--enable-acns "
+        )
+        self.cmd(
+            update_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("networkProfile.advancedNetworking.enabled", True),
+                self.check("networkProfile.advancedNetworking.security.enabled", True),
+                self.check("networkProfile.advancedNetworking.observability.enabled", True),
+            ],
+        )
+
+        # update: disable security
+        update_cmd2 = (
+            "aks update --resource-group={resource_group} --name={name} "
+            "--enable-acns --disable-acns-security "
+        )
+        self.cmd(
+            update_cmd2,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("networkProfile.advancedNetworking.enabled", True),
+                self.check("networkProfile.advancedNetworking.security.enabled", False),
+                self.check("networkProfile.advancedNetworking.observability.enabled", True),
+            ],
+        )
+
+        # update: enable FQDN policy, disable observability
+        update_cmd3 = (
+            "aks update --resource-group={resource_group} --name={name} "
+            "--enable-acns --disable-acns-observability "
+        )
+        self.cmd(
+            update_cmd3,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("networkProfile.advancedNetworking.enabled", True),
+                self.check("networkProfile.advancedNetworking.security.enabled", True),
+                self.check("networkProfile.advancedNetworking.observability.enabled", False),
+            ],
+        )
+
+        # update: disable acns
+        update_cmd5 = (
+            "aks update --resource-group={resource_group} --name={name} "
+            "--disable-acns "
+        )
+        self.cmd(
+            update_cmd5,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("networkProfile.advancedNetworking.enabled", False),
+                self.check("networkProfile.advancedNetworking.security.enabled", False),
+                self.check("networkProfile.advancedNetworking.observability.enabled", False),
+            ],
+        )
+
+        # delete
+        self.cmd(
+            "aks delete -g {resource_group} -n {name} --yes --no-wait",
+            checks=[self.is_empty()],
+        )
