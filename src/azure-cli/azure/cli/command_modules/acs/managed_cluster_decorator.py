@@ -178,7 +178,7 @@ class AKSManagedClusterModels(AKSAgentPoolModels):
                 "ManagedClusterLoadBalancerProfileOutboundIPs"
             ] = self.ManagedClusterLoadBalancerProfileOutboundIPs
             load_balancer_models[
-               "ManagedClusterLoadBalancerProfileOutboundIPPrefixes"
+                "ManagedClusterLoadBalancerProfileOutboundIPPrefixes"
             ] = self.ManagedClusterLoadBalancerProfileOutboundIPPrefixes
             load_balancer_models["ResourceReference"] = self.ResourceReference
             self.__loadbalancer_models = SimpleNamespace(**load_balancer_models)
