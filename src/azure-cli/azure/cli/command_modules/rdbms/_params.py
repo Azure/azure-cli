@@ -606,6 +606,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('database_name', arg_type=database_name_arg_type)
             c.argument('yes', arg_type=yes_arg_type)
 
+        with self.argument_context('{} flexible-server list'.format(command_group)) as c:
+            c.argument('show_cluster', options_list=['--show-cluster'], required=False, action='store_true',
+                       help='Only show elastic clusters.')
+
         with self.argument_context('{} flexible-server delete'.format(command_group)) as c:
             c.argument('yes', arg_type=yes_arg_type)
 
