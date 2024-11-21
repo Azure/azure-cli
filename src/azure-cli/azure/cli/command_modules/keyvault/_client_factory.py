@@ -173,8 +173,11 @@ def data_plane_azure_keyvault_administration_backup_client(cli_ctx, command_args
 
     vault_url, credential, version = _prepare_data_plane_azure_keyvault_client(
         cli_ctx, command_args, ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP)
+    client_kwargs = prepare_client_kwargs_track2(cli_ctx)
+    client_kwargs.pop('http_logging_policy')
     return KeyVaultBackupClient(
-        vault_url=vault_url, credential=credential, api_version=version, verify_challenge_resource=False)
+        vault_url=vault_url, credential=credential, api_version=version,
+        verify_challenge_resource=False, **client_kwargs)
 
 
 def data_plane_azure_keyvault_administration_access_control_client(cli_ctx, command_args):
@@ -185,7 +188,8 @@ def data_plane_azure_keyvault_administration_access_control_client(cli_ctx, comm
     client_kwargs = prepare_client_kwargs_track2(cli_ctx)
     client_kwargs.pop('http_logging_policy')
     return KeyVaultAccessControlClient(
-        vault_url=vault_url, credential=credential, api_version=version, **client_kwargs)
+        vault_url=vault_url, credential=credential, api_version=version,
+        verify_challenge_resource=False, **client_kwargs)
 
 
 def data_plane_azure_keyvault_administration_setting_client(cli_ctx, command_args):
@@ -199,7 +203,8 @@ def data_plane_azure_keyvault_administration_setting_client(cli_ctx, command_arg
     client_kwargs = prepare_client_kwargs_track2(cli_ctx)
     client_kwargs.pop('http_logging_policy')
     return KeyVaultSettingsClient(
-        vault_url=vault_url, credential=credential, api_version='7.4', **client_kwargs)
+        vault_url=vault_url, credential=credential, api_version='7.4',
+        verify_challenge_resource=False, **client_kwargs)
 
 
 def data_plane_azure_keyvault_certificate_client(cli_ctx, command_args):
@@ -214,7 +219,8 @@ def data_plane_azure_keyvault_certificate_client(cli_ctx, command_args):
     client_kwargs = prepare_client_kwargs_track2(cli_ctx)
     client_kwargs.pop('http_logging_policy')
     return CertificateClient(
-        vault_url=vault_url, credential=credential, api_version=api_version or version, **client_kwargs)
+        vault_url=vault_url, credential=credential, api_version=api_version or version,
+        verify_challenge_resource=False, **client_kwargs)
 
 
 def data_plane_azure_keyvault_key_client(cli_ctx, command_args):
@@ -229,7 +235,8 @@ def data_plane_azure_keyvault_key_client(cli_ctx, command_args):
     client_kwargs = prepare_client_kwargs_track2(cli_ctx)
     client_kwargs.pop('http_logging_policy')
     return KeyClient(
-        vault_url=vault_url, credential=credential, api_version=api_version or version, **client_kwargs)
+        vault_url=vault_url, credential=credential, api_version=api_version or version,
+        verify_challenge_resource=False, **client_kwargs)
 
 
 def data_plane_azure_keyvault_secret_client(cli_ctx, command_args):
@@ -244,7 +251,8 @@ def data_plane_azure_keyvault_secret_client(cli_ctx, command_args):
     client_kwargs = prepare_client_kwargs_track2(cli_ctx)
     client_kwargs.pop('http_logging_policy')
     return SecretClient(
-        vault_url=vault_url, credential=credential, api_version=api_version or version, **client_kwargs)
+        vault_url=vault_url, credential=credential, api_version=api_version or version,
+        verify_challenge_resource=False, **client_kwargs)
 
 
 def data_plane_azure_keyvault_security_domain_client(cli_ctx, command_args):
@@ -256,7 +264,8 @@ def data_plane_azure_keyvault_security_domain_client(cli_ctx, command_args):
     command_args.pop('identifier', None)
     client_kwargs = prepare_client_kwargs_track2(cli_ctx)
     client_kwargs.pop('http_logging_policy')
-    return SecurityDomainClient(vault_url=vault_url, credential=credential, **client_kwargs)
+    return SecurityDomainClient(vault_url=vault_url, credential=credential,
+                                verify_challenge_resource=False, **client_kwargs)
 
 
 def _prepare_data_plane_azure_keyvault_client(cli_ctx, command_args, resource_type):
