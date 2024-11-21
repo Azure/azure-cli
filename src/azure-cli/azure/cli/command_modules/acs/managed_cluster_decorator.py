@@ -2023,24 +2023,24 @@ class AKSManagedClusterContext(BaseAKSContext):
         return load_balancer_backend_pool_type
 
     def get_nrg_lockdown_restriction_level(self) -> Union[str, None]:
-            """Obtain the value of nrg_lockdown_restriction_level.
-            :return: string or None
-            """
-            # read the original value passed by the command
-            nrg_lockdown_restriction_level = self.raw_param.get("nrg_lockdown_restriction_level")
+        """Obtain the value of nrg_lockdown_restriction_level.
+        :return: string or None
+        """
+        # read the original value passed by the command
+        nrg_lockdown_restriction_level = self.raw_param.get("nrg_lockdown_restriction_level")
 
-            # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
-            if self.decorator_mode == DecoratorMode.CREATE:
-                if (
-                    self.mc and
-                    self.mc.node_resource_group_profile and
-                    self.mc.node_resource_group_profile.restriction_level is not None
-                ):
-                    nrg_lockdown_restriction_level = self.mc.node_resource_group_profile.restriction_level
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.node_resource_group_profile and
+                self.mc.node_resource_group_profile.restriction_level is not None
+            ):
+                nrg_lockdown_restriction_level = self.mc.node_resource_group_profile.restriction_level
 
-            # this parameter does not need dynamic completion
-            # this parameter does not need validation
-            return nrg_lockdown_restriction_level
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return nrg_lockdown_restriction_level
 
     def get_nat_gateway_managed_outbound_ip_count(self) -> Union[int, None]:
         """Obtain the value of nat_gateway_managed_outbound_ip_count.
