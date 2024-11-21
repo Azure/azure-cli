@@ -315,14 +315,14 @@ class GenericUpdateCommandOperation(BaseCommandOperation):     # pylint: disable
 
     def load_setter_op_arguments(self):
         op = self.get_op_handler(self.setter_op_path)
-        return {k: v for k, v in extract_args_from_signature(op, excluded_params=EXCLUDED_PARAMS)}
+        return dict(extract_args_from_signature(op, excluded_params=EXCLUDED_PARAMS))
 
     def load_custom_function_op_arguments(self):
         if not self.custom_function_op_path:
             return {}
         op = self.get_op_handler(self.custom_function_op_path)
         self.apply_doc_string(op)  # pylint: disable=protected-access
-        return {k: v for k, v in extract_args_from_signature(op, excluded_params=EXCLUDED_PARAMS)}
+        return dict(extract_args_from_signature(op, excluded_params=EXCLUDED_PARAMS))
 
     def description_loader(self):
         """ Callback function of CLICommand description_loader """
