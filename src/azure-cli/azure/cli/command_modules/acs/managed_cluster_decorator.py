@@ -169,13 +169,18 @@ class AKSManagedClusterModels(AKSAgentPoolModels):
         :return: SimpleNamespace
         """
         if self.__loadbalancer_models is None:
-            load_balancer_models = {
-                "ManagedClusterLoadBalancerProfile": self.ManagedClusterLoadBalancerProfile,
-                "ManagedClusterLoadBalancerProfileManagedOutboundIPs": self.ManagedClusterLoadBalancerProfileManagedOutboundIPs,
-                "ManagedClusterLoadBalancerProfileOutboundIPs": self.ManagedClusterLoadBalancerProfileOutboundIPs,
-                "ManagedClusterLoadBalancerProfileOutboundIPPrefixes": self.ManagedClusterLoadBalancerProfileOutboundIPPrefixes,
-                "ResourceReference": self.ResourceReference
-            }
+            load_balancer_models = {}
+            load_balancer_models["ManagedClusterLoadBalancerProfile"] = self.ManagedClusterLoadBalancerProfile
+            load_balancer_models[
+                "ManagedClusterLoadBalancerProfileManagedOutboundIPs"
+            ] = self.ManagedClusterLoadBalancerProfileManagedOutboundIPs
+            load_balancer_models[
+                "ManagedClusterLoadBalancerProfileOutboundIPs"
+            ] = self.ManagedClusterLoadBalancerProfileOutboundIPs
+            load_balancer_models[
+               "ManagedClusterLoadBalancerProfileOutboundIPPrefixes"
+            ] = self.ManagedClusterLoadBalancerProfileOutboundIPPrefixes
+            load_balancer_models["ResourceReference"] = self.ResourceReference
             self.__loadbalancer_models = SimpleNamespace(**load_balancer_models)
         return self.__loadbalancer_models
 

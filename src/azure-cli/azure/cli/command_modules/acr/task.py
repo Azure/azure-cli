@@ -1132,7 +1132,7 @@ def _build_identities_info(cmd, identities, is_remove=False):
         if is_remove:
             identity.user_assigned_identities = dict.fromkeys(external_identities)
         else:
-            identity.user_assigned_identities = dict.fromkeys(external_identities, UserIdentityProperties())
+            identity.user_assigned_identities = {e: UserIdentityProperties() for e in external_identities}
     return identity
 
 

@@ -29,14 +29,14 @@ def exists(cmd, client, timeout=None):
 def list_fs_directories(client, path=None, recursive=True, num_results=None, timeout=None):
     generator = client.get_paths(path=path, recursive=recursive, timeout=timeout, max_results=num_results)
 
-    return list(f for f in generator if f.is_directory)
+    return [f for f in generator if f.is_directory]
 
 
 def get_directory_properties(client, timeout=None):
     from .._transformers import transform_fs_access_output
     prop = todict(client.get_directory_properties(timeout=timeout))
-    acl = transform_fs_access_output(client.get_accessF_control(timeout=timeout))
-    result = {**prop, ** acl}
+    acl = transform_fs_access_output(client.get_access_control(timeout=timeout))
+    result = dict(prop, **acl)
     return result
 
 

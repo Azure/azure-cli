@@ -147,7 +147,7 @@ def _prepare_client_kwargs_track2(cli_ctx):
         pass
 
     # Prepare custom headers, used by HeadersPolicy
-    headers = {**cli_ctx.data['headers']}
+    headers = dict(cli_ctx.data['headers'])
 
     # - Prepare CommandName header
     command_name_suffix = ';completer-request' if cli_ctx.data['completer_active'] else ''

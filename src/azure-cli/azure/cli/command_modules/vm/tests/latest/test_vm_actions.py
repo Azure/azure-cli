@@ -662,7 +662,7 @@ class TestActions(unittest.TestCase):
         for test_sku, expected in sku_tests.values():
             if isinstance(expected, dict):
                 # build info dict from expected values.
-                info_dict = {"lun": {"managedDisk": {'storageAccountType': None} for lun in expected if lun != "os"}}
+                info_dict = {"lun": {"managedDisk": {'storageAccountType': None}} for lun in expected if lun != "os"}
                 if "os" in expected:
                     info_dict["os"] = {}
 
@@ -675,10 +675,8 @@ class TestActions(unittest.TestCase):
             elif expected is None:
                 dummy_expected = ["os", 1, 2]
                 info_dict = {
-                    "lun": {
-                        "managedDisk": {'storageAccountType': None}
-                        for lun in dummy_expected if lun != "os"
-                    }
+                    lun: {"managedDisk": {'storageAccountType': None}}
+                    for lun in dummy_expected if lun != "os"
                 }
                 if "os" in dummy_expected:
                     info_dict["os"] = {}
