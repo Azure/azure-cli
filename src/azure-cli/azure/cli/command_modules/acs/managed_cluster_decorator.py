@@ -6496,7 +6496,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.set_up_cost_analysis(mc)
 
         return mc
-    
+
     def set_up_node_resource_group_profile(self, mc: ManagedCluster) -> ManagedCluster:
         """Set up node resource group profile for the ManagedCluster object.
         :return: the ManagedCluster object
@@ -7840,7 +7840,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             self._update_dns_zone_resource_ids(mc, dns_zone_resource_ids)
 
         return mc
-    
+
     def update_node_resource_group_profile(self, mc: ManagedCluster) -> ManagedCluster:
         """Update node resource group profile for the ManagedCluster object.
         :return: the ManagedCluster object

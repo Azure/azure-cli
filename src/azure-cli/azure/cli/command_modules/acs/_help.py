@@ -972,7 +972,7 @@ parameters:
     type: string
     short-summary: Restriction level on the managed node resource group.
     long-summary: The restriction level of permissions allowed on the cluster's managed node resource group, supported values are Unrestricted, and ReadOnly (recommended ReadOnly).
-    
+
 examples:
   - name: Reconcile the cluster back to its current state.
     text: az aks update -g MyResourceGroup -n MyManagedCluster
