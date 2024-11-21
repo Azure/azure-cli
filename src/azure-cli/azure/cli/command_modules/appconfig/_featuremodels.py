@@ -14,6 +14,7 @@ from ._constants import FeatureFlagConstants
 
 # pylint: disable=too-few-public-methods
 # pylint: disable=too-many-instance-attributes
+# pylint: disable=line-too-long
 
 logger = get_logger(__name__)
 
