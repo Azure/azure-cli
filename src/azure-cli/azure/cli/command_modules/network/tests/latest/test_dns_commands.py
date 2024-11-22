@@ -98,47 +98,47 @@ class DnsZoneImportTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_dns_zone1_import')
     def test_dns_zone1_import(self, resource_group):
-        self._test_zone('zone1.com', 'zone1.txt')
+        self._test_zone('dnstestzone1.com', 'zone1.txt')
 
     @ResourceGroupPreparer(name_prefix='cli_dns_zone2_import')
     def test_dns_zone2_import(self, resource_group):
-        self._test_zone('zone2.com', 'zone2.txt')
+        self._test_zone('dnstestzone2.com', 'zone2.txt')
 
     @ResourceGroupPreparer(name_prefix='cli_dns_zone3_import')
     def test_dns_zone3_import(self, resource_group):
-        self._test_zone('zone3.com', 'zone3.txt')
+        self._test_zone('dnstestzone3.com', 'zone3.txt')
 
     @ResourceGroupPreparer(name_prefix='cli_dns_zone4_import')
     def test_dns_zone4_import(self, resource_group):
-        self._test_zone('zone4.com', 'zone4.txt')
+        self._test_zone('dnstestzone4.com', 'zone4.txt')
 
     @ResourceGroupPreparer(name_prefix='cli_dns_zone5_import')
     def test_dns_zone5_import(self, resource_group):
-        self._test_zone('zone5.com', 'zone5.txt')
+        self._test_zone('dnstestzone5.com', 'zone5.txt')
 
     @ResourceGroupPreparer(name_prefix='cli_dns_zone6_import')
     def test_dns_zone6_import(self, resource_group):
-        self._test_zone('zone6.com', 'zone6.txt')
+        self._test_zone('dnstestzone6.com', 'zone6.txt')
 
     @ResourceGroupPreparer(name_prefix='cli_dns_zone7_import')
     def test_dns_zone7_import(self, resource_group):
-        self._test_zone('zone7.com', 'zone7.txt')
+        self._test_zone('dnstestzone7.com', 'zone7.txt')
 
     @ResourceGroupPreparer(name_prefix='cli_dns_zone8_import')
     def test_dns_zone8_import(self, resource_group):
-        self._test_zone('zone8.com', 'zone8.txt')
+        self._test_zone('dnstestzone8.com', 'zone8.txt')
 
     @ResourceGroupPreparer(name_prefix='cli_dns_zone9_import')
     def test_dns_zone9_import(self, resource_group):
-        self._test_zone('zone9.com', 'zone9.txt')
+        self._test_zone('dnstestzone9.com', 'zone9.txt')
 
     @ResourceGroupPreparer(name_prefix='cli_dns_zone10_import')
     def test_dns_zone10_import(self, resource_group):
-        self._test_zone('zone10.com', 'zone10.txt')
+        self._test_zone('dnstestzone10.com', 'zone10.txt')
 
     @ResourceGroupPreparer(name_prefix='cli_dns_zone11_import')
     def test_dns_zone11_import(self, resource_group):
-        self._test_zone('zone11.com', 'zone11.txt')
+        self._test_zone('dnstestzone11.com', 'zone11.txt')
 
 
 class DnsScenarioTest(ScenarioTest):
@@ -553,7 +553,7 @@ class DnsParseZoneFiles(unittest.TestCase):
         return parse_zone_file(file_text, zone_name)
 
     def test_zone_file_1(self):
-        zn = 'zone1.com.'
+        zn = 'dnstestzone1.com.'
         zone = self._get_zone_object('zone1.txt', zn)
         self._check_soa(zone, zn, 3600, 1, 3600, 300, 2419200, 300)
         self._check_ns(zone, zn, [
@@ -594,11 +594,11 @@ class DnsParseZoneFiles(unittest.TestCase):
         ])
 
     def test_zone_file_2(self):
-        zn = 'zone2.com.'
+        zn = 'dnstestzone2.com.'
         zone = self._get_zone_object('zone2.txt', zn)
         self._check_txt(zone, 'spaces.' + zn, [(3600, 5, None)])
         self._check_soa(zone, zn, 3600, 10, 900, 600, 86400, 3600)
-        self._check_ns(zone, zn, [(3600, 'zone2.com.')])
+        self._check_ns(zone, zn, [(3600, 'dnstestzone2.com.')])
         self._check_a(zone, 'a2.' + zn, [
             (3600, '1.2.3.4'),
             (3600, '2.3.4.5')
@@ -669,7 +669,7 @@ class DnsParseZoneFiles(unittest.TestCase):
         self._check_txt(zone, 'even.' + zn, [(3600, None, 'v=spf1 mx include:_spf4.xgn.de include:_spf6.xgn.de -all')])  # pylint: disable=line-too-long
 
     def test_zone_file_3(self):
-        zn = 'zone3.com.'
+        zn = 'dnstestzone3.com.'
         zone = self._get_zone_object('zone3.txt', zn)
         self._check_soa(zone, zn, 86400, 2003080800, 43200, 900, 1814400, 10800)
         self._check_ns(zone, zn, [(86400, 'ns1.com.')])
@@ -710,7 +710,7 @@ class DnsParseZoneFiles(unittest.TestCase):
         ])
 
     def test_zone_file_4(self):
-        zn = 'zone4.com.'
+        zn = 'dnstestzone4.com.'
         zone = self._get_zone_object('zone4.txt', zn)
         self._check_soa(zone, zn, 3600, 2003080800, 43200, 900, 1814400, 10800)
         self._check_ns(zone, zn, [(100, 'ns1.' + zn)])
@@ -741,7 +741,7 @@ class DnsParseZoneFiles(unittest.TestCase):
         ])
 
     def test_zone_file_5(self):
-        zn = 'zone5.com.'
+        zn = 'dnstestzone5.com.'
         zone = self._get_zone_object('zone5.txt', zn)
         self._check_soa(zone, zn, 3600, 2003080800, 43200, 900, 1814400, 10800)
         self._check_a(zone, 'default.' + zn, [(3600, '0.1.2.3')])
@@ -763,7 +763,7 @@ class DnsParseZoneFiles(unittest.TestCase):
         self._check_a(zone, 'test.' + zn, [(3600, '7.8.9.0')])
 
     def test_zone_file_6(self):
-        zn = 'zone6.com.'
+        zn = 'dnstestzone6.com.'
         zone = self._get_zone_object('zone6.txt', zn)
         self._check_soa(zone, zn, 3600, 1, 3600, 300, 2419200, 300)
         self._check_a(zone, 'www.' + zn, [(3600, '1.1.1.1')])
@@ -776,7 +776,7 @@ class DnsParseZoneFiles(unittest.TestCase):
         ])
 
     def test_zone_file_7(self):
-        zn = 'zone7.com.'
+        zn = 'dnstestzone7.com.'
         zone = self._get_zone_object('zone7.txt', zn)
         self._check_soa(zone, zn, 3600, 1, 3600, 300, 2419200, 300)
         self._check_txt(zone, zn, [(60, None, 'a\\\\b\\255\\000\\;\\"\\"\\"testtesttest\\"\\"\\"')])
@@ -790,7 +790,7 @@ class DnsParseZoneFiles(unittest.TestCase):
         ])
 
     def test_zone_file_8(self):
-        zn = 'zone8.com.'
+        zn = 'dnstestzone8.com.'
         zone = self._get_zone_object('zone8.txt', zn)
         self._check_soa(zone, zn, 3600, 1, 3600, 300, 2419200, 300)
         self._check_a(zone, 'ns.' + zn, [(3600, '1.2.3.4')])
@@ -803,7 +803,7 @@ class DnsParseZoneFiles(unittest.TestCase):
         self._check_a(zone, '*.' + zn, [(3600, '2.3.4.5')])
 
     def test_zone_file_11(self):
-        zn = 'zone11.com.'
+        zn = 'dnstestzone11.com.'
         zone = self._get_zone_object('zone11.txt', zn)
         self._check_soa(zone, zn, 3600, 1, 3600, 300, 2419200, 300)
         self._check_ns(zone, zn, [
