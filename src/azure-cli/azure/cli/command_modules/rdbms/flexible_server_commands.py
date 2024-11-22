@@ -242,6 +242,7 @@ def load_flexibleserver_command_table(self, _):
     with self.command_group('postgres flexible-server identity', postgres_flexible_servers_sdk,
                             custom_command_type=flexible_servers_custom_postgres,
                             client_factory=cf_postgres_flexible_servers) as g:
+        g.custom_command('update', 'flexible_server_identity_update', supports_no_wait=True)
         g.custom_command('assign', 'flexible_server_identity_assign', supports_no_wait=True)
         g.custom_command('remove', 'flexible_server_identity_remove', supports_no_wait=True, confirmation=True)
         g.custom_show_command('show', 'flexible_server_identity_show')

@@ -914,6 +914,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         with self.argument_context('{} flexible-server identity'.format(command_group)) as c:
             c.argument('server_name', id_part=None, options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
 
+        with self.argument_context('{} flexible-server identity update'.format(command_group)) as c:
+            c.argument('system_assigned', options_list=['--system-assigned'], arg_type=get_enum_type(['Enabled', 'Disabled']),
+                       help='Enable or disable system assigned identity to authenticate to cloud services without storing credentials in code. Default is `Disabled`.')
+
         with self.argument_context('{} flexible-server identity assign'.format(command_group)) as c:
             c.argument('identities', arg_type=identities_arg_type)
 

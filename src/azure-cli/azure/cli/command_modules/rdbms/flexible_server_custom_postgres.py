@@ -885,6 +885,30 @@ def flexible_server_connection_string(
 
 
 # Custom functions for identity
+def flexible_server_identity_update(cmd, client, resource_group_name, server_name, system_assigned):
+    validate_resource_group(resource_group_name)
+
+    type = 'None'
+    if system_assigned.lower() == 'enabled':
+        type = 'SystemAssigned'
+    else: 
+        server = client.get(resource_group_name, server_name)
+        type = 'UserAssigned' if (server and server.identity and server.identity.type and 'UserAssigned' in server.identity.type) else 'None'
+
+    parameters = {
+        'identity': postgresql_flexibleservers.models.UserAssignedIdentity(
+            type=type)}
+
+    result = resolve_poller(
+        client.begin_update(
+            resource_group_name=resource_group_name,
+            server_name=server_name,
+            parameters=parameters),
+        cmd.cli_ctx, 'Updating user assigned identity type for server {}'.format(server_name)
+    )
+
+    return result.identity
+
 def flexible_server_identity_assign(cmd, client, resource_group_name, server_name, identities):
     validate_resource_group(resource_group_name)
 
