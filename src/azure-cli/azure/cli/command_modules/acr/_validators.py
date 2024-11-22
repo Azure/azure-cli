@@ -116,6 +116,12 @@ def validate_registry_name(cmd, namespace):
         if pos > 0:
             logger.warning("The login server endpoint suffix '%s' is automatically omitted.", acr_suffix)
             namespace.registry_name = registry[:pos]
+    # If registry contains - due to Domain Name Label Scope, such as "myregistry-dnlhash123.azurecr.io", strip "-dnlhash123"
+    dnl_hash = registry.find("-")
+    if registry and dnl_hash > 0:
+        logger.warning("The domain name label suffix '%s' is automatically omitted.", registry[dnl_hash:])
+        namespace.registry_name = registry[:dnl_hash]
+
     registry = namespace.registry_name
     if not re.match(ACR_NAME_VALIDATION_REGEX, registry):
         raise InvalidArgumentValueError(BAD_REGISTRY_NAME)
