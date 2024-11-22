@@ -2604,7 +2604,8 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):  # pylint:
             elif record_type == 'mx':
                 record_obj.update({'preference': record["preference"], 'host': record["exchange"].rstrip('.') + '.'})
             elif record_type == 'naptr':
-                record_obj.update({'order': record["order"], 'preference': record["preference"], 'flags': record["flags"], 'services': record["services"], 'regexp': record["regexp"], 'replacement': record["replacement"].rstrip('.') + '.'})
+                regexp_value = record["regexp"] if record["regexp"] != "" else "EMPTY"
+                record_obj.update({'order': record["order"], 'preference': record["preference"], 'flags': record["flags"], 'services': record["services"], 'regexp': regexp_value, 'replacement': record["replacement"].rstrip('.') + '.'})
             elif record_type == 'ns':
                 record_obj.update({'host': record["nsdname"].rstrip('.') + '.'})
             elif record_type == 'ptr':

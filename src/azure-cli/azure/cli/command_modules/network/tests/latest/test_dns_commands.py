@@ -136,6 +136,10 @@ class DnsZoneImportTest(ScenarioTest):
     def test_dns_zone10_import(self, resource_group):
         self._test_zone('zone10.com', 'zone10.txt')
 
+    @ResourceGroupPreparer(name_prefix='cli_dns_zone11_import')
+    def test_dns_zone11_import(self, resource_group):
+        self._test_zone('zone11.com', 'zone11.txt')
+
 
 class DnsScenarioTest(ScenarioTest):
 
@@ -588,10 +592,6 @@ class DnsParseZoneFiles(unittest.TestCase):
             (60, 0, 'issue', 'ca1.contoso.com'),
             (60, 45, 'tag56', 'test test test')
         ])
-        self._check_naptr(zone, 'mynaptr.' + zn, [
-            (3600, 10, 20, 'A', 'EAU+SIP', '', 'domain.com.'),
-            (3600, 20, 20, 'U', 'SIP+D2U', '!^(\\+441632960083)$!sip:\\1@example.com!', '.')
-        ])
 
     def test_zone_file_2(self):
         zn = 'zone2.com.'
@@ -801,6 +801,21 @@ class DnsParseZoneFiles(unittest.TestCase):
             (172800, 'ns4-03.azure-dns.info.'),
         ])
         self._check_a(zone, '*.' + zn, [(3600, '2.3.4.5')])
+
+    def test_zone_file_11(self):
+        zn = 'zone11.com.'
+        zone = self._get_zone_object('zone11.txt', zn)
+        self._check_soa(zone, zn, 3600, 1, 3600, 300, 2419200, 300)
+        self._check_ns(zone, zn, [
+            (172800, 'ns0-00.azure-dns.com.'),
+            (172800, 'ns0-00.azure-dns.net.'),
+            (172800, 'ns0-00.azure-dns.org.'),
+            (172800, 'ns0-00.azure-dns.info.')
+        ])
+        self._check_naptr(zone, 'mynaptr.' + zn, [
+            (3600, 10, 20, 'A', 'EAU+SIP', '', 'domain.com.'),
+            (3600, 20, 20, 'U', 'SIP+D2U', '!^(\\+441632960083)$!sip:\\1@example.com!', '.')
+        ])
 
     def test_zone_import_errors(self):
         from knack.util import CLIError
