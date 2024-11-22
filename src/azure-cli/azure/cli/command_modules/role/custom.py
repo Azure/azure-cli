@@ -1302,14 +1302,10 @@ def create_service_principal_for_rbac(
     }
     if cert_file:
         logger.warning(
-            "Please copy %s to a safe place. When you run 'az login', provide the file path in the --password argument",
+            "Please copy %s to a safe place. When you run `az login`, provide the file path in the --certificate "
+            "argument",
             cert_file)
         result['fileWithCertAndPrivateKey'] = cert_file
-
-    login_hint = ('To log in with this service principal, run:\n'
-                  f'az login --service-principal --username {app_id} --password {password or cert_file} '
-                  f'--tenant {graph_client.tenant}')
-    logger.info(login_hint)
     return result
 
 

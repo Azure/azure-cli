@@ -47,8 +47,7 @@ class ProfileCommandsLoader(AzCommandsLoader):
             c.argument('username', options_list=['--username', '-u'],
                        help='User name, service principal client ID, or managed identity ID.')
             c.argument('password', options_list=['--password', '-p'],
-                       help='Provide credentials such as a user password, a service principal secret or a PEM file '
-                            'with key and public certificate. Will prompt if not given.')
+                       help='User password or service principal secret. Will prompt if not given.')
             c.argument('tenant', options_list=['--tenant', '-t'], validator=validate_tenant,
                        help='The Microsoft Entra tenant, must be provided when using a service principal.')
             c.argument('scopes', options_list=['--scope'], nargs='+',
@@ -66,6 +65,7 @@ class ProfileCommandsLoader(AzCommandsLoader):
             # Service principal
             c.argument('service_principal', action='store_true',
                        help='Log in with a service principal.')
+            c.argument('certificate', help='PEM file with key and public certificate.')
             c.argument('use_cert_sn_issuer', action='store_true',
                        help='Use Subject Name + Issuer (SN+I) authentication in order to support automatic '
                             'certificate rolls.')

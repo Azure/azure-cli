@@ -14,6 +14,12 @@ logger = get_logger(__name__)
 AccessToken = namedtuple("AccessToken", ["token", "expires_on"])
 
 
+PASSWORD_CERTIFICATE_WARNING = (
+    "The error may be caused by passing a service principal certificate with --password. "
+    "Please note that --password no longer accepts a service principal certificate. "
+    "To pass a service principal certificate, use --certificate instead.")
+
+
 def aad_error_handler(error, **kwargs):
     """ Handle the error from AAD server returned by ADAL or MSAL. """
 
@@ -30,17 +36,21 @@ def aad_error_handler(error, **kwargs):
                        "below, please mention the hostname '%s'", socket.gethostname())
 
     error_description = error.get('error_description')
+    error_codes = error.get('error_codes')
 
     # Build recommendation message
-    login_command = _generate_login_command(**kwargs)
-    login_message = (
-        # Cloud Shell uses IMDS-like interface for implicit login. If getting token/cert failed,
-        # we let the user explicitly log in to AAD with MSAL.
-        "Please explicitly log in with:\n{}" if error.get('error') == 'broker_error'
-        else "Interactive authentication is needed. Please run:\n{}").format(login_command)
+    if error_codes and 7000215 in error_codes:
+        recommendation = PASSWORD_CERTIFICATE_WARNING
+    else:
+        login_command = _generate_login_command(**kwargs)
+        recommendation = (
+            # Cloud Shell uses IMDS-like interface for implicit login. If getting token/cert failed,
+            # we let the user explicitly log in to AAD with MSAL.
+            "Please explicitly log in with:\n{}" if error.get('error') == 'broker_error'
+            else "Interactive authentication is needed. Please run:\n{}").format(login_command)
 
     from azure.cli.core.azclierror import AuthenticationError
-    raise AuthenticationError(error_description, msal_error=error, recommendation=login_message)
+    raise AuthenticationError(error_description, msal_error=error, recommendation=recommendation)
 
 
 def _generate_login_command(scopes=None, claims=None):

@@ -1204,12 +1204,12 @@ def _int_to_bytes(i):
 
 def _public_rsa_key_to_jwk(rsa_key, jwk, encoding=None):
     pubv = rsa_key.public_numbers()
-    jwk.n = _int_to_bytes(pubv.n)
+    jwk['n'] = _int_to_bytes(pubv.n)
     if encoding:
-        jwk.n = encoding(jwk.n)
-    jwk.e = _int_to_bytes(pubv.e)
+        jwk['n'] = encoding(jwk['n'])
+    jwk['e'] = _int_to_bytes(pubv.e)
     if encoding:
-        jwk.e = encoding(jwk.e)
+        jwk['e'] = encoding(jwk['e'])
 
 
 def _private_rsa_key_to_jwk(rsa_key, jwk):
@@ -2133,13 +2133,12 @@ def full_restore(cmd, client, folder_to_restore,
 
 
 # region security domain
-def security_domain_init_recovery(client, hsm_name, sd_exchange_key,
-                                  identifier=None, vault_base_url=None):  # pylint: disable=unused-argument
+def security_domain_init_recovery(client, sd_exchange_key):
     if os.path.exists(sd_exchange_key):
         raise CLIError("File named '{}' already exists.".format(sd_exchange_key))
 
-    ret = client.transfer_key(vault_base_url=hsm_name or vault_base_url)
-    exchange_key = json.loads(json.loads(ret)['transfer_key'])
+    ret = client.get_transfer_key()
+    exchange_key = json.loads(ret['transfer_key'])
 
     def get_x5c_as_pem():
         x5c = exchange_key.get('x5c', [])
@@ -2165,8 +2164,7 @@ def security_domain_init_recovery(client, hsm_name, sd_exchange_key,
         raise ex
 
 
-def _wait_security_domain_operation(client, hsm_name, target_operation='upload',
-                                    identifier=None, vault_base_url=None):  # pylint: disable=unused-argument
+def _wait_security_domain_operation(client, target_operation='upload'):
     retries = 0
     max_retries = 30
     wait_second = 5
@@ -2174,9 +2172,9 @@ def _wait_security_domain_operation(client, hsm_name, target_operation='upload',
         try:
             ret = None
             if target_operation == 'upload':
-                ret = client.upload_pending(vault_base_url=hsm_name or vault_base_url)
+                ret = client.get_upload_status()
             elif target_operation == 'download':
-                ret = client.download_pending(vault_base_url=hsm_name or vault_base_url)
+                ret = client.get_download_status()
 
             # v7.2-preview and v7.2 will change the upload operation from Sync to Async
             # due to service defects, it returns 'Succeeded' before the change and 'Success' after the change
@@ -2328,25 +2326,15 @@ def _security_domain_restore_blob(sd_file, sd_exchange_key, sd_wrapping_keys, pa
     return restore_blob_value
 
 
-def _security_domain_upload_blob(cmd, client, hsm_name, restore_blob_value, identifier=None,
-                                 vault_base_url=None, no_wait=False):
-    from .vendored_sdks.azure_keyvault_t1.v7_2.models import SecurityDomainObject
-    security_domain = SecurityDomainObject(value=restore_blob_value)
-    retval = client.upload(vault_base_url=hsm_name or vault_base_url, security_domain=security_domain)
-    if no_wait:
-        return retval
-
-    wait_second = 5
-    time.sleep(wait_second)
-    new_retval = _wait_security_domain_operation(client, hsm_name, 'upload', vault_base_url=vault_base_url)
-    if new_retval:
-        return new_retval
-    return retval
+def _security_domain_upload_blob(client, restore_blob_value, no_wait=False):
+    security_domain = {'value': restore_blob_value}
+    poller = client.begin_upload(security_domain=security_domain, polling=not no_wait)
+    if not no_wait:
+        return poller.result()
 
 
-def security_domain_upload(cmd, client, hsm_name, sd_file, restore_blob=False, sd_exchange_key=None,
-                           sd_wrapping_keys=None, passwords=None, identifier=None, vault_base_url=None,
-                           no_wait=False):  # pylint: disable=unused-argument
+def security_domain_upload(client, sd_file, restore_blob=False, sd_exchange_key=None,
+                           sd_wrapping_keys=None, passwords=None, no_wait=False):
     if not restore_blob:
         restore_blob_value = _security_domain_restore_blob(sd_file, sd_exchange_key, sd_wrapping_keys, passwords)
     else:
@@ -2354,8 +2342,7 @@ def security_domain_upload(cmd, client, hsm_name, sd_file, restore_blob=False, s
             restore_blob_value = f.read()
             if not restore_blob_value:
                 raise CLIError('Empty restore_blob_value.')
-    retval = _security_domain_upload_blob(cmd, client, hsm_name, restore_blob_value,
-                                          identifier, vault_base_url, no_wait)
+    retval = _security_domain_upload_blob(client, restore_blob_value, no_wait)
     return retval
 
 
@@ -2372,12 +2359,9 @@ def security_domain_restore_blob(sd_file, sd_exchange_key, sd_wrapping_keys, sd_
         raise ex
 
 
-def security_domain_download(cmd, client, hsm_name, sd_wrapping_keys, security_domain_file, sd_quorum,
-                             identifier=None, vault_base_url=None, no_wait=False):  # pylint: disable=unused-argument
+def security_domain_download(client, sd_wrapping_keys, security_domain_file, sd_quorum, no_wait=False):
     if os.path.exists(security_domain_file):
         raise CLIError("File named '{}' already exists.".format(security_domain_file))
-
-    from .vendored_sdks.azure_keyvault_t1.v7_2.models import CertificateSet, SecurityDomainJsonWebKey
 
     for path in sd_wrapping_keys:
         if os.path.isdir(path):
@@ -2392,22 +2376,22 @@ def security_domain_download(cmd, client, hsm_name, sd_wrapping_keys, security_d
 
     certificates = []
     for path in sd_wrapping_keys:
-        sd_jwk = SecurityDomainJsonWebKey()
+        sd_jwk = {}
         with open(path, 'rb') as f:
             pem_data = f.read()
 
         cert = load_pem_x509_certificate(pem_data, backend=default_backend())
         public_key = cert.public_key()
         public_bytes = cert.public_bytes(Encoding.DER)
-        sd_jwk.x5c = [Utils.security_domain_b64_url_encode_for_x5c(public_bytes)]  # only one cert, not a chain
-        sd_jwk.x5t = Utils.security_domain_b64_url_encode(hashlib.sha1(public_bytes).digest())
-        sd_jwk.x5tS256 = Utils.security_domain_b64_url_encode(hashlib.sha256(public_bytes).digest())
-        sd_jwk.key_ops = ['verify', 'encrypt', 'wrapKey']
+        sd_jwk['x5c'] = [Utils.security_domain_b64_url_encode_for_x5c(public_bytes)]  # only one cert, not a chain
+        sd_jwk['x5t'] = Utils.security_domain_b64_url_encode(hashlib.sha1(public_bytes).digest())
+        sd_jwk['x5t#S256'] = Utils.security_domain_b64_url_encode(hashlib.sha256(public_bytes).digest())
+        sd_jwk['key_ops'] = ['verify', 'encrypt', 'wrapKey']
 
         # populate key into jwk
         if isinstance(public_key, rsa.RSAPublicKey) and public_key.key_size >= 2048:
-            sd_jwk.kty = 'RSA'
-            sd_jwk.alg = 'RSA-OAEP-256'
+            sd_jwk['kty'] = 'RSA'
+            sd_jwk['alg'] = 'RSA-OAEP-256'
             _public_rsa_key_to_jwk(public_key, sd_jwk, encoding=Utils.security_domain_b64_url_encode)
         else:
             raise CLIError('Only RSA >= 2048 is supported.')
@@ -2425,21 +2409,13 @@ def security_domain_download(cmd, client, hsm_name, sd_wrapping_keys, security_d
             from azure.cli.core.azclierror import FileOperationError
             raise FileOperationError(str(ex))
 
-    ret = client.download(
-        vault_base_url=hsm_name or vault_base_url,
-        certificates=CertificateSet(certificates=certificates, required=sd_quorum)
-    )
-
+    certificate_info = {'certificates': certificates, 'required': sd_quorum}
+    poller = client.begin_download(certificate_info_object=certificate_info, polling=not no_wait)
+    security_domain = poller.result()
+    if poller.status() != 'Failed':
+        _save_to_local_file(security_domain_file, security_domain)
     if not no_wait:
-        wait_second = 5
-        time.sleep(wait_second)
-        polling_ret = _wait_security_domain_operation(client, hsm_name, 'download', vault_base_url=vault_base_url)
-        # Due to service defect, status could be 'Success' or 'Succeeded' when it succeeded
-        if polling_ret and getattr(polling_ret, 'status', None) != 'Failed':
-            _save_to_local_file(security_domain_file, ret)
-        return polling_ret
-
-    _save_to_local_file(security_domain_file, ret)
+        return _wait_security_domain_operation(client, 'download')
 
 
 def check_name_availability(cmd, client, name, resource_type='hsm'):
