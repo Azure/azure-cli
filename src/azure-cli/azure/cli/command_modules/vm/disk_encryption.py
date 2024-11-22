@@ -61,6 +61,34 @@ def _detect_ade_status(vm):
     return True, False   # we believe impossible to have both old & new ADE
 
 
+def updateVmEncryptionSetting(cmd, vm, resource_group_name, vm_name, encryption_identity):
+    
+    SecurityProfile, EncryptionIdentity  = cmd.get_models('SecurityProfile', 'EncryptionIdentity')
+    updateVm = False
+    if vm.security_profile is None:
+        vm.security_profile =  SecurityProfile()
+        
+    if vm.security_profile.encryption_identity is None:
+        vm.security_profile.encryption_identity = EncryptionIdentity()
+    
+    if vm.security_profile.encryption_identity.user_assigned_identity_resource_id is None or vm.security_profile.encryption_identity.user_assigned_identity_resource_id.lower() != encryption_identity:
+        vm.security_profile.encryption_identity.user_assigned_identity_resource_id = encryption_identity
+        updateVm = True
+    else:
+        print ("No changes in identity")
+    print ("Check something")    
+    
+    if updateVm:
+        compute_client = _compute_client_factory(cmd.cli_ctx)
+        updateEncryptionIdentity = compute_client.virtual_machines.begin_create_or_update(resource_group_name,vm_name,vm)
+        LongRunningOperation(cmd.cli_ctx)(updateEncryptionIdentity)
+        result = updateEncryptionIdentity.result()
+        print (result)
+        if result is not None and result.provisioning_state == 'Succeeded':
+            return True
+        return False
+        
+
 def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-locals, too-many-statements
                disk_encryption_keyvault,
                aad_client_id=None,
@@ -70,7 +98,8 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
                key_encryption_algorithm='RSA-OAEP',
                volume_type=None,
                encrypt_format_all=False,
-               force=False):
+               force=False,
+               encryption_identity = None):
     from azure.mgmt.core.tools import parse_resource_id
     from knack.util import CLIError
 
@@ -109,9 +138,14 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
     # disk encryption key itself can be further protected, so let us verify
     if key_encryption_key:
         key_encryption_keyvault = key_encryption_keyvault or disk_encryption_keyvault
+        
+    if encryption_identity:
+        result = updateVmEncryptionSetting(cmd, vm, resource_group_name,vm_name,encryption_identity)
+        if result:
+            print ("Encryption Identity successfully set in virtual machine")
 
     #  to avoid bad server errors, ensure the vault has the right configurations
-    _verify_keyvault_good_for_encryption(cmd.cli_ctx, disk_encryption_keyvault, key_encryption_keyvault, vm, force)
+    _verify_keyvault_good_for_encryption(cmd.cli_ctx, disk_encryption_keyvault,key_encryption_keyvault, vm, force)
 
     # if key name and not key url, get url.
     if key_encryption_key and '://' not in key_encryption_key:  # if key name and not key url
@@ -155,7 +189,8 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
         type_handler_version=extension['version'] if use_new_ade else extension['legacy_version'],
         settings=public_config,
         auto_upgrade_minor_version=True)
-
+    
+        
     poller = compute_client.virtual_machine_extensions.begin_create_or_update(
         resource_group_name, vm_name, extension['name'], ext)
     LongRunningOperation(cmd.cli_ctx)(poller)
@@ -535,7 +570,7 @@ def show_vmss_encryption_status(cmd, resource_group_name, vmss_name):
     return result
 
 
-def _verify_keyvault_good_for_encryption(cli_ctx, disk_vault_id, kek_vault_id, vm_or_vmss, force):
+def _verify_keyvault_good_for_encryption(cli_ctx, disk_vault_id, kek_vault_id,vm_or_vmss, force):
     def _report_client_side_validation_error(msg):
         if force:
             logger.warning("WARNING: %s %s", msg, "Encryption might fail.")
@@ -554,9 +589,17 @@ def _verify_keyvault_good_for_encryption(cli_ctx, disk_vault_id, kek_vault_id, v
     key_vault = client.get(disk_vault_resource_info['resource_group'], disk_vault_resource_info['name'])
 
     # ensure vault has 'EnabledForDiskEncryption' permission
-    if not key_vault.properties or not key_vault.properties.enabled_for_disk_encryption:
-        _report_client_side_validation_error("Keyvault '{}' is not enabled for disk encryption.".format(
+        
+    if resource_type == 'VM':
+        if vm_or_vmss.security_profile and vm_or_vmss.security_profile.encryption_identity and vm_or_vmss.security_profile.encryption_identity.user_assigned_identity_resource_id:
+            print ("Encryption Identity is there to perform KeyVault operation")
+        elif not key_vault.properties or not key_vault.properties.enabled_for_disk_encryption:
+            _report_client_side_validation_error("Keyvault '{}' is not enabled for disk encryption.".format(
             disk_vault_resource_info['resource_name']))
+    else:
+        if not key_vault.properties or not key_vault.properties.enabled_for_disk_encryption:
+            _report_client_side_validation_error("Keyvault '{}' is not enabled for disk encryption.".format(disk_vault_resource_info['resource_name']))
+           
 
     if kek_vault_id:
         kek_vault_info = parse_resource_id(kek_vault_id)

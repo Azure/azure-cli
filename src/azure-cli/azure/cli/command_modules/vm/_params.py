@@ -1194,6 +1194,9 @@ def load_arguments(self, _):
             c.argument('key_encryption_key', help='Key vault key name or URL used to encrypt the disk encryption key.')
             c.argument('key_encryption_keyvault', help='Name or ID of the key vault containing the key encryption key used to encrypt the disk encryption key. If missing, CLI will use `--disk-encryption-keyvault`.')
 
+    with self.argument_context('vm encryption enable') as c:
+        c.argument('encryption_identity', help= 'Resource Id of the user managed identity which can be used for enable disk encryption')
+    
     for scope in ['vm extension', 'vmss extension']:
         with self.argument_context(scope) as c:
             c.argument('publisher', help='The name of the extension publisher.')
