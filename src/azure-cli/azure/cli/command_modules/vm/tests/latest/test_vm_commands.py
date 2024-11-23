@@ -10402,31 +10402,38 @@ class VMInstallPatchesScenarioTest(ScenarioTest):
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_vm_install_patches_')
     def test_vm_install_patches(self, resource_group):
+        from azure.core.exceptions import HttpResponseError
+
         self.kwargs.update({
             'subnet': 'subnet1',
             'vnet': 'vnet1'
         })
-        # Create new one
+        # Create a windows vm
         self.cmd('vm create -g {rg} -n vm -l westus --image MicrosoftWindowsServer:WindowsServer:2022-Datacenter-Azure-Edition-Hotpatch:latest '
                  '--enable-hotpatching true --patch-mode AutomaticByPlatform --enable-agent --admin-username azureuser --admin-password testPassword0 --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
 
         # Create a linux vm
-        self.cmd('vm create -g {rg} -n vm2 --image Ubuntu2204 -l westus --admin-username azureuser --admin-password Password123! --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+        self.cmd('vm create -g {rg} -n vm2 --image Ubuntu2204 -l westus --admin-username azureuser --admin-password Password123! '
+                 '--subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
 
         # Disable default outbound access
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
         # Test for WindowsParameters and check for serialization warning/errors
-        with self.assertNoLogs(logger='azure.mgmt.compute._serialization', level='WARNING'):
-            self.cmd('vm install-patches -g {rg} -n vm --maximum-duration PT4H --reboot-setting IfRequired --classifications-to-include-win Critical Security --exclude-kbs-requiring-reboot true --max-patch-publish-date 2024-11-01T02:36:43', checks=[
-                self.check('status', 'Succeeded')
-            ])
+        with self.assertRaisesRegex(HttpResponseError, "The entry in 'kbNumbersToInclude' with value '1111' is not valid. It must be a KBID such as"):
+            self.cmd('vm install-patches -g {rg} -n vm --maximum-duration PT4H --reboot-setting Never --classifications-to-include-win Critical Security '
+                     '--exclude-kbs-requiring-reboot true --kb-numbers-to-include=1111 --max-patch-publish-date 2024-11-01T02:36:43')
 
-        # Test for LinuxParameters and check for serialization warning/errors
-        with self.assertNoLogs(logger='azure.mgmt.compute._serialization', level='WARNING'):
-            self.cmd('vm install-patches -g {rg} -n vm2 --maximum-duration PT4H --reboot-setting Never --classifications-to-include-linux Other', checks=[
-                self.check('status', 'Succeeded')
-            ])
+        self.cmd('vm install-patches -g {rg} -n vm --maximum-duration PT4H --reboot-setting Never --classifications-to-include-win Critical Security '
+                 '--exclude-kbs-requiring-reboot true --kb-numbers-to-include=KB4512508 --max-patch-publish-date 2024-11-01T02:36:43', 
+                 checks=[
+                    self.check('status', 'Succeeded')
+                    ])
+
+        # Test for LinuxParameters and check for success
+        self.cmd('vm install-patches -g {rg} -n vm2 --maximum-duration PT4H --reboot-setting ifRequired --classifications-to-include-linux Critical Security', checks=[
+            self.check('status', 'Succeeded')
+        ])
 
 class VMTrustedLaunchScenarioTest(ScenarioTest):
     @AllowLargeResponse(size_kb=99999)
