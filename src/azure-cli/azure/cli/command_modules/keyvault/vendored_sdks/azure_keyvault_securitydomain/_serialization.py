@@ -27,6 +27,7 @@
 # pyright: reportUnnecessaryTypeIgnoreComment=false
 
 from base64 import b64decode, b64encode
+from datetime import timezone
 import calendar
 import datetime
 import decimal
@@ -55,10 +56,6 @@ from typing import (
 
 from urllib.parse import quote
 import xml.etree.ElementTree as ET
-
-from datetime import timezone as _FixedOffset  # type: ignore
-from datetime import timezone
-
 
 import isodate  # type: ignore
 
@@ -172,44 +169,6 @@ class RawDeserializer:
 
 _LOGGER = logging.getLogger(__name__)
 
-_long_type = int
-
-
-class UTC(datetime.tzinfo):
-    """Time Zone info for handling UTC"""
-
-    def utcoffset(self, dt):
-        """UTF offset for UTC is 0.
-
-        :param datetime.datetime dt: The datetime
-        :returns: The offset
-        :rtype: datetime.timedelta
-        """
-        return datetime.timedelta(0)
-
-    def tzname(self, dt):
-        """Timestamp representation.
-
-        :param datetime.datetime dt: The datetime
-        :returns: The timestamp representation
-        :rtype: str
-        """
-        return "Z"
-
-    def dst(self, dt):
-        """No daylight saving for UTC.
-
-        :param datetime.datetime dt: The datetime
-        :returns: The daylight saving time
-        :rtype: datetime.timedelta
-        """
-        return datetime.timedelta(hours=1)
-
-
-
-
-
-TZ_UTC = timezone.utc
 
 _FLATTEN = re.compile(r"(?<!\\)\.")
 
@@ -236,7 +195,7 @@ def full_restapi_key_transformer(key, attr_desc, value):  # pylint: disable=unus
     :rtype: list
     """
     keys = _FLATTEN.split(attr_desc["key"])
-    return ([_decode_attribute_map_key(k) for k in keys], value)
+    return [_decode_attribute_map_key(k) for k in keys], value
 
 
 def last_restapi_key_transformer(key, attr_desc, value):
@@ -297,15 +256,6 @@ class Model:
         if isinstance(other, self.__class__):
             return self.__dict__ == other.__dict__
         return False
-
-    def __ne__(self, other: Any) -> bool:
-        """Compare objects by comparing all attributes.
-
-        :param object other: The object to compare
-        :returns: True if objects are not equal
-        :rtype: bool
-        """
-        return not self.__eq__(other)
 
     def __str__(self) -> str:
         return str(self.__dict__)
@@ -1003,7 +953,7 @@ class Serializer:  # pylint: disable=too-many-public-methods
         obj_type = type(attr)
         if obj_type in self.basic_types:
             return self.serialize_basic(attr, self.basic_types[obj_type], **kwargs)
-        if obj_type is _long_type:
+        if obj_type is int:
             return self.serialize_long(attr)
         if obj_type is str:
             return self.serialize_unicode(attr)
@@ -1096,7 +1046,7 @@ class Serializer:  # pylint: disable=too-many-public-methods
         :rtype: int/long
         :return: serialized long
         """
-        return _long_type(attr)
+        return int(attr)
 
     @staticmethod
     def serialize_date(attr, **kwargs):  # pylint: disable=unused-argument
@@ -1381,9 +1331,8 @@ def xml_key_extractor(attr, attr_desc, data):  # pylint: disable=unused-argument
         # Iter and wrapped, should have found one node only (the wrap one)
         if len(children) != 1:
             raise DeserializationError(
-                "Tried to deserialize an array not wrapped, and found several nodes '{}'. Maybe you should declare this array as wrapped?".format(  # pylint: disable=line-too-long
-                    xml_name
-                )
+                f"Tried to deserialize an array not wrapped, and found several nodes '{xml_name}'. "
+                "Maybe you should declare this array as wrapped?"
             )
         return list(children[0])  # Might be empty list and that's ok.
 
@@ -1515,8 +1464,7 @@ class Deserializer:
                 value = self.deserialize_data(raw_value, attr_desc["type"])
                 d_attrs[attr] = value
         except (AttributeError, TypeError, KeyError) as err:
-            msg = "Unable to deserialize to object: " + class_name  # type: ignore
-            raise DeserializationError(msg) from err
+            raise DeserializationError("Unable to deserialize to object: " + class_name ) from err
         additional_properties = self._build_additional_properties(attributes, data)
         return self._instantiate_model(response, d_attrs, additional_properties)
 
@@ -1759,7 +1707,7 @@ class Deserializer:
         obj_type = type(attr)
         if obj_type in self.basic_types:
             return self.deserialize_basic(attr, self.basic_types[obj_type])
-        if obj_type is _long_type:
+        if obj_type is int:
             return self.deserialize_long(attr)
 
         if obj_type == dict:
@@ -1835,12 +1783,6 @@ class Deserializer:
         if isinstance(data, Enum):
             return data
 
-        # Consider this is real string
-        try:
-            if isinstance(data, unicode):  # type: ignore
-                return data
-        except NameError:
-            return str(data)
         return str(data)
 
     @staticmethod
@@ -1888,7 +1830,7 @@ class Deserializer:
         """
         if isinstance(attr, ET.Element):
             attr = attr.text
-        return bytearray(b64decode(attr))  # type: ignore
+        return bytearray(b64decode(attr))
 
     @staticmethod
     def deserialize_base64(attr):
@@ -1918,7 +1860,7 @@ class Deserializer:
         if isinstance(attr, ET.Element):
             attr = attr.text
         try:
-            return decimal.Decimal(str(attr))  # type: ignore
+            return decimal.Decimal(str(attr))
         except decimal.DecimalException as err:
             msg = "Invalid decimal {}".format(attr)
             raise DeserializationError(msg) from err
@@ -1934,7 +1876,7 @@ class Deserializer:
         """
         if isinstance(attr, ET.Element):
             attr = attr.text
-        return _long_type(attr)  # type: ignore
+        return int(attr)
 
     @staticmethod
     def deserialize_duration(attr):
@@ -1999,10 +1941,10 @@ class Deserializer:
         try:
             parsed_date = email.utils.parsedate_tz(attr)  # type: ignore
             date_obj = datetime.datetime(
-                *parsed_date[:6], tzinfo=_FixedOffset(datetime.timedelta(minutes=(parsed_date[9] or 0) / 60))
+                *parsed_date[:6], tzinfo=timezone(datetime.timedelta(minutes=(parsed_date[9] or 0) / 60))
             )
             if not date_obj.tzinfo:
-                date_obj = date_obj.astimezone(tz=TZ_UTC)
+                date_obj = date_obj.astimezone(tz=timezone.utc)
         except ValueError as err:
             msg = "Cannot deserialize to rfc datetime object."
             raise DeserializationError(msg) from err
@@ -2056,10 +1998,10 @@ class Deserializer:
         :raises: DeserializationError if format invalid
         """
         if isinstance(attr, ET.Element):
-            attr = int(attr.text)  # type: ignore
+            attr = int(attr.text)
         try:
             attr = int(attr)
-            date_obj = datetime.datetime.fromtimestamp(attr, TZ_UTC)
+            date_obj = datetime.datetime.fromtimestamp(attr, timezone.utc)
         except ValueError as err:
             msg = "Cannot deserialize to unix datetime object."
             raise DeserializationError(msg) from err

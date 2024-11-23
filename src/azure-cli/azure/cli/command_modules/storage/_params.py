@@ -2242,7 +2242,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('expiry', type=get_datetime_type(True), help='expiration UTC datetime in (Y-m-d\'T\'H:M:S\'Z\')')
         c.ignore('auth_mode')
 
-    from six import u as unicode_string
     for item in ['get', 'peek', 'put', 'update', 'delete', 'clear']:
         with self.argument_context('storage message {}'.format(item)) as c:
             c.extra('queue_name', queue_name_type, required=True)
@@ -2257,7 +2256,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                             'the :func:`~get_messages` or :func:`~update_message` operation.')
 
     with self.argument_context('storage message put') as c:
-        c.argument('content', type=unicode_string, help='Message content, up to 64KB in size.')
+        c.argument('content', type=str, help='Message content, up to 64KB in size.')
         c.extra('time_to_live', type=int,
                 help='Specify the time-to-live interval for the message, in seconds. '
                      'The time-to-live may be any positive number or -1 for infinity. '
@@ -2285,7 +2284,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                      'a maximum of 32. By default, a single message is peeked from the queue with this operation.')
 
     with self.argument_context('storage message update') as c:
-        c.argument('content', type=unicode_string, help='Message content, up to 64KB in size.')
+        c.argument('content', type=str, help='Message content, up to 64KB in size.')
         c.extra('visibility_timeout', type=int,
                 help='If not specified, the default value is 0. Specify the new visibility timeout value, in seconds, '
                      'relative to server time. The new value must be larger than or equal to 0, and cannot be larger '

@@ -7,10 +7,7 @@ import os
 import tempfile
 import unittest
 
-try:
-    import mock
-except ImportError:
-    from unittest import mock
+from unittest import mock
 
 from azure.cli.testsdk.scenario_tests.const import ENV_LIVE_TEST
 
