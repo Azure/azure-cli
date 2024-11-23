@@ -70,14 +70,14 @@ class TestAAZField(unittest.TestCase):
         model_schema.properties.enable = AAZBoolType()
         v.properties.enable = True
         assert not v.properties.enable._is_patch
-        assert v.properties.enable == True
-        assert not (v.properties.enable != True)
+        assert v.properties.enable == True  # noqa: E712
+        assert not (v.properties.enable != True)  # noqa: E712
         assert v.properties.enable
-        assert v.properties.enable is not True  # cannot us is
+        assert v.properties.enable is not True  # cannot use "is True" due to custom __eq__ logic
 
         v.properties.enable = False
-        assert v.properties.enable == False
-        assert not (v.properties.enable != False)
+        assert v.properties.enable == False  # noqa: E712
+        assert not (v.properties.enable != False)  # noqa: E712
         assert not v.properties.enable
         assert v.properties.enable is not False
 
@@ -98,7 +98,7 @@ class TestAAZField(unittest.TestCase):
         assert str(v.properties.height) == "10.0"
         assert not v.properties.height._is_patch
         assert v.properties.height._data == 10
-        assert v.properties.height == 10 and v.properties.height <= 10 and v.properties.height >= 10
+        assert v.properties.height == 10 and v.properties.height <= 10 <= v.properties.height
         assert not (v.properties.height != 10) and not (v.properties.height < 10) and not (v.properties.height > 10)
         assert v.properties.height != 11 and v.properties.height < 11 and v.properties.height <= 11
         assert not (v.properties.height == 11) and not (v.properties.height > 11) and not (v.properties.height >= 11)
@@ -130,7 +130,7 @@ class TestAAZField(unittest.TestCase):
         assert not v.properties._is_patch
         assert v.properties.name._data == "abc"
         assert v.properties.count._data == 100
-        assert v.properties.enable._data == True
+        assert v.properties.enable._data is True
         assert v.properties.height._data == 111
 
         # test assign properties by dict with all string value
@@ -269,14 +269,14 @@ class TestAAZField(unittest.TestCase):
             self.assertTrue(False)
 
         v.additional['bool'] = True
-        self.assertEqual(v.additional['bool'], True)
+        self.assertIs(v.additional['bool'], True)
 
         del v.additional['bool']
         with self.assertRaises(KeyError):
             v.additional['bool']
 
         v.additional['none'] = None
-        self.assertEqual(v.additional['none'], None)
+        self.assertIsNone(v.additional['none'])
 
         v.additional['obj'] = {"a": 1, "b": "str", "c": True, "d": None}
         self.assertEqual(v.additional['obj'], {"a": 1, "b": "str", "c": True, "d": None})
@@ -835,7 +835,7 @@ class TestAAZField(unittest.TestCase):
             ]
         })
 
-        self.assertTrue(AAZCommand.deserialize_output(v, client_flatten=False, secret_hidden=True) == {
+        self.assertEqual(AAZCommand.deserialize_output(v, client_flatten=False, secret_hidden=True), {
             "actions": [
                 {
                     "action_type": "ModifyProperties",
@@ -862,7 +862,7 @@ class TestAAZField(unittest.TestCase):
             ]
         })
 
-        self.assertTrue(AAZCommand.deserialize_output(v, client_flatten=False, secret_hidden=False) == {
+        self.assertEqual(AAZCommand.deserialize_output(v, client_flatten=False, secret_hidden=False), {
             "actions": [
                 {
                     "action_type": "ModifyProperties",
