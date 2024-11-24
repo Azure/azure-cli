@@ -809,7 +809,7 @@ class FunctionAppFlex(LiveScenarioTest):
         server_farm_id =functionapp['properties']['serverFarmId']
         function_plan = self.cmd('az functionapp plan show --ids {}'
                                .format(server_farm_id)).get_output_in_json()
-        self.assertTrue(function_plan['zoneRedundant'] == True) 
+        self.assertIs(function_plan['zoneRedundant'], True)
 
     @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -823,7 +823,7 @@ class FunctionAppFlex(LiveScenarioTest):
         server_farm_id =functionapp['properties']['serverFarmId']
         function_plan = self.cmd('az functionapp plan show --ids {}'
                                .format(server_farm_id)).get_output_in_json()
-        self.assertTrue(function_plan['zoneRedundant'] == False) 
+        self.assertIs(function_plan['zoneRedundant'], False)
 
     @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()

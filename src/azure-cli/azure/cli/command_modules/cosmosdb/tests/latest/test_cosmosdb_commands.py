@@ -1941,9 +1941,9 @@ class CosmosDBTests(ScenarioTest):
             self.check('principalId', principal_id)
         ])
 
-        assert self.cmd('az cosmosdb sql role assignment exists -g {rg} -a {acc} -i {role_assignment_id3}').get_output_in_json() == False
+        assert self.cmd('az cosmosdb sql role assignment exists -g {rg} -a {acc} -i {role_assignment_id3}').get_output_in_json() is False
         self.cmd('az cosmosdb sql role assignment create -g {rg} -a {acc} -s {scope} -p {principal_id} -n roleName2 -i {role_assignment_id3} --no-wait')
-        assert self.cmd('az cosmosdb sql role assignment exists -g {rg} -a {acc} -i {role_assignment_id3}').get_output_in_json() == False
+        assert self.cmd('az cosmosdb sql role assignment exists -g {rg} -a {acc} -i {role_assignment_id3}').get_output_in_json() is False
         self.cmd('az cosmosdb sql role assignment wait -g {rg} -a {acc} -i {role_assignment_id3} --exists')
         assert self.cmd('az cosmosdb sql role assignment exists -g {rg} -a {acc} -i {role_assignment_id3}').get_output_in_json()
 
@@ -2615,7 +2615,7 @@ class CosmosDBTests(ScenarioTest):
 
         assert restored_account['restoreParameters']['restoreSource'] == restorable_database_account['id']
         assert restored_account['restoreParameters']['restoreTimestampInUtc'] == restore_ts_string
-        assert restored_account['restoreParameters']['restoreWithTtlDisabled'] == True
+        assert restored_account['restoreParameters']['restoreWithTtlDisabled'] is True
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_table_restorable_commands', location='eastus2')
     @AllowLargeResponse(size_kb=9999)

@@ -59,14 +59,14 @@ class TestAAZField(unittest.TestCase):
         model_schema.properties.enable = AAZBoolType()
         v.properties.enable = True
         assert not v.properties.enable._is_patch
-        assert v.properties.enable == True
-        assert not (v.properties.enable != True)
+        assert v.properties.enable is True
+        assert not (v.properties.enable is not True)
         assert v.properties.enable
         assert v.properties.enable is not True  # cannot us is
 
         v.properties.enable = False
-        assert v.properties.enable == False
-        assert not (v.properties.enable != False)
+        assert v.properties.enable is False
+        assert not (v.properties.enable is not False)
         assert not v.properties.enable
         assert v.properties.enable is not False
 
@@ -97,7 +97,7 @@ class TestAAZField(unittest.TestCase):
         assert not v.properties._is_patch
         assert v.properties.name._data == "abc"
         assert v.properties.count._data == 100
-        assert v.properties.enable._data == True
+        assert v.properties.enable._data is True
         assert v.properties.height._data == 111
 
     def test_aaz_dict_type(self):
