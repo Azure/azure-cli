@@ -229,8 +229,10 @@ def load_flexibleserver_command_table(self, _):
         g.custom_command('pre-check', 'ltr_precheck_func', custom_command_type=flexible_servers_custom_postgres)
         g.custom_command('start', 'ltr_start_func', custom_command_type=flexible_servers_custom_postgres)
 
-    with self.command_group('postgres flexible-server replica', postgres_flexible_replica_sdk) as g:
-        g.command('list', 'list_by_server')
+    with self.command_group('postgres flexible-server replica', postgres_flexible_replica_sdk,
+                            custom_command_type=flexible_servers_custom_postgres,
+                            client_factory=cf_postgres_flexible_replica) as g:
+        g.custom_command('list', 'flexible_replica_list_by_server')
 
     with self.command_group('postgres flexible-server replica', postgres_flexible_servers_sdk,
                             custom_command_type=flexible_servers_custom_postgres,

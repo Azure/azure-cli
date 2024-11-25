@@ -34,7 +34,7 @@ ENV_COMMAND_COVERAGE = 'AZURE_CLI_TEST_COMMAND_COVERAGE'
 COVERAGE_FILE = 'az_command_coverage.txt'
 
 
-class CheckerMixin(object):
+class CheckerMixin:
 
     def _apply_kwargs(self, val):
         try:
@@ -235,7 +235,7 @@ class LiveScenarioTest(IntegrationTestBase, CheckerMixin, unittest.TestCase):
         return self.cmd('account list --query "[?isDefault].id" -o tsv').output.strip()
 
 
-class ExecutionResult(object):
+class ExecutionResult:
     def __init__(self, cli_ctx, command, expect_failure=False):
         self.output = ''
         self.applog = ''

@@ -13,8 +13,7 @@ from knack.log import get_logger
 from ._clients import ContainerAppClient, ManagedEnvironmentClient
 from ._ssh_utils import ping_container_app
 from ._utils import safe_get, is_registry_msi_system
-from ._constants import ACR_IMAGE_SUFFIX, LOG_TYPE_SYSTEM
-
+from ._constants import ACR_IMAGE_SUFFIX, LOG_TYPE_SYSTEM, MANAGED_ENVIRONMENT_RESOURCE_TYPE
 
 logger = get_logger(__name__)
 
@@ -149,10 +148,11 @@ def _ping_containerapp_if_need(cmd, app) -> (bool, str):
     parsed_env = parse_resource_id(safe_get(app, "properties", "environmentId"))
     env_name = parsed_env['name']
     env_rg = parsed_env['resource_group']
-    env = ManagedEnvironmentClient.show(cmd, env_rg, env_name)
-    # if environment is internal, not need to ping
-    if safe_get(env, "properties", "vnetConfiguration", "internal") is True:
-        return False, None
+    if parsed_env["resource_type"].lower() == MANAGED_ENVIRONMENT_RESOURCE_TYPE.lower():
+        env = ManagedEnvironmentClient.show(cmd, env_rg, env_name)
+        # if environment is internal, not need to ping
+        if safe_get(env, "properties", "vnetConfiguration", "internal") is True:
+            return False, None
 
     try:
         # ping containerapp to activate its replica

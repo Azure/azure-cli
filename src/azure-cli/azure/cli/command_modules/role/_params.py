@@ -205,7 +205,7 @@ def load_arguments(self, _):
             c.argument('cert', arg_group='keyCredential', validator=validate_cert,
                        help='Certificate to use for credentials. When used with `--keyvault,`, indicates the name of the '
                             'cert to use or create. Otherwise, supply a PEM or DER formatted public certificate string. '
-                            'Use `@{path}` to load from a file. Do not include private key info.')
+                            'Use `@{path}` to load from a file. Do not include the private key.')
             c.argument('create_cert', arg_group='keyCredential', action='store_true',
                        help='Create a self-signed certificate to use for the credential. Only the current OS user has '
                             'read/write permission to this certificate. Use with `--keyvault` to create the certificate in '

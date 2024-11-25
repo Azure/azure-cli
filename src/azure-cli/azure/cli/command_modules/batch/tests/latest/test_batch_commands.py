@@ -16,7 +16,7 @@ from azure.cli.command_modules.batch import _validators
 from azure.cli.command_modules.batch import _command_type
 
 
-class TestObj(object):  # pylint: disable=too-few-public-methods
+class TestObj:  # pylint: disable=too-few-public-methods
     pass
 
 

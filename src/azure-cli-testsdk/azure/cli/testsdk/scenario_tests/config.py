@@ -8,7 +8,7 @@ import configargparse
 from .const import ENV_LIVE_TEST
 
 
-class TestConfig(object):  # pylint: disable=too-few-public-methods
+class TestConfig:  # pylint: disable=too-few-public-methods
     def __init__(self, parent_parsers=None, config_file=None):
         parent_parsers = parent_parsers or []
         self.parser = configargparse.ArgumentParser(parents=parent_parsers)

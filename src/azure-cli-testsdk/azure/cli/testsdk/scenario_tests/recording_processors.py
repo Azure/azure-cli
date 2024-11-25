@@ -6,7 +6,7 @@
 from .utilities import is_text_payload, is_json_payload
 
 
-class RecordingProcessor(object):
+class RecordingProcessor:
     def process_request(self, request):  # pylint: disable=no-self-use
         return request
 

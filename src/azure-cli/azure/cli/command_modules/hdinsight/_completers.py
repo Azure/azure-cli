@@ -72,7 +72,7 @@ def get_resource_name_completion_list_under_subscription(resource_type):
     return completer
 
 
-class HDInsightCompleter():
+class HDInsightCompleter:
 
     def __init__(self, worker=None, timeout=COMPLETION_TIME_OUT):
         self.worker = worker

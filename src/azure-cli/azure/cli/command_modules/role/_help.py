@@ -528,18 +528,27 @@ long-summary: >-
     You may also use `az role assignment create` to create role assignments for this service principal later.
     See [steps to add a role assignment](https://aka.ms/azadsp-more) for more information.
 examples:
-  - name: Create without role assignment.
-    text: az ad sp create-for-rbac
-  - name: Create using a custom display name.
-    text: az ad sp create-for-rbac -n MyApp
-  - name: Create with a Contributor role assignments on specified scopes. To retrieve current subscription ID, run `az account show --query id --output tsv`.
-    text: az ad sp create-for-rbac -n MyApp --role Contributor --scopes /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/resourceGroup1 /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/resourceGroup2
-  - name: Create using a self-signed certificate.
-    text: az ad sp create-for-rbac --create-cert
-  - name: Create using a self-signed certificate, and store it within KeyVault.
-    text: az ad sp create-for-rbac --keyvault MyVault --cert CertName --create-cert
-  - name: Create using existing certificate in KeyVault.
-    text: az ad sp create-for-rbac --keyvault MyVault --cert CertName
+- name: Create without role assignment.
+  text: az ad sp create-for-rbac
+- name: Create using a custom display name.
+  text: az ad sp create-for-rbac -n MyApp
+- name: Create with a Contributor role assignments on specified scopes. To retrieve current subscription ID, run `az account show --query id --output tsv`.
+  text: az ad sp create-for-rbac -n MyApp --role Contributor --scopes /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/resourceGroup1 /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/resourceGroup2
+- name: Create using a self-signed certificate.
+  text: az ad sp create-for-rbac --create-cert
+- name: Create using an existing certificate string.
+  text: az ad sp create-for-rbac --cert "MIICoT..."
+- name: Create using an existing certificate file.
+  text: |-
+      az ad sp create-for-rbac --cert "@~/cert.pem"
+      `cert.pem` contains the following content
+      -----BEGIN CERTIFICATE-----  <<< this line is optional
+      MIICoT...
+      -----END CERTIFICATE-----    <<< this line is optional
+- name: Create using a self-signed certificate, and store it within Azure Key Vault.
+  text: az ad sp create-for-rbac --keyvault MyVault --cert CertName --create-cert
+- name: Create using existing certificate in Azure Key Vault.
+  text: az ad sp create-for-rbac --keyvault MyVault --cert CertName
 """
 
 helps['ad sp credential'] = """

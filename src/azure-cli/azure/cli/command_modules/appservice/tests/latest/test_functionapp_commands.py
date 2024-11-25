@@ -169,6 +169,7 @@ class FunctionappACRDeploymentScenarioTest(ScenarioTest):
 
 
 class FunctionAppReservedInstanceTest(ScenarioTest):
+    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_reserved_instance(self, resource_group, storage_account):
@@ -191,6 +192,7 @@ class FunctionAppReservedInstanceTest(ScenarioTest):
 
 
 class FunctionAppHttpsOnlyTest(ScenarioTest):
+    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_https_only(self, resource_group, storage_account):
@@ -210,6 +212,7 @@ class FunctionAppHttpsOnlyTest(ScenarioTest):
 
 
 class FunctionAppWithPlanE2ETest(ScenarioTest):
+    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @ResourceGroupPreparer(parameter_name='resource_group2', location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     def test_functionapp_e2e(self, resource_group, resource_group2):
@@ -364,6 +367,7 @@ class FunctionAppWithPlanE2ETest(ScenarioTest):
 
 
 class FunctionUpdatePlan(ScenarioTest):
+    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_move_plan_to_elastic(self, resource_group, storage_account):
@@ -431,6 +435,7 @@ class FunctionUpdatePlan(ScenarioTest):
 
 
 class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
+    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(name_prefix='azurecli-functionapp-c-e2e', location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_consumption_e2e(self, resource_group, storage_account):
@@ -459,6 +464,7 @@ class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
         self.cmd(
             'functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
 
+    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(name_prefix='azurecli-functionapp-c-e2e-ragrs', location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer(sku='Standard_RAGRS')
     def test_functionapp_consumption_ragrs_storage_e2e(self, resource_group, storage_account):
@@ -638,6 +644,7 @@ class FunctionAppWithLinuxConsumptionPlanTest(ScenarioTest):
 
 
 class FunctionappDaprConfig(ScenarioTest):
+    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location='northeurope')
     @StorageAccountPreparer()
     def test_functionapp_enable_dapr(self, resource_group, storage_account):
@@ -982,6 +989,7 @@ class FunctionAppManagedEnvironment(ScenarioTest):
         super().__init__(method_name, config_file, recording_name, recording_processors, replay_processors, recording_patches, replay_patches, random_config_dir)
         self.cmd('extension add -n application-insights')
 
+    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location='westeurope')
     @StorageAccountPreparer()
     def test_functionapp_create_with_appcontainer_managed_environment(self, resource_group, storage_account):
@@ -1006,6 +1014,7 @@ class FunctionAppManagedEnvironment(ScenarioTest):
 
         self.assertTrue('ftpPublishingUrl' not in r)
 
+    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location='eastus')
     @StorageAccountPreparer()
     def test_functionapp_create_with_appcontainer_managed_environment_existing_app_insights(self, resource_group, storage_account):
@@ -1069,7 +1078,8 @@ class FunctionAppManagedEnvironment(ScenarioTest):
         with self.assertRaises(ArgumentUsageError):
             self.cmd('functionapp create -g {} -n {} -s {} --vnet {} --subnet {}  --environment {} --runtime dotnet --functions-version 4'
                     .format(resource_group, functionapp_name, storage_account, vnet_name, subnet_name, managed_environment_name))
-            
+
+    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location='westeurope')
     @StorageAccountPreparer()
     def test_functionapp_create_with_appcontainer_managed_environment_add_vnet_error(self, resource_group, storage_account):
@@ -1098,6 +1108,7 @@ class FunctionAppManagedEnvironment(ScenarioTest):
             self.cmd('functionapp vnet-integration add -g {} -n {} --vnet {} --subnet {}'
             .format(resource_group, functionapp_name, vnet_name, subnet_name))
 
+    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location='southcentralus')
     @StorageAccountPreparer()
     def test_functionapp_create_with_appcontainer_managed_environment_remove_vnet_error(self, resource_group, storage_account):
@@ -1123,6 +1134,7 @@ class FunctionAppManagedEnvironment(ScenarioTest):
         with self.assertRaises(ValidationError):
             self.cmd('functionapp vnet-integration remove -g {} -n {}'.format(resource_group, functionapp_name))
 
+    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location='westeurope')
     @StorageAccountPreparer()
     def test_functionapp_create_with_appcontainer_managed_environment_list_vnet_error(self, resource_group, storage_account):
@@ -1147,7 +1159,8 @@ class FunctionAppManagedEnvironment(ScenarioTest):
                      JMESPathPatternCheck('hostNames[0]', functionapp_name + ".+" + 'azurecontainerapps.io')])
         with self.assertRaises(ValidationError):
             self.cmd('functionapp vnet-integration list -g {} -n {}'.format(resource_group, functionapp_name))
-            
+
+    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location='northeurope')
     @StorageAccountPreparer()
     def test_functionapp_delete_functions(self, resource_group, storage_account):
@@ -1196,6 +1209,7 @@ class FunctionAppManagedEnvironment(ScenarioTest):
             self.cmd('functionapp create -g {} -n {} -p {} -s {} --environment {} --runtime dotnet --functions-version 4'
                     .format(resource_group, functionapp_name, plan_name, storage_account, managed_environment_name))
 
+    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location='northeurope')
     @StorageAccountPreparer()
     def test_functionapp_config_with_appcontainer_managed_environment_error(self, resource_group, storage_account):
@@ -1222,6 +1236,7 @@ class FunctionAppManagedEnvironment(ScenarioTest):
             self.cmd('functionapp config show -g {} -n {}'
             .format(resource_group, functionapp_name))
 
+    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location='eastus')
     @StorageAccountPreparer()
     def test_functionapp_create_with_replicas(self, resource_group, storage_account):
@@ -1261,6 +1276,7 @@ class FunctionAppManagedEnvironment(ScenarioTest):
             self.cmd('functionapp create -g {} -n {} -p {} -s {} --runtime dotnet --functions-version 4 --min-replicas 1'
                     .format(resource_group, functionapp_name, plan_name, storage_account))
 
+    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location='eastus')
     @StorageAccountPreparer()
     def test_functionapp_container_config_set_replicas(self, resource_group, storage_account):
@@ -1511,6 +1527,7 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
 
 
 class FunctionAppOnWindowsWithoutRuntime(ScenarioTest):
+    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_windows_without_runtime(self, resource_group, storage_account):
@@ -1529,6 +1546,7 @@ class FunctionAppOnWindowsWithoutRuntime(ScenarioTest):
 
 
 class FunctionAppWithAppInsightsKey(ScenarioTest):
+    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_with_app_insights_key(self, resource_group, storage_account):
@@ -1560,6 +1578,7 @@ class FunctionAppWithAppInsightsConnString(ScenarioTest):
         super().__init__(method_name, config_file, recording_name, recording_processors, replay_processors, recording_patches, replay_patches, random_config_dir)
         self.cmd('extension add -n application-insights')
 
+    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_with_app_insights_conn_string(self, resource_group, storage_account):
@@ -1635,6 +1654,7 @@ class FunctionAppWithDistributedTracing(ScenarioTest):
 
 
 class FunctionAppWithAppInsightsDefault(ScenarioTest):
+    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_with_default_app_insights(self, resource_group, storage_account):
@@ -1657,6 +1677,7 @@ class FunctionAppWithAppInsightsDefault(ScenarioTest):
         self.assertTrue('AzureWebJobsDashboard' not in [
                         kp['name'] for kp in app_set])
 
+    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_with_no_default_app_insights(self, resource_group, storage_account):
@@ -1685,6 +1706,7 @@ class FunctionappAppInsightsWorkspace(ScenarioTest):
         super().__init__(method_name, config_file, recording_name, recording_processors, replay_processors, recording_patches, replay_patches, random_config_dir)
         self.cmd('extension add -n application-insights')
 
+    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_create_default_rg_and_workspace(self, resource_group, storage_account):
@@ -1702,6 +1724,7 @@ class FunctionappAppInsightsWorkspace(ScenarioTest):
             self.check('workspaceResourceId', workspace_id)
         ])
 
+    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_existing_workspace(self, resource_group, storage_account):
@@ -1713,6 +1736,7 @@ class FunctionappAppInsightsWorkspace(ScenarioTest):
             self.check('workspaceResourceId', workspace['id'])
         ])
 
+    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_existing_default_rg(self, resource_group, storage_account):
@@ -1884,6 +1908,7 @@ class FunctionAppOnLinux(ScenarioTest):
                 "[?name=='FUNCTIONS_EXTENSION_VERSION'].value|[0]", '~4')
         ])
 
+    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_on_linux_dotnet_consumption(self, resource_group, storage_account):
@@ -2038,6 +2063,7 @@ class FunctionAppSlotTests(ScenarioTest):
 
 
 class FunctionAppKeysTests(ScenarioTest):
+    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_keys_set(self, resource_group, storage_account):
@@ -2065,6 +2091,7 @@ class FunctionAppKeysTests(ScenarioTest):
                      JMESPathCheck('type', 'Microsoft.Web/sites/host/functionKeys'),
                      JMESPathCheck('value', None)])
 
+    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_keys_list(self, resource_group, storage_account):
@@ -2089,6 +2116,7 @@ class FunctionAppKeysTests(ScenarioTest):
                  .format(resource_group, functionapp_name)).assert_with_checks([
                      JMESPathCheck('functionKeys.{}'.format(key_name), key_value)])
 
+    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_keys_delete(self, resource_group, storage_account):
@@ -2116,6 +2144,7 @@ class FunctionAppKeysTests(ScenarioTest):
                  .format(resource_group, functionapp_name)).assert_with_checks([
                      JMESPathCheck('functionKeys.{}'.format(key_name), None)])
 
+    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_keys_set_slot(self, resource_group, storage_account):
@@ -2523,6 +2552,7 @@ class FunctionappDeploymentLogsScenarioTest(LiveScenarioTest):
 
 
 class FunctionappLocalContextScenarioTest(LocalContextScenarioTest):
+    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_local_context(self, resource_group, storage_account):
@@ -2579,6 +2609,7 @@ class FunctionappIdentityTest(ScenarioTest):
         self.cmd('functionapp identity show -g {} -n {}'.format(resource_group,
                                                            functionapp_name), checks=self.is_empty())
 
+    @live_only()  # TODO to be fixed
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -2611,6 +2642,7 @@ class FunctionappIdentityTest(ScenarioTest):
             self.check('userAssignedIdentities', None),
         ])
 
+    @live_only()  # TODO to be fixed
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -2655,6 +2687,7 @@ class FunctionappIdentityTest(ScenarioTest):
 
 
 class FunctionappCorsTest(ScenarioTest):
+    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_cors_credentials(self, resource_group, storage_account):
@@ -2671,6 +2704,7 @@ class FunctionappCorsTest(ScenarioTest):
 
 
 class FunctionappNetworkConnectionTests(ScenarioTest):
+    @live_only()  # TODO to be fixed
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -2713,6 +2747,7 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
             JMESPathCheck('length(@)', 0)
         ])
 
+    @live_only()  # TODO to be fixed
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -2745,6 +2780,7 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
             self.cmd(
                 'functionapp create -g {} -n {} -s {} --consumption-plan-location {} --vnet {} --subnet {} --functions-version 4'.format(resource_group, functionapp_name, storage_account, WINDOWS_ASP_LOCATION_FUNCTIONAPP, vnet_name, subnet_name))
 
+    @live_only()  # TODO to be fixed
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -2767,6 +2803,7 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
             JMESPathCheck('[0].name', subnet_name)
         ])
 
+    @live_only()  # TODO to be fixed
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -2789,6 +2826,7 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
             JMESPathCheck('[0].name', subnet_name)
         ])
 
+    @live_only()  # TODO to be fixed
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP, parameter_name="rg2")

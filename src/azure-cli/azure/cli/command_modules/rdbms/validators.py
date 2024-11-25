@@ -749,6 +749,18 @@ def validate_and_format_restore_point_in_time(restore_time):
                               "Please use ISO format e.g., 2021-10-22T00:08:23+00:00.")
 
 
+def is_citus_cluster(cmd, resource_group_name, server_name):
+    server_operations_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
+    server = server_operations_client.get(resource_group_name, server_name)
+
+    return server.cluster and server.cluster.cluster_size > 0
+
+
+def validate_citus_cluster(cmd, resource_group_name, server_name):
+    if is_citus_cluster(cmd, resource_group_name, server_name):
+        raise ValidationError("Citus cluster is not supported for this operation.")
+
+
 def validate_public_access_server(cmd, client, resource_group_name, server_name):
     if isinstance(client, MySqlFirewallRulesOperations):
         server_operations_client = cf_mysql_flexible_servers(cmd.cli_ctx, '_')

@@ -83,7 +83,7 @@ def get_error_type(error_msg):
     return error_type.value
 
 
-class CommandRecommender():  # pylint: disable=too-few-public-methods
+class CommandRecommender:  # pylint: disable=too-few-public-methods
     """Recommend a command for user when user's command fails.
     It combines Aladdin recommendations and examples in help files."""
 

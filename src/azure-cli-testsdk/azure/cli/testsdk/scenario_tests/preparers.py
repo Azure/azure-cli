@@ -13,7 +13,7 @@ from .recording_processors import RecordingProcessor
 
 # Core Utility
 
-class AbstractPreparer(object):
+class AbstractPreparer:
     def __init__(self, name_prefix, name_len, disable_recording=False):
         self.name_prefix = name_prefix
         self.name_len = name_len

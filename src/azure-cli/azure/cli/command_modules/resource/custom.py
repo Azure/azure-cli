@@ -1177,7 +1177,7 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
     template_obj['resources'] = template_obj.get('resources', [])
 
     if _is_bicepparam_file_provided(parameters):
-        parameters = json.loads(bicepparam_json_content).get('parameters', {})
+        parameters = json.loads(bicepparam_json_content).get('parameters', {})  # pylint: disable=used-before-assignment
     else:
         parameters = _process_parameters(template_obj, parameters) or {}
         parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters, no_prompt)
@@ -1381,7 +1381,7 @@ def _prepare_stacks_templates_and_parameters(cmd, rcf, deployment_scope, deploym
     template_obj['resources'] = template_obj.get('resources', [])
 
     if _is_bicepparam_file_provided(parameters):
-        parameters = json.loads(bicepparam_json_content).get('parameters', {})
+        parameters = json.loads(bicepparam_json_content).get('parameters', {})  # pylint: disable=used-before-assignment
     else:
         parameters = _process_parameters(template_obj, parameters) or {}
         parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters, False)

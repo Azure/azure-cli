@@ -311,7 +311,7 @@ def process_image_template_create_namespace(cmd, namespace):  # pylint: disable=
     for script in scripts:
         if script["type"] is None:
             try:
-                script["type"] = ScriptType.SHELL if likely_linux else ScriptType.POWERSHELL
+                script["type"] = ScriptType.SHELL if likely_linux else ScriptType.POWERSHELL  # pylint: disable=used-before-assignment
                 logger.info("For script %s, likely linux is %s.", script["script"], likely_linux)
             except NameError:
                 raise CLIError("Unable to infer the type of script {}.".format(script["script"]))

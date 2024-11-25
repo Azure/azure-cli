@@ -941,7 +941,7 @@ def db_show_conn_str(
     return f.format(**conn_str_props)
 
 
-class DatabaseIdentity():  # pylint: disable=too-few-public-methods
+class DatabaseIdentity:  # pylint: disable=too-few-public-methods
     '''
     Helper class to bundle up database identity properties and generate
     database resource id.

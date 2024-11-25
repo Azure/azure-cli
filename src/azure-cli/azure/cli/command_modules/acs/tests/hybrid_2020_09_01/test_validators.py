@@ -21,7 +21,7 @@ class MockCLI(CLI):
         self.cloud = get_active_cloud(self)
 
 
-class MockLoader(object):
+class MockLoader:
     def __init__(self, ctx):
         self.ctx = ctx
 
@@ -31,7 +31,7 @@ class MockLoader(object):
                        mod='models', operation_group='managed_clusters')
 
 
-class MockCmd(object):
+class MockCmd:
     def __init__(self, ctx, arguments={}):
         self.cli_ctx = ctx
         self.loader = MockLoader(self.cli_ctx)

@@ -274,7 +274,7 @@ class TestParser(unittest.TestCase):
             self.assertIn("Extension another-ext-name installed. Please rerun your command.", logger_msgs[6])
 
 
-class VerifyError(object):  # pylint: disable=too-few-public-methods
+class VerifyError:  # pylint: disable=too-few-public-methods
 
     def __init__(self, test, substr=None):
         self.test = test

@@ -47,7 +47,7 @@ def put_rules(cmd, default_rule_group_id, default_rule_group_name, mac_region, c
         except CLIError as e:
             error = e
     else:
-        raise error
+        raise error  # pylint: disable=used-before-assignment
 
 
 # pylint: disable=line-too-long
