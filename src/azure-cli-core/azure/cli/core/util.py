@@ -624,15 +624,6 @@ def b64_to_hex(s):
     return hex_data
 
 
-def recursively_to_camel_case(obj):
-    if isinstance(obj, dict):
-        result = {to_camel_case(k): recursively_to_camel_case(v) for (k, v) in obj.items()}
-        return result
-    if isinstance(obj, list):
-        return [recursively_to_camel_case(a) for a in obj]
-    return obj
-
-
 def todict(obj, post_processor=None):
     """
     Convert an object to a dictionary. Use 'post_processor(original_obj, dictionary)' to update the
