@@ -18,7 +18,7 @@ import sys
 from urllib.request import urlopen
 
 from knack.log import get_logger
-from knack.util import CLIError, to_snake_case
+from knack.util import CLIError, to_snake_case, to_camel_case
 
 logger = get_logger(__name__)
 
@@ -622,6 +622,49 @@ def b64_to_hex(s):
     if isinstance(hex_data, bytes):
         return str(hex_data.decode("utf-8"))
     return hex_data
+
+
+def recursively_to_camel_case(obj):
+    if isinstance(obj, dict):
+        result = {to_camel_case(k): recursively_to_camel_case(v) for (k, v) in obj.items()}
+        return result
+    if isinstance(obj, list):
+        return [recursively_to_camel_case(a) for a in obj]
+    return obj
+
+
+def todict(obj, post_processor=None):
+    """
+    Convert an object to a dictionary. Use 'post_processor(original_obj, dictionary)' to update the
+    dictionary in the process
+    """
+    from datetime import date, time, datetime, timedelta
+    from enum import Enum
+    if isinstance(obj, dict):
+        result = {k: todict(v, post_processor) for (k, v) in obj.items()}
+        return post_processor(obj, result) if post_processor else result
+    if isinstance(obj, list):
+        return [todict(a, post_processor) for a in obj]
+    if isinstance(obj, Enum):
+        return obj.value
+    if isinstance(obj, (date, time, datetime)):
+        return obj.isoformat()
+    if isinstance(obj, timedelta):
+        return str(obj)
+    # This is the only difference with knack.util.todict because for typespec generated SDKs
+    # The base model stores data in obj.__dict__['_data'] instead of in obj.__dict__
+    # We need to call obj.as_dict() to extract data for this kind of model
+    if hasattr(obj, 'as_dict') and not hasattr(obj, '_attribute_map'):
+        result = {to_camel_case(k): todict(v, post_processor) for k, v in obj.as_dict()}
+        return post_processor(obj, result) if post_processor else result
+    if hasattr(obj, '_asdict'):
+        return todict(obj._asdict(), post_processor)
+    if hasattr(obj, '__dict__'):
+        result = {to_camel_case(k): todict(v, post_processor)
+                  for k, v in obj.__dict__.items()
+                  if not callable(v) and not k.startswith('_')}
+        return post_processor(obj, result) if post_processor else result
+    return obj
 
 
 def random_string(length=16, force_lower=False, digits_only=False):
