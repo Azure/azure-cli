@@ -1636,7 +1636,7 @@ helps['aks nodepool delete'] = """
 type: command
 short-summary: Delete the agent pool in the managed Kubernetes cluster.
 parameters:
-    - name: --ignore-pod-disruption-budget --ignore-pdb
+    - name: --ignore-pdb --ignore-pod-disruption-budget
       type: bool
       short-summary: ignore-pdb deletes an existing nodepool without considering Pod Disruption Budget.
 
