@@ -1134,3 +1134,11 @@ examples:
   - name: Get the private link resource for a flexible server using --ids parameter.
     text: az postgres flexible-server private-link-resource show --ids /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/testGroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/testServer
 """
+
+helps['postgres flexible-server fabric'] = """
+type: group
+short-summary: Bring your PostgreSQL data into Microsoft Fabric.
+examples:
+  - name: Enable bringing your PostgreSQL data into Microsoft Fabric.
+    text: az postgres flexible-server fabric -g testgroup -s testsvr --mirroring Enabled --database-names testdb
+"""

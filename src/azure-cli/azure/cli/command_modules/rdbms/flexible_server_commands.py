@@ -152,6 +152,7 @@ def load_flexibleserver_command_table(self, _):
         g.custom_command('upgrade', 'flexible_server_version_upgrade', custom_command_type=flexible_server_custom_common)
         g.custom_wait_command('wait', 'flexible_server_postgresql_get')
         g.custom_command('restart', 'flexible_server_restart')
+        g.custom_command('fabric', 'flexible_server_fabric')
 
     with self.command_group('postgres flexible-server firewall-rule', postgres_flexible_firewall_rule_sdk,
                             custom_command_type=flexible_servers_custom_postgres,
