@@ -7366,7 +7366,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         self.update_network_plugin_settings(mc)
         
         return mc
-        
+
     def update_network_plugin_settings(self, mc: ManagedCluster) -> ManagedCluster:
         """Update network plugin settings of network profile for the ManagedCluster object.
 
