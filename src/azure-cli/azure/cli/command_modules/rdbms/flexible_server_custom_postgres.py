@@ -898,6 +898,7 @@ def flexible_server_connection_string(
 # Custom functions for identity
 def flexible_server_identity_update(cmd, client, resource_group_name, server_name, system_assigned):
     validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
 
     identity_type = 'None'
     if system_assigned.lower() == 'enabled':
@@ -1462,6 +1463,7 @@ def flexible_server_private_link_resource_get(
 
 def flexible_server_fabric_mirroring_start(cmd, client, resource_group_name, server_name, database_names, yes=False):
     validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
     flexible_servers_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
 
     databases = ','.join(database_names[0].split())
@@ -1487,8 +1489,9 @@ def flexible_server_fabric_mirroring_start(cmd, client, resource_group_name, ser
     return client.begin_restart(resource_group_name, server_name, parameters)
 
 
-def flexible_server_fabric_mirroring_stop(client, resource_group_name, server_name, yes=False):
+def flexible_server_fabric_mirroring_stop(cmd, client, resource_group_name, server_name, yes=False):
     validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
     user_confirmation("Are you sure you want to disable mirroring for server '{0}' in resource group '{1}'".format(server_name, resource_group_name), yes=yes)
 
     configuration_name = "azure.fabric_mirror_enabled"
@@ -1500,8 +1503,9 @@ def flexible_server_fabric_mirroring_stop(client, resource_group_name, server_na
     return client.begin_update(resource_group_name, server_name, configuration_name, parameters)
 
 
-def flexible_server_fabric_mirroring_update_databases(client, resource_group_name, server_name, database_names, yes=False):
+def flexible_server_fabric_mirroring_update_databases(cmd, client, resource_group_name, server_name, database_names, yes=False):
     validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
     databases = ','.join(database_names[0].split())
     user_confirmation("Are you sure for server '{0}' in resource group '{1}' you want to update the databases being mirrored to be '{2}'"
                       .format(server_name, resource_group_name, databases), yes=yes)
