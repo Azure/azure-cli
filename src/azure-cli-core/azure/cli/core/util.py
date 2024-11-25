@@ -646,7 +646,7 @@ def todict(obj, post_processor=None):
     # The base model stores data in obj.__dict__['_data'] instead of in obj.__dict__
     # We need to call obj.as_dict() to extract data for this kind of model
     if hasattr(obj, 'as_dict') and not hasattr(obj, '_attribute_map'):
-        result = {to_camel_case(k): todict(v, post_processor) for k, v in obj.as_dict()}
+        result = {to_camel_case(k): todict(v, post_processor) for k, v in obj.as_dict().items()}
         return post_processor(obj, result) if post_processor else result
     if hasattr(obj, '_asdict'):
         return todict(obj._asdict(), post_processor)
