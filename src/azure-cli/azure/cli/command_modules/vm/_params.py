@@ -927,15 +927,18 @@ def load_arguments(self, _):
                        arg_type=get_three_state_flag(),
                        help='If set, the extension service will not automatically pick or upgrade to the latest minor version, even if the extension is redeployed.')
 
+    for scope in ['vm', 'vmss']:
         with self.argument_context('{} run-command'.format(scope)) as c:
             c.argument('command_id', completer=get_vm_run_command_completion_list, help="The command id. Use 'az {} run-command list' to get the list".format(scope))
             if scope == 'vmss':
                 c.argument('vmss_name', vmss_name_type)
 
+    for scope in ['vm', 'vmss']:
         with self.argument_context('{} run-command invoke'.format(scope)) as c:
             c.argument('parameters', nargs='+', help="space-separated parameters in the format of '[name=]value'")
             c.argument('scripts', nargs='+', help="Space-separated script lines. Use @{file} to load script from a file")
 
+    for scope in ['vm', 'vmss']:
         with self.argument_context('{} stop'.format(scope)) as c:
             c.argument('skip_shutdown', action='store_true', help='Skip shutdown and power-off immediately.', min_api='2019-03-01')
 
