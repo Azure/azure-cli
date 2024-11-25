@@ -3,11 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import json
 # TODO refactor out _image_builder commands.
 # i.e something like image_builder/_client_factory image_builder/commands.py image_builder/_params.py
 import os
 import re
+import json
 import traceback
 from enum import Enum
 
@@ -77,7 +77,6 @@ def image_builder_client_factory(cli_ctx, _):
 
 def cf_img_bldr_image_templates(cli_ctx, _):
     return image_builder_client_factory(cli_ctx, _).virtual_machine_image_templates
-
 
 # endregion
 
@@ -297,21 +296,20 @@ def process_image_template_create_namespace(cmd, namespace):  # pylint: disable=
                 'type': _SourceType.MANAGED_IMAGE
             }
 
-            logger.info("%s, looks like a managed image name. Using resource ID: %s", image_name,
-                        namespace.source)  # pylint: disable=line-too-long
+            logger.info("%s, looks like a managed image name. Using resource ID: %s", image_name, namespace.source)  # pylint: disable=line-too-long
         except HttpResponseError:
             pass
 
     if not source:
         err = 'Invalid image "{}". Use a valid image URN, managed image name or ID, ISO URI, ' \
-              'or pick a platform image alias from {}.\nSee vm create -h for more information on specifying an image.' \
+              'or pick a platform image alias from {}.\nSee vm create -h for more information on specifying an image.'\
             .format(namespace.source, ", ".join([x['urnAlias'] for x in images]))
         raise CLIError(err)
 
     for script in scripts:
         if script["type"] is None:
             try:
-                script["type"] = ScriptType.SHELL if likely_linux else ScriptType.POWERSHELL
+                script["type"] = ScriptType.SHELL if likely_linux else ScriptType.POWERSHELL  # pylint: disable=used-before-assignment
                 logger.info("For script %s, likely linux is %s.", script["script"], likely_linux)
             except NameError:
                 raise CLIError("Unable to infer the type of script {}.".format(script["script"]))
@@ -324,8 +322,7 @@ def process_image_template_create_namespace(cmd, namespace):  # pylint: disable=
 # first argument is `cmd`, but it is unused. Feel free to substitute it in.
 def process_img_tmpl_customizer_add_namespace(cmd, namespace):  # pylint:disable=unused-argument
 
-    if namespace.customizer_type.lower() in [ScriptType.SHELL.value.lower(),
-                                             ScriptType.POWERSHELL.value.lower()]:  # pylint:disable=no-member, line-too-long
+    if namespace.customizer_type.lower() in [ScriptType.SHELL.value.lower(), ScriptType.POWERSHELL.value.lower()]:  # pylint:disable=no-member, line-too-long
         if not (namespace.script_url or namespace.inline_script):
             raise CLIError("A script must be provided if the customizer type is one of: {} {}"
                            .format(ScriptType.SHELL.value, ScriptType.POWERSHELL.value))
@@ -341,8 +338,7 @@ def process_img_tmpl_customizer_add_namespace(cmd, namespace):  # pylint:disable
 def process_img_tmpl_output_add_namespace(cmd, namespace):
     from azure.cli.core.commands.parameters import get_subscription_locations
 
-    outputs = [output for output in [namespace.managed_image, namespace.gallery_image_definition, namespace.is_vhd] if
-               output]  # pylint:disable=line-too-long
+    outputs = [output for output in [namespace.managed_image, namespace.gallery_image_definition, namespace.is_vhd] if output]  # pylint:disable=line-too-long
 
     if len(outputs) != 1:
         err = "Supplied outputs: {}".format(outputs)
@@ -388,8 +384,7 @@ def process_img_tmpl_output_add_namespace(cmd, namespace):
         namespace.gallery_replication_regions = processed_regions
 
     # get default location from resource group
-    if not any([namespace.managed_image_location, namespace.gallery_replication_regions]) and hasattr(namespace,
-                                                                                                      'location'):  # pylint: disable=line-too-long
+    if not any([namespace.managed_image_location, namespace.gallery_replication_regions]) and hasattr(namespace, 'location'):  # pylint: disable=line-too-long
         # store location in namespace.location for use in custom method.
         get_default_location_from_resource_group(cmd, namespace)
 
@@ -518,9 +513,7 @@ def create_image_template(  # pylint: disable=too-many-locals, too-many-branches
         else:
             raise RequiredArgumentMissingError(
                 'Usage error: --proxy-vm-size is only configurable when --subnet is specified.')
-    vm_profile = ImageTemplateVmProfile(vm_size=vm_size, os_disk_size_gb=os_disk_size,
-                                        user_assigned_identities=build_vm_identities,
-                                        vnet_config=vnet_config)  # pylint: disable=line-too-long
+    vm_profile = ImageTemplateVmProfile(vm_size=vm_size, os_disk_size_gb=os_disk_size, user_assigned_identities=build_vm_identities, vnet_config=vnet_config)  # pylint: disable=line-too-long
 
     validate = None
     if validator:
@@ -644,17 +637,14 @@ def list_image_templates(client, resource_group_name=None):
 
 def show_build_output(client, resource_group_name, image_template_name, output_name=None):
     if output_name:
-        return client.virtual_machine_image_templates.get_run_output(resource_group_name, image_template_name,
-                                                                     output_name)  # pylint: disable=line-too-long
+        return client.virtual_machine_image_templates.get_run_output(resource_group_name, image_template_name, output_name)  # pylint: disable=line-too-long
     return client.virtual_machine_image_templates.list_run_outputs(resource_group_name, image_template_name)
 
 
-def add_template_output(cmd, client, resource_group_name, image_template_name, gallery_name=None, location=None,
-                        # pylint: disable=line-too-long, unused-argument
+def add_template_output(cmd, client, resource_group_name, image_template_name, gallery_name=None, location=None,  # pylint: disable=line-too-long, unused-argument
                         output_name=None, is_vhd=None, vhd_uri=None, tags=None,
                         gallery_image_definition=None, gallery_replication_regions=None,
-                        managed_image=None, managed_image_location=None,
-                        versioning=None):  # pylint: disable=line-too-long, unused-argument
+                        managed_image=None, managed_image_location=None, versioning=None):  # pylint: disable=line-too-long, unused-argument
 
     _require_defer(cmd)
 
@@ -696,8 +686,7 @@ def add_template_output(cmd, client, resource_group_name, image_template_name, g
 
     existing_image_template.distribute.append(distributor)
 
-    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update,
-                      parameters=existing_image_template,  # pylint: disable=line-too-long
+    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=existing_image_template,  # pylint: disable=line-too-long
                       resource_group_name=resource_group_name, image_template_name=image_template_name)
 
 
@@ -721,8 +710,7 @@ def remove_template_output(cmd, client, resource_group_name, image_template_name
 
     existing_image_template.distribute = new_distribute
 
-    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update,
-                      parameters=existing_image_template,  # pylint: disable=line-too-long
+    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=existing_image_template,  # pylint: disable=line-too-long
                       resource_group_name=resource_group_name, image_template_name=image_template_name)
 
 
@@ -737,13 +725,11 @@ def clear_template_output(cmd, client, resource_group_name, image_template_name)
 
     existing_image_template.distribute = []
 
-    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update,
-                      parameters=existing_image_template,  # pylint: disable=line-too-long
+    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=existing_image_template,  # pylint: disable=line-too-long
                       resource_group_name=resource_group_name, image_template_name=image_template_name)
 
 
-def set_template_output_versioning(cmd, client, resource_group_name, image_template_name, output_name, scheme,
-                                   major=None):  # pylint: disable=line-too-long, unused-argument
+def set_template_output_versioning(cmd, client, resource_group_name, image_template_name, output_name, scheme, major=None):  # pylint: disable=line-too-long, unused-argument
 
     _require_defer(cmd)
 
@@ -764,8 +750,7 @@ def set_template_output_versioning(cmd, client, resource_group_name, image_templ
     else:
         distribute[0].versioning = DistributeVersionerSource(scheme=scheme)
 
-    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update,
-                      parameters=existing_image_template,  # pylint: disable=line-too-long
+    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=existing_image_template,  # pylint: disable=line-too-long
                       resource_group_name=resource_group_name, image_template_name=image_template_name)
 
 
@@ -785,8 +770,7 @@ def remove_template_output_versioning(cmd, client, resource_group_name, image_te
 
     distribute[0].versioning = None
 
-    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update,
-                      parameters=existing_image_template,  # pylint: disable=line-too-long
+    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=existing_image_template,  # pylint: disable=line-too-long
                       resource_group_name=resource_group_name, image_template_name=image_template_name)
 
 
@@ -851,8 +835,7 @@ def add_template_customizer(cmd, client, resource_group_name, image_template_nam
 
     existing_image_template.customize.append(new_customizer)
 
-    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update,
-                      parameters=existing_image_template,  # pylint: disable=line-too-long
+    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=existing_image_template,  # pylint: disable=line-too-long
                       resource_group_name=resource_group_name, image_template_name=image_template_name)
 
 
@@ -876,8 +859,7 @@ def remove_template_customizer(cmd, client, resource_group_name, image_template_
 
     existing_image_template.customize = new_customize
 
-    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update,
-                      parameters=existing_image_template,  # pylint: disable=line-too-long
+    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=existing_image_template,  # pylint: disable=line-too-long
                       resource_group_name=resource_group_name, image_template_name=image_template_name)
 
 
@@ -893,8 +875,7 @@ def clear_template_customizer(cmd, client, resource_group_name, image_template_n
 
     existing_image_template.customize = []
 
-    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update,
-                      parameters=existing_image_template,  # pylint: disable=line-too-long
+    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=existing_image_template,  # pylint: disable=line-too-long
                       resource_group_name=resource_group_name, image_template_name=image_template_name)
 
 
@@ -929,8 +910,7 @@ def remove_template_validator(cmd, client, resource_group_name, image_template_n
 
     existing_image_template.validate = None
 
-    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update,
-                      parameters=existing_image_template,  # pylint: disable=line-too-long
+    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=existing_image_template,  # pylint: disable=line-too-long
                       resource_group_name=resource_group_name, image_template_name=image_template_name)
 
 
@@ -974,8 +954,7 @@ def remove_template_optimizer(cmd, client, resource_group_name, image_template_n
 
     existing_image_template.optimize = None
 
-    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update,
-                      parameters=existing_image_template,  # pylint: disable=line-too-long
+    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=existing_image_template,  # pylint: disable=line-too-long
                       resource_group_name=resource_group_name, image_template_name=image_template_name)
 
 
