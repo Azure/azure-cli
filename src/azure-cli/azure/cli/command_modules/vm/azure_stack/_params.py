@@ -1083,6 +1083,7 @@ def load_arguments(self, _):
             c.argument('os_disk_secure_vm_disk_encryption_set', min_api='2021-11-01', help='Specify the customer managed disk encryption set resource ID or name for the managed disk that is used for customer managed key encrypted Confidential VM OS disk and VM guest blob.')
             c.argument('disable_integrity_monitoring_autoupgrade', action='store_true', min_api='2020-12-01', help='Disable auto upgrade of guest attestation extension for Trusted Launch enabled VMs and VMSS.')
 
+    for scope in ['vm create', 'vmss create']:
         with self.argument_context(scope, arg_group='Authentication') as c:
             c.argument('generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing. The keys will be stored in the ~/.ssh directory')
             c.argument('ssh_key_type', arg_type=get_enum_type(['RSA', 'Ed25519']), default='RSA', min_api='2023-09-01', help='Specify the type of SSH public and private key files to be generated if missing.')
@@ -1092,6 +1093,7 @@ def load_arguments(self, _):
             c.argument('ssh_dest_key_path', help='Destination file path on the VM for the SSH key. If the file already exists, the specified key(s) are appended to the file. Destination path for SSH public keys is currently limited to its default value "/home/username/.ssh/authorized_keys" due to a known issue in Linux provisioning agent.')
             c.argument('authentication_type', help='Type of authentication to use with the VM. Defaults to password for Windows and SSH public key for Linux. "all" enables both ssh and password authentication. ', arg_type=get_enum_type(['ssh', 'password', 'all']))
 
+    for scope in ['vm create', 'vmss create']:
         with self.argument_context(scope, arg_group='Storage') as c:
             if DiskStorageAccountTypes:
                 allowed_values = ", ".join([sku.value for sku in DiskStorageAccountTypes])
@@ -1129,6 +1131,7 @@ def load_arguments(self, _):
             c.argument('specialized', arg_type=get_three_state_flag(), help='Indicate whether the source image is specialized.')
             c.argument('encryption_at_host', arg_type=get_three_state_flag(), help='Enable Host Encryption for the VM or VMSS. This will enable the encryption for all the disks including Resource/Temp disk at host itself.')
 
+    for scope in ['vm create', 'vmss create']:
         with self.argument_context(scope, arg_group='Network') as c:
             c.argument('vnet_name', help='Name of the virtual network when creating a new one or referencing an existing one.')
             c.argument('vnet_address_prefix', help='The IP address prefix to use when creating a new VNet in CIDR format.')
@@ -1149,6 +1152,7 @@ def load_arguments(self, _):
                        'value to apply on all resources, or use <Name>=<Value> to configure '
                        'the delete behavior for individual resources. Possible options are Delete and Detach.')
 
+    for scope in ['vm create', 'vmss create']:
         with self.argument_context(scope, arg_group='Marketplace Image Plan') as c:
             c.argument('plan_name', help='plan name')
             c.argument('plan_product', help='plan product')
