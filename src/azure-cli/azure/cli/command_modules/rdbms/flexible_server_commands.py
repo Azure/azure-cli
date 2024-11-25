@@ -152,7 +152,12 @@ def load_flexibleserver_command_table(self, _):
         g.custom_command('upgrade', 'flexible_server_version_upgrade', custom_command_type=flexible_server_custom_common)
         g.custom_wait_command('wait', 'flexible_server_postgresql_get')
         g.custom_command('restart', 'flexible_server_restart')
-        g.custom_command('fabric', 'flexible_server_fabric')
+
+    with self.command_group('postgres flexible-server', postgres_flexible_location_capabilities_sdk,
+                            custom_command_type=flexible_servers_custom_postgres,
+                            client_factory=cf_postgres_flexible_location_capabilities) as g:
+        g.custom_command('list-skus', 'flexible_list_skus', table_transformer=postgres_table_transform_output_list_skus)
+        g.custom_command('show-connection-string', 'flexible_server_connection_string')
 
     with self.command_group('postgres flexible-server firewall-rule', postgres_flexible_firewall_rule_sdk,
                             custom_command_type=flexible_servers_custom_postgres,
@@ -192,12 +197,6 @@ def load_flexibleserver_command_table(self, _):
         g.custom_command('set', 'flexible_parameter_update')
         g.show_command('show', 'get')
         g.command('list', 'list_by_server')
-
-    with self.command_group('postgres flexible-server', postgres_flexible_location_capabilities_sdk,
-                            custom_command_type=flexible_servers_custom_postgres,
-                            client_factory=cf_postgres_flexible_location_capabilities) as g:
-        g.custom_command('list-skus', 'flexible_list_skus', table_transformer=postgres_table_transform_output_list_skus)
-        g.custom_command('show-connection-string', 'flexible_server_connection_string')
 
     with self.command_group('postgres flexible-server db', postgres_flexible_db_sdk,
                             custom_command_type=flexible_server_custom_common,
@@ -288,3 +287,10 @@ def load_flexibleserver_command_table(self, _):
                             client_factory=cf_postgres_flexible_private_link_resources) as g:
         g.command('list', 'list_by_server')
         g.custom_show_command('show', 'flexible_server_private_link_resource_get', custom_command_type=flexible_servers_custom_postgres)
+
+    with self.command_group('postgres flexible-server fabric-mirroring', postgres_flexible_config_sdk,
+                            custom_command_type=flexible_servers_custom_postgres,
+                            client_factory=cf_postgres_flexible_config) as g:
+        g.custom_command('start', 'flexible_server_fabric_mirroring_start')
+        g.custom_command('stop', 'flexible_server_fabric_mirroring_stop')
+        g.custom_command('update-databases', 'flexible_server_fabric_mirroring_update_databases')

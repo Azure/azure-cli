@@ -1135,10 +1135,31 @@ examples:
     text: az postgres flexible-server private-link-resource show --ids /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/testGroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/testServer
 """
 
-helps['postgres flexible-server fabric'] = """
+helps['postgres flexible-server fabric-mirroring'] = """
 type: group
-short-summary: Bring your PostgreSQL data into Microsoft Fabric.
+short-summary: Bring your PostgreSQL data into Microsoft Fabric. Mirroring allows you to create a replica of your data in OneLake which can be used for all your analytical needs.
+"""
+
+helps['postgres flexible-server fabric-mirroring start'] = """
+type: command
+short-summary: Enable bringing your PostgreSQL data into Microsoft Fabric.
 examples:
   - name: Enable bringing your PostgreSQL data into Microsoft Fabric.
-    text: az postgres flexible-server fabric -g testgroup -s testsvr --mirroring Enabled --database-names testdb
+    text: az postgres flexible-server fabric-mirroring start -g testgroup -s testsvr --database-names testdb
+"""
+
+helps['postgres flexible-server fabric-mirroring stop'] = """
+type: command
+short-summary: Stop bringing your PostgreSQL data into Microsoft Fabric.
+examples:
+  - name: Stop bringing your PostgreSQL data into Microsoft Fabric.
+    text: az postgres flexible-server fabric-mirroring stop -g testgroup -s testsvr
+"""
+
+helps['postgres flexible-server fabric-mirroring update-databases'] = """
+type: command
+short-summary: Update allowed mirrored databases.
+examples:
+  - name: Update allowed mirrored databases.
+    text: az postgres flexible-server fabric-mirroring update-databases -g testgroup -s testsvr --database-names testdb2 testdb3
 """
