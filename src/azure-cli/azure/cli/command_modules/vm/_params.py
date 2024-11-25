@@ -883,9 +883,10 @@ def load_arguments(self, _):
             c.argument('enable_auto_os_upgrade', enable_auto_os_upgrade_type)
             c.argument('upgrade_policy_mode', help='Specify the mode of an upgrade to virtual machines in the scale set.', arg_type=get_enum_type(UpgradeMode))
 
-    for scope, help_prefix in [('vmss update', 'Update the'), ('vmss wait', 'Wait on the')]:
-        with self.argument_context(scope) as c:
-            c.argument('instance_id', id_part='child_name_1', help="{0} VM instance with this ID. If missing, {0} VMSS.".format(help_prefix))
+    with self.argument_context('vmss update') as c:
+        c.argument('instance_id', id_part='child_name_1', help="Update the VM instance with this ID. If missing, update the VMSS.")
+    with self.argument_context('vmss wait') as c:
+        c.argument('instance_id', id_part='child_name_1', help="Wait on the VM instance with this ID. If missing, wait on the VMSS.")
 
     for scope in ['vmss update-instances', 'vmss delete-instances']:
         with self.argument_context(scope) as c:
@@ -1532,13 +1533,29 @@ def load_arguments(self, _):
             c.argument('ppg_type', options_list=['--type', '-t'], arg_type=get_enum_type(self.get_models('ProximityPlacementGroupType')), min_api='2018-04-01', help="The type of the proximity placement group.")
             c.argument('intent_vm_sizes', nargs='*', min_api='2021-11-01', help="Specify possible sizes of virtual machines that can be created in the proximity placement group.")
 
-    for scope, item in [('vm create', 'VM'), ('vmss create', 'VMSS'),
-                        ('vm availability-set create', 'availability set'),
-                        ('vm update', 'VM'), ('vmss update', 'VMSS'),
-                        ('vm availability-set update', 'availability set')]:
-        with self.argument_context(scope, min_api='2018-04-01') as c:
-            c.argument('proximity_placement_group', options_list=['--ppg'], help="The name or ID of the proximity placement group the {} should be associated with.".format(item),
-                       validator=_validate_proximity_placement_group)    # only availability set does not have a command level validator, so this should be added.
+    with self.argument_context('vm create', min_api='2018-04-01') as c:
+        c.argument('proximity_placement_group', options_list=['--ppg'], help="The name or ID of the proximity placement group the VM should be associated with.",
+                   validator=_validate_proximity_placement_group)
+
+    with self.argument_context('vmss create', min_api='2018-04-01') as c:
+        c.argument('proximity_placement_group', options_list=['--ppg'], help="The name or ID of the proximity placement group the VMSS should be associated with.",
+                   validator=_validate_proximity_placement_group)
+
+    with self.argument_context('vm availability-set create', min_api='2018-04-01') as c:
+        c.argument('proximity_placement_group', options_list=['--ppg'], help="The name or ID of the proximity placement group the availability set should be associated with.",
+                   validator=_validate_proximity_placement_group)
+
+    with self.argument_context('vm update', min_api='2018-04-01') as c:
+        c.argument('proximity_placement_group', options_list=['--ppg'], help="The name or ID of the proximity placement group the VM should be associated with.",
+                   validator=_validate_proximity_placement_group)
+
+    with self.argument_context('vmss update', min_api='2018-04-01') as c:
+        c.argument('proximity_placement_group', options_list=['--ppg'], help="The name or ID of the proximity placement group the VMSS should be associated with.",
+                   validator=_validate_proximity_placement_group)
+
+    with self.argument_context('vm availability-set update', min_api='2018-04-01') as c:
+        c.argument('proximity_placement_group', options_list=['--ppg'], help="The name or ID of the proximity placement group the availability set should be associated with.",
+                   validator=_validate_proximity_placement_group)
     # endregion
 
     # region VM Monitor
