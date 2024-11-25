@@ -14,6 +14,7 @@ from ._constants import FeatureFlagConstants
 
 # pylint: disable=too-few-public-methods
 # pylint: disable=too-many-instance-attributes
+# pylint: disable=line-too-long
 
 logger = get_logger(__name__)
 
@@ -52,7 +53,7 @@ class FeatureFlagValue:
         Dictionary that contains client_filters List
     :ivar FeatureAllocation allocation:
         Determines how variants should be allocated for the feature to various users.
-    :ivar list FeatureVariant[] variants:
+    :ivar list FeatureVariant variants:
         The list of variants defined for this feature.
     :ivar dict telemetry:
         The declaration of options used to configure telemetry for this feature.
@@ -98,14 +99,10 @@ class FeatureFlagValue:
             featureflagvalue[FeatureFlagConstants.DISPLAY_NAME] = self.display_name
 
         if hasattr(self, FeatureFlagConstants.ALLOCATION):
-            featureflagvalue[FeatureFlagConstants.ALLOCATION] = (
-                custom_serialize_allocation(self.allocation)
-            )
+            featureflagvalue[FeatureFlagConstants.ALLOCATION] = custom_serialize_allocation(self.allocation)
 
         if hasattr(self, FeatureFlagConstants.VARIANTS):
-            featureflagvalue[FeatureFlagConstants.VARIANTS] = custom_serialize_variants(
-                self.variants
-            )
+            featureflagvalue[FeatureFlagConstants.VARIANTS] = custom_serialize_variants(self.variants)
 
         if hasattr(self, FeatureFlagConstants.TELEMETRY):
             featureflagvalue[FeatureFlagConstants.TELEMETRY] = self.telemetry
@@ -139,7 +136,7 @@ class FeatureFlag:
         Dictionary that contains client_filters List
     :ivar dict allocation:
         Determines how variants should be allocated for the feature to various users.
-    :ivar list FeatureVariant[] variants:
+    :ivar list FeatureVariant variants:
         The list of variants defined for this feature.
     :ivar dict {string, bool} telemetry:
         The declaration of options used to configure telemetry for this feature.
@@ -208,7 +205,7 @@ class FeatureFilter:
     """
     Feature filters class.
 
-    :ivar str Name:
+    :ivar str name:
         Name of the filter
     :ivar dict parameters:
         Name-Value pairs of parameters
@@ -230,9 +227,9 @@ class FeatureVariant:
     """
     Feature variants class.
 
-    :ivar str Name:
+    :ivar str name:
         Name of the variant
-    :ivar str Configuration_Value:
+    :ivar str configuration_Value:
         The configuration value of the variant
     :ivar str Status_Overide:
         Overrides the enabled state of the feature if the given variant is assigned.
@@ -282,14 +279,10 @@ class FeatureVariant:
         }
 
         if hasattr(self, FeatureFlagConstants.VARIANT_CONFIGURATION_VALUE):
-            featurevariant[FeatureFlagConstants.VARIANT_CONFIGURATION_VALUE] = (
-                self.configuration_value
-            )
+            featurevariant[FeatureFlagConstants.VARIANT_CONFIGURATION_VALUE] = self.configuration_value
 
         if hasattr(self, FeatureFlagConstants.VARIANT_STATUS_OVERRIDE):
-            featurevariant[FeatureFlagConstants.VARIANT_STATUS_OVERRIDE] = (
-                self.status_override
-            )
+            featurevariant[FeatureFlagConstants.VARIANT_STATUS_OVERRIDE] = self.status_override
 
         return json.dumps(featurevariant, indent=2, ensure_ascii=False)
 
@@ -298,9 +291,9 @@ class FeatureUserAllocation:
     """
     Feature user allocation class.
 
-    :ivar str Variant:
+    :ivar str variant:
         The name of the variant to use if the user allocation matches the current user.
-    :ivar list Users:
+    :ivar list users:
         Collection of users where if any match the current user, the variant specified in the user allocation is used.
     """
 
@@ -332,22 +325,22 @@ class FeatureUserAllocation:
         return cls(variant=variant, users=users)
 
     def __repr__(self):
-        featureallocationuser = {
+        feature_user_allocation = {
             FeatureFlagConstants.VARIANT: self.variant,
             FeatureFlagConstants.USERS: self.users,
         }
 
-        return json.dumps(featureallocationuser, indent=2, ensure_ascii=False)
+        return json.dumps(feature_user_allocation, indent=2, ensure_ascii=False)
 
 
 class FeatureGroupAllocation:
     """
     Feature group allocation class.
 
-    :ivar str Variant:
+    :ivar str variant:
         The name of the variant to use
         if the group allocation matches a group the current user is in.
-    :ivar list Groups:
+    :ivar list groups:
         Collection of groups where if the current user is in any of these groups,
         the variant specified in the group allocation is used.
     """
@@ -380,23 +373,23 @@ class FeatureGroupAllocation:
         return cls(variant=variant, groups=groups)
 
     def __repr__(self):
-        featureallocationgroup = {
+        feature_group_allocation = {
             FeatureFlagConstants.VARIANT: self.variant,
             FeatureFlagConstants.GROUPS: self.groups,
         }
 
-        return json.dumps(featureallocationgroup, indent=2, ensure_ascii=False)
+        return json.dumps(feature_group_allocation, indent=2, ensure_ascii=False)
 
 
 class FeaturePercentileAllocation:
     """
     Feature percentile allocation class.
 
-    :ivar str Variant:
+    :ivar str variant:
         The name of the variant to use if the calculated percentile for the current user falls in the provided range.
     :ivar number from_:
         The lower end of the percentage range for which this variant will be used.
-    :ivar number To:
+    :ivar number to:
         The upper end of the percentage range for which this variant will be used.
     """
 
@@ -461,24 +454,24 @@ class FeaturePercentileAllocation:
         return cls(variant=variant, from_=percentile_from, to=perecentile_to)
 
     def __repr__(self):
-        featureallocationpercentile = {
+        feature_percentile_allocation = {
             FeatureFlagConstants.VARIANT: self.variant,
             FeatureFlagConstants.FROM: self.From,
             FeatureFlagConstants.TO: self.to,
         }
 
-        return json.dumps(featureallocationpercentile, indent=2, ensure_ascii=False)
+        return json.dumps(feature_percentile_allocation, indent=2, ensure_ascii=False)
 
 
 class FeatureAllocation:
     """
     Feature allocation class.
 
-    :ivar list FeatureUserAllocation[] user:
+    :ivar list FeatureUserAllocation user:
         Determines how variants should be allocated for the feature to various users.
-    :ivar list FeatureGroupAllocation[] group:
+    :ivar list FeatureGroupAllocation group:
         Determines how variants should be allocated for the feature to various groups.
-    :ivar list FeaturePercentileAllocation[] percentile:
+    :ivar list FeaturePercentileAllocation percentile:
         Determines how variants should be allocated for the feature to various users based on percentile.
     :ivar str default_when_enabled:
         Specifies which variant should be used
@@ -594,14 +587,10 @@ class FeatureAllocation:
             featureallocation[FeatureFlagConstants.PERCENTILE] = list(self.percentile)
 
         if hasattr(self, FeatureFlagConstants.DEFAULT_WHEN_ENABLED):
-            featureallocation[FeatureFlagConstants.DEFAULT_WHEN_ENABLED] = (
-                self.default_when_enabled
-            )
+            featureallocation[FeatureFlagConstants.DEFAULT_WHEN_ENABLED] = self.default_when_enabled
 
         if hasattr(self, FeatureFlagConstants.DEFAULT_WHEN_DISABLED):
-            featureallocation[FeatureFlagConstants.DEFAULT_WHEN_DISABLED] = (
-                self.default_when_disabled
-            )
+            featureallocation[FeatureFlagConstants.DEFAULT_WHEN_DISABLED] = self.default_when_disabled
 
         return json.dumps(featureallocation, indent=2, ensure_ascii=False)
 
@@ -658,14 +647,10 @@ def custom_serialize_allocation(allocation):
         ]
 
     if hasattr(allocation, FeatureFlagConstants.DEFAULT_WHEN_ENABLED):
-        featureallocationdict[FeatureFlagConstants.DEFAULT_WHEN_ENABLED] = (
-            allocation.default_when_enabled
-        )
+        featureallocationdict[FeatureFlagConstants.DEFAULT_WHEN_ENABLED] = allocation.default_when_enabled
 
     if hasattr(allocation, FeatureFlagConstants.DEFAULT_WHEN_DISABLED):
-        featureallocationdict[FeatureFlagConstants.DEFAULT_WHEN_DISABLED] = (
-            allocation.default_when_disabled
-        )
+        featureallocationdict[FeatureFlagConstants.DEFAULT_WHEN_DISABLED] = allocation.default_when_disabled
 
     return featureallocationdict
 
@@ -686,14 +671,10 @@ def custom_serialize_variants(variants_list):
         variant_dict[FeatureFlagConstants.NAME] = variant.name
 
         if hasattr(variant, FeatureFlagConstants.VARIANT_CONFIGURATION_VALUE):
-            variant_dict[FeatureFlagConstants.VARIANT_CONFIGURATION_VALUE] = (
-                variant.configuration_value
-            )
+            variant_dict[FeatureFlagConstants.VARIANT_CONFIGURATION_VALUE] = variant.configuration_value
 
         if hasattr(variant, FeatureFlagConstants.VARIANT_STATUS_OVERRIDE):
-            variant_dict[FeatureFlagConstants.VARIANT_STATUS_OVERRIDE] = (
-                variant.status_override
-            )
+            variant_dict[FeatureFlagConstants.VARIANT_STATUS_OVERRIDE] = variant.status_override
 
         featurevariants.append(variant_dict)
     return featurevariants

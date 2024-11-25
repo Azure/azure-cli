@@ -1698,9 +1698,10 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
         os.remove(exported_prop_file_path)
 
         # Invalid fm sections should fail import
-        invalid_ms_fm_sections_file_path = os.path.join(TEST_DIR, 'import_invalid_ms_fm_schema_with_both_schemas.json')
+        invalid_ms_fm_schema_with_both_schemas_file_path = os.path.join(TEST_DIR, 'import_invalid_ms_fm_schema_with_both_schemas.json')
         self.kwargs.update({
-            'imported_file_path': invalid_ms_fm_sections_file_path
+            'imported_file_path': invalid_ms_fm_schema_with_both_schemas_file_path,
+            'imported_format': 'json'
         })
         with self.assertRaisesRegex(CLIError, "Data contains an already defined section with the key FeatureManagement."):
             self.cmd(
