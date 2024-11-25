@@ -49,7 +49,7 @@ class FeatureFlagValue:
     :ivar bool enabled:
         Represents if the Feature flag is On/Off/Conditionally On
     :ivar dict {string, FeatureFilter[]} conditions:
-        Dictionary that contains client_filters List (and server_filters List in future)
+        Dictionary that contains client_filters List
     :ivar FeatureAllocation allocation:
         Determines how variants should be allocated for the feature to various users.
     :ivar list FeatureVariant[] variants:
@@ -136,7 +136,7 @@ class FeatureFlag:
     :ivar str etag:
         The ETag contains a value that you can use to perform operations.
     :ivar dict {string, FeatureFilter[]} conditions:
-        Dictionary that contains client_filters List (and server_filters List in future)
+        Dictionary that contains client_filters List
     :ivar dict allocation:
         Determines how variants should be allocated for the feature to various users.
     :ivar list FeatureVariant[] variants:
@@ -247,28 +247,27 @@ class FeatureVariant:
             self.status_override = status_override
 
     @classmethod
-    def convert_from_json(cls, json_string):
+    def convert_from_dict(cls, variant_dict):
         """
         Convert JSON string to FeatureVariant object
 
         Args:
-            json_string - JSON string
+            dictionary - {string, Any}
 
         Return:
             FeatureVariant object
         """
-        variant = json.loads(json_string)
-        name = variant.get(FeatureFlagConstants.NAME, None)
+        name = variant_dict.get(FeatureFlagConstants.NAME, None)
         if not name:
             raise ValidationError(
                 "Feature variant must contain required '%s' attribute: \n%s"
-                % (FeatureFlagConstants.NAME, json.dumps(variant, indent=2, ensure_ascii=False))
+                % (FeatureFlagConstants.NAME, json.dumps(variant_dict, indent=2, ensure_ascii=False))
             )
 
-        configuration_value = variant.get(
+        configuration_value = variant_dict.get(
             FeatureFlagConstants.VARIANT_CONFIGURATION_VALUE, None
         )
-        status_override = variant.get(
+        status_override = variant_dict.get(
             FeatureFlagConstants.VARIANT_STATUS_OVERRIDE, None
         )
         return cls(
@@ -310,23 +309,24 @@ class FeatureUserAllocation:
         self.users = users
 
     @classmethod
-    def convert_from_json(cls, json_string):
+    def convert_from_dict(cls, user_allocation_dict):
         """
         Convert JSON string to FeatureUserAllocation object
 
         Args:
-            json_string - JSON string
+            dictionary - {string, Any}
 
         Return:
             FeatureUserAllocation object
         """
-        user_allocation = json.loads(json_string)
-        variant = user_allocation.get(FeatureFlagConstants.VARIANT, None)
-        users = user_allocation.get(FeatureFlagConstants.USERS, None)
+        variant = user_allocation_dict.get(FeatureFlagConstants.VARIANT, None)
+        users = user_allocation_dict.get(FeatureFlagConstants.USERS, None)
         if not variant or not users:
             raise ValidationError(
                 "User variant allocation must contain required '%s' and '%s' attributes: \n%s"
-                % (FeatureFlagConstants.VARIANT, FeatureFlagConstants.USERS, json.dumps(user_allocation, indent=2, ensure_ascii=False))
+                % (FeatureFlagConstants.VARIANT,
+                   FeatureFlagConstants.USERS,
+                   json.dumps(user_allocation_dict, indent=2, ensure_ascii=False))
             )
 
         return cls(variant=variant, users=users)
@@ -357,23 +357,24 @@ class FeatureGroupAllocation:
         self.groups = groups
 
     @classmethod
-    def convert_from_json(cls, json_string):
+    def convert_from_dict(cls, group_allocation_dict):
         """
         Convert JSON string to FeatureGroupAllocation object
 
         Args:
-            json_string - JSON string
+            dictionary - {string, Any}
 
         Return:
             FeatureGroupAllocation object
         """
-        group_allocation = json.loads(json_string)
-        variant = group_allocation.get(FeatureFlagConstants.VARIANT, None)
-        groups = group_allocation.get(FeatureFlagConstants.GROUPS, None)
+        variant = group_allocation_dict.get(FeatureFlagConstants.VARIANT, None)
+        groups = group_allocation_dict.get(FeatureFlagConstants.GROUPS, None)
         if not variant or not groups:
             raise ValidationError(
                 "Group variant allocation must contain required '%s' and '%s' attributes: \n%s"
-                % (FeatureFlagConstants.VARIANT, FeatureFlagConstants.GROUPS, json.dumps(group_allocation, indent=2, ensure_ascii=False))
+                % (FeatureFlagConstants.VARIANT,
+                   FeatureFlagConstants.GROUPS,
+                   json.dumps(group_allocation_dict, indent=2, ensure_ascii=False))
             )
 
         return cls(variant=variant, groups=groups)
@@ -393,62 +394,71 @@ class FeaturePercentileAllocation:
 
     :ivar str Variant:
         The name of the variant to use if the calculated percentile for the current user falls in the provided range.
-    :ivar number From:
+    :ivar number from_:
         The lower end of the percentage range for which this variant will be used.
     :ivar number To:
         The upper end of the percentage range for which this variant will be used.
     """
 
-    def __init__(self, variant, From, to):
+    def __init__(self, variant, from_, to):
         self.variant = variant
-        self.From = From
+        self.from_ = from_
         self.to = to
 
     @classmethod
-    def convert_from_json(cls, json_string):
+    def convert_from_dict(cls, percentile_allocation_dict):
         """
         Convert JSON string to FeaturePercentileAllocation object
 
         Args:
-            json_string - JSON string
+            dictionary - {string, Any}
 
         Return:
             FeaturePercentileAllocation object
         """
-        percentile_allocation = json.loads(json_string)
-        variant = percentile_allocation.get(FeatureFlagConstants.VARIANT, None)
-        percentileFrom = percentile_allocation.get(FeatureFlagConstants.FROM, None)
-        perecentileTo = percentile_allocation.get(FeatureFlagConstants.TO, None)
-        if not variant or not percentileFrom or not perecentileTo:
+
+        variant = percentile_allocation_dict.get(FeatureFlagConstants.VARIANT, None)
+        percentile_from = percentile_allocation_dict.get(FeatureFlagConstants.FROM, None)
+        perecentile_to = percentile_allocation_dict.get(FeatureFlagConstants.TO, None)
+        if not variant or not percentile_from or not perecentile_to:
             raise ValidationError(
                 "Percentile allocation must contain required '%s', '%s' and '%s' attributes: \n%s"
-                % (FeatureFlagConstants.VARIANT, FeatureFlagConstants.TO, FeatureFlagConstants.FROM, json.dumps(percentile_allocation, indent=2, ensure_ascii=False))
+                % (FeatureFlagConstants.VARIANT,
+                   FeatureFlagConstants.TO,
+                   FeatureFlagConstants.FROM,
+                   json.dumps(percentile_allocation_dict, indent=2, ensure_ascii=False))
             )
 
-        if not isinstance(percentileFrom, int) or not isinstance(perecentileTo, int):
+        if not isinstance(percentile_from, int) or not isinstance(perecentile_to, int):
             raise ValidationError(
                 "Percentile allocation '%s' and '%s' must be integers: \n%s"
-                % (FeatureFlagConstants.FROM, FeatureFlagConstants.TO, json.dumps(percentile_allocation, indent=2, ensure_ascii=False))
+                % (FeatureFlagConstants.FROM,
+                   FeatureFlagConstants.TO,
+                   json.dumps(percentile_allocation_dict, indent=2, ensure_ascii=False))
             )
 
         if (
-            percentileFrom < 0 or
-            percentileFrom > 100 or
-            perecentileTo < 0 or
-            perecentileTo > 100
+            percentile_from < 0 or
+            percentile_from > 100 or
+            perecentile_to < 0 or
+            perecentile_to > 100
         ):
             raise ValidationError(
                 "Percentile allocation '%s' and '%s' must be between 0 and 100: \n%s"
-                % (FeatureFlagConstants.TO, FeatureFlagConstants.FROM, json.dumps(percentile_allocation, indent=2, ensure_ascii=False))
+                % (FeatureFlagConstants.TO,
+                   FeatureFlagConstants.FROM,
+                   json.dumps(percentile_allocation_dict, indent=2, ensure_ascii=False))
             )
 
-        if percentileFrom >= perecentileTo:
+        if percentile_from >= perecentile_to:
             raise ValidationError(
                 "Percentile allocation '%s' must be less than '%s': \n%s"
-                % (FeatureFlagConstants.FROM, FeatureFlagConstants.TO, json.dumps(percentile_allocation, indent=2, ensure_ascii=False))
+                % (FeatureFlagConstants.FROM,
+                   FeatureFlagConstants.TO,
+                   json.dumps(percentile_allocation_dict, indent=2, ensure_ascii=False))
             )
 
-        return cls(variant=variant, From=percentileFrom, to=perecentileTo)
+        return cls(variant=variant, from_=percentile_from, to=perecentile_to)
 
     def __repr__(self):
         featureallocationpercentile = {
@@ -470,6 +480,14 @@ class FeatureAllocation:
         Determines how variants should be allocated for the feature to various groups.
     :ivar list FeaturePercentileAllocation[] percentile:
         Determines how variants should be allocated for the feature to various users based on percentile.
+    :ivar str default_when_enabled:
+        Specifies which variant should be used
+        when the feature is considered enabled and no other allocation rules are applicable.
+    :ivar str default_when_disabled:
+        Specifies which variant should be used when the feature is considered disabled.
+    :ivar str seed:
+        The value percentile calculations are based on.
+        The calculated percentile is consistent across features for a given user if the same nonempty seed is used.
     """
 
     def __init__(
@@ -479,6 +497,7 @@ class FeatureAllocation:
         percentile=None,
         default_when_enabled=None,
         default_when_disabled=None,
+        seed=None
     ):
         if user is not None:
             self.user = user
@@ -490,23 +509,24 @@ class FeatureAllocation:
             self.default_when_enabled = default_when_enabled
         if default_when_disabled is not None:
             self.default_when_disabled = default_when_disabled
+        if seed is not None:
+            self.seed = seed
 
     @classmethod
-    def convert_from_json(cls, json_string):
+    def convert_from_dict(cls, allocation_dict):
         """
         Convert JSON string to FeatureAllocation object
 
         Args:
-            json_string - JSON string
+            dict {string, Any}
 
         Return:
             FeatureAllocation object
         """
-        allocation_json = json.loads(json_string)
-        default_when_disabled = allocation_json.get(
+        default_when_disabled = allocation_dict.get(
             FeatureFlagConstants.DEFAULT_WHEN_DISABLED, None
         )
-        default_when_enabled = allocation_json.get(
+        default_when_enabled = allocation_dict.get(
             FeatureFlagConstants.DEFAULT_WHEN_ENABLED, None
         )
 
@@ -515,13 +535,13 @@ class FeatureAllocation:
             default_when_disabled=default_when_disabled,
         )
 
-        allocation_user = allocation_json.get(FeatureFlagConstants.USER, None)
+        allocation_user = allocation_dict.get(FeatureFlagConstants.USER, None)
 
         # Convert all users to FeatureUserAllocation object
         if allocation_user:
             allocation_user_list = []
             for user in allocation_user:
-                feature_user_allocation = FeatureUserAllocation.convert_from_json(
+                feature_user_allocation = FeatureUserAllocation.convert_from_dict(
                     json.dumps(user, ensure_ascii=False)
                 )
                 if feature_user_allocation:
@@ -530,11 +550,11 @@ class FeatureAllocation:
             allocation.user = allocation_user_list
 
         # Convert all groups to FeatureGroupAllocation object
-        allocation_group = allocation_json.get(FeatureFlagConstants.GROUP, None)
+        allocation_group = allocation_dict.get(FeatureFlagConstants.GROUP, None)
         if allocation_group:
             allocation_group_list = []
             for group in allocation_group:
-                feature_group_allocation = FeatureGroupAllocation.convert_from_json(
+                feature_group_allocation = FeatureGroupAllocation.convert_from_dict(
                     json.dumps(group, ensure_ascii=False)
                 )
                 if feature_group_allocation:
@@ -543,14 +563,14 @@ class FeatureAllocation:
             allocation.group = allocation_group_list
 
         # Convert all percentile to FeatureAllocationPercentile object
-        allocation_percentile = allocation_json.get(
+        allocation_percentile = allocation_dict.get(
             FeatureFlagConstants.PERCENTILE, None
         )
         if allocation_percentile:
             allocation_percentile_list = []
             for percentile in allocation_percentile:
                 feature_percentile_allocation = (
-                    FeaturePercentileAllocation.convert_from_json(
+                    FeaturePercentileAllocation.convert_from_dict(
                         json.dumps(percentile, ensure_ascii=False)
                     )
                 )
@@ -736,11 +756,7 @@ def map_featureflag_to_keyvalue(featureflag):
         set_kv.last_modified = featureflag.last_modified
 
     except ValueError as exception:
-        error_msg = (
-            "Exception while converting feature flag to key value: {0}\n{1}".format(
-                featureflag.key, exception
-            )
-        )
+        error_msg = "Exception while converting feature flag to key value: {0}\n{1}".format(featureflag.key, exception)
         raise ValueError(error_msg)
 
     except Exception as exception:
@@ -872,10 +888,9 @@ def map_keyvalue_to_featureflagvalue(keyvalue):
                     )
                     client_filters_list.append(FeatureFilter(name, params))
                 else:
-                    raise ValidationError(
-                        "Feature filter must contain the %s attribute:\n%s"
-                        % (FeatureFlagConstants.NAME, json.dumps(client_filter, indent=2, ensure_ascii=False))
-                    )
+                    logger.warning("Ignoring this filter without the %s attribute:\n%s",
+                                   FeatureFlagConstants.FILTER_NAME,
+                                   json.dumps(client_filter, indent=2, ensure_ascii=False))
 
             conditions[FeatureFlagConstants.CLIENT_FILTERS] = client_filters_list
 
@@ -895,18 +910,14 @@ def map_keyvalue_to_featureflagvalue(keyvalue):
         # Allocation
         allocation = feature_flag_dict.get(FeatureFlagConstants.ALLOCATION, None)
         if allocation:
-            feature_flag_dict[FeatureFlagConstants.ALLOCATION] = (
-                FeatureAllocation.convert_from_json(
-                    json.dumps(allocation, ensure_ascii=False)
-                )
-            )
+            feature_flag_dict[FeatureFlagConstants.ALLOCATION] = FeatureAllocation.convert_from_dict(allocation)
 
         # Variants
         variants = feature_flag_dict.get(FeatureFlagConstants.VARIANTS, None)
         variant_list = []
         if variants:
             for variant in variants:
-                feature_variant = FeatureVariant.convert_from_json(
+                feature_variant = FeatureVariant.convert_from_dict(
                     json.dumps(variant, ensure_ascii=False)
                 )
                 if feature_variant:

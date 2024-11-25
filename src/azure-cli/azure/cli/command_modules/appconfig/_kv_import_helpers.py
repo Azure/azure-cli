@@ -334,14 +334,13 @@ def __read_features_from_msfm_schema(feature_flags_list):
                         )
                         client_filters_list.append(FeatureFilter(name, params))
                     else:
-                        raise ValidationError(
-                            "Feature filter must contain the %s attribute:\n%s"
-                            % (FeatureFlagConstants.NAME, json.dumps(client_filter, indent=2, ensure_ascii=False))
+                        logger.warning(
+                            "Ignoring this filter without the %s attribute:\n%s",
+                            FeatureFlagConstants.FILTER_NAME,
+                            json.dumps(client_filter, indent=2, ensure_ascii=False),
                         )
 
-                new_feature.conditions[FeatureFlagConstants.CLIENT_FILTERS] = (
-                    client_filters_list
-                )
+                new_feature.conditions[FeatureFlagConstants.CLIENT_FILTERS] = client_filters_list
 
                 requirement_type = conditions.get(
                     FeatureFlagConstants.REQUIREMENT_TYPE, None
@@ -359,16 +358,12 @@ def __read_features_from_msfm_schema(feature_flags_list):
                     ] = requirement_type
 
             if allocation := feature.get(FeatureFlagConstants.ALLOCATION, None):
-                new_feature.allocation = FeatureAllocation.convert_from_json(
-                    json.dumps(allocation, ensure_ascii=False)
-                )
+                new_feature.allocation = FeatureAllocation.convert_from_dict(allocation)
 
             if variants := feature.get(FeatureFlagConstants.VARIANTS, None):
                 new_feature.variants = []
                 for variant in variants:
-                    new_variant = FeatureVariant.convert_from_json(
-                        json.dumps(variant, ensure_ascii=False)
-                    )
+                    new_variant = FeatureVariant.convert_from_dict(variant)
                     if new_variant:
                         new_feature.variants.append(new_variant)
 
