@@ -52,7 +52,7 @@ COMMAND_LOADER_CLS = TestCommandLoader
 # region Test Help Loader
 
 
-class JsonLoaderMixin(object):
+class JsonLoaderMixin:
     """A class containing helper methods for Json Loaders."""
 
     # get the list of json help file names for the command or group

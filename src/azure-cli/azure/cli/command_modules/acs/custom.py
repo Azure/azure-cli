@@ -68,7 +68,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_AZURE_SERVICE_MESH_MODE_ISTIO,
     CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM,
 )
-
+from azure.cli.command_modules.acs._polling import RunCommandLocationPolling
 from azure.cli.command_modules.acs._helpers import get_snapshot_by_snapshot_id, check_is_private_link_cluster
 from azure.cli.command_modules.acs._resourcegroup import get_rg_location
 from azure.cli.command_modules.acs._validators import extract_comma_separated_string
@@ -95,9 +95,11 @@ from azure.cli.core.azclierror import (
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.profiles import ResourceType
+from azure.mgmt.core.polling.arm_polling import ARMPolling
 from azure.cli.core.util import in_cloud_console, sdk_no_wait
 from azure.core.exceptions import ResourceNotFoundError as ResourceNotFoundErrorAzCore
 from azure.mgmt.containerservice.models import KubernetesSupportPlan
+from humanfriendly.terminal.spinners import Spinner
 from knack.log import get_logger
 from knack.prompting import NoTTYException, prompt_y_n
 from knack.util import CLIError
@@ -560,6 +562,10 @@ def aks_create(
     image_cleaner_interval_hours=None,
     enable_keda=False,
     enable_vpa=False,
+    # advanced networking
+    enable_acns=None,
+    disable_acns_observability=None,
+    disable_acns_security=None,
     # addons
     enable_addons=None,
     workspace_resource_id=None,
@@ -756,6 +762,11 @@ def aks_update(
     enable_force_upgrade=False,
     disable_force_upgrade=False,
     upgrade_override_until=None,
+    # advanced networking
+    disable_acns=None,
+    enable_acns=None,
+    disable_acns_observability=None,
+    disable_acns_security=None,
     # addons
     enable_secret_rotation=False,
     disable_secret_rotation=False,
@@ -2040,6 +2051,7 @@ def aks_runcommand(cmd, client, resource_group_name, name, command_string="", co
 
     if not command_string:
         raise ValidationError('Command cannot be empty.')
+
     RunCommandRequest = cmd.get_models('RunCommandRequest', resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                        operation_group='managed_clusters')
     request_payload = RunCommandRequest(command=command_string)
@@ -2052,8 +2064,15 @@ def aks_runcommand(cmd, client, resource_group_name, name, command_string="", co
         request_payload.cluster_token = _get_dataplane_aad_token(
             cmd.cli_ctx, "6dae42f8-4368-4678-94ff-3960e28e3630")
 
+    polling_interval = 5
+    retry_total = 0
+
     command_result_poller = sdk_no_wait(
-        no_wait, client.begin_run_command, resource_group_name, name, request_payload, polling_interval=5, retry_total=0
+        no_wait, client.begin_run_command, resource_group_name, name, request_payload,
+        # NOTE: Note sure if retry_total is used in ARMPolling
+        polling=ARMPolling(polling_interval, lro_options={"final-state-via": "location"}, lro_algorithms=[RunCommandLocationPolling()], retry_total=retry_total),
+        polling_interval=polling_interval,
+        retry_total=retry_total
     )
     if no_wait:
         # pylint: disable=protected-access
@@ -2064,7 +2083,22 @@ def aks_runcommand(cmd, client, resource_group_name, name, command_string="", co
         command_id = command_id_regex.findall(command_result_polling_url)[0]
         _aks_command_result_in_progess_helper(client, resource_group_name, name, command_id)
         return
-    return _print_command_result(cmd.cli_ctx, command_result_poller.result(300))
+
+    spinner = Spinner(label='Running', stream=sys.stderr, hide_cursor=False)
+    progress_controller = cmd.cli_ctx.get_progress_controller(det=False, spinner=spinner)
+
+    now = datetime.datetime.now()
+    progress_controller.begin()
+    while not command_result_poller.done():
+        if datetime.datetime.now() - now >= datetime.timedelta(seconds=300):
+            break
+
+        progress_controller.add(message=command_result_poller.status())
+        progress_controller.update()
+        time.sleep(0.5)
+
+    progress_controller.end()
+    return _print_command_result(cmd.cli_ctx, command_result_poller.result(timeout=0))
 
 
 def aks_command_result(cmd, client, resource_group_name, name, command_id=""):
@@ -2121,7 +2155,7 @@ def _print_command_result(cli_ctx, commandResult):
         return
 
     # *-ing state
-    print(f"{colorama.Fore.BLUE}command is in {commandResult.provisioning_state} state{colorama.Style.RESET_ALL}")
+    print(f"{colorama.Fore.BLUE}command (id: {commandResult.id}) is in {commandResult.provisioning_state} state{colorama.Style.RESET_ALL}")
     return
 
 
