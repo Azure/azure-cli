@@ -410,7 +410,7 @@ class Update(AAZCommand):
                 value=instance,
                 typ=AAZObjectType
             )
-            _builder.set_prop("identity", AAZObjectType, ".identity")
+            _builder.set_prop("identity", AAZIdentityObjectType, ".identity")
             _builder.set_prop("location", AAZStrType, ".location", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
             _builder.set_prop("sku", AAZObjectType, ".", typ_kwargs={"flags": {"required": True}})
@@ -491,7 +491,7 @@ class _UpdateHelper:
         profile_read.id = AAZStrType(
             flags={"read_only": True},
         )
-        profile_read.identity = AAZObjectType()
+        profile_read.identity = AAZIdentityObjectType()
         profile_read.kind = AAZStrType(
             flags={"read_only": True},
         )

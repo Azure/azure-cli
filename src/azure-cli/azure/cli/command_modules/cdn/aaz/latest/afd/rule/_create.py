@@ -150,11 +150,6 @@ class Create(AAZCommand):
             required=True,
             enum={"All": "All"},
         )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleCacheExpirationActionParameters": "DeliveryRuleCacheExpirationActionParameters"},
-        )
 
         cache_key_query_string = cls._args_schema.actions.Element.cache_key_query_string
         cache_key_query_string.parameters = AAZObjectArg(
@@ -174,11 +169,6 @@ class Create(AAZCommand):
             help="Caching behavior for the requests",
             required=True,
             enum={"Exclude": "Exclude", "ExcludeAll": "ExcludeAll", "Include": "Include", "IncludeAll": "IncludeAll"},
-        )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleCacheKeyQueryStringBehaviorActionParameters": "DeliveryRuleCacheKeyQueryStringBehaviorActionParameters"},
         )
 
         modify_request_header = cls._args_schema.actions.Element.modify_request_header
@@ -210,11 +200,11 @@ class Create(AAZCommand):
             help="defines the OriginGroup that would override the DefaultOriginGroup.",
             required=True,
         )
-        cls._build_args_resource_reference_create(parameters.origin_group)
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleOriginGroupOverrideActionParameters": "DeliveryRuleOriginGroupOverrideActionParameters"},
+
+        origin_group = cls._args_schema.actions.Element.origin_group_override.parameters.origin_group
+        origin_group.id = AAZStrArg(
+            options=["id"],
+            help="Resource ID.",
         )
 
         route_configuration_override = cls._args_schema.actions.Element.route_configuration_override
@@ -232,11 +222,6 @@ class Create(AAZCommand):
         parameters.origin_group_override = AAZObjectArg(
             options=["origin-group-override"],
             help="A reference to the origin group override configuration. Leave empty to use the default origin group on route.",
-        )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleRouteConfigurationOverrideActionParameters": "DeliveryRuleRouteConfigurationOverrideActionParameters"},
         )
 
         cache_configuration = cls._args_schema.actions.Element.route_configuration_override.parameters.cache_configuration
@@ -274,7 +259,12 @@ class Create(AAZCommand):
             options=["origin-group"],
             help="defines the OriginGroup that would override the DefaultOriginGroup on route.",
         )
-        cls._build_args_resource_reference_create(origin_group_override.origin_group)
+
+        origin_group = cls._args_schema.actions.Element.route_configuration_override.parameters.origin_group_override.origin_group
+        origin_group.id = AAZStrArg(
+            options=["id"],
+            help="Resource ID.",
+        )
 
         url_redirect = cls._args_schema.actions.Element.url_redirect
         url_redirect.parameters = AAZObjectArg(
@@ -311,11 +301,6 @@ class Create(AAZCommand):
             required=True,
             enum={"Found": "Found", "Moved": "Moved", "PermanentRedirect": "PermanentRedirect", "TemporaryRedirect": "TemporaryRedirect"},
         )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleUrlRedirectActionParameters": "DeliveryRuleUrlRedirectActionParameters"},
-        )
 
         url_rewrite = cls._args_schema.actions.Element.url_rewrite
         url_rewrite.parameters = AAZObjectArg(
@@ -339,11 +324,6 @@ class Create(AAZCommand):
             help="define a request URI pattern that identifies the type of requests that may be rewritten. If value is blank, all strings are matched.",
             required=True,
         )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleUrlRewriteActionParameters": "DeliveryRuleUrlRewriteActionParameters"},
-        )
 
         url_signing = cls._args_schema.actions.Element.url_signing
         url_signing.parameters = AAZObjectArg(
@@ -361,11 +341,6 @@ class Create(AAZCommand):
         parameters.parameter_name_override = AAZListArg(
             options=["parameter-name-override"],
             help="Defines which query string parameters in the url to be considered for expires, key id etc. ",
-        )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleUrlSigningActionParameters": "DeliveryRuleUrlSigningActionParameters"},
         )
 
         parameter_name_override = cls._args_schema.actions.Element.url_signing.parameters.parameter_name_override
@@ -473,11 +448,6 @@ class Create(AAZCommand):
             options=["transforms"],
             help="List of transforms",
         )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleClientPortConditionParameters": "DeliveryRuleClientPortConditionParameters"},
-        )
 
         match_values = cls._args_schema.conditions.Element.client_port.parameters.match_values
         match_values.Element = AAZStrArg()
@@ -518,11 +488,6 @@ class Create(AAZCommand):
             options=["transforms"],
             help="List of transforms",
         )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleCookiesConditionParameters": "DeliveryRuleCookiesConditionParameters"},
-        )
 
         match_values = cls._args_schema.conditions.Element.cookies.parameters.match_values
         match_values.Element = AAZStrArg()
@@ -558,11 +523,6 @@ class Create(AAZCommand):
         parameters.transforms = AAZListArg(
             options=["transforms"],
             help="List of transforms",
-        )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleHostNameConditionParameters": "DeliveryRuleHostNameConditionParameters"},
         )
 
         match_values = cls._args_schema.conditions.Element.host_name.parameters.match_values
@@ -600,11 +560,6 @@ class Create(AAZCommand):
             options=["transforms"],
             help="List of transforms",
         )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleHttpVersionConditionParameters": "DeliveryRuleHttpVersionConditionParameters"},
-        )
 
         match_values = cls._args_schema.conditions.Element.http_version.parameters.match_values
         match_values.Element = AAZStrArg()
@@ -640,11 +595,6 @@ class Create(AAZCommand):
         parameters.transforms = AAZListArg(
             options=["transforms"],
             help="List of transforms",
-        )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleIsDeviceConditionParameters": "DeliveryRuleIsDeviceConditionParameters"},
         )
 
         match_values = cls._args_schema.conditions.Element.is_device.parameters.match_values
@@ -688,11 +638,6 @@ class Create(AAZCommand):
             options=["transforms"],
             help="List of transforms",
         )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRulePostArgsConditionParameters": "DeliveryRulePostArgsConditionParameters"},
-        )
 
         match_values = cls._args_schema.conditions.Element.post_args.parameters.match_values
         match_values.Element = AAZStrArg()
@@ -728,11 +673,6 @@ class Create(AAZCommand):
         parameters.transforms = AAZListArg(
             options=["transforms"],
             help="List of transforms",
-        )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleQueryStringConditionParameters": "DeliveryRuleQueryStringConditionParameters"},
         )
 
         match_values = cls._args_schema.conditions.Element.query_string.parameters.match_values
@@ -770,11 +710,6 @@ class Create(AAZCommand):
             options=["transforms"],
             help="List of transforms",
         )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleRemoteAddressConditionParameters": "DeliveryRuleRemoteAddressConditionParameters"},
-        )
 
         match_values = cls._args_schema.conditions.Element.remote_address.parameters.match_values
         match_values.Element = AAZStrArg()
@@ -810,11 +745,6 @@ class Create(AAZCommand):
         parameters.transforms = AAZListArg(
             options=["transforms"],
             help="List of transforms",
-        )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleRequestBodyConditionParameters": "DeliveryRuleRequestBodyConditionParameters"},
         )
 
         match_values = cls._args_schema.conditions.Element.request_body.parameters.match_values
@@ -856,11 +786,6 @@ class Create(AAZCommand):
             options=["transforms"],
             help="List of transforms",
         )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleRequestHeaderConditionParameters": "DeliveryRuleRequestHeaderConditionParameters"},
-        )
 
         match_values = cls._args_schema.conditions.Element.request_header.parameters.match_values
         match_values.Element = AAZStrArg()
@@ -896,11 +821,6 @@ class Create(AAZCommand):
         parameters.transforms = AAZListArg(
             options=["transforms"],
             help="List of transforms",
-        )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleRequestMethodConditionParameters": "DeliveryRuleRequestMethodConditionParameters"},
         )
 
         match_values = cls._args_schema.conditions.Element.request_method.parameters.match_values
@@ -940,11 +860,6 @@ class Create(AAZCommand):
             options=["transforms"],
             help="List of transforms",
         )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleRequestSchemeConditionParameters": "DeliveryRuleRequestSchemeConditionParameters"},
-        )
 
         match_values = cls._args_schema.conditions.Element.request_scheme.parameters.match_values
         match_values.Element = AAZStrArg(
@@ -983,11 +898,6 @@ class Create(AAZCommand):
             options=["transforms"],
             help="List of transforms",
         )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleRequestUriConditionParameters": "DeliveryRuleRequestUriConditionParameters"},
-        )
 
         match_values = cls._args_schema.conditions.Element.request_uri.parameters.match_values
         match_values.Element = AAZStrArg()
@@ -1023,11 +933,6 @@ class Create(AAZCommand):
         parameters.transforms = AAZListArg(
             options=["transforms"],
             help="List of transforms",
-        )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleServerPortConditionParameters": "DeliveryRuleServerPortConditionParameters"},
         )
 
         match_values = cls._args_schema.conditions.Element.server_port.parameters.match_values
@@ -1065,11 +970,6 @@ class Create(AAZCommand):
             options=["transforms"],
             help="List of transforms",
         )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleSocketAddrConditionParameters": "DeliveryRuleSocketAddrConditionParameters"},
-        )
 
         match_values = cls._args_schema.conditions.Element.socket_addr.parameters.match_values
         match_values.Element = AAZStrArg()
@@ -1105,11 +1005,6 @@ class Create(AAZCommand):
         parameters.transforms = AAZListArg(
             options=["transforms"],
             help="List of transforms",
-        )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleSslProtocolConditionParameters": "DeliveryRuleSslProtocolConditionParameters"},
         )
 
         match_values = cls._args_schema.conditions.Element.ssl_protocol.parameters.match_values
@@ -1149,11 +1044,6 @@ class Create(AAZCommand):
             options=["transforms"],
             help="List of transforms",
         )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleUrlFileExtensionMatchConditionParameters": "DeliveryRuleUrlFileExtensionMatchConditionParameters"},
-        )
 
         match_values = cls._args_schema.conditions.Element.url_file_extension.parameters.match_values
         match_values.Element = AAZStrArg()
@@ -1189,11 +1079,6 @@ class Create(AAZCommand):
         parameters.transforms = AAZListArg(
             options=["transforms"],
             help="List of transforms",
-        )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleUrlFilenameConditionParameters": "DeliveryRuleUrlFilenameConditionParameters"},
         )
 
         match_values = cls._args_schema.conditions.Element.url_file_name.parameters.match_values
@@ -1231,11 +1116,6 @@ class Create(AAZCommand):
             options=["transforms"],
             help="List of transforms",
         )
-        parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleUrlPathMatchConditionParameters": "DeliveryRuleUrlPathMatchConditionParameters"},
-        )
 
         match_values = cls._args_schema.conditions.Element.url_path.parameters.match_values
         match_values.Element = AAZStrArg()
@@ -1253,7 +1133,6 @@ class Create(AAZCommand):
         if cls._args_header_action_parameters_create is not None:
             _schema.header_action = cls._args_header_action_parameters_create.header_action
             _schema.header_name = cls._args_header_action_parameters_create.header_name
-            _schema.type_name = cls._args_header_action_parameters_create.type_name
             _schema.value = cls._args_header_action_parameters_create.value
             return
 
@@ -1271,11 +1150,6 @@ class Create(AAZCommand):
             help="Name of the header to modify",
             required=True,
         )
-        header_action_parameters_create.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"DeliveryRuleHeaderActionParameters": "DeliveryRuleHeaderActionParameters"},
-        )
         header_action_parameters_create.value = AAZStrArg(
             options=["value"],
             help="Value for the specified action",
@@ -1283,26 +1157,7 @@ class Create(AAZCommand):
 
         _schema.header_action = cls._args_header_action_parameters_create.header_action
         _schema.header_name = cls._args_header_action_parameters_create.header_name
-        _schema.type_name = cls._args_header_action_parameters_create.type_name
         _schema.value = cls._args_header_action_parameters_create.value
-
-    _args_resource_reference_create = None
-
-    @classmethod
-    def _build_args_resource_reference_create(cls, _schema):
-        if cls._args_resource_reference_create is not None:
-            _schema.id = cls._args_resource_reference_create.id
-            return
-
-        cls._args_resource_reference_create = AAZObjectArg()
-
-        resource_reference_create = cls._args_resource_reference_create
-        resource_reference_create.id = AAZStrArg(
-            options=["id"],
-            help="Resource ID.",
-        )
-
-        _schema.id = cls._args_resource_reference_create.id
 
     def _execute_operations(self):
         self.pre_operations()
@@ -1461,7 +1316,7 @@ class Create(AAZCommand):
                 parameters.set_prop("cacheBehavior", AAZStrType, ".cache_behavior", typ_kwargs={"flags": {"required": True}})
                 parameters.set_prop("cacheDuration", AAZStrType, ".cache_duration", typ_kwargs={"nullable": True})
                 parameters.set_prop("cacheType", AAZStrType, ".cache_type", typ_kwargs={"flags": {"required": True}})
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleCacheExpirationActionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             disc_cache_key_query_string = _builder.get(".properties.actions[]{name:CacheKeyQueryString}")
             if disc_cache_key_query_string is not None:
@@ -1471,7 +1326,7 @@ class Create(AAZCommand):
             if parameters is not None:
                 parameters.set_prop("queryParameters", AAZStrType, ".query_parameters", typ_kwargs={"nullable": True})
                 parameters.set_prop("queryStringBehavior", AAZStrType, ".query_string_behavior", typ_kwargs={"flags": {"required": True}})
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleCacheKeyQueryStringBehaviorActionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             disc_modify_request_header = _builder.get(".properties.actions[]{name:ModifyRequestHeader}")
             if disc_modify_request_header is not None:
@@ -1487,8 +1342,12 @@ class Create(AAZCommand):
 
             parameters = _builder.get(".properties.actions[]{name:OriginGroupOverride}.parameters")
             if parameters is not None:
-                _CreateHelper._build_schema_resource_reference_create(parameters.set_prop("originGroup", AAZObjectType, ".origin_group", typ_kwargs={"flags": {"required": True}}))
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_prop("originGroup", AAZObjectType, ".origin_group", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleOriginGroupOverrideActionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
+
+            origin_group = _builder.get(".properties.actions[]{name:OriginGroupOverride}.parameters.originGroup")
+            if origin_group is not None:
+                origin_group.set_prop("id", AAZStrType, ".id")
 
             disc_route_configuration_override = _builder.get(".properties.actions[]{name:RouteConfigurationOverride}")
             if disc_route_configuration_override is not None:
@@ -1498,7 +1357,7 @@ class Create(AAZCommand):
             if parameters is not None:
                 parameters.set_prop("cacheConfiguration", AAZObjectType, ".cache_configuration")
                 parameters.set_prop("originGroupOverride", AAZObjectType, ".origin_group_override")
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleRouteConfigurationOverrideActionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             cache_configuration = _builder.get(".properties.actions[]{name:RouteConfigurationOverride}.parameters.cacheConfiguration")
             if cache_configuration is not None:
@@ -1511,7 +1370,11 @@ class Create(AAZCommand):
             origin_group_override = _builder.get(".properties.actions[]{name:RouteConfigurationOverride}.parameters.originGroupOverride")
             if origin_group_override is not None:
                 origin_group_override.set_prop("forwardingProtocol", AAZStrType, ".forwarding_protocol")
-                _CreateHelper._build_schema_resource_reference_create(origin_group_override.set_prop("originGroup", AAZObjectType, ".origin_group"))
+                origin_group_override.set_prop("originGroup", AAZObjectType, ".origin_group")
+
+            origin_group = _builder.get(".properties.actions[]{name:RouteConfigurationOverride}.parameters.originGroupOverride.originGroup")
+            if origin_group is not None:
+                origin_group.set_prop("id", AAZStrType, ".id")
 
             disc_url_redirect = _builder.get(".properties.actions[]{name:UrlRedirect}")
             if disc_url_redirect is not None:
@@ -1525,7 +1388,7 @@ class Create(AAZCommand):
                 parameters.set_prop("customQueryString", AAZStrType, ".custom_querystring")
                 parameters.set_prop("destinationProtocol", AAZStrType, ".destination_protocol")
                 parameters.set_prop("redirectType", AAZStrType, ".redirect_type", typ_kwargs={"flags": {"required": True}})
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleUrlRedirectActionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             disc_url_rewrite = _builder.get(".properties.actions[]{name:UrlRewrite}")
             if disc_url_rewrite is not None:
@@ -1536,7 +1399,7 @@ class Create(AAZCommand):
                 parameters.set_prop("destination", AAZStrType, ".destination", typ_kwargs={"flags": {"required": True}})
                 parameters.set_prop("preserveUnmatchedPath", AAZBoolType, ".preserve_unmatched_path")
                 parameters.set_prop("sourcePattern", AAZStrType, ".source_pattern", typ_kwargs={"flags": {"required": True}})
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleUrlRewriteActionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             disc_url_signing = _builder.get(".properties.actions[]{name:UrlSigning}")
             if disc_url_signing is not None:
@@ -1546,7 +1409,7 @@ class Create(AAZCommand):
             if parameters is not None:
                 parameters.set_prop("algorithm", AAZStrType, ".algorithm")
                 parameters.set_prop("parameterNameOverride", AAZListType, ".parameter_name_override")
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleUrlSigningActionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             parameter_name_override = _builder.get(".properties.actions[]{name:UrlSigning}.parameters.parameterNameOverride")
             if parameter_name_override is not None:
@@ -1612,7 +1475,7 @@ class Create(AAZCommand):
                 parameters.set_prop("negateCondition", AAZBoolType, ".negate_condition")
                 parameters.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
                 parameters.set_prop("transforms", AAZListType, ".transforms")
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleClientPortConditionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             match_values = _builder.get(".properties.conditions[]{name:ClientPort}.parameters.matchValues")
             if match_values is not None:
@@ -1633,7 +1496,7 @@ class Create(AAZCommand):
                 parameters.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
                 parameters.set_prop("selector", AAZStrType, ".selector")
                 parameters.set_prop("transforms", AAZListType, ".transforms")
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleCookiesConditionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             match_values = _builder.get(".properties.conditions[]{name:Cookies}.parameters.matchValues")
             if match_values is not None:
@@ -1653,7 +1516,7 @@ class Create(AAZCommand):
                 parameters.set_prop("negateCondition", AAZBoolType, ".negate_condition")
                 parameters.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
                 parameters.set_prop("transforms", AAZListType, ".transforms")
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleHostNameConditionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             match_values = _builder.get(".properties.conditions[]{name:HostName}.parameters.matchValues")
             if match_values is not None:
@@ -1673,7 +1536,7 @@ class Create(AAZCommand):
                 parameters.set_prop("negateCondition", AAZBoolType, ".negate_condition")
                 parameters.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
                 parameters.set_prop("transforms", AAZListType, ".transforms")
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleHttpVersionConditionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             match_values = _builder.get(".properties.conditions[]{name:HttpVersion}.parameters.matchValues")
             if match_values is not None:
@@ -1693,7 +1556,7 @@ class Create(AAZCommand):
                 parameters.set_prop("negateCondition", AAZBoolType, ".negate_condition")
                 parameters.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
                 parameters.set_prop("transforms", AAZListType, ".transforms")
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleIsDeviceConditionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             match_values = _builder.get(".properties.conditions[]{name:IsDevice}.parameters.matchValues")
             if match_values is not None:
@@ -1714,7 +1577,7 @@ class Create(AAZCommand):
                 parameters.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
                 parameters.set_prop("selector", AAZStrType, ".selector")
                 parameters.set_prop("transforms", AAZListType, ".transforms")
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRulePostArgsConditionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             match_values = _builder.get(".properties.conditions[]{name:PostArgs}.parameters.matchValues")
             if match_values is not None:
@@ -1734,7 +1597,7 @@ class Create(AAZCommand):
                 parameters.set_prop("negateCondition", AAZBoolType, ".negate_condition")
                 parameters.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
                 parameters.set_prop("transforms", AAZListType, ".transforms")
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleQueryStringConditionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             match_values = _builder.get(".properties.conditions[]{name:QueryString}.parameters.matchValues")
             if match_values is not None:
@@ -1754,7 +1617,7 @@ class Create(AAZCommand):
                 parameters.set_prop("negateCondition", AAZBoolType, ".negate_condition")
                 parameters.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
                 parameters.set_prop("transforms", AAZListType, ".transforms")
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleRemoteAddressConditionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             match_values = _builder.get(".properties.conditions[]{name:RemoteAddress}.parameters.matchValues")
             if match_values is not None:
@@ -1774,7 +1637,7 @@ class Create(AAZCommand):
                 parameters.set_prop("negateCondition", AAZBoolType, ".negate_condition")
                 parameters.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
                 parameters.set_prop("transforms", AAZListType, ".transforms")
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleRequestBodyConditionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             match_values = _builder.get(".properties.conditions[]{name:RequestBody}.parameters.matchValues")
             if match_values is not None:
@@ -1795,7 +1658,7 @@ class Create(AAZCommand):
                 parameters.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
                 parameters.set_prop("selector", AAZStrType, ".selector")
                 parameters.set_prop("transforms", AAZListType, ".transforms")
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleRequestHeaderConditionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             match_values = _builder.get(".properties.conditions[]{name:RequestHeader}.parameters.matchValues")
             if match_values is not None:
@@ -1815,7 +1678,7 @@ class Create(AAZCommand):
                 parameters.set_prop("negateCondition", AAZBoolType, ".negate_condition")
                 parameters.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
                 parameters.set_prop("transforms", AAZListType, ".transforms")
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleRequestMethodConditionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             match_values = _builder.get(".properties.conditions[]{name:RequestMethod}.parameters.matchValues")
             if match_values is not None:
@@ -1835,7 +1698,7 @@ class Create(AAZCommand):
                 parameters.set_prop("negateCondition", AAZBoolType, ".negate_condition")
                 parameters.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
                 parameters.set_prop("transforms", AAZListType, ".transforms")
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleRequestSchemeConditionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             match_values = _builder.get(".properties.conditions[]{name:RequestScheme}.parameters.matchValues")
             if match_values is not None:
@@ -1855,7 +1718,7 @@ class Create(AAZCommand):
                 parameters.set_prop("negateCondition", AAZBoolType, ".negate_condition")
                 parameters.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
                 parameters.set_prop("transforms", AAZListType, ".transforms")
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleRequestUriConditionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             match_values = _builder.get(".properties.conditions[]{name:RequestUri}.parameters.matchValues")
             if match_values is not None:
@@ -1875,7 +1738,7 @@ class Create(AAZCommand):
                 parameters.set_prop("negateCondition", AAZBoolType, ".negate_condition")
                 parameters.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
                 parameters.set_prop("transforms", AAZListType, ".transforms")
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleServerPortConditionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             match_values = _builder.get(".properties.conditions[]{name:ServerPort}.parameters.matchValues")
             if match_values is not None:
@@ -1895,7 +1758,7 @@ class Create(AAZCommand):
                 parameters.set_prop("negateCondition", AAZBoolType, ".negate_condition")
                 parameters.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
                 parameters.set_prop("transforms", AAZListType, ".transforms")
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleSocketAddrConditionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             match_values = _builder.get(".properties.conditions[]{name:SocketAddr}.parameters.matchValues")
             if match_values is not None:
@@ -1915,7 +1778,7 @@ class Create(AAZCommand):
                 parameters.set_prop("negateCondition", AAZBoolType, ".negate_condition")
                 parameters.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
                 parameters.set_prop("transforms", AAZListType, ".transforms")
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleSslProtocolConditionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             match_values = _builder.get(".properties.conditions[]{name:SslProtocol}.parameters.matchValues")
             if match_values is not None:
@@ -1935,7 +1798,7 @@ class Create(AAZCommand):
                 parameters.set_prop("negateCondition", AAZBoolType, ".negate_condition")
                 parameters.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
                 parameters.set_prop("transforms", AAZListType, ".transforms")
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleUrlFileExtensionMatchConditionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             match_values = _builder.get(".properties.conditions[]{name:UrlFileExtension}.parameters.matchValues")
             if match_values is not None:
@@ -1955,7 +1818,7 @@ class Create(AAZCommand):
                 parameters.set_prop("negateCondition", AAZBoolType, ".negate_condition")
                 parameters.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
                 parameters.set_prop("transforms", AAZListType, ".transforms")
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleUrlFilenameConditionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             match_values = _builder.get(".properties.conditions[]{name:UrlFileName}.parameters.matchValues")
             if match_values is not None:
@@ -1975,7 +1838,7 @@ class Create(AAZCommand):
                 parameters.set_prop("negateCondition", AAZBoolType, ".negate_condition")
                 parameters.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
                 parameters.set_prop("transforms", AAZListType, ".transforms")
-                parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                parameters.set_const("typeName", "DeliveryRuleUrlPathMatchConditionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             match_values = _builder.get(".properties.conditions[]{name:UrlPath}.parameters.matchValues")
             if match_values is not None:
@@ -2017,14 +1880,8 @@ class _CreateHelper:
             return
         _builder.set_prop("headerAction", AAZStrType, ".header_action", typ_kwargs={"flags": {"required": True}})
         _builder.set_prop("headerName", AAZStrType, ".header_name", typ_kwargs={"flags": {"required": True}})
-        _builder.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+        _builder.set_const("typeName", "DeliveryRuleHeaderActionParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
         _builder.set_prop("value", AAZStrType, ".value")
-
-    @classmethod
-    def _build_schema_resource_reference_create(cls, _builder):
-        if _builder is None:
-            return
-        _builder.set_prop("id", AAZStrType, ".id")
 
     _schema_header_action_parameters_read = None
 
@@ -2058,21 +1915,6 @@ class _CreateHelper:
         _schema.header_name = cls._schema_header_action_parameters_read.header_name
         _schema.type_name = cls._schema_header_action_parameters_read.type_name
         _schema.value = cls._schema_header_action_parameters_read.value
-
-    _schema_resource_reference_read = None
-
-    @classmethod
-    def _build_schema_resource_reference_read(cls, _schema):
-        if cls._schema_resource_reference_read is not None:
-            _schema.id = cls._schema_resource_reference_read.id
-            return
-
-        cls._schema_resource_reference_read = _schema_resource_reference_read = AAZObjectType()
-
-        resource_reference_read = _schema_resource_reference_read
-        resource_reference_read.id = AAZStrType()
-
-        _schema.id = cls._schema_resource_reference_read.id
 
     _schema_rule_read = None
 
@@ -2138,12 +1980,12 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        disc_cache_expiration = _schema_rule_read.properties.actions.Element["discriminate_by(\"name\", \"CacheExpiration\")"]
+        disc_cache_expiration = _schema_rule_read.properties.actions.Element.discriminate_by("name", "CacheExpiration")
         disc_cache_expiration.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_rule_read.properties.actions.Element["discriminate_by(\"name\", \"CacheExpiration\")"].parameters
+        parameters = _schema_rule_read.properties.actions.Element.discriminate_by("name", "CacheExpiration").parameters
         parameters.cache_behavior = AAZStrType(
             serialized_name="cacheBehavior",
             flags={"required": True},
@@ -2161,12 +2003,12 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        disc_cache_key_query_string = _schema_rule_read.properties.actions.Element["discriminate_by(\"name\", \"CacheKeyQueryString\")"]
+        disc_cache_key_query_string = _schema_rule_read.properties.actions.Element.discriminate_by("name", "CacheKeyQueryString")
         disc_cache_key_query_string.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_rule_read.properties.actions.Element["discriminate_by(\"name\", \"CacheKeyQueryString\")"].parameters
+        parameters = _schema_rule_read.properties.actions.Element.discriminate_by("name", "CacheKeyQueryString").parameters
         parameters.query_parameters = AAZStrType(
             serialized_name="queryParameters",
             nullable=True,
@@ -2180,40 +2022,42 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        disc_modify_request_header = _schema_rule_read.properties.actions.Element["discriminate_by(\"name\", \"ModifyRequestHeader\")"]
+        disc_modify_request_header = _schema_rule_read.properties.actions.Element.discriminate_by("name", "ModifyRequestHeader")
         disc_modify_request_header.parameters = AAZObjectType(
             flags={"required": True},
         )
         cls._build_schema_header_action_parameters_read(disc_modify_request_header.parameters)
 
-        disc_modify_response_header = _schema_rule_read.properties.actions.Element["discriminate_by(\"name\", \"ModifyResponseHeader\")"]
+        disc_modify_response_header = _schema_rule_read.properties.actions.Element.discriminate_by("name", "ModifyResponseHeader")
         disc_modify_response_header.parameters = AAZObjectType(
             flags={"required": True},
         )
         cls._build_schema_header_action_parameters_read(disc_modify_response_header.parameters)
 
-        disc_origin_group_override = _schema_rule_read.properties.actions.Element["discriminate_by(\"name\", \"OriginGroupOverride\")"]
+        disc_origin_group_override = _schema_rule_read.properties.actions.Element.discriminate_by("name", "OriginGroupOverride")
         disc_origin_group_override.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_rule_read.properties.actions.Element["discriminate_by(\"name\", \"OriginGroupOverride\")"].parameters
+        parameters = _schema_rule_read.properties.actions.Element.discriminate_by("name", "OriginGroupOverride").parameters
         parameters.origin_group = AAZObjectType(
             serialized_name="originGroup",
             flags={"required": True},
         )
-        cls._build_schema_resource_reference_read(parameters.origin_group)
         parameters.type_name = AAZStrType(
             serialized_name="typeName",
             flags={"required": True},
         )
 
-        disc_route_configuration_override = _schema_rule_read.properties.actions.Element["discriminate_by(\"name\", \"RouteConfigurationOverride\")"]
+        origin_group = _schema_rule_read.properties.actions.Element.discriminate_by("name", "OriginGroupOverride").parameters.origin_group
+        origin_group.id = AAZStrType()
+
+        disc_route_configuration_override = _schema_rule_read.properties.actions.Element.discriminate_by("name", "RouteConfigurationOverride")
         disc_route_configuration_override.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_rule_read.properties.actions.Element["discriminate_by(\"name\", \"RouteConfigurationOverride\")"].parameters
+        parameters = _schema_rule_read.properties.actions.Element.discriminate_by("name", "RouteConfigurationOverride").parameters
         parameters.cache_configuration = AAZObjectType(
             serialized_name="cacheConfiguration",
         )
@@ -2225,7 +2069,7 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        cache_configuration = _schema_rule_read.properties.actions.Element["discriminate_by(\"name\", \"RouteConfigurationOverride\")"].parameters.cache_configuration
+        cache_configuration = _schema_rule_read.properties.actions.Element.discriminate_by("name", "RouteConfigurationOverride").parameters.cache_configuration
         cache_configuration.cache_behavior = AAZStrType(
             serialized_name="cacheBehavior",
         )
@@ -2242,21 +2086,23 @@ class _CreateHelper:
             serialized_name="queryStringCachingBehavior",
         )
 
-        origin_group_override = _schema_rule_read.properties.actions.Element["discriminate_by(\"name\", \"RouteConfigurationOverride\")"].parameters.origin_group_override
+        origin_group_override = _schema_rule_read.properties.actions.Element.discriminate_by("name", "RouteConfigurationOverride").parameters.origin_group_override
         origin_group_override.forwarding_protocol = AAZStrType(
             serialized_name="forwardingProtocol",
         )
         origin_group_override.origin_group = AAZObjectType(
             serialized_name="originGroup",
         )
-        cls._build_schema_resource_reference_read(origin_group_override.origin_group)
 
-        disc_url_redirect = _schema_rule_read.properties.actions.Element["discriminate_by(\"name\", \"UrlRedirect\")"]
+        origin_group = _schema_rule_read.properties.actions.Element.discriminate_by("name", "RouteConfigurationOverride").parameters.origin_group_override.origin_group
+        origin_group.id = AAZStrType()
+
+        disc_url_redirect = _schema_rule_read.properties.actions.Element.discriminate_by("name", "UrlRedirect")
         disc_url_redirect.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_rule_read.properties.actions.Element["discriminate_by(\"name\", \"UrlRedirect\")"].parameters
+        parameters = _schema_rule_read.properties.actions.Element.discriminate_by("name", "UrlRedirect").parameters
         parameters.custom_fragment = AAZStrType(
             serialized_name="customFragment",
         )
@@ -2281,12 +2127,12 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        disc_url_rewrite = _schema_rule_read.properties.actions.Element["discriminate_by(\"name\", \"UrlRewrite\")"]
+        disc_url_rewrite = _schema_rule_read.properties.actions.Element.discriminate_by("name", "UrlRewrite")
         disc_url_rewrite.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_rule_read.properties.actions.Element["discriminate_by(\"name\", \"UrlRewrite\")"].parameters
+        parameters = _schema_rule_read.properties.actions.Element.discriminate_by("name", "UrlRewrite").parameters
         parameters.destination = AAZStrType(
             flags={"required": True},
         )
@@ -2302,12 +2148,12 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        disc_url_signing = _schema_rule_read.properties.actions.Element["discriminate_by(\"name\", \"UrlSigning\")"]
+        disc_url_signing = _schema_rule_read.properties.actions.Element.discriminate_by("name", "UrlSigning")
         disc_url_signing.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_rule_read.properties.actions.Element["discriminate_by(\"name\", \"UrlSigning\")"].parameters
+        parameters = _schema_rule_read.properties.actions.Element.discriminate_by("name", "UrlSigning").parameters
         parameters.algorithm = AAZStrType()
         parameters.parameter_name_override = AAZListType(
             serialized_name="parameterNameOverride",
@@ -2317,10 +2163,10 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        parameter_name_override = _schema_rule_read.properties.actions.Element["discriminate_by(\"name\", \"UrlSigning\")"].parameters.parameter_name_override
+        parameter_name_override = _schema_rule_read.properties.actions.Element.discriminate_by("name", "UrlSigning").parameters.parameter_name_override
         parameter_name_override.Element = AAZObjectType()
 
-        _element = _schema_rule_read.properties.actions.Element["discriminate_by(\"name\", \"UrlSigning\")"].parameters.parameter_name_override.Element
+        _element = _schema_rule_read.properties.actions.Element.discriminate_by("name", "UrlSigning").parameters.parameter_name_override.Element
         _element.param_indicator = AAZStrType(
             serialized_name="paramIndicator",
             flags={"required": True},
@@ -2338,12 +2184,12 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        disc_client_port = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"ClientPort\")"]
+        disc_client_port = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "ClientPort")
         disc_client_port.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"ClientPort\")"].parameters
+        parameters = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "ClientPort").parameters
         parameters.match_values = AAZListType(
             serialized_name="matchValues",
         )
@@ -2359,18 +2205,18 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        match_values = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"ClientPort\")"].parameters.match_values
+        match_values = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "ClientPort").parameters.match_values
         match_values.Element = AAZStrType()
 
-        transforms = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"ClientPort\")"].parameters.transforms
+        transforms = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "ClientPort").parameters.transforms
         transforms.Element = AAZStrType()
 
-        disc_cookies = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"Cookies\")"]
+        disc_cookies = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "Cookies")
         disc_cookies.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"Cookies\")"].parameters
+        parameters = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "Cookies").parameters
         parameters.match_values = AAZListType(
             serialized_name="matchValues",
         )
@@ -2387,18 +2233,18 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        match_values = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"Cookies\")"].parameters.match_values
+        match_values = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "Cookies").parameters.match_values
         match_values.Element = AAZStrType()
 
-        transforms = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"Cookies\")"].parameters.transforms
+        transforms = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "Cookies").parameters.transforms
         transforms.Element = AAZStrType()
 
-        disc_host_name = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"HostName\")"]
+        disc_host_name = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "HostName")
         disc_host_name.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"HostName\")"].parameters
+        parameters = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "HostName").parameters
         parameters.match_values = AAZListType(
             serialized_name="matchValues",
         )
@@ -2414,18 +2260,18 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        match_values = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"HostName\")"].parameters.match_values
+        match_values = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "HostName").parameters.match_values
         match_values.Element = AAZStrType()
 
-        transforms = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"HostName\")"].parameters.transforms
+        transforms = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "HostName").parameters.transforms
         transforms.Element = AAZStrType()
 
-        disc_http_version = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"HttpVersion\")"]
+        disc_http_version = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "HttpVersion")
         disc_http_version.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"HttpVersion\")"].parameters
+        parameters = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "HttpVersion").parameters
         parameters.match_values = AAZListType(
             serialized_name="matchValues",
         )
@@ -2441,18 +2287,18 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        match_values = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"HttpVersion\")"].parameters.match_values
+        match_values = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "HttpVersion").parameters.match_values
         match_values.Element = AAZStrType()
 
-        transforms = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"HttpVersion\")"].parameters.transforms
+        transforms = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "HttpVersion").parameters.transforms
         transforms.Element = AAZStrType()
 
-        disc_is_device = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"IsDevice\")"]
+        disc_is_device = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "IsDevice")
         disc_is_device.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"IsDevice\")"].parameters
+        parameters = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "IsDevice").parameters
         parameters.match_values = AAZListType(
             serialized_name="matchValues",
         )
@@ -2468,18 +2314,18 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        match_values = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"IsDevice\")"].parameters.match_values
+        match_values = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "IsDevice").parameters.match_values
         match_values.Element = AAZStrType()
 
-        transforms = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"IsDevice\")"].parameters.transforms
+        transforms = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "IsDevice").parameters.transforms
         transforms.Element = AAZStrType()
 
-        disc_post_args = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"PostArgs\")"]
+        disc_post_args = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "PostArgs")
         disc_post_args.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"PostArgs\")"].parameters
+        parameters = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "PostArgs").parameters
         parameters.match_values = AAZListType(
             serialized_name="matchValues",
         )
@@ -2496,18 +2342,18 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        match_values = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"PostArgs\")"].parameters.match_values
+        match_values = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "PostArgs").parameters.match_values
         match_values.Element = AAZStrType()
 
-        transforms = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"PostArgs\")"].parameters.transforms
+        transforms = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "PostArgs").parameters.transforms
         transforms.Element = AAZStrType()
 
-        disc_query_string = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"QueryString\")"]
+        disc_query_string = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "QueryString")
         disc_query_string.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"QueryString\")"].parameters
+        parameters = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "QueryString").parameters
         parameters.match_values = AAZListType(
             serialized_name="matchValues",
         )
@@ -2523,18 +2369,18 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        match_values = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"QueryString\")"].parameters.match_values
+        match_values = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "QueryString").parameters.match_values
         match_values.Element = AAZStrType()
 
-        transforms = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"QueryString\")"].parameters.transforms
+        transforms = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "QueryString").parameters.transforms
         transforms.Element = AAZStrType()
 
-        disc_remote_address = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"RemoteAddress\")"]
+        disc_remote_address = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "RemoteAddress")
         disc_remote_address.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"RemoteAddress\")"].parameters
+        parameters = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "RemoteAddress").parameters
         parameters.match_values = AAZListType(
             serialized_name="matchValues",
         )
@@ -2550,18 +2396,18 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        match_values = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"RemoteAddress\")"].parameters.match_values
+        match_values = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "RemoteAddress").parameters.match_values
         match_values.Element = AAZStrType()
 
-        transforms = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"RemoteAddress\")"].parameters.transforms
+        transforms = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "RemoteAddress").parameters.transforms
         transforms.Element = AAZStrType()
 
-        disc_request_body = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"RequestBody\")"]
+        disc_request_body = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "RequestBody")
         disc_request_body.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"RequestBody\")"].parameters
+        parameters = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "RequestBody").parameters
         parameters.match_values = AAZListType(
             serialized_name="matchValues",
         )
@@ -2577,18 +2423,18 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        match_values = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"RequestBody\")"].parameters.match_values
+        match_values = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "RequestBody").parameters.match_values
         match_values.Element = AAZStrType()
 
-        transforms = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"RequestBody\")"].parameters.transforms
+        transforms = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "RequestBody").parameters.transforms
         transforms.Element = AAZStrType()
 
-        disc_request_header = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"RequestHeader\")"]
+        disc_request_header = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "RequestHeader")
         disc_request_header.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"RequestHeader\")"].parameters
+        parameters = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "RequestHeader").parameters
         parameters.match_values = AAZListType(
             serialized_name="matchValues",
         )
@@ -2605,18 +2451,18 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        match_values = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"RequestHeader\")"].parameters.match_values
+        match_values = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "RequestHeader").parameters.match_values
         match_values.Element = AAZStrType()
 
-        transforms = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"RequestHeader\")"].parameters.transforms
+        transforms = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "RequestHeader").parameters.transforms
         transforms.Element = AAZStrType()
 
-        disc_request_method = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"RequestMethod\")"]
+        disc_request_method = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "RequestMethod")
         disc_request_method.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"RequestMethod\")"].parameters
+        parameters = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "RequestMethod").parameters
         parameters.match_values = AAZListType(
             serialized_name="matchValues",
         )
@@ -2632,18 +2478,18 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        match_values = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"RequestMethod\")"].parameters.match_values
+        match_values = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "RequestMethod").parameters.match_values
         match_values.Element = AAZStrType()
 
-        transforms = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"RequestMethod\")"].parameters.transforms
+        transforms = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "RequestMethod").parameters.transforms
         transforms.Element = AAZStrType()
 
-        disc_request_scheme = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"RequestScheme\")"]
+        disc_request_scheme = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "RequestScheme")
         disc_request_scheme.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"RequestScheme\")"].parameters
+        parameters = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "RequestScheme").parameters
         parameters.match_values = AAZListType(
             serialized_name="matchValues",
         )
@@ -2659,18 +2505,18 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        match_values = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"RequestScheme\")"].parameters.match_values
+        match_values = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "RequestScheme").parameters.match_values
         match_values.Element = AAZStrType()
 
-        transforms = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"RequestScheme\")"].parameters.transforms
+        transforms = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "RequestScheme").parameters.transforms
         transforms.Element = AAZStrType()
 
-        disc_request_uri = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"RequestUri\")"]
+        disc_request_uri = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "RequestUri")
         disc_request_uri.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"RequestUri\")"].parameters
+        parameters = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "RequestUri").parameters
         parameters.match_values = AAZListType(
             serialized_name="matchValues",
         )
@@ -2686,18 +2532,18 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        match_values = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"RequestUri\")"].parameters.match_values
+        match_values = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "RequestUri").parameters.match_values
         match_values.Element = AAZStrType()
 
-        transforms = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"RequestUri\")"].parameters.transforms
+        transforms = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "RequestUri").parameters.transforms
         transforms.Element = AAZStrType()
 
-        disc_server_port = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"ServerPort\")"]
+        disc_server_port = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "ServerPort")
         disc_server_port.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"ServerPort\")"].parameters
+        parameters = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "ServerPort").parameters
         parameters.match_values = AAZListType(
             serialized_name="matchValues",
         )
@@ -2713,18 +2559,18 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        match_values = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"ServerPort\")"].parameters.match_values
+        match_values = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "ServerPort").parameters.match_values
         match_values.Element = AAZStrType()
 
-        transforms = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"ServerPort\")"].parameters.transforms
+        transforms = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "ServerPort").parameters.transforms
         transforms.Element = AAZStrType()
 
-        disc_socket_addr = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"SocketAddr\")"]
+        disc_socket_addr = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "SocketAddr")
         disc_socket_addr.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"SocketAddr\")"].parameters
+        parameters = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "SocketAddr").parameters
         parameters.match_values = AAZListType(
             serialized_name="matchValues",
         )
@@ -2740,18 +2586,18 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        match_values = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"SocketAddr\")"].parameters.match_values
+        match_values = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "SocketAddr").parameters.match_values
         match_values.Element = AAZStrType()
 
-        transforms = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"SocketAddr\")"].parameters.transforms
+        transforms = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "SocketAddr").parameters.transforms
         transforms.Element = AAZStrType()
 
-        disc_ssl_protocol = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"SslProtocol\")"]
+        disc_ssl_protocol = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "SslProtocol")
         disc_ssl_protocol.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"SslProtocol\")"].parameters
+        parameters = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "SslProtocol").parameters
         parameters.match_values = AAZListType(
             serialized_name="matchValues",
         )
@@ -2767,18 +2613,18 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        match_values = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"SslProtocol\")"].parameters.match_values
+        match_values = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "SslProtocol").parameters.match_values
         match_values.Element = AAZStrType()
 
-        transforms = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"SslProtocol\")"].parameters.transforms
+        transforms = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "SslProtocol").parameters.transforms
         transforms.Element = AAZStrType()
 
-        disc_url_file_extension = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"UrlFileExtension\")"]
+        disc_url_file_extension = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "UrlFileExtension")
         disc_url_file_extension.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"UrlFileExtension\")"].parameters
+        parameters = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "UrlFileExtension").parameters
         parameters.match_values = AAZListType(
             serialized_name="matchValues",
         )
@@ -2794,18 +2640,18 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        match_values = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"UrlFileExtension\")"].parameters.match_values
+        match_values = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "UrlFileExtension").parameters.match_values
         match_values.Element = AAZStrType()
 
-        transforms = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"UrlFileExtension\")"].parameters.transforms
+        transforms = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "UrlFileExtension").parameters.transforms
         transforms.Element = AAZStrType()
 
-        disc_url_file_name = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"UrlFileName\")"]
+        disc_url_file_name = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "UrlFileName")
         disc_url_file_name.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"UrlFileName\")"].parameters
+        parameters = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "UrlFileName").parameters
         parameters.match_values = AAZListType(
             serialized_name="matchValues",
         )
@@ -2821,18 +2667,18 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        match_values = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"UrlFileName\")"].parameters.match_values
+        match_values = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "UrlFileName").parameters.match_values
         match_values.Element = AAZStrType()
 
-        transforms = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"UrlFileName\")"].parameters.transforms
+        transforms = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "UrlFileName").parameters.transforms
         transforms.Element = AAZStrType()
 
-        disc_url_path = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"UrlPath\")"]
+        disc_url_path = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "UrlPath")
         disc_url_path.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"UrlPath\")"].parameters
+        parameters = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "UrlPath").parameters
         parameters.match_values = AAZListType(
             serialized_name="matchValues",
         )
@@ -2848,10 +2694,10 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        match_values = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"UrlPath\")"].parameters.match_values
+        match_values = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "UrlPath").parameters.match_values
         match_values.Element = AAZStrType()
 
-        transforms = _schema_rule_read.properties.conditions.Element["discriminate_by(\"name\", \"UrlPath\")"].parameters.transforms
+        transforms = _schema_rule_read.properties.conditions.Element.discriminate_by("name", "UrlPath").parameters.transforms
         transforms.Element = AAZStrType()
 
         system_data = _schema_rule_read.system_data

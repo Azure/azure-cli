@@ -2556,12 +2556,12 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        disc_cache_expiration = _schema_endpoint_read.properties.delivery_policy.rules.Element.actions.Element["discriminate_by(\"name\", \"CacheExpiration\")"]
+        disc_cache_expiration = _schema_endpoint_read.properties.delivery_policy.rules.Element.actions.Element.discriminate_by("name", "CacheExpiration")
         disc_cache_expiration.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.actions.Element["discriminate_by(\"name\", \"CacheExpiration\")"].parameters
+        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.actions.Element.discriminate_by("name", "CacheExpiration").parameters
         parameters.cache_behavior = AAZStrType(
             serialized_name="cacheBehavior",
             flags={"required": True},
@@ -2579,12 +2579,12 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        disc_cache_key_query_string = _schema_endpoint_read.properties.delivery_policy.rules.Element.actions.Element["discriminate_by(\"name\", \"CacheKeyQueryString\")"]
+        disc_cache_key_query_string = _schema_endpoint_read.properties.delivery_policy.rules.Element.actions.Element.discriminate_by("name", "CacheKeyQueryString")
         disc_cache_key_query_string.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.actions.Element["discriminate_by(\"name\", \"CacheKeyQueryString\")"].parameters
+        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.actions.Element.discriminate_by("name", "CacheKeyQueryString").parameters
         parameters.query_parameters = AAZStrType(
             serialized_name="queryParameters",
             nullable=True,
@@ -2598,24 +2598,24 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        disc_modify_request_header = _schema_endpoint_read.properties.delivery_policy.rules.Element.actions.Element["discriminate_by(\"name\", \"ModifyRequestHeader\")"]
+        disc_modify_request_header = _schema_endpoint_read.properties.delivery_policy.rules.Element.actions.Element.discriminate_by("name", "ModifyRequestHeader")
         disc_modify_request_header.parameters = AAZObjectType(
             flags={"required": True},
         )
         cls._build_schema_header_action_parameters_read(disc_modify_request_header.parameters)
 
-        disc_modify_response_header = _schema_endpoint_read.properties.delivery_policy.rules.Element.actions.Element["discriminate_by(\"name\", \"ModifyResponseHeader\")"]
+        disc_modify_response_header = _schema_endpoint_read.properties.delivery_policy.rules.Element.actions.Element.discriminate_by("name", "ModifyResponseHeader")
         disc_modify_response_header.parameters = AAZObjectType(
             flags={"required": True},
         )
         cls._build_schema_header_action_parameters_read(disc_modify_response_header.parameters)
 
-        disc_origin_group_override = _schema_endpoint_read.properties.delivery_policy.rules.Element.actions.Element["discriminate_by(\"name\", \"OriginGroupOverride\")"]
+        disc_origin_group_override = _schema_endpoint_read.properties.delivery_policy.rules.Element.actions.Element.discriminate_by("name", "OriginGroupOverride")
         disc_origin_group_override.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.actions.Element["discriminate_by(\"name\", \"OriginGroupOverride\")"].parameters
+        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.actions.Element.discriminate_by("name", "OriginGroupOverride").parameters
         parameters.origin_group = AAZObjectType(
             serialized_name="originGroup",
             flags={"required": True},
@@ -2626,12 +2626,12 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        disc_route_configuration_override = _schema_endpoint_read.properties.delivery_policy.rules.Element.actions.Element["discriminate_by(\"name\", \"RouteConfigurationOverride\")"]
+        disc_route_configuration_override = _schema_endpoint_read.properties.delivery_policy.rules.Element.actions.Element.discriminate_by("name", "RouteConfigurationOverride")
         disc_route_configuration_override.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.actions.Element["discriminate_by(\"name\", \"RouteConfigurationOverride\")"].parameters
+        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.actions.Element.discriminate_by("name", "RouteConfigurationOverride").parameters
         parameters.cache_configuration = AAZObjectType(
             serialized_name="cacheConfiguration",
         )
@@ -2643,7 +2643,7 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        cache_configuration = _schema_endpoint_read.properties.delivery_policy.rules.Element.actions.Element["discriminate_by(\"name\", \"RouteConfigurationOverride\")"].parameters.cache_configuration
+        cache_configuration = _schema_endpoint_read.properties.delivery_policy.rules.Element.actions.Element.discriminate_by("name", "RouteConfigurationOverride").parameters.cache_configuration
         cache_configuration.cache_behavior = AAZStrType(
             serialized_name="cacheBehavior",
         )
@@ -2660,7 +2660,7 @@ class _CreateHelper:
             serialized_name="queryStringCachingBehavior",
         )
 
-        origin_group_override = _schema_endpoint_read.properties.delivery_policy.rules.Element.actions.Element["discriminate_by(\"name\", \"RouteConfigurationOverride\")"].parameters.origin_group_override
+        origin_group_override = _schema_endpoint_read.properties.delivery_policy.rules.Element.actions.Element.discriminate_by("name", "RouteConfigurationOverride").parameters.origin_group_override
         origin_group_override.forwarding_protocol = AAZStrType(
             serialized_name="forwardingProtocol",
         )
@@ -2669,12 +2669,12 @@ class _CreateHelper:
         )
         cls._build_schema_resource_reference_read(origin_group_override.origin_group)
 
-        disc_url_redirect = _schema_endpoint_read.properties.delivery_policy.rules.Element.actions.Element["discriminate_by(\"name\", \"UrlRedirect\")"]
+        disc_url_redirect = _schema_endpoint_read.properties.delivery_policy.rules.Element.actions.Element.discriminate_by("name", "UrlRedirect")
         disc_url_redirect.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.actions.Element["discriminate_by(\"name\", \"UrlRedirect\")"].parameters
+        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.actions.Element.discriminate_by("name", "UrlRedirect").parameters
         parameters.custom_fragment = AAZStrType(
             serialized_name="customFragment",
         )
@@ -2699,12 +2699,12 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        disc_url_rewrite = _schema_endpoint_read.properties.delivery_policy.rules.Element.actions.Element["discriminate_by(\"name\", \"UrlRewrite\")"]
+        disc_url_rewrite = _schema_endpoint_read.properties.delivery_policy.rules.Element.actions.Element.discriminate_by("name", "UrlRewrite")
         disc_url_rewrite.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.actions.Element["discriminate_by(\"name\", \"UrlRewrite\")"].parameters
+        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.actions.Element.discriminate_by("name", "UrlRewrite").parameters
         parameters.destination = AAZStrType(
             flags={"required": True},
         )
@@ -2720,12 +2720,12 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        disc_url_signing = _schema_endpoint_read.properties.delivery_policy.rules.Element.actions.Element["discriminate_by(\"name\", \"UrlSigning\")"]
+        disc_url_signing = _schema_endpoint_read.properties.delivery_policy.rules.Element.actions.Element.discriminate_by("name", "UrlSigning")
         disc_url_signing.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.actions.Element["discriminate_by(\"name\", \"UrlSigning\")"].parameters
+        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.actions.Element.discriminate_by("name", "UrlSigning").parameters
         parameters.algorithm = AAZStrType()
         parameters.parameter_name_override = AAZListType(
             serialized_name="parameterNameOverride",
@@ -2735,10 +2735,10 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        parameter_name_override = _schema_endpoint_read.properties.delivery_policy.rules.Element.actions.Element["discriminate_by(\"name\", \"UrlSigning\")"].parameters.parameter_name_override
+        parameter_name_override = _schema_endpoint_read.properties.delivery_policy.rules.Element.actions.Element.discriminate_by("name", "UrlSigning").parameters.parameter_name_override
         parameter_name_override.Element = AAZObjectType()
 
-        _element = _schema_endpoint_read.properties.delivery_policy.rules.Element.actions.Element["discriminate_by(\"name\", \"UrlSigning\")"].parameters.parameter_name_override.Element
+        _element = _schema_endpoint_read.properties.delivery_policy.rules.Element.actions.Element.discriminate_by("name", "UrlSigning").parameters.parameter_name_override.Element
         _element.param_indicator = AAZStrType(
             serialized_name="paramIndicator",
             flags={"required": True},
@@ -2756,12 +2756,12 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        disc_client_port = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"ClientPort\")"]
+        disc_client_port = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "ClientPort")
         disc_client_port.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"ClientPort\")"].parameters
+        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "ClientPort").parameters
         parameters.match_values = AAZListType(
             serialized_name="matchValues",
         )
@@ -2777,18 +2777,18 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        match_values = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"ClientPort\")"].parameters.match_values
+        match_values = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "ClientPort").parameters.match_values
         match_values.Element = AAZStrType()
 
-        transforms = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"ClientPort\")"].parameters.transforms
+        transforms = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "ClientPort").parameters.transforms
         transforms.Element = AAZStrType()
 
-        disc_cookies = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"Cookies\")"]
+        disc_cookies = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "Cookies")
         disc_cookies.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"Cookies\")"].parameters
+        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "Cookies").parameters
         parameters.match_values = AAZListType(
             serialized_name="matchValues",
         )
@@ -2805,18 +2805,18 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        match_values = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"Cookies\")"].parameters.match_values
+        match_values = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "Cookies").parameters.match_values
         match_values.Element = AAZStrType()
 
-        transforms = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"Cookies\")"].parameters.transforms
+        transforms = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "Cookies").parameters.transforms
         transforms.Element = AAZStrType()
 
-        disc_host_name = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"HostName\")"]
+        disc_host_name = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "HostName")
         disc_host_name.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"HostName\")"].parameters
+        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "HostName").parameters
         parameters.match_values = AAZListType(
             serialized_name="matchValues",
         )
@@ -2832,18 +2832,18 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        match_values = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"HostName\")"].parameters.match_values
+        match_values = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "HostName").parameters.match_values
         match_values.Element = AAZStrType()
 
-        transforms = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"HostName\")"].parameters.transforms
+        transforms = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "HostName").parameters.transforms
         transforms.Element = AAZStrType()
 
-        disc_http_version = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"HttpVersion\")"]
+        disc_http_version = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "HttpVersion")
         disc_http_version.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"HttpVersion\")"].parameters
+        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "HttpVersion").parameters
         parameters.match_values = AAZListType(
             serialized_name="matchValues",
         )
@@ -2859,18 +2859,18 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        match_values = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"HttpVersion\")"].parameters.match_values
+        match_values = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "HttpVersion").parameters.match_values
         match_values.Element = AAZStrType()
 
-        transforms = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"HttpVersion\")"].parameters.transforms
+        transforms = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "HttpVersion").parameters.transforms
         transforms.Element = AAZStrType()
 
-        disc_is_device = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"IsDevice\")"]
+        disc_is_device = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "IsDevice")
         disc_is_device.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"IsDevice\")"].parameters
+        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "IsDevice").parameters
         parameters.match_values = AAZListType(
             serialized_name="matchValues",
         )
@@ -2886,18 +2886,18 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        match_values = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"IsDevice\")"].parameters.match_values
+        match_values = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "IsDevice").parameters.match_values
         match_values.Element = AAZStrType()
 
-        transforms = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"IsDevice\")"].parameters.transforms
+        transforms = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "IsDevice").parameters.transforms
         transforms.Element = AAZStrType()
 
-        disc_post_args = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"PostArgs\")"]
+        disc_post_args = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "PostArgs")
         disc_post_args.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"PostArgs\")"].parameters
+        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "PostArgs").parameters
         parameters.match_values = AAZListType(
             serialized_name="matchValues",
         )
@@ -2914,18 +2914,18 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        match_values = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"PostArgs\")"].parameters.match_values
+        match_values = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "PostArgs").parameters.match_values
         match_values.Element = AAZStrType()
 
-        transforms = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"PostArgs\")"].parameters.transforms
+        transforms = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "PostArgs").parameters.transforms
         transforms.Element = AAZStrType()
 
-        disc_query_string = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"QueryString\")"]
+        disc_query_string = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "QueryString")
         disc_query_string.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"QueryString\")"].parameters
+        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "QueryString").parameters
         parameters.match_values = AAZListType(
             serialized_name="matchValues",
         )
@@ -2941,18 +2941,18 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        match_values = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"QueryString\")"].parameters.match_values
+        match_values = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "QueryString").parameters.match_values
         match_values.Element = AAZStrType()
 
-        transforms = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"QueryString\")"].parameters.transforms
+        transforms = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "QueryString").parameters.transforms
         transforms.Element = AAZStrType()
 
-        disc_remote_address = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"RemoteAddress\")"]
+        disc_remote_address = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "RemoteAddress")
         disc_remote_address.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"RemoteAddress\")"].parameters
+        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "RemoteAddress").parameters
         parameters.match_values = AAZListType(
             serialized_name="matchValues",
         )
@@ -2968,18 +2968,18 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        match_values = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"RemoteAddress\")"].parameters.match_values
+        match_values = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "RemoteAddress").parameters.match_values
         match_values.Element = AAZStrType()
 
-        transforms = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"RemoteAddress\")"].parameters.transforms
+        transforms = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "RemoteAddress").parameters.transforms
         transforms.Element = AAZStrType()
 
-        disc_request_body = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"RequestBody\")"]
+        disc_request_body = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "RequestBody")
         disc_request_body.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"RequestBody\")"].parameters
+        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "RequestBody").parameters
         parameters.match_values = AAZListType(
             serialized_name="matchValues",
         )
@@ -2995,18 +2995,18 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        match_values = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"RequestBody\")"].parameters.match_values
+        match_values = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "RequestBody").parameters.match_values
         match_values.Element = AAZStrType()
 
-        transforms = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"RequestBody\")"].parameters.transforms
+        transforms = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "RequestBody").parameters.transforms
         transforms.Element = AAZStrType()
 
-        disc_request_header = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"RequestHeader\")"]
+        disc_request_header = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "RequestHeader")
         disc_request_header.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"RequestHeader\")"].parameters
+        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "RequestHeader").parameters
         parameters.match_values = AAZListType(
             serialized_name="matchValues",
         )
@@ -3023,18 +3023,18 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        match_values = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"RequestHeader\")"].parameters.match_values
+        match_values = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "RequestHeader").parameters.match_values
         match_values.Element = AAZStrType()
 
-        transforms = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"RequestHeader\")"].parameters.transforms
+        transforms = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "RequestHeader").parameters.transforms
         transforms.Element = AAZStrType()
 
-        disc_request_method = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"RequestMethod\")"]
+        disc_request_method = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "RequestMethod")
         disc_request_method.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"RequestMethod\")"].parameters
+        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "RequestMethod").parameters
         parameters.match_values = AAZListType(
             serialized_name="matchValues",
         )
@@ -3050,18 +3050,18 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        match_values = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"RequestMethod\")"].parameters.match_values
+        match_values = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "RequestMethod").parameters.match_values
         match_values.Element = AAZStrType()
 
-        transforms = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"RequestMethod\")"].parameters.transforms
+        transforms = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "RequestMethod").parameters.transforms
         transforms.Element = AAZStrType()
 
-        disc_request_scheme = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"RequestScheme\")"]
+        disc_request_scheme = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "RequestScheme")
         disc_request_scheme.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"RequestScheme\")"].parameters
+        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "RequestScheme").parameters
         parameters.match_values = AAZListType(
             serialized_name="matchValues",
         )
@@ -3077,18 +3077,18 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        match_values = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"RequestScheme\")"].parameters.match_values
+        match_values = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "RequestScheme").parameters.match_values
         match_values.Element = AAZStrType()
 
-        transforms = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"RequestScheme\")"].parameters.transforms
+        transforms = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "RequestScheme").parameters.transforms
         transforms.Element = AAZStrType()
 
-        disc_request_uri = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"RequestUri\")"]
+        disc_request_uri = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "RequestUri")
         disc_request_uri.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"RequestUri\")"].parameters
+        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "RequestUri").parameters
         parameters.match_values = AAZListType(
             serialized_name="matchValues",
         )
@@ -3104,18 +3104,18 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        match_values = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"RequestUri\")"].parameters.match_values
+        match_values = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "RequestUri").parameters.match_values
         match_values.Element = AAZStrType()
 
-        transforms = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"RequestUri\")"].parameters.transforms
+        transforms = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "RequestUri").parameters.transforms
         transforms.Element = AAZStrType()
 
-        disc_server_port = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"ServerPort\")"]
+        disc_server_port = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "ServerPort")
         disc_server_port.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"ServerPort\")"].parameters
+        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "ServerPort").parameters
         parameters.match_values = AAZListType(
             serialized_name="matchValues",
         )
@@ -3131,18 +3131,18 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        match_values = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"ServerPort\")"].parameters.match_values
+        match_values = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "ServerPort").parameters.match_values
         match_values.Element = AAZStrType()
 
-        transforms = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"ServerPort\")"].parameters.transforms
+        transforms = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "ServerPort").parameters.transforms
         transforms.Element = AAZStrType()
 
-        disc_socket_addr = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"SocketAddr\")"]
+        disc_socket_addr = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "SocketAddr")
         disc_socket_addr.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"SocketAddr\")"].parameters
+        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "SocketAddr").parameters
         parameters.match_values = AAZListType(
             serialized_name="matchValues",
         )
@@ -3158,18 +3158,18 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        match_values = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"SocketAddr\")"].parameters.match_values
+        match_values = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "SocketAddr").parameters.match_values
         match_values.Element = AAZStrType()
 
-        transforms = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"SocketAddr\")"].parameters.transforms
+        transforms = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "SocketAddr").parameters.transforms
         transforms.Element = AAZStrType()
 
-        disc_ssl_protocol = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"SslProtocol\")"]
+        disc_ssl_protocol = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "SslProtocol")
         disc_ssl_protocol.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"SslProtocol\")"].parameters
+        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "SslProtocol").parameters
         parameters.match_values = AAZListType(
             serialized_name="matchValues",
         )
@@ -3185,18 +3185,18 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        match_values = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"SslProtocol\")"].parameters.match_values
+        match_values = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "SslProtocol").parameters.match_values
         match_values.Element = AAZStrType()
 
-        transforms = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"SslProtocol\")"].parameters.transforms
+        transforms = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "SslProtocol").parameters.transforms
         transforms.Element = AAZStrType()
 
-        disc_url_file_extension = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"UrlFileExtension\")"]
+        disc_url_file_extension = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "UrlFileExtension")
         disc_url_file_extension.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"UrlFileExtension\")"].parameters
+        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "UrlFileExtension").parameters
         parameters.match_values = AAZListType(
             serialized_name="matchValues",
         )
@@ -3212,18 +3212,18 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        match_values = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"UrlFileExtension\")"].parameters.match_values
+        match_values = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "UrlFileExtension").parameters.match_values
         match_values.Element = AAZStrType()
 
-        transforms = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"UrlFileExtension\")"].parameters.transforms
+        transforms = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "UrlFileExtension").parameters.transforms
         transforms.Element = AAZStrType()
 
-        disc_url_file_name = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"UrlFileName\")"]
+        disc_url_file_name = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "UrlFileName")
         disc_url_file_name.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"UrlFileName\")"].parameters
+        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "UrlFileName").parameters
         parameters.match_values = AAZListType(
             serialized_name="matchValues",
         )
@@ -3239,18 +3239,18 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        match_values = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"UrlFileName\")"].parameters.match_values
+        match_values = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "UrlFileName").parameters.match_values
         match_values.Element = AAZStrType()
 
-        transforms = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"UrlFileName\")"].parameters.transforms
+        transforms = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "UrlFileName").parameters.transforms
         transforms.Element = AAZStrType()
 
-        disc_url_path = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"UrlPath\")"]
+        disc_url_path = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "UrlPath")
         disc_url_path.parameters = AAZObjectType(
             flags={"required": True},
         )
 
-        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"UrlPath\")"].parameters
+        parameters = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "UrlPath").parameters
         parameters.match_values = AAZListType(
             serialized_name="matchValues",
         )
@@ -3266,10 +3266,10 @@ class _CreateHelper:
             flags={"required": True},
         )
 
-        match_values = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"UrlPath\")"].parameters.match_values
+        match_values = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "UrlPath").parameters.match_values
         match_values.Element = AAZStrType()
 
-        transforms = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element["discriminate_by(\"name\", \"UrlPath\")"].parameters.transforms
+        transforms = _schema_endpoint_read.properties.delivery_policy.rules.Element.conditions.Element.discriminate_by("name", "UrlPath").parameters.transforms
         transforms.Element = AAZStrType()
 
         geo_filters = _schema_endpoint_read.properties.geo_filters

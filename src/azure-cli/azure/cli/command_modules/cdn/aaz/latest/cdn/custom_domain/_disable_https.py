@@ -266,13 +266,13 @@ class _DisableHttpsHelper:
             flags={"required": True},
         )
 
-        disc_azure_key_vault = _schema_custom_domain_read.properties.custom_https_parameters["discriminate_by(\"certificate_source\", \"AzureKeyVault\")"]
+        disc_azure_key_vault = _schema_custom_domain_read.properties.custom_https_parameters.discriminate_by("certificate_source", "AzureKeyVault")
         disc_azure_key_vault.certificate_source_parameters = AAZObjectType(
             serialized_name="certificateSourceParameters",
             flags={"required": True},
         )
 
-        certificate_source_parameters = _schema_custom_domain_read.properties.custom_https_parameters["discriminate_by(\"certificate_source\", \"AzureKeyVault\")"].certificate_source_parameters
+        certificate_source_parameters = _schema_custom_domain_read.properties.custom_https_parameters.discriminate_by("certificate_source", "AzureKeyVault").certificate_source_parameters
         certificate_source_parameters.delete_rule = AAZStrType(
             serialized_name="deleteRule",
             flags={"required": True},
@@ -305,13 +305,13 @@ class _DisableHttpsHelper:
             flags={"required": True},
         )
 
-        disc_cdn = _schema_custom_domain_read.properties.custom_https_parameters["discriminate_by(\"certificate_source\", \"Cdn\")"]
+        disc_cdn = _schema_custom_domain_read.properties.custom_https_parameters.discriminate_by("certificate_source", "Cdn")
         disc_cdn.certificate_source_parameters = AAZObjectType(
             serialized_name="certificateSourceParameters",
             flags={"required": True},
         )
 
-        certificate_source_parameters = _schema_custom_domain_read.properties.custom_https_parameters["discriminate_by(\"certificate_source\", \"Cdn\")"].certificate_source_parameters
+        certificate_source_parameters = _schema_custom_domain_read.properties.custom_https_parameters.discriminate_by("certificate_source", "Cdn").certificate_source_parameters
         certificate_source_parameters.certificate_type = AAZStrType(
             serialized_name="certificateType",
             flags={"required": True},

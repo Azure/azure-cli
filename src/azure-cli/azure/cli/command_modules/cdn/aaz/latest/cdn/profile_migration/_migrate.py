@@ -93,7 +93,7 @@ class Migrate(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.CdnProfilesCdnMigrateToAfd(ctx=self.ctx)()
+        yield self.ProfilesCdnMigrateToAfd(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -108,7 +108,7 @@ class Migrate(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class CdnProfilesCdnMigrateToAfd(AAZHttpOperation):
+    class ProfilesCdnMigrateToAfd(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):

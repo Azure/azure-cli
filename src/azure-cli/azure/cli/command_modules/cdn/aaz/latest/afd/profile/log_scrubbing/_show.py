@@ -190,7 +190,7 @@ class _ShowHelper:
         profile_read.id = AAZStrType(
             flags={"read_only": True},
         )
-        profile_read.identity = AAZObjectType()
+        profile_read.identity = AAZIdentityObjectType()
         profile_read.kind = AAZStrType(
             flags={"read_only": True},
         )

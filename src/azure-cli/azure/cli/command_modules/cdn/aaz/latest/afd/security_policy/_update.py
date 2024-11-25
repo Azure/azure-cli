@@ -468,35 +468,35 @@ class _UpdateHelper:
             flags={"required": True},
         )
 
-        disc_web_application_firewall = _schema_security_policy_read.properties.parameters["discriminate_by(\"type\", \"WebApplicationFirewall\")"]
+        disc_web_application_firewall = _schema_security_policy_read.properties.parameters.discriminate_by("type", "WebApplicationFirewall")
         disc_web_application_firewall.associations = AAZListType()
         disc_web_application_firewall.waf_policy = AAZObjectType(
             serialized_name="wafPolicy",
         )
 
-        associations = _schema_security_policy_read.properties.parameters["discriminate_by(\"type\", \"WebApplicationFirewall\")"].associations
+        associations = _schema_security_policy_read.properties.parameters.discriminate_by("type", "WebApplicationFirewall").associations
         associations.Element = AAZObjectType()
 
-        _element = _schema_security_policy_read.properties.parameters["discriminate_by(\"type\", \"WebApplicationFirewall\")"].associations.Element
+        _element = _schema_security_policy_read.properties.parameters.discriminate_by("type", "WebApplicationFirewall").associations.Element
         _element.domains = AAZListType()
         _element.patterns_to_match = AAZListType(
             serialized_name="patternsToMatch",
         )
 
-        domains = _schema_security_policy_read.properties.parameters["discriminate_by(\"type\", \"WebApplicationFirewall\")"].associations.Element.domains
+        domains = _schema_security_policy_read.properties.parameters.discriminate_by("type", "WebApplicationFirewall").associations.Element.domains
         domains.Element = AAZObjectType()
 
-        _element = _schema_security_policy_read.properties.parameters["discriminate_by(\"type\", \"WebApplicationFirewall\")"].associations.Element.domains.Element
+        _element = _schema_security_policy_read.properties.parameters.discriminate_by("type", "WebApplicationFirewall").associations.Element.domains.Element
         _element.id = AAZStrType()
         _element.is_active = AAZBoolType(
             serialized_name="isActive",
             flags={"read_only": True},
         )
 
-        patterns_to_match = _schema_security_policy_read.properties.parameters["discriminate_by(\"type\", \"WebApplicationFirewall\")"].associations.Element.patterns_to_match
+        patterns_to_match = _schema_security_policy_read.properties.parameters.discriminate_by("type", "WebApplicationFirewall").associations.Element.patterns_to_match
         patterns_to_match.Element = AAZStrType()
 
-        waf_policy = _schema_security_policy_read.properties.parameters["discriminate_by(\"type\", \"WebApplicationFirewall\")"].waf_policy
+        waf_policy = _schema_security_policy_read.properties.parameters.discriminate_by("type", "WebApplicationFirewall").waf_policy
         waf_policy.id = AAZStrType()
 
         system_data = _schema_security_policy_read.system_data

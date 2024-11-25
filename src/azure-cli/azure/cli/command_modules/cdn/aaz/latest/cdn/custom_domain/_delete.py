@@ -81,10 +81,6 @@ class Delete(AAZCommand):
     def post_operations(self):
         pass
 
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
-
     class CustomDomainsDelete(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
