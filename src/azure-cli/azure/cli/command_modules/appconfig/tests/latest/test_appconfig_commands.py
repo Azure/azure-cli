@@ -50,7 +50,6 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
             'rg_loc': location,
             'rg': resource_group,
             'sku': standard_sku,
-            'sku': standard_sku,
             'tags': tag,
             'identity': system_assigned_identity,
             'retention_days': 1,
