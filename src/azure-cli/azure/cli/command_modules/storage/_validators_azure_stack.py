@@ -439,7 +439,7 @@ def get_content_setting_validator(settings_class, update, guess_from_file=None):
         )
 
         # if update, fill in any None values with existing
-        if update and props:
+        if update:
             if not clear_content_settings:
                 for attr in ['content_type', 'content_disposition', 'content_encoding', 'content_language',
                              'content_md5', 'cache_control']:
