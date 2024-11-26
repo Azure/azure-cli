@@ -25,9 +25,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-09-01",
+        "version": "2024-03-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworkgateways/{}", "2023-09-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworkgateways/{}", "2024-03-01"],
         ]
     }
 
@@ -94,6 +94,12 @@ class Update(AAZCommand):
             help="The gateway type.",
             nullable=True,
             enum={"ExpressRoute": "ExpressRoute", "LocalGateway": "LocalGateway", "Vpn": "Vpn"},
+        )
+        _args_schema.resiliency_model = AAZStrArg(
+            options=["--resiliency-model"],
+            help="Indicates if the Express Route Gateway has resiliency model of MultiHomed or SingleHomed",
+            nullable=True,
+            enum={"MultiHomed": "MultiHomed", "SingleHomed": "SingleHomed"},
         )
         _args_schema.sku = AAZStrArg(
             options=["--sku"],
@@ -184,6 +190,8 @@ class Update(AAZCommand):
         )
 
         # define Arg Group "BgpSettings"
+
+        # define Arg Group "Identity"
 
         # define Arg Group "Parameters"
 
@@ -516,7 +524,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-09-01",
+                    "api-version", "2024-03-01",
                     required=True,
                 ),
             }
@@ -615,7 +623,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-09-01",
+                    "api-version", "2024-03-01",
                     required=True,
                 ),
             }
@@ -674,6 +682,7 @@ class Update(AAZCommand):
                 typ=AAZObjectType
             )
             _builder.set_prop("extendedLocation", AAZObjectType)
+            _builder.set_prop("identity", AAZIdentityObjectType)
             _builder.set_prop("properties", AAZObjectType, ".", typ_kwargs={"flags": {"required": True, "client_flatten": True}})
             _builder.set_prop("tags", AAZDictType, ".tags")
 
@@ -690,6 +699,7 @@ class Update(AAZCommand):
                 properties.set_prop("gatewayDefaultSite", AAZObjectType)
                 properties.set_prop("gatewayType", AAZStrType, ".gateway_type")
                 properties.set_prop("ipConfigurations", AAZListType, ".ip_configurations")
+                properties.set_prop("resiliencyModel", AAZStrType, ".resiliency_model")
                 properties.set_prop("sku", AAZObjectType)
                 properties.set_prop("vpnClientConfiguration", AAZObjectType)
                 properties.set_prop("vpnType", AAZStrType, ".vpn_type")
@@ -885,6 +895,7 @@ class _UpdateHelper:
             _schema.etag = cls._schema_virtual_network_gateway_read.etag
             _schema.extended_location = cls._schema_virtual_network_gateway_read.extended_location
             _schema.id = cls._schema_virtual_network_gateway_read.id
+            _schema.identity = cls._schema_virtual_network_gateway_read.identity
             _schema.location = cls._schema_virtual_network_gateway_read.location
             _schema.name = cls._schema_virtual_network_gateway_read.name
             _schema.properties = cls._schema_virtual_network_gateway_read.properties
@@ -902,6 +913,7 @@ class _UpdateHelper:
             serialized_name="extendedLocation",
         )
         virtual_network_gateway_read.id = AAZStrType()
+        virtual_network_gateway_read.identity = AAZIdentityObjectType()
         virtual_network_gateway_read.location = AAZStrType()
         virtual_network_gateway_read.name = AAZStrType(
             flags={"read_only": True},
@@ -917,6 +929,33 @@ class _UpdateHelper:
         extended_location = _schema_virtual_network_gateway_read.extended_location
         extended_location.name = AAZStrType()
         extended_location.type = AAZStrType()
+
+        identity = _schema_virtual_network_gateway_read.identity
+        identity.principal_id = AAZStrType(
+            serialized_name="principalId",
+            flags={"read_only": True},
+        )
+        identity.tenant_id = AAZStrType(
+            serialized_name="tenantId",
+            flags={"read_only": True},
+        )
+        identity.type = AAZStrType()
+        identity.user_assigned_identities = AAZDictType(
+            serialized_name="userAssignedIdentities",
+        )
+
+        user_assigned_identities = _schema_virtual_network_gateway_read.identity.user_assigned_identities
+        user_assigned_identities.Element = AAZObjectType()
+
+        _element = _schema_virtual_network_gateway_read.identity.user_assigned_identities.Element
+        _element.client_id = AAZStrType(
+            serialized_name="clientId",
+            flags={"read_only": True},
+        )
+        _element.principal_id = AAZStrType(
+            serialized_name="principalId",
+            flags={"read_only": True},
+        )
 
         properties = _schema_virtual_network_gateway_read.properties
         properties.active_active = AAZBoolType(
@@ -976,6 +1015,9 @@ class _UpdateHelper:
         properties.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
             flags={"read_only": True},
+        )
+        properties.resiliency_model = AAZStrType(
+            serialized_name="resiliencyModel",
         )
         properties.resource_guid = AAZStrType(
             serialized_name="resourceGuid",
@@ -1356,6 +1398,7 @@ class _UpdateHelper:
         _schema.etag = cls._schema_virtual_network_gateway_read.etag
         _schema.extended_location = cls._schema_virtual_network_gateway_read.extended_location
         _schema.id = cls._schema_virtual_network_gateway_read.id
+        _schema.identity = cls._schema_virtual_network_gateway_read.identity
         _schema.location = cls._schema_virtual_network_gateway_read.location
         _schema.name = cls._schema_virtual_network_gateway_read.name
         _schema.properties = cls._schema_virtual_network_gateway_read.properties
