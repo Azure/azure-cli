@@ -7364,7 +7364,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             mc.network_profile.ip_families = ip_families
 
         self.update_network_plugin_settings(mc)
-        
+
         return mc
 
     def update_network_plugin_settings(self, mc: ManagedCluster) -> ManagedCluster:
