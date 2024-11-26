@@ -220,7 +220,7 @@ def validate_ssl_cert(namespace):
 
 def validate_dns_record_type(namespace):
     tokens = namespace.command.split(' ')
-    types = ['a', 'aaaa', 'caa', 'cname', 'ds', 'mx', 'ns', 'ptr', 'soa', 'srv', 'tlsa', 'txt']
+    types = ['a', 'aaaa', 'caa', 'cname', 'ds', 'mx', 'naptr', 'ns', 'ptr', 'soa', 'srv', 'tlsa', 'txt']
     for token in tokens:
         if token in types:
             if hasattr(namespace, 'record_type'):
