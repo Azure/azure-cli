@@ -935,7 +935,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
             for scope in ['start', 'update-databases']:
                 with self.argument_context('{} flexible-server fabric-mirroring'.format(command_group)) as c:
-                    c.argument('database_names', options_list=['--database-names', '-d'], nargs='+', required=False,
+                    c.argument('database_names', options_list=['--database-names', '-d'], nargs='+',
                                help='Space-separated list of the database names to be mirrored. Required if --mirroring is enabled.')
 
         # ad-admin

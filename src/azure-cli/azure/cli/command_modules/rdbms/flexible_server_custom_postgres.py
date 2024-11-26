@@ -22,7 +22,7 @@ from azure.cli.core.util import CLIError, sdk_no_wait, user_confirmation
 from azure.core.exceptions import HttpResponseError, ResourceNotFoundError
 from azure.mgmt.core.tools import resource_id, is_valid_resource_id, parse_resource_id
 from azure.cli.core.azclierror import BadRequestError, FileOperationError, MutuallyExclusiveArgumentError, RequiredArgumentMissingError, ArgumentUsageError, InvalidArgumentValueError
-from azure.mgmt.rdbms import postgresql_flexibleservers
+from azure.mgmt import postgresqlflexibleservers as postgresql_flexibleservers
 from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client, \
     cf_postgres_flexible_db, cf_postgres_check_resource_availability, cf_postgres_flexible_servers, \
     cf_postgres_check_resource_availability_with_location, \
@@ -1475,6 +1475,10 @@ def flexible_server_fabric_mirroring_start(cmd, client, resource_group_name, ser
         logger.warning('Enabling system assigned managed identity on the server.')
         flexible_server_identity_update(cmd, flexible_servers_client, resource_group_name, server_name, 'Enabled')
 
+    logger.warning('Restarting server.')
+    parameters = postgresql_flexibleservers.models.RestartParameter(restart_with_failover=False)
+    resolve_poller(flexible_servers_client.begin_restart(resource_group_name, server_name, parameters), cmd.cli_ctx, 'PostgreSQL Server Restart')
+
     logger.warning('Updating necessary server parameters.')
     source = "user-override"
     configuration_name = "azure.fabric_mirror_enabled"
@@ -1482,11 +1486,7 @@ def flexible_server_fabric_mirroring_start(cmd, client, resource_group_name, ser
     _update_parameters(cmd, client, server_name, configuration_name, resource_group_name, source, value)
     configuration_name = "azure.mirror_databases"
     value = databases
-    _update_parameters(cmd, client, server_name, configuration_name, resource_group_name, source, value)
-
-    logger.warning('Restarting server.')
-    parameters = postgresql_flexibleservers.models.RestartParameter(restart_with_failover=False)
-    return client.begin_restart(resource_group_name, server_name, parameters)
+    return _update_parameters(cmd, client, server_name, configuration_name, resource_group_name, source, value)
 
 
 def flexible_server_fabric_mirroring_stop(cmd, client, resource_group_name, server_name, yes=False):
