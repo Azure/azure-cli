@@ -6,6 +6,7 @@
 # pylint: disable=line-too-long
 # pylint: disable=too-many-statements
 # pylint: disable=too-many-locals
+# pylint: disable=reimported
 
 from azure.cli.core.commands import CliCommandType
 
@@ -40,6 +41,9 @@ def load_command_table(self, _):
                             is_preview=True) as g:
         g.custom_command('set', 'set_georecovery_alias', supports_no_wait=True)
 
+    from azure.cli.command_modules.servicebus.aaz.latest.servicebus.georecovery_alias._update import Update as georeccovery_alias_update
+    self.command_table['servicebus georecovery-alias update'] = georeccovery_alias_update(loader=self, deprecate_info=self.deprecate())
+
 # NetwrokRuleSet Region
     with self.command_group('servicebus namespace network-rule-set ip-rule', custom_command_type=sb_network_custom,
                             is_preview=True) as g:
@@ -60,3 +64,7 @@ def load_command_table(self, _):
     with self.command_group('servicebus namespace encryption', custom_command_type=sb_namespace_custom, is_preview=True) as g:
         g.custom_command('add', 'cli_add_encryption')
         g.custom_command('remove', 'cli_remove_encryption')
+
+# Migration Region
+    from azure.cli.command_modules.servicebus.aaz.latest.servicebus.migration._update import Update as migration_update
+    self.command_table['servicebus migration update'] = migration_update(loader=self, deprecate_info=self.deprecate())

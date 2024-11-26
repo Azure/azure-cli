@@ -27,7 +27,7 @@ from ._util import resolve_poller, generate_missing_parameters, get_mysql_list_s
     run_subprocess_get_output, fill_action_template, get_git_root_dir, get_location_from_resource_group, GITHUB_ACTION_PATH
 from ._network import prepare_mysql_exist_private_dns_zone, prepare_mysql_exist_private_network, prepare_private_network, prepare_private_dns_zone, prepare_public_network
 from ._validators import mysql_arguments_validator, mysql_auto_grow_validator, mysql_georedundant_backup_validator, mysql_restore_tier_validator, \
-    mysql_retention_validator, mysql_sku_name_validator, mysql_storage_validator, validate_mysql_replica, validate_server_name, validate_georestore_location, \
+    mysql_retention_validator, mysql_sku_name_validator, mysql_storage_validator, validate_mysql_replica, validate_server_name, \
     validate_mysql_tier_update, validate_and_format_restore_point_in_time, validate_public_access_server
 
 logger = get_logger(__name__)
@@ -805,7 +805,6 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
             logging_name='MySQL', command_group='mysql', server_client=client, location=source_server_object.location)
 
         validate_server_name(db_context, server_name, provider + '/flexibleServers')
-        validate_georestore_location(db_context, location)
 
         identity, data_encryption = get_identity_and_data_encryption(source_server_object)
 
@@ -1139,6 +1138,35 @@ def flexible_parameter_update(client, server_name, configuration_name, resource_
     )
 
     return client.begin_update(resource_group_name, server_name, configuration_name, parameters)
+
+
+def flexible_parameter_update_batch(client, server_name, resource_group_name, source, configuration_list):
+    configurations = []
+    if not configuration_list:
+        raise CLIError('No configuration parameters were found to update.')
+    for (name, value) in (configuration_list[0].items()):
+        if name is None:
+            raise CLIError('Error format: configuration name cannot be empty.')
+        if source is None and value is None:
+            try:
+                parameter = client.get(resource_group_name, server_name, name)
+                value = parameter.default_value  # reset value to default
+                source = "system-default"
+            except CloudError as e:
+                raise CLIError('Unable to get default parameter value: {}.'.format(str(e)))
+        elif source is None:
+            source = "user-override"
+        configurations.append(mysql_flexibleservers.models.ConfigurationForBatchUpdate(
+            name=name,
+            value=value,
+            source=source
+        ))
+
+    parameters = mysql_flexibleservers.models.ConfigurationListForBatchUpdate(
+        value=configurations
+    )
+
+    return client.begin_batch_update(resource_group_name, server_name, parameters)
 
 
 # Replica commands

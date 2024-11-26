@@ -2236,10 +2236,10 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
         ])
 
         self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
-                 '--type Microsoft_BotManagerRuleSet --version 0.1',
+                 '--type Microsoft_BotManagerRuleSet --version 1.0',
                  checks=[
                      self.check('managedRules.managedRuleSets[1].ruleSetType', 'Microsoft_BotManagerRuleSet'),
-                     self.check('managedRules.managedRuleSets[1].ruleSetVersion', '0.1')
+                     self.check('managedRules.managedRuleSets[1].ruleSetVersion', '1.0')
                  ])
 
         # add one exclusion rule to the managed rules of this waf-policy
@@ -2258,7 +2258,7 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
             self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[1].ruleGroupName', self.kwargs['csr_grp2']),
             self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[1].rules[0].ruleId', '913100'),
             self.check('managedRules.managedRuleSets[1].ruleSetType', 'Microsoft_BotManagerRuleSet'),
-            self.check('managedRules.managedRuleSets[1].ruleSetVersion', '0.1'),
+            self.check('managedRules.managedRuleSets[1].ruleSetVersion', '1.0'),
             self.check('policySettings.fileUploadLimitInMb', 64),
             self.check('policySettings.maxRequestBodySizeInKb', 128),
             self.check('policySettings.mode', 'Prevention'),
@@ -2916,12 +2916,13 @@ class NetworkPublicIpScenarioTest(ScenarioTest):
         ])
 
         self.cmd(
-            'network public-ip update -g {rg} -n {ip2} --allocation-method static --dns-name wowza2 --idle-timeout 10 --tags foo=doo',
+            'network public-ip update -g {rg} -n {ip2} --allocation-method static --dns-name wowza2 --idle-timeout 10 --ip-tags null --tags foo=doo',
             checks=[
                 self.check('publicIPAllocationMethod', 'Static'),
                 self.check('dnsSettings.domainNameLabel', 'wowza2'),
                 self.check('idleTimeoutInMinutes', 10),
-                self.check('tags.foo', 'doo')
+                self.check('tags.foo', 'doo'),
+                self.check("ipTags", [])
             ])
 
         self.cmd('network public-ip list -g {rg}', checks=[

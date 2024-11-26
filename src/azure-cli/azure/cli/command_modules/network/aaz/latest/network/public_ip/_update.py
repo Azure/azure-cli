@@ -91,9 +91,9 @@ class Update(AAZCommand):
             help="Idle timeout in minutes.",
             nullable=True,
         )
-        _args_schema.ip_tags = AAZListArg(
-            options=["--ip-tags"],
-            help="Space-separated list of IP tags in 'TYPE=VAL' format.",
+        _args_schema.ip_tags_list = AAZListArg(
+            options=["--ip-tags-list"],
+            help="The list of tags associated with the public IP address.",
             nullable=True,
         )
         _args_schema.version = AAZStrArg(
@@ -126,12 +126,12 @@ class Update(AAZCommand):
             nullable=True,
         )
 
-        ip_tags = cls._args_schema.ip_tags
-        ip_tags.Element = AAZObjectArg(
+        ip_tags_list = cls._args_schema.ip_tags_list
+        ip_tags_list.Element = AAZObjectArg(
             nullable=True,
         )
 
-        _element = cls._args_schema.ip_tags.Element
+        _element = cls._args_schema.ip_tags_list.Element
         _element.ip_tag_type = AAZStrArg(
             options=["ip-tag-type"],
             help="The IP tag type. Example: FirstPartyUsage.",
@@ -754,7 +754,7 @@ class Update(AAZCommand):
                 properties.set_prop("ddosSettings", AAZObjectType)
                 properties.set_prop("dnsSettings", AAZObjectType)
                 properties.set_prop("idleTimeoutInMinutes", AAZIntType, ".idle_timeout")
-                properties.set_prop("ipTags", AAZListType, ".ip_tags")
+                properties.set_prop("ipTags", AAZListType, ".ip_tags_list")
                 properties.set_prop("publicIPAddressVersion", AAZStrType, ".version")
                 properties.set_prop("publicIPAllocationMethod", AAZStrType, ".allocation_method")
                 properties.set_prop("publicIPPrefix", AAZObjectType)

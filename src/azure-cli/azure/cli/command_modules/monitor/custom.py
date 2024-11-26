@@ -2,9 +2,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
-from azure.cli.command_modules.monitor._client_factory import cf_metrics
-
 from knack.log import get_logger
 
 logger = get_logger(__name__)
@@ -101,7 +98,6 @@ def list_metrics(cmd, resource,
                  metadata=None, dimension=None, aggregation=None, metrics=None,
                  filters=None, metric_namespace=None, orderby=None, top=10):
 
-    from azure.mgmt.monitor.models import ResultType
     from datetime import datetime
     import dateutil.parser
     from urllib.parse import quote_plus
@@ -118,16 +114,33 @@ def list_metrics(cmd, resource,
 
     timespan = '{}/{}'.format(start_time, end_time)
 
-    client = cf_metrics(cmd.cli_ctx, None)
-    return client.list(
-        resource_uri=resource,
-        timespan=quote_plus(timespan),
-        interval=interval,
-        metricnames=','.join(metrics) if metrics else None,
-        aggregation=','.join(aggregation) if aggregation else None,
-        top=top,
-        orderby=orderby,
-        filter=filters,
-        result_type=ResultType.metadata if metadata else None,
-        metricnamespace=metric_namespace)
+    from .aaz.latest.monitor.metrics import List
+    return List(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_uri": resource,
+        "timespan": quote_plus(timespan),
+        "interval": interval,
+        "metricnames": ','.join(metrics) if metrics else None,
+        "aggregation": ','.join(aggregation) if aggregation else None,
+        "top": top,
+        "orderby": orderby,
+        "filter": filters,
+        "result_typ": "Metadata" if metadata else None,
+        "metricnamespac": metric_namespace
+    })
+
+
+def list_definations(cmd, resource_uri, metricnamespace=None):
+    from .aaz.latest.monitor.metrics import ListDefinitions
+    return ListDefinitions(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_uri": resource_uri,
+        "metricnamespace": metricnamespace
+    })
+
+
+def list_namespaces(cmd, resource_uri, start_time=None):
+    from .aaz.latest.monitor.metrics import ListNamespaces
+    return ListNamespaces(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_uri": resource_uri,
+        "start_time": start_time
+    })
 # endregion

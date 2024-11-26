@@ -8,6 +8,7 @@
 
 from knack.arguments import CLIArgumentType
 from azure.cli.core.commands.parameters import tags_type, get_location_type, get_enum_type, file_type, resource_group_name_type, get_three_state_flag
+from azure.cli.command_modules.mysql.action import AddArgs
 from azure.cli.command_modules.mysql.random.generate import generate_username
 from azure.cli.command_modules.mysql._validators import public_access_validator, maintenance_window_validator, ip_address_validator, \
     firewall_rule_name_validator, validate_identity, validate_byok_identity, validate_identities
@@ -118,6 +119,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
     vnet_arg_type = CLIArgumentType(
         options_list=['--vnet'],
         help='Name or ID of a new or existing virtual network. '
+             'This parameter only applies if you are creating cross region replica server with private access. '
+             'For in-region read replica with private access, source server settings are carried over and this parameter is ignored. '
              'If you want to use a vnet from different resource group or subscription, '
              'please provide a resource ID. The name must be between 2 to 64 characters. '
              'The name must begin with a letter or number, end with a letter, number or underscore, '
@@ -133,6 +136,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
     subnet_arg_type = CLIArgumentType(
         options_list=['--subnet'],
         help='Name or resource ID of a new or existing subnet. '
+             'This parameter only applies if you are creating cross region replica server with private access. '
+             'For in-region read replica with private access, source server settings are carried over and this parameter is ignored. '
              'If you want to use a subnet from different resource group or subscription, please provide resource ID instead of name. '
              'Please note that the subnet will be delegated to flexibleServers. '
              'After delegation, this subnet cannot be used for any other type of Azure resources.'
@@ -182,7 +187,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
     private_dns_zone_arguments_arg_type = CLIArgumentType(
         options_list=['--private-dns-zone'],
-        help='This parameter only applies for a server with private access. '
+        help='This parameter only applies if you are creating cross region replica server with private access. '
+             'For in-region read replica with private access, source server settings are carried over and this parameter is ignored. '
              'The name or id of new or existing private dns zone. '
              'You can use the private dns zone from same resource group, different resource group, or different subscription. '
              'If you want to use a zone from different resource group or subscription, please provide resource Id. '
@@ -408,7 +414,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
 
     # flexible-server parameter
-    for scope in ['list', 'set', 'show']:
+    for scope in ['list', 'set', 'show', 'set-batch']:
         argument_context_string = 'mysql flexible-server parameter {}'.format(scope)
         with self.argument_context(argument_context_string) as c:
             if scope == "list":
@@ -424,6 +430,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
     with self.argument_context('mysql flexible-server parameter set') as c:
         c.argument('value', options_list=['--value', '-v'], help='Value of the configuration.')
         c.argument('source', options_list=['--source'], help='Source of the configuration.')
+
+    with self.argument_context('mysql flexible-server parameter set-batch') as c:
+        c.argument('configuration_list', action=AddArgs, nargs='*', options_list=['--args'], required=True, help='List of the configuration key-value pair.')
+        c.argument('source', options_list=['--source'], required=False, help='Source of the configuration.')
 
     # firewall-rule
     for scope in ['create', 'delete', 'list', 'show', 'update']:

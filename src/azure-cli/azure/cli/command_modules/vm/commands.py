@@ -6,7 +6,7 @@
 from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set,
                                                           cf_vm_ext, cf_vm_ext_image,
                                                           cf_vm_image, cf_vm_image_term, cf_usage,
-                                                          cf_vmss, cf_vm_sizes, cf_disks, cf_snapshots,
+                                                          cf_vmss, cf_disks, cf_snapshots,
                                                           cf_disk_accesses, cf_images, cf_run_commands,
                                                           cf_galleries, cf_gallery_images, cf_gallery_image_versions,
                                                           cf_proximity_placement_groups,
@@ -131,11 +131,6 @@ def load_command_table(self, _):
     compute_vmss_run_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations#VirtualMachineScaleSetVmRunCommandsOperations.{}',
         client_factory=cf_vmss_run_commands
-    )
-
-    compute_vm_size_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations#VirtualMachineSizesOperations.{}',
-        client_factory=cf_vm_sizes
     )
 
     compute_vmss_sdk = CliCommandType(
@@ -326,31 +321,20 @@ def load_command_table(self, _):
 
         g.custom_command('capture', 'capture_vm')
         g.custom_command('create', 'create_vm', transform=transform_vm_create_output, supports_no_wait=True, table_transformer=deployment_validate_table_format, validator=process_vm_create_namespace, exception_handler=handle_template_based_exception)
-        g.command('convert', 'begin_convert_to_managed_disks', min_api='2016-04-30-preview')
-        g.command('deallocate', 'begin_deallocate', supports_no_wait=True)
         g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
-        g.command('generalize', 'generalize', supports_no_wait=True)
         g.custom_command('get-instance-view', 'get_instance_view', table_transformer='{Name:name, ResourceGroup:resourceGroup, Location:location, ProvisioningState:provisioningState, PowerState:instanceView.statuses[1].displayStatus}')
         g.custom_command('list', 'list_vm', table_transformer=transform_vm_list)
         g.custom_command('list-ip-addresses', 'list_vm_ip_addresses', table_transformer=transform_ip_addresses)
-        g.command('list-sizes', 'list', command_type=compute_vm_size_sdk)
         g.custom_command('list-skus', 'list_skus', table_transformer=transform_sku_for_table_output, min_api='2017-03-30')
         g.command('list-usage', 'list', command_type=compute_vm_usage_sdk, transform=transform_vm_usage_list, table_transformer='[].{Name:localName, CurrentValue:currentValue, Limit:limit}')
-        g.command('list-vm-resize-options', 'list_available_sizes')
         g.custom_command('open-port', 'open_vm_port')
-        g.command('perform-maintenance', 'begin_perform_maintenance', min_api='2017-03-30')
-        g.command('redeploy', 'begin_redeploy', supports_no_wait=True)
         g.custom_command('resize', 'resize_vm', supports_no_wait=True)
         g.custom_command('restart', 'restart_vm', supports_no_wait=True)
         g.custom_show_command('show', 'show_vm', table_transformer=transform_vm)
-        g.command('simulate-eviction', 'simulate_eviction', min_api='2019-12-01')
-        g.command('start', 'begin_start', supports_no_wait=True)
         g.command('stop', 'begin_power_off', supports_no_wait=True, validator=process_vm_vmss_stop)
-        g.command('reapply', 'begin_reapply', supports_no_wait=True, min_api='2019-07-01')
         g.generic_update_command('update', getter_name='get_vm_to_update', setter_name='update_vm', setter_type=compute_custom, command_type=compute_custom, supports_no_wait=True, validator=process_vm_update_namespace)
         g.wait_command('wait', getter_name='get_instance_view', getter_type=compute_custom)
         g.custom_command('auto-shutdown', 'auto_shutdown_vm')
-        g.command('assess-patches', 'begin_assess_patches', min_api='2020-06-01')
 
     with self.command_group('vm', compute_vm_sdk, client_factory=cf_vm) as g:
         g.custom_command('install-patches', 'install_vm_patches', supports_no_wait=True, min_api='2020-12-01')
