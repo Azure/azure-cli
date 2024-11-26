@@ -11,7 +11,7 @@ class ClassicCdnMigration(CdnScenarioMixin, ScenarioTest):
         list_checks = [JMESPathCheck('length(@)', 0)]
         self.profile_list_cmd(resource_group, checks=list_checks)
 
-        profile_name = 'profile123'
+        profile_name = self.create_random_name(prefix='profile', length=24)
         checks = [JMESPathCheck('name', profile_name),
                   JMESPathCheck('sku.name', 'Standard_Microsoft')]
         self.profile_create_cmd(resource_group, profile_name, sku='Standard_Microsoft', checks=checks)
@@ -34,7 +34,7 @@ class ClassicCdnMigration(CdnScenarioMixin, ScenarioTest):
         list_checks = [JMESPathCheck('length(@)', 0)]
         self.profile_list_cmd(resource_group, checks=list_checks)
 
-        profile_name = 'profile123'
+        profile_name = self.create_random_name(prefix='profile', length=24)
         checks = [JMESPathCheck('name', profile_name),
                   JMESPathCheck('sku.name', 'Standard_Microsoft')]
         self.profile_create_cmd(resource_group, profile_name, sku='Standard_Microsoft', checks=checks)

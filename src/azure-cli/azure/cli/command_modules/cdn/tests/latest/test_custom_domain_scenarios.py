@@ -54,7 +54,7 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
         # Endpoint name and custom domain hostname are hard-coded because of
         # custom domain CNAME requirement. If test fails to cleanup, the
         # resource group must be manually deleted in order to re-run.
-        endpoint_name = 'cdn-cli-test-aaz'
+        endpoint_name = 'aaz-09-01-crud'
         origin = 'www.microsoft1.com'
         self.endpoint_create_cmd(resource_group, endpoint_name, profile_name, origin)
 
@@ -62,27 +62,17 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
         self.custom_domain_list_cmd(resource_group, profile_name, endpoint_name, checks=list_checks)
 
         custom_domain_name = self.create_random_name(prefix='customdomain', length=20)
-        hostname = custom_domain_name + '.aaz.clitest.azfdtest.xyz'
+        hostname = custom_domain_name + '.aaz0901.clitest.azfdtest.xyz'
         checks = [JMESPathCheck('name', custom_domain_name),
                   JMESPathCheck('hostName', hostname),
                   JMESPathCheck('customHttpsParameters', None)]
-        try:
-            self.custom_domain_create_cmd(group=resource_group,
-                                          profile_name=profile_name,
-                                          endpoint_name=endpoint_name,
-                                          name=custom_domain_name,
-                                          hostname=hostname,
-                                          checks=checks)
-        except HttpResponseError as err:
-            if err.status_code != 400:
-                raise err
-            hostname = custom_domain_name + '.aaz-df.clitest.azfdtest.xyz'
-            self.custom_domain_create_cmd(group=resource_group,
-                                          profile_name=profile_name,
-                                          endpoint_name=endpoint_name,
-                                          name=custom_domain_name,
-                                          hostname=hostname,
-                                          checks=checks)
+
+        self.custom_domain_create_cmd(group=resource_group,
+                                      profile_name=profile_name,
+                                      endpoint_name=endpoint_name,
+                                      name=custom_domain_name,
+                                      hostname=hostname,
+                                      checks=checks)
 
         list_checks = [JMESPathCheck('length(@)', 1)]
         self.custom_domain_list_cmd(resource_group, profile_name, endpoint_name, checks=list_checks)
@@ -101,15 +91,15 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
         # Endpoint name and custom domain hostname are hard-coded because of
         # custom domain CNAME requirement. If test fails to cleanup, the
         # resource group must be manually deleted in order to re-run.
-        endpoint_name = 'cdn-cli-test-aaz-v4'
+        endpoint_name = 'aaz-09-01-verizon'
         origin = 'www.microsoft1.com'
-        endpoint = self.endpoint_create_cmd(resource_group, endpoint_name, profile_name, origin).get_output_in_json()
+        self.endpoint_create_cmd(resource_group, endpoint_name, profile_name, origin).get_output_in_json()
 
         custom_domain_name = self.create_random_name(prefix='customdomain', length=20)
-        hostname = custom_domain_name + '.aaz-v4.clitest.azfdtest.xyz'
-        # Use alternate hostnames for dogfood.
-        if '.azureedge-test.net' in endpoint['hostName']:
-            hostname = custom_domain_name + '.aaz-v4-df.clitest.azfdtest.xyz'
+        hostname = custom_domain_name + '.aaz0901-verizon.clitest.azfdtest.xyz'
+        # # Use alternate hostnames for dogfood.
+        # if '.azureedge-test.net' in endpoint['hostName']:
+        #     hostname = custom_domain_name + '.aaz0901-verizon-fd.clitest.azfdtest.xyz'
         self.custom_domain_create_cmd(resource_group, profile_name, endpoint_name, custom_domain_name, hostname)
 
         checks = [JMESPathCheck('name', custom_domain_name),
@@ -140,19 +130,19 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
         # Endpoint name and custom domain hostname are hard-coded because of
         # custom domain CNAME requirement. If test fails to cleanup, the
         # resource group must be manually deleted in order to re-run.
-        endpoint_name = 'cdn-cli-test-aaz-4'
+        endpoint_name = 'aaz-09-01-byoc'
         origin = 'www.microsoft1.com'
-        endpoint = self.endpoint_create_cmd(resource_group, endpoint_name, profile_name, origin).get_output_in_json()
+        self.endpoint_create_cmd(resource_group, endpoint_name, profile_name, origin).get_output_in_json()
 
         # Create custom domains for CDN managed cert and BYOC
         custom_domain_name = self.create_random_name(prefix='customdomain', length=20)
         byoc_custom_domain_name = self.create_random_name(prefix='customdomain', length=20)
-        hostname = custom_domain_name + '.aaz-4.clitest.azfdtest.xyz'
-        byoc_hostname = byoc_custom_domain_name + '.aaz-4.clitest.azfdtest.xyz'
-        # Use alternate hostnames for dogfood.
-        if '.azureedge-test.net' in endpoint['hostName']:
-            hostname = custom_domain_name + '.aaz-4-df.clitest.azfdtest.xyz'
-            byoc_hostname = byoc_custom_domain_name + '.aaz-4-df.clitest.azfdtest.xyz'
+        hostname = custom_domain_name + '.aaz0901-byoc.clitest.azfdtest.xyz'
+        byoc_hostname = byoc_custom_domain_name + '.aaz0901-byoc.clitest.azfdtest.xyz'
+        # # Use alternate hostnames for dogfood.
+        # if '.azureedge-test.net' in endpoint['hostName']:
+        #     hostname = custom_domain_name + '.aaz0901-byoc-fd.clitest.azfdtest.xyz'
+        #     byoc_hostname = byoc_custom_domain_name + '.aaz0901-byoc-fd.clitest.azfdtest.xyz'
         self.custom_domain_create_cmd(resource_group, profile_name, endpoint_name, custom_domain_name, hostname)
         self.custom_domain_create_cmd(resource_group, profile_name, endpoint_name, byoc_custom_domain_name, byoc_hostname)
 
@@ -175,7 +165,7 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
                                                 profile_name,
                                                 endpoint_name,
                                                 custom_domain_name,
-                                                min_tls_version='1.0',
+                                                min_tls_version='1.2',
                                                 checks=checks)
 
         # Create a TLS cert to use for BYOC.
@@ -210,16 +200,16 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
         # Endpoint name and custom domain hostname are hard-coded because of
         # custom domain CNAME requirement. If test fails to cleanup, the
         # resource group must be manually deleted in order to re-run.
-        endpoint_name = 'cdn-cli-test-aaz-5'
+        endpoint_name = 'aaz-09-01-byoc'
         origin = 'www.microsoft1.com'
-        endpoint = self.endpoint_create_cmd(resource_group, endpoint_name, profile_name, origin).get_output_in_json()
+        self.endpoint_create_cmd(resource_group, endpoint_name, profile_name, origin).get_output_in_json()
 
         # Create custom domain for BYOC
         custom_domain_name = self.create_random_name(prefix='customdomain', length=20)
-        hostname = custom_domain_name + '.aaz-5.clitest.azfdtest.xyz'
-        # Use alternate hostname for dogfood.
-        if '.azureedge-test.net' in endpoint['hostName']:
-            hostname = custom_domain_name + '.aaz-5-df.clitest.azfdtest.xyz'
+        hostname = custom_domain_name + '.aaz0901-byoc-l.clitest.azfdtest.xyz'
+        # # Use alternate hostname for dogfood.
+        # if '.azureedge-test.net' in endpoint['hostName']:
+        #     hostname = custom_domain_name + '.aaz-5-df.clitest.azfdtest.xyz'
         self.custom_domain_create_cmd(resource_group, profile_name, endpoint_name, custom_domain_name, hostname)
 
         # Verify the created custom domain doesn't have custom HTTPS enabled.
