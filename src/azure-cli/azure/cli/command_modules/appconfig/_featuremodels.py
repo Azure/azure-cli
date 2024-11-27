@@ -49,6 +49,8 @@ class FeatureFlagValue:
         Description of Feature Flag
     :ivar bool enabled:
         Represents if the Feature flag is On/Off/Conditionally On
+    :ivar str display_name:
+        A display name for the feature to use for display rather than the ID.
     :ivar dict {string, FeatureFilter[]} conditions:
         Dictionary that contains client_filters List
     :ivar FeatureAllocation allocation:
@@ -534,9 +536,7 @@ class FeatureAllocation:
         if allocation_user:
             allocation_user_list = []
             for user in allocation_user:
-                feature_user_allocation = FeatureUserAllocation.convert_from_dict(
-                    json.dumps(user, ensure_ascii=False)
-                )
+                feature_user_allocation = FeatureUserAllocation.convert_from_dict(user)
                 if feature_user_allocation:
                     allocation_user_list.append(feature_user_allocation)
 
@@ -547,9 +547,7 @@ class FeatureAllocation:
         if allocation_group:
             allocation_group_list = []
             for group in allocation_group:
-                feature_group_allocation = FeatureGroupAllocation.convert_from_dict(
-                    json.dumps(group, ensure_ascii=False)
-                )
+                feature_group_allocation = FeatureGroupAllocation.convert_from_dict(group)
                 if feature_group_allocation:
                     allocation_group_list.append(feature_group_allocation)
 
@@ -862,7 +860,7 @@ def map_keyvalue_to_featureflagvalue(keyvalue):
                 # If there is a filter, it should always have a name
                 # In case it doesn't, ignore this filter
                 lowercase_filter = {k.lower(): v for k, v in client_filter.items()}
-                name = lowercase_filter.get(FeatureFlagConstants.NAME)
+                name = lowercase_filter.get(FeatureFlagConstants.NAME, None)
                 if name:
                     params = lowercase_filter.get(
                         FeatureFlagConstants.FILTER_PARAMETERS, {}
@@ -898,9 +896,7 @@ def map_keyvalue_to_featureflagvalue(keyvalue):
         variant_list = []
         if variants:
             for variant in variants:
-                feature_variant = FeatureVariant.convert_from_dict(
-                    json.dumps(variant, ensure_ascii=False)
-                )
+                feature_variant = FeatureVariant.convert_from_dict(variant)
                 if feature_variant:
                     variant_list.append(feature_variant)
 
@@ -910,6 +906,7 @@ def map_keyvalue_to_featureflagvalue(keyvalue):
             id_=feature_name,
             description=feature_flag_dict.get(FeatureFlagConstants.DESCRIPTION, ""),
             enabled=feature_flag_dict.get(FeatureFlagConstants.ENABLED, False),
+            display_name=feature_flag_dict.get(FeatureFlagConstants.DISPLAY_NAME, None),
             conditions=feature_flag_dict.get(FeatureFlagConstants.CONDITIONS, None),
             allocation=feature_flag_dict.get(FeatureFlagConstants.ALLOCATION, None),
             variants=feature_flag_dict.get(FeatureFlagConstants.VARIANTS, None),

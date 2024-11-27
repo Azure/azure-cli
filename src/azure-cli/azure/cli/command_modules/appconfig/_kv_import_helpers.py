@@ -136,9 +136,9 @@ def __read_features_from_file(file_path, format_):
 
     try:
         config_data = __read_with_appropriate_encoding(file_path, format_)
-        foundLegacySchema = False
-        foundMsFmSchema = False
-        legacySchemaKeyWord = None
+        found_dotnet_schema = False
+        found_ms_fm_schema = False
+        dotnet_schema_keyword = None
         for keywordset in (
             FeatureManagementReservedKeywords.PASCAL,
             FeatureManagementReservedKeywords.CAMEL,
@@ -146,47 +146,47 @@ def __read_features_from_file(file_path, format_):
         ):
             # find the occurrences of feature management section in file.
             if keywordset.feature_management in config_data:
-                if foundLegacySchema:
+                if found_dotnet_schema:
                     raise FileOperationError(
                         'Unable to proceed because file contains multiple sections corresponding to "Feature Management".'
                     )
                 features_dict[keywordset.feature_management] = config_data[
                     keywordset.feature_management
                 ]
-                legacySchemaKeyWord = keywordset.feature_management
+                dotnet_schema_keyword = keywordset.feature_management
                 del config_data[keywordset.feature_management]
-                foundLegacySchema = True
+                found_dotnet_schema = True
 
-        msFeatureManagementKeyword = (
+        ms_feature_management_keyword = (
             FeatureManagementReservedKeywords.UNDERSCORE.feature_management
         )
-        if msFeatureManagementKeyword in config_data:
-            if foundLegacySchema and any(
+        if ms_feature_management_keyword in config_data:
+            if found_dotnet_schema and any(
                 key != FeatureFlagConstants.FEATURE_FLAGS_KEY
-                for key in config_data[msFeatureManagementKeyword].keys()
+                for key in config_data[ms_feature_management_keyword].keys()
             ):
                 raise FileOperationError(
                     "Data contains an already defined section with the key %s."
-                    % (legacySchemaKeyWord)
+                    % (dotnet_schema_keyword)
                 )
 
             if (
                 FeatureFlagConstants.FEATURE_FLAGS_KEY
-                in config_data[msFeatureManagementKeyword]
+                in config_data[ms_feature_management_keyword]
             ):
-                foundMsFmSchema = True
+                found_ms_fm_schema = True
 
             if any(
                 key != FeatureFlagConstants.FEATURE_FLAGS_KEY
-                for key in config_data[msFeatureManagementKeyword].keys()
+                for key in config_data[ms_feature_management_keyword].keys()
             ):
-                foundLegacySchema = True
-                legacySchemaKeyWord = msFeatureManagementKeyword
+                found_dotnet_schema = True
+                dotnet_schema_keyword = ms_feature_management_keyword
 
-            features_dict[msFeatureManagementKeyword] = config_data[
-                msFeatureManagementKeyword
+            features_dict[ms_feature_management_keyword] = config_data[
+                ms_feature_management_keyword
             ]
-            del config_data[msFeatureManagementKeyword]
+            del config_data[ms_feature_management_keyword]
 
     except ValueError as ex:
         raise FileOperationError(
@@ -203,46 +203,43 @@ def __read_features_from_file(file_path, format_):
 
     # features_dict contains all features that need to be converted to KeyValue format now
     return __convert_feature_dict_to_keyvalue_list(
-        legacySchemaKeyWord, foundMsFmSchema, features_dict
+        dotnet_schema_keyword, found_ms_fm_schema, features_dict
     )
 
 
 def __convert_feature_dict_to_keyvalue_list(
-    legacySchemaKeyWord, foundMsFmSchema, features_dict
+    dotnet_schema_keyword, found_ms_fm_schema, features_dict
 ):
     # pylint: disable=too-many-nested-blocks
     key_values = []
     feature_flags = []
 
     try:
-        if foundMsFmSchema:
-            featureManagementSection = __get_ms_feature_management_schema(features_dict)
-            feature_flags.extend(
-                __read_features_from_msfm_schema(
-                    featureManagementSection[FeatureFlagConstants.FEATURE_FLAGS_KEY]
-                )
-            )
-
-        if legacySchemaKeyWord:
+        if dotnet_schema_keyword:
             for keywordset in FeatureManagementReservedKeywords.ALL:
-                if keywordset.feature_management == legacySchemaKeyWord:
+                if keywordset.feature_management == dotnet_schema_keyword:
                     feature_management_keywords = keywordset
                     break
-            legacy_feature_management_section = __get_legacy_feature_management_schema(
-                legacySchemaKeyWord, features_dict
+            dotnet_feature_management_section = __get_dotnet_feature_management_schema(
+                dotnet_schema_keyword, features_dict
             )
-            legacy_feature_flags = __read_features_from_legacy_schema(
-                legacy_feature_management_section, feature_management_keywords
+            dotnet_feature_flags = __read_features_from_dotnet_schema(
+                dotnet_feature_management_section, feature_management_keywords
             )
-            feature_flags.extend(
-                [
-                    flag
-                    for flag in legacy_feature_flags
-                    if not any(
-                        flag.id == existingflag.id for existingflag in feature_flags
-                    )
-                ]
-            )
+            feature_flags.extend(dotnet_feature_flags)
+
+        if found_ms_fm_schema:
+            feature_management_section = __get_ms_feature_management_schema(features_dict)
+            ms_feature_flags = __read_features_from_msfm_schema(feature_management_section[FeatureFlagConstants.FEATURE_FLAGS_KEY])
+            # Check if the featureFlag with the same id already exists
+            # Replace the existing flag with the later one, the later one always wins
+            for flag in ms_feature_flags:
+                index_of_existing_flag = next((i for i, existing_flag in enumerate(feature_flags) if existing_flag.id == flag.id), -1)
+
+                if index_of_existing_flag != -1:
+                    feature_flags[index_of_existing_flag] = flag
+                else:
+                    feature_flags.append(flag)
 
         for feature in feature_flags:
             key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + str(feature.id)
@@ -276,18 +273,18 @@ def __get_ms_feature_management_schema(features_dict):
     return feature_management_section
 
 
-def __get_legacy_feature_management_schema(
-    legacySchemaFeatureManagementKeyWord, features_dict
+def __get_dotnet_feature_management_schema(
+    dotnetSchemaFeatureManagementKeyWord, features_dict
 ):
     ms_fm_keyword = FeatureManagementReservedKeywords.UNDERSCORE.feature_management
     feature_management_section = features_dict.get(
-        legacySchemaFeatureManagementKeyWord, None
+        dotnetSchemaFeatureManagementKeyWord, None
     )
 
     if feature_management_section and not isinstance(feature_management_section, dict):
         raise ValidationError("Feature management section must be a dictionary.")
 
-    if legacySchemaFeatureManagementKeyWord == ms_fm_keyword:
+    if dotnetSchemaFeatureManagementKeyWord == ms_fm_keyword:
         return dict(
             (key, feature_management_section[key])
             for key in feature_management_section.keys()
@@ -301,14 +298,6 @@ def __read_features_from_msfm_schema(feature_flags_list):
     for feature in feature_flags_list:
         if validate_import_feature(feature[FeatureFlagConstants.ID]):
             feature_id = feature[FeatureFlagConstants.ID]
-
-            if any(
-                existing_feature_flag.id == feature_id
-                for existing_feature_flag in feature_flags
-            ):
-                raise ValidationError(
-                    f"Duplicate feature flag with id '{feature['id']}' is found."
-                )
 
             new_feature = FeatureFlagValue(
                 id_=str(feature.get(FeatureFlagConstants.ID)),
@@ -375,7 +364,7 @@ def __read_features_from_msfm_schema(feature_flags_list):
     return feature_flags
 
 
-def __read_features_from_legacy_schema(features_dict, feature_management_keywords):
+def __read_features_from_dotnet_schema(features_dict, feature_management_keywords):
     feature_flags = []
     default_conditions = {FeatureFlagConstants.CLIENT_FILTERS: []}
 
