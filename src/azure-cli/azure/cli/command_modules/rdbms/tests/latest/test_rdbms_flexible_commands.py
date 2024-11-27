@@ -2781,5 +2781,11 @@ class FlexibleServerFabricMirroringMgmtScenarioTest(ScenarioTest):
                  .format(database_engine, resource_group, server_name, database2),
                  checks=[JMESPathCheck('value', database2)])
 
+        # disable fabric mirroring
+        self.cmd('{} flexible-server fabric-mirroring stop -g {} --server-name {} --yes'
+                 .format(database_engine, resource_group, server_name))
+        self.cmd('{} flexible-server parameter show --name azure.fabric_mirror_enabled -g {} -s {}'.format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('value', 'off')])
+
         # delete server
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name))
