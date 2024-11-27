@@ -46,9 +46,6 @@ from ._actions import (load_images_from_aliases_doc, load_extension_images_thru_
                        load_images_thru_services, _get_latest_image_version)
 from ._client_factory import (_compute_client_factory, cf_vm_image_term, _dev_test_labs_client_factory)
 
-from .aaz.latest.ppg import Show as _PPGShow
-from .aaz.latest.vmss import ListInstances as _VMSSListInstances
-from .aaz.latest.capacity.reservation.group import List as _CapacityReservationGroupList
 from .aaz.latest.vm.disk import AttachDetachDataDisk
 
 from .generated.custom import *  # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
@@ -5725,37 +5722,6 @@ def show_capacity_reservation_group(client, resource_group_name, capacity_reserv
                       expand=expand)
 
 
-class CapacityReservationGroupList(_CapacityReservationGroupList):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZBoolArg
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.vm_instance = AAZBoolArg(
-            options=['--vm-instance'],
-            help="Retrieve the Virtual Machine Instance "
-                 "which are associated to capacity reservation group in the response.",
-            nullable=True
-        )
-        args_schema.vmss_instance = AAZBoolArg(
-            options=['--vmss-instance'],
-            help="Retrieve the ScaleSet VM Instance which are associated to capacity reservation group in the response.",
-            nullable=True
-        )
-        args_schema.expand._registered = False
-        return args_schema
-
-    def pre_operations(self):
-        from azure.cli.core.aaz import has_value
-        args = self.ctx.args
-        if args.vm_instance:
-            args.expand = "virtualMachines/$ref"
-        if args.vmss_instance:
-            if has_value(args.expand):
-                args.expand = args.expand.to_serialized_data() + ",virtualMachineScaleSetVMs/$ref"
-            else:
-                args.expand = "virtualMachineScaleSetVMs/$ref"
-
-
 def create_capacity_reservation(cmd, client, resource_group_name, capacity_reservation_group_name,
                                 capacity_reservation_name, location=None, sku_name=None, capacity=None,
                                 zone=None, tags=None):
@@ -6162,33 +6128,3 @@ def sig_community_image_version_list(client, location, public_gallery_name, gall
                             gallery_image_name=gallery_image_name)
     return get_page_result(generator, marker, show_next_marker)
 # endRegion
-
-
-class PPGShow(_PPGShow):
-
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-
-        from azure.cli.core.aaz import AAZArgEnum
-        args_schema.include_colocation_status._blank = "True"
-        args_schema.include_colocation_status.enum = AAZArgEnum({"True": "True", "False": "False"})
-
-        return args_schema
-
-
-class VMSSListInstances(_VMSSListInstances):
-    def _output(self, *args, **kwargs):
-        from azure.cli.core.aaz import AAZUndefined, has_value
-
-        # Resolve flatten conflict
-        # When the type field conflicts, the type in inner layer is ignored and the outer layer is applied
-        for value in self.ctx.vars.instance.value:
-            if has_value(value.resources):
-                for resource in value.resources:
-                    if has_value(resource.type):
-                        resource.type = AAZUndefined
-
-        result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
-        next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
-        return result, next_link
