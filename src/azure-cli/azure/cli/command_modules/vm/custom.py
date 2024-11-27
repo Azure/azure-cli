@@ -39,8 +39,6 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import sdk_no_wait
 
-from azure.cli.core.aaz import has_value
-
 from ._vm_utils import read_content_if_is_file, import_aaz_by_profile
 from ._vm_diagnostics_templates import get_default_diag_config
 
@@ -49,10 +47,6 @@ from ._actions import (load_images_from_aliases_doc, load_extension_images_thru_
 from ._client_factory import (_compute_client_factory, cf_vm_image_term, _dev_test_labs_client_factory)
 
 from .aaz.latest.vm.disk import AttachDetachDataDisk
-from .aaz.latest.ppg import Show as _PPGShow
-from .aaz.latest.vmss import ListInstances as _VMSSListInstances
-from .aaz.latest.capacity.reservation.group import List as _CapacityReservationGroupList
-from .aaz.latest.disk import Update as _DiskUpdate, GrantAccess as _DiskGrantAccess
 
 from .generated.custom import *  # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
 try:
@@ -559,84 +553,6 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
 
     from .aaz.latest.disk import Create
     return Create(cli_ctx=cmd.cli_ctx)(command_args=args)
-
-
-class DiskGrantAccess(_DiskGrantAccess):
-    def pre_operations(self):
-        args = self.ctx.args
-
-        from .aaz.latest.disk import Show
-        disk_info = Show(cli_ctx=self.cli_ctx)(command_args={
-            "disk_name": args.disk_name,
-            "resource_group": args.resource_group
-        })
-
-        if disk_info.get("creation_data", None) and \
-                disk_info["creation_data"].get("create_option", None) == "UploadPreparedSecure":
-            args.secure_vm_guest_state_sas = True
-
-
-class DiskUpdate(_DiskUpdate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-
-        args_schema.disk_access_id._registered = False
-        args_schema.disk_encryption_set_id._registered = False
-
-        args_schema.disk_access = AAZStrArg(
-            options=["--disk-access"],
-            help="Name or ID of the disk access resource for using private endpoints on disks.",
-        )
-        args_schema.disk_encryption_set = AAZStrArg(
-            options=["--disk-encryption-set"],
-            help="Name or ID of disk encryption set that is used to encrypt the disk."
-        )
-
-        return args_schema
-
-    def pre_instance_update(self, instance):
-        from azure.mgmt.core.tools import resource_id, is_valid_resource_id
-        from azure.cli.core.commands.client_factory import get_subscription_id
-
-        args = self.ctx.args
-        if has_value(args.disk_encryption_set):
-            if instance.properties.encryption.type != 'EncryptionAtRestWithCustomerKey' and \
-                    has_value(args.encryption_type) and \
-                    args.encryption_type != 'EncryptionAtRestWithCustomerKey':
-                raise CLIError('usage error: Please set --encryption-type to EncryptionAtRestWithCustomerKey')
-
-            disk_encryption_set = args.disk_encryption_set
-            if not is_valid_resource_id(disk_encryption_set.to_serialized_data()):
-                disk_encryption_set = resource_id(
-                    subscription=get_subscription_id(self.cli_ctx), resource_group=args.resource_group,
-                    namespace='Microsoft.Compute', type='diskEncryptionSets', name=disk_encryption_set)
-
-            instance.properties.encryption.disk_encryption_set_id = disk_encryption_set
-
-        if has_value(args.encryption_type):
-            if args.encryption_type != 'EncryptionAtRestWithCustomerKey':
-                instance.properties.encryption.disk_encryption_set_id = None
-
-        if has_value(args.disk_access):
-            disk_access = args.disk_access
-            if not is_valid_resource_id(disk_access.to_serialized_data()):
-                disk_access = resource_id(
-                    subscription=get_subscription_id(self.cli_ctx), resource_group=args.resource_group,
-                    namespace='Microsoft.Compute', type='diskAccesses', name=disk_access)
-            instance.properties.disk_access_id = disk_access
-
-        if has_value(args.accelerated_network) or has_value(args.architecture):
-            if has_value(instance.properties.supported_capabilities):
-                supported_capabilities = {
-                    "accelerated_network": args.accelerated_network,
-                    "architecture": args.architecture
-                }
-                instance.properties.supported_capabilities = supported_capabilities
-            else:
-                instance.properties.supported_capabilities.accelerated_network = args.accelerated_network
-                instance.properties.supported_capabilities.architecture = args.architecture
 
 
 # region Images (Managed)

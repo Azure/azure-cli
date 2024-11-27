@@ -40,8 +40,6 @@ from azure.cli.command_modules.vm._image_builder import (
     process_image_template_create_namespace, process_img_tmpl_output_add_namespace,
     process_img_tmpl_customizer_add_namespace, image_builder_client_factory, cf_img_bldr_image_templates)
 
-from azure.cli.command_modules.vm._vm_utils import import_aaz_by_profile
-
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation, CliCommandType
 from azure.cli.core.commands.arm import deployment_validate_table_format, handle_template_based_exception
 
@@ -241,7 +239,7 @@ def load_command_table(self, _):
 
     with self.command_group('disk', compute_disk_sdk, operation_group='disks', min_api='2017-03-30') as g:
         g.custom_command('create', 'create_managed_disk', supports_no_wait=True, table_transformer=transform_disk_create_table_output, validator=process_disk_create_namespace)
-        from .custom import DiskUpdate, DiskGrantAccess
+        from .operations.disk import DiskUpdate, DiskGrantAccess
         self.command_table["disk grant-access"] = DiskGrantAccess(loader=self)
         self.command_table["disk update"] = DiskUpdate(loader=self)
 
