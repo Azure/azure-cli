@@ -1818,7 +1818,7 @@ def _match_odata_type(odata_type, user_input):
     user_input = user_input.lower()
     # Full match "#microsoft.graph.servicePrincipal" == "#microsoft.graph.servicePrincipal"
     # Partial match "#microsoft.graph.servicePrincipal" ~= "servicePrincipal"
-    return odata_type == user_input or odata_type.split('.')[-1] == user_input
+    return user_input in (odata_type, odata_type.split('.')[-1])
 
 
 def _open(location):

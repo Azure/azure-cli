@@ -979,7 +979,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                     c.extra('connection_id', options_list=['--id'], required=False,
                             help='The ID of the private endpoint connection associated with the Server. '
                             'If specified --server-name/-s and --name/-n, this should be omitted.')
-                if scope == "approve" or scope == "reject":
+                if scope in ('approve', 'reject'):
                     c.argument('description', help='Comments for {} operation.'.format(scope), required=True)
 
         for scope in ['list', 'show']:

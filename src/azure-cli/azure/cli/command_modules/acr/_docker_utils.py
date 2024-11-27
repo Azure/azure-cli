@@ -625,7 +625,7 @@ def request_data_from_registry(http_method,
                 result = response.json()[result_index] if result_index else response.json()
                 next_link = response.headers['link'] if 'link' in response.headers else None
                 return result, next_link, response.status_code
-            if response.status_code == 201 or response.status_code == 202:
+            if response.status_code in (201, 202):
                 result = None
                 try:
                     result = response.json()[result_index] if result_index else response.json()

@@ -55,7 +55,7 @@ class AAZHttpOperation(AAZOperation):
         if isinstance(value, AAZBaseValue):
             value = value.to_serialized_data()
 
-        if value == AAZUndefined or value == None:  # noqa: E711, pylint: disable=singleton-comparison
+        if value in (AAZUndefined, None):  # noqa: E711, pylint: disable=singleton-comparison
             if required:
                 raise ValueError(f"url parameter {name} is required.")
             return {}  # return empty dict
@@ -204,7 +204,7 @@ class AAZHttpOperation(AAZOperation):
         else:
             data = value
 
-        if data == AAZUndefined or data == None:  # noqa: E711, pylint: disable=singleton-comparison
+        if data in (AAZUndefined, None):  # noqa: E711, pylint: disable=singleton-comparison
             if required:
                 raise ValueError("Missing request content")
             return None

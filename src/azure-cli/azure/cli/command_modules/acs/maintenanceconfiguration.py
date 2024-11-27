@@ -48,7 +48,7 @@ def getMaintenanceConfiguration(cmd, raw_parameters):
     config_name = raw_parameters.get("config_name")
     if config_name == CONST_DEFAULT_CONFIGURATION_NAME:
         return constructDefaultMaintenanceConfiguration(cmd, raw_parameters)
-    if config_name == CONST_AUTOUPGRADE_CONFIGURATION_NAME or config_name == CONST_NODEOSUPGRADE_CONFIGURATION_NAME:
+    if config_name in (CONST_AUTOUPGRADE_CONFIGURATION_NAME, CONST_NODEOSUPGRADE_CONFIGURATION_NAME):
         return constructDedicatedMaintenanceConfiguration(cmd, raw_parameters)
 
     raise InvalidArgumentValueError('--config-name must be one of default, aksManagedAutoUpgradeSchedule or aksManagedNodeOSUpgradeSchedule, not {}'.format(config_name))

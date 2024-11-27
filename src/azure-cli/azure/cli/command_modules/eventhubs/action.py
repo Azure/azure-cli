@@ -64,7 +64,7 @@ class AlertAddVirtualNetwork(argparse._AppendAction):
             if k == 'id':
                 VirtualNetworkList["id"] = v
             elif k == 'ignore-missing-endpoint':
-                if v == "true" or v == "True" or v == "TRUE":
+                if v in ('true', 'True', 'TRUE'):
                     VirtualNetworkList["ignore_missing_endpoint"] = True
                 else:
                     VirtualNetworkList["ignore_missing_endpoint"] = False
