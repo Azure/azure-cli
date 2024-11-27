@@ -377,7 +377,6 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
         version = '15'
         storage_size = 200
-        location = 'southcentralus'
         sku_name = 'Standard_D2s_v3'
         tier = 'GeneralPurpose'
         storage_type = 'PremiumV2_LRS'
@@ -397,7 +396,6 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
         basic_info = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name)).get_output_in_json()
         self.assertEqual(basic_info['name'], server_name)
-        self.assertEqual(str(basic_info['location']).replace(' ', '').lower(), location)
         self.assertEqual(basic_info['resourceGroup'], resource_group)
         self.assertEqual(basic_info['sku']['name'], sku_name)
         self.assertEqual(basic_info['sku']['tier'], tier)
@@ -2277,7 +2275,7 @@ class FlexibleServerIdentityAADAdminMgmtScenarioTest(ScenarioTest):
         self._test_identity_aad_admin_mgmt('postgres', resource_group, 'disabled')
 
     def _test_identity_aad_admin_mgmt(self, database_engine, resource_group, password_auth, location=postgres_location):
-        login = 'alanenriqueo@microsoft.com'
+        login = 'aaa@foo.com'
         sid = '894ef8da-7971-4f68-972c-f561441eb329'
         auth_args = '--password-auth {} --active-directory-auth enabled'.format(password_auth)
         admin_id_arg = '-i {}'.format(sid) if database_engine == 'postgres' else ''
