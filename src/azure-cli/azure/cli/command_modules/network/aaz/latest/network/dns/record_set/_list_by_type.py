@@ -55,7 +55,7 @@ class ListByType(AAZCommand):
         )
         _args_schema.recordsetnamesuffix = AAZStrArg(
             options=["--recordsetnamesuffix"],
-            help="The suffix label of the record set name that has to be used to filter the record set enumerations. If this parameter is specified, Enumeration will return only records that end with .<recordSetNameSuffix>",
+            help="The suffix label of the record set name that has to be used to filter the record set enumerations. If this parameter is specified, Enumeration will return only records that end with `.<recordSetNameSuffix>`",
         )
         _args_schema.top = AAZIntArg(
             options=["--top"],
