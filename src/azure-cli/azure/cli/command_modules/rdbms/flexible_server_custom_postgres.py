@@ -22,7 +22,7 @@ from azure.cli.core.util import CLIError, sdk_no_wait, user_confirmation
 from azure.core.exceptions import HttpResponseError, ResourceNotFoundError
 from azure.mgmt.core.tools import resource_id, is_valid_resource_id, parse_resource_id
 from azure.cli.core.azclierror import BadRequestError, FileOperationError, MutuallyExclusiveArgumentError, RequiredArgumentMissingError, ArgumentUsageError, InvalidArgumentValueError
-from azure.mgmt.rdbms import postgresql_flexibleservers
+from azure.mgmt import postgresqlflexibleservers as postgresql_flexibleservers
 from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client, \
     cf_postgres_flexible_db, cf_postgres_check_resource_availability, cf_postgres_flexible_servers, \
     cf_postgres_check_resource_availability_with_location, \
@@ -60,7 +60,7 @@ def flexible_server_create(cmd, client,
                            high_availability=None, zone=None, standby_availability_zone=None,
                            geo_redundant_backup=None, byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None,
                            active_directory_auth=None, password_auth=None, auto_grow=None, performance_tier=None,
-                           storage_type=None, iops=None, throughput=None, create_default_db='Enabled', yes=False):
+                           storage_type=None, iops=None, throughput=None, create_default_db='Enabled', create_cluster=None, cluster_size=None, yes=False):
 
     if (not check_resource_group(resource_group_name)):
         resource_group_name = None
@@ -97,7 +97,11 @@ def flexible_server_create(cmd, client,
                            byok_key=byok_key,
                            backup_byok_identity=backup_byok_identity,
                            backup_byok_key=backup_byok_key,
-                           performance_tier=performance_tier)
+                           performance_tier=performance_tier,
+                           create_cluster=create_cluster,
+                           cluster_size=cluster_size)
+
+    cluster = postgresql_flexibleservers.models.Cluster(cluster_size=cluster_size) if create_cluster else None
 
     server_result = firewall_id = None
 
@@ -151,7 +155,8 @@ def flexible_server_create(cmd, client,
                                    availability_zone=zone,
                                    identity=identity,
                                    data_encryption=data_encryption,
-                                   auth_config=auth_config)
+                                   auth_config=auth_config,
+                                   cluster=cluster)
 
     # Adding firewall rule
     if start_ip != -1 and end_ip != -1:

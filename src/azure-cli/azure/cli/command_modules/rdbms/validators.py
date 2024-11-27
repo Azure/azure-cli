@@ -92,6 +92,13 @@ def retention_validator(ns):
             raise CLIError('incorrect usage: --backup-retention. Range is 7 to 35 days.')
 
 
+def node_count_validator(ns):
+    if ns.cluster_size is not None:
+        val = ns.cluster_size
+        if not 1 <= int(val) <= 10:
+            raise CLIError('incorrect usage: --node-count. Range is 1 to 10 for an elastic cluster.')
+
+
 # Validates if a subnet id or name have been given by the user. If subnet id is given, vnet-name should not be provided.
 def validate_subnet(cmd, namespace):
 
@@ -301,7 +308,7 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
                            version=None, instance=None, geo_redundant_backup=None,
                            byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None,
                            auto_grow=None, performance_tier=None,
-                           storage_type=None, iops=None, throughput=None):
+                           storage_type=None, iops=None, throughput=None, create_cluster=None, cluster_size=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
     is_create = not instance
     if is_create:
@@ -317,6 +324,8 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
     sku_info = {k.lower(): v for k, v in sku_info.items()}
     single_az = list_location_capability_info['single_az']
     geo_backup_supported = list_location_capability_info['geo_backup_supported']
+    _cluster_validator(create_cluster, cluster_size, auto_grow, geo_redundant_backup, version, tier,
+                       byok_identity, byok_key, backup_byok_identity, backup_byok_key, instance)
     _network_arg_validator(subnet, public_access)
     _pg_tier_validator(tier, sku_info)  # need to be validated first
     if tier is None and instance is not None:
@@ -339,6 +348,24 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
     _pg_high_availability_validator(high_availability, standby_availability_zone, zone, tier, single_az, instance)
     _pg_version_validator(version, list_location_capability_info['server_versions'], is_create)
     pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup, instance)
+
+
+def _cluster_validator(create_cluster, cluster_size, auto_grow, geo_redundant_backup, version, tier,
+                       byok_identity, byok_key, backup_byok_identity, backup_byok_key, instance):
+    if create_cluster == 'ElasticCluster' or (instance and instance.cluster and instance.cluster.cluster_size > 0 ):
+        if instance is None and cluster_size is None:
+            cluster_size = 2
+        if instance is None and version == '17':
+            raise ValidationError("PostgreSQL version 17 is currently not supported for elastic cluster.")
+
+        if auto_grow and auto_grow.lower() != 'disabled':
+            raise ValidationError("Storage Auto-grow is currently not supported for elastic cluster.")
+        if geo_redundant_backup and geo_redundant_backup.lower() != 'disabled':
+            raise ValidationError("Geo-redundancy is currently not supported for elastic cluster.")
+        if byok_identity or byok_key or backup_byok_identity or backup_byok_key:
+            raise ValidationError("Data encryption is currently not supported for elastic cluster.")
+        if tier == 'Burstable':
+            raise ValidationError("Burstable tier is currently not supported for elastic cluster.")
 
 
 def _pg_storage_validator(storage_gb, sku_info, tier, storage_type, iops, throughput, instance):
