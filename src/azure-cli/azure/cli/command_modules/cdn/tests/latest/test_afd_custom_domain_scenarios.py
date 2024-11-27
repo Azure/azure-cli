@@ -21,7 +21,7 @@ class CdnAfdCustomDomainScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
 
         # Create a secret
         secret_name = self.create_random_name(prefix='secret', length=24)
-        secret_source = f"/subscriptions/{self.get_subscription_id()}/resourceGroups/CliDevReservedGroup/providers/Microsoft.KeyVault/vaults/clibyoc-int/secrets/localdev-wild"
+        secret_source = "/subscriptions/3c0124f9-e564-4c42-86f7-fa79457aedc3/resourceGroups/byoc/providers/Microsoft.KeyVault/vaults/Azure-CDN-BYOC/secrets/afde2e-root-azfdtest-xyz"
         use_latest_version = True
         secret_version = None
 
@@ -36,7 +36,7 @@ class CdnAfdCustomDomainScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
         secretId = secretData['id']
 
         custom_domain_name = self.create_random_name(prefix='customdomain', length=24)
-        host_name = f"{custom_domain_name}.localdev.cdn.azure.cn"
+        host_name = f"{custom_domain_name}.afde2e.azfdtest.xyz"
         certificate_type = AfdCertificateType.customer_certificate.value
         minimum_tls_version = AfdMinimumTlsVersion.tls12.value
         azure_dns_zone = None
