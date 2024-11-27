@@ -284,7 +284,7 @@ def get_auth_if_no_valid_key_vault_connection(source_name, source_id, key_vault_
     return {'authType': 'systemAssignedIdentity'}
 
 
-# https://docs.microsoft.com/azure/app-service/app-service-key-vault-references
+# https://learn.microsoft.com/azure/app-service/app-service-key-vault-references
 def get_auth_if_no_valid_key_vault_connection_for_webapp(source_id, key_vault_connections):
 
     try:

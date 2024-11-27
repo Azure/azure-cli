@@ -87,7 +87,7 @@ class Create(AAZCommand):
         _args_schema.func_param = AAZStrArg(
             options=["--fp", "--func-param"],
             arg_group="Properties",
-            help="The optional function parameters if query serves as a function. Value should be in the following format: 'param-name1:type1 = default_value1, param-name2:type2 = default_value2'. For more examples and proper syntax please refer to https://docs.microsoft.com/azure/kusto/query/functions/user-defined-functions.",
+            help="The optional function parameters if query serves as a function. Value should be in the following format: 'param-name1:type1 = default_value1, param-name2:type2 = default_value2'. For more examples and proper syntax please refer to https://learn.microsoft.com/azure/kusto/query/functions/user-defined-functions.",
         )
         _args_schema.saved_query = AAZStrArg(
             options=["-q", "--saved-query"],

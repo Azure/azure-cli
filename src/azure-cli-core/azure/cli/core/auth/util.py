@@ -23,7 +23,7 @@ PASSWORD_CERTIFICATE_WARNING = (
 def aad_error_handler(error, **kwargs):
     """ Handle the error from AAD server returned by ADAL or MSAL. """
 
-    # https://docs.microsoft.com/en-us/azure/active-directory/develop/reference-aadsts-error-codes
+    # https://learn.microsoft.com/en-us/azure/active-directory/develop/reference-aadsts-error-codes
     # Search for an error code at https://login.microsoftonline.com/error
 
     # To trigger this function for testing, simply provide an invalid scope:
@@ -77,7 +77,7 @@ def resource_to_scopes(resource):
     :param resource: The ADAL resource ID
     :return: A list of scopes
     """
-    # https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-permissions-and-consent#trailing-slash-and-default
+    # https://learn.microsoft.com/en-us/azure/active-directory/develop/v2-permissions-and-consent#trailing-slash-and-default
     # We should not trim the trailing slash, like in https://management.azure.com/
     # In other word, the trailing slash should be preserved and scope should be https://management.azure.com//.default
     scope = resource + '/.default'
