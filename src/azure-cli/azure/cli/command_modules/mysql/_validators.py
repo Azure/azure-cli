@@ -106,7 +106,7 @@ def mysql_arguments_validator(db_context, location, tier, sku_name, storage_gb, 
                               zone=None, standby_availability_zone=None, high_availability=None, backup_byok_key=None,
                               public_access=None, version=None, auto_grow=None, replication_role=None, subnet=None,
                               byok_identity=None, backup_byok_identity=None, byok_key=None, geo_redundant_backup=None,
-                              disable_data_encryption=None, iops=None, auto_io_scaling=None, accelerated_logs=None,
+                              disable_data_encryption=None, iops=None, auto_io_scaling=None, accelerated_logs=None, storage_redundancy=None,
                               instance=None, data_source_type=None, mode=None,
                               data_source_backup_dir=None, data_source_sas_token=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforMySQL/flexibleServers')
@@ -134,6 +134,7 @@ def mysql_arguments_validator(db_context, location, tier, sku_name, storage_gb, 
                           disable_data_encryption, geo_redundant_backup, instance)
     _mysql_iops_validator(iops, auto_io_scaling, instance)
     mysql_accelerated_logs_validator(accelerated_logs, tier)
+    storage_redundancy_validator(storage_redundancy, tier)
     _mysql_import_data_source_type_validator(data_source_type, data_source_backup_dir, data_source_sas_token)
     _mysql_import_mode_validator(mode)
 
@@ -314,6 +315,12 @@ def mysql_accelerated_logs_validator(accelerated_logs, tier):
     if tier != "MemoryOptimized" and accelerated_logs is not None and accelerated_logs.lower() == "enabled":
         logger.warning("Accelerated logs is only supported for Memory Optimized tier. "
                        "So the accelerated logs will be disabled.")
+
+
+def storage_redundancy_validator(storage_redundancy, tier):
+    if tier != "MemoryOptimized" and storage_redundancy is not None and storage_redundancy.lower() == "zoneredundancy":
+        logger.warning("Zone Redundancy is only supported for Memory Optimized tier. "
+                       "So Local Redundancy will be enabled for your server.")
 
 
 def _network_arg_validator(subnet, public_access):
