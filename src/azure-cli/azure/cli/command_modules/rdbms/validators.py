@@ -303,7 +303,8 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
                            auto_grow=None, performance_tier=None,
                            storage_type=None, iops=None, throughput=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
-    if not instance:
+    is_create = not instance
+    if is_create:
         list_location_capability_info = get_postgres_location_capability_info(
             db_context.cmd,
             location)
@@ -336,7 +337,7 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
     _pg_storage_validator(storage_gb, sku_info, tier, storage_type, iops, throughput, instance)
     _pg_sku_name_validator(sku_name, sku_info, tier, instance)
     _pg_high_availability_validator(high_availability, standby_availability_zone, zone, tier, single_az, instance)
-    _pg_version_validator(version, list_location_capability_info['server_versions'])
+    _pg_version_validator(version, list_location_capability_info['server_versions'], is_create)
     pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup, instance)
 
 
@@ -438,10 +439,20 @@ def _pg_storage_performance_tier_validator(performance_tier, sku_info, tier=None
                                ' Allowed values : {}'.format(storage_size, performance_tiers))
 
 
-def _pg_version_validator(version, versions):
+def _pg_version_validator(version, versions, is_create):
     if version:
         if version not in versions:
             raise CLIError('Incorrect value for --version. Allowed values : {}'.format(versions))
+        if version == '12':
+            logger.warning("Support for PostgreSQL 12 has officially ended. As a result, "
+                           "the option to select version 12 will be removed in the near future. "
+                           "We recommend selecting PostgreSQL 13 or a later version for "
+                           "all future operations.")
+
+    if is_create:
+        # Warning for upcoming breaking change to default value of pg version
+        logger.warning("The default value for the PostgreSQL server major version "
+                       "will be updating to 17 in the near future.")
 
 
 def _pg_high_availability_validator(high_availability, standby_availability_zone, zone, tier, single_az, instance):
@@ -738,6 +749,18 @@ def validate_and_format_restore_point_in_time(restore_time):
                               "Please use ISO format e.g., 2021-10-22T00:08:23+00:00.")
 
 
+def is_citus_cluster(cmd, resource_group_name, server_name):
+    server_operations_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
+    server = server_operations_client.get(resource_group_name, server_name)
+
+    return server.cluster and server.cluster.cluster_size > 0
+
+
+def validate_citus_cluster(cmd, resource_group_name, server_name):
+    if is_citus_cluster(cmd, resource_group_name, server_name):
+        raise ValidationError("Citus cluster is not supported for this operation.")
+
+
 def validate_public_access_server(cmd, client, resource_group_name, server_name):
     if isinstance(client, MySqlFirewallRulesOperations):
         server_operations_client = cf_mysql_flexible_servers(cmd.cli_ctx, '_')
@@ -813,8 +836,15 @@ def _pg_storage_type_validator(storage_type, auto_grow, high_availability, geo_r
 
 
 def check_resource_group(resource_group_name):
+    # check if rg is already null originally
+    if (not resource_group_name):
+        return False
+
+    # replace single and double quotes with empty string
     resource_group_name = resource_group_name.replace("'", '')
     resource_group_name = resource_group_name.replace('"', '')
+
+    # check if rg is empty after removing quotes
     if (not resource_group_name):
         return False
     return True

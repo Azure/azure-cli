@@ -13,12 +13,12 @@ from knack.util import CLIError
 
 from azure.cli.core.profiles import ResourceType
 
-from azure.cli.command_modules.vm._validators import (_validate_vm_vmss_create_vnet,
-                                                      _validate_vmss_create_subnet,
-                                                      _validate_vm_create_storage_account,
-                                                      _validate_vm_vmss_create_auth,
-                                                      _validate_vm_create_storage_profile,
-                                                      _validate_vmss_create_load_balancer_or_app_gateway)
+from azure.cli.command_modules.vm.azure_stack._validators import (_validate_vm_vmss_create_vnet,
+                                                                  _validate_vmss_create_subnet,
+                                                                  _validate_vm_create_storage_account,
+                                                                  _validate_vm_vmss_create_auth,
+                                                                  _validate_vm_create_storage_profile,
+                                                                  _validate_vmss_create_load_balancer_or_app_gateway)
 
 
 def _get_test_cmd():
@@ -396,7 +396,7 @@ class TestVMDefaultAuthType(unittest.TestCase):
 
 
 class TestVMImageDefaults(unittest.TestCase):
-    @mock.patch('azure.cli.command_modules.vm._validators._compute_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.vm.azure_stack._validators._compute_client_factory', autospec=True)
     def test_vm_validator_retrieve_image_info_cross_subscription(self, factory_mock):
         ns = argparse.Namespace()
         cmd = mock.MagicMock()
@@ -424,7 +424,7 @@ class TestVMImageDefaults(unittest.TestCase):
         self.assertEqual(ns.os_type.value, 'someOS')
         self.assertTrue(0 in ns.disk_info)
 
-    @mock.patch('azure.cli.command_modules.vm._validators._compute_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.vm.azure_stack._validators._compute_client_factory', autospec=True)
     def test_vm_validator_enables_ultrassd_lrs(self, factory_mock):
         ns = argparse.Namespace()
         cmd = mock.MagicMock()

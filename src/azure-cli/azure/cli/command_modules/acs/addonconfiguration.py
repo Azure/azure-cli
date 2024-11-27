@@ -770,7 +770,7 @@ def create_data_collection_endpoint(cmd, subscription, resource_group, region, e
 def validate_data_collection_settings(dataCollectionSettings):
     if 'interval' in dataCollectionSettings.keys():
         intervalValue = dataCollectionSettings["interval"]
-    if (bool(re.match(r'^[0-9]+[m]$', intervalValue))) is False:
+    if (bool(re.match(r'^[0-9]+[m]$', intervalValue))) is False:  # pylint: disable=used-before-assignment
         raise InvalidArgumentValueError('interval format must be in <number>m')
     intervalValue = int(intervalValue.rstrip("m"))
     if intervalValue <= 0 or intervalValue > 30:
@@ -844,7 +844,7 @@ def add_monitoring_role_assignment(result, cluster_resource_id, cmd):
             cmd,
             "Monitoring Metrics Publisher",
             service_principal_msi_id,
-            is_service_principal,
+            is_service_principal,  # pylint: disable=used-before-assignment
             scope=cluster_resource_id,
         ):
             logger.warning(
@@ -901,7 +901,7 @@ def add_ingress_appgw_addon_role_assignment(result, cmd):
             )
             if not add_role_assignment(
                 cmd,
-                "Contributor",
+                "Network Contributor",
                 service_principal_msi_id,
                 is_service_principal,
                 scope=appgw_group_id,
@@ -943,7 +943,7 @@ def add_ingress_appgw_addon_role_assignment(result, cmd):
                 )
                 if not add_role_assignment(
                     cmd,
-                    "Contributor",
+                    "Network Contributor",
                     service_principal_msi_id,
                     is_service_principal,
                     scope=vnet_id,

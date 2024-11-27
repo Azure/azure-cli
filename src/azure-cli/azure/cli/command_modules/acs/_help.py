@@ -128,18 +128,6 @@ parameters:
   - name: --aad-admin-group-object-ids
     type: string
     short-summary: Comma-separated list of aad group object IDs that will be set as cluster admin.
-  - name: --aad-client-app-id
-    type: string
-    short-summary: The ID of an Azure Active Directory client application of type "Native". This application is for user login via kubectl.
-    long-summary: --aad-client-app-id is deprecated. See https://aka.ms/aks/aad-legacy for details.
-  - name: --aad-server-app-id
-    type: string
-    short-summary: The ID of an Azure Active Directory server application of type "Web app/API". This application represents the managed cluster's apiserver (Server application).
-    long-summary: --aad-server-app-id is deprecated. See https://aka.ms/aks/aad-legacy for details.
-  - name: --aad-server-app-secret
-    type: string
-    short-summary: The secret of an Azure Active Directory server application.
-    long-summary: --aad-server-app-secret is deprecated. See https://aka.ms/aks/aad-legacy for details.
   - name: --aad-tenant-id
     type: string
     short-summary: The ID of an Azure Active Directory tenant.
@@ -326,9 +314,6 @@ parameters:
   - name: --enable-high-log-scale-mode
     type: bool
     short-summary: Enable High Log Scale Mode for Container Logs.
-  - name: --uptime-sla
-    type: bool
-    short-summary: --uptime-sla is deprecated. Please use '--tier standard' instead.
   - name: --tier
     type: string
     short-summary: Specify SKU tier for managed clusters. '--tier standard' enables a standard managed cluster service with a financially backed SLA. '--tier free' does not have a financially backed SLA.
@@ -556,6 +541,15 @@ parameters:
   - name: --enable-vtpm
     type: bool
     short-summary: Enable vTPM on all node pools in the cluster. Must use VMSS agent pool type.
+  - name: --enable-acns
+    type: bool
+    short-summary: Enable advanced network functionalities on a cluster. Enabling this will incur additional costs. For non-cilium clusters, acns security will be disabled by default until further notice.
+  - name: --disable-acns-observability
+    type: bool
+    short-summary: Used to disable advanced networking observability features on a clusters when enabling advanced networking features with "--enable-acns".
+  - name: --disable-acns-security
+    type: bool
+    short-summary: Used to disable advanced networking security features on a clusters when enabling advanced networking features with "--enable-acns".
 
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
@@ -653,12 +647,6 @@ parameters:
   - name: --max-count
     type: int
     short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 1000]
-  - name: --uptime-sla
-    type: bool
-    short-summary: Enable a standard managed cluster service with a financially backed SLA. --uptime-sla is deprecated. Please use '--tier standard' instead.
-  - name: --no-uptime-sla
-    type: bool
-    short-summary: Change a standard managed cluster to a free one. --no-uptime-sla is deprecated. Please use '--tier free' instead.
   - name: --tier
     type: string
     short-summary: Specify SKU tier for managed clusters. '--tier standard' enables a standard managed cluster service with a financially backed SLA. '--tier free' changes a standard managed cluster to a free one.
@@ -964,6 +952,18 @@ parameters:
   - name: --disable-cost-analysis
     type: bool
     short-summary: Disable exporting Kubernetes Namespace and Deployment details to the Cost Analysis views in the Azure portal.
+  - name: --enable-acns
+    type: bool
+    short-summary: Enable advanced network functionalities on a cluster. Enabling this will incur additional costs. For non-cilium clusters, acns security will be disabled by default until further notice.
+  - name: --disable-acns
+    type: bool
+    short-summary: Disable all advanced networking functionalities on a cluster.
+  - name: --disable-acns-observability
+    type: bool
+    short-summary: Used to disable advanced networking observability features on a clusters when enabling advanced networking features with "--enable-acns".
+  - name: --disable-acns-security
+    type: bool
+    short-summary: Used to disable advanced networking security features on a clusters when enabling advanced networking features with "--enable-acns".
 
 examples:
   - name: Reconcile the cluster back to its current state.

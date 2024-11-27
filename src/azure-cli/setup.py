@@ -17,7 +17,7 @@ except ImportError:
     logging.warning("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.66.0"
+VERSION = "2.67.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -42,7 +42,6 @@ CLASSIFIERS = [
     'Intended Audience :: System Administrators',
     'Programming Language :: Python',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: 3.11',
@@ -64,7 +63,7 @@ DEPENDENCIES = [
     'azure-keyvault-secrets==4.7.0',
     'azure-mgmt-advisor==9.0.0',
     'azure-mgmt-apimanagement==4.0.0',
-    'azure-mgmt-appconfiguration==3.0.0',
+    'azure-mgmt-appconfiguration==3.1.0',
     'azure-mgmt-appcontainers==2.0.0',
     'azure-mgmt-applicationinsights~=1.0.0',
     'azure-mgmt-authorization~=4.0.0',
@@ -75,11 +74,12 @@ DEPENDENCIES = [
     'azure-mgmt-cdn==12.0.0',
     'azure-mgmt-cognitiveservices~=13.5.0',
     'azure-mgmt-compute~=33.0.0',
-    'azure-mgmt-containerinstance==10.1.0',
+    'azure-mgmt-containerinstance==10.2.0b1',
     'azure-mgmt-containerregistry==10.3.0',
-    'azure-mgmt-containerservice~=32.1.0',
+    'azure-mgmt-containerservice~=33.0.0',
     'azure-mgmt-cosmosdb==9.6.0',
     'azure-mgmt-databoxedge~=1.0.0',
+    'azure-mgmt-datalake-store~=1.1.0b1',
     'azure-mgmt-datamigration~=10.0.0',
     'azure-mgmt-devtestlabs~=4.0',
     'azure-mgmt-dns~=8.0.0',
@@ -92,7 +92,6 @@ DEPENDENCIES = [
     'azure-mgmt-iothub==3.0.0',
     'azure-mgmt-iothubprovisioningservices==1.1.0',
     'azure-mgmt-keyvault==10.3.0',
-    'azure-mgmt-kusto~=0.3.0',
     'azure-mgmt-loganalytics==13.0.0b4',
     'azure-mgmt-managementgroups~=1.0.0',
     'azure-mgmt-maps~=2.0.0',
@@ -102,7 +101,7 @@ DEPENDENCIES = [
     'azure-mgmt-msi~=7.0.0',
     'azure-mgmt-netapp~=10.1.0',
     'azure-mgmt-policyinsights==1.1.0b4',
-    'azure-mgmt-postgresqlflexibleservers==1.0.0',
+    'azure-mgmt-postgresqlflexibleservers==1.1.0b1',
     'azure-mgmt-privatedns~=1.0.0',
     'azure-mgmt-rdbms==10.2.0b17',
     'azure-mgmt-mysqlflexibleservers==1.0.0b2',
@@ -119,7 +118,7 @@ DEPENDENCIES = [
     'azure-mgmt-servicefabric~=2.1.0',
     'azure-mgmt-signalr==2.0.0b2',
     'azure-mgmt-sqlvirtualmachine==1.0.0b5',
-    'azure-mgmt-sql==4.0.0b19',
+    'azure-mgmt-sql==4.0.0b20',
     'azure-mgmt-storage==21.2.0',
     'azure-mgmt-synapse==2.1.0b5',
     'azure-mgmt-trafficmanager~=1.0.0',
@@ -178,7 +177,7 @@ setup(
     ],
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests", "azure", "azure.cli"]),
     install_requires=DEPENDENCIES,
-    python_requires='>=3.8.0',
+    python_requires='>=3.9.0',
     package_data={
         'azure.cli.command_modules.acr': ['*.json'],
         'azure.cli.command_modules.botservice': ['*.json', '*.config'],

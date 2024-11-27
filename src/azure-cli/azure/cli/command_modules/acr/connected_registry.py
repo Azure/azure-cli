@@ -253,7 +253,7 @@ def acr_connected_registry_delete(cmd,
     try:
         connected_registry = acr_connected_registry_show(
             cmd, client, connected_registry_name, registry_name, resource_group_name)
-        result = client.begin_delete(resource_group_name, registry_name, connected_registry_name)
+        result = client.begin_delete(resource_group_name, registry_name, connected_registry_name).result()
         sync_token = get_token_from_id(cmd, connected_registry.parent.sync_properties.token_id)
         sync_token_name = sync_token.name
         sync_scope_map_name = sync_token.scope_map_id.split('/scopeMaps/')[1]
@@ -264,8 +264,10 @@ def acr_connected_registry_delete(cmd,
             scope_map_client = cf_acr_scope_maps(cmd.cli_ctx)
 
             # Delete target sync scope map and token.
-            acr_token_delete(cmd, token_client, registry_name, sync_token_name, yes, resource_group_name)
-            acr_scope_map_delete(cmd, scope_map_client, registry_name, sync_scope_map_name, yes, resource_group_name)
+            acr_token_delete(cmd, token_client, registry_name,
+                             sync_token_name, yes, resource_group_name).result()
+            acr_scope_map_delete(cmd, scope_map_client, registry_name,
+                                 sync_scope_map_name, yes, resource_group_name).result()
             # Cleanup gateway permissions from ancestors
             connected_registry_list = list(client.list(resource_group_name, registry_name))
             family_tree, _ = _get_family_tree(connected_registry_list, None)
