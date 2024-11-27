@@ -2851,7 +2851,7 @@ class SqlServerDnsAliasMgmtScenarioTest(ScenarioTest):
                                        resource_group_2, resource_group_location_2,
                                        server_name_1, server_name_2, server_name_3):
         # helper class so that it's clear which servers are in which groups
-        class ServerInfo(object):  # pylint: disable=too-few-public-methods
+        class ServerInfo:  # pylint: disable=too-few-public-methods
             def __init__(self, name, group, location):
                 self.name = name
                 self.group = group
@@ -2983,7 +2983,7 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
         hs_service_objective = 'HS_Gen5_8'
 
         # helper class so that it's clear which servers are in which groups
-        class ServerInfo(object):  # pylint: disable=too-few-public-methods
+        class ServerInfo:  # pylint: disable=too-few-public-methods
             def __init__(self, name, group, location):
                 self.name = name
                 self.group = group
@@ -6575,7 +6575,7 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                                      resource_group_2, resource_group_location_2,
                                      server_name_1, server_name_2):
         # helper class so that it's clear which servers are in which groups
-        class ServerInfo(object):  # pylint disable=too-few-public-methods
+        class ServerInfo:  # pylint disable=too-few-public-methods
             def __init__(self, name, group, location):
                 self.name = name
                 self.group = group

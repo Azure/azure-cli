@@ -6088,10 +6088,11 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
         self.cmd('network vnet create -g {rg} -n {vnet1} --subnet-name GatewaySubnet --address-prefix 10.0.0.0/16 --subnet-prefix 10.0.0.0/24')
 
         self.cmd(
-            "network vnet-gateway create -n {gw1} -g {rg} --public-ip-address {ip1} --vnet {vnet1} --gateway-type ExpressRoute --sku ErGwScale --min-scale-unit 3 --max-scale-unit 5",
+            "network vnet-gateway create -n {gw1} -g {rg} --public-ip-address {ip1} --vnet {vnet1} --gateway-type ExpressRoute --resiliency-model SingleHomed --sku ErGwScale --min-scale-unit 3 --max-scale-unit 5",
             checks=[
                 self.check("vnetGateway.autoScaleConfiguration.bounds.max", 5),
                 self.check("vnetGateway.autoScaleConfiguration.bounds.min", 3),
+                self.check("vnetGateway.resiliencyModel", "SingleHomed"),
             ]
         )
         self.cmd(
