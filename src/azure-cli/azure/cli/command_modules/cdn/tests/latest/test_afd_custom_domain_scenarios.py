@@ -36,7 +36,7 @@ class CdnAfdCustomDomainScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
         secretId = secretData['id']
 
         custom_domain_name = self.create_random_name(prefix='customdomain', length=24)
-        host_name = f"{custom_domain_name}.afde2e.azfdtest.xyz"
+        host_name = f"{custom_domain_name}.afde2e-root.azfdtest.xyz"
         certificate_type = AfdCertificateType.customer_certificate.value
         minimum_tls_version = AfdMinimumTlsVersion.tls12.value
         azure_dns_zone = None
