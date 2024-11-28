@@ -20,6 +20,9 @@ else
     against=$(git hash-object -t tree /dev/null)
 fi
 has_secrets=0
+
+IFS_OLD=${IFS}
+IFS=$'\n'
 for FILE in "`git diff --cached --name-only --diff-filter=AM $against`" ; do
     # Check if the file contains secrets
     detected=$(azdev scan -f "$FILE" | python -c "import sys, json; print(json.load(sys.stdin)['secrets_detected'])")
@@ -28,6 +31,7 @@ for FILE in "`git diff --cached --name-only --diff-filter=AM $against`" ; do
       has_secrets=1
     fi
 done
+IFS=${IFS_OLD}
 
 if [ $has_secrets -eq 1 ]; then
     printf "\033[0;31mSecret detected. If you want to skip that, run add '--no-verify' in the end of 'git commit' command.\033[0m\n"
