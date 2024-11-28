@@ -2087,7 +2087,7 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
             {
                 "priority": CONST_SCALE_SET_PRIORITY_SPOT,
                 "eviction_policy": CONST_SPOT_EVICTION_POLICY_DEALLOCATE,
-                "spot_max_price": float(1.2345),
+                "spot_max_price": 1.2345,
             },
             self.resource_type,
             self.agentpool_decorator_mode,
@@ -2103,7 +2103,7 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
         ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
             scale_set_priority=CONST_SCALE_SET_PRIORITY_SPOT,
             scale_set_eviction_policy=CONST_SPOT_EVICTION_POLICY_DEALLOCATE,
-            spot_max_price=float(1.2345),
+            spot_max_price=1.2345,
         )
         self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
 

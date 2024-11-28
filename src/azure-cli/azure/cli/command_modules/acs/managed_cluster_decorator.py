@@ -996,7 +996,7 @@ class AKSManagedClusterContext(BaseAKSContext):
             # Use subscription id to provide uniqueness and prevent DNS name clashes
             name_part = re.sub('[^A-Za-z0-9-]', '', name)[0:10]
             if not name_part[0].isalpha():
-                name_part = (str('a') + name_part)[0:10]
+                name_part = ('a' + name_part)[0:10]
             resource_group_part = re.sub(
                 '[^A-Za-z0-9-]', '', resource_group_name)[0:16]
             dns_name_prefix = '{}-{}-{}'.format(name_part, resource_group_part, subscription_id[0:6])

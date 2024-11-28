@@ -227,7 +227,7 @@ def acr_helm_install_cli(client_version='2.16.3', install_location=None, yes=Fal
 
                 if os.path.splitext(f.name)[0] in ('helm', 'tiller'):
                     os.chmod(target_path, os.stat(target_path).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
-    except IOError as e:
+    except OSError as e:
         import traceback
         logger.debug(traceback.format_exc())
         raise CLIError('Error while installing {} to {}: {}'.format(cli, install_dir, e))

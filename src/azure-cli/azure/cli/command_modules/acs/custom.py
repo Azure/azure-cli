@@ -1471,7 +1471,7 @@ def load_kubernetes_configuration(filename):
     try:
         with open(filename) as stream:
             return yaml.safe_load(stream)
-    except (IOError, OSError) as ex:
+    except OSError as ex:
         if getattr(ex, 'errno', 0) == errno.ENOENT:
             raise CLIError('{} does not exist'.format(filename))
         raise
@@ -1922,7 +1922,7 @@ def k8s_install_kubectl(cmd, client_version='latest', install_location=None, sou
         _urlretrieve(file_url, install_location)
         os.chmod(install_location,
                  os.stat(install_location).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
-    except IOError as ex:
+    except OSError as ex:
         raise CLIError(
             'Connection error while attempting to download client ({})'.format(ex))
 
@@ -1986,7 +1986,7 @@ def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, s
             logger.warning('Downloading client to "%s" from "%s"',
                            download_path, file_url)
             _urlretrieve(file_url, download_path)
-        except IOError as ex:
+        except OSError as ex:
             raise CLIError(
                 'Connection error while attempting to download client ({})'.format(ex))
         _unzip(download_path, tmp_dir)

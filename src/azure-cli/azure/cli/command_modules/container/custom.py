@@ -1054,10 +1054,10 @@ def _flush_stdin(ws, buff, lock):
             buff.clear()
             lock.release()
             ws.send(x, opcode=0x2)  # OPCODE_BINARY = 0x2
-        except (OSError, IOError, websocket.WebSocketConnectionClosedException) as e:
+        except (OSError, websocket.WebSocketConnectionClosedException) as e:
             if isinstance(e, websocket.WebSocketConnectionClosedException):
                 pass
-            elif e.errno == 9:  # [Errno 9] Bad file descriptor
+            elif e.errno == errno.EBADF:  # [Errno 9] Bad file descriptor
                 pass
             elif e.args and e.args[0] == errno.EINTR:
                 pass

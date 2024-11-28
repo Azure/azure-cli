@@ -41,7 +41,7 @@ class TelemetryNote(portalocker.utils.Lock):
             last_send = datetime.datetime.strptime(raw, '%Y-%m-%dT%H:%M:%S')
             self._logger.info("Read timestamp from the note. The last send was %s.", last_send)
             return last_send
-        except (AttributeError, ValueError, IOError) as err:
+        except (OSError, AttributeError, ValueError) as err:
             self._logger.warning("Fail to parse or read the timestamp '%s' in the note file. Set the last send time "
                                  "to minimal. Reason: %s", raw, err)
             return fallback
@@ -54,7 +54,7 @@ class TelemetryNote(portalocker.utils.Lock):
                 self.fh.write(next_send.strftime('%Y-%m-%dT%H:%M:%S'))
                 self.fh.truncate()
                 break
-            except IOError:
+            except OSError:
                 self._logger.warning('Fail to update the note file. This is the %d try.', retry + 1)
         else:
             # TODO: how to save this?
