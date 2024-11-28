@@ -296,7 +296,6 @@ def flexible_server_update_custom_func(cmd, client, instance,
                                        auto_grow=None,
                                        performance_tier=None,
                                        iops=None, throughput=None,
-                                       cluster_size=None,
                                        yes=False):
 
     # validator
