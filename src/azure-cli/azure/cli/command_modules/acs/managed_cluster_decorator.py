@@ -2033,7 +2033,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         if self.decorator_mode == DecoratorMode.CREATE:
             if (
                 self.mc and
-                hasattr(self.mc, "nrg_lockdown_restriction_level") and # for backward compatibility
+                hasattr(self.mc, "nrg_lockdown_restriction_level") and  # for backward compatibility
                 self.mc.node_resource_group_profile and
                 self.mc.node_resource_group_profile.restriction_level is not None
             ):
