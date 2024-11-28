@@ -543,7 +543,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
     args["disk_name"] = disk_name
     args["resource_group"] = resource_group_name
 
-    _Disk = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "disk").Create
+    _Disk = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "disk")
     return _Disk.Create(cli_ctx=cmd.cli_ctx)(command_args=args)
 # endregion
 

@@ -215,7 +215,6 @@ class Create(AAZCommand):
         image_reference.id = AAZStrArg(
             options=["id"],
             help="A relative uri containing either a Platform Image Repository or user image reference.",
-            required=True,
         )
         image_reference.lun = AAZIntArg(
             options=["lun"],
@@ -386,7 +385,7 @@ class Create(AAZCommand):
 
             image_reference = _builder.get(".properties.creationData.imageReference")
             if image_reference is not None:
-                image_reference.set_prop("id", AAZStrType, ".id", typ_kwargs={"flags": {"required": True}})
+                image_reference.set_prop("id", AAZStrType, ".id")
                 image_reference.set_prop("lun", AAZIntType, ".lun")
 
             encryption = _builder.get(".properties.encryption")
@@ -551,9 +550,7 @@ class _CreateHelper:
         )
 
         image_reference = _schema_disk_read.properties.creation_data.image_reference
-        image_reference.id = AAZStrType(
-            flags={"required": True},
-        )
+        image_reference.id = AAZStrType()
         image_reference.lun = AAZIntType()
 
         encryption = _schema_disk_read.properties.encryption

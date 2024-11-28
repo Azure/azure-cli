@@ -20,6 +20,63 @@ except ImportError:
 
 # pylint: disable=line-too-long, too-many-lines
 
+helps['disk create'] = """
+type: command
+short-summary: Create a managed disk.
+examples:
+  - name: Create a managed disk by importing from a blob uri.
+    text: >
+        az disk create -g MyResourceGroup -n MyDisk --source https://vhd1234.blob.core.windows.net/vhds/osdisk1234.vhd
+  - name: Create an empty managed disk.
+    text: >
+        az disk create -g MyResourceGroup -n MyDisk --size-gb 10
+  - name: Create an empty managed disk with bursting enabled.
+    text: >
+        az disk create -g MyResourceGroup -n MyDisk --size-gb 1024 --location centraluseuap --enable-bursting
+  - name: Create a managed disk by copying an existing disk or snapshot.
+    text: >
+        az disk create -g MyResourceGroup -n MyDisk2 --source MyDisk
+  - name: Create a disk in an availability zone in the region of "East US 2"
+    text: >
+        az disk create -g MyResourceGroup -n MyDisk --size-gb 10 --location eastus2 --zone 1
+  - name: Create a disk from image.
+    text: >
+        az disk create -g MyResourceGroup -n MyDisk --image-reference Canonical:0001-com-ubuntu-server-jammy:22_04-lts-gen2:latest
+  - name: Create a disk from the OS Disk of a compute gallery image version
+    text: >
+        az disk create -g MyResourceGroup -n MyDisk --gallery-image-reference /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myRG/providers/Microsoft.Compute/galleries/myGallery/images/myImage/versions/1.0.0
+  - name: Create a disk from the OS Disk of the latest version in a compute gallery image
+    text: >
+        az disk create -g MyResourceGroup -n MyDisk --gallery-image-reference /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myRG/providers/Microsoft.Compute/galleries/myGallery/images/myImage
+  - name: Create a disk from the OS Disk of a shared gallery image version
+    text: >
+        az disk create -g MyResourceGroup -n MyDisk --gallery-image-reference /SharedGalleries/sharedGalleryUniqueName/Images/imageName/Versions/1.0.0
+  - name: Create a disk from the OS Disk of a community gallery image version
+    text: >
+        az disk create -g MyResourceGroup -n MyDisk --gallery-image-reference /CommunityGalleries/communityGalleryPublicGalleryName/Images/imageName/Versions/1.0.0
+  - name: Create a disk from the Data Disk of a gallery image
+    text: >
+        az disk create -g MyResourceGroup -n MyDisk --gallery-image-reference /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myRG/providers/Microsoft.Compute/galleries/myGallery/images/myImage/versions/1.0.0 --gallery-image-reference-lun 0
+  - name: Create a disk with total number of IOPS and total throughput (MBps) limitation.
+    text: >
+        az disk create -g MyResourceGroup -n MyDisk --size-gb 10 --sku UltraSSD_LRS --disk-iops-read-only 200 --disk-mbps-read-only 30
+  - name: Create a disk and specify maximum number of VMs that can attach to the disk at the same time.
+    text: >
+        az disk create -g MyResourceGroup -n MyDisk --size-gb 256 --max-shares 2 -l centraluseuap
+  - name: Create a disk and associate it with a disk access resource.
+    text: >
+        az disk create -g MyResourceGroup -n MyDisk --size-gb 10 --network-access-policy AllowPrivate --disk-access MyDiskAccessID
+  - name: Create a disk from the blob URI for VM guest state VHD.
+    text: >
+        az disk create -g MyResourceGroup -n MyDisk --size-gb 10 --security-data-uri GuestStateDiskVhdUri --security-type TrustedLaunch --hyper-v-generation V2
+  - name: Create a standard disk for uploading blobs.
+    text: >
+        az disk create -g MyResourceGroup -n MyDisk --upload-size-bytes 20972032 --upload-type Upload
+  - name: Create an OS disk for uploading along with VM guest state.
+    text: >
+        az disk create -g MyResourceGroup -n MyDisk --upload-size-bytes 20972032 --upload-type UploadWithSecurityData --security-type TrustedLaunch --hyper-v-generation V2
+"""
+
 helps['disk wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a condition of a managed disk is met.
@@ -137,6 +194,18 @@ examples:
   - name: Display managed identities of a disk encryption set.
     text: |
         az disk-encryption-set identity show --name MyDiskEncryptionSet --resource-group MyResourceGroup
+"""
+
+helps['image create'] = """
+type: command
+short-summary: Create a custom Virtual Machine Image from managed disks or snapshots.
+examples:
+  - name: Create an image from an existing disk.
+    text: |
+        az image create -g MyResourceGroup -n image1 --os-type Linux \\
+            --source /subscriptions/db5eb68e-73e2-4fa8-b18a-0123456789999/resourceGroups/rg1/providers/Microsoft.Compute/snapshots/s1
+  - name: Create an image by capturing an existing generalized virtual machine in the same resource group.
+    text: az image create -g MyResourceGroup -n image1 --source MyVm1
 """
 
 helps['image builder'] = """
