@@ -307,7 +307,7 @@ def load_arguments(self, _):
         c.argument('max_age', nargs='?', const='', validator=validate_cors_max_age, help="The maximum age of the allowed origin in seconds. Only postive integer or empty string are allowed. Empty string resets max_age to null.")
 
     with self.argument_context('containerapp secret') as c:
-        c.argument('secrets', nargs='+', options_list=['--secrets', '-s'], help="A list of secret(s) for the container app. Space-separated values in 'key=value' or 'key=keyvaultref:keyvaulturl,identityref:identity' format (where 'key' cannot be longer than 20 characters).")
+        c.argument('secrets', nargs='+', options_list=['--secrets', '-s'], help="A list of secret(s) for the container app. Space-separated values in 'key=value' or 'key=keyvaultref:keyvaulturl,identityref:identity' format (where 'key' cannot be longer than 20 characters. For 'identityref', Use 'system' for a system-defined identity or a resource id for a user-defined identity).")
         c.argument('secret_name', help="The name of the secret to show.")
         c.argument('secret_names', nargs='+', help="A list of secret(s) for the container app. Space-separated secret values names.")
         c.argument('show_values', help='Show the secret values.')
