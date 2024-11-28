@@ -941,7 +941,7 @@ def db_show_conn_str(
     return f.format(**conn_str_props)
 
 
-class DatabaseIdentity():  # pylint: disable=too-few-public-methods
+class DatabaseIdentity:  # pylint: disable=too-few-public-methods
     '''
     Helper class to bundle up database identity properties and generate
     database resource id.
@@ -6432,7 +6432,7 @@ def failover_group_create(
         partner_server,
         secondary_type=None,
         partner_resource_group=None,
-        failover_policy=FailoverPolicyType.automatic.value,
+        failover_policy=FailoverPolicyType.manual.value,
         grace_period=1,
         add_db=None):
     '''

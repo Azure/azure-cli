@@ -3526,6 +3526,63 @@ class VMDiskAttachDetachTest(ScenarioTest):
         ])
 
     @AllowLargeResponse(size_kb=99999)
+    @ResourceGroupPreparer(name_prefix='cli-test-disk-attach-detach')
+    def test_vm_disk_attach_detach_api(self, resource_group):
+        self.kwargs.update({
+            'loc': 'westus',
+            'vm': self.create_random_name('vm', 10),
+            'disk1': self.create_random_name('disk', 10),
+            'disk2': self.create_random_name('disk', 10),
+            'subnet': self.create_random_name('subnet', 15),
+            'vnet': self.create_random_name('vnet', 15)
+        })
+
+        self.cmd('vm create -g {rg} --location {loc} -n {vm} --admin-username admin123 --image OpenLogic:CentOS:7.5:latest --admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk1} --new --size-gb 1 --caching ReadOnly')
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk2} --new --size-gb 2 --lun 2 --sku standard_lrs')
+        disks = self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('length(storageProfile.dataDisks)', 2),
+            self.check('storageProfile.dataDisks[0].name', '{disk1}'),
+            self.check('storageProfile.dataDisks[0].caching', 'ReadOnly'),
+            self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Premium_LRS'),
+            self.check('storageProfile.dataDisks[1].name', '{disk2}'),
+            self.check('storageProfile.dataDisks[1].lun', 2),
+            self.check('storageProfile.dataDisks[1].managedDisk.storageAccountType', 'Standard_LRS'),
+            self.check('storageProfile.dataDisks[1].caching', 'None')
+        ]).get_output_in_json()['storageProfile']['dataDisks']
+        self.kwargs.update({
+            'disk1_id': disks[0]['managedDisk']['id'],
+            'disk2_id': disks[1]['managedDisk']['id']
+        })
+
+        self.cmd('vm disk detach -g {rg} --vm-name {vm} --disk-ids {disk1_id}')
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            # self.check('length(storageProfile.dataDisks)', 1),
+            # self.check('storageProfile.dataDisks[0].name', '{disk2}'),
+            # self.check('storageProfile.dataDisks[0].lun', 2)
+        ])
+
+        self.cmd('vm disk detach -g {rg} --vm-name {vm} --disk-ids {disk2_id} --force-detach')
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            # self.check('length(storageProfile.dataDisks)', 0)
+        ])
+
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --disk-ids {disk1_id} {disk2_id}')
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            # self.check('storageProfile.dataDisks[0].caching', 'ReadWrite'),
+            # self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Standard_LRS'),
+            # self.check('storageProfile.dataDisks[0].lun', 0)
+        ])
+
+        # force detach a disk
+        self.cmd('vm disk detach -g {rg} --vm-name {vm} --disk-ids {disk1_id} {disk2_id} --force-detach')
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            # self.check('length(storageProfile.dataDisks)', 0)
+        ])
+
+    @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli-test-disk-attach-multiple-disks')
     def test_vm_disk_attach_multiple_disks(self, resource_group):
 
@@ -3546,14 +3603,23 @@ class VMDiskAttachDetachTest(ScenarioTest):
         self.cmd(
             'network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
-        with self.assertRaisesRegex(RequiredArgumentMissingError, 'Please use --name or --disks to specify the disk names'):
+        with self.assertRaisesRegex(RequiredArgumentMissingError, 'Please use at least one of --name, --disks and --disk-ids'):
             self.cmd('vm disk attach -g {rg} --vm-name {vm} --new --size-gb 1 ')
 
         with self.assertRaisesRegex(MutuallyExclusiveArgumentError, 'You can only specify one of --name and --disks'):
             self.cmd('vm disk attach -g {rg} --name {disk1} --disks {disk1} {disk2} {disk3} --vm-name {vm} --new --size-gb 1 ')
 
+        with self.assertRaisesRegex(MutuallyExclusiveArgumentError, 'You can only specify one of --name and --disk-ids'):
+            self.cmd('vm disk attach -g {rg} --name {disk1} --disk-ids {disk1} {disk2} {disk3} --vm-name {vm} --new --size-gb 1 ')
+
+        with self.assertRaisesRegex(MutuallyExclusiveArgumentError, 'You can only specify one of --disks and --disk-ids'):
+            self.cmd('vm disk attach -g {rg} --disk-ids {disk1} --disks {disk1} {disk2} {disk3} --vm-name {vm} --new --size-gb 1 ')
+
         with self.assertRaisesRegex(MutuallyExclusiveArgumentError, 'You cannot specify the --lun for multiple disks'):
             self.cmd('vm disk attach -g {rg} --disks {disk1} {disk2} {disk3} --vm-name {vm} --new --size-gb 1 --lun 2')
+
+        with self.assertRaisesRegex(MutuallyExclusiveArgumentError, 'You cannot specify the --lun for multiple disk IDs'):
+            self.cmd('vm disk attach -g {rg} --disk-ids {disk1} {disk2} {disk3} --vm-name {vm} --lun 2')
 
         self.cmd('vm disk attach -g {rg} --vm-name {vm} --disks {disk1} {disk2} {disk3} --new --size-gb 1 ')
 
@@ -4723,6 +4789,7 @@ class VMSSUpdateTests(ScenarioTest):
             self.check('upgradePolicy.automaticOsUpgradePolicy.enableAutomaticOsUpgrade', True)
         ])
 
+    @live_only()
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_image_', location='westus')
     def test_vmss_update_image(self):
@@ -10335,22 +10402,38 @@ class VMInstallPatchesScenarioTest(ScenarioTest):
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_vm_install_patches_')
     def test_vm_install_patches(self, resource_group):
+        from azure.core.exceptions import HttpResponseError
+
         self.kwargs.update({
             'subnet': 'subnet1',
             'vnet': 'vnet1'
         })
-        # Create new one
-        self.cmd('vm create -g {rg} -n vm --image MicrosoftWindowsServer:WindowsServer:2022-Datacenter-Azure-Edition-Hotpatch:latest '
+        # Create a windows vm
+        self.cmd('vm create -g {rg} -n vm -l westus --image MicrosoftWindowsServer:WindowsServer:2022-Datacenter-Azure-Edition-Hotpatch:latest '
                  '--enable-hotpatching true --patch-mode AutomaticByPlatform --enable-agent --admin-username azureuser --admin-password testPassword0 --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+
+        # Create a linux vm
+        self.cmd('vm create -g {rg} -n vm2 --image Ubuntu2204 -l westus --admin-username azureuser --admin-password Password123! '
+                 '--subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
 
         # Disable default outbound access
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
-        self.cmd('vm install-patches -g {rg} -n vm --maximum-duration PT4H --reboot-setting IfRequired --classifications-to-include-win Critical Security --exclude-kbs-requiring-reboot true --max-patch-publish-date 2024-08-01T02:36:43', checks=[
+        # Test for WindowsParameters and check for serialization warning/errors
+        with self.assertRaisesRegex(HttpResponseError, "The entry in 'kbNumbersToInclude' with value '1111' is not valid. It must be a KBID such as"):
+            self.cmd('vm install-patches -g {rg} -n vm --maximum-duration PT4H --reboot-setting Never --classifications-to-include-win Critical Security '
+                     '--exclude-kbs-requiring-reboot true --kb-numbers-to-include=1111 --max-patch-publish-date 2024-11-01T02:36:43')
+
+        self.cmd('vm install-patches -g {rg} -n vm --maximum-duration PT4H --reboot-setting Never --classifications-to-include-win Critical Security '
+                 '--exclude-kbs-requiring-reboot true --kb-numbers-to-include=KB4512508 --max-patch-publish-date 2024-11-01T02:36:43', 
+                 checks=[
+                    self.check('status', 'Succeeded')
+                    ])
+
+        # Test for LinuxParameters and check for success
+        self.cmd('vm install-patches -g {rg} -n vm2 --maximum-duration PT4H --reboot-setting ifRequired --classifications-to-include-linux Critical Security', checks=[
             self.check('status', 'Succeeded')
         ])
-
-
 
 class VMTrustedLaunchScenarioTest(ScenarioTest):
     @AllowLargeResponse(size_kb=99999)

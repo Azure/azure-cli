@@ -1883,17 +1883,23 @@ def validate_vmss_update_namespace(cmd, namespace):  # pylint: disable=unused-ar
 
 # region disk, snapshot, image validators
 def process_vm_disk_attach_namespace(cmd, namespace):
-    disks = []
-    if not namespace.disks:
-        if not namespace.disk:
-            raise RequiredArgumentMissingError("Please use --name or --disks to specify the disk names")
+    if not namespace.disks and not namespace.disk and not namespace.disk_ids:
+        raise RequiredArgumentMissingError("Please use at least one of --name, --disks and --disk-ids")
 
+    if namespace.disk and namespace.disks:
+        raise MutuallyExclusiveArgumentError("You can only specify one of --name and --disks")
+
+    if namespace.disk and namespace.disk_ids:
+        raise MutuallyExclusiveArgumentError("You can only specify one of --name and --disk-ids")
+
+    if namespace.disks and namespace.disk_ids:
+        raise MutuallyExclusiveArgumentError("You can only specify one of --disks and --disk-ids")
+
+    disks = []
+    if namespace.disk:
         disks = [_get_resource_id(cmd.cli_ctx, namespace.disk, namespace.resource_group_name,
                                   'disks', 'Microsoft.Compute')]
-    else:
-        if namespace.disk:
-            raise MutuallyExclusiveArgumentError("You can only specify one of --name and --disks")
-
+    if namespace.disks:
         for disk in namespace.disks:
             disks.append(_get_resource_id(cmd.cli_ctx, disk, namespace.resource_group_name,
                                           'disks', 'Microsoft.Compute'))
@@ -1901,6 +1907,14 @@ def process_vm_disk_attach_namespace(cmd, namespace):
 
     if len(disks) > 1 and namespace.lun:
         raise MutuallyExclusiveArgumentError("You cannot specify the --lun for multiple disks")
+
+    if namespace.disk_ids and len(namespace.disk_ids) > 1 and namespace.lun:
+        raise MutuallyExclusiveArgumentError("You cannot specify the --lun for multiple disk IDs")
+
+
+def process_vm_disk_detach_namespace(namespace):
+    if not namespace.disk_name and not namespace.disk_ids:
+        raise RequiredArgumentMissingError("Please use at least one '--name', '--disk-ids'")
 
 
 def validate_vmss_disk(cmd, namespace):

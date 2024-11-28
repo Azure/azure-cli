@@ -704,6 +704,7 @@ TARGET_SUPPORT_PRIVATE_ENDPOINT = [
     RESOURCE.Redis,
     RESOURCE.Postgres,
     RESOURCE.Mysql,
+    RESOURCE.MysqlFlexible,
     RESOURCE.EventHub,
     RESOURCE.KeyVault,
     RESOURCE.SignalR,

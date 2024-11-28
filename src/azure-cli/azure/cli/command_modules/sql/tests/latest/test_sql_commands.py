@@ -2851,7 +2851,7 @@ class SqlServerDnsAliasMgmtScenarioTest(ScenarioTest):
                                        resource_group_2, resource_group_location_2,
                                        server_name_1, server_name_2, server_name_3):
         # helper class so that it's clear which servers are in which groups
-        class ServerInfo(object):  # pylint: disable=too-few-public-methods
+        class ServerInfo:  # pylint: disable=too-few-public-methods
             def __init__(self, name, group, location):
                 self.name = name
                 self.group = group
@@ -2983,7 +2983,7 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
         hs_service_objective = 'HS_Gen5_8'
 
         # helper class so that it's clear which servers are in which groups
-        class ServerInfo(object):  # pylint: disable=too-few-public-methods
+        class ServerInfo:  # pylint: disable=too-few-public-methods
             def __init__(self, name, group, location):
                 self.name = name
                 self.group = group
@@ -6575,7 +6575,7 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                                      resource_group_2, resource_group_location_2,
                                      server_name_1, server_name_2):
         # helper class so that it's clear which servers are in which groups
-        class ServerInfo(object):  # pylint disable=too-few-public-methods
+        class ServerInfo:  # pylint disable=too-few-public-methods
             def __init__(self, name, group, location):
                 self.name = name
                 self.group = group
@@ -7439,55 +7439,64 @@ class SqlManagedInstanceServerTrustCertificateScenarioTest(ScenarioTest):
 
 class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
     @AllowLargeResponse()
-    @ManagedInstancePreparer(parameter_name="mi")
-    def test_sql_mi_link_mgmt(self, mi, rg):
-        link_name = 'dag'
-        primary_ag = 'ag_primary'
+    @record_only()
+    def test_sql_mi_link_mgmt(self):
+        rg = 'DaniRG'
+        mi_name = 'chimera-canary-gpv2-01'
+        box_name = 'wwi-2022-sql02'
+        link_name = 'Link1'
+        instance_ag_name = 'AG_CLI1_MI'
+        partner_ag_name = 'AG_CLI1'
         replication_mode = 'Async'
-        secondary_ag = 'ag_secondary'
-        source_endpoint = 'TCP://localhost:7022'
-        target_database = 'db'
+        database_name = 'CLI1'
+        databases = "[{database-name:CLI1}]"
+        partner_endpoint = 'tcp://10.0.1.8:5022'
+        instance_link_role = 'Primary'
+        failover_mode = 'Manual'
+        seeding_mode = 'Automatic'
+
         self.kwargs.update({
             'rg': rg,
-            'mi': mi,
+            'mi_name': mi_name,
+            'box_name': box_name,
             'link_name': link_name,
-            'primary_ag': primary_ag,
+            'instance_ag_name': instance_ag_name,
+            'partner_ag_name': partner_ag_name,
             'replication_mode': replication_mode,
-            'secondary_ag': secondary_ag,
-            'source_endpoint': source_endpoint,
-            'target_database': target_database,
+            'databases': databases,
+            'partner_endpoint': partner_endpoint,
+            'instance_link_role': instance_link_role,
+            'failover_mode': failover_mode,
+            'seeding_mode': seeding_mode
         })
 
-        # Create sql managed_instance
-        self.cmd('sql mi show -g {rg} -n {mi}',
-                    checks=[
-                        JMESPathCheck('name', mi),
-                        JMESPathCheck('resourceGroup', rg)]).get_output_in_json()
-
         # no links on the instance
-        self.cmd('sql mi link list -g {rg} --instance-name {mi}',
+        self.cmd('sql mi link list -g {rg} --instance-name {mi_name}',
                     checks=[JMESPathCheck('length(@)', 0)])
 
         # upsert link (copying state)
-        self.cmd('sql mi link create -g {rg} --instance-name {mi} --name {link_name} --primary-availability-group-name {primary_ag} --secondary-availability-group-name {secondary_ag} --source-endpoint {source_endpoint} --target-database {target_database} --no-wait')
+        self.cmd('sql mi link create -g {rg} --instance-name {mi_name} --name {link_name} --databases \"{databases}\" --instance-availability-group-name {instance_ag_name} --partner-availability-group-name {partner_ag_name} --partner-endpoint {partner_endpoint} --instance-link-role {instance_link_role} --failover-mode {failover_mode} --seeding-mode {seeding_mode}')
 
-        # wait a bit for the resource creation (this doesn't mean the link is fully established)
-        time.sleep(60)
         # show link
-        link = self.cmd('sql mi link show -g {rg} --instance-name {mi} --name {link_name}',
+        link = self.cmd('sql mi link show -g {rg} --instance-name {mi_name} --name {link_name}',
                     checks=[
                         JMESPathCheck('name', link_name),
                         JMESPathCheck('resourceGroup', rg),
                         JMESPathCheck('type', 'Microsoft.Sql/managedInstances/distributedAvailabilityGroups'),
-                        JMESPathCheck('targetDatabase', target_database),
-                        JMESPathCheck('sourceEndpoint', source_endpoint),
-                        JMESPathCheck('linkState', 'WaitForHybridConnectionToEstablish'),
-                        JMESPathCheck('replicationMode', replication_mode), # link is in async repl mode by default
+                        JMESPathCheck('databases[0].databaseName', database_name),
+                        JMESPathCheck('databases[0].replicaState', 'LinkSynchronizing'),
+                        JMESPathCheck('replicationMode', 'Async'),
+                        JMESPathCheck('instanceLinkRole', instance_link_role),
+                        JMESPathCheck('instanceAvailabilityGroupName', instance_ag_name),
+                        JMESPathCheck('partnerAvailabilityGroupName', partner_ag_name),
+                        JMESPathCheck('seedingMode', seeding_mode),
+                        JMESPathCheck('failoverMode', failover_mode),
+                        JMESPathCheck('partnerEndpoint', partner_endpoint),
                         ]).get_output_in_json()
 
         link_id = link['id']
         self.kwargs.update({
-            'link_id': link_id
+            'link_id': link_id + '/distributedAvailabilityGroups/' + link_name
         })
 
         # show command with --ids parameter
@@ -7496,18 +7505,390 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
                         JMESPathCheck('name', link_name),
                         JMESPathCheck('resourceGroup', rg),
                         JMESPathCheck('type', 'Microsoft.Sql/managedInstances/distributedAvailabilityGroups'),
-                        JMESPathCheck('targetDatabase', target_database),
-                        JMESPathCheck('sourceEndpoint', source_endpoint),
-                        JMESPathCheck('linkState', 'WaitForHybridConnectionToEstablish'),
-                        JMESPathCheck('replicationMode', replication_mode), # link is in async repl mode by default
+                        JMESPathCheck('databases[0].databaseName', database_name),
+                        JMESPathCheck('databases[0].replicaState', 'LinkSynchronizing'),
+                        JMESPathCheck('replicationMode', 'Async'),
+                        JMESPathCheck('instanceLinkRole', instance_link_role),
+                        JMESPathCheck('instanceAvailabilityGroupName', instance_ag_name),
+                        JMESPathCheck('partnerAvailabilityGroupName', partner_ag_name),
+                        JMESPathCheck('seedingMode', seeding_mode),
+                        JMESPathCheck('failoverMode', failover_mode),
+                        JMESPathCheck('partnerEndpoint', partner_endpoint),
                         ]).get_output_in_json()
 
         # delete instance link
-        self.cmd('sql mi link delete -g {rg} --instance-name {mi} -n {link_name} --yes')
+        self.cmd('sql mi link delete -g {rg} --instance-name {mi_name} -n {link_name} --yes')
 
         # list 0 instance links
-        self.cmd('sql mi link list -g {rg} --instance-name {mi}',
-                    checks=[JMESPathCheck('length(@)', 0)]).get_output_in_json
+        self.cmd('sql mi link list -g {rg} --instance-name {mi_name}', checks=[JMESPathCheck('length(@)', 0)]).get_output_in_json
+
+    @AllowLargeResponse()
+    @record_only()
+    def test_sql_mi_first_planned_failover(self):
+        rg = 'DaniRG'
+        mi_name = 'chimera-canary-gpv2-01'
+        box_name = 'wwi-2022-sql02'
+        link_name = 'Link1'
+        instance_ag_name = 'AG_CLI1_MI'
+        partner_ag_name = 'AG_CLI1'
+        replication_mode = 'Async'
+        databases = "[{database-name:CLI1}]"
+        partner_endpoint = 'tcp://10.0.1.8:5022'
+        instance_link_role = 'Primary'
+        failover_mode = 'Manual'
+        seeding_mode = 'Automatic'
+        failover_type = 'Planned'
+
+        self.kwargs.update({
+            'rg': rg,
+            'mi_name': mi_name,
+            'box_name': box_name,
+            'link_name': link_name,
+            'instance_ag_name': instance_ag_name,
+            'partner_ag_name': partner_ag_name,
+            'replication_mode': replication_mode,
+            'databases': databases,
+            'partner_endpoint': partner_endpoint,
+            'instance_link_role': instance_link_role,
+            'failover_mode': failover_mode,
+            'seeding_mode': seeding_mode,
+            'failover_type': failover_type
+        })
+
+        # list 0 instance links
+        self.cmd('sql mi link list -g {rg} --instance-name {mi_name}',
+                 checks=[JMESPathCheck('length(@)', 0)])
+
+        # create link
+        self.cmd(
+            'sql mi link create -g {rg} --instance-name {mi_name} --name {link_name} --databases \"{databases}\" --instance-availability-group-name {instance_ag_name} --partner-availability-group-name {partner_ag_name} --partner-endpoint {partner_endpoint} --instance-link-role {instance_link_role} --failover-mode {failover_mode} --seeding-mode {seeding_mode}')
+
+        # list 1 instance links
+        self.cmd('sql mi link list -g {rg} --instance-name {mi_name}',
+                 checks=[JMESPathCheck('length(@)', 1)])
+
+        # assert that the MI is primary before failover
+        self.cmd('sql mi link show -g {rg} --instance-name {mi_name} --name {link_name}',
+                    checks=[
+                        JMESPathCheck('instanceLinkRole', 'Primary'),
+                        ]).get_output_in_json()
+
+        # perform failover
+        self.cmd('sql mi link failover -g {rg} --instance-name {mi_name} -n {link_name} --failover-type {failover_type} --yes')
+
+        # assert that the MI is secondary after failover
+        self.cmd('sql mi link show -g {rg} --instance-name {mi_name} --name {link_name}',
+                    checks=[
+                        JMESPathCheck('instanceLinkRole', 'Secondary'),
+                        ]).get_output_in_json()
+
+        # delete instance link
+        self.cmd('sql mi link delete -g {rg} --instance-name {mi_name} -n {link_name} --yes')
+
+        # list 0 instance links
+        self.cmd('sql mi link list -g {rg} --instance-name {mi_name}',
+                 checks=[JMESPathCheck('length(@)', 0)]).get_output_in_json
+
+    @AllowLargeResponse()
+    @record_only()
+    def test_sql_mi_first_forced_failover(self):
+        rg = 'DaniRG'
+        mi_name = 'chimera-canary-gpv2-01'
+        box_name = 'wwi-2022-sql02'
+        link_name = 'Link1'
+        instance_ag_name = 'AG_CLI1_MI'
+        partner_ag_name = 'AG_CLI1'
+        replication_mode = 'Async'
+        databases = "[{database-name:CLI1}]"
+        partner_endpoint = 'tcp://10.0.1.8:5022'
+        instance_link_role = 'Primary'
+        failover_mode = 'Manual'
+        seeding_mode = 'Automatic'
+        failover_type = 'ForcedAllowDataLoss'
+
+        self.kwargs.update({
+            'rg': rg,
+            'mi_name': mi_name,
+            'box_name': box_name,
+            'link_name': link_name,
+            'instance_ag_name': instance_ag_name,
+            'partner_ag_name': partner_ag_name,
+            'replication_mode': replication_mode,
+            'databases': databases,
+            'partner_endpoint': partner_endpoint,
+            'instance_link_role': instance_link_role,
+            'failover_mode': failover_mode,
+            'seeding_mode': seeding_mode,
+            'failover_type': failover_type
+        })
+
+        # list 0 instance links
+        self.cmd('sql mi link list -g {rg} --instance-name {mi_name}',
+                 checks=[JMESPathCheck('length(@)', 0)])
+
+        # create link
+        self.cmd(
+            'sql mi link create -g {rg} --instance-name {mi_name} --name {link_name} --databases \"{databases}\" --instance-availability-group-name {instance_ag_name} --partner-availability-group-name {partner_ag_name} --partner-endpoint {partner_endpoint} --instance-link-role {instance_link_role} --failover-mode {failover_mode} --seeding-mode {seeding_mode}')
+
+        # list 1 instance links
+        self.cmd('sql mi link list -g {rg} --instance-name {mi_name}',
+                 checks=[JMESPathCheck('length(@)', 1)])
+
+        # assert that the MI is primary before failover
+        self.cmd('sql mi link show -g {rg} --instance-name {mi_name} --name {link_name}',
+                 checks=[
+                     JMESPathCheck('instanceLinkRole', 'Primary'),
+                 ]).get_output_in_json()
+
+        # perform failover
+        self.cmd(
+            'sql mi link failover -g {rg} --instance-name {mi_name} -n {link_name} --failover-type {failover_type} --yes')
+
+        # assert that the MI is secondary after failover
+        self.cmd('sql mi link show -g {rg} --instance-name {mi_name} --name {link_name}',
+                 checks=[
+                     JMESPathCheck('instanceLinkRole', 'Secondary'),
+                 ]).get_output_in_json()
+
+        # delete instance link
+        self.cmd('sql mi link delete -g {rg} --instance-name {mi_name} -n {link_name} --yes')
+
+        # list 0 instance links
+        self.cmd('sql mi link list -g {rg} --instance-name {mi_name}',
+                 checks=[JMESPathCheck('length(@)', 0)]).get_output_in_json
+
+    @AllowLargeResponse()
+    @record_only()
+    def test_sql_box_first_failover(self):
+        rg = 'DaniRG'
+        mi_name = 'chimera-canary-gpv2-01'
+        box_name = 'wwi-2022-sql02'
+        link_name = 'Link4'
+        instance_ag_name = 'AG_PS4_MI'
+        partner_ag_name = 'AG_PS4'
+        replication_mode = 'Async'
+        databases = "[{database-name:PS4}]"
+        partner_endpoint = 'tcp://10.0.1.8:5022'
+        instance_link_role = 'Secondary'
+        failover_mode = 'Manual'
+        seeding_mode = 'Automatic'
+        failover_type1 = 'Planned'
+        failover_type2 = 'ForcedAllowDataLoss'
+
+        self.kwargs.update({
+            'rg': rg,
+            'mi_name': mi_name,
+            'box_name': box_name,
+            'link_name': link_name,
+            'instance_ag_name': instance_ag_name,
+            'partner_ag_name': partner_ag_name,
+            'replication_mode': replication_mode,
+            'databases': databases,
+            'partner_endpoint': partner_endpoint,
+            'instance_link_role': instance_link_role,
+            'failover_mode': failover_mode,
+            'seeding_mode': seeding_mode,
+            'failover_type1': failover_type1,
+            'failover_type2': failover_type2
+        })
+
+        # list 0 instance links
+        self.cmd('sql mi link list -g {rg} --instance-name {mi_name}',
+                 checks=[JMESPathCheck('length(@)', 0)])
+
+        # create link
+        self.cmd(
+            'sql mi link create -g {rg} --instance-name {mi_name} --name {link_name} --databases \"{databases}\" --instance-availability-group-name {instance_ag_name} --partner-availability-group-name {partner_ag_name} --partner-endpoint {partner_endpoint} --instance-link-role {instance_link_role} --failover-mode {failover_mode} --seeding-mode {seeding_mode}')
+
+        # list 1 instance links
+        self.cmd('sql mi link list -g {rg} --instance-name {mi_name}',
+                 checks=[JMESPathCheck('length(@)', 1)])
+
+        # assert that the MI is primary before failover
+        self.cmd('sql mi link show -g {rg} --instance-name {mi_name} --name {link_name}',
+                 checks=[
+                     JMESPathCheck('instanceLinkRole', 'Secondary'),
+                 ]).get_output_in_json()
+
+        # perform planned failover and assert error
+        try:
+            self.cmd(
+                'sql mi link failover -g {rg} --instance-name {mi_name} -n {link_name} --failover-type {failover_type1} --yes')
+        except Exception as e:
+            expected_message = "Planned failover can be executed on a link in the primary role only. Current state of the specified link is secondary."
+            if expected_message in str(e):
+                pass
+
+        # perform failover and assert that the role has changed
+        self.cmd(
+            'sql mi link failover -g {rg} --instance-name {mi_name} -n {link_name} --failover-type {failover_type2} --yes',
+                 checks=[
+                     JMESPathCheck('instanceLinkRole', 'Primary'),
+                 ]).get_output_in_json()
+
+        # delete instance link
+        self.cmd('sql mi link delete -g {rg} --instance-name {mi_name} -n {link_name} --yes')
+
+        # list 0 instance links
+        self.cmd('sql mi link list -g {rg} --instance-name {mi_name}',
+                 checks=[JMESPathCheck('length(@)', 0)]).get_output_in_json
+
+    @AllowLargeResponse()
+    @record_only()
+    def test_sql_mi_link_error_handling(self):
+        rg = 'DaniRG'
+        mi_name = 'chimera-canary-gpv2-01'
+        box_name = 'wwi-2022-sql02'
+        link_name = 'Link4'
+        instance_ag_name = 'AG_PS4_MI'
+        partner_ag_name = 'AG_PS4'
+        replication_mode = 'Async'
+        databases = "[{database-name:PS4}]"
+        empty_databases = "[]"
+        partner_endpoint = 'tcp://10.0.1.8:5022'
+        instance_link_role = 'Secondary'
+        failover_mode = 'Manual'
+        seeding_mode = 'Automatic'
+        failover_type = 'Planned'
+
+        self.kwargs.update({
+            'rg': rg,
+            'mi_name': mi_name,
+            'box_name': box_name,
+            'link_name': link_name,
+            'instance_ag_name': instance_ag_name,
+            'partner_ag_name': partner_ag_name,
+            'replication_mode': replication_mode,
+            'databases': databases,
+            'partner_endpoint': partner_endpoint,
+            'instance_link_role': instance_link_role,
+            'failover_mode': failover_mode,
+            'seeding_mode': seeding_mode,
+            'failover_type': failover_type,
+            'empty_databases': empty_databases
+        })
+
+        # test required args validation
+        try:
+            # empty database list
+            self.cmd(
+                'sql mi link create -g {rg} --instance-name {mi_name} --name {link_name} --databases \"{empty_databases}\" --instance-availability-group-name {instance_ag_name} --partner-availability-group-name {partner_ag_name} --partner-endpoint {partner_endpoint} --instance-link-role {instance_link_role} --failover-mode {failover_mode} --seeding-mode {seeding_mode}')
+        except Exception as e:
+            expected_message = "Distributed Availability Group Create or Update request body has empty or Invalid Databases."
+            if expected_message in str(e):
+                pass
+            else:
+                raise e
+
+        try:
+            # empty instance ag name
+            self.cmd(
+                'sql mi link create -g {rg} --instance-name {mi_name} --name {link_name} --databases \"{databases}\" --instance-availability-group-name "" --partner-availability-group-name {partner_ag_name} --partner-endpoint {partner_endpoint} --instance-link-role {instance_link_role} --failover-mode {failover_mode} --seeding-mode {seeding_mode}')
+        except Exception as e:
+            expected_message = "Invalid Instance Availability Group Name"
+            if expected_message in str(e):
+                pass
+            else:
+                raise e
+
+        try:
+            # empty partner ag name
+            self.cmd(
+                'sql mi link create -g {rg} --instance-name {mi_name} --name {link_name} --databases \"{databases}\" --instance-availability-group-name {instance_ag_name} --partner-availability-group-name "" --partner-endpoint {partner_endpoint} --instance-link-role {instance_link_role} --failover-mode {failover_mode} --seeding-mode {seeding_mode}')
+        except Exception as e:
+            expected_message = "Invalid Partner Availability Group Name."
+            if expected_message in str(e):
+                pass
+            else:
+                raise e
+
+        try:
+            # empty managed instance name
+            self.cmd(
+                'sql mi link create -g {rg} --instance-name "" --name {link_name} --databases \"{databases}\" --instance-availability-group-name {instance_ag_name} --partner-availability-group-name {partner_ag_name} --partner-endpoint {partner_endpoint} --instance-link-role {instance_link_role} --failover-mode {failover_mode} --seeding-mode {seeding_mode}')
+        except Exception as e:
+            expected_message = "was not found"
+            if expected_message in str(e):
+                pass
+            else:
+                raise e
+
+        # should throw when partner endpoint is not in proper format
+        try:
+            self.cmd('sql mi link create -g {rg} --instance-name {mi_name} --name {link_name} --databases \"{databases}\" --instance-availability-group-name {instance_ag_name} --partner-availability-group-name {partner_ag_name} --partner-endpoint "not_valid_value" --instance-link-role {instance_link_role} --failover-mode {failover_mode} --seeding-mode {seeding_mode}')
+        except Exception as e:
+            expected_message = "Invalid value"
+            if expected_message in str(e):
+                pass
+            else:
+                raise e
+
+        # should throw when the managed instance is non-existent
+        try:
+            invalid_instance_name = "invalidmi"
+            self.cmd('sql mi link failover -g {rg} --instance-name ' + invalid_instance_name + ' -n {link_name} --failover-type {failover_type} --yes')
+        except Exception as e:
+            expected_message = "The Resource 'Microsoft.Sql/managedInstances/" + invalid_instance_name + "' under resource group '" + rg + "' was not found. For more details please go to https://aka.ms/ARMResourceNotFoundFix"
+            if expected_message in str(e):
+                pass
+            else:
+                raise e
+
+        # should throw when deleting non-existent mi link
+        try:
+            link_name = "InvalidLink"
+            self.cmd('sql mi link delete -g {rg} --instance-name {mi_name} -n ' + link_name + ' --yes')
+        except Exception as e:
+            expected_message = link_name + "' does not exist."
+            if expected_message in str(e):
+                pass
+            else:
+                raise e
+
+        # should throw when getting non-existent mi link
+        try:
+            link_name = "InvalidLink"
+            self.cmd('sql mi link show -g {rg} --instance-name {mi_name} -n ' + link_name)
+        except Exception as e:
+            expected_message = link_name + "' was not found."
+            if expected_message in str(e):
+                pass
+            else:
+                raise e
+
+        # create valid link
+        self.cmd('sql mi link create -g {rg} --instance-name {mi_name} --name {link_name} --databases \"{databases}\" --instance-availability-group-name {instance_ag_name} --partner-availability-group-name {partner_ag_name} --partner-endpoint {partner_endpoint} --instance-link-role {instance_link_role} --failover-mode {failover_mode} --seeding-mode {seeding_mode}')
+
+        # try creating another link with same parameters
+        try:
+            self.cmd('sql mi link create -g {rg} --instance-name {mi_name} --name {link_name} --databases \"{databases}\" --instance-availability-group-name {instance_ag_name} --partner-availability-group-name {partner_ag_name} --partner-endpoint {partner_endpoint} --instance-link-role {instance_link_role} --failover-mode {failover_mode} --seeding-mode {seeding_mode}')
+        except Exception as e:
+            expected_message = "Choose a different database name"
+            if expected_message in str(e):
+                pass
+            else:
+                raise e
+
+        # perform planned failover and assert error
+        try:
+            self.cmd(
+                'sql mi link failover -g {rg} --instance-name {mi_name} -n {link_name} --failover-type {failover_type} --yes')
+        except Exception as e:
+            expected_message = "Planned failover can be executed on a link in the primary role only. Current state of the specified link is secondary."
+            if expected_message in str(e):
+                pass
+            else:
+                raise e
+
+        # check that confirmation is triggered on delete (tests don't support user interaction so we'll validate the exception)
+        try:
+            self.cmd('sql mi link delete -g {rg} --instance-name {mi_name} -n {link_name}')
+        except CLIError as e:
+            expected_message = "Operation cancelled"
+            if expected_message in str(e):
+                pass
+            else:
+                raise e
 
 
 class SqlManagedInstanceRestoreCrossSubscriptionScenarioTest(ScenarioTest):

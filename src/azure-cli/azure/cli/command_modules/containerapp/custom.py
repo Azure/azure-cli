@@ -47,7 +47,6 @@ from ._clients import (
 )
 from ._github_oauth import get_github_access_token
 from ._models import (
-    Ingress as IngressModel,
     JobExecutionTemplate as JobExecutionTemplateModel,
     RegistryCredentials as RegistryCredentialsModel,
     ContainerResources as ContainerResourcesModel,
@@ -899,6 +898,7 @@ def update_managed_environment(cmd,
                                max_nodes=None,
                                mtls_enabled=None,
                                p2p_encryption_enabled=None,
+                               dapr_connection_string=None,
                                no_wait=False):
     raw_parameters = locals()
     containerapp_env_update_decorator = ContainerAppEnvUpdateDecorator(
@@ -2437,6 +2437,8 @@ def enable_ingress(cmd, name, resource_group_name, type, target_port=None, trans
     if not containerapp_def:
         raise ResourceNotFoundError("The containerapp '{}' does not exist".format(name))
 
+    new_containerapp_def = {}
+
     external_ingress = None
     if type is not None:
         if type.lower() == "internal":
@@ -2444,9 +2446,8 @@ def enable_ingress(cmd, name, resource_group_name, type, target_port=None, trans
         elif type.lower() == "external":
             external_ingress = True
 
-    ingress_def = None
     if type is not None:
-        ingress_def = IngressModel
+        ingress_def = {}
         ingress_def["external"] = external_ingress
         ingress_def["transport"] = transport
         ingress_def["allowInsecure"] = allow_insecure
@@ -2457,13 +2458,11 @@ def enable_ingress(cmd, name, resource_group_name, type, target_port=None, trans
         else:
             ingress_def["targetPort"] = DEFAULT_PORT
 
-    containerapp_def["properties"]["configuration"]["ingress"] = ingress_def
-
-    _get_existing_secrets(cmd, resource_group_name, name, containerapp_def)
+        safe_set(new_containerapp_def, "properties", "configuration", "ingress", value=ingress_def)
 
     try:
-        r = ContainerAppClient.create_or_update(
-            cmd=cmd, resource_group_name=resource_group_name, name=name, container_app_envelope=containerapp_def, no_wait=no_wait)
+        r = ContainerAppClient.update(
+            cmd=cmd, resource_group_name=resource_group_name, name=name, container_app_envelope=new_containerapp_def, no_wait=no_wait)
         not disable_warnings and logger.warning("\nIngress enabled. Access your app at https://{}/\n".format(r["properties"]["configuration"]["ingress"]["fqdn"]))
         return r["properties"]["configuration"]["ingress"]
     except Exception as e:
