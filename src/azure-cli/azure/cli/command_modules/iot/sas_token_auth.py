@@ -39,7 +39,7 @@ class SasTokenAuthentication(Authentication):
 
         :rtype: requests.Session.
         """
-        session = session or super(SasTokenAuthentication, self).signed_session()
+        session = session or super().signed_session()
         session.headers['Authorization'] = self.generate_sas_token()
         return session
 

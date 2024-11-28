@@ -24,10 +24,10 @@ class ComputeCommandsLoader(AzCommandsLoader):
             operations_tmpl='azure.cli.command_modules.vm.custom#{}',
             operation_group='virtual_machines'
         )
-        super(ComputeCommandsLoader, self).__init__(cli_ctx=cli_ctx,
-                                                    resource_type=ResourceType.MGMT_COMPUTE,
-                                                    operation_group='virtual_machines',
-                                                    custom_command_type=compute_custom)
+        super().__init__(cli_ctx=cli_ctx,
+                         resource_type=ResourceType.MGMT_COMPUTE,
+                         operation_group='virtual_machines',
+                         custom_command_type=compute_custom)
 
     def load_command_table(self, args):
         from azure.cli.command_modules.vm.commands import load_command_table

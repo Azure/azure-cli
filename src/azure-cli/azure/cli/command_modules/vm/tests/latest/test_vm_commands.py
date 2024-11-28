@@ -2630,7 +2630,7 @@ class VMMonitorTestDefault(ScenarioTest):
                  replay_processors=None, recording_patches=None, replay_patches=None):
         from azure.cli.command_modules.vm.tests.latest._test_util import TimeSpanProcessor
         TIMESPANTEMPLATE = '0000-00-00'
-        super(VMMonitorTestDefault, self).__init__(
+        super().__init__(
             method_name,
             recording_processors=[TimeSpanProcessor(TIMESPANTEMPLATE)],
             replay_processors=[TimeSpanProcessor(TIMESPANTEMPLATE)]

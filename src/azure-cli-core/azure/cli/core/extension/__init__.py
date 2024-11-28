@@ -51,7 +51,7 @@ logger = get_logger(__name__)
 
 class ExtensionNotInstalledException(Exception):
     def __init__(self, extension_name):
-        super(ExtensionNotInstalledException, self).__init__(extension_name)
+        super().__init__(extension_name)
         self.extension_name = extension_name
 
     def __str__(self):
@@ -127,7 +127,7 @@ class Extension:
 class WheelExtension(Extension):
 
     def __init__(self, name, path=None):
-        super(WheelExtension, self).__init__(name, 'whl', path)
+        super().__init__(name, 'whl', path)
 
     def get_version(self):
         return self.metadata.get('version')
@@ -207,7 +207,7 @@ class WheelExtension(Extension):
 
 class DevExtension(Extension):
     def __init__(self, name, path):
-        super(DevExtension, self).__init__(name, 'dev', path)
+        super().__init__(name, 'dev', path)
 
     def get_version(self):
         return self.metadata.get('version')

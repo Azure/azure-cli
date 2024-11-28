@@ -53,10 +53,7 @@ from typing import (
     List,
 )
 
-try:
-    from urllib import quote  # type: ignore
-except ImportError:
-    from urllib.parse import quote
+from urllib.parse import quote
 import xml.etree.ElementTree as ET
 
 import isodate  # type: ignore
@@ -931,13 +928,6 @@ class Serializer:  # pylint: disable=too-many-public-methods
         except AttributeError:
             pass
 
-        try:
-            if isinstance(data, unicode):  # type: ignore
-                # Don't change it, JSON and XML ElementTree are totally able
-                # to serialize correctly u'' strings
-                return data
-        except NameError:
-            return str(data)
         return str(data)
 
     def serialize_iter(self, data, iter_type, div=None, **kwargs):
