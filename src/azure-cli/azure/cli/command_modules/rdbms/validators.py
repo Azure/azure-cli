@@ -352,12 +352,13 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
 
 def _cluster_validator(create_cluster, cluster_size, auto_grow, geo_redundant_backup, version, tier,
                        byok_identity, byok_key, backup_byok_identity, backup_byok_key, instance):
-    if create_cluster == 'ElasticCluster' or (instance and instance.cluster and instance.cluster.cluster_size > 0 ):
-        if instance is None and cluster_size is None:
-            cluster_size = 2
+    if create_cluster == 'ElasticCluster' or (instance and instance.cluster and instance.cluster.cluster_size > 0):
         if instance is None and version == '17':
             raise ValidationError("PostgreSQL version 17 is currently not supported for elastic cluster.")
 
+        if cluster_size and instance and instance.cluster.cluster_size > cluster_size:
+            raise ValidationError('Updating node count cannot be less than the current size of {} nodes.'
+                                  .format(instance.cluster.cluster_size))
         if auto_grow and auto_grow.lower() != 'disabled':
             raise ValidationError("Storage Auto-grow is currently not supported for elastic cluster.")
         if geo_redundant_backup and geo_redundant_backup.lower() != 'disabled':
@@ -366,6 +367,18 @@ def _cluster_validator(create_cluster, cluster_size, auto_grow, geo_redundant_ba
             raise ValidationError("Data encryption is currently not supported for elastic cluster.")
         if tier == 'Burstable':
             raise ValidationError("Burstable tier is currently not supported for elastic cluster.")
+
+    if cluster_size and instance and not instance.cluster:
+        raise ValidationError("Node count can only be specified for an elastic cluster.")
+
+
+def cluster_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key,
+                           geo_redundant_backup, instance):
+    if instance and instance.cluster and instance.cluster.cluster_size > 0:
+        if geo_redundant_backup and geo_redundant_backup.lower() != 'disabled':
+            raise ValidationError("Geo-redundancy is currently not supported for elastic cluster.")
+        if byok_identity or byok_key or backup_byok_identity or backup_byok_key:
+            raise ValidationError("Data encryption is currently not supported for elastic cluster.")
 
 
 def _pg_storage_validator(storage_gb, sku_info, tier, storage_type, iops, throughput, instance):
@@ -785,7 +798,7 @@ def is_citus_cluster(cmd, resource_group_name, server_name):
 
 def validate_citus_cluster(cmd, resource_group_name, server_name):
     if is_citus_cluster(cmd, resource_group_name, server_name):
-        raise ValidationError("Citus cluster is not supported for this operation.")
+        raise ValidationError("Elastic cluster does not currently support this operation.")
 
 
 def validate_public_access_server(cmd, client, resource_group_name, server_name):
