@@ -636,12 +636,18 @@ def create_image(cmd, resource_group_name, name, source, os_type=None, data_disk
     return _Image.Create(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 
+def update_image(instance, tags=None):
+    if tags is not None:
+        instance.tags = tags
+    return instance
+
+
 # region Snapshots
 # pylint: disable=unused-argument,too-many-locals
 def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size_gb=None, sku='Standard_LRS',
                     source=None, for_upload=None, copy_start=None, incremental=None,
                     # below are generated internally from 'source'
-                    source_blob_uri=None, source_disk=None, source_snapshot=None, source_storage_account_id=None,
+                    source_blob_uric=None, source_disk=None, source_snapshot=None, source_storage_account_id=None,
                     hyper_v_generation=None, tags=None, no_wait=False, disk_encryption_set=None,
                     encryption_type=None, network_access_policy=None, disk_access=None, edge_zone=None,
                     public_network_access=None, accelerated_network=None, architecture=None,

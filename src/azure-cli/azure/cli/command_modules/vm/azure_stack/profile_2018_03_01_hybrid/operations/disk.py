@@ -7,12 +7,14 @@ from knack.log import get_logger
 from knack.util import CLIError
 
 from azure.cli.core.aaz import has_value
-from ..aaz.latest.disk import Update as _DiskUpdate, GrantAccess as _DiskGrantAccess, Show
+from ._util import import_aaz_by_profile
 
 logger = get_logger(__name__)
 
+_Disk = import_aaz_by_profile("disk")
 
-class DiskUpdate(_DiskUpdate):
+
+class DiskUpdate(_Disk.Update):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZStrArg
@@ -75,11 +77,11 @@ class DiskUpdate(_DiskUpdate):
                 instance.properties.supported_capabilities.architecture = args.architecture
 
 
-class DiskGrantAccess(_DiskGrantAccess):
+class DiskGrantAccess(_Disk.GrantAccess):
     def pre_operations(self):
         args = self.ctx.args
 
-        disk_info = Show(cli_ctx=self.cli_ctx)(command_args={
+        disk_info = _Disk.Show(cli_ctx=self.cli_ctx)(command_args={
             "disk_name": args.disk_name,
             "resource_group": args.resource_group
         })
