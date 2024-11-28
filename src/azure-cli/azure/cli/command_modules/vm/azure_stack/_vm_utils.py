@@ -8,12 +8,9 @@ import json
 import os
 import re
 
-from azure.cli.core.commands.arm import ArmTemplateBuilder
+from urllib.parse import urlparse
 
-try:
-    from urllib.parse import urlparse
-except ImportError:
-    from urlparse import urlparse  # pylint: disable=import-error
+from azure.cli.core.commands.arm import ArmTemplateBuilder
 
 from knack.log import get_logger
 from knack.util import CLIError
