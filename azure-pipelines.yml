@@ -1137,7 +1137,8 @@ jobs:
         . env/bin/activate
         git fetch origin --depth=1 $(System.PullRequest.TargetBranch)
         declare -A secret_files
-        for FILE in `git diff --name-only --diff-filter=AM origin/$(System.PullRequest.TargetBranch)` ; do
+        for FILE in "`git diff --name-only --diff-filter=AM origin/$(System.PullRequest.TargetBranch)`" ; do
+          echo $FILE
           detected=$(azdev scan -f "$FILE" | python -c "import sys, json; print(json.load(sys.stdin)['secrets_detected'])")
           if [ $detected == 'True' ]; then
             printf "\033[0;31mDetected secrets from %s, You can run 'azdev mask' to remove secrets.\033[0m\n" "$FILE"
