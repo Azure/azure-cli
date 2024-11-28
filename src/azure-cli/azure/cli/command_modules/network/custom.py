@@ -432,7 +432,7 @@ class AddressPoolCreate(_AddressPoolCreate):
             try:
                 socket.inet_aton(str(server))  # pylint:disable=no-member
                 return {"ip_address": server}
-            except OSError:  # pylint:disable=no-member
+            except OSError:
                 return {"fqdn": server}
 
         args.backend_addresses = assign_aaz_list_arg(
@@ -478,7 +478,7 @@ class AddressPoolUpdate(_AddressPoolUpdate):
             try:
                 socket.inet_aton(str(server))  # pylint:disable=no-member
                 return {"ip_address": server}
-            except OSError:  # pylint:disable=no-member
+            except OSError:
                 return {"fqdn": server}
 
         args.backend_addresses = assign_aaz_list_arg(

@@ -42,8 +42,6 @@ from knack.util import CLIError, CommandResultItem, todict
 from knack.events import EVENT_INVOKER_TRANSFORM_RESULT
 from knack.validators import DefaultStr
 
-t_JSONDecodeError = json.JSONDecodeError
-
 logger = get_logger(__name__)
 DEFAULT_CACHE_TTL = '10'
 

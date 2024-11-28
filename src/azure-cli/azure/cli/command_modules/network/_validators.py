@@ -491,7 +491,7 @@ def get_servers_validator(camel_case=False):
             try:
                 socket.inet_aton(item)  # pylint:disable=no-member
                 servers.append({'ipAddress' if camel_case else 'ip_address': item})
-            except OSError:  # pylint:disable=no-member
+            except OSError:
                 servers.append({'fqdn': item})
         namespace.servers = servers if servers else None
 
