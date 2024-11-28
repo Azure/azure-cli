@@ -162,7 +162,8 @@ def _load_dockerignore_file(source_location, original_docker_file_name):
         return None, 0
 
     encoding = "utf-8"
-    header = open(docker_ignore_file, "rb").read(len(codecs.BOM_UTF8))
+    with open(docker_ignore_file, "rb") as fp:
+        header = fp.read(len(codecs.BOM_UTF8))
     if header.startswith(codecs.BOM_UTF8):
         encoding = "utf-8-sig"
 

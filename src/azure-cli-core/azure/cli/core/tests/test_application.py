@@ -83,11 +83,11 @@ class TestApplication(unittest.TestCase):
         cli.raise_event('other_handler_called', args='secret sauce')
 
     def test_expand_file_prefixed_files(self):
-        f = tempfile.NamedTemporaryFile(delete=False)
-        f.close()
+        with tempfile.NamedTemporaryFile(delete=False) as f:
+            pass
 
-        f_with_bom = tempfile.NamedTemporaryFile(delete=False)
-        f_with_bom.close()
+        with tempfile.NamedTemporaryFile(delete=False) as f_with_bom:
+            pass
 
         with open(f.name, 'w+') as stream:
             stream.write('foo')

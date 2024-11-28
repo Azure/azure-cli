@@ -22,8 +22,6 @@ def get_repo_root():
 
 
 def comment_import_help(init_file, out_file):
-    f_out =  open(out_file, "w")
-
     output = ""
     updated = False
     with open(init_file, "r") as f_in:
@@ -33,13 +31,12 @@ def comment_import_help(init_file, out_file):
                 line = "# " + line
             output += line
 
-    f_out.write(output)
-    f_out.close()
+    with open(out_file, "w") as f_out:
+        f_out.write(output)
     return updated
 
-def decomment_import_help(init_file, out_file):
-    f_out =  open(out_file, "w")
 
+def decomment_import_help(init_file, out_file):
     output = ""
     updated = False
     with open(init_file, "r") as f_in:
@@ -48,9 +45,10 @@ def decomment_import_help(init_file, out_file):
                 updated = True
                 line = line.lstrip("# ")
             output += line
-    f_out.write(output)
-    f_out.close()
+    with open(out_file, "w") as f_out:
+        f_out.write(output)
     return updated
+
 
 def install_extension(ext_name):
     command = "az extension add -n " + ext_name

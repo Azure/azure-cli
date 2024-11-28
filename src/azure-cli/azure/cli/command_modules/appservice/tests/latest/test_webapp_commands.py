@@ -451,8 +451,8 @@ class AppServiceLogTest(ScenarioTest):
         log_dir = log_file + '-dir'
         self.cmd('webapp log download -g {} -n {} --log-file "{}"'.format(
             resource_group, webapp_name, log_file))
-        zip_ref = zipfile.ZipFile(log_file, 'r')
-        zip_ref.extractall(log_dir)
+        with zipfile.ZipFile(log_file, 'r') as zip_ref:
+            zip_ref.extractall(log_dir)
         self.assertTrue(os.path.isdir(os.path.join(
             log_dir, 'LogFiles', 'kudu', 'trace')))
 
