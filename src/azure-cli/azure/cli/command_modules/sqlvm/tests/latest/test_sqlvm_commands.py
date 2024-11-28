@@ -36,7 +36,7 @@ class SqlVirtualMachinePreparer(AbstractPreparer, SingleValueReplacer):
                  vm_user='admin123', vm_password='SecretPassword123', parameter_name='sqlvm',
                  resource_group_parameter_name='resource_group', skip_delete=True,
                  image='microsoftsqlserver:sql2019-ws2022:enterprise:latest'):
-        super(SqlVirtualMachinePreparer, self).__init__(name_prefix, sqlvm_max_length)
+        super().__init__(name_prefix, sqlvm_max_length)
         self.location = location
         self.parameter_name = parameter_name
         self.vm_user = vm_user
@@ -70,7 +70,7 @@ class DomainPreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix=sqlvm_domain_prefix, location='westus',
                  vm_user='admin123', vm_password='SecretPassword123', parameter_name='domainvm',
                  resource_group_parameter_name='resource_group', skip_delete=True):
-        super(DomainPreparer, self).__init__(name_prefix, sqlvm_max_length)
+        super().__init__(name_prefix, sqlvm_max_length)
         self.location = location
         self.parameter_name = parameter_name
         self.vm_user = vm_user

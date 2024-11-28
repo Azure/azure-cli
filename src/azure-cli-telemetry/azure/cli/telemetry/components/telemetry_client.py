@@ -93,7 +93,7 @@ class _NoRetrySender(SynchronousSender):
     def __init__(self):
         from azure.cli.telemetry.components.telemetry_logging import get_logger
 
-        super(_NoRetrySender, self).__init__()
+        super().__init__()
         self._logger = get_logger('sender')
 
     def send(self, data_to_send):
