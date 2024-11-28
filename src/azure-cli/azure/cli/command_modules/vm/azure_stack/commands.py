@@ -236,8 +236,6 @@ def load_command_table(self, _):
 
     with self.command_group('disk', compute_disk_sdk, operation_group='disks', min_api='2017-03-30') as g:
         g.custom_command('create', 'create_managed_disk', supports_no_wait=True, table_transformer=transform_disk_create_table_output, validator=process_disk_create_namespace)
-        g.custom_command('grant-access', 'grant_disk_access')
-        g.generic_update_command('update', custom_func_name='update_managed_disk', setter_name='begin_create_or_update', setter_arg_name='disk', supports_no_wait=True)
 
     with self.command_group('disk-encryption-set', compute_disk_encryption_set_sdk, operation_group='disk_encryption_sets', client_factory=cf_disk_encryption_set, min_api='2019-07-01') as g:
         g.custom_command('create', 'create_disk_encryption_set', supports_no_wait=True)
@@ -254,7 +252,6 @@ def load_command_table(self, _):
 
     with self.command_group('image', compute_image_sdk, min_api='2016-04-30-preview') as g:
         g.custom_command('create', 'create_image', validator=process_image_create_namespace)
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_image')
 
     with self.command_group('image builder', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
         g.custom_command('create', 'create_image_template', supports_no_wait=True, supports_local_cache=True, validator=process_image_template_create_namespace)

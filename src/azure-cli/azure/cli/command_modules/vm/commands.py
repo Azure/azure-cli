@@ -237,7 +237,7 @@ def load_command_table(self, _):
         from .operations.ppg import PPGShow
         self.command_table["ppg show"] = PPGShow(loader=self)
 
-    with self.command_group('disk', compute_disk_sdk, operation_group='disks', min_api='2017-03-30') as g:
+    with self.command_group('disk', compute_disk_sdk, operation_group='disks') as g:
         g.custom_command('create', 'create_managed_disk', supports_no_wait=True, table_transformer=transform_disk_create_table_output, validator=process_disk_create_namespace)
         from .operations.disk import DiskUpdate, DiskGrantAccess
         self.command_table["disk grant-access"] = DiskGrantAccess(loader=self)
@@ -260,7 +260,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_disk_access', supports_no_wait=True)
         g.generic_update_command('update', setter_name='set_disk_access', setter_type=compute_custom, supports_no_wait=True)
 
-    with self.command_group('image', compute_image_sdk, min_api='2016-04-30-preview') as g:
+    with self.command_group('image', compute_image_sdk) as g:
         g.custom_command('create', 'create_image', validator=process_image_create_namespace)
 
     with self.command_group('image builder', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
