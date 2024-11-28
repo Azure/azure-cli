@@ -15,7 +15,6 @@ from azure.cli.testsdk.base import execute
 from knack.log import get_logger
 logger = get_logger(__name__)
 
-
 class VaultPreparer(AbstractPreparer, SingleValueReplacer):  # pylint: disable=too-many-instance-attributes
     def __init__(self, name_prefix='clitest-vault', parameter_name='vault_name',
                  resource_group_location_parameter_name='resource_group_location',
