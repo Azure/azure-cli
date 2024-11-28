@@ -46,7 +46,7 @@ class _AppendToDictionaryAction(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
         items = getattr(namespace, self.dest, None)
         if items is None:
-            items = dict()
+            items = {}
         key = values[0]
         value = values[1]
         if key in items:
@@ -97,7 +97,7 @@ class GetExtension(argparse._AppendAction):
 
     def get_action(self, values, option_string):  # pylint: disable=no-self-use
         try:
-            properties = dict()
+            properties = {}
             for (k, v) in (x.split('=', 1) for x in values):
                 if k == "isEnabled":
                     properties["is_enabled"] = v

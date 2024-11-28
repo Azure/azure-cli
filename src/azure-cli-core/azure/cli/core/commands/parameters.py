@@ -420,7 +420,7 @@ class AzArgumentContext(ArgumentsContext):
             return
 
         if not patches:
-            patches = dict()
+            patches = {}
 
         # fetch the documentation for model parameters first. for models, which are the classes
         # derive from msrest.serialization.Model and used in the SDK API to carry parameters, the
@@ -440,7 +440,7 @@ class AzArgumentContext(ArgumentsContext):
                 :return: The argument of specific type.
                 """
                 ns = vars(namespace)
-                kwargs = dict((k, ns[k]) for k in ns if k in set(expanded_arguments))
+                kwargs = {k: ns[k] for k in ns if k in set(expanded_arguments)}
 
                 setattr(namespace, assigned_arg, model_type(**kwargs))
 

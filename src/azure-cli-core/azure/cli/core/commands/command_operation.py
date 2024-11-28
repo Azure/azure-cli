@@ -68,8 +68,7 @@ class BaseCommandOperation:
     def load_getter_op_arguments(self, getter_op_path, cmd_args=None):
         """ Load arguments from function signature of getter command op """
         op = self.get_op_handler(getter_op_path)
-        getter_args = dict(
-            extract_args_from_signature(op, excluded_params=EXCLUDED_PARAMS))
+        getter_args = dict(extract_args_from_signature(op, excluded_params=EXCLUDED_PARAMS))
         cmd_args = cmd_args or {}
         cmd_args.update(getter_args)
         # The cmd argument is required when calling self.handler function.

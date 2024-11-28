@@ -10,7 +10,7 @@ def _get_images(container_group):
     """Get all images of a container group. """
     containers = container_group.get('containers')
     if containers is not None and containers:
-        images = set([])
+        images = set()
         for container in containers:
             images.add(container['image'])
         return ','.join(images)
