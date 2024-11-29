@@ -251,9 +251,7 @@ class Show(AAZCommand):
             encryption.disk_encryption_set_id = AAZStrType(
                 serialized_name="diskEncryptionSetId",
             )
-            encryption.type = AAZStrType(
-                flags={"required": True},
-            )
+            encryption.type = AAZStrType()
 
             encryption_settings_collection = cls._schema_on_200.properties.encryption_settings_collection
             encryption_settings_collection.enabled = AAZBoolType(

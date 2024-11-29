@@ -229,7 +229,6 @@ class Create(AAZCommand):
         encryption.type = AAZStrArg(
             options=["type"],
             help="The type of key used to encrypt the data of the disk.",
-            required=True,
             enum={"EncryptionAtRestWithCustomerKey": "EncryptionAtRestWithCustomerKey", "EncryptionAtRestWithPlatformKey": "EncryptionAtRestWithPlatformKey"},
         )
         return cls._args_schema
@@ -391,7 +390,7 @@ class Create(AAZCommand):
             encryption = _builder.get(".properties.encryption")
             if encryption is not None:
                 encryption.set_prop("diskEncryptionSetId", AAZStrType, ".disk_encryption_set_id")
-                encryption.set_prop("type", AAZStrType, ".type", typ_kwargs={"flags": {"required": True}})
+                encryption.set_prop("type", AAZStrType, ".type")
 
             sku = _builder.get(".sku")
             if sku is not None:
@@ -557,9 +556,7 @@ class _CreateHelper:
         encryption.disk_encryption_set_id = AAZStrType(
             serialized_name="diskEncryptionSetId",
         )
-        encryption.type = AAZStrType(
-            flags={"required": True},
-        )
+        encryption.type = AAZStrType()
 
         encryption_settings_collection = _schema_disk_read.properties.encryption_settings_collection
         encryption_settings_collection.enabled = AAZBoolType(

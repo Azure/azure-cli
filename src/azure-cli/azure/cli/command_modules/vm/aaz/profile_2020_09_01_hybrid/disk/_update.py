@@ -81,6 +81,7 @@ class Update(AAZCommand):
             options=["--encryption-type"],
             arg_group="Encryption",
             help={"short-summary": "Encryption type.", "long-summary": "EncryptionAtRestWithPlatformKey: Disk is encrypted with XStore managed key at rest. It is the default encryption type. EncryptionAtRestWithCustomerKey: Disk is encrypted with Customer managed key at rest."},
+            nullable=True,
             enum={"EncryptionAtRestWithCustomerKey": "EncryptionAtRestWithCustomerKey", "EncryptionAtRestWithPlatformKey": "EncryptionAtRestWithPlatformKey"},
         )
 
@@ -374,7 +375,7 @@ class Update(AAZCommand):
             encryption = _builder.get(".properties.encryption")
             if encryption is not None:
                 encryption.set_prop("diskEncryptionSetId", AAZStrType, ".disk_encryption_set_id")
-                encryption.set_prop("type", AAZStrType, ".encryption_type", typ_kwargs={"flags": {"required": True}})
+                encryption.set_prop("type", AAZStrType, ".encryption_type")
 
             sku = _builder.get(".sku")
             if sku is not None:
@@ -520,9 +521,7 @@ class _UpdateHelper:
         encryption.disk_encryption_set_id = AAZStrType(
             serialized_name="diskEncryptionSetId",
         )
-        encryption.type = AAZStrType(
-            flags={"required": True},
-        )
+        encryption.type = AAZStrType()
 
         encryption_settings_collection = _schema_disk_read.properties.encryption_settings_collection
         encryption_settings_collection.enabled = AAZBoolType(

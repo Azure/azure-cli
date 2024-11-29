@@ -510,9 +510,7 @@ class _UpdateHelper:
         )
 
         image_reference = _schema_disk_read.properties.creation_data.image_reference
-        image_reference.id = AAZStrType(
-            flags={"required": True},
-        )
+        image_reference.id = AAZStrType()
         image_reference.lun = AAZIntType()
 
         encryption_settings = _schema_disk_read.properties.encryption_settings
