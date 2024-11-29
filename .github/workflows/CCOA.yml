@@ -32,10 +32,16 @@ jobs:
 
       - name: Add do-not-merge label
         if: steps.date_check.outputs.continue == 'true'
-        uses: actions-ecosystem/action-add-labels@v1
+        uses: actions/github-script@v7
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          labels: do-not-merge
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                labels: ["do-not-merge"],
+              })
 
       - name: Comment on PR
         if: steps.date_check.outputs.continue == 'true'
