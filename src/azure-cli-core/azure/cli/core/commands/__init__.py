@@ -255,13 +255,13 @@ class CacheObject:
             payload = object.__getattribute__(self, '_payload')
             return payload.__getattribute__(key)
         except AttributeError:
-            return super(CacheObject, self).__getattribute__(key)
+            return super().__getattribute__(key)
 
     def __setattr__(self, key, value):
         try:
             return self._payload.__setattr__(key, value)
         except AttributeError:
-            return super(CacheObject, self).__setattr__(key, value)
+            return super().__setattr__(key, value)
 
 
 class AzCliCommand(CLICommand):
@@ -269,10 +269,10 @@ class AzCliCommand(CLICommand):
     def __init__(self, loader, name, handler, description=None, table_transformer=None,
                  arguments_loader=None, description_loader=None,
                  formatter_class=None, sensitive_info=None, deprecate_info=None, validator=None, **kwargs):
-        super(AzCliCommand, self).__init__(loader.cli_ctx, name, handler, description=description,
-                                           table_transformer=table_transformer, arguments_loader=arguments_loader,
-                                           description_loader=description_loader, formatter_class=formatter_class,
-                                           deprecate_info=deprecate_info, validator=validator, **kwargs)
+        super().__init__(loader.cli_ctx, name, handler, description=description,
+                         table_transformer=table_transformer, arguments_loader=arguments_loader,
+                         description_loader=description_loader, formatter_class=formatter_class,
+                         deprecate_info=deprecate_info, validator=validator, **kwargs)
         self.loader = loader
         self.command_source = None
         self.sensitive_info = sensitive_info
@@ -299,7 +299,7 @@ class AzCliCommand(CLICommand):
 
         # same blunt mechanism like we handled id-parts, for create command, no name default
         if not (self.name.split()[-1] == 'create' and overrides.settings.get('metavar', None) == 'NAME'):
-            super(AzCliCommand, self)._resolve_default_value_from_config_file(arg, overrides)
+            super()._resolve_default_value_from_config_file(arg, overrides)
 
         self._resolve_default_value_from_local_context(arg, overrides)
 
@@ -318,7 +318,7 @@ class AzCliCommand(CLICommand):
                     overrides.settings['default_value_source'] = 'Local Context'
 
     def load_arguments(self):
-        super(AzCliCommand, self).load_arguments()
+        super().load_arguments()
         if self.arguments_loader:
             cmd_args = self.arguments_loader()
             if self.supports_no_wait or self.no_wait_param:
@@ -1089,7 +1089,7 @@ class DeploymentOutputLongRunningOperation(LongRunningOperation):
 
         if isinstance(result, poller_classes()):
             # most deployment operations return a poller
-            result = super(DeploymentOutputLongRunningOperation, self).__call__(result)
+            result = super().__call__(result)
             outputs = None
             try:
                 if isinstance(result, str) and result:
@@ -1151,7 +1151,7 @@ class ExtensionCommandSource:
     """ Class for commands contributed by an extension """
 
     def __init__(self, overrides_command=False, extension_name=None, preview=False, experimental=False):
-        super(ExtensionCommandSource, self).__init__()
+        super().__init__()
         # True if the command overrides a CLI command
         self.overrides_command = overrides_command
         self.extension_name = extension_name
@@ -1257,8 +1257,8 @@ class AzCommandGroup(CommandGroup):
         """
         merged_kwargs = self._merge_kwargs(kwargs, base_kwargs=command_loader.module_kwargs)
         operations_tmpl = merged_kwargs.pop('operations_tmpl', None)
-        super(AzCommandGroup, self).__init__(command_loader, group_name,
-                                             operations_tmpl, **merged_kwargs)
+        super().__init__(command_loader, group_name,
+                         operations_tmpl, **merged_kwargs)
         self.group_kwargs = merged_kwargs
         if operations_tmpl:
             self.group_kwargs['operations_tmpl'] = operations_tmpl

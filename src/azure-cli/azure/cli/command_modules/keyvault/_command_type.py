@@ -55,7 +55,7 @@ class KeyVaultCommandGroup(AzCommandGroup):
         from azure.cli.command_modules.keyvault._client_factory import keyvault_mgmt_client_factory
         merged_kwargs = self._merge_kwargs(kwargs, base_kwargs=command_loader.module_kwargs)
         merged_kwargs['custom_command_type'].settings['client_factory'] = keyvault_mgmt_client_factory
-        super(KeyVaultCommandGroup, self).__init__(command_loader, group_name, **kwargs)
+        super().__init__(command_loader, group_name, **kwargs)
 
     def _create_keyvault_command(self, name, method_name=None, command_type_name=None, **kwargs):
         self._check_stale()

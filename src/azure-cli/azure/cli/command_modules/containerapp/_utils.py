@@ -1974,7 +1974,14 @@ def parse_oryx_mariner_tag(tag: str) -> OryxMarinerRunImgTagProperty:
         if len(re_matches) == 0:
             tag_obj = None
         else:
-            tag_obj = dict(fullTag=tag, version=SemVer.parse(re_matches[0][0]), framework=tag_split[2], marinerVersion=re_matches[0][2], architectures=None, support="lts")
+            tag_obj = {
+                "fullTag": tag,
+                "version": SemVer.parse(re_matches[0][0]),
+                "framework": tag_split[2],
+                "marinerVersion": re_matches[0][2],
+                "architectures": None,
+                "support": "lts",
+            }
     else:
         tag_obj = None
     return tag_obj

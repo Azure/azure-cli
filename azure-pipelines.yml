@@ -425,7 +425,7 @@ jobs:
         echo "== Test docker image =="
         
         docker load < $TAR_FILE
-        docker run $IMAGE_NAME /bin/bash -c "time az self-test && time az --version && sleep 5"
+        docker run $IMAGE_NAME /bin/bash -c "time az self-test && time az --version && tdnf list --installed && sleep 5"
       displayName: 'Bash Script'
 
 - job: BuildPythonWheel
@@ -747,7 +747,7 @@ jobs:
       BuildDropPath: $(Build.ArtifactStagingDirectory)
 
   - task: PublishPipelineArtifact@0
-    displayName: 'Publish Artifact: rpm-mariner'
+    displayName: 'Publish Artifact: rpm-azurelinux'
     inputs:
       TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: $(artifact)
@@ -798,7 +798,7 @@ jobs:
       docker pull $IMAGE
       docker run --rm -e RPM_NAME=$RPM_NAME -v $SYSTEM_ARTIFACTSDIRECTORY/rpm:/mnt/rpm -v $(pwd):/azure-cli $IMAGE /bin/bash "/azure-cli/scripts/release/rpm/test_azurelinux_in_docker.sh"
 
-    displayName: 'Test Rpm Package Mariner'
+    displayName: 'Test Rpm Package Azure Linux'
 
 # TODO: rpmbuild on Red Hat UBI 8 is slow for unknown reason. Still working with Red Hat to investigate.
 - job: BuildRpmPackages
@@ -1138,9 +1138,9 @@ jobs:
         git fetch origin --depth=1 $(System.PullRequest.TargetBranch)
         declare -A secret_files
         for FILE in `git diff --name-only --diff-filter=AM origin/$(System.PullRequest.TargetBranch)` ; do
-          detected=$(azdev scan -f $FILE | python -c "import sys, json; print(json.load(sys.stdin)['secrets_detected'])")
+          detected=$(azdev scan -f "$FILE" | python -c "import sys, json; print(json.load(sys.stdin)['secrets_detected'])")
           if [ $detected == 'True' ]; then
-            echo "Secrets detected from "$FILE", Please remove or replace it. You can leverage 'azdev scan'/'azdev mask' command if needed." 1>&2
+            printf "\033[0;31mDetected secrets from %s, You can run 'azdev mask' to remove secrets.\033[0m\n" "$FILE"
             secret_files+=$FILE
           fi
         done
@@ -1150,15 +1150,14 @@ jobs:
 
 
 - job: CodegenCoverage
-  condition: and(succeededOrFailed(), in(variables['Build.Reason'], 'BatchedCI'))
   displayName: "Codegen Coverage"
   pool:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.12'
+    displayName: 'Use Python 3.11'
     inputs:
-      versionSpec: 3.12
+      versionSpec: 3.11
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -1167,24 +1166,17 @@ jobs:
       cd ..
       git clone --depth 1 -b main https://github.com/Azure/azure-cli-extensions.git ./azure-cli-extensions
       azdev extension repo add ./azure-cli-extensions
+      pip install setuptools==70.0.0 wheel==0.30.0
       azdev extension add "*"
       # Some extension will change the dependence, so run `azdev setup` again after all extensions installed.
       azdev setup -c $CLI_REPO_PATH -r ./azure-cli-extensions
       # CLI repo only
       azdev statistics list-command-table CLI --statistics-only
       # CLI + EXT repos
+      pip install jinja2 -U
       azdev statistics list-command-table --statistics-only > /tmp/codegen_report.json
-      # azure-kusto is not compatible with azure-cli
-      # so we need run azdev statistics before installing azure-kusto to avoid the error `No module named azure.cli`
-      pip install azure-kusto-data azure-kusto-ingest
       python s/scripts/ci/codegen_report.py
     env:
       BUILD_ID: $(Build.BuildId)
       BUILD_BRANCH: $(Build.SourceBranchName)
-      KUSTO_CLIENT_ID: $(KUSTO_CLIENT_ID)
-      KUSTO_CLIENT_SECRET: $(KUSTO_CLIENT_SECRET)
-      KUSTO_CLUSTER: $(KUSTO_CLUSTER)
-      KUSTO_DATABASE: $(KUSTO_DATABASE)
-      KUSTO_TABLE: $(KUSTO_TABLE)
-      KUSTO_TENANT_ID: $(KUSTO_TENANT_ID)
-    enabled: false
+    enabled: true

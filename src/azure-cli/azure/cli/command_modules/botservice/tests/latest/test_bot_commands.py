@@ -19,7 +19,7 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, LiveScenarioT
 from azure.cli.testsdk.decorators import serial_test
 from knack.util import CLIError
 
-class DirectLineClient(object):
+class DirectLineClient:
     """Shared methods for the parsed result objects."""
 
     def __init__(self, direct_line_secret):

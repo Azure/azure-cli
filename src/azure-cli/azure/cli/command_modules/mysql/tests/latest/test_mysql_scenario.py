@@ -51,7 +51,7 @@ class ServerPreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, engine_type, location, engine_parameter_name='database_engine',
                  name_prefix=SERVER_NAME_PREFIX, parameter_name='server',
                  resource_group_parameter_name='resource_group'):
-        super(ServerPreparer, self).__init__(name_prefix, SERVER_NAME_MAX_LENGTH)
+        super().__init__(name_prefix, SERVER_NAME_MAX_LENGTH)
         from azure.cli.core.mock import DummyCli
         self.cli_ctx = DummyCli()
         self.engine_type = engine_type
@@ -2035,7 +2035,7 @@ class FlexibleServerIdentityAADAdminMgmtScenarioTest(ScenarioTest):
         self._test_identity_aad_admin_mgmt('mysql', resource_group, 'enabled')
 
     def _test_identity_aad_admin_mgmt(self, database_engine, resource_group, password_auth):
-        login = 'alanenriqueo@microsoft.com'
+        login = 'aaa@foo.com'
         sid = '894ef8da-7971-4f68-972c-f561441eb329'
 
         server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
