@@ -56,11 +56,12 @@ class ClassicCdnMigration(CdnScenarioMixin, ScenarioTest):
         self.profile_delete_cmd(resource_group, profile_name)
 
     def test_classic_cdn_migration_with_endpoint(self):
-        rg_name = "cli-test-rg"
+        resource_group = "cli-test-rg"
         profile_name = "cli-test-profile"
         checks = [JMESPathCheck('canMigrate', True),
                   JMESPathCheck('type', 'Microsoft.Cdn/canmigrate')]
-        self.cdn_can_migrate_to_afd(rg_name, profile_name, checks=checks)
+        self.cdn_can_migrate_to_afd(resource_group, profile_name, checks=checks)
 
         maps = "[{{migrated-from:maxtestendpointcli-test-profile1.azureedge.net,migrated-to:maxtestendpointcli-test-profile2}}]"
-        self.cdn_migrate_to_afd(rg_name, profile_name, "Premium_AzureFrontDoor", maps)
+        self.cdn_migrate_to_afd(resource_group, profile_name, "Premium_AzureFrontDoor", maps)
+        self.cdn_migration_abort(resource_group, profile_name)
