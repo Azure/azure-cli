@@ -12,7 +12,7 @@ from azure.cli.core.azclierror import (
     ValidationError,
     CLIInternalError
 )
-from azure.cli.core._profile import Profile
+# from azure.cli.core._profile import Profile
 from ._resource_config import (
     SOURCE_RESOURCES_USERTOKEN,
     TARGET_RESOURCES_USERTOKEN,
@@ -108,14 +108,15 @@ def _in_process_execute(command):
     return cli.result
 
 
+# pylint: disable=unused-argument
 def set_user_token_header(client, cli_ctx):
     '''Set user token header to work around OBO'''
 
     # pylint: disable=protected-access
     # HACK: set custom header to work around OBO
-    profile = Profile(cli_ctx=cli_ctx)
-    creds, _, _ = profile.get_raw_token()
-    client._client._config.headers_policy._headers['x-ms-serviceconnector-user-token'] = creds[1]
+    # profile = Profile(cli_ctx=cli_ctx)
+    # creds, _, _ = profile.get_raw_token()
+    # client._client._config.headers_policy._headers['x-ms-serviceconnector-user-token'] = creds[1]
     # HACK: hide token header
     client._config.logging_policy.headers_to_redact.append(
         'x-ms-serviceconnector-user-token')
@@ -218,7 +219,7 @@ def create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, k
     key_vault_connections = []
     for connection in client.list(resource_uri=source_id):
         connection = todict(connection)
-        if connection.get('targetService', dict()).get('id') == key_vault_id:
+        if connection.get('targetService', {}).get('id') == key_vault_id:
             key_vault_connections.append(connection)
 
     source_name = get_source_resource_name(cmd)
@@ -269,8 +270,8 @@ def get_auth_if_no_valid_key_vault_connection(source_name, source_id, key_vault_
     # any connection with csi enabled is a valid connection
     if source_name == RESOURCE.KubernetesCluster:
         for connection in key_vault_connections:
-            if connection.get('targetService', dict()).get(
-                    'resourceProperties', dict()).get('connectAsKubernetesCsiDriver'):
+            if connection.get('targetService', {}).get(
+                    'resourceProperties', {}).get('connectAsKubernetesCsiDriver'):
                 return
         return {'authType': 'userAssignedIdentity'}
 
@@ -348,7 +349,7 @@ def create_app_config_connection_if_not_exist(cmd, client, source_id, app_config
     logger.warning('looking for valid app configuration connections')
     for connection in client.list(resource_uri=source_id):
         connection = todict(connection)
-        if connection.get('targetService', dict()).get('id') == app_config_id:
+        if connection.get('targetService', {}).get('id') == app_config_id:
             logger.warning('Valid app configuration connection found.')
             return
 

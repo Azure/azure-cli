@@ -21,8 +21,7 @@ class SynapseManagementClientCommandsLoader(AzCommandsLoader):
         synapse_custom = CliCommandType(
             operations_tmpl='azure.cli.command_modules.synapse.custom#{}',
             client_factory=cf_synapse_cl)
-        parent = super(SynapseManagementClientCommandsLoader, self)
-        parent.__init__(cli_ctx=cli_ctx, custom_command_type=synapse_custom)
+        super().__init__(cli_ctx=cli_ctx, custom_command_type=synapse_custom)
 
     def load_command_table(self, args):
         from .generated.commands import load_command_table

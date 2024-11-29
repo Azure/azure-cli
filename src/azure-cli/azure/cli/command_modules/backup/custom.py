@@ -92,6 +92,7 @@ secondary_region_map = {
     "southafricawest": "southafricanorth",
     "southcentralus": "northcentralus",
     "southeastasia": "eastasia",
+    "southeastus": "westus3",
     "southindia": "centralindia",
     "swedencentral": "swedensouth",
     "swedensouth": "swedencentral",
@@ -455,7 +456,7 @@ def assign_identity(client, resource_group_name, vault_name, system_assigned=Non
 
     if user_assigned is not None:
         userid = UserIdentity()
-        user_assigned_identity = dict()
+        user_assigned_identity = {}
         for userMSI in user_assigned:
             user_assigned_identity[userMSI] = userid
         if system_assigned is not None or curr_identity_type in ["systemassigned", "systemassigned, userassigned"]:
@@ -498,7 +499,7 @@ def remove_identity(client, resource_group_name, vault_name, system_assigned=Non
         userid = None
         remove_count_of_userMSI = 0
         totaluserMSI = 0
-        user_assigned_identity = dict()
+        user_assigned_identity = {}
         for element in curr_identity_details.user_assigned_identities.keys():
             if element in user_assigned:
                 remove_count_of_userMSI += 1

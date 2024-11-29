@@ -374,7 +374,7 @@ def _update_artifacts(artifacts, lab_resource_id):
             parameters = artifact.get('parameters', [])
 
         if artifact_id:
-            result_artifact = dict()
+            result_artifact = {}
             result_artifact['artifact_id'] = _update_artifact_id(artifact_id, lab_resource_id)
             result_artifact['parameters'] = parameters
             result_artifacts.append(result_artifact)

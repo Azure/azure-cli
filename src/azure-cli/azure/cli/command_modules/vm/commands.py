@@ -26,7 +26,7 @@ from azure.cli.command_modules.vm._format import (
     transform_disk_create_table_output, transform_sku_for_table_output, transform_disk_show_table_output,
     transform_extension_show_table_output, get_vmss_table_output_transformer,
     transform_vm_encryption_show_table_output, transform_log_analytics_query_output,
-    transform_vmss_list_with_zones_table_output, transform_vmss_list_without_zones_table_output)
+    transform_vmss_list_with_zones_table_output)
 from azure.cli.command_modules.vm._validators import (
     process_vm_create_namespace, process_vmss_create_namespace, process_image_create_namespace,
     process_disk_create_namespace, process_snapshot_create_namespace,
@@ -34,7 +34,7 @@ from azure.cli.command_modules.vm._validators import (
     process_remove_identity_namespace, process_vm_secret_format, process_vm_vmss_stop, validate_vmss_update_namespace,
     process_vm_update_namespace, process_set_applications_namespace, process_vm_disk_attach_namespace,
     process_image_version_create_namespace, process_image_version_update_namespace,
-    process_image_version_undelete_namespace, process_ppg_create_namespace)
+    process_image_version_undelete_namespace, process_ppg_create_namespace, process_vm_disk_detach_namespace)
 
 from azure.cli.command_modules.vm._image_builder import (
     process_image_template_create_namespace, process_img_tmpl_output_add_namespace,
@@ -234,7 +234,7 @@ def load_command_table(self, _):
         client_factory=cf_community_gallery_image_version)
 
     with self.command_group("ppg"):
-        from .custom import PPGShow
+        from .operations.ppg import PPGShow
         self.command_table["ppg show"] = PPGShow(loader=self)
 
     with self.command_group('disk', compute_disk_sdk, operation_group='disks', min_api='2017-03-30') as g:
@@ -242,10 +242,9 @@ def load_command_table(self, _):
         g.custom_command('grant-access', 'grant_disk_access')
         g.generic_update_command('update', custom_func_name='update_managed_disk', setter_name='begin_create_or_update', setter_arg_name='disk', supports_no_wait=True)
 
-        from azure.cli.command_modules.vm._vm_utils import import_aaz_by_profile
-        Disk = import_aaz_by_profile(self.cli_ctx.cloud.profile, "disk")
-        self.command_table['disk list'] = Disk.List(loader=self, table_transformer='[].' + transform_disk_show_table_output)
-        self.command_table['disk show'] = Disk.Show(loader=self, table_transformer=transform_disk_show_table_output)
+        from .aaz.latest.disk import List as DiskList, Show as DiskShow
+        self.command_table['disk list'] = DiskList(loader=self, table_transformer='[].' + transform_disk_show_table_output)
+        self.command_table['disk show'] = DiskShow(loader=self, table_transformer=transform_disk_show_table_output)
 
     with self.command_group('disk-encryption-set', compute_disk_encryption_set_sdk, operation_group='disk_encryption_sets', client_factory=cf_disk_encryption_set, min_api='2019-07-01') as g:
         g.custom_command('create', 'create_disk_encryption_set', supports_no_wait=True)
@@ -362,7 +361,7 @@ def load_command_table(self, _):
 
     with self.command_group('vm disk', compute_vm_sdk, min_api='2017-03-30') as g:
         g.custom_command('attach', 'attach_managed_data_disk', validator=process_vm_disk_attach_namespace)
-        g.custom_command('detach', 'detach_managed_data_disk')
+        g.custom_command('detach', 'detach_managed_data_disk', validator=process_vm_disk_detach_namespace)
 
     with self.command_group('vm encryption', custom_command_type=compute_disk_encryption_custom) as g:
         g.custom_command('enable', 'encrypt_vm', validator=process_disk_encryption_namespace)
@@ -459,18 +458,12 @@ def load_command_table(self, _):
         g.wait_command('wait', getter_name='get_vmss', getter_type=compute_custom)
         g.custom_command('set-orchestration-service-state', 'set_orchestration_service_state', supports_no_wait=True)
 
-        from azure.cli.command_modules.vm._vm_utils import import_aaz_by_profile
-        VMSS = import_aaz_by_profile(self.cli_ctx.cloud.profile, "vmss")
-        if self.supported_api_version(min_api='2017-03-30'):
-            self.command_table['vmss list'] = VMSS.List(loader=self,
-                                                        table_transformer=transform_vmss_list_with_zones_table_output)
-        else:
-            self.command_table['vmss list'] = VMSS.List(loader=self,
-                                                        table_transformer=transform_vmss_list_without_zones_table_output)
+        from .aaz.latest.vmss import List as VMSSList
+        self.command_table['vmss list'] = VMSSList(loader=self,
+                                                   table_transformer=transform_vmss_list_with_zones_table_output)
 
-        if self.cli_ctx.cloud.profile == 'latest':
-            from .custom import VMSSListInstances
-            self.command_table['vmss list-instances'] = VMSSListInstances(loader=self)
+        from .operations.vmss import VMSSListInstances
+        self.command_table['vmss list-instances'] = VMSSListInstances(loader=self)
 
     with self.command_group('vmss diagnostics', compute_vmss_sdk) as g:
         g.custom_command('set', 'set_vmss_diagnostics_extension')
@@ -606,7 +599,7 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'show_capacity_reservation_group')
 
     with self.command_group('capacity reservation group'):
-        from .custom import CapacityReservationGroupList
+        from .operations.capacity_reservation_group import CapacityReservationGroupList
         self.command_table['capacity reservation group list'] = CapacityReservationGroupList(loader=self)
 
     with self.command_group('capacity reservation', capacity_reservations_sdk, min_api='2021-04-01',

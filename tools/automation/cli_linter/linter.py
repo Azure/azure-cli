@@ -12,7 +12,7 @@ import colorama
 from .util import share_element, exclude_commands, LinterError
 
 
-class Linter(object):
+class Linter:
     def __init__(self, command_loader=None, help_file_entries=None, loaded_help=None):
         self._all_yaml_help = help_file_entries
         self._loaded_help = loaded_help
@@ -132,7 +132,7 @@ class Linter(object):
         return help_entry
 
 
-class LinterManager(object):
+class LinterManager:
     def __init__(self, command_loader=None, help_file_entries=None, loaded_help=None, exclusions=None,
                  rule_inclusions=None):
         self.linter = Linter(command_loader=command_loader, help_file_entries=help_file_entries, loaded_help=loaded_help)
@@ -236,7 +236,7 @@ class RuleError(Exception):
     pass
 
 
-class LinterScope():
+class LinterScope:
     def __init__(self, linter_manager, linter_callable):
         self.linter_manager = linter_manager
         self.linter = linter_callable()

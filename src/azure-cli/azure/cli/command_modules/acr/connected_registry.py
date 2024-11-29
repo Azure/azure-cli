@@ -108,7 +108,7 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
             client_token_list[i] = build_token_id(
                 subscription_id, resource_group_name, registry_name, client_token_name)
 
-    notifications_set = set(list(notifications)) \
+    notifications_set = set(notifications) \
         if notifications else set()
 
     ConnectedRegistry, LoggingProperties, SyncProperties, ParentProperties = cmd.get_models(
@@ -192,10 +192,10 @@ def acr_connected_registry_update(cmd,  # pylint: disable=too-many-locals, too-m
     client_token_list = list(client_token_set) if client_token_set != current_client_token_set else None
 
     # Add or remove from the current notifications list
-    add_notifications_set = set(list(add_notifications)) \
+    add_notifications_set = set(add_notifications) \
         if add_notifications else set()
 
-    remove_notifications_set = set(list(remove_notifications)) \
+    remove_notifications_set = set(remove_notifications) \
         if remove_notifications else set()
 
     duplicate_notifications = set.intersection(add_notifications_set, remove_notifications_set)
@@ -253,7 +253,7 @@ def acr_connected_registry_delete(cmd,
     try:
         connected_registry = acr_connected_registry_show(
             cmd, client, connected_registry_name, registry_name, resource_group_name)
-        result = client.begin_delete(resource_group_name, registry_name, connected_registry_name)
+        result = client.begin_delete(resource_group_name, registry_name, connected_registry_name).result()
         sync_token = get_token_from_id(cmd, connected_registry.parent.sync_properties.token_id)
         sync_token_name = sync_token.name
         sync_scope_map_name = sync_token.scope_map_id.split('/scopeMaps/')[1]
@@ -264,8 +264,10 @@ def acr_connected_registry_delete(cmd,
             scope_map_client = cf_acr_scope_maps(cmd.cli_ctx)
 
             # Delete target sync scope map and token.
-            acr_token_delete(cmd, token_client, registry_name, sync_token_name, yes, resource_group_name)
-            acr_scope_map_delete(cmd, scope_map_client, registry_name, sync_scope_map_name, yes, resource_group_name)
+            acr_token_delete(cmd, token_client, registry_name,
+                             sync_token_name, yes, resource_group_name).result()
+            acr_scope_map_delete(cmd, scope_map_client, registry_name,
+                                 sync_scope_map_name, yes, resource_group_name).result()
             # Cleanup gateway permissions from ancestors
             connected_registry_list = list(client.list(resource_group_name, registry_name))
             family_tree, _ = _get_family_tree(connected_registry_list, None)

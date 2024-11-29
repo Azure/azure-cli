@@ -18,7 +18,7 @@ from azure.cli.testsdk.checkers import NoneCheck
 from azure.cli.command_modules.appconfig._constants import FeatureFlagConstants, KeyVaultConstants, ImportExportProfiles, AppServiceConstants
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse, RecordingProcessor
 from azure.cli.testsdk.scenario_tests.utilities import is_json_payload
-from azure.core.exceptions import ResourceNotFoundError
+from azure.core.exceptions import ResourceNotFoundError, HttpResponseError
 from azure.cli.core.azclierror import ResourceNotFoundError as CliResourceNotFoundError, RequiredArgumentMissingError, MutuallyExclusiveArgumentError
 from azure.cli.core.util import shell_safe_json_parse
 
@@ -29,7 +29,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
 
     def __init__(self, *args, **kwargs):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
-        super(AppConfigMgmtScenarioTest, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     @ResourceGroupPreparer(parameter_name_for_location='location')
     @AllowLargeResponse()
@@ -143,6 +143,48 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                     self.check('provisioningState', 'Succeeded'),
                     self.check('sku.name', premium_sku),
                     self.check('encryption.keyVaultProperties.keyIdentifier', keyvault_uri.strip('/') + "/keys/{}/".format(encryption_key))])
+        
+        # update private link delegation mode and private network access
+        pass_through_auth_mode = 'pass-through'
+        local_auth_mode = "local"
+
+        # update authentication mode to 'local'        
+        self.kwargs.update({
+            'data_plane_auth_mode': local_auth_mode,
+        })
+
+        self.cmd('appconfig update -n {config_store_name} -g {rg} --arm-auth-mode {data_plane_auth_mode}',
+                 checks=[self.check('name', '{config_store_name}'),
+                    self.check('location', '{rg_loc}'),
+                    self.check('resourceGroup', resource_group),
+                    self.check('tags', {}),
+                    self.check('provisioningState', 'Succeeded'),
+                    self.check('dataPlaneProxy.authenticationMode', 'Local')])
+        
+        # enabling private network access should fail
+        with self.assertRaisesRegex(HttpResponseError, 'Data plane proxy authentication mode must be set to Pass-through to enable private link delegation'):
+            self.cmd('appconfig update -n {config_store_name} -g {rg} --enable-arm-private-network-access')
+
+        # update authengication mode to 'pass-through'
+        self.kwargs.update({
+            'data_plane_auth_mode': pass_through_auth_mode,
+        })
+
+        self.cmd('appconfig update -n {config_store_name} -g {rg} --arm-auth-mode {data_plane_auth_mode}',
+                 checks=[self.check('name', '{config_store_name}'),
+                    self.check('location', '{rg_loc}'),
+                    self.check('resourceGroup', resource_group),
+                    self.check('tags', {}),
+                    self.check('provisioningState', 'Succeeded'),
+                    self.check('dataPlaneProxy.authenticationMode', 'Pass-through')])
+        
+        self.cmd('appconfig update -n {config_store_name} -g {rg} --enable-arm-private-network-access',
+                 checks=[self.check('name', '{config_store_name}'),
+                    self.check('location', '{rg_loc}'),
+                    self.check('resourceGroup', resource_group),
+                    self.check('tags', {}),
+                    self.check('provisioningState', 'Succeeded'),
+                    self.check('dataPlaneProxy.privateLinkDelegation', 'Enabled')])
 
         self.cmd('appconfig delete -n {config_store_name} -g {rg} -y')
 
@@ -382,7 +424,7 @@ class AppConfigCredentialScenarioTest(ScenarioTest):
 
     def __init__(self, *args, **kwargs):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
-        super(AppConfigCredentialScenarioTest, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
@@ -419,7 +461,7 @@ class AppConfigIdentityScenarioTest(ScenarioTest):
 
     def __init__(self, *args, **kwargs):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
-        super(AppConfigIdentityScenarioTest, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_identity(self, resource_group, location):
@@ -463,7 +505,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
 
     def __init__(self, *args, **kwargs):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
-        super(AppConfigKVScenarioTest, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
@@ -780,7 +822,7 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
 
     def __init__(self, *args, **kwargs):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
-        super(AppConfigImportExportScenarioTest, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
@@ -1395,7 +1437,7 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
 
     def __init__(self, *args, **kwargs):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
-        super(AppConfigImportExportNamingConventionScenarioTest, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
@@ -1505,7 +1547,7 @@ class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
 
     def __init__(self, *args, **kwargs):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
-        super(AppConfigToAppConfigImportExportScenarioTest, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
     
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
@@ -1706,7 +1748,7 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
 
     def __init__(self, *args, **kwargs):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
-        super(AppConfigJsonContentTypeScenarioTest, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
@@ -2138,7 +2180,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
 
     def __init__(self, *args, **kwargs):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
-        super(AppConfigFeatureScenarioTest, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
@@ -2555,7 +2597,7 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
 
     def __init__(self, *args, **kwargs):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
-        super(AppConfigFeatureFilterScenarioTest, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
@@ -2813,7 +2855,7 @@ class AppConfigKeyValidationScenarioTest(ScenarioTest):
 
     def __init__(self, *args, **kwargs):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
-        super(AppConfigKeyValidationScenarioTest, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
     
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
@@ -2904,7 +2946,7 @@ class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
 
     def __init__(self, *args, **kwargs):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
-        super(AppConfigAadAuthLiveScenarioTest, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
     
     @live_only()
     @AllowLargeResponse()
@@ -3066,7 +3108,7 @@ class AppconfigReplicaLiveScenarioTest(ScenarioTest):
 
     def __init__(self, *args, **kwargs):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
-        super(AppconfigReplicaLiveScenarioTest, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     @ResourceGroupPreparer(parameter_name_for_location='location')
     @AllowLargeResponse()
@@ -3138,7 +3180,7 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
 
     def __init__(self, *args, **kwargs):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
-        super(AppConfigSnapshotLiveScenarioTest, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
     @ResourceGroupPreparer(parameter_name_for_location='location')
@@ -3342,22 +3384,29 @@ class CredentialResponseSanitizer(RecordingProcessor):
             try:
                 json_data = shell_safe_json_parse(response["body"]["string"])
 
-                if isinstance(json_data["value"], list):
+                if isinstance(json_data.get("value"), list):
                     for idx, credential in enumerate(json_data["value"]):
-                        if "connectionString" in credential:
-                            credential["id"] = "sanitized_id{}".format(idx + 1)
-                            credential["value"] = "sanitized_secret{}".format(
-                                idx + 1)
+                        self._try_replace_secret(credential, idx)
 
-                            endpoint = next(
-                                filter(lambda x: x.startswith("Endpoint="), credential["connectionString"].split(";")))[len("Endpoint="):]
+                    response["body"]["string"] = json.dumps(json_data)
+                
+                elif isinstance(json_data, dict):
+                    self._try_replace_secret(json_data)
 
-                            credential["connectionString"] = "Endpoint={};Id={};Secret={}".format(
-                                endpoint, credential["id"], credential["value"])
-
-                response["body"]["string"] = json.dumps(json_data)
+                    response["body"]["string"] = json.dumps(json_data)
 
             except Exception:
                 pass
 
         return response
+
+    def _try_replace_secret(self, credential, idx = 0):
+        if "connectionString" in credential:
+            credential["id"] = "sanitized_id{}".format(idx + 1)
+            credential["value"] = "sanitized_secret{}".format(idx + 1)
+
+            endpoint = next(
+                filter(lambda x: x.startswith("Endpoint="), credential["connectionString"].split(";")))[len("Endpoint="):]
+
+            credential["connectionString"] = "Endpoint={};Id={};Secret={}".format(
+                endpoint, credential["id"], credential["value"])

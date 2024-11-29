@@ -617,6 +617,7 @@ def get_content_setting_validator(settings_class, update, guess_from_file=None, 
         clear_content_settings = ns.pop('clear_content_settings', False)
 
         # retrieve the existing object properties for an update
+        props = None
         if update and not clear_content_settings:
             account = ns.get('account_name')
             key = ns.get('account_key')

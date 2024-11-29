@@ -25,7 +25,7 @@ parameters:
   default:
   - name: AMD64
     value: amd64
-    pool: pool-ubuntu-2004
+    pool: pool-ubuntu-2004-multi-core
   - name: ARM64
     value: arm64
     pool: ubuntu-arm64-2004-pool
@@ -129,9 +129,9 @@ jobs:
 
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.11'
+    displayName: 'Use Python 3.12'
     inputs:
-      versionSpec: 3.11
+      versionSpec: 3.12
 
   - bash: ./scripts/ci/dependency_check.sh
     displayName: 'Verify src/azure-cli/requirements.py3.Linux.txt'
@@ -144,9 +144,9 @@ jobs:
 
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.11'
+    displayName: 'Use Python 3.12'
     inputs:
-      versionSpec: 3.11
+      versionSpec: 3.12
 
   - bash: ./scripts/ci/dependency_check.sh
     displayName: 'Verify src/azure-cli/requirements.py3.Darwin.txt'
@@ -159,9 +159,9 @@ jobs:
 
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.11'
+    displayName: 'Use Python 3.12'
     inputs:
-      versionSpec: 3.11
+      versionSpec: 3.12
 
   - task: BatchScript@1
     inputs:
@@ -176,9 +176,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.11'
+    displayName: 'Use Python 3.12'
     inputs:
-      versionSpec: 3.11
+      versionSpec: 3.12
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -425,7 +425,7 @@ jobs:
         echo "== Test docker image =="
         
         docker load < $TAR_FILE
-        docker run $IMAGE_NAME /bin/bash -c "time az self-test && time az --version && sleep 5"
+        docker run $IMAGE_NAME /bin/bash -c "time az self-test && time az --version && tdnf list --installed && sleep 5"
       displayName: 'Bash Script'
 
 - job: BuildPythonWheel
@@ -437,9 +437,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.11'
+    displayName: 'Use Python 3.12'
     inputs:
-      versionSpec: 3.11
+      versionSpec: 3.12
 
   - task: PipAuthenticate@1
     condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
@@ -469,7 +469,12 @@ jobs:
 
 - job: TestPythonWheel
   displayName: Test Python Wheels
-
+  strategy:
+    matrix:
+      Python39:
+        python.version: '3.9'
+      Python312:
+        python.version: '3.12'
   dependsOn: BuildPythonWheel
   condition: succeeded()
   pool:
@@ -480,35 +485,23 @@ jobs:
     inputs:
       TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
       artifactName: metadata
-
-
   - task: DownloadPipelineArtifact@1
     displayName: 'Download PyPI Packages'
     inputs:
       TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
       artifactName: pypi
-
-
+  - task: UsePythonVersion@0
+    displayName: 'Use Python $(python.version)'
+    inputs:
+      versionSpec: '$(python.version)'
   - bash: |
       #!/usr/bin/env bash
-      
-      # Verify the pip wheels
-      
       set -ex
       
       CLI_VERSION=`cat $BUILD_ARTIFACTSTAGINGDIRECTORY/metadata/version`
-      PYPI_FILES=$(cd $BUILD_ARTIFACTSTAGINGDIRECTORY/pypi; pwd)
-      
-      echo "== Testing pip install on Python 3.9 =="
-      docker run \
-        --rm -v $PYPI_FILES:/mnt/pypi mcr.microsoft.com/mirror/docker/library/python:3.9-slim \
-        /bin/bash -c "cd /mnt/pypi && ls && pip install --find-links ./ azure_cli-$CLI_VERSION*whl && az self-test && az --version && sleep 5"
-      
-      echo "== Testing pip install on Python 3.11 =="
-      docker run \
-        --rm -v $PYPI_FILES:/mnt/pypi mcr.microsoft.com/mirror/docker/library/python:3.11-slim \
-        /bin/bash -c "cd /mnt/pypi && ls && pip install --find-links ./ azure_cli-$CLI_VERSION*whl && az self-test && az --version && sleep 5"
-
+      echo "== Testing pip install on $PYTHON_VERSION =="
+      cd $BUILD_ARTIFACTSTAGINGDIRECTORY/pypi
+      pip install --find-links ./ azure_cli-$CLI_VERSION*whl && az self-test && az --version && sleep 5
     displayName: 'Test pip Install'
 
 - job: TestCore
@@ -520,8 +513,8 @@ jobs:
     matrix:
       Python39:
         python.version: '3.9'
-      Python311:
-        python.version: '3.11'
+      Python312:
+        python.version: '3.12'
   steps:
   - template: .azure-pipelines/templates/automation_test.yml
     parameters:
@@ -537,8 +530,8 @@ jobs:
     matrix:
       Python39:
         python.version: '3.9'
-      Python311:
-        python.version: '3.11'
+      Python312:
+        python.version: '3.12'
   steps:
   - template: .azure-pipelines/templates/automation_test.yml
     parameters:
@@ -557,14 +550,14 @@ jobs:
     matrix:
       Python39:
         python.version: '3.9'
-      Python311:
-        python.version: '3.11'
+      Python312:
+        python.version: '3.12'
   steps:
   - task: UsePythonVersion@0
     displayName: 'Use Python $(python.version)'
     inputs:
       versionSpec: '$(python.version)'
-  - bash: pip install --upgrade pip wheel
+  - bash: pip install --upgrade pip wheel setuptools
     displayName: 'Install pip and wheel'
   - bash: ./scripts/ci/test_profile_integration.sh
     displayName: 'Run Integration Test against Profiles'
@@ -578,15 +571,15 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   strategy:
     matrix:
-      Python311:
-        python.version: '3.11'
+      Python312:
+        python.version: '3.12'
   steps:
   - task: UsePythonVersion@0
     displayName: 'Use Python $(python.version)'
     inputs:
       versionSpec: '$(python.version)'
-  - bash: pip install --upgrade pip wheel
-    displayName: 'Install pip and wheel'
+  - bash: pip install --upgrade pip wheel setuptools
+    displayName: 'Install pip and wheel setuptools'
   - bash: ./scripts/ci/test_extensions.sh
     displayName: 'Load extensions'
 
@@ -623,7 +616,7 @@ jobs:
                  -e CLI_VERSION=$CLI_VERSION \
                  -e HOMEBREW_UPSTREAM_URL=$HOMEBREW_UPSTREAM_URL \
                  --name azurecli \
-                 mcr.microsoft.com/mirror/docker/library/python:3.11-slim \
+                 mcr.microsoft.com/azurelinux/base/python:3 \
                  /mnt/scripts/run.sh
       
       # clean up
@@ -670,7 +663,7 @@ jobs:
       set -ev
       # Force relink python@3.xx in Homebrew to resolve the conflict with pre-installed python 3.xx on macOS-12 image
       # See: https://github.com/Azure/azure-cli/issues/29054
-      python_version=3.11
+      python_version=3.12
       brew unlink python@$python_version && brew link --overwrite python@$python_version
       
       echo == Remove pre-installed azure-cli ==
@@ -754,14 +747,14 @@ jobs:
       BuildDropPath: $(Build.ArtifactStagingDirectory)
 
   - task: PublishPipelineArtifact@0
-    displayName: 'Publish Artifact: rpm-mariner'
+    displayName: 'Publish Artifact: rpm-azurelinux'
     inputs:
       TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: $(artifact)
 
 - job: TestRpmPackagesAzureLinux
   displayName: Test Rpm Package
-  timeoutInMinutes: 120
+  timeoutInMinutes: 180
   dependsOn:
   - BuildRpmPackagesAzureLinux
   - ExtractMetadata
@@ -805,7 +798,7 @@ jobs:
       docker pull $IMAGE
       docker run --rm -e RPM_NAME=$RPM_NAME -v $SYSTEM_ARTIFACTSDIRECTORY/rpm:/mnt/rpm -v $(pwd):/azure-cli $IMAGE /bin/bash "/azure-cli/scripts/release/rpm/test_azurelinux_in_docker.sh"
 
-    displayName: 'Test Rpm Package Mariner'
+    displayName: 'Test Rpm Package Azure Linux'
 
 # TODO: rpmbuild on Red Hat UBI 8 is slow for unknown reason. Still working with Red Hat to investigate.
 - job: BuildRpmPackages
@@ -855,7 +848,7 @@ jobs:
 
 - job: TestRpmPackage
   displayName: Test Rpm Package
-  timeoutInMinutes: 120
+  timeoutInMinutes: 180
   dependsOn:
     - BuildRpmPackages
     - ExtractMetadata
@@ -979,7 +972,7 @@ jobs:
       ArtifactName: $(deb_system)-$(distro)-$(arch)
 
 - job: TestDebPackages
-  timeoutInMinutes: 120
+  timeoutInMinutes: 180
   displayName: Test Deb Packages
   dependsOn:
   - BuildDebPackages
@@ -1050,9 +1043,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.11'
+    displayName: 'Use Python 3.12'
     inputs:
-      versionSpec: 3.11
+      versionSpec: 3.12
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -1066,9 +1059,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.11'
+    displayName: 'Use Python 3.12'
     inputs:
-      versionSpec: 3.11
+      versionSpec: 3.12
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -1083,8 +1076,8 @@ jobs:
     matrix:
       Python39:
         python.version: '3.9'
-      Python311:
-        python.version: '3.11'
+      Python312:
+        python.version: '3.12'
   pool:
     name: ${{ variables.ubuntu_pool }}
   steps:
@@ -1112,9 +1105,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.11'
+    displayName: 'Use Python 3.12'
     inputs:
-      versionSpec: 3.11
+      versionSpec: 3.12
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -1128,8 +1121,35 @@ jobs:
         azdev linter --ci-exclusions --min-severity medium
       fi
 
+- job: AzdevScan
+  condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
+  displayName: "Secret Scan"
+  pool:
+    name: ${{ variables.ubuntu_pool }}
+  steps:
+    - task: UsePythonVersion@0
+      displayName: 'Use Python 3.12'
+      inputs:
+        versionSpec: 3.12
+    - template: .azure-pipelines/templates/azdev_setup.yml
+    - bash: |
+        set -ev
+        . env/bin/activate
+        git fetch origin --depth=1 $(System.PullRequest.TargetBranch)
+        declare -A secret_files
+        for FILE in `git diff --name-only --diff-filter=AM origin/$(System.PullRequest.TargetBranch)` ; do
+          detected=$(azdev scan -f "$FILE" | python -c "import sys, json; print(json.load(sys.stdin)['secrets_detected'])")
+          if [ $detected == 'True' ]; then
+            printf "\033[0;31mDetected secrets from %s, You can run 'azdev mask' to remove secrets.\033[0m\n" "$FILE"
+            secret_files+=$FILE
+          fi
+        done
+        if [ "${#secret_files[@]}" -gt 0 ]; then
+          exit 1
+        fi
+
+
 - job: CodegenCoverage
-  condition: and(succeededOrFailed(), in(variables['Build.Reason'], 'BatchedCI'))
   displayName: "Codegen Coverage"
   pool:
     name: ${{ variables.ubuntu_pool }}
@@ -1146,103 +1166,17 @@ jobs:
       cd ..
       git clone --depth 1 -b main https://github.com/Azure/azure-cli-extensions.git ./azure-cli-extensions
       azdev extension repo add ./azure-cli-extensions
+      pip install setuptools==70.0.0 wheel==0.30.0
       azdev extension add "*"
       # Some extension will change the dependence, so run `azdev setup` again after all extensions installed.
       azdev setup -c $CLI_REPO_PATH -r ./azure-cli-extensions
       # CLI repo only
       azdev statistics list-command-table CLI --statistics-only
       # CLI + EXT repos
+      pip install jinja2 -U
       azdev statistics list-command-table --statistics-only > /tmp/codegen_report.json
-      # azure-kusto is not compatible with azure-cli
-      # so we need run azdev statistics before installing azure-kusto to avoid the error `No module named azure.cli`
-      pip install azure-kusto-data azure-kusto-ingest
       python s/scripts/ci/codegen_report.py
     env:
       BUILD_ID: $(Build.BuildId)
       BUILD_BRANCH: $(Build.SourceBranchName)
-      KUSTO_CLIENT_ID: $(KUSTO_CLIENT_ID)
-      KUSTO_CLIENT_SECRET: $(KUSTO_CLIENT_SECRET)
-      KUSTO_CLUSTER: $(KUSTO_CLUSTER)
-      KUSTO_DATABASE: $(KUSTO_DATABASE)
-      KUSTO_TABLE: $(KUSTO_TABLE)
-      KUSTO_TENANT_ID: $(KUSTO_TENANT_ID)
-    enabled: false
-
-#- job: VerifySphinxDocumentGenerator
-#  displayName: "Verify Sphinx Document Generator"
-#  pool:
-#    name: ${{ variables.ubuntu_pool }}
-#  steps:
-#  - task: UsePythonVersion@0
-#    displayName: 'Use Python 3.10'
-#    inputs:
-#      versionSpec: 3.10
-#  - bash: pip install --upgrade pip wheel
-#    displayName: "Install pip and wheel"
-#  - bash: ./scripts/ci/test_ref_doc.sh
-#    displayName: "Verify Sphinx Document Generator"
-
-- job: NotifyCIErrors
-  dependsOn:
-    - CheckPullRequest
-    - RejectPullRequestToMasterBranch
-    - CredentialScanner
-    - PolicyCheck
-    - ExtractMetadata
-    - VerifyLinuxRequirements
-    - VerifyDarwinRequirements
-    - VerifyWindowsRequirements
-    - VerifyVersions
-    - BuildWindowsMSI
-    - TestMsiInstallation
-    - BuildWindowsZIP
-    - TestZipInstallation
-    - BuildDockerImageAzureLinux
-    - TestDockerImageAzureLinux
-    - BuildPythonWheel
-    - TestPythonWheel
-    - TestCore
-    - TestTelemetry
-    - IntegrationTestAgainstProfiles
-    - TestExtensionsLoading
-    - BuildHomebrewFormula
-    - TestHomebrewFormula
-    - TestHomebrewPackage
-    - BuildRpmPackagesAzureLinux
-    - BuildRpmPackages
-    - TestRpmPackage
-    - BuildDebPackages
-    - TestDebPackages
-    - CheckStyle
-    - CheckHeaders
-    - PerformanceCheck
-    - CheckLinter
-    - CodegenCoverage
-#    - VerifySphinxDocumentGenerator
-  condition: and(failed(), in(variables['Build.Reason'], 'BatchedCI'))
-  displayName: Notify CI Errors
-  pool:
-    name: ${{ variables.ubuntu_pool }}
-  steps:
-  - task: UsePythonVersion@0
-    displayName: 'Use Python 3.11'
-    inputs:
-      versionSpec: 3.11
-  - task: AzureCLI@2
-    inputs:
-      azureSubscription: 'Azure CLI'
-      scriptType: 'bash'
-      scriptLocation: 'inlineScript'
-      inlineScript: |
-        pip install requests
-        teams_api_url=$(az keyvault secret show --vault-name $(TEAMS_BOT_VAULT_NAME) --name $(TEAMS_BOT_API_URL_SECRET_NAME) --query value -otsv)
-        teams_api_key=$(az keyvault secret show --vault-name $(TEAMS_BOT_VAULT_NAME) --name $(TEAMS_BOT_API_KEY_SECRET_NAME) --query value -otsv)
-        echo "If any task fails, notify to teams channel"
-        python scripts/ci/notify_ci_errors.py $teams_api_url $teams_api_key $(TEAMS_CHANNEL_ID)
-    displayName: 'Notify To Teams Channel'
-    env:
-      BASE_URI: $(System.CollectionUri)
-      PROJECT_TYPE: $(System.TeamProject)
-      BUILD_ID: $(Build.BuildId)
-      JOB_ID: $(System.JobId)
-    enabled: false
+    enabled: true
