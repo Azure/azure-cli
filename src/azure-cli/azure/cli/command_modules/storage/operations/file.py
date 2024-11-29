@@ -133,7 +133,7 @@ def list_share_files(cmd, client, directory_name=None, timeout=None, exclude_dir
 
     if exclude_dir:
         t_file_properties = cmd.get_models('_models#FileProperties', resource_type=ResourceType.DATA_STORAGE_FILESHARE)
-        return list(f for f in results if isinstance(f, t_file_properties))
+        return [f for f in results if isinstance(f, t_file_properties)]
     return results
 
 
@@ -315,7 +315,7 @@ def storage_file_copy_batch(cmd, client, source_client, share_name=None, destina
 
         # the cache of existing directories in the destination file share. the cache helps to avoid
         # repeatedly create existing directory so as to optimize the performance.
-        existing_dirs = set([])
+        existing_dirs = set()
 
         # pylint: disable=inconsistent-return-statements
         def action_blob_copy(blob_name):
@@ -335,7 +335,7 @@ def storage_file_copy_batch(cmd, client, source_client, share_name=None, destina
 
         # the cache of existing directories in the destination file share. the cache helps to avoid
         # repeatedly create existing directory so as to optimize the performance.
-        existing_dirs = set([])
+        existing_dirs = set()
 
         # pylint: disable=inconsistent-return-statements
         def action_file_copy(file_info):

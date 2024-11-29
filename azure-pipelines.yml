@@ -1173,6 +1173,7 @@ jobs:
       # CLI repo only
       azdev statistics list-command-table CLI --statistics-only
       # CLI + EXT repos
+      pip install jinja2 -U
       azdev statistics list-command-table --statistics-only > /tmp/codegen_report.json
       python s/scripts/ci/codegen_report.py
     env:

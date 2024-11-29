@@ -15,7 +15,7 @@ class AppconfigCommandsLoader(AzCommandsLoader):
         from azure.cli.core import ModExtensionSuppress
         configstore_custom = CliCommandType(
             operations_tmpl='azure.cli.command_modules.appconfig.custom#{}')
-        super(AppconfigCommandsLoader, self).__init__(
+        super().__init__(
             cli_ctx=cli_ctx,
             suppress_extension=ModExtensionSuppress(__name__, 'appconfig', '0.5.0',
                                                     reason='These commands are now in the CLI.',

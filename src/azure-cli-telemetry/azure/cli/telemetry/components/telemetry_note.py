@@ -18,9 +18,9 @@ class TelemetryNote(portalocker.utils.Lock):
         self._logger = get_logger('note')
 
         if not os.path.exists(self._path):
-            super(TelemetryNote, self).__init__(self._path, mode='w', timeout=0.1, fail_when_locked=True)
+            super().__init__(self._path, mode='w', timeout=0.1, fail_when_locked=True)
         else:
-            super(TelemetryNote, self).__init__(self._path, mode='r+', timeout=1, fail_when_locked=True)
+            super().__init__(self._path, mode='r+', timeout=1, fail_when_locked=True)
 
     @staticmethod
     def get_file_path(config_dir):

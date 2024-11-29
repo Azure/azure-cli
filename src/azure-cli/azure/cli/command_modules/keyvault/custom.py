@@ -96,12 +96,12 @@ def _default_certificate_profile(cmd):
     template = CertificatePolicy(
         key_properties=KeyProperties(
             exportable=True,
-            key_type=u'RSA',
+            key_type='RSA',
             key_size=2048,
             reuse_key=True
         ),
         secret_properties=SecretProperties(
-            content_type=u'application/x-pkcs12'
+            content_type='application/x-pkcs12'
         ),
         x509_certificate_properties=X509CertificateProperties(
             key_usage=[
@@ -112,7 +112,7 @@ def _default_certificate_profile(cmd):
                 KeyUsageType.key_agreement,
                 KeyUsageType.key_cert_sign
             ],
-            subject=u'CN=CLIGetDefaultPolicy',
+            subject='CN=CLIGetDefaultPolicy',
             validity_in_months=12
         ),
         lifetime_actions=[LifetimeAction(
@@ -124,7 +124,7 @@ def _default_certificate_profile(cmd):
             )
         )],
         issuer_parameters=IssuerParameters(
-            name=u'Self',
+            name='Self',
         ),
         attributes=CertificateAttributes(
             enabled=True
@@ -159,12 +159,12 @@ def _scaffold_certificate_profile(cmd):
     template = CertificatePolicy(
         key_properties=KeyProperties(
             exportable=True,
-            key_type=u'(optional) RSA or RSA-HSM (default RSA)',
+            key_type='(optional) RSA or RSA-HSM (default RSA)',
             key_size=2048,
             reuse_key=True
         ),
         secret_properties=SecretProperties(
-            content_type=u'application/x-pkcs12 or application/x-pem-file'
+            content_type='application/x-pkcs12 or application/x-pem-file'
         ),
         x509_certificate_properties=X509CertificateProperties(
             key_usage=[
@@ -176,12 +176,12 @@ def _scaffold_certificate_profile(cmd):
                 KeyUsageType.key_cert_sign
             ],
             subject_alternative_names=SubjectAlternativeNames(
-                emails=[u'hello@contoso.com'],
-                dns_names=[u'hr.contoso.com', u'm.contoso.com'],
+                emails=['hello@contoso.com'],
+                dns_names=['hr.contoso.com', 'm.contoso.com'],
                 upns=[]
             ),
-            subject=u'C=US, ST=WA, L=Redmond, O=Contoso, OU=Contoso HR, CN=www.contoso.com',
-            ekus=[u'1.3.6.1.5.5.7.3.1'],
+            subject='C=US, ST=WA, L=Redmond, O=Contoso, OU=Contoso HR, CN=www.contoso.com',
+            ekus=['1.3.6.1.5.5.7.3.1'],
             validity_in_months=24
         ),
         lifetime_actions=[LifetimeAction(
@@ -193,8 +193,8 @@ def _scaffold_certificate_profile(cmd):
             )
         )],
         issuer_parameters=IssuerParameters(
-            name=u'Unknown, Self, or {IssuerName}',
-            certificate_type=u'(optional) DigiCert, GlobalSign or WoSign'
+            name='Unknown, Self, or {IssuerName}',
+            certificate_type='(optional) DigiCert, GlobalSign or WoSign'
         ),
         attributes=CertificateAttributes(
             enabled=True

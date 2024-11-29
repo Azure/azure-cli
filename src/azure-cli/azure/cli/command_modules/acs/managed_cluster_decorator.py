@@ -4139,10 +4139,10 @@ class AKSManagedClusterContext(BaseAKSContext):
             if cluster_autoscaler_profile and self.mc and self.mc.auto_scaler_profile:
                 # shallow copy should be enough for string-to-string dictionary
                 copy_of_raw_dict = self.mc.auto_scaler_profile.__dict__.copy()
-                new_options_dict = dict(
-                    (key.replace("-", "_"), value)
-                    for (key, value) in cluster_autoscaler_profile.items()
-                )
+                new_options_dict = {
+                    key.replace("-", "_"): value
+                    for key, value in cluster_autoscaler_profile.items()
+                }
                 copy_of_raw_dict.update(new_options_dict)
                 cluster_autoscaler_profile = copy_of_raw_dict
 

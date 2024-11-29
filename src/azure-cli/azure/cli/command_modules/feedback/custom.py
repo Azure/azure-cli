@@ -500,7 +500,7 @@ def _display_recent_commands(cmd):
 
     command_log_files = command_log_files[-9:]
 
-    max_len_dict = dict(name_len=0, success_len=0, time_len=0)
+    max_len_dict = {"name_len": 0, "success_len": 0, "time_len": 0}
 
     for log_file in command_log_files:
         max_len_dict["name_len"] = max(len(log_file.get_command_name_str()), max_len_dict["name_len"])

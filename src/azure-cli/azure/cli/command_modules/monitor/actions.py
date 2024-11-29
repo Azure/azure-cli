@@ -186,7 +186,7 @@ class MetricAlertConditionAction(argparse._AppendAction):
                 raise NotImplementedError()
         except (AttributeError, TypeError, KeyError):
             raise InvalidArgumentValueError(usage)
-        super(MetricAlertConditionAction, self).__call__(parser, namespace, metric_condition, option_string)
+        super().__call__(parser, namespace, metric_condition, option_string)
 
 
 # pylint: disable=protected-access, too-few-public-methods
@@ -208,7 +208,7 @@ class MetricAlertAddAction(argparse._AppendAction):
         }
         action["odatatype"] = "Microsoft.WindowsAzure.Management.Monitoring.Alerts.Models.Microsoft.AppInsights." \
                               "Nexus.DataContracts.Resources.ScheduledQueryRules.Action"
-        super(MetricAlertAddAction, self).__call__(parser, namespace, action, option_string)
+        super().__call__(parser, namespace, action, option_string)
 
 
 # pylint: disable=too-few-public-methods
@@ -241,7 +241,7 @@ class ConditionAction(argparse.Action):
 class AlertAddAction(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
         action = self.get_action(values, option_string)
-        super(AlertAddAction, self).__call__(parser, namespace, action, option_string)
+        super().__call__(parser, namespace, action, option_string)
 
     def get_action(self, values, option_string):  # pylint: disable=no-self-use
         _type = values[0].lower()
@@ -262,7 +262,7 @@ class AlertAddAction(argparse._AppendAction):
 class AlertRemoveAction(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
         action = self.get_action(values, option_string)
-        super(AlertRemoveAction, self).__call__(parser, namespace, action, option_string)
+        super().__call__(parser, namespace, action, option_string)
 
     def get_action(self, values, option_string):  # pylint: disable=no-self-use
         # TYPE is artificially enforced to create consistency with the --add-action argument
@@ -277,7 +277,7 @@ class AlertRemoveAction(argparse._AppendAction):
 class AutoscaleCreateAction(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
         action = self.get_action(values, option_string)
-        super(AutoscaleCreateAction, self).__call__(parser, namespace, action, option_string)
+        super().__call__(parser, namespace, action, option_string)
 
     def get_action(self, values, option_string):  # pylint: disable=no-self-use
         _type = values[0].lower()
@@ -308,7 +308,7 @@ class AutoscaleCreateAction(argparse._AppendAction):
 class AutoscaleAddAction(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
         action = self.get_action(values, option_string)
-        super(AutoscaleAddAction, self).__call__(parser, namespace, action, option_string)
+        super().__call__(parser, namespace, action, option_string)
 
     def get_action(self, values, option_string):  # pylint: disable=no-self-use
         _type = values[0].lower()
@@ -329,7 +329,7 @@ class AutoscaleAddAction(argparse._AppendAction):
 class AutoscaleRemoveAction(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
         action = self.get_action(values, option_string)
-        super(AutoscaleRemoveAction, self).__call__(parser, namespace, action, option_string)
+        super().__call__(parser, namespace, action, option_string)
 
     def get_action(self, values, option_string):  # pylint: disable=no-self-use
         # TYPE is artificially enforced to create consistency with the --add-action argument
@@ -410,10 +410,10 @@ class MultiObjectsDeserializeAction(argparse._AppendAction):  # pylint: disable=
         type_properties = values[1:]
 
         try:
-            super(MultiObjectsDeserializeAction, self).__call__(parser,
-                                                                namespace,
-                                                                self.deserialize_object(type_name, type_properties),
-                                                                option_string)
+            super().__call__(parser,
+                             namespace,
+                             self.deserialize_object(type_name, type_properties),
+                             option_string)
         except KeyError:
             raise InvalidArgumentValueError('the type "{}" is not recognizable.'.format(type_name))
         except TypeError:
