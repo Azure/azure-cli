@@ -473,6 +473,7 @@ def load_arguments(self, _):
         # managed cluster paramerters
         c.argument('disable_local_accounts', action='store_true')
         c.argument('enable_local_accounts', action='store_true')
+        c.argument('ip_families')
         c.argument('load_balancer_managed_outbound_ip_count', type=int)
         c.argument('load_balancer_managed_outbound_ipv6_count', type=int)
         c.argument('load_balancer_outbound_ips', validator=validate_load_balancer_outbound_ips)
