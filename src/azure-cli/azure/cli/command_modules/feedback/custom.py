@@ -259,7 +259,7 @@ class CommandLogFile:
         try:
             with open(file_name, 'r') as log_fp:
                 log_record_list = _get_log_record_list(log_fp, p_id)
-        except IOError:
+        except OSError:
             logger.debug("Failed to open command log file %s", file_name)
             return {}
 

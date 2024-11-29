@@ -95,7 +95,7 @@ def _expand_file_prefixed_files(args):
         if ix == 0:
             try:
                 return _load_file(poss_file)
-            except IOError:
+            except OSError:
                 logger.debug("Failed to load '%s', assume not a file", arg)
                 return arg
 
@@ -471,7 +471,7 @@ def cached_put(cmd_obj, operation, parameters, *args, setter_arg_name='parameter
     obj_path = os.path.join(obj_dir, obj_file)
     try:
         os.remove(obj_path)
-    except (OSError, IOError):  # FileNotFoundError introduced in Python 3
+    except OSError:  # FileNotFoundError introduced in Python 3
         pass
     return result
 
