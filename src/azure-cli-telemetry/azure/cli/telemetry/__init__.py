@@ -37,10 +37,9 @@ def _start(config_dir, cache_dir):
         startupinfo.wShowWindow = subprocess.SW_HIDE
         kwargs['startupinfo'] = startupinfo
     else:
-        if sys.version_info >= (3, 3):
-            kwargs['stdin'] = subprocess.DEVNULL
-            kwargs['stdout'] = subprocess.DEVNULL
-            kwargs['stderr'] = subprocess.STDOUT
+        kwargs['stdin'] = subprocess.DEVNULL
+        kwargs['stdout'] = subprocess.DEVNULL
+        kwargs['stderr'] = subprocess.STDOUT
 
     process = subprocess.Popen(**kwargs)
     logger.info('Return from creating process %s', process.pid)
