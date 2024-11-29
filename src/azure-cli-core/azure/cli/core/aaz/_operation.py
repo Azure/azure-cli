@@ -5,6 +5,7 @@
 
 # pylint: disable=too-few-public-methods, protected-access, too-many-nested-blocks, too-many-branches
 
+from urllib.parse import quote
 import json
 
 from azure.core.exceptions import ClientAuthenticationError, ResourceExistsError, ResourceNotFoundError, \
@@ -18,11 +19,6 @@ from ._content_builder import AAZContentBuilder
 from ._field_type import AAZSimpleType, AAZObjectType, AAZBaseDictType, AAZListType
 from ._field_value import AAZList, AAZObject, AAZBaseDictValue
 from .exceptions import AAZInvalidValueError
-
-try:
-    from urllib import quote  # type: ignore
-except ImportError:
-    from urllib.parse import quote  # type: ignore
 
 
 class AAZOperation:
