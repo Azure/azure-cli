@@ -5,13 +5,12 @@
 
 # pylint: disable=too-few-public-methods, protected-access, too-many-nested-blocks, too-many-branches
 
-from urllib.parse import quote
+from urllib.parse import parse_qs, urljoin, urlparse, quote
 import json
 
 from azure.core.exceptions import ClientAuthenticationError, ResourceExistsError, ResourceNotFoundError, \
     HttpResponseError
 from azure.cli.core.azclierror import InvalidArgumentValueError
-from urllib.parse import parse_qs, urljoin, urlparse, quote
 
 from ._arg_browser import AAZArgBrowser
 from ._base import AAZUndefined, AAZBaseValue, AAZBaseType, has_value
