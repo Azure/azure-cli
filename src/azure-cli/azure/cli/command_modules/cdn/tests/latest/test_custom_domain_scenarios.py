@@ -54,7 +54,7 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
         # Endpoint name and custom domain hostname are hard-coded because of
         # custom domain CNAME requirement. If test fails to cleanup, the
         # resource group must be manually deleted in order to re-run.
-        endpoint_name = 'cdn-cli-test-aaz'
+        endpoint_name = 'aaz-09-01-crud'
         origin = 'www.microsoft1.com'
         self.endpoint_create_cmd(resource_group, endpoint_name, profile_name, origin)
 
@@ -62,27 +62,17 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
         self.custom_domain_list_cmd(resource_group, profile_name, endpoint_name, checks=list_checks)
 
         custom_domain_name = self.create_random_name(prefix='customdomain', length=20)
-        hostname = custom_domain_name + '.aaz.clitest.azfdtest.xyz'
+        hostname = custom_domain_name + '.aaz0901.clitest.azfdtest.xyz'
         checks = [JMESPathCheck('name', custom_domain_name),
                   JMESPathCheck('hostName', hostname),
                   JMESPathCheck('customHttpsParameters', None)]
-        try:
-            self.custom_domain_create_cmd(group=resource_group,
-                                          profile_name=profile_name,
-                                          endpoint_name=endpoint_name,
-                                          name=custom_domain_name,
-                                          hostname=hostname,
-                                          checks=checks)
-        except HttpResponseError as err:
-            if err.status_code != 400:
-                raise err
-            hostname = custom_domain_name + '.aaz-df.clitest.azfdtest.xyz'
-            self.custom_domain_create_cmd(group=resource_group,
-                                          profile_name=profile_name,
-                                          endpoint_name=endpoint_name,
-                                          name=custom_domain_name,
-                                          hostname=hostname,
-                                          checks=checks)
+
+        self.custom_domain_create_cmd(group=resource_group,
+                                      profile_name=profile_name,
+                                      endpoint_name=endpoint_name,
+                                      name=custom_domain_name,
+                                      hostname=hostname,
+                                      checks=checks)
 
         list_checks = [JMESPathCheck('length(@)', 1)]
         self.custom_domain_list_cmd(resource_group, profile_name, endpoint_name, checks=list_checks)
@@ -101,15 +91,15 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
         # Endpoint name and custom domain hostname are hard-coded because of
         # custom domain CNAME requirement. If test fails to cleanup, the
         # resource group must be manually deleted in order to re-run.
-        endpoint_name = 'cdn-cli-test-aaz-v4'
+        endpoint_name = 'aaz-09-01-verizon'
         origin = 'www.microsoft1.com'
-        endpoint = self.endpoint_create_cmd(resource_group, endpoint_name, profile_name, origin).get_output_in_json()
+        self.endpoint_create_cmd(resource_group, endpoint_name, profile_name, origin).get_output_in_json()
 
         custom_domain_name = self.create_random_name(prefix='customdomain', length=20)
-        hostname = custom_domain_name + '.aaz-v4.clitest.azfdtest.xyz'
-        # Use alternate hostnames for dogfood.
-        if '.azureedge-test.net' in endpoint['hostName']:
-            hostname = custom_domain_name + '.aaz-v4-df.clitest.azfdtest.xyz'
+        hostname = custom_domain_name + '.aaz0901-verizon.clitest.azfdtest.xyz'
+        # # Use alternate hostnames for dogfood.
+        # if '.azureedge-test.net' in endpoint['hostName']:
+        #     hostname = custom_domain_name + '.aaz0901-verizon-fd.clitest.azfdtest.xyz'
         self.custom_domain_create_cmd(resource_group, profile_name, endpoint_name, custom_domain_name, hostname)
 
         checks = [JMESPathCheck('name', custom_domain_name),
@@ -131,8 +121,9 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
         self.custom_domain_disable_https_cmd(resource_group, profile_name, endpoint_name, custom_domain_name)
 
     @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
-    @KeyVaultPreparer(location='centralus', name_prefix='cdncli-byoc', name_len=24)
-    def test_cdn_custom_domain_https_msft(self, resource_group, key_vault):
+    # need to switch to a different subscription 3c0124f9-e564-4c42-86f7-fa79457aedc3
+    # @KeyVaultPreparer(location='centralus', name_prefix='cdncli-byoc', name_len=24)
+    def test_cdn_custom_domain_https_msft(self, resource_group):
         profile_name = 'profile123'
         self.endpoint_list_cmd(resource_group, profile_name, expect_failure=True)
 
@@ -140,19 +131,19 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
         # Endpoint name and custom domain hostname are hard-coded because of
         # custom domain CNAME requirement. If test fails to cleanup, the
         # resource group must be manually deleted in order to re-run.
-        endpoint_name = 'cdn-cli-test-aaz-4'
+        endpoint_name = 'aaz-byoc-6'
         origin = 'www.microsoft1.com'
-        endpoint = self.endpoint_create_cmd(resource_group, endpoint_name, profile_name, origin).get_output_in_json()
+        self.endpoint_create_cmd(resource_group, endpoint_name, profile_name, origin).get_output_in_json()
 
         # Create custom domains for CDN managed cert and BYOC
-        custom_domain_name = self.create_random_name(prefix='customdomain', length=20)
-        byoc_custom_domain_name = self.create_random_name(prefix='customdomain', length=20)
-        hostname = custom_domain_name + '.aaz-4.clitest.azfdtest.xyz'
-        byoc_hostname = byoc_custom_domain_name + '.aaz-4.clitest.azfdtest.xyz'
-        # Use alternate hostnames for dogfood.
-        if '.azureedge-test.net' in endpoint['hostName']:
-            hostname = custom_domain_name + '.aaz-4-df.clitest.azfdtest.xyz'
-            byoc_hostname = byoc_custom_domain_name + '.aaz-4-df.clitest.azfdtest.xyz'
+        custom_domain_name = "msft-c"
+        byoc_custom_domain_name = "msft-b"
+        hostname = custom_domain_name + '-aaz0901.afdx-rp-platform-test.azfdtest.xyz'
+        byoc_hostname = byoc_custom_domain_name + '-aaz0901.afdx-rp-platform-test.azfdtest.xyz'
+        # # Use alternate hostnames for dogfood.
+        # if '.azureedge-test.net' in endpoint['hostName']:
+        #     hostname = custom_domain_name + '.aaz0901-byoc-fd.clitest.azfdtest.xyz'
+        #     byoc_hostname = byoc_custom_domain_name + '.aaz0901-byoc-fd.clitest.azfdtest.xyz'
         self.custom_domain_create_cmd(resource_group, profile_name, endpoint_name, custom_domain_name, hostname)
         self.custom_domain_create_cmd(resource_group, profile_name, endpoint_name, byoc_custom_domain_name, byoc_hostname)
 
@@ -175,34 +166,30 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
                                                 profile_name,
                                                 endpoint_name,
                                                 custom_domain_name,
-                                                min_tls_version='1.0',
+                                                min_tls_version='1.2',
                                                 checks=checks)
 
-        # Create a TLS cert to use for BYOC.
-        cert_name = self.create_random_name(prefix='cert', length=20)
-        self.byoc_create_keyvault_cert(key_vault, cert_name)
-        # Get and parse the latest version for the certificate.
-        versions = self.byoc_get_keyvault_cert_versions(key_vault, cert_name).get_output_in_json()
-        version = versions[0]['id'].split('/')[-1]
+        version = "634c38a587884de4980f1b8c1c368712"
 
         # Enable custom HTTPS with a custom certificate
         # With the latest service side change to move the certificate validation to RP layer, the request will be rejected.
-        with self.assertRaisesRegex(HttpResponseError, "The certificate chain includes an invalid number of certificates. The number of certificates should be greater than 2"):
-            self.custom_domain_enable_https_command(resource_group,
-                                                    profile_name,
-                                                    endpoint_name,
-                                                    byoc_custom_domain_name,
-                                                    user_cert_subscription_id=self.get_subscription_id(),
-                                                    user_cert_group_name=resource_group,
-                                                    user_cert_vault_name=key_vault,
-                                                    user_cert_secret_name=cert_name,
-                                                    user_cert_secret_version=version,
-                                                    user_cert_protocol_type='sni')
+        # with self.assertRaisesRegex(HttpResponseError, "The certificate chain includes an invalid number of certificates. The number of certificates should be greater than 2"):
+        self.custom_domain_enable_https_command(resource_group,
+                                                profile_name,
+                                                endpoint_name,
+                                                byoc_custom_domain_name,
+                                                user_cert_subscription_id="3c0124f9-e564-4c42-86f7-fa79457aedc3",
+                                                user_cert_group_name="byoc",
+                                                user_cert_vault_name="AZURE-CDN-BYOC",
+                                                user_cert_secret_name="wildcard-afdx-rp-platform-test-azfdtest-xyz",
+                                                user_cert_secret_version=version,
+                                                user_cert_protocol_type='sni')
 
-    @unittest.skip("Duplicate cdn endpoint name, cannot rerun live.")
+    #@unittest.skip("Duplicate cdn endpoint name, cannot rerun live.")
+    # need to switch to a different subscription 3c0124f9-e564-4c42-86f7-fa79457aedc3
     @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
-    @KeyVaultPreparer(location='centralus', name_prefix='cdnclibyoc-latest', name_len=24)
-    def test_cdn_custom_domain_byoc_latest(self, resource_group, key_vault):
+    # @KeyVaultPreparer(location='centralus', name_prefix='cdnclibyoc-latest', name_len=24)
+    def test_cdn_custom_domain_byoc_latest(self, resource_group):
         profile_name = 'profile123'
         self.endpoint_list_cmd(resource_group, profile_name, expect_failure=True)
 
@@ -210,16 +197,16 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
         # Endpoint name and custom domain hostname are hard-coded because of
         # custom domain CNAME requirement. If test fails to cleanup, the
         # resource group must be manually deleted in order to re-run.
-        endpoint_name = 'cdn-cli-test-aaz-5'
+        endpoint_name = 'aaz-byoc-4'
         origin = 'www.microsoft1.com'
-        endpoint = self.endpoint_create_cmd(resource_group, endpoint_name, profile_name, origin).get_output_in_json()
+        self.endpoint_create_cmd(resource_group, endpoint_name, profile_name, origin).get_output_in_json()
 
         # Create custom domain for BYOC
-        custom_domain_name = self.create_random_name(prefix='customdomain', length=20)
-        hostname = custom_domain_name + '.aaz-5.clitest.azfdtest.xyz'
-        # Use alternate hostname for dogfood.
-        if '.azureedge-test.net' in endpoint['hostName']:
-            hostname = custom_domain_name + '.aaz-5-df.clitest.azfdtest.xyz'
+        custom_domain_name = "byoc-c"
+        hostname = custom_domain_name + '-aaz0901.afdx-rp-platform-test.azfdtest.xyz'
+        # # Use alternate hostname for dogfood.
+        # if '.azureedge-test.net' in endpoint['hostName']:
+        #     hostname = custom_domain_name + '.aaz-5-df.clitest.azfdtest.xyz'
         self.custom_domain_create_cmd(resource_group, profile_name, endpoint_name, custom_domain_name, hostname)
 
         # Verify the created custom domain doesn't have custom HTTPS enabled.
@@ -228,19 +215,15 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
                   JMESPathCheck('customHttpsParameters', None)]
         self.custom_domain_show_cmd(resource_group, profile_name, endpoint_name, custom_domain_name, checks=checks)
 
-        # Create a TLS cert to use for BYOC.
-        cert_name = self.create_random_name(prefix='cert', length=20)
-        self.byoc_create_keyvault_cert(key_vault, cert_name)
-
         # Enable custom HTTPS with the custom certificate.
         # With the latest service side change to move the certificate validation to RP layer, the request will be rejected.
-        with self.assertRaisesRegex(HttpResponseError, "The certificate chain includes an invalid number of certificates. The number of certificates should be greater than 2"):
-            self.custom_domain_enable_https_command(resource_group,
-                                                    profile_name,
-                                                    endpoint_name,
-                                                    custom_domain_name,
-                                                    user_cert_subscription_id=self.get_subscription_id(),
-                                                    user_cert_group_name=resource_group,
-                                                    user_cert_vault_name=key_vault,
-                                                    user_cert_secret_name=cert_name,
-                                                    user_cert_protocol_type='sni')
+        # with self.assertRaisesRegex(HttpResponseError, "The certificate chain includes an invalid number of certificates. The number of certificates should be greater than 2"):
+        self.custom_domain_enable_https_command(resource_group,
+                                                profile_name,
+                                                endpoint_name,
+                                                custom_domain_name,
+                                                user_cert_subscription_id="3c0124f9-e564-4c42-86f7-fa79457aedc3",
+                                                user_cert_group_name="byoc",
+                                                user_cert_vault_name="AZURE-CDN-BYOC",
+                                                user_cert_secret_name="wildcard-afdx-rp-platform-test-azfdtest-xyz",
+                                                user_cert_protocol_type='sni')

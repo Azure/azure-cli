@@ -4247,7 +4247,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
         else:
             vmss.sku.name = vm_sku
 
-    sku_profile = dict()
+    sku_profile = {}
     if skuprofile_vmsizes is not None or skuprofile_allostrat is not None:
         if skuprofile_vmsizes is not None:
             sku_profile_vmsizes_list = []
