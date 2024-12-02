@@ -22,9 +22,9 @@ class Stop(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-02-01",
+        "version": "2024-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}/endpoints/{}/stop", "2024-02-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}/endpoints/{}/stop", "2024-09-01"],
         ]
     }
 
@@ -147,7 +147,7 @@ class Stop(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-02-01",
+                    "api-version", "2024-09-01",
                     required=True,
                 ),
             }
@@ -1166,6 +1166,7 @@ class _StopHelper:
         properties.priority = AAZIntType()
         properties.private_endpoint_status = AAZStrType(
             serialized_name="privateEndpointStatus",
+            flags={"read_only": True},
         )
         properties.private_link_alias = AAZStrType(
             serialized_name="privateLinkAlias",

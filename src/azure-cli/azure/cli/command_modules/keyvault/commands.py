@@ -12,7 +12,7 @@ from azure.cli.command_modules.keyvault._client_factory import (
     get_client, get_client_factory, Clients, is_azure_stack_profile)
 
 from azure.cli.command_modules.keyvault._transformers import (
-    filter_out_managed_resources, transform_security_domain_output,
+    filter_out_managed_resources,
     multi_transformers, transform_key_decryption_output, keep_max_results, transform_key_list_output,
     transform_key_output, transform_key_encryption_output, transform_key_random_output,
     transform_secret_list, transform_deleted_secret_list, transform_secret_set,
@@ -145,11 +145,9 @@ def load_command_table(self, _):
         with self.command_group('keyvault security-domain', data_security_domain_entity.command_type) as g:
             g.keyvault_custom('init-recovery', 'security_domain_init_recovery')
             g.keyvault_custom('restore-blob', 'security_domain_restore_blob')
-            g.keyvault_custom('upload', 'security_domain_upload', supports_no_wait=True,
-                              transform=transform_security_domain_output)
-            g.keyvault_custom('download', 'security_domain_download', supports_no_wait=True,
-                              transform=transform_security_domain_output)
-            g.keyvault_custom('wait', '_wait_security_domain_operation', transform=transform_security_domain_output)
+            g.keyvault_custom('upload', 'security_domain_upload', supports_no_wait=True)
+            g.keyvault_custom('download', 'security_domain_download', supports_no_wait=True)
+            g.keyvault_custom('wait', '_wait_security_domain_operation')
 
     with self.command_group('keyvault key', data_key_entity.command_type) as g:
         g.keyvault_custom('create', 'create_key', transform=transform_key_output, validator=validate_key_create)

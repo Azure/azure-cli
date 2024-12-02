@@ -28,7 +28,7 @@ class _TestSender(SynchronousSender):
     instances = []
 
     def __init__(self):
-        super(_TestSender, self).__init__()
+        super().__init__()
         _TestSender.instances.append(self)
 
         self.data = []
