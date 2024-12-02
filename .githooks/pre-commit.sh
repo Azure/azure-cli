@@ -23,7 +23,7 @@ has_secrets=0
 
 IFS_OLD=${IFS}
 IFS=$'\n'
-for FILE in "`git diff --cached --name-only --diff-filter=AM $against`" ; do
+for FILE in `git diff --cached --name-only --diff-filter=AM $against` ; do
     # Check if the file contains secrets
     detected=$(azdev scan -f "$FILE" | python -c "import sys, json; print(json.load(sys.stdin)['secrets_detected'])")
     if [ "$detected" = "True" ]; then

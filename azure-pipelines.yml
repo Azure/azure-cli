@@ -1139,7 +1139,7 @@ jobs:
         declare -A secret_files
         IFS_OLD=${IFS}
         IFS=$'\n'
-        for FILE in "`git diff --name-only --diff-filter=AM origin/$(System.PullRequest.TargetBranch)`" ; do
+        for FILE in `git diff --name-only --diff-filter=AM origin/$(System.PullRequest.TargetBranch)` ; do
           echo $FILE
           detected=$(azdev scan -f "$FILE" | python -c "import sys, json; print(json.load(sys.stdin)['secrets_detected'])")
           if [ $detected == 'True' ]; then
