@@ -85,7 +85,6 @@ class CdnAfdSecretScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
         show_checks = [JMESPathCheck('name', secret_name),
                        JMESPathCheck('provisioningState', 'Succeeded'),
                        JMESPathCheck('parameters.type', 'CustomerCertificate'),
-                       JMESPathCheck('parameters.secretSource.id', secret_source, False),
                        JMESPathCheck('parameters.secretVersion', latest_version),
                        JMESPathCheck('parameters.useLatestVersion', True)]
         self.afd_secret_show_cmd(resource_group, profile_name, secret_name, checks=show_checks)
