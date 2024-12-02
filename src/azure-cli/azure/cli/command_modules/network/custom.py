@@ -5564,6 +5564,11 @@ class VNetUpdate(_VNetUpdate):
         )
         return args_schema
 
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.ipam_pool_prefix_allocations):
+            args.address_prefixes = []
+
     def post_instance_update(self, instance):
         if not has_value(instance.properties.ddos_protection_plan.id):
             instance.properties.ddos_protection_plan = None
