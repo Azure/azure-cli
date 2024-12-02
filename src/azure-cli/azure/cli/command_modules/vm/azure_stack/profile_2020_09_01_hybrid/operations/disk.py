@@ -21,6 +21,11 @@ class DiskUpdate(_Disk.Update):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
 
         args_schema.disk_encryption_set_id._registered = False
+        args_schema.data_access_auth_mode._registered = False
+        args_schema.disk_access_id._registered = False
+        args_schema.public_network_access._registered = False
+        args_schema.accelerated_network._registered = False
+        args_schema.architecture._registered = False
 
         args_schema.disk_access = AAZStrArg(
             options=["--disk-access"],
@@ -63,6 +68,17 @@ class DiskUpdate(_Disk.Update):
                     subscription=get_subscription_id(self.cli_ctx), resource_group=args.resource_group,
                     namespace='Microsoft.Compute', type='diskAccesses', name=disk_access)
             instance.properties.disk_access_id = disk_access
+
+        if has_value(args.accelerated_network) or has_value(args.architecture):
+            if has_value(instance.properties.supported_capabilities):
+                supported_capabilities = {
+                    "accelerated_network": args.accelerated_network,
+                    "architecture": args.architecture
+                }
+                instance.properties.supported_capabilities = supported_capabilities
+            else:
+                instance.properties.supported_capabilities.accelerated_network = args.accelerated_network
+                instance.properties.supported_capabilities.architecture = args.architecture
 
 
 class DiskGrantAccess(_Disk.GrantAccess):

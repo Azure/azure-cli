@@ -21,48 +21,17 @@ class DiskUpdate(_Disk.Update):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
 
         args_schema.disk_encryption_set_id._registered = False
-
-        args_schema.disk_access = AAZStrArg(
-            options=["--disk-access"],
-            help="Name or ID of the disk access resource for using private endpoints on disks.",
-        )
-        args_schema.disk_encryption_set = AAZStrArg(
-            options=["--disk-encryption-set"],
-            help="Name or ID of disk encryption set that is used to encrypt the disk."
-        )
+        args_schema.data_access_auth_mode._registered = False
+        args_schema.disk_access_id._registered = False
+        args_schema.public_network_access._registered = False
+        args_schema.accelerated_network._registered = False
+        args_schema.architecture._registered = False
+        args_schema.encryption_type._registered = False
+        args_schema.disk_iops_read_write._registered = False
+        args_schema.disk_mbps_read_write._registered = False
+        args_schema.network_access_policy._registered = False
 
         return args_schema
-
-    def pre_instance_update(self, instance):
-        from azure.mgmt.core.tools import resource_id, is_valid_resource_id
-        from azure.cli.core.commands.client_factory import get_subscription_id
-
-        args = self.ctx.args
-        if has_value(args.disk_encryption_set):
-            if instance.properties.encryption.type != 'EncryptionAtRestWithCustomerKey' and \
-                    has_value(args.encryption_type) and \
-                    args.encryption_type != 'EncryptionAtRestWithCustomerKey':
-                raise CLIError('usage error: Please set --encryption-type to EncryptionAtRestWithCustomerKey')
-
-            disk_encryption_set = args.disk_encryption_set
-            if not is_valid_resource_id(disk_encryption_set.to_serialized_data()):
-                disk_encryption_set = resource_id(
-                    subscription=get_subscription_id(self.cli_ctx), resource_group=args.resource_group,
-                    namespace='Microsoft.Compute', type='diskEncryptionSets', name=disk_encryption_set)
-
-            instance.properties.encryption.disk_encryption_set_id = disk_encryption_set
-
-        if has_value(args.encryption_type):
-            if args.encryption_type != 'EncryptionAtRestWithCustomerKey':
-                instance.properties.encryption.disk_encryption_set_id = None
-
-        if has_value(args.disk_access):
-            disk_access = args.disk_access
-            if not is_valid_resource_id(disk_access.to_serialized_data()):
-                disk_access = resource_id(
-                    subscription=get_subscription_id(self.cli_ctx), resource_group=args.resource_group,
-                    namespace='Microsoft.Compute', type='diskAccesses', name=disk_access)
-            instance.properties.disk_access_id = disk_access
 
 
 class DiskGrantAccess(_Disk.GrantAccess):

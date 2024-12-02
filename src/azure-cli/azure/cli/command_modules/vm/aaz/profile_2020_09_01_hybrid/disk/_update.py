@@ -25,9 +25,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2019-07-01",
+        "version": "2023-04-02",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/disks/{}", "2019-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/disks/{}", "2023-04-02"],
         ]
     }
 
@@ -63,7 +63,7 @@ class Update(AAZCommand):
             options=["--sku"],
             help="Underlying storage SKU.",
             nullable=True,
-            enum={"Premium_LRS": "Premium_LRS", "StandardSSD_LRS": "StandardSSD_LRS", "Standard_LRS": "Standard_LRS", "UltraSSD_LRS": "UltraSSD_LRS"},
+            enum={"PremiumV2_LRS": "PremiumV2_LRS", "Premium_LRS": "Premium_LRS", "Premium_ZRS": "Premium_ZRS", "StandardSSD_LRS": "StandardSSD_LRS", "StandardSSD_ZRS": "StandardSSD_ZRS", "Standard_LRS": "Standard_LRS", "UltraSSD_LRS": "UltraSSD_LRS"},
         )
 
         # define Arg Group "Disk"
@@ -82,16 +82,47 @@ class Update(AAZCommand):
             arg_group="Encryption",
             help={"short-summary": "Encryption type.", "long-summary": "EncryptionAtRestWithPlatformKey: Disk is encrypted with XStore managed key at rest. It is the default encryption type. EncryptionAtRestWithCustomerKey: Disk is encrypted with Customer managed key at rest."},
             nullable=True,
-            enum={"EncryptionAtRestWithCustomerKey": "EncryptionAtRestWithCustomerKey", "EncryptionAtRestWithPlatformKey": "EncryptionAtRestWithPlatformKey"},
+            enum={"EncryptionAtRestWithCustomerKey": "EncryptionAtRestWithCustomerKey", "EncryptionAtRestWithPlatformAndCustomerKeys": "EncryptionAtRestWithPlatformAndCustomerKeys", "EncryptionAtRestWithPlatformKey": "EncryptionAtRestWithPlatformKey"},
         )
 
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
+        _args_schema.bursting_enabled = AAZBoolArg(
+            options=["--enable-bursting", "--bursting-enabled"],
+            arg_group="Properties",
+            help="Enable on-demand bursting beyond the provisioned performance target of the disk. On-demand bursting is disabled by default, and it does not apply to Ultra disks.",
+            nullable=True,
+        )
+        _args_schema.data_access_auth_mode = AAZStrArg(
+            options=["--data-access-auth-mode"],
+            arg_group="Properties",
+            help="Specify the auth mode when exporting or uploading to a disk or snapshot.",
+            nullable=True,
+            enum={"AzureActiveDirectory": "AzureActiveDirectory", "None": "None"},
+        )
+        _args_schema.disk_access_id = AAZStrArg(
+            options=["--disk-access-id"],
+            arg_group="Properties",
+            help="ARM id of the DiskAccess resource for using private endpoints on disks.",
+            nullable=True,
+        )
+        _args_schema.disk_iops_read_only = AAZIntArg(
+            options=["--disk-iops-read-only"],
+            arg_group="Properties",
+            help="The total number of IOPS that will be allowed across all VMs mounting the shared disk as ReadOnly. One operation can transfer between 4k and 256k bytes.",
+            nullable=True,
+        )
         _args_schema.disk_iops_read_write = AAZIntArg(
             options=["--disk-iops-read-write"],
             arg_group="Properties",
             help="The number of IOPS allowed for this disk; only settable for UltraSSD disks. One operation can transfer between 4k and 256k bytes.",
+            nullable=True,
+        )
+        _args_schema.disk_mbps_read_only = AAZIntArg(
+            options=["--disk-mbps-read-only"],
+            arg_group="Properties",
+            help="The total throughput (MBps) that will be allowed across all VMs mounting the shared disk as ReadOnly. MBps means millions of bytes per second - MB here uses the ISO notation, of powers of 10.",
             nullable=True,
         )
         _args_schema.disk_mbps_read_write = AAZIntArg(
@@ -106,7 +137,88 @@ class Update(AAZCommand):
             help="Size in GB. Max size: 4095 GB (certain preview disks can be larger).",
             nullable=True,
         )
+        _args_schema.max_shares = AAZIntArg(
+            options=["--max-shares"],
+            arg_group="Properties",
+            help="The maximum number of VMs that can attach to the disk at the same time. Value greater than one indicates a disk that can be mounted on multiple VMs at the same time.",
+            nullable=True,
+        )
+        _args_schema.network_access_policy = AAZStrArg(
+            options=["--network-access-policy"],
+            arg_group="Properties",
+            help="Policy for accessing the disk via network.",
+            nullable=True,
+            enum={"AllowAll": "AllowAll", "AllowPrivate": "AllowPrivate", "DenyAll": "DenyAll"},
+        )
+        _args_schema.public_network_access = AAZStrArg(
+            options=["--public-network-access"],
+            arg_group="Properties",
+            help="Customers can set on Managed Disks or Snapshots to control the export policy on the disk.",
+            is_preview=True,
+            nullable=True,
+            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
+        )
+
+        # define Arg Group "SupportedCapabilities"
+
+        _args_schema = cls._args_schema
+        _args_schema.accelerated_network = AAZBoolArg(
+            options=["--accelerated-network"],
+            arg_group="SupportedCapabilities",
+            help="Customers can set on Managed Disks or Snapshots to enable the accelerated networking if the OS disk image support.",
+            is_preview=True,
+            nullable=True,
+        )
+        _args_schema.architecture = AAZStrArg(
+            options=["--architecture"],
+            arg_group="SupportedCapabilities",
+            help="CPU architecture supported by an OS disk.",
+            nullable=True,
+            enum={"Arm64": "Arm64", "x64": "x64"},
+        )
         return cls._args_schema
+
+    _args_image_disk_reference_update = None
+
+    @classmethod
+    def _build_args_image_disk_reference_update(cls, _schema):
+        if cls._args_image_disk_reference_update is not None:
+            _schema.community_gallery_image_id = cls._args_image_disk_reference_update.community_gallery_image_id
+            _schema.id = cls._args_image_disk_reference_update.id
+            _schema.lun = cls._args_image_disk_reference_update.lun
+            _schema.shared_gallery_image_id = cls._args_image_disk_reference_update.shared_gallery_image_id
+            return
+
+        cls._args_image_disk_reference_update = AAZObjectArg(
+            nullable=True,
+        )
+
+        image_disk_reference_update = cls._args_image_disk_reference_update
+        image_disk_reference_update.community_gallery_image_id = AAZStrArg(
+            options=["community-gallery-image-id"],
+            help="A relative uri containing a community Azure Compute Gallery image reference.",
+            nullable=True,
+        )
+        image_disk_reference_update.id = AAZStrArg(
+            options=["id"],
+            help="A relative uri containing either a Platform Image Repository, user image, or Azure Compute Gallery image reference.",
+            nullable=True,
+        )
+        image_disk_reference_update.lun = AAZIntArg(
+            options=["lun"],
+            help="If the disk is created from an image's data disk, this is an index that indicates which of the data disks in the image to use. For OS disks, this field is null.",
+            nullable=True,
+        )
+        image_disk_reference_update.shared_gallery_image_id = AAZStrArg(
+            options=["shared-gallery-image-id"],
+            help="A relative uri containing a direct shared Azure Compute Gallery image reference.",
+            nullable=True,
+        )
+
+        _schema.community_gallery_image_id = cls._args_image_disk_reference_update.community_gallery_image_id
+        _schema.id = cls._args_image_disk_reference_update.id
+        _schema.lun = cls._args_image_disk_reference_update.lun
+        _schema.shared_gallery_image_id = cls._args_image_disk_reference_update.shared_gallery_image_id
 
     _args_source_vault_update = None
 
@@ -205,7 +317,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2019-07-01",
+                    "api-version", "2023-04-02",
                     required=True,
                 ),
             }
@@ -304,7 +416,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2019-07-01",
+                    "api-version", "2023-04-02",
                     required=True,
                 ),
             }
@@ -367,15 +479,29 @@ class Update(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
+                properties.set_prop("burstingEnabled", AAZBoolType, ".bursting_enabled")
+                properties.set_prop("dataAccessAuthMode", AAZStrType, ".data_access_auth_mode")
+                properties.set_prop("diskAccessId", AAZStrType, ".disk_access_id")
+                properties.set_prop("diskIOPSReadOnly", AAZIntType, ".disk_iops_read_only")
                 properties.set_prop("diskIOPSReadWrite", AAZIntType, ".disk_iops_read_write")
+                properties.set_prop("diskMBpsReadOnly", AAZIntType, ".disk_mbps_read_only")
                 properties.set_prop("diskMBpsReadWrite", AAZIntType, ".disk_mbps_read_write")
                 properties.set_prop("diskSizeGB", AAZIntType, ".disk_size_gb")
                 properties.set_prop("encryption", AAZObjectType)
+                properties.set_prop("maxShares", AAZIntType, ".max_shares")
+                properties.set_prop("networkAccessPolicy", AAZStrType, ".network_access_policy")
+                properties.set_prop("publicNetworkAccess", AAZStrType, ".public_network_access")
+                properties.set_prop("supportedCapabilities", AAZObjectType)
 
             encryption = _builder.get(".properties.encryption")
             if encryption is not None:
                 encryption.set_prop("diskEncryptionSetId", AAZStrType, ".disk_encryption_set_id")
                 encryption.set_prop("type", AAZStrType, ".encryption_type")
+
+            supported_capabilities = _builder.get(".properties.supportedCapabilities")
+            if supported_capabilities is not None:
+                supported_capabilities.set_prop("acceleratedNetwork", AAZBoolType, ".accelerated_network")
+                supported_capabilities.set_prop("architecture", AAZStrType, ".architecture")
 
             sku = _builder.get(".sku")
             if sku is not None:
@@ -396,6 +522,15 @@ class _UpdateHelper:
     """Helper class for Update"""
 
     @classmethod
+    def _build_schema_image_disk_reference_update(cls, _builder):
+        if _builder is None:
+            return
+        _builder.set_prop("communityGalleryImageId", AAZStrType, ".community_gallery_image_id")
+        _builder.set_prop("id", AAZStrType, ".id")
+        _builder.set_prop("lun", AAZIntType, ".lun")
+        _builder.set_prop("sharedGalleryImageId", AAZStrType, ".shared_gallery_image_id")
+
+    @classmethod
     def _build_schema_source_vault_update(cls, _builder):
         if _builder is None:
             return
@@ -406,9 +541,11 @@ class _UpdateHelper:
     @classmethod
     def _build_schema_disk_read(cls, _schema):
         if cls._schema_disk_read is not None:
+            _schema.extended_location = cls._schema_disk_read.extended_location
             _schema.id = cls._schema_disk_read.id
             _schema.location = cls._schema_disk_read.location
             _schema.managed_by = cls._schema_disk_read.managed_by
+            _schema.managed_by_extended = cls._schema_disk_read.managed_by_extended
             _schema.name = cls._schema_disk_read.name
             _schema.properties = cls._schema_disk_read.properties
             _schema.sku = cls._schema_disk_read.sku
@@ -420,6 +557,9 @@ class _UpdateHelper:
         cls._schema_disk_read = _schema_disk_read = AAZObjectType()
 
         disk_read = _schema_disk_read
+        disk_read.extended_location = AAZObjectType(
+            serialized_name="extendedLocation",
+        )
         disk_read.id = AAZStrType(
             flags={"read_only": True},
         )
@@ -428,6 +568,10 @@ class _UpdateHelper:
         )
         disk_read.managed_by = AAZStrType(
             serialized_name="managedBy",
+            flags={"read_only": True},
+        )
+        disk_read.managed_by_extended = AAZListType(
+            serialized_name="managedByExtended",
             flags={"read_only": True},
         )
         disk_read.name = AAZStrType(
@@ -443,13 +587,46 @@ class _UpdateHelper:
         )
         disk_read.zones = AAZListType()
 
+        extended_location = _schema_disk_read.extended_location
+        extended_location.name = AAZStrType()
+        extended_location.type = AAZStrType()
+
+        managed_by_extended = _schema_disk_read.managed_by_extended
+        managed_by_extended.Element = AAZStrType()
+
         properties = _schema_disk_read.properties
+        properties.last_ownership_update_time = AAZStrType(
+            serialized_name="LastOwnershipUpdateTime",
+            flags={"read_only": True},
+        )
+        properties.bursting_enabled = AAZBoolType(
+            serialized_name="burstingEnabled",
+        )
+        properties.bursting_enabled_time = AAZStrType(
+            serialized_name="burstingEnabledTime",
+            flags={"read_only": True},
+        )
+        properties.completion_percent = AAZFloatType(
+            serialized_name="completionPercent",
+        )
         properties.creation_data = AAZObjectType(
             serialized_name="creationData",
             flags={"required": True},
         )
+        properties.data_access_auth_mode = AAZStrType(
+            serialized_name="dataAccessAuthMode",
+        )
+        properties.disk_access_id = AAZStrType(
+            serialized_name="diskAccessId",
+        )
+        properties.disk_iops_read_only = AAZIntType(
+            serialized_name="diskIOPSReadOnly",
+        )
         properties.disk_iops_read_write = AAZIntType(
             serialized_name="diskIOPSReadWrite",
+        )
+        properties.disk_m_bps_read_only = AAZIntType(
+            serialized_name="diskMBpsReadOnly",
         )
         properties.disk_m_bps_read_write = AAZIntType(
             serialized_name="diskMBpsReadWrite",
@@ -472,13 +649,46 @@ class _UpdateHelper:
         properties.hyper_v_generation = AAZStrType(
             serialized_name="hyperVGeneration",
         )
+        properties.max_shares = AAZIntType(
+            serialized_name="maxShares",
+        )
+        properties.network_access_policy = AAZStrType(
+            serialized_name="networkAccessPolicy",
+        )
+        properties.optimized_for_frequent_attach = AAZBoolType(
+            serialized_name="optimizedForFrequentAttach",
+        )
         properties.os_type = AAZStrType(
             serialized_name="osType",
+        )
+        properties.property_updates_in_progress = AAZObjectType(
+            serialized_name="propertyUpdatesInProgress",
+            flags={"read_only": True},
         )
         properties.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
             flags={"read_only": True},
         )
+        properties.public_network_access = AAZStrType(
+            serialized_name="publicNetworkAccess",
+        )
+        properties.purchase_plan = AAZObjectType(
+            serialized_name="purchasePlan",
+        )
+        properties.security_profile = AAZObjectType(
+            serialized_name="securityProfile",
+        )
+        properties.share_info = AAZListType(
+            serialized_name="shareInfo",
+            flags={"read_only": True},
+        )
+        properties.supported_capabilities = AAZObjectType(
+            serialized_name="supportedCapabilities",
+        )
+        properties.supports_hibernation = AAZBoolType(
+            serialized_name="supportsHibernation",
+        )
+        properties.tier = AAZStrType()
         properties.time_created = AAZStrType(
             serialized_name="timeCreated",
             flags={"read_only": True},
@@ -493,8 +703,25 @@ class _UpdateHelper:
             serialized_name="createOption",
             flags={"required": True},
         )
+        creation_data.elastic_san_resource_id = AAZStrType(
+            serialized_name="elasticSanResourceId",
+        )
+        creation_data.gallery_image_reference = AAZObjectType(
+            serialized_name="galleryImageReference",
+        )
+        cls._build_schema_image_disk_reference_read(creation_data.gallery_image_reference)
         creation_data.image_reference = AAZObjectType(
             serialized_name="imageReference",
+        )
+        cls._build_schema_image_disk_reference_read(creation_data.image_reference)
+        creation_data.logical_sector_size = AAZIntType(
+            serialized_name="logicalSectorSize",
+        )
+        creation_data.performance_plus = AAZBoolType(
+            serialized_name="performancePlus",
+        )
+        creation_data.security_data_uri = AAZStrType(
+            serialized_name="securityDataUri",
         )
         creation_data.source_resource_id = AAZStrType(
             serialized_name="sourceResourceId",
@@ -512,10 +739,6 @@ class _UpdateHelper:
         creation_data.upload_size_bytes = AAZIntType(
             serialized_name="uploadSizeBytes",
         )
-
-        image_reference = _schema_disk_read.properties.creation_data.image_reference
-        image_reference.id = AAZStrType()
-        image_reference.lun = AAZIntType()
 
         encryption = _schema_disk_read.properties.encryption
         encryption.disk_encryption_set_id = AAZStrType(
@@ -567,6 +790,51 @@ class _UpdateHelper:
         )
         cls._build_schema_source_vault_read(key_encryption_key.source_vault)
 
+        property_updates_in_progress = _schema_disk_read.properties.property_updates_in_progress
+        property_updates_in_progress.target_tier = AAZStrType(
+            serialized_name="targetTier",
+        )
+
+        purchase_plan = _schema_disk_read.properties.purchase_plan
+        purchase_plan.name = AAZStrType(
+            flags={"required": True},
+        )
+        purchase_plan.product = AAZStrType(
+            flags={"required": True},
+        )
+        purchase_plan.promotion_code = AAZStrType(
+            serialized_name="promotionCode",
+        )
+        purchase_plan.publisher = AAZStrType(
+            flags={"required": True},
+        )
+
+        security_profile = _schema_disk_read.properties.security_profile
+        security_profile.secure_vm_disk_encryption_set_id = AAZStrType(
+            serialized_name="secureVMDiskEncryptionSetId",
+        )
+        security_profile.security_type = AAZStrType(
+            serialized_name="securityType",
+        )
+
+        share_info = _schema_disk_read.properties.share_info
+        share_info.Element = AAZObjectType()
+
+        _element = _schema_disk_read.properties.share_info.Element
+        _element.vm_uri = AAZStrType(
+            serialized_name="vmUri",
+            flags={"read_only": True},
+        )
+
+        supported_capabilities = _schema_disk_read.properties.supported_capabilities
+        supported_capabilities.accelerated_network = AAZBoolType(
+            serialized_name="acceleratedNetwork",
+        )
+        supported_capabilities.architecture = AAZStrType()
+        supported_capabilities.disk_controller_types = AAZStrType(
+            serialized_name="diskControllerTypes",
+        )
+
         sku = _schema_disk_read.sku
         sku.name = AAZStrType()
         sku.tier = AAZStrType(
@@ -579,15 +847,45 @@ class _UpdateHelper:
         zones = _schema_disk_read.zones
         zones.Element = AAZStrType()
 
+        _schema.extended_location = cls._schema_disk_read.extended_location
         _schema.id = cls._schema_disk_read.id
         _schema.location = cls._schema_disk_read.location
         _schema.managed_by = cls._schema_disk_read.managed_by
+        _schema.managed_by_extended = cls._schema_disk_read.managed_by_extended
         _schema.name = cls._schema_disk_read.name
         _schema.properties = cls._schema_disk_read.properties
         _schema.sku = cls._schema_disk_read.sku
         _schema.tags = cls._schema_disk_read.tags
         _schema.type = cls._schema_disk_read.type
         _schema.zones = cls._schema_disk_read.zones
+
+    _schema_image_disk_reference_read = None
+
+    @classmethod
+    def _build_schema_image_disk_reference_read(cls, _schema):
+        if cls._schema_image_disk_reference_read is not None:
+            _schema.community_gallery_image_id = cls._schema_image_disk_reference_read.community_gallery_image_id
+            _schema.id = cls._schema_image_disk_reference_read.id
+            _schema.lun = cls._schema_image_disk_reference_read.lun
+            _schema.shared_gallery_image_id = cls._schema_image_disk_reference_read.shared_gallery_image_id
+            return
+
+        cls._schema_image_disk_reference_read = _schema_image_disk_reference_read = AAZObjectType()
+
+        image_disk_reference_read = _schema_image_disk_reference_read
+        image_disk_reference_read.community_gallery_image_id = AAZStrType(
+            serialized_name="communityGalleryImageId",
+        )
+        image_disk_reference_read.id = AAZStrType()
+        image_disk_reference_read.lun = AAZIntType()
+        image_disk_reference_read.shared_gallery_image_id = AAZStrType(
+            serialized_name="sharedGalleryImageId",
+        )
+
+        _schema.community_gallery_image_id = cls._schema_image_disk_reference_read.community_gallery_image_id
+        _schema.id = cls._schema_image_disk_reference_read.id
+        _schema.lun = cls._schema_image_disk_reference_read.lun
+        _schema.shared_gallery_image_id = cls._schema_image_disk_reference_read.shared_gallery_image_id
 
     _schema_source_vault_read = None
 
