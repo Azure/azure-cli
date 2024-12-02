@@ -38,7 +38,7 @@ from knack.invocation import CommandInvoker
 from knack.preview import ImplicitPreviewItem, PreviewItem, resolve_preview_info
 from knack.experimental import ImplicitExperimentalItem, ExperimentalItem, resolve_experimental_info
 from knack.log import get_logger, CLILogging
-from knack.util import CLIError, CommandResultItem, todict
+from knack.util import CLIError, CommandResultItem
 from knack.events import EVENT_INVOKER_TRANSFORM_RESULT
 from knack.validators import DefaultStr
 
@@ -715,6 +715,7 @@ class AzCliCommandInvoker(CommandInvoker):
             elif _is_paged(result):
                 result = list(result)
 
+            from ..util import todict
             result = todict(result, AzCliCommandInvoker.remove_additional_prop_layer)
 
             event_data = {'result': result}
