@@ -1602,6 +1602,9 @@ examples:
   - name: Create a Debian11 VM with both system and user assigned identity.
     text: >
         az vm create -n MyVm -g rg1 --image Debian11 --assign-identity [system] /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
+  - name: Create a vm with user assigned identity and add encryption identity for Azure disk encryption
+    text: >
+        az vm create -n MyVm -g rg1 --image Debian11 --assign-identity myID --encryption-identity /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
   - name: Create a VM in an availability zone in the current resource group's region.
     supported-profiles: latest
     text: >

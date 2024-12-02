@@ -886,8 +886,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               storage_account_type=None, vnet_type=None, nsg_type=None, public_ip_address_type=None, nic_type=None,
               validate=False, custom_data=None, secrets=None, plan_name=None, plan_product=None, plan_publisher=None,
               plan_promotion_code=None, license_type=None, assign_identity=None, identity_scope=None,
-              identity_role=None, identity_role_id=None, encryption_identity=None,application_security_groups=None, zone=None,
-              boot_diagnostics_storage=None, ultra_ssd_enabled=None,
+              identity_role=None, identity_role_id=None, encryption_identity=None,
+              application_security_groups=None, zone=None, boot_diagnostics_storage=None, ultra_ssd_enabled=None,
               ephemeral_os_disk=None, ephemeral_os_disk_placement=None,
               proximity_placement_group=None, dedicated_host=None, dedicated_host_group=None, aux_subscriptions=None,
               priority=None, max_price=None, eviction_policy=None, enable_agent=None, workspace=None, vmss=None,
@@ -1144,18 +1144,21 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
             role_assignment_guid = str(_gen_guid())
             master_template.add_resource(build_msi_role_assignment(vm_name, vm_id, identity_role_id,
                                                                     role_assignment_guid, identity_scope))
-
     if encryption_identity is not None:
-        if 'identity' in vm_resource and 'userAssignedIdentities' in vm_resource['identity'] and encryption_identity.lower() in (k.lower() for k in vm_resource['identity']['userAssignedIdentities'].keys()):
+        if 'identity' in vm_resource and 'userAssignedIdentities' in vm_resource['identity'] \
+            and encryption_identity.lower() in \
+                (k.lower() for k in vm_resource['identity']['userAssignedIdentities'].keys()):
             if 'securityProfile' not in vm_resource['properties']:
                 vm_resource['securityProfile'] = {}
-        
             if 'encryptionIdentity' not in vm_resource['properties']['securityProfile']:
                 vm_resource['properties']['securityProfile']['encryptionIdentity'] = {}
-            
-            if 'userAssignedIdentityResourceId' not in vm_resource['properties']['securityProfile']['encryptionIdentity'] or vm_resource['properties']['securityProfile']['encryptionIdentity']['userAssignedIdentityResourceId'] != encryption_identity: 
-                vm_resource['properties']['securityProfile']['encryptionIdentity']['userAssignedIdentityResourceId'] = encryption_identity
-                
+            if 'userAssignedIdentityResourceId' not \
+                in vm_resource['properties']['securityProfile']['encryptionIdentity'] or \
+                vm_resource['properties']['securityProfile']['encryptionIdentity']['userAssignedIdentityResourceId'] \
+                        != encryption_identity:
+                vm_resource['properties']['securityProfile']['encryptionIdentity']['userAssignedIdentityResourceId'] \
+                        = encryption_identity
+
     if workspace is not None:
         workspace_id = _prepare_workspace(cmd, resource_group_name, workspace)
         master_template.add_secure_parameter('workspaceId', workspace_id)
@@ -1269,7 +1272,7 @@ def auto_shutdown_vm(cmd, resource_group_name, vm_name, off=None, email=None, we
         return client.global_schedules.delete(resource_group_name, name)
 
     if time is None:
-         CLIErrorraise('usage error: --time is a required parameter')
+        CLIErrorraise('usage error: --time is a required parameter')
     daily_recurrence = {'time': time}
     notification_settings = None
     if email or webhook:
@@ -3674,9 +3677,7 @@ def _build_identities_info(identities):
         info['userAssignedIdentities'] = {e: {} for e in external_identities}
     return (info, identity_types, external_identities, 'SystemAssigned' in identity_types)
 
-def _build_encryption_identities_info(identity):
-    return {'type':'UserAssigned','userAssignedIdentities': {identity: {}}}
-    
+
 def _build_identities_info_from_system_user_assigned(cmd, mi_system_assigned, mi_user_assigned):
     IdentityType, UserAssignedIdentitiesValue = cmd.get_models('DiskEncryptionSetIdentityType',
                                                                'UserAssignedIdentitiesValue',
