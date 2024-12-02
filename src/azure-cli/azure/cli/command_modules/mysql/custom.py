@@ -32,7 +32,7 @@ from ._network import prepare_mysql_exist_private_dns_zone, prepare_mysql_exist_
 from ._validators import mysql_arguments_validator, mysql_auto_grow_validator, mysql_georedundant_backup_validator, mysql_restore_tier_validator, mysql_accelerated_logs_validator, \
     mysql_retention_validator, mysql_sku_name_validator, mysql_storage_validator, validate_mysql_replica, validate_server_name, \
     validate_mysql_tier_update, validate_and_format_restore_point_in_time, validate_public_access_server, mysql_import_single_server_ready_validator, \
-    mysql_import_version_validator, mysql_import_storage_validator, validate_and_format_maintenance_start_time
+    mysql_import_version_validator, mysql_import_storage_validator, validate_and_format_maintenance_start_time, storage_redundancy_validator
 
 logger = get_logger(__name__)
 DELEGATION_SERVICE_NAME = "Microsoft.DBforMySQL/flexibleServers"
@@ -337,8 +337,8 @@ def flexible_server_create(cmd, client,
                            subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
                            private_dns_zone_arguments=None, public_access=None,
                            high_availability=None, zone=None, standby_availability_zone=None,
-                           iops=None, auto_grow=None, auto_scale_iops=None, accelerated_logs=None, geo_redundant_backup=None,
-                           byok_identity=None, backup_byok_identity=None, byok_key=None, backup_byok_key=None,
+                           iops=None, auto_grow=None, auto_scale_iops=None, accelerated_logs=None, storage_redundancy=None,
+                           geo_redundant_backup=None, byok_identity=None, backup_byok_identity=None, byok_key=None, backup_byok_key=None,
                            maintenance_policy_patch_strategy=None, yes=False):
     # Generate missing parameters
     location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name, server_name)
@@ -376,6 +376,7 @@ def flexible_server_create(cmd, client,
                               backup_byok_key=backup_byok_key,
                               auto_io_scaling=auto_scale_iops,
                               accelerated_logs=accelerated_logs,
+                              storage_redundancy=storage_redundancy,
                               iops=iops)
     list_skus_info = get_mysql_list_skus_info(db_context.cmd, location)
     iops_info = list_skus_info['iops_info']
@@ -404,11 +405,14 @@ def flexible_server_create(cmd, client,
 
     accelerated_logs = _determine_acceleratedLogs(accelerated_logs, tier)
 
+    storage_redundancy = _determine_storage_redundancy(storage_redundancy, tier)
+
     storage = models.Storage(storage_size_gb=storage_gb,
                              iops=iops,
                              auto_grow=auto_grow,
                              auto_io_scaling=auto_scale_iops,
-                             log_on_disk=accelerated_logs)
+                             log_on_disk=accelerated_logs,
+                             storage_redundancy=storage_redundancy)
 
     backup = models.Backup(backup_retention_days=backup_retention, geo_redundant_backup=geo_redundant_backup)
 
@@ -703,7 +707,8 @@ def flexible_server_import_replica_stop(client, resource_group_name, server_name
 def flexible_server_restore(cmd, client, resource_group_name, server_name, source_server, restore_point_in_time=None, zone=None,
                             no_wait=False, subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
                             private_dns_zone_arguments=None, public_access=None, yes=False, sku_name=None, tier=None, database_port=None,
-                            storage_gb=None, auto_grow=None, accelerated_logs=None, backup_retention=None, geo_redundant_backup=None, tags=None):
+                            storage_gb=None, auto_grow=None, accelerated_logs=None, storage_redundancy=None, backup_retention=None,
+                            geo_redundant_backup=None, tags=None):
     provider = 'Microsoft.DBforMySQL'
     server_name = server_name.lower()
 
@@ -756,6 +761,11 @@ def flexible_server_restore(cmd, client, resource_group_name, server_name, sourc
         else:
             mysql_accelerated_logs_validator(accelerated_logs, tier)
 
+        if not storage_redundancy:
+            storage_redundancy = source_server_object.storage.storage_redundancy
+        else:
+            storage_redundancy_validator(storage_redundancy, tier)
+
         if not backup_retention:
             backup_retention = source_server_object.backup.backup_retention_days
         else:
@@ -779,7 +789,7 @@ def flexible_server_restore(cmd, client, resource_group_name, server_name, sourc
 
         storage = models.Storage(storage_size_gb=storage_gb, iops=iops, auto_grow=auto_grow,
                                  auto_io_scaling=source_server_object.storage.auto_io_scaling,
-                                 log_on_disk=accelerated_logs)
+                                 log_on_disk=accelerated_logs, storage_redundancy=storage_redundancy)
 
         backup = models.Backup(backup_retention_days=backup_retention, geo_redundant_backup=geo_redundant_backup)
 
@@ -842,7 +852,8 @@ def flexible_server_restore(cmd, client, resource_group_name, server_name, sourc
 def flexible_server_georestore(cmd, client, resource_group_name, server_name, source_server, location, zone=None, no_wait=False,
                                subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None, tags=None,
                                private_dns_zone_arguments=None, public_access=None, yes=False, sku_name=None, tier=None,
-                               storage_gb=None, auto_grow=None, accelerated_logs=None, backup_retention=None, geo_redundant_backup=None):
+                               storage_gb=None, auto_grow=None, accelerated_logs=None, storage_redundancy=None,
+                               backup_retention=None, geo_redundant_backup=None):
     provider = 'Microsoft.DBforMySQL'
     server_name = server_name.lower()
 
@@ -889,6 +900,11 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
         else:
             mysql_accelerated_logs_validator(accelerated_logs, tier)
 
+        if not storage_redundancy:
+            storage_redundancy = source_server_object.storage.storage_redundancy
+        else:
+            storage_redundancy_validator(storage_redundancy, tier)
+
         if not backup_retention:
             backup_retention = source_server_object.backup.backup_retention_days
         else:
@@ -915,7 +931,7 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
 
         storage = models.Storage(storage_size_gb=storage_gb, iops=iops, auto_grow=auto_grow,
                                  auto_io_scaling=source_server_object.storage.auto_io_scaling,
-                                 log_on_disk=accelerated_logs)
+                                 log_on_disk=accelerated_logs, storage_redundancy=storage_redundancy)
 
         backup = models.Backup(backup_retention_days=backup_retention, geo_redundant_backup=geo_redundant_backup)
 
@@ -1311,7 +1327,8 @@ def flexible_parameter_update_batch(client, server_name, resource_group_name, so
 # Custom functions for server replica, will add MySQL part after backend ready in future
 def flexible_replica_create(cmd, client, resource_group_name, source_server, replica_name, location=None, tags=None, sku_name=None,
                             private_dns_zone_arguments=None, vnet=None, subnet=None, zone=None, public_access=None, no_wait=False,
-                            storage_gb=None, iops=None, geo_redundant_backup=None, backup_retention=None, tier=None, database_port=None):
+                            storage_gb=None, iops=None, storage_redundancy=None, geo_redundant_backup=None, backup_retention=None,
+                            tier=None, database_port=None):
     provider = 'Microsoft.DBforMySQL'
     replica_name = replica_name.lower()
 
@@ -1356,12 +1373,18 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
     if not iops:
         iops = source_server_object.storage.iops
 
+    if not storage_redundancy:
+        storage_redundancy = source_server_object.storage.storage_redundancy
+    else:
+        storage_redundancy_validator(storage_redundancy, tier)
+
     identity, data_encryption = get_identity_and_data_encryption(source_server_object)
 
     storage = models.Storage(storage_size_gb=storage_gb,
                              iops=iops,
                              auto_grow="Enabled",
-                             auto_io_scaling=source_server_object.storage.auto_io_scaling)
+                             auto_io_scaling=source_server_object.storage.auto_io_scaling,
+                             storage_redundancy=storage_redundancy)
 
     backup = models.Backup(backup_retention_days=backup_retention, geo_redundant_backup=geo_redundant_backup)
 
@@ -1647,6 +1670,15 @@ def _determine_acceleratedLogs(accelerated_logs, tier):
     if tier != "MemoryOptimized" and accelerated_logs.lower() == "enabled":
         accelerated_logs = "Disabled"
     return accelerated_logs
+
+
+def _determine_storage_redundancy(storage_redundancy, tier):
+    if storage_redundancy is None:
+        if tier == "MemoryOptimized":
+            storage_redundancy = "ZoneRedundancy"
+        else:
+            storage_redundancy = "LocalRedundancy"
+    return storage_redundancy
 
 
 def get_free_iops(storage_in_mb, iops_info, tier, sku_name):

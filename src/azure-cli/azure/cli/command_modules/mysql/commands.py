@@ -13,6 +13,7 @@ from azure.cli.command_modules.mysql._client_factory import (
     cf_mysql_flexible_replica,
     cf_mysql_flexible_location_capabilities,
     cf_mysql_flexible_log,
+    cf_mysql_flexible_backup,
     cf_mysql_flexible_backups,
     cf_mysql_flexible_adadmin,
     cf_mysql_flexible_export,
@@ -69,8 +70,13 @@ def load_command_table(self, _):
         client_factory=cf_mysql_flexible_log
     )
 
-    mysql_flexible_backups_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.mysqlflexibleservers.operations#BackupsOperations.{}',
+    mysql_flexible_long_running_backup_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.mysqlflexibleservers.operations#LongRunningBackupOperations.{}',
+        client_factory=cf_mysql_flexible_backup
+    )
+
+    mysql_flexible_long_running_backups_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.mysqlflexibleservers.operations#LongRunningBackupsOperations.{}',
         client_factory=cf_mysql_flexible_backups
     )
 
@@ -185,10 +191,13 @@ def load_command_table(self, _):
         g.custom_command('list', 'flexible_server_log_list')
         g.custom_command('download', 'flexible_server_log_download')
 
-    with self.command_group('mysql flexible-server backup', mysql_flexible_backups_sdk,
+    with self.command_group('mysql flexible-server backup', mysql_flexible_long_running_backup_sdk,
+                            client_factory=cf_mysql_flexible_backup) as g:
+        g.command('create', 'begin_create')
+
+    with self.command_group('mysql flexible-server backup', mysql_flexible_long_running_backups_sdk,
                             client_factory=cf_mysql_flexible_backups) as g:
-        g.command('create', 'put', transform=transform_backup)
-        g.command('list', 'list_by_server', transform=transform_backups_list)
+        g.command('list', 'list', transform=transform_backups_list)
         g.show_command('show', 'get', transform=transform_backup)
 
     with self.command_group('mysql flexible-server export', mysql_flexible_export_sdk,
