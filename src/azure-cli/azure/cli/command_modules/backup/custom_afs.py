@@ -245,9 +245,9 @@ def list_recovery_points(cmd, client, resource_group_name, vault_name, item, sta
             Please either remove the flag or query for any other backup-management-type.
             """)
 
-    if is_ready_for_move is not None or target_tier is not None or tier is not None:
+    if is_ready_for_move is not None or target_tier is not None:
         raise ArgumentUsageError("""Invalid argument has been passed. --is-ready-for-move true, --target-tier
-        and --tier flags are not supported for --backup-management-type AzureStorage.""")
+        are not supported for --backup-management-type AzureStorage.""")
 
     if recommended_for_archive is not None:
         raise ArgumentUsageError("""--recommended-for-archive is supported by AzureIaasVM backup management
@@ -269,6 +269,45 @@ def list_recovery_points(cmd, client, resource_group_name, vault_name, item, sta
     # Get recovery points
     recovery_points = client.list(vault_name, resource_group_name, fabric_name, container_uri, item_uri, filter_string)
     paged_recovery_points = helper.get_list_from_paged_response(recovery_points)
+    
+    if tier:
+        filtered_recovery_points = []
+        for rp in paged_recovery_points:
+            rp_tier = None
+            rp_tier_types = []
+
+            # Safely access 'additional_properties' attribute of rp.properties
+            additional_props = getattr(rp.properties, 'additional_properties', {})
+
+            # Ensure additional_props is a dictionary before using dict.get()
+            if isinstance(additional_props, dict):
+                # Safely get 'recoveryPointTierDetails' from the dictionary
+                tier_details_list = additional_props.get("recoveryPointTierDetails", [])
+        
+                # Ensure tier_details_list is a list before iterating
+                if isinstance(tier_details_list, list):
+                    for detail in tier_details_list:
+                        # Ensure each detail is a dictionary
+                        if isinstance(detail, dict):
+                            # Safely get the 'type' from each detail
+                            rp_type = detail.get("type")
+                            if rp_type:
+                                rp_tier_types.append(rp_type)
+
+            # Determine the tier of the recovery point based on the types
+            if 'InstantRP' in rp_tier_types and 'HardenedRP' in rp_tier_types:
+                rp_tier = 'SnapshotAndVaultStandard'
+            elif 'InstantRP' in rp_tier_types:
+                rp_tier = 'Snapshot'
+            elif 'HardenedRP' in rp_tier_types:
+                rp_tier = 'VaultStandard'
+            else:
+                rp_tier = 'Unknown'
+
+            # Compare with the tier parameter and add to filtered list if matched
+            if rp_tier == tier:
+                filtered_recovery_points.append(rp)
+        return filtered_recovery_points
 
     return paged_recovery_points
 
@@ -302,6 +341,13 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, p
                                                  aux_tenants=[tenant_id]).protected_items
             afs_item.properties.resource_guard_operation_requests = [helper.get_resource_guard_operation_request(
                 cmd.cli_ctx, resource_group_name, vault_name, "updateProtection")]
+            
+    # Validate existing & new policy
+    existing_policy_name = item.properties.policy_id.split('/')[-1]         
+    existing_policy = common.show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name,
+                                             existing_policy_name)
+    helper.validate_update_policy_request(existing_policy, policy)
+
     # Update policy
     result = client.create_or_update(vault_name, resource_group_name, fabric_name,
                                      container_uri, item_uri, afs_item, cls=helper.get_pipeline_response)

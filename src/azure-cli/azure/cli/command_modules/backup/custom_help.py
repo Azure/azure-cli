@@ -11,6 +11,7 @@ from datetime import datetime, timedelta
 from urllib.parse import urlparse
 
 from knack.log import get_logger
+from knack.prompting import prompt_y_n
 
 from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id
 
@@ -676,6 +677,20 @@ def validate_update_policy_request(existing_policy, new_policy):
     new_backup_management_type = new_policy.properties.backup_management_type
     if existing_backup_management_type != new_backup_management_type:
         raise CLIError("BackupManagementType cannot be different than the existing type.")
+    # vault -> snapshot
+    if hasattr(existing_policy.properties, 'vault_retention_policy') and existing_policy.properties.vault_retention_policy is not None and hasattr(new_policy.properties, 'retention_policy') and new_policy.properties.retention_policy is not None:
+        raise CLIError(
+            """
+            Switching the backup tier from vaulted backup to snapshot is not possible. 
+            Please create a new policy for snapshot-only backups.
+            """)
+    # snapshot -> vault
+    if hasattr(existing_policy.properties, 'retention_policy') and existing_policy.properties.retention_policy is not None and hasattr(new_policy.properties, 'vault_retention_policy') and new_policy.properties.vault_retention_policy is not None:
+        warning_prompt = ('Changing the backup tier keeps current snapshots as-is under the existing policy. Future backups will be stored in the vault with new retention settings.' 
+                          'This action is irreversible and incurs additional costs. Switching from vault to snapshot requires reconfiguration.' 
+                          'Learn more at https://learn.microsoft.com/en-us/azure/backup/azure-file-share-backup-overview?tabs=snapshot.')
+        if not prompt_y_n(warning_prompt):
+            raise CLIError('Cancelling policy update operation')
 
 
 def transform_softdelete_parameters(parameter):
