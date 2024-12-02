@@ -708,8 +708,6 @@ examples:
     text: az acr manifest list-metadata -r myregistry -n hello-world --query "[]"
   - name: List the metadata of untagged manifests in the repository 'hello-world'.
     text: az acr manifest list-metadata -r myregistry -n hello-world --query "[?tags==null]"
-  - name: List the metadata of untagged manifests by digests for the repository 'hello-world'.
-    text: az acr manifest list-metadata -r myregistry -n hello-world --query "[?tags==null].digests"
 """
 
 helps['acr manifest update-metadata'] = """
