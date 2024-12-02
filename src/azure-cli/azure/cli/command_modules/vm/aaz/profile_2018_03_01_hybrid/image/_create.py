@@ -100,12 +100,11 @@ class Create(AAZCommand):
         storage_profile = cls._args_schema.storage_profile
         storage_profile.data_disks = AAZListArg(
             options=["data-disks"],
-            help="Specifies the parameters that are used to add a data disk to a virtual machine. <br><br> For more information about disks, see [About disks and VHDs for Azure virtual machines](https://docs.microsoft.com/azure/virtual-machines/managed-disks-overview).",
+            help="Specifies the parameters that are used to add a data disk to a virtual machine. <br><br> For more information about disks, see [About disks and VHDs for Azure virtual machines](https://learn.microsoft.com/azure/virtual-machines/managed-disks-overview).",
         )
         storage_profile.os_disk = AAZObjectArg(
             options=["os-disk"],
-            help="Specifies information about the operating system disk used by the virtual machine. <br><br> For more information about disks, see [About disks and VHDs for Azure virtual machines](https://docs.microsoft.com/azure/virtual-machines/managed-disks-overview).",
-            required=True,
+            help="Specifies information about the operating system disk used by the virtual machine. <br><br> For more information about disks, see [About disks and VHDs for Azure virtual machines](https://learn.microsoft.com/azure/virtual-machines/managed-disks-overview).",
         )
 
         data_disks = cls._args_schema.storage_profile.data_disks
@@ -344,7 +343,7 @@ class Create(AAZCommand):
             storage_profile = _builder.get(".properties.storageProfile")
             if storage_profile is not None:
                 storage_profile.set_prop("dataDisks", AAZListType, ".data_disks")
-                storage_profile.set_prop("osDisk", AAZObjectType, ".os_disk", typ_kwargs={"flags": {"required": True}})
+                storage_profile.set_prop("osDisk", AAZObjectType, ".os_disk")
 
             data_disks = _builder.get(".properties.storageProfile.dataDisks")
             if data_disks is not None:
@@ -443,7 +442,6 @@ class Create(AAZCommand):
             )
             storage_profile.os_disk = AAZObjectType(
                 serialized_name="osDisk",
-                flags={"required": True},
             )
 
             data_disks = cls._schema_on_200_201.properties.storage_profile.data_disks

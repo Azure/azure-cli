@@ -413,7 +413,6 @@ class _UpdateHelper:
         )
         storage_profile.os_disk = AAZObjectType(
             serialized_name="osDisk",
-            flags={"required": True},
         )
 
         data_disks = _schema_image_read.properties.storage_profile.data_disks
