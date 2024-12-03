@@ -112,7 +112,7 @@ def __write_kv_and_features_to_file(
         exported_keyvalues = __export_keyvalues(key_values, format_, separator, None)
         if features and not skip_features:
             compatibility_mode = os.environ.get(
-                "AZURE_APPCONFIG_FM_COMPATIBILITY_MODE", True
+                "AZURE_APPCONFIG_FM_COMPATIBLE", True
             )
             exported_features = __export_features(
                 features, naming_convention, compatibility_mode
@@ -195,9 +195,9 @@ def __export_features(retrieved_features, naming_convention, compatibility_mode)
 
             for feature in retrieved_features:
                 if (
-                    hasattr(feature, FeatureFlagConstants.ALLOCATION) or
-                    hasattr(feature, FeatureFlagConstants.VARIANTS) or
-                    hasattr(feature, FeatureFlagConstants.TELEMETRY)
+                    feature.allocation is not None or
+                    feature.variants is not None or
+                    feature.telemetry is not None
                 ):
                     if new_ms_featuremanagement_keyword not in exported_dict:
                         exported_dict[new_ms_featuremanagement_keyword] = {
@@ -302,20 +302,20 @@ def __export_feature_to_new_ms_schema(feature):
             feature.conditions
         )
 
-        if hasattr(feature, FeatureFlagConstants.ALLOCATION):
+        if feature.allocation is not None:
             feature_dict[FeatureFlagConstants.ALLOCATION] = custom_serialize_allocation(
                 feature.allocation
             )
 
-        if hasattr(feature, FeatureFlagConstants.VARIANTS):
+        if feature.variants is not None:
             feature_dict[FeatureFlagConstants.VARIANTS] = custom_serialize_variants(
                 feature.variants
             )
 
-        if hasattr(feature, FeatureFlagConstants.TELEMETRY):
+        if feature.telemetry is not None:
             feature_dict[FeatureFlagConstants.TELEMETRY] = feature.telemetry
 
-        if hasattr(feature, FeatureFlagConstants.DISPLAY_NAME):
+        if feature.display_name is not None:
             feature_dict[FeatureFlagConstants.DISPLAY_NAME] = feature.display_name
 
         return feature_dict

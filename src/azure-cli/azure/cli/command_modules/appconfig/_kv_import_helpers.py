@@ -247,7 +247,7 @@ def __convert_feature_dict_to_keyvalue_list(
                 key=key,
                 value=json.dumps(
                     feature,
-                    default=lambda o: o.__dict__,
+                    default=lambda o: {k: v for k, v in o.__dict__.items() if v is not None},
                     ensure_ascii=False,
                 ),
                 content_type=FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE,

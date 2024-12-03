@@ -163,13 +163,13 @@ def get_serializer(level):
             # conditions
             feature_json['conditions'] = custom_serialize_conditions(feature.conditions)
             # allocation
-            if hasattr(feature, 'allocation'):
+            if feature.allocation:
                 feature_json['allocation'] = custom_serialize_allocation(feature.allocation)
             # variants
-            if hasattr(feature, 'variants'):
+            if feature.variants:
                 feature_json['variants'] = custom_serialize_variants(feature.variants)
             # telemetry
-            if hasattr(feature, 'telemetry'):
+            if feature.telemetry:
                 feature_json['telemetry'] = feature.telemetry
 
             return feature_json

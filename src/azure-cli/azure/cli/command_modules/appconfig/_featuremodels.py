@@ -78,36 +78,22 @@ class FeatureFlagValue:
         self.description = "" if description is None else description
         self.enabled = enabled if enabled else False
         self.conditions = conditions if conditions else default_conditions
-        if allocation is not None:
-            self.allocation = allocation
-        if variants is not None:
-            self.variants = variants
-        if telemetry is not None:
-            self.telemetry = telemetry
-        if display_name is not None:
-            self.display_name = display_name
+        self.allocation = allocation
+        self.variants = variants
+        self.telemetry = telemetry
+        self.display_name = display_name
 
     def __repr__(self):
         featureflagvalue = {
             FeatureFlagConstants.ID: self.id,
             FeatureFlagConstants.DESCRIPTION: self.description,
             FeatureFlagConstants.ENABLED: self.enabled,
-            FeatureFlagConstants.CONDITIONS: custom_serialize_conditions(
-                self.conditions
-            ),
+            FeatureFlagConstants.CONDITIONS: custom_serialize_conditions(self.conditions),
+            FeatureFlagConstants.DISPLAY_NAME: self.display_name,
+            FeatureFlagConstants.ALLOCATION: custom_serialize_allocation(self.allocation),
+            FeatureFlagConstants.VARIANTS: custom_serialize_variants(self.variants),
+            FeatureFlagConstants.TELEMETRY: self.telemetry
         }
-
-        if hasattr(self, FeatureFlagConstants.DISPLAY_NAME):
-            featureflagvalue[FeatureFlagConstants.DISPLAY_NAME] = self.display_name
-
-        if hasattr(self, FeatureFlagConstants.ALLOCATION):
-            featureflagvalue[FeatureFlagConstants.ALLOCATION] = custom_serialize_allocation(self.allocation)
-
-        if hasattr(self, FeatureFlagConstants.VARIANTS):
-            featureflagvalue[FeatureFlagConstants.VARIANTS] = custom_serialize_variants(self.variants)
-
-        if hasattr(self, FeatureFlagConstants.TELEMETRY):
-            featureflagvalue[FeatureFlagConstants.TELEMETRY] = self.telemetry
 
         return json.dumps(featureflagvalue, indent=2, ensure_ascii=False)
 
@@ -167,14 +153,10 @@ class FeatureFlag:
         self.conditions = conditions
         self.last_modified = last_modified
         self.locked = locked
-        if allocation is not None:
-            self.allocation = allocation
-        if variants is not None:
-            self.variants = variants
-        if telemetry is not None:
-            self.telemetry = telemetry
-        if display_name is not None:
-            self.display_name = display_name
+        self.allocation = allocation
+        self.variants = variants
+        self.telemetry = telemetry
+        self.display_name = display_name
 
     def __repr__(self):
         featureflag = {
@@ -186,19 +168,11 @@ class FeatureFlag:
             "Description": self.description,
             "Last Modified": self.last_modified,
             "Conditions": custom_serialize_conditions(self.conditions),
+            "Allocation": custom_serialize_allocation(self.allocation),
+            "Variants": custom_serialize_variants(self.variants),
+            "Telemetry": self.telemetry,
+            "Display Name": self.display_name
         }
-
-        if hasattr(self, FeatureFlagConstants.ALLOCATION):
-            featureflag["Allocation"] = custom_serialize_allocation(self.allocation)
-
-        if hasattr(self, FeatureFlagConstants.VARIANTS):
-            featureflag["Variants"] = custom_serialize_variants(self.variants)
-
-        if hasattr(self, FeatureFlagConstants.DISPLAY_NAME):
-            featureflag["Display Name"] = self.display_name
-
-        if hasattr(self, FeatureFlagConstants.TELEMETRY):
-            featureflag["Telemetry"] = self.telemetry
 
         return json.dumps(featureflag, indent=2, ensure_ascii=False)
 
@@ -240,10 +214,8 @@ class FeatureVariant:
 
     def __init__(self, name, configuration_value=None, status_override=None):
         self.name = name
-        if configuration_value is not None:
-            self.configuration_value = configuration_value
-        if status_override is not None:
-            self.status_override = status_override
+        self.configuration_value = configuration_value
+        self.status_override = status_override
 
     @classmethod
     def convert_from_dict(cls, variant_dict):
@@ -278,13 +250,9 @@ class FeatureVariant:
     def __repr__(self):
         featurevariant = {
             FeatureFlagConstants.NAME: self.name,
+            FeatureFlagConstants.VARIANT_CONFIGURATION_VALUE: self.configuration_value,
+            FeatureFlagConstants.VARIANT_STATUS_OVERRIDE: self.status_override
         }
-
-        if hasattr(self, FeatureFlagConstants.VARIANT_CONFIGURATION_VALUE):
-            featurevariant[FeatureFlagConstants.VARIANT_CONFIGURATION_VALUE] = self.configuration_value
-
-        if hasattr(self, FeatureFlagConstants.VARIANT_STATUS_OVERRIDE):
-            featurevariant[FeatureFlagConstants.VARIANT_STATUS_OVERRIDE] = self.status_override
 
         return json.dumps(featurevariant, indent=2, ensure_ascii=False)
 
@@ -494,18 +462,12 @@ class FeatureAllocation:
         default_when_disabled=None,
         seed=None
     ):
-        if user is not None:
-            self.user = user
-        if group is not None:
-            self.group = group
-        if percentile is not None:
-            self.percentile = percentile
-        if default_when_enabled is not None:
-            self.default_when_enabled = default_when_enabled
-        if default_when_disabled is not None:
-            self.default_when_disabled = default_when_disabled
-        if seed is not None:
-            self.seed = seed
+        self.user = user
+        self.group = group
+        self.percentile = percentile
+        self.default_when_enabled = default_when_enabled
+        self.default_when_disabled = default_when_disabled
+        self.seed = seed
 
     @classmethod
     def convert_from_dict(cls, allocation_dict):
@@ -573,22 +535,14 @@ class FeatureAllocation:
         return allocation
 
     def __repr__(self):
-        featureallocation = {}
-
-        if hasattr(self, FeatureFlagConstants.USER):
-            featureallocation[FeatureFlagConstants.USER] = list(self.user)
-
-        if hasattr(self, FeatureFlagConstants.GROUP):
-            featureallocation[FeatureFlagConstants.GROUP] = list(self.group)
-
-        if hasattr(self, FeatureFlagConstants.PERCENTILE):
-            featureallocation[FeatureFlagConstants.PERCENTILE] = list(self.percentile)
-
-        if hasattr(self, FeatureFlagConstants.DEFAULT_WHEN_ENABLED):
-            featureallocation[FeatureFlagConstants.DEFAULT_WHEN_ENABLED] = self.default_when_enabled
-
-        if hasattr(self, FeatureFlagConstants.DEFAULT_WHEN_DISABLED):
-            featureallocation[FeatureFlagConstants.DEFAULT_WHEN_DISABLED] = self.default_when_disabled
+        featureallocation = {
+            FeatureFlagConstants.USER: list(self.user),
+            FeatureFlagConstants.GROUP: list(self.group),
+            FeatureFlagConstants.PERCENTILE: list(self.percentile),
+            FeatureFlagConstants.DEFAULT_WHEN_ENABLED: self.default_when_enabled,
+            FeatureFlagConstants.DEFAULT_WHEN_DISABLED: self.default_when_disabled,
+            FeatureFlagConstants.SEED: self.seed
+        }
 
         return json.dumps(featureallocation, indent=2, ensure_ascii=False)
 
@@ -629,25 +583,25 @@ def custom_serialize_allocation(allocation):
     """
     featureallocationdict = {}
 
-    if hasattr(allocation, FeatureFlagConstants.USER):
+    if allocation.user:
         featureallocationdict[FeatureFlagConstants.USER] = [
             user.__dict__ for user in allocation.user
         ]
 
-    if hasattr(allocation, FeatureFlagConstants.GROUP):
+    if allocation.group:
         featureallocationdict[FeatureFlagConstants.GROUP] = [
             group.__dict__ for group in allocation.group
         ]
 
-    if hasattr(allocation, FeatureFlagConstants.PERCENTILE):
+    if allocation.percentile:
         featureallocationdict[FeatureFlagConstants.PERCENTILE] = [
             percentile.__dict__ for percentile in allocation.percentile
         ]
 
-    if hasattr(allocation, FeatureFlagConstants.DEFAULT_WHEN_ENABLED):
+    if allocation.default_when_enabled:
         featureallocationdict[FeatureFlagConstants.DEFAULT_WHEN_ENABLED] = allocation.default_when_enabled
 
-    if hasattr(allocation, FeatureFlagConstants.DEFAULT_WHEN_DISABLED):
+    if allocation.default_when_disabled:
         featureallocationdict[FeatureFlagConstants.DEFAULT_WHEN_DISABLED] = allocation.default_when_disabled
 
     return featureallocationdict
@@ -667,11 +621,10 @@ def custom_serialize_variants(variants_list):
     for variant in variants_list:
         variant_dict = {}
         variant_dict[FeatureFlagConstants.NAME] = variant.name
-
-        if hasattr(variant, FeatureFlagConstants.VARIANT_CONFIGURATION_VALUE):
+        if variant.configuration_value:
             variant_dict[FeatureFlagConstants.VARIANT_CONFIGURATION_VALUE] = variant.configuration_value
 
-        if hasattr(variant, FeatureFlagConstants.VARIANT_STATUS_OVERRIDE):
+        if variant.status_override:
             variant_dict[FeatureFlagConstants.VARIANT_STATUS_OVERRIDE] = variant.status_override
 
         featurevariants.append(variant_dict)
@@ -693,32 +646,15 @@ def map_featureflag_to_keyvalue(featureflag):
         if featureflag.state in ("on", "conditional"):
             enabled = True
 
-        allocation = None
-        variants = None
-        telemetry = None
-        display_name = None
-
-        if hasattr(featureflag, FeatureFlagConstants.ALLOCATION):
-            allocation = featureflag.allocation
-
-        if hasattr(featureflag, FeatureFlagConstants.VARIANTS):
-            variants = featureflag.variants
-
-        if hasattr(featureflag, FeatureFlagConstants.TELEMETRY):
-            telemetry = featureflag.telemetry
-
-        if hasattr(featureflag, FeatureFlagConstants.DISPLAY_NAME):
-            display_name = featureflag.display_name
-
         feature_flag_value = FeatureFlagValue(
             id_=featureflag.name,
             description=featureflag.description,
             enabled=enabled,
             conditions=featureflag.conditions,
-            display_name=display_name,
-            allocation=allocation,
-            variants=variants,
-            telemetry=telemetry,
+            display_name=featureflag.display_name,
+            allocation=featureflag.allocation,
+            variants=featureflag.variants,
+            telemetry=featureflag.telemetry,
         )
 
         set_kv = KeyValue(
@@ -775,23 +711,6 @@ def map_keyvalue_to_featureflag(keyvalue, show_conditions=True):
     if filters and state == FeatureState.ON:
         state = FeatureState.CONDITIONAL
 
-    allocation = None
-    variants = None
-    telemetry = None
-    display_name = None
-
-    if hasattr(feature_flag_value, FeatureFlagConstants.ALLOCATION):
-        allocation = feature_flag_value.allocation
-
-    if hasattr(feature_flag_value, FeatureFlagConstants.VARIANTS):
-        variants = feature_flag_value.variants
-
-    if hasattr(feature_flag_value, FeatureFlagConstants.TELEMETRY):
-        telemetry = feature_flag_value.telemetry
-
-    if hasattr(feature_flag_value, FeatureFlagConstants.DISPLAY_NAME):
-        display_name = feature_flag_value.display_name
-
     feature_flag = FeatureFlag(
         name=feature_name,
         key=keyvalue.key,
@@ -800,11 +719,11 @@ def map_keyvalue_to_featureflag(keyvalue, show_conditions=True):
         description=feature_flag_value.description,
         conditions=conditions,
         locked=keyvalue.locked,
-        display_name=display_name,
+        display_name=feature_flag_value.display_name,
         last_modified=keyvalue.last_modified,
-        allocation=allocation,
-        variants=variants,
-        telemetry=telemetry,
+        allocation=feature_flag_value.allocation,
+        variants=feature_flag_value.variants,
+        telemetry=feature_flag_value.telemetry,
     )
 
     # By Default, we will try to show conditions unless the user has
