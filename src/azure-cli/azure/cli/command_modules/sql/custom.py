@@ -281,7 +281,7 @@ def _find_edition_capability(sku, supported_editions):
             return next(e for e in supported_editions if e.name == sku.tier)
         except StopIteration:
             candidate_editions = [e.name for e in supported_editions]
-            raise CLIError('Could not find tier ''{}''. Supported tiers are: {}'.format(
+            raise CLIError('Could not find tier {}. Supported tiers are: {}'.format(
                 sku.tier, candidate_editions
             ))
     else:
@@ -304,7 +304,7 @@ def _find_family_capability(sku, supported_families):
             return next(f for f in supported_families if f.name == sku.family)
         except StopIteration:
             candidate_families = [e.name for e in supported_families]
-            raise CLIError('Could not find family ''{}''. Supported families are: {}'.format(
+            raise CLIError('Could not find family {}. Supported families are: {}'.format(
                 sku.family, candidate_families
             ))
     else:
