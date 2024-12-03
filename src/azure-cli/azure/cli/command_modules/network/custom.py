@@ -3289,7 +3289,7 @@ class ExpressRouteCreate(_ExpressRouteCreate):
         if has_value(args.express_route_port):
             args.provider = None
             args.peering_location = None
-            args.bandwidth_in_gbps = (converted_bandwidth / 1000.0)
+            args.bandwidth_in_gbps = converted_bandwidth / 1000.0
         else:
             args.bandwidth_in_mbps = int(converted_bandwidth)
 

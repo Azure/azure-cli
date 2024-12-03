@@ -241,7 +241,7 @@ def _aks_browse(
                 stderr=subprocess.STDOUT,
             )
             # output format: "'{port}'"
-            dashboard_port = int((dashboard_port.replace("'", "")))
+            dashboard_port = int(dashboard_port.replace("'", ""))
         except subprocess.CalledProcessError as err:
             raise ResourceNotFoundError('Could not find dashboard port: {} Command output: {}'.format(err, err.output))
 
@@ -473,7 +473,7 @@ def wait_then_open_async(url):
     """
     Spawns a thread that waits for a bit then opens a URL.
     """
-    t = threading.Thread(target=wait_then_open, args=({url}))
+    t = threading.Thread(target=wait_then_open, args=(url,))
     t.daemon = True
     t.start()
 

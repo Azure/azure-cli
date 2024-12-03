@@ -760,7 +760,7 @@ def _to_filetimeutc(dateTime):
     NET_epoch = datetime(1601, 1, 1)
     UNIX_epoch = datetime(1970, 1, 1)
 
-    epoch_delta = (UNIX_epoch - NET_epoch)
+    epoch_delta = UNIX_epoch - NET_epoch
 
     log_time = parse(dateTime)
 
