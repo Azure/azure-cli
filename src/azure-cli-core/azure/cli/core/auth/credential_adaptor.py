@@ -7,7 +7,7 @@ import requests
 from knack.log import get_logger
 from knack.util import CLIError
 
-from .util import resource_to_scopes, _normalize_scopes
+from .util import resource_to_scopes
 
 logger = get_logger(__name__)
 
@@ -62,7 +62,6 @@ class CredentialAdaptor:
         if 'data' in kwargs:
             filtered_kwargs['data'] = kwargs['data']
 
-        scopes = _normalize_scopes(scopes)
         token, _ = self._get_token(scopes, **filtered_kwargs)
         return token
 
