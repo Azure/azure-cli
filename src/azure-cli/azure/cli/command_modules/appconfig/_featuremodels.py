@@ -661,7 +661,7 @@ def map_featureflag_to_keyvalue(featureflag):
             key=featureflag.key,
             label=featureflag.label,
             value=json.dumps(
-                feature_flag_value, default=lambda o: o.__dict__, ensure_ascii=False
+                feature_flag_value, default=lambda o: {k: v for k, v in o.__dict__.items() if v is not None}, ensure_ascii=False
             ),
             content_type=FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE,
             tags={},

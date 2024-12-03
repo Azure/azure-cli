@@ -2470,8 +2470,12 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
                                          self.check('description', updated_entry_description),
                                          self.check('label', updated_label),
                                          self.check('state', default_state),
-                                         self.check('conditions', default_conditions)]).get_output_in_json()
-        assert len(response_dict) == 8
+                                         self.check('display_name', None),
+                                         self.check('conditions', default_conditions),
+                                         self.check('allocation', None),
+                                         self.check('variants', None),
+                                         self.check('telemetry', None)]).get_output_in_json()
+        assert len(response_dict) == 12
 
         # show a feature flag with field filtering
         response_dict = self.cmd('appconfig feature show -n {config_store_name} --feature {feature} --label {label} --fields key label state locked',

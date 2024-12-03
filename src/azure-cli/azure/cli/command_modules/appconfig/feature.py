@@ -129,7 +129,7 @@ def set_feature(cmd,
 
                 set_kv = KeyValue(key=key,
                                   label=label,
-                                  value=json.dumps(feature_flag_value, default=lambda o: o.__dict__, ensure_ascii=False),
+                                  value=json.dumps(feature_flag_value, default=lambda o: {k: v for k, v in o.__dict__.items() if v is not None}, ensure_ascii=False),
                                   content_type=FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE,
                                   tags=retrieved_kv.tags if tags is None else tags,
                                   etag=retrieved_kv.etag,
@@ -469,7 +469,7 @@ def enable_feature(cmd,
             updated_key_value = __update_existing_key_value(azconfig_client=azconfig_client,
                                                             retrieved_kv=retrieved_kv,
                                                             updated_value=json.dumps(feature_flag_value,
-                                                                                     default=lambda o: o.__dict__,
+                                                                                     default=lambda o: {k: v for k, v in o.__dict__.items() if v is not None},
                                                                                      ensure_ascii=False),
                                                             correlation_request_id=correlation_request_id)
 
@@ -535,7 +535,7 @@ def disable_feature(cmd,
             updated_key_value = __update_existing_key_value(azconfig_client=azconfig_client,
                                                             retrieved_kv=retrieved_kv,
                                                             updated_value=json.dumps(feature_flag_value,
-                                                                                     default=lambda o: o.__dict__,
+                                                                                     default=lambda o: {k: v for k, v in o.__dict__.items() if v is not None},
                                                                                      ensure_ascii=False),
                                                             correlation_request_id=correlation_request_id)
 
@@ -628,7 +628,7 @@ def add_filter(cmd,
             __update_existing_key_value(azconfig_client=azconfig_client,
                                         retrieved_kv=retrieved_kv,
                                         updated_value=json.dumps(feature_flag_value,
-                                                                 default=lambda o: o.__dict__,
+                                                                 default=lambda o: {k: v for k, v in o.__dict__.items() if v is not None},
                                                                  ensure_ascii=False),
                                         correlation_request_id=correlation_request_id)
 
@@ -764,7 +764,7 @@ def update_filter(cmd,
             __update_existing_key_value(azconfig_client=azconfig_client,
                                         retrieved_kv=retrieved_kv,
                                         updated_value=json.dumps(feature_flag_value,
-                                                                 default=lambda o: o.__dict__,
+                                                                 default=lambda o: {k: v for k, v in o.__dict__.items() if v is not None},
                                                                  ensure_ascii=False),
                                         correlation_request_id=correlation_request_id)
 
@@ -887,7 +887,7 @@ def delete_filter(cmd,
             __update_existing_key_value(azconfig_client=azconfig_client,
                                         retrieved_kv=retrieved_kv,
                                         updated_value=json.dumps(feature_flag_value,
-                                                                 default=lambda o: o.__dict__,
+                                                                 default=lambda o: {k: v for k, v in o.__dict__.items() if v is not None},
                                                                  ensure_ascii=False),
                                         correlation_request_id=correlation_request_id)
 
@@ -1170,7 +1170,7 @@ def __clear_filter(azconfig_client, feature, label=None, yes=False):
                     retrieved_kv=retrieved_kv,
                     updated_value=json.dumps(
                         feature_flag_value,
-                        default=lambda o: o.__dict__,
+                        default=lambda o: {k: v for k, v in o.__dict__.items() if v is not None},
                         ensure_ascii=False,
                     ),
                 )
