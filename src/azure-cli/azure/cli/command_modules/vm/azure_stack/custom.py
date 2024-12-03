@@ -5863,7 +5863,7 @@ def set_vm_applications(cmd, vm_name, resource_group_name, application_version_i
         index = 0
         for treat_as_failure in treat_deployment_as_failure:
             vm.application_profile.gallery_applications[index].treat_failure_as_deployment_failure = \
-                (treat_as_failure.lower() == 'true')
+                treat_as_failure.lower() == 'true'
             index += 1
     return sdk_no_wait(no_wait, client.virtual_machines.begin_create_or_update, resource_group_name, vm_name, vm)
 
@@ -5907,7 +5907,7 @@ def set_vmss_applications(cmd, vmss_name, resource_group_name, application_versi
         index = 0
         for treat_as_failure in treat_deployment_as_failure:
             vmss.virtual_machine_profile.application_profile.gallery_applications[
-                index].treat_failure_as_deployment_failure = (treat_as_failure.lower() == 'true')
+                index].treat_failure_as_deployment_failure = treat_as_failure.lower() == 'true'
             index += 1
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_create_or_update, resource_group_name,
                        vmss_name, vmss)
