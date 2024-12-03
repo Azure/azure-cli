@@ -70,7 +70,7 @@ def updateVmEncryptionSetting(cmd, vm, resource_group_name, vm_name, encryption_
         vm.security_profile.encryption_identity = EncryptionIdentity()
     if vm.security_profile.encryption_identity.user_assigned_identity_resource_id is None \
             or vm.security_profile.encryption_identity.user_assigned_identity_resource_id.lower() \
-                != encryption_identity:
+            != encryption_identity:
         vm.security_profile.encryption_identity.user_assigned_identity_resource_id = encryption_identity
         updateVm = True
     else:
@@ -587,7 +587,7 @@ def _verify_keyvault_good_for_encryption(cli_ctx, disk_vault_id, kek_vault_id, v
     # ensure vault has 'EnabledForDiskEncryption' permission or VM has encryption identity set for ADE operation
     if resource_type == 'VM':
         if vm_or_vmss.security_profile and vm_or_vmss.security_profile.encryption_identity and \
-            vm_or_vmss.security_profile.encryption_identity.user_assigned_identity_resource_id:
+                vm_or_vmss.security_profile.encryption_identity.user_assigned_identity_resource_id:
             pass
         elif not key_vault.properties or not key_vault.properties.enabled_for_disk_encryption:
             _report_client_side_validation_error(

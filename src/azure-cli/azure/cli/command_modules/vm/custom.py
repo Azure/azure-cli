@@ -1143,7 +1143,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         if identity_scope:
             role_assignment_guid = str(_gen_guid())
             master_template.add_resource(build_msi_role_assignment(vm_name, vm_id, identity_role_id,
-                                                                    role_assignment_guid, identity_scope))
+                                                                   role_assignment_guid, identity_scope))
     if encryption_identity is not None:
         if 'identity' in vm_resource and 'userAssignedIdentities' in vm_resource['identity'] \
             and encryption_identity.lower() in \
@@ -1155,9 +1155,9 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
             if 'userAssignedIdentityResourceId' not \
                 in vm_resource['properties']['securityProfile']['encryptionIdentity'] or \
                 vm_resource['properties']['securityProfile']['encryptionIdentity']['userAssignedIdentityResourceId'] \
-                        != encryption_identity:
+                    != encryption_identity:
                 vm_resource['properties']['securityProfile']['encryptionIdentity']['userAssignedIdentityResourceId'] \
-                        = encryption_identity
+                    = encryption_identity
 
     if workspace is not None:
         workspace_id = _prepare_workspace(cmd, resource_group_name, workspace)
