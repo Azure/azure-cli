@@ -1149,7 +1149,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
             and encryption_identity.lower() in \
                 (k.lower() for k in vm_resource['identity']['userAssignedIdentities'].keys()):
             if 'securityProfile' not in vm_resource['properties']:
-                vm_resource['securityProfile'] = {}
+                vm_resource['properties']['securityProfile'] = {}
             if 'encryptionIdentity' not in vm_resource['properties']['securityProfile']:
                 vm_resource['properties']['securityProfile']['encryptionIdentity'] = {}
             if 'userAssignedIdentityResourceId' not \

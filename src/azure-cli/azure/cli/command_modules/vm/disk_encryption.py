@@ -73,8 +73,6 @@ def updateVmEncryptionSetting(cmd, vm, resource_group_name, vm_name, encryption_
             != encryption_identity:
         vm.security_profile.encryption_identity.user_assigned_identity_resource_id = encryption_identity
         updateVm = True
-    else:
-        print("No changes in identity")
 
     if updateVm:
         compute_client = _compute_client_factory(cmd.cli_ctx)
@@ -82,9 +80,9 @@ def updateVmEncryptionSetting(cmd, vm, resource_group_name, vm_name, encryption_
             = compute_client.virtual_machines.begin_create_or_update(resource_group_name, vm_name, vm)
         LongRunningOperation(cmd.cli_ctx)(updateEncryptionIdentity)
         result = updateEncryptionIdentity.result()
-        if result is not None and result.provisioning_state == 'Succeeded':
-            return True
-        return False
+        return result is not None and result.provisioning_state == 'Succeeded'
+    logger.info("No changes in identity")
+    return True
 
 
 def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-locals, too-many-statements
@@ -139,7 +137,9 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
     if encryption_identity:
         result = updateVmEncryptionSetting(cmd, vm, resource_group_name, vm_name, encryption_identity)
         if result:
-            print("Encryption Identity successfully set in virtual machine")
+            logger.info("Encryption Identity successfully set in virtual machine")
+        else:
+            raise CLIError("Failed to update encryption Identity to the VM")
 
     #  to avoid bad server errors, ensure the vault has the right configurations
     _verify_keyvault_good_for_encryption(cmd.cli_ctx, disk_encryption_keyvault, key_encryption_keyvault, vm, force)

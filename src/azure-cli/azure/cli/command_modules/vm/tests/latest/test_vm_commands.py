@@ -6522,7 +6522,6 @@ class VMDiskEncryptionTest(ScenarioTest):
         message = 'Encryption Identity should be an ARM Resource ID of one of the user assigned identities associated to the resource'
         with self.assertRaisesRegex(ResourceExistsError, message) as context:
             self.cmd('vm encryption enable -g {rg} -n {vm} --disk-encryption-keyvault {vault} --encryption-identity {encryptionIdentityId2}')
-            print (context)
         
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_vm_encryption_with_encryption_identity', location='westus')
@@ -6560,9 +6559,7 @@ class VMDiskEncryptionTest(ScenarioTest):
         self.assertIsNotNone(virtualMachine['securityProfile'])
         self.assertIsNotNone(virtualMachine['securityProfile']['encryptionIdentity'])
         self.assertEqual(virtualMachine['securityProfile']['encryptionIdentity']['userAssignedIdentityResourceId'], encryptionIdentityId)
-        
-        #self.cmd('keyvault set-policy -n {vault} -g {rg} --key-permissions all --secret-permissions all')
-                        
+                                
         time.sleep(15)
 
         from azure.core.exceptions import HttpResponseError
