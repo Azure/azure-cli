@@ -99,7 +99,6 @@ class VMShowListSizesListIPAddressesScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_vm_list_ip')
     @AllowLargeResponse(size_kb=99999)
     def test_vm_show_list_sizes_list_ip_addresses(self, resource_group):
-
         self.kwargs.update({
             'loc': 'centralus',
             'vm': 'vm-with-public-ip',

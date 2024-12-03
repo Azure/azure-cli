@@ -4,9 +4,7 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=no-self-use, line-too-long, protected-access, too-few-public-methods, unused-argument
 from knack.log import get_logger
-from knack.util import CLIError
 
-from azure.cli.core.aaz import has_value
 from ._util import import_aaz_by_profile
 
 logger = get_logger(__name__)
@@ -17,7 +15,6 @@ _Disk = import_aaz_by_profile("disk")
 class DiskUpdate(_Disk.Update):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
 
         args_schema.disk_encryption_set_id._registered = False
