@@ -462,7 +462,7 @@ def get_parameter_kwargs(args):
     :type: dict
     """
 
-    parameter_kwargs = dict()
+    parameter_kwargs = {}
     for index, parameter in enumerate(args):
         if parameter.startswith('-'):
 
@@ -501,7 +501,7 @@ def replace_parameter_values(target_command, source_kwargs, param_mappings):
         :return: The replaced value for target_param
         :type: str
         """
-        standard_source_kwargs = dict()
+        standard_source_kwargs = {}
 
         for param, val in source_kwargs.items():
             if param in param_mappings:

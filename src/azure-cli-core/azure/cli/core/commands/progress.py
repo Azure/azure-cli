@@ -105,7 +105,7 @@ class ProgressHook:
 class IndeterminateStandardOut(ProgressViewBase):
     """ custom output for progress reporting """
     def __init__(self, out=None, spinner=None):
-        super(IndeterminateStandardOut, self).__init__(
+        super().__init__(
             out if out else sys.stderr)
         self.spinner = spinner
 
@@ -144,7 +144,7 @@ def _format_value(msg, percent):
 class DeterminateStandardOut(ProgressViewBase):
     """ custom output for progress reporting """
     def __init__(self, out=None):
-        super(DeterminateStandardOut, self).__init__(out if out else sys.stderr)
+        super().__init__(out if out else sys.stderr)
 
     def write(self, args):
         """

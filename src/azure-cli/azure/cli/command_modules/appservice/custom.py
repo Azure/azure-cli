@@ -1001,7 +1001,7 @@ def set_webapp(cmd, resource_group_name, name, slot=None, skip_dns_registration=
     instance = kwargs['parameters']
     client = web_client_factory(cmd.cli_ctx)
     updater = client.web_apps.begin_create_or_update_slot if slot else client.web_apps.begin_create_or_update
-    kwargs = dict(resource_group_name=resource_group_name, name=name, site_envelope=instance)
+    kwargs = {"resource_group_name": resource_group_name, "name": name, "site_envelope": instance}
     if slot:
         kwargs['slot'] = slot
 
@@ -1103,7 +1103,7 @@ def set_functionapp(cmd, resource_group_name, name, slot=None, **kwargs):
     instance = kwargs['parameters']
     client = web_client_factory(cmd.cli_ctx)
     updater = client.web_apps.begin_create_or_update_slot if slot else client.web_apps.begin_create_or_update
-    kwargs = dict(resource_group_name=resource_group_name, name=name, site_envelope=instance)
+    kwargs = {"resource_group_name": resource_group_name, "name": name, "site_envelope": instance}
     if slot:
         kwargs['slot'] = slot
 
@@ -3870,7 +3870,7 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                      linux=False,
                      is_auto_update=None):
             self.display_name = display_name
-            self.configs = configs if configs is not None else dict()
+            self.configs = configs if configs is not None else {}
             self.github_actions_properties = github_actions_properties
             self.linux = linux
             self.is_auto_update = is_auto_update
@@ -4225,7 +4225,7 @@ class _FlexFunctionAppStackRuntimeHelper:
     def _format_version_names(self, runtime_to_version):
         formatted_runtime_to_version = {}
         for runtime, versions in runtime_to_version.items():
-            formatted_runtime_to_version[runtime] = formatted_runtime_to_version.get(runtime, dict())
+            formatted_runtime_to_version[runtime] = formatted_runtime_to_version.get(runtime, {})
             for version_name, version_info in versions.items():
                 formatted_name = self._format_version_name(version_name)
                 if formatted_name in formatted_runtime_to_version[runtime]:
@@ -4268,7 +4268,7 @@ class _FlexFunctionAppStackRuntimeHelper:
                             'github_actions_properties': self.GithubActionsProperties(**github_actions_properties)
                         }
 
-                        runtime_to_version[runtime_name] = runtime_to_version.get(runtime_name, dict())
+                        runtime_to_version[runtime_name] = runtime_to_version.get(runtime_name, {})
                         runtime_to_version[runtime_name][runtime_version] = runtime_version_properties
 
         runtime_to_version = self._format_version_names(runtime_to_version)
@@ -4337,8 +4337,8 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
             self.is_preview = is_preview
             self.supported_func_versions = [] if not supported_func_versions else supported_func_versions
             self.linux = linux
-            self.app_settings_dict = dict() if not app_settings_dict else app_settings_dict
-            self.site_config_dict = dict() if not site_config_dict else site_config_dict
+            self.app_settings_dict = {} if not app_settings_dict else app_settings_dict
+            self.site_config_dict = {} if not site_config_dict else site_config_dict
             self.app_insights = app_insights
             self.default = default
             self.github_actions_properties = github_actions_properties
@@ -4460,7 +4460,7 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
     def _format_version_names(self, runtime_to_version):
         formatted_runtime_to_version = {}
         for runtime, versions in runtime_to_version.items():
-            formatted_runtime_to_version[runtime] = formatted_runtime_to_version.get(runtime, dict())
+            formatted_runtime_to_version[runtime] = formatted_runtime_to_version.get(runtime, {})
             for version_name, version_info in versions.items():
                 formatted_name = self._format_version_name(version_name)
                 if formatted_name in formatted_runtime_to_version[runtime]:
@@ -4497,12 +4497,12 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
                     self.KEYS.GIT_HUB_ACTION_SETTINGS: runtime_settings.git_hub_action_settings
                 }
 
-                runtime_to_version[runtime_name] = runtime_to_version.get(runtime_name, dict())
+                runtime_to_version[runtime_name] = runtime_to_version.get(runtime_name, {})
                 runtime_to_version[runtime_name][minor_version_name] = runtime_version_properties
 
         # obtain end of life date for all runtime versions
         if runtime_settings.end_of_life_date is not None:
-            runtime_to_version_eol[runtime_name] = runtime_to_version_eol.get(runtime_name, dict())
+            runtime_to_version_eol[runtime_name] = runtime_to_version_eol.get(runtime_name, {})
             runtime_to_version_eol[runtime_name][minor_version_name] = runtime_settings.end_of_life_date
 
     def _create_runtime_from_properties(self, runtime_name, version_name, version_properties, linux):
@@ -5000,7 +5000,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
 
     site_config_dict = matched_runtime.site_config_dict if not flexconsumption_location \
         else SiteConfigPropertiesDictionary()
-    app_settings_dict = matched_runtime.app_settings_dict if not flexconsumption_location else dict()
+    app_settings_dict = matched_runtime.app_settings_dict if not flexconsumption_location else {}
 
     con_string = _validate_and_get_connection_string(cmd.cli_ctx, resource_group_name, storage_account)
 

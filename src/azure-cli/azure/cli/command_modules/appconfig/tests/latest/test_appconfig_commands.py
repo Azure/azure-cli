@@ -29,7 +29,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
 
     def __init__(self, *args, **kwargs):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
-        super(AppConfigMgmtScenarioTest, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     @ResourceGroupPreparer(parameter_name_for_location='location')
     @AllowLargeResponse()
@@ -424,7 +424,7 @@ class AppConfigCredentialScenarioTest(ScenarioTest):
 
     def __init__(self, *args, **kwargs):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
-        super(AppConfigCredentialScenarioTest, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
@@ -461,7 +461,7 @@ class AppConfigIdentityScenarioTest(ScenarioTest):
 
     def __init__(self, *args, **kwargs):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
-        super(AppConfigIdentityScenarioTest, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_identity(self, resource_group, location):
@@ -505,7 +505,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
 
     def __init__(self, *args, **kwargs):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
-        super(AppConfigKVScenarioTest, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
@@ -822,7 +822,7 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
 
     def __init__(self, *args, **kwargs):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
-        super(AppConfigImportExportScenarioTest, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
@@ -1437,7 +1437,7 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
 
     def __init__(self, *args, **kwargs):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
-        super(AppConfigImportExportNamingConventionScenarioTest, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
@@ -1547,7 +1547,7 @@ class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
 
     def __init__(self, *args, **kwargs):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
-        super(AppConfigToAppConfigImportExportScenarioTest, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
     
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
@@ -1748,7 +1748,7 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
 
     def __init__(self, *args, **kwargs):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
-        super(AppConfigJsonContentTypeScenarioTest, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
@@ -2180,7 +2180,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
 
     def __init__(self, *args, **kwargs):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
-        super(AppConfigFeatureScenarioTest, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
@@ -2597,7 +2597,7 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
 
     def __init__(self, *args, **kwargs):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
-        super(AppConfigFeatureFilterScenarioTest, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
@@ -2855,7 +2855,7 @@ class AppConfigKeyValidationScenarioTest(ScenarioTest):
 
     def __init__(self, *args, **kwargs):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
-        super(AppConfigKeyValidationScenarioTest, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
     
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
@@ -2946,7 +2946,7 @@ class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
 
     def __init__(self, *args, **kwargs):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
-        super(AppConfigAadAuthLiveScenarioTest, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
     
     @live_only()
     @AllowLargeResponse()
@@ -3108,7 +3108,7 @@ class AppconfigReplicaLiveScenarioTest(ScenarioTest):
 
     def __init__(self, *args, **kwargs):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
-        super(AppconfigReplicaLiveScenarioTest, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     @ResourceGroupPreparer(parameter_name_for_location='location')
     @AllowLargeResponse()
@@ -3180,7 +3180,7 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
 
     def __init__(self, *args, **kwargs):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
-        super(AppConfigSnapshotLiveScenarioTest, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
     @ResourceGroupPreparer(parameter_name_for_location='location')
