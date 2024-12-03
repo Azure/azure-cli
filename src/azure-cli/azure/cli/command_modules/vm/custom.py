@@ -1272,7 +1272,8 @@ def auto_shutdown_vm(cmd, resource_group_name, vm_name, off=None, email=None, we
         return client.global_schedules.delete(resource_group_name, name)
 
     if time is None:
-        CLIErrorraise('usage error: --time is a required parameter')
+        raise CLIError('usage error: --time is a required parameter')
+    
     daily_recurrence = {'time': time}
     notification_settings = None
     if email or webhook:

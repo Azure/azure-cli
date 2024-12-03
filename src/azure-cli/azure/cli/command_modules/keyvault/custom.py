@@ -874,18 +874,13 @@ def set_policy(cmd, client, resource_group_name, vault_name,
     certificate_permissions = _permissions_distinct(certificate_permissions)
     storage_permissions = _permissions_distinct(storage_permissions)
     
-    print(key_permissions)
-    print(secret_permissions)
-    print(certificate_permissions)
-
     try:
         enable_rbac_authorization = getattr(vault.properties, 'enable_rbac_authorization')
     except:  # pylint: disable=bare-except
         pass
     else:
         if enable_rbac_authorization:
-            raise CLIError('Cannot set policies to a vault with \'--enable-rbac-authorization\' specified')
-    print (vault.properties)    
+            raise CLIError('Cannot set policies to a vault with \'--enable-rbac-authorization\' specified')  
 
     # Find the existing policy to set
     policy = next((p for p in vault.properties.access_policies
@@ -912,8 +907,6 @@ def set_policy(cmd, client, resource_group_name, vault_name,
         storage = policy.permissions.storage if storage_permissions is None else storage_permissions
         policy.permissions = Permissions(keys=keys, secrets=secrets, certificates=certs, storage=storage)
         
-    print (policy)
-
     return _azure_stack_wrapper(cmd, client, 'create_or_update',
                                 resource_type=ResourceType.MGMT_KEYVAULT,
                                 min_api_version='2018-02-14',
