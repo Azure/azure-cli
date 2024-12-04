@@ -2741,3 +2741,65 @@ class FlexibleServerPrivateEndpointsMgmtScenarioTest(ScenarioTest):
         result = self.cmd('{} flexible-server private-link-resource show -g {} -s {}'
                           .format(database_engine, resource_group, server)).get_output_in_json()
         self.assertEqual(result['groupId'], group_id)
+
+
+class CitusOnFlexMgmtScenarioTest(ScenarioTest):
+
+    postgres_location = 'eastus2'
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    def test_citus_on_flex_mgmt(self, resource_group):
+        self._test_citus_on_flex_mgmt('postgres', resource_group)
+
+    def _test_citus_on_flex_mgmt(self, database_engine, resource_group):
+
+        if self.cli_ctx.local_context.is_on:
+            self.cmd('config param-persist off')
+
+        version = '16'
+        storage_size = 128
+        location = self.postgres_location
+        sku_name = 'Standard_D2s_v3'
+        tier = 'GeneralPurpose'
+        backup_retention = 7
+        cluster_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        cluster_size = 2
+
+        self.cmd('{} flexible-server create -g {} -n {} --backup-retention {} --sku-name {} --tier {} \
+                  --storage-size {} -u {} --version {} --cluster-option ElasticCluster --node-count {} --public-access None'
+                  .format(database_engine, resource_group, cluster_name, backup_retention,
+                                               sku_name, tier, storage_size, 'dbadmin', version, cluster_size))
+
+        basic_info = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, cluster_name)).get_output_in_json()
+        self.assertEqual(basic_info['name'], cluster_name)
+        self.assertEqual(str(basic_info['location']).replace(' ', '').lower(), location)
+        self.assertEqual(basic_info['resourceGroup'], resource_group)
+        self.assertEqual(basic_info['sku']['name'], sku_name)
+        self.assertEqual(basic_info['sku']['tier'], tier)
+        self.assertEqual(basic_info['version'], version)
+        self.assertEqual(basic_info['storage']['storageSizeGb'], storage_size)
+        self.assertEqual(basic_info['backup']['backupRetentionDays'], backup_retention)
+        self.assertEqual(basic_info['cluster']['clusterSize'], cluster_size)
+
+        # test failures
+        self.cmd('{} flexible-server update -g {} -n {} --storage-auto-grow Enabled'
+                 .format(database_engine, resource_group, cluster_name), expect_failure=True)
+        self.cmd('{} flexible-server replica list -g {} -n {}'
+                 .format(database_engine, resource_group, cluster_name), expect_failure=True)
+        self.cmd('{} flexible-server db create -g {} -s {} -d dbclusterfail'
+                 .format(database_engine, resource_group, cluster_name), expect_failure=True)
+
+        # Wait until snapshot is created
+        os.environ.get(ENV_LIVE_TEST, False) and sleep(1800)
+
+        # Restore
+        cluster_restore_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        restore_result = self.cmd('{} flexible-server restore -g {} --name {} --source-server {}'
+                                  .format(database_engine, resource_group, cluster_restore_name, basic_info['id'])).get_output_in_json()
+        self.assertEqual(restore_result['name'], cluster_restore_name)
+        self.assertEqual(restore_result['cluster']['clusterSize'], cluster_size)
+
+        # delete everything
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, cluster_name))
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, cluster_restore_name))

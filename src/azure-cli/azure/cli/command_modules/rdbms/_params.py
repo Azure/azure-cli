@@ -17,7 +17,7 @@ from azure.cli.core.commands.parameters import (
 from azure.cli.command_modules.rdbms.validators import configuration_value_validator, validate_subnet, \
     tls_validator, public_access_validator, maintenance_window_validator, ip_address_validator, \
     retention_validator, firewall_rule_name_validator, validate_identity, validate_byok_identity, validate_identities, \
-    virtual_endpoint_name_validator
+    virtual_endpoint_name_validator, node_count_validator
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction
 
 from .randomname.generate import generate_username
@@ -332,6 +332,20 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             help='Enable or disable the creation of default database flexibleserverdb. Default value is Enabled.'
         )
 
+        cluster_option_arg_type = CLIArgumentType(
+            arg_type=get_enum_type(['Server', 'ElasticCluster']),
+            options_list=['--cluster-option'],
+            help='Cluster option for the server. Servers are for workloads that can fit on one node. '
+                 'Elastic clusters provides schema- and row-based sharding on a database. Default value is Server.'
+        )
+
+        create_node_count_arg_type = CLIArgumentType(
+            type=int,
+            options_list=['--node-count'],
+            help='The number of nodes for elastic cluster. Range of 1 to 10. Default is 2 nodes.',
+            validator=node_count_validator
+        )
+
         auto_grow_arg_type = CLIArgumentType(
             arg_type=get_enum_type(['Enabled', 'Disabled']),
             options_list=['--storage-auto-grow'],
@@ -576,6 +590,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('throughput', default=None, arg_type=throughput_arg_type)
                 c.argument('performance_tier', default=None, arg_type=performance_tier_arg_type)
                 c.argument('create_default_db', default='Enabled', arg_type=create_default_db_arg_type)
+                c.argument('create_cluster', default='Server', arg_type=cluster_option_arg_type)
+                c.argument('cluster_size', default=None, arg_type=create_node_count_arg_type)
             elif command_group == 'mysql':
                 c.argument('tier', default='Burstable', arg_type=tier_arg_type)
                 c.argument('sku_name', default='Standard_B1ms', arg_type=sku_name_arg_type)
