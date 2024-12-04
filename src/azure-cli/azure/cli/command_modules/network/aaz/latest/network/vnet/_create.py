@@ -24,6 +24,9 @@ class Create(AAZCommand):
 
     :example: Create a virtual network.
         az network vnet create --address-prefixes 10.0.0.0/16 --name MyVirtualNetwork --resource-group MyResourceGroup --subnet-name MyAseSubnet --subnet-prefixes 10.0.0.0/24
+
+    :example: Create virtual network with an IPAM pool allocation.
+        az network vnet create -g MyResourceGroup -n MyVNet --ipam-allocations [0].number-of-ip-addresses=100 [0].id=ipam-pool-resource-id
     """
 
     _aaz_info = {

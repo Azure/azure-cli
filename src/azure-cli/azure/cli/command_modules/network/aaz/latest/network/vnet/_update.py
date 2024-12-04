@@ -65,7 +65,6 @@ class Update(AAZCommand):
         _args_schema.address_prefixes = AAZListArg(
             options=["--address-prefixes"],
             help="Space-separated list of IP address prefixes for the VNet. Default: 10.0.0.0/16. If provided, --ipam-allocations should not be specified.",
-            default=["10.0.0.0/16"],
             nullable=True,
         )
         _args_schema.bgp_community = AAZStrArg(
