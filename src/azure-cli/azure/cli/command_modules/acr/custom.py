@@ -68,7 +68,7 @@ def acr_create(cmd,
 
     if re.match(r'\w*[A-Z]\w*', registry_name):
         raise InvalidArgumentValueError("argument error: Registry name must use only lowercase.")
-    
+
     if re.match(r'\w*[-]\w*', registry_name):
         raise InvalidArgumentValueError("argument error: Registry name cannot contain dashes.")
 
