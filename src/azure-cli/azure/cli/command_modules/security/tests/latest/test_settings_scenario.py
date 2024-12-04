@@ -22,16 +22,16 @@ class SecurityCenterSettingsTests(ScenarioTest):
         assert setting["kind"] == "AlertSyncSettings"
 
         setting = self.cmd('az security setting update -n Sentinel --alert-sync-settings Enabled=True').get_output_in_json()
-        assert setting['enabled'] == True
+        assert setting['enabled'] is True
 
         setting = self.cmd('az security setting update -n Sentinel --alert-sync-settings Enabled=False').get_output_in_json()
-        assert setting['enabled'] == False
+        assert setting['enabled'] is False
 
         setting = self.cmd('az security setting update -n MCAS --data-export-settings Enabled=True').get_output_in_json()
-        assert setting['enabled'] == True
+        assert setting['enabled'] is True
 
         setting = self.cmd('az security setting update -n MCAS --data-export-settings Enabled=False').get_output_in_json()
-        assert setting['enabled'] == False
+        assert setting['enabled'] is False
 
         # incorrect kind matching
         # ['Code'] == "InvalidSettingsInput"
