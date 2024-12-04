@@ -339,8 +339,7 @@ def _get_bicep_env_vars(custom_env=None):
 def _run_command(bicep_installation_path, args, custom_env=None):
     process = subprocess.run(
         [rf"{bicep_installation_path}"] + args,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        capture_output=True,
         env=_get_bicep_env_vars(custom_env))
 
     try:
