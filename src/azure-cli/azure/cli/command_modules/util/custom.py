@@ -222,7 +222,7 @@ def _upgrade_on_windows():
 def _download_from_url(url, target_dir):
     import requests
     from azure.cli.core.util import should_disable_connection_verify
-    r = requests.get(url, stream=True, verify=(not should_disable_connection_verify()))
+    r = requests.get(url, stream=True, verify=not should_disable_connection_verify())
     if r.status_code != 200:
         raise CLIError("Request to {} failed with {}".format(url, r.status_code))
 

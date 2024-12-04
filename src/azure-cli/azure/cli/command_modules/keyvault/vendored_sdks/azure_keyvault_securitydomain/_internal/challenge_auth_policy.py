@@ -89,7 +89,7 @@ class ChallengeAuthPolicy(BearerTokenCredentialPolicy):
 
     def __init__(self, credential: TokenProvider, *scopes: str, **kwargs: Any) -> None:
         # Pass `enable_cae` so `enable_cae=True` is always passed through self.authorize_request
-        super(ChallengeAuthPolicy, self).__init__(credential, *scopes, enable_cae=True, **kwargs)
+        super().__init__(credential, *scopes, enable_cae=True, **kwargs)
         self._credential: TokenProvider = credential
         self._token: Optional[Union["AccessToken", "AccessTokenInfo"]] = None
         self._verify_challenge_resource = kwargs.pop("verify_challenge_resource", True)

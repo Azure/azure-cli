@@ -1112,7 +1112,7 @@ def _validate_vm_nic_delete_option(namespace):
     if not namespace.nics and namespace.nic_delete_option:
         if len(namespace.nic_delete_option) == 1 and len(namespace.nic_delete_option[0].split('=')) == 1:  # pylint: disable=line-too-long
             namespace.nic_delete_option = namespace.nic_delete_option[0]
-        elif len(namespace.nic_delete_option) > 1 or any((len(delete_option.split('=')) > 1 for delete_option in namespace.nic_delete_option)):  # pylint: disable=line-too-long
+        elif len(namespace.nic_delete_option) > 1 or any(len(delete_option.split('=')) > 1 for delete_option in namespace.nic_delete_option):  # pylint: disable=line-too-long
             from azure.cli.core.parser import InvalidArgumentValueError
             raise InvalidArgumentValueError("incorrect usage: Cannot specify individual delete option when no nic is "
                                             "specified. Either specify a list of nics and their delete option like: "
@@ -1194,7 +1194,7 @@ def _validate_admin_username(username, os_type):
     import re
     if not username:
         raise CLIError("admin user name can not be empty")
-    is_linux = (os_type.lower() == 'linux')
+    is_linux = os_type.lower() == 'linux'
     # pylint: disable=line-too-long
     pattern = (r'[\\\/"\[\]:|<>+=;,?*@#()!A-Z]+' if is_linux else r'[\\\/"\[\]:|<>+=;,?*@]+')
     linux_err = r'admin user name cannot contain upper case character A-Z, special characters \/"[]:|<>+=;,?*@#()! or start with $ or -'
@@ -1212,7 +1212,7 @@ def _validate_admin_username(username, os_type):
 
 def _validate_admin_password(password, os_type):
     import re
-    is_linux = (os_type.lower() == 'linux')
+    is_linux = os_type.lower() == 'linux'
     max_length = 72 if is_linux else 123
     min_length = 12
 

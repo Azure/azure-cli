@@ -695,7 +695,7 @@ class WebappConfigureTest(ScenarioTest):
         # show
         result = self.cmd('webapp config appsettings list -g {} -n {}'.format(
             resource_group, webapp_name)).get_output_in_json()
-        s2 = next((x for x in result if x['name'] == 's2'))
+        s2 = next(x for x in result if x['name'] == 's2')
         self.assertEqual(s2['name'], 's2')
         self.assertEqual(s2['slotSetting'], False)
         self.assertEqual(s2['value'], 'bar')
@@ -916,7 +916,7 @@ class WebappConfigureTest(ScenarioTest):
         # show
         result = self.cmd('webapp config appsettings list -g {} -n {}'.format(
             resource_group, webapp_name)).get_output_in_json()
-        s2 = next((x for x in result if x['name'] == 's2'))
+        s2 = next(x for x in result if x['name'] == 's2')
         self.assertEqual(s2['name'], 's2')
         self.assertEqual(s2['slotSetting'], False)
         self.assertEqual(s2['value'], 'bar')
@@ -1218,11 +1218,11 @@ class LinuxWebappScenarioTest(ScenarioTest):
         self.assertEqual(set(x['value'] for x in result if x['name'] ==
                              'DOCKER_REGISTRY_SERVER_PASSWORD'), set([None]))   # we mask the password
         sample = next(
-            (x for x in result if x['name'] == 'DOCKER_REGISTRY_SERVER_URL'))
+            x for x in result if x['name'] == 'DOCKER_REGISTRY_SERVER_URL')
         self.assertEqual(sample, {
                          'name': 'DOCKER_REGISTRY_SERVER_URL', 'slotSetting': False, 'value': 'foo-url'})
         sample = next(
-            (x for x in result if x['name'] == 'WEBSITES_ENABLE_APP_SERVICE_STORAGE'))
+            x for x in result if x['name'] == 'WEBSITES_ENABLE_APP_SERVICE_STORAGE')
         self.assertEqual(sample, {
                          'name': 'WEBSITES_ENABLE_APP_SERVICE_STORAGE', 'slotSetting': False, 'value': 'false'})
 
@@ -1231,7 +1231,7 @@ class LinuxWebappScenarioTest(ScenarioTest):
         self.assertEqual(set(x['value'] for x in result if x['name'] ==
                              'DOCKER_REGISTRY_SERVER_PASSWORD'), set([None]))  # we mask the password
         sample = next(
-            (x for x in result if x['name'] == 'WEBSITES_ENABLE_APP_SERVICE_STORAGE'))
+            x for x in result if x['name'] == 'WEBSITES_ENABLE_APP_SERVICE_STORAGE')
         self.assertEqual(sample, {
                          'name': 'WEBSITES_ENABLE_APP_SERVICE_STORAGE', 'slotSetting': False, 'value': 'true'})
 
