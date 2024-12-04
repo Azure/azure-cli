@@ -55,7 +55,7 @@ def _detect_ade_status(vm):
     ade = _find_existing_ade(vm, ade_ext_info=ade_ext_info)
     if ade is None:
         return False, False
-    if ade.type_handler_version.split('.')[0] == ade_ext_info['legacy_version'].split('.')[0]:
+    if ade.type_handler_version.split('.')[0] == ade_ext_info['legacy_version'].split('.', maxsplit=1)[0]:
         return False, True
 
     return True, False  # we believe impossible to have both old & new ADE
