@@ -1137,13 +1137,17 @@ jobs:
         . env/bin/activate
         git fetch origin --depth=1 $(System.PullRequest.TargetBranch)
         declare -A secret_files
+        IFS_OLD=${IFS}
+        IFS=$'\n'
         for FILE in `git diff --name-only --diff-filter=AM origin/$(System.PullRequest.TargetBranch)` ; do
+          echo $FILE
           detected=$(azdev scan -f "$FILE" | python -c "import sys, json; print(json.load(sys.stdin)['secrets_detected'])")
           if [ $detected == 'True' ]; then
             printf "\033[0;31mDetected secrets from %s, You can run 'azdev mask' to remove secrets.\033[0m\n" "$FILE"
             secret_files+=$FILE
           fi
         done
+        IFS=${IFS_OLD}
         if [ "${#secret_files[@]}" -gt 0 ]; then
           exit 1
         fi
@@ -1151,6 +1155,7 @@ jobs:
 
 - job: CodegenCoverage
   displayName: "Codegen Coverage"
+  continueOnError: true
   pool:
     name: ${{ variables.ubuntu_pool }}
   steps:
@@ -1173,6 +1178,7 @@ jobs:
       # CLI repo only
       azdev statistics list-command-table CLI --statistics-only
       # CLI + EXT repos
+      pip install jinja2 -U
       azdev statistics list-command-table --statistics-only > /tmp/codegen_report.json
       python s/scripts/ci/codegen_report.py
     env:

@@ -82,8 +82,8 @@ def validate_ip_ranges(namespace):
     ip_ranges = [ip.strip() for ip in namespace.api_server_authorized_ip_ranges.split(",")]
 
     if restrict_traffic_to_agentnodes in ip_ranges and len(ip_ranges) > 1:
-        raise CLIError(("Setting --api-server-authorized-ip-ranges to 0.0.0.0/32 is not allowed with other IP ranges."
-                        "Refer to https://aka.ms/aks/whitelist for more details"))
+        raise CLIError("Setting --api-server-authorized-ip-ranges to 0.0.0.0/32 is not allowed with other IP ranges."
+                       "Refer to https://aka.ms/aks/whitelist for more details")
 
     if allow_all_traffic in ip_ranges and len(ip_ranges) > 1:
         raise CLIError("--api-server-authorized-ip-ranges cannot be disabled and simultaneously enabled")
@@ -615,7 +615,7 @@ def validate_azure_keyvault_kms_key_id(namespace):
     key_id = namespace.azure_keyvault_kms_key_id
     if key_id:
         # pylint:disable=line-too-long
-        err_msg = '--azure-keyvault-kms-key-id is not a valid Key Vault key ID. See https://docs.microsoft.com/en-us/azure/key-vault/general/about-keys-secrets-certificates#vault-name-and-object-name'
+        err_msg = '--azure-keyvault-kms-key-id is not a valid Key Vault key ID. See https://learn.microsoft.com/en-us/azure/key-vault/general/about-keys-secrets-certificates#vault-name-and-object-name'
 
         https_prefix = "https://"
         if not key_id.startswith(https_prefix):

@@ -875,7 +875,7 @@ def _to_snake(s):
 
 def _convert_to_snake_case(element):
     if isinstance(element, dict):
-        ret = dict()
+        ret = {}
         for k, v in element.items():
             ret[_to_snake(k)] = _convert_to_snake_case(v)
 
@@ -940,7 +940,7 @@ def _privatedns_add_save_record(cmd, record, record_type, relative_record_set_na
             "record_type": record_type,
             "name": relative_record_set_name
         })
-        record_set = dict()
+        record_set = {}
         record_set["ttl"] = ret.get("ttl", None)
         record_set[record_snake] = ret.get(record_camel, None)
         record_set = _convert_to_snake_case(record_set)
@@ -1036,7 +1036,7 @@ def update_privatedns_soa_record(cmd, resource_group_name, private_zone_name, ho
     })
 
     record_camal = record_set["soaRecord"]
-    record = dict()
+    record = {}
     record["host"] = host or record_camal.get("host", None)
     record["email"] = email or record_camal.get("email", None)
     record["serial_number"] = serial_number or record_camal.get("serialNumber", None)
@@ -1099,7 +1099,7 @@ def _privatedns_remove_record(cmd, record, record_type, relative_record_set_name
         "record_type": record_type,
         "name": relative_record_set_name
     })
-    record_set = dict()
+    record_set = {}
     record_set["ttl"] = ret.get("ttl", None)
     record_set[record_snake] = ret.get(record_camel, None)
     record_set = _convert_to_snake_case(record_set)
