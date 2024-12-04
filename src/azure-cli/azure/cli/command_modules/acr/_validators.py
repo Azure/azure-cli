@@ -117,10 +117,14 @@ def validate_registry_name(cmd, namespace):
             logger.warning("The login server endpoint suffix '%s' is automatically omitted.", acr_suffix)
             namespace.registry_name = registry[:pos]
             registry = registry[:pos]
-    # If registry contains - due to Domain Name Label Scope, such as "myregistry-dnlhash123.azurecr.io", strip "-dnlhash123"
+    # If registry contains '-' due to Domain Name Label Scope,
+    # ex: "myregistry-dnlhash123.azurecr.io", strip "-dnlhash123"
     dnl_hash = registry.find("-")
     if registry and dnl_hash > 0:
-        logger.warning("The domain name label suffix '%s' is automatically omitted. Registry name is %s.", registry[dnl_hash:], registry[:dnl_hash])
+        logger.warning(
+            "The domain name label suffix '%s' is automatically omitted. Registry name is %s.",
+            registry[dnl_hash:],
+            registry[:dnl_hash])
         namespace.registry_name = registry[:dnl_hash]
 
     registry = namespace.registry_name
