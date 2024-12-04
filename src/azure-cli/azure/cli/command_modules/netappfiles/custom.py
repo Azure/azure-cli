@@ -1020,7 +1020,7 @@ def create_data_volume_properties(subnet_id, application_identifier, pool_id, pp
     if data_repl_skd is not None and data_src_id is not None:
         replication = ({"replication_schedule": data_repl_skd,
                         "remote_volume_resource_id": data_src_id})
-        data_protection = ({"replication": replication})
+        data_protection = {"replication": replication}
 
     data_volume = {
         "subnet_id": subnet_id,
@@ -1200,7 +1200,7 @@ def create_log_backup_volume_properties(subnet_id, sap_sid, pool_id, ppg, memory
 # Memory should be sent in as GiB and additional snapshot capacity as percentage (0-200). Usage is returned in bytes.
 def calculate_usage_threshold(memory, volume_type, add_snap_capacity=50, total_host_count=1, data_size=50, log_size=50):
     if volume_type == VolumeType.DATA:
-        usage = ((add_snap_capacity / 100) * memory + memory)
+        usage = (add_snap_capacity / 100) * memory + memory
         return int(usage) * gib_scale if usage > 100 else 100 * gib_scale  # MIN 100 GiB
     if volume_type == VolumeType.LOG:
         if memory < 512:
@@ -1261,7 +1261,7 @@ def create_default_export_policy_for_vg(nfsv3=False):
                       "kerberos5p_read_write": False,
                       "allowed_clients": "0.0.0.0/0"})
     rules.append(export_policy)
-    volume_export_policy = ({"rules": rules})
+    volume_export_policy = {"rules": rules}
     return volume_export_policy
 
 

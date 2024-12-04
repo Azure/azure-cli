@@ -21,7 +21,7 @@ from ._test_utils import CredentialReplacer, ConfigCredentialReplacer
 class WebAppConnectionScenarioTest(ScenarioTest):
 
     def __init__(self, method_name):
-        super(WebAppConnectionScenarioTest, self).__init__(
+        super().__init__(
             method_name,
             recording_processors=[CredentialReplacer(), ConfigCredentialReplacer()]
         )

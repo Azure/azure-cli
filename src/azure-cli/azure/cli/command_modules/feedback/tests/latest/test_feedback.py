@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 class TestCommandLogFile(ScenarioTest):
 
     def __init__(self, *args, **kwargs):
-        super(TestCommandLogFile, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self.disable_recording = True
         self.is_live = True
@@ -45,7 +45,7 @@ class TestCommandLogFile(ScenarioTest):
             self.cmd("az extension add -n alias")
             logger.warning("Adding whl ext alias")
 
-        super(TestCommandLogFile, self).setUp()
+        super().setUp()
         self.temp_command_log_dir = self.create_temp_dir()
 
         # if alias is installed as a wheel extension. Remove it for now and re-install it later.

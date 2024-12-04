@@ -46,9 +46,6 @@ from ._actions import (load_images_from_aliases_doc, load_extension_images_thru_
                        load_images_thru_services, _get_latest_image_version)
 from ._client_factory import (_compute_client_factory, cf_vm_image_term, _dev_test_labs_client_factory)
 
-from .aaz.latest.ppg import Show as _PPGShow
-from .aaz.latest.vmss import ListInstances as _VMSSListInstances
-from .aaz.latest.capacity.reservation.group import List as _CapacityReservationGroupList
 from .aaz.latest.vm.disk import AttachDetachDataDisk
 
 from .generated.custom import *  # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
@@ -1504,7 +1501,7 @@ def open_vm_port(cmd, resource_group_name, vm_name, port, priority=900, network_
 
     # update the NSG with the new rule to allow inbound traffic
 
-    rule_name = 'open-port-all' if port == '*' else 'open-port-{}'.format((port.replace(',', '_')))
+    rule_name = 'open-port-all' if port == '*' else 'open-port-{}'.format(port.replace(',', '_'))
 
     # use portranges if multiple ports are entered
     if "," not in port:
@@ -2590,7 +2587,7 @@ def _build_nic_list(cmd, nic_ids):
                 'name': name,
                 'resource_group': rg
             })
-            nic_list.append((NetworkInterfaceReference(id=nic['id'], primary=False)))
+            nic_list.append(NetworkInterfaceReference(id=nic['id'], primary=False))
     return nic_list
 
 
@@ -4217,7 +4214,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
         else:
             vmss.sku.name = vm_sku
 
-    sku_profile = dict()
+    sku_profile = {}
     if skuprofile_vmsizes is not None or skuprofile_allostrat is not None:
         if skuprofile_vmsizes is not None:
             sku_profile_vmsizes_list = []
@@ -5443,7 +5440,7 @@ def set_disk_access(cmd, client, parameters, resource_group_name, disk_access_na
 def install_vm_patches(cmd, client, resource_group_name, vm_name, maximum_duration, reboot_setting, classifications_to_include_win=None, classifications_to_include_linux=None, kb_numbers_to_include=None, kb_numbers_to_exclude=None,
                        exclude_kbs_requiring_reboot=None, package_name_masks_to_include=None, package_name_masks_to_exclude=None, max_patch_publish_date=None, no_wait=False):
     VMInstallPatchesParameters, WindowsParameters, LinuxParameters = cmd.get_models('VirtualMachineInstallPatchesParameters', 'WindowsParameters', 'LinuxParameters')
-    windows_parameters = WindowsParameters(classifications_to_include=classifications_to_include_win, kb_numbers_to_inclunde=kb_numbers_to_include, kb_numbers_to_exclude=kb_numbers_to_exclude, exclude_kbs_requirig_reboot=exclude_kbs_requiring_reboot, max_patch_publish_date=max_patch_publish_date)
+    windows_parameters = WindowsParameters(classifications_to_include=classifications_to_include_win, kb_numbers_to_include=kb_numbers_to_include, kb_numbers_to_exclude=kb_numbers_to_exclude, exclude_kbs_requiring_reboot=exclude_kbs_requiring_reboot, max_patch_publish_date=max_patch_publish_date)
     linux_parameters = LinuxParameters(classifications_to_include=classifications_to_include_linux, package_name_masks_to_include=package_name_masks_to_include, package_name_masks_to_exclude=package_name_masks_to_exclude)
     install_patches_input = VMInstallPatchesParameters(maximum_duration=maximum_duration, reboot_setting=reboot_setting, linux_parameters=linux_parameters, windows_parameters=windows_parameters)
 
@@ -5725,37 +5722,6 @@ def show_capacity_reservation_group(client, resource_group_name, capacity_reserv
                       expand=expand)
 
 
-class CapacityReservationGroupList(_CapacityReservationGroupList):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZBoolArg
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.vm_instance = AAZBoolArg(
-            options=['--vm-instance'],
-            help="Retrieve the Virtual Machine Instance "
-                 "which are associated to capacity reservation group in the response.",
-            nullable=True
-        )
-        args_schema.vmss_instance = AAZBoolArg(
-            options=['--vmss-instance'],
-            help="Retrieve the ScaleSet VM Instance which are associated to capacity reservation group in the response.",
-            nullable=True
-        )
-        args_schema.expand._registered = False
-        return args_schema
-
-    def pre_operations(self):
-        from azure.cli.core.aaz import has_value
-        args = self.ctx.args
-        if args.vm_instance:
-            args.expand = "virtualMachines/$ref"
-        if args.vmss_instance:
-            if has_value(args.expand):
-                args.expand = args.expand.to_serialized_data() + ",virtualMachineScaleSetVMs/$ref"
-            else:
-                args.expand = "virtualMachineScaleSetVMs/$ref"
-
-
 def create_capacity_reservation(cmd, client, resource_group_name, capacity_reservation_group_name,
                                 capacity_reservation_name, location=None, sku_name=None, capacity=None,
                                 zone=None, tags=None):
@@ -5827,7 +5793,7 @@ def set_vm_applications(cmd, vm_name, resource_group_name, application_version_i
         index = 0
         for treat_as_failure in treat_deployment_as_failure:
             vm.application_profile.gallery_applications[index].treat_failure_as_deployment_failure = \
-                (treat_as_failure.lower() == 'true')
+                treat_as_failure.lower() == 'true'
             index += 1
     return sdk_no_wait(no_wait, client.virtual_machines.begin_create_or_update, resource_group_name, vm_name, vm)
 
@@ -5867,7 +5833,7 @@ def set_vmss_applications(cmd, vmss_name, resource_group_name, application_versi
     if treat_deployment_as_failure:
         index = 0
         for treat_as_failure in treat_deployment_as_failure:
-            vmss.virtual_machine_profile.application_profile.gallery_applications[index].treat_failure_as_deployment_failure = (treat_as_failure.lower() == 'true')
+            vmss.virtual_machine_profile.application_profile.gallery_applications[index].treat_failure_as_deployment_failure = treat_as_failure.lower() == 'true'
             index += 1
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_create_or_update, resource_group_name, vmss_name, vmss)
 
@@ -6162,33 +6128,3 @@ def sig_community_image_version_list(client, location, public_gallery_name, gall
                             gallery_image_name=gallery_image_name)
     return get_page_result(generator, marker, show_next_marker)
 # endRegion
-
-
-class PPGShow(_PPGShow):
-
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-
-        from azure.cli.core.aaz import AAZArgEnum
-        args_schema.include_colocation_status._blank = "True"
-        args_schema.include_colocation_status.enum = AAZArgEnum({"True": "True", "False": "False"})
-
-        return args_schema
-
-
-class VMSSListInstances(_VMSSListInstances):
-    def _output(self, *args, **kwargs):
-        from azure.cli.core.aaz import AAZUndefined, has_value
-
-        # Resolve flatten conflict
-        # When the type field conflicts, the type in inner layer is ignored and the outer layer is applied
-        for value in self.ctx.vars.instance.value:
-            if has_value(value.resources):
-                for resource in value.resources:
-                    if has_value(resource.type):
-                        resource.type = AAZUndefined
-
-        result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
-        next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
-        return result, next_link

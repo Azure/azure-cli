@@ -514,7 +514,7 @@ class TestHandleException(unittest.TestCase):
         # create test HttpOperationError Exception
         err_msg = "Bad Request because of some incorrect param"
         err_code = "BadRequest"
-        err = dict(error=dict(code=err_code, message=err_msg))
+        err = {"error": {"code": err_code, "message": err_msg}}
         response_text = json.dumps(err)
         mock_http_error = self._get_mock_HttpOperationError(response_text)
 
@@ -533,7 +533,7 @@ class TestHandleException(unittest.TestCase):
 
         # create test HttpOperationError Exception
         err_msg = "BadRequest"
-        err = dict(error=err_msg)
+        err = {"error": err_msg}
         response_text = json.dumps(err)
         mock_http_error = self._get_mock_HttpOperationError(response_text)
 

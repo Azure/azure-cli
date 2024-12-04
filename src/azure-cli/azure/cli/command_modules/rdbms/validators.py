@@ -372,7 +372,7 @@ def _valid_ssdv2_range(storage_gb, sku_info, tier, iops, throughput, instance):
     supported_storageV2_size = sku_info[sku_tier]["supported_storageV2_size"]
     min_storage = instance.storage.storage_size_gb if instance is not None else supported_storageV2_size
     max_storage = sku_info[sku_tier]["supported_storageV2_size_max"]
-    if not (min_storage <= storage_gib <= max_storage):
+    if not min_storage <= storage_gib <= max_storage:
         raise CLIError('The requested value for storage size does not fall between {} and {} GiB.'
                        .format(min_storage, max_storage))
 
@@ -384,7 +384,7 @@ def _valid_ssdv2_range(storage_gb, sku_info, tier, iops, throughput, instance):
     else:
         max_iops = math.floor(max(0, storage - 6) * 500 + min_iops)
 
-    if not (min_iops <= storage_iops <= max_iops):
+    if not min_iops <= storage_iops <= max_iops:
         raise CLIError('The requested value for IOPS does not fall between {} and {} operations/sec.'
                        .format(min_iops, max_iops))
 
@@ -399,7 +399,7 @@ def _valid_ssdv2_range(storage_gb, sku_info, tier, iops, throughput, instance):
     else:
         max_throughout = max_storage_throughout
 
-    if not (min_throughout <= storage_throughput <= max_throughout):
+    if not min_throughout <= storage_throughput <= max_throughout:
         raise CLIError('The requested value for throughput does not fall between {} and {} MB/sec.'
                        .format(min_throughout, max_throughout))
 
@@ -837,7 +837,7 @@ def _pg_storage_type_validator(storage_type, auto_grow, high_availability, geo_r
 
 def check_resource_group(resource_group_name):
     # check if rg is already null originally
-    if (not resource_group_name):
+    if not resource_group_name:
         return False
 
     # replace single and double quotes with empty string
@@ -845,11 +845,11 @@ def check_resource_group(resource_group_name):
     resource_group_name = resource_group_name.replace('"', '')
 
     # check if rg is empty after removing quotes
-    if (not resource_group_name):
+    if not resource_group_name:
         return False
     return True
 
 
 def validate_resource_group(resource_group_name):
-    if (not check_resource_group(resource_group_name)):
+    if not check_resource_group(resource_group_name):
         raise CLIError('Resource group name cannot be empty.')
