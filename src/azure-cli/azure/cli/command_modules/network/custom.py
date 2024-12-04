@@ -432,7 +432,7 @@ class AddressPoolCreate(_AddressPoolCreate):
             try:
                 socket.inet_aton(str(server))  # pylint:disable=no-member
                 return {"ip_address": server}
-            except socket.error:  # pylint:disable=no-member
+            except OSError:  # pylint:disable=no-member
                 return {"fqdn": server}
 
         args.backend_addresses = assign_aaz_list_arg(
@@ -478,7 +478,7 @@ class AddressPoolUpdate(_AddressPoolUpdate):
             try:
                 socket.inet_aton(str(server))  # pylint:disable=no-member
                 return {"ip_address": server}
-            except socket.error:  # pylint:disable=no-member
+            except OSError:  # pylint:disable=no-member
                 return {"fqdn": server}
 
         args.backend_addresses = assign_aaz_list_arg(
@@ -2653,7 +2653,7 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):  # pylint:
         try:
             with open(file_name, 'w') as f:
                 f.write(zone_file_content)
-        except IOError:
+        except OSError:
             raise CLIError('Unable to export to file: {}'.format(file_name))
 
 

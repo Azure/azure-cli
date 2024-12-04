@@ -106,7 +106,7 @@ def main():
             # another upload process is running.
             logger.info('Lock out from note file under %s which means another process is running. Exit 0.', config_dir)
             sys.exit(0)
-        except IOError as err:
+        except OSError as err:
             logger.warning('Unexpected IO Error %s. Exit 1.', err)
             sys.exit(1)
         except Exception as err:  # pylint: disable=broad-except

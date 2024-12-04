@@ -158,7 +158,7 @@ def ensure_bicep_installation(cli_ctx, release_tag=None, target_platform=None, s
                 "Successfully installed Bicep CLI to %s",
                 installation_path,
             )
-    except IOError as err:
+    except OSError as err:
         raise ClientRequestError(f"Error while attempting to download Bicep CLI: {err}")
 
 
@@ -190,7 +190,7 @@ def get_bicep_available_release_tags():
         os.environ.setdefault("CURL_CA_BUNDLE", certifi.where())
         response = requests.get("https://aka.ms/BicepReleases", verify=_requests_verify)
         return [release["tag_name"] for release in response.json()]
-    except IOError as err:
+    except OSError as err:
         raise ClientRequestError(f"Error while attempting to retrieve available Bicep versions: {err}.")
 
 
@@ -258,7 +258,7 @@ def _load_bicep_version_check_result_from_cache():
             cache_expired = datetime.now() - last_check_time > _bicep_version_check_cache_ttl
 
             return latest_release_tag, cache_expired
-    except (IOError, JSONDecodeError):
+    except (OSError, JSONDecodeError):
         return None, True
 
 

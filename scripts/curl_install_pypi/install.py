@@ -204,7 +204,7 @@ def _backup_rc(rc_file):
     try:
         shutil.copyfile(rc_file, rc_file+'.backup')
         print_status("Backed up '{}' to '{}'".format(rc_file, rc_file+'.backup'))
-    except (OSError, IOError):
+    except OSError:
         pass
 
 
@@ -233,7 +233,7 @@ def _find_line_in_file(file_path, search_pattern):
             for line in search_file:
                 if search_pattern in line:
                     return True
-    except (OSError, IOError):
+    except OSError:
         pass
     return False
 

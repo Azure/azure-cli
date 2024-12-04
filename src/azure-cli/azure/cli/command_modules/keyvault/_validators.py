@@ -459,7 +459,7 @@ def certificate_type(string):
         with open(os.path.expanduser(string), 'rb') as f:
             cert_data = f.read()
         return cert_data
-    except (IOError, OSError) as e:
+    except OSError as e:
         raise CLIError("Unable to load certificate file '{}': {}.".format(string, e.strerror))
 
 

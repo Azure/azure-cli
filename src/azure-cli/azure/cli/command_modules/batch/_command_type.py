@@ -404,7 +404,7 @@ class BatchArgumentTree:
             if namespace.json_file:
                 try:
                     namespace.json_file = get_file_json(namespace.json_file)
-                except EnvironmentError:
+                except OSError:
                     raise ValueError("Cannot access JSON request file: " + namespace.json_file)
                 except ValueError as err:
                     raise ValueError(f"Invalid JSON file: {err}")

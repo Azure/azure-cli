@@ -48,7 +48,7 @@ def generate_ssh_keys(private_key_filepath, public_key_filepath):
                                public_key_filepath, pub_ssh_dir)
 
                 return public_key
-        except IOError as e:
+        except OSError as e:
             raise CLIError(e)
 
     ssh_dir = os.path.dirname(private_key_filepath)
