@@ -135,6 +135,11 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
     if key_encryption_key:
         key_encryption_keyvault = key_encryption_keyvault or disk_encryption_keyvault
     if encryption_identity:
+        from azure.cli.core.profiles import ResourceType
+        if not cmd.supported_api_version(min_api='2023-07-01', resource_type=ResourceType.MGMT_COMPUTE):
+            raise CLIError("Usage error: Encryption identity is not available under current profile."\
+                "You can set the cloud's profile to latest with az cloud set --profile latest --name <cloud name>")
+
         result = updateVmEncryptionSetting(cmd, vm, resource_group_name, vm_name, encryption_identity)
         if result:
             logger.info("Encryption Identity successfully set in virtual machine")
