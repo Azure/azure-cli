@@ -402,15 +402,15 @@ def _check_private_endpoint(cmd, registry_name, vnet_of_private_endpoint):  # py
                ' Please make sure you provided correct vnet')
         raise CLIError(err.format(registry_name, vnet_of_private_endpoint))
 
-    for fqdn in dns_mappings:
+    for k, v in dns_mappings.items():
         try:
-            result = socket.gethostbyname(fqdn)
-            if result != dns_mappings[fqdn]:
+            result = socket.gethostbyname(k)
+            if result != v:
                 err = 'DNS routing to registry "%s" through private IP is incorrect. Expect: %s, Actual: %s'
-                logger.warning(err, registry_name, dns_mappings[fqdn], result)
+                logger.warning(err, registry_name, v, result)
                 dns_ok = False
         except Exception as e:  # pylint: disable=broad-except
-            logger.warning('Error resolving DNS for %s. Ex: %s', fqdn, e)
+            logger.warning('Error resolving DNS for %s. Ex: %s', k, e)
             dns_ok = False
 
     if dns_ok:
