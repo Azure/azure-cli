@@ -353,7 +353,7 @@ def load_arguments(self, _):
         c.ignore('no_wait')
 
     with self.argument_context('containerapp up', arg_group='Github Repo') as c:
-        c.argument('repo', help='Create an app via Github Actions. In the format: `https://github.com/<owner>/<repository-name> or <owner>/<repository-name>`')
+        c.argument('repo', help='Create an app via Github Actions. In the format: `https://github.com/<owner>/<repository-name>` or `<owner>/<repository-name>`')
         c.argument('token', help='A Personal Access Token with write access to the specified repository. For more information: https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line. If not provided or not found in the cache (and using --repo), a browser page will be opened to authenticate with Github.')
         c.argument('branch', options_list=['--branch', '-b'], help='The branch of the Github repo. Assumed to be the Github repo\'s default branch if not specified.')
         c.argument('context_path', help='Path in the repo from which to run the docker build. Defaults to "./". Dockerfile is assumed to be named "Dockerfile" and in this directory.')
@@ -436,7 +436,7 @@ def load_arguments(self, _):
         c.argument('workload_profile_name', options_list=['--workload-profile-name', '-w'], help='The friendly name for the workload profile')
 
     with self.argument_context('containerapp env workload-profile add') as c:
-        c.argument('workload_profile_type', help="The type of workload profile to add to this environment. Run 'az containerapp env workload-profile list-supported -l `<region>`' to check the options for your region.")
+        c.argument('workload_profile_type', help="The type of workload profile to add to this environment. Run `az containerapp env workload-profile list-supported -l <region>` to check the options for your region.")
         c.argument('min_nodes', help="The minimum node count for the workload profile")
         c.argument('max_nodes', help="The maximum node count for the workload profile")
 

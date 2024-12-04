@@ -70,7 +70,7 @@ def load_arguments(self, _):
 
     with self.argument_context('batchai cluster create', arg_group='File Server Mount') as c:
         c.argument('nfs', options_list=['--nfs'], help='Name or ARM ID of a file server to be mounted on each cluster node. You need to provide full ARM ID if the file server belongs to a different workspace. Multiple NFS can be mounted using configuration file (see --config-file option).')
-        c.argument('nfs_mount_path', options_list=['--nfs-mount-path'], help='Relative mount path for NFS. The NFS will be available at $AZ_BATCHAI_MOUNT_ROOT/`<relative_mount_path>` folder.')
+        c.argument('nfs_mount_path', options_list=['--nfs-mount-path'], help='Relative mount path for NFS. The NFS will be available at `$AZ_BATCHAI_MOUNT_ROOT/<relative_mount_path>` folder.')
 
     with self.argument_context('batchai cluster create', arg_group='Azure Storage Mount') as c:
         c.argument('account_name', options_list=['--storage-account-name'], help='Storage account name for Azure File Shares and/or Azure Storage Containers to be mounted on each cluster node. Can be specified using AZURE_BATCHAI_STORAGE_ACCOUNT environment variable.')
