@@ -5544,6 +5544,9 @@ class VNetCreate(_VNetCreate):
                 subnet["network_security_group"] = {"id": args.subnet_nsg}
             args.subnets = [subnet]
 
+        if has_value(args.ipam_pool_prefix_allocations):
+            args.address_prefixes = []
+
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return {"newVNet": result}
@@ -5560,6 +5563,11 @@ class VNetUpdate(_VNetUpdate):
                      "/ddosProtectionPlans/{}",
         )
         return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.ipam_pool_prefix_allocations):
+            args.address_prefixes = []
 
     def post_instance_update(self, instance):
         if not has_value(instance.properties.ddos_protection_plan.id):
