@@ -123,11 +123,11 @@ class Create(AAZCommand):
         storage_profile = cls._args_schema.storage_profile
         storage_profile.data_disks = AAZListArg(
             options=["data-disks"],
-            help="Specifies the parameters that are used to add a data disk to a virtual machine. <br><br> For more information about disks, see [About disks and VHDs for Azure virtual machines](https://docs.microsoft.com/azure/virtual-machines/managed-disks-overview).",
+            help="Specifies the parameters that are used to add a data disk to a virtual machine. <br><br> For more information about disks, see [About disks and VHDs for Azure virtual machines](https://learn.microsoft.com/azure/virtual-machines/managed-disks-overview).",
         )
         storage_profile.os_disk = AAZObjectArg(
             options=["os-disk"],
-            help="Specifies information about the operating system disk used by the virtual machine. <br><br> For more information about disks, see [About disks and VHDs for Azure virtual machines](https://docs.microsoft.com/azure/virtual-machines/managed-disks-overview).",
+            help="Specifies information about the operating system disk used by the virtual machine. <br><br> For more information about disks, see [About disks and VHDs for Azure virtual machines](https://learn.microsoft.com/azure/virtual-machines/managed-disks-overview).",
         )
         storage_profile.zone_resilient = AAZBoolArg(
             options=["zone-resilient"],
