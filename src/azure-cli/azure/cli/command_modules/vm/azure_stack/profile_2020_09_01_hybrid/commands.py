@@ -18,6 +18,10 @@ def load_command_table(self, _):
     self.command_table['disk list'] = Disk.List(loader=self, table_transformer='[].' + transform_disk_show_table_output)
     self.command_table['disk show'] = Disk.Show(loader=self, table_transformer=transform_disk_show_table_output)
 
+    from .operations.disk import DiskUpdate, DiskGrantAccess
+    self.command_table["disk grant-access"] = DiskGrantAccess(loader=self)
+    self.command_table["disk update"] = DiskUpdate(loader=self)
+
     VMSS = import_aaz_by_profile("vmss")
     self.command_table['vmss list'] = VMSS.List(loader=self,
                                                 table_transformer=transform_vmss_list_with_zones_table_output)
