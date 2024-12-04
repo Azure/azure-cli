@@ -2026,7 +2026,7 @@ def add_waf_managed_rule_set(cmd, resource_group_name, policy_name,
                              rule_set_type, rule_set_version, rule_group_name=None, rules=None):
     """
     Add managed rule set to the WAF policy managed rules.
-    Visit: https://docs.microsoft.com/en-us/azure/web-application-firewall/ag/application-gateway-crs-rulegroups-rules
+    Visit: https://learn.microsoft.com/en-us/azure/web-application-firewall/ag/application-gateway-crs-rulegroups-rules
     """
     if rules is None:
         managed_rule_overrides = []
@@ -3289,7 +3289,7 @@ class ExpressRouteCreate(_ExpressRouteCreate):
         if has_value(args.express_route_port):
             args.provider = None
             args.peering_location = None
-            args.bandwidth_in_gbps = (converted_bandwidth / 1000.0)
+            args.bandwidth_in_gbps = converted_bandwidth / 1000.0
         else:
             args.bandwidth_in_mbps = int(converted_bandwidth)
 

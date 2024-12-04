@@ -474,7 +474,7 @@ class BotTests(ScenarioTest):
         })
 
         expected_error = "--appid must be a valid GUID from a Microsoft Azure AD Application Registration. See " \
-                         "https://docs.microsoft.com/azure/active-directory/develop/quickstart-register-app " \
+                         "https://learn.microsoft.com/azure/active-directory/develop/quickstart-register-app " \
                          "for more information on App Registrations. See 'az bot create --help' for more CLI " \
                          "information."
         try:
