@@ -482,7 +482,7 @@ def apim_api_import(
             False: ContentFormat.WSDL_LINK.value
         },
         ImportFormat.GraphQL.value: {
-            True: ContentFormat.GRAPHQL_LINK.value,
+            True: ContentFormat.GRAPHQL.value,
             False: ContentFormat.GRAPHQL_LINK.value
         }
     }
