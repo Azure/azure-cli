@@ -110,15 +110,15 @@ def _get_extension_run_after_dynamic_install_config(cli_ctx):
 
 
 def _get_extension_allow_preview_install_config(cli_ctx):
-    default_value = True
-    if cli_ctx and cli_ctx.config.get('extension', 'dynamic_install_allow_preview', None) is None:
-        logger.warning("Preview version of extension is enabled by default for extension installation now. "
-                       "Will be disabled in future release. ")
-        logger.warning("Please run 'az config set extension.dynamic_install_allow_preview=true or false' "
-                       "to config it specifically. ")
-    dynamic_install_allow_preview = cli_ctx.config.getboolean('extension',
-                                                              'dynamic_install_allow_preview',
-                                                              default_value) if cli_ctx else default_value
+    dynamic_install_allow_preview = None
+    if cli_ctx:
+        if cli_ctx.config.get('extension', 'dynamic_install_allow_preview', None) is None:
+            logger.warning("Preview version of extension is disabled by default for extension installation, "
+                           "enabled for modules without stable versions. ")
+            logger.warning("Please run 'az config set extension.dynamic_install_allow_preview=true or false' "
+                           "to config it specifically. ")
+        else:
+            dynamic_install_allow_preview = cli_ctx.config.getboolean('extension', 'dynamic_install_allow_preview')
     return dynamic_install_allow_preview
 
 
