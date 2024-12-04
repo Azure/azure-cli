@@ -13,10 +13,7 @@ from enum import Enum
 
 import requests
 
-try:
-    from urllib.parse import urlparse
-except ImportError:
-    from urlparse import urlparse  # pylint: disable=import-error
+from urllib.parse import urlparse
 
 from knack.util import CLIError
 from knack.log import get_logger

@@ -3,12 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-
 import os
 import platform
 import subprocess
 import datetime
-import sys
 import zipfile
 import stat
 from urllib.parse import urlparse
@@ -224,12 +222,7 @@ def _urlretrieve(url, install_location):
     req = urlopen(url)
     compressedFile = io.BytesIO(req.read())
     if url.endswith('zip'):
-        if sys.version_info.major >= 3:
-            zip_file = zipfile.ZipFile(compressedFile)
-        else:
-            # If Python version is 2.X, use StringIO instead.
-            import StringIO  # pylint: disable=import-error
-            zip_file = zipfile.ZipFile(StringIO.StringIO(req.read()))
+        zip_file = zipfile.ZipFile(compressedFile)
         for fileName in zip_file.namelist():
             if fileName.endswith('azcopy') or fileName.endswith('azcopy.exe'):
                 with open(install_location, 'wb') as f:

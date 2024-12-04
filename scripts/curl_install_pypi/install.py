@@ -23,19 +23,7 @@ import tempfile
 import shutil
 import subprocess
 import hashlib
-try:
-    # Attempt to load python 3 module
-    from urllib.request import urlopen
-except ImportError:
-    # Import python 2 version
-    from urllib2 import urlopen
-
-try:
-    # Rename raw_input to input to support Python 2
-    input = raw_input
-except NameError:
-    # Python 3 doesn't have raw_input
-    pass
+from urllib.request import urlopen
 
 AZ_DISPATCH_TEMPLATE = """#!/usr/bin/env bash
 {install_dir}/bin/python -m azure.cli "$@"
