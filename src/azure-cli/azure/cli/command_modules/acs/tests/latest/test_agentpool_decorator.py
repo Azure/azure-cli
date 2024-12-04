@@ -1493,6 +1493,60 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         agentpool_1 = self.create_initialized_agentpool_instance(upgrade_settings=self.models.AgentPoolUpgradeSettings(drain_timeout_in_minutes=123))
         ctx_1.attach_agentpool(agentpool_1)
         self.assertEqual(ctx_1.get_drain_timeout(), 123)
+    
+    def test_get_if_match(self):
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_1.get_if_match(), None)
+
+        ctx_2 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"if_match": "abc"}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_2.get_if_match(), "abc")
+
+        ctx_3 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"if_match": ""}),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_3.get_if_match(), "")
+
+    def test_get_if_none_match(self):
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_1.get_if_none_match(), None)
+
+        ctx_2 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"if_none_match": "abc"}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_2.get_if_none_match(), "abc")
+
+        ctx_3 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"if_none_match": ""}),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_3.get_if_none_match(), "")
 
 class AKSAgentPoolContextStandaloneModeTestCase(AKSAgentPoolContextCommonTestCase):
     def setUp(self):

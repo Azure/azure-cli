@@ -5242,6 +5242,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         # this parameter does not need validation
         return self.raw_param.get("if_none_match")
 
+
 class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
     def __init__(
         self, cmd: AzCliCommand, client: ContainerServiceClient, raw_parameters: Dict, resource_type: ResourceType
