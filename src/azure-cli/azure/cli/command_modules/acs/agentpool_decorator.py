@@ -2249,7 +2249,7 @@ class AKSAgentPoolUpdateDecorator:
                 agentpool,
                 headers=self.context.get_aks_custom_headers(),
             )
-        
+
         return sdk_no_wait(
             self.context.get_no_wait(),
             self.client.begin_create_or_update,
