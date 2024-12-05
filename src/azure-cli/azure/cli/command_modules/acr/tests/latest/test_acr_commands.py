@@ -713,6 +713,15 @@ class AcrCommandsTests(ScenarioTest):
         self.cmd('acr update --name {registry_name} --resource-group {rg} --anonymous-pull-enabled false',
                  checks=[self.check('anonymousPullEnabled', False)])
 
+    @ResourceGroupPreparer()
+    def test_acr_create_invalid_name(self, resource_group, resource_group_location):
+        # Block registry creation if there is '-'.
+        self.kwargs.update({
+            'registry_name': self.create_random_name('testreg', 20) + '-' + self.create_random_name('dnlhash', 6)
+        })
+        with self.assertRaises(Exception):
+            self.cmd('acr create --name {registry_name} --resource-group {rg} --sku premium -l eastus')
+
     @ResourceGroupPreparer(location='eastus2')
     def test_acr_with_private_endpoint(self, resource_group):
         self.kwargs.update({
