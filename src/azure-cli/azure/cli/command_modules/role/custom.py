@@ -212,13 +212,14 @@ def _create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, s
                                          condition=condition, condition_version=condition_version)
 
 
-def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=None,
+def list_role_assignments(cmd,
+                          assignee=None, assignee_object_id=None,
+                          role=None, resource_group_name=None,
                           scope=None, include_inherited=False,
                           show_all=False, include_groups=False, include_classic_administrators=False):
-    '''
-    :param include_groups: include extra assignments to the groups of which the user is a
-    member(transitively).
-    '''
+    # include_groups: include extra assignments to the groups of which the user is a member(transitively).
+    assignee_object_id = _resolve_assignee(cmd.cli_ctx, assignee, assignee_object_id)
+
     if include_classic_administrators:
         logger.warning(CLASSIC_ADMINISTRATOR_WARNING)
 
@@ -236,7 +237,7 @@ def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=Non
                                   definitions_client._config.subscription_id)
 
     assignments = _search_role_assignments(cmd.cli_ctx, assignments_client, definitions_client,
-                                           scope, assignee, role,
+                                           scope, assignee_object_id, role,
                                            include_inherited, include_groups)
 
     results = todict(assignments) if assignments else []
@@ -500,8 +501,12 @@ def _get_displayable_name(graph_object):
     return graph_object['displayName'] or ''
 
 
-def delete_role_assignments(cmd, ids=None, assignee=None, role=None, resource_group_name=None,
+def delete_role_assignments(cmd, ids=None,
+                            assignee=None, assignee_object_id=None,
+                            role=None, resource_group_name=None,
                             scope=None, include_inherited=False, yes=None):
+    assignee_object_id = _resolve_assignee(cmd.cli_ctx, assignee, assignee_object_id)
+
     factory = _auth_client_factory(cmd.cli_ctx, scope)
     assignments_client = factory.role_assignments
     definitions_client = factory.role_definitions
@@ -548,11 +553,7 @@ def delete_role_assignments(cmd, ids=None, assignee=None, role=None, resource_gr
 
 
 def _search_role_assignments(cli_ctx, assignments_client, definitions_client,
-                             scope, assignee, role, include_inherited, include_groups):
-    assignee_object_id = None
-    if assignee:
-        assignee_object_id = _resolve_object_id(cli_ctx, assignee, fallback_to_object_id=True)
-
+                             scope, assignee_object_id, role, include_inherited, include_groups):
     # https://learn.microsoft.com/en-us/azure/role-based-access-control/role-assignments-list-rest
     # "atScope()" and "principalId eq '{value}'" query cannot be used together (API limitation).
     # always use "scope" if provided, so we can get assignments beyond subscription e.g. management groups
@@ -588,6 +589,15 @@ def _search_role_assignments(cli_ctx, assignments_client, definitions_client,
             assignments = [i for i in assignments if worker.get_role_property(i, 'principal_id') == assignee_object_id]
 
     return assignments
+
+
+def _resolve_assignee(cli_ctx, assignee, assignee_object_id):
+    if assignee and assignee_object_id:
+        raise CLIError('Usage error: Please provide only one of --assignee or --assignee-object-id.')
+    if assignee_object_id:
+        return assignee_object_id
+    if assignee:
+        return _resolve_object_id(cli_ctx, assignee, fallback_to_object_id=True)
 
 
 def _build_role_scope(resource_group_name, scope, subscription_id):
