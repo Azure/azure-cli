@@ -12,7 +12,7 @@
 
 from collections.abc import MutableMapping
 import datetime
-from typing import Any, Dict, List, Literal, Optional, Union, TypeAlias
+from typing import Any, Dict, List, Literal, Optional, Union
 
 import msrest.serialization as _serialization
 
@@ -41,7 +41,7 @@ from ._sdk_enums import (
     StorageType
 )
 
-JSON: TypeAlias = MutableMapping[str, Any]
+JSON = MutableMapping[str, Any]
 
 
 class AllowedAudiencesValidation(_serialization.Model):
