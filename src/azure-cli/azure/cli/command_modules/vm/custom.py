@@ -852,8 +852,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               storage_account_type=None, vnet_type=None, nsg_type=None, public_ip_address_type=None, nic_type=None,
               validate=False, custom_data=None, secrets=None, plan_name=None, plan_product=None, plan_publisher=None,
               plan_promotion_code=None, license_type=None, assign_identity=None, identity_scope=None,
-              identity_role=None, identity_role_id=None, application_security_groups=None, zone=None,
-              boot_diagnostics_storage=None, ultra_ssd_enabled=None,
+              identity_role=None, identity_role_id=None, encryption_identity=None,
+              application_security_groups=None, zone=None, boot_diagnostics_storage=None, ultra_ssd_enabled=None,
               ephemeral_os_disk=None, ephemeral_os_disk_placement=None,
               proximity_placement_group=None, dedicated_host=None, dedicated_host_group=None, aux_subscriptions=None,
               priority=None, max_price=None, eviction_policy=None, enable_agent=None, workspace=None, vmss=None,
@@ -1110,6 +1110,26 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
             role_assignment_guid = str(_gen_guid())
             master_template.add_resource(build_msi_role_assignment(vm_name, vm_id, identity_role_id,
                                                                    role_assignment_guid, identity_scope))
+
+    if encryption_identity:
+        if not cmd.supported_api_version(min_api='2023-07-01', resource_type=ResourceType.MGMT_COMPUTE):
+            raise CLIInternalError("Usage error: Encryption identity is not available under current profile."
+                                   "You can set the cloud's profile to latest with:"
+                                   "az cloud set --profile latest --name <cloud name>")
+
+        if 'identity' in vm_resource and 'userAssignedIdentities' in vm_resource['identity'] \
+            and encryption_identity.lower() in \
+                (k.lower() for k in vm_resource['identity']['userAssignedIdentities'].keys()):
+            if 'securityProfile' not in vm_resource['properties']:
+                vm_resource['properties']['securityProfile'] = {}
+            if 'encryptionIdentity' not in vm_resource['properties']['securityProfile']:
+                vm_resource['properties']['securityProfile']['encryptionIdentity'] = {}
+            if 'userAssignedIdentityResourceId' not \
+                in vm_resource['properties']['securityProfile']['encryptionIdentity'] or \
+                vm_resource['properties']['securityProfile']['encryptionIdentity']['userAssignedIdentityResourceId'] \
+                    != encryption_identity:
+                vm_resource['properties']['securityProfile']['encryptionIdentity']['userAssignedIdentityResourceId'] \
+                    = encryption_identity
 
     if workspace is not None:
         workspace_id = _prepare_workspace(cmd, resource_group_name, workspace)
