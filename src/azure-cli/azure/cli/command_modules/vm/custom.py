@@ -1147,9 +1147,10 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
 
     if encryption_identity:
         if not cmd.supported_api_version(min_api='2023-07-01', resource_type=ResourceType.MGMT_COMPUTE):
-            raise CLIInternalError("Usage error: Encryption identity is not available under current profile."\
-                "You can set the cloud's profile to latest with az cloud set --profile latest --name <cloud name>")
-        
+            raise CLIInternalError("Usage error: Encryption identity is not available under current profile."
+                                   "You can set the cloud's profile to latest with:"
+                                   "az cloud set --profile latest --name <cloud name>")
+
         if 'identity' in vm_resource and 'userAssignedIdentities' in vm_resource['identity'] \
             and encryption_identity.lower() in \
                 (k.lower() for k in vm_resource['identity']['userAssignedIdentities'].keys()):

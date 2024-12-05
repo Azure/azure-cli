@@ -85,6 +85,16 @@ def updateVmEncryptionSetting(cmd, vm, resource_group_name, vm_name, encryption_
     return True
 
 
+def isVersionSuppprtedForEncryptionIdentity(cmd):
+    from azure.cli.core.profiles import ResourceType
+    from knack.util import CLIError
+    if not cmd.supported_api_version(min_api='2023-07-01', resource_type=ResourceType.MGMT_COMPUTE):
+        raise CLIError("Usage error: Encryption identity is not available under current profile."
+                       "You can set the cloud's profile to latest with:"
+                       "az cloud set --profile latest --name <cloud name>")
+    return True
+
+
 def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-locals, too-many-statements
                disk_encryption_keyvault,
                aad_client_id=None,
@@ -94,8 +104,7 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
                key_encryption_algorithm='RSA-OAEP',
                volume_type=None,
                encrypt_format_all=False,
-               force=False,
-               encryption_identity=None):
+               force=False, encryption_identity=None):
     from azure.mgmt.core.tools import parse_resource_id
     from knack.util import CLIError
 
@@ -134,12 +143,7 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
     # disk encryption key itself can be further protected, so let us verify
     if key_encryption_key:
         key_encryption_keyvault = key_encryption_keyvault or disk_encryption_keyvault
-    if encryption_identity:
-        from azure.cli.core.profiles import ResourceType
-        if not cmd.supported_api_version(min_api='2023-07-01', resource_type=ResourceType.MGMT_COMPUTE):
-            raise CLIError("Usage error: Encryption identity is not available under current profile."\
-                "You can set the cloud's profile to latest with az cloud set --profile latest --name <cloud name>")
-
+    if encryption_identity and isVersionSuppprtedForEncryptionIdentity(cmd):
         result = updateVmEncryptionSetting(cmd, vm, resource_group_name, vm_name, encryption_identity)
         if result:
             logger.info("Encryption Identity successfully set in virtual machine")
