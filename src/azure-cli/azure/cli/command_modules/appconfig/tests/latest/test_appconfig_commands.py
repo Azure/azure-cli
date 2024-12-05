@@ -2016,7 +2016,7 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
         entry_feature = 'Beta'
         internal_feature_key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + entry_feature
         default_description = ""
-        default_conditions = "{{u\'client_filters\': []}}" if sys.version_info[0] < 3 else "{{\'client_filters\': []}}"
+        default_conditions = "{{\'client_filters\': []}}"
         default_locked = False
         default_state = "off"
         self.kwargs.update({
@@ -2201,7 +2201,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         internal_feature_key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + entry_feature
         entry_label = 'v1'
         default_description = ""
-        default_conditions = "{{u\'client_filters\': []}}" if sys.version_info[0] < 3 else "{{\'client_filters\': []}}"
+        default_conditions = "{{\'client_filters\': []}}"
         default_locked = False
         default_state = "off"
 
@@ -2513,7 +2513,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         feature_key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature_prefix + feature_name
         entry_label = 'v1'
         default_description = ""
-        default_conditions = "{{u\'client_filters\': []}}" if sys.version_info[0] < 3 else "{{\'client_filters\': []}}"
+        default_conditions = "{{\'client_filters\': []}}"
         default_locked = False
         default_state = "off"
 
@@ -2618,7 +2618,7 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
         internal_feature_key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + entry_feature
         entry_label = 'Standard'
         default_description = ""
-        default_conditions = "{{u\'client_filters\': []}}" if sys.version_info[0] < 3 else "{{\'client_filters\': []}}"
+        default_conditions = "{{\'client_filters\': []}}"
         default_locked = False
         default_state = "off"
 
@@ -2986,7 +2986,7 @@ class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
         entry_feature = 'Beta'
         internal_feature_key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + entry_feature
         default_description = ""
-        default_conditions = "{{u\'client_filters\': []}}" if sys.version_info[0] < 3 else "{{\'client_filters\': []}}"
+        default_conditions = "{{\'client_filters\': []}}"
         default_locked = False
         default_state = "off"
         self.kwargs.update({
