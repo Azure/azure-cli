@@ -12,7 +12,6 @@ import json
 import os
 import re
 import ssl
-import sys
 import uuid
 import base64
 
