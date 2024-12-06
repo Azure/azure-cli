@@ -32,7 +32,7 @@ class LabScenarioTest(ScenarioTest):
 
         # Create claimable linux vm in the lab
         self.cmd('lab vm create -g {rg} --lab-name {lab_name} --name {linux_vm_name} --image {linux_image}'
-                 ' --image-type {image_type} --size {size} --admin-password {password} --allow-claim', checks=[
+                 ' --image-type {image_type} --size {size} --admin-password {password} --disk-type Premium --allow-claim', checks=[
                      self.is_empty()])
 
         self.cmd('lab vm show -g {rg} --lab-name {lab_name} --name {linux_vm_name}', checks=[
@@ -43,12 +43,13 @@ class LabScenarioTest(ScenarioTest):
             self.check('size', '{size}'),
             self.check('disallowPublicIpAddress', True),
             self.check('artifactDeploymentStatus.totalArtifacts', 0),
-            self.check('galleryImageReference.publisher', 'canonical')
+            self.check('galleryImageReference.publisher', 'canonical'),
+            self.check('storageType', 'Premium')
         ])
 
         # Create windows vm in the lab
         self.cmd('lab vm create -g {rg} --lab-name {lab_name} --name {windows_vm_name} '
-                 '--image {windows_image} --image-type {image_type} --size {size} --admin-password {password} '
+                 '--image {windows_image} --image-type {image_type} --size {size} --admin-password {password} --disk-type Standard '
                  '--allow-claim', checks=[
                      self.is_empty()])
 
@@ -60,7 +61,8 @@ class LabScenarioTest(ScenarioTest):
             self.check('size', '{size}'),
             self.check('disallowPublicIpAddress', True),
             self.check('artifactDeploymentStatus.totalArtifacts', 0),
-            self.check('galleryImageReference.publisher', 'MicrosoftWindowsServer')
+            self.check('galleryImageReference.publisher', 'MicrosoftWindowsServer'),
+            self.check('storageType', 'Standard')
         ])
 
         # List claimable vms
@@ -75,7 +77,7 @@ class LabScenarioTest(ScenarioTest):
 
         # List my vms - we have already claimed one VM
         self.cmd('lab vm list -g {rg} --lab-name {lab_name}', checks=[
-            self.check('length(@)', 3)
+            self.check('length(@)', 1)
         ])
 
         # claim any vm
@@ -85,7 +87,7 @@ class LabScenarioTest(ScenarioTest):
 
         # List my vms - we have claimed both VMs
         self.cmd('lab vm list -g {rg} --lab-name {lab_name}', checks=[
-            self.check('length(@)', 4)
+            self.check('length(@)', 2)
         ])
 
         # Delete all the vms

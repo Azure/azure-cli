@@ -36,7 +36,7 @@ class LabVmCreate(_LabVmCreate):
             options=["--artifacts"],
             help="Path to the JSON encoded array of artifacts to be applied. JSON encoded list of parameters."
         )
-        args_schema.disk_type = AAZBoolArg(
+        args_schema.disk_type = AAZStrArg(
             options=["--disk-type"],
             help="Storage type to use for virtual machine.",
             enum={'Premium': 'Premium', 'Standard': 'Standard', 'StandardSSD': 'StandardSSD'}
