@@ -7,6 +7,7 @@
 # --------------------------------------------------------------------------
 # pylint: disable=protected-access, arguments-differ, signature-differs, broad-except, too-many-lines
 
+from collections.abc import MutableMapping
 import copy
 import calendar
 import decimal
@@ -27,11 +28,6 @@ from azure.core.exceptions import DeserializationError
 from azure.core import CaseInsensitiveEnumMeta
 from azure.core.pipeline import PipelineResponse
 from azure.core.serialization import _Null
-
-if sys.version_info >= (3, 9):
-    from collections.abc import MutableMapping
-else:
-    from typing import MutableMapping
 
 _LOGGER = logging.getLogger(__name__)
 

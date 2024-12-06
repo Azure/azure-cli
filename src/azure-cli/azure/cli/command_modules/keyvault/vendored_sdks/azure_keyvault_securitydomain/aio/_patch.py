@@ -6,7 +6,7 @@
 
 Follow our quickstart for examples: https://aka.ms/azsdk/python/dpcodegen/python/customize
 """
-import sys
+from collections.abc import Awaitable
 from typing import Any, IO, List, Literal, MutableMapping, Optional, overload, Union
 
 from azure.core.credentials_async import AsyncTokenCredential
@@ -27,11 +27,6 @@ from .._internal import (
 )
 from ..models import CertificateInfoObject, SecurityDomainObject, SecurityDomainOperationStatus
 from .._patch import DEFAULT_VERSION, _format_api_version, _SERIALIZER
-
-if sys.version_info < (3, 9):
-    from typing import Awaitable
-else:
-    from collections.abc import Awaitable
 
 JSON = MutableMapping[str, Any]  # pylint: disable=unsubscriptable-object
 
