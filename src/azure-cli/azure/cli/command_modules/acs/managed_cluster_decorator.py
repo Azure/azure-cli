@@ -5252,6 +5252,22 @@ class AKSManagedClusterContext(BaseAKSContext):
         # because it's already checked in _get_enable_cost_analysis
         return self.raw_param.get("disable_cost_analysis")
 
+    def get_if_match(self) -> Union[str, None]:
+        """Obtain the value of if_match.
+        :return: string or None
+        """
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return self.raw_param.get("if_match")
+
+    def get_if_none_match(self) -> Union[str, None]:
+        """Obtain the value of if_none_match.
+        :return: string or None
+        """
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return self.raw_param.get("if_none_match")
+
 
 class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
     def __init__(
@@ -6830,6 +6846,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 resource_name=self.context.get_name(),
                 parameters=mc,
                 headers=self.context.get_aks_custom_headers(),
+                if_match=self.context.get_if_match(),
+                if_none_match=self.context.get_if_none_match(),
             )
             self.immediate_processing_after_request(mc)
             # poll until the result is returned
@@ -6843,6 +6861,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 resource_name=self.context.get_name(),
                 parameters=mc,
                 headers=self.context.get_aks_custom_headers(),
+                if_match=self.context.get_if_match(),
+                if_none_match=self.context.get_if_none_match(),
             )
         return cluster
 
@@ -8723,6 +8743,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 resource_name=self.context.get_name(),
                 parameters=mc,
                 headers=self.context.get_aks_custom_headers(),
+                if_match=self.context.get_if_match(),
+                if_none_match=self.context.get_if_none_match(),
             )
             self.immediate_processing_after_request(mc)
             # poll until the result is returned
@@ -8736,6 +8758,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 resource_name=self.context.get_name(),
                 parameters=mc,
                 headers=self.context.get_aks_custom_headers(),
+                if_match=self.context.get_if_match(),
+                if_none_match=self.context.get_if_none_match(),
             )
         return cluster
 

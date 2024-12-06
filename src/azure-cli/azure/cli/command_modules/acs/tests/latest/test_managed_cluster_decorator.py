@@ -283,6 +283,54 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         with self.assertRaises(InvalidArgumentValueError):
             ctx._AKSManagedClusterContext__validate_gmsa_options(False, True, None, "test_gmsa_root_domain_name", False)
 
+    def test_get_if_match(self):
+        ctx_0 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({}),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_0.get_if_match(), None)
+
+        ctx_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({"if_match": "abc"}),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_1.get_if_match(), "abc")
+        ctx_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({"if_match": ""}),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_2.get_if_match(), "")
+
+    def test_get_if_none_match(self):
+        ctx_0 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({}),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_0.get_if_none_match(), None)
+
+        ctx_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({"if_none_match": "abc"}),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_1.get_if_none_match(), "abc")
+        ctx_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({"if_none_match": ""}),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_2.get_if_none_match(), "")
+
     def test_get_subscription_id(self):
         ctx_1 = AKSManagedClusterContext(self.cmd, AKSManagedClusterParamDict({}), self.models, DecoratorMode.CREATE)
         ctx_1.set_intermediate("subscription_id", "test_subscription_id")
