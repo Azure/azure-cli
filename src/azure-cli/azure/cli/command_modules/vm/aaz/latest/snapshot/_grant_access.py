@@ -61,13 +61,13 @@ class GrantAccess(AAZCommand):
         # define Arg Group "GrantAccessData"
 
         _args_schema = cls._args_schema
-        _args_schema.access = AAZStrArg(
-            options=["--access"],
+        _args_schema.access_level = AAZStrArg(
+            options=["--access", "--access-level"],
             arg_group="GrantAccessData",
             help="Access level.",
             required=True,
             default="Read",
-            enum={"None": "None", "Read": "Read", "Write": "Write"},
+            enum={"Read": "Read", "Write": "Write"},
         )
         _args_schema.duration_in_seconds = AAZIntArg(
             options=["--duration-in-seconds"],
@@ -80,11 +80,6 @@ class GrantAccess(AAZCommand):
             arg_group="GrantAccessData",
             help="Used to specify the file format when making request for SAS on a VHDX file format snapshot",
             enum={"VHD": "VHD", "VHDX": "VHDX"},
-        )
-        _args_schema.secure_vm_guest_state_sas = AAZBoolArg(
-            options=["--secure-state-sas", "--secure-vm-guest-state-sas"],
-            arg_group="GrantAccessData",
-            help="Set this flag to true to get additional SAS for VM guest state",
         )
         return cls._args_schema
 
@@ -194,10 +189,9 @@ class GrantAccess(AAZCommand):
                 typ=AAZObjectType,
                 typ_kwargs={"flags": {"required": True, "client_flatten": True}}
             )
-            _builder.set_prop("access", AAZStrType, ".access", typ_kwargs={"flags": {"required": True}})
+            _builder.set_prop("access", AAZStrType, ".access_level", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("durationInSeconds", AAZIntType, ".duration_in_seconds", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("fileFormat", AAZStrType, ".file_format")
-            _builder.set_prop("getSecureVMGuestStateSAS", AAZBoolType, ".secure_vm_guest_state_sas")
 
             return self.serialize_content(_content_value)
 

@@ -61,13 +61,13 @@ class GrantAccess(AAZCommand):
         # define Arg Group "GrantAccessData"
 
         _args_schema = cls._args_schema
-        _args_schema.access = AAZStrArg(
-            options=["--access"],
+        _args_schema.access_level = AAZStrArg(
+            options=["--access", "--access-level"],
             arg_group="GrantAccessData",
             help="Access level.",
             required=True,
             default="Read",
-            enum={"None": "None", "Read": "Read"},
+            enum={"Read": "Read"},
         )
         _args_schema.duration_in_seconds = AAZIntArg(
             options=["--duration-in-seconds"],
@@ -183,7 +183,7 @@ class GrantAccess(AAZCommand):
                 typ=AAZObjectType,
                 typ_kwargs={"flags": {"required": True, "client_flatten": True}}
             )
-            _builder.set_prop("access", AAZStrType, ".access", typ_kwargs={"flags": {"required": True}})
+            _builder.set_prop("access", AAZStrType, ".access_level", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("durationInSeconds", AAZIntType, ".duration_in_seconds", typ_kwargs={"flags": {"required": True}})
 
             return self.serialize_content(_content_value)
