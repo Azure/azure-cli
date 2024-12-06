@@ -16,22 +16,21 @@ then
     printf "Using HEAD as the previous commit\n"
     against=HEAD
 else
-    printf "Using empty tree object as the previous commit\n"
+    printf "Using an empty tree object as the previous commit\n"
     against=$(git hash-object -t tree /dev/null)
 fi
 has_secrets=0
-
-IFS_OLD=${IFS}
-IFS=$'\n'
 for FILE in `git diff --cached --name-only --diff-filter=AM $against` ; do
     # Check if the file contains secrets
     detected=$(azdev scan -f "$FILE" | python -c "import sys, json; print(json.load(sys.stdin)['secrets_detected'])")
     if [ "$detected" = "True" ]; then
-      printf "\033[0;31mDetected secrets from %s, You can run 'azdev mask' to remove secrets before commit.\033[0m\n" "$FILE"
+      printf "\033[0;31mDetected secrets from %s, Please run the following command to mask it:\033[0m\n" "$FILE"
+      printf "\033[0;31m+++++++++++++++++++++++++++++++++++++++++++++++++++++++\033[0m\n"
+      printf "\033[0;31mazdev mask -f %s\033[0m\n" "$FILE"
+      printf "\033[0;31m+++++++++++++++++++++++++++++++++++++++++++++++++++++++\033[0m\n"
       has_secrets=1
     fi
 done
-IFS=${IFS_OLD}
 
 if [ $has_secrets -eq 1 ]; then
     printf "\033[0;31mSecret detected. If you want to skip that, run add '--no-verify' in the end of 'git commit' command.\033[0m\n"
