@@ -231,19 +231,19 @@ def get_hyper_v_generation_from_vmss(cli_ctx, image_ref, location):  # pylint: d
     return None
 
 
-def _grant_access(cmd, resource_group_name, name, duration_in_seconds, is_disk, access_level,
-                  secure_vm_guest_state_sas=None, file_format=None):
-    AccessLevel, GrantAccessData = cmd.get_models('AccessLevel', 'GrantAccessData')
-    client = _compute_client_factory(cmd.cli_ctx)
-    op = client.disks if is_disk else client.snapshots
-    grant_access_data = GrantAccessData(access=access_level or AccessLevel.read,
-                                        duration_in_seconds=duration_in_seconds)
-    if secure_vm_guest_state_sas:
-        grant_access_data.get_secure_vm_guest_state_sas = secure_vm_guest_state_sas
-    if file_format:
-        grant_access_data.file_format = file_format
-
-    return op.begin_grant_access(resource_group_name, name, grant_access_data)
+# def _grant_access(cmd, resource_group_name, name, duration_in_seconds, is_disk, access_level,
+#                   secure_vm_guest_state_sas=None, file_format=None):
+#     AccessLevel, GrantAccessData = cmd.get_models('AccessLevel', 'GrantAccessData')
+#     client = _compute_client_factory(cmd.cli_ctx)
+#     op = client.disks if is_disk else client.snapshots
+#     grant_access_data = GrantAccessData(access=access_level or AccessLevel.read,
+#                                         duration_in_seconds=duration_in_seconds)
+#     if secure_vm_guest_state_sas:
+#         grant_access_data.get_secure_vm_guest_state_sas = secure_vm_guest_state_sas
+#     if file_format:
+#         grant_access_data.file_format = file_format
+#
+#     return op.begin_grant_access(resource_group_name, name, grant_access_data)
 
 
 def _is_linux_os(vm):
@@ -648,31 +648,30 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
     from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
-    Snapshot, CreationData, DiskCreateOption, Encryption = cmd.get_models(
-        'Snapshot', 'CreationData', 'DiskCreateOption', 'Encryption')
-
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     if source_blob_uri:
-        option = getattr(DiskCreateOption, 'import_enum')
+        option = 'Import'
     elif source_disk or source_snapshot:
-        option = getattr(DiskCreateOption, 'copy')
-        if cmd.supported_api_version(min_api='2021-04-01', operation_group='snapshots'):
-            option = getattr(DiskCreateOption, 'copy_start') if copy_start else getattr(DiskCreateOption, 'copy')
+        option = 'CopyStart' if copy_start else 'Copy'
     elif for_upload:
-        option = getattr(DiskCreateOption, 'upload')
+        option = 'Upload'
     elif elastic_san_resource_id:
-        option = getattr(DiskCreateOption, 'copy_from_san_snapshot')
+        option = 'CopyFromSanSnapshot'
     else:
-        option = getattr(DiskCreateOption, 'empty')
+        option = 'Empty'
 
-    creation_data = CreationData(create_option=option, source_uri=source_blob_uri,
-                                 image_reference=None,
-                                 source_resource_id=source_disk or source_snapshot,
-                                 storage_account_id=source_storage_account_id,
-                                 elastic_san_resource_id=elastic_san_resource_id,
-                                 provisioned_bandwidth_copy_speed=bandwidth_copy_speed)
+    creation_data = {
+        'create_option': option,
+        'source_uri': source_blob_uri,
+        'image_reference': None,
+        'source_resource_id': source_disk or source_snapshot,
+        'storage_account_id': source_storage_account_id,
+        'elastic_san_resource_id': elastic_san_resource_id,
+        'provisioned_bandwidth_copy_speed': bandwidth_copy_speed,
 
-    if size_gb is None and option == DiskCreateOption.empty:
+    }
+
+    if size_gb is None and option == 'Empty':
         raise CLIError('Please supply size for the snapshots')
 
     if disk_encryption_set is not None and not is_valid_resource_id(disk_encryption_set):
@@ -688,80 +687,50 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
     if disk_encryption_set is not None and encryption_type is None:
         raise CLIError('usage error: Please specify --encryption-type.')
     if encryption_type is not None:
-        encryption = Encryption(type=encryption_type, disk_encryption_set_id=disk_encryption_set)
+        encryption = {
+            'type': encryption_type,
+            'disk_encryption_set_id': disk_encryption_set
+        }
     else:
         encryption = None
 
-    snapshot = Snapshot(location=location, creation_data=creation_data, tags=(tags or {}),
-                        sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb, incremental=incremental,
-                        encryption=encryption)
+    args = {
+        'location': location,
+        'creation_data': creation_data,
+        'tags': tags or {},
+        'sku': {'name': sku},
+        'disk_size_gb': size_gb,
+        'incremental': incremental,
+        'encryption': encryption,
+    }
+
     if hyper_v_generation:
-        snapshot.hyper_v_generation = hyper_v_generation
+        args['hyper_v_generation'] = hyper_v_generation
     if network_access_policy is not None:
-        snapshot.network_access_policy = network_access_policy
+        args['network_access_policy'] = network_access_policy
     if disk_access is not None:
-        snapshot.disk_access_id = disk_access
+        args['disk_access_id'] = disk_access
     if edge_zone:
-        snapshot.extended_location = edge_zone
+        args['extended_location'] = edge_zone
     if public_network_access is not None:
-        snapshot.public_network_access = public_network_access
+        args['public_network_access'] = public_network_access
     if accelerated_network is not None or architecture is not None:
-        if snapshot.supported_capabilities is None:
-            supportedCapabilities = cmd.get_models('SupportedCapabilities')(accelerated_network=accelerated_network,
-                                                                            architecture=architecture)
-            snapshot.supported_capabilities = supportedCapabilities
+        if args.get('supported_capabilities', None) is None:
+            supported_capabilities = {
+                'accelerated_network': accelerated_network,
+                'architecture': architecture
+            }
+            args['supported_capabilities'] = supported_capabilities
         else:
-            snapshot.supported_capabilities.accelerated_network = accelerated_network
-            snapshot.supported_capabilities.architecture = architecture
+            args['supported_capabilities']['accelerated_network'] = accelerated_network
+            args['supported_capabilities']['architecture'] = architecture
 
-    client = _compute_client_factory(cmd.cli_ctx)
-    return sdk_no_wait(no_wait, client.snapshots.begin_create_or_update, resource_group_name, snapshot_name, snapshot)
+    args['snapshot_name'] = snapshot_name
+    args['resource_group'] = resource_group_name
+    args['no_wait'] = no_wait
 
-
-def grant_snapshot_access(cmd, resource_group_name, snapshot_name, duration_in_seconds,
-                          access_level=None, file_format=None):
-    return _grant_access(cmd, resource_group_name, snapshot_name, duration_in_seconds, is_disk=False,
-                         access_level=access_level, file_format=file_format)
-
-
-def update_snapshot(cmd, resource_group_name, instance, sku=None, disk_encryption_set=None,
-                    encryption_type=None, network_access_policy=None, disk_access=None, public_network_access=None,
-                    accelerated_network=None, architecture=None):
-    from azure.mgmt.core.tools import resource_id, is_valid_resource_id
-    from azure.cli.core.commands.client_factory import get_subscription_id
-
-    if sku is not None:
-        _set_sku(cmd, instance, sku)
-    if disk_encryption_set is not None:
-        if instance.encryption.type != 'EncryptionAtRestWithCustomerKey' and \
-                encryption_type != 'EncryptionAtRestWithCustomerKey':
-            raise CLIError('usage error: Please set --encryption-type to EncryptionAtRestWithCustomerKey')
-        if not is_valid_resource_id(disk_encryption_set):
-            disk_encryption_set = resource_id(
-                subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
-                namespace='Microsoft.Compute', type='diskEncryptionSets', name=disk_encryption_set)
-        instance.encryption.disk_encryption_set_id = disk_encryption_set
-    if encryption_type is not None:
-        instance.encryption.type = encryption_type
-    if network_access_policy is not None:
-        instance.network_access_policy = network_access_policy
-    if disk_access is not None and not is_valid_resource_id(disk_access):
-        disk_access = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
-            namespace='Microsoft.Compute', type='diskAccesses', name=disk_access)
-        instance.disk_access_id = disk_access
-    if public_network_access is not None:
-        instance.public_network_access = public_network_access
-    if accelerated_network is not None or architecture is not None:
-        if instance.supported_capabilities is None:
-            supportedCapabilities = cmd.get_models('SupportedCapabilities')(accelerated_network=accelerated_network,
-                                                                            architecture=architecture)
-            instance.supported_capabilities = supportedCapabilities
-        else:
-            instance.supported_capabilities.accelerated_network = accelerated_network
-            instance.supported_capabilities.architecture = architecture
-    return instance
-# endregion
+    from .aaz.latest.snapshot import Create
+    return Create(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 
 # region VirtualMachines Identity

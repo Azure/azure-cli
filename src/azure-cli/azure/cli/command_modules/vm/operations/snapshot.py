@@ -7,12 +7,12 @@ from knack.log import get_logger
 from knack.util import CLIError
 
 from azure.cli.core.aaz import has_value
-from ..aaz.latest.disk import Update as _DiskUpdate, GrantAccess as _DiskGrantAccess, Show
+from ..aaz.latest.snapshot import Update as _SnapshotUpdate
 
 logger = get_logger(__name__)
 
 
-class DiskUpdate(_DiskUpdate):
+class SnapshotUpdate(_SnapshotUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZStrArg
@@ -48,12 +48,7 @@ class DiskUpdate(_DiskUpdate):
                 disk_encryption_set = resource_id(
                     subscription=get_subscription_id(self.cli_ctx), resource_group=args.resource_group,
                     namespace='Microsoft.Compute', type='diskEncryptionSets', name=disk_encryption_set)
-
             instance.properties.encryption.disk_encryption_set_id = disk_encryption_set
-
-        if has_value(args.encryption_type):
-            if args.encryption_type != 'EncryptionAtRestWithCustomerKey':
-                instance.properties.encryption.disk_encryption_set_id = None
 
         if has_value(args.disk_access):
             disk_access = args.disk_access
@@ -62,17 +57,3 @@ class DiskUpdate(_DiskUpdate):
                     subscription=get_subscription_id(self.cli_ctx), resource_group=args.resource_group,
                     namespace='Microsoft.Compute', type='diskAccesses', name=disk_access)
             instance.properties.disk_access_id = disk_access
-
-
-class DiskGrantAccess(_DiskGrantAccess):
-    def pre_operations(self):
-        args = self.ctx.args
-
-        disk_info = Show(cli_ctx=self.cli_ctx)(command_args={
-            "disk_name": args.disk_name,
-            "resource_group": args.resource_group
-        })
-
-        if disk_info.get("creation_data", None) and \
-                disk_info["creation_data"].get("create_option", None) == "UploadPreparedSecure":
-            args.secure_vm_guest_state_sas = True

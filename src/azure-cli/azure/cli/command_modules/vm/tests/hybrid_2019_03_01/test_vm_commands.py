@@ -639,13 +639,13 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         # create a snpashot
         os_snapshot = self.cmd('snapshot create -g {rg} -n {snapshot1} --size-gb 1 --sku Premium_LRS --tags tag1=s1', checks=[
             self.check('sku.name', 'Premium_LRS'),
-            self.check('diskSizeGb', 1),
+            self.check('diskSizeGB', 1),
             self.check('tags.tag1', 's1')
         ]).get_output_in_json()
         # update the sku
         self.cmd('snapshot update -g {rg} -n {snapshot1} --sku Standard_LRS', checks=[
             self.check('sku.name', 'Standard_LRS'),
-            self.check('diskSizeGb', 1)
+            self.check('diskSizeGB', 1)
         ])
 
         # create another snapshot by importing from the disk1

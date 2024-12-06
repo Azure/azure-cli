@@ -23,7 +23,7 @@ from azure.cli.command_modules.vm._constants import COMPATIBLE_SECURITY_TYPE_VAL
 from azure.cli.command_modules.vm._validators import (
     validate_nsg_name, validate_vm_nics, validate_vm_nic, validate_vmss_disk,
     validate_asg_names_or_ids, validate_keyvault, _validate_proximity_placement_group,
-    validate_vm_name_for_monitor_metrics, validate_secure_vm_guest_state_sas)
+    validate_vm_name_for_monitor_metrics)
 
 from azure.cli.command_modules.vm._vm_utils import MSI_LOCAL_ID
 from azure.cli.command_modules.vm._image_builder import ScriptType
@@ -176,13 +176,6 @@ def load_arguments(self, _):
     # endregion
 
     # region Disks
-    with self.argument_context('disk grant-access', resource_type=ResourceType.MGMT_COMPUTE, operation_group='disks') as c:
-        c.argument('secure_vm_guest_state_sas', options_list=['--secure-vm-guest-state-sas', '-s'], min_api='2022-03-02',
-                   action='store_true', validator=validate_secure_vm_guest_state_sas,
-                   help="Get SAS on managed disk with VM guest state. It will be used by default when the create option of disk is 'secureOSUpload'")
-    # endregion
-
-    # region Disks
     with self.argument_context('disk', resource_type=ResourceType.MGMT_COMPUTE, operation_group='disks') as c:
         # The `Standard` is used for backward compatibility to allow customers to keep their current behavior after changing the default values to Trusted Launch VMs in the future.
         t_disk_security = [x.value for x in self.get_models('DiskSecurityTypes', operation_group='disks') or []] + [COMPATIBLE_SECURITY_TYPE_VALUE]
@@ -246,9 +239,6 @@ def load_arguments(self, _):
         c.argument('bandwidth_copy_speed', min_api='2023-10-02',
                    help='If this field is set on a snapshot and createOption is CopyStart, the snapshot will be copied at a quicker speed.',
                    arg_type=get_enum_type(["None", "Enhanced"]))
-
-    with self.argument_context('snapshot grant-access', resource_type=ResourceType.MGMT_COMPUTE, operation_group='snapshots') as c:
-        c.argument('file_format', arg_type=get_enum_type(self.get_models('FileFormat', operation_group='snapshots')), help='Used to specify the file format when making request for SAS on a VHDX file format snapshot.')
     # endregion
 
     # region Images
