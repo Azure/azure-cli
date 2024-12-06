@@ -231,21 +231,6 @@ def get_hyper_v_generation_from_vmss(cli_ctx, image_ref, location):  # pylint: d
     return None
 
 
-# def _grant_access(cmd, resource_group_name, name, duration_in_seconds, is_disk, access_level,
-#                   secure_vm_guest_state_sas=None, file_format=None):
-#     AccessLevel, GrantAccessData = cmd.get_models('AccessLevel', 'GrantAccessData')
-#     client = _compute_client_factory(cmd.cli_ctx)
-#     op = client.disks if is_disk else client.snapshots
-#     grant_access_data = GrantAccessData(access=access_level or AccessLevel.read,
-#                                         duration_in_seconds=duration_in_seconds)
-#     if secure_vm_guest_state_sas:
-#         grant_access_data.get_secure_vm_guest_state_sas = secure_vm_guest_state_sas
-#     if file_format:
-#         grant_access_data.file_format = file_format
-#
-#     return op.begin_grant_access(resource_group_name, name, grant_access_data)
-
-
 def _is_linux_os(vm):
     os_type = None
     if vm and vm.storage_profile and vm.storage_profile.os_disk and vm.storage_profile.os_disk.os_type:

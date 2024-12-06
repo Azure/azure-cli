@@ -81,8 +81,8 @@ class GrantAccess(AAZCommand):
             help="Used to specify the file format when making request for SAS on a VHDX file format snapshot",
             enum={"VHD": "VHD", "VHDX": "VHDX"},
         )
-        _args_schema.get_secure_vm_guest_state_sas = AAZBoolArg(
-            options=["--secure-vm-guest-state-sas", "--get-secure-vm-guest-state-sas"],
+        _args_schema.secure_vm_guest_state_sas = AAZBoolArg(
+            options=["--secure-state-sas", "--secure-vm-guest-state-sas"],
             arg_group="GrantAccessData",
             help="Set this flag to true to get additional SAS for VM guest state",
         )
@@ -197,7 +197,7 @@ class GrantAccess(AAZCommand):
             _builder.set_prop("access", AAZStrType, ".access", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("durationInSeconds", AAZIntType, ".duration_in_seconds", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("fileFormat", AAZStrType, ".file_format")
-            _builder.set_prop("getSecureVMGuestStateSAS", AAZBoolType, ".get_secure_vm_guest_state_sas")
+            _builder.set_prop("getSecureVMGuestStateSAS", AAZBoolType, ".secure_vm_guest_state_sas")
 
             return self.serialize_content(_content_value)
 
