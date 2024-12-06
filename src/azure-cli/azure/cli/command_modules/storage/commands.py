@@ -392,7 +392,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_custom_command_oauth('generate-sas', 'generate_sas_blob_uri')
 
     blob_service_sdk = CliCommandType(
-        operations_tmpl='azure.multiapi.storagev2.blob._blob_service_client#' 'BlobServiceClient.{}',
+        operations_tmpl='azure.multiapi.storagev2.blob._blob_service_client#BlobServiceClient.{}',
         client_factory=cf_blob_service,
         resource_type=ResourceType.DATA_STORAGE_BLOB
     )
@@ -957,3 +957,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_custom_command_oauth('set-recursive', 'set_access_control_recursive', min_api='2020-02-10')
         g.storage_custom_command_oauth('update-recursive', 'update_access_control_recursive', min_api='2020-02-10')
         g.storage_custom_command_oauth('remove-recursive', 'remove_access_control_recursive', min_api='2020-02-10')
+
+    with self.command_group('storage account migration'):
+        from .operations.account import AccountMigrationStart
+        self.command_table['storage account migration start'] = AccountMigrationStart(loader=self)

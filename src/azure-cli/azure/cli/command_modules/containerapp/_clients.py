@@ -25,7 +25,7 @@ HEADER_AZURE_ASYNC_OPERATION = "azure-asyncoperation"
 HEADER_LOCATION = "location"
 
 
-class PollingAnimation():
+class PollingAnimation:
     def __init__(self):
         self.tickers = ["/", "|", "\\", "-", "/", "|", "\\", "-"]
         self.currTicker = 0
@@ -115,7 +115,7 @@ def _extract_delay(response):
     return POLLING_SECONDS
 
 
-class ContainerAppClient():
+class ContainerAppClient:
     api_version = CURRENT_API_VERSION
 
     @classmethod
@@ -456,7 +456,7 @@ class ContainerAppClient():
         return r.json()
 
 
-class ManagedEnvironmentClient():
+class ManagedEnvironmentClient:
     api_version = CURRENT_API_VERSION
 
     @classmethod
@@ -818,7 +818,7 @@ class ManagedEnvironmentClient():
         return r.json()
 
 
-class WorkloadProfileClient():
+class WorkloadProfileClient:
     api_version = CURRENT_API_VERSION
 
     @classmethod
@@ -1108,7 +1108,7 @@ def poll(cmd, request_url, poll_if_status):  # pylint: disable=inconsistent-retu
             raise e
 
 
-class GitHubActionClient():
+class GitHubActionClient:
     api_version = CURRENT_API_VERSION
 
     @classmethod
@@ -1217,7 +1217,7 @@ class GitHubActionClient():
         return None
 
 
-class DaprComponentClient():
+class DaprComponentClient:
     api_version = CURRENT_API_VERSION
 
     @classmethod
@@ -1300,7 +1300,7 @@ class DaprComponentClient():
         return app_list
 
 
-class StorageClient():
+class StorageClient:
     api_version = CURRENT_API_VERSION
 
     @classmethod
@@ -1384,7 +1384,7 @@ class StorageClient():
         return env_list
 
 
-class AuthClient():
+class AuthClient:
     api_version = CURRENT_API_VERSION
 
     @classmethod
@@ -1421,7 +1421,7 @@ class AuthClient():
         return r.json()
 
 
-class SubscriptionClient():
+class SubscriptionClient:
     api_version = CURRENT_API_VERSION
 
     @classmethod

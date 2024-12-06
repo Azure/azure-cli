@@ -16,11 +16,7 @@ def is_valid_ssh_rsa_public_key(openssh_pubkey):
     # http://stackoverflow.com/questions/2494450/ssh-rsa-public-key-validation-using-a-regular-expression # pylint: disable=line-too-long
     # A "good enough" check is to see if the key starts with the correct header.
     import struct
-    try:
-        from base64 import decodebytes as base64_decode
-    except ImportError:
-        # deprecated and redirected to decodebytes in Python 3
-        from base64 import decodestring as base64_decode
+    from base64 import decodebytes as base64_decode
 
     parts = openssh_pubkey.split()
     if len(parts) < 2:
@@ -48,7 +44,7 @@ def generate_ssh_keys(private_key_filepath, public_key_filepath):
                                public_key_filepath, pub_ssh_dir)
 
                 return public_key
-        except IOError as e:
+        except OSError as e:
             raise CLIError(e)
 
     ssh_dir = os.path.dirname(private_key_filepath)

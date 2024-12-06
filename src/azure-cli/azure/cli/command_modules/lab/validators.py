@@ -374,7 +374,7 @@ def _update_artifacts(artifacts, lab_resource_id):
             parameters = artifact.get('parameters', [])
 
         if artifact_id:
-            result_artifact = dict()
+            result_artifact = {}
             result_artifact['artifact_id'] = _update_artifact_id(artifact_id, lab_resource_id)
             result_artifact['parameters'] = parameters
             result_artifacts.append(result_artifact)
@@ -499,11 +499,7 @@ def _is_valid_ssh_rsa_public_key(openssh_pubkey):
     # http://stackoverflow.com/questions/2494450/ssh-rsa-public-key-validation-using-a-regular-expression
     # A "good enough" check is to see if the key starts with the correct header.
     import struct
-    try:
-        from base64 import decodebytes as base64_decode
-    except ImportError:
-        # deprecated and redirected to decodebytes in Python 3
-        from base64 import decodestring as base64_decode
+    from base64 import decodebytes as base64_decode
     parts = openssh_pubkey.split()
     if len(parts) < 2:
         return False

@@ -16,7 +16,7 @@ def run_cli_cmd(cmd, retry=0):
     import json
     import subprocess
 
-    output = subprocess.run(cmd, shell=True, check=False, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+    output = subprocess.run(cmd, shell=True, check=False, capture_output=True)
     if output.returncode != 0:
         if retry:
             run_cli_cmd(cmd, retry - 1)
