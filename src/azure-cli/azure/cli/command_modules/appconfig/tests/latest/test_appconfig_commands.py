@@ -62,7 +62,6 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                                  self.check('resourceGroup', resource_group),
                                  self.check('provisioningState', 'Succeeded'),
                                  self.check('sku.name', standard_sku),
-                                 self.check('sku.name', standard_sku),
                                  self.check('tags', structured_tag),
                                  self.check('identity.type', 'SystemAssigned'),
                                  self.check('softDeleteRetentionInDays', '{retention_days}'),
@@ -74,7 +73,6 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                          self.check('[0].resourceGroup', resource_group),
                          self.check('[0].provisioningState', 'Succeeded'),
                          self.check('[0].sku.name', standard_sku),
-                         self.check('[0].sku.name', standard_sku),
                          self.check('[0].tags', structured_tag),
                          self.check('[0].identity.type', 'SystemAssigned')])
 
@@ -83,7 +81,6 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                          self.check('location', '{rg_loc}'),
                          self.check('resourceGroup', resource_group),
                          self.check('provisioningState', 'Succeeded'),
-                         self.check('sku.name', standard_sku),
                          self.check('sku.name', standard_sku),
                          self.check('tags', structured_tag),
                          self.check('identity.type', 'SystemAssigned')])
@@ -127,7 +124,6 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                          self.check('tags', structured_tag),
                          self.check('provisioningState', 'Succeeded'),
                          self.check('sku.name', premium_sku),
-                         self.check('sku.name', premium_sku),
                          self.check('encryption.keyVaultProperties.keyIdentifier', keyvault_uri.strip('/') + "/keys/{}/".format(encryption_key))])
 
         self.kwargs.update({
@@ -142,12 +138,12 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                     self.check('provisioningState', 'Succeeded'),
                     self.check('sku.name', premium_sku),
                     self.check('encryption.keyVaultProperties.keyIdentifier', keyvault_uri.strip('/') + "/keys/{}/".format(encryption_key))])
-        
+
         # update private link delegation mode and private network access
         pass_through_auth_mode = 'pass-through'
         local_auth_mode = "local"
 
-        # update authentication mode to 'local'        
+        # update authentication mode to 'local'
         self.kwargs.update({
             'data_plane_auth_mode': local_auth_mode,
         })
@@ -159,7 +155,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                     self.check('tags', {}),
                     self.check('provisioningState', 'Succeeded'),
                     self.check('dataPlaneProxy.authenticationMode', 'Local')])
-        
+
         # enabling private network access should fail
         with self.assertRaisesRegex(HttpResponseError, 'Data plane proxy authentication mode must be set to Pass-through to enable private link delegation'):
             self.cmd('appconfig update -n {config_store_name} -g {rg} --enable-arm-private-network-access')
@@ -176,7 +172,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                     self.check('tags', {}),
                     self.check('provisioningState', 'Succeeded'),
                     self.check('dataPlaneProxy.authenticationMode', 'Pass-through')])
-        
+
         self.cmd('appconfig update -n {config_store_name} -g {rg} --enable-arm-private-network-access',
                  checks=[self.check('name', '{config_store_name}'),
                     self.check('location', '{rg_loc}'),
