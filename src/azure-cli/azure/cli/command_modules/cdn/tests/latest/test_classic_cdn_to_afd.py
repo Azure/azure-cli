@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-from azure.cli.testsdk import ResourceGroupPreparer, JMESPathCheck
+from azure.cli.testsdk import ResourceGroupPreparer, JMESPathCheck, live_only
 from azure.cli.testsdk import ScenarioTest
 import time
 from .scenario_mixin import CdnScenarioMixin
@@ -55,6 +55,7 @@ class ClassicCdnMigration(CdnScenarioMixin, ScenarioTest):
 
         self.profile_delete_cmd(resource_group, profile_name)
 
+    @live_only()
     def test_classic_cdn_migration_with_endpoint(self):
         resource_group = "cli-test-rg"
         profile_name = "cli-test-profile"
