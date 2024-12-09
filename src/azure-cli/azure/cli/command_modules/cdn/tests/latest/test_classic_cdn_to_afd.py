@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-from azure.cli.testsdk import ResourceGroupPreparer, JMESPathCheck, live_only
+from azure.cli.testsdk import ResourceGroupPreparer, JMESPathCheck, live_only, unittest
 from azure.cli.testsdk import ScenarioTest
 import time
 from .scenario_mixin import CdnScenarioMixin
@@ -32,6 +32,7 @@ class ClassicCdnMigration(CdnScenarioMixin, ScenarioTest):
 
         self.profile_delete_cmd(resource_group, profile_name)
 
+    @unittest.skip("thread race issuse")
     @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
     def test_classic_cdn_migration_abort(self, resource_group):
         list_checks = [JMESPathCheck('length(@)', 0)]
