@@ -1931,6 +1931,18 @@ class AKSAgentPoolAddDecorator:
         """
         self._ensure_agentpool(agentpool)
 
+        active_cloud = get_active_cloud(self.cmd.cli_ctx)
+        if active_cloud.profile != "latest":
+            return sdk_no_wait(
+                self.context.get_no_wait(),
+                self.client.begin_create_or_update,
+                self.context.get_resource_group_name(),
+                self.context.get_cluster_name(),
+                self.context._get_nodepool_name(enable_validation=False),
+                agentpool,
+                headers=self.context.get_aks_custom_headers(),
+            )
+
         return sdk_no_wait(
             self.context.get_no_wait(),
             self.client.begin_create_or_update,
