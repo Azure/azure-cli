@@ -499,8 +499,7 @@ class FeatureAllocation:
             allocation_user_list = []
             for user in allocation_user:
                 feature_user_allocation = FeatureUserAllocation.convert_from_dict(user)
-                if feature_user_allocation:
-                    allocation_user_list.append(feature_user_allocation)
+                allocation_user_list.append(feature_user_allocation)
 
             allocation.user = allocation_user_list
 
@@ -510,8 +509,7 @@ class FeatureAllocation:
             allocation_group_list = []
             for group in allocation_group:
                 feature_group_allocation = FeatureGroupAllocation.convert_from_dict(group)
-                if feature_group_allocation:
-                    allocation_group_list.append(feature_group_allocation)
+                allocation_group_list.append(feature_group_allocation)
 
             allocation.group = allocation_group_list
 
@@ -527,8 +525,7 @@ class FeatureAllocation:
                         json.dumps(percentile, ensure_ascii=False)
                     )
                 )
-                if feature_percentile_allocation:
-                    allocation_percentile_list.append(feature_percentile_allocation)
+                allocation_percentile_list.append(feature_percentile_allocation)
 
             allocation.percentile = allocation_percentile_list
 
