@@ -223,7 +223,7 @@ Declare other custom-breaking changes that do not fall into the predefined categ
 * `command`: REQUIRED: The name of the command.
 * `message`: REQUIRED: The short-summary description of the breaking change. The description displays in warning messages.
 * `arg`: REQUIRED: The name of the argument associated with the breaking change. If arg is not None, the warning message will only be displayed when the argument is used.
-* `target_version`: REQUIRED: The version in which the breaking change will occur. By default, this is set to the next breaking change window. This information is published in the [Azure CLI Breaking Changes]() article, but does NOT display in the warning message.
+* `target_version`: REQUIRED: The version in which the breaking change will occur. By default, this is set to the next breaking change window. This information is published in the [Azure CLI Breaking Changes](https://learn.microsoft.com/en-us/cli/azure/upcoming-breaking-changes) article, but does NOT display in the warning message.
 
 ```python
 from azure.cli.core.breaking_change import register_other_breaking_change
