@@ -4,8 +4,8 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=no-self-use, line-too-long, protected-access, too-few-public-methods, unused-argument
 from knack.log import get_logger
-from knack.util import CLIError
 
+from azure.cli.core.azclierror import ArgumentUsageError
 from azure.cli.core.aaz import has_value
 from ._util import import_aaz_by_profile
 
@@ -38,7 +38,7 @@ class SnapshotUpdate(_Snapshot.Update):
             if instance.properties.encryption.type != 'EncryptionAtRestWithCustomerKey' and \
                     has_value(args.encryption_type) and \
                     args.encryption_type != 'EncryptionAtRestWithCustomerKey':
-                raise CLIError('usage error: Please set --encryption-type to EncryptionAtRestWithCustomerKey')
+                raise ArgumentUsageError('usage error: Please set --encryption-type to EncryptionAtRestWithCustomerKey')
 
             disk_encryption_set = args.disk_encryption_set
             if not is_valid_resource_id(disk_encryption_set.to_serialized_data()):
