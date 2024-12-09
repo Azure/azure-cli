@@ -440,9 +440,9 @@ def list_job(client, job_schedule_id=None, filter=None,  # pylint: disable=redef
              select=None, expand=None):
     
     if job_schedule_id:
-        return transformers.todict_track2(list(client.list_jobs_from_schedule(job_schedule_id=job_schedule_id,filter=filter,select=select,expand=expand)))
+        return client.list_jobs_from_schedule(job_schedule_id=job_schedule_id,filter=filter,select=select,expand=expand)
   
-    return transformers.todict_track2(list(client.list_jobs(filter=filter,select=select,expand=expand)))
+    return client.list_jobs(filter=filter,select=select,expand=expand)
 
 
 

@@ -526,14 +526,15 @@ class AzureBatchDataPlaneCommand:
                 if self._head_cmd:
                     kwargs['raw'] = True
                 result = _get_operation()(client, **kwargs)
-                if hasattr(result, 'as_dict'):
+                '''if hasattr(result, 'as_dict'):
                     result = result.as_dict()
                 elif _is_paged(result):
-                    result = transformers.todict_track2(list(result))
+                    result = list(result)
+                '''
 
                 # Head output
                 if self._head_cmd:
-                    return transformers.transform_response_headers(result)
+                    return result
 
                 # File download
                 if stream_output:
@@ -543,7 +544,7 @@ class AzureBatchDataPlaneCommand:
                     return
 
                 # Otherwise handle based on return type of results
-                if isinstance(result, Paged):
+                if _is_paged(result):
                     return list(result)
 
                 return result
