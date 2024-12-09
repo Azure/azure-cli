@@ -152,7 +152,7 @@ Declare breaking changes that affect the output of a command. This ensures users
 * `command`: REQUIRED: The name of the command group or command. If it is a command group, the warning would show in the execution of all commands in the group. 
 * `description`: REQUIRED: The short-summary description of the breaking change. The description displays in warning messages.
 * `target_version`: REQUIRED: The version when the deprecated item should be removed. The `target_version` is the next breaking change window by default.
-* `guide`: REQUIRED: The migration guide that customers can follow to prepare for the future breaking change. Provide as much detail as possible to help our customers transition smoothly. This information is published in the [Azure CLI Breaking Changes]() article, but does NOT display in the warning message.
+* `guide`: REQUIRED: The migration guide that customers can follow to prepare for the future breaking change. Provide as much detail as possible to help our customers transition smoothly. 
 * `doc_link`: A link to related documentation, which will be displayed in warning messages.
 
 ```python
