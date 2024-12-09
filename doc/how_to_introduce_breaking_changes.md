@@ -170,7 +170,7 @@ Declare breaking changes in the logic of the command.
 * `command`: REQUIRED: The name of the command.
 * `summary`: REQUIRED: The short-summary description of the breaking change. The description displays in warning messages.
 * `target_version`: REQUIRED: The version when the breaking change should happen. The `target_version` is the next breaking change window by default.
-* `detail`: A detailed description of the breaking change, including the actions customers should take. Provide as much detail as possible to help our customers transition smoothly. This information is published in the [Azure CLI Breaking Changes]() article, but does NOT display in the warning message.
+* `detail`: A detailed description of the breaking change, including the actions customers should take. Provide as much detail as possible to help our customers transition smoothly.
 * `doc_link`: A link to related documentation, which will be displayed in warning messages.
 
 ```python
