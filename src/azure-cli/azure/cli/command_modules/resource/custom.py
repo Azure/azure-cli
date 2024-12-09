@@ -12,7 +12,6 @@ import json
 import os
 import re
 import ssl
-import sys
 import uuid
 import base64
 
@@ -341,9 +340,6 @@ def _is_bicepparam_file_provided(parameters):
 
 
 def _ssl_context():
-    if sys.version_info < (3, 4):
-        return ssl.SSLContext(ssl.PROTOCOL_TLSv1)
-
     return ssl.create_default_context()
 
 
