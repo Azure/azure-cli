@@ -1291,14 +1291,13 @@ class AzCommandGroup(CommandGroup):
             return arg_source_copy
         return merged_kwargs
 
-    # pylint: disable=arguments-differ
-    def command(self, name, method_name=None, **kwargs):
+    def command(self, name, handler_name=None, **kwargs):
         """
         Register a CLI command.
         :param name: Name of the command as it will be called on the command line
         :type name: str
-        :param method_name: Name of the method the command maps to
-        :type method_name: str
+        :param handler_name: Name of the method the command maps to
+        :type handler_name: str
         :param kwargs: Keyword arguments. Supported keyword arguments include:
             - client_factory: Callable which returns a client needed to access the underlying command method. (function)
             - confirmation: Prompt prior to the action being executed. This is useful if the action
@@ -1315,7 +1314,7 @@ class AzCommandGroup(CommandGroup):
             - max_api: Maximum API version required for commands within the group (string)
         :rtype: None
         """
-        return self._command(name, method_name=method_name, **kwargs)
+        return self._command(name, method_name=handler_name, **kwargs)
 
     def custom_command(self, name, method_name=None, **kwargs):
         """
