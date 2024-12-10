@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, KeyVaultPreparer, record_only
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, KeyVaultPreparer, record_only, live_only
 from azure.cli.command_modules.acr.custom import DEF_DIAG_SETTINGS_NAME_TEMPLATE
 
 
@@ -715,6 +715,7 @@ class AcrCommandsTests(ScenarioTest):
                  checks=[self.check('anonymousPullEnabled', False)])
 
     @ResourceGroupPreparer()
+    @live_only()
     def test_acr_create_invalid_name(self, resource_group):
         from azure.cli.core.azclierror import InvalidArgumentValueError
 
