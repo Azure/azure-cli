@@ -1196,17 +1196,17 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         # create a disk and update
         data_disk = self.cmd('disk create -g {rg} -n {disk1} --size-gb 1 --tags tag1=d1', checks=[
             self.check('sku.name', 'Premium_LRS'),
-            self.check('diskSizeGb', 1),
+            self.check('diskSizeGB', 1),
             self.check('tags.tag1', 'd1')
         ]).get_output_in_json()
         self.cmd('disk update -g {rg} -n {disk1} --size-gb 10 --sku Standard_LRS', checks=[
             self.check('sku.name', 'Standard_LRS'),
-            self.check('diskSizeGb', 10)
+            self.check('diskSizeGB', 10)
         ])
 
         # get SAS token
         result = self.cmd('disk grant-access -g {rg} -n {disk1} --duration-in-seconds 10').get_output_in_json()
-        self.assertTrue('sv=' in result['accessSas'])
+        self.assertTrue('sv=' in result['accessSAS'])
 
         # create another disk by importing from the disk1
         self.kwargs['disk1_id'] = data_disk['id']
@@ -1215,13 +1215,13 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         # create a snpashot
         os_snapshot = self.cmd('snapshot create -g {rg} -n {snapshot1} --size-gb 1 --sku Premium_LRS --tags tag1=s1', checks=[
             self.check('sku.name', 'Premium_LRS'),
-            self.check('diskSizeGb', 1),
+            self.check('diskSizeGB', 1),
             self.check('tags.tag1', 's1')
         ]).get_output_in_json()
         # update the sku
         self.cmd('snapshot update -g {rg} -n {snapshot1} --sku Standard_LRS', checks=[
             self.check('sku.name', 'Standard_LRS'),
-            self.check('diskSizeGb', 1)
+            self.check('diskSizeGB', 1)
         ])
 
         # create another snapshot by importing from the disk1
@@ -1284,7 +1284,7 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         # create a disk and update
         data_disk = self.cmd('disk create -g {rg} -n {disk_name1} --size-gb 1', checks=[
             self.check('sku.name', 'Premium_LRS'),
-            self.check('diskSizeGb', 1)
+            self.check('diskSizeGB', 1)
         ]).get_output_in_json()
         # create a vm
         vm = self.cmd('vm create -n {vm_name} -g {rg} --image {vm_image} --attach-data-disks {disk_name1} '
@@ -1316,7 +1316,7 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         self.cmd('disk create --resource-group {rg} --name {disk_name2} --sku {disk_sku} --size-gb {disk_size2} --source {disk_restore_point_id}',
                  checks=[
                      self.check('sku.name', 'Premium_LRS'),
-                     self.check('diskSizeGb', 2),
+                     self.check('diskSizeGB', 2),
                      self.check('creationData.createOption', 'Restore'),
                      self.check('creationData.sourceResourceId', '{disk_restore_point_id}')
                  ])
@@ -1471,12 +1471,12 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         })
 
         self.cmd('disk create -g {rg} -n {disk1} --size-gb 10 --sku UltraSSD_LRS --disk-iops-read-only 200 --disk-mbps-read-only 30', checks=[
-            self.check('diskIopsReadOnly', 200),
+            self.check('diskIOPSReadOnly', 200),
             self.check('diskMBpsReadOnly', 30)
         ])
 
         self.cmd('disk update -g {rg} -n {disk1} --disk-iops-read-only 250 --disk-mbps-read-only 40', checks=[
-            self.check('diskIopsReadOnly', 250),
+            self.check('diskIOPSReadOnly', 250),
             self.check('diskMBpsReadOnly', 40)
         ])
 
@@ -2630,7 +2630,7 @@ class VMMonitorTestDefault(ScenarioTest):
                  replay_processors=None, recording_patches=None, replay_patches=None):
         from azure.cli.command_modules.vm.tests.latest._test_util import TimeSpanProcessor
         TIMESPANTEMPLATE = '0000-00-00'
-        super(VMMonitorTestDefault, self).__init__(
+        super().__init__(
             method_name,
             recording_processors=[TimeSpanProcessor(TIMESPANTEMPLATE)],
             replay_processors=[TimeSpanProcessor(TIMESPANTEMPLATE)]
@@ -3771,7 +3771,7 @@ class VMDiskAttachDetachTest(ScenarioTest):
         })
         self.cmd('disk create -g {rg} -n {disk1} --size-gb 4 --sku UltraSSD_LRS --disk-iops-read-write 500 --disk-mbps-read-write 8 --zone 2')
         self.cmd('disk update -g {rg} -n {disk1} --disk-iops-read-write 510 --disk-mbps-read-write 10', checks=[
-            self.check('diskIopsReadWrite', 510),
+            self.check('diskIOPSReadWrite', 510),
             self.check('diskMBpsReadWrite', 10)
         ])
 
@@ -7184,7 +7184,6 @@ class VMGalleryImage(ScenarioTest):
         self.cmd(
             'sig image-version delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version}')
 
-
     @ResourceGroupPreparer(name_prefix='cli_test_target_extended_locations_encryption', location='westus')
     @KeyVaultPreparer(name_prefix='vault-', name_len=20, key='vault', location='westus', additional_params='--enable-purge-protection')
     def test_image_version_with_target_extended_locations_encryption(self, resource_group, key_vault ):
@@ -9196,13 +9195,13 @@ class DiskEncryptionSetTest(ScenarioTest):
         
         # create disk with des name
         self.cmd('disk create -g {rg} -n {disk1} --security-type ConfidentialVM_DiskEncryptedWithCustomerKey --hyper-v-generation V2 --secure-vm-disk-encryption-set {des} --image-reference "{image}"', checks=[
-            self.check_pattern('securityProfile.secureVmDiskEncryptionSetId', self.kwargs['des_pattern']),
+            self.check_pattern('securityProfile.secureVMDiskEncryptionSetId', self.kwargs['des_pattern']),
             self.check('securityProfile.securityType', 'ConfidentialVM_DiskEncryptedWithCustomerKey')
         ])
 
         # create disk with des id
         self.cmd('disk create -g {rg} -n {disk2} --security-type ConfidentialVM_DiskEncryptedWithCustomerKey --hyper-v-generation V2 --secure-vm-disk-encryption-set {des} --image-reference "{image}"', checks=[
-            self.check_pattern('securityProfile.secureVmDiskEncryptionSetId', self.kwargs['des_pattern']),
+            self.check_pattern('securityProfile.secureVMDiskEncryptionSetId', self.kwargs['des_pattern']),
             self.check('securityProfile.securityType', 'ConfidentialVM_DiskEncryptedWithCustomerKey')
         ])
 
@@ -10402,22 +10401,38 @@ class VMInstallPatchesScenarioTest(ScenarioTest):
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_vm_install_patches_')
     def test_vm_install_patches(self, resource_group):
+        from azure.core.exceptions import HttpResponseError
+
         self.kwargs.update({
             'subnet': 'subnet1',
             'vnet': 'vnet1'
         })
-        # Create new one
-        self.cmd('vm create -g {rg} -n vm --image MicrosoftWindowsServer:WindowsServer:2022-Datacenter-Azure-Edition-Hotpatch:latest '
+        # Create a windows vm
+        self.cmd('vm create -g {rg} -n vm -l westus --image MicrosoftWindowsServer:WindowsServer:2022-Datacenter-Azure-Edition-Hotpatch:latest '
                  '--enable-hotpatching true --patch-mode AutomaticByPlatform --enable-agent --admin-username azureuser --admin-password testPassword0 --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+
+        # Create a linux vm
+        self.cmd('vm create -g {rg} -n vm2 --image Ubuntu2204 -l westus --admin-username azureuser --admin-password Password123! '
+                 '--subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
 
         # Disable default outbound access
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
-        self.cmd('vm install-patches -g {rg} -n vm --maximum-duration PT4H --reboot-setting IfRequired --classifications-to-include-win Critical Security --exclude-kbs-requiring-reboot true --max-patch-publish-date 2024-08-01T02:36:43', checks=[
+        # Test for WindowsParameters and check for serialization warning/errors
+        with self.assertRaisesRegex(HttpResponseError, "The entry in 'kbNumbersToInclude' with value '1111' is not valid. It must be a KBID such as"):
+            self.cmd('vm install-patches -g {rg} -n vm --maximum-duration PT4H --reboot-setting Never --classifications-to-include-win Critical Security '
+                     '--exclude-kbs-requiring-reboot true --kb-numbers-to-include=1111 --max-patch-publish-date 2024-11-01T02:36:43')
+
+        self.cmd('vm install-patches -g {rg} -n vm --maximum-duration PT4H --reboot-setting Never --classifications-to-include-win Critical Security '
+                 '--exclude-kbs-requiring-reboot true --kb-numbers-to-include=KB4512508 --max-patch-publish-date 2024-11-01T02:36:43', 
+                 checks=[
+                    self.check('status', 'Succeeded')
+                    ])
+
+        # Test for LinuxParameters and check for success
+        self.cmd('vm install-patches -g {rg} -n vm2 --maximum-duration PT4H --reboot-setting ifRequired --classifications-to-include-linux Critical Security', checks=[
             self.check('status', 'Succeeded')
         ])
-
-
 
 class VMTrustedLaunchScenarioTest(ScenarioTest):
     @AllowLargeResponse(size_kb=99999)
@@ -10559,8 +10574,8 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('creationData.createOption', 'UploadPreparedSecure'),
         ])
         self.cmd('disk grant-access -n {disk} -g {rg} --access-level Write --duration-in-seconds 86400', checks=[
-            self.exists('accessSas'),
-            self.exists('securityDataAccessSas')
+            self.exists('accessSAS'),
+            self.exists('securityDataAccessSAS')
         ])
 
         self.cmd('disk create -n {disk1} -g {rg} --os-type Windows --hyper-v-generation v2 --security-type TrustedLaunch --upload-type UploadWithSecurityData --upload-size-bytes 34359738880 --sku standard_lrs', checks=[
@@ -10568,15 +10583,15 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('creationData.createOption', 'UploadPreparedSecure')
         ])
         self.cmd('disk grant-access -n {disk1} -g {rg} --access-level Write --duration-in-seconds 86400 --secure-vm-guest-state-sas', checks=[
-            self.exists('accessSas'),
-            self.exists('securityDataAccessSas')
+            self.exists('accessSAS'),
+            self.exists('securityDataAccessSAS')
         ])
 
         self.cmd('disk create -n {disk2} -g {rg} --os-type Windows --hyper-v-generation v2 --upload-type Upload --upload-size-bytes 34359738880 --sku standard_lrs', checks=[
             self.check('creationData.createOption', 'Upload'),
         ])
         self.cmd('disk grant-access -n {disk2} -g {rg} --access-level Write --duration-in-seconds 86400', checks=[
-            self.exists('accessSas'),
+            self.exists('accessSAS'),
         ])
 
         message = "Please specify --security-type when the value of --upload-type is 'UploadWithSecurityData'"

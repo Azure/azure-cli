@@ -1502,8 +1502,7 @@ class SubscriptionStub(Subscription):  # pylint: disable=too-few-public-methods
         policies = SubscriptionPolicies()
         policies.spending_limit = SpendingLimit.current_period_off
         policies.quota_id = 'some quota'
-        super(SubscriptionStub, self).__init__(subscription_policies=policies,
-                                               authorization_source='some_authorization_source')
+        super().__init__(subscription_policies=policies, authorization_source='some_authorization_source')
         self.id = id
         self.subscription_id = id.split('/')[1]
         self.display_name = display_name

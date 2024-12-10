@@ -23,10 +23,10 @@ class __CMDGroup(AAZCommandGroup):
             Azure Managed and Unmanaged Data Disks have a maximum size of 4095 GB (with the exception of
             larger disks in preview). Azure Unmanaged Disks also have a maximum capacity of 4095 GB.
             For more information, see:
-            - Azure Disks - https://docs.microsoft.com/azure/virtual-machines/managed-disks-overview.
+            - Azure Disks - https://learn.microsoft.com/azure/virtual-machines/managed-disks-overview.
             - Larger Managed Disks in Public Preview - https://azure.microsoft.com/blog/introducing-the-
             public-preview-of-larger-managed-disks-sizes/
-            - Ultra SSD Managed Disks in Public Preview - https://docs.microsoft.com/azure/virtual-
+            - Ultra SSD Managed Disks in Public Preview - https://learn.microsoft.com/azure/virtual-
             machines/disks-types.
     """
     pass

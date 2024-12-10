@@ -3,12 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-
 import os
 import platform
 import subprocess
 import datetime
-import sys
 import zipfile
 import stat
 from urllib.parse import urlparse
@@ -76,7 +74,7 @@ class AzCopy:
             _urlretrieve(file_url, install_location)
             os.chmod(install_location,
                      os.stat(install_location).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
-        except IOError as err:
+        except OSError as err:
             raise CLIError('Connection error while attempting to download azcopy {}. You could also install the '
                            'specified azcopy version to {} manually. ({})'.format(AZCOPY_VERSION, install_dir, err))
 
@@ -214,7 +212,7 @@ def _get_default_install_location():
     else:
         raise CLIError('The {} platform is not currently supported. If you want to know which platforms are supported, '
                        'please refer to the document for supported platforms: '
-                       'https://docs.microsoft.com/en-us/azure/storage/common/storage-use-azcopy-v10#download-azcopy'
+                       'https://learn.microsoft.com/en-us/azure/storage/common/storage-use-azcopy-v10#download-azcopy'
                        .format(system))
     return install_location
 
@@ -224,12 +222,7 @@ def _urlretrieve(url, install_location):
     req = urlopen(url)
     compressedFile = io.BytesIO(req.read())
     if url.endswith('zip'):
-        if sys.version_info.major >= 3:
-            zip_file = zipfile.ZipFile(compressedFile)
-        else:
-            # If Python version is 2.X, use StringIO instead.
-            import StringIO  # pylint: disable=import-error
-            zip_file = zipfile.ZipFile(StringIO.StringIO(req.read()))
+        zip_file = zipfile.ZipFile(compressedFile)
         for fileName in zip_file.namelist():
             if fileName.endswith('azcopy') or fileName.endswith('azcopy.exe'):
                 with open(install_location, 'wb') as f:

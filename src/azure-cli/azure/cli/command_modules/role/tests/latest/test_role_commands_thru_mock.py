@@ -75,7 +75,7 @@ MOCKED_SP = {
     'appId': MOCKED_APP_APP_ID
 }
 
-# Example from https://docs.microsoft.com/en-us/graph/api/serviceprincipal-addpassword
+# Example from https://learn.microsoft.com/en-us/graph/api/serviceprincipal-addpassword
 MOCKED_ADD_PASSWORD_RESULT = {
     "customKeyIdentifier": None,
     "endDateTime": "2021-09-09T19:50:29.3086381Z",
@@ -337,7 +337,7 @@ class TestRoleMocked(unittest.TestCase):
             create_service_principal_for_rbac(cmd, 'will-fail')
 
         # assert we handled such error
-        self.assertTrue('https://docs.microsoft.com/azure/azure-resource-manager/resource-group-create-service-principal-portal' in str(context.exception))
+        self.assertTrue('https://learn.microsoft.com/azure/azure-resource-manager/resource-group-create-service-principal-portal' in str(context.exception))
 
     @mock.patch('azure.cli.command_modules.role.custom._auth_client_factory', autospec=True)
     @mock.patch('azure.cli.command_modules.role.custom._graph_client_factory', autospec=True)

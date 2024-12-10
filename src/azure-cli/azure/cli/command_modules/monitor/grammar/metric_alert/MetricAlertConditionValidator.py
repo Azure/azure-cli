@@ -40,7 +40,7 @@ dim_op_conversion = {
 class MetricAlertConditionValidator(MetricAlertConditionListener):
 
     def __init__(self):
-        super(MetricAlertConditionValidator, self).__init__()
+        super().__init__()
         self.parameters = {}
         self._dimension_index = 0
 

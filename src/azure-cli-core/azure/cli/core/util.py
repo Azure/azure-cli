@@ -18,7 +18,7 @@ import sys
 from urllib.request import urlopen
 
 from knack.log import get_logger
-from knack.util import CLIError, to_snake_case
+from knack.util import CLIError, to_snake_case, to_camel_case
 
 logger = get_logger(__name__)
 
@@ -28,10 +28,10 @@ COMPONENT_PREFIX = 'azure-cli-'
 SSLERROR_TEMPLATE = ('Certificate verification failed. This typically happens when using Azure CLI behind a proxy '
                      'that intercepts traffic with a self-signed certificate. '
                      # pylint: disable=line-too-long
-                     'Please add this certificate to the trusted CA bundle. More info: https://docs.microsoft.com/cli/azure/use-cli-effectively#work-behind-a-proxy.')
+                     'Please add this certificate to the trusted CA bundle. More info: https://learn.microsoft.com/cli/azure/use-cli-effectively#work-behind-a-proxy.')
 
 QUERY_REFERENCE = ("To learn more about --query, please visit: "
-                   "'https://docs.microsoft.com/cli/azure/query-azure-cli'")
+                   "'https://learn.microsoft.com/cli/azure/query-azure-cli'")
 
 
 _PROXYID_RE = re.compile(
@@ -587,7 +587,7 @@ def shell_safe_json_parse(json_or_dict_string, preserve_order=False, strict=True
             # Recommendation for all shells
             from azure.cli.core.azclierror import InvalidArgumentValueError
             recommendation = "The provided JSON string may have been parsed by the shell. See " \
-                             "https://docs.microsoft.com/cli/azure/use-cli-effectively#use-quotation-marks-in-arguments"
+                             "https://learn.microsoft.com/cli/azure/use-azure-cli-successfully-quoting#json-strings"
 
             # Recommendation especially for PowerShell
             parent_proc = get_parent_proc_name()
@@ -622,6 +622,40 @@ def b64_to_hex(s):
     if isinstance(hex_data, bytes):
         return str(hex_data.decode("utf-8"))
     return hex_data
+
+
+def todict(obj, post_processor=None):
+    """
+    Convert an object to a dictionary. Use 'post_processor(original_obj, dictionary)' to update the
+    dictionary in the process
+    """
+    from datetime import date, time, datetime, timedelta
+    from enum import Enum
+    if isinstance(obj, dict):
+        result = {k: todict(v, post_processor) for (k, v) in obj.items()}
+        return post_processor(obj, result) if post_processor else result
+    if isinstance(obj, list):
+        return [todict(a, post_processor) for a in obj]
+    if isinstance(obj, Enum):
+        return obj.value
+    if isinstance(obj, (date, time, datetime)):
+        return obj.isoformat()
+    if isinstance(obj, timedelta):
+        return str(obj)
+    # This is the only difference with knack.util.todict because for typespec generated SDKs
+    # The base model stores data in obj.__dict__['_data'] instead of in obj.__dict__
+    # We need to call obj.as_dict() to extract data for this kind of model
+    if hasattr(obj, 'as_dict') and not hasattr(obj, '_attribute_map'):
+        result = {to_camel_case(k): todict(v, post_processor) for k, v in obj.as_dict().items()}
+        return post_processor(obj, result) if post_processor else result
+    if hasattr(obj, '_asdict'):
+        return todict(obj._asdict(), post_processor)
+    if hasattr(obj, '__dict__'):
+        result = {to_camel_case(k): todict(v, post_processor)
+                  for k, v in obj.__dict__.items()
+                  if not callable(v) and not k.startswith('_')}
+        return post_processor(obj, result) if post_processor else result
+    return obj
 
 
 def random_string(length=16, force_lower=False, digits_only=False):
@@ -715,7 +749,7 @@ def open_page_in_browser(url):
 
     if is_wsl():   # windows 10 linux subsystem
         try:
-            # https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_powershell_exe
+            # https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_powershell_exe
             # Ampersand (&) should be quoted
             return subprocess.Popen(
                 ['powershell.exe', '-NoProfile', '-Command', 'Start-Process "{}"'.format(url)]).wait()

@@ -155,7 +155,7 @@ class BaseAKSContext:
         self.raw_param = raw_parameters
         self.models = models
         self.decorator_mode = decorator_mode
-        self.intermediates = dict()
+        self.intermediates = {}
 
     def get_intermediate(self, variable_name: str, default_value: Any = None) -> Any:
         """Get the value of an intermediate by its name.

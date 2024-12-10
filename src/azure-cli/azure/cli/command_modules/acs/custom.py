@@ -241,7 +241,7 @@ def _aks_browse(
                 stderr=subprocess.STDOUT,
             )
             # output format: "'{port}'"
-            dashboard_port = int((dashboard_port.replace("'", "")))
+            dashboard_port = int(dashboard_port.replace("'", ""))
         except subprocess.CalledProcessError as err:
             raise ResourceNotFoundError('Could not find dashboard port: {} Command output: {}'.format(err, err.output))
 
@@ -473,7 +473,7 @@ def wait_then_open_async(url):
     """
     Spawns a thread that waits for a bit then opens a URL.
     """
-    t = threading.Thread(target=wait_then_open, args=({url}))
+    t = threading.Thread(target=wait_then_open, args=(url,))
     t.daemon = True
     t.start()
 
@@ -546,6 +546,7 @@ def aks_create(
     attach_acr=None,
     skip_subnet_role_assignment=False,
     node_resource_group=None,
+    nrg_lockdown_restriction_level=None,
     k8s_support_plan=None,
     enable_defender=False,
     defender_config=None,
@@ -689,6 +690,7 @@ def aks_update(
     tags=None,
     disable_local_accounts=False,
     enable_local_accounts=False,
+    ip_families=None,
     network_plugin=None,
     network_plugin_mode=None,
     network_dataplane=None,
@@ -731,6 +733,7 @@ def aks_update(
     disable_windows_gmsa=False,
     attach_acr=None,
     detach_acr=None,
+    nrg_lockdown_restriction_level=None,
     enable_defender=False,
     disable_defender=False,
     defender_config=None,
@@ -1471,7 +1474,7 @@ def load_kubernetes_configuration(filename):
     try:
         with open(filename) as stream:
             return yaml.safe_load(stream)
-    except (IOError, OSError) as ex:
+    except OSError as ex:
         if getattr(ex, 'errno', 0) == errno.ENOENT:
             raise CLIError('{} does not exist'.format(filename))
         raise
@@ -1922,7 +1925,7 @@ def k8s_install_kubectl(cmd, client_version='latest', install_location=None, sou
         _urlretrieve(file_url, install_location)
         os.chmod(install_location,
                  os.stat(install_location).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
-    except IOError as ex:
+    except OSError as ex:
         raise CLIError(
             'Connection error while attempting to download client ({})'.format(ex))
 
@@ -1986,7 +1989,7 @@ def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, s
             logger.warning('Downloading client to "%s" from "%s"',
                            download_path, file_url)
             _urlretrieve(file_url, download_path)
-        except IOError as ex:
+        except OSError as ex:
             raise CLIError(
                 'Connection error while attempting to download client ({})'.format(ex))
         _unzip(download_path, tmp_dir)

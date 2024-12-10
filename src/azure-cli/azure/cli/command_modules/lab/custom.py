@@ -264,7 +264,7 @@ def claim_vm(cmd, lab_name=None, name=None, resource_group_name=None):
 def _export_parameters(arm_template):
     parameters = []
     if arm_template and arm_template.get('contents') and arm_template['contents'].get('parameters'):
-        default_values = dict()
+        default_values = {}
         if arm_template.get('parametersValueFilesInfo'):
             for parameter_value_file_info in arm_template.get('parametersValueFilesInfo'):
                 if isinstance(parameter_value_file_info['parametersValueInfo'], dict):
@@ -273,7 +273,7 @@ def _export_parameters(arm_template):
 
         if isinstance(arm_template['contents']['parameters'], dict):
             for k in arm_template['contents']['parameters']:
-                param = dict()
+                param = {}
                 param['name'] = k
                 param['value'] = default_values.get(k, "")
                 parameters.append(param)
