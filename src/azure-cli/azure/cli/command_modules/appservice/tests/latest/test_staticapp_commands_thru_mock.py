@@ -618,7 +618,7 @@ class TestStaticAppCommands(unittest.TestCase):
 
         self.staticapp_client.list_static_site_secrets.assert_called_once_with(resource_group_name=self.rg1, name=self.name1)
         from ast import literal_eval
-        self.assertEqual(literal_eval(secret.__str__())["properties"]["apiKey"], "key")
+        self.assertEqual(literal_eval(str(secret))["properties"]["apiKey"], "key")
 
 
     def test_staticsite_identity_assign(self):
@@ -656,7 +656,7 @@ class TestStaticAppCommands(unittest.TestCase):
         self.staticapp_client.reset_static_site_api_key.assert_called_once()
 
         from ast import literal_eval
-        reset_envelope = literal_eval(self.staticapp_client.reset_static_site_api_key.call_args[1]["reset_properties_envelope"].__str__())
+        reset_envelope = literal_eval(str(self.staticapp_client.reset_static_site_api_key.call_args[1]["reset_properties_envelope"]))
         self.assertEqual(reset_envelope["repository_token"], self.token1)
 
     @mock.patch("azure.cli.command_modules.appservice.static_sites.show_app")

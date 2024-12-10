@@ -316,7 +316,7 @@ def flush():
     save(get_config_dir(), _session.generate_payload())
 
     # reset session fields, retaining correlation id and application
-    _session.__init__(correlation_id=_session.correlation_id, application=_session.application)
+    _session.__init__(correlation_id=_session.correlation_id, application=_session.application)  # pylint: disable=unnecessary-dunder-call
 
 
 @_user_agrees_to_telemetry
