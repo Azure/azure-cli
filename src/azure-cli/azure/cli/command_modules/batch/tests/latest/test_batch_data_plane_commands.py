@@ -310,14 +310,62 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         self.kwargs.update({
             'j_id': 'job1',
             'p_id': 'testpool',
+            'etag': 'somevalue',
             'j_file': self._get_test_data_file('batchCreateJob-simple.json'),
             'json': self._get_test_data_file('batch-pool-create.json').replace('\\', '\\\\')
         })
 
 
+        
+
+        
+        result = self.batch_cmd('batch pool create --id testpool --vm-size Standard_A1 '
+                                '--image canonical:ubuntuserver:18.04-lts --node-agent-sku-id "batch.node.ubuntu 18.04" '
+                                '--disk-encryption-targets "TemporaryDisk"')
+        
+        self.batch_cmd('batch job create --json-file "{j_file}"')
+
+        result = self.batch_cmd('batch job show --job-id cli-test-job-1').get_output_in_json()
+
+        result = self.batch_cmd('batch job list') \
+            .assert_with_checks([self.check('length(@)', 1)]) \
+            .get_output_in_json()
+
+        
+        
+        '''
+        self.batch_cmd('az batch pool autoscale evaluate --help')
+        self.batch_cmd('batch pool create --json-file "{json}"')
+        
+        
+        result = self.batch_cmd('batch job show --job-id fake').get_output_in_json()
+
+        self.batch_cmd('batch job create --id {j_id} --metadata test=value '
+                       '--job-max-task-retry-count 5 '
+                       '--job-manager-task-id JobManager '
+                       '--job-manager-task-command-line "cmd /c set AZ_BATCH_TASK_ID" '
+                       '--job-manager-task-environment-settings '
+                       'CLI_TEST_VAR=CLI_TEST_VAR_VALUE --pool-id {p_id}')
+
+
+        result = self.batch_cmd('batch job show --job-id {j_id}').get_output_in_json()
+
+        self.batch_cmd('batch job show --job-id {j_id} --if-match {etag}').assert_with_checks([
+            self.check('onAllTasksComplete', 'noaction'),
+            self.check('constraints.maxTaskRetryCount', 5),
+            self.check('jobManagerTask.id', 'JobManager'),
+            self.check('jobManagerTask.environmentSettings[0].name', 'CLI_TEST_VAR'),
+            self.check('jobManagerTask.environmentSettings[0].value', 'CLI_TEST_VAR_VALUE'),
+            self.check('metadata[0].name', 'test'),
+            self.check('metadata[0].value', 'value')])
+
+
+
+
+
         self.batch_cmd('batch pool create --json-file "{json}"')
 
-        #self.batch_cmd('batch pool autoscale enable --help')
+    
        
         pool_list = self.batch_cmd('batch pool list')
         pool_list = pool_list.get_output_in_json()
@@ -325,8 +373,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         pool_ids = sorted([p['id'] for p in pool_list])
 
 
-        self.batch_cmd('batch pool autoscale enable --pool-id {p_id} '
-                       '--auto-scale-formula "$TargetLowPriorityNodes=3"')
+       
       
         # test create job
         self.batch_cmd('batch job create --id {j_id} --metadata test=value '
@@ -336,6 +383,8 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
                        '--job-manager-task-environment-settings '
                        'CLI_TEST_VAR=CLI_TEST_VAR_VALUE --pool-id {p_id}')
 
+        self.batch_cmd('batch pool autoscale enable --pool-id {p_id} '
+                       '--auto-scale-formula "$TargetLowPriorityNodes=3"')
         
         result = self.batch_cmd('batch job list') \
             .assert_with_checks([self.check('length(@)', 1)]) \
@@ -345,7 +394,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
        
 
         # test get job
-        self.batch_cmd('batch job show --job-id {j_id}').assert_with_checks([
+        self.batch_cmd('batch job show --job-id {j_id} --if-match etag').assert_with_checks([
             self.check('onAllTasksComplete', 'noaction'),
             self.check('constraints.maxTaskRetryCount', 5),
             self.check('jobManagerTask.id', 'JobManager'),
@@ -355,7 +404,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
             self.check('metadata[0].value', 'value')])
         
 
-        '''
+        
         self.batch_cmd('batch job create --json-file "{j_file}"')
 
         result = self.batch_cmd('batch pool create --id pool_image1 --vm-size Standard_A1 '
