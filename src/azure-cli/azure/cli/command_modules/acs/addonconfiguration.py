@@ -500,8 +500,8 @@ def ensure_container_insights_for_monitoring(
                 extensionSettings["dataCollectionSettings"] = dataCollectionSettings
 
             if enable_high_log_scale_mode:
-                for i in range(len(cistreams)):
-                    if cistreams[i] == "Microsoft-ContainerLogV2":
+                for i, v in enumerate(cistreams):
+                    if v == "Microsoft-ContainerLogV2":
                         cistreams[i] = "Microsoft-ContainerLogV2-HighScale"
             # create the DCR
             dcr_creation_body_without_syslog = json.dumps(
