@@ -527,18 +527,19 @@ def create_task(client,
     tasks = []
     if json_file:
         json_obj = get_file_json(json_file)
-        try:
-            task = BatchTaskCreateContent.from_dict(json_obj)
-        except (DeserializationError, TypeError):
+
+        if isinstance(json_obj, list):
+            for json_task in json_obj:
+                tasks.append(BatchTaskCreateContent(json_task))
+        else:  
             try:
-                task_collection = BatchTaskGroup.from_dict(json_obj)
-                tasks = task_collection.value
-            except (DeserializationError, TypeError):
+                task = BatchTaskCreateContent(json_obj)
+            except (DeserializationError, TypeError, AttributeError):
                 try:
-                    for json_task in json_obj:
-                        tasks.append(BatchTaskCreateContent.from_dict(json_task))
-                except (DeserializationError, TypeError):
-                    raise ValueError(f"JSON file '{json_file}' is not formatted correctly.")
+                    task_collection = BatchTaskGroup(json_obj)
+                    tasks = task_collection.value
+                except (DeserializationError, TypeError,AttributeError):
+                        raise ValueError(f"JSON file '{json_file}' is not formatted correctly.")
     else:
         if command_line is None or task_id is None:
             raise ValueError("Missing required arguments.\nEither --json-file, "
@@ -555,9 +556,12 @@ def create_task(client,
             task.constraints = BatchTaskConstraints(max_wall_clock_time=max_wall_clock_time,
                                                retention_time=retention_time,
                                                max_task_retry_count=max_task_retry_count)
+    
+    print("got to this point")
     if task is not None:
         client.create_task(job_id=job_id, task=task)
-        return client.get_task(job_id=job_id, task_id=task.id)
+        result = client.get_task(job_id=job_id, task_id=task.id)
+        return result
 
     submitted_tasks = []
     for i in range(0, len(tasks), MAX_TASKS_PER_REQUEST):
