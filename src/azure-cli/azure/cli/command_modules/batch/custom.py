@@ -530,7 +530,7 @@ def create_task(client,
 
         if isinstance(json_obj, list):
             for json_task in json_obj:
-                tasks.append(BatchTaskCreateContent(json_task))
+                tasks.append(BatchTaskCreateContent(json_task).as_dict())
         else:  
             try:
                 task = BatchTaskCreateContent(json_obj)

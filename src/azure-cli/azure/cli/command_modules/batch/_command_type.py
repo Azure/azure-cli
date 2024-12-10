@@ -288,6 +288,7 @@ class BatchArgumentTree:
         self._request_param['name'] = name
         self._request_param['model'] = model.split('.')[-1]
 
+    
     def deserialize_json(self, kwargs, json_obj):
         """Deserialize the contents of a JSON file into the request body
         parameter.
@@ -297,11 +298,20 @@ class BatchArgumentTree:
         from msrest.exceptions import DeserializationError
         message = "Failed to deserialized JSON file into object {}"
         try:
+            def remove_none_values(d):
+                    """Recursively remove None values from dictionaries."""
+                    if isinstance(d, dict):
+                        return {k: remove_none_values(v) for k, v in d.items() if v is not None}
+                    elif isinstance(d, list):
+                        return [remove_none_values(v) for v in d if v is not None]
+                    else:
+                        return d
             
+            json_obj = remove_none_values(json_obj)
             import azure.batch.models
             model_type = getattr(azure.batch.models, self._request_param['model'])
             # Use from_dict in order to deserialize with case insensitive
-            kwargs[self._request_param['name']] = model_type(json_obj).as_dict()
+            kwargs[self._request_param['name']] = model_type(json_obj).as_dict(exclude_readonly=True)
 
 
             
