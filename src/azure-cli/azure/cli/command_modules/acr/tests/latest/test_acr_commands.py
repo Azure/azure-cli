@@ -127,6 +127,7 @@ class AcrCommandsTests(ScenarioTest):
     def test_acr_create_webhook(self, resource_group, resource_group_location):
         registry_name = self.create_random_name('clireg', 20)
         webhook_name = 'cliregwebhook'
+        print(webhook_name)
 
         self.kwargs.update({
             'registry_name': registry_name,
@@ -714,13 +715,16 @@ class AcrCommandsTests(ScenarioTest):
                  checks=[self.check('anonymousPullEnabled', False)])
 
     @ResourceGroupPreparer()
-    def test_acr_create_invalid_name(self, resource_group, resource_group_location):
+    def test_acr_create_invalid_name(self, resource_group):
         # Block registry creation if there is '-'.
         self.kwargs.update({
-            'registry_name': self.create_random_name('testreg', 20) + '-' + self.create_random_name('dnlhash', 20)
-        })
-        with self.assertRaises(Exception):
+           'registry_name': self.create_random_name('testreg', 20) + '-' + self.create_random_name('dnlhash', 20)
+        })   
+
+        with self.assertRaises(Exception) as ex:
             self.cmd('acr create --name {registry_name} --resource-group {rg} --sku premium -l eastus')
+
+        self.assertTrue('argument error: Registry name cannot contain dashes.' in ex.exception)
 
     @ResourceGroupPreparer(location='eastus2')
     def test_acr_with_private_endpoint(self, resource_group):
