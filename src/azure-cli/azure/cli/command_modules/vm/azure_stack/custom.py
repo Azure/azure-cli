@@ -1931,7 +1931,7 @@ def set_diagnostics_extension(
     vm_extension_name = _LINUX_DIAG_EXT if is_linux_os else _WINDOWS_DIAG_EXT
     if is_linux_os:  # check incompatible version
         exts = vm.instance_view.extensions or []
-        major_ver = extension_mappings[_LINUX_DIAG_EXT]['version'].split('.')[0]
+        major_ver = extension_mappings[_LINUX_DIAG_EXT]['version'].split('.', maxsplit=1)[0]
         if next((e for e in exts if e.name == vm_extension_name and
                 not e.type_handler_version.startswith(major_ver + '.')), None):
             logger.warning('There is an incompatible version of diagnostics extension installed. '
@@ -4251,7 +4251,7 @@ def set_vmss_diagnostics_extension(
     vm_extension_name = _LINUX_DIAG_EXT if is_linux_os else _WINDOWS_DIAG_EXT
     if is_linux_os and vmss.virtual_machine_profile.extension_profile:  # check incompatibles
         exts = vmss.virtual_machine_profile.extension_profile.extensions or []
-        major_ver = extension_mappings[_LINUX_DIAG_EXT]['version'].split('.')[0]
+        major_ver = extension_mappings[_LINUX_DIAG_EXT]['version'].split('.', maxsplit=1)[0]
         # For VMSS, we don't do auto-removal like VM because there is no reliable API to wait for
         # the removal done before we can install the newer one
         if next((e for e in exts if e.name == _LINUX_DIAG_EXT and
