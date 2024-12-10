@@ -999,10 +999,10 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
 
                     if deploy_values.get('timestamp', None) is None or \
                             event.event_timestamp > deploy_values.get('timestamp'):
-                        for value in checked_values:
-                            if deploy_values.get(checked_values[value], None) != value:
+                        for k, v in checked_values.items():
+                            if deploy_values.get(v, None) != k:
                                 update = True
-                            deploy_values[checked_values[value]] = value
+                            deploy_values[v] = k
                         deploy_values['timestamp'] = event.event_timestamp
 
                         # don't want to show the timestamp

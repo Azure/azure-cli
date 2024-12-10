@@ -374,14 +374,14 @@ def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):  # py
         # Only query Role Definitions and Graph when there are events returned
         role_defs = {d.name: worker.get_role_property(d, 'role_name') for d in list_role_definitions(cmd)}
 
-        for op_id in start_events:
-            e = end_events.get(op_id, None)
+        for k, v in start_events.items():
+            e = end_events.get(k, None)
             if not e:
                 continue
 
             entry = {}
             if e.status.value == 'Succeeded':
-                s, payload = start_events[op_id], None
+                s, payload = v, None
                 entry = dict.fromkeys(
                     ['principalId', 'principalName', 'scope', 'scopeName', 'scopeType', 'roleDefinitionId', 'roleName'],
                     None)

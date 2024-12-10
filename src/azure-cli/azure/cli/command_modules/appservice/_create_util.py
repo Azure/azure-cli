@@ -632,8 +632,8 @@ def zip_dotnet_project_references(dirPath, zip_file_path):
             csproj_content = csproj_file.read()
             new_csproj_content = str(csproj_content)
 
-            for include in replace_dict:
-                new_csproj_content = str(new_csproj_content).replace(include, replace_dict[include])
+            for k, v in replace_dict.items():
+                new_csproj_content = str(new_csproj_content).replace(k, v)
 
         # Step 3: append transitive project references to .zip.tmp
         transitives_references = _get_dotnet_transitive_missing_references(abs_references)
