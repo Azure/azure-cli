@@ -217,7 +217,7 @@ def _aks_browse(
             raise ResourceNotFoundError('Could not find dashboard pod: {} Command output: {}'.format(err, err.output))
         if dashboard_pod:
             # remove any "pods/" or "pod/" prefix from the name
-            dashboard_pod = str(dashboard_pod).split('/')[-1].strip()
+            dashboard_pod = str(dashboard_pod).rsplit('/', maxsplit=1)[-1].strip()
         else:
             raise ResourceNotFoundError("Couldn't find the Kubernetes dashboard pod.")
 
