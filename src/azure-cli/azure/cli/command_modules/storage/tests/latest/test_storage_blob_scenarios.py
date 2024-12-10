@@ -800,6 +800,32 @@ class StorageBlobSetTierTests(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(JMESPathCheck('properties.blobTier', 'Archive'),
                                 JMESPathCheck('properties.rehydrationStatus', 'rehydrate-pending-to-cold'))
 
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
+    def test_storage_block_blob_set_tier_batch(self, resource_group, storage_account):
+        source_file = self.create_temp_file(16)
+        account_info = self.get_account_info(resource_group, storage_account)
+        container_name = self.create_container(account_info)
+
+        blob_1_name = self.create_random_name(prefix='blob', length=24)
+        blob_2_name = self.create_random_name(prefix='blob', length=24)
+
+        self.storage_cmd('storage blob upload -c {} -n {} -f "{}"', account_info,
+                         container_name, blob_1_name, source_file)
+        self.storage_cmd('storage blob upload -c {} -n {} -f "{}"', account_info,
+                         container_name, blob_2_name, source_file)
+        result = self.storage_cmd('storage blob set-tier-batch -c {} --blobs {} --tier Cool',
+                                  account_info, container_name, blob_1_name + " " + blob_2_name).get_output_in_json()
+        for res in result:
+            self.assertEqual(res["status_code"], 200)
+        result = self.storage_cmd('storage blob set-tier-batch -c {} --blobs {} --tier Cold',
+                                  account_info, container_name, blob_1_name + " " + blob_2_name).get_output_in_json()
+        for res in result:
+            self.assertEqual(res["status_code"], 200)
+        result = self.storage_cmd('storage blob set-tier-batch -c {} --blobs {} --tier Archive',
+                                  account_info, container_name, blob_1_name + " " + blob_2_name).get_output_in_json()
+        for res in result:
+            self.assertEqual(res["status_code"], 200)
 
 @api_version_constraint(ResourceType.DATA_STORAGE_BLOB, min_api='2020-10-02')
 class StorageBlobImmutabilityTests(StorageScenarioMixin, ScenarioTest):
