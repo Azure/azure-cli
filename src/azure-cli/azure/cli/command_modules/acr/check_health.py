@@ -234,7 +234,7 @@ def _get_registry_status(login_server, registry_name, ignore_errors):
     try:
         request_url = 'https://' + login_server + '/v2/'
         logger.debug(add_timestamp("Sending a HTTP GET request to {}".format(request_url)))
-        challenge = requests.get(request_url, verify=(not should_disable_connection_verify()))
+        challenge = requests.get(request_url, verify=not should_disable_connection_verify())
     except SSLError:
         from ._errors import CONNECTIVITY_SSL_ERROR
         _handle_error(CONNECTIVITY_SSL_ERROR.format_error_message(login_server), ignore_errors)
@@ -334,7 +334,7 @@ def _check_registry_health(cmd, registry_name, ignore_errors):
                         if v.client_id == client_id:
                             from azure.core.exceptions import HttpResponseError
                             try:
-                                valid_identity = (resolve_identity_client_id(cmd.cli_ctx, k) == client_id)
+                                valid_identity = resolve_identity_client_id(cmd.cli_ctx, k) == client_id
                             except HttpResponseError:
                                 pass
             if not valid_identity:

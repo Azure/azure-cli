@@ -432,7 +432,7 @@ class AddressPoolCreate(_AddressPoolCreate):
             try:
                 socket.inet_aton(str(server))  # pylint:disable=no-member
                 return {"ip_address": server}
-            except socket.error:  # pylint:disable=no-member
+            except OSError:  # pylint:disable=no-member
                 return {"fqdn": server}
 
         args.backend_addresses = assign_aaz_list_arg(
@@ -478,7 +478,7 @@ class AddressPoolUpdate(_AddressPoolUpdate):
             try:
                 socket.inet_aton(str(server))  # pylint:disable=no-member
                 return {"ip_address": server}
-            except socket.error:  # pylint:disable=no-member
+            except OSError:  # pylint:disable=no-member
                 return {"fqdn": server}
 
         args.backend_addresses = assign_aaz_list_arg(
@@ -2026,7 +2026,7 @@ def add_waf_managed_rule_set(cmd, resource_group_name, policy_name,
                              rule_set_type, rule_set_version, rule_group_name=None, rules=None):
     """
     Add managed rule set to the WAF policy managed rules.
-    Visit: https://docs.microsoft.com/en-us/azure/web-application-firewall/ag/application-gateway-crs-rulegroups-rules
+    Visit: https://learn.microsoft.com/en-us/azure/web-application-firewall/ag/application-gateway-crs-rulegroups-rules
     """
     if rules is None:
         managed_rule_overrides = []
@@ -2653,7 +2653,7 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):  # pylint:
         try:
             with open(file_name, 'w') as f:
                 f.write(zone_file_content)
-        except IOError:
+        except OSError:
             raise CLIError('Unable to export to file: {}'.format(file_name))
 
 
@@ -3289,7 +3289,7 @@ class ExpressRouteCreate(_ExpressRouteCreate):
         if has_value(args.express_route_port):
             args.provider = None
             args.peering_location = None
-            args.bandwidth_in_gbps = (converted_bandwidth / 1000.0)
+            args.bandwidth_in_gbps = converted_bandwidth / 1000.0
         else:
             args.bandwidth_in_mbps = int(converted_bandwidth)
 
@@ -5544,6 +5544,9 @@ class VNetCreate(_VNetCreate):
                 subnet["network_security_group"] = {"id": args.subnet_nsg}
             args.subnets = [subnet]
 
+        if has_value(args.ipam_pool_prefix_allocations):
+            args.address_prefixes = []
+
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return {"newVNet": result}
@@ -5560,6 +5563,11 @@ class VNetUpdate(_VNetUpdate):
                      "/ddosProtectionPlans/{}",
         )
         return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.ipam_pool_prefix_allocations):
+            args.address_prefixes = []
 
     def post_instance_update(self, instance):
         if not has_value(instance.properties.ddos_protection_plan.id):

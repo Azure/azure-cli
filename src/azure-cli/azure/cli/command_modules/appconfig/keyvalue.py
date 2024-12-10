@@ -225,8 +225,8 @@ def import_config(cmd,
         kvs_to_write = []
         kvs_to_write.extend(kv_diff.get(JsonDiff.ADD, []))
         kvs_to_write.extend(ff_diff.get(JsonDiff.ADD, []))
-        kvs_to_write.extend((update["new"] for update in kv_diff.get(JsonDiff.UPDATE, [])))
-        kvs_to_write.extend((update["new"] for update in ff_diff.get(JsonDiff.UPDATE, [])))
+        kvs_to_write.extend(update["new"] for update in kv_diff.get(JsonDiff.UPDATE, []))
+        kvs_to_write.extend(update["new"] for update in ff_diff.get(JsonDiff.UPDATE, []))
 
     # write all kvs
     else:

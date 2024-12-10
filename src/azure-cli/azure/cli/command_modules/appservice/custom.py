@@ -475,7 +475,7 @@ def check_language_runtime(cmd, resource_group_name, name):
             functions_version = runtime_info['functionapp_version']
             if runtime and runtime_version:
                 if not is_flex:
-                    runtime_helper = _FunctionAppStackRuntimeHelper(cmd=cmd, linux=is_linux, windows=(not is_linux))
+                    runtime_helper = _FunctionAppStackRuntimeHelper(cmd=cmd, linux=is_linux, windows=not is_linux)
                     runtime_helper.resolve(runtime, runtime_version, functions_version, is_linux)
                 else:
                     location = app.location
@@ -929,9 +929,9 @@ def validate_zip_deploy_app_setting_exists(cmd, resource_group_name, name, slot=
             storage_connection = str(keyval['value'])
 
     if storage_connection is None:
-        raise ValidationError(('The Azure CLI does not support this deployment path. Please '
-                               'configure the app to deploy from a remote package using the steps here: '
-                               'https://aka.ms/deployfromurl'))
+        raise ValidationError('The Azure CLI does not support this deployment path. Please '
+                              'configure the app to deploy from a remote package using the steps here: '
+                              'https://aka.ms/deployfromurl')
 
 
 def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
@@ -4239,7 +4239,7 @@ class _FlexFunctionAppStackRuntimeHelper:
             for major_version in runtime['properties']['majorVersions']:
                 for minor_version in major_version['minorVersions']:
                     runtime_version = minor_version['value']
-                    if (minor_version['stackSettings'].get('linuxRuntimeSettings') is None):
+                    if minor_version['stackSettings'].get('linuxRuntimeSettings') is None:
                         continue
 
                     runtime_settings = minor_version['stackSettings']['linuxRuntimeSettings']
@@ -4791,7 +4791,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     if functions_version is None and flexconsumption_location is None:
         logger.warning("No functions version specified so defaulting to 4.")
         functions_version = '4'
-    enable_dapr = (enable_dapr == "true")
+    enable_dapr = enable_dapr == "true"
     if deployment_source_url and deployment_local_git:
         raise MutuallyExclusiveArgumentError('usage error: --deployment-source-url <url> | --deployment-local-git')
     if any([cpu, memory, workload_profile_name]) and environment is None:
@@ -4875,7 +4875,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     if flexconsumption_location is None:
         deployment_source_branch = deployment_source_branch or 'master'
 
-    disable_app_insights = (disable_app_insights == "true")
+    disable_app_insights = disable_app_insights == "true"
 
     site_config = SiteConfig(app_settings=[])
     client = web_client_factory(cmd.cli_ctx)
@@ -4992,7 +4992,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         runtime_helper = _FlexFunctionAppStackRuntimeHelper(cmd, flexconsumption_location, runtime, runtime_version)
         matched_runtime = runtime_helper.resolve(runtime, runtime_version)
     else:
-        runtime_helper = _FunctionAppStackRuntimeHelper(cmd, linux=is_linux, windows=(not is_linux))
+        runtime_helper = _FunctionAppStackRuntimeHelper(cmd, linux=is_linux, windows=not is_linux)
         matched_runtime = runtime_helper.resolve("dotnet" if not runtime else runtime,
                                                  runtime_version, functions_version, is_linux)
 
@@ -5082,10 +5082,10 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         # validate cpu and memory parameters.
         _validate_cpu_momory_functionapp(cpu, memory)
 
-        if (workload_profile_name is not None):
+        if workload_profile_name is not None:
             functionapp_def.workload_profile_name = workload_profile_name
 
-        if (cpu is not None and memory is not None):
+        if cpu is not None and memory is not None:
             functionapp_def.resource_config = ResourceConfig()
             functionapp_def.resource_config.cpu = cpu
             functionapp_def.resource_config.memory = memory
@@ -5105,7 +5105,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         if enable_dapr:
             logger.warning("Please note while using Dapr Extension for Azure Functions, app port is "
                            "mandatory when using Dapr triggers and should be empty when using only Dapr bindings.")
-            dapr_enable_api_logging = (dapr_enable_api_logging == "true")
+            dapr_enable_api_logging = dapr_enable_api_logging == "true"
             dapr_config = DaprConfig()
             dapr_config.enabled = True
             dapr_config.app_id = dapr_app_id
@@ -6577,7 +6577,7 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
             raise ValidationError("The webapp '{}' is a {} app. The code detected at '{}' will default to "
                                   "'{}'. Please create a new app "
                                   "to continue this operation. For more information on default behaviors, "
-                                  "see https://docs.microsoft.com/cli/azure/webapp?view=azure-cli-latest#az_webapp_up."
+                                  "see https://learn.microsoft.com/cli/azure/webapp?view=azure-cli-latest#az_webapp_up."
                                   .format(name, current_os, src_dir, os_name))
         _is_linux = plan_info.reserved
         # for an existing app check if the runtime version needs to be updated
@@ -8187,7 +8187,7 @@ def _remove_publish_profile_from_github(cmd, resource_group, name, repo, token, 
 
 
 def _runtime_supports_github_actions(cmd, runtime_string, is_linux):
-    helper = _StackRuntimeHelper(cmd, linux=(is_linux), windows=(not is_linux))
+    helper = _StackRuntimeHelper(cmd, linux=is_linux, windows=not is_linux)
     matched_runtime = helper.resolve(runtime_string, is_linux)
     if not matched_runtime:
         return False
@@ -8203,8 +8203,8 @@ def _get_functionapp_runtime_version(cmd, location, name, resource_group, runtim
     is_flex = is_flex_functionapp(cmd.cli_ctx, resource_group, name)
 
     try:
-        if (not is_flex):
-            helper = _FunctionAppStackRuntimeHelper(cmd, linux=(is_linux), windows=(not is_linux))
+        if not is_flex:
+            helper = _FunctionAppStackRuntimeHelper(cmd, linux=is_linux, windows=not is_linux)
             matched_runtime = helper.resolve(runtime_string, runtime_version, functionapp_version, is_linux)
         else:
             runtime_helper = _FlexFunctionAppStackRuntimeHelper(cmd, location, runtime_string, runtime_version)
@@ -8328,7 +8328,7 @@ def _get_functionapp_runtime_info(cmd, resource_group, name, slot, is_linux):  #
 
 
 def _get_app_runtime_info_helper(cmd, app_runtime, app_runtime_version, is_linux):
-    helper = _StackRuntimeHelper(cmd, linux=(is_linux), windows=(not is_linux))
+    helper = _StackRuntimeHelper(cmd, linux=is_linux, windows=not is_linux)
     if not is_linux:
         matched_runtime = helper.resolve("{}|{}".format(app_runtime, app_runtime_version), is_linux)
     else:

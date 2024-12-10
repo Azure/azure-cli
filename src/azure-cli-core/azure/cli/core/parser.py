@@ -30,9 +30,9 @@ logger = get_logger(__name__)
 EXTENSION_REFERENCE = ("If the command is from an extension, "
                        "please make sure the corresponding extension is installed. "
                        "To learn more about extensions, please visit "
-                       "'https://docs.microsoft.com/cli/azure/azure-cli-extensions-overview'")
+                       "'https://learn.microsoft.com/cli/azure/azure-cli-extensions-overview'")
 
-OVERVIEW_REFERENCE = ("https://aka.ms/cli_ref")
+OVERVIEW_REFERENCE = "https://aka.ms/cli_ref"
 
 
 class IncorrectUsageError(CLIError):

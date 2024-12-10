@@ -237,10 +237,11 @@ def load_command_table(self, _):
         from .operations.ppg import PPGShow
         self.command_table["ppg show"] = PPGShow(loader=self)
 
-    with self.command_group('disk', compute_disk_sdk, operation_group='disks', min_api='2017-03-30') as g:
+    with self.command_group('disk', compute_disk_sdk, operation_group='disks') as g:
         g.custom_command('create', 'create_managed_disk', supports_no_wait=True, table_transformer=transform_disk_create_table_output, validator=process_disk_create_namespace)
-        g.custom_command('grant-access', 'grant_disk_access')
-        g.generic_update_command('update', custom_func_name='update_managed_disk', setter_name='begin_create_or_update', setter_arg_name='disk', supports_no_wait=True)
+        from .operations.disk import DiskUpdate, DiskGrantAccess
+        self.command_table["disk grant-access"] = DiskGrantAccess(loader=self)
+        self.command_table["disk update"] = DiskUpdate(loader=self)
 
         from .aaz.latest.disk import List as DiskList, Show as DiskShow
         self.command_table['disk list'] = DiskList(loader=self, table_transformer='[].' + transform_disk_show_table_output)
@@ -259,9 +260,8 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_disk_access', supports_no_wait=True)
         g.generic_update_command('update', setter_name='set_disk_access', setter_type=compute_custom, supports_no_wait=True)
 
-    with self.command_group('image', compute_image_sdk, min_api='2016-04-30-preview') as g:
+    with self.command_group('image', compute_image_sdk) as g:
         g.custom_command('create', 'create_image', validator=process_image_create_namespace)
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_image')
 
     with self.command_group('image builder', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
         g.custom_command('create', 'create_image_template', supports_no_wait=True, supports_local_cache=True, validator=process_image_template_create_namespace)
@@ -312,8 +312,8 @@ def load_command_table(self, _):
 
     with self.command_group('snapshot', compute_snapshot_sdk, operation_group='snapshots', min_api='2016-04-30-preview') as g:
         g.custom_command('create', 'create_snapshot', validator=process_snapshot_create_namespace, supports_no_wait=True)
-        g.custom_command('grant-access', 'grant_snapshot_access')
-        g.generic_update_command('update', custom_func_name='update_snapshot', setter_name='begin_create_or_update', setter_arg_name='snapshot', supports_no_wait=True)
+        from .operations.snapshot import SnapshotUpdate
+        self.command_table['snapshot update'] = SnapshotUpdate(loader=self)
 
     with self.command_group('vm', compute_vm_sdk) as g:
         g.custom_command('identity assign', 'assign_vm_identity', validator=process_assign_identity_namespace)

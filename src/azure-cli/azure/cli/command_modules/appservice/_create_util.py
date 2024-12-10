@@ -77,7 +77,7 @@ def zip_contents_from_dir(dirPath, lang):
                 zip_dotnet_project_references(abs_src, "{}".format(zip_file_path))
             except (OSError, ValueError, TypeError, ParseError, BadZipFile, LargeZipFile):
                 logger.warning("Analysing and bundling dotnet project references have failed.")
-    except IOError as e:
+    except OSError as e:
         if e.errno == 13:
             raise CLIError('Insufficient permissions to create a zip in current directory. '
                            'Please re-run the command with administrator privileges')

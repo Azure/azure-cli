@@ -95,7 +95,7 @@ def _expand_file_prefixed_files(args):
         if ix == 0:
             try:
                 return _load_file(poss_file)
-            except IOError:
+            except OSError:
                 logger.debug("Failed to load '%s', assume not a file", arg)
                 return arg
 
@@ -471,7 +471,7 @@ def cached_put(cmd_obj, operation, parameters, *args, setter_arg_name='parameter
     obj_path = os.path.join(obj_dir, obj_file)
     try:
         os.remove(obj_path)
-    except (OSError, IOError):  # FileNotFoundError introduced in Python 3
+    except OSError:  # FileNotFoundError introduced in Python 3
         pass
     return result
 
@@ -1291,14 +1291,13 @@ class AzCommandGroup(CommandGroup):
             return arg_source_copy
         return merged_kwargs
 
-    # pylint: disable=arguments-differ
-    def command(self, name, method_name=None, **kwargs):
+    def command(self, name, handler_name=None, **kwargs):
         """
         Register a CLI command.
         :param name: Name of the command as it will be called on the command line
         :type name: str
-        :param method_name: Name of the method the command maps to
-        :type method_name: str
+        :param handler_name: Name of the method the command maps to
+        :type handler_name: str
         :param kwargs: Keyword arguments. Supported keyword arguments include:
             - client_factory: Callable which returns a client needed to access the underlying command method. (function)
             - confirmation: Prompt prior to the action being executed. This is useful if the action
@@ -1315,7 +1314,7 @@ class AzCommandGroup(CommandGroup):
             - max_api: Maximum API version required for commands within the group (string)
         :rtype: None
         """
-        return self._command(name, method_name=method_name, **kwargs)
+        return self._command(name, method_name=handler_name, **kwargs)
 
     def custom_command(self, name, method_name=None, **kwargs):
         """

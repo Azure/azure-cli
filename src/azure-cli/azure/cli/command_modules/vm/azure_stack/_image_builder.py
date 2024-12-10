@@ -11,12 +11,9 @@ import json
 import traceback
 from enum import Enum
 
-import requests
+from urllib.parse import urlparse
 
-try:
-    from urllib.parse import urlparse
-except ImportError:
-    from urlparse import urlparse  # pylint: disable=import-error
+import requests
 
 from knack.util import CLIError
 from knack.log import get_logger
