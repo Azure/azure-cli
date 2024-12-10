@@ -716,6 +716,8 @@ class AcrCommandsTests(ScenarioTest):
 
     @ResourceGroupPreparer()
     def test_acr_create_invalid_name(self, resource_group):
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+
         # Block registry creation if there is '-'.
         self.kwargs.update({
            'registry_name': self.create_random_name('testreg', 20) + '-' + self.create_random_name('dnlhash', 20)
@@ -724,7 +726,7 @@ class AcrCommandsTests(ScenarioTest):
         with self.assertRaises(Exception) as ex:
             self.cmd('acr create --name {registry_name} --resource-group {rg} --sku premium -l eastus')
 
-        self.assertTrue('argument error: Registry name cannot contain dashes.' in ex.exception)
+        self.assertTrue(InvalidArgumentValueError, ex.exception)
 
     @ResourceGroupPreparer(location='eastus2')
     def test_acr_with_private_endpoint(self, resource_group):
