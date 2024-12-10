@@ -1040,8 +1040,8 @@ def _parse_bicepparam_inline_params(parameters, template_obj):
                 raise InvalidArgumentValueError(f"Unable to parse parameter: {parameter_item}. Only correctly formatted in-line parameters are allowed with a .bicepparam file")
 
     name_value_obj = {}
-    for param in parsed_inline_params:
-        name_value_obj[param] = parsed_inline_params[param]['value']
+    for k, v in parsed_inline_params.items():
+        name_value_obj[k] = v['value']
 
     return name_value_obj
 
