@@ -46,6 +46,7 @@ from azure.cli.command_modules.batch._validators import (
     validate_client_parameters,
     validate_json_file,
     validate_pool_resize_parameters)
+from pkg_resources import require
 
 
 class NetworkProfile(Enum):
@@ -403,6 +404,10 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(BatchNodeCommunicationMode))
     
 
+    with self.argument_context('batch job-schedule create') as c:
+        c.argument('id', required=True)
+        
+
     with self.argument_context('batch task create') as c:
         c.argument('json_file', type=file_type, help='The file containing the task(s) to create in JSON(formatted to match REST API request body). When submitting multiple tasks, accepts either an array of tasks or a TaskAddCollectionParamater. If this parameter is specified, all other parameters are ignored.', validator=validate_json_file, completer=FilesCompleter())
         c.argument('application_package_references', nargs='+', help='The space-separated list of IDs specifying the application packages to be installed. Space-separated application IDs with optional version in \'id[#version]\' format.', type=batch_application_package_reference_format)
@@ -438,7 +443,7 @@ def load_arguments(self, _):
     for item in ['batch pool resize', 'batch pool reset', 'batch job list', 'batch task create']:
         with self.argument_context(item) as c:
             c.extra('account_name', arg_group='Batch Account', validator=validate_client_parameters,
-                    help='The Batch account name. Alternatively, set by environment variable: AZURE_BATCH_ACCOUNT')
+                    help='The Batch account name. Only needed Alternatively, set by environment variable: AZURE_BATCH_ACCOUNT')
             c.extra('account_key', arg_group='Batch Account',
                     help='The Batch account key. Alternatively, set by environment variable: AZURE_BATCH_ACCESS_KEY')
             c.extra('account_endpoint', arg_group='Batch Account',
