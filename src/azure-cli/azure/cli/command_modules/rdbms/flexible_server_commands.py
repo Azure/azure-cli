@@ -61,7 +61,7 @@ def load_flexibleserver_command_table(self, _):
     )
 
     postgres_flexible_location_capabilities_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms..postgresql_flexibleservers.operations#LocationBasedCapabilitiesOperations.{}',
+        operations_tmpl='azure.mgmt.rdbms.postgresqlflexibleservers.operations#LocationBasedCapabilitiesOperations.{}',
         client_factory=cf_postgres_flexible_location_capabilities
     )
 
@@ -153,6 +153,12 @@ def load_flexibleserver_command_table(self, _):
         g.custom_wait_command('wait', 'flexible_server_postgresql_get')
         g.custom_command('restart', 'flexible_server_restart')
 
+    with self.command_group('postgres flexible-server', postgres_flexible_location_capabilities_sdk,
+                            custom_command_type=flexible_servers_custom_postgres,
+                            client_factory=cf_postgres_flexible_location_capabilities) as g:
+        g.custom_command('list-skus', 'flexible_list_skus', table_transformer=postgres_table_transform_output_list_skus)
+        g.custom_command('show-connection-string', 'flexible_server_connection_string')
+
     with self.command_group('postgres flexible-server firewall-rule', postgres_flexible_firewall_rule_sdk,
                             custom_command_type=flexible_servers_custom_postgres,
                             client_factory=cf_postgres_flexible_firewall_rules) as g:
@@ -191,12 +197,6 @@ def load_flexibleserver_command_table(self, _):
         g.custom_command('set', 'flexible_parameter_update')
         g.show_command('show', 'get')
         g.command('list', 'list_by_server')
-
-    with self.command_group('postgres flexible-server', postgres_flexible_location_capabilities_sdk,
-                            custom_command_type=flexible_servers_custom_postgres,
-                            client_factory=cf_postgres_flexible_location_capabilities) as g:
-        g.custom_command('list-skus', 'flexible_list_skus', table_transformer=postgres_table_transform_output_list_skus)
-        g.custom_command('show-connection-string', 'flexible_server_connection_string')
 
     with self.command_group('postgres flexible-server db', postgres_flexible_db_sdk,
                             custom_command_type=flexible_server_custom_common,
@@ -244,6 +244,7 @@ def load_flexibleserver_command_table(self, _):
     with self.command_group('postgres flexible-server identity', postgres_flexible_servers_sdk,
                             custom_command_type=flexible_servers_custom_postgres,
                             client_factory=cf_postgres_flexible_servers) as g:
+        g.custom_command('update', 'flexible_server_identity_update', supports_no_wait=True)
         g.custom_command('assign', 'flexible_server_identity_assign', supports_no_wait=True)
         g.custom_command('remove', 'flexible_server_identity_remove', supports_no_wait=True, confirmation=True)
         g.custom_show_command('show', 'flexible_server_identity_show')
@@ -288,3 +289,10 @@ def load_flexibleserver_command_table(self, _):
                             client_factory=cf_postgres_flexible_private_link_resources) as g:
         g.command('list', 'list_by_server')
         g.custom_show_command('show', 'flexible_server_private_link_resource_get', custom_command_type=flexible_servers_custom_postgres)
+
+    with self.command_group('postgres flexible-server fabric-mirroring', postgres_flexible_config_sdk,
+                            custom_command_type=flexible_servers_custom_postgres,
+                            client_factory=cf_postgres_flexible_config) as g:
+        g.custom_command('start', 'flexible_server_fabric_mirroring_start')
+        g.custom_command('stop', 'flexible_server_fabric_mirroring_stop')
+        g.custom_command('update-databases', 'flexible_server_fabric_mirroring_update_databases')
