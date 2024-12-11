@@ -494,7 +494,6 @@ def flexible_parameter_update(client, server_name, configuration_name, resource_
         source = "user-override"
 
     parameters = postgresql_flexibleservers.models.Configuration(
-        configuration_name=configuration_name,
         value=value,
         source=source
     )
@@ -908,6 +907,41 @@ def flexible_server_connection_string(
 
 
 # Custom functions for identity
+def flexible_server_identity_update(cmd, client, resource_group_name, server_name, system_assigned):
+    validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
+
+    identity_type = 'None'
+    if system_assigned.lower() == 'enabled':
+        identity_type = 'SystemAssigned'
+    else:
+        server = client.get(resource_group_name, server_name)
+        identity_type = 'UserAssigned' if (server and server.identity and server.identity.type and 'UserAssigned' in server.identity.type) else 'None'
+
+    if identity_type == 'UserAssigned':
+        identities_map = {}
+        for identity in server.identity.user_assigned_identities:
+            identities_map[identity] = {}
+        parameters = {
+            'identity': postgresql_flexibleservers.models.UserAssignedIdentity(
+                user_assigned_identities=identities_map,
+                type="UserAssigned")}
+    else:
+        parameters = {
+            'identity': postgresql_flexibleservers.models.UserAssignedIdentity(
+                type=identity_type)}
+
+    result = resolve_poller(
+        client.begin_update(
+            resource_group_name=resource_group_name,
+            server_name=server_name,
+            parameters=parameters),
+        cmd.cli_ctx, 'Updating user assigned identity type for server {}'.format(server_name)
+    )
+
+    return result.identity
+
+
 def flexible_server_identity_assign(cmd, client, resource_group_name, server_name, identities):
     validate_resource_group(resource_group_name)
     validate_citus_cluster(cmd, resource_group_name, server_name)
@@ -1436,6 +1470,74 @@ def flexible_server_private_link_resource_get(
         resource_group_name=resource_group_name,
         server_name=server_name,
         group_name="postgresqlServer")
+
+
+def flexible_server_fabric_mirroring_start(cmd, client, resource_group_name, server_name, database_names, yes=False):
+    validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
+    flexible_servers_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
+
+    databases = ','.join(database_names[0].split())
+    user_confirmation("Are you sure you want to prepare and enable your server" +
+                      " '{0}' in resource group '{1}' for mirroring of databases '{2}'.".format(server_name, resource_group_name, databases) +
+                      " This requires restart.", yes=yes)
+    server = flexible_servers_client.get(resource_group_name, server_name)
+    if (server.identity is None or 'SystemAssigned' not in server.identity.type):
+        logger.warning('Enabling system assigned managed identity on the server.')
+        flexible_server_identity_update(cmd, flexible_servers_client, resource_group_name, server_name, 'Enabled')
+
+    logger.warning('Restarting server.')
+    parameters = postgresql_flexibleservers.models.RestartParameter(restart_with_failover=False)
+    resolve_poller(flexible_servers_client.begin_restart(resource_group_name, server_name, parameters), cmd.cli_ctx, 'PostgreSQL Server Restart')
+
+    logger.warning('Updating necessary server parameters.')
+    source = "user-override"
+    configuration_name = "azure.fabric_mirror_enabled"
+    value = "on"
+    _update_parameters(cmd, client, server_name, configuration_name, resource_group_name, source, value)
+    configuration_name = "azure.mirror_databases"
+    value = databases
+    return _update_parameters(cmd, client, server_name, configuration_name, resource_group_name, source, value)
+
+
+def flexible_server_fabric_mirroring_stop(cmd, client, resource_group_name, server_name, yes=False):
+    validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
+    user_confirmation("Are you sure you want to disable mirroring for server '{0}' in resource group '{1}'".format(server_name, resource_group_name), yes=yes)
+
+    configuration_name = "azure.fabric_mirror_enabled"
+    parameters = postgresql_flexibleservers.models.Configuration(
+        value="off",
+        source="user-override"
+    )
+
+    return client.begin_update(resource_group_name, server_name, configuration_name, parameters)
+
+
+def flexible_server_fabric_mirroring_update_databases(cmd, client, resource_group_name, server_name, database_names, yes=False):
+    validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
+    databases = ','.join(database_names[0].split())
+    user_confirmation("Are you sure for server '{0}' in resource group '{1}' you want to update the databases being mirrored to be '{2}'"
+                      .format(server_name, resource_group_name, databases), yes=yes)
+
+    configuration_name = "azure.mirror_databases"
+    parameters = postgresql_flexibleservers.models.Configuration(
+        value=databases,
+        source="user-override"
+    )
+
+    return client.begin_update(resource_group_name, server_name, configuration_name, parameters)
+
+
+def _update_parameters(cmd, client, server_name, configuration_name, resource_group_name, source, value):
+    parameters = postgresql_flexibleservers.models.Configuration(
+        value=value,
+        source=source
+    )
+
+    return resolve_poller(
+        client.begin_update(resource_group_name, server_name, configuration_name, parameters), cmd.cli_ctx, 'PostgreSQL Parameter update')
 
 
 def _update_private_endpoint_connection_status(cmd, client, resource_group_name, server_name,
