@@ -12,7 +12,6 @@ import json
 import os
 import re
 import ssl
-import sys
 import uuid
 import base64
 
@@ -341,9 +340,6 @@ def _is_bicepparam_file_provided(parameters):
 
 
 def _ssl_context():
-    if sys.version_info < (3, 4):
-        return ssl.SSLContext(ssl.PROTOCOL_TLSv1)
-
     return ssl.create_default_context()
 
 
@@ -1040,8 +1036,8 @@ def _parse_bicepparam_inline_params(parameters, template_obj):
                 raise InvalidArgumentValueError(f"Unable to parse parameter: {parameter_item}. Only correctly formatted in-line parameters are allowed with a .bicepparam file")
 
     name_value_obj = {}
-    for param in parsed_inline_params:
-        name_value_obj[param] = parsed_inline_params[param]['value']
+    for k, v in parsed_inline_params.items():
+        name_value_obj[k] = v['value']
 
     return name_value_obj
 

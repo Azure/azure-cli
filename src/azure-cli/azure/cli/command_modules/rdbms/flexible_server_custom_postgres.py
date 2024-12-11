@@ -36,7 +36,7 @@ from .flexible_server_custom_common import create_firewall_rule
 from .flexible_server_virtual_network import prepare_private_network, prepare_private_dns_zone, prepare_public_network
 from .validators import pg_arguments_validator, validate_server_name, validate_and_format_restore_point_in_time, \
     validate_postgres_replica, validate_georestore_network, pg_byok_validator, validate_migration_runtime_server, \
-    validate_resource_group, check_resource_group, validate_citus_cluster
+    validate_resource_group, check_resource_group, validate_citus_cluster, cluster_byok_validator
 
 logger = get_logger(__name__)
 DEFAULT_DB_NAME = 'flexibleserverdb'
@@ -60,7 +60,7 @@ def flexible_server_create(cmd, client,
                            high_availability=None, zone=None, standby_availability_zone=None,
                            geo_redundant_backup=None, byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None,
                            active_directory_auth=None, password_auth=None, auto_grow=None, performance_tier=None,
-                           storage_type=None, iops=None, throughput=None, create_default_db='Enabled', yes=False):
+                           storage_type=None, iops=None, throughput=None, create_default_db='Enabled', create_cluster=None, cluster_size=None, yes=False):
 
     if not check_resource_group(resource_group_name):
         resource_group_name = None
@@ -97,7 +97,13 @@ def flexible_server_create(cmd, client,
                            byok_key=byok_key,
                            backup_byok_identity=backup_byok_identity,
                            backup_byok_key=backup_byok_key,
-                           performance_tier=performance_tier)
+                           performance_tier=performance_tier,
+                           create_cluster=create_cluster)
+
+    cluster = None
+    if create_cluster == 'ElasticCluster':
+        cluster_size = cluster_size if cluster_size else 2
+        cluster = postgresql_flexibleservers.models.Cluster(cluster_size=cluster_size)
 
     server_result = firewall_id = None
 
@@ -151,14 +157,15 @@ def flexible_server_create(cmd, client,
                                    availability_zone=zone,
                                    identity=identity,
                                    data_encryption=data_encryption,
-                                   auth_config=auth_config)
+                                   auth_config=auth_config,
+                                   cluster=cluster)
 
     # Adding firewall rule
     if start_ip != -1 and end_ip != -1:
         firewall_id = create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip)
 
     # Create mysql database if it does not exist
-    if database_name is not None or (create_default_db and create_default_db.lower() == 'enabled'):
+    if (database_name is not None or (create_default_db and create_default_db.lower() == 'enabled') and create_cluster != 'ElasticCluster'):
         db_name = database_name if database_name else DEFAULT_DB_NAME
         _create_database(db_context, cmd, resource_group_name, server_name, db_name)
 
@@ -226,9 +233,11 @@ def flexible_server_restore(cmd, client,
             logging_name='PostgreSQL', command_group='postgres', server_client=client, location=location)
         validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
 
+        instance = client.get(id_parts['resource_group'], id_parts['name'])
+
+        cluster_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup, instance)
         pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup)
 
-        instance = client.get(id_parts['resource_group'], id_parts['name'])
         storage = postgresql_flexibleservers.models.Storage(type=storage_type if instance.storage.type != "PremiumV2_LRS" else None)
 
         parameters = postgresql_flexibleservers.models.Server(
@@ -803,7 +812,7 @@ def flexible_replica_promote(cmd, client, resource_group_name, server_name, prom
 
 
 def _create_server(db_context, cmd, resource_group_name, server_name, tags, location, sku, administrator_login, administrator_login_password,
-                   storage, backup, network, version, high_availability, availability_zone, identity, data_encryption, auth_config):
+                   storage, backup, network, version, high_availability, availability_zone, identity, data_encryption, auth_config, cluster):
     validate_resource_group(resource_group_name)
 
     logging_name, server_client = db_context.logging_name, db_context.server_client
@@ -829,6 +838,7 @@ def _create_server(db_context, cmd, resource_group_name, server_name, tags, loca
         identity=identity,
         data_encryption=data_encryption,
         auth_config=auth_config,
+        cluster=cluster,
         create_mode="Create")
 
     return resolve_poller(
@@ -855,8 +865,9 @@ def _create_database(db_context, cmd, resource_group_name, server_name, database
         '{} Database Create/Update'.format(logging_name))
 
 
-def database_create_func(client, resource_group_name, server_name, database_name=None, charset=None, collation=None):
+def database_create_func(cmd, client, resource_group_name, server_name, database_name=None, charset=None, collation=None):
     validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
 
     if charset is None and collation is None:
         charset = 'utf8'

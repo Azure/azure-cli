@@ -18,8 +18,7 @@ from azure.cli.testsdk.scenario_tests.const import MOCKED_SUBSCRIPTION_ID
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,
                                create_random_name, live_only, record_only)
-from azure.cli.testsdk.checkers import (
-    StringContainCheckIgnoreCase)
+from azure.cli.testsdk.checkers import StringContainCheckIgnoreCase
 from azure.cli.testsdk.constants import AUX_SUBSCRIPTION, AUX_TENANT
 from azure.cli.core.util import get_file_json
 from knack.util import CLIError
@@ -2403,7 +2402,6 @@ class DeploymentStacksTest(ScenarioTest):
             'template-file': os.path.join(curr_dir, 'simple_template.json').replace('\\', '\\\\'),
             'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
             'template-file-spec': os.path.join(curr_dir, 'simple_template_spec.json').replace('\\', '\\\\'),
-            'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
             'bicep-file': os.path.join(curr_dir, 'data', 'bicep_simple_template.bicep').replace('\\', '\\\\'),
             'template-file-rg': os.path.join(curr_dir, 'simple_template_resource_group.json').replace('\\', '\\\\'),
             'track-rg-file': os.path.join(curr_dir, 'tracked_resource_group.json').replace('\\', '\\\\'),
@@ -2553,7 +2551,6 @@ class DeploymentStacksTest(ScenarioTest):
 
         self.kwargs.update({
             'name': deployment_stack_name,
-            'resource-group': resource_group,
             'location': location,
             'template-file': os.path.join(curr_dir, 'simple_template.json').replace('\\', '\\\\'),
             'template-file-spec': os.path.join(curr_dir, 'simple_template_spec.json').replace('\\', '\\\\'),
@@ -3046,7 +3043,6 @@ class DeploymentStacksTest(ScenarioTest):
             'template-file': os.path.join(curr_dir, 'simple_template.json').replace('\\', '\\\\'),
             'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
             'template-file-spec': os.path.join(curr_dir, 'simple_template_spec.json').replace('\\', '\\\\'),
-            'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
             'bicep-file': os.path.join(curr_dir, 'data', 'bicep_simple_template.bicep').replace('\\', '\\\\'),
             'template-file-rg': os.path.join(curr_dir, 'simple_template_resource_group.json').replace('\\', '\\\\'),
             'track-rg-file': os.path.join(curr_dir, 'tracked_resource_group.json').replace('\\', '\\\\'),

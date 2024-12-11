@@ -5409,7 +5409,7 @@ def _get_content_share_name(app_name):
     # content share name should be up to 63 characters long, lowercase letter and digits, and random
     # so take the first 50 characters of the app name and add the last 12 digits of a random uuid
     share_name = app_name[0:50]
-    suffix = str(uuid.uuid4()).split('-')[-1]
+    suffix = str(uuid.uuid4()).rsplit('-', maxsplit=1)[-1]
     return share_name.lower() + suffix
 
 
