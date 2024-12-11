@@ -537,37 +537,6 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
                             'start_task': {'run_elevated': True, 'command_line': 'cmd'}}}
         self.assertEqual(kwargs, request)
 
-    def test_batch_options(self):
-        self.command_delete._load_options_model(
-            azure.batch._client.BatchClient.delete_pool)
-        #self.assertIsInstance(self.command_delete._options_model, models.PoolDeleteOptions)
-        self.assertEqual(sorted(self.command_delete._options_attrs),
-                         ['additional_properties',
-                          'client_request_id',
-                          'if_match',
-                          'if_modified_since',
-                          'if_none_match',
-                          'if_unmodified_since',
-                          'ocp_date',
-                          'return_client_request_id',
-                          'timeout'])
-        kwargs = {
-            'if_match': None,
-            'if_modified_since': 'abc',
-            'if_none_match': None,
-            'if_unmodified_since': 'def',
-            'client_request_id': 'ignored'
-        }
-        self.command_delete._build_options(kwargs)
-        #self.assertIsInstance(kwargs['pool_delete_options'], models.PoolDeleteOptions)
-        #self.assertEqual(kwargs['pool_delete_options'].if_modified_since, 'abc')
-        #self.assertEqual(kwargs['pool_delete_options'].if_unmodified_since, 'def')
-        #self.assertIsNone(kwargs['pool_delete_options'].client_request_id)
-        #self.assertEqual(kwargs['pool_delete_options'].timeout, 30)
-        #self.assertIsNone(kwargs['pool_delete_options'].ocp_date)
-        options = list(self.command_delete._process_options())
-        self.assertEqual(len(options), 4)
-
     def test_batch_should_flatten(self):
         self.assertFalse(self.command_task._should_flatten('task.depends_on'))
         self.assertTrue(self.command_task._should_flatten('task'))
@@ -612,27 +581,25 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
         attrs = list(self.command_job._get_attrs(models.ResourceFile, 'task.resource_files'))
         self.assertEqual(len(attrs), 7)
         attrs = list(self.command_job._get_attrs(models.BatchJobManagerTask, 'job.job_manager_task'))
-        self.assertEqual(len(attrs), 7)
+        self.assertEqual(len(attrs), 8)
         attrs = list(self.command_job._get_attrs(models.BatchJobCreateContent, 'job'))
-        self.assertEqual(len(attrs), 10)
+        self.assertEqual(len(attrs), 11)
 
     def test_batch_load_arguments(self):
         # pylint: disable=too-many-statements
         handler = azure.batch._client.BatchClient.create_pool
         args = list(self.command_pool._load_transformed_arguments(handler))
-        self.assertEqual(len(args), 50)
+        self.assertEqual(len(args), 47)
         self.assertFalse('yes' in [a for a, _ in args])
         self.assertTrue('json_file' in [a for a, _ in args])
         self.assertFalse('destination' in [a for a, _ in args])
         self.assertTrue('application_package_references' in [a for a, _ in args])
-        self.assertFalse('start_task_environment_settings' in [a for a, _ in args])
-        self.assertTrue('certificate_references' in [a for a, _ in args])
         self.assertTrue('metadata' in [a for a, _ in args])
         self.assertTrue('task_slots_per_node' in [a for a, _ in args])
         self.assertTrue('account_endpoint' in [a for a, _ in args])
         handler = azure.batch._client.BatchClient.create_job
         args = list(self.command_job._load_transformed_arguments(handler))
-        self.assertEqual(len(args), 19)
+        self.assertEqual(len(args), 21)
         self.assertFalse('yes' in [a for a, _ in args])
         self.assertTrue('json_file' in [a for a, _ in args])
         self.assertFalse('destination' in [a for a, _ in args])
@@ -645,27 +612,27 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
         self.assertFalse('destination' in [a for a, _ in args])
         handler = azure.batch._client.BatchClient.get_task_file
         args = list(self.command_file._load_transformed_arguments(handler))
-        self.assertEqual(len(args), 12)
+        self.assertEqual(len(args), 8)
         self.assertFalse('yes' in [a for a, _ in args])
         self.assertFalse('json_file' in [a for a, _ in args])
         self.assertTrue('destination' in [a for a, _ in args])
         handler = azure.batch._client.BatchClient.list_jobs
         args = list(self.command_list._load_transformed_arguments(handler))
-        self.assertEqual(len(args), 7)
+        self.assertEqual(len(args), 4)
         names = [a for a, _ in args]
-        self.assertEqual(set(names), set(['filter', 'select', 'expand', 'cmd', 'account_name', 'account_key', 'account_endpoint']))
+        self.assertEqual(set(names), set(['cmd', 'account_name', 'account_key', 'account_endpoint']))
         self.assertFalse('yes' in [a for a, _ in args])
         self.assertFalse('json_file' in [a for a, _ in args])
         self.assertFalse('destination' in [a for a, _ in args])
         handler = azure.batch._client.BatchClient.delete_pool
         args = list(self.command_delete._load_transformed_arguments(handler))
-        self.assertEqual(len(args), 10)
+        self.assertEqual(len(args), 6)
         self.assertTrue('yes' in [a for a, _ in args])
         self.assertFalse('json_file' in [a for a, _ in args])
         self.assertFalse('destination' in [a for a, _ in args])
         handler =azure.batch._client.BatchClient.create_job_schedule
         args = [a for a, _ in self.command_conflicts._load_transformed_arguments(handler)]
-        self.assertEqual(len(args), 23)
+        self.assertEqual(len(args), 26)
         self.assertTrue('id' in args)
         self.assertTrue('job_manager_task_id' in args)
         self.assertFalse('job_manager_task_max_wall_clock_time' in args)
@@ -678,8 +645,9 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
         self.assertTrue('account_endpoint' in args)
         handler = azure.batch._client.BatchClient.reboot_node
         args = list(self.command_node._load_transformed_arguments(handler))
-        self.assertEqual(len(args), 7)
+        self.assertEqual(len(args), 8)
         self.assertTrue('node_reboot_option' in [a for a, _ in args])
-        option = [arg for (name, arg) in args if name == 'node_reboot_option'][0]
-        self.assertIsNotNone(option.choices)
-        self.assertFalse([a for a in option.choices if "'" in a])
+        # disabling check as this is a track1 logic and the track2 help lists out the options
+        # option = [arg for (name, arg) in args if name == 'node_reboot_option'][0]
+        # self.assertIsNotNone(option.choices)
+        # self.assertFalse([a for a in option.choices if "'" in a])

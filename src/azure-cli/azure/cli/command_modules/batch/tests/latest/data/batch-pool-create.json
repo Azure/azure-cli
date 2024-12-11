@@ -1,5 +1,5 @@
 {
-  "id": "xplatCreatedPool",
+  "id": "azure-cli-test-json",
   "vmSize": "STANDARD_D2S_V3",
   "virtualMachineConfiguration": {
     "imageReference": {
@@ -20,14 +20,19 @@
     }
   },
   "targetDedicatedNodes": 0,
+  "taskSlotsPerNode": 3,
   "startTask": {
     "commandLine": "cmd /c echo test",
+    "waitForSuccess": true,
     "userIdentity": {
-      "autoUser": {
-        "scope": "task",
-        "elevationLevel": "admin"
-      }
-    },
-    "maxTaskRetryCount": 0
-  }
+      "username": "cliTestUser"
+    }
+  },
+  "userAccounts": [
+    {
+      "name": "cliTestUser",
+      "password": "SRYES@#%#_DSFH",
+      "elevationLevel": "admin"
+    }
+  ]
 }
