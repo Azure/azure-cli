@@ -26,7 +26,7 @@ def load_arguments(self, _):
     with self.argument_context('databoxedge device list') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('expand', type=str, help='Specify $expand=details to populate additional fields related to the '
-                   'resource or Specify $skipToken=<token> to populate the next page in the list.')
+                   'resource or Specify `$skipToken=<token>` to populate the next page in the list.')
 
     with self.argument_context('databoxedge device show') as c:
         c.argument('device_name', options_list=['--name', '-n', '--device-name'], type=str, help='The device name.',
@@ -223,5 +223,5 @@ def load_arguments(self, _):
         c.argument('resource_group_name', resource_group_name_type)
 
     with self.argument_context('databoxedge list-sku') as c:
-        c.argument('filter_', options_list=['--filter'], type=str, help='Specify $filter=\'location eq <location>\' to '
+        c.argument('filter_', options_list=['--filter'], type=str, help='Specify `$filter=\'location eq <location>\'` to '
                    'filter on location.')

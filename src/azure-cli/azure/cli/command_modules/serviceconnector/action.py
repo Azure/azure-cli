@@ -266,7 +266,7 @@ class AddWorkloadIdentityAuthInfo(argparse.Action):
             properties = defaultdict(list)
             if len(values) != 1:
                 raise ValidationError(
-                    'Invalid number of values for --workload-identity <USER-IDENTITY-RESOURCE-ID>')
+                    'Invalid number of values for --workload-identity `<USER-IDENTITY-RESOURCE-ID>`')
             properties['user-identity-resource-id'] = values[0]
         except ValueError:
             raise ValidationError('Usage error: {} [VALUE]'.format(option_string))

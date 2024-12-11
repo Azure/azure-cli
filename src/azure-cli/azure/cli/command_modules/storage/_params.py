@@ -846,7 +846,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
             c.argument('ssh_authorized_key', nargs='+', action=SshPublicKeyAddAction,
                        help='SSH authorized keys for SFTP. Includes an optional description and key. '
                             'The key is the base64 encoded SSH public key , with format: '
-                            '<keyType> <keyData> e.g. ssh-rsa AAAABBBB.'
+                            '`<keyType> <keyData>` e.g. ssh-rsa AAAABBBB.'
                             'Example: --ssh_authorized_key description=description key="ssh-rsa AAAABBBB"'
                             'or --ssh_authorized_key key="ssh-rsa AAAABBBB"')
             c.argument('has_shared_key', arg_type=get_three_state_flag(),

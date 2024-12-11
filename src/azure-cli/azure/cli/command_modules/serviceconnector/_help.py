@@ -283,9 +283,9 @@ for source in SOURCE_RESOURCES:
                        --secret name=XX secret-name=XX
 
                 name    : Required. Username or account name for secret auth.
-                secret  : One of <secret, secret-uri, secret-name> is required. Password or account key for secret auth.
-                secret-uri  : One of <secret, secret-uri, secret-name> is required. Keyvault secret uri which stores password.
-                secret-name : One of <secret, secret-uri, secret-name> is required. Keyvault secret name which stores password. It's for AKS only.
+                secret  : One of `<secret, secret-uri, secret-name>` is required. Password or account key for secret auth.
+                secret-uri  : One of `<secret, secret-uri, secret-name>` is required. Keyvault secret uri which stores password.
+                secret-name : One of `<secret, secret-uri, secret-name>` is required. Keyvault secret name which stores password. It's for AKS only.
         '''
             else:
                 secret_param = '''
@@ -296,8 +296,8 @@ for source in SOURCE_RESOURCES:
                        --secret name=XX secret-name=XX
 
                 name    : Required. Username or account name for secret auth.
-                secret  : One of <secret, secret-uri, secret-name> is required. Password or account key for secret auth.
-                secret-name : One of <secret, secret-uri, secret-name> is required. Keyvault secret name which stores password. It's for AKS only.
+                secret  : One of `<secret, secret-uri, secret-name>` is required. Password or account key for secret auth.
+                secret-name : One of `<secret, secret-uri, secret-name>` is required. Keyvault secret name which stores password. It's for AKS only.
         '''
         secret_auto_param = '''
             - name: --secret
@@ -338,7 +338,7 @@ for source in SOURCE_RESOURCES:
             - name: --workload-identity
               short-summary: The user-assigned managed identity used to create workload identity federation.
               long-summary: |
-                Usage: --workload-identity <user-identity-resource-id>
+                Usage: --workload-identity `<user-identity-resource-id>`
 
                 user-identity-resource-id: Required. The resource id of the user assigned identity.
                 Please DO NOT use AKS control plane identity and kubelet identity which is not supported by federated identity credential.

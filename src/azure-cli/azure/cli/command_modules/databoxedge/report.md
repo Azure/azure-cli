@@ -112,7 +112,7 @@ az databoxedge list-sku
 ##### <a name="ParametersSkusList">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
 |------|----|-----------|----------|------------|
-|**--filter**|string|Specify $filter='location eq <location>' to filter on location.|filter|$filter|
+|**--filter**|string|Specify `$filter='location eq <location>'` to filter on location.|filter|$filter|
 
 ### group `az databoxedge alert`
 #### <a name="AlertsListByDataBoxEdgeDevice">Command `az databoxedge alert list`</a>
