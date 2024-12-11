@@ -19,7 +19,7 @@ variables:
 - name: Codeql.Enabled
   value: false
 - name: ComponentDetection.ForceScan
-  value: True
+  value: eq(variables['Build.SourceBranch'], 'refs/heads/release')
 
 parameters:
 - name: architectures
