@@ -2176,9 +2176,9 @@ def process_assign_identity_namespace(cmd, namespace):
 def process_remove_identity_namespace(cmd, namespace):
     if namespace.identities:
         from ._vm_utils import MSI_LOCAL_ID
-        for i, v in enumerate(namespace.identities):
-            if v != MSI_LOCAL_ID:
-                namespace.identities[i] = _get_resource_id(cmd.cli_ctx, v,
+        for i, identity in enumerate(namespace.identities):
+            if identity != MSI_LOCAL_ID:
+                namespace.identities[i] = _get_resource_id(cmd.cli_ctx, identity,
                                                            namespace.resource_group_name,
                                                            'userAssignedIdentities',
                                                            'Microsoft.ManagedIdentity')
