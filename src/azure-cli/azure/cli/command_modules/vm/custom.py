@@ -5002,9 +5002,9 @@ def get_image_version_to_update(cmd, resource_group_name, gallery_name, gallery_
     if version.storage_profile.os_disk_image and version.storage_profile.os_disk_image.source:
         version.storage_profile.os_disk_image.source = None
     if version.storage_profile.data_disk_images:
-        for i in range(len(version.storage_profile.data_disk_images)):
-            if version.storage_profile.data_disk_images[i].source:
-                version.storage_profile.data_disk_images[i].source = None
+        for v in version.storage_profile.data_disk_images:
+            if v.source:
+                v.source = None
     return version
 
 
@@ -5835,10 +5835,10 @@ def restore_point_create(client,
             if data_disk_restore_point_encryption_type is not None and (len(source_data_disk_resource) != len(data_disk_restore_point_encryption_type)):
                 raise ArgumentUsageError('Length of --source-data-disk-resource, --data-disk-restore-point-encryption-type must be same.')
 
-            for i in range(len(source_data_disk_resource)):
+            for i, v in enumerate(source_data_disk_resource):
                 data_disks.append({
                     'managedDisk': {
-                        'id': source_data_disk_resource[i]
+                        'id': v
                     },
                     'diskRestorePoint': {
                         'encryption': {
@@ -5890,11 +5890,11 @@ def restore_point_create(client,
             if data_disk_restore_point_encryption_type is not None and (len(source_data_disk_resource) != len(data_disk_restore_point_encryption_type)):
                 raise ArgumentUsageError('Length of --source-data-disk-resource, --data-disk-restore-point-encryption-type must be same.')
 
-            for i in range(len(source_data_disk_resource)):
+            for i, v in enumerate(source_data_disk_resource):
                 data_disks.append({
                     'diskRestorePoint': {
                         'sourceDiskRestorePoint': {
-                            'id': source_data_disk_resource[i]
+                            'id': v
                         },
                         'encryption': {
                             'disk_encryption_set': {
