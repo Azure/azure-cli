@@ -9,9 +9,8 @@ from knack.util import CLIError
 def batch_exception_handler(ex):
     from msrest.exceptions import ValidationError, ClientRequestError
     from azure.core.exceptions import HttpResponseError
-    from azure.batch.models import BatchErrorException
-
-    if isinstance(ex, BatchErrorException):
+    #from azure.batch.models import BatchErrorException
+    ''' if isinstance(ex, BatchErrorException):
         try:
             message = ex.error.message.value
             if ex.error.values:
@@ -20,7 +19,8 @@ def batch_exception_handler(ex):
             raise CLIError(message)
         except AttributeError:
             raise CLIError(ex)
-    elif isinstance(ex, (ValidationError, ClientRequestError)):
+    elif isinstance(ex, (ValidationError, ClientRequestError)):'''
+    if isinstance(ex, (ValidationError, ClientRequestError)):
         raise CLIError(ex)
     elif isinstance(ex, HttpResponseError):
         raise CLIError(ex)
