@@ -484,7 +484,7 @@ def update_pool(client,
         json_obj = get_file_json(json_file)
         param = None
         try:
-            param = BatchPoolUpdateContent(json_obj).as_dict()
+            param = BatchPoolUpdateContent(json_obj)
         except DeserializationError:
             pass
         if not param:
@@ -508,7 +508,7 @@ def update_pool(client,
                                          environment_settings=start_task_environment_settings,
                                          wait_for_success=start_task_wait_for_success,
                                          max_task_retry_count=start_task_max_task_retry_count)
-    client.update_pool(pool_id=pool_id, pool_update_properties_parameter=param)
+    client.update_pool(pool_id=pool_id, pool=param)
     return client.get_pool(pool_id)
     
 
@@ -557,7 +557,7 @@ def create_task(client,
                                                retention_time=retention_time,
                                                max_task_retry_count=max_task_retry_count)
     
-    print("got to this point")
+
     if task is not None:
         client.create_task(job_id=job_id, task=task)
         result = client.get_task(job_id=job_id, task_id=task.id)

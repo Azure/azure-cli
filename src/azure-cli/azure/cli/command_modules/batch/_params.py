@@ -283,7 +283,7 @@ def load_arguments(self, _):
                             'The operation will be performed only if the resource on the service has been modified '
                             'since the specified time.')
     
-    for command in ['pool node-counts list', 'pool supported-images list', 'job list', 'pool list','job-schedule list', 'task list', 'job prep-release-status list','node list','node file list','task file list']:
+    for command in ['pool node-counts list', 'pool supported-images list', 'job list', 'pool list','job-schedule list', 'task list', 'job prep-release-status list','node list','node file list','task file list','pool usage-metrics list']:
         with self.argument_context(f'batch {command}') as c:
             c.extra('filter', arg_group='Pre-condition and Query',  help='An OData $filter clause. For more information on constructing this filter,'
                          'see https://docs.microsoft.com/rest/api/batchservice/odata-filters-in-batch.')
@@ -314,20 +314,37 @@ def load_arguments(self, _):
     with self.argument_context('batch node file list') as c:
         c.extra('recursive', arg_type=get_three_state_flag(), help='Whether to list children of a directory.')
 
+
+    with self.argument_context('batch task reset') as c:
+        c.argument('max_task_retry_count', options_list=['--max-task-retry-count'], arg_group='Task: Constraints',help="hi")
+        c.argument('max_wall_clock_time', options_list=['--max-wall-clock-time'], arg_group='Task: Constraints')
+        c.argument('retention_time', options_list=['--retention-time'], arg_group='Task: Constraints')
+
+    with self.argument_context('batch pool usage-metrics list') as c:
+        c.extra('endtime', options_list=['--end-time'], arg_group='Pre-condition and Query', 
+                help=' The latest time from which to include metrics. This must be at least two'
+                'hours before the current time. If not specified this defaults to the end'
+                'time of the last aggregation interval currently available.')
+        c.extra('starttime', options_list=['--start-time'], arg_group='Pre-condition and Query', 
+                help='The earliest time from which to include metrics. This must be at least two'
+                'and a half hours before the current time. If not specified this defaults to'
+                'the start time of the last aggregation interval currently available.')
+
     with self.argument_context('batch task file list') as c:
         c.extra('recursive', arg_type=get_three_state_flag(), 
                 help='Whether to list children of the Task directory. This parameter can be'
                 'used in combination with the filter parameter to list specific type of files.')
 
 
-    with self.argument_context('batch node file download') as c:
+    for command in ['file download','task file download']:
+        with self.argument_context(f'batch {command}') as c:
             c.extra('end-range', arg_group='Pre-condition and Query', 
                        help='The byte range to be retrieved. If not set the file will be retrieved to the end.')
             c.extra('start-range', arg_group='Pre-condition and Query', 
                        help='The byte range to be retrieved. If not set the file will be retrieved from the beginning.')
     
 
-    for command in ['node file download', 'node file show', 'task file show']:
+    for command in ['node file download', 'node file show', 'task file show', 'task file download']:
         with self.argument_context(f'batch {command}') as c:
             c.extra('if-modified-since', arg_group='Pre-condition and Query', 
                        help='A timestamp indicating the last modified time of the resource known to the client. '
@@ -402,10 +419,6 @@ def load_arguments(self, _):
         c.argument('target_node_communication_mode', options_list=['--target-communication'],
                    help="The desired node communication mode for the pool. If this element is present, it replaces the existing targetNodeCommunicationMode configured on the Pool. If omitted, any existing metadata is left unchanged.",
                    arg_type=get_enum_type(BatchNodeCommunicationMode))
-    
-
-    with self.argument_context('batch job-schedule create') as c:
-        c.argument('id', required=True)
         
 
     with self.argument_context('batch task create') as c:

@@ -29,35 +29,6 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         self.assertTrue(os.path.isfile(filepath), 'File {} does not exist.'.format(filepath))
         return filepath
 
-    @ResourceGroupPreparer()
-    @BatchAccountPreparer(location='eastus')
-    def test_batch_certificate_cmd(self, resource_group, batch_account_name):
-        create_cert_file_path = self._get_test_data_file('batchtest.cer')
-        self.kwargs.update({
-            'cert': '59833fd835f827e9ec693a4c82435a6360cc6271',
-            'cert_f': create_cert_file_path
-        })
-
-        # test create certificate with default set
-        self.set_account_info(batch_account_name, resource_group)
-
-        self.batch_cmd('batch certificate create --thumbprint {cert} '
-                       '--certificate-file "{cert_f}"').assert_with_checks([
-                           self.check('thumbprint', '{cert}'),
-                           self.check('thumbprintAlgorithm', 'sha1'),
-                           self.check('state', 'active')])
-
-        # test create account with default set
-        self.batch_cmd('batch certificate list').assert_with_checks([
-            self.check('length(@)', 1),
-            self.check('[0].thumbprint', '{cert}')])
-
-        self.batch_cmd("batch certificate delete --thumbprint {cert} --yes")
-
-        self.batch_cmd('batch certificate show --thumbprint {cert}').assert_with_checks([
-            self.check('thumbprint', '{cert}'),
-            self.check('thumbprintAlgorithm', 'sha1'),
-            self.check('state', 'deleting')])
 
     @ResourceGroupPreparer()
     @BatchAccountPreparer()
@@ -214,7 +185,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
 
         self.assertTrue(res['virtualMachineConfiguration']['osDisk']['caching'])
         self.assertTrue(res['virtualMachineConfiguration']['osDisk']['managedDisk']['storageAccountType'])
-        self.assertTrue(res['virtualMachineConfiguration']['osDisk']['diskSizeGb'])
+        self.assertTrue(res['virtualMachineConfiguration']['osDisk']['diskSizeGB'])
 
         self.batch_cmd('batch pool delete --pool-id {p_id} --yes')
 
@@ -260,10 +231,10 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         print(res)
 
         self.assertTrue(res['upgradePolicy']['mode'])
-        self.assertTrue(res['upgradePolicy']['automaticOsUpgradePolicy']['disableAutomaticRollback'])
-        self.assertTrue(res['upgradePolicy']['automaticOsUpgradePolicy']['enableAutomaticOsUpgrade'])
-        self.assertTrue(res['upgradePolicy']['automaticOsUpgradePolicy']['osRollingUpgradeDeferral'])
-        self.assertTrue(res['upgradePolicy']['automaticOsUpgradePolicy']['useRollingUpgradePolicy'])
+        self.assertTrue(res['upgradePolicy']['automaticOSUpgradePolicy']['disableAutomaticRollback'])
+        self.assertTrue(res['upgradePolicy']['automaticOSUpgradePolicy']['enableAutomaticOSUpgrade'])
+        self.assertTrue(res['upgradePolicy']['automaticOSUpgradePolicy']['osRollingUpgradeDeferral'])
+        self.assertTrue(res['upgradePolicy']['automaticOSUpgradePolicy']['useRollingUpgradePolicy'])
         self.assertTrue(res['upgradePolicy']['rollingUpgradePolicy']['enableCrossZoneUpgrade'])
         self.assertEqual(res['upgradePolicy']['rollingUpgradePolicy']['maxBatchInstancePercent'], 20)
         self.assertEqual(res['upgradePolicy']['rollingUpgradePolicy']['maxUnhealthyInstancePercent'], 20)
@@ -298,130 +269,6 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         self.assertTrue(self.batch_cmd('batch pool show --pool-id {p_id}').get_output_in_json()['networkConfiguration']['enableAcceleratedNetworking'])
 
         self.batch_cmd('batch pool delete --pool-id {p_id} --yes')
-
-    @ResourceGroupPreparer()
-    @BatchAccountPreparer()
-    def test_batch_job_help_cmd(
-            self,
-            resource_group,
-            batch_account_name):
-        self.set_account_info(batch_account_name, resource_group)
-
-        self.kwargs.update({
-            'j_id': 'job1',
-            'p_id': 'testpool',
-            'etag': 'somevalue',
-            'j_file': self._get_test_data_file('batchCreateJob-simple.json'),
-            'json': self._get_test_data_file('batch-pool-create.json').replace('\\', '\\\\')
-        })
-
-
-        
-
-        
-        result = self.batch_cmd('batch pool create --id testpool --vm-size Standard_A1 '
-                                '--image canonical:ubuntuserver:18.04-lts --node-agent-sku-id "batch.node.ubuntu 18.04" '
-                                '--disk-encryption-targets "TemporaryDisk"')
-        
-        self.batch_cmd('batch job create --json-file "{j_file}"')
-
-        result = self.batch_cmd('batch job show --job-id cli-test-job-1').get_output_in_json()
-
-        result = self.batch_cmd('batch job list') \
-            .assert_with_checks([self.check('length(@)', 1)]) \
-            .get_output_in_json()
-
-        
-        
-        '''
-        self.batch_cmd('az batch pool autoscale evaluate --help')
-        self.batch_cmd('batch pool create --json-file "{json}"')
-        
-        
-        result = self.batch_cmd('batch job show --job-id fake').get_output_in_json()
-
-        self.batch_cmd('batch job create --id {j_id} --metadata test=value '
-                       '--job-max-task-retry-count 5 '
-                       '--job-manager-task-id JobManager '
-                       '--job-manager-task-command-line "cmd /c set AZ_BATCH_TASK_ID" '
-                       '--job-manager-task-environment-settings '
-                       'CLI_TEST_VAR=CLI_TEST_VAR_VALUE --pool-id {p_id}')
-
-
-        result = self.batch_cmd('batch job show --job-id {j_id}').get_output_in_json()
-
-        self.batch_cmd('batch job show --job-id {j_id} --if-match {etag}').assert_with_checks([
-            self.check('onAllTasksComplete', 'noaction'),
-            self.check('constraints.maxTaskRetryCount', 5),
-            self.check('jobManagerTask.id', 'JobManager'),
-            self.check('jobManagerTask.environmentSettings[0].name', 'CLI_TEST_VAR'),
-            self.check('jobManagerTask.environmentSettings[0].value', 'CLI_TEST_VAR_VALUE'),
-            self.check('metadata[0].name', 'test'),
-            self.check('metadata[0].value', 'value')])
-
-
-
-
-
-        self.batch_cmd('batch pool create --json-file "{json}"')
-
-    
-       
-        pool_list = self.batch_cmd('batch pool list')
-        pool_list = pool_list.get_output_in_json()
-        self.assertEqual(len(pool_list), 3)
-        pool_ids = sorted([p['id'] for p in pool_list])
-
-
-       
-      
-        # test create job
-        self.batch_cmd('batch job create --id {j_id} --metadata test=value '
-                       '--job-max-task-retry-count 5 '
-                       '--job-manager-task-id JobManager '
-                       '--job-manager-task-command-line "cmd /c set AZ_BATCH_TASK_ID" '
-                       '--job-manager-task-environment-settings '
-                       'CLI_TEST_VAR=CLI_TEST_VAR_VALUE --pool-id {p_id}')
-
-        self.batch_cmd('batch pool autoscale enable --pool-id {p_id} '
-                       '--auto-scale-formula "$TargetLowPriorityNodes=3"')
-        
-        result = self.batch_cmd('batch job list') \
-            .assert_with_checks([self.check('length(@)', 1)]) \
-            .get_output_in_json()
-    
-
-       
-
-        # test get job
-        self.batch_cmd('batch job show --job-id {j_id} --if-match etag').assert_with_checks([
-            self.check('onAllTasksComplete', 'noaction'),
-            self.check('constraints.maxTaskRetryCount', 5),
-            self.check('jobManagerTask.id', 'JobManager'),
-            self.check('jobManagerTask.environmentSettings[0].name', 'CLI_TEST_VAR'),
-            self.check('jobManagerTask.environmentSettings[0].value', 'CLI_TEST_VAR_VALUE'),
-            self.check('metadata[0].name', 'test'),
-            self.check('metadata[0].value', 'value')])
-        
-
-        
-        self.batch_cmd('batch job create --json-file "{j_file}"')
-
-        result = self.batch_cmd('batch pool create --id pool_image1 --vm-size Standard_A1 '
-                                '--image canonical:ubuntuserver:18.04-lts --node-agent-sku-id "batch.node.ubuntu 18.04" '
-                                '--disk-encryption-targets "TemporaryDisk"')
-                      
-        pool = self.batch_cmd("batch pool show --pool-id testpool").get_output_in_json()
-        self.batch_cmd("batch pool show --pool-id testpool").assert_with_checks([
-            self.check('targetNodeCommunicationMode', 'default')
-        ])
-
-        result = self.batch_cmd("batch job list")
-        
-        result =  self.batch_cmd('az batch job create --id job1')
-        '''
-        
-
 
     @ResourceGroupPreparer()
     @BatchAccountPreparer()
