@@ -1391,7 +1391,7 @@ class AcrMockCommandsTests(unittest.TestCase):
 
         mock_get_access_credentials.return_value = 'testregistry.azurecr.io', EMPTY_GUID, 'password'
 
-        builtins_open = '__builtin__.open' if sys.version_info[0] < 3 else 'builtins.open'
+        builtins_open = 'builtins.open'
 
         # Push a chart
         with mock.patch(builtins_open) as mock_open:
