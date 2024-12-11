@@ -192,6 +192,12 @@ def load_flexibleserver_command_table(self, _):
         g.show_command('show', 'get')
         g.command('list', 'list_by_server')
 
+    with self.command_group('postgres flexible-server', postgres_flexible_location_capabilities_sdk,
+                            custom_command_type=flexible_servers_custom_postgres,
+                            client_factory=cf_postgres_flexible_location_capabilities) as g:
+        g.custom_command('list-skus', 'flexible_list_skus', table_transformer=postgres_table_transform_output_list_skus)
+        g.custom_command('show-connection-string', 'flexible_server_connection_string')
+
     with self.command_group('postgres flexible-server db', postgres_flexible_db_sdk,
                             custom_command_type=flexible_server_custom_common,
                             client_factory=cf_postgres_flexible_db) as g:
@@ -199,12 +205,6 @@ def load_flexibleserver_command_table(self, _):
         g.custom_command('delete', 'database_delete_func')
         g.show_command('show', 'get')
         g.command('list', 'list_by_server')
-
-    with self.command_group('postgres flexible-server', postgres_flexible_location_capabilities_sdk,
-                            custom_command_type=flexible_servers_custom_postgres,
-                            client_factory=cf_postgres_flexible_location_capabilities) as g:
-        g.custom_command('list-skus', 'flexible_list_skus', table_transformer=postgres_table_transform_output_list_skus)
-        g.custom_command('show-connection-string', 'flexible_server_connection_string')
 
     with self.command_group('postgres flexible-server deploy', postgres_flexible_servers_sdk,
                             custom_command_type=flexible_server_custom_common,
