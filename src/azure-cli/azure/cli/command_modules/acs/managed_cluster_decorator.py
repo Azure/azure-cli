@@ -102,6 +102,7 @@ from azure.cli.core.azclierror import (
     RequiredArgumentMissingError,
     UnknownError,
 )
+from azure.cli.core.cloud import get_active_cloud
 from azure.cli.core.commands import AzCliCommand, LongRunningOperation
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
 from azure.cli.core.profiles import ResourceType
@@ -5252,6 +5253,22 @@ class AKSManagedClusterContext(BaseAKSContext):
         # because it's already checked in _get_enable_cost_analysis
         return self.raw_param.get("disable_cost_analysis")
 
+    def get_if_match(self) -> Union[str, None]:
+        """Obtain the value of if_match.
+        :return: string or None
+        """
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return self.raw_param.get("if_match")
+
+    def get_if_none_match(self) -> Union[str, None]:
+        """Obtain the value of if_none_match.
+        :return: string or None
+        """
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return self.raw_param.get("if_none_match")
+
 
 class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
     def __init__(
@@ -6823,6 +6840,18 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             )
 
     def put_mc(self, mc: ManagedCluster) -> ManagedCluster:
+        active_cloud = get_active_cloud(self.cmd.cli_ctx)
+        if active_cloud.profile != "latest":
+            cluster = sdk_no_wait(
+                self.context.get_no_wait(),
+                self.client.begin_create_or_update,
+                resource_group_name=self.context.get_resource_group_name(),
+                resource_name=self.context.get_name(),
+                parameters=mc,
+                headers=self.context.get_aks_custom_headers(),
+            )
+            return cluster 
+        
         if self.check_is_postprocessing_required(mc):
             # send request
             poller = self.client.begin_create_or_update(
@@ -6830,6 +6859,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 resource_name=self.context.get_name(),
                 parameters=mc,
                 headers=self.context.get_aks_custom_headers(),
+                if_match=self.context.get_if_match(),
+                if_none_match=self.context.get_if_none_match(),
             )
             self.immediate_processing_after_request(mc)
             # poll until the result is returned
@@ -6843,6 +6874,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 resource_name=self.context.get_name(),
                 parameters=mc,
                 headers=self.context.get_aks_custom_headers(),
+                if_match=self.context.get_if_match(),
+                if_none_match=self.context.get_if_none_match(),
             )
         return cluster
 
@@ -8716,6 +8749,18 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 raise CLIError('Keyvault secrets provider addon must be enabled to attach keyvault.\n')
 
     def put_mc(self, mc: ManagedCluster) -> ManagedCluster:
+        active_cloud = get_active_cloud(self.cmd.cli_ctx)
+        if active_cloud.profile != "latest":
+            cluster = sdk_no_wait(
+                self.context.get_no_wait(),
+                self.client.begin_create_or_update,
+                resource_group_name=self.context.get_resource_group_name(),
+                resource_name=self.context.get_name(),
+                parameters=mc,
+                headers=self.context.get_aks_custom_headers(),
+            )
+            return cluster 
+        
         if self.check_is_postprocessing_required(mc):
             # send request
             poller = self.client.begin_create_or_update(
@@ -8723,6 +8768,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 resource_name=self.context.get_name(),
                 parameters=mc,
                 headers=self.context.get_aks_custom_headers(),
+                if_match=self.context.get_if_match(),
+                if_none_match=self.context.get_if_none_match(),
             )
             self.immediate_processing_after_request(mc)
             # poll until the result is returned
@@ -8736,6 +8783,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 resource_name=self.context.get_name(),
                 parameters=mc,
                 headers=self.context.get_aks_custom_headers(),
+                if_match=self.context.get_if_match(),
+                if_none_match=self.context.get_if_none_match(),
             )
         return cluster
 
