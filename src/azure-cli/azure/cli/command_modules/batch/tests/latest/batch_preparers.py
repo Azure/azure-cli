@@ -33,9 +33,10 @@ class BatchAccountPreparer(AbstractPreparer, SingleValueReplacer):
         return {self.parameter_name: self.dev_setting_value}
 
     def remove_resource(self, name, **kwargs):
-        if not self.dev_setting_value and not self.skip_delete:
-            cmd = 'az batch account delete -n {} -g {} -y'.format(name, self.resource_group)
-            execute(self.cli_ctx, cmd)
+        return
+        # if not self.dev_setting_value and not self.skip_delete:
+        #     cmd = 'az batch account delete -n {} -g {} -y'.format(name, self.resource_group)
+        #     execute(self.cli_ctx, cmd)
 
     def _get_resource_group(self, **kwargs):
         try:

@@ -23,7 +23,6 @@ from azure.cli.core.commands import CONFIRM_PARAM_NAME
 from azure.cli.core.commands import AzCommandGroup
 from azure.cli.core.util import get_file_json
 
-
 _CLASS_NAME = re.compile(r"~(.*)")  # Strip model name from class docstring
 _UNDERSCORE_CASE = re.compile('(?!^)([A-Z]+)')  # Convert from CamelCase to underscore_case
 
@@ -470,6 +469,8 @@ class AzureBatchDataPlaneCommand:
         def _execute_command(kwargs):
             from msrest.paging import Paged
             from msrest.exceptions import ValidationError, ClientRequestError
+            from azure.core.exceptions import HttpResponseError, ResourceExistsError
+            # from azure.batch.models import BatchError
             #from azure.batch.models import BatchErrorException
             from knack.util import CLIError
             cmd = kwargs.pop('cmd')
@@ -522,17 +523,18 @@ class AzureBatchDataPlaneCommand:
                     return list(result)
 
                 return result
-            except (ValidationError, ClientRequestError) as ex:
-                raise CLIError(ex)
-            """ except BatchErrorException as ex:
+            
+            except HttpResponseError as ex:
                 try:
-                    message = ex.error.message.value
-                    if ex.error.values:
-                        for detail in ex.error.values:
+                    message = ex.model.message.value
+                    if ex.model.values_property:
+                        for detail in ex.model.values_property:
                             message += f"\n{detail.key}: {detail.value}"
                     raise CLIError(message)
-                except AttributeError:
-                    raise CLIError(ex) """
+                except AttributeError: 
+                    raise CLIError(ex)
+            except (ValidationError, ClientRequestError) as ex:
+                raise CLIError(ex)
 
         self.table_transformer = None
         try:
