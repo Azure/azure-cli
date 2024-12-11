@@ -17,7 +17,7 @@ from azure.cli.core.commands.parameters import (
 from azure.cli.command_modules.rdbms.validators import configuration_value_validator, validate_subnet, \
     tls_validator, public_access_validator, maintenance_window_validator, ip_address_validator, \
     retention_validator, firewall_rule_name_validator, validate_identity, validate_byok_identity, validate_identities, \
-    virtual_endpoint_name_validator
+    virtual_endpoint_name_validator, node_count_validator
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction
 
 from .randomname.generate import generate_username
@@ -94,7 +94,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('location', arg_type=get_location_type(self.cli_ctx))
             if command_group == 'postgres':
                 c.argument('version', default='11',
-                           help='Server major version. https://docs.microsoft.com/en-us/azure/postgresql/single-server/concepts-supported-versions')
+                           help='Server major version. https://learn.microsoft.com/en-us/azure/postgresql/single-server/concepts-supported-versions')
             else:
                 c.argument('version', help='Server major version.')
 
@@ -330,6 +330,20 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             arg_type=get_enum_type(['Enabled', 'Disabled']),
             options_list=['--create-default-database', '-c'],
             help='Enable or disable the creation of default database flexibleserverdb. Default value is Enabled.'
+        )
+
+        cluster_option_arg_type = CLIArgumentType(
+            arg_type=get_enum_type(['Server', 'ElasticCluster']),
+            options_list=['--cluster-option'],
+            help='Cluster option for the server. Servers are for workloads that can fit on one node. '
+                 'Elastic clusters provides schema- and row-based sharding on a database. Default value is Server.'
+        )
+
+        create_node_count_arg_type = CLIArgumentType(
+            type=int,
+            options_list=['--node-count'],
+            help='The number of nodes for elastic cluster. Range of 1 to 10. Default is 2 nodes.',
+            validator=node_count_validator
         )
 
         auto_grow_arg_type = CLIArgumentType(
@@ -576,6 +590,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('throughput', default=None, arg_type=throughput_arg_type)
                 c.argument('performance_tier', default=None, arg_type=performance_tier_arg_type)
                 c.argument('create_default_db', default='Enabled', arg_type=create_default_db_arg_type)
+                c.argument('create_cluster', default='Server', arg_type=cluster_option_arg_type)
+                c.argument('cluster_size', default=None, arg_type=create_node_count_arg_type)
             elif command_group == 'mysql':
                 c.argument('tier', default='Burstable', arg_type=tier_arg_type)
                 c.argument('sku_name', default='Standard_B1ms', arg_type=sku_name_arg_type)
@@ -605,6 +621,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('standby_availability_zone', arg_type=standby_availability_zone_arg_type)
             c.argument('database_name', arg_type=database_name_arg_type)
             c.argument('yes', arg_type=yes_arg_type)
+
+        with self.argument_context('{} flexible-server list'.format(command_group)) as c:
+            c.argument('show_cluster', options_list=['--show-cluster'], required=False, action='store_true',
+                       help='Only show elastic clusters.')
 
         with self.argument_context('{} flexible-server delete'.format(command_group)) as c:
             c.argument('yes', arg_type=yes_arg_type)

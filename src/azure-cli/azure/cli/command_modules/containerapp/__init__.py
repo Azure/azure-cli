@@ -2,7 +2,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-# pylint: disable=super-with-arguments
 
 from azure.cli.core import AzCommandsLoader
 
@@ -16,8 +15,7 @@ class ContainerappCommandsLoader(AzCommandsLoader):
         containerapp_custom = CliCommandType(
             operations_tmpl='azure.cli.command_modules.containerapp.custom#{}',
             client_factory=None)
-        super(ContainerappCommandsLoader, self).__init__(cli_ctx=cli_ctx,
-                                                         custom_command_type=containerapp_custom)
+        super().__init__(cli_ctx=cli_ctx, custom_command_type=containerapp_custom)
 
     def load_command_table(self, args):
         from azure.cli.command_modules.containerapp.commands import load_command_table

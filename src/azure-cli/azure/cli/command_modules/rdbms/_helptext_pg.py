@@ -22,11 +22,11 @@ long-summary: >
 
     - Configure public access
 
-    https://docs.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-manage-firewall-cli
+    https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-manage-firewall-cli
 
     - Configure private access
 
-    https://docs.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-manage-virtual-network-cli
+    https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-manage-virtual-network-cli
 
 examples:
   - name: >
@@ -216,9 +216,14 @@ examples:
       az postgres flexible-server create -g testGroup -n testServer --location testLocation --performance-tier P15
 
   - name: >
-      create flexible server with storage auto-grow as Enabled. Accepted values Enabled / Disabled. Default value for storage auto-grow is "Disabled".
+      Create flexible server with storage auto-grow as Enabled. Accepted values Enabled / Disabled. Default value for storage auto-grow is "Disabled".
     text: >
       az postgres flexible-server create -g testGroup -n testServer --location testLocation --storage-auto-grow Enabled
+
+  - name: >
+      Create elastic cluster with node count of 5. Default node count is 2 when --cluster-option is "ElasticCluster".
+    text: >
+      az postgres flexible-server create -g testGroup -n testServer --location testLocation --cluster-option ElasticCluster --node-count 5
 """
 
 helps['postgres flexible-server show'] = """

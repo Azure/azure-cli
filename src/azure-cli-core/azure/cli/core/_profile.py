@@ -220,8 +220,8 @@ class Profile:
         return deepcopy(consolidated)
 
     def login_with_managed_identity(self, identity_id=None, allow_no_subscriptions=None):
-        if _on_azure_arc_windows():
-            return self.login_with_managed_identity_azure_arc_windows(
+        if _on_azure_arc():
+            return self.login_with_managed_identity_azure_arc(
                 identity_id=identity_id, allow_no_subscriptions=allow_no_subscriptions)
 
         import jwt
@@ -286,7 +286,7 @@ class Profile:
         self._set_subscriptions(consolidated)
         return deepcopy(consolidated)
 
-    def login_with_managed_identity_azure_arc_windows(self, identity_id=None, allow_no_subscriptions=None):
+    def login_with_managed_identity_azure_arc(self, identity_id=None, allow_no_subscriptions=None):
         import jwt
         identity_type = MsiAccountTypes.system_assigned
         from .auth.msal_credentials import ManagedIdentityCredential
@@ -377,7 +377,7 @@ class Profile:
 
         account = self.get_subscription(subscription_id)
 
-        managed_identity_type, managed_identity_id = Profile._try_parse_msi_account_name(account)
+        managed_identity_type, managed_identity_id = Profile._parse_managed_identity_account(account)
 
         if in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
             # Cloud Shell
@@ -388,7 +388,7 @@ class Profile:
 
         elif managed_identity_type:
             # managed identity
-            if _on_azure_arc_windows():
+            if _on_azure_arc():
                 from .auth.msal_credentials import ManagedIdentityCredential
                 from azure.cli.core.auth.credential_adaptor import CredentialAdaptor
                 # The credential must be wrapped by CredentialAdaptor so that it can work with Track 1 SDKs.
@@ -436,7 +436,7 @@ class Profile:
 
         account = self.get_subscription(subscription)
 
-        managed_identity_type, managed_identity_id = Profile._try_parse_msi_account_name(account)
+        managed_identity_type, managed_identity_id = Profile._parse_managed_identity_account(account)
 
         if in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
             # Cloud Shell
@@ -449,7 +449,7 @@ class Profile:
             # managed identity
             if tenant:
                 raise CLIError("Tenant shouldn't be specified for managed identity account")
-            if _on_azure_arc_windows():
+            if _on_azure_arc():
                 from .auth.msal_credentials import ManagedIdentityCredential
                 cred = ManagedIdentityCredential()
             else:
@@ -642,15 +642,18 @@ class Profile:
         return self.get_subscription(subscription)[_SUBSCRIPTION_ID]
 
     @staticmethod
-    def _try_parse_msi_account_name(account):
-        msi_info, user = account[_USER_ENTITY].get(_ASSIGNED_IDENTITY_INFO), account[_USER_ENTITY].get(_USER_NAME)
-
-        if user in [_SYSTEM_ASSIGNED_IDENTITY, _USER_ASSIGNED_IDENTITY]:
-            if not msi_info:
-                msi_info = account[_SUBSCRIPTION_NAME]  # fall back to old persisting way
-            parts = msi_info.split('-', 1)
-            if parts[0] in MsiAccountTypes.valid_msi_account_types():
-                return parts[0], (None if len(parts) <= 1 else parts[1])
+    def _parse_managed_identity_account(account):
+        user_name = account[_USER_ENTITY][_USER_NAME]
+        if user_name == _SYSTEM_ASSIGNED_IDENTITY:
+            # The account contains:
+            #   "assignedIdentityInfo": "MSI",
+            #   "name": "systemAssignedIdentity",
+            return MsiAccountTypes.system_assigned, None
+        if user_name == _USER_ASSIGNED_IDENTITY:
+            # The account contains:
+            #   "assignedIdentityInfo": "MSIClient-xxx"/"MSIObject-xxx"/"MSIResource-xxx",
+            #   "name": "userAssignedIdentity",
+            return tuple(account[_USER_ENTITY][_ASSIGNED_IDENTITY_INFO].split('-', maxsplit=1))
         return None, None
 
     def _create_credential(self, account, tenant_id=None, client_id=None):
@@ -688,7 +691,7 @@ class Profile:
             if user_name in refreshed_list:
                 continue
             refreshed_list.add(user_name)
-            is_service_principal = (s[_USER_ENTITY][_USER_TYPE] == _SERVICE_PRINCIPAL)
+            is_service_principal = s[_USER_ENTITY][_USER_TYPE] == _SERVICE_PRINCIPAL
             tenant = s[_TENANT_ID]
             subscriptions = []
             try:
@@ -960,6 +963,7 @@ def _create_identity_instance(cli_ctx, authority, tenant_id=None, client_id=None
                     instance_discovery=instance_discovery)
 
 
-def _on_azure_arc_windows():
-    # This indicates an Azure Arc-enabled Windows server
-    return "IDENTITY_ENDPOINT" in os.environ and "IMDS_ENDPOINT" in os.environ
+def _on_azure_arc():
+    # This indicates an Azure Arc-enabled server
+    from msal.managed_identity import get_managed_identity_source, AZURE_ARC
+    return get_managed_identity_source() == AZURE_ARC

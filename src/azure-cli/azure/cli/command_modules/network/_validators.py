@@ -220,7 +220,7 @@ def validate_ssl_cert(namespace):
 
 def validate_dns_record_type(namespace):
     tokens = namespace.command.split(' ')
-    types = ['a', 'aaaa', 'caa', 'cname', 'ds', 'mx', 'ns', 'ptr', 'soa', 'srv', 'tlsa', 'txt']
+    types = ['a', 'aaaa', 'caa', 'cname', 'ds', 'mx', 'naptr', 'ns', 'ptr', 'soa', 'srv', 'tlsa', 'txt']
     for token in tokens:
         if token in types:
             if hasattr(namespace, 'record_type'):
@@ -491,7 +491,7 @@ def get_servers_validator(camel_case=False):
             try:
                 socket.inet_aton(item)  # pylint:disable=no-member
                 servers.append({'ipAddress' if camel_case else 'ip_address': item})
-            except socket.error:  # pylint:disable=no-member
+            except OSError:  # pylint:disable=no-member
                 servers.append({'fqdn': item})
         namespace.servers = servers if servers else None
 

@@ -500,8 +500,8 @@ def ensure_container_insights_for_monitoring(
                 extensionSettings["dataCollectionSettings"] = dataCollectionSettings
 
             if enable_high_log_scale_mode:
-                for i in range(len(cistreams)):
-                    if cistreams[i] == "Microsoft-ContainerLogV2":
+                for i, v in enumerate(cistreams):
+                    if v == "Microsoft-ContainerLogV2":
                         cistreams[i] = "Microsoft-ContainerLogV2-HighScale"
             # create the DCR
             dcr_creation_body_without_syslog = json.dumps(
@@ -770,7 +770,7 @@ def create_data_collection_endpoint(cmd, subscription, resource_group, region, e
 def validate_data_collection_settings(dataCollectionSettings):
     if 'interval' in dataCollectionSettings.keys():
         intervalValue = dataCollectionSettings["interval"]
-    if (bool(re.match(r'^[0-9]+[m]$', intervalValue))) is False:
+    if (bool(re.match(r'^[0-9]+[m]$', intervalValue))) is False:  # pylint: disable=used-before-assignment
         raise InvalidArgumentValueError('interval format must be in <number>m')
     intervalValue = int(intervalValue.rstrip("m"))
     if intervalValue <= 0 or intervalValue > 30:
@@ -844,7 +844,7 @@ def add_monitoring_role_assignment(result, cluster_resource_id, cmd):
             cmd,
             "Monitoring Metrics Publisher",
             service_principal_msi_id,
-            is_service_principal,
+            is_service_principal,  # pylint: disable=used-before-assignment
             scope=cluster_resource_id,
         ):
             logger.warning(
