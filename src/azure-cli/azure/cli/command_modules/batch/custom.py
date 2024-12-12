@@ -27,9 +27,10 @@ from azure.mgmt.batch.operations import (ApplicationPackageOperations)
 
 import azure.batch.models as models
 
-from azure.batch.models import (BatchPoolResizeContent, BatchStartTask, BatchTaskConstraints, 
+from azure.batch.models import (BatchPoolResizeContent, BatchStartTask, BatchTaskConstraints, BatchTask,
                                 BatchPoolUpdateContent, BatchTaskCreateContent, BatchTaskConstraints, AffinityInfo,
-                                BatchPoolResizeContent, BatchTaskCreateContent, BatchTaskGroup, AffinityInfo)
+                                BatchPoolResizeContent, BatchTaskCreateContent, BatchTaskGroup, AffinityInfo,
+                                BatchTaskConstraints)
 from azure.cli.command_modules.batch import _format as transformers
                                 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -446,7 +447,26 @@ def list_job(client, job_schedule_id=None, filter=None,  # pylint: disable=redef
   
     return client.list_jobs(filter=filter,select=select,expand=expand)
 
+def reset_task(client, job_id=None, task_id=None, json_file=None, # pylint: disable=redefined-builtin
+               max_task_retry_count=None, retention_time=None, max_wall_clock_time=None,
+             if_match=None, if_none_match=None, if_modified_since=None,
+                if_unmodified_since=None):
 
+    if json_file:
+        json_obj = get_file_json(json_file)
+        param = None
+        try:
+            param = BatchTask(json_obj)
+        except DeserializationError:
+            pass
+        if not param:
+            raise ValueError(f"JSON file '{json_file}' is not in correct format.")
+    else:
+        constrants = BatchTaskConstraints(max_wall_clock_time, retention_time, max_task_retry_count)
+        param = BatchTask(
+            constraints=constrants)
+  
+    return client.replace_task(job_id=job_id, task_id=task_id,task=param)
 
 
 

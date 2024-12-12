@@ -262,7 +262,7 @@ def load_arguments(self, _):
         'job delete', 'job show', 'job reset', 'job set', 'job disable', 'job enable', 'job stop',
         'job-schedule delete', 'job-schedule show', 'job-schedule reset', 'job-schedule set',
         'job-schedule disable', 'job-schedule enable', 'job-schedule stop',
-        'task delete', 'task show', 'task reset', 'task stop', 'task reactivate',
+        'task delete', 'task show', 'task stop', 'task reactivate',
         'node delete'
     ]:
         with self.argument_context(f'batch {command}') as c:
@@ -314,12 +314,44 @@ def load_arguments(self, _):
     with self.argument_context('batch node file list') as c:
         c.extra('recursive', arg_type=get_three_state_flag(), help='Whether to list children of a directory.')
 
-
+    
+    
     with self.argument_context('batch task reset') as c:
-        c.argument('max_task_retry_count', options_list=['--max-task-retry-count'], arg_group='Task: Constraints',help="hi")
-        c.argument('max_wall_clock_time', options_list=['--max-wall-clock-time'], arg_group='Task: Constraints')
-        c.argument('retention_time', options_list=['--retention-time'], arg_group='Task: Constraints')
+        c.argument('if_modified_since', help='The operation will be performed only if the resource has been modified since the specified timestamp.', type=datetime_format, arg_group='Pre-condition and Query')
+        c.argument('if_unmodified_since', help='The operation will not be performed only if the resource has been modified since the specified timestamp.', type=datetime_format, arg_group='Pre-condition and Query')
+        c.argument('if_match', help='The operation will be performed only if the resource\'s current ETag exactly matches the specified value.', arg_group='Pre-condition and Query')
+        c.argument('if_none_match', help='The operation will not be performed only if the resource\'s current ETag exactly matches the specified value.', arg_group='Pre-condition and Query')
+        c.argument('job_id', help='The ID of the Job containing the Task.',required=True)
+        c.argument('task_id', help='The ID of the Task to update.',required=True)
+        c.argument('json_file', type=file_type, help='The file containing pool update properties parameter specification in JSON(formatted to match REST API request body). If this parameter is specified, all \'Pool Update Properties Parameter Arguments\' are ignored.', validator=validate_json_file, completer=FilesCompleter())
+        c.argument('max_task_retry_count', arg_group='Constraints',
+                   help='The maximum number of times the Task may be retried. The Batch service'
+                             'retries a Task if its exit code is nonzero. Note that this value'
+                             'specifically controls the number of retries for the Task executable due'
+                             'to a nonzero exit code. The Batch service will try the Task once, and'
+                             'may then retry up to this limit. For example, if the maximum retry'
+                             'count is 3, Batch tries the Task up to 4 times (one initial try and 3'
+                             'retries). If the maximum retry count is 0, the Batch service does not'
+                             'retry the Task after the first attempt. If the maximum retry count is'
+                             '-1, the Batch service retries the Task without limit, however this is'
+                             'not recommended for a start task or any task. The default value is 0'
+                             '(no retries).')
+        c.argument('max_wall_clock_time', arg_group='Constraints',
+                   help='If this is not specified, there is no time limit on how long the Task'
+                             'may run. Expected format is an ISO-8601 duration.')
+        c.argument('retention_time', arg_group='Constraints',
+                   help='The default is 7 days, i.e. the Task directory will be retained for 7'
+                             'days unless the Compute Node is removed or the Job is deleted. Expected'
+                             'format is an ISO-8601 duration.')
 
+
+        
+    '''
+    with self.argument_context('batch task reset') as c:
+        c.extra('max_task_retry_count', options_list=['--max-task-retry-count'], arg_group='Task: Constraints',help="hi")
+        c.extra('max_wall_clock_time', options_list=['--max-wall-clock-time'], arg_group='Task: Constraints')
+        c.extra('retention_time', options_list=['--retention-time'], arg_group='Constraints')
+    '''
     with self.argument_context('batch pool usage-metrics list') as c:
         c.extra('endtime', options_list=['--end-time'], arg_group='Pre-condition and Query', 
                 help=' The latest time from which to include metrics. This must be at least two'
@@ -453,7 +485,7 @@ def load_arguments(self, _):
                                        'Job is deleted.')
 
 
-    for item in ['batch pool resize', 'batch pool reset', 'batch job list', 'batch task create']:
+    for item in ['batch pool resize', 'batch pool reset', 'batch job list', 'batch task create', 'batch task reset']:
         with self.argument_context(item) as c:
             c.extra('account_name', arg_group='Batch Account', validator=validate_client_parameters,
                     help='The Batch account name. Only needed Alternatively, set by environment variable: AZURE_BATCH_ACCOUNT')
