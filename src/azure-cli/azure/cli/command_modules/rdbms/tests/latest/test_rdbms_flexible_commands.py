@@ -2743,6 +2743,54 @@ class FlexibleServerPrivateEndpointsMgmtScenarioTest(ScenarioTest):
         self.assertEqual(result['groupId'], group_id)
 
 
+class FlexibleServerFabricMirroringMgmtScenarioTest(ScenarioTest):
+    postgres_location = 'eastus2euap'
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    def test_postgres_flexible_server_fabric_mirroring_mgmt(self, resource_group):
+        self._test_fabric_mirroring_mgmt('postgres', resource_group)
+
+
+    def _test_fabric_mirroring_mgmt(self, database_engine, resource_group):
+        location = self.postgres_location
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, 32)
+
+        # create a server
+        self.cmd('{} flexible-server create -g {} --name {} -l {} --storage-size {} --public-access none '
+                 '--tier GeneralPurpose --sku-name Standard_D4ds_v5 --create-default-database Enabled --yes'
+                 .format(database_engine, resource_group, server_name, location, 128))
+
+        # enable system assigned managed identity
+        self.cmd('{} flexible-server identity update -g {} -s {} --system-assigned Enabled'
+                 .format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('type', 'SystemAssigned')])
+
+        # enable fabric mirroring
+        database1 = 'postgres'
+        self.cmd('{} flexible-server fabric-mirroring start -g {} --server-name {} --database-names {} --yes'
+                    .format(database_engine, resource_group, server_name, database1))
+        self.cmd('{} flexible-server parameter show --name azure.fabric_mirror_enabled -g {} -s {}'.format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('value', 'on')])
+        self.cmd('{} flexible-server parameter show --name azure.mirror_databases -g {} -s {}'.format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('value', database1)])
+
+        # update mirrored database
+        database2 = 'flexibleserverdb'
+        self.cmd('{} flexible-server fabric-mirroring update-databases -g {} --server-name {} --database-names {} --yes'
+                 .format(database_engine, resource_group, server_name, database2),
+                 checks=[JMESPathCheck('value', database2)])
+
+        # disable fabric mirroring
+        self.cmd('{} flexible-server fabric-mirroring stop -g {} --server-name {} --yes'
+                 .format(database_engine, resource_group, server_name))
+        self.cmd('{} flexible-server parameter show --name azure.fabric_mirror_enabled -g {} -s {}'.format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('value', 'off')])
+
+        # delete server
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name))
+
+
 class CitusOnFlexMgmtScenarioTest(ScenarioTest):
 
     postgres_location = 'eastus2'
