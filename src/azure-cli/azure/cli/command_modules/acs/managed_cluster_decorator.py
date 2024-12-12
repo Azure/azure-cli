@@ -6850,8 +6850,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 parameters=mc,
                 headers=self.context.get_aks_custom_headers(),
             )
-            return cluster 
-        
+            return cluster
+
         if self.check_is_postprocessing_required(mc):
             # send request
             poller = self.client.begin_create_or_update(
@@ -8759,8 +8759,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 parameters=mc,
                 headers=self.context.get_aks_custom_headers(),
             )
-            return cluster 
-        
+            return cluster
+
         if self.check_is_postprocessing_required(mc):
             # send request
             poller = self.client.begin_create_or_update(

@@ -1517,6 +1517,7 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
             self.cmd,
             AKSAgentPoolParamDict({"if_match": ""}),
             self.models,
+            DecoratorMode.CREATE,
             decorator_mode=DecoratorMode.UPDATE,
         )
         self.assertEqual(ctx_3.get_if_match(), "")
@@ -1544,6 +1545,7 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
             self.cmd,
             AKSAgentPoolParamDict({"if_none_match": ""}),
             self.models,
+            DecoratorMode.CREATE,
             decorator_mode=DecoratorMode.UPDATE,
         )
         self.assertEqual(ctx_3.get_if_none_match(), "")
@@ -2524,6 +2526,8 @@ class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCom
             "test_cluster_name",
             "test_nodepool_name",
             agentpool_1,
+            if_match=None,
+            if_none_match=None,
             headers={},
         )
 
@@ -3031,6 +3035,8 @@ class AKSAgentPoolUpdateDecoratorStandaloneModeTestCase(AKSAgentPoolUpdateDecora
             "test_cluster_name",
             "test_nodepool_name",
             agentpool_1,
+            if_match=None,
+            if_none_match=None,
             headers={},
         )
 
