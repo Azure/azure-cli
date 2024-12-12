@@ -536,14 +536,10 @@ class AzureBatchDataPlaneCommand:
                 if self._head_cmd:
                     kwargs['raw'] = True
                 result = _get_operation()(client, **kwargs)
-                '''if hasattr(result, 'as_dict'):
-                    result = result.as_dict()
-                elif _is_paged(result):
-                    result = list(result)
-                '''
+               
 
                 # Head output
-                if self._head_cmd:
+                if self._head_cmd: # todo: need to figure out why i'm not calling transformers.transform_response_headers(result)
                     return result
 
                 # File download
