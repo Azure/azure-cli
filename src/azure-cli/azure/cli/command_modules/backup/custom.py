@@ -1074,7 +1074,7 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, p
             if not prompt_y_n(warning_prompt):
                 logger.warning('Cancelling policy update operation')
                 return None
-    except (AttributeError):
+    except AttributeError:
         logger.warning("Unable to fetch policy type for either existing or new policy. Proceeding with update.")
 
     # Update policy

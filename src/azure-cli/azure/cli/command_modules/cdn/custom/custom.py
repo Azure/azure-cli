@@ -564,9 +564,9 @@ def add_condition(client, resource_group_name, profile_name, endpoint_name,
     endpoint = client.endpoints.get(resource_group_name, profile_name, endpoint_name)
     policy = endpoint.delivery_policy
     condition = create_condition(match_variable, operator, match_values, selector, negate_condition, transform)
-    for i in range(0, len(policy.rules)):
-        if policy.rules[i].name == rule_name:
-            policy.rules[i].conditions.append(condition)
+    for v in policy.rules:
+        if v.name == rule_name:
+            v.conditions.append(condition)
 
     params = EndpointUpdateParameters(
         delivery_policy=policy
@@ -589,9 +589,9 @@ def add_action(cmd, client, resource_group_name, profile_name, endpoint_name,
                            redirect_protocol, custom_hostname, custom_path, custom_querystring,
                            custom_fragment, source_pattern, destination, preserve_unmatched_path,
                            cmd, resource_group_name, profile_name, endpoint_name, origin_group)
-    for i in range(0, len(policy.rules)):
-        if policy.rules[i].name == rule_name:
-            policy.rules[i].actions.append(action)
+    for v in policy.rules:
+        if v.name == rule_name:
+            v.actions.append(action)
 
     params = EndpointUpdateParameters(
         delivery_policy=policy
@@ -645,9 +645,9 @@ def remove_condition(client, resource_group_name, profile_name, endpoint_name, r
     endpoint = client.endpoints.get(resource_group_name, profile_name, endpoint_name)
     policy = endpoint.delivery_policy
     if policy is not None:
-        for i in range(0, len(policy.rules)):
-            if policy.rules[i].name == rule_name:
-                policy.rules[i].conditions.pop(index)
+        for v in policy.rules:
+            if v.name == rule_name:
+                v.conditions.pop(index)
     else:
         logger.warning("rule cannot be found. This command will be skipped. Please check the rule name")
 
@@ -663,9 +663,9 @@ def remove_action(client, resource_group_name, profile_name, endpoint_name, rule
     endpoint = client.endpoints.get(resource_group_name, profile_name, endpoint_name)
     policy = endpoint.delivery_policy
     if policy is not None:
-        for i in range(0, len(policy.rules)):
-            if policy.rules[i].name == rule_name:
-                policy.rules[i].actions.pop(index)
+        for v in policy.rules:
+            if v.name == rule_name:
+                v.actions.pop(index)
     else:
         logger.warning("rule cannot be found. This command will be skipped. Please check the rule name")
 

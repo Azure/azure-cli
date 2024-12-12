@@ -32,7 +32,7 @@ def load_arguments(self, _):
     with self.argument_context('containerapp') as c:
         c.argument('tags', arg_type=tags_type)
         c.argument('managed_env', validator=validate_managed_env_name_or_id, options_list=['--environment'], help="Name or resource ID of the container app's environment.")
-        c.argument('yaml', type=file_type, help='Path to a .yaml file with the configuration of a container app. All other parameters will be ignored. For an example, see  https://docs.microsoft.com/azure/container-apps/azure-resource-manager-api-spec#examples')
+        c.argument('yaml', type=file_type, help='Path to a .yaml file with the configuration of a container app. All other parameters will be ignored. For an example, see  https://learn.microsoft.com/azure/container-apps/azure-resource-manager-api-spec#examples')
 
     with self.argument_context('containerapp exec') as c:
         c.argument('container', help="The name of the container to ssh into")

@@ -30,9 +30,9 @@ logger = get_logger(__name__)
 EXTENSION_REFERENCE = ("If the command is from an extension, "
                        "please make sure the corresponding extension is installed. "
                        "To learn more about extensions, please visit "
-                       "'https://docs.microsoft.com/cli/azure/azure-cli-extensions-overview'")
+                       "'https://learn.microsoft.com/cli/azure/azure-cli-extensions-overview'")
 
-OVERVIEW_REFERENCE = ("https://aka.ms/cli_ref")
+OVERVIEW_REFERENCE = "https://aka.ms/cli_ref"
 
 
 class IncorrectUsageError(CLIError):
@@ -305,7 +305,7 @@ class AzCliCommandParser(CLICommandParser):
                 if candidates:
                     # use the most likely candidate to replace the misspelled command
                     args_inferred = [item if item != value else candidates[0] for item in args]
-                    command_name_inferred = ' '.join(args_inferred).split('-')[0]
+                    command_name_inferred = ' '.join(args_inferred).split('-', maxsplit=1)[0]
             else:
                 # `command_source` indicates command values have been parsed, value is an argument
                 parameter = action.option_strings[0] if action.option_strings else action.dest

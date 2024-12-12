@@ -30,7 +30,7 @@ def flexible_server_update_get(client, resource_group_name, server_name):
 
 
 def flexible_server_stop(client, resource_group_name=None, server_name=None, no_wait=False):
-    if (not check_resource_group(resource_group_name)):
+    if not check_resource_group(resource_group_name):
         resource_group_name = None
 
     days = 7
@@ -45,13 +45,21 @@ def flexible_server_update_set(client, resource_group_name, server_name, paramet
     return client.begin_update(resource_group_name, server_name, parameters)
 
 
-def server_list_custom_func(client, resource_group_name=None):
-    if (not check_resource_group(resource_group_name)):
+def server_list_custom_func(client, resource_group_name=None, show_cluster=None):
+    if not check_resource_group(resource_group_name):
         resource_group_name = None
 
+    servers = client.list()
+
     if resource_group_name:
-        return client.list_by_resource_group(resource_group_name)
-    return client.list()
+        servers = client.list_by_resource_group(resource_group_name)
+
+    if show_cluster:
+        servers = [s for s in servers if s.cluster is not None]
+    else:
+        servers = [s for s in servers if s.cluster is None]
+
+    return servers
 
 
 def firewall_rule_delete_func(cmd, client, resource_group_name, server_name, firewall_rule_name, yes=None):
@@ -148,7 +156,7 @@ def firewall_rule_list_func(cmd, client, resource_group_name, server_name):
 
 
 def database_delete_func(cmd, client, resource_group_name=None, server_name=None, database_name=None, yes=None):
-    if (not check_resource_group(resource_group_name)):
+    if not check_resource_group(resource_group_name):
         resource_group_name = None
 
     result = None

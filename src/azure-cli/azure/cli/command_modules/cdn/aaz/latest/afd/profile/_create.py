@@ -22,9 +22,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-02-01",
+        "version": "2024-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}", "2024-02-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}", "2024-09-01"],
         ]
     }
 
@@ -77,16 +77,29 @@ class Create(AAZCommand):
         )
 
         identity = cls._args_schema.identity
+        identity.mi_system_assigned = AAZStrArg(
+            options=["system-assigned", "mi-system-assigned"],
+            help="Set the system managed identity.",
+            blank="True",
+        )
         identity.type = AAZStrArg(
             options=["type"],
             help="Type of managed service identity (where both SystemAssigned and UserAssigned types are allowed).",
             required=True,
             enum={"None": "None", "SystemAssigned": "SystemAssigned", "SystemAssigned, UserAssigned": "SystemAssigned, UserAssigned", "UserAssigned": "UserAssigned"},
         )
+        identity.mi_user_assigned = AAZListArg(
+            options=["user-assigned", "mi-user-assigned"],
+            help="Set the user managed identities.",
+            blank=[],
+        )
         identity.user_assigned_identities = AAZDictArg(
             options=["user-assigned-identities"],
             help="The set of user assigned identities associated with the resource. The userAssignedIdentities dictionary keys will be ARM resource ids in the form: '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{identityName}. The dictionary values can be empty objects ({}) in requests.",
         )
+
+        mi_user_assigned = cls._args_schema.identity.mi_user_assigned
+        mi_user_assigned.Element = AAZStrArg()
 
         user_assigned_identities = cls._args_schema.identity.user_assigned_identities
         user_assigned_identities.Element = AAZObjectArg(
@@ -242,7 +255,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-02-01",
+                    "api-version", "2024-09-01",
                     required=True,
                 ),
             }
@@ -267,7 +280,7 @@ class Create(AAZCommand):
                 typ=AAZObjectType,
                 typ_kwargs={"flags": {"required": True, "client_flatten": True}}
             )
-            _builder.set_prop("identity", AAZObjectType, ".identity")
+            _builder.set_prop("identity", AAZIdentityObjectType, ".identity")
             _builder.set_prop("location", AAZStrType, ".location", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
             _builder.set_prop("sku", AAZObjectType, ".", typ_kwargs={"flags": {"required": True}})
@@ -277,10 +290,16 @@ class Create(AAZCommand):
             if identity is not None:
                 identity.set_prop("type", AAZStrType, ".type", typ_kwargs={"flags": {"required": True}})
                 identity.set_prop("userAssignedIdentities", AAZDictType, ".user_assigned_identities")
+                identity.set_prop("userAssigned", AAZListType, ".mi_user_assigned", typ_kwargs={"flags": {"action": "create"}})
+                identity.set_prop("systemAssigned", AAZStrType, ".mi_system_assigned", typ_kwargs={"flags": {"action": "create"}})
 
             user_assigned_identities = _builder.get(".identity.userAssignedIdentities")
             if user_assigned_identities is not None:
                 user_assigned_identities.set_elements(AAZObjectType, ".")
+
+            user_assigned = _builder.get(".identity.userAssigned")
+            if user_assigned is not None:
+                user_assigned.set_elements(AAZStrType, ".")
 
             properties = _builder.get(".properties")
             if properties is not None:
@@ -360,7 +379,7 @@ class _CreateHelper:
         profile_read.id = AAZStrType(
             flags={"read_only": True},
         )
-        profile_read.identity = AAZObjectType()
+        profile_read.identity = AAZIdentityObjectType()
         profile_read.kind = AAZStrType(
             flags={"read_only": True},
         )

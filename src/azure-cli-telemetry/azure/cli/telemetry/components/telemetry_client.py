@@ -6,17 +6,11 @@
 import json
 import datetime
 
+import urllib.request as http_client_t
+from urllib.error import HTTPError
+
 from applicationinsights import TelemetryClient
 from applicationinsights.channel import SynchronousSender, SynchronousQueue, TelemetryChannel
-
-try:
-    # Python 2.x
-    import urllib2 as http_client_t
-    from urllib2 import HTTPError
-except ImportError:
-    # Python 3.x
-    import urllib.request as http_client_t
-    from urllib.error import HTTPError
 
 
 class CliTelemetryClient:

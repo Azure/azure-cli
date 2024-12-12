@@ -474,14 +474,14 @@ class BotTests(ScenarioTest):
         })
 
         expected_error = "--appid must be a valid GUID from a Microsoft Azure AD Application Registration. See " \
-                         "https://docs.microsoft.com/azure/active-directory/develop/quickstart-register-app " \
+                         "https://learn.microsoft.com/azure/active-directory/develop/quickstart-register-app " \
                          "for more information on App Registrations. See 'az bot create --help' for more CLI " \
                          "information."
         try:
             self.cmd('az bot create -g {rg} -n {botname} --appid {numbers_id} --app-type MultiTenant')
             raise AssertionError()
         except CLIError as cli_error:
-            assert cli_error.__str__() == expected_error
+            assert str(cli_error) == expected_error
         except AssertionError:
             raise AssertionError('should have thrown an error for appid that is not valid GUID.')
 
@@ -489,7 +489,7 @@ class BotTests(ScenarioTest):
             self.cmd('az bot create -g {rg} -n {botname} --appid {short_app_id} --app-type MultiTenant')
             raise AssertionError()
         except CLIError as cli_error:
-            assert cli_error.__str__() == expected_error
+            assert str(cli_error) == expected_error
         except AssertionError:
             raise AssertionError('should have thrown an error for appid that is not valid GUID.')
 
@@ -497,7 +497,7 @@ class BotTests(ScenarioTest):
             self.cmd('az bot create -g {rg} -n {botname} --appid "" --app-type MultiTenant')
             raise AssertionError()
         except CLIError as cli_error:
-            assert cli_error.__str__() == expected_error
+            assert str(cli_error) == expected_error
         except AssertionError:
             raise AssertionError('should have thrown an error for appid that is not valid GUID.')
 
@@ -527,7 +527,7 @@ class BotTests(ScenarioTest):
                 'az bot create -g {rg2} -n {botname} -d {description} -e {endpoint} --appid {app_id} --app-type MultiTenant')
             raise AssertionError()
         except CLIError as cli_error:
-            assert cli_error.__str__().startswith('Unable to create bot.\nReason: ')
+            assert str(cli_error).startswith('Unable to create bot.\nReason: ')
         except AssertionError:
             raise AssertionError('should have thrown an error for unavailable name.')
 
@@ -780,8 +780,8 @@ class BotLocalErrorsTests(unittest.TestCase):
             prepare_webapp_deploy(language, code_dir, proj_file_path)
             raise Exception("'az bot prepare-publish' should have failed with nonexistent --code-dir value")
         except CLIError as cli_error:
-            print(cli_error.__str__())
-            assert cli_error.__str__() == 'Provided --code-dir value (does_not_exist) does not exist'
+            print(str(cli_error))
+            assert str(cli_error) == 'Provided --code-dir value (does_not_exist) does not exist'
         except Exception as error:
             raise error
 
@@ -794,7 +794,7 @@ class BotLocalErrorsTests(unittest.TestCase):
             prepare_webapp_deploy(language, code_dir, proj_file_path)
             raise Exception("'az bot prepare-publish ' should have failed with --proj-file-path")
         except CLIError as cli_error:
-            assert cli_error.__str__() == '--proj-file-path should not be passed in if language is not Csharp'
+            assert str(cli_error) == '--proj-file-path should not be passed in if language is not Csharp'
         except Exception as error:
             raise error
 
@@ -820,7 +820,7 @@ class BotLocalErrorsTests(unittest.TestCase):
             prepare_webapp_deploy(language, code_dir, proj_file_path)
             raise Exception("'az bot prepare-publish --lang Typescript' should have failed with --proj-file-path")
         except CLIError as cli_error:
-            assert cli_error.__str__() == '--proj-file-path should not be passed in if language is not Csharp'
+            assert str(cli_error) == '--proj-file-path should not be passed in if language is not Csharp'
 
     def test_botservice_prepare_deploy_typescript(self):
         code_dir = 'node_bot_typescript'
@@ -880,7 +880,7 @@ class BotLocalErrorsTests(unittest.TestCase):
             prepare_webapp_deploy(language, code_dir, proj_file_path)
             raise Exception("'az bot prepare-publish ' should have failed with no --proj-file-path")
         except CLIError as cli_error:
-            assert cli_error.__str__() == '--proj-file-path must be provided if language is Csharp'
+            assert str(cli_error) == '--proj-file-path must be provided if language is Csharp'
 
     def test_botservice_prepare_deploy_csharp_fail_if_deployment_file_exists(self):
         code_dir = 'csharp_bot_deployment'
@@ -899,7 +899,7 @@ class BotLocalErrorsTests(unittest.TestCase):
             shutil.rmtree(code_dir)
         except CLIError as cli_error:
             shutil.rmtree(code_dir)
-            assert cli_error.__str__() == '.deployment found in csharp_bot_deployment\nPlease delete this .deployment before ' \
+            assert str(cli_error) == '.deployment found in csharp_bot_deployment\nPlease delete this .deployment before ' \
                                           'calling "az bot prepare-deploy"'
         except Exception as error:
             shutil.rmtree(code_dir)
@@ -921,7 +921,7 @@ class BotLocalErrorsTests(unittest.TestCase):
             shutil.rmtree(code_dir)
         except CLIError as cli_error:
             shutil.rmtree(code_dir)
-            assert cli_error.__str__() == 'web.config found in node_bot_web_config\nPlease delete this web.config before ' \
+            assert str(cli_error) == 'web.config found in node_bot_web_config\nPlease delete this web.config before ' \
                                           'calling "az bot prepare-deploy"'
         except Exception as error:
             shutil.rmtree(code_dir)

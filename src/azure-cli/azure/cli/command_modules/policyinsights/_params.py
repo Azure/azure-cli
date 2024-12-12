@@ -42,17 +42,17 @@ def load_arguments(self, _):
                 'namespace',
                 completer=get_providers_completion_list,
                 arg_group='Resource ID',
-                help='Provider namespace (Ex: ''Microsoft.Provider'').')
+                help='Provider namespace (Ex: Microsoft.Provider).')
             c.argument(
                 'resource_type_parent',
                 options_list=['--parent'],
                 arg_group='Resource ID',
-                help='The parent path (Ex: ''resourceTypeA/nameA/resourceTypeB/nameB'').')
+                help='The parent path (Ex: resourceTypeA/nameA/resourceTypeB/nameB).')
             c.argument(
                 'resource_type',
                 completer=get_resource_types_completion_list,
                 arg_group='Resource ID',
-                help='Resource type (Ex: ''resourceTypeC'').')
+                help='Resource type (Ex: resourceTypeC).')
 
     for scope in ['state', 'event']:
         with self.argument_context('policy {}'.format(scope)) as c:
@@ -137,7 +137,7 @@ def load_arguments(self, _):
             'location_filters',
             options_list='--location-filters',
             nargs='+',
-            help='Space separated list of resource locations that should be remediated (Ex: ''centralus westeurope'').')  # pylint: disable=line-too-long
+            help='Space separated list of resource locations that should be remediated (Ex: centralus westeurope).')  # pylint: disable=line-too-long
         c.argument(
             'policy_assignment',
             options_list=['--policy-assignment', '-a'],

@@ -333,9 +333,9 @@ def intelligent_experience(cmd, namespace, missing_args):
 
         # apply local context arguments
         param_str = ''
-        for arg in context_arg_values:
-            option = missing_args[arg].get('options')[0]
-            value = context_arg_values[arg]
+        for k, v in context_arg_values.items():
+            option = missing_args[k].get('options')[0]
+            value = v
             param_str += '{} {} '.format(option, value)
         if param_str:
             logger.warning('Apply local context arguments: %s', param_str.strip())
