@@ -40,8 +40,8 @@ if [ "$MERGE_BASE" != "$UPSTREAM_HEAD" ]; then
     printf "\033[1;33mYour branch is not up to date with upstream/dev.\033[0m\n"
     printf "\033[1;33mWould you like to automatically rebase and setup? [Y/n]\033[0m\n"
 
-    read -r INPUT
-    if [[ "$INPUT" =~ ^[Yy]$ ]]; then
+    read -r INPUT < /dev/tty
+    if [ "$INPUT" = "Y" ] || [ "$INPUT" = "y" ]; then
         printf "\033[0;32mRebasing with upstream/dev...\033[0m\n"
         git rebase upstream/dev
         if [ $? -ne 0 ]; then
@@ -61,7 +61,7 @@ if [ "$MERGE_BASE" != "$UPSTREAM_HEAD" ]; then
             exit 1
         fi
         printf "\033[0;32mSetup completed successfully.\033[0m\n"
-    elif [[ "$INPUT" =~ ^[Nn]$ ]]; then
+    elif [ "$INPUT" = "N" ] || [ "$INPUT" = "n" ]; then
         printf "\r\033[K\033[1;33mSkipping rebase and setup. Continue push...\033[0m\n"
     else
         printf "\033[0;31mInvalid input. Aborting push...\033[0m\n"
