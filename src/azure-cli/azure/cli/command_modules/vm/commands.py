@@ -310,7 +310,7 @@ def load_command_table(self, _):
         g.custom_command('remove', 'remove_template_error_handler', supports_local_cache=True)
         g.custom_show_command('show', 'show_template_error_handler', supports_local_cache=True)
 
-    with self.command_group('snapshot', compute_snapshot_sdk, operation_group='snapshots', min_api='2016-04-30-preview') as g:
+    with self.command_group('snapshot', compute_snapshot_sdk, operation_group='snapshots') as g:
         g.custom_command('create', 'create_snapshot', validator=process_snapshot_create_namespace, supports_no_wait=True)
         from .operations.snapshot import SnapshotUpdate
         self.command_table['snapshot update'] = SnapshotUpdate(loader=self)
@@ -496,14 +496,11 @@ def load_command_table(self, _):
         g.custom_command('update', 'vmss_run_command_update', supports_no_wait=True)
         g.custom_command('delete', 'vmss_run_command_delete', supports_no_wait=True, confirmation=True)
 
-    with self.command_group('sig', compute_galleries_sdk, operation_group='galleries', min_api='2018-06-01') as g:
-        # g.custom_command('create', 'create_image_gallery')
+    with self.command_group('sig', compute_galleries_sdk, operation_group='galleries') as g:
         from .operations.sig import SigCreate, SigUpdate, SigShow
         self.command_table['sig create'] = SigCreate(loader=self)
         self.command_table['sig update'] = SigUpdate(loader=self)
         self.command_table['sig show'] = SigShow(loader=self)
-        # g.custom_show_command('show', 'show_image_gallery')
-        # g.generic_update_command('update', setter_type=compute_custom, setter_name='update_image_galleries', setter_arg_name='gallery')
 
     with self.command_group('sig', community_gallery_sdk, client_factory=cf_community_gallery, operation_group='shared_galleries', min_api='2022-01-03') as g:
         g.custom_command('list-community', 'sig_community_gallery_list')
@@ -525,15 +522,6 @@ def load_command_table(self, _):
         g.custom_command('undelete', 'undelete_image_version', supports_no_wait=True, min_api='2021-07-01', validator=process_image_version_undelete_namespace, is_preview=True)
         g.generic_update_command('update', getter_name='get_image_version_to_update', setter_arg_name='gallery_image_version', setter_name='update_image_version', setter_type=compute_custom, command_type=compute_custom, supports_no_wait=True, validator=process_image_version_update_namespace)
         g.wait_command('wait')
-
-    vm_shared_gallery = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations._shared_galleries_operations#SharedGalleriesOperations.{}',
-        client_factory=cf_shared_galleries,
-        operation_group='shared_galleries'
-    )
-    with self.command_group('sig', vm_shared_gallery) as g:
-        g.custom_command('list-shared', 'sig_shared_gallery_list', client_factory=cf_shared_galleries,
-                         operation_group='shared_galleries', min_api='2020-09-30')
 
     vm_gallery_sharing_profile = CliCommandType(
         operations_tmpl=(

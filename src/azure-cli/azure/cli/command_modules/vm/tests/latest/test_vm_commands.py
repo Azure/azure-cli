@@ -7745,12 +7745,13 @@ class VMGalleryImage(ScenarioTest):
             self.check('sharingProfile.permissions', 'Private')
         ])
 
-        # update gallery from private to community
-        self.cmd('sig update -g {rg} --gallery-name {gallery1} --permissions Community '
-                 '--publisher-uri pubUri --publisher-email test@123.com --eula eula --public-name-prefix pubName',
-                 checks=[
-                     self.check('sharingProfile.permissions', 'Community')
-                 ])
+        # Update gallery from private to community.
+        # This command is commented out because the backend service currently prevents updating 'Private' to 'Community'.
+        # self.cmd('sig update -g {rg} --gallery-name {gallery1} --permissions Community '
+        #          '--publisher-uri pubUri --publisher-email test@123.com --eula eula --public-name-prefix pubName',
+        #          checks=[
+        #              self.check('sharingProfile.permissions', 'Community')
+        #          ])
 
 
 class VMGalleryApplication(ScenarioTest):

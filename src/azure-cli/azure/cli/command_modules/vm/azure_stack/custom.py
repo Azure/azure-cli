@@ -4698,53 +4698,6 @@ def remove_vmss_identity(cmd, resource_group_name, vmss_name, identities=None):
 # endregion
 
 
-# from azure.mgmt.compute.models import Gallery, SharingProfile
-def update_image_galleries(cmd, resource_group_name, gallery_name, gallery, permissions=None,
-                           soft_delete=None, publisher_uri=None, publisher_contact=None, eula=None,
-                           public_name_prefix=None, **kwargs):
-    if permissions:
-        if gallery.sharing_profile is None:
-            SharingProfile = cmd.get_models('SharingProfile', operation_group='shared_galleries')
-            gallery.sharing_profile = SharingProfile(permissions=permissions)
-        else:
-            gallery.sharing_profile.permissions = permissions
-        community_gallery_info = None
-        if permissions == 'Community':
-            if publisher_uri is None or publisher_contact is None or eula is None or public_name_prefix is None:
-                raise RequiredArgumentMissingError('If you want to share to the community, '
-                                                   'you need to fill in all the following parameters:'
-                                                   ' --publisher-uri, --publisher-email, --eula, --public-name-prefix.')
-
-            CommunityGalleryInfo = cmd.get_models('CommunityGalleryInfo', operation_group='shared_galleries')
-            community_gallery_info = CommunityGalleryInfo(publisher_uri=publisher_uri,
-                                                          publisher_contact=publisher_contact,
-                                                          eula=eula,
-                                                          public_name_prefix=public_name_prefix)
-        gallery.sharing_profile.community_gallery_info = community_gallery_info
-
-    if soft_delete is not None:
-        if gallery.soft_delete_policy:
-            gallery.soft_delete_policy.is_soft_delete_enabled = soft_delete
-        else:
-            gallery.soft_delete_policy = {'is_soft_delete_enabled': soft_delete}
-    else:
-        # This is a workaround to solve historical legacy issues,
-        # send None to the service will let service not modify this property.
-        # We can delete this logic when the service no longer checks AFEC in the future.
-        gallery.soft_delete_policy = None
-
-    client = _compute_client_factory(cmd.cli_ctx)
-
-    return client.galleries.begin_create_or_update(resource_group_name, gallery_name, gallery, **kwargs)
-
-
-def show_image_gallery(cmd, resource_group_name, gallery_name, select=None, sharing_groups=None):
-    if sharing_groups:
-        sharing_groups = 'sharingProfile/Groups'
-    client = _compute_client_factory(cmd.cli_ctx)
-    return client.galleries.get(resource_group_name, gallery_name, select=select, expand=sharing_groups)
-
-
 def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_name, os_type, publisher, offer, sku,
                          os_state='Generalized', end_of_life_date=None, privacy_statement_uri=None,
                          release_note_uri=None, eula=None, description=None, location=None,
@@ -5411,13 +5364,6 @@ def install_vm_patches(cmd, client, resource_group_name, vm_name, maximum_durati
 # endregion
 
 
-def sig_shared_gallery_list(client, location, shared_to=None):
-    # Keep it here as it will add subscription in the future and we need to set it to None to make it work
-    if shared_to == 'subscription':
-        shared_to = None
-    return client.list(location=location, shared_to=shared_to)
-
-
 def get_page_result(generator, marker, show_next_marker=None):
     pages = generator.by_page(continuation_token=marker)  # ContainerPropertiesPaged
     result = list_generator(pages=pages)
@@ -6040,44 +5986,6 @@ def restore_point_collection_update(client,
 
 
 # endRegion
-
-
-# region Community gallery
-def sig_community_gallery_list(cmd, location=None, marker=None, show_next_marker=None):
-    from .._arg_client import ARGClient, QueryBody
-
-    query_table = 'communitygalleryresources'
-    query_type = 'microsoft.compute/locations/communitygalleries'
-
-    query = "{}| where type == '{}' ".format(query_table, query_type)
-    if location:
-        # Since the location data in table "communitygalleryresources" is in lowercase
-        # For accurate matching, we also need to convert the location in the query statement to lowercase
-        query = query + "| where location == '{}' ".format(location.lower())
-    query_body = QueryBody(query)
-
-    item_count_per_page = 30
-    query_body.options = {
-        "$top": item_count_per_page
-    }
-
-    if marker:
-        query_body.options['$skipToken'] = marker
-
-    query_result = ARGClient(cmd.cli_ctx).send(query_body)
-    result = _transform_community_gallery_list_output(query_result)
-
-    continuation_token = query_result.get('$skipToken')
-
-    if show_next_marker:
-        next_marker = {"nextMarker": continuation_token}
-        result.append(next_marker)
-    else:
-        if continuation_token:
-            logger.warning('Next Marker:')
-            logger.warning(continuation_token)
-
-    return result
 
 
 def _transform_community_gallery_list_output(result):
