@@ -389,7 +389,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
             self.check('metadata[0].value', 'value')])
 
         # test bad enum value
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(CLIError):
             self.batch_cmd('batch job set --job-id {j_id} --on-all-tasks-complete badValue ')
 
         # test patch job
@@ -398,7 +398,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         self.batch_cmd('batch job show --job-id {j_id}').assert_with_checks([
             self.check('onAllTasksComplete', 'terminatejob'),
             self.check('constraints.maxTaskRetryCount', 0),
-            self.check('constraints.maxWallClockTime', '1279 days, 12:30:05'),
+            self.check('constraints.maxWallClockTime', 'P1279DT12H30M5S'),
             self.check('jobManagerTask.id', 'JobManager'),
             self.check('jobManagerTask.environmentSettings[0].name', 'CLI_TEST_VAR'),
             self.check('jobManagerTask.environmentSettings[0].value', 'CLI_TEST_VAR_VALUE'),
@@ -475,9 +475,10 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         # test create pool from JSON file
         self.kwargs['json'] = self._get_test_data_file('batch-pool-create.json').replace('\\', '\\\\')
         self.batch_cmd('batch pool create --json-file "{json}"')
+        res = self.batch_cmd('batch pool show --pool-id azure-cli-test-json').get_output_in_json()
         self.batch_cmd('batch pool show --pool-id azure-cli-test-json').assert_with_checks([
             self.check('userAccounts[0].name', 'cliTestUser'),
-            self.check('startTask.userIdentity.userName', 'cliTestUser'),
+            self.check('startTask.userIdentity.username', 'cliTestUser'),
             self.check('taskSlotsPerNode', 3)
         ])
 
