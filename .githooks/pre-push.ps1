@@ -58,6 +58,7 @@ if ($mergeBase -ne $upstreamHead) {
             exit 1
         }
         Write-Host "Rebase completed successfully." -ForegroundColor Green
+        $mergeBase = git merge-base HEAD upstream/dev
 
         Write-Host "Running azdev setup..." -ForegroundColor Green
         if ($Extensions) {
@@ -113,18 +114,6 @@ if ($LASTEXITCODE -ne 0) {
     Remove-Item test_results.xml
 }
 
+Write-Host "If you want to skip that, run add '--no-verify' in the end of 'git push' command." -ForegroundColor Yellow
 Write-Host "Pre-push hook passed." -ForegroundColor Green
-
-if ($mergeBase -ne $upstreamHead) {
-    Write-Host ""
-    Write-Host "Your branch is not up to date with upstream/dev. Please run the following commands to rebase code and setup:" -ForegroundColor Yellow
-    Write-Host "+++++++++++++++++++++++++++++++++++++++++++++++++++++++" -ForegroundColor Yellow
-    Write-Host "git rebase upstream/dev" -ForegroundColor Yellow
-    if ($Extensions) {
-        Write-Host "azdev setup -c $AZURE_CLI_FOLDER -r $Extensions" -ForegroundColor Yellow
-    } else {
-        Write-Host "azdev setup -c $AZURE_CLI_FOLDER" -ForegroundColor Yellow
-    }
-    Write-Host "+++++++++++++++++++++++++++++++++++++++++++++++++++++++" -ForegroundColor Yellow
-}
 exit 0
