@@ -18,6 +18,8 @@ variables:
 - template: ${{ variables.Pipeline.Workspace }}/.azure-pipelines/templates/variables.yml
 - name: Codeql.Enabled
   value: false
+- name: ComponentDetection.ForceScan
+  value: eq(variables['Build.SourceBranch'], 'refs/heads/release')
 
 parameters:
 - name: architectures

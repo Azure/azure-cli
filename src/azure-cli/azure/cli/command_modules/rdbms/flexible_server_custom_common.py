@@ -45,13 +45,21 @@ def flexible_server_update_set(client, resource_group_name, server_name, paramet
     return client.begin_update(resource_group_name, server_name, parameters)
 
 
-def server_list_custom_func(client, resource_group_name=None):
+def server_list_custom_func(client, resource_group_name=None, show_cluster=None):
     if not check_resource_group(resource_group_name):
         resource_group_name = None
 
+    servers = client.list()
+
     if resource_group_name:
-        return client.list_by_resource_group(resource_group_name)
-    return client.list()
+        servers = client.list_by_resource_group(resource_group_name)
+
+    if show_cluster:
+        servers = [s for s in servers if s.cluster is not None]
+    else:
+        servers = [s for s in servers if s.cluster is None]
+
+    return servers
 
 
 def firewall_rule_delete_func(cmd, client, resource_group_name, server_name, firewall_rule_name, yes=None):

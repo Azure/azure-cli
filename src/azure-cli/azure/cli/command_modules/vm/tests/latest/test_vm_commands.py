@@ -9530,7 +9530,6 @@ class VMCreateAutoCreateSubnetScenarioTest(ScenarioTest):
         self.kwargs.update({
             'loc': 'eastus',
             'vm': 'vm-subnet',
-            'vnet': 'myvnet',
             'subnet': 'subnet1',
             'vnet': 'vnet1'
         })

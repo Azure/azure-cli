@@ -1927,7 +1927,7 @@ def set_diagnostics_extension(
     vm_extension_name = _LINUX_DIAG_EXT if is_linux_os else _WINDOWS_DIAG_EXT
     if is_linux_os:  # check incompatible version
         exts = vm.instance_view.extensions or []
-        major_ver = extension_mappings[_LINUX_DIAG_EXT]['version'].split('.')[0]
+        major_ver = extension_mappings[_LINUX_DIAG_EXT]['version'].split('.', maxsplit=1)[0]
         if next((e for e in exts if e.name == vm_extension_name and
                  not e.type_handler_version.startswith(major_ver + '.')), None):
             logger.warning('There is an incompatible version of diagnostics extension installed. '
@@ -4219,7 +4219,7 @@ def set_vmss_diagnostics_extension(
     vm_extension_name = _LINUX_DIAG_EXT if is_linux_os else _WINDOWS_DIAG_EXT
     if is_linux_os and vmss.virtual_machine_profile.extension_profile:  # check incompatibles
         exts = vmss.virtual_machine_profile.extension_profile.extensions or []
-        major_ver = extension_mappings[_LINUX_DIAG_EXT]['version'].split('.')[0]
+        major_ver = extension_mappings[_LINUX_DIAG_EXT]['version'].split('.', maxsplit=1)[0]
         # For VMSS, we don't do auto-removal like VM because there is no reliable API to wait for
         # the removal done before we can install the newer one
         if next((e for e in exts if e.name == _LINUX_DIAG_EXT and
@@ -4928,9 +4928,9 @@ def get_image_version_to_update(cmd, resource_group_name, gallery_name, gallery_
     if version.storage_profile.os_disk_image and version.storage_profile.os_disk_image.source:
         version.storage_profile.os_disk_image.source = None
     if version.storage_profile.data_disk_images:
-        for i in range(len(version.storage_profile.data_disk_images)):
-            if version.storage_profile.data_disk_images[i].source:
-                version.storage_profile.data_disk_images[i].source = None
+        for v in version.storage_profile.data_disk_images:
+            if v.source:
+                v.source = None
     return version
 
 
@@ -5754,10 +5754,10 @@ def restore_point_create(client,
             if data_disk_restore_point_encryption_type is not None and (len(source_data_disk_resource) != len(data_disk_restore_point_encryption_type)):
                 raise ArgumentUsageError('Length of --source-data-disk-resource, --data-disk-restore-point-encryption-type must be same.')
 
-            for i in range(len(source_data_disk_resource)):
+            for i, v in enumerate(source_data_disk_resource):
                 data_disks.append({
                     'managedDisk': {
-                        'id': source_data_disk_resource[i]
+                        'id': v
                     },
                     'diskRestorePoint': {
                         'encryption': {
@@ -5809,11 +5809,11 @@ def restore_point_create(client,
             if data_disk_restore_point_encryption_type is not None and (len(source_data_disk_resource) != len(data_disk_restore_point_encryption_type)):
                 raise ArgumentUsageError('Length of --source-data-disk-resource, --data-disk-restore-point-encryption-type must be same.')
 
-            for i in range(len(source_data_disk_resource)):
+            for i, v in enumerate(source_data_disk_resource):
                 data_disks.append({
                     'diskRestorePoint': {
                         'sourceDiskRestorePoint': {
-                            'id': source_data_disk_resource[i]
+                            'id': v
                         },
                         'encryption': {
                             'disk_encryption_set': {
