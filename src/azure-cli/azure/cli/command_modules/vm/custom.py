@@ -4656,78 +4656,78 @@ def remove_vmss_identity(cmd, resource_group_name, vmss_name, identities=None):
 # endregion
 
 
-# from azure.mgmt.compute.models import Gallery, SharingProfile
-def update_image_galleries(cmd, resource_group_name, gallery_name, gallery, permissions=None,
-                           soft_delete=None, publisher_uri=None, publisher_contact=None, eula=None,
-                           public_name_prefix=None, **kwargs):
-    if permissions:
-        if gallery.sharing_profile is None:
-            SharingProfile = cmd.get_models('SharingProfile', operation_group='shared_galleries')
-            gallery.sharing_profile = SharingProfile(permissions=permissions)
-        else:
-            gallery.sharing_profile.permissions = permissions
-        community_gallery_info = None
-        if permissions == 'Community':
-            if publisher_uri is None or publisher_contact is None or eula is None or public_name_prefix is None:
-                raise RequiredArgumentMissingError('If you want to share to the community, '
-                                                   'you need to fill in all the following parameters:'
-                                                   ' --publisher-uri, --publisher-email, --eula, --public-name-prefix.')
-
-            CommunityGalleryInfo = cmd.get_models('CommunityGalleryInfo', operation_group='shared_galleries')
-            community_gallery_info = CommunityGalleryInfo(publisher_uri=publisher_uri,
-                                                          publisher_contact=publisher_contact,
-                                                          eula=eula,
-                                                          public_name_prefix=public_name_prefix)
-        gallery.sharing_profile.community_gallery_info = community_gallery_info
-
-    if soft_delete is not None:
-        if gallery.soft_delete_policy:
-            gallery.soft_delete_policy.is_soft_delete_enabled = soft_delete
-        else:
-            gallery.soft_delete_policy = {'is_soft_delete_enabled': soft_delete}
-    else:
-        # This is a workaround to solve historical legacy issues,
-        # send None to the service will let service not modify this property.
-        # We can delete this logic when the service no longer checks AFEC in the future.
-        gallery.soft_delete_policy = None
-
-    client = _compute_client_factory(cmd.cli_ctx)
-
-    return client.galleries.begin_create_or_update(resource_group_name, gallery_name, gallery, **kwargs)
-
-
-def show_image_gallery(cmd, resource_group_name, gallery_name, select=None, sharing_groups=None):
-    if sharing_groups:
-        sharing_groups = 'sharingProfile/Groups'
-    client = _compute_client_factory(cmd.cli_ctx)
-    return client.galleries.get(resource_group_name, gallery_name, select=select, expand=sharing_groups)
+# # from azure.mgmt.compute.models import Gallery, SharingProfile
+# def update_image_galleries(cmd, resource_group_name, gallery_name, gallery, permissions=None,
+#                            soft_delete=None, publisher_uri=None, publisher_contact=None, eula=None,
+#                            public_name_prefix=None, **kwargs):
+#     if permissions:
+#         if gallery.sharing_profile is None:
+#             SharingProfile = cmd.get_models('SharingProfile', operation_group='shared_galleries')
+#             gallery.sharing_profile = SharingProfile(permissions=permissions)
+#         else:
+#             gallery.sharing_profile.permissions = permissions
+#         community_gallery_info = None
+#         if permissions == 'Community':
+#             if publisher_uri is None or publisher_contact is None or eula is None or public_name_prefix is None:
+#                 raise RequiredArgumentMissingError('If you want to share to the community, '
+#                                                    'you need to fill in all the following parameters:'
+#                                                    ' --publisher-uri, --publisher-email, --eula, --public-name-prefix.')
+#
+#             CommunityGalleryInfo = cmd.get_models('CommunityGalleryInfo', operation_group='shared_galleries')
+#             community_gallery_info = CommunityGalleryInfo(publisher_uri=publisher_uri,
+#                                                           publisher_contact=publisher_contact,
+#                                                           eula=eula,
+#                                                           public_name_prefix=public_name_prefix)
+#         gallery.sharing_profile.community_gallery_info = community_gallery_info
+#
+#     if soft_delete is not None:
+#         if gallery.soft_delete_policy:
+#             gallery.soft_delete_policy.is_soft_delete_enabled = soft_delete
+#         else:
+#             gallery.soft_delete_policy = {'is_soft_delete_enabled': soft_delete}
+#     else:
+#         # This is a workaround to solve historical legacy issues,
+#         # send None to the service will let service not modify this property.
+#         # We can delete this logic when the service no longer checks AFEC in the future.
+#         gallery.soft_delete_policy = None
+#
+#     client = _compute_client_factory(cmd.cli_ctx)
+#
+#     return client.galleries.begin_create_or_update(resource_group_name, gallery_name, gallery, **kwargs)
 
 
-def create_image_gallery(cmd, resource_group_name, gallery_name, description=None,
-                         location=None, no_wait=False, tags=None, permissions=None, soft_delete=None,
-                         publisher_uri=None, publisher_contact=None, eula=None, public_name_prefix=None):
-    Gallery = cmd.get_models('Gallery')
-    location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
-    gallery = Gallery(description=description, location=location, tags=(tags or {}))
-    if soft_delete is not None:
-        gallery.soft_delete_policy = {'is_soft_delete_enabled': soft_delete}
-    client = _compute_client_factory(cmd.cli_ctx)
-    if permissions:
-        SharingProfile = cmd.get_models('SharingProfile', operation_group='shared_galleries')
-        gallery.sharing_profile = SharingProfile(permissions=permissions)
-        if permissions == 'Community':
-            if publisher_uri is None or publisher_contact is None or eula is None or public_name_prefix is None:
-                raise RequiredArgumentMissingError('If you want to share to the community, '
-                                                   'you need to fill in all the following parameters:'
-                                                   ' --publisher-uri, --publisher-email, --eula, --public-name-prefix.')
+# def show_image_gallery(cmd, resource_group_name, gallery_name, select=None, sharing_groups=None):
+#     if sharing_groups:
+#         sharing_groups = 'sharingProfile/Groups'
+#     client = _compute_client_factory(cmd.cli_ctx)
+#     return client.galleries.get(resource_group_name, gallery_name, select=select, expand=sharing_groups)
 
-            CommunityGalleryInfo = cmd.get_models('CommunityGalleryInfo', operation_group='shared_galleries')
-            gallery.sharing_profile.community_gallery_info = CommunityGalleryInfo(publisher_uri=publisher_uri,
-                                                                                  publisher_contact=publisher_contact,
-                                                                                  eula=eula,
-                                                                                  public_name_prefix=public_name_prefix)
 
-    return sdk_no_wait(no_wait, client.galleries.begin_create_or_update, resource_group_name, gallery_name, gallery)
+# def create_image_gallery(cmd, resource_group_name, gallery_name, description=None,
+#                          location=None, no_wait=False, tags=None, permissions=None, soft_delete=None,
+#                          publisher_uri=None, publisher_contact=None, eula=None, public_name_prefix=None):
+#     Gallery = cmd.get_models('Gallery')
+#     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
+#     gallery = Gallery(description=description, location=location, tags=(tags or {}))
+#     if soft_delete is not None:
+#         gallery.soft_delete_policy = {'is_soft_delete_enabled': soft_delete}
+#     client = _compute_client_factory(cmd.cli_ctx)
+#     if permissions:
+#         SharingProfile = cmd.get_models('SharingProfile', operation_group='shared_galleries')
+#         gallery.sharing_profile = SharingProfile(permissions=permissions)
+#         if permissions == 'Community':
+#             if publisher_uri is None or publisher_contact is None or eula is None or public_name_prefix is None:
+#                 raise RequiredArgumentMissingError('If you want to share to the community, '
+#                                                    'you need to fill in all the following parameters:'
+#                                                    ' --publisher-uri, --publisher-email, --eula, --public-name-prefix.')
+#
+#             CommunityGalleryInfo = cmd.get_models('CommunityGalleryInfo', operation_group='shared_galleries')
+#             gallery.sharing_profile.community_gallery_info = CommunityGalleryInfo(publisher_uri=publisher_uri,
+#                                                                                   publisher_contact=publisher_contact,
+#                                                                                   eula=eula,
+#                                                                                   public_name_prefix=public_name_prefix)
+#
+#     return sdk_no_wait(no_wait, client.galleries.begin_create_or_update, resource_group_name, gallery_name, gallery)
 
 
 def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_name, os_type, publisher, offer, sku,

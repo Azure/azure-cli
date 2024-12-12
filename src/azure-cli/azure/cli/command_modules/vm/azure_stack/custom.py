@@ -4745,33 +4745,6 @@ def show_image_gallery(cmd, resource_group_name, gallery_name, select=None, shar
     return client.galleries.get(resource_group_name, gallery_name, select=select, expand=sharing_groups)
 
 
-def create_image_gallery(cmd, resource_group_name, gallery_name, description=None,
-                         location=None, no_wait=False, tags=None, permissions=None, soft_delete=None,
-                         publisher_uri=None, publisher_contact=None, eula=None, public_name_prefix=None):
-    Gallery = cmd.get_models('Gallery')
-    location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
-    gallery = Gallery(description=description, location=location, tags=(tags or {}))
-    if soft_delete is not None:
-        gallery.soft_delete_policy = {'is_soft_delete_enabled': soft_delete}
-    client = _compute_client_factory(cmd.cli_ctx)
-    if permissions:
-        SharingProfile = cmd.get_models('SharingProfile', operation_group='shared_galleries')
-        gallery.sharing_profile = SharingProfile(permissions=permissions)
-        if permissions == 'Community':
-            if publisher_uri is None or publisher_contact is None or eula is None or public_name_prefix is None:
-                raise RequiredArgumentMissingError('If you want to share to the community, '
-                                                   'you need to fill in all the following parameters:'
-                                                   ' --publisher-uri, --publisher-email, --eula, --public-name-prefix.')
-
-            CommunityGalleryInfo = cmd.get_models('CommunityGalleryInfo', operation_group='shared_galleries')
-            gallery.sharing_profile.community_gallery_info = CommunityGalleryInfo(publisher_uri=publisher_uri,
-                                                                                  publisher_contact=publisher_contact,
-                                                                                  eula=eula,
-                                                                                  public_name_prefix=public_name_prefix)
-
-    return sdk_no_wait(no_wait, client.galleries.begin_create_or_update, resource_group_name, gallery_name, gallery)
-
-
 def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_name, os_type, publisher, offer, sku,
                          os_state='Generalized', end_of_life_date=None, privacy_statement_uri=None,
                          release_note_uri=None, eula=None, description=None, location=None,

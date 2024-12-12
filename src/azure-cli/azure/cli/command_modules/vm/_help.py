@@ -712,19 +712,19 @@ examples:
             --intent-vm-sizes Standard_E64s_v4 Standard_M416ms_v2
 """
 
-helps['sig create'] = """
-type: command
-short-summary: Create a shared image gallery.
-examples:
-  - name: Create a shared image gallery
-    text: |
-        az sig create --resource-group MyResourceGroup --gallery-name MyGallery
-"""
+# helps['sig create'] = """
+# type: command
+# short-summary: Create a shared image gallery.
+# examples:
+#   - name: Create a shared image gallery
+#     text: |
+#         az sig create --resource-group MyResourceGroup --gallery-name MyGallery
+# """
 
-helps['sig show'] = """
-type: command
-short-summary: Retrieve information about a Shared Image Gallery.
-"""
+# helps['sig show'] = """
+# type: command
+# short-summary: Retrieve information about a Shared Image Gallery.
+# """
 
 helps['sig image-definition create'] = """
 type: command
@@ -1202,23 +1202,23 @@ examples:
         az sig share wait --updated --resource-group MyResourceGroup --gallery-name Gallery
 """
 
-helps['sig update'] = """
-type: command
-short-summary: update a share image gallery.
-parameters:
-  - name: --select
-    short-summary: The select expression to apply on the operation. "Permissions" Default value is None.
-examples:
-  - name: Enable gallery to be shared to subscription or tenant
-    text: |
-        az sig update --resource-group myResourceGroup --gallery-name myGallery \\
-        --permissions groups
-  - name: Update gallery from private to community
-    text: |
-        az sig update -g myResourceGroup --gallery-name myGallery --permissions Community \\
-        --publisher-uri myPublisherUri --publisher-email myPublisherEmail \\
-        --eula myEula --public-name-prefix myPublicNamePrefix
-"""
+# helps['sig update'] = """
+# type: command
+# short-summary: update a share image gallery.
+# parameters:
+#   - name: --select
+#     short-summary: The select expression to apply on the operation. "Permissions" Default value is None.
+# examples:
+#   - name: Enable gallery to be shared to subscription or tenant
+#     text: |
+#         az sig update --resource-group myResourceGroup --gallery-name myGallery \\
+#         --permissions groups
+#   - name: Update gallery from private to community
+#     text: |
+#         az sig update -g myResourceGroup --gallery-name myGallery --permissions Community \\
+#         --publisher-uri myPublisherUri --publisher-email myPublisherEmail \\
+#         --eula myEula --public-name-prefix myPublicNamePrefix
+# """
 
 helps['sig gallery-application'] = """
     type: group

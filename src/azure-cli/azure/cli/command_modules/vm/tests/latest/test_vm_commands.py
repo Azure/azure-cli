@@ -7517,9 +7517,6 @@ class VMGalleryImage(ScenarioTest):
         if self.is_live:
             time.sleep(30)
 
-        self.cmd('sig image-version delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image_name} '
-                 '--gallery-image-version {version}')
-
         self.cmd('sig update -g {rg} -r {gallery} --soft-delete False', checks=[
             self.check('location', 'westus'),
             self.check('name', '{gallery}'),
@@ -7534,6 +7531,9 @@ class VMGalleryImage(ScenarioTest):
         ])
         if self.is_live:
             time.sleep(30)
+
+        self.cmd('sig image-version delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image_name} '
+                 '--gallery-image-version {version}')
 
         from azure.cli.core.azclierror import InvalidArgumentValueError
         with self.assertRaises(InvalidArgumentValueError):

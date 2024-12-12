@@ -497,9 +497,13 @@ def load_command_table(self, _):
         g.custom_command('delete', 'vmss_run_command_delete', supports_no_wait=True, confirmation=True)
 
     with self.command_group('sig', compute_galleries_sdk, operation_group='galleries', min_api='2018-06-01') as g:
-        g.custom_command('create', 'create_image_gallery')
-        g.custom_show_command('show', 'show_image_gallery')
-        g.generic_update_command('update', setter_type=compute_custom, setter_name='update_image_galleries', setter_arg_name='gallery')
+        # g.custom_command('create', 'create_image_gallery')
+        from .operations.sig import SigCreate, SigUpdate, SigShow
+        self.command_table['sig create'] = SigCreate(loader=self)
+        self.command_table['sig update'] = SigUpdate(loader=self)
+        self.command_table['sig show'] = SigShow(loader=self)
+        # g.custom_show_command('show', 'show_image_gallery')
+        # g.generic_update_command('update', setter_type=compute_custom, setter_name='update_image_galleries', setter_arg_name='gallery')
 
     with self.command_group('sig', community_gallery_sdk, client_factory=cf_community_gallery, operation_group='shared_galleries', min_api='2022-01-03') as g:
         g.custom_command('list-community', 'sig_community_gallery_list')
