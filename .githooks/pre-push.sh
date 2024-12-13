@@ -21,7 +21,7 @@ else
 fi
 
 # Get extension repo paths and join them with spaces
-EXTENSIONS=$(azdev extension repo list -o tsv | tr '\n' ' ')
+EXTENSIONS=$(azdev extension repo list -o tsv | tr '\n' ' ' | sed 's/ $//')
 
 # Fetch upstream/dev branch
 printf "\033[0;32mFetching upstream/dev branch...\033[0m\n"
