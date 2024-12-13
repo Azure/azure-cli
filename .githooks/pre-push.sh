@@ -34,6 +34,7 @@ fi
 # Check if current branch needs rebasing
 MERGE_BASE=$(git merge-base HEAD upstream/dev)
 UPSTREAM_HEAD=$(git rev-parse upstream/dev)
+printf "\033[0;36mInitial mergeBase: %s\033[0m\n" "$MERGE_BASE"
 
 if [ "$MERGE_BASE" != "$UPSTREAM_HEAD" ]; then
     printf "\n"
@@ -50,6 +51,7 @@ if [ "$MERGE_BASE" != "$UPSTREAM_HEAD" ]; then
         fi
         printf "\033[0;32mRebase completed successfully.\033[0m\n"
         MERGE_BASE=$(git merge-base HEAD upstream/dev)
+        printf "\033[0;36mUpdated mergeBase: %s\033[0m\n" "$MERGE_BASE"
 
         printf "\033[0;32mRunning azdev setup...\033[0m\n"
         if [ -n "$EXTENSIONS" ]; then
@@ -108,3 +110,4 @@ fi
 printf "\033[0;32mIf you want to skip that, run add '--no-verify' in the end of 'git push' command.\033[0m\n"
 printf "\033[0;32mPre-push hook passed.\033[0m\n"
 exit 0
+
