@@ -37,6 +37,7 @@ if ($LASTEXITCODE -ne 0) {
 # Check if current branch needs rebasing
 $mergeBase = git merge-base HEAD upstream/dev
 $upstreamHead = git rev-parse upstream/dev
+Write-Host "Initial mergeBase: $mergeBase" -ForegroundColor Cyan
 if ($mergeBase -ne $upstreamHead) {
     Write-Host ""
     Write-Host "Your branch is not up to date with upstream/dev." -ForegroundColor Yellow
@@ -59,6 +60,7 @@ if ($mergeBase -ne $upstreamHead) {
         }
         Write-Host "Rebase completed successfully." -ForegroundColor Green
         $mergeBase = git merge-base HEAD upstream/dev
+        Write-Host "Updated mergeBase: $mergeBase" -ForegroundColor Cyan
 
         Write-Host "Running azdev setup..." -ForegroundColor Green
         if ($Extensions) {
