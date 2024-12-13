@@ -627,6 +627,32 @@ def api_export_result_to_dict(api_export_result):
         'value': api_export_result.value
     }
 
+# Api Policy Operations
+
+def apim_api_policy_create(client, resource_group_name, service_name, api_id, value_path, policy_format=None, no_wait=False):
+    """Creates a new API policy. """
+    with open(value_path, 'r') as api_file:
+        content_value = api_file.read()
+
+    parameters = PolicyContract(
+        format=policy_format,
+        value=content_value
+    )
+
+    return sdk_no_wait(no_wait, client.api_policy.create_or_update,
+                       resource_group_name=resource_group_name,
+                       service_name=service_name,
+                       api_id=api_id,
+                       policy_id="policy",
+                       parameters=parameters)
+
+def apim_api_policy_get(client, resource_group_name, service_name, api_id, file_path=None):
+    """Get the policy configuration at the API level. """
+
+    return client.api_policy.get(resource_group_name=resource_group_name,
+                                 service_name=service_name,
+                                 api_id=api_id,
+                                 policy_id='policy').value
 
 # Product API Operations
 def apim_product_api_list(client, resource_group_name, service_name, product_id):
