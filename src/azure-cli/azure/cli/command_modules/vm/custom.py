@@ -840,9 +840,9 @@ def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, 
         if external_identities:
             vm.identity.user_assigned_identities = {}
             if not cmd.supported_api_version(min_api='2018-06-01', resource_type=ResourceType.MGMT_COMPUTE):
-                raise CLIInternalError("Usage error: user assigned identity is not available under current profile.",
-                                       "You can set the cloud's profile to latest with 'az cloud set --profile latest"
-                                       " --name <cloud name>'")
+                raise CLIError("Usage error: Encryption Identity required API version 2023-07-01 or higher."
+                               "You can set the cloud's profile to use the required API Version with:"
+                               "az cloud set --profile latest --name <cloud name>")
             for identity in external_identities:
                 vm.identity.user_assigned_identities[identity] = UserAssignedIdentitiesValue()
 
