@@ -705,7 +705,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         is_move = False
         for i in rp_names:
-            if i['tierType']=="VaultStandard" and i['properties']['recoveryPointMoveReadinessInfo']['ArchivedRP']['isReadyForMove'] is True:
+            if i['tierType'] == "VaultStandard" and i['properties']['recoveryPointMoveReadinessInfo']['ArchivedRP']['isReadyForMove']:
                 self.kwargs['rp_move'] = i['name']
                 is_move = True
                 break

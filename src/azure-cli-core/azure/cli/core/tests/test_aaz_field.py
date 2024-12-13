@@ -59,16 +59,15 @@ class TestAAZField(unittest.TestCase):
         model_schema.properties.enable = AAZBoolType()
         v.properties.enable = True
         assert not v.properties.enable._is_patch
-        assert v.properties.enable is True
-        assert not (v.properties.enable is not True)
+        assert not (v.properties.enable != True)  # noqa: E712
         assert v.properties.enable
-        assert v.properties.enable is not True  # cannot us is
+        assert v.properties.enable != True  # noqa: E712
 
         v.properties.enable = False
-        assert v.properties.enable is False
-        assert not (v.properties.enable is not False)
+        assert v.properties.enable == False  # noqa: E712
+        assert not (v.properties.enable != False)  # noqa: E712
         assert not v.properties.enable
-        assert v.properties.enable is not False
+        assert v.properties.enable is not False  # noqa: E712
 
         # test float type
         model_schema.properties.height = AAZFloatType()
@@ -76,7 +75,7 @@ class TestAAZField(unittest.TestCase):
         assert str(v.properties.height) == "10.0"
         assert not v.properties.height._is_patch
         assert v.properties.height._data == 10
-        assert v.properties.height == 10 and v.properties.height <= 10 and v.properties.height >= 10
+        assert v.properties.height == 10 and v.properties.height <= 10 <= v.properties.height
         assert not (v.properties.height != 10) and not (v.properties.height < 10) and not (v.properties.height > 10)
         assert v.properties.height != 11 and v.properties.height < 11 and v.properties.height <= 11
         assert not (v.properties.height == 11) and not (v.properties.height > 11) and not (v.properties.height >= 11)
