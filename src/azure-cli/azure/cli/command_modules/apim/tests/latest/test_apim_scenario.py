@@ -346,6 +346,12 @@ class ApimScenarioTest(ScenarioTest):
             self.cmd('apim api release list -g "{rg}" -n "{service_name}" --api-id "{api_id}"').get_output_in_json())
         self.assertEqual(final_release_count, initial_release_count)
 
+        # API policy operations
+
+        # get API policy
+        #self.cmd('apim api policy show -g {rg} --service-name {service_name} --api-id {api_id}',
+             #checks=[self.check('policyContentFormat', 'xml')])
+
         # product Apis operations
 
         # list APIs in a product

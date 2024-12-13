@@ -8,7 +8,7 @@
 
 from azure.cli.core.commands import CliCommandType
 from azure.cli.command_modules.apim._format import (service_output_format)
-from azure.cli.command_modules.apim._client_factory import (cf_service, cf_api, cf_product, cf_nv, cf_apiops,
+from azure.cli.command_modules.apim._client_factory import (cf_service, cf_api, cf_api_policy, cf_product, cf_nv, cf_apiops,
                                                             cf_apirelease, cf_apirevision, cf_apiversionset,
                                                             cf_apischema, cf_ds, cf_graphqlapiresolver,
                                                             cf_graphqlapiresolverpolicy)
@@ -23,6 +23,11 @@ def load_command_table(self, _):
     api_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.apimanagement.operations#ApiOperations.{}',
         client_factory=cf_api
+    )
+
+    api_policy_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.apimanagement.operations#ApiPolicyOperations.{}',
+        client_factory=cf_api_policy
     )
 
     api_schema = CliCommandType(
@@ -104,6 +109,9 @@ def load_command_table(self, _):
                          confirmation=True, supports_no_wait=True)
         g.generic_update_command('update', custom_func_name='apim_api_update',
                                  setter_name='begin_create_or_update', getter_name='get', supports_no_wait=True)
+
+    with self.command_group('apim api policy', api_sdk) as g:
+        g.custom_command('get', 'apim_api_policy_get')
         g.wait_command('wait')
 
     with self.command_group('apim product api', api_sdk) as g:
