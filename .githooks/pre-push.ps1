@@ -117,6 +117,5 @@ if ($LASTEXITCODE -ne 0) {
     Remove-Item test_results.xml
 }
 
-Write-Host "If you want to skip that, run add '--no-verify' in the end of 'git push' command." -ForegroundColor Yellow
 Write-Host "Pre-push hook passed." -ForegroundColor Green
 exit 0

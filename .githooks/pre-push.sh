@@ -107,8 +107,6 @@ else
     rm -f test_results.xml
 fi
 
-printf "\033[0;32m+++++++++++++++++++++++++++++++++++++++++++++++++++++++\033[0m\n"
-printf "\033[0;32mIf you want to skip that, run add '--no-verify' in the end of 'git push' command.\033[0m\n"
 printf "\033[0;32mPre-push hook passed.\033[0m\n"
 exit 0
 
