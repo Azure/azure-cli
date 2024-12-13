@@ -38,6 +38,7 @@ if ($LASTEXITCODE -ne 0) {
 $mergeBase = git merge-base HEAD upstream/dev
 $upstreamHead = git rev-parse upstream/dev
 Write-Host "Initial mergeBase: $mergeBase" -ForegroundColor Cyan
+
 if ($mergeBase -ne $upstreamHead) {
     Write-Host ""
     Write-Host "Your branch is not up to date with upstream/dev." -ForegroundColor Yellow
