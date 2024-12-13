@@ -16,7 +16,7 @@ class Exporter(json.JSONEncoder):
 
     def default(self, o):#pylint: disable=method-hidden
         try:
-            return super(Exporter, self).default(o)
+            return super().default(o)
         except TypeError:
             return str(o)
 

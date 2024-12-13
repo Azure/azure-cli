@@ -16,7 +16,7 @@ from azure.cli.core.azclierror import ClientRequestError, RequiredArgumentMissin
 from ._client_factory import cf_postgres_flexible_replica
 from ._flexible_server_util import run_subprocess, \
     fill_action_template, get_git_root_dir, resolve_poller, GITHUB_ACTION_PATH
-from .validators import validate_public_access_server, validate_resource_group, check_resource_group
+from .validators import validate_public_access_server, validate_resource_group, check_resource_group, validate_citus_cluster
 
 logger = get_logger(__name__)
 # pylint: disable=raise-missing-from
@@ -30,7 +30,7 @@ def flexible_server_update_get(client, resource_group_name, server_name):
 
 
 def flexible_server_stop(client, resource_group_name=None, server_name=None, no_wait=False):
-    if (not check_resource_group(resource_group_name)):
+    if not check_resource_group(resource_group_name):
         resource_group_name = None
 
     days = 7
@@ -45,13 +45,21 @@ def flexible_server_update_set(client, resource_group_name, server_name, paramet
     return client.begin_update(resource_group_name, server_name, parameters)
 
 
-def server_list_custom_func(client, resource_group_name=None):
-    if (not check_resource_group(resource_group_name)):
+def server_list_custom_func(client, resource_group_name=None, show_cluster=None):
+    if not check_resource_group(resource_group_name):
         resource_group_name = None
 
+    servers = client.list()
+
     if resource_group_name:
-        return client.list_by_resource_group(resource_group_name)
-    return client.list()
+        servers = client.list_by_resource_group(resource_group_name)
+
+    if show_cluster:
+        servers = [s for s in servers if s.cluster is not None]
+    else:
+        servers = [s for s in servers if s.cluster is None]
+
+    return servers
 
 
 def firewall_rule_delete_func(cmd, client, resource_group_name, server_name, firewall_rule_name, yes=None):
@@ -147,8 +155,8 @@ def firewall_rule_list_func(cmd, client, resource_group_name, server_name):
     return client.list_by_server(resource_group_name, server_name)
 
 
-def database_delete_func(client, resource_group_name=None, server_name=None, database_name=None, yes=None):
-    if (not check_resource_group(resource_group_name)):
+def database_delete_func(cmd, client, resource_group_name=None, server_name=None, database_name=None, yes=None):
+    if not check_resource_group(resource_group_name):
         resource_group_name = None
 
     result = None
@@ -162,6 +170,7 @@ def database_delete_func(client, resource_group_name=None, server_name=None, dat
             "Are you sure you want to delete the database '{0}' of server '{1}'".format(database_name,
                                                                                         server_name), yes=yes)
 
+    validate_citus_cluster(cmd, resource_group_name, server_name)
     try:
         result = client.begin_delete(resource_group_name, server_name, database_name)
     except Exception as ex:  # pylint: disable=broad-except
@@ -274,6 +283,7 @@ def flexible_server_log_list(client, resource_group_name, server_name, filename_
 
 def flexible_server_version_upgrade(cmd, client, resource_group_name, server_name, version, yes=None):
     validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
 
     if not yes:
         user_confirmation(

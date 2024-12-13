@@ -66,7 +66,7 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
 
     # Format dictionary/free-form arguments
     if not cluster_configurations:
-        cluster_configurations = dict()
+        cluster_configurations = {}
 
     if component_version:
         # See validator
@@ -77,7 +77,7 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
     if 'gateway' in cluster_configurations:
         gateway_config = cluster_configurations['gateway']
     else:
-        gateway_config = dict()
+        gateway_config = {}
     if http_username and 'restAuthCredential.username' in gateway_config:
         raise CLIError('An HTTP username must be specified either as a command-line parameter '
                        'or in the cluster configuration, but not both.')

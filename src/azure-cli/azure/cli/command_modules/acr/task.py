@@ -1130,7 +1130,7 @@ def _build_identities_info(cmd, identities, is_remove=False):
     identity = IdentityProperties(type=identity_types)
     if external_identities:
         if is_remove:
-            identity.user_assigned_identities = {e: None for e in external_identities}
+            identity.user_assigned_identities = dict.fromkeys(external_identities)
         else:
             identity.user_assigned_identities = {e: UserIdentityProperties() for e in external_identities}
     return identity

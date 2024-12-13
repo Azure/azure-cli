@@ -404,7 +404,7 @@ class BatchArgumentTree:
             if namespace.json_file:
                 try:
                     namespace.json_file = get_file_json(namespace.json_file)
-                except EnvironmentError:
+                except OSError:
                     raise ValueError("Cannot access JSON request file: " + namespace.json_file)
                 except ValueError as err:
                     raise ValueError(f"Invalid JSON file: {err}")
@@ -748,12 +748,12 @@ class AzureBatchDataPlaneCommand:
                     choices = docstring[values_index + 25:].split(', ')
                     choices = [enum_value(c) for c in choices if enum_value(c) != "'unmapped'"]
                     docstring = docstring[0:values_index]
-                args.append(((arg[0], CLICommandArgument(arg[0],
-                                                         options_list=[arg_name(arg[0])],
-                                                         required=False,
-                                                         default=None,
-                                                         choices=choices,
-                                                         help=docstring))))
+                args.append((arg[0], CLICommandArgument(arg[0],
+                                                        options_list=[arg_name(arg[0])],
+                                                        required=False,
+                                                        default=None,
+                                                        choices=choices,
+                                                        help=docstring)))
             elif arg_type.startswith("~"):  # TODO: could add handling for enums
                 param_type = class_name(arg_type)
                 self.parser.set_request_param(arg[0], param_type)

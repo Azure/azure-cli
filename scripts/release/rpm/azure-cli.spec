@@ -21,7 +21,7 @@ License:        MIT
 Name:           %{name}
 Version:        %{version}
 Release:        %{release}
-Url:            https://docs.microsoft.com/cli/azure/install-azure-cli
+Url:            https://learn.microsoft.com/cli/azure/install-azure-cli
 Requires:       %{python_package}
 Prefix:         /usr
 Prefix:         /etc

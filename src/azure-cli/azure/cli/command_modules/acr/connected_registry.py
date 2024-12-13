@@ -108,7 +108,7 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
             client_token_list[i] = build_token_id(
                 subscription_id, resource_group_name, registry_name, client_token_name)
 
-    notifications_set = set(list(notifications)) \
+    notifications_set = set(notifications) \
         if notifications else set()
 
     ConnectedRegistry, LoggingProperties, SyncProperties, ParentProperties = cmd.get_models(
@@ -192,10 +192,10 @@ def acr_connected_registry_update(cmd,  # pylint: disable=too-many-locals, too-m
     client_token_list = list(client_token_set) if client_token_set != current_client_token_set else None
 
     # Add or remove from the current notifications list
-    add_notifications_set = set(list(add_notifications)) \
+    add_notifications_set = set(add_notifications) \
         if add_notifications else set()
 
-    remove_notifications_set = set(list(remove_notifications)) \
+    remove_notifications_set = set(remove_notifications) \
         if remove_notifications else set()
 
     duplicate_notifications = set.intersection(add_notifications_set, remove_notifications_set)

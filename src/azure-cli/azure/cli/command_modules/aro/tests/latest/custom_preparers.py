@@ -23,7 +23,7 @@ class AROClusterServicePrincipalPreparer(RoleBasedServicePrincipalPreparer):
         dev_setting_sp_password="AZURE_CLI_TEST_DEV_SP_PASSWORD",
         key="aro_csp",
     ):
-        super(AROClusterServicePrincipalPreparer, self).__init__(
+        super().__init__(
             name_prefix,
             skip_assignment,
             parameter_name,

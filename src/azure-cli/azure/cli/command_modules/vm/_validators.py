@@ -7,10 +7,7 @@
 
 import os
 
-try:
-    from urllib.parse import urlparse
-except ImportError:
-    from urlparse import urlparse  # pylint: disable=import-error
+from urllib.parse import urlparse
 
 from knack.log import get_logger
 from knack.util import CLIError
@@ -1112,7 +1109,7 @@ def _validate_vm_nic_delete_option(namespace):
     if not namespace.nics and namespace.nic_delete_option:
         if len(namespace.nic_delete_option) == 1 and len(namespace.nic_delete_option[0].split('=')) == 1:  # pylint: disable=line-too-long
             namespace.nic_delete_option = namespace.nic_delete_option[0]
-        elif len(namespace.nic_delete_option) > 1 or any((len(delete_option.split('=')) > 1 for delete_option in namespace.nic_delete_option)):  # pylint: disable=line-too-long
+        elif len(namespace.nic_delete_option) > 1 or any(len(delete_option.split('=')) > 1 for delete_option in namespace.nic_delete_option):  # pylint: disable=line-too-long
             from azure.cli.core.parser import InvalidArgumentValueError
             raise InvalidArgumentValueError("incorrect usage: Cannot specify individual delete option when no nic is "
                                             "specified. Either specify a list of nics and their delete option like: "
@@ -1194,7 +1191,7 @@ def _validate_admin_username(username, os_type):
     import re
     if not username:
         raise CLIError("admin user name can not be empty")
-    is_linux = (os_type.lower() == 'linux')
+    is_linux = os_type.lower() == 'linux'
     # pylint: disable=line-too-long
     pattern = (r'[\\\/"\[\]:|<>+=;,?*@#()!A-Z]+' if is_linux else r'[\\\/"\[\]:|<>+=;,?*@]+')
     linux_err = r'admin user name cannot contain upper case character A-Z, special characters \/"[]:|<>+=;,?*@#()! or start with $ or -'
@@ -1212,7 +1209,7 @@ def _validate_admin_username(username, os_type):
 
 def _validate_admin_password(password, os_type):
     import re
-    is_linux = (os_type.lower() == 'linux')
+    is_linux = os_type.lower() == 'linux'
     max_length = 72 if is_linux else 123
     min_length = 12
 
@@ -2179,9 +2176,9 @@ def process_assign_identity_namespace(cmd, namespace):
 def process_remove_identity_namespace(cmd, namespace):
     if namespace.identities:
         from ._vm_utils import MSI_LOCAL_ID
-        for i in range(len(namespace.identities)):
-            if namespace.identities[i] != MSI_LOCAL_ID:
-                namespace.identities[i] = _get_resource_id(cmd.cli_ctx, namespace.identities[i],
+        for i, identity in enumerate(namespace.identities):
+            if identity != MSI_LOCAL_ID:
+                namespace.identities[i] = _get_resource_id(cmd.cli_ctx, identity,
                                                            namespace.resource_group_name,
                                                            'userAssignedIdentities',
                                                            'Microsoft.ManagedIdentity')
@@ -2658,12 +2655,3 @@ def _validate_community_gallery_legal_agreement_acceptance(cmd, namespace):
     if not prompt_y_n(msg, default="y"):
         import sys
         sys.exit(0)
-
-
-def validate_secure_vm_guest_state_sas(cmd, namespace):
-    compute_client = _compute_client_factory(cmd.cli_ctx)
-    disk_info = compute_client.disks.get(namespace.resource_group_name, namespace.disk_name)
-    DiskCreateOption = cmd.get_models('DiskCreateOption')
-
-    if disk_info.creation_data and disk_info.creation_data.create_option == DiskCreateOption.upload_prepared_secure:
-        namespace.secure_vm_guest_state_sas = True

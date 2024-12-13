@@ -63,7 +63,7 @@ def acr_pack_build(cmd,  # pylint: disable=too-many-locals
 
     registry_prefixes = '$Registry/', registry.login_server + '/'
     # If the image name doesn't have any required prefix, add it
-    if all((not image_name.startswith(prefix) for prefix in registry_prefixes)):
+    if all(not image_name.startswith(prefix) for prefix in registry_prefixes):
         original_image_name = image_name
         image_name = registry_prefixes[0] + image_name
         logger.debug('Modified image name from %s to %s', original_image_name, image_name)

@@ -136,12 +136,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         help='When creating a file or directory and the parent folder does not have a default ACL, the umask restricts '
              'the permissions of the file or directory to be created. The resulting permission is given by p & ^u, '
              'where p is the permission and u is the umask. For more information, please refer to '
-             'https://docs.microsoft.com/azure/storage/blobs/data-lake-storage-access-control#umask.')
+             'https://learn.microsoft.com/azure/storage/blobs/data-lake-storage-access-control#umask.')
     permissions_type = CLIArgumentType(
         help='POSIX access permissions for the file owner, the file owning group, and others. Each class may be '
              'granted read, write, or execute permission. The sticky bit is also supported. Both symbolic (rwxrw-rw-) '
              'and 4-digit octal notation (e.g. 0766) are supported. For more information, please refer to https://'
-             'docs.microsoft.com/azure/storage/blobs/data-lake-storage-access-control#levels-of-permission.')
+             'learn.microsoft.com/azure/storage/blobs/data-lake-storage-access-control#levels-of-permission.')
 
     timeout_type = CLIArgumentType(
         help='Request timeout in seconds. Applies to each call to the service.', type=int
@@ -341,7 +341,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage account management-policy create') as c:
         c.argument('policy', type=file_type, completer=FilesCompleter(),
                    help='The Storage Account ManagementPolicies Rules, in JSON format. See more details in: '
-                        'https://docs.microsoft.com/azure/storage/common/storage-lifecycle-managment-concepts.')
+                        'https://learn.microsoft.com/azure/storage/common/storage-lifecycle-managment-concepts.')
 
     for item in ['create', 'update', 'show', 'delete']:
         with self.argument_context('storage account management-policy {}'.format(item)) as c:
@@ -624,7 +624,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The type of blob at the destination.')
         c.argument('preserve_s2s_access_tier', arg_group='Additional Flags', arg_type=get_three_state_flag(),
                    help='Preserve access tier during service to service copy. '
-                   'Please refer to https://docs.microsoft.com/azure/storage/blobs/storage-blob-storage-tiers '
+                   'Please refer to https://learn.microsoft.com/azure/storage/blobs/storage-blob-storage-tiers '
                    'to ensure destination storage account support setting access tier. In the cases that setting '
                    'access tier is not supported, please use `--preserve-s2s-access-tier false` to bypass copying '
                    'access tier. (Default true)')

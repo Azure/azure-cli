@@ -32,7 +32,7 @@ def load_arguments(self, _):
     with self.argument_context('containerapp') as c:
         c.argument('tags', arg_type=tags_type)
         c.argument('managed_env', validator=validate_managed_env_name_or_id, options_list=['--environment'], help="Name or resource ID of the container app's environment.")
-        c.argument('yaml', type=file_type, help='Path to a .yaml file with the configuration of a container app. All other parameters will be ignored. For an example, see  https://docs.microsoft.com/azure/container-apps/azure-resource-manager-api-spec#examples')
+        c.argument('yaml', type=file_type, help='Path to a .yaml file with the configuration of a container app. All other parameters will be ignored. For an example, see  https://learn.microsoft.com/azure/container-apps/azure-resource-manager-api-spec#examples')
 
     with self.argument_context('containerapp exec') as c:
         c.argument('container', help="The name of the container to ssh into")
@@ -307,7 +307,7 @@ def load_arguments(self, _):
         c.argument('max_age', nargs='?', const='', validator=validate_cors_max_age, help="The maximum age of the allowed origin in seconds. Only postive integer or empty string are allowed. Empty string resets max_age to null.")
 
     with self.argument_context('containerapp secret') as c:
-        c.argument('secrets', nargs='+', options_list=['--secrets', '-s'], help="A list of secret(s) for the container app. Space-separated values in 'key=value' or 'key=keyvaultref:keyvaulturl,identityref:identity' format (where 'key' cannot be longer than 20 characters).")
+        c.argument('secrets', nargs='+', options_list=['--secrets', '-s'], help="A list of secret(s) for the container app. Space-separated values in 'key=value' or 'key=keyvaultref:keyvaulturl,identityref:identity' format (where 'key' cannot be longer than 20 characters. For 'identityref', Use 'system' for a system-defined identity or a resource id for a user-defined identity).")
         c.argument('secret_name', help="The name of the secret to show.")
         c.argument('secret_names', nargs='+', help="A list of secret(s) for the container app. Space-separated secret values names.")
         c.argument('show_values', help='Show the secret values.')

@@ -459,7 +459,7 @@ def certificate_type(string):
         with open(os.path.expanduser(string), 'rb') as f:
             cert_data = f.read()
         return cert_data
-    except (IOError, OSError) as e:
+    except OSError as e:
         raise CLIError("Unable to load certificate file '{}': {}.".format(string, e.strerror))
 
 
@@ -585,14 +585,14 @@ def _show_vault_only_deprecate_message(ns):
                        'Warning! If you have soft-delete protection enabled on this key vault, you will '
                        'not be able to reuse this key vault name until the key vault has been purged from '
                        'the soft deleted state. Please see the following documentation for additional '
-                       'guidance.\nhttps://docs.microsoft.com/azure/key-vault/general/soft-delete-overview'),
+                       'guidance.\nhttps://learn.microsoft.com/azure/key-vault/general/soft-delete-overview'),
         'keyvault key delete':
             Deprecated(ns.cmd.cli_ctx, message_func=lambda x:
                        'Warning! If you have soft-delete protection enabled on this key vault, this key '
                        'will be moved to the soft deleted state. You will not be able to create a key with '
                        'the same name within this key vault until the key has been purged from the '
                        'soft-deleted state. Please see the following documentation for additional '
-                       'guidance.\nhttps://docs.microsoft.com/azure/key-vault/general/soft-delete-overview')
+                       'guidance.\nhttps://learn.microsoft.com/azure/key-vault/general/soft-delete-overview')
     }
     cmds = ['keyvault delete', 'keyvault key delete']
     for cmd in cmds:

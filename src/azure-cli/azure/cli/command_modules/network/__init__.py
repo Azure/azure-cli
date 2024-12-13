@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long
-
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core.profiles import ResourceType
 
@@ -17,16 +15,20 @@ class NetworkCommandsLoader(AzCommandsLoader):
         from azure.cli.core import ModExtensionSuppress
         from azure.cli.core.commands import CliCommandType
         network_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.network.custom#{}')
-        super(NetworkCommandsLoader, self).__init__(cli_ctx=cli_ctx,
-                                                    custom_command_type=network_custom,
-                                                    suppress_extension=[
-                                                        ModExtensionSuppress(__name__, 'dns', '0.0.2',
-                                                                             reason='These commands are now in the CLI.',
-                                                                             recommend_remove=True),
-                                                        ModExtensionSuppress(__name__, 'express-route', '0.1.3',
-                                                                             reason='These commands are now in the CLI.',
-                                                                             recommend_remove=True)
-                                                    ])
+        super().__init__(
+            cli_ctx=cli_ctx,
+            custom_command_type=network_custom,
+            suppress_extension=[
+                ModExtensionSuppress(
+                    __name__, 'dns', '0.0.2',
+                    reason='These commands are now in the CLI.',
+                    recommend_remove=True),
+                ModExtensionSuppress(
+                    __name__, 'express-route', '0.1.3',
+                    reason='These commands are now in the CLI.',
+                    recommend_remove=True)
+            ]
+        )
 
     def load_command_table(self, args):
         from azure.cli.command_modules.network.commands import load_command_table

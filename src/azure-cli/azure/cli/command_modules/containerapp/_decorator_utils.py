@@ -17,7 +17,7 @@ def load_yaml_file(file_name):
     try:
         with open(file_name) as stream:  # pylint: disable=unspecified-encoding
             return yaml.safe_load(stream.read().replace('\x00', ''))
-    except (IOError, OSError) as ex:
+    except OSError as ex:
         if getattr(ex, 'errno', 0) == errno.ENOENT:
             raise ValidationError('{} does not exist'.format(file_name)) from ex
         raise

@@ -438,7 +438,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('dapr_enable_api_logging', options_list=['--dapr-enable-api-logging', '--dal'], help="Enable/Disable API logging for the Dapr sidecar.", arg_type=get_three_state_flag(return_label=True))
         c.argument('workload_profile_name', help="The name of the workload profile to run the app on.", is_preview=True)
         c.argument('cpu', type=float, help="Required CPU in cores from 0.5 to 2.0.", is_preview=True)
-        c.argument('memory', help="Required momory from 1.0 to 4.0 ending with ""Gi"" e.g. 1.0Gi, ", is_preview=True)
+        c.argument('memory', help="Required momory from 1.0 to 4.0 ending with Gi e.g. 1.0Gi, ", is_preview=True)
 
     with self.argument_context('functionapp runtime config') as c:
         c.argument('runtime_version', help='The version of the functions runtime stack. Use "az functionapp list-flexconsumption-runtimes" to check supported runtimes and versions', is_preview=True)

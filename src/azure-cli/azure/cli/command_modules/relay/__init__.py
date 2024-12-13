@@ -15,7 +15,7 @@ class RelayCommandsLoader(AzCommandsLoader):
     def __init__(self, cli_ctx=None):
         from azure.cli.core.commands import CliCommandType
         relay_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.relay.custom#{}')
-        super(RelayCommandsLoader, self).__init__(
+        super().__init__(
             cli_ctx=cli_ctx, custom_command_type=relay_custom)
 
     def load_command_table(self, args):

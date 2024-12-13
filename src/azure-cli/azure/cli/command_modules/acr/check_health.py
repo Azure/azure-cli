@@ -234,7 +234,7 @@ def _get_registry_status(login_server, registry_name, ignore_errors):
     try:
         request_url = 'https://' + login_server + '/v2/'
         logger.debug(add_timestamp("Sending a HTTP GET request to {}".format(request_url)))
-        challenge = requests.get(request_url, verify=(not should_disable_connection_verify()))
+        challenge = requests.get(request_url, verify=not should_disable_connection_verify())
     except SSLError:
         from ._errors import CONNECTIVITY_SSL_ERROR
         _handle_error(CONNECTIVITY_SSL_ERROR.format_error_message(login_server), ignore_errors)
@@ -334,7 +334,7 @@ def _check_registry_health(cmd, registry_name, ignore_errors):
                         if v.client_id == client_id:
                             from azure.core.exceptions import HttpResponseError
                             try:
-                                valid_identity = (resolve_identity_client_id(cmd.cli_ctx, k) == client_id)
+                                valid_identity = resolve_identity_client_id(cmd.cli_ctx, k) == client_id
                             except HttpResponseError:
                                 pass
             if not valid_identity:
@@ -402,15 +402,15 @@ def _check_private_endpoint(cmd, registry_name, vnet_of_private_endpoint):  # py
                ' Please make sure you provided correct vnet')
         raise CLIError(err.format(registry_name, vnet_of_private_endpoint))
 
-    for fqdn in dns_mappings:
+    for k, v in dns_mappings.items():
         try:
-            result = socket.gethostbyname(fqdn)
-            if result != dns_mappings[fqdn]:
+            result = socket.gethostbyname(k)
+            if result != v:
                 err = 'DNS routing to registry "%s" through private IP is incorrect. Expect: %s, Actual: %s'
-                logger.warning(err, registry_name, dns_mappings[fqdn], result)
+                logger.warning(err, registry_name, v, result)
                 dns_ok = False
         except Exception as e:  # pylint: disable=broad-except
-            logger.warning('Error resolving DNS for %s. Ex: %s', fqdn, e)
+            logger.warning('Error resolving DNS for %s. Ex: %s', k, e)
             dns_ok = False
 
     if dns_ok:

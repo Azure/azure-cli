@@ -2022,6 +2022,27 @@ class AKSManagedClusterContext(BaseAKSContext):
         # this parameter does not need validation
         return load_balancer_backend_pool_type
 
+    def get_nrg_lockdown_restriction_level(self) -> Union[str, None]:
+        """Obtain the value of nrg_lockdown_restriction_level.
+        :return: string or None
+        """
+        # read the original value passed by the command
+        nrg_lockdown_restriction_level = self.raw_param.get("nrg_lockdown_restriction_level")
+
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                hasattr(self.mc, "nrg_lockdown_restriction_level") and  # for backward compatibility
+                self.mc.node_resource_group_profile and
+                self.mc.node_resource_group_profile.restriction_level is not None
+            ):
+                nrg_lockdown_restriction_level = self.mc.node_resource_group_profile.restriction_level
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return nrg_lockdown_restriction_level
+
     def get_nat_gateway_managed_outbound_ip_count(self) -> Union[int, None]:
         """Obtain the value of nat_gateway_managed_outbound_ip_count.
 
@@ -2124,7 +2145,12 @@ class AKSManagedClusterContext(BaseAKSContext):
         # normalize
         ip_families = extract_comma_separated_string(ip_families, keep_none=True, default_value=[])
         # try to read the property value corresponding to the parameter from the `mc` object
-        if self.mc and self.mc.network_profile and self.mc.network_profile.ip_families is not None:
+        if (
+            not ip_families and
+            self.mc and
+            self.mc.network_profile and
+            self.mc.network_profile.ip_families is not None
+        ):
             ip_families = self.mc.network_profile.ip_families
 
         # this parameter does not need dynamic completion
@@ -4139,10 +4165,10 @@ class AKSManagedClusterContext(BaseAKSContext):
             if cluster_autoscaler_profile and self.mc and self.mc.auto_scaler_profile:
                 # shallow copy should be enough for string-to-string dictionary
                 copy_of_raw_dict = self.mc.auto_scaler_profile.__dict__.copy()
-                new_options_dict = dict(
-                    (key.replace("-", "_"), value)
-                    for (key, value) in cluster_autoscaler_profile.items()
-                )
+                new_options_dict = {
+                    key.replace("-", "_"): value
+                    for key, value in cluster_autoscaler_profile.items()
+                }
                 copy_of_raw_dict.update(new_options_dict)
                 cluster_autoscaler_profile = copy_of_raw_dict
 
@@ -6477,6 +6503,19 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
 
         return mc
 
+    def set_up_node_resource_group_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Set up node resource group profile for the ManagedCluster object.
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        node_resource_group_profile = None
+        nrg_lockdown_restriction_level = self.context.get_nrg_lockdown_restriction_level()
+        if nrg_lockdown_restriction_level:
+            node_resource_group_profile = self.models.ManagedClusterNodeResourceGroupProfile(restriction_level=nrg_lockdown_restriction_level)
+        mc.node_resource_group_profile = node_resource_group_profile
+        return mc
+
     def construct_mc_profile_default(self, bypass_restore_defaults: bool = False) -> ManagedCluster:
         """The overall controller used to construct the default ManagedCluster profile.
 
@@ -6555,6 +6594,9 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.set_up_azure_container_storage(mc)
         # set up metrics profile
         mc = self.set_up_metrics_profile(mc)
+        # set up node resource group profile
+        mc = self.set_up_node_resource_group_profile(mc)
+
         # DO NOT MOVE: keep this at the bottom, restore defaults
         if not bypass_restore_defaults:
             mc = self._restore_defaults_in_mc(mc)
@@ -7347,6 +7389,21 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
         return mc
 
+    def update_network_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update ip families settings for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        ip_families = self.context.get_ip_families()
+        if ip_families:
+            mc.network_profile.ip_families = ip_families
+
+        self.update_network_plugin_settings(mc)
+
+        return mc
+
     def update_network_plugin_settings(self, mc: ManagedCluster) -> ManagedCluster:
         """Update network plugin settings of network profile for the ManagedCluster object.
 
@@ -7803,6 +7860,21 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         if dns_zone_resource_ids:
             self._update_dns_zone_resource_ids(mc, dns_zone_resource_ids)
 
+        return mc
+
+    def update_node_resource_group_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update node resource group profile for the ManagedCluster object.
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        nrg_lockdown_restriction_level = self.context.get_nrg_lockdown_restriction_level()
+        if nrg_lockdown_restriction_level is not None:
+            if mc.node_resource_group_profile is None:
+                mc.node_resource_group_profile = (
+                    self.models.ManagedClusterNodeResourceGroupProfile()  # pylint: disable=no-member
+                )
+            mc.node_resource_group_profile.restriction_level = nrg_lockdown_restriction_level
         return mc
 
     def _enable_keyvault_secret_provider_addon(self, mc: ManagedCluster) -> None:
@@ -8329,6 +8401,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_windows_profile(mc)
         # update network plugin settings
         mc = self.update_network_plugin_settings(mc)
+        # update network profile settings
+        mc = self.update_network_profile(mc)
         # update network profile with acns
         mc = self.update_network_profile_advanced_networking(mc)
         # update aad profile
@@ -8367,6 +8441,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_upgrade_settings(mc)
         # update metrics profile
         mc = self.update_metrics_profile(mc)
+        # update node resource group profile
+        mc = self.update_node_resource_group_profile(mc)
         return mc
 
     def check_is_postprocessing_required(self, mc: ManagedCluster) -> bool:

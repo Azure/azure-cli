@@ -20,7 +20,7 @@ class Wait(AAZWaitCommand):
 
     _aaz_info = {
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworks/{}", "2024-03-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworks/{}", "2024-05-01"],
         ]
     }
 
@@ -123,7 +123,7 @@ class Wait(AAZWaitCommand):
                     "$expand", self.ctx.args.expand,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2024-03-01",
+                    "api-version", "2024-05-01",
                     required=True,
                 ),
             }
@@ -382,6 +382,7 @@ class _WaitHelper:
     def _build_schema_address_space_read(cls, _schema):
         if cls._schema_address_space_read is not None:
             _schema.address_prefixes = cls._schema_address_space_read.address_prefixes
+            _schema.ipam_pool_prefix_allocations = cls._schema_address_space_read.ipam_pool_prefix_allocations
             return
 
         cls._schema_address_space_read = _schema_address_space_read = AAZObjectType()
@@ -390,11 +391,19 @@ class _WaitHelper:
         address_space_read.address_prefixes = AAZListType(
             serialized_name="addressPrefixes",
         )
+        address_space_read.ipam_pool_prefix_allocations = AAZListType(
+            serialized_name="ipamPoolPrefixAllocations",
+        )
 
         address_prefixes = _schema_address_space_read.address_prefixes
         address_prefixes.Element = AAZStrType()
 
+        ipam_pool_prefix_allocations = _schema_address_space_read.ipam_pool_prefix_allocations
+        ipam_pool_prefix_allocations.Element = AAZObjectType()
+        cls._build_schema_ipam_pool_prefix_allocation_read(ipam_pool_prefix_allocations.Element)
+
         _schema.address_prefixes = cls._schema_address_space_read.address_prefixes
+        _schema.ipam_pool_prefix_allocations = cls._schema_address_space_read.ipam_pool_prefix_allocations
 
     _schema_application_security_group_read = None
 
@@ -490,7 +499,7 @@ class _WaitHelper:
             flags={"read_only": True},
         )
         flow_log_read.id = AAZStrType()
-        flow_log_read.identity = AAZObjectType()
+        flow_log_read.identity = AAZIdentityObjectType()
         flow_log_read.location = AAZStrType()
         flow_log_read.name = AAZStrType(
             flags={"read_only": True},
@@ -746,6 +755,40 @@ class _WaitHelper:
         _schema.id = cls._schema_ip_configuration_read.id
         _schema.name = cls._schema_ip_configuration_read.name
         _schema.properties = cls._schema_ip_configuration_read.properties
+
+    _schema_ipam_pool_prefix_allocation_read = None
+
+    @classmethod
+    def _build_schema_ipam_pool_prefix_allocation_read(cls, _schema):
+        if cls._schema_ipam_pool_prefix_allocation_read is not None:
+            _schema.allocated_address_prefixes = cls._schema_ipam_pool_prefix_allocation_read.allocated_address_prefixes
+            _schema.number_of_ip_addresses = cls._schema_ipam_pool_prefix_allocation_read.number_of_ip_addresses
+            _schema.pool = cls._schema_ipam_pool_prefix_allocation_read.pool
+            return
+
+        cls._schema_ipam_pool_prefix_allocation_read = _schema_ipam_pool_prefix_allocation_read = AAZObjectType()
+
+        ipam_pool_prefix_allocation_read = _schema_ipam_pool_prefix_allocation_read
+        ipam_pool_prefix_allocation_read.allocated_address_prefixes = AAZListType(
+            serialized_name="allocatedAddressPrefixes",
+            flags={"read_only": True},
+        )
+        ipam_pool_prefix_allocation_read.number_of_ip_addresses = AAZStrType(
+            serialized_name="numberOfIpAddresses",
+        )
+        ipam_pool_prefix_allocation_read.pool = AAZObjectType(
+            flags={"client_flatten": True},
+        )
+
+        allocated_address_prefixes = _schema_ipam_pool_prefix_allocation_read.allocated_address_prefixes
+        allocated_address_prefixes.Element = AAZStrType()
+
+        pool = _schema_ipam_pool_prefix_allocation_read.pool
+        pool.id = AAZStrType()
+
+        _schema.allocated_address_prefixes = cls._schema_ipam_pool_prefix_allocation_read.allocated_address_prefixes
+        _schema.number_of_ip_addresses = cls._schema_ipam_pool_prefix_allocation_read.number_of_ip_addresses
+        _schema.pool = cls._schema_ipam_pool_prefix_allocation_read.pool
 
     _schema_network_interface_ip_configuration_read = None
 
@@ -1172,6 +1215,10 @@ class _WaitHelper:
         )
         properties.auxiliary_sku = AAZStrType(
             serialized_name="auxiliarySku",
+        )
+        properties.default_outbound_connectivity_enabled = AAZBoolType(
+            serialized_name="defaultOutboundConnectivityEnabled",
+            flags={"read_only": True},
         )
         properties.disable_tcp_state_tracking = AAZBoolType(
             serialized_name="disableTcpStateTracking",
@@ -2138,6 +2185,9 @@ class _WaitHelper:
             serialized_name="ipConfigurations",
             flags={"read_only": True},
         )
+        properties.ipam_pool_prefix_allocations = AAZListType(
+            serialized_name="ipamPoolPrefixAllocations",
+        )
         properties.nat_gateway = AAZObjectType(
             serialized_name="natGateway",
         )
@@ -2271,6 +2321,10 @@ class _WaitHelper:
         ip_configurations = _schema_subnet_read.properties.ip_configurations
         ip_configurations.Element = AAZObjectType()
         cls._build_schema_ip_configuration_read(ip_configurations.Element)
+
+        ipam_pool_prefix_allocations = _schema_subnet_read.properties.ipam_pool_prefix_allocations
+        ipam_pool_prefix_allocations.Element = AAZObjectType()
+        cls._build_schema_ipam_pool_prefix_allocation_read(ipam_pool_prefix_allocations.Element)
 
         private_endpoints = _schema_subnet_read.properties.private_endpoints
         private_endpoints.Element = AAZObjectType()

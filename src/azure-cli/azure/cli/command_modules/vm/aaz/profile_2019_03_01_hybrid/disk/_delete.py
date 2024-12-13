@@ -184,7 +184,9 @@ class Delete(AAZCommand):
                 serialized_name="endTime",
                 flags={"read_only": True},
             )
-            _schema_on_200.error = AAZObjectType()
+            _schema_on_200.error = AAZObjectType(
+                flags={"read_only": True},
+            )
             _schema_on_200.name = AAZStrType(
                 flags={"read_only": True},
             )

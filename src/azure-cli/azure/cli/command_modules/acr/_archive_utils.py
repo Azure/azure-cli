@@ -7,7 +7,6 @@ import tarfile
 import os
 import re
 import codecs
-from io import open
 import requests
 from knack.log import get_logger
 from knack.util import CLIError

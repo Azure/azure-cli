@@ -107,11 +107,14 @@ class TestRecordingProcessors(unittest.TestCase):
 
         for template in body_templates:
             mock_sub_id = str(uuid.uuid4())
-            mock_response = dict({'body': {}})
-            mock_response['body']['string'] = template.format(mock_sub_id)
-            mock_response['headers'] = {'Location': [location_header_template.format(mock_sub_id)],
-                                        'azure-asyncoperation': [asyncoperation_header_template.format(mock_sub_id)],
-                                        'content-type': ['application/json']}
+            mock_response = {
+                'body': {'string': template.format(mock_sub_id)},
+                'headers': {
+                    'Location': [location_header_template.format(mock_sub_id)],
+                    'azure-asyncoperation': [asyncoperation_header_template.format(mock_sub_id)],
+                    'content-type': ['application/json'],
+                }
+            }
             rp.process_response(mock_response)
             self.assertEqual(mock_response['body']['string'], template.format(replaced_subscription_id))
 
@@ -127,11 +130,12 @@ class TestRecordingProcessors(unittest.TestCase):
         rp = SubscriptionRecordingProcessor(replaced_subscription_id)
 
         mock_sub_id = str(uuid.uuid4())
-        mock_response = dict({'body': {}})
-        mock_response['body']['string'] = mock_sub_id
-        mock_response['headers'] = {
-            'Location': [location_header_template.format(mock_sub_id)],
-            'content-type': ['application/foo']
+        mock_response = {
+            'body': {'string': mock_sub_id},
+            'headers': {
+                'Location': [location_header_template.format(mock_sub_id)],
+                'content-type': ['application/foo'],
+            }
         }
 
         # action

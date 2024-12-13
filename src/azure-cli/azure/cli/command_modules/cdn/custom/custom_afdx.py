@@ -705,7 +705,7 @@ class AFDRuleCreate(_AFDRuleCreate):
         args_schema.action_name = AAZStrArg(
             options=['--action-name'],
             help='The name of the action for the delivery rule: '
-            'https://docs.microsoft.com/en-us/azure/frontdoor/front-door-rules-engine-actions.',
+            'https://learn.microsoft.com/en-us/azure/frontdoor/front-door-rules-engine-actions.',
         )
         args_schema.cache_behavior = AAZStrArg(
             options=['--cache-behavior'],
@@ -772,7 +772,7 @@ class AFDRuleCreate(_AFDRuleCreate):
         args_schema.match_variable = AAZStrArg(
             options=['--match-variable'],
             help='Name of the match condition: '
-            'https://docs.microsoft.com/en-us/azure/frontdoor/rules-match-conditions.',
+            'https://learn.microsoft.com/en-us/azure/frontdoor/rules-match-conditions.',
         )
         args_schema.negate_condition = AAZBoolArg(
             options=['--negate-condition'],
@@ -872,7 +872,7 @@ class AFDRuleconditionAdd(_AFDRuleUpdate):
         args_schema.match_variable = AAZStrArg(
             options=['--match-variable'],
             help='Name of the match condition: '
-            'https://docs.microsoft.com/en-us/azure/frontdoor/rules-match-conditions.',
+            'https://learn.microsoft.com/en-us/azure/frontdoor/rules-match-conditions.',
             required=True,
         )
         args_schema.negate_condition = AAZBoolArg(
@@ -952,7 +952,7 @@ class AFDRuleActionCreate(_AFDRuleUpdate):
         args_schema.action_name = AAZStrArg(
             options=['--action-name'],
             help='The name of the action for the delivery rule: '
-            'https://docs.microsoft.com/en-us/azure/frontdoor/front-door-rules-engine-actions.',
+            'https://learn.microsoft.com/en-us/azure/frontdoor/front-door-rules-engine-actions.',
             required=True,
         )
         args_schema.cache_behavior = AAZStrArg(

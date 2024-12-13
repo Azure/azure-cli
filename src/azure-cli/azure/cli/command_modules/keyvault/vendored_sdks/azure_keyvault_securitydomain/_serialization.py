@@ -53,10 +53,7 @@ from typing import (
     List,
 )
 
-try:
-    from urllib import quote  # type: ignore
-except ImportError:
-    from urllib.parse import quote
+from urllib.parse import quote
 import xml.etree.ElementTree as ET
 
 import isodate  # type: ignore
@@ -320,13 +317,13 @@ class Model:
 
     def __init__(self, **kwargs: Any) -> None:
         self.additional_properties: Optional[Dict[str, Any]] = {}
-        for k in kwargs:  # pylint: disable=consider-using-dict-items
+        for k, v in kwargs.items():
             if k not in self._attribute_map:
                 _LOGGER.warning("%s is not a known attribute of class %s and will be ignored", k, self.__class__)
             elif k in self._validation and self._validation[k].get("readonly", False):
                 _LOGGER.warning("Readonly attribute %s will be ignored in class %s", k, self.__class__)
             else:
-                setattr(self, k, kwargs[k])
+                setattr(self, k, v)
 
     def __eq__(self, other: Any) -> bool:
         """Compare objects by comparing all attributes.
@@ -931,13 +928,6 @@ class Serializer:  # pylint: disable=too-many-public-methods
         except AttributeError:
             pass
 
-        try:
-            if isinstance(data, unicode):  # type: ignore
-                # Don't change it, JSON and XML ElementTree are totally able
-                # to serialize correctly u'' strings
-                return data
-        except NameError:
-            return str(data)
         return str(data)
 
     def serialize_iter(self, data, iter_type, div=None, **kwargs):

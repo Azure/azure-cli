@@ -10,6 +10,7 @@ from ipaddress import ip_network
 from azure.cli.command_modules.storage._client_factory import storage_client_factory, cf_sa_for_keys
 from azure.cli.core.util import get_file_json, shell_safe_json_parse, find_child_item, user_confirmation
 from azure.cli.core.profiles import ResourceType, get_sdk
+from ..aaz.latest.storage.account.migration._start import Start as _AccountMigrationStart
 from knack.log import get_logger
 from knack.util import CLIError
 
@@ -1209,3 +1210,13 @@ def clear_blob_cors_rules(cmd, client, resource_group_name, account_name):
                                   account_name=account_name,
                                   parameters=blob_service_properties)
     return []
+
+
+class AccountMigrationStart(_AccountMigrationStart):
+    def pre_operations(self):
+        logger.warning('After your request to convert the account’s redundancy configuration is validated, the '
+                       'conversion will typically complete in a few days, but can take a few weeks depending on '
+                       'current resource demands in the region, account size, and other factors. The conversion can’t '
+                       'be stopped after being initiated, and for accounts with geo redundancy a failover can’t be '
+                       'initiated while conversion is in progress. The data within the storage account will continue '
+                       'to be accessible with no loss of durability or availability.')

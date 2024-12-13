@@ -25,9 +25,9 @@ class EnableHttps(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-02-01",
+        "version": "2024-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}/endpoints/{}/customdomains/{}/enablecustomhttps", "2024-02-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}/endpoints/{}/customdomains/{}/enablecustomhttps", "2024-09-01"],
         ]
     }
 
@@ -127,11 +127,6 @@ class EnableHttps(AAZCommand):
             help="Subscription Id of the user's Key Vault containing the SSL certificate",
             required=True,
         )
-        certificate_source_parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"KeyVaultCertificateSourceParameters": "KeyVaultCertificateSourceParameters"},
-        )
         certificate_source_parameters.update_rule = AAZStrArg(
             options=["update-rule"],
             help="Describes the action that shall be taken when the certificate is updated in Key Vault.",
@@ -157,11 +152,6 @@ class EnableHttps(AAZCommand):
             help="Type of certificate used",
             required=True,
             enum={"Dedicated": "Dedicated", "Shared": "Shared"},
-        )
-        certificate_source_parameters.type_name = AAZStrArg(
-            options=["type-name"],
-            required=True,
-            enum={"CdnCertificateSourceParameters": "CdnCertificateSourceParameters"},
         )
         return cls._args_schema
 
@@ -254,7 +244,7 @@ class EnableHttps(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-02-01",
+                    "api-version", "2024-09-01",
                     required=True,
                 ),
             }
@@ -297,7 +287,7 @@ class EnableHttps(AAZCommand):
                 certificate_source_parameters.set_prop("secretName", AAZStrType, ".secret_name", typ_kwargs={"flags": {"required": True}})
                 certificate_source_parameters.set_prop("secretVersion", AAZStrType, ".secret_version")
                 certificate_source_parameters.set_prop("subscriptionId", AAZStrType, ".subscription_id", typ_kwargs={"flags": {"required": True}})
-                certificate_source_parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                certificate_source_parameters.set_const("typeName", "KeyVaultCertificateSourceParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
                 certificate_source_parameters.set_prop("updateRule", AAZStrType, ".update_rule", typ_kwargs={"flags": {"required": True}})
                 certificate_source_parameters.set_prop("vaultName", AAZStrType, ".vault_name", typ_kwargs={"flags": {"required": True}})
 
@@ -308,7 +298,7 @@ class EnableHttps(AAZCommand):
             certificate_source_parameters = _builder.get("{certificateSource:Cdn}.certificateSourceParameters")
             if certificate_source_parameters is not None:
                 certificate_source_parameters.set_prop("certificateType", AAZStrType, ".certificate_type", typ_kwargs={"flags": {"required": True}})
-                certificate_source_parameters.set_prop("typeName", AAZStrType, ".type_name", typ_kwargs={"flags": {"required": True}})
+                certificate_source_parameters.set_const("typeName", "CdnCertificateSourceParameters", AAZStrType, ".", typ_kwargs={"flags": {"required": True}})
 
             return self.serialize_content(_content_value)
 

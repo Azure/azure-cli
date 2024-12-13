@@ -75,7 +75,7 @@ def _prepare_test_loader():
     class GenericUpdateTestCommandsLoader(AzCommandsLoader):
 
         def load_command_table(self, args):
-            super(GenericUpdateTestCommandsLoader, self).load_command_table(args)
+            super().load_command_table(args)
 
             from azure.cli.core.commands import CliCommandType
 

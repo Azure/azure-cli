@@ -11,7 +11,7 @@ import azure.cli.command_modules.configure._help  # pylint: disable=unused-impor
 class ConfigureCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
-        super(ConfigureCommandsLoader, self).__init__(cli_ctx=cli_ctx)
+        super().__init__(cli_ctx=cli_ctx)
 
     def load_command_table(self, args):
         from azure.cli.command_modules.configure.commands import load_command_table

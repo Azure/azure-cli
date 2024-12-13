@@ -7,6 +7,7 @@
 # --------------------------------------------------------------------------
 # pylint: disable=protected-access, arguments-differ, signature-differs, broad-except, too-many-lines
 
+from collections.abc import MutableMapping
 import copy
 import calendar
 import decimal
@@ -27,11 +28,6 @@ from azure.core.exceptions import DeserializationError
 from azure.core import CaseInsensitiveEnumMeta
 from azure.core.pipeline import PipelineResponse
 from azure.core.serialization import _Null
-
-if sys.version_info >= (3, 9):
-    from collections.abc import MutableMapping
-else:
-    from typing import MutableMapping
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -145,7 +141,7 @@ class SdkJSONEncoder(JSONEncoder):
                 return {k: v for k, v in o.items() if k not in readonly_props}
             return dict(o.items())
         try:
-            return super(SdkJSONEncoder, self).default(o)
+            return super().default(o)
         except TypeError:
             if isinstance(o, _Null):
                 return None
@@ -164,7 +160,7 @@ class SdkJSONEncoder(JSONEncoder):
             except AttributeError:
                 # This will be raised when it hits value.total_seconds in the method above
                 pass
-            return super(SdkJSONEncoder, self).default(o)
+            return super().default(o)
 
 
 _VALID_DATE = re.compile(r"\d{4}[-]\d{2}[-]\d{2}T\d{2}:\d{2}:\d{2}" + r"\.?\d*Z?[-+]?[\d{2}]?:?[\d{2}]?")

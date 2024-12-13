@@ -24,7 +24,7 @@ class ContainerAppConnectionScenarioTest(ScenarioTest):
     default_container_name = 'simple-hello-world-container'
 
     def __init__(self, method_name):
-        super(ContainerAppConnectionScenarioTest, self).__init__(
+        super().__init__(
             method_name,
             recording_processors=[CredentialReplacer(), ConfigCredentialReplacer()]
         )

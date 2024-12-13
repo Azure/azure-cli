@@ -20,7 +20,7 @@ dim_op_conversion = {
 class AutoscaleConditionValidator(AutoscaleConditionListener):
 
     def __init__(self):
-        super(AutoscaleConditionValidator, self).__init__()
+        super().__init__()
         self.parameters = {}
         self._dimension_index = 0
 

@@ -301,7 +301,7 @@ def ensure_cluster_identity_permission_on_kubelet_identity(cmd, cluster_identity
         if use_shared_identity():
             return
         raise UnauthorizedError(
-            "Could not grant Managed Identity Operator " "permission to cluster identity at scope {}".format(scope)
+            "Could not grant Managed Identity Operator permission to cluster identity at scope {}".format(scope)
         )
 
 

@@ -1109,10 +1109,20 @@ class ContainerappRevisionTests(ScenarioTest):
             if "label" in traffic:
                 self.assertEqual(traffic["label"] in labels, True)
 
-        self.cmd(f"containerapp ingress traffic set -g {resource_group} -n {ca_name} --revision-weight latest=50 --label-weight {labels[0]}=25 {labels[1]}=25")
+        self.cmd(f"containerapp ingress traffic set -g {resource_group} -n {ca_name} --revision-weight latest=50 --label-weight {labels[0]}=25 {labels[1]}=25", checks=[
+            JMESPathCheck('length(@)', 3),
+        ])
 
         traffic_weight = self.cmd(f"containerapp ingress traffic show -g {resource_group} -n {ca_name} --query '[].name'").get_output_in_json()
 
+        for traffic in traffic_weight:
+            if "label" in traffic:
+                self.assertEqual(traffic["weight"], 25)
+            else:
+                self.assertEqual(traffic["weight"], 50)
+
+        # Check the traffic label exist after `ingress enable`
+        traffic_weight = self.cmd(f"containerapp ingress enable -g {resource_group} -n {ca_name} --type external --query 'traffic'").get_output_in_json()
         for traffic in traffic_weight:
             if "label" in traffic:
                 self.assertEqual(traffic["weight"], 25)

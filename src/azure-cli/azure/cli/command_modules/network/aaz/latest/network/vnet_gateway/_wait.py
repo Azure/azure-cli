@@ -20,7 +20,7 @@ class Wait(AAZWaitCommand):
 
     _aaz_info = {
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworkgateways/{}", "2023-09-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworkgateways/{}", "2024-03-01"],
         ]
     }
 
@@ -116,7 +116,7 @@ class Wait(AAZWaitCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-09-01",
+                    "api-version", "2024-03-01",
                     required=True,
                 ),
             }
@@ -156,6 +156,7 @@ class Wait(AAZWaitCommand):
                 serialized_name="extendedLocation",
             )
             _schema_on_200.id = AAZStrType()
+            _schema_on_200.identity = AAZIdentityObjectType()
             _schema_on_200.location = AAZStrType()
             _schema_on_200.name = AAZStrType(
                 flags={"read_only": True},
@@ -171,6 +172,33 @@ class Wait(AAZWaitCommand):
             extended_location = cls._schema_on_200.extended_location
             extended_location.name = AAZStrType()
             extended_location.type = AAZStrType()
+
+            identity = cls._schema_on_200.identity
+            identity.principal_id = AAZStrType(
+                serialized_name="principalId",
+                flags={"read_only": True},
+            )
+            identity.tenant_id = AAZStrType(
+                serialized_name="tenantId",
+                flags={"read_only": True},
+            )
+            identity.type = AAZStrType()
+            identity.user_assigned_identities = AAZDictType(
+                serialized_name="userAssignedIdentities",
+            )
+
+            user_assigned_identities = cls._schema_on_200.identity.user_assigned_identities
+            user_assigned_identities.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.identity.user_assigned_identities.Element
+            _element.client_id = AAZStrType(
+                serialized_name="clientId",
+                flags={"read_only": True},
+            )
+            _element.principal_id = AAZStrType(
+                serialized_name="principalId",
+                flags={"read_only": True},
+            )
 
             properties = cls._schema_on_200.properties
             properties.active_active = AAZBoolType(
@@ -230,6 +258,9 @@ class Wait(AAZWaitCommand):
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
                 flags={"read_only": True},
+            )
+            properties.resiliency_model = AAZStrType(
+                serialized_name="resiliencyModel",
             )
             properties.resource_guid = AAZStrType(
                 serialized_name="resourceGuid",

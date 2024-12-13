@@ -174,14 +174,17 @@ class TestMonitorActivityLogAlert(ScenarioTest):
         update_cmd = 'az monitor activity-log alert update -n {} -g {} '.format(name, resource_group)
 
         state = self.cmd(update_cmd + '-c category=Security and level=Informational').get_output_in_json()
-        condition_dict = dict((each['field'], each['equals']) for each in state['condition']['allOf'])
+        condition_dict = {each['field']: each['equals'] for each in state['condition']['allOf']}
         self.assertEqual(2, len(condition_dict))
         self.assertEqual('Informational', condition_dict['level'])
         self.assertEqual('Security', condition_dict['category'])
 
         state = self.cmd(update_cmd + '-c level=Error and category=Security and resourceGroup={}'.format(
             resource_group)).get_output_in_json()
-        condition_dict = dict((each['field'], each['equals']) for each in state['condition']['allOf'])
+        condition_dict = {
+            each['field']: each['equals']
+            for each in state['condition']['allOf']
+        }
         self.assertEqual(3, len(condition_dict))
         self.assertEqual('Error', condition_dict['level'])
         self.assertEqual('Security', condition_dict['category'])

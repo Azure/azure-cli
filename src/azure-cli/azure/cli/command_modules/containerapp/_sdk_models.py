@@ -10,9 +10,9 @@
 # pylint: disable=redefined-builtin
 # pylint: disable=too-many-instance-attributes, useless-parent-delegation, anomalous-backslash-in-string
 
+from collections.abc import MutableMapping
 import datetime
-import sys
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Literal, Optional, Union
 
 import msrest.serialization as _serialization
 
@@ -41,16 +41,7 @@ from ._sdk_enums import (
     StorageType
 )
 
-if sys.version_info >= (3, 9):
-    from collections.abc import MutableMapping
-else:
-    from typing import MutableMapping  # type: ignore  # pylint: disable=ungrouped-imports
-if sys.version_info >= (3, 8):
-    from typing import Literal  # pylint: disable=no-name-in-module, ungrouped-imports
-else:
-    from typing_extensions import Literal  # type: ignore  # pylint: disable=ungrouped-imports
-
-JSON = MutableMapping[str, Any]  # pylint: disable=unsubscriptable-object
+JSON = MutableMapping[str, Any]
 
 
 class AllowedAudiencesValidation(_serialization.Model):

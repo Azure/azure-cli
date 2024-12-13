@@ -11,12 +11,7 @@ import zipfile
 import requests
 import urllib3
 
-try:
-    # Try importing Python 3 urllib.parse
-    from urllib.parse import quote
-except ImportError:
-    # If urllib.parse was not imported, use Python 2 module urlparse
-    from urllib import quote  # pylint: disable=import-error
+from urllib.parse import quote
 
 from knack.util import CLIError
 from azure.cli.command_modules.botservice.http_response_validator import HttpResponseValidator

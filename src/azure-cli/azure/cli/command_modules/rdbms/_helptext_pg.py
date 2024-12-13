@@ -22,11 +22,11 @@ long-summary: >
 
     - Configure public access
 
-    https://docs.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-manage-firewall-cli
+    https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-manage-firewall-cli
 
     - Configure private access
 
-    https://docs.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-manage-virtual-network-cli
+    https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-manage-virtual-network-cli
 
 examples:
   - name: >
@@ -216,9 +216,14 @@ examples:
       az postgres flexible-server create -g testGroup -n testServer --location testLocation --performance-tier P15
 
   - name: >
-      create flexible server with storage auto-grow as Enabled. Accepted values Enabled / Disabled. Default value for storage auto-grow is "Disabled".
+      Create flexible server with storage auto-grow as Enabled. Accepted values Enabled / Disabled. Default value for storage auto-grow is "Disabled".
     text: >
       az postgres flexible-server create -g testGroup -n testServer --location testLocation --storage-auto-grow Enabled
+
+  - name: >
+      Create elastic cluster with node count of 5. Default node count is 2 when --cluster-option is "ElasticCluster".
+    text: >
+      az postgres flexible-server create -g testGroup -n testServer --location testLocation --cluster-option ElasticCluster --node-count 5
 """
 
 helps['postgres flexible-server show'] = """
@@ -910,9 +915,17 @@ type: group
 short-summary: Manage server user assigned identities.
 """
 
+helps['postgres flexible-server identity update'] = """
+type: command
+short-summary: Update to enable or disable system assigned managed identity on the server.
+examples:
+  - name: Enable system assigned managed identity on the server.
+    text: az postgres flexible-server identity update -g testgroup -s testsvr --system-assigned Enabled
+"""
+
 helps['postgres flexible-server identity assign'] = """
 type: command
-short-summary: Add user asigned managed identities to the server.
+short-summary: Add user assigned managed identities to the server.
 examples:
   - name: Add identities 'test-identity' and 'test-identity-2' to server 'testsvr'.
     text: az postgres flexible-server identity assign -g testgroup -s testsvr --identity test-identity test-identity-2
@@ -920,7 +933,7 @@ examples:
 
 helps['postgres flexible-server identity remove'] = """
 type: command
-short-summary: Remove user asigned managed identites from the server.
+short-summary: Remove user assigned managed identites from the server.
 examples:
   - name: Remove identity 'test-identity' from server 'testsvr'.
     text: az postgres flexible-server identity remove -g testgroup -s testsvr --identity test-identity
@@ -1125,4 +1138,33 @@ examples:
     text: az postgres flexible-server private-link-resource show --subscription testSubscription --resource-group testGroup --server-name testserver
   - name: Get the private link resource for a flexible server using --ids parameter.
     text: az postgres flexible-server private-link-resource show --ids /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/testGroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/testServer
+"""
+
+helps['postgres flexible-server fabric-mirroring'] = """
+type: group
+short-summary: Bring your PostgreSQL data into Microsoft Fabric. Mirroring allows you to create a replica of your data in OneLake which can be used for all your analytical needs.
+"""
+
+helps['postgres flexible-server fabric-mirroring start'] = """
+type: command
+short-summary: Enable bringing your PostgreSQL data into Microsoft Fabric.
+examples:
+  - name: Enable bringing your PostgreSQL data into Microsoft Fabric.
+    text: az postgres flexible-server fabric-mirroring start -g testgroup -s testsvr --database-names testdb
+"""
+
+helps['postgres flexible-server fabric-mirroring stop'] = """
+type: command
+short-summary: Stop bringing your PostgreSQL data into Microsoft Fabric.
+examples:
+  - name: Stop bringing your PostgreSQL data into Microsoft Fabric.
+    text: az postgres flexible-server fabric-mirroring stop -g testgroup -s testsvr
+"""
+
+helps['postgres flexible-server fabric-mirroring update-databases'] = """
+type: command
+short-summary: Update allowed mirrored databases.
+examples:
+  - name: Update allowed mirrored databases.
+    text: az postgres flexible-server fabric-mirroring update-databases -g testgroup -s testsvr --database-names testdb2 testdb3
 """

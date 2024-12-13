@@ -5,10 +5,7 @@
 
 from datetime import datetime, timedelta
 
-try:
-    from urllib.parse import unquote
-except ImportError:
-    from urllib import unquote
+from urllib.parse import unquote
 
 from knack.log import get_logger
 from azure.cli.core.util import user_confirmation

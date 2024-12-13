@@ -16,7 +16,7 @@ logger = get_logger(__name__)
 
 class APIVersionException(Exception):
     def __init__(self, type_name, api_profile):
-        super(APIVersionException, self).__init__(type_name, api_profile)
+        super().__init__(type_name, api_profile)
         self.type_name = type_name
         self.api_profile = api_profile
 

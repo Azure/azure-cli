@@ -17,8 +17,7 @@ class TestCommandLoader(AzCommandsLoader):
         compute_custom = CliCommandType(
             operations_tmpl='{}#{{}}'.format(__name__),
         )
-        super(TestCommandLoader, self).__init__(cli_ctx=cli_ctx,
-                                                custom_command_type=compute_custom)
+        super().__init__(cli_ctx=cli_ctx, custom_command_type=compute_custom)
         self.cmd_to_loader_map = {}
 
     def load_command_table(self, args):

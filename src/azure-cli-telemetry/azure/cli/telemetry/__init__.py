@@ -37,10 +37,9 @@ def _start(config_dir, cache_dir):
         startupinfo.wShowWindow = subprocess.SW_HIDE
         kwargs['startupinfo'] = startupinfo
     else:
-        if sys.version_info >= (3, 3):
-            kwargs['stdin'] = subprocess.DEVNULL
-            kwargs['stdout'] = subprocess.DEVNULL
-            kwargs['stderr'] = subprocess.STDOUT
+        kwargs['stdin'] = subprocess.DEVNULL
+        kwargs['stdout'] = subprocess.DEVNULL
+        kwargs['stderr'] = subprocess.STDOUT
 
     process = subprocess.Popen(**kwargs)
     logger.info('Return from creating process %s', process.pid)
@@ -106,7 +105,7 @@ def main():
             # another upload process is running.
             logger.info('Lock out from note file under %s which means another process is running. Exit 0.', config_dir)
             sys.exit(0)
-        except IOError as err:
+        except OSError as err:
             logger.warning('Unexpected IO Error %s. Exit 1.', err)
             sys.exit(1)
         except Exception as err:  # pylint: disable=broad-except

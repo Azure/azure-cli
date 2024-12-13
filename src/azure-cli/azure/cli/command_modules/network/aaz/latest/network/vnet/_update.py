@@ -28,9 +28,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-03-01",
+        "version": "2024-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworks/{}", "2024-03-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworks/{}", "2024-05-01"],
         ]
     }
 
@@ -64,7 +64,7 @@ class Update(AAZCommand):
         )
         _args_schema.address_prefixes = AAZListArg(
             options=["--address-prefixes"],
-            help="Space-separated list of IP address prefixes for the VNet.",
+            help="Space-separated list of IP address prefixes for the VNet. Default: 10.0.0.0/16. If provided, --ipam-allocations should not be specified.",
             nullable=True,
         )
         _args_schema.bgp_community = AAZStrArg(
@@ -123,6 +123,22 @@ class Update(AAZCommand):
             nullable=True,
         )
 
+        # define Arg Group "AddressSpace"
+
+        _args_schema = cls._args_schema
+        _args_schema.ipam_pool_prefix_allocations = AAZListArg(
+            options=["--ipam-allocations", "--ipam-pool-prefix-allocations"],
+            arg_group="AddressSpace",
+            help="A list of IPAM Pools allocating IP address prefixes. If provided, --address-prefixes would be empty and should not be specified.",
+            nullable=True,
+        )
+
+        ipam_pool_prefix_allocations = cls._args_schema.ipam_pool_prefix_allocations
+        ipam_pool_prefix_allocations.Element = AAZObjectArg(
+            nullable=True,
+        )
+        cls._build_args_ipam_pool_prefix_allocation_update(ipam_pool_prefix_allocations.Element)
+
         # define Arg Group "Parameters"
 
         # define Arg Group "Properties"
@@ -134,6 +150,7 @@ class Update(AAZCommand):
     def _build_args_address_space_update(cls, _schema):
         if cls._args_address_space_update is not None:
             _schema.address_prefixes = cls._args_address_space_update.address_prefixes
+            _schema.ipam_pool_prefix_allocations = cls._args_address_space_update.ipam_pool_prefix_allocations
             return
 
         cls._args_address_space_update = AAZObjectArg(
@@ -146,13 +163,25 @@ class Update(AAZCommand):
             help="A list of address blocks reserved for this virtual network in CIDR notation.",
             nullable=True,
         )
+        address_space_update.ipam_pool_prefix_allocations = AAZListArg(
+            options=["ipam-pool-prefix-allocations"],
+            help="A list of IPAM Pools allocating IP address prefixes.",
+            nullable=True,
+        )
 
         address_prefixes = cls._args_address_space_update.address_prefixes
         address_prefixes.Element = AAZStrArg(
             nullable=True,
         )
 
+        ipam_pool_prefix_allocations = cls._args_address_space_update.ipam_pool_prefix_allocations
+        ipam_pool_prefix_allocations.Element = AAZObjectArg(
+            nullable=True,
+        )
+        cls._build_args_ipam_pool_prefix_allocation_update(ipam_pool_prefix_allocations.Element)
+
         _schema.address_prefixes = cls._args_address_space_update.address_prefixes
+        _schema.ipam_pool_prefix_allocations = cls._args_address_space_update.ipam_pool_prefix_allocations
 
     _args_application_security_group_update = None
 
@@ -172,9 +201,6 @@ class Update(AAZCommand):
             options=["l", "location"],
             help="Resource location.",
             nullable=True,
-            fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group",
-            ),
         )
         application_security_group_update.tags = AAZDictArg(
             options=["tags"],
@@ -189,6 +215,34 @@ class Update(AAZCommand):
 
         _schema.location = cls._args_application_security_group_update.location
         _schema.tags = cls._args_application_security_group_update.tags
+
+    _args_ipam_pool_prefix_allocation_update = None
+
+    @classmethod
+    def _build_args_ipam_pool_prefix_allocation_update(cls, _schema):
+        if cls._args_ipam_pool_prefix_allocation_update is not None:
+            _schema.id = cls._args_ipam_pool_prefix_allocation_update.id
+            _schema.number_of_ip_addresses = cls._args_ipam_pool_prefix_allocation_update.number_of_ip_addresses
+            return
+
+        cls._args_ipam_pool_prefix_allocation_update = AAZObjectArg(
+            nullable=True,
+        )
+
+        ipam_pool_prefix_allocation_update = cls._args_ipam_pool_prefix_allocation_update
+        ipam_pool_prefix_allocation_update.number_of_ip_addresses = AAZStrArg(
+            options=["number-of-ip-addresses"],
+            help="Number of IP addresses to allocate.",
+            nullable=True,
+        )
+        ipam_pool_prefix_allocation_update.id = AAZResourceIdArg(
+            options=["id"],
+            help="Resource id of the associated Azure IpamPool resource.",
+            nullable=True,
+        )
+
+        _schema.id = cls._args_ipam_pool_prefix_allocation_update.id
+        _schema.number_of_ip_addresses = cls._args_ipam_pool_prefix_allocation_update.number_of_ip_addresses
 
     _args_sub_resource_update = None
 
@@ -289,7 +343,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-03-01",
+                    "api-version", "2024-05-01",
                     required=True,
                 ),
             }
@@ -388,7 +442,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-03-01",
+                    "api-version", "2024-05-01",
                     required=True,
                 ),
             }
@@ -463,10 +517,15 @@ class Update(AAZCommand):
             address_space = _builder.get(".properties.addressSpace")
             if address_space is not None:
                 address_space.set_prop("addressPrefixes", AAZListType, ".address_prefixes")
+                address_space.set_prop("ipamPoolPrefixAllocations", AAZListType, ".ipam_pool_prefix_allocations")
 
             address_prefixes = _builder.get(".properties.addressSpace.addressPrefixes")
             if address_prefixes is not None:
                 address_prefixes.set_elements(AAZStrType, ".")
+
+            ipam_pool_prefix_allocations = _builder.get(".properties.addressSpace.ipamPoolPrefixAllocations")
+            if ipam_pool_prefix_allocations is not None:
+                _UpdateHelper._build_schema_ipam_pool_prefix_allocation_update(ipam_pool_prefix_allocations.set_elements(AAZObjectType, "."))
 
             bgp_communities = _builder.get(".properties.bgpCommunities")
             if bgp_communities is not None:
@@ -508,10 +567,15 @@ class _UpdateHelper:
         if _builder is None:
             return
         _builder.set_prop("addressPrefixes", AAZListType, ".address_prefixes")
+        _builder.set_prop("ipamPoolPrefixAllocations", AAZListType, ".ipam_pool_prefix_allocations")
 
         address_prefixes = _builder.get(".addressPrefixes")
         if address_prefixes is not None:
             address_prefixes.set_elements(AAZStrType, ".")
+
+        ipam_pool_prefix_allocations = _builder.get(".ipamPoolPrefixAllocations")
+        if ipam_pool_prefix_allocations is not None:
+            cls._build_schema_ipam_pool_prefix_allocation_update(ipam_pool_prefix_allocations.set_elements(AAZObjectType, "."))
 
     @classmethod
     def _build_schema_application_security_group_update(cls, _builder):
@@ -525,6 +589,17 @@ class _UpdateHelper:
             tags.set_elements(AAZStrType, ".")
 
     @classmethod
+    def _build_schema_ipam_pool_prefix_allocation_update(cls, _builder):
+        if _builder is None:
+            return
+        _builder.set_prop("numberOfIpAddresses", AAZStrType, ".number_of_ip_addresses")
+        _builder.set_prop("pool", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+
+        pool = _builder.get(".pool")
+        if pool is not None:
+            pool.set_prop("id", AAZStrType, ".id")
+
+    @classmethod
     def _build_schema_sub_resource_update(cls, _builder):
         if _builder is None:
             return
@@ -536,6 +611,7 @@ class _UpdateHelper:
     def _build_schema_address_space_read(cls, _schema):
         if cls._schema_address_space_read is not None:
             _schema.address_prefixes = cls._schema_address_space_read.address_prefixes
+            _schema.ipam_pool_prefix_allocations = cls._schema_address_space_read.ipam_pool_prefix_allocations
             return
 
         cls._schema_address_space_read = _schema_address_space_read = AAZObjectType()
@@ -544,11 +620,19 @@ class _UpdateHelper:
         address_space_read.address_prefixes = AAZListType(
             serialized_name="addressPrefixes",
         )
+        address_space_read.ipam_pool_prefix_allocations = AAZListType(
+            serialized_name="ipamPoolPrefixAllocations",
+        )
 
         address_prefixes = _schema_address_space_read.address_prefixes
         address_prefixes.Element = AAZStrType()
 
+        ipam_pool_prefix_allocations = _schema_address_space_read.ipam_pool_prefix_allocations
+        ipam_pool_prefix_allocations.Element = AAZObjectType()
+        cls._build_schema_ipam_pool_prefix_allocation_read(ipam_pool_prefix_allocations.Element)
+
         _schema.address_prefixes = cls._schema_address_space_read.address_prefixes
+        _schema.ipam_pool_prefix_allocations = cls._schema_address_space_read.ipam_pool_prefix_allocations
 
     _schema_application_security_group_read = None
 
@@ -644,7 +728,7 @@ class _UpdateHelper:
             flags={"read_only": True},
         )
         flow_log_read.id = AAZStrType()
-        flow_log_read.identity = AAZObjectType()
+        flow_log_read.identity = AAZIdentityObjectType()
         flow_log_read.location = AAZStrType()
         flow_log_read.name = AAZStrType(
             flags={"read_only": True},
@@ -900,6 +984,40 @@ class _UpdateHelper:
         _schema.id = cls._schema_ip_configuration_read.id
         _schema.name = cls._schema_ip_configuration_read.name
         _schema.properties = cls._schema_ip_configuration_read.properties
+
+    _schema_ipam_pool_prefix_allocation_read = None
+
+    @classmethod
+    def _build_schema_ipam_pool_prefix_allocation_read(cls, _schema):
+        if cls._schema_ipam_pool_prefix_allocation_read is not None:
+            _schema.allocated_address_prefixes = cls._schema_ipam_pool_prefix_allocation_read.allocated_address_prefixes
+            _schema.number_of_ip_addresses = cls._schema_ipam_pool_prefix_allocation_read.number_of_ip_addresses
+            _schema.pool = cls._schema_ipam_pool_prefix_allocation_read.pool
+            return
+
+        cls._schema_ipam_pool_prefix_allocation_read = _schema_ipam_pool_prefix_allocation_read = AAZObjectType()
+
+        ipam_pool_prefix_allocation_read = _schema_ipam_pool_prefix_allocation_read
+        ipam_pool_prefix_allocation_read.allocated_address_prefixes = AAZListType(
+            serialized_name="allocatedAddressPrefixes",
+            flags={"read_only": True},
+        )
+        ipam_pool_prefix_allocation_read.number_of_ip_addresses = AAZStrType(
+            serialized_name="numberOfIpAddresses",
+        )
+        ipam_pool_prefix_allocation_read.pool = AAZObjectType(
+            flags={"client_flatten": True},
+        )
+
+        allocated_address_prefixes = _schema_ipam_pool_prefix_allocation_read.allocated_address_prefixes
+        allocated_address_prefixes.Element = AAZStrType()
+
+        pool = _schema_ipam_pool_prefix_allocation_read.pool
+        pool.id = AAZStrType()
+
+        _schema.allocated_address_prefixes = cls._schema_ipam_pool_prefix_allocation_read.allocated_address_prefixes
+        _schema.number_of_ip_addresses = cls._schema_ipam_pool_prefix_allocation_read.number_of_ip_addresses
+        _schema.pool = cls._schema_ipam_pool_prefix_allocation_read.pool
 
     _schema_network_interface_ip_configuration_read = None
 
@@ -1326,6 +1444,10 @@ class _UpdateHelper:
         )
         properties.auxiliary_sku = AAZStrType(
             serialized_name="auxiliarySku",
+        )
+        properties.default_outbound_connectivity_enabled = AAZBoolType(
+            serialized_name="defaultOutboundConnectivityEnabled",
+            flags={"read_only": True},
         )
         properties.disable_tcp_state_tracking = AAZBoolType(
             serialized_name="disableTcpStateTracking",
@@ -2292,6 +2414,9 @@ class _UpdateHelper:
             serialized_name="ipConfigurations",
             flags={"read_only": True},
         )
+        properties.ipam_pool_prefix_allocations = AAZListType(
+            serialized_name="ipamPoolPrefixAllocations",
+        )
         properties.nat_gateway = AAZObjectType(
             serialized_name="natGateway",
         )
@@ -2425,6 +2550,10 @@ class _UpdateHelper:
         ip_configurations = _schema_subnet_read.properties.ip_configurations
         ip_configurations.Element = AAZObjectType()
         cls._build_schema_ip_configuration_read(ip_configurations.Element)
+
+        ipam_pool_prefix_allocations = _schema_subnet_read.properties.ipam_pool_prefix_allocations
+        ipam_pool_prefix_allocations.Element = AAZObjectType()
+        cls._build_schema_ipam_pool_prefix_allocation_read(ipam_pool_prefix_allocations.Element)
 
         private_endpoints = _schema_subnet_read.properties.private_endpoints
         private_endpoints.Element = AAZObjectType()

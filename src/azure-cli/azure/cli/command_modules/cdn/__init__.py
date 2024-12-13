@@ -14,9 +14,9 @@ class CdnCommandsLoader(AzCommandsLoader):
         from azure.cli.core.commands import CliCommandType
         from azure.cli.core.profiles import ResourceType
         cdn_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.cdn.custom#{}')
-        super(CdnCommandsLoader, self).__init__(cli_ctx=cli_ctx,
-                                                resource_type=ResourceType.MGMT_CDN,
-                                                custom_command_type=cdn_custom)
+        super().__init__(cli_ctx=cli_ctx,
+                         resource_type=ResourceType.MGMT_CDN,
+                         custom_command_type=cdn_custom)
 
     def load_command_table(self, args):
         from azure.cli.command_modules.cdn.commands import load_command_table

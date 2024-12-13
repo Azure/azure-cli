@@ -20,9 +20,9 @@ class CheckCompatibility(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-05-01-preview",
+        "version": "2024-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}/cdncanmigratetoafd", "2024-05-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}/cdncanmigratetoafd", "2024-09-01"],
         ]
     }
 
@@ -61,7 +61,7 @@ class CheckCompatibility(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.CdnProfilesCdnCanMigrateToAfd(ctx=self.ctx)()
+        yield self.ProfilesCdnCanMigrateToAfd(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -76,7 +76,7 @@ class CheckCompatibility(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class CdnProfilesCdnCanMigrateToAfd(AAZHttpOperation):
+    class ProfilesCdnCanMigrateToAfd(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -140,7 +140,7 @@ class CheckCompatibility(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-05-01-preview",
+                    "api-version", "2024-09-01",
                     required=True,
                 ),
             }
