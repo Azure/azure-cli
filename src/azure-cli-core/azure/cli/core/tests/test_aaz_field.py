@@ -61,13 +61,13 @@ class TestAAZField(unittest.TestCase):
         assert not v.properties.enable._is_patch
         assert not (v.properties.enable != True)  # noqa: E712
         assert v.properties.enable
-        assert v.properties.enable != True  # noqa: E712
+        assert not v.properties.enable
 
         v.properties.enable = False
         assert v.properties.enable == False  # noqa: E712
         assert not (v.properties.enable != False)  # noqa: E712
         assert not v.properties.enable
-        assert v.properties.enable is not False  # noqa: E712
+        assert v.properties.enable is not False
 
         # test float type
         model_schema.properties.height = AAZFloatType()
@@ -220,20 +220,20 @@ class TestAAZField(unittest.TestCase):
             self.assertTrue(False)
 
         v.additional['bool'] = True
-        self.assertEqual(v.additional['bool'], True)
+        self.assertIs(v.additional['bool'], True)
 
         del v.additional['bool']
         with self.assertRaises(KeyError):
             v.additional['bool']
 
         v.additional['none'] = None
-        self.assertEqual(v.additional['none'], None)
+        self.assertIsNone(v.additional['none'])
 
         v.additional['obj'] = {"a": 1, "b": "str", "c": True, "d": None}
-        self.assertEqual(v.additional['obj'], {"a": 1, "b": "str", "c": True, "d": None})
+        self.assertDictEqual(v.additional['obj'], {"a": 1, "b": "str", "c": True, "d": None})
 
         v.additional['list'] = ['a', 1, True, None, ["s", "v"], {"a": 1, "b": 2}]
-        self.assertEqual(v.additional['list'], ['a', 1, True, None, ["s", "v"], {"a": 1, "b": 2}])
+        self.assertListEqual(v.additional['list'], ['a', 1, True, None, ["s", "v"], {"a": 1, "b": 2}])
 
         self.assertTrue(v.additional._is_patch)
 
@@ -251,7 +251,7 @@ class TestAAZField(unittest.TestCase):
 
         v.configs[1] = {"obj": {"a": 1, "c": 2}}
         del v.configs[1]['obj']['a']
-        self.assertEqual(v.configs[1], {"obj": {"c": 2}})
+        self.assertDictEqual(v.configs[1], {"obj": {"c": 2}})
 
         v.configs[0] = None
         self.assertEqual(v.configs.to_serialized_data(), [{"obj": {"c": 2}}])
