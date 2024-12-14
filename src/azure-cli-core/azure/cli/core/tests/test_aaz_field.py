@@ -786,7 +786,7 @@ class TestAAZField(unittest.TestCase):
             ]
         })
 
-        self.assertTrue(AAZCommand.deserialize_output(v, client_flatten=False, secret_hidden=True) == {
+        self.assertDictEqual(AAZCommand.deserialize_output(v, client_flatten=False, secret_hidden=True), {
             "actions": [
                 {
                     "action_type": "ModifyProperties",
@@ -813,7 +813,7 @@ class TestAAZField(unittest.TestCase):
             ]
         })
 
-        self.assertTrue(AAZCommand.deserialize_output(v, client_flatten=False, secret_hidden=False) == {
+        self.assertDictEqual(AAZCommand.deserialize_output(v, client_flatten=False, secret_hidden=False), {
             "actions": [
                 {
                     "action_type": "ModifyProperties",
