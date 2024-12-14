@@ -230,10 +230,10 @@ class TestAAZField(unittest.TestCase):
         self.assertIsNone(v.additional['none'])
 
         v.additional['obj'] = {"a": 1, "b": "str", "c": True, "d": None}
-        self.assertDictEqual(v.additional['obj'], {"a": 1, "b": "str", "c": True, "d": None})
+        self.assertEqual(v.additional['obj'], {"a": 1, "b": "str", "c": True, "d": None})
 
         v.additional['list'] = ['a', 1, True, None, ["s", "v"], {"a": 1, "b": 2}]
-        self.assertListEqual(v.additional['list'], ['a', 1, True, None, ["s", "v"], {"a": 1, "b": 2}])
+        self.assertEqual(v.additional['list'], ['a', 1, True, None, ["s", "v"], {"a": 1, "b": 2}])
 
         self.assertTrue(v.additional._is_patch)
 
@@ -251,7 +251,7 @@ class TestAAZField(unittest.TestCase):
 
         v.configs[1] = {"obj": {"a": 1, "c": 2}}
         del v.configs[1]['obj']['a']
-        self.assertDictEqual(v.configs[1], {"obj": {"c": 2}})
+        self.assertEqual(v.configs[1], {"obj": {"c": 2}})
 
         v.configs[0] = None
         self.assertEqual(v.configs.to_serialized_data(), [{"obj": {"c": 2}}])
@@ -786,7 +786,7 @@ class TestAAZField(unittest.TestCase):
             ]
         })
 
-        self.assertDictEqual(AAZCommand.deserialize_output(v, client_flatten=False, secret_hidden=True), {
+        self.assertEqual(AAZCommand.deserialize_output(v, client_flatten=False, secret_hidden=True), {
             "actions": [
                 {
                     "action_type": "ModifyProperties",
@@ -813,7 +813,7 @@ class TestAAZField(unittest.TestCase):
             ]
         })
 
-        self.assertDictEqual(AAZCommand.deserialize_output(v, client_flatten=False, secret_hidden=False), {
+        self.assertEqual(AAZCommand.deserialize_output(v, client_flatten=False, secret_hidden=False), {
             "actions": [
                 {
                     "action_type": "ModifyProperties",
