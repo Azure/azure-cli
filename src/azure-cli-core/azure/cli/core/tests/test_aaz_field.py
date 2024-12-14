@@ -61,7 +61,7 @@ class TestAAZField(unittest.TestCase):
         assert not v.properties.enable._is_patch
         assert not (v.properties.enable != True)  # noqa: E712
         assert v.properties.enable
-        assert not v.properties.enable
+        assert v.properties.enable is not True
 
         v.properties.enable = False
         assert v.properties.enable == False  # noqa: E712
