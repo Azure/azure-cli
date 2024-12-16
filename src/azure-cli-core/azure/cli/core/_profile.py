@@ -228,13 +228,13 @@ class Profile:
             if is_valid_resource_id(identity_id):
                 cred = ManagedIdentityCredential(resource_id=identity_id)
                 cred.get_token(*self._arm_scope)
-                identity_type = MsiAccountTypes.user_assigned_resource_id
+                identity_type = ManagedIdentityAccountTypes.user_assigned_resource_id
             else:
                 authenticated = False
                 try:
                     cred = ManagedIdentityCredential(client_id=identity_id)
                     cred.get_token(*self._arm_scope)
-                    identity_type = MsiAccountTypes.user_assigned_client_id
+                    identity_type = ManagedIdentityAccountTypes.user_assigned_client_id
                     authenticated = True
                 except AuthenticationError as ex:
                     if 'Identity not found' in ex.error_msg:
@@ -246,7 +246,7 @@ class Profile:
                     try:
                         cred = ManagedIdentityCredential(object_id=identity_id)
                         cred.get_token(*self._arm_scope)
-                        identity_type = MsiAccountTypes.user_assigned_object_id
+                        identity_type = ManagedIdentityAccountTypes.user_assigned_object_id
                         authenticated = True
                     except AuthenticationError as ex:
                         if 'Identity not found' in ex.error_msg:
@@ -258,7 +258,7 @@ class Profile:
                     raise CLIError('Failed to connect to managed identity, check your managed identity ID.')
 
         else:
-            identity_type = MsiAccountTypes.system_assigned
+            identity_type = ManagedIdentityAccountTypes.system_assigned
             cred = ManagedIdentityCredential()
 
         token = cred.get_token(*self._arm_scope).token
@@ -360,7 +360,9 @@ class Profile:
             from .auth.msal_credentials import ManagedIdentityCredential
             from azure.cli.core.auth.credential_adaptor import CredentialAdaptor
             # The credential must be wrapped by CredentialAdaptor so that it can work with Track 1 SDKs.
-            cred = CredentialAdaptor(ManagedIdentityCredential(), resource=resource)
+            cred = CredentialAdaptor(
+                ManagedIdentityAccountTypes.credential_factory(managed_identity_type, managed_identity_id),
+                resource=resource)
 
         else:
             # user and service principal
@@ -735,7 +737,7 @@ class Profile:
         return installation_id
 
 
-class MsiAccountTypes:
+class ManagedIdentityAccountTypes:
     # pylint: disable=no-method-argument,no-self-argument
     system_assigned = 'MSI'
     user_assigned_client_id = 'MSIClient'
@@ -744,20 +746,23 @@ class MsiAccountTypes:
 
     @staticmethod
     def valid_msi_account_types():
-        return [MsiAccountTypes.system_assigned, MsiAccountTypes.user_assigned_client_id,
-                MsiAccountTypes.user_assigned_object_id, MsiAccountTypes.user_assigned_resource_id]
+        return [ManagedIdentityAccountTypes.system_assigned,
+                ManagedIdentityAccountTypes.user_assigned_client_id,
+                ManagedIdentityAccountTypes.user_assigned_object_id,
+                ManagedIdentityAccountTypes.user_assigned_resource_id]
 
     @staticmethod
-    def msi_auth_factory(cli_account_name, identity, resource):
-        from azure.cli.core.auth.adal_authentication import MSIAuthenticationWrapper
-        if cli_account_name == MsiAccountTypes.system_assigned:
-            return MSIAuthenticationWrapper(resource=resource)
-        if cli_account_name == MsiAccountTypes.user_assigned_client_id:
-            return MSIAuthenticationWrapper(resource=resource, client_id=identity)
-        if cli_account_name == MsiAccountTypes.user_assigned_object_id:
-            return MSIAuthenticationWrapper(resource=resource, object_id=identity)
-        if cli_account_name == MsiAccountTypes.user_assigned_resource_id:
-            return MSIAuthenticationWrapper(resource=resource, msi_res_id=identity)
+    def credential_factory(cli_account_name, id_value):
+        # id is a python built-in name, so we use id_value
+        from azure.cli.core.auth.msal_credentials import ManagedIdentityCredential
+        if cli_account_name == ManagedIdentityAccountTypes.system_assigned:
+            return ManagedIdentityCredential()
+        if cli_account_name == ManagedIdentityAccountTypes.user_assigned_client_id:
+            return ManagedIdentityCredential(client_id=id_value)
+        if cli_account_name == ManagedIdentityAccountTypes.user_assigned_object_id:
+            return ManagedIdentityCredential(object_id=id_value)
+        if cli_account_name == ManagedIdentityAccountTypes.user_assigned_resource_id:
+            return ManagedIdentityCredential(resource_id=id_value)
         raise ValueError("unrecognized msi account name '{}'".format(cli_account_name))
 
 
