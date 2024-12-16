@@ -6647,7 +6647,7 @@ class VMGalleryImage(ScenarioTest):
         ])
 
         # Check result by shared user
-        self.cmd('sig list-shared --location {location}', checks=[
+        self.cmd('sig list-shared --location {location} --query "[?name==\'{unique_name}\']"', checks=[
             self.check('[0].location', '{location}'),
             self.check('[0].name', '{unique_name}'),
             self.check('[0].uniqueId', '/SharedGalleries/{unique_name}')
