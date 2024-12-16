@@ -318,7 +318,7 @@ class AFDOriginCreate(_AFDOriginCreate):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.enable_private_link = AAZBoolArg(
             options=['--enable-private-link'],
-            help='Indicates whether private link is enanbled on that origin.',
+            help='Indicates whether private link is enabled on that origin.',
             blank=True,
             default=False
         )
@@ -365,7 +365,7 @@ class AFDOriginUpdate(_AFDOriginUpdate):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.enable_private_link = AAZBoolArg(
             options=['--enable-private-link'],
-            help='Indicates whether private link is enanbled on that origin.',
+            help='Indicates whether private link is enabled on that origin.',
             blank=True
         )
         args_schema.private_link_location = AAZStrArg(
@@ -459,7 +459,7 @@ class AFDRouteCreate(_AFDRouteCreate):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.enable_caching = AAZBoolArg(
             options=['--enable-caching'],
-            help='Indicates whether caching is enanbled on that route.',
+            help='Indicates whether caching is enabled on that route.',
         )
         args_schema.custom_domains = AAZListArg(
             options=['--custom-domains'],
@@ -495,7 +495,7 @@ class AFDRouteCreate(_AFDRouteCreate):
             'Default value is false. If compression is enabled,'
             'content will be served as compressed if user requests for a compressed version.'
             'Content won\'t be compressed on AzureFrontDoor'
-            'when requested content is smaller than 1 byte or larger than 1 MB.',
+            'when requested content is smaller than 8 MB or larger than 1 KB.',
         )
         args_schema.cache_configuration._registered = False
         args_schema.formatted_custom_domains._registered = False
@@ -561,7 +561,7 @@ class AFDRouteUpdate(_AFDRouteUpdate):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.enable_caching = AAZBoolArg(
             options=['--enable-caching'],
-            help='Indicates whether caching is enanbled on that route.',
+            help='Indicates whether caching is enabled on that route.',
         )
         args_schema.custom_domains = AAZListArg(
             options=['--custom-domains'],
@@ -596,7 +596,7 @@ class AFDRouteUpdate(_AFDRouteUpdate):
             help='Indicates whether content compression is enabled on AzureFrontDoor. Default value is false.'
             'If compression is enabled, content will be served as compressed if user requests for a compressed version.'
             'Content won\'t be compressed on AzureFrontDoor'
-            'when requested content is smaller than 1 byte or larger than 1 MB.',
+            'when requested content is smaller than 8 MB or larger than 1 KB.',
         )
         args_schema.cache_configuration._registered = False
         args_schema.formatted_custom_domains._registered = False
@@ -746,7 +746,7 @@ class AFDRuleCreate(_AFDRuleCreate):
             help='Indicates whether content compression is enabled on AzureFrontDoor. Default value is false.'
             'If compression is enabled, content will be served as compressed if user requests for a compressed version.'
             'Content won\'t be compressed on AzureFrontDoor'
-            'when requested content is smaller than 1 byte or larger than 1 MB.',
+            'when requested content is smaller than 8 MB or larger than 1 KB.',
         )
         args_schema.forwarding_protocol = AAZStrArg(
             options=['--forwarding-protocol'],
@@ -994,7 +994,7 @@ class AFDRuleActionCreate(_AFDRuleUpdate):
             help='Indicates whether content compression is enabled on AzureFrontDoor. Default value is false.'
             'If compression is enabled, content will be served as compressed if user requests for a compressed version.'
             'Content won\'t be compressed on AzureFrontDoor'
-            'when requested content is smaller than 1 byte or larger than 1 MB.',
+            'when requested content is smaller than 8 MB or larger than 1 KB.',
         )
         args_schema.forwarding_protocol = AAZStrArg(
             options=['--forwarding-protocol'],
