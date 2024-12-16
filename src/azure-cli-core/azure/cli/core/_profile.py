@@ -219,48 +219,12 @@ class Profile:
         self._set_subscriptions(consolidated)
         return deepcopy(consolidated)
 
-    def login_with_managed_identity(self, identity_id=None, allow_no_subscriptions=None):
+    def login_with_managed_identity(self, client_id=None, object_id=None, resource_id=None,
+                                    allow_no_subscriptions=None):
         import jwt
-        from azure.mgmt.core.tools import is_valid_resource_id
         from azure.cli.core.auth.msal_credentials import ManagedIdentityCredential
 
-        if identity_id:
-            if is_valid_resource_id(identity_id):
-                cred = ManagedIdentityCredential(resource_id=identity_id)
-                cred.get_token(*self._arm_scope)
-                identity_type = ManagedIdentityAccountTypes.user_assigned_resource_id
-            else:
-                authenticated = False
-                try:
-                    cred = ManagedIdentityCredential(client_id=identity_id)
-                    cred.get_token(*self._arm_scope)
-                    identity_type = ManagedIdentityAccountTypes.user_assigned_client_id
-                    authenticated = True
-                except AuthenticationError as ex:
-                    if 'Identity not found' in ex.error_msg:
-                        logger.info('Sniff: not client id')
-                    else:
-                        raise
-
-                if not authenticated:
-                    try:
-                        cred = ManagedIdentityCredential(object_id=identity_id)
-                        cred.get_token(*self._arm_scope)
-                        identity_type = ManagedIdentityAccountTypes.user_assigned_object_id
-                        authenticated = True
-                    except AuthenticationError as ex:
-                        if 'Identity not found' in ex.error_msg:
-                            logger.info('Sniff: not object id')
-                        else:
-                            raise
-
-                if not authenticated:
-                    raise CLIError('Failed to connect to managed identity, check your managed identity ID.')
-
-        else:
-            identity_type = ManagedIdentityAccountTypes.system_assigned
-            cred = ManagedIdentityCredential()
-
+        cred = ManagedIdentityCredential(client_id=client_id, object_id=object_id, resource_id=resource_id)
         token = cred.get_token(*self._arm_scope).token
         logger.info('Managed identity: token was retrieved. Now trying to initialize local accounts...')
         decode = jwt.decode(token, algorithms=['RS256'], options={"verify_signature": False})
@@ -268,8 +232,9 @@ class Profile:
 
         subscription_finder = SubscriptionFinder(self.cli_ctx)
         subscriptions = subscription_finder.find_using_specific_tenant(tenant, cred)
-        base_name = ('{}-{}'.format(identity_type, identity_id) if identity_id else identity_type)
-        user = _USER_ASSIGNED_IDENTITY if identity_id else _SYSTEM_ASSIGNED_IDENTITY
+        base_name, user = ManagedIdentityAccountTypes.get_id_string_and_type(client_id=client_id,
+                                                                             object_id=object_id,
+                                                                             resource_id=resource_id)
         if not subscriptions:
             if allow_no_subscriptions:
                 subscriptions = self._build_tenant_level_accounts([tenant])
@@ -743,6 +708,27 @@ class ManagedIdentityAccountTypes:
     user_assigned_client_id = 'MSIClient'
     user_assigned_object_id = 'MSIObject'
     user_assigned_resource_id = 'MSIResource'
+
+    @staticmethod
+    def get_id_string_and_type(client_id=None, object_id=None, resource_id=None):
+        # As long as one ID is provided, the managed identity is treated as user-assigned.
+        # See https://github.com/Azure/azure-cli/issues/13188
+        identity_type = _SYSTEM_ASSIGNED_IDENTITY
+        id_type = None
+        id_value = None
+        if client_id:
+            identity_type = _USER_ASSIGNED_IDENTITY
+            id_type = ManagedIdentityAccountTypes.user_assigned_client_id
+            id_value = client_id
+        elif object_id:
+            identity_type = _USER_ASSIGNED_IDENTITY
+            id_type = ManagedIdentityAccountTypes.user_assigned_object_id
+            id_value = object_id
+        elif resource_id:
+            identity_type = _USER_ASSIGNED_IDENTITY
+            id_type = ManagedIdentityAccountTypes.user_assigned_resource_id
+            id_value = resource_id
+        return '{}-{}'.format(id_type, id_value) if id_type else id_type, identity_type
 
     @staticmethod
     def valid_msi_account_types():
