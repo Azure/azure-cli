@@ -24,9 +24,6 @@ class AAZSimpleType(AAZBaseType):
 
     _ValueCls = AAZSimpleValue
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
     def process_data(self, data, **kwargs):
         if data == None:  # noqa: E711, pylint: disable=singleton-comparison
             # data can be None or AAZSimpleValue == None
@@ -275,9 +272,6 @@ class AAZObjectType(AAZBaseType):
 class AAZBaseDictType(AAZBaseType):
 
     _PatchDataCls = dict
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
 
     @abc.abstractmethod
     def __getitem__(self, key):

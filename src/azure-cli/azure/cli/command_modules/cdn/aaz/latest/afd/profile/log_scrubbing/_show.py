@@ -19,9 +19,9 @@ class Show(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-02-01",
+        "version": "2024-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}", "2024-02-01", "properties.logScrubbing"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}", "2024-09-01", "properties.logScrubbing"],
         ]
     }
 
@@ -128,7 +128,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-02-01",
+                    "api-version", "2024-09-01",
                     required=True,
                 ),
             }
@@ -190,7 +190,7 @@ class _ShowHelper:
         profile_read.id = AAZStrType(
             flags={"read_only": True},
         )
-        profile_read.identity = AAZObjectType()
+        profile_read.identity = AAZIdentityObjectType()
         profile_read.kind = AAZStrType(
             flags={"read_only": True},
         )

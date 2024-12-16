@@ -27,12 +27,12 @@ logger = get_logger(__name__)
 
 class TunnelWebSocket(WebSocket):
     def recv_frame(self):
-        frame = super(TunnelWebSocket, self).recv_frame()
+        frame = super().recv_frame()
         logger.info('Received frame: %s', frame)
         return frame
 
     def recv(self):
-        data = super(TunnelWebSocket, self).recv()
+        data = super().recv()
         logger.info('Received websocket data: %s', data)
         return data
 

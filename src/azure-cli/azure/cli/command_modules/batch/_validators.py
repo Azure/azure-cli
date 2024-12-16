@@ -204,7 +204,7 @@ def validate_json_file(namespace):
     if namespace.json_file:
         try:
             get_file_json(namespace.json_file)
-        except EnvironmentError:
+        except OSError:
             raise ValueError("Cannot access JSON request file: " + namespace.json_file)
         except ValueError as err:
             raise ValueError(f"Invalid JSON file: {err}")
@@ -215,7 +215,7 @@ def validate_cert_file(namespace):
     try:
         with open(namespace.certificate_file, "rb"):
             pass
-    except EnvironmentError:
+    except OSError:
         raise ValueError("Cannot access certificate file: " + namespace.certificate_file)
 
 
@@ -250,7 +250,7 @@ def validate_file_destination(namespace):
     elif not os.path.isdir(file_dir):
         try:
             os.mkdir(file_dir)
-        except EnvironmentError as exp:
+        except OSError as exp:
             message = "Directory {} does not exist, and cannot be created: {}"
             raise ValueError(message.format(file_dir, exp))
     if os.path.isfile(file_path):

@@ -12,13 +12,13 @@ from azure.cli.command_modules.resource.custom import _remove_comments_from_json
 from azure.cli.core.profiles import ResourceType, get_sdk
 
 
-class PackagedTemplate():  # pylint: disable=too-few-public-methods
+class PackagedTemplate:  # pylint: disable=too-few-public-methods
     def __init__(self, template, artifacts):
         self.RootTemplate = template
         self.Artifacts = artifacts
 
 
-class PackingContext():  # pylint: disable=too-few-public-methods
+class PackingContext:  # pylint: disable=too-few-public-methods
     def __init__(self, root_template_directory):
         self.RootTemplateDirectory = os.path.abspath(root_template_directory)
         self.CurrentDirectory = os.path.abspath(root_template_directory)

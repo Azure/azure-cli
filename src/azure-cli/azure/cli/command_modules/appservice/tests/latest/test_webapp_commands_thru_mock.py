@@ -451,7 +451,7 @@ class TestWebappMocked(unittest.TestCase):
                                                                      certificate_envelope=cert_def)
 
 
-class FakedResponse(object):  # pylint: disable=too-few-public-methods
+class FakedResponse:  # pylint: disable=too-few-public-methods
     def __init__(self, status_code):
         self.status_code = status_code
 

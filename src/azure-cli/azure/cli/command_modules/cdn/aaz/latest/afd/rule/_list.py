@@ -22,9 +22,9 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-02-01",
+        "version": "2024-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}/rulesets/{}/rules", "2024-02-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}/rulesets/{}/rules", "2024-09-01"],
         ]
     }
 
@@ -130,7 +130,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-02-01",
+                    "api-version", "2024-09-01",
                     required=True,
                 ),
             }
@@ -287,11 +287,13 @@ class List(AAZCommand):
                 serialized_name="originGroup",
                 flags={"required": True},
             )
-            _ListHelper._build_schema_resource_reference_read(parameters.origin_group)
             parameters.type_name = AAZStrType(
                 serialized_name="typeName",
                 flags={"required": True},
             )
+
+            origin_group = cls._schema_on_200.value.Element.properties.actions.Element.discriminate_by("name", "OriginGroupOverride").parameters.origin_group
+            origin_group.id = AAZStrType()
 
             disc_route_configuration_override = cls._schema_on_200.value.Element.properties.actions.Element.discriminate_by("name", "RouteConfigurationOverride")
             disc_route_configuration_override.parameters = AAZObjectType(
@@ -334,7 +336,9 @@ class List(AAZCommand):
             origin_group_override.origin_group = AAZObjectType(
                 serialized_name="originGroup",
             )
-            _ListHelper._build_schema_resource_reference_read(origin_group_override.origin_group)
+
+            origin_group = cls._schema_on_200.value.Element.properties.actions.Element.discriminate_by("name", "RouteConfigurationOverride").parameters.origin_group_override.origin_group
+            origin_group.id = AAZStrType()
 
             disc_url_redirect = cls._schema_on_200.value.Element.properties.actions.Element.discriminate_by("name", "UrlRedirect")
             disc_url_redirect.parameters = AAZObjectType(
@@ -997,21 +1001,6 @@ class _ListHelper:
         _schema.header_name = cls._schema_header_action_parameters_read.header_name
         _schema.type_name = cls._schema_header_action_parameters_read.type_name
         _schema.value = cls._schema_header_action_parameters_read.value
-
-    _schema_resource_reference_read = None
-
-    @classmethod
-    def _build_schema_resource_reference_read(cls, _schema):
-        if cls._schema_resource_reference_read is not None:
-            _schema.id = cls._schema_resource_reference_read.id
-            return
-
-        cls._schema_resource_reference_read = _schema_resource_reference_read = AAZObjectType()
-
-        resource_reference_read = _schema_resource_reference_read
-        resource_reference_read.id = AAZStrType()
-
-        _schema.id = cls._schema_resource_reference_read.id
 
 
 __all__ = ["List"]

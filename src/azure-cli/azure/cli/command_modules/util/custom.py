@@ -73,7 +73,7 @@ def upgrade_version(cmd, update_all=None, yes=None, allow_preview=None):  # pyli
         logger.warning("Your current Azure CLI version is %s. %s", local_version, latest_version_msg)
         from knack.prompting import prompt_y_n, NoTTYException
         if not yes:
-            logger.warning("Please check the release notes first: https://docs.microsoft.com/"
+            logger.warning("Please check the release notes first: https://learn.microsoft.com/"
                            "cli/azure/release-notes-azure-cli")
             try:
                 confirmation = prompt_y_n("Do you want to continue?", default='y')
@@ -183,7 +183,7 @@ def upgrade_version(cmd, update_all=None, yes=None, allow_preview=None):  # pyli
             msg = "Extension {} update failed during az upgrade. {}".format(ext_name, str(ex))
             raise CLIError(msg)
     auto_upgrade_msg = "You can enable auto-upgrade with 'az config set auto-upgrade.enable=yes'. " \
-        "More details in https://docs.microsoft.com/cli/azure/update-azure-cli#automatic-update"
+        "More details in https://learn.microsoft.com/cli/azure/update-azure-cli#automatic-update"
     logger.warning("Upgrade finished.%s", "" if cmd.cli_ctx.config.getboolean('auto-upgrade', 'enable', False)
                    else auto_upgrade_msg)
 
@@ -222,7 +222,7 @@ def _upgrade_on_windows():
 def _download_from_url(url, target_dir):
     import requests
     from azure.cli.core.util import should_disable_connection_verify
-    r = requests.get(url, stream=True, verify=(not should_disable_connection_verify()))
+    r = requests.get(url, stream=True, verify=not should_disable_connection_verify())
     if r.status_code != 200:
         raise CLIError("Request to {} failed with {}".format(url, r.status_code))
 
@@ -311,7 +311,7 @@ def demo_style(cmd, theme=None):  # pylint: disable=unused-argument
         (Style.ACTION, "--resource-group"),
         (Style.PRIMARY, " MyResourceGroup\n"),
         (Style.SECONDARY, "Create a storage account. For more detail, see "),
-        (Style.HYPERLINK, "https://docs.microsoft.com/azure/storage/common/storage-account-create?"
+        (Style.HYPERLINK, "https://learn.microsoft.com/azure/storage/common/storage-account-create?"
                           "tabs=azure-cli#create-a-storage-account-1"),
         (Style.SECONDARY, "\n"),
     ]

@@ -2,11 +2,15 @@
 # exclusions for the vm module
 
 vmss application set:
+    rule_exclusions:
+        - missing_command_test_coverage
     parameters:
         treat_deployment_as_failure:
             rule_exclusions:
                 - option_length_too_long
 vmss create:
+    rule_exclusions:
+        - missing_command_test_coverage
     parameters:
         upgrade_policy_mode:
             rule_exclusions:
@@ -63,6 +67,8 @@ vmss create:
             rule_exclusions:
                 - option_length_too_long
 vmss update:
+    rule_exclusions:
+        - missing_command_test_coverage
     parameters:
         enable_cross_zone_upgrade:
             rule_exclusions:
@@ -95,16 +101,22 @@ vmss update:
             rule_exclusions:
                 - option_length_too_long
 vmss encryption enable:
+    rule_exclusions:
+        - missing_command_test_coverage
     parameters:
         key_encryption_algorithm:
             rule_exclusions:
             - missing_parameter_help
 vm application set:
+    rule_exclusions:
+        - missing_command_test_coverage
     parameters:
         treat_deployment_as_failure:
             rule_exclusions:
                 - option_length_too_long
 vm create:
+    rule_exclusions:
+        - missing_command_test_coverage
     parameters:
         public_ip_address_allocation:
             rule_exclusions:
@@ -125,19 +137,26 @@ vm create:
             rule_exclusions:
                 - option_length_too_long
 vm unmanaged-disk attach:
+    rule_exclusions:
+        - missing_command_test_coverage
     parameters:
         size_gb:
             rule_exclusions:
             - missing_parameter_help
 vm encryption enable:
+    rule_exclusions:
+        - missing_command_test_coverage
     parameters:
         key_encryption_algorithm:
             rule_exclusions:
             - missing_parameter_help
 vm extension list:
     rule_exclusions:
+        - missing_command_test_coverage
         - no_ids_for_list_commands
 vm install-patches:
+    rule_exclusions:
+        - missing_command_test_coverage
     parameters:
         classifications_to_include_win:
             rule_exclusions:
@@ -155,21 +174,29 @@ vm install-patches:
             rule_exclusions:
             - option_length_too_long
 image create:
+    rule_exclusions:
+        - missing_command_test_coverage
     parameters:
         os_type:
             rule_exclusions:
             - missing_parameter_help
 snapshot create:
+    rule_exclusions:
+        - missing_command_test_coverage
     parameters:
         sku:
             rule_exclusions:
             - missing_parameter_help
 snapshot update:
+    rule_exclusions:
+        - missing_command_test_coverage
     parameters:
         sku:
             rule_exclusions:
             - missing_parameter_help
 sig image-version create:
+    rule_exclusions:
+        - missing_command_test_coverage
     parameters:
         target_region_cvm_encryption:
             rule_exclusions:
@@ -178,16 +205,22 @@ sig image-version create:
             rule_exclusions:
             - option_length_too_long
 sig image-version update:
+    rule_exclusions:
+        - missing_command_test_coverage
     parameters:
         allow_replicated_location_deletion:
             rule_exclusions:
             - option_length_too_long
 sig image-version undelete:
+    rule_exclusions:
+        - missing_command_test_coverage
     parameters:
         allow_replicated_location_deletion:
             rule_exclusions:
             - option_length_too_long
 restore-point create:
+    rule_exclusions:
+        - missing_command_test_coverage
     parameters:
         data_disk_restore_point_encryption_set:
             rule_exclusions:
@@ -205,8 +238,583 @@ restore-point create:
             rule_exclusions:
                 - option_length_too_long
 disk create:
+    rule_exclusions:
+        - missing_command_test_coverage
     parameters:
         optimized_for_frequent_attach:
             rule_exclusions:
             - option_length_too_long
+disk grant-access:
+    rule_exclusions:
+        - missing_command_test_coverage
+disk update:
+    rule_exclusions:
+        - missing_command_test_coverage
+disk-encryption-set create:
+    rule_exclusions:
+        - missing_command_test_coverage
+disk-encryption-set update:
+    rule_exclusions:
+        - missing_command_test_coverage
+disk-encryption-set identity assign:
+    rule_exclusions:
+        - missing_command_test_coverage
+disk-encryption-set identity remove:
+    rule_exclusions:
+        - missing_command_test_coverage
+disk-encryption-set identity show:
+    rule_exclusions:
+        - missing_command_test_coverage
+disk-access create:
+    rule_exclusions:
+        - missing_command_test_coverage
+disk-access update:
+    rule_exclusions:
+        - missing_command_test_coverage
+image update:
+    rule_exclusions:
+        - missing_command_test_coverage
+image builder create:
+    rule_exclusions:
+        - missing_command_test_coverage
+image builder list:
+    rule_exclusions:
+        - missing_command_test_coverage
+image builder show:
+    rule_exclusions:
+        - missing_command_test_coverage
+image builder delete:
+    rule_exclusions:
+        - missing_command_test_coverage
+image builder update:
+    rule_exclusions:
+        - missing_command_test_coverage
+image builder wait:
+    rule_exclusions:
+        - missing_command_test_coverage
+image builder run:
+    rule_exclusions:
+        - missing_command_test_coverage
+image builder show-runs:
+    rule_exclusions:
+        - missing_command_test_coverage
+image builder cancel:
+    rule_exclusions:
+        - missing_command_test_coverage
+image builder identity assign:
+    rule_exclusions:
+        - missing_command_test_coverage
+image builder identity remove:
+    rule_exclusions:
+        - missing_command_test_coverage
+image builder identity show:
+    rule_exclusions:
+        - missing_command_test_coverage
+image builder customizer add:
+    rule_exclusions:
+        - missing_command_test_coverage
+image builder customizer remove:
+    rule_exclusions:
+        - missing_command_test_coverage
+image builder customizer clear:
+    rule_exclusions:
+        - missing_command_test_coverage
+image builder output add:
+    rule_exclusions:
+        - missing_command_test_coverage
+image builder output remove:
+    rule_exclusions:
+        - missing_command_test_coverage
+image builder output clear:
+    rule_exclusions:
+        - missing_command_test_coverage
+image builder output versioning set:
+    rule_exclusions:
+        - missing_command_test_coverage
+image builder output versioning remove:
+    rule_exclusions:
+        - missing_command_test_coverage
+image builder output versioning show:
+    rule_exclusions:
+        - missing_command_test_coverage
+image builder validator add:
+    rule_exclusions:
+        - missing_command_test_coverage
+image builder validator remove:
+    rule_exclusions:
+        - missing_command_test_coverage
+image builder validator show:
+    rule_exclusions:
+        - missing_command_test_coverage
+image builder optimizer add:
+    rule_exclusions:
+        - missing_command_test_coverage
+image builder optimizer update:
+    rule_exclusions:
+        - missing_command_test_coverage
+image builder optimizer remove:
+    rule_exclusions:
+        - missing_command_test_coverage
+image builder optimizer show:
+    rule_exclusions:
+        - missing_command_test_coverage
+image builder error-handler add:
+    rule_exclusions:
+        - missing_command_test_coverage
+image builder error-handler remove:
+    rule_exclusions:
+        - missing_command_test_coverage
+image builder error-handler show:
+    rule_exclusions:
+        - missing_command_test_coverage
+snapshot grant-access:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm identity assign:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm identity remove:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm identity show:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm application list:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm capture:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm delete:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm get-instance-view:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm list:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm list-ip-addresses:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm list-skus:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm list-usage:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm open-port:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm resize:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm restart:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm show:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm stop:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm update:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm wait:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm auto-shutdown:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm availability-set convert:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm availability-set create:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm availability-set list:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm availability-set update:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm boot-diagnostics disable:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm boot-diagnostics enable:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm boot-diagnostics get-boot-log:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm boot-diagnostics get-boot-log-uris:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm diagnostics set:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm diagnostics get-default-config:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm disk attach:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm disk detach:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm encryption disable:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm encryption show:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm extension show:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm extension set:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm extension wait:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm extension image list:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm image list-offers:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm image list-publishers:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm image list-skus:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm image list:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm image show:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm image terms accept:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm image terms cancel:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm image terms show:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm nic add:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm nic remove:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm nic set:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm nic show:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm nic list:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm run-command invoke:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm run-command list:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm run-command show:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm run-command create:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm run-command update:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm run-command delete:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm run-command wait:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm secret format:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm secret add:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm secret list:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm secret remove:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm unmanaged-disk detach:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm unmanaged-disk list:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm user update:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm user delete:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm user reset-ssh:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm host get-instance-view:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm host create:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm host update:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm host group get-instance-view:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm host group create:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm host group update:
+    rule_exclusions:
+        - missing_command_test_coverage
+vmss identity assign:
+    rule_exclusions:
+        - missing_command_test_coverage
+vmss identity remove:
+    rule_exclusions:
+        - missing_command_test_coverage
+vmss identity show:
+    rule_exclusions:
+        - missing_command_test_coverage
+vmss application list:
+    rule_exclusions:
+        - missing_command_test_coverage
+vmss deallocate:
+    rule_exclusions:
+        - missing_command_test_coverage
+vmss delete-instances:
+    rule_exclusions:
+        - missing_command_test_coverage
+vmss get-instance-view:
+    rule_exclusions:
+        - missing_command_test_coverage
+vmss list-instance-connection-info:
+    rule_exclusions:
+        - missing_command_test_coverage
+vmss list-instance-public-ips:
+    rule_exclusions:
+        - missing_command_test_coverage
+vmss reimage:
+    rule_exclusions:
+        - missing_command_test_coverage
+vmss restart:
+    rule_exclusions:
+        - missing_command_test_coverage
+vmss scale:
+    rule_exclusions:
+        - missing_command_test_coverage
+vmss show:
+    rule_exclusions:
+        - missing_command_test_coverage
+vmss start:
+    rule_exclusions:
+        - missing_command_test_coverage
+vmss stop:
+    rule_exclusions:
+        - missing_command_test_coverage
+vmss update-instances:
+    rule_exclusions:
+        - missing_command_test_coverage
+vmss wait:
+    rule_exclusions:
+        - missing_command_test_coverage
+vmss set-orchestration-service-state:
+    rule_exclusions:
+        - missing_command_test_coverage
+vmss diagnostics set:
+    rule_exclusions:
+        - missing_command_test_coverage
+vmss diagnostics get-default-config:
+    rule_exclusions:
+        - missing_command_test_coverage
+vmss disk attach:
+    rule_exclusions:
+        - missing_command_test_coverage
+vmss disk detach:
+    rule_exclusions:
+        - missing_command_test_coverage
+vmss encryption disable:
+    rule_exclusions:
+        - missing_command_test_coverage
+vmss encryption show:
+    rule_exclusions:
+        - missing_command_test_coverage
+vmss extension delete:
+    rule_exclusions:
+        - missing_command_test_coverage
+vmss extension show:
+    rule_exclusions:
+        - missing_command_test_coverage
+vmss extension set:
+    rule_exclusions:
+        - missing_command_test_coverage
+vmss extension list:
+    rule_exclusions:
+        - missing_command_test_coverage
+vmss extension upgrade:
+    rule_exclusions:
+        - missing_command_test_coverage
+vmss extension image list:
+    rule_exclusions:
+        - missing_command_test_coverage
+vmss run-command invoke:
+    rule_exclusions:
+        - missing_command_test_coverage
+vmss run-command list:
+    rule_exclusions:
+        - missing_command_test_coverage
+vmss run-command show:
+    rule_exclusions:
+        - missing_command_test_coverage
+vmss run-command create:
+    rule_exclusions:
+        - missing_command_test_coverage
+vmss run-command update:
+    rule_exclusions:
+        - missing_command_test_coverage
+vmss run-command delete:
+    rule_exclusions:
+        - missing_command_test_coverage
+sig create:
+    rule_exclusions:
+        - missing_command_test_coverage
+sig show:
+    rule_exclusions:
+        - missing_command_test_coverage
+sig update:
+    rule_exclusions:
+        - missing_command_test_coverage
+sig list-community:
+    rule_exclusions:
+        - missing_command_test_coverage
+sig image-definition show-community:
+    rule_exclusions:
+        - missing_command_test_coverage
+sig image-definition list-community:
+    rule_exclusions:
+        - missing_command_test_coverage
+sig image-version list-community:
+    rule_exclusions:
+        - missing_command_test_coverage
+sig image-definition create:
+    rule_exclusions:
+        - missing_command_test_coverage
+sig image-definition update:
+    rule_exclusions:
+        - missing_command_test_coverage
+sig image-version show:
+    rule_exclusions:
+        - missing_command_test_coverage
+sig image-version wait:
+    rule_exclusions:
+        - missing_command_test_coverage
+sig share add:
+    rule_exclusions:
+        - missing_command_test_coverage
+sig share remove:
+    rule_exclusions:
+        - missing_command_test_coverage
+sig share reset:
+    rule_exclusions:
+        - missing_command_test_coverage
+sig share enable-community:
+    rule_exclusions:
+        - missing_command_test_coverage
+sig share wait:
+    rule_exclusions:
+        - missing_command_test_coverage
+sig image-definition list-shared:
+    rule_exclusions:
+        - missing_command_test_coverage
+sig image-version list-shared:
+    rule_exclusions:
+        - missing_command_test_coverage
+sig gallery-application create:
+    rule_exclusions:
+        - missing_command_test_coverage
+sig gallery-application update:
+    rule_exclusions:
+        - missing_command_test_coverage
+sig gallery-application wait:
+    rule_exclusions:
+        - missing_command_test_coverage
+sig gallery-application version create:
+    rule_exclusions:
+        - missing_command_test_coverage
+sig gallery-application version update:
+    rule_exclusions:
+        - missing_command_test_coverage
+ppg create:
+    rule_exclusions:
+        - missing_command_test_coverage
+ppg list:
+    rule_exclusions:
+        - missing_command_test_coverage
+ppg update:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm monitor log show:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm monitor metrics tail:
+    rule_exclusions:
+        - missing_command_test_coverage
+vm monitor metrics list-definitions:
+    rule_exclusions:
+        - missing_command_test_coverage
+capacity reservation group create:
+    rule_exclusions:
+        - missing_command_test_coverage
+capacity reservation group update:
+    rule_exclusions:
+        - missing_command_test_coverage
+capacity reservation group show:
+    rule_exclusions:
+        - missing_command_test_coverage
+capacity reservation create:
+    rule_exclusions:
+        - missing_command_test_coverage
+capacity reservation update:
+    rule_exclusions:
+        - missing_command_test_coverage
+capacity reservation show:
+    rule_exclusions:
+        - missing_command_test_coverage
+restore-point show:
+    rule_exclusions:
+        - missing_command_test_coverage
+restore-point wait:
+    rule_exclusions:
+        - missing_command_test_coverage
+restore-point collection show:
+    rule_exclusions:
+        - missing_command_test_coverage
+restore-point collection create:
+    rule_exclusions:
+        - missing_command_test_coverage
+restore-point collection update:
+    rule_exclusions:
+        - missing_command_test_coverage
+restore-point collection wait:
+    rule_exclusions:
+        - missing_command_test_coverage
 ...

@@ -18,7 +18,7 @@ cloud_resource_types = ["oss-rdbms", "arm", "aad-graph", "ms-graph", "batch", "m
 class ProfileCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
-        super(ProfileCommandsLoader, self).__init__(cli_ctx=cli_ctx)
+        super().__init__(cli_ctx=cli_ctx)
 
     def load_command_table(self, args):
 

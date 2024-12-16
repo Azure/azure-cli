@@ -80,7 +80,7 @@ from ._validators import (
 #####
 
 
-class SizeWithUnitConverter():  # pylint: disable=too-few-public-methods
+class SizeWithUnitConverter:  # pylint: disable=too-few-public-methods
 
     def __init__(
             self,
@@ -89,8 +89,8 @@ class SizeWithUnitConverter():  # pylint: disable=too-few-public-methods
             unit_map=None):
         self.unit = unit
         self.result_type = result_type
-        self.unit_map = unit_map or dict(B=1, kB=1024, MB=1024 * 1024, GB=1024 * 1024 * 1024,
-                                         TB=1024 * 1024 * 1024 * 1024)
+        self.unit_map = unit_map or {"B": 1, "kB": 1024, "MB": 1024 * 1024, "GB": 1024 * 1024 * 1024,
+                                     "TB": 1024 * 1024 * 1024 * 1024}
 
     def __call__(self, value):
         numeric_part = ''.join(itertools.takewhile(str.isdigit, value))
@@ -292,11 +292,11 @@ server_key_type_param_type = CLIArgumentType(
 
 storage_param_type = CLIArgumentType(
     options_list=['--storage'],
-    type=SizeWithUnitConverter('GB', result_type=int, unit_map=dict(B=1.0 / (1024 * 1024 * 1024),
-                                                                    kB=1.0 / (1024 * 1024),
-                                                                    MB=1.0 / 1024,
-                                                                    GB=1,
-                                                                    TB=1024)),
+    type=SizeWithUnitConverter('GB', result_type=int, unit_map={"B": 1.0 / (1024 * 1024 * 1024),
+                                                                "kB": 1.0 / (1024 * 1024),
+                                                                "MB": 1.0 / 1024,
+                                                                "GB": 1,
+                                                                "TB": 1024}),
     help='The storage size. If no unit is specified, defaults to gigabytes (GB).',
     validator=validate_managed_instance_storage_size)
 

@@ -42,7 +42,7 @@ class ServerPreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, engine_type, location, engine_parameter_name='database_engine',
                  name_prefix=SERVER_NAME_PREFIX, parameter_name='server',
                  resource_group_parameter_name='resource_group'):
-        super(ServerPreparer, self).__init__(name_prefix, SERVER_NAME_MAX_LENGTH)
+        super().__init__(name_prefix, SERVER_NAME_MAX_LENGTH)
         from azure.cli.core.mock import DummyCli
         self.cli_ctx = DummyCli()
         self.engine_type = engine_type
@@ -377,7 +377,6 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
         version = '15'
         storage_size = 200
-        location = 'southcentralus'
         sku_name = 'Standard_D2s_v3'
         tier = 'GeneralPurpose'
         storage_type = 'PremiumV2_LRS'
@@ -397,7 +396,6 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
         basic_info = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name)).get_output_in_json()
         self.assertEqual(basic_info['name'], server_name)
-        self.assertEqual(str(basic_info['location']).replace(' ', '').lower(), location)
         self.assertEqual(basic_info['resourceGroup'], resource_group)
         self.assertEqual(basic_info['sku']['name'], sku_name)
         self.assertEqual(basic_info['sku']['tier'], tier)
@@ -2277,7 +2275,7 @@ class FlexibleServerIdentityAADAdminMgmtScenarioTest(ScenarioTest):
         self._test_identity_aad_admin_mgmt('postgres', resource_group, 'disabled')
 
     def _test_identity_aad_admin_mgmt(self, database_engine, resource_group, password_auth, location=postgres_location):
-        login = 'alanenriqueo@microsoft.com'
+        login = 'aaa@foo.com'
         sid = '894ef8da-7971-4f68-972c-f561441eb329'
         auth_args = '--password-auth {} --active-directory-auth enabled'.format(password_auth)
         admin_id_arg = '-i {}'.format(sid) if database_engine == 'postgres' else ''
@@ -2743,3 +2741,113 @@ class FlexibleServerPrivateEndpointsMgmtScenarioTest(ScenarioTest):
         result = self.cmd('{} flexible-server private-link-resource show -g {} -s {}'
                           .format(database_engine, resource_group, server)).get_output_in_json()
         self.assertEqual(result['groupId'], group_id)
+
+
+class FlexibleServerFabricMirroringMgmtScenarioTest(ScenarioTest):
+    postgres_location = 'eastus2euap'
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    def test_postgres_flexible_server_fabric_mirroring_mgmt(self, resource_group):
+        self._test_fabric_mirroring_mgmt('postgres', resource_group)
+
+
+    def _test_fabric_mirroring_mgmt(self, database_engine, resource_group):
+        location = self.postgres_location
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, 32)
+
+        # create a server
+        self.cmd('{} flexible-server create -g {} --name {} -l {} --storage-size {} --public-access none '
+                 '--tier GeneralPurpose --sku-name Standard_D4ds_v5 --create-default-database Enabled --yes'
+                 .format(database_engine, resource_group, server_name, location, 128))
+
+        # enable system assigned managed identity
+        self.cmd('{} flexible-server identity update -g {} -s {} --system-assigned Enabled'
+                 .format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('type', 'SystemAssigned')])
+
+        # enable fabric mirroring
+        database1 = 'postgres'
+        self.cmd('{} flexible-server fabric-mirroring start -g {} --server-name {} --database-names {} --yes'
+                    .format(database_engine, resource_group, server_name, database1))
+        self.cmd('{} flexible-server parameter show --name azure.fabric_mirror_enabled -g {} -s {}'.format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('value', 'on')])
+        self.cmd('{} flexible-server parameter show --name azure.mirror_databases -g {} -s {}'.format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('value', database1)])
+
+        # update mirrored database
+        database2 = 'flexibleserverdb'
+        self.cmd('{} flexible-server fabric-mirroring update-databases -g {} --server-name {} --database-names {} --yes'
+                 .format(database_engine, resource_group, server_name, database2),
+                 checks=[JMESPathCheck('value', database2)])
+
+        # disable fabric mirroring
+        self.cmd('{} flexible-server fabric-mirroring stop -g {} --server-name {} --yes'
+                 .format(database_engine, resource_group, server_name))
+        self.cmd('{} flexible-server parameter show --name azure.fabric_mirror_enabled -g {} -s {}'.format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('value', 'off')])
+
+        # delete server
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name))
+
+
+class CitusOnFlexMgmtScenarioTest(ScenarioTest):
+
+    postgres_location = 'eastus2'
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    def test_citus_on_flex_mgmt(self, resource_group):
+        self._test_citus_on_flex_mgmt('postgres', resource_group)
+
+    def _test_citus_on_flex_mgmt(self, database_engine, resource_group):
+
+        if self.cli_ctx.local_context.is_on:
+            self.cmd('config param-persist off')
+
+        version = '16'
+        storage_size = 128
+        location = self.postgres_location
+        sku_name = 'Standard_D2s_v3'
+        tier = 'GeneralPurpose'
+        backup_retention = 7
+        cluster_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        cluster_size = 2
+
+        self.cmd('{} flexible-server create -g {} -n {} --backup-retention {} --sku-name {} --tier {} \
+                  --storage-size {} -u {} --version {} --cluster-option ElasticCluster --node-count {} --public-access None'
+                  .format(database_engine, resource_group, cluster_name, backup_retention,
+                                               sku_name, tier, storage_size, 'dbadmin', version, cluster_size))
+
+        basic_info = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, cluster_name)).get_output_in_json()
+        self.assertEqual(basic_info['name'], cluster_name)
+        self.assertEqual(str(basic_info['location']).replace(' ', '').lower(), location)
+        self.assertEqual(basic_info['resourceGroup'], resource_group)
+        self.assertEqual(basic_info['sku']['name'], sku_name)
+        self.assertEqual(basic_info['sku']['tier'], tier)
+        self.assertEqual(basic_info['version'], version)
+        self.assertEqual(basic_info['storage']['storageSizeGb'], storage_size)
+        self.assertEqual(basic_info['backup']['backupRetentionDays'], backup_retention)
+        self.assertEqual(basic_info['cluster']['clusterSize'], cluster_size)
+
+        # test failures
+        self.cmd('{} flexible-server update -g {} -n {} --storage-auto-grow Enabled'
+                 .format(database_engine, resource_group, cluster_name), expect_failure=True)
+        self.cmd('{} flexible-server replica list -g {} -n {}'
+                 .format(database_engine, resource_group, cluster_name), expect_failure=True)
+        self.cmd('{} flexible-server db create -g {} -s {} -d dbclusterfail'
+                 .format(database_engine, resource_group, cluster_name), expect_failure=True)
+
+        # Wait until snapshot is created
+        os.environ.get(ENV_LIVE_TEST, False) and sleep(1800)
+
+        # Restore
+        cluster_restore_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        restore_result = self.cmd('{} flexible-server restore -g {} --name {} --source-server {}'
+                                  .format(database_engine, resource_group, cluster_restore_name, basic_info['id'])).get_output_in_json()
+        self.assertEqual(restore_result['name'], cluster_restore_name)
+        self.assertEqual(restore_result['cluster']['clusterSize'], cluster_size)
+
+        # delete everything
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, cluster_name))
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, cluster_restore_name))

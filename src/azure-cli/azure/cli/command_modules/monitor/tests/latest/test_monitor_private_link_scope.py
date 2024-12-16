@@ -10,7 +10,7 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, record_only
 class TestMonitorPrivateLinkScope(ScenarioTest):
     def __init__(self, method_name, config_file=None, recording_dir=None, recording_name=None, recording_processors=None,
                  replay_processors=None, recording_patches=None, replay_patches=None):
-        super(TestMonitorPrivateLinkScope, self).__init__(method_name)
+        super().__init__(method_name)
         self.cmd('extension add -n application-insights')
 
     # @record_only()  # record_only as the private-link-scope scoped-resource cannot find the components of application insights

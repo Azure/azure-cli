@@ -23,7 +23,7 @@ PASSWORD_CERTIFICATE_WARNING = (
 def aad_error_handler(error, **kwargs):
     """ Handle the error from AAD server returned by ADAL or MSAL. """
 
-    # https://docs.microsoft.com/en-us/azure/active-directory/develop/reference-aadsts-error-codes
+    # https://learn.microsoft.com/en-us/azure/active-directory/develop/reference-aadsts-error-codes
     # Search for an error code at https://login.microsoftonline.com/error
 
     # To trigger this function for testing, simply provide an invalid scope:
@@ -77,7 +77,7 @@ def resource_to_scopes(resource):
     :param resource: The ADAL resource ID
     :return: A list of scopes
     """
-    # https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-permissions-and-consent#trailing-slash-and-default
+    # https://learn.microsoft.com/en-us/azure/active-directory/develop/v2-permissions-and-consent#trailing-slash-and-default
     # We should not trim the trailing slash, like in https://management.azure.com/
     # In other word, the trailing slash should be preserved and scope should be https://management.azure.com//.default
     scope = resource + '/.default'
@@ -104,27 +104,6 @@ def scopes_to_resource(scopes):
             return scope[:-len(s)]
 
     return scope
-
-
-def _normalize_scopes(scopes):
-    """Normalize scopes to workaround some SDK issues."""
-
-    # Track 2 SDKs generated before https://github.com/Azure/autorest.python/pull/239 don't maintain
-    # credential_scopes and call `get_token` with empty scopes.
-    # As a workaround, return None so that the CLI-managed resource is used.
-    if not scopes:
-        logger.debug("No scope is provided by the SDK, use the CLI-managed resource.")
-        return None
-
-    # Track 2 SDKs generated before https://github.com/Azure/autorest.python/pull/745 extend default
-    # credential_scopes with custom credential_scopes. Instead, credential_scopes should be replaced by
-    # custom credential_scopes. https://github.com/Azure/azure-sdk-for-python/issues/12947
-    # As a workaround, remove the first one if there are multiple scopes provided.
-    if len(scopes) > 1:
-        logger.debug("Multiple scopes are provided by the SDK, discarding the first one: %s", scopes[0])
-        return scopes[1:]
-
-    return scopes
 
 
 def check_result(result, **kwargs):

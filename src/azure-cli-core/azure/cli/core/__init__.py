@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long
 
-__version__ = "2.66.0"
+__version__ = "2.67.0"
 
 import os
 import sys
@@ -56,7 +56,7 @@ _configure_knack()
 class AzCli(CLI):
 
     def __init__(self, **kwargs):
-        super(AzCli, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
         from azure.cli.core.breaking_change import register_upcoming_breaking_change_info
         from azure.cli.core.commands import register_cache_arguments
@@ -200,7 +200,7 @@ class MainCommandsLoader(CLICommandsLoader):
     item_ext_format_string = item_format_string + "  %s"
 
     def __init__(self, cli_ctx=None):
-        super(MainCommandsLoader, self).__init__(cli_ctx)
+        super().__init__(cli_ctx)
         self.cmd_to_loader_map = {}
         self.loaders = []
 
@@ -677,9 +677,9 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
                  suppress_extension=None, **kwargs):
         from azure.cli.core.commands import AzCliCommand, AzCommandGroup, AzArgumentContext
 
-        super(AzCommandsLoader, self).__init__(cli_ctx=cli_ctx,
-                                               command_cls=AzCliCommand,
-                                               excluded_command_handler_args=EXCLUDED_PARAMS)
+        super().__init__(cli_ctx=cli_ctx,
+                         command_cls=AzCliCommand,
+                         excluded_command_handler_args=EXCLUDED_PARAMS)
         self.suppress_extension = suppress_extension
         self.module_kwargs = kwargs
         self.command_name = None

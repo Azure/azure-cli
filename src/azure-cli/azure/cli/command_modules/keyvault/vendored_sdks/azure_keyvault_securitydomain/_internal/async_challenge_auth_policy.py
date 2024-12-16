@@ -14,6 +14,7 @@ requirements can change. For example, a vault may move to a new tenant. In such 
 protocol again.
 """
 
+from collections.abc import Awaitable
 from copy import deepcopy
 import sys
 import time
@@ -31,11 +32,6 @@ from azure.core.rest import AsyncHttpResponse, HttpRequest
 from .http_challenge import HttpChallenge
 from . import http_challenge_cache as ChallengeCache
 from .challenge_auth_policy import _enforce_tls, _has_claims, _update_challenge
-
-if sys.version_info < (3, 9):
-    from typing import Awaitable
-else:
-    from collections.abc import Awaitable
 
 
 P = ParamSpec("P")

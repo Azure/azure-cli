@@ -17,7 +17,7 @@ from azure.cli.core.aaz import *
 class Restart(AAZCommand):
     """Restart the dedicated host.
 
-    The operation will complete successfully once the dedicated host has restarted and is running. To determine the health of VMs deployed on the dedicated host after the restart check the Resource Health Center in the Azure Portal. Please refer to https://docs.microsoft.com/azure/service-health/resource-health-overview for more details.
+    The operation will complete successfully once the dedicated host has restarted and is running. To determine the health of VMs deployed on the dedicated host after the restart check the Resource Health Center in the Azure Portal. Please refer to https://learn.microsoft.com/azure/service-health/resource-health-overview for more details.
     """
 
     _aaz_info = {

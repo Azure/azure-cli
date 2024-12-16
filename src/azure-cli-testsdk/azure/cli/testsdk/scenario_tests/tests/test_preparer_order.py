@@ -11,7 +11,7 @@ traces = []
 
 class _TestPreparer(AbstractPreparer):
     def __init__(self, name):
-        super(_TestPreparer, self).__init__('test', 20)
+        super().__init__('test', 20)
         self._name = name
 
     def create_resource(self, name, **kwargs):

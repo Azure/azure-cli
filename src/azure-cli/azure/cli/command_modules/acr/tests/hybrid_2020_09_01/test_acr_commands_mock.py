@@ -3,10 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-try:
-    from urllib.parse import urlencode
-except ImportError:
-    from urllib import urlencode
+from urllib.parse import urlencode
 import json
 import unittest
 from unittest import mock

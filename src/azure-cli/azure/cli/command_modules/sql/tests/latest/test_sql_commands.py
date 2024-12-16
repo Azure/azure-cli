@@ -47,7 +47,7 @@ class SqlServerPreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix=server_name_prefix, parameter_name='server', location='westus',
                  admin_user='admin123', admin_password='SecretPassword123',
                  resource_group_parameter_name='resource_group', skip_delete=True):
-        super(SqlServerPreparer, self).__init__(name_prefix, server_name_max_length)
+        super().__init__(name_prefix, server_name_max_length)
         self.location = location
         self.parameter_name = parameter_name
         self.admin_user = admin_user
@@ -111,7 +111,7 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
                  minimalTlsVersion='', user_assigned_identity_id='', identity_type='', pid='', otherParams='',
                  admin_password='SecretPassword123SecretPassword', public=True, tags='', is_geo_secondary=False,
                  skip_delete=False, vnet_name = 'vnet-mi-tooling', v_core = 4):
-        super(ManagedInstancePreparer, self).__init__(name_prefix, server_name_max_length)
+        super().__init__(name_prefix, server_name_max_length)
         self.parameter_name = parameter_name
         self.admin_user = admin_user
         self.admin_password = admin_password
@@ -2851,7 +2851,7 @@ class SqlServerDnsAliasMgmtScenarioTest(ScenarioTest):
                                        resource_group_2, resource_group_location_2,
                                        server_name_1, server_name_2, server_name_3):
         # helper class so that it's clear which servers are in which groups
-        class ServerInfo(object):  # pylint: disable=too-few-public-methods
+        class ServerInfo:  # pylint: disable=too-few-public-methods
             def __init__(self, name, group, location):
                 self.name = name
                 self.group = group
@@ -2983,7 +2983,7 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
         hs_service_objective = 'HS_Gen5_8'
 
         # helper class so that it's clear which servers are in which groups
-        class ServerInfo(object):  # pylint: disable=too-few-public-methods
+        class ServerInfo:  # pylint: disable=too-few-public-methods
             def __init__(self, name, group, location):
                 self.name = name
                 self.group = group
@@ -3155,7 +3155,7 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
 
 class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
     def __init__(self, method_name):
-        super(SqlElasticPoolsMgmtScenarioTest, self).__init__(method_name)
+        super().__init__(method_name)
         self.pool_name = "cliautomationpool01"
 
     def verify_activities(self, activities, resource_group, server):
@@ -3729,7 +3729,7 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
 
 class SqlElasticPoolOperationMgmtScenarioTest(ScenarioTest):
     def __init__(self, method_name):
-        super(SqlElasticPoolOperationMgmtScenarioTest, self).__init__(method_name)
+        super().__init__(method_name)
         self.pool_name = "operationtestep1"
 
     @ResourceGroupPreparer(location='westeurope')
@@ -6575,7 +6575,7 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                                      resource_group_2, resource_group_location_2,
                                      server_name_1, server_name_2):
         # helper class so that it's clear which servers are in which groups
-        class ServerInfo(object):  # pylint disable=too-few-public-methods
+        class ServerInfo:  # pylint disable=too-few-public-methods
             def __init__(self, name, group, location):
                 self.name = name
                 self.group = group

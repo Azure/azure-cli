@@ -944,11 +944,11 @@ def iot_hub_get_stats(client, hub_name, resource_group_name=None):
 
 def validate_authentication_type_input(endpoint_type, connection_string=None, authentication_type=None, endpoint_uri=None, entity_path=None):
     is_keyBased = (AuthenticationType.KeyBased.value == authentication_type) or (authentication_type is None)
-    has_connection_string = (connection_string is not None)
+    has_connection_string = connection_string is not None
     if is_keyBased and not has_connection_string:
         raise CLIError("Please provide a connection string '--connection-string/-c'")
 
-    has_endpoint_uri = (endpoint_uri is not None)
+    has_endpoint_uri = endpoint_uri is not None
     has_endpoint_uri_and_path = (has_endpoint_uri) and (entity_path is not None)
     if EndpointType.AzureStorageContainer.value == endpoint_type.lower() and not has_endpoint_uri:
         raise CLIError("Please provide an endpoint uri '--endpoint-uri'")

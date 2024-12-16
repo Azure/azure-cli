@@ -329,12 +329,15 @@ def set_service_properties_track2(client, parameters, delete_retention=None, del
 
     if hasattr(parameters, 'static_website'):
         kwargs['static_website'] = parameters.static_website
-    if static_website is not None:
-        parameters.static_website.enabled = static_website
     if index_document is not None:
         parameters.static_website.index_document = index_document
     if error_document_404_path is not None:
         parameters.static_website.error_document404_path = error_document_404_path
+    if static_website is not None:
+        parameters.static_website.enabled = static_website
+        if not static_website:
+            parameters.static_website.index_document = None
+            parameters.static_website.error_document404_path = None
     if hasattr(parameters, 'hour_metrics'):
         kwargs['hour_metrics'] = parameters.hour_metrics
     if hasattr(parameters, 'logging'):

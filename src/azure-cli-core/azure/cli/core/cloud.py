@@ -29,7 +29,7 @@ CLOUDS_FORBIDDING_ALADDIN_REQUEST = ['USSec', 'USNat']
 
 class CloudNotRegisteredException(Exception):
     def __init__(self, cloud_name):
-        super(CloudNotRegisteredException, self).__init__(cloud_name)
+        super().__init__(cloud_name)
         self.cloud_name = cloud_name
 
     def __str__(self):
@@ -38,7 +38,7 @@ class CloudNotRegisteredException(Exception):
 
 class CloudAlreadyRegisteredException(Exception):
     def __init__(self, cloud_name):
-        super(CloudAlreadyRegisteredException, self).__init__(cloud_name)
+        super().__init__(cloud_name)
         self.cloud_name = cloud_name
 
     def __str__(self):

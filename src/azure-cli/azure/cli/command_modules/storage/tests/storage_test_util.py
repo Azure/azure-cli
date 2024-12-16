@@ -80,7 +80,7 @@ class StorageScenarioMixin:
 
 class StorageTestFilesPreparer(AbstractPreparer):
     def __init__(self, parameter_name='test_dir'):
-        super(StorageTestFilesPreparer, self).__init__(name_prefix='test', name_len=24)
+        super().__init__(name_prefix='test', name_len=24)
         self.parameter_name = parameter_name
 
     def create_resource(self, name, **kwargs):

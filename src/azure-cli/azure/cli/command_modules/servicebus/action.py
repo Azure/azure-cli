@@ -14,7 +14,7 @@ import argparse
 class AlertAddEncryption(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
         action = self.get_action(values, option_string)
-        super(AlertAddEncryption, self).__call__(parser, namespace, action, option_string)
+        super().__call__(parser, namespace, action, option_string)
 
     def get_action(self, values, option_string):
         from azure.cli.core.azclierror import InvalidArgumentValueError
@@ -52,7 +52,7 @@ class AlertAddEncryption(argparse._AppendAction):
 class AlertAddVirtualNetwork(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
         action = self.get_action(values, option_string)
-        super(AlertAddVirtualNetwork, self).__call__(parser, namespace, action, option_string)
+        super().__call__(parser, namespace, action, option_string)
 
     def get_action(self, values, option_string):  # pylint: disable=no-self-use
         from azure.cli.core import CLIError
@@ -78,7 +78,7 @@ class AlertAddVirtualNetwork(argparse._AppendAction):
 class AlertAddIpRule(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
         action = self.get_action(values, option_string)
-        super(AlertAddIpRule, self).__call__(parser, namespace, action, option_string)
+        super().__call__(parser, namespace, action, option_string)
 
     def get_action(self, values, option_string):  # pylint: disable=no-self-use
         from azure.cli.core import CLIError
@@ -104,7 +104,7 @@ class AlertAddIpRule(argparse._AppendAction):
 class AlertAddlocation(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
         action = self.get_action(values, option_string)
-        super(AlertAddlocation, self).__call__(parser, namespace, action, option_string)
+        super().__call__(parser, namespace, action, option_string)
 
     def get_action(self, values, option_string):  # pylint: disable=no-self-use
         from azure.cli.core import CLIError

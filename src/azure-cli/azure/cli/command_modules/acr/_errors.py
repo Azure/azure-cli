@@ -90,7 +90,7 @@ CONNECTIVITY_DNS_ERROR = ErrorClass(
 
 CONNECTIVITY_FORBIDDEN_ERROR = ErrorClass(
     "CONNECTIVITY_FORBIDDEN_ERROR",
-    "Looks like you don't have access to registry '{}'. To see configured firewall rules, run 'az acr show --query networkRuleSet --name {}'. Details: https://docs.microsoft.com/azure/container-registry/container-registry-health-error-reference#connectivity_forbidden_error"
+    "Looks like you don't have access to registry '{}'. To see configured firewall rules, run 'az acr show --query networkRuleSet --name {}'. Details: https://learn.microsoft.com/azure/container-registry/container-registry-health-error-reference#connectivity_forbidden_error"
 )
 
 

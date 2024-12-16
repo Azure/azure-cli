@@ -30,7 +30,7 @@ def create_args_for_complex_type(arg_ctx, dest, model_type, arguments):
             :return: The argument of specific type.
             '''
             ns = vars(namespace)
-            kwargs = dict((k, ns[k]) for k in ns if k in set(expanded_arguments))
+            kwargs = {k: ns[k] for k in ns if k in set(expanded_arguments)}
             setattr(namespace, assigned_arg, model_type(**kwargs))
 
         return _expansion_validator_impl

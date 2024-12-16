@@ -12,7 +12,7 @@ import azure.cli.command_modules.feedback._help  # pylint: disable=unused-import
 class FeedbackCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
-        super(FeedbackCommandsLoader, self).__init__(cli_ctx=cli_ctx)
+        super().__init__(cli_ctx=cli_ctx)
 
     def load_command_table(self, args):
         custom_feedback = CliCommandType(operations_tmpl='azure.cli.command_modules.feedback.custom#{}')

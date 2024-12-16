@@ -21,7 +21,7 @@ class Session(MutableMapping):
     """
 
     def __init__(self, encoding=None):
-        super(Session, self).__init__()
+        super().__init__()
         self.filename = None
         self.data = {}
         self._encoding = encoding if encoding else 'utf-8-sig'
@@ -36,7 +36,7 @@ class Session(MutableMapping):
                     self.save()
             with open(self.filename, 'r', encoding=self._encoding) as f:
                 self.data = json.load(f)
-        except (OSError, IOError, json.JSONDecodeError) as load_exception:
+        except (OSError, json.JSONDecodeError) as load_exception:
             # OSError / IOError should imply file not found issues which are expected on fresh runs (e.g. on build
             # agents or new systems). A parse error indicates invalid/bad data in the file. We do not wish to warn
             # on missing files since we expect that, but do if the data isn't parsing as expected.

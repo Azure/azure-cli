@@ -292,7 +292,7 @@ def create_action(action_name, cache_behavior=None, cache_duration=None, header_
         action = {
             "cache_key_query_string": {
                 "parameters": {
-                    "type_name" "DeliveryRuleCacheKeyQueryStringBehaviorActionParameters"
+                    "type_name": "DeliveryRuleCacheKeyQueryStringBehaviorActionParameters",
                     "query_string_behavior": query_string_behavior,
                     "query_parameters": query_parameters
                 }

@@ -270,7 +270,7 @@ def resolve_replicas_from_service(service):
 
 def valid_resource_settings():
     # vCPU and Memory reservations
-    # https://docs.microsoft.com/azure/container-apps/containers#configuration
+    # https://learn.microsoft.com/azure/container-apps/containers#configuration
     return {
         "0.25": "0.5",
         "0.5": "1.0",

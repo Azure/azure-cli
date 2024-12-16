@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 class TestCommandLogFile(ScenarioTest):
 
     def __init__(self, *args, **kwargs):
-        super(TestCommandLogFile, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self.disable_recording = True
         self.is_live = True
@@ -45,7 +45,7 @@ class TestCommandLogFile(ScenarioTest):
             self.cmd("az extension add -n alias")
             logger.warning("Adding whl ext alias")
 
-        super(TestCommandLogFile, self).setUp()
+        super().setUp()
         self.temp_command_log_dir = self.create_temp_dir()
 
         # if alias is installed as a wheel extension. Remove it for now and re-install it later.
@@ -80,7 +80,7 @@ class TestCommandLogFile(ScenarioTest):
         self.assertTrue(_is_valid_github_project_url('https://github.com/azure/devops-extension'))
         self.assertFalse(_is_valid_github_project_url('https://github.com/'))
         self.assertFalse(_is_valid_github_project_url('https://github.com/Azure/azure-cli-extensions/tree/master/src/vm-repair'))
-        self.assertFalse(_is_valid_github_project_url('https://docs.microsoft.com/azure/machine-learning/service/'))
+        self.assertFalse(_is_valid_github_project_url('https://learn.microsoft.com/azure/machine-learning/service/'))
 
     def _helper_test_get_repository_url_pretty(self):
         # default behaviour is pretty url

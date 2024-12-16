@@ -449,7 +449,7 @@ class AAZList(AAZBaseValue):
 
 class AAZIdentityObject(AAZObject):  # pylint: disable=too-few-public-methods
     def to_serialized_data(self, processor=None, **kwargs):
-        calculate_data = dict()
+        calculate_data = {}
         if self._data == AAZUndefined:
             result = AAZUndefined
 

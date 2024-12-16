@@ -16,7 +16,7 @@ from azure.cli.command_modules.batch import _validators
 from azure.cli.command_modules.batch import _command_type
 
 
-class TestObj(object):  # pylint: disable=too-few-public-methods
+class TestObj:  # pylint: disable=too-few-public-methods
     pass
 
 
@@ -24,7 +24,7 @@ class TestBatchValidators(unittest.TestCase):
     # pylint: disable=protected-access
 
     def __init__(self, methodName):
-        super(TestBatchValidators, self).__init__(methodName)
+        super().__init__(methodName)
 
     def test_batch_datetime_format(self):
         obj = _validators.datetime_format("2017-01-24T15:47:24Z")
@@ -488,7 +488,7 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
             'azure.batch.operations._job_schedule_operations#JobScheduleOperations.add',
             operations._job_schedule_operations.JobScheduleOperations.add,
             client_factory=get_client, flatten=4)
-        return super(TestBatchLoader, self).setUp()
+        return super().setUp()
 
     def test_batch_build_parameters(self):
         kwargs = {

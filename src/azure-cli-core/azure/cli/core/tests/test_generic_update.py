@@ -15,19 +15,19 @@ from azure.cli.core.mock import DummyCli
 from knack.util import CLIError
 
 
-class ListTestObject(object):
+class ListTestObject:
 
     def __init__(self, val):
         self.list_value = list(val)
 
 
-class DictTestObject(object):
+class DictTestObject:
 
     def __init__(self, val):
         self.dict_value = dict(val)
 
 
-class ObjectTestObject(object):
+class ObjectTestObject:
 
     def __init__(self, str_val, int_val, bool_val):
         self.my_string = str(str_val)
@@ -75,7 +75,7 @@ def _prepare_test_loader():
     class GenericUpdateTestCommandsLoader(AzCommandsLoader):
 
         def load_command_table(self, args):
-            super(GenericUpdateTestCommandsLoader, self).load_command_table(args)
+            super().load_command_table(args)
 
             from azure.cli.core.commands import CliCommandType
 

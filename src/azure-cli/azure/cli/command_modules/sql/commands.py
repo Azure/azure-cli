@@ -332,8 +332,7 @@ def load_command_table(self, _):
 
     with self.command_group('sql db ltr-policy',
                             database_long_term_retention_policies_operations,
-                            client_factory=get_sql_database_long_term_retention_policies_operations,
-                            is_preview=True) as g:
+                            client_factory=get_sql_database_long_term_retention_policies_operations) as g:
 
         g.custom_command('set', 'update_long_term_retention')
         g.custom_show_command('show', 'get_long_term_retention')
@@ -344,8 +343,7 @@ def load_command_table(self, _):
 
     with self.command_group('sql db ltr-backup',
                             database_long_term_retention_backups_operations,
-                            client_factory=get_sql_database_long_term_retention_backups_operations,
-                            is_preview=True) as g:
+                            client_factory=get_sql_database_long_term_retention_backups_operations) as g:
 
         g.show_command('show', 'get')
         g.custom_command('list', 'list_long_term_retention_backups')
@@ -353,8 +351,8 @@ def load_command_table(self, _):
 
     with self.command_group('sql db ltr-backup',
                             database_operations,
-                            client_factory=get_sql_databases_operations,
-                            is_preview=True) as g:
+                            client_factory=get_sql_databases_operations) as g:
+
         g.custom_command(
             'restore',
             'restore_long_term_retention_backup',
@@ -385,8 +383,7 @@ def load_command_table(self, _):
 
     with self.command_group('sql db str-policy',
                             backup_short_term_retention_policies_operations,
-                            client_factory=get_sql_backup_short_term_retention_policies_operations,
-                            is_preview=True) as g:
+                            client_factory=get_sql_backup_short_term_retention_policies_operations) as g:
 
         g.custom_command('set', 'update_short_term_retention', supports_no_wait=True)
         g.custom_show_command('show', 'get_short_term_retention')

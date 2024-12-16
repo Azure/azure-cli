@@ -51,7 +51,7 @@ class RecordsCollection:
                     self._add_record(line)
 
                 self._logger.info("Processed file %s into %d records.", path, len(self._records))
-        except IOError as err:
+        except OSError as err:
             self._logger.warning("Fail to open file %s. Reason: %s.", path, err)
 
     def _add_record(self, content_line):

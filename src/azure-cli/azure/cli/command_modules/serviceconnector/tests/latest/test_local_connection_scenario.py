@@ -25,7 +25,7 @@ resource_group = 'servicelinker-cli-test-group'
 class LocalConnectionScenarioTest(ScenarioTest):
 
     def __init__(self, method_name):
-        super(LocalConnectionScenarioTest, self).__init__(
+        super().__init__(
             method_name,
             recording_processors=[CredentialReplacer(), ConfigCredentialReplacer()]
         )

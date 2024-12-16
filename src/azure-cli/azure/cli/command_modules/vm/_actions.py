@@ -144,7 +144,7 @@ def load_images_from_aliases_doc(cli_ctx, publisher=None, offer=None, sku=None, 
     else:
         # under hack mode(say through proxies with unsigned cert), opt out the cert verification
         try:
-            response = requests.get(target_url, verify=(not should_disable_connection_verify()))
+            response = requests.get(target_url, verify=not should_disable_connection_verify())
             if response.status_code == 200:
                 dic = json.loads(response.content.decode())
             else:
@@ -157,7 +157,7 @@ def load_images_from_aliases_doc(cli_ctx, publisher=None, offer=None, sku=None, 
             dic = json.loads(alias_json)
     try:
         all_images = []
-        result = (dic['outputs']['aliases']['value'])
+        result = dic['outputs']['aliases']['value']
         for v in result.values():  # loop around os
             for alias, vv in v.items():  # loop around distros
                 all_images.append({

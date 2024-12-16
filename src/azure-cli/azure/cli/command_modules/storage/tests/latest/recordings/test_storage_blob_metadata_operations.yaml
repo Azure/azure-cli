@@ -101,7 +101,7 @@ interactions:
       import ResourceType\r\n\r\nfrom azure.cli.command_modules.storage._client_factory
       import MISSING_CREDENTIALS_ERROR_MESSAGE\r\nfrom ..storage_test_util import
       StorageScenarioMixin, StorageTestFilesPreparer\r\nfrom azure.cli.testsdk.scenario_tests
-      import AllowLargeResponse\r\n\r\n\r\n@api_version_constraint(ResourceType.MGMT_STORAGE,
+      import AllowLargeResponse\r\n\r\n\r\aaa@foo.com_constraint(ResourceType.MGMT_STORAGE,
       min_api='2016-12-01')\r\nclass StorageBlobUploadTests(StorageScenarioMixin,
       ScenarioTest):\r\n    @ResourceGroupPreparer()\r\n    @StorageAccountPreparer(parameter_name='source_account')\r\n
       \   @StorageAccountPreparer(parameter_name='target_account')\r\n    def test_storage_blob_incremental_copy(self,
@@ -573,7 +573,7 @@ interactions:
       -n {} --socket-timeout 50', account_info,\r\n                         container,
       local_file, blob_name)\r\n        self.storage_cmd('storage blob exists -c {}
       -n {}', account_info,\r\n                         container, blob_name).\\\r\n
-      \           assert_with_checks(JMESPathCheck(\"exists\", True))\r\n\r\n\r\n\r\n@api_version_constraint(ResourceType.DATA_STORAGE_BLOB,
+      \           assert_with_checks(JMESPathCheck(\"exists\", True))\r\n\r\n\r\n\r\aaa@foo.com_constraint(ResourceType.DATA_STORAGE_BLOB,
       min_api='2019-02-02')\r\nclass StorageBlobSetTierTests(StorageScenarioMixin,
       ScenarioTest):\r\n\r\n    @ResourceGroupPreparer()\r\n    @StorageAccountPreparer(kind='StorageV2',
       sku='Premium_LRS')\r\n    def test_storage_page_blob_set_tier(self, resource_group,
@@ -637,7 +637,7 @@ interactions:
       \       self.storage_cmd('az storage blob show -c {} -n {} ', account_info,
       container_name, blob_name3) \\\r\n            .assert_with_checks(JMESPathCheck('properties.blobTier',
       'Archive'),\r\n                                JMESPathCheck('properties.rehydrationStatus',
-      'rehydrate-pending-to-cold'))\r\n\r\n\r\n@api_version_constraint(ResourceType.DATA_STORAGE_BLOB,
+      'rehydrate-pending-to-cold'))\r\n\r\n\r\aaa@foo.com_constraint(ResourceType.DATA_STORAGE_BLOB,
       min_api='2020-10-02')\r\nclass StorageBlobImmutabilityTests(StorageScenarioMixin,
       ScenarioTest):\r\n    @ResourceGroupPreparer(name_prefix='clitest')\r\n    @StorageAccountPreparer(name_prefix='version',
       kind='StorageV2', location='centraluseuap')\r\n    def test_storage_blob_vlm(self,
@@ -663,7 +663,7 @@ interactions:
       --legal-hold -n {} -c {}', storage_account_info, blob, container)\\\r\n            .assert_with_checks(JMESPathCheck('legal_hold',
       True))\r\n        self.storage_cmd('storage blob set-legal-hold --legal-hold
       false -n {} -c {}', storage_account_info, blob, container) \\\r\n            .assert_with_checks(JMESPathCheck('legal_hold',
-      False))\r\n\r\n\r\n@api_version_constraint(ResourceType.DATA_STORAGE_BLOB, min_api='2019-02-02')\r\nclass
+      False))\r\n\r\n\r\aaa@foo.com_constraint(ResourceType.DATA_STORAGE_BLOB, min_api='2019-02-02')\r\nclass
       StorageBlobCommonTests(StorageScenarioMixin, ScenarioTest):\r\n    @ResourceGroupPreparer(name_prefix='clitest')\r\n
       \   @StorageAccountPreparer(name_prefix='storage', kind='StorageV2', location='eastus2',
       sku='Standard_RAGZRS')\r\n    def test_storage_blob_list_scenarios(self, resource_group,
@@ -712,7 +712,7 @@ interactions:
       = account_info[0] + '-secondary'\r\n        account_key = account_info[1]\r\n
       \       self.cmd('storage blob list -c {} --account-name {} --account-key {}
       '.format(\r\n            container, account_name, account_key)).assert_with_checks(\r\n
-      \           JMESPathCheck('length(@)', 2))\r\n\r\n\r\n@api_version_constraint(ResourceType.MGMT_STORAGE,
+      \           JMESPathCheck('length(@)', 2))\r\n\r\n\r\aaa@foo.com_constraint(ResourceType.MGMT_STORAGE,
       min_api='2019-06-01')\r\nclass StorageBlobPITRTests(StorageScenarioMixin, ScenarioTest):\r\n
       \   @AllowLargeResponse()\r\n    @ResourceGroupPreparer(name_prefix=\"storage_blob_restore\",
       location=\"centraluseuap\")\r\n    @StorageAccountPreparer(name_prefix=\"restore\",

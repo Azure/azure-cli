@@ -44,7 +44,7 @@ def get_index(index_url=None, cli_ctx=None):
 
     for try_number in range(TRIES):
         try:
-            response = requests.get(index_url, verify=(not should_disable_connection_verify()))
+            response = requests.get(index_url, verify=not should_disable_connection_verify())
             if response.status_code == 200:
                 return response.json()
             msg = ERR_TMPL_NON_200.format(response.status_code, index_url)

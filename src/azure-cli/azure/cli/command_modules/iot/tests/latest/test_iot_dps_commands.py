@@ -18,7 +18,7 @@ import random
 class IoTDpsTest(ScenarioTest):
 
     def __init__(self, method_name):
-        super(IoTDpsTest, self).__init__(
+        super().__init__(
             method_name, recording_processors=[KeyReplacer()]
         )
 

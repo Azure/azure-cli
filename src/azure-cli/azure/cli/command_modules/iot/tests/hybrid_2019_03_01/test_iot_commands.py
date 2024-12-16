@@ -11,7 +11,7 @@ from ..utils import KeyReplacer
 class IoTHubTest(ScenarioTest):
 
     def __init__(self, method_name):
-        super(IoTHubTest, self).__init__(
+        super().__init__(
             method_name, recording_processors=[KeyReplacer()]
     )
 

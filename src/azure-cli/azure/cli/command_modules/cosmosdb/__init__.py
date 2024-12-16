@@ -29,10 +29,10 @@ class CosmosDbCommandsLoader(AzCommandsLoader):
 
         cli_ctx.register_event(EVENT_INVOKER_PRE_PARSE_ARGS, _documentdb_deprecate)
 
-        super(CosmosDbCommandsLoader, self).__init__(cli_ctx=cli_ctx,
-                                                     resource_type=ResourceType.MGMT_COSMOSDB,
-                                                     custom_command_type=cosmosdb_custom,
-                                                     command_group_cls=CosmosDbCommandGroup)
+        super().__init__(cli_ctx=cli_ctx,
+                         resource_type=ResourceType.MGMT_COSMOSDB,
+                         custom_command_type=cosmosdb_custom,
+                         command_group_cls=CosmosDbCommandGroup)
 
     def load_command_table(self, args):
         from azure.cli.command_modules.cosmosdb.commands import load_command_table

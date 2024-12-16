@@ -31,12 +31,12 @@ def transform_sensitive_values(response_json):
             for (key, val) in rule.items():
                 if key != "name":
                     if val.get("metadata"):
-                        val["metadata"] = dict((k, "") for k, v in val.get("metadata").items())
+                        val["metadata"] = {k: "" for k, v in val.get("metadata").items()}
 
     if safe_get(response_json, "properties", "configuration", "eventTriggerConfig") and "scale" in response_json["properties"]["configuration"]["eventTriggerConfig"]:
         for rule in safe_get(response_json, "properties", "configuration", "eventTriggerConfig", "scale", "rules", default=[]):
             if rule.get("metadata"):
-                rule["metadata"] = dict((k, "") for k, v in rule.get("metadata").items())
+                rule["metadata"] = {k: "" for k, v in rule.get("metadata").items()}
 
     return response_json
 

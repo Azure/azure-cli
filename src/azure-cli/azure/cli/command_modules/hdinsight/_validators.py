@@ -111,7 +111,7 @@ def validate_workspace(cmd, namespace):
         resource_name=namespace.workspace).validate(cmd, namespace)
 
 
-class HDInsightValidator():
+class HDInsightValidator:
 
     def __init__(self,
                  worker=None,

@@ -193,7 +193,6 @@ class Show(AAZCommand):
             )
             storage_profile.os_disk = AAZObjectType(
                 serialized_name="osDisk",
-                flags={"required": True},
             )
 
             data_disks = cls._schema_on_200.properties.storage_profile.data_disks

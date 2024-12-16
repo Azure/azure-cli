@@ -127,14 +127,14 @@ class DataLakeStoreFileScenarioTest(ScenarioTest):
 
         self.mp = mock.patch('uuid.uuid4', const_uuid)
         self.mp.__enter__()
-        super(DataLakeStoreFileScenarioTest, self).setUp()
+        super().setUp()
 
     def tearDown(self):
         local_folder = self.kwargs.get('local_folder', None)
         if local_folder and os.path.exists(local_folder):
             rmtree(local_folder)
         self.mp.__exit__(None, None, None)
-        return super(DataLakeStoreFileScenarioTest, self).tearDown()
+        return super().tearDown()
 
     @ResourceGroupPreparer(name_prefix='cls_test_adls_file')
     def test_dls_file_mgmt(self):

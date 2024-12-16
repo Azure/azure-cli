@@ -160,7 +160,7 @@ class TestParser(unittest.TestCase):
 
         class TestCommandsLoader(AzCommandsLoader):
             def load_command_table(self, args):
-                super(TestCommandsLoader, self).load_command_table(args)
+                super().load_command_table(args)
                 command = AzCliCommand(loader, 'test module', test_handler)
                 command.add_argument('opt', '--opt', required=True, **enum_choice_list(TestEnum))
                 self.command_table['test module'] = command
@@ -170,7 +170,7 @@ class TestParser(unittest.TestCase):
         class ExtCommandsLoader(AzCommandsLoader):
 
             def load_command_table(self, args):
-                super(ExtCommandsLoader, self).load_command_table(args)
+                super().load_command_table(args)
                 command = AzCliCommand(loader, 'test extension', test_handler)
                 command.add_argument('opt', '--opt', required=True, **enum_choice_list(TestEnum))
                 self.command_table['test extension'] = command
@@ -274,7 +274,7 @@ class TestParser(unittest.TestCase):
             self.assertIn("Extension another-ext-name installed. Please rerun your command.", logger_msgs[6])
 
 
-class VerifyError(object):  # pylint: disable=too-few-public-methods
+class VerifyError:  # pylint: disable=too-few-public-methods
 
     def __init__(self, test, substr=None):
         self.test = test

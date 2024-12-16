@@ -45,7 +45,7 @@ class VirtualNetworkRule(msrest.serialization.Model):
          providers/Microsoft.Network/virtualNetworks/{vnetName}/subnets/{subnetName}.'
         :paramtype virtual_network_resource_id: str
         """
-        super(VirtualNetworkRule, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.action = action
         self.virtual_network_resource_id = virtual_network_resource_id
 
