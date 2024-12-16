@@ -51,7 +51,8 @@ def load_images_thru_services(cli_ctx, publisher, offer, sku, location, edge_zon
 
     from .aaz.latest.vm.image.edge_zone import (ListPublishers as VMImageEdgeZoneListPublishers,
                                                 ListOffers as VMImageEdgeZoneListOffers)
-    from .aaz.latest.vm.image import ListPublishers as VMImageListPublishers
+    from .aaz.latest.vm.image import (ListPublishers as VMImageListPublishers,
+                                      ListOffers as VMImageListOffers)
 
     all_images = []
     client = _compute_client_factory(cli_ctx)
@@ -68,7 +69,10 @@ def load_images_thru_services(cli_ctx, publisher, offer, sku, location, edge_zon
                     'publisher_name': publisher,
                 })
             else:
-                offers = client.virtual_machine_images.list_offers(location=location, publisher_name=publisher)
+                offers = VMImageListOffers(cli_ctx=cli_ctx)(command_args={
+                    'location': location,
+                    'publisher_name': publisher,
+                })
         except ResourceNotFoundError as e:
             logger.warning(str(e))
             return
