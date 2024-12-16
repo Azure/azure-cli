@@ -49,6 +49,10 @@ def _get_thread_count():
 def load_images_thru_services(cli_ctx, publisher, offer, sku, location, edge_zone, architecture):
     from concurrent.futures import ThreadPoolExecutor, as_completed
 
+    from .aaz.latest.vm.image.edge_zone import (ListPublishers as VMImageEdgeZoneListPublishers,
+                                                ListOffers as VMImageEdgeZoneListOffers)
+    from .aaz.latest.vm.image import ListPublishers as VMImageListPublishers
+
     all_images = []
     client = _compute_client_factory(cli_ctx)
     if location is None:
@@ -58,7 +62,11 @@ def load_images_thru_services(cli_ctx, publisher, offer, sku, location, edge_zon
         from azure.core.exceptions import ResourceNotFoundError
         try:
             if edge_zone is not None:
-                offers = edge_zone_client.list_offers(location=location, edge_zone=edge_zone, publisher_name=publisher)
+                offers = VMImageEdgeZoneListOffers(cli_ctx=cli_ctx)(command_args={
+                    'location': location,
+                    'edge_zone': edge_zone,
+                    'publisher_name': publisher,
+                })
             else:
                 offers = client.virtual_machine_images.list_offers(location=location, publisher_name=publisher)
         except ResourceNotFoundError as e:
@@ -110,11 +118,18 @@ def load_images_thru_services(cli_ctx, publisher, offer, sku, location, edge_zon
     if edge_zone is not None:
         from azure.cli.core.commands.client_factory import get_mgmt_service_client
         from azure.cli.core.profiles import ResourceType
-        edge_zone_client = get_mgmt_service_client(cli_ctx,
-                                                   ResourceType.MGMT_COMPUTE).virtual_machine_images_edge_zone
-        publishers = edge_zone_client.list_publishers(location=location, edge_zone=edge_zone)
+        # edge_zone_client = get_mgmt_service_client(cli_ctx,
+        #                                            ResourceType.MGMT_COMPUTE).virtual_machine_images_edge_zone
+        # publishers = edge_zone_client.list_publishers(location=location, edge_zone=edge_zone)
+        publishers = VMImageEdgeZoneListPublishers(cli_ctx=cli_ctx)(command_args={
+            'location': location,
+            'edge_zone': edge_zone
+        })
     else:
-        publishers = client.virtual_machine_images.list_publishers(location=location)
+        # publishers = client.virtual_machine_images.list_publishers(location=location)
+        publishers = VMImageListPublishers(cli_ctx=cli_ctx)(command_args={
+            'location': location,
+        })
     if publisher:
         publishers = [p for p in publishers if _matched(publisher, p.name)]
 
