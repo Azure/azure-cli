@@ -8,12 +8,12 @@ from azure.cli.command_modules.vm.azure_stack._client_factory import (cf_vm, cf_
                                                                       cf_vm_image, cf_vm_image_term, cf_usage,
                                                                       cf_vmss, cf_disks, cf_snapshots,
                                                                       cf_disk_accesses, cf_images, cf_run_commands,
-                                                                      cf_galleries, cf_gallery_images,
+                                                                      cf_gallery_images,
                                                                       cf_gallery_image_versions,
                                                                       cf_proximity_placement_groups,
                                                                       cf_dedicated_hosts, cf_dedicated_host_groups,
                                                                       cf_log_analytics_data_plane,
-                                                                      cf_disk_encryption_set, cf_shared_galleries,
+                                                                      cf_disk_encryption_set,
                                                                       cf_gallery_sharing_profile,
                                                                       cf_shared_gallery_image,
                                                                       cf_shared_gallery_image_version,
@@ -21,7 +21,7 @@ from azure.cli.command_modules.vm.azure_stack._client_factory import (cf_vm, cf_
                                                                       cf_capacity_reservations,
                                                                       cf_vmss_run_commands, cf_gallery_application,
                                                                       cf_gallery_application_version, cf_restore_point,
-                                                                      cf_restore_point_collection, cf_community_gallery,
+                                                                      cf_restore_point_collection,
                                                                       cf_community_gallery_image,
                                                                       cf_community_gallery_image_version)
 from azure.cli.command_modules.vm.azure_stack._format import (
@@ -140,11 +140,6 @@ def load_command_table(self, _):
         operation_group='virtual_machine_scale_sets'
     )
 
-    compute_galleries_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations#GalleriesOperations.{}',
-        client_factory=cf_galleries,
-    )
-
     compute_gallery_images_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations#GalleryImagesOperations.{}',
         client_factory=cf_gallery_images,
@@ -221,10 +216,6 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.compute.operations#RestorePointCollectionsOperations.{}',
         client_factory=cf_restore_point_collection
     )
-
-    community_gallery_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations#CommunityGalleriesOperations.{}',
-        client_factory=cf_community_gallery)
 
     community_gallery_image_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations#CommunityGalleryImagesOperations.{}',
