@@ -937,7 +937,7 @@ def load_arguments(self, _):
     with self.argument_context('aks approuting zone update') as c:
         c.argument('dns_zone_resource_ids', options_list=['--ids'], required=True)
         c.argument('attach_zones')
-    
+
     with self.argument_context('aks nodepool delete') as c:
         c.argument("if_match")
 

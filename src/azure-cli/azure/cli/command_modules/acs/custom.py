@@ -92,6 +92,7 @@ from azure.cli.core.azclierror import (
     ValidationError,
     RequiredArgumentMissingError,
 )
+from azure.cli.core.cloud import get_active_cloud
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.profiles import ResourceType
@@ -938,6 +939,10 @@ def aks_upgrade(cmd,
 
     # null out the SP profile because otherwise validation complains
     instance.service_principal_profile = None
+
+    active_cloud = get_active_cloud(cmd.cli_ctx)
+    if active_cloud.profile != "latest":
+        return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance)
 
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance, if_match=if_match, if_none_match=if_none_match)
 
@@ -2657,6 +2662,10 @@ def aks_agentpool_delete(cmd, client, resource_group_name, cluster_name,
     if not agentpool_exists:
         raise CLIError("Node pool {} doesnt exist, "
                        "use 'aks nodepool list' to get current node pool list".format(nodepool_name))
+
+    active_cloud = get_active_cloud(cmd.cli_ctx)
+    if active_cloud.profile != "latest":
+        return sdk_no_wait(no_wait, client.begin_delete, resource_group_name, cluster_name, nodepool_name)
 
     return sdk_no_wait(no_wait, client.begin_delete, resource_group_name, cluster_name, nodepool_name, if_match=if_match)
 
