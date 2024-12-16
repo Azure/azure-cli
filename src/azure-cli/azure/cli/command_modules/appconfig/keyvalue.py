@@ -189,7 +189,7 @@ def import_config(cmd,
         label=label,
         content_type=content_type)
 
-    kv_diff = kv_comparer.compare(dest_kvs=dest_kvs, strict=strict)
+    kv_diff = kv_comparer.compare(dest_kvs=dest_kvs, strict=strict, ignore_matching_kvs=import_mode == ImportMode.IGNORE_MATCH)
     # Show indented key-value preview similar to kvset for appconfig source
     indent = 2 if source == "appconfig" else None
     need_kv_change = print_preview(kv_diff, source, yes=yes, strict=strict, title="Key Values", indent=indent)
@@ -212,7 +212,7 @@ def import_config(cmd,
             compare_fields=CompareFieldsMap[source],
             preserve_labels=source == "appconfig" and preserve_labels,
             label=label)
-        ff_diff = ff_comparer.compare(dest_kvs=dest_features, strict=strict)
+        ff_diff = ff_comparer.compare(dest_kvs=dest_features, strict=strict, ignore_matching_kvs=import_mode == ImportMode.IGNORE_MATCH)
         need_feature_change = print_preview(ff_diff, source, yes=yes, strict=strict, title="Feature Flags")
 
     if not need_kv_change and not need_feature_change:
@@ -239,8 +239,8 @@ def import_config(cmd,
         kvs_to_write = []
         kvs_to_write.extend(kv_diff.get(JsonDiff.ADD, []))
         kvs_to_write.extend(ff_diff.get(JsonDiff.ADD, []))
-        kvs_to_write.extend((update["new"] for update in kv_diff.get(JsonDiff.UPDATE, [])))
-        kvs_to_write.extend((update["new"] for update in ff_diff.get(JsonDiff.UPDATE, [])))
+        kvs_to_write.extend(update["new"] for update in kv_diff.get(JsonDiff.UPDATE, []))
+        kvs_to_write.extend(update["new"] for update in ff_diff.get(JsonDiff.UPDATE, []))
 
     # write all kvs
     else:

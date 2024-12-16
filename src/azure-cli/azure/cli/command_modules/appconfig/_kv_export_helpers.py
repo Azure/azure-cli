@@ -111,11 +111,8 @@ def __write_kv_and_features_to_file(
     try:
         exported_keyvalues = __export_keyvalues(key_values, format_, separator, None)
         if features and not skip_features:
-            compatibility_mode = os.environ.get(
-                "AZURE_APPCONFIG_FM_COMPATIBLE", True
-            )
             exported_features = __export_features(
-                features, naming_convention, compatibility_mode
+                features, naming_convention
             )
             exported_keyvalues.update(exported_features)
 
@@ -180,13 +177,14 @@ def __export_keyvalues(fetched_items, format_, separator, prefix=None):
         raise CLIError("Fail to export key-values." + str(exception))
 
 
-def __export_features(retrieved_features, naming_convention, compatibility_mode):
+def __export_features(retrieved_features, naming_convention):
     new_ms_featuremanagement_keyword = (
         FeatureManagementReservedKeywords.UNDERSCORE.feature_management
     )
     feature_flags_keyword = FeatureFlagConstants.FEATURE_FLAGS_KEY
     try:
-        compatibility_mode = str(compatibility_mode).lower() in ["true"]
+        env_compatibility_mode = os.environ.get("AZURE_APPCONFIG_FM_COMPATIBLE", True)
+        compatibility_mode = str(env_compatibility_mode).lower() == "true"
         if compatibility_mode:
             feature_reserved_keywords = FeatureManagementReservedKeywords.get_keywords(
                 naming_convention

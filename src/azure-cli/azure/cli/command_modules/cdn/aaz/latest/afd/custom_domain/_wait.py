@@ -20,7 +20,7 @@ class Wait(AAZWaitCommand):
 
     _aaz_info = {
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}/customdomains/{}", "2024-02-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}/customdomains/{}", "2024-09-01"],
         ]
     }
 
@@ -126,7 +126,7 @@ class Wait(AAZWaitCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-02-01",
+                    "api-version", "2024-09-01",
                     required=True,
                 ),
             }
@@ -213,6 +213,7 @@ class Wait(AAZWaitCommand):
             )
             properties.validation_properties = AAZObjectType(
                 serialized_name="validationProperties",
+                flags={"read_only": True},
             )
 
             extended_properties = cls._schema_on_200.properties.extended_properties

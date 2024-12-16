@@ -32,7 +32,7 @@ Known limitations:
     * PTR records must have a non-empty name
     * currently only supports the following:
     '$ORIGIN', '$TTL', 'SOA', 'NS', 'A', 'AAAA', 'CNAME', 'MX', 'PTR',
-    'TXT', 'SRV', 'SPF', 'URI', 'CAA'
+    'TXT', 'SRV', 'SPF', 'URI', 'CAA', 'NAPTR'
 """
 
 import copy
@@ -67,6 +67,7 @@ _REGEX = {
     'caa': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>caa)\s+(?P<flags>\d+)\s+(?P<tag>\w+)\s+(?P<val>.+)',
     'cname': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>cname)\s+(?P<alias>[@\w\.-]+)',
     'mx': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>mx)\s+(?P<preference>\d+)\s+(?P<host>[@\w\.-]+)',
+    'naptr': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>naptr)\s+(?P<order>\d+)\s+(?P<preference>\d+)\s+"(?P<flags>[^"]*)"\s+"(?P<services>[^"]*)"\s+"(?P<regexp>[^"]*)"\s+(?P<replacement>[\w.-]+)\.?',
     'txt': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>txt)\s+(?P<txt>.+)',
     'ptr': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>ptr)\s+(?P<host>[\w\.-]+)',
     'srv': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>srv)\s+(?P<priority>\d+)\s+(?P<weight>\d+)\s+(?P<port>\d+)\s+(?P<target>[@\w\.-]+)',

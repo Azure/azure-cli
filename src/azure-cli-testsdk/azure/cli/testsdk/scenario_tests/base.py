@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from __future__ import print_function
 import unittest
 import os
 import inspect
@@ -22,7 +21,7 @@ from .recording_processors import ContentLengthProcessor
 
 class IntegrationTestBase(unittest.TestCase):
     def __init__(self, method_name):
-        super(IntegrationTestBase, self).__init__(method_name)
+        super().__init__(method_name)
         self.diagnose = os.environ.get(ENV_TEST_DIAGNOSE, None) == 'True'
         self.logger = logging.getLogger('azure.cli.testsdk.scenario_tests')
 
@@ -92,7 +91,7 @@ class ReplayableTest(IntegrationTestBase):  # pylint: disable=too-many-instance-
     def __init__(self,  # pylint: disable=too-many-arguments
                  method_name, config_file=None, recording_dir=None, recording_name=None, recording_processors=None,
                  replay_processors=None, recording_patches=None, replay_patches=None):
-        super(ReplayableTest, self).__init__(method_name)
+        super().__init__(method_name)
 
         self.recording_processors = recording_processors or []
         # Processors that will be called when all self.recording_processors finishes
@@ -134,7 +133,7 @@ class ReplayableTest(IntegrationTestBase):  # pylint: disable=too-many-instance-
         self.original_env = os.environ.copy()
 
     def setUp(self):
-        super(ReplayableTest, self).setUp()
+        super().setUp()
 
         # set up cassette
         cm = self.vcr.use_cassette(self.temp_recording_file if self.in_recording else self.recording_file)

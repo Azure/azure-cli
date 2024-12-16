@@ -32,7 +32,7 @@ class KVComparer:
                 kv.label = label
 
     # Returns a diff in the form {"add": List[KeyValue], "delete": List[KeyValue], "update": List[{"new": KeyValue, "old": KeyValue}]}
-    def compare(self, dest_kvs, strict=False):
+    def compare(self, dest_kvs, strict=False, ignore_matching_kvs=True):
         if not strict and not self._src_kvs:
             return {}
 
@@ -52,7 +52,7 @@ class KVComparer:
                 kv_diff[JsonDiff.ADD].append(kv)
 
             else:
-                if not self._kv_equals(kv, dest_kv_lookup[lookup_key], self._compare_fields):
+                if not (ignore_matching_kvs and self._kv_equals(kv, dest_kv_lookup[lookup_key], self._compare_fields)):
                     kv_diff[JsonDiff.UPDATE].append({"new": kv, "old": dest_kv_lookup[lookup_key]})
 
                 del dest_kv_lookup[lookup_key]

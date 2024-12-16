@@ -12,7 +12,7 @@ from azure.cli.core.azclierror import HTTPError, AzureResponseError
 class ARGClient:  # pylint: disable=too-few-public-methods
     """A lightweight Microsoft ARG API client.
 
-    For what ARG is, please see https://docs.microsoft.com/en-us/azure/governance/resource-graph/overview for details.
+    For what ARG is, please see https://learn.microsoft.com/en-us/azure/governance/resource-graph/overview for details.
     The reason for directly using this client to request REST is that ARG API does not return "nextLink" data,
     so the Python SDK "azure-mgmt-resourcegraph" cannot support paging
 

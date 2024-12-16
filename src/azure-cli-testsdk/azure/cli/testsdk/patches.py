@@ -68,7 +68,10 @@ def patch_retrieve_token_for_user(unit_test):
             def __init__(self, *args, **kwargs):
                 super().__init__()
 
-            def get_token(*args, **kwargs):  # pylint: disable=unused-argument
+            def get_token(self, *scopes, **kwargs):  # pylint: disable=unused-argument
+                # Old Track 2 SDKs are no longer supported. https://github.com/Azure/azure-cli/pull/29690
+                assert len(scopes) == 1, "'scopes' must contain only one element."
+
                 from azure.core.credentials import AccessToken
                 import time
                 fake_raw_token = 'top-secret-token-for-you'

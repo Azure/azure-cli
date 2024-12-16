@@ -450,9 +450,9 @@ class ContainerApp(Resource):  # pylint: disable=too-many-instance-attributes
                         task_command_kwargs = {"resource_type": ResourceType.MGMT_CONTAINERREGISTRY,
                                                'operation_group': 'webhooks'}
                         old_command_kwargs = {}
-                        for key in task_command_kwargs:  # pylint: disable=consider-using-dict-items
-                            old_command_kwargs[key] = self.cmd.command_kwargs.get(key)
-                            self.cmd.command_kwargs[key] = task_command_kwargs[key]
+                        for k, v in task_command_kwargs.items():
+                            old_command_kwargs[k] = self.cmd.command_kwargs.get(k)
+                            self.cmd.command_kwargs[k] = v
                         if self.acr and self.acr.name is not None:
                             acr_login(self.cmd, self.acr.name)
                         for k, v in old_command_kwargs.items():
@@ -557,9 +557,9 @@ class ContainerApp(Resource):  # pylint: disable=too-many-instance-attributes
         run_client = cf_acr_runs(self.cmd.cli_ctx)
         task_command_kwargs = {"resource_type": ResourceType.MGMT_CONTAINERREGISTRY, 'operation_group': 'webhooks'}
         old_command_kwargs = {}
-        for key in task_command_kwargs:  # pylint: disable=consider-using-dict-items
-            old_command_kwargs[key] = self.cmd.command_kwargs.get(key)
-            self.cmd.command_kwargs[key] = task_command_kwargs[key]
+        for k, v in task_command_kwargs.items():
+            old_command_kwargs[k] = self.cmd.command_kwargs.get(k)
+            self.cmd.command_kwargs[k] = v
 
         with NamedTemporaryFile(mode="w", delete=False) as task_file:
             try:
