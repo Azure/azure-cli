@@ -358,9 +358,6 @@ class AAZFloatArg(AAZSimpleTypeArg, AAZFloatType):
 
 class AAZCompoundTypeArg(AAZBaseArg):
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
     @abc.abstractmethod
     def _build_cmd_action(self):
         raise NotImplementedError()

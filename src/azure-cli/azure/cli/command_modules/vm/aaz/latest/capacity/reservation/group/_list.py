@@ -20,7 +20,7 @@ class List(AAZCommand):
     :example: List capacity reservation groups
         az capacity reservation group list -g rg
 
-    :example: List the capacity reservation groups containing VM instances and VMSS instance which are     associated to capacity reservation group
+    :example: List the capacity reservation groups containing VM instances and VMSS instance which are associated to capacity reservation group
         az capacity reservation group list -g rg --vm-instance --vmss-instance
     """
 
@@ -200,6 +200,7 @@ class List(AAZCommand):
             )
             properties.instance_view = AAZObjectType(
                 serialized_name="instanceView",
+                flags={"read_only": True},
             )
             properties.sharing_profile = AAZObjectType(
                 serialized_name="sharingProfile",
@@ -404,6 +405,7 @@ class List(AAZCommand):
             )
             properties.instance_view = AAZObjectType(
                 serialized_name="instanceView",
+                flags={"read_only": True},
             )
             properties.sharing_profile = AAZObjectType(
                 serialized_name="sharingProfile",

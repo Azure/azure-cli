@@ -37,7 +37,7 @@ LINUXAPP_KIND = "linux"
 DOTNET_REFERENCES_DIR_IN_ZIP = ".az-references"
 
 
-class FUNCTIONS_STACKS_API_KEYS():
+class FUNCTIONS_STACKS_API_KEYS:
     # pylint:disable=too-few-public-methods,too-many-instance-attributes
     def __init__(self):
         self.NAME = 'name'

@@ -8,7 +8,6 @@ from azure.cli.core import AzCommandsLoader
 import azure.cli.command_modules.sqlvm._help  # pylint: disable=unused-import
 
 
-# pylint: disable=line-too-long
 class SqlVmCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
@@ -17,12 +16,12 @@ class SqlVmCommandsLoader(AzCommandsLoader):
         from azure.cli.core.profiles import ResourceType
 
         sqlvm_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.sqlvm.custom#{}')
-        super(SqlVmCommandsLoader, self).__init__(cli_ctx=cli_ctx,
-                                                  custom_command_type=sqlvm_custom,
-                                                  resource_type=ResourceType.MGMT_SQLVM,
-                                                  suppress_extension=ModExtensionSuppress(__name__, 'sqlvm-preview', '0.1.0',
-                                                                                          reason='These commands are now in the CLI.',
-                                                                                          recommend_remove=True))
+        super().__init__(cli_ctx=cli_ctx,
+                         custom_command_type=sqlvm_custom,
+                         resource_type=ResourceType.MGMT_SQLVM,
+                         suppress_extension=ModExtensionSuppress(__name__, 'sqlvm-preview', '0.1.0',
+                                                                 reason='These commands are now in the CLI.',
+                                                                 recommend_remove=True))
 
     def load_command_table(self, args):
         from azure.cli.command_modules.sqlvm.commands import load_command_table

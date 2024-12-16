@@ -474,13 +474,3 @@ def transform_certificate_issuer_admin_list(result, **command_args):
         } for contact in admin_contacts]
         return ret
     return result
-
-
-def transform_security_domain_output(result, **command_args):
-    if not result or isinstance(result, dict):
-        return result
-    ret = {
-        'status': getattr(result, 'status', None),
-        'statusDetails': getattr(result, 'status_details', None)
-    }
-    return ret

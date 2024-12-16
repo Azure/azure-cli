@@ -42,7 +42,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         # if source resource is released as an extension, load our command groups
         # only when the extension is installed
         if should_load_source(source):
-            is_preview_source = (source == RESOURCE.KubernetesCluster)
+            is_preview_source = source == RESOURCE.KubernetesCluster
 
             with self.command_group('{} connection'.format(source.value), connection_type,
                                     client_factory=cf_linker, is_preview=is_preview_source) as og:

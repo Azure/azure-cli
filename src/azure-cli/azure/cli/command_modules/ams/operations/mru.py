@@ -62,7 +62,7 @@ def _map_mru(mru):
     return mapped_obj
 
 
-class MediaV2Client():
+class MediaV2Client:
     """ Media V2 Client """
     def __init__(self, cli_ctx, resource_group_name, account_name):
         from azure.cli.core._profile import Profile

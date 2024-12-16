@@ -260,7 +260,7 @@ def connection_validate(cmd, client,
     # HACK: get linker first to infer target resource type so that user token can be
     # set to work around OBO
     linker = todict(client.get(resource_uri=source_id, linker_name=connection_name))
-    target_id = linker.get('targetService', dict()).get('id', '')
+    target_id = linker.get('targetService', {}).get('id', '')
     target_type = get_resource_type_by_id(target_id)
     source_type = get_source_resource_name(cmd)
     client = set_user_token_by_source_and_target(client, cmd.cli_ctx, source_type, target_type)

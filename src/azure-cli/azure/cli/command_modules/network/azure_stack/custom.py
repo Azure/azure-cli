@@ -248,7 +248,7 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):  # pylint:
         try:
             with open(file_name, 'w') as f:
                 f.write(zone_file_content)
-        except IOError:
+        except OSError:
             raise CLIError('Unable to export to file: {}'.format(file_name))
 
 
