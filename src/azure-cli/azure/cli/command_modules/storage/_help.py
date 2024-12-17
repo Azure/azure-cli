@@ -1861,11 +1861,11 @@ parameters:
     type: list
     short-summary: Space-separated list of key=value pairs. Must contain a PartitionKey and a RowKey.
     long-summary: >
-        The PartitionKey and RowKey must be unique within the table, and may be up to 64Kb in size. 
-        If using an integer value as a key, convert it to a fixed-width string which can be canonically sorted. 
+        The PartitionKey and RowKey must be unique within the table, and may be up to 64Kb in size.
+        If using an integer value as a key, convert it to a fixed-width string which can be canonically sorted.
         For example, convert the integer value 1 to the string value "0000001" to ensure proper sorting. \n
         To manually specify the value type, an additional key,value pair can be added in the format of
-        key@odata.type=<EdmType> where <EdmType> can be from the following list: Edm.Binary, Edm.Int64, Edm.Guid, 
+        key@odata.type=<EdmType> where <EdmType> can be from the following list: Edm.Binary, Edm.Int64, Edm.Guid,
         Edm.DateTime, Edm.String, Edm.Int32, Edm.Double, Edm.Boolean
   - name: --if-exists
     type: string
