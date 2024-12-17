@@ -15,14 +15,15 @@ SECRET_STORE_DEMO = "secret_store_demo"
 
 
 def rest_call(cmd, url, method=None, headers=None, uri_parameters=None,
-              body=None, skip_authorization_header=False, resource=None, output_file=None):
+              body=None, skip_authorization_header=False, resource=None, scopes=None, output_file=None):
     from azure.cli.core.commands.transform import unregister_global_transforms
     # No transform should be performed on `az rest`.
     unregister_global_transforms(cmd.cli_ctx)
 
     from azure.cli.core.util import send_raw_request
-    r = send_raw_request(cmd.cli_ctx, method, url, headers, uri_parameters, body,
-                         skip_authorization_header, resource, output_file)
+    r = send_raw_request(cmd.cli_ctx, method, url, headers=headers, uri_parameters=uri_parameters, body=body,
+                         skip_authorization_header=skip_authorization_header, resource=resource, scopes=scopes,
+                         output_file=output_file)
     if not output_file and r.content:
         try:
             return r.json()
