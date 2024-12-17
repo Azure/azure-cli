@@ -1040,8 +1040,8 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
                  checks=self.check('result', '{base64_value}'))
 
         # sign/verify
-        # Run `echo "HelloWorld" | openssl dgst -sha256 -binary | openssl base64` to generate test data
-        self.kwargs['digest'] = 'Pz8hPx8/Pz9mP11RFj8/Mz8/bj91PwRhPz8JQ2k/eGMNCg=='
+        # generate test digest data: base64.b64encode(hashlib.sha256(b'HelloWorld').digest())
+        self.kwargs['digest'] = 'hy5OUM6ZkNiwQTMMR8nd0Rvsa1A66ThqmdqFhOm7EsQ='
         self.kwargs['sign_result'] = self.cmd('keyvault key sign -n {key} --vault-name {kv} -a RS256 --digest {digest}').get_output_in_json()['signature']
         self.cmd('keyvault key verify -n {key} --vault-name {kv} -a RS256 --digest {digest} --signature "{sign_result}"',
                  checks=self.check('isValid', True))

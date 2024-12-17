@@ -1128,31 +1128,18 @@ def decrypt_key(cmd, client, algorithm, value, iv=None, tag=None, aad=None,
 
 
 def sign_key(cmd, client, algorithm, digest, name=None, version=None):
-    if '256' in algorithm:
-        hash_func = hashlib.sha256
-    elif '384' in algorithm:
-        hash_func = hashlib.sha384
-    else:
-        hash_func = hashlib.sha512
     SignatureAlgorithm = cmd.loader.get_sdk('SignatureAlgorithm', mod='crypto._enums',
                                             resource_type=ResourceType.DATA_KEYVAULT_KEYS)
     crypto_client = client.get_cryptography_client(name, key_version=version)
-    return crypto_client.sign(SignatureAlgorithm(algorithm),
-                              hash_func(base64.b64decode(digest.encode('utf-8'))).digest())
+    return crypto_client.sign(SignatureAlgorithm(algorithm), base64.b64decode(digest.encode('utf-8')))
 
 
 def verify_key(cmd, client, algorithm, digest, signature, name=None, version=None):
-    if '256' in algorithm:
-        hash_func = hashlib.sha256
-    elif '384' in algorithm:
-        hash_func = hashlib.sha384
-    else:
-        hash_func = hashlib.sha512
     SignatureAlgorithm = cmd.loader.get_sdk('SignatureAlgorithm', mod='crypto._enums',
                                             resource_type=ResourceType.DATA_KEYVAULT_KEYS)
     crypto_client = client.get_cryptography_client(name, key_version=version)
     return crypto_client.verify(SignatureAlgorithm(algorithm),
-                                hash_func(base64.b64decode(digest.encode('utf-8'))).digest(),
+                                base64.b64decode(digest.encode('utf-8')),
                                 base64.b64decode(signature.encode('utf-8')))
 
 
