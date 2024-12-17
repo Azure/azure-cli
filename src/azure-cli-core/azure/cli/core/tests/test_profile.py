@@ -509,9 +509,9 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(s['id'], self.id1.split('/')[-1])
         self.assertEqual(s['tenantId'], self.test_mi_tenant)
 
-    @mock.patch('requests.get', autospec=True)
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
-    def test_find_subscriptions_in_vm_with_mi_no_subscriptions(self, create_subscription_client_mock, mock_get):
+    @mock.patch('azure.cli.core.auth.msal_credentials.ManagedIdentityCredential', ManagedIdentityCredentialStub)
+    def test_find_subscriptions_in_vm_with_mi_system_assigned_no_subscriptions(self, create_subscription_client_mock):
         mock_subscription_client = mock.MagicMock()
         mock_subscription_client.subscriptions.list.return_value = []
         create_subscription_client_mock.return_value = mock_subscription_client
@@ -519,18 +519,13 @@ class TestProfile(unittest.TestCase):
         cli = DummyCli()
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock)
-
-        test_token_entry = {
-            'token_type': 'Bearer',
-            'access_token': TestProfile.test_mi_access_token
-        }
-        encoded_test_token = json.dumps(test_token_entry).encode()
-        good_response = mock.MagicMock()
-        good_response.status_code = 200
-        good_response.content = encoded_test_token
-        mock_get.return_value = good_response
-
         subscriptions = profile.login_with_managed_identity(allow_no_subscriptions=True)
+
+        credential_instance = create_subscription_client_mock.call_args.args[1]
+        assert credential_instance.client_id is None
+        assert credential_instance.object_id is None
+        assert credential_instance.resource_id is None
+        assert credential_instance.get_token_scopes == ('https://management.core.windows.net//.default',)
 
         # assert
         self.assertEqual(len(subscriptions), 1)
@@ -554,10 +549,10 @@ class TestProfile(unittest.TestCase):
         cli = DummyCli()
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock)
-        subscriptions = profile.login_with_managed_identity(identity_id=self.test_mi_client_id)
+        subscriptions = profile.login_with_managed_identity(client_id=self.test_mi_client_id)
 
         credential_instance = create_subscription_client_mock.call_args.args[1]
-        assert credential_instance.client_id is self.test_mi_client_id
+        assert credential_instance.client_id == self.test_mi_client_id
         assert credential_instance.object_id is None
         assert credential_instance.resource_id is None
         assert credential_instance.get_token_scopes == ('https://management.core.windows.net//.default',)
@@ -572,50 +567,32 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(s['user']['type'], 'servicePrincipal')
         self.assertEqual(s['user']['assignedIdentityInfo'], 'MSIClient-{}'.format(self.test_mi_client_id))
 
-    @mock.patch('azure.cli.core.auth.adal_authentication.MSIAuthenticationWrapper', autospec=True)
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
-    def test_find_subscriptions_in_vm_with_mi_user_assigned_with_object_id(self, create_subscription_client_mock,
-                                                                           mock_msi_auth):
+    @mock.patch('azure.cli.core.auth.msal_credentials.ManagedIdentityCredential', ManagedIdentityCredentialStub)
+    def test_find_subscriptions_in_vm_with_mi_user_assigned_with_object_id(self, create_subscription_client_mock):
         mock_subscription_client = mock.MagicMock()
         mock_subscription_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
         create_subscription_client_mock.return_value = mock_subscription_client
 
-        from azure.cli.core.azclierror import AzureResponseError
-        class AuthStub:
-            def __init__(self, **kwargs):
-                self.token = None
-                self.client_id = kwargs.get('client_id')
-                self.object_id = kwargs.get('object_id')
-                # since msrestazure 0.4.34, set_token in init
-                self.set_token()
-
-            def set_token(self):
-                # here we will reject the 1st sniffing of trying with client_id and then acccept the 2nd
-                if self.object_id:
-                    self.token = {
-                        'token_type': 'Bearer',
-                        'access_token': TestProfile.test_mi_access_token
-                    }
-                else:
-                    raise AzureResponseError('Failed to connect to MSI. Please make sure MSI is configured correctly.\n'
-                                             'Get Token request returned http error: 400, reason: Bad Request')
-
+        cli = DummyCli()
+        storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None})
+        subscriptions = profile.login_with_managed_identity(object_id=self.test_mi_object_id)
 
-        mock_msi_auth.side_effect = AuthStub
-        test_object_id = '54826b22-38d6-4fb2-bad9-b7b93a3e9999'
-
-        subscriptions = profile.login_with_managed_identity(identity_id=test_object_id)
+        credential_instance = create_subscription_client_mock.call_args.args[1]
+        assert credential_instance.client_id is None
+        assert credential_instance.object_id == self.test_mi_object_id
+        assert credential_instance.resource_id is None
+        assert credential_instance.get_token_scopes == ('https://management.core.windows.net//.default',)
 
         s = subscriptions[0]
         self.assertEqual(s['user']['name'], 'userAssignedIdentity')
         self.assertEqual(s['user']['type'], 'servicePrincipal')
-        self.assertEqual(s['user']['assignedIdentityInfo'], 'MSIObject-{}'.format(test_object_id))
+        self.assertEqual(s['user']['assignedIdentityInfo'], 'MSIObject-{}'.format(self.test_mi_object_id))
 
-    @mock.patch('requests.get', autospec=True)
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
-    def test_find_subscriptions_in_vm_with_mi_user_assigned_with_res_id(self, create_subscription_client_mock,
-                                                                        mock_get):
+    @mock.patch('azure.cli.core.auth.msal_credentials.ManagedIdentityCredential', ManagedIdentityCredentialStub)
+    def test_find_subscriptions_in_vm_with_mi_user_assigned_with_resource_id(self, create_subscription_client_mock):
 
         mock_subscription_client = mock.MagicMock()
         mock_subscription_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
@@ -624,26 +601,18 @@ class TestProfile(unittest.TestCase):
         cli = DummyCli()
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock)
+        subscriptions = profile.login_with_managed_identity(resource_id=self.test_mi_resource_id)
 
-        test_token_entry = {
-            'token_type': 'Bearer',
-            'access_token': TestProfile.test_mi_access_token
-        }
-        test_res_id = ('/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourcegroups/g1/'
-                       'providers/Microsoft.ManagedIdentity/userAssignedIdentities/id1')
-
-        encoded_test_token = json.dumps(test_token_entry).encode()
-        good_response = mock.MagicMock()
-        good_response.status_code = 200
-        good_response.content = encoded_test_token
-        mock_get.return_value = good_response
-
-        subscriptions = profile.login_with_managed_identity(identity_id=test_res_id)
+        credential_instance = create_subscription_client_mock.call_args.args[1]
+        assert credential_instance.client_id is None
+        assert credential_instance.object_id is None
+        assert credential_instance.resource_id == self.test_mi_resource_id
+        assert credential_instance.get_token_scopes == ('https://management.core.windows.net//.default',)
 
         s = subscriptions[0]
         self.assertEqual(s['user']['name'], 'userAssignedIdentity')
         self.assertEqual(s['user']['type'], 'servicePrincipal')
-        self.assertEqual(subscriptions[0]['user']['assignedIdentityInfo'], 'MSIResource-{}'.format(test_res_id))
+        self.assertEqual(subscriptions[0]['user']['assignedIdentityInfo'], 'MSIResource-{}'.format(self.test_mi_resource_id))
 
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
     @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential', autospec=True)
@@ -1002,11 +971,10 @@ class TestProfile(unittest.TestCase):
 
         self.assertEqual(subscription_id, self.test_mi_subscription_id)
 
-        # sniff test the msi_auth object
-        cred.set_token()
-        cred.token
-        self.assertTrue(cred.set_token_invoked_count)
-        self.assertTrue(cred.token_read_count)
+        assert cred.get_token(profile._arm_scope).token == self.test_mi_access_token
+        assert cred._credential.client_id is None
+        assert cred._credential.object_id is None
+        assert cred._credential.resource_id is None
 
     @mock.patch('azure.cli.core.auth.msal_credentials.ManagedIdentityCredential', ManagedIdentityCredentialStub)
     def test_get_login_credentials_mi_user_assigned_with_client_id(self):
@@ -1154,8 +1122,8 @@ class TestProfile(unittest.TestCase):
         self.assertIsNone(sub)
         self.assertEqual(tenant, self.tenant_id)
 
-    @mock.patch('azure.cli.core.auth.adal_authentication.MSIAuthenticationWrapper', autospec=True)
-    def test_get_raw_token_mi_system_assigned(self, mock_msi_auth):
+    @mock.patch('azure.cli.core.auth.msal_credentials.ManagedIdentityCredential', autospec=True)
+    def test_get_raw_token_mi_system_assigned(self, managed_identity_credential_mock):
         profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None})
         consolidated = profile._normalize_properties('systemAssignedIdentity',
                                                      [deepcopy(self.test_mi_subscription)],
@@ -1163,21 +1131,22 @@ class TestProfile(unittest.TestCase):
                                                      user_assigned_identity_id='MSI')
         profile._set_subscriptions(consolidated)
 
-        mi_auth_instance = None
+        credential_instances = []
 
-        def mi_auth_factory(*args, **kwargs):
-            nonlocal mi_auth_instance
-            mi_auth_instance = MSRestAzureAuthStub(*args, **kwargs)
-            return mi_auth_instance
+        def managed_identity_credential_factory():
+            credential = ManagedIdentityCredentialStub()
+            credential_instances.append(credential)
+            return credential
 
-        mock_msi_auth.side_effect = mi_auth_factory
+        managed_identity_credential_mock.side_effect = managed_identity_credential_factory
 
         # action
         cred, subscription_id, tenant_id = profile.get_raw_token(resource=self.adal_resource)
 
-        # Make sure resource/scopes are passed to MSIAuthenticationWrapper
-        assert mi_auth_instance.resource == self.adal_resource
-        assert list(mi_auth_instance.get_token_scopes) == self.msal_scopes
+        # Verify only one credential is created
+        assert len(credential_instances) == 1
+        # Verify correct scopes are passed to get_token
+        assert list(credential_instances[0].get_token_scopes) == self.msal_scopes
 
         self.assertEqual(cred[0], 'Bearer')
         self.assertEqual(cred[1], self.test_mi_access_token)

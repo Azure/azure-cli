@@ -576,7 +576,7 @@ class Profile:
             # The account contains:
             #   "assignedIdentityInfo": "MSI",
             #   "name": "systemAssignedIdentity",
-            return MsiAccountTypes.system_assigned, None
+            return ManagedIdentityAccountTypes.system_assigned, None
         if user_name == _USER_ASSIGNED_IDENTITY:
             # The account contains:
             #   "assignedIdentityInfo": "MSIClient-xxx"/"MSIObject-xxx"/"MSIResource-xxx",
@@ -714,7 +714,7 @@ class ManagedIdentityAccountTypes:
         # As long as one ID is provided, the managed identity is treated as user-assigned.
         # See https://github.com/Azure/azure-cli/issues/13188
         identity_type = _SYSTEM_ASSIGNED_IDENTITY
-        id_type = None
+        id_type = ManagedIdentityAccountTypes.system_assigned
         id_value = None
         if client_id:
             identity_type = _USER_ASSIGNED_IDENTITY
@@ -728,7 +728,7 @@ class ManagedIdentityAccountTypes:
             identity_type = _USER_ASSIGNED_IDENTITY
             id_type = ManagedIdentityAccountTypes.user_assigned_resource_id
             id_value = resource_id
-        return '{}-{}'.format(id_type, id_value) if id_type else id_type, identity_type
+        return '{}-{}'.format(id_type, id_value) if id_value else id_type, identity_type
 
     @staticmethod
     def valid_msi_account_types():
