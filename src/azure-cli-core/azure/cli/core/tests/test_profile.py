@@ -483,7 +483,7 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
     @mock.patch('azure.cli.core.auth.msal_credentials.ManagedIdentityCredential', ManagedIdentityCredentialStub)
-    def test_find_subscriptions_in_vm_with_mi_system_assigned(self, create_subscription_client_mock):
+    def test_login_with_mi_system_assigned(self, create_subscription_client_mock):
         mock_subscription_client = mock.MagicMock()
         mock_subscription_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
         create_subscription_client_mock.return_value = mock_subscription_client
@@ -511,7 +511,7 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
     @mock.patch('azure.cli.core.auth.msal_credentials.ManagedIdentityCredential', ManagedIdentityCredentialStub)
-    def test_find_subscriptions_in_vm_with_mi_system_assigned_no_subscriptions(self, create_subscription_client_mock):
+    def test_login_with_mi_system_assigned_no_subscriptions(self, create_subscription_client_mock):
         mock_subscription_client = mock.MagicMock()
         mock_subscription_client.subscriptions.list.return_value = []
         create_subscription_client_mock.return_value = mock_subscription_client
@@ -541,7 +541,7 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
     @mock.patch('azure.cli.core.auth.msal_credentials.ManagedIdentityCredential', ManagedIdentityCredentialStub)
-    def test_find_subscriptions_in_vm_with_mi_user_assigned_with_client_id(self, create_subscription_client_mock):
+    def test_login_with_mi_user_assigned_client_id(self, create_subscription_client_mock):
         mock_subscription_client = mock.MagicMock()
         mock_subscription_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
         create_subscription_client_mock.return_value = mock_subscription_client
@@ -569,7 +569,7 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
     @mock.patch('azure.cli.core.auth.msal_credentials.ManagedIdentityCredential', ManagedIdentityCredentialStub)
-    def test_find_subscriptions_in_vm_with_mi_user_assigned_with_object_id(self, create_subscription_client_mock):
+    def test_login_with_mi_user_assigned_object_id(self, create_subscription_client_mock):
         mock_subscription_client = mock.MagicMock()
         mock_subscription_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
         create_subscription_client_mock.return_value = mock_subscription_client
@@ -592,7 +592,7 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
     @mock.patch('azure.cli.core.auth.msal_credentials.ManagedIdentityCredential', ManagedIdentityCredentialStub)
-    def test_find_subscriptions_in_vm_with_mi_user_assigned_with_resource_id(self, create_subscription_client_mock):
+    def test_login_with_mi_user_assigned_resource_id(self, create_subscription_client_mock):
 
         mock_subscription_client = mock.MagicMock()
         mock_subscription_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
@@ -977,7 +977,7 @@ class TestProfile(unittest.TestCase):
         assert cred._credential.resource_id is None
 
     @mock.patch('azure.cli.core.auth.msal_credentials.ManagedIdentityCredential', ManagedIdentityCredentialStub)
-    def test_get_login_credentials_mi_user_assigned_with_client_id(self):
+    def test_get_login_credentials_mi_user_assigned_client_id(self):
         profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None})
         consolidated = profile._normalize_properties(
             'userAssignedIdentity',
@@ -997,7 +997,7 @@ class TestProfile(unittest.TestCase):
         assert cred._credential.resource_id is None
 
     @mock.patch('azure.cli.core.auth.msal_credentials.ManagedIdentityCredential', ManagedIdentityCredentialStub)
-    def test_get_login_credentials_mi_user_assigned_with_object_id(self):
+    def test_get_login_credentials_mi_user_assigned_object_id(self):
         profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None})
         consolidated = profile._normalize_properties(
             'userAssignedIdentity',
@@ -1017,7 +1017,7 @@ class TestProfile(unittest.TestCase):
         assert cred._credential.resource_id is None
 
     @mock.patch('azure.cli.core.auth.msal_credentials.ManagedIdentityCredential', ManagedIdentityCredentialStub)
-    def test_get_login_credentials_mi_user_assigned_with_resource_id(self):
+    def test_get_login_credentials_mi_user_assigned_resource_id(self):
         profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None})
         consolidated = profile._normalize_properties(
             'userAssignedIdentity',
@@ -1141,19 +1141,138 @@ class TestProfile(unittest.TestCase):
         managed_identity_credential_mock.side_effect = managed_identity_credential_factory
 
         # action
-        cred, subscription_id, tenant_id = profile.get_raw_token(resource=self.adal_resource)
+        token_tuple, subscription_id, tenant_id = profile.get_raw_token(resource=self.adal_resource)
 
         # Verify only one credential is created
         assert len(credential_instances) == 1
+        cred = credential_instances[0]
+        assert cred.client_id is None
+        assert cred.object_id is None
+        assert cred.resource_id is None
         # Verify correct scopes are passed to get_token
         assert list(credential_instances[0].get_token_scopes) == self.msal_scopes
 
-        self.assertEqual(cred[0], 'Bearer')
-        self.assertEqual(cred[1], self.test_mi_access_token)
+        self.assertEqual(token_tuple[0], 'Bearer')
+        self.assertEqual(token_tuple[1], self.test_mi_access_token)
 
         # Make sure expires_on and expiresOn are set
-        self.assertEqual(cred[2]['expires_on'], MOCK_EXPIRES_ON_INT)
-        self.assertEqual(cred[2]['expiresOn'], MOCK_EXPIRES_ON_DATETIME)
+        self.assertEqual(token_tuple[2]['expires_on'], MOCK_EXPIRES_ON_INT)
+        self.assertEqual(token_tuple[2]['expiresOn'], MOCK_EXPIRES_ON_DATETIME)
+        self.assertEqual(subscription_id, self.test_mi_subscription_id)
+        self.assertEqual(tenant_id, self.test_mi_tenant)
+
+        # verify tenant shouldn't be specified for MSI account
+        with self.assertRaisesRegex(CLIError, "Tenant shouldn't be specified"):
+            cred, subscription_id, _ = profile.get_raw_token(resource='http://test_resource', tenant=self.tenant_id)
+
+    @mock.patch('azure.cli.core.auth.msal_credentials.ManagedIdentityCredential', autospec=True)
+    def test_get_raw_token_mi_user_assigned_client_id(self, managed_identity_credential_mock):
+        profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None})
+        consolidated = profile._normalize_properties(
+            'userAssignedIdentity',
+            [deepcopy(self.test_mi_subscription)],
+            True,
+            user_assigned_identity_id='MSIClient-{}'.format(self.test_mi_client_id)
+        )
+        profile._set_subscriptions(consolidated)
+
+        credential_instances = []
+
+        def managed_identity_credential_factory():
+            credential = ManagedIdentityCredentialStub()
+            credential_instances.append(credential)
+            return credential
+
+        managed_identity_credential_mock.side_effect = managed_identity_credential_factory
+
+        # action
+        token_tuple, subscription_id, tenant_id = profile.get_raw_token(resource=self.adal_resource)
+
+        # Verify only one credential is created
+        assert len(credential_instances) == 1
+        cred = credential_instances[0]
+        assert cred.client_id is self.test_mi_client_id
+        assert cred.object_id is None
+        assert cred.resource_id is None
+        # Verify correct scopes are passed to get_token
+        assert list(credential_instances[0].get_token_scopes) == self.msal_scopes
+
+        self.assertEqual(token_tuple[0], 'Bearer')
+        self.assertEqual(token_tuple[1], self.test_mi_access_token)
+
+    @mock.patch('azure.cli.core.auth.msal_credentials.ManagedIdentityCredential', autospec=True)
+    def test_get_raw_token_mi_user_assigned_object_id(self, managed_identity_credential_mock):
+        profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None})
+        consolidated = profile._normalize_properties(
+            'userAssignedIdentity',
+            [deepcopy(self.test_mi_subscription)],
+            True,
+            user_assigned_identity_id='MSIObject-{}'.format(self.test_mi_object_id)
+        )
+        profile._set_subscriptions(consolidated)
+
+        credential_instances = []
+
+        def managed_identity_credential_factory():
+            credential = ManagedIdentityCredentialStub()
+            credential_instances.append(credential)
+            return credential
+
+        managed_identity_credential_mock.side_effect = managed_identity_credential_factory
+
+        # action
+        token_tuple, subscription_id, tenant_id = profile.get_raw_token(resource=self.adal_resource)
+
+        # Verify only one credential is created
+        assert len(credential_instances) == 1
+        cred = credential_instances[0]
+        assert cred.client_id is self.test_mi_client_id
+        assert cred.object_id is None
+        assert cred.resource_id is None
+        # Verify correct scopes are passed to get_token
+        assert list(credential_instances[0].get_token_scopes) == self.msal_scopes
+
+        self.assertEqual(token_tuple[0], 'Bearer')
+        self.assertEqual(token_tuple[1], self.test_mi_access_token)
+
+    @mock.patch('azure.cli.core.auth.msal_credentials.ManagedIdentityCredential', autospec=True)
+    def test_get_raw_token_mi_user_assigned_client_id(self, managed_identity_credential_mock):
+        profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None})
+        consolidated = profile._normalize_properties(
+            'userAssignedIdentity',
+            [deepcopy(self.test_mi_subscription)],
+            True,
+            user_assigned_identity_id='MSIClient-{}'.format(self.test_mi_client_id)
+        )
+        profile._set_subscriptions(consolidated)
+
+        credential_instances = []
+
+        def managed_identity_credential_factory():
+            credential = ManagedIdentityCredentialStub()
+            credential_instances.append(credential)
+            return credential
+
+        managed_identity_credential_mock.side_effect = managed_identity_credential_factory
+
+        # action
+        token_tuple, subscription_id, tenant_id = profile.get_raw_token(resource=self.adal_resource)
+
+        # Verify only one credential is created
+        assert len(credential_instances) == 1
+        cred = credential_instances[0]
+        assert cred.client_id is self.test_mi_client_id
+        assert cred.object_id is None
+        assert cred.resource_id is None
+        # Verify correct scopes are passed to get_token
+        assert list(credential_instances[0].get_token_scopes) == self.msal_scopes
+
+        self.assertEqual(token_tuple[0], 'Bearer')
+        self.assertEqual(token_tuple[1], self.test_mi_access_token)
+
+        # Make sure expires_on and expiresOn are set
+        self.assertEqual(token_tuple[2]['expires_on'], MOCK_EXPIRES_ON_INT)
+        self.assertEqual(token_tuple[2]['expiresOn'], MOCK_EXPIRES_ON_DATETIME)
         self.assertEqual(subscription_id, self.test_mi_subscription_id)
         self.assertEqual(tenant_id, self.test_mi_tenant)
 

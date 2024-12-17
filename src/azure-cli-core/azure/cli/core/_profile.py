@@ -311,7 +311,7 @@ class Profile:
 
         account = self.get_subscription(subscription_id)
 
-        managed_identity_type, managed_identity_id = Profile._parse_managed_identity_account(account)
+        managed_identity_id_type, managed_identity_id_value = Profile._parse_managed_identity_account(account)
 
         if in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
             # Cloud Shell
@@ -320,13 +320,12 @@ class Profile:
             # The credential must be wrapped by CredentialAdaptor so that it can work with Track 1 SDKs.
             cred = CredentialAdaptor(CloudShellCredential(), resource=resource)
 
-        elif managed_identity_type:
+        elif managed_identity_id_type:
             # managed identity
-            from .auth.msal_credentials import ManagedIdentityCredential
             from azure.cli.core.auth.credential_adaptor import CredentialAdaptor
             # The credential must be wrapped by CredentialAdaptor so that it can work with Track 1 SDKs.
             cred = CredentialAdaptor(
-                ManagedIdentityAccountTypes.credential_factory(managed_identity_type, managed_identity_id),
+                ManagedIdentityAccountTypes.credential_factory(managed_identity_id_type, managed_identity_id_value),
                 resource=resource)
 
         else:
@@ -369,7 +368,7 @@ class Profile:
 
         account = self.get_subscription(subscription)
 
-        managed_identity_type, managed_identity_id = Profile._parse_managed_identity_account(account)
+        managed_identity_id_type, managed_identity_id_value = Profile._parse_managed_identity_account(account)
 
         if in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
             # Cloud Shell
@@ -378,12 +377,12 @@ class Profile:
             from .auth.msal_credentials import CloudShellCredential
             cred = CloudShellCredential()
 
-        elif managed_identity_type:
+        elif managed_identity_id_type:
             # managed identity
             if tenant:
                 raise CLIError("Tenant shouldn't be specified for managed identity account")
             from .auth.msal_credentials import ManagedIdentityCredential
-            cred = ManagedIdentityCredential()
+            cred = ManagedIdentityAccountTypes.credential_factory(managed_identity_id_type, managed_identity_id_value)
 
         else:
             cred = self._create_credential(account, tenant_id=tenant)
