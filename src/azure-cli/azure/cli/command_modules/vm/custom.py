@@ -1164,6 +1164,9 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                     != encryption_identity:
                 vm_resource['properties']['securityProfile']['encryptionIdentity']['userAssignedIdentityResourceId'] \
                     = encryption_identity
+        else:
+            raise CLIError("Encryption Identity should be an ARM Resource ID of one of the "
+                           "user assigned identities associated to the resource")
 
     if workspace is not None:
         workspace_id = _prepare_workspace(cmd, resource_group_name, workspace)

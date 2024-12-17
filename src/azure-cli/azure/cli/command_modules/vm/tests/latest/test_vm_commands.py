@@ -6305,6 +6305,33 @@ class VMSecurityProfileTestForDiskEncryption(ScenarioTest):
     
     
     @AllowLargeResponse(size_kb=99999)
+    @ResourceGroupPreparer(name_prefix='test_vm_incorrect_encryption_identity_for_disk_encryption', location='westus')
+    def test_vm_incorrect_encryption_identity_for_disk_encryption(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'vm': 'vm1',
+            'subnet': 'subnet1',
+            'emsi': 'id1',
+            'emsi2':'id2',
+            'vnet': 'vnet1'
+        })
+        
+        emsi_result2 = self.cmd('identity create -g {rg} -n {emsi2} --tags tag1=d2', checks=[
+            self.check('name', '{emsi2}'),
+            self.check('tags.tag1', 'd2')]).get_output_in_json()
+         
+        encryptionIdentityId = emsi_result2['id']
+            
+        self.kwargs.update({
+            'encryptionIdentityId' : encryptionIdentityId
+        })
+        
+        from knack.util import CLIError
+        message = 'Encryption Identity should be an ARM Resource ID of one of the user assigned identities associated to the resource'
+        with self.assertRaisesRegex(CLIError, message) as context:
+            self.cmd('vm create -g {rg} -n {vm} --image win2022datacenter --admin-username clitester1 --admin-password Test123456789! --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --encryption-identity {encryptionIdentityId} --assign-identity {emsi}')
+        
+        
+    @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='test_vm_null_encryption_identity_for_disk_encryption', location='westus')
     def test_vm_null_encryption_identity_for_disk_encryption(self, resource_group, resource_group_location):
         self.kwargs.update({
@@ -6487,9 +6514,9 @@ class VMDiskEncryptionTest(ScenarioTest):
             self.check('name', '{emsi1}'),
             self.check('tags.tag1', 'd1')]).get_output_in_json()
         
-        emsi_result2 = self.cmd('identity create -g {rg} -n {emsi2} --tags tag1=d1', checks=[
+        emsi_result2 = self.cmd('identity create -g {rg} -n {emsi2} --tags tag1=d2', checks=[
             self.check('name', '{emsi2}'),
-            self.check('tags.tag1', 'd1')]).get_output_in_json()
+            self.check('tags.tag1', 'd2')]).get_output_in_json()
          
         encryptionIdentityId1 = emsi_result1['id']
         encryptionIdentityId2 = emsi_result2['id']
@@ -6506,23 +6533,24 @@ class VMDiskEncryptionTest(ScenarioTest):
             'principalId2' : principalId2
         })
 
-        self.cmd('vm create -g {rg} -n {vm} --image win2022datacenter --admin-username clitester1 --admin-password Test123456789! --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --encryption-identity {encryptionIdentityId2} --assign-identity {emsi1}')
+        self.cmd('vm create -g {rg} -n {vm} --image win2022datacenter --admin-username clitester1 --admin-password Test123456789! --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --encryption-identity {encryptionIdentityId2} --assign-identity {emsi2}')
         virtualMachine = self.cmd('vm show -g {rg} -n {vm}').get_output_in_json()
         
         self.assertIsNotNone(virtualMachine)
         self.assertIsNotNone(virtualMachine['identity'])
-        self.assertTrue(encryptionIdentityId1.lower() in (k.lower() for k in virtualMachine['identity']['userAssignedIdentities'].keys()))
+        self.assertTrue(encryptionIdentityId2.lower() in (k.lower() for k in virtualMachine['identity']['userAssignedIdentities'].keys()))
         self.assertIsNotNone(virtualMachine['securityProfile'])
-        self.assertIsNone(virtualMachine['securityProfile']['encryptionIdentity'])
-        
+        self.assertIsNotNone(virtualMachine['securityProfile']['encryptionIdentity'])
+        self.assertEqual(virtualMachine['securityProfile']['encryptionIdentity']['userAssignedIdentityResourceId'], encryptionIdentityId2)
+
         self.cmd('keyvault set-policy -n {vault} -g {rg} --object-id {principalId1} --key-permissions all --secret-permissions all')
                         
         time.sleep(15)
-        from azure.core.exceptions import ResourceExistsError
+        from knack.util import CLIError
         message = 'Encryption Identity should be an ARM Resource ID of one of the user assigned identities associated to the resource'
-        with self.assertRaisesRegex(ResourceExistsError, message) as context:
-            self.cmd('vm encryption enable -g {rg} -n {vm} --disk-encryption-keyvault {vault} --encryption-identity {encryptionIdentityId2}')
-        
+        with self.assertRaisesRegex(CLIError, message) as context:
+            self.cmd('vm encryption enable -g {rg} -n {vm} --disk-encryption-keyvault {vault} --encryption-identity {encryptionIdentityId1}')
+
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_vm_encryption_with_encryption_identity', location='westus')
     @KeyVaultPreparer(name_prefix='vault', name_len=10, key='vault',
