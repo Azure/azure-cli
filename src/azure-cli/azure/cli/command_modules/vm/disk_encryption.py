@@ -67,7 +67,7 @@ def updateVmEncryptionSetting(cmd, vm, resource_group_name, vm_name, encryption_
             (k.lower() for k in vm.identity.user_assigned_identities.keys()):
         raise CLIError("Encryption Identity should be an ARM Resource ID of one of the "
                        "user assigned identities associated to the resource")
-    
+
     SecurityProfile, EncryptionIdentity = cmd.get_models('SecurityProfile', 'EncryptionIdentity')
     updateVm = False
 
