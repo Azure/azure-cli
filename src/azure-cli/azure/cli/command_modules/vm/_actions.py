@@ -50,12 +50,15 @@ def load_images_thru_services(cli_ctx, publisher, offer, sku, location, edge_zon
     from concurrent.futures import ThreadPoolExecutor, as_completed
 
     from .aaz.latest.vm.image.edge_zone import (ListPublishers as VMImageEdgeZoneListPublishers,
-                                                ListOffers as VMImageEdgeZoneListOffers)
+                                                ListOffers as VMImageEdgeZoneListOffers,
+                                                ListSkus as VMImageEdgeZoneListSkus,
+                                                List as VMImageEdgeZoneList)
     from .aaz.latest.vm.image import (ListPublishers as VMImageListPublishers,
-                                      ListOffers as VMImageListOffers)
+                                      ListOffers as VMImageListOffers,
+                                      ListSkus as VMImageListSkus,
+                                      List as VMImageList)
 
     all_images = []
-    client = _compute_client_factory(cli_ctx)
     if location is None:
         location = get_one_of_subscription_locations(cli_ctx)
 
@@ -81,11 +84,18 @@ def load_images_thru_services(cli_ctx, publisher, offer, sku, location, edge_zon
         for o in offers:
             try:
                 if edge_zone is not None:
-                    skus = edge_zone_client.list_skus(location=location, edge_zone=edge_zone,
-                                                      publisher_name=publisher, offer=o.name)
+                    skus = VMImageEdgeZoneListSkus(cli_ctx=cli_ctx)(command_args={
+                        'location': location,
+                        'edge_zone': edge_zone,
+                        'publisher_name': publisher,
+                        'offer': o.name
+                    })
                 else:
-                    skus = client.virtual_machine_images.list_skus(location=location, publisher_name=publisher,
-                                                                   offer=o.name)
+                    skus = VMImageListSkus(cli_ctx=cli_ctx)(command_args={
+                        'location': location,
+                        'publisher_name': publisher,
+                        'offer': o.name
+                    })
             except ResourceNotFoundError as e:
                 logger.warning(str(e))
                 continue
@@ -95,11 +105,22 @@ def load_images_thru_services(cli_ctx, publisher, offer, sku, location, edge_zon
                 try:
                     expand = "properties/imageDeprecationStatus"
                     if edge_zone is not None:
-                        images = edge_zone_client.list(location=location, edge_zone=edge_zone, publisher_name=publisher,
-                                                       offer=o.name, skus=s.name, expand=expand)
+                        images = VMImageEdgeZoneList(cli_ctx=cli_ctx)(command_args={
+                            'location': location,
+                            'edge_zone': edge_zone,
+                            'publisher_name': publisher,
+                            'offer': o.name,
+                            'skus': s.name,
+                            'expand': expand,
+                        })
                     else:
-                        images = client.virtual_machine_images.list(location=location, publisher_name=publisher,
-                                                                    offer=o.name, skus=s.name, expand=expand)
+                        images = VMImageList(cli_ctx=cli_ctx)(command_args={
+                            'location': location,
+                            'publisher_name': publisher,
+                            'offer': o.name,
+                            'skus': s.name,
+                            'expand': expand,
+                        })
                 except ResourceNotFoundError as e:
                     logger.warning(str(e))
                     continue
@@ -120,17 +141,11 @@ def load_images_thru_services(cli_ctx, publisher, offer, sku, location, edge_zon
                     all_images.append(image_info)
 
     if edge_zone is not None:
-        from azure.cli.core.commands.client_factory import get_mgmt_service_client
-        from azure.cli.core.profiles import ResourceType
-        # edge_zone_client = get_mgmt_service_client(cli_ctx,
-        #                                            ResourceType.MGMT_COMPUTE).virtual_machine_images_edge_zone
-        # publishers = edge_zone_client.list_publishers(location=location, edge_zone=edge_zone)
         publishers = VMImageEdgeZoneListPublishers(cli_ctx=cli_ctx)(command_args={
             'location': location,
             'edge_zone': edge_zone
         })
     else:
-        # publishers = client.virtual_machine_images.list_publishers(location=location)
         publishers = VMImageListPublishers(cli_ctx=cli_ctx)(command_args={
             'location': location,
         })
