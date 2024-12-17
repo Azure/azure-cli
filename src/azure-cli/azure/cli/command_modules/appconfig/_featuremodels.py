@@ -126,7 +126,7 @@ class FeatureFlag:
         Determines how variants should be allocated for the feature to various users.
     :ivar list FeatureVariant variants:
         The list of variants defined for this feature.
-    :ivar dict {string, bool} telemetry:
+    :ivar dict {string, object} telemetry:
         The declaration of options used to configure telemetry for this feature.
     """
 
@@ -601,6 +601,9 @@ def custom_serialize_allocation(allocation):
     if allocation.default_when_disabled:
         featureallocationdict[FeatureFlagConstants.DEFAULT_WHEN_DISABLED] = allocation.default_when_disabled
 
+    if allocation.seed:
+        featureallocationdict[FeatureFlagConstants.SEED] = allocation.seed
+
     return featureallocationdict
 
 
@@ -618,8 +621,7 @@ def custom_serialize_variants(variants_list):
     for variant in variants_list:
         variant_dict = {}
         variant_dict[FeatureFlagConstants.NAME] = variant.name
-        if variant.configuration_value:
-            variant_dict[FeatureFlagConstants.VARIANT_CONFIGURATION_VALUE] = variant.configuration_value
+        variant_dict[FeatureFlagConstants.VARIANT_CONFIGURATION_VALUE] = variant.configuration_value
 
         if variant.status_override:
             variant_dict[FeatureFlagConstants.VARIANT_STATUS_OVERRIDE] = variant.status_override
