@@ -418,7 +418,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     @VaultPreparer(soft_delete=False)
     @StorageAccountPreparer(location="eastus2euap")
     @FileSharePreparer()
-    @AFSPolicyPreparer()
+    @AFSPolicyPreparer(backup_tier="Snapshot")
     @AFSItemPreparer()
     def test_afs_backup_policy(self, resource_group, vault_name, storage_account, afs_name, policy_name, item_name):
         self.kwargs.update({
@@ -505,4 +505,145 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.cmd('backup container list -v {vault} -g {rg} --backup-management-type {type}', checks=[
             self.check("length([?properties.friendlyName == '{container}'])", 0)])
+        time.sleep(100)
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location="eastus2euap", random_name_length=20)
+    @VaultPreparer(soft_delete=False)
+    @StorageAccountPreparer(location="eastus2euap")
+    @FileSharePreparer()
+    @AFSPolicyPreparer(backup_tier="Snapshot")
+    @AFSPolicyPreparer(backup_tier="VaultStandard", parameter_name="policy_name2")
+    @AFSItemPreparer()
+    def test_afs_backup_vaultstandard_policy(self, resource_group, vault_name, storage_account, afs_name, policy_name, policy_name2, item_name):
+        self.kwargs.update({
+            'vault': vault_name,
+            'item': item_name,
+            'container': storage_account,
+            'rg': resource_group,
+            'type': "AzureStorage",
+            'default_snapshot_policy': policy_name,
+            'default_vault_policy': policy_name2,
+            'new_snapshot_policy': "clitestafspolicy"
+        })
+        # Count how many policies are instantiated by the preparers
+        policies_json = self.cmd('backup policy list -g {rg} -v {vault} --backup-management-type {type}').get_output_in_json()
+        policy_count1 = len(policies_json)
+        
+        #Retrieve default snapshot policy json created by the preparers
+        self.kwargs['default_snapshot_policy_json'] = self.cmd('backup policy show -g {rg} -v {vault} -n {default_snapshot_policy}', checks=[
+            self.check("name", '{default_snapshot_policy}'),
+            self.check("properties.backupManagementType", '{type}'),
+            self.check("resourceGroup", '{rg}')
+        ]).get_output_in_json()
+ 
+        self.kwargs['default_vault_policy_json'] = self.cmd('backup policy show -g {rg} -v {vault} -n {default_vault_policy}', checks=[
+            self.check("name", '{default_vault_policy}'),
+            self.check("properties.backupManagementType", '{type}'),
+            self.check("resourceGroup", '{rg}')
+        ]).get_output_in_json()
+
+        # Create new policy by modifying the default snapshot policy json
+        self.kwargs['default_snapshot_policy_json']['name'] = self.kwargs['new_snapshot_policy']
+        self.kwargs['default_snapshot_policy_json']['properties']['retentionPolicy']['dailySchedule']['retentionDuration']['count'] = 25
+        self.kwargs['default_snapshot_policy_json'] = json.dumps(self.kwargs['default_snapshot_policy_json'])
+
+        self.cmd("backup policy create -g {rg} -v {vault} --policy '{default_snapshot_policy_json}' --name {new_snapshot_policy} --backup-management-type {type}")
+        #Retrieve new snapshot policy json created within the test
+        self.kwargs['new_snapshot_policy_json'] = self.cmd('backup policy show -g {rg} -v {vault} --n {new_snapshot_policy}', checks=[
+            self.check("name", '{new_snapshot_policy}'),
+            self.check("properties.backupManagementType", '{type}'),
+            self.check("properties.protectedItemsCount", 0),
+            self.check("properties.retentionPolicy.dailySchedule.retentionDuration.count", 25),
+        ]).get_output_in_json()
+
+        # Validate that the new policy has been added to list
+        policies_json = self.cmd('backup policy list -g {rg} -v {vault} --backup-management-type {type}').get_output_in_json()
+        policy_count2 = len(policies_json)
+        self.assertTrue(policy_count2 == policy_count1 + 1)
+        # Modify the new policy created within the test
+        self.kwargs['default_vault_policy_json'] = json.dumps(self.kwargs['default_vault_policy_json'])
+
+        self.cmd("backup policy set -g {rg} -v {vault} --policy '{default_vault_policy_json}' -n {new_snapshot_policy} --yes")
+        self.cmd('backup policy show -g {rg} -v {vault} -n {new_snapshot_policy}', checks=[
+            self.check("properties.vaultRetentionPolicy.snapshotRetentionInDays", 5),
+            self.check("properties.vaultRetentionPolicy.vaultRetention.dailySchedule.retentionDuration.count", 30)
+        ]).get_output_in_json()
+
+        self.cmd("backup policy set -g {rg} -v {vault} --policy '{default_snapshot_policy_json}' -n {default_vault_policy} --yes", expect_failure=True)
+        self.kwargs['afsitem'] = self.cmd('backup item list -g {rg} -v {vault} -c {container} --backup-management-type AzureStorage --query [0].name').get_output_in_json()
+        self.cmd('backup protection disable -g {rg} -v {vault} -c {container} -i {afsitem} --backup-management-type AzureStorage --delete-backup-data true --yes').get_output_in_json()
+        self.cmd('backup container unregister -g {rg} -v {vault} -c {container} --yes --backup-management-type AzureStorage')
+        time.sleep(100)
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location="eastus2euap", random_name_length=20)
+    @VaultPreparer(soft_delete=False)
+    @StorageAccountPreparer(location="eastus2euap")
+    @FileSharePreparer()
+    @FileSharePreparer(parameter_name="afs2")
+    @AFSPolicyPreparer()
+    @AFSPolicyPreparer(backup_tier="VaultStandard", parameter_name="newpolicy")
+    @AFSItemPreparer()
+    @AFSItemPreparer(afs_parameter_name="afs2")
+    def test_afs_backup_vaultstandard_item(self, resource_group, vault_name, storage_account, afs_name, policy_name, afs2, newpolicy):
+        self.kwargs.update({
+            'vault': vault_name,
+            'item1': afs_name,
+            'item2': afs2,
+            'container': storage_account,
+            'rg': resource_group,
+            'type': "AzureStorage",
+            'policy': policy_name,
+            'newpolicy': newpolicy
+        })
+
+        self.kwargs['container1'] = self.cmd('backup container show -g {rg} -v {vault} -n {container} --backup-management-type {type} --query name').get_output_in_json()
+
+        item1_json = self.cmd('backup item show -g {rg} -v {vault} -c {container1} -n {item1}', checks=[
+            self.check('properties.friendlyName', '{item1}'),
+            self.check('properties.protectionState', 'IRPending'),
+            self.check('properties.protectionStatus', 'Healthy'),
+            self.check('resourceGroup', '{rg}')
+        ]).get_output_in_json()
+
+        self.kwargs['item1_fullname'] = item1_json['name']
+
+        self.cmd('backup item show -g {rg} -v {vault} -c {container1} -n {item1_fullname}', checks=[
+            self.check('properties.friendlyName', '{item1}'),
+            self.check('properties.protectionState', 'IRPending'),
+            self.check('properties.protectionStatus', 'Healthy'),
+            self.check('resourceGroup', '{rg}')
+        ])
+
+        self.cmd('backup item list -g {rg} -v {vault} -c {container}', checks=[
+            self.check("length(@)", 2),
+            self.check("length([?properties.friendlyName == '{item1}'])", 1)
+        ])
+
+        self.cmd('backup item list -g {rg} -v {vault} -c {container}', checks=[
+            self.check("length(@)", 2),
+            self.check("length([?properties.friendlyName == '{item2}'])", 1)
+        ])
+
+        self.cmd('backup item list -g {rg} -v {vault} -c {container1}', checks=[
+            self.check("length(@)", 2),
+            self.check("length([?properties.friendlyName == '{item1}'])", 1)
+        ])
+
+        # Set policy Snapshot to VaultStandard
+        self.cmd('backup item set-policy -g {rg} -v {vault} -c {container1} -n {item1} -p {newpolicy} --yes', checks=[
+            self.check("properties.operation", "ConfigureBackup"),
+            self.check("properties.status", "Completed"),
+            self.check("resourceGroup", '{rg}')
+        ])
+        # Set policy Snapshot to Snapshot
+        self.cmd('backup item set-policy -g {rg} -v {vault} -c {container1} -n {item1} -p {policy} --yes', expect_failure=True)
+
+
+        item1_json = self.cmd('backup item show -g {rg} -v {vault} -c {container1} -n {item1}').get_output_in_json()
+        self.assertIn(self.kwargs['newpolicy'].lower(), item1_json['properties']['policyId'].split('/')[-1].lower())
+        self.cmd('backup protection disable -g {rg} -v {vault} -c {container} -i {item1} --backup-management-type AzureStorage --delete-backup-data true --yes').get_output_in_json()
+        self.cmd('backup protection disable -g {rg} -v {vault} -c {container} -i {item2} --backup-management-type AzureStorage --delete-backup-data true --yes').get_output_in_json()
+        self.cmd('backup container unregister -g {rg} -v {vault} -c {container} --yes --backup-management-type AzureStorage')
         time.sleep(100)

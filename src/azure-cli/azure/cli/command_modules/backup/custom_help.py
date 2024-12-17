@@ -672,7 +672,7 @@ def validate_and_extract_container_type(container_name, backup_management_type):
     return None
 
 
-def validate_update_policy_request(existing_policy, new_policy):
+def validate_update_policy_request(existing_policy, new_policy, yes=False):
     existing_backup_management_type = existing_policy.properties.backup_management_type
     new_backup_management_type = new_policy.properties.backup_management_type
     if existing_backup_management_type != new_backup_management_type:
@@ -685,7 +685,7 @@ def validate_update_policy_request(existing_policy, new_policy):
             Please create a new policy for snapshot-only backups.
             """)
     # snapshot -> vault
-    if hasattr(existing_policy.properties, 'retention_policy') and existing_policy.properties.retention_policy is not None and hasattr(new_policy.properties, 'vault_retention_policy') and new_policy.properties.vault_retention_policy is not None:
+    if not yes and hasattr(existing_policy.properties, 'retention_policy') and existing_policy.properties.retention_policy is not None and hasattr(new_policy.properties, 'vault_retention_policy') and new_policy.properties.vault_retention_policy is not None:
         warning_prompt = ('Changing the backup tier keeps current snapshots as-is under the existing policy. Future backups will be stored in the vault with new retention settings.' 
                           'This action is irreversible and incurs additional costs. Switching from vault to snapshot requires reconfiguration.' 
                           'Learn more at https://learn.microsoft.com/en-us/azure/backup/azure-file-share-backup-overview?tabs=snapshot.')

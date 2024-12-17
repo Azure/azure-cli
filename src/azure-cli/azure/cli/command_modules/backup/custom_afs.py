@@ -313,7 +313,7 @@ def list_recovery_points(cmd, client, resource_group_name, vault_name, item, sta
 
 
 def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, policy, tenant_id=None,
-                           is_critical_operation=False):
+                           is_critical_operation=False, yes=False):
     if item.properties.backup_management_type != policy.properties.backup_management_type:
         raise CLIError(
             """
@@ -346,7 +346,7 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, p
     existing_policy_name = item.properties.policy_id.split('/')[-1]         
     existing_policy = common.show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name,
                                              existing_policy_name)
-    helper.validate_update_policy_request(existing_policy, policy)
+    helper.validate_update_policy_request(existing_policy, policy, yes)
 
     # Update policy
     result = client.create_or_update(vault_name, resource_group_name, fabric_name,
@@ -411,7 +411,7 @@ def _get_storage_account_id(cli_ctx, storage_account_name, storage_account_rg):
 
 
 def set_policy(cmd, client, resource_group_name, vault_name, policy, policy_name, tenant_id=None,
-               is_critical_operation=False):
+               is_critical_operation=False, yes=False):
     if policy_name is None:
         raise CLIError(
             """
@@ -421,7 +421,8 @@ def set_policy(cmd, client, resource_group_name, vault_name, policy, policy_name
     policy_object = helper.get_policy_from_json(client, policy)
     policy_object.properties.work_load_type = workload_type
     existing_policy = common.show_policy(client, resource_group_name, vault_name, policy_name)
-    helper.validate_update_policy_request(existing_policy, policy_object)
+    
+    helper.validate_update_policy_request(existing_policy, policy_object, yes)
     if is_critical_operation:
         if helper.is_retention_duration_decreased(existing_policy, policy_object, "AzureStorage"):
             # update the payload with critical operation and add auxiliary header for cross tenant case
