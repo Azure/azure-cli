@@ -296,6 +296,11 @@ def flexible_server_version_upgrade(cmd, client, resource_group_name, server_nam
     current_version = int(instance.version.split('.')[0])
     if current_version >= int(version):
         raise CLIError("The version to upgrade to must be greater than the current version.")
+    if version == '12':
+        logger.warning("Support for PostgreSQL 12 has officially ended. As a result, "
+                        "the option to select version 12 will be removed in the near future. "
+                        "We recommend selecting PostgreSQL 13 or a later version for "
+                        "all future operations.")
 
     replica_operations_client = cf_postgres_flexible_replica(cmd.cli_ctx, '_')
     version_mapped = version
