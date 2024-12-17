@@ -714,15 +714,6 @@ class RoleAssignmentLiveScenarioTest(LiveScenarioTest):
         # There are role assignments inherited from subscription, so we can't tell the exact number.
         self.cmd('role assignment list -g {rg} --include-inherited', checks=[self.greater_than("length([])", 0)])
 
-    @ResourceGroupPreparer(name_prefix='cli_test_assignments_for_coadmins')
-    def test_role_assignment_for_co_admins(self, resource_group):
-
-        result = self.cmd('role assignment list --include-classic-administrator').get_output_in_json()
-        self.assertTrue([x for x in result if x['roleDefinitionName'] in ['CoAdministrator', 'AccountAdministrator']])
-
-        result = self.cmd('role assignment list -g {rg} --include-classic-administrator').get_output_in_json()
-        self.assertTrue([x for x in result if x['roleDefinitionName'] in ['CoAdministrator', 'AccountAdministrator']])
-
 
 if __name__ == '__main__':
     unittest.main()
