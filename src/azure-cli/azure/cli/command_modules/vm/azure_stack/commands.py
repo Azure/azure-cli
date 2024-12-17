@@ -8,12 +8,12 @@ from azure.cli.command_modules.vm.azure_stack._client_factory import (cf_vm, cf_
                                                                       cf_vm_image, cf_vm_image_term, cf_usage,
                                                                       cf_vmss, cf_disks, cf_snapshots,
                                                                       cf_disk_accesses, cf_images, cf_run_commands,
-                                                                      cf_galleries, cf_gallery_images,
+                                                                      cf_gallery_images,
                                                                       cf_gallery_image_versions,
                                                                       cf_proximity_placement_groups,
                                                                       cf_dedicated_hosts, cf_dedicated_host_groups,
                                                                       cf_log_analytics_data_plane,
-                                                                      cf_disk_encryption_set, cf_shared_galleries,
+                                                                      cf_disk_encryption_set,
                                                                       cf_gallery_sharing_profile,
                                                                       cf_shared_gallery_image,
                                                                       cf_shared_gallery_image_version,
@@ -21,7 +21,7 @@ from azure.cli.command_modules.vm.azure_stack._client_factory import (cf_vm, cf_
                                                                       cf_capacity_reservations,
                                                                       cf_vmss_run_commands, cf_gallery_application,
                                                                       cf_gallery_application_version, cf_restore_point,
-                                                                      cf_restore_point_collection, cf_community_gallery,
+                                                                      cf_restore_point_collection,
                                                                       cf_community_gallery_image,
                                                                       cf_community_gallery_image_version)
 from azure.cli.command_modules.vm.azure_stack._format import (
@@ -140,11 +140,6 @@ def load_command_table(self, _):
         operation_group='virtual_machine_scale_sets'
     )
 
-    compute_galleries_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations#GalleriesOperations.{}',
-        client_factory=cf_galleries,
-    )
-
     compute_gallery_images_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations#GalleryImagesOperations.{}',
         client_factory=cf_gallery_images,
@@ -221,10 +216,6 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.compute.operations#RestorePointCollectionsOperations.{}',
         client_factory=cf_restore_point_collection
     )
-
-    community_gallery_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations#CommunityGalleriesOperations.{}',
-        client_factory=cf_community_gallery)
 
     community_gallery_image_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations#CommunityGalleryImagesOperations.{}',
@@ -477,14 +468,6 @@ def load_command_table(self, _):
         g.custom_command('update', 'vmss_run_command_update', supports_no_wait=True)
         g.custom_command('delete', 'vmss_run_command_delete', supports_no_wait=True, confirmation=True)
 
-    with self.command_group('sig', compute_galleries_sdk, operation_group='galleries', min_api='2018-06-01') as g:
-        g.custom_command('create', 'create_image_gallery')
-        g.custom_show_command('show', 'show_image_gallery')
-        g.generic_update_command('update', setter_type=compute_custom, setter_name='update_image_galleries', setter_arg_name='gallery')
-
-    with self.command_group('sig', community_gallery_sdk, client_factory=cf_community_gallery, operation_group='shared_galleries', min_api='2022-01-03') as g:
-        g.custom_command('list-community', 'sig_community_gallery_list')
-
     with self.command_group('sig image-definition', community_gallery_image_sdk, client_factory=cf_community_gallery_image, operation_group='shared_galleries', min_api='2022-01-03') as g:
         g.command('show-community', 'get')
         g.custom_command('list-community', 'sig_community_image_definition_list')
@@ -502,15 +485,6 @@ def load_command_table(self, _):
         g.custom_command('undelete', 'undelete_image_version', supports_no_wait=True, min_api='2021-07-01', validator=process_image_version_undelete_namespace, is_preview=True)
         g.generic_update_command('update', getter_name='get_image_version_to_update', setter_arg_name='gallery_image_version', setter_name='update_image_version', setter_type=compute_custom, command_type=compute_custom, supports_no_wait=True, validator=process_image_version_update_namespace)
         g.wait_command('wait')
-
-    vm_shared_gallery = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations._shared_galleries_operations#SharedGalleriesOperations.{}',
-        client_factory=cf_shared_galleries,
-        operation_group='shared_galleries'
-    )
-    with self.command_group('sig', vm_shared_gallery) as g:
-        g.custom_command('list-shared', 'sig_shared_gallery_list', client_factory=cf_shared_galleries,
-                         operation_group='shared_galleries', min_api='2020-09-30')
 
     vm_gallery_sharing_profile = CliCommandType(
         operations_tmpl=(

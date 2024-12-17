@@ -19,12 +19,14 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2021-10-01",
+        "version": "2019-12-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/galleries", "2021-10-01"],
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/galleries", "2021-10-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/galleries", "2019-12-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/galleries", "2019-12-01"],
         ]
     }
+
+    AZ_SUPPORT_PAGINATION = True
 
     def _handler(self, command_args):
         super()._handler(command_args)
@@ -107,7 +109,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2021-10-01",
+                    "api-version", "2019-12-01",
                     required=True,
                 ),
             }
@@ -175,84 +177,11 @@ class List(AAZCommand):
                 serialized_name="provisioningState",
                 flags={"read_only": True},
             )
-            properties.sharing_profile = AAZObjectType(
-                serialized_name="sharingProfile",
-            )
-            properties.sharing_status = AAZObjectType(
-                serialized_name="sharingStatus",
-            )
-            properties.soft_delete_policy = AAZObjectType(
-                serialized_name="softDeletePolicy",
-            )
 
             identifier = cls._schema_on_200.value.Element.properties.identifier
             identifier.unique_name = AAZStrType(
                 serialized_name="uniqueName",
                 flags={"read_only": True},
-            )
-
-            sharing_profile = cls._schema_on_200.value.Element.properties.sharing_profile
-            sharing_profile.community_gallery_info = AAZObjectType(
-                serialized_name="communityGalleryInfo",
-            )
-            sharing_profile.groups = AAZListType(
-                flags={"read_only": True},
-            )
-            sharing_profile.permissions = AAZStrType()
-
-            community_gallery_info = cls._schema_on_200.value.Element.properties.sharing_profile.community_gallery_info
-            community_gallery_info.community_gallery_enabled = AAZBoolType(
-                serialized_name="communityGalleryEnabled",
-                flags={"read_only": True},
-            )
-            community_gallery_info.eula = AAZStrType()
-            community_gallery_info.public_name_prefix = AAZStrType(
-                serialized_name="publicNamePrefix",
-            )
-            community_gallery_info.public_names = AAZListType(
-                serialized_name="publicNames",
-                flags={"read_only": True},
-            )
-            community_gallery_info.publisher_contact = AAZStrType(
-                serialized_name="publisherContact",
-            )
-            community_gallery_info.publisher_uri = AAZStrType(
-                serialized_name="publisherUri",
-            )
-
-            public_names = cls._schema_on_200.value.Element.properties.sharing_profile.community_gallery_info.public_names
-            public_names.Element = AAZStrType()
-
-            groups = cls._schema_on_200.value.Element.properties.sharing_profile.groups
-            groups.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.sharing_profile.groups.Element
-            _element.ids = AAZListType()
-            _element.type = AAZStrType()
-
-            ids = cls._schema_on_200.value.Element.properties.sharing_profile.groups.Element.ids
-            ids.Element = AAZStrType()
-
-            sharing_status = cls._schema_on_200.value.Element.properties.sharing_status
-            sharing_status.aggregated_state = AAZStrType(
-                serialized_name="aggregatedState",
-                flags={"read_only": True},
-            )
-            sharing_status.summary = AAZListType()
-
-            summary = cls._schema_on_200.value.Element.properties.sharing_status.summary
-            summary.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.sharing_status.summary.Element
-            _element.details = AAZStrType()
-            _element.region = AAZStrType()
-            _element.state = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            soft_delete_policy = cls._schema_on_200.value.Element.properties.soft_delete_policy
-            soft_delete_policy.is_soft_delete_enabled = AAZBoolType(
-                serialized_name="isSoftDeleteEnabled",
             )
 
             tags = cls._schema_on_200.value.Element.tags
@@ -304,7 +233,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2021-10-01",
+                    "api-version", "2019-12-01",
                     required=True,
                 ),
             }
@@ -372,84 +301,11 @@ class List(AAZCommand):
                 serialized_name="provisioningState",
                 flags={"read_only": True},
             )
-            properties.sharing_profile = AAZObjectType(
-                serialized_name="sharingProfile",
-            )
-            properties.sharing_status = AAZObjectType(
-                serialized_name="sharingStatus",
-            )
-            properties.soft_delete_policy = AAZObjectType(
-                serialized_name="softDeletePolicy",
-            )
 
             identifier = cls._schema_on_200.value.Element.properties.identifier
             identifier.unique_name = AAZStrType(
                 serialized_name="uniqueName",
                 flags={"read_only": True},
-            )
-
-            sharing_profile = cls._schema_on_200.value.Element.properties.sharing_profile
-            sharing_profile.community_gallery_info = AAZObjectType(
-                serialized_name="communityGalleryInfo",
-            )
-            sharing_profile.groups = AAZListType(
-                flags={"read_only": True},
-            )
-            sharing_profile.permissions = AAZStrType()
-
-            community_gallery_info = cls._schema_on_200.value.Element.properties.sharing_profile.community_gallery_info
-            community_gallery_info.community_gallery_enabled = AAZBoolType(
-                serialized_name="communityGalleryEnabled",
-                flags={"read_only": True},
-            )
-            community_gallery_info.eula = AAZStrType()
-            community_gallery_info.public_name_prefix = AAZStrType(
-                serialized_name="publicNamePrefix",
-            )
-            community_gallery_info.public_names = AAZListType(
-                serialized_name="publicNames",
-                flags={"read_only": True},
-            )
-            community_gallery_info.publisher_contact = AAZStrType(
-                serialized_name="publisherContact",
-            )
-            community_gallery_info.publisher_uri = AAZStrType(
-                serialized_name="publisherUri",
-            )
-
-            public_names = cls._schema_on_200.value.Element.properties.sharing_profile.community_gallery_info.public_names
-            public_names.Element = AAZStrType()
-
-            groups = cls._schema_on_200.value.Element.properties.sharing_profile.groups
-            groups.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.sharing_profile.groups.Element
-            _element.ids = AAZListType()
-            _element.type = AAZStrType()
-
-            ids = cls._schema_on_200.value.Element.properties.sharing_profile.groups.Element.ids
-            ids.Element = AAZStrType()
-
-            sharing_status = cls._schema_on_200.value.Element.properties.sharing_status
-            sharing_status.aggregated_state = AAZStrType(
-                serialized_name="aggregatedState",
-                flags={"read_only": True},
-            )
-            sharing_status.summary = AAZListType()
-
-            summary = cls._schema_on_200.value.Element.properties.sharing_status.summary
-            summary.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.sharing_status.summary.Element
-            _element.details = AAZStrType()
-            _element.region = AAZStrType()
-            _element.state = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            soft_delete_policy = cls._schema_on_200.value.Element.properties.soft_delete_policy
-            soft_delete_policy.is_soft_delete_enabled = AAZBoolType(
-                serialized_name="isSoftDeleteEnabled",
             )
 
             tags = cls._schema_on_200.value.Element.tags

@@ -7,7 +7,6 @@
 from argcomplete.completers import FilesCompleter
 
 from knack.arguments import CLIArgumentType
-from knack.deprecation import Deprecated
 
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.parameters import get_datetime_type
@@ -42,7 +41,6 @@ def load_arguments(self, _):
     DedicatedHostLicenseTypes = self.get_models('DedicatedHostLicenseTypes')
     OrchestrationServiceNames, OrchestrationServiceStateAction = self.get_models('OrchestrationServiceNames', 'OrchestrationServiceStateAction', operation_group='virtual_machine_scale_sets')
     RebootSetting, VMGuestPatchClassificationWindows, VMGuestPatchClassificationLinux = self.get_models('VMGuestPatchRebootSetting', 'VMGuestPatchClassificationWindows', 'VMGuestPatchClassificationLinux')
-    GallerySharingPermissionTypes = self.get_models('GallerySharingPermissionTypes', operation_group='shared_galleries')
     ReplicationMode = self.get_models('ReplicationMode', operation_group='gallery_image_versions')
     DiskControllerTypes = self.get_models('DiskControllerTypes', operation_group='virtual_machines')
 
@@ -1258,18 +1256,6 @@ def load_arguments(self, _):
         c.argument('gallery_image_name', options_list=['--gallery-image-definition', '-i'], help='gallery image definition')
         c.argument('gallery_image_version', options_list=['--gallery-image-version', '-e'], help='gallery image version')
 
-    with self.argument_context('sig show') as c:
-        c.argument('gallery_name', options_list=['--gallery-name', '-r'], id_part='name', help='gallery name')
-        c.argument('gallery_image_name', options_list=['--gallery-image-definition', '-i'], id_part='child_name_1', help='gallery image definition')
-
-    with self.argument_context('sig show') as c:
-        c.argument('select', help='The select expression to apply on the operation.')
-        c.argument('sharing_groups', action='store_true', help='The expand query option to query shared gallery groups')
-
-    with self.argument_context('sig list-shared') as c:
-        c.argument('location', arg_type=get_location_type(self.cli_ctx))
-        c.argument('shared_to', shared_to_type)
-
     for scope in ['sig share add', 'sig share remove']:
         with self.argument_context(scope) as c:
             c.argument('gallery_name', type=str, help='The name of the Shared Image Gallery.', id_part='name')
@@ -1318,28 +1304,6 @@ def load_arguments(self, _):
         c.argument('shared_to', shared_to_type)
         c.argument('marker', arg_type=marker_type)
         c.argument('show_next_marker', action='store_true', help='Show nextMarker in result when specified.')
-
-    with self.argument_context('sig create') as c:
-        c.argument('description', help='the description of the gallery')
-
-    with self.argument_context('sig update') as c:
-        c.ignore('gallery')
-
-    for scope in ['sig create', 'sig update']:
-        with self.argument_context(scope) as c:
-            c.argument('permissions', arg_type=get_enum_type(GallerySharingPermissionTypes),
-                       arg_group='Sharing Profile',
-                       min_api='2020-09-30',
-                       help='This property allows you to specify the permission of sharing gallery.')
-            c.argument('soft_delete', arg_type=get_three_state_flag(), min_api='2021-03-01',
-                       deprecate_info=Deprecated(self.cli_ctx, hide=True, message_func=lambda x: "Argument '--soft-delete' is in preview and under development. Reference and support levels: https://aka.ms/CLI_refstatus"),
-                       help='Enable soft-deletion for resources in this gallery, '
-                            'allowing them to be recovered within retention time.')
-            c.argument('publisher_uri', help='Community gallery publisher uri.')
-            c.argument('publisher_contact', options_list=['--publisher-email'],
-                       help='Community gallery publisher contact email.')
-            c.argument('eula', help='Community gallery publisher eula.')
-            c.argument('public_name_prefix', help='Community gallery public name prefix.')
 
     with self.argument_context('sig image-definition create') as c:
         c.argument('description', help='the description of the gallery image definition')

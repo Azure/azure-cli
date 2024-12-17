@@ -6647,7 +6647,7 @@ class VMGalleryImage(ScenarioTest):
         ])
 
         # Check result by shared user
-        self.cmd('sig list-shared --location {location}', checks=[
+        self.cmd('sig list-shared --location {location} --query "[?name==\'{unique_name}\']"', checks=[
             self.check('[0].location', '{location}'),
             self.check('[0].name', '{unique_name}'),
             self.check('[0].uniqueId', '/SharedGalleries/{unique_name}')
@@ -7517,9 +7517,6 @@ class VMGalleryImage(ScenarioTest):
         if self.is_live:
             time.sleep(30)
 
-        self.cmd('sig image-version delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image_name} '
-                 '--gallery-image-version {version}')
-
         self.cmd('sig update -g {rg} -r {gallery} --soft-delete False', checks=[
             self.check('location', 'westus'),
             self.check('name', '{gallery}'),
@@ -7534,6 +7531,9 @@ class VMGalleryImage(ScenarioTest):
         ])
         if self.is_live:
             time.sleep(30)
+
+        self.cmd('sig image-version delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image_name} '
+                 '--gallery-image-version {version}')
 
         from azure.cli.core.azclierror import InvalidArgumentValueError
         with self.assertRaises(InvalidArgumentValueError):
@@ -7745,12 +7745,13 @@ class VMGalleryImage(ScenarioTest):
             self.check('sharingProfile.permissions', 'Private')
         ])
 
-        # update gallery from private to community
-        self.cmd('sig update -g {rg} --gallery-name {gallery1} --permissions Community '
-                 '--publisher-uri pubUri --publisher-email test@123.com --eula eula --public-name-prefix pubName',
-                 checks=[
-                     self.check('sharingProfile.permissions', 'Community')
-                 ])
+        # Update gallery from private to community.
+        # This command is commented out because the backend service currently prevents updating 'Private' to 'Community'.
+        # self.cmd('sig update -g {rg} --gallery-name {gallery1} --permissions Community '
+        #          '--publisher-uri pubUri --publisher-email test@123.com --eula eula --public-name-prefix pubName',
+        #          checks=[
+        #              self.check('sharingProfile.permissions', 'Community')
+        #          ])
 
 
 class VMGalleryApplication(ScenarioTest):
