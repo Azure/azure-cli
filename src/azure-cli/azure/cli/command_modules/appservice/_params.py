@@ -1009,7 +1009,7 @@ subscription than the app service environment, please use the resource ID for --
     with self.argument_context('functionapp deployment github-actions')as c:
         c.argument('name', arg_type=functionapp_name_arg_type)
         c.argument('resource_group', arg_type=resource_group_name_type)
-        c.argument('repo', help='The GitHub repository to which the workflow file will be added. In the format: `https://github.com/<owner>/<repository-name> or <owner>/<repository-name>`')
+        c.argument('repo', help='The GitHub repository to which the workflow file will be added. In the format: `https://github.com/<owner>/<repository-name>` or `<owner>/<repository-name>`')
         c.argument('token', help='A Personal Access Token with write access to the specified repository. For more information: https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line', arg_group="Github")
         c.argument('slot', options_list=['--slot', '-s'], help='The name of the slot. Default to the production slot if not specified.')
         c.argument('branch', options_list=['--branch', '-b'], help='The branch to which the workflow file will be added.')
