@@ -95,8 +95,8 @@ def updateVmEncryptionSetting(cmd, vm, resource_group_name, vm_name, encryption_
 def isVersionSuppprtedForEncryptionIdentity(cmd):
     from azure.cli.core.profiles import ResourceType
     from knack.util import CLIError
-    if not cmd.supported_api_version(min_api='2023-07-01', resource_type=ResourceType.MGMT_COMPUTE):
-        raise CLIError("Usage error: Encryption Identity required API version 2023-07-01 or higher."
+    if not cmd.supported_api_version(min_api='2023-09-01', resource_type=ResourceType.MGMT_COMPUTE):
+        raise CLIError("Usage error: Encryption Identity required API version 2023-09-01 or higher."
                        "You can set the cloud's profile to use the required API Version with:"
                        "az cloud set --profile latest --name <cloud name>")
     return True
