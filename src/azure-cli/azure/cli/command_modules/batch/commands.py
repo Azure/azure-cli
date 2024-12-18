@@ -49,7 +49,7 @@ def load_command_table(self, _):
         return getattr(factories, f"mgmt_{name}_client_factory")
 
     def get_data_factory():
-        return getattr(factories, f"batch_data_service_factory")
+        return factories.batch_data_client_factory
 
     # Mgmt Account Operations
     with self.command_group('batch account', get_mgmt_type('batch_account'), client_factory=get_mgmt_factory('batch_account')) as g:
@@ -116,7 +116,7 @@ def load_command_table(self, _):
         g.batch_command('set', 'update_job', flatten=2)
         g.batch_command('reset', 'replace_job', flatten=2)
         g.batch_command('disable', 'disable_job')
-        g.custom_command('list', 'list_job', table_transformer=job_list_table_format)
+        g.custom_command('list', 'list_jobs', table_transformer=job_list_table_format)
         g.batch_command('enable', 'enable_job')
         g.batch_command('stop', 'terminate_job')
         g.batch_command('prep-release-status list', 'list_job_preparation_and_release_task_status')
