@@ -47,17 +47,17 @@ class List(AAZCommand):
             required=True,
         )
         _args_schema.offer = AAZStrArg(
-            options=["--offer"],
+            options=["-f", "--offer"],
             help="A valid image publisher offer.",
             required=True,
         )
-        _args_schema.publisher_name = AAZStrArg(
-            options=["--publisher-name"],
+        _args_schema.publisher = AAZStrArg(
+            options=["-p", "--publisher"],
             help="A valid image publisher.",
             required=True,
         )
-        _args_schema.skus = AAZStrArg(
-            options=["--skus"],
+        _args_schema.sku = AAZStrArg(
+            options=["-s", "--sku"],
             help="A valid image SKU.",
             required=True,
         )
@@ -134,11 +134,11 @@ class List(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "publisherName", self.ctx.args.publisher_name,
+                    "publisherName", self.ctx.args.publisher,
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "skus", self.ctx.args.skus,
+                    "skus", self.ctx.args.sku,
                     required=True,
                 ),
                 **self.serialize_url_param(

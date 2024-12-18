@@ -2281,21 +2281,6 @@ def list_vm_images(cmd, image_location=None, publisher_name=None, offer=None, sk
     return all_images
 
 
-# def list_offers(cmd, publisher_name, location, edge_zone=None):
-#     client = _compute_client_factory(cmd.cli_ctx).virtual_machine_images
-#     return client.list_offers(location=location, publisher_name=publisher_name)
-#
-#
-# def list_publishers(cmd, location, edge_zone=None):
-#     client = _compute_client_factory(cmd.cli_ctx).virtual_machine_images
-#     return client.list_publishers(location=location)
-#
-#
-# def list_sku(cmd, location, publisher_name, offer, edge_zone=None, ):
-#     client = _compute_client_factory(cmd.cli_ctx).virtual_machine_images
-#     return client.list_skus(location=location, publisher_name=publisher_name, offer=offer)
-
-
 def show_vm_image(cmd, urn=None, publisher=None, offer=None, sku=None, version=None, location=None, edge_zone=None):
     from azure.cli.core.commands.parameters import get_one_of_subscription_locations
     from azure.cli.core.azclierror import (MutuallyExclusiveArgumentError,
@@ -2321,9 +2306,14 @@ def show_vm_image(cmd, urn=None, publisher=None, offer=None, sku=None, version=N
     elif not publisher or not offer or not sku or not version:
         raise RequiredArgumentMissingError(error_msg)
 
-    client = _compute_client_factory(cmd.cli_ctx)
-    return client.virtual_machine_images.get(location=location, publisher_name=publisher,
-                                                 offer=offer, skus=sku, version=version)
+    _VMImage = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "vm.image")
+    return _VMImage.Show(cli_ctx=cmd.cli_ctx)(command_args={
+        'location': location,
+        'publisher': publisher,
+        'offer': offer,
+        'sku': sku,
+        'version': version,
+    })
 
 
 def accept_market_ordering_terms(cmd, urn=None, publisher=None, offer=None, plan=None):

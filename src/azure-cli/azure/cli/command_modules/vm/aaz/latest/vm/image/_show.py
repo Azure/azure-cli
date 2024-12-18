@@ -43,25 +43,25 @@ class Show(AAZCommand):
             id_part="name",
         )
         _args_schema.offer = AAZStrArg(
-            options=["--offer"],
+            options=["-f", "--offer"],
             help="A valid image publisher offer.",
             required=True,
             id_part="child_name_3",
         )
-        _args_schema.publisher_name = AAZStrArg(
-            options=["--publisher-name"],
+        _args_schema.publisher = AAZStrArg(
+            options=["-p", "--publisher"],
             help="A valid image publisher.",
             required=True,
             id_part="child_name_1",
         )
-        _args_schema.skus = AAZStrArg(
-            options=["--skus"],
+        _args_schema.sku = AAZStrArg(
+            options=["-s", "--sku"],
             help="A valid image SKU.",
             required=True,
             id_part="child_name_4",
         )
         _args_schema.version = AAZStrArg(
-            options=["-n", "--name", "--version"],
+            options=["--version"],
             help="A valid image SKU version.",
             required=True,
             id_part="child_name_5",
@@ -123,11 +123,11 @@ class Show(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "publisherName", self.ctx.args.publisher_name,
+                    "publisherName", self.ctx.args.publisher,
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "skus", self.ctx.args.skus,
+                    "skus", self.ctx.args.sku,
                     required=True,
                 ),
                 **self.serialize_url_param(

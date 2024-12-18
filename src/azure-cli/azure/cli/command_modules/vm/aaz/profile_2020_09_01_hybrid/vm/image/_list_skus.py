@@ -15,13 +15,16 @@ from azure.cli.core.aaz import *
     "vm image list-skus",
 )
 class ListSkus(AAZCommand):
-    """List the VM image SKUs available in the Azure Marketplace.
+    """List a list of virtual machine image SKUs for the specified location, publisher, and offer.
+
+    :example: List all skus available for CentOS published by OpenLogic in the West US region.
+        az vm image list-skus -l westus -f CentOS -p OpenLogic
     """
 
     _aaz_info = {
-        "version": "2024-07-01",
+        "version": "2020-06-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/locations/{}/publishers/{}/artifacttypes/vmimage/offers/{}/skus", "2024-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/locations/{}/publishers/{}/artifacttypes/vmimage/offers/{}/skus", "2020-06-01"],
         ]
     }
 
@@ -46,13 +49,13 @@ class ListSkus(AAZCommand):
             id_part="name",
         )
         _args_schema.offer = AAZStrArg(
-            options=["--offer"],
+            options=["-f", "--offer"],
             help="A valid image publisher offer.",
             required=True,
             id_part="child_name_3",
         )
-        _args_schema.publisher_name = AAZStrArg(
-            options=["--publisher-name"],
+        _args_schema.publisher = AAZStrArg(
+            options=["-p", "--publisher"],
             help="A valid image publisher.",
             required=True,
             id_part="child_name_1",
@@ -100,7 +103,7 @@ class ListSkus(AAZCommand):
 
         @property
         def error_format(self):
-            return "ODataV4Format"
+            return "MgmtErrorFormat"
 
         @property
         def url_parameters(self):
@@ -114,7 +117,7 @@ class ListSkus(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "publisherName", self.ctx.args.publisher_name,
+                    "publisherName", self.ctx.args.publisher,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -128,7 +131,7 @@ class ListSkus(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-07-01",
+                    "api-version", "2020-06-01",
                     required=True,
                 ),
             }
@@ -164,9 +167,6 @@ class ListSkus(AAZCommand):
             _schema_on_200.Element = AAZObjectType()
 
             _element = cls._schema_on_200.Element
-            _element.extended_location = AAZObjectType(
-                serialized_name="extendedLocation",
-            )
             _element.id = AAZStrType()
             _element.location = AAZStrType(
                 flags={"required": True},
@@ -175,10 +175,6 @@ class ListSkus(AAZCommand):
                 flags={"required": True},
             )
             _element.tags = AAZDictType()
-
-            extended_location = cls._schema_on_200.Element.extended_location
-            extended_location.name = AAZStrType()
-            extended_location.type = AAZStrType()
 
             tags = cls._schema_on_200.Element.tags
             tags.Element = AAZStrType()

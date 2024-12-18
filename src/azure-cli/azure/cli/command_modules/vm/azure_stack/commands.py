@@ -357,9 +357,6 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_vm_extension_images')
 
     with self.command_group('vm image', compute_vm_image_sdk) as g:
-        g.custom_command('list-offers', 'list_offers')
-        g.custom_command('list-publishers', 'list_publishers')
-        g.custom_command('list-skus', 'list_sku')
         g.custom_command('list', 'list_vm_images')
         g.custom_show_command('show', 'show_vm_image')
         g.custom_command('accept-terms', 'accept_market_ordering_terms',

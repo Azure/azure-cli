@@ -25,9 +25,9 @@ class ListPublishers(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2020-06-01",
+        "version": "2017-12-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/locations/{}/publishers", "2020-06-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/locations/{}/publishers", "2017-12-01"],
         ]
     }
 
@@ -114,7 +114,7 @@ class ListPublishers(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2020-06-01",
+                    "api-version", "2017-12-01",
                     required=True,
                 ),
             }

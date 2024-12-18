@@ -11,23 +11,14 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "vm image list-publishers",
-)
-class ListPublishers(AAZCommand):
-    """List a list of virtual machine image publishers for the specified Azure location.
-
-    :example: List all publishers in the West US region.
-        az vm image list-publishers -l westus
-
-    :example: List all publishers with names starting with "Open" in westus.
-        az vm image list-publishers -l westus --query "[?starts_with(name, 'Open')]"
+class List(AAZCommand):
+    """List a list of all virtual machine image versions for the specified location, publisher, offer, and SKU.
     """
 
     _aaz_info = {
-        "version": "2020-06-01",
+        "version": "2017-12-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/locations/{}/publishers", "2020-06-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/locations/{}/publishers/{}/artifacttypes/vmimage/offers/{}/skus/{}/versions", "2017-12-01"],
         ]
     }
 
@@ -49,13 +40,37 @@ class ListPublishers(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.location = AAZResourceLocationArg(
             required=True,
-            id_part="name",
+        )
+        _args_schema.offer = AAZStrArg(
+            options=["-f", "--offer"],
+            help="A valid image publisher offer.",
+            required=True,
+        )
+        _args_schema.publisher = AAZStrArg(
+            options=["-p", "--publisher"],
+            help="A valid image publisher.",
+            required=True,
+        )
+        _args_schema.sku = AAZStrArg(
+            options=["-s", "--sku"],
+            help="A valid image SKU.",
+            required=True,
+        )
+        _args_schema.expand = AAZStrArg(
+            options=["--expand"],
+            help="The expand expression to apply on the operation.",
+        )
+        _args_schema.orderby = AAZStrArg(
+            options=["--orderby"],
+        )
+        _args_schema.top = AAZIntArg(
+            options=["--top"],
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.VirtualMachineImagesListPublishers(ctx=self.ctx)()
+        self.VirtualMachineImagesList(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -70,7 +85,7 @@ class ListPublishers(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class VirtualMachineImagesListPublishers(AAZHttpOperation):
+    class VirtualMachineImagesList(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -84,7 +99,7 @@ class ListPublishers(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/providers/Microsoft.Compute/locations/{location}/publishers",
+                "/subscriptions/{subscriptionId}/providers/Microsoft.Compute/locations/{location}/publishers/{publisherName}/artifacttypes/vmimage/offers/{offer}/skus/{skus}/versions",
                 **self.url_parameters
             )
 
@@ -104,6 +119,18 @@ class ListPublishers(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
+                    "offer", self.ctx.args.offer,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "publisherName", self.ctx.args.publisher,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "skus", self.ctx.args.sku,
+                    required=True,
+                ),
+                **self.serialize_url_param(
                     "subscriptionId", self.ctx.subscription_id,
                     required=True,
                 ),
@@ -114,7 +141,16 @@ class ListPublishers(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2020-06-01",
+                    "$expand", self.ctx.args.expand,
+                ),
+                **self.serialize_query_param(
+                    "$orderby", self.ctx.args.orderby,
+                ),
+                **self.serialize_query_param(
+                    "$top", self.ctx.args.top,
+                ),
+                **self.serialize_query_param(
+                    "api-version", "2017-12-01",
                     required=True,
                 ),
             }
@@ -165,8 +201,8 @@ class ListPublishers(AAZCommand):
             return cls._schema_on_200
 
 
-class _ListPublishersHelper:
-    """Helper class for ListPublishers"""
+class _ListHelper:
+    """Helper class for List"""
 
 
-__all__ = ["ListPublishers"]
+__all__ = ["List"]

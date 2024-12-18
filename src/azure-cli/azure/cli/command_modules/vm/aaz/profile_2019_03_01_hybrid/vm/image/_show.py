@@ -11,23 +11,20 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "vm image list-offers",
-)
-class ListOffers(AAZCommand):
-    """List a list of virtual machine image offers for the specified location and publisher.
+class Show(AAZCommand):
+    """Get a virtual machine image.
 
-    :example: List all offers from Microsoft in the West US region.
-        az vm image list-offers -l westus -p MicrosoftWindowsServer
+    :example: Get the details for a VM image available in the Azure Marketplace.
+        az vm image show --location westus --urn publisher:offer:sku:version
 
-    :example: List all offers from OpenLocic in the West US region.
-        az vm image list-offers -l westus -p OpenLogic
+    :example: Show information for the latest available CentOS image from OpenLogic.
+        az vm image show -l westus -f CentOS -p OpenLogic --sku 7.3 --version $(az vm image list -p OpenLogic -s 7.3 --all --query "[?offer=='CentOS'].version" -o tsv | sort -u | tail -n 1)
     """
 
     _aaz_info = {
-        "version": "2020-06-01",
+        "version": "2017-12-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/locations/{}/publishers/{}/artifacttypes/vmimage/offers", "2020-06-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/locations/{}/publishers/{}/artifacttypes/vmimage/offers/{}/skus/{}/versions/{}", "2017-12-01"],
         ]
     }
 
@@ -51,17 +48,35 @@ class ListOffers(AAZCommand):
             required=True,
             id_part="name",
         )
+        _args_schema.offer = AAZStrArg(
+            options=["-f", "--offer"],
+            help="A valid image publisher offer.",
+            required=True,
+            id_part="child_name_3",
+        )
         _args_schema.publisher = AAZStrArg(
             options=["-p", "--publisher"],
             help="A valid image publisher.",
             required=True,
             id_part="child_name_1",
         )
+        _args_schema.sku = AAZStrArg(
+            options=["-s", "--sku"],
+            help="A valid image SKU.",
+            required=True,
+            id_part="child_name_4",
+        )
+        _args_schema.version = AAZStrArg(
+            options=["--version"],
+            help="A valid image SKU version.",
+            required=True,
+            id_part="child_name_5",
+        )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.VirtualMachineImagesListOffers(ctx=self.ctx)()
+        self.VirtualMachineImagesGet(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -76,7 +91,7 @@ class ListOffers(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class VirtualMachineImagesListOffers(AAZHttpOperation):
+    class VirtualMachineImagesGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -90,7 +105,7 @@ class ListOffers(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/providers/Microsoft.Compute/locations/{location}/publishers/{publisherName}/artifacttypes/vmimage/offers",
+                "/subscriptions/{subscriptionId}/providers/Microsoft.Compute/locations/{location}/publishers/{publisherName}/artifacttypes/vmimage/offers/{offer}/skus/{skus}/versions/{version}",
                 **self.url_parameters
             )
 
@@ -110,11 +125,23 @@ class ListOffers(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
+                    "offer", self.ctx.args.offer,
+                    required=True,
+                ),
+                **self.serialize_url_param(
                     "publisherName", self.ctx.args.publisher,
                     required=True,
                 ),
                 **self.serialize_url_param(
+                    "skus", self.ctx.args.sku,
+                    required=True,
+                ),
+                **self.serialize_url_param(
                     "subscriptionId", self.ctx.subscription_id,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "version", self.ctx.args.version,
                     required=True,
                 ),
             }
@@ -124,7 +151,7 @@ class ListOffers(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2020-06-01",
+                    "api-version", "2017-12-01",
                     required=True,
                 ),
             }
@@ -154,29 +181,63 @@ class ListOffers(AAZCommand):
             if cls._schema_on_200 is not None:
                 return cls._schema_on_200
 
-            cls._schema_on_200 = AAZListType()
+            cls._schema_on_200 = AAZObjectType()
 
             _schema_on_200 = cls._schema_on_200
-            _schema_on_200.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.Element
-            _element.id = AAZStrType()
-            _element.location = AAZStrType(
+            _schema_on_200.id = AAZStrType()
+            _schema_on_200.location = AAZStrType(
                 flags={"required": True},
             )
-            _element.name = AAZStrType(
+            _schema_on_200.name = AAZStrType(
                 flags={"required": True},
             )
-            _element.tags = AAZDictType()
+            _schema_on_200.properties = AAZObjectType(
+                flags={"client_flatten": True},
+            )
+            _schema_on_200.tags = AAZDictType()
 
-            tags = cls._schema_on_200.Element.tags
+            properties = cls._schema_on_200.properties
+            properties.data_disk_images = AAZListType(
+                serialized_name="dataDiskImages",
+            )
+            properties.os_disk_image = AAZObjectType(
+                serialized_name="osDiskImage",
+            )
+            properties.plan = AAZObjectType()
+
+            data_disk_images = cls._schema_on_200.properties.data_disk_images
+            data_disk_images.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.properties.data_disk_images.Element
+            _element.lun = AAZIntType(
+                flags={"read_only": True},
+            )
+
+            os_disk_image = cls._schema_on_200.properties.os_disk_image
+            os_disk_image.operating_system = AAZStrType(
+                serialized_name="operatingSystem",
+                flags={"required": True},
+            )
+
+            plan = cls._schema_on_200.properties.plan
+            plan.name = AAZStrType(
+                flags={"required": True},
+            )
+            plan.product = AAZStrType(
+                flags={"required": True},
+            )
+            plan.publisher = AAZStrType(
+                flags={"required": True},
+            )
+
+            tags = cls._schema_on_200.tags
             tags.Element = AAZStrType()
 
             return cls._schema_on_200
 
 
-class _ListOffersHelper:
-    """Helper class for ListOffers"""
+class _ShowHelper:
+    """Helper class for Show"""
 
 
-__all__ = ["ListOffers"]
+__all__ = ["Show"]

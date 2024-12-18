@@ -11,17 +11,20 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "vm image show",
-)
 class Show(AAZCommand):
     """Get a virtual machine image.
+
+    :example: Get the details for a VM image available in the Azure Marketplace.
+        az vm image show --location westus --urn publisher:offer:sku:version
+
+    :example: Show information for the latest available CentOS image from OpenLogic.
+        az vm image show -l westus -f CentOS -p OpenLogic --sku 7.3 --version $(az vm image list -p OpenLogic -s 7.3 --all --query "[?offer=='CentOS'].version" -o tsv | sort -u | tail -n 1)
     """
 
     _aaz_info = {
-        "version": "2024-07-01",
+        "version": "2020-06-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/locations/{}/publishers/{}/artifacttypes/vmimage/offers/{}/skus/{}/versions/{}", "2024-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/locations/{}/publishers/{}/artifacttypes/vmimage/offers/{}/skus/{}/versions/{}", "2020-06-01"],
         ]
     }
 
@@ -46,25 +49,25 @@ class Show(AAZCommand):
             id_part="name",
         )
         _args_schema.offer = AAZStrArg(
-            options=["--offer"],
+            options=["-f", "--offer"],
             help="A valid image publisher offer.",
             required=True,
             id_part="child_name_3",
         )
-        _args_schema.publisher_name = AAZStrArg(
-            options=["--publisher-name"],
+        _args_schema.publisher = AAZStrArg(
+            options=["-p", "--publisher"],
             help="A valid image publisher.",
             required=True,
             id_part="child_name_1",
         )
-        _args_schema.skus = AAZStrArg(
-            options=["--skus"],
+        _args_schema.sku = AAZStrArg(
+            options=["-s", "--sku"],
             help="A valid image SKU.",
             required=True,
             id_part="child_name_4",
         )
         _args_schema.version = AAZStrArg(
-            options=["-n", "--name", "--version"],
+            options=["--version"],
             help="A valid image SKU version.",
             required=True,
             id_part="child_name_5",
@@ -112,7 +115,7 @@ class Show(AAZCommand):
 
         @property
         def error_format(self):
-            return "ODataV4Format"
+            return "MgmtErrorFormat"
 
         @property
         def url_parameters(self):
@@ -126,11 +129,11 @@ class Show(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "publisherName", self.ctx.args.publisher_name,
+                    "publisherName", self.ctx.args.publisher,
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "skus", self.ctx.args.skus,
+                    "skus", self.ctx.args.sku,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -148,7 +151,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-07-01",
+                    "api-version", "2020-06-01",
                     required=True,
                 ),
             }
@@ -181,9 +184,6 @@ class Show(AAZCommand):
             cls._schema_on_200 = AAZObjectType()
 
             _schema_on_200 = cls._schema_on_200
-            _schema_on_200.extended_location = AAZObjectType(
-                serialized_name="extendedLocation",
-            )
             _schema_on_200.id = AAZStrType()
             _schema_on_200.location = AAZStrType(
                 flags={"required": True},
@@ -196,12 +196,7 @@ class Show(AAZCommand):
             )
             _schema_on_200.tags = AAZDictType()
 
-            extended_location = cls._schema_on_200.extended_location
-            extended_location.name = AAZStrType()
-            extended_location.type = AAZStrType()
-
             properties = cls._schema_on_200.properties
-            properties.architecture = AAZStrType()
             properties.automatic_os_upgrade_properties = AAZObjectType(
                 serialized_name="automaticOSUpgradeProperties",
             )
@@ -209,12 +204,8 @@ class Show(AAZCommand):
                 serialized_name="dataDiskImages",
             )
             properties.disallowed = AAZObjectType()
-            properties.features = AAZListType()
             properties.hyper_v_generation = AAZStrType(
                 serialized_name="hyperVGeneration",
-            )
-            properties.image_deprecation_status = AAZObjectType(
-                serialized_name="imageDeprecationStatus",
             )
             properties.os_disk_image = AAZObjectType(
                 serialized_name="osDiskImage",
@@ -239,28 +230,6 @@ class Show(AAZCommand):
             disallowed.vm_disk_type = AAZStrType(
                 serialized_name="vmDiskType",
             )
-
-            features = cls._schema_on_200.properties.features
-            features.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.properties.features.Element
-            _element.name = AAZStrType()
-            _element.value = AAZStrType()
-
-            image_deprecation_status = cls._schema_on_200.properties.image_deprecation_status
-            image_deprecation_status.alternative_option = AAZObjectType(
-                serialized_name="alternativeOption",
-            )
-            image_deprecation_status.image_state = AAZStrType(
-                serialized_name="imageState",
-            )
-            image_deprecation_status.scheduled_deprecation_time = AAZStrType(
-                serialized_name="scheduledDeprecationTime",
-            )
-
-            alternative_option = cls._schema_on_200.properties.image_deprecation_status.alternative_option
-            alternative_option.type = AAZStrType()
-            alternative_option.value = AAZStrType()
 
             os_disk_image = cls._schema_on_200.properties.os_disk_image
             os_disk_image.operating_system = AAZStrType(

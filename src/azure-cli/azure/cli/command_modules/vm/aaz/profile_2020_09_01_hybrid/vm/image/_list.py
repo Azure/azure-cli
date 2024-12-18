@@ -16,9 +16,9 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-07-01",
+        "version": "2020-06-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/locations/{}/publishers/{}/artifacttypes/vmimage/offers/{}/skus/{}/versions", "2024-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/locations/{}/publishers/{}/artifacttypes/vmimage/offers/{}/skus/{}/versions", "2020-06-01"],
         ]
     }
 
@@ -42,17 +42,17 @@ class List(AAZCommand):
             required=True,
         )
         _args_schema.offer = AAZStrArg(
-            options=["--offer"],
+            options=["-f", "--offer"],
             help="A valid image publisher offer.",
             required=True,
         )
-        _args_schema.publisher_name = AAZStrArg(
-            options=["--publisher-name"],
+        _args_schema.publisher = AAZStrArg(
+            options=["-p", "--publisher"],
             help="A valid image publisher.",
             required=True,
         )
-        _args_schema.skus = AAZStrArg(
-            options=["--skus"],
+        _args_schema.sku = AAZStrArg(
+            options=["-s", "--sku"],
             help="A valid image SKU.",
             required=True,
         )
@@ -109,7 +109,7 @@ class List(AAZCommand):
 
         @property
         def error_format(self):
-            return "ODataV4Format"
+            return "MgmtErrorFormat"
 
         @property
         def url_parameters(self):
@@ -123,11 +123,11 @@ class List(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "publisherName", self.ctx.args.publisher_name,
+                    "publisherName", self.ctx.args.publisher,
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "skus", self.ctx.args.skus,
+                    "skus", self.ctx.args.sku,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -150,7 +150,7 @@ class List(AAZCommand):
                     "$top", self.ctx.args.top,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2024-07-01",
+                    "api-version", "2020-06-01",
                     required=True,
                 ),
             }
@@ -186,9 +186,6 @@ class List(AAZCommand):
             _schema_on_200.Element = AAZObjectType()
 
             _element = cls._schema_on_200.Element
-            _element.extended_location = AAZObjectType(
-                serialized_name="extendedLocation",
-            )
             _element.id = AAZStrType()
             _element.location = AAZStrType(
                 flags={"required": True},
@@ -197,10 +194,6 @@ class List(AAZCommand):
                 flags={"required": True},
             )
             _element.tags = AAZDictType()
-
-            extended_location = cls._schema_on_200.Element.extended_location
-            extended_location.name = AAZStrType()
-            extended_location.type = AAZStrType()
 
             tags = cls._schema_on_200.Element.tags
             tags.Element = AAZStrType()

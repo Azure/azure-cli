@@ -2267,13 +2267,13 @@ def list_offers(cmd, publisher_name, location, edge_zone=None):
         return ListOffers(cli_ctx=cmd.cli_ctx)(command_args={
             'location': location,
             'edge_zone': edge_zone,
-            'publisher_name': publisher_name
+            'publisher': publisher_name
         })
     else:
         from .aaz.latest.vm.image import ListOffers
         return ListOffers(cli_ctx=cmd.cli_ctx)(command_args={
             'location': location,
-            'publisher_name': publisher_name
+            'publisher': publisher_name
         })
 
 
@@ -2297,14 +2297,14 @@ def list_sku(cmd, location, publisher_name, offer, edge_zone=None,):
         return ListSkus(cli_ctx=cmd.cli_ctx)(command_args={
             'location': location,
             'edge_zone': edge_zone,
-            'publisher_name': publisher_name,
+            'publisher': publisher_name,
             'offer': offer,
         })
     else:
         from .aaz.latest.vm.image import ListSkus
         return ListSkus(cli_ctx=cmd.cli_ctx)(command_args={
             'location': location,
-            'publisher_name': publisher_name,
+            'publisher': publisher_name,
             'offer': offer,
         })
 
@@ -2338,18 +2338,18 @@ def show_vm_image(cmd, urn=None, publisher=None, offer=None, sku=None, version=N
         return Show(cli_ctx=cmd.cli_ctx)(command_args={
             'location': location,
             'edge_zone': edge_zone,
-            'publisher_name': publisher,
+            'publisher': publisher,
             'offer': offer,
-            'skus': sku,
+            'sku': sku,
             'version': version,
         })
     else:
         from .aaz.latest.vm.image import Show
         return Show(cli_ctx=cmd.cli_ctx)(command_args={
             'location': location,
-            'publisher_name': publisher,
+            'publisher': publisher,
             'offer': offer,
-            'skus': sku,
+            'sku': sku,
             'version': version,
         })
 

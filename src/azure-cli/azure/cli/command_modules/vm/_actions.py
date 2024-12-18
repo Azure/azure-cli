@@ -69,12 +69,12 @@ def load_images_thru_services(cli_ctx, publisher, offer, sku, location, edge_zon
                 offers = VMImageEdgeZoneListOffers(cli_ctx=cli_ctx)(command_args={
                     'location': location,
                     'edge_zone': edge_zone,
-                    'publisher_name': publisher,
+                    'publisher': publisher,
                 })
             else:
                 offers = VMImageListOffers(cli_ctx=cli_ctx)(command_args={
                     'location': location,
-                    'publisher_name': publisher,
+                    'publisher': publisher,
                 })
         except ResourceNotFoundError as e:
             logger.warning(str(e))
@@ -87,13 +87,13 @@ def load_images_thru_services(cli_ctx, publisher, offer, sku, location, edge_zon
                     skus = VMImageEdgeZoneListSkus(cli_ctx=cli_ctx)(command_args={
                         'location': location,
                         'edge_zone': edge_zone,
-                        'publisher_name': publisher,
+                        'publisher': publisher,
                         'offer': o.name
                     })
                 else:
                     skus = VMImageListSkus(cli_ctx=cli_ctx)(command_args={
                         'location': location,
-                        'publisher_name': publisher,
+                        'publisher': publisher,
                         'offer': o.name
                     })
             except ResourceNotFoundError as e:
@@ -108,17 +108,17 @@ def load_images_thru_services(cli_ctx, publisher, offer, sku, location, edge_zon
                         images = VMImageEdgeZoneList(cli_ctx=cli_ctx)(command_args={
                             'location': location,
                             'edge_zone': edge_zone,
-                            'publisher_name': publisher,
+                            'publisher': publisher,
                             'offer': o.name,
-                            'skus': s.name,
+                            'sku': s.name,
                             'expand': expand,
                         })
                     else:
                         images = VMImageList(cli_ctx=cli_ctx)(command_args={
                             'location': location,
-                            'publisher_name': publisher,
+                            'publisher': publisher,
                             'offer': o.name,
-                            'skus': s.name,
+                            'sku': s.name,
                             'expand': expand,
                         })
                 except ResourceNotFoundError as e:

@@ -12,22 +12,22 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "vm image list-publishers",
+    "vm image list-offers",
 )
-class ListPublishers(AAZCommand):
-    """List a list of virtual machine image publishers for the specified Azure location.
+class ListOffers(AAZCommand):
+    """List a list of virtual machine image offers for the specified location and publisher.
 
-    :example: List all publishers in the West US region.
-        az vm image list-publishers -l westus
+    :example: List all offers from Microsoft in the West US region.
+        az vm image list-offers -l westus -p MicrosoftWindowsServer
 
-    :example: List all publishers with names starting with "Open" in westus.
-        az vm image list-publishers -l westus --query "[?starts_with(name, 'Open')]"
+    :example: List all offers from OpenLocic in the West US region.
+        az vm image list-offers -l westus -p OpenLogic
     """
 
     _aaz_info = {
-        "version": "2020-06-01",
+        "version": "2017-03-30",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/locations/{}/publishers", "2020-06-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/locations/{}/publishers/{}/artifacttypes/vmimage/offers", "2017-03-30"],
         ]
     }
 
@@ -51,11 +51,17 @@ class ListPublishers(AAZCommand):
             required=True,
             id_part="name",
         )
+        _args_schema.publisher = AAZStrArg(
+            options=["-p", "--publisher"],
+            help="A valid image publisher.",
+            required=True,
+            id_part="child_name_1",
+        )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.VirtualMachineImagesListPublishers(ctx=self.ctx)()
+        self.VirtualMachineImagesListOffers(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -70,7 +76,7 @@ class ListPublishers(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class VirtualMachineImagesListPublishers(AAZHttpOperation):
+    class VirtualMachineImagesListOffers(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -84,7 +90,7 @@ class ListPublishers(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/providers/Microsoft.Compute/locations/{location}/publishers",
+                "/subscriptions/{subscriptionId}/providers/Microsoft.Compute/locations/{location}/publishers/{publisherName}/artifacttypes/vmimage/offers",
                 **self.url_parameters
             )
 
@@ -104,6 +110,10 @@ class ListPublishers(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
+                    "publisherName", self.ctx.args.publisher,
+                    required=True,
+                ),
+                **self.serialize_url_param(
                     "subscriptionId", self.ctx.subscription_id,
                     required=True,
                 ),
@@ -114,7 +124,7 @@ class ListPublishers(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2020-06-01",
+                    "api-version", "2017-03-30",
                     required=True,
                 ),
             }
@@ -165,8 +175,8 @@ class ListPublishers(AAZCommand):
             return cls._schema_on_200
 
 
-class _ListPublishersHelper:
-    """Helper class for ListPublishers"""
+class _ListOffersHelper:
+    """Helper class for ListOffers"""
 
 
-__all__ = ["ListPublishers"]
+__all__ = ["ListOffers"]
