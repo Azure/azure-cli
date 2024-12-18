@@ -137,7 +137,7 @@ def set_feature(cmd,
 
             # Convert KeyValue object to required FeatureFlag format for
             # display
-            feature_flag = map_keyvalue_to_featureflag(set_kv, show_conditions=True)
+            feature_flag = map_keyvalue_to_featureflag(set_kv, show_all_details=True)
             entry = json.dumps(feature_flag, default=lambda o: o.__dict__, indent=2, sort_keys=True, ensure_ascii=False)
 
         except Exception as exception:
@@ -233,7 +233,7 @@ def delete_feature(cmd,
     # Convert result list of KeyValue to list of FeatureFlag
     deleted_ff = []
     for success_kv in deleted_kvs:
-        success_ff = map_keyvalue_to_featureflag(success_kv, show_conditions=False)
+        success_ff = map_keyvalue_to_featureflag(success_kv, show_all_details=False)
         deleted_ff.append(success_ff)
 
     return deleted_ff
@@ -265,7 +265,7 @@ def show_feature(cmd,
             raise CLIErrors.ResourceNotFoundError("The feature flag does not exist.")
 
         retrieved_kv = convert_configurationsetting_to_keyvalue(config_setting)
-        feature_flag = map_keyvalue_to_featureflag(keyvalue=retrieved_kv, show_conditions=True)
+        feature_flag = map_keyvalue_to_featureflag(keyvalue=retrieved_kv, show_all_details=True)
 
         # If user has specified fields, we still get all the fields and then
         # filter what we need from the response.
@@ -354,7 +354,7 @@ def lock_feature(cmd,
         try:
             new_kv = azconfig_client.set_read_only(retrieved_kv, match_condition=MatchConditions.IfNotModified, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
             return map_keyvalue_to_featureflag(convert_configurationsetting_to_keyvalue(new_kv),
-                                               show_conditions=False)
+                                               show_all_details=False)
         except HttpResponseError as exception:
             if exception.status_code == StatusCodes.PRECONDITION_FAILED:
                 logger.debug('Retrying lock operation %s times with exception: concurrent setting operations', i + 1)
@@ -408,7 +408,7 @@ def unlock_feature(cmd,
         try:
             new_kv = azconfig_client.set_read_only(retrieved_kv, read_only=False, match_condition=MatchConditions.IfNotModified, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
             return map_keyvalue_to_featureflag(convert_configurationsetting_to_keyvalue(new_kv),
-                                               show_conditions=False)
+                                               show_all_details=False)
         except HttpResponseError as exception:
             if exception.status_code == StatusCodes.PRECONDITION_FAILED:
                 logger.debug('Retrying unlock operation %s times with exception: concurrent setting operations', i + 1)
@@ -473,7 +473,7 @@ def enable_feature(cmd,
                                                                                      ensure_ascii=False),
                                                             correlation_request_id=correlation_request_id)
 
-            return map_keyvalue_to_featureflag(keyvalue=updated_key_value, show_conditions=False)
+            return map_keyvalue_to_featureflag(keyvalue=updated_key_value, show_all_details=False)
 
         except HttpResponseError as exception:
             if exception.status_code == StatusCodes.PRECONDITION_FAILED:
@@ -539,7 +539,7 @@ def disable_feature(cmd,
                                                                                      ensure_ascii=False),
                                                             correlation_request_id=correlation_request_id)
 
-            return map_keyvalue_to_featureflag(keyvalue=updated_key_value, show_conditions=False)
+            return map_keyvalue_to_featureflag(keyvalue=updated_key_value, show_all_details=False)
 
         except HttpResponseError as exception:
             if exception.status_code == StatusCodes.PRECONDITION_FAILED:
@@ -1069,7 +1069,7 @@ def __list_features(
         for kv in retrieved_keyvalues:
             try:
                 retrieved_featureflags.append(
-                    map_keyvalue_to_featureflag(keyvalue=kv, show_conditions=True)
+                    map_keyvalue_to_featureflag(keyvalue=kv, show_all_details=True)
                 )
             except ValueError as exception:
                 logger.warning("%s\n", exception)

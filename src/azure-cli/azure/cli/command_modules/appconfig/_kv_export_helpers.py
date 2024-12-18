@@ -24,6 +24,7 @@ from ._featuremodels import (
     custom_serialize_allocation,
     custom_serialize_conditions,
     custom_serialize_variants,
+    custom_serialize_telemetry
 )
 from ._kv_helpers import __is_key_vault_ref
 from ._models import KeyValue
@@ -311,7 +312,9 @@ def __export_feature_to_new_ms_schema(feature):
             )
 
         if feature.telemetry is not None:
-            feature_dict[FeatureFlagConstants.TELEMETRY] = feature.telemetry
+            feature_dict[FeatureFlagConstants.TELEMETRY] = custom_serialize_telemetry(
+                feature.telemetry
+            )
 
         if feature.display_name is not None:
             feature_dict[FeatureFlagConstants.DISPLAY_NAME] = feature.display_name

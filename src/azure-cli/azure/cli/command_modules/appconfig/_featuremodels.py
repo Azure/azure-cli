@@ -92,7 +92,7 @@ class FeatureFlagValue:
             FeatureFlagConstants.DISPLAY_NAME: self.display_name,
             FeatureFlagConstants.ALLOCATION: custom_serialize_allocation(self.allocation),
             FeatureFlagConstants.VARIANTS: custom_serialize_variants(self.variants),
-            FeatureFlagConstants.TELEMETRY: self.telemetry
+            FeatureFlagConstants.TELEMETRY: custom_serialize_telemetry(self.telemetry)
         }
 
         return json.dumps(featureflagvalue, indent=2, ensure_ascii=False)
@@ -170,7 +170,7 @@ class FeatureFlag:
             "Conditions": custom_serialize_conditions(self.conditions),
             "Allocation": custom_serialize_allocation(self.allocation),
             "Variants": custom_serialize_variants(self.variants),
-            "Telemetry": self.telemetry,
+            "Telemetry": custom_serialize_telemetry(self.telemetry),
             "Display Name": self.display_name
         }
 
@@ -544,6 +544,44 @@ class FeatureAllocation:
         return json.dumps(featureallocation, indent=2, ensure_ascii=False)
 
 
+class FeatureTelemetry:
+    """
+    Feature telemtry class.
+
+    :ivar bool enabled:
+        Indicates if telemetry is enabled.
+    :ivar dict metadata:
+        A container for metadata that should be bundled with flag telemetry.
+    """
+    def __init__(self, enabled=False, metadata=None):
+        self.enabled = enabled
+        self.metadata = metadata
+
+    @classmethod
+    def convert_from_dict(cls, feature_telemetry_dict):
+        """
+        Convert JSON string to FeatureTelemetry object
+
+        Args:
+            dictionary - {string, Any}
+
+        Return:
+            FeatureTelemetry object
+        """
+        enabled = feature_telemetry_dict.get(FeatureFlagConstants.ENABLED, False)
+        metadata = feature_telemetry_dict.get(FeatureFlagConstants.METADATA, None)
+
+        return cls(enabled=enabled, metadata=metadata)
+
+    def __repr__(self):
+        feature_telemetry = {
+            FeatureFlagConstants.ENABLED: self.enabled,
+            FeatureFlagConstants.METADATA: self.metadata,
+        }
+
+        return json.dumps(feature_telemetry, indent=2, ensure_ascii=False)
+
+
 # Feature Flag Helper Functions #
 def custom_serialize_conditions(conditions_dict):
     """
@@ -630,6 +668,29 @@ def custom_serialize_variants(variants_list):
     return featurevariants
 
 
+def custom_serialize_telemetry(telemetry):
+    """
+    Helper Function to serialize Telemetry
+
+    Args:
+        telemetry - FeatureTelemetry object
+
+    Return:
+        JSON serializable dictionary
+
+    """
+
+    feature_telemetry_dict = {}
+
+    if telemetry.enabled:
+        feature_telemetry_dict[FeatureFlagConstants.TELEMETRY] = telemetry.enabled
+
+    if telemetry.metadata:
+        feature_telemetry_dict[FeatureFlagConstants.METADATA] = telemetry.metadata
+
+    return feature_telemetry_dict
+
+
 def map_featureflag_to_keyvalue(featureflag):
     """
     Helper Function to convert FeatureFlag object to KeyValue object
@@ -674,23 +735,19 @@ def map_featureflag_to_keyvalue(featureflag):
         raise ValueError(error_msg)
 
     except Exception as exception:
-        error_msg = (
-            "Exception while converting feature flag to key value: {0}\n{1}".format(
-                featureflag.key, exception
-            )
-        )
+        error_msg = "Exception while converting feature flag to key value: {0}\n{1}".format(featureflag.key, exception)
         raise Exception(error_msg)  # pylint: disable=broad-exception-raised
 
     return set_kv
 
 
-def map_keyvalue_to_featureflag(keyvalue, show_conditions=True):
+def map_keyvalue_to_featureflag(keyvalue, show_all_details=True):
     """
     Helper Function to convert KeyValue object to FeatureFlag object for display
 
     Args:
         keyvalue - KeyValue object to be converted
-        show_conditions - Boolean for controlling whether we want to display "Conditions" or not
+        show_all_details - Boolean for controlling whether we want to display "Conditions", "Allocation", "Variants", "Telemetry" or not
 
     Return:
         FeatureFlag object
@@ -722,15 +779,18 @@ def map_keyvalue_to_featureflag(keyvalue, show_conditions=True):
         last_modified=keyvalue.last_modified,
         allocation=feature_flag_value.allocation,
         variants=feature_flag_value.variants,
-        telemetry=feature_flag_value.telemetry,
+        telemetry=feature_flag_value.telemetry
     )
 
     # By Default, we will try to show conditions unless the user has
     # specifically filtered them using --fields arg.
     # But in some operations like 'Delete feature', we don't want
     # to display all the conditions as a result of delete operation
-    if not show_conditions:
+    if not show_all_details:
         del feature_flag.conditions
+        del feature_flag.allocation
+        del feature_flag.variants
+        del feature_flag.telemetry
     return feature_flag
 
 
@@ -756,12 +816,16 @@ def map_keyvalue_to_featureflagvalue(keyvalue):
             FeatureFlagConstants.DESCRIPTION,
             FeatureFlagConstants.ENABLED,
             FeatureFlagConstants.CONDITIONS,
+            FeatureFlagConstants.ALLOCATION,
+            FeatureFlagConstants.VARIANTS,
+            FeatureFlagConstants.TELEMETRY,
+            FeatureFlagConstants.DISPLAY_NAME
         }
-        if valid_fields != feature_flag_dict.keys():
+        if valid_fields.union(feature_flag_dict.keys()) == valid_fields:
             logger.debug(
                 "'%s' feature flag is missing required values or it contains ",
                 keyvalue.key +
-                "unsupported values. Setting missing value to defaults and ignoring unsupported values\n",
+                "unsupported values. Unsupported values will be ignored.\n",
             )
 
         feature_name = feature_flag_dict.get(FeatureFlagConstants.ID, "")
@@ -819,6 +883,11 @@ def map_keyvalue_to_featureflagvalue(keyvalue):
                     variant_list.append(feature_variant)
 
             feature_flag_dict[FeatureFlagConstants.VARIANTS] = variant_list
+
+        # Telemetry
+        telemetry = feature_flag_dict.get(FeatureFlagConstants.TELEMETRY, None)
+        if telemetry:
+            feature_flag_dict[FeatureFlagConstants.TELEMETRY] = FeatureTelemetry.convert_from_dict(telemetry)
 
         feature_flag_value = FeatureFlagValue(
             id_=feature_name,

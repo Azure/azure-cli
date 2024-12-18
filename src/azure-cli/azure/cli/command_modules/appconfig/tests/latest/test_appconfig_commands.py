@@ -950,7 +950,6 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         import_separator_features_file_path = os.path.join(TEST_DIR, 'import_separator_features.json')
         import_features_alt_syntax_file_path = os.path.join(TEST_DIR, 'import_features_alt_syntax.json')
         import_features_random_conditions_file_path = os.path.join(TEST_DIR, 'import_features_random_conditions.json')
-        import_features_invalid_requirement_type_file_path = os.path.join(TEST_DIR, 'import_features_invalid_requirement_type.json')
         os.environ['AZURE_APPCONFIG_FM_COMPATIBLE'] = 'True'
 
         self.kwargs.update({
@@ -1072,14 +1071,35 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         assert imported_kvs == exported_kvs
         os.remove(exported_file_path)
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(parameter_name_for_location='location')
+    def test_azconfig_import_export_new_fm_schema(self, resource_group, location):
+        # Feature flags test with new ms fm schema
+        os.environ['AZURE_APPCONFIG_FM_COMPATIBLE'] = 'False'
+
+        config_store_name = self.create_random_name(prefix='NewFmImport', length=24)
+
+        location = 'eastus'
+        sku = 'standard'
+        self.kwargs.update({
+            'config_store_name': config_store_name,
+            'rg_loc': location,
+            'rg': resource_group,
+            'sku': sku,
+            'import_source': 'file',
+            'imported_format': 'json',
+        })
+        _create_config_store(self, self.kwargs)
+       
+        # Invalid requirement type should fail import
+        import_features_invalid_requirement_type_file_path = os.path.join(TEST_DIR, 'import_features_invalid_requirement_type.json')
         self.kwargs.update({
             'imported_file_path': import_features_invalid_requirement_type_file_path
         })
 
-        # Invalid requirement type should fail import
         with self.assertRaisesRegex(CLIError, "Feature 'Timestamp' must have an any/all requirement type"):
             self.cmd(
-            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} -y')
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} -y')
 
         # Invalid variants import
         invalid_variants_file_path = os.path.join(TEST_DIR, 'import_invalid_variants.json')
@@ -1090,8 +1110,6 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
             self.cmd(
             'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} -y')
         
-        # Feature flags test with new ms fm schema
-        os.environ['AZURE_APPCONFIG_FM_COMPATIBLE'] = 'False'
         imported_new_fm_schema_file_path = os.path.join(TEST_DIR, 'import_features_new_fm_schema.json')
         exported_new_fm_schema_file_path = os.path.join(TEST_DIR, 'export_features_new_fm_schema.json')
 
@@ -1110,6 +1128,54 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
             exported_kvs = json.load(json_file)
         assert imported_kvs == exported_kvs
         os.remove(exported_new_fm_schema_file_path)
+
+        # Import/Export new fm yaml file
+        imported_new_fm_schema_yaml_file_path = os.path.join(TEST_DIR, 'import_features_new_fm_schema_yaml.json')
+        exported_new_fm_schema_yaml_file_path = os.path.join(TEST_DIR, 'export_features_new_fm_schema_yaml.json')
+        exported_new_fm_schema_as_yaml_file_path = os.path.join(TEST_DIR, 'export_features_new_fm_schema_as_yaml.json')
+
+        self.kwargs.update({
+            'label': 'NewFmSchemaYamlTests',
+            'imported_format': 'yaml',
+            'imported_ffv2_file_path': imported_new_fm_schema_yaml_file_path,
+            'exported_ffv2_file_path': exported_new_fm_schema_yaml_file_path
+        })
+        self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_ffv2_file_path}" --format {imported_format} --label {label} -y')
+        self.cmd(
+            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_ffv2_file_path}" --format {imported_format} --label {label} -y')
+        exported_new_fm_yaml_file = {}
+        exported_new_fm_as_yaml_file = {}
+        with open(exported_new_fm_schema_yaml_file_path) as yaml_file:
+            for yaml_data in list(yaml.safe_load_all(yaml_file)):
+                exported_new_fm_yaml_file.update(yaml_data)
+        with open(exported_new_fm_schema_as_yaml_file_path) as yaml_file:
+            for yaml_data in list(yaml.safe_load_all(yaml_file)):
+                exported_new_fm_as_yaml_file.update(yaml_data)
+        assert exported_new_fm_yaml_file == exported_new_fm_as_yaml_file
+        os.remove(exported_new_fm_schema_yaml_file_path)
+
+        # Import/Export properties file
+        imported_prop_file_path = os.path.join(TEST_DIR, 'import_features_prop.json')
+        exported_prop_file_path = os.path.join(TEST_DIR, 'export_features_prop.json')
+        exported_as_kv_prop_file_path = os.path.join(TEST_DIR, 'export_as_kv_prop.json')
+
+        self.kwargs.update({
+            'label': 'NewFmSchemaPropertiesTests',
+            'imported_format': 'properties',
+            'imported_file_path': imported_prop_file_path,
+            'exported_file_path': exported_prop_file_path
+        })
+        self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} -y')
+        self.cmd(
+            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} -y')
+        with open(exported_prop_file_path) as prop_file:
+            exported_prop_file = javaproperties.load(prop_file)
+        with open(exported_as_kv_prop_file_path) as prop_file:
+            exported_kv_prop_file = javaproperties.load(prop_file)
+        assert exported_prop_file == exported_kv_prop_file
+        os.remove(exported_prop_file_path)
 
 
     @AllowLargeResponse()
@@ -1549,7 +1615,23 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
         assert exported_yaml_file == exported_hyphen_yaml_file
         os.remove(exported_yaml_file_path)
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(parameter_name_for_location='location')
+    def test_azconfig_import_export_respect_both_schemas_naming_conventions(self, resource_group, location):
         # Respect both fm schemas in file
+        config_store_name = self.create_random_name(prefix='BothSchemaTest', length=24)
+
+        location = 'eastus'
+        sku = 'standard'
+        self.kwargs.update({
+            'config_store_name': config_store_name,
+            'rg_loc': location,
+            'rg': resource_group,
+            'sku': sku,
+            'import_source': 'file'
+        })
+        _create_config_store(self, self.kwargs)
+
         # # Camel case naming convention
         os.environ['AZURE_APPCONFIG_FM_COMPATIBLE'] = 'False'
 
@@ -1659,56 +1741,6 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
             expected_duplicate_features = json.load(json_file)
         assert exported_duplicate_features == expected_duplicate_features
         os.remove(exported_duplicate_features_both_schemas_file_path)
-
-        # Import/Export new fm yaml file
-        os.environ['AZURE_APPCONFIG_FM_COMPATIBLE'] = 'False'
-        imported_new_fm_schema_yaml_file_path = os.path.join(TEST_DIR, 'import_features_new_fm_schema_yaml.json')
-        exported_new_fm_schema_yaml_file_path = os.path.join(TEST_DIR, 'export_features_new_fm_schema_yaml.json')
-        exported_new_fm_schema_as_yaml_file_path = os.path.join(TEST_DIR, 'export_features_new_fm_schema_as_yaml.json')
-
-        self.kwargs.update({
-            'label': 'NewFmSchemaYamlTests',
-            'imported_format': 'yaml',
-            'naming_convention': 'hyphen',
-            'imported_ffv2_file_path': imported_new_fm_schema_yaml_file_path,
-            'exported_ffv2_file_path': exported_new_fm_schema_yaml_file_path
-        })
-        self.cmd(
-            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_ffv2_file_path}" --format {imported_format} --label {label} -y')
-        self.cmd(
-            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_ffv2_file_path}" --format {imported_format} --label {label} --naming-convention {naming_convention} -y')
-        exported_new_fm_yaml_file = {}
-        exported_new_fm_as_yaml_file = {}
-        with open(exported_new_fm_schema_yaml_file_path) as yaml_file:
-            for yaml_data in list(yaml.safe_load_all(yaml_file)):
-                exported_new_fm_yaml_file.update(yaml_data)
-        with open(exported_new_fm_schema_as_yaml_file_path) as yaml_file:
-            for yaml_data in list(yaml.safe_load_all(yaml_file)):
-                exported_new_fm_as_yaml_file.update(yaml_data)
-        assert exported_new_fm_yaml_file == exported_new_fm_as_yaml_file
-        os.remove(exported_new_fm_schema_yaml_file_path)
-
-        # Import/Export properties file
-        imported_prop_file_path = os.path.join(TEST_DIR, 'import_features_prop.json')
-        exported_prop_file_path = os.path.join(TEST_DIR, 'export_features_prop.json')
-        exported_as_kv_prop_file_path = os.path.join(TEST_DIR, 'export_as_kv_prop.json')
-
-        self.kwargs.update({
-            'label': 'NewFmSchemaPropertiesTests',
-            'imported_format': 'properties',
-            'imported_file_path': imported_prop_file_path,
-            'exported_file_path': exported_prop_file_path
-        })
-        self.cmd(
-            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} -y')
-        self.cmd(
-            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} -y')
-        with open(exported_prop_file_path) as prop_file:
-            exported_prop_file = javaproperties.load(prop_file)
-        with open(exported_as_kv_prop_file_path) as prop_file:
-            exported_kv_prop_file = javaproperties.load(prop_file)
-        assert exported_prop_file == exported_kv_prop_file
-        os.remove(exported_prop_file_path)
 
         # Invalid fm sections should fail import
         invalid_ms_fm_schema_with_both_schemas_file_path = os.path.join(TEST_DIR, 'import_invalid_ms_fm_schema_with_both_schemas.json')

@@ -157,14 +157,12 @@ def __read_features_from_file(file_path, format_):
                 del config_data[keywordset.feature_management]
                 found_dotnet_schema = True
 
-        ms_feature_management_keyword = (
-            FeatureManagementReservedKeywords.UNDERSCORE.feature_management
-        )
+        ms_feature_management_keyword = FeatureManagementReservedKeywords.UNDERSCORE.feature_management
+
         if ms_feature_management_keyword in config_data:
-            if found_dotnet_schema and any(
-                key != FeatureFlagConstants.FEATURE_FLAGS_KEY
-                for key in config_data[ms_feature_management_keyword].keys()
-            ):
+            found_dotnet_schema_within_ms_fm_schema = any(key != FeatureFlagConstants.FEATURE_FLAGS_KEY for key in config_data[ms_feature_management_keyword].keys())
+
+            if found_dotnet_schema and found_dotnet_schema_within_ms_fm_schema:
                 raise FileOperationError(
                     "Data contains an already defined section with the key %s."
                     % (dotnet_schema_keyword)
@@ -176,10 +174,7 @@ def __read_features_from_file(file_path, format_):
             ):
                 found_ms_fm_schema = True
 
-            if any(
-                key != FeatureFlagConstants.FEATURE_FLAGS_KEY
-                for key in config_data[ms_feature_management_keyword].keys()
-            ):
+            if found_dotnet_schema_within_ms_fm_schema:
                 found_dotnet_schema = True
                 dotnet_schema_keyword = ms_feature_management_keyword
 
@@ -302,7 +297,7 @@ def __read_features_from_msfm_schema(feature_flags_list):
             new_feature = FeatureFlagValue(
                 id_=str(feature.get(FeatureFlagConstants.ID)),
                 enabled=_convert_boolean_value(
-                    feature.get(FeatureFlagConstants.ENABLED, None), feature_id
+                    feature.get(FeatureFlagConstants.ENABLED, False), feature_id
                 ),
                 description=feature.get(FeatureFlagConstants.DESCRIPTION, None),
             )
@@ -352,9 +347,7 @@ def __read_features_from_msfm_schema(feature_flags_list):
             if variants := feature.get(FeatureFlagConstants.VARIANTS, None):
                 new_feature.variants = []
                 for variant in variants:
-                    new_variant = FeatureVariant.convert_from_dict(variant)
-                    if new_variant:
-                        new_feature.variants.append(new_variant)
+                    new_feature.variants.append(FeatureVariant.convert_from_dict(variant))
 
             if telemetry := feature.get(FeatureFlagConstants.TELEMETRY, None):
                 new_feature.telemetry = telemetry
