@@ -1218,7 +1218,7 @@ def generate_randomized_cert_name(thumbprint, prefix, initial="rg"):
     from random import randint
     cert_name = "{}-{}-{}-{:04}".format(prefix[:14], initial[:14], thumbprint[:4].lower(), randint(0, 9999))
     for c in cert_name:
-        if not (c.isalnum() or c == '-' or c == '.'):
+        if not (c.isalnum() or c in ('-', '.')):
             cert_name = cert_name.replace(c, '-')
     return cert_name.lower()
 

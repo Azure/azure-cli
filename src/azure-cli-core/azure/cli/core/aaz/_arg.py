@@ -65,7 +65,7 @@ class AAZArgEnum:
         if isinstance(self.items, dict):
             # convert data, it can be key, value or key.lower() when not case sensitive
             for k, v in self.items.items():
-                if v == data or k == data or not self._case_sensitive and k.lower() == data.lower():
+                if data in (v, k) or not self._case_sensitive and k.lower() == data.lower():
                     key = k
                     break
 

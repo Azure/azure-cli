@@ -197,7 +197,7 @@ class StorageBlobCopyTests(StorageScenarioMixin, LiveScenarioTest):
                              src_blob_name, '--destination-blob-type '+dst_type if dst_type != '' else '')
             self.storage_cmd('storage blob show -c {} -n {}', account1_info, target_container, 'dst'+dst_type). \
                 assert_with_checks([JMESPathCheck('properties.blobType',
-                                                  dst_type if (dst_type != '' and dst_type != 'Detect')
+                                                  dst_type if (dst_type not in ('', 'Detect'))
                                                   else src_type)])
 
         src_type = 'AppendBlob'
@@ -210,7 +210,7 @@ class StorageBlobCopyTests(StorageScenarioMixin, LiveScenarioTest):
                              src_blob_name, '--destination-blob-type ' + dst_type if dst_type != '' else '')
             self.storage_cmd('storage blob show -c {} -n {}', account1_info, target_container, 'dst2' + dst_type). \
                 assert_with_checks([JMESPathCheck('properties.blobType',
-                                                  dst_type if (dst_type != '' and dst_type != 'Detect')
+                                                  dst_type if (dst_type not in ('', 'Detect'))
                                                   else src_type)])
 
         src_type = 'PageBlob'
@@ -223,7 +223,7 @@ class StorageBlobCopyTests(StorageScenarioMixin, LiveScenarioTest):
                              src_blob_name, '--destination-blob-type ' + dst_type if dst_type != '' else '')
             self.storage_cmd('storage blob show -c {} -n {}', account1_info, target_container, 'dst3' + dst_type). \
                 assert_with_checks([JMESPathCheck('properties.blobType',
-                                                  dst_type if (dst_type != '' and dst_type != 'Detect')
+                                                  dst_type if (dst_type not in ('', 'Detect'))
                                                   else src_type)])
 
         # tier
@@ -273,7 +273,7 @@ class StorageBlobCopyTests(StorageScenarioMixin, LiveScenarioTest):
             self.storage_cmd('storage blob show -c {} -n {}', account2_info, target_container_different_account,
                              'dst' + dst_type).\
                 assert_with_checks([JMESPathCheck('properties.blobType',
-                                                  dst_type if (dst_type != '' and dst_type != 'Detect')
+                                                  dst_type if (dst_type not in ('', 'Detect'))
                                                   else src_type)])
 
         src_type = 'AppendBlob'
@@ -287,7 +287,7 @@ class StorageBlobCopyTests(StorageScenarioMixin, LiveScenarioTest):
                              '--destination-blob-type ' + dst_type if dst_type != '' else '')
             self.storage_cmd('storage blob show -c {} -n {}', account2_info, target_container_different_account, 'dst2' + dst_type). \
                 assert_with_checks([JMESPathCheck('properties.blobType',
-                                                  dst_type if (dst_type != '' and dst_type != 'Detect')
+                                                  dst_type if (dst_type not in ('', 'Detect'))
                                                   else src_type)])
 
         src_type = 'PageBlob'
@@ -301,7 +301,7 @@ class StorageBlobCopyTests(StorageScenarioMixin, LiveScenarioTest):
                              '--destination-blob-type ' + dst_type if dst_type != '' else '')
             self.storage_cmd('storage blob show -c {} -n {}', account2_info, target_container_different_account, 'dst3' + dst_type). \
                 assert_with_checks([JMESPathCheck('properties.blobType',
-                                                  dst_type if (dst_type != '' and dst_type != 'Detect')
+                                                  dst_type if (dst_type not in ('', 'Detect'))
                                                   else src_type)])
 
         # tier
@@ -431,12 +431,12 @@ class StorageBlobCopyTests(StorageScenarioMixin, LiveScenarioTest):
                 blob_name = 'src' + src_type
                 self.storage_cmd('storage blob show -c {} -n {}', account1_info, dst_container, blob_name). \
                     assert_with_checks([JMESPathCheck('properties.blobType',
-                                                      dst_type if (dst_type != '' and dst_type != 'Detect')
+                                                      dst_type if (dst_type not in ('', 'Detect'))
                                                       else src_type)])
                 self.storage_cmd('storage blob show -c {} -n {}', account2_info, dst_container_different_account,
                                  blob_name). \
                     assert_with_checks([JMESPathCheck('properties.blobType',
-                                                      dst_type if (dst_type != '' and dst_type != 'Detect')
+                                                      dst_type if (dst_type not in ('', 'Detect'))
                                                       else src_type)])
 
         # tier
