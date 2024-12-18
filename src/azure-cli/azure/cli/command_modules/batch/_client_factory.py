@@ -5,40 +5,40 @@
 
 
 def mgmt_batch_account_client_factory(cli_ctx, _):
-    return batch_client_factory(cli_ctx).batch_account
+    return batch_mgmt_client_factory(cli_ctx).batch_account
 
 
 def mgmt_pool_client_factory(cli_ctx, _):
-    return batch_client_factory(cli_ctx).pool
+    return batch_mgmt_client_factory(cli_ctx).pool
 
 
 def mgmt_private_link_resource_client_factory(cli_ctx, _):
-    return batch_client_factory(cli_ctx).private_link_resource
+    return batch_mgmt_client_factory(cli_ctx).private_link_resource
 
 
 def mgmt_private_endpoint_connection_client_factory(cli_ctx, _):
-    return batch_client_factory(cli_ctx).private_endpoint_connection
+    return batch_mgmt_client_factory(cli_ctx).private_endpoint_connection
 
 
 def mgmt_application_client_factory(cli_ctx, _):
-    return batch_client_factory(cli_ctx).application
+    return batch_mgmt_client_factory(cli_ctx).application
 
 
 def mgmt_application_package_client_factory(cli_ctx, _):
-    return batch_client_factory(cli_ctx).application_package
+    return batch_mgmt_client_factory(cli_ctx).application_package
 
 
 def mgmt_location_client_factory(cli_ctx, _):
-    return batch_client_factory(cli_ctx).location
+    return batch_mgmt_client_factory(cli_ctx).location
 
-def batch_client_factory(cli_ctx, **_):
+def batch_mgmt_client_factory(cli_ctx, **_):
     from azure.mgmt.batch import BatchManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     return get_mgmt_service_client(cli_ctx, BatchManagementClient)
 
 
-def batch_data_service_factory(cmd, kwargs):
-    import azure.batch as batch
+def batch_data_client_factory(cli_ctx, kwargs):
+    from azure.batch import BatchClient
 
     account_name = kwargs.pop('account_name', None)
     account_key = kwargs.pop('account_key', None)
@@ -49,12 +49,13 @@ def batch_data_service_factory(cmd, kwargs):
 
     if not token_credential and not account_key:
         from azure.cli.core._profile import Profile
-        profile = Profile(cli_ctx=cmd.cli_ctx)
-        resource = cmd.cli_ctx.cloud.endpoints.batch_resource_id
+        profile = Profile(cli_ctx=cli_ctx)
+        resource = cli_ctx.cloud.endpoints.batch_resource_id
         token_credential, _, _ = profile.get_login_credentials(resource=resource)
+
     if account_key:
         from azure.core.credentials import AzureNamedKeyCredential
         credential = AzureNamedKeyCredential(name=account_name, key=account_key)
     else:
         credential = token_credential
-    return batch.BatchClient(credential=credential, endpoint=account_endpoint.rstrip('/'))
+    return BatchClient(credential=credential, endpoint=account_endpoint.rstrip('/'))

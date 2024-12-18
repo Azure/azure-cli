@@ -507,7 +507,7 @@ class AzureBatchDataPlaneCommand:
             cmd = kwargs.pop('cmd')
 
             try:
-                client = self.client_factory(cmd, kwargs)
+                client = self.client_factory(cmd.cli_ctx, kwargs)
                 #self._build_options(kwargs)
 
                 stream_output = kwargs.pop('destination', None)

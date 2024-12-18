@@ -439,9 +439,8 @@ def activate_application_package(client, resource_group_name, account_name, appl
 
 # Data plane custom commands
 
-def list_job(client, job_schedule_id=None, filter=None,  # pylint: disable=redefined-builtin
+def list_jobs(client, job_schedule_id=None, filter=None,  # pylint: disable=redefined-builtin
              select=None, expand=None):
-    
     if job_schedule_id:
         return client.list_jobs_from_schedule(job_schedule_id=job_schedule_id,filter=filter,select=select,expand=expand)
   
