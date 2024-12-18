@@ -14,7 +14,6 @@ from .batch_preparers import BatchAccountPreparer, BatchScenarioMixin
 
 from .recording_processors import BatchAccountKeyReplacer, StorageSASReplacer
 import azure.batch.models as models
-import azure.mgmt.batch
 
 class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
 
@@ -302,7 +301,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         self.batch_cmd('batch job delete --job-id {j_id} --yes')
 
     @ResourceGroupPreparer()
-    @BatchAccountPreparer(location='eastus')
+    @BatchAccountPreparer(location='eastus2')
     def test_batch_task_create_cmd(self, resource_group, batch_account_name):
         self.set_account_info(batch_account_name, resource_group)
         self.kwargs.update({
@@ -350,7 +349,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         self.assertTrue(any([i for i in result if i['taskId'] == 'xplatTask1']))
 
     @ResourceGroupPreparer()
-    @BatchAccountPreparer(location='eastus')
+    @BatchAccountPreparer(location='eastus2')
     def test_batch_jobs_and_tasks(self, resource_group, batch_account_name):
         self.set_account_info(batch_account_name, resource_group)
         self.kwargs.update({
