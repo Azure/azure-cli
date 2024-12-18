@@ -2370,10 +2370,10 @@ def accept_market_ordering_terms(cmd, urn=None, publisher=None, offer=None, plan
             raise InvalidArgumentValueError('--urn should be in the format of publisher:offer:sku:version')
         publisher, offer, _, _ = items
         image = show_vm_image(cmd, urn)
-        if not image.plan:
+        if not image.get('plan', None):
             logger.warning("Image '%s' has no terms to accept.", urn)
             return
-        plan = image.plan.name
+        plan = image['plan']['name']
     else:
         if not publisher or not offer or not plan:
             raise RequiredArgumentMissingError(error_msg)
@@ -2402,9 +2402,9 @@ def _terms_prepare(cmd, urn, publisher, offer, plan):
             raise CLIError('usage error: urn should be in the format of publisher:offer:sku:version.')
         publisher, offer = terms[0], terms[1]
         image = show_vm_image(cmd, urn)
-        if not image.plan:
+        if not image.get('plan', None):
             raise CLIError("Image '%s' has no terms to accept." % urn)
-        plan = image.plan.name
+        plan = image['plan']['name']
     else:
         if not all([publisher, offer, plan]):
             raise CLIError(
