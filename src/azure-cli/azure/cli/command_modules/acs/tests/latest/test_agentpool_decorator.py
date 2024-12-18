@@ -1518,7 +1518,7 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
             AKSAgentPoolParamDict({"if_match": ""}),
             self.models,
             DecoratorMode.CREATE,
-            decorator_mode=DecoratorMode.UPDATE,
+            self.agentpool_decorator_mode,
         )
         self.assertEqual(ctx_3.get_if_match(), "")
 
@@ -1546,7 +1546,7 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
             AKSAgentPoolParamDict({"if_none_match": ""}),
             self.models,
             DecoratorMode.CREATE,
-            decorator_mode=DecoratorMode.UPDATE,
+            self.agentpool_decorator_mode,
         )
         self.assertEqual(ctx_3.get_if_none_match(), "")
 
@@ -1748,6 +1748,12 @@ class AKSAgentPoolContextStandaloneModeTestCase(AKSAgentPoolContextCommonTestCas
     def test_get_enable_secure_boot(self):
         self.common_get_enable_secure_boot()
 
+    def test_get_if_match(self):
+        self.test_get_if_match()
+
+    def test_get_if_none_match(self):
+        self.test_get_if_none_match()
+
 class AKSAgentPoolContextManagedClusterModeTestCase(AKSAgentPoolContextCommonTestCase):
     def setUp(self):
         self.cli_ctx = MockCLI()
@@ -1917,6 +1923,12 @@ class AKSAgentPoolContextManagedClusterModeTestCase(AKSAgentPoolContextCommonTes
     def test_get_enable_secure_boot(self):
         self.common_get_enable_secure_boot()
 
+    def test_get_if_match(self):
+        self.test_get_if_match()
+
+    def test_get_if_none_match(self):
+        self.test_get_if_none_match()
+    
 class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
     def _remove_defaults_in_agentpool(self, agentpool):
         self.defaults_in_agentpool = {}
