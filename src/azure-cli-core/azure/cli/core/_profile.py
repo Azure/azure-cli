@@ -353,7 +353,8 @@ class Profile:
                 str(account[_SUBSCRIPTION_ID]),
                 str(account[_TENANT_ID]))
 
-    def get_raw_token(self, resource=None, scopes=None, subscription=None, tenant=None):
+    def get_raw_token(self, resource=None, scopes=None, subscription=None, tenant=None, credential_out=None):
+        # credential_out is reserved for unit tests to check the credential properties. Do not use it in normal cases.
         # Convert resource to scopes
         if resource and not scopes:
             from .auth.util import resource_to_scopes
@@ -401,6 +402,9 @@ class Profile:
 
         # Build a tuple of (token_type, token, token_entry)
         token_tuple = 'Bearer', sdk_token.token, token_entry
+
+        if credential_out is not None:
+            credential_out['credential'] = cred
 
         # Return a tuple of (token_tuple, subscription, tenant)
         return (token_tuple,
