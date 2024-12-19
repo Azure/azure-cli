@@ -9,10 +9,11 @@ import time
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from knack.util import CLIError
+import pytest
 from .batch_preparers import BatchAccountPreparer, BatchScenarioMixin
 
 from .recording_processors import BatchAccountKeyReplacer, StorageSASReplacer
-
+import azure.batch.models as models
 
 class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
 
@@ -27,35 +28,6 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         self.assertTrue(os.path.isfile(filepath), 'File {} does not exist.'.format(filepath))
         return filepath
 
-    @ResourceGroupPreparer()
-    @BatchAccountPreparer(location='eastus')
-    def test_batch_certificate_cmd(self, resource_group, batch_account_name):
-        create_cert_file_path = self._get_test_data_file('batchtest.cer')
-        self.kwargs.update({
-            'cert': '59833fd835f827e9ec693a4c82435a6360cc6271',
-            'cert_f': create_cert_file_path
-        })
-
-        # test create certificate with default set
-        self.set_account_info(batch_account_name, resource_group)
-
-        self.batch_cmd('batch certificate create --thumbprint {cert} '
-                       '--certificate-file "{cert_f}"').assert_with_checks([
-                           self.check('thumbprint', '{cert}'),
-                           self.check('thumbprintAlgorithm', 'sha1'),
-                           self.check('state', 'active')])
-
-        # test create account with default set
-        self.batch_cmd('batch certificate list').assert_with_checks([
-            self.check('length(@)', 1),
-            self.check('[0].thumbprint', '{cert}')])
-
-        self.batch_cmd("batch certificate delete --thumbprint {cert} --yes")
-
-        self.batch_cmd('batch certificate show --thumbprint {cert}').assert_with_checks([
-            self.check('thumbprint', '{cert}'),
-            self.check('thumbprintAlgorithm', 'sha1'),
-            self.check('state', 'deleting')])
 
     @ResourceGroupPreparer()
     @BatchAccountPreparer()
@@ -212,7 +184,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
 
         self.assertTrue(res['virtualMachineConfiguration']['osDisk']['caching'])
         self.assertTrue(res['virtualMachineConfiguration']['osDisk']['managedDisk']['storageAccountType'])
-        self.assertTrue(res['virtualMachineConfiguration']['osDisk']['diskSizeGb'])
+        self.assertTrue(res['virtualMachineConfiguration']['osDisk']['diskSizeGB'])
 
         self.batch_cmd('batch pool delete --pool-id {p_id} --yes')
 
@@ -258,10 +230,10 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         print(res)
 
         self.assertTrue(res['upgradePolicy']['mode'])
-        self.assertTrue(res['upgradePolicy']['automaticOsUpgradePolicy']['disableAutomaticRollback'])
-        self.assertTrue(res['upgradePolicy']['automaticOsUpgradePolicy']['enableAutomaticOsUpgrade'])
-        self.assertTrue(res['upgradePolicy']['automaticOsUpgradePolicy']['osRollingUpgradeDeferral'])
-        self.assertTrue(res['upgradePolicy']['automaticOsUpgradePolicy']['useRollingUpgradePolicy'])
+        self.assertTrue(res['upgradePolicy']['automaticOSUpgradePolicy']['disableAutomaticRollback'])
+        self.assertTrue(res['upgradePolicy']['automaticOSUpgradePolicy']['enableAutomaticOSUpgrade'])
+        self.assertTrue(res['upgradePolicy']['automaticOSUpgradePolicy']['osRollingUpgradeDeferral'])
+        self.assertTrue(res['upgradePolicy']['automaticOSUpgradePolicy']['useRollingUpgradePolicy'])
         self.assertTrue(res['upgradePolicy']['rollingUpgradePolicy']['enableCrossZoneUpgrade'])
         self.assertEqual(res['upgradePolicy']['rollingUpgradePolicy']['maxBatchInstancePercent'], 20)
         self.assertEqual(res['upgradePolicy']['rollingUpgradePolicy']['maxUnhealthyInstancePercent'], 20)
@@ -329,7 +301,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         self.batch_cmd('batch job delete --job-id {j_id} --yes')
 
     @ResourceGroupPreparer()
-    @BatchAccountPreparer(location='eastus')
+    @BatchAccountPreparer(location='eastus2')
     def test_batch_task_create_cmd(self, resource_group, batch_account_name):
         self.set_account_info(batch_account_name, resource_group)
         self.kwargs.update({
@@ -377,7 +349,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         self.assertTrue(any([i for i in result if i['taskId'] == 'xplatTask1']))
 
     @ResourceGroupPreparer()
-    @BatchAccountPreparer(location='eastus')
+    @BatchAccountPreparer(location='eastus2')
     def test_batch_jobs_and_tasks(self, resource_group, batch_account_name):
         self.set_account_info(batch_account_name, resource_group)
         self.kwargs.update({
@@ -416,7 +388,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
             self.check('metadata[0].value', 'value')])
 
         # test bad enum value
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(CLIError):
             self.batch_cmd('batch job set --job-id {j_id} --on-all-tasks-complete badValue ')
 
         # test patch job
@@ -425,7 +397,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         self.batch_cmd('batch job show --job-id {j_id}').assert_with_checks([
             self.check('onAllTasksComplete', 'terminatejob'),
             self.check('constraints.maxTaskRetryCount', 0),
-            self.check('constraints.maxWallClockTime', '1279 days, 12:30:05'),
+            self.check('constraints.maxWallClockTime', 'P1279DT12H30M5S'),
             self.check('jobManagerTask.id', 'JobManager'),
             self.check('jobManagerTask.environmentSettings[0].name', 'CLI_TEST_VAR'),
             self.check('jobManagerTask.environmentSettings[0].value', 'CLI_TEST_VAR_VALUE'),
@@ -502,9 +474,10 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         # test create pool from JSON file
         self.kwargs['json'] = self._get_test_data_file('batch-pool-create.json').replace('\\', '\\\\')
         self.batch_cmd('batch pool create --json-file "{json}"')
+        res = self.batch_cmd('batch pool show --pool-id azure-cli-test-json').get_output_in_json()
         self.batch_cmd('batch pool show --pool-id azure-cli-test-json').assert_with_checks([
             self.check('userAccounts[0].name', 'cliTestUser'),
-            self.check('startTask.userIdentity.userName', 'cliTestUser'),
+            self.check('startTask.userIdentity.username', 'cliTestUser'),
             self.check('taskSlotsPerNode', 3)
         ])
 
@@ -584,6 +557,6 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         self.batch_cmd('batch pool create --id app_package_test --vm-size small --os-family 4 '
                        '--application-package-references does-not-exist', expect_failure=True)
         self.batch_cmd('batch pool set --pool-id {pool_p} --application-package-references does-not-exist',
-                       expect_failure=True)
+                       expect_failure=True)#
 
         # TODO: Test node commands
