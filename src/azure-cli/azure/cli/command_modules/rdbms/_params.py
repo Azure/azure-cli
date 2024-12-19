@@ -823,7 +823,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             argument_context_string = '{} flexible-server virtual-endpoint {}'.format(command_group, scope)
             with self.argument_context(argument_context_string) as c:
                 c.argument('resource_group_name', arg_type=resource_group_name_type)
-                c.argument('server_name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
+                if scope == 'list':
+                    c.argument('server_name', options_list=['--server-name', '-s'], id_part=None, arg_type=server_name_arg_type)
+                else:
+                    c.argument('server_name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
                 c.argument('virtual_endpoint_name', options_list=['--name', '-n'], arg_type=virtual_endpoint_arg_type, validator=virtual_endpoint_name_validator)
 
         with self.argument_context('{} flexible-server long-term-retention list'.format(command_group)) as c:
@@ -990,7 +993,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             argument_context_string = '{} flexible-server server-logs {}'.format(command_group, scope)
             with self.argument_context(argument_context_string) as c:
                 c.argument('resource_group_name', arg_type=resource_group_name_type)
-                c.argument('server_name', id_part='name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
+                if scope == "list":
+                    c.argument('server_name', options_list=['--server-name', '-s'], id_part=None, arg_type=server_name_arg_type)
+                else:
+                    c.argument('server_name', id_part='name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
 
         with self.argument_context('{} flexible-server server-logs download'.format(command_group)) as c:
             c.argument('file_name', options_list=['--name', '-n'], nargs='+', help='Space-separated list of log filenames on the server to download.')
@@ -1004,7 +1010,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             with self.argument_context('{} flexible-server private-endpoint-connection {}'.format(command_group, scope)) as c:
                 c.argument('resource_group_name', arg_type=resource_group_name_type)
                 if scope == "list":
-                    c.argument('server_name', options_list=['--server-name', '-s'], id_part='name', arg_type=server_name_arg_type, required=False)
+                    c.argument('server_name', options_list=['--server-name', '-s'], id_part=None, arg_type=server_name_arg_type, required=False)
                 else:
                     c.argument('server_name', options_list=['--server-name', '-s'], id_part='name', arg_type=server_name_arg_type, required=False,
                                help='Name of the Server. Required if --id is not specified')
@@ -1020,7 +1026,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         for scope in ['list', 'show']:
             with self.argument_context('{} flexible-server private-link-resource {}'.format(command_group, scope)) as c:
                 c.argument('resource_group_name', arg_type=resource_group_name_type)
-                c.argument('server_name', options_list=['--server-name', '-s'], id_part='name', arg_type=server_name_arg_type, required=False)
+                if scope == 'list':
+                    c.argument('server_name', options_list=['--server-name', '-s'], id_part=None, arg_type=server_name_arg_type, required=False)
+                else:
+                    c.argument('server_name', options_list=['--server-name', '-s'], id_part='name', arg_type=server_name_arg_type, required=False)
 
         # GTID
         if command_group == 'mysql':
