@@ -129,7 +129,7 @@ def set_feature(cmd,
 
                 set_kv = KeyValue(key=key,
                                   label=label,
-                                  value=json.dumps(feature_flag_value, default=lambda o: o.__dict__, ensure_ascii=False),
+                                  value=json.dumps(feature_flag_value, default=lambda o: {k: v for k, v in o.__dict__.items() if v is not None}, ensure_ascii=False),
                                   content_type=FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE,
                                   tags=retrieved_kv.tags if tags is None else tags,
                                   etag=retrieved_kv.etag,
@@ -137,7 +137,7 @@ def set_feature(cmd,
 
             # Convert KeyValue object to required FeatureFlag format for
             # display
-            feature_flag = map_keyvalue_to_featureflag(set_kv, show_conditions=True)
+            feature_flag = map_keyvalue_to_featureflag(set_kv, show_all_details=True)
             entry = json.dumps(feature_flag, default=lambda o: o.__dict__, indent=2, sort_keys=True, ensure_ascii=False)
 
         except Exception as exception:
@@ -233,7 +233,7 @@ def delete_feature(cmd,
     # Convert result list of KeyValue to list of FeatureFlag
     deleted_ff = []
     for success_kv in deleted_kvs:
-        success_ff = map_keyvalue_to_featureflag(success_kv, show_conditions=False)
+        success_ff = map_keyvalue_to_featureflag(success_kv, show_all_details=False)
         deleted_ff.append(success_ff)
 
     return deleted_ff
@@ -265,7 +265,7 @@ def show_feature(cmd,
             raise CLIErrors.ResourceNotFoundError("The feature flag does not exist.")
 
         retrieved_kv = convert_configurationsetting_to_keyvalue(config_setting)
-        feature_flag = map_keyvalue_to_featureflag(keyvalue=retrieved_kv, show_conditions=True)
+        feature_flag = map_keyvalue_to_featureflag(keyvalue=retrieved_kv, show_all_details=True)
 
         # If user has specified fields, we still get all the fields and then
         # filter what we need from the response.
@@ -354,7 +354,7 @@ def lock_feature(cmd,
         try:
             new_kv = azconfig_client.set_read_only(retrieved_kv, match_condition=MatchConditions.IfNotModified, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
             return map_keyvalue_to_featureflag(convert_configurationsetting_to_keyvalue(new_kv),
-                                               show_conditions=False)
+                                               show_all_details=False)
         except HttpResponseError as exception:
             if exception.status_code == StatusCodes.PRECONDITION_FAILED:
                 logger.debug('Retrying lock operation %s times with exception: concurrent setting operations', i + 1)
@@ -408,7 +408,7 @@ def unlock_feature(cmd,
         try:
             new_kv = azconfig_client.set_read_only(retrieved_kv, read_only=False, match_condition=MatchConditions.IfNotModified, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
             return map_keyvalue_to_featureflag(convert_configurationsetting_to_keyvalue(new_kv),
-                                               show_conditions=False)
+                                               show_all_details=False)
         except HttpResponseError as exception:
             if exception.status_code == StatusCodes.PRECONDITION_FAILED:
                 logger.debug('Retrying unlock operation %s times with exception: concurrent setting operations', i + 1)
@@ -469,11 +469,11 @@ def enable_feature(cmd,
             updated_key_value = __update_existing_key_value(azconfig_client=azconfig_client,
                                                             retrieved_kv=retrieved_kv,
                                                             updated_value=json.dumps(feature_flag_value,
-                                                                                     default=lambda o: o.__dict__,
+                                                                                     default=lambda o: {k: v for k, v in o.__dict__.items() if v is not None},
                                                                                      ensure_ascii=False),
                                                             correlation_request_id=correlation_request_id)
 
-            return map_keyvalue_to_featureflag(keyvalue=updated_key_value, show_conditions=False)
+            return map_keyvalue_to_featureflag(keyvalue=updated_key_value, show_all_details=False)
 
         except HttpResponseError as exception:
             if exception.status_code == StatusCodes.PRECONDITION_FAILED:
@@ -535,11 +535,11 @@ def disable_feature(cmd,
             updated_key_value = __update_existing_key_value(azconfig_client=azconfig_client,
                                                             retrieved_kv=retrieved_kv,
                                                             updated_value=json.dumps(feature_flag_value,
-                                                                                     default=lambda o: o.__dict__,
+                                                                                     default=lambda o: {k: v for k, v in o.__dict__.items() if v is not None},
                                                                                      ensure_ascii=False),
                                                             correlation_request_id=correlation_request_id)
 
-            return map_keyvalue_to_featureflag(keyvalue=updated_key_value, show_conditions=False)
+            return map_keyvalue_to_featureflag(keyvalue=updated_key_value, show_all_details=False)
 
         except HttpResponseError as exception:
             if exception.status_code == StatusCodes.PRECONDITION_FAILED:
@@ -628,7 +628,7 @@ def add_filter(cmd,
             __update_existing_key_value(azconfig_client=azconfig_client,
                                         retrieved_kv=retrieved_kv,
                                         updated_value=json.dumps(feature_flag_value,
-                                                                 default=lambda o: o.__dict__,
+                                                                 default=lambda o: {k: v for k, v in o.__dict__.items() if v is not None},
                                                                  ensure_ascii=False),
                                         correlation_request_id=correlation_request_id)
 
@@ -764,7 +764,7 @@ def update_filter(cmd,
             __update_existing_key_value(azconfig_client=azconfig_client,
                                         retrieved_kv=retrieved_kv,
                                         updated_value=json.dumps(feature_flag_value,
-                                                                 default=lambda o: o.__dict__,
+                                                                 default=lambda o: {k: v for k, v in o.__dict__.items() if v is not None},
                                                                  ensure_ascii=False),
                                         correlation_request_id=correlation_request_id)
 
@@ -887,7 +887,7 @@ def delete_filter(cmd,
             __update_existing_key_value(azconfig_client=azconfig_client,
                                         retrieved_kv=retrieved_kv,
                                         updated_value=json.dumps(feature_flag_value,
-                                                                 default=lambda o: o.__dict__,
+                                                                 default=lambda o: {k: v for k, v in o.__dict__.items() if v is not None},
                                                                  ensure_ascii=False),
                                         correlation_request_id=correlation_request_id)
 
@@ -948,7 +948,6 @@ def show_filter(cmd,
         # detailed message
         feature_flag_value = map_keyvalue_to_featureflagvalue(retrieved_kv)
         feature_filters = feature_flag_value.conditions[FeatureFlagConstants.CLIENT_FILTERS]
-
         display_filters = []
 
         # If user has specified index, we use it as secondary check to display
@@ -1070,7 +1069,7 @@ def __list_features(
         for kv in retrieved_keyvalues:
             try:
                 retrieved_featureflags.append(
-                    map_keyvalue_to_featureflag(keyvalue=kv, show_conditions=True)
+                    map_keyvalue_to_featureflag(keyvalue=kv, show_all_details=True)
                 )
             except ValueError as exception:
                 logger.warning("%s\n", exception)
@@ -1151,9 +1150,7 @@ def __clear_filter(azconfig_client, feature, label=None, yes=False):
 
             # These fields will never be missing because we validate that
             # in map_keyvalue_to_featureflagvalue
-            feature_filters = feature_flag_value.conditions[
-                FeatureFlagConstants.CLIENT_FILTERS
-            ]
+            feature_filters = feature_flag_value.conditions[FeatureFlagConstants.CLIENT_FILTERS]
 
             # create a deep copy of the filters to display to the user
             # after deletion
@@ -1173,7 +1170,7 @@ def __clear_filter(azconfig_client, feature, label=None, yes=False):
                     retrieved_kv=retrieved_kv,
                     updated_value=json.dumps(
                         feature_flag_value,
-                        default=lambda o: o.__dict__,
+                        default=lambda o: {k: v for k, v in o.__dict__.items() if v is not None},
                         ensure_ascii=False,
                     ),
                 )
