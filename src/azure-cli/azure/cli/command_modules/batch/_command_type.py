@@ -10,7 +10,6 @@ import importlib
 from enum import Enum
 from tokenize import String
 from typing import Optional, get_type_hints, get_origin, get_args
-from git import Union
 from azure.core import MatchConditions
 from knack.arguments import CLICommandArgument, IgnoreAction
 from knack.introspection import extract_full_summary_from_signature, extract_args_from_signature
