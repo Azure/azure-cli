@@ -159,7 +159,7 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
     if service_principal:
         from azure.cli.core.auth.identity import ServicePrincipalAuth
         password = ServicePrincipalAuth.build_credential(
-            secret_or_certificate=password,
+            client_secret=password,
             certificate=certificate, use_cert_sn_issuer=use_cert_sn_issuer,
             client_assertion=client_assertion)
 
