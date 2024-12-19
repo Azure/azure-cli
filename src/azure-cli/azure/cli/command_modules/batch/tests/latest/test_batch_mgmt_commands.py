@@ -274,7 +274,6 @@ class BatchMgmtApplicationScenarioTests(ScenarioTest):
     def test_batch_application_cmd(self, resource_group, storage_account):
         account_name = self.create_random_name(prefix='clibatchtestacct', length=24)
 
-
         _, package_file_name = tempfile.mkstemp()
 
         self.kwargs.update({
@@ -345,8 +344,6 @@ class BatchMgmtByosScenarioTests(BatchMgmtScenarioMixin,ScenarioTest):
         account_name = self.create_random_name(prefix='clibatchtestacct', length=24)
         kv_name = self.create_random_name('clibatchtestkv', 24)
 
-        
-
         self.kwargs.update({
             'rg': resource_group,
             'byos_n': account_name,
@@ -377,10 +374,6 @@ class BatchMgmtByosScenarioTests(BatchMgmtScenarioMixin,ScenarioTest):
                 self.check('location', '{byos_l}'),
                 self.check('resourceGroup', '{rg}')])
 
-        # test for resource tags
-
-
-        # test create certificate with default set
         self.set_account_info(account_name, resource_group)    
 
         self.batch_cmd('batch pool create --id xplatCreatedPool --vm-size "standard_d2s_v3" '
@@ -388,7 +381,7 @@ class BatchMgmtByosScenarioTests(BatchMgmtScenarioMixin,ScenarioTest):
                         '--node-agent-sku-id "batch.node.ubuntu 20.04" '
                         '--resource-tags "dept=finance env=prod"')
 
-
+        # test for resource tags
         self.batch_cmd('batch pool show --pool-id xplatCreatedPool').assert_with_checks([
             self.check('resourceTags.dept', 'finance'),
             self.check('resourceTags.env', 'prod'),

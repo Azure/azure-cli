@@ -413,46 +413,6 @@ class TestBatchParser(unittest.TestCase):
         ns.node_agent_sku_id = "sku id"
         tree.parse(ns)
 
-        with self.assertRaises(ValueError):
-            tree.parse_mutually_exclusive(ns, False, ['pool.id', 'pool.vm_size'])
-        ns.id = None
-        tree.parse_mutually_exclusive(ns, False, ['pool.id', 'pool.vm_size'])
-        ns.vm_size = None
-        tree.parse_mutually_exclusive(ns, False, ['pool.id', 'pool.vm_size'])
-        with self.assertRaises(ValueError):
-            tree.parse_mutually_exclusive(ns, True, ['pool.id', 'pool.vm_size'])
-
-        ns.id = None
-        tree.parse_mutually_exclusive(ns, False, ['pool.id', 'pool.cloud_service_configuration'])
-        with self.assertRaises(ValueError):
-            tree.parse_mutually_exclusive(
-                ns, True, ['pool.id', 'pool.cloud_service_configuration'])
-        ns.id = "id"
-        tree.parse_mutually_exclusive(
-            ns, True, ['pool.id', 'pool.cloud_service_configuration'])
-        ns.target_os_version = "4"
-        with self.assertRaises(ValueError):
-            tree.parse_mutually_exclusive(
-                ns, True, ['pool.id', 'pool.cloud_service_configuration'])
-
-        with self.assertRaises(ValueError):
-            tree.parse_mutually_exclusive(
-                ns, True, ['pool.virtual_machine_configuration',
-                           'pool.cloud_service_configuration'])
-        ns.target_os_version = None
-        tree.parse_mutually_exclusive(
-            ns, True, ['pool.virtual_machine_configuration',
-                       'pool.cloud_service_configuration'])
-        ns.publisher = None
-        ns.offer = None
-        ns.node_agent_sku_id = None
-        tree.parse_mutually_exclusive(
-            ns, False, ['pool.virtual_machine_configuration',
-                        'pool.cloud_service_configuration'])
-        with self.assertRaises(ValueError):
-            tree.parse_mutually_exclusive(ns, True, ['pool.virtual_machine_configuration',
-                                                     'pool.cloud_service_configuration'])
-
         siblings = tree._get_siblings("pool")
         self.assertEqual(sorted(siblings), ["id", "target_dedicated_nodes", "vm_size"])
         siblings = tree._get_siblings("pool.virtual_machine_configuration")

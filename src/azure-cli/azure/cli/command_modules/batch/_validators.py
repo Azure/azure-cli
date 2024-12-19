@@ -279,15 +279,7 @@ def validate_pool_settings(namespace, parser):
             if namespace.disk_encryption_targets:
                 namespace.targets = namespace.disk_encryption_targets
                 del namespace.disk_encryption_targets
-        groups = ['pool.cloud_service_configuration', 'pool.virtual_machine_configuration']
-        parser.parse_mutually_exclusive(namespace, True, groups)
 
-        paas_sizes = ['small', 'medium', 'large', 'extralarge']
-        if namespace.vm_size and namespace.vm_size.lower() in paas_sizes and not namespace.os_family:
-            message = ("The selected VM size is incompatible with Virtual Machine Configuration. "
-                       "Please swap for the equivalent: Standard_A1 (small), Standard_A2 "
-                       "(medium), Standard_A3 (large), or Standard_A4 (extra large).")
-            raise ValueError(message)
         if namespace.auto_scale_formula:
             namespace.enable_auto_scale = True
 
