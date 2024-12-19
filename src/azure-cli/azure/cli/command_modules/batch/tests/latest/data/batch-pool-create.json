@@ -6,9 +6,7 @@
       "publisher": "microsoftwindowsserver",
       "offer": "windowsserver",
       "sku": "2022-datacenter",
-      "version": "latest",
-      "virtualMachineImageId": null,
-      "exactVersion": "latest"
+      "version": "latest"
     },
     "nodeAgentSKUId": "batch.node.windows amd64",
     "nodePlacementConfiguration": {
@@ -18,20 +16,11 @@
       "caching": "none",
       "managedDisk": {
         "storageAccountType": "premium_lrs"
-      },
-      "diskSizeGB": null,
-      "writeAcceleratorEnabled": null
+      }
     }
   },
-  "targetLowPriorityNodes": 2,
+  "targetDedicatedNodes": 0,
   "taskSlotsPerNode": 3,
-  "resizeTimeout": "PT15M",
-  "environmentSettings": [
-    {
-      "name": "TEST_ENV",
-      "value": "TEST_VALUE"
-    }
-  ],
   "startTask": {
     "commandLine": "cmd /c echo test",
     "waitForSuccess": true,
