@@ -476,6 +476,8 @@ def load_arguments(self, _):
         c.argument('enable_acns', action='store_true')
         c.argument('disable_acns_observability', action='store_true')
         c.argument('disable_acns_security', action='store_true')
+        c.argument("if_match")
+        c.argument("if_none_match")
 
     with self.argument_context('aks update') as c:
         # managed cluster paramerters
@@ -629,6 +631,8 @@ def load_arguments(self, _):
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
         c.argument('enable_cost_analysis', action='store_true')
         c.argument('disable_cost_analysis', action='store_true')
+        c.argument("if_match")
+        c.argument("if_none_match")
 
     with self.argument_context('aks disable-addons', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('addons', options_list=['--addons', '-a'])
@@ -782,6 +786,8 @@ def load_arguments(self, _):
                    help='space-separated tags: key[=value] [key[=value] ...].')
         c.argument('enable_vtpm', action='store_true')
         c.argument('enable_secure_boot', action='store_true')
+        c.argument("if_match")
+        c.argument("if_none_match")
 
     with self.argument_context('aks nodepool update', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='agent_pools') as c:
         c.argument('enable_cluster_autoscaler', options_list=[
@@ -809,6 +815,8 @@ def load_arguments(self, _):
         c.argument('disable_vtpm', action='store_true')
         c.argument('enable_secure_boot', action='store_true')
         c.argument('disable_secure_boot', action='store_true')
+        c.argument("if_match")
+        c.argument("if_none_match")
 
     with self.argument_context('aks nodepool upgrade') as c:
         c.argument('max_surge', validator=validate_max_surge)
@@ -929,6 +937,9 @@ def load_arguments(self, _):
     with self.argument_context('aks approuting zone update') as c:
         c.argument('dns_zone_resource_ids', options_list=['--ids'], required=True)
         c.argument('attach_zones')
+
+    with self.argument_context('aks nodepool delete') as c:
+        c.argument("if_match")
 
     with self.argument_context("aks nodepool delete-machines") as c:
         c.argument(
