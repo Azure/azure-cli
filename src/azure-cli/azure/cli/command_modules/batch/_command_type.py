@@ -750,7 +750,7 @@ class AzureBatchDataPlaneCommand:
         rest_names = {}
         for name, value in inspect.getmembers(cls):
             rest_name = name
-            if not name.startswith('__') and not inspect.isroutine(value):
+            if not name.startswith('_') and not inspect.isroutine(value):
                 str_value =  str(value)
                 try:
                   if str_value is not None and "_RestField" in str_value and hasattr(value,"_rest_name") and value._rest_name is not None and len(value._rest_name) > 0:
