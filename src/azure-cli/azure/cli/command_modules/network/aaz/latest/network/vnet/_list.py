@@ -28,10 +28,10 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-03-01",
+        "version": "2024-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.network/virtualnetworks", "2024-03-01"],
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworks", "2024-03-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.network/virtualnetworks", "2024-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworks", "2024-05-01"],
         ]
     }
 
@@ -57,12 +57,12 @@ class List(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        condition_0 = has_value(self.ctx.args.resource_group) and has_value(self.ctx.subscription_id)
-        condition_1 = has_value(self.ctx.subscription_id) and has_value(self.ctx.args.resource_group) is not True
+        condition_0 = has_value(self.ctx.subscription_id) and has_value(self.ctx.args.resource_group) is not True
+        condition_1 = has_value(self.ctx.args.resource_group) and has_value(self.ctx.subscription_id)
         if condition_0:
-            self.VirtualNetworksList(ctx=self.ctx)()
-        if condition_1:
             self.VirtualNetworksListAll(ctx=self.ctx)()
+        if condition_1:
+            self.VirtualNetworksList(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -78,7 +78,7 @@ class List(AAZCommand):
         next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
         return result, next_link
 
-    class VirtualNetworksList(AAZHttpOperation):
+    class VirtualNetworksListAll(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -92,7 +92,7 @@ class List(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworks",
+                "/subscriptions/{subscriptionId}/providers/Microsoft.Network/virtualNetworks",
                 **self.url_parameters
             )
 
@@ -108,10 +108,6 @@ class List(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.resource_group,
-                    required=True,
-                ),
-                **self.serialize_url_param(
                     "subscriptionId", self.ctx.subscription_id,
                     required=True,
                 ),
@@ -122,7 +118,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-03-01",
+                    "api-version", "2024-05-01",
                     required=True,
                 ),
             }
@@ -380,7 +376,7 @@ class List(AAZCommand):
 
             return cls._schema_on_200
 
-    class VirtualNetworksListAll(AAZHttpOperation):
+    class VirtualNetworksList(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -394,7 +390,7 @@ class List(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/providers/Microsoft.Network/virtualNetworks",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworks",
                 **self.url_parameters
             )
 
@@ -410,6 +406,10 @@ class List(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
+                    "resourceGroupName", self.ctx.args.resource_group,
+                    required=True,
+                ),
+                **self.serialize_url_param(
                     "subscriptionId", self.ctx.subscription_id,
                     required=True,
                 ),
@@ -420,7 +420,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-03-01",
+                    "api-version", "2024-05-01",
                     required=True,
                 ),
             }
@@ -688,6 +688,7 @@ class _ListHelper:
     def _build_schema_address_space_read(cls, _schema):
         if cls._schema_address_space_read is not None:
             _schema.address_prefixes = cls._schema_address_space_read.address_prefixes
+            _schema.ipam_pool_prefix_allocations = cls._schema_address_space_read.ipam_pool_prefix_allocations
             return
 
         cls._schema_address_space_read = _schema_address_space_read = AAZObjectType()
@@ -696,11 +697,19 @@ class _ListHelper:
         address_space_read.address_prefixes = AAZListType(
             serialized_name="addressPrefixes",
         )
+        address_space_read.ipam_pool_prefix_allocations = AAZListType(
+            serialized_name="ipamPoolPrefixAllocations",
+        )
 
         address_prefixes = _schema_address_space_read.address_prefixes
         address_prefixes.Element = AAZStrType()
 
+        ipam_pool_prefix_allocations = _schema_address_space_read.ipam_pool_prefix_allocations
+        ipam_pool_prefix_allocations.Element = AAZObjectType()
+        cls._build_schema_ipam_pool_prefix_allocation_read(ipam_pool_prefix_allocations.Element)
+
         _schema.address_prefixes = cls._schema_address_space_read.address_prefixes
+        _schema.ipam_pool_prefix_allocations = cls._schema_address_space_read.ipam_pool_prefix_allocations
 
     _schema_application_security_group_read = None
 
@@ -796,7 +805,7 @@ class _ListHelper:
             flags={"read_only": True},
         )
         flow_log_read.id = AAZStrType()
-        flow_log_read.identity = AAZObjectType()
+        flow_log_read.identity = AAZIdentityObjectType()
         flow_log_read.location = AAZStrType()
         flow_log_read.name = AAZStrType(
             flags={"read_only": True},
@@ -1052,6 +1061,40 @@ class _ListHelper:
         _schema.id = cls._schema_ip_configuration_read.id
         _schema.name = cls._schema_ip_configuration_read.name
         _schema.properties = cls._schema_ip_configuration_read.properties
+
+    _schema_ipam_pool_prefix_allocation_read = None
+
+    @classmethod
+    def _build_schema_ipam_pool_prefix_allocation_read(cls, _schema):
+        if cls._schema_ipam_pool_prefix_allocation_read is not None:
+            _schema.allocated_address_prefixes = cls._schema_ipam_pool_prefix_allocation_read.allocated_address_prefixes
+            _schema.number_of_ip_addresses = cls._schema_ipam_pool_prefix_allocation_read.number_of_ip_addresses
+            _schema.pool = cls._schema_ipam_pool_prefix_allocation_read.pool
+            return
+
+        cls._schema_ipam_pool_prefix_allocation_read = _schema_ipam_pool_prefix_allocation_read = AAZObjectType()
+
+        ipam_pool_prefix_allocation_read = _schema_ipam_pool_prefix_allocation_read
+        ipam_pool_prefix_allocation_read.allocated_address_prefixes = AAZListType(
+            serialized_name="allocatedAddressPrefixes",
+            flags={"read_only": True},
+        )
+        ipam_pool_prefix_allocation_read.number_of_ip_addresses = AAZStrType(
+            serialized_name="numberOfIpAddresses",
+        )
+        ipam_pool_prefix_allocation_read.pool = AAZObjectType(
+            flags={"client_flatten": True},
+        )
+
+        allocated_address_prefixes = _schema_ipam_pool_prefix_allocation_read.allocated_address_prefixes
+        allocated_address_prefixes.Element = AAZStrType()
+
+        pool = _schema_ipam_pool_prefix_allocation_read.pool
+        pool.id = AAZStrType()
+
+        _schema.allocated_address_prefixes = cls._schema_ipam_pool_prefix_allocation_read.allocated_address_prefixes
+        _schema.number_of_ip_addresses = cls._schema_ipam_pool_prefix_allocation_read.number_of_ip_addresses
+        _schema.pool = cls._schema_ipam_pool_prefix_allocation_read.pool
 
     _schema_network_interface_ip_configuration_read = None
 
@@ -1478,6 +1521,10 @@ class _ListHelper:
         )
         properties.auxiliary_sku = AAZStrType(
             serialized_name="auxiliarySku",
+        )
+        properties.default_outbound_connectivity_enabled = AAZBoolType(
+            serialized_name="defaultOutboundConnectivityEnabled",
+            flags={"read_only": True},
         )
         properties.disable_tcp_state_tracking = AAZBoolType(
             serialized_name="disableTcpStateTracking",
@@ -2444,6 +2491,9 @@ class _ListHelper:
             serialized_name="ipConfigurations",
             flags={"read_only": True},
         )
+        properties.ipam_pool_prefix_allocations = AAZListType(
+            serialized_name="ipamPoolPrefixAllocations",
+        )
         properties.nat_gateway = AAZObjectType(
             serialized_name="natGateway",
         )
@@ -2577,6 +2627,10 @@ class _ListHelper:
         ip_configurations = _schema_subnet_read.properties.ip_configurations
         ip_configurations.Element = AAZObjectType()
         cls._build_schema_ip_configuration_read(ip_configurations.Element)
+
+        ipam_pool_prefix_allocations = _schema_subnet_read.properties.ipam_pool_prefix_allocations
+        ipam_pool_prefix_allocations.Element = AAZObjectType()
+        cls._build_schema_ipam_pool_prefix_allocation_read(ipam_pool_prefix_allocations.Element)
 
         private_endpoints = _schema_subnet_read.properties.private_endpoints
         private_endpoints.Element = AAZObjectType()

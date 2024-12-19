@@ -31,9 +31,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-09-01",
+        "version": "2024-03-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworkgateways/{}", "2023-09-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworkgateways/{}", "2024-03-01"],
         ]
     }
 
@@ -105,6 +105,11 @@ class Create(AAZCommand):
         _args_schema.ip_configurations = AAZListArg(
             options=["--ip-configurations"],
             help="IP configurations for virtual network gateway.",
+        )
+        _args_schema.resiliency_model = AAZStrArg(
+            options=["--resiliency-model"],
+            help="Indicates if the Express Route Gateway has resiliency model of MultiHomed or SingleHomed",
+            enum={"MultiHomed": "MultiHomed", "SingleHomed": "SingleHomed"},
         )
         _args_schema.sku = AAZStrArg(
             options=["--sku"],
@@ -218,6 +223,25 @@ class Create(AAZCommand):
         )
 
         # define Arg Group "BgpSettings"
+
+        # define Arg Group "Identity"
+
+        _args_schema = cls._args_schema
+        _args_schema.mi_system_assigned = AAZStrArg(
+            options=["--system-assigned", "--mi-system-assigned"],
+            arg_group="Identity",
+            help="Set the system managed identity.",
+            blank="True",
+        )
+        _args_schema.mi_user_assigned = AAZListArg(
+            options=["--user-assigned", "--mi-user-assigned"],
+            arg_group="Identity",
+            help="Set the user managed identities.",
+            blank=[],
+        )
+
+        mi_user_assigned = cls._args_schema.mi_user_assigned
+        mi_user_assigned.Element = AAZStrArg()
 
         # define Arg Group "Nat Rule"
 
@@ -488,7 +512,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-09-01",
+                    "api-version", "2024-03-01",
                     required=True,
                 ),
             }
@@ -514,6 +538,7 @@ class Create(AAZCommand):
                 typ_kwargs={"flags": {"required": True, "client_flatten": True}}
             )
             _builder.set_prop("extendedLocation", AAZObjectType)
+            _builder.set_prop("identity", AAZIdentityObjectType)
             _builder.set_prop("location", AAZStrType, ".location")
             _builder.set_prop("properties", AAZObjectType, ".", typ_kwargs={"flags": {"required": True, "client_flatten": True}})
             _builder.set_prop("tags", AAZDictType, ".tags")
@@ -522,6 +547,15 @@ class Create(AAZCommand):
             if extended_location is not None:
                 extended_location.set_prop("name", AAZStrType, ".edge_zone")
                 extended_location.set_prop("type", AAZStrType, ".edge_zone_type")
+
+            identity = _builder.get(".identity")
+            if identity is not None:
+                identity.set_prop("userAssigned", AAZListType, ".mi_user_assigned", typ_kwargs={"flags": {"action": "create"}})
+                identity.set_prop("systemAssigned", AAZStrType, ".mi_system_assigned", typ_kwargs={"flags": {"action": "create"}})
+
+            user_assigned = _builder.get(".identity.userAssigned")
+            if user_assigned is not None:
+                user_assigned.set_elements(AAZStrType, ".")
 
             properties = _builder.get(".properties")
             if properties is not None:
@@ -537,6 +571,7 @@ class Create(AAZCommand):
                 properties.set_prop("gatewayType", AAZStrType, ".gateway_type")
                 properties.set_prop("ipConfigurations", AAZListType, ".ip_configurations")
                 properties.set_prop("natRules", AAZListType, ".nat_rules")
+                properties.set_prop("resiliencyModel", AAZStrType, ".resiliency_model")
                 properties.set_prop("sku", AAZObjectType)
                 properties.set_prop("vNetExtendedLocationResourceId", AAZStrType, ".edge_zone_vnet_id")
                 properties.set_prop("vpnClientConfiguration", AAZObjectType)
@@ -704,6 +739,7 @@ class Create(AAZCommand):
                 serialized_name="extendedLocation",
             )
             _schema_on_200_201.id = AAZStrType()
+            _schema_on_200_201.identity = AAZIdentityObjectType()
             _schema_on_200_201.location = AAZStrType()
             _schema_on_200_201.name = AAZStrType(
                 flags={"read_only": True},
@@ -719,6 +755,33 @@ class Create(AAZCommand):
             extended_location = cls._schema_on_200_201.extended_location
             extended_location.name = AAZStrType()
             extended_location.type = AAZStrType()
+
+            identity = cls._schema_on_200_201.identity
+            identity.principal_id = AAZStrType(
+                serialized_name="principalId",
+                flags={"read_only": True},
+            )
+            identity.tenant_id = AAZStrType(
+                serialized_name="tenantId",
+                flags={"read_only": True},
+            )
+            identity.type = AAZStrType()
+            identity.user_assigned_identities = AAZDictType(
+                serialized_name="userAssignedIdentities",
+            )
+
+            user_assigned_identities = cls._schema_on_200_201.identity.user_assigned_identities
+            user_assigned_identities.Element = AAZObjectType()
+
+            _element = cls._schema_on_200_201.identity.user_assigned_identities.Element
+            _element.client_id = AAZStrType(
+                serialized_name="clientId",
+                flags={"read_only": True},
+            )
+            _element.principal_id = AAZStrType(
+                serialized_name="principalId",
+                flags={"read_only": True},
+            )
 
             properties = cls._schema_on_200_201.properties
             properties.active_active = AAZBoolType(
@@ -778,6 +841,9 @@ class Create(AAZCommand):
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
                 flags={"read_only": True},
+            )
+            properties.resiliency_model = AAZStrType(
+                serialized_name="resiliencyModel",
             )
             properties.resource_guid = AAZStrType(
                 serialized_name="resourceGuid",

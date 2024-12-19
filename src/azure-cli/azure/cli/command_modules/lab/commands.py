@@ -15,7 +15,7 @@ def load_command_table(self, _):
     with self.command_group('lab vm') as g:
         g.custom_command('claim', 'claim_vm', validator=validate_claim_vm)
 
-    with (self.command_group('lab vm')):
+    with self.command_group('lab vm'):
         from .custom import LabVmCreate, LabVmList, LabVmShow, LabVmDelete, LabVmStart, LabVmStop, \
             LabVmApplyArtifacts
         self.command_table['lab vm create'] = LabVmCreate(loader=self)
