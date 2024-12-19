@@ -9,11 +9,9 @@ import time
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from knack.util import CLIError
-import pytest
 from .batch_preparers import BatchAccountPreparer, BatchScenarioMixin
 
 from .recording_processors import BatchAccountKeyReplacer, StorageSASReplacer
-import azure.batch.models as models
 
 class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
 
@@ -65,8 +63,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
                                 '--image canonical:ubuntuserver:18.04-lts --node-agent-sku-id "batch.node.ubuntu 18.04" '
                                 '--disk-encryption-targets "TemporaryDisk"')
 
-        if self.is_live or self.in_recording:
-            time.sleep(120)
+        self.wait_for_pool_steady("pool_image1")
 
         result = self.batch_cmd('batch pool show --pool-id {p_id}').assert_with_checks([
             self.check('allocationState', 'steady'),
@@ -83,8 +80,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
 
         self.batch_cmd('batch pool resize --pool-id {p_id} --abort')
 
-        if self.is_live or self.in_recording:
-            time.sleep(30)
+        self.wait_for_pool_steady("xplatCreatedPool")
         
         self.batch_cmd('batch pool node-counts list').assert_with_checks([
             self.check('length(@)', 2),
@@ -357,7 +353,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
             'j_id': "cli-test-job-1",
         })
 
-        # test create paas pool using parameters
+        # test create pool using parameters
         self.batch_cmd('batch pool create --id {p_id} --vm-size Standard_A1 '
                                 '--image canonical:ubuntuserver:18.04-lts --node-agent-sku-id "batch.node.ubuntu 18.04" '
                                 '--disk-encryption-targets "TemporaryDisk"')
@@ -428,17 +424,11 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
             batch_account_name):  # pylint:disable=too-many-statements
         self.set_account_info(batch_account_name, resource_group)
         self.kwargs.update({
-            'pool_p': "azure-cli-test-paas",
             'pool_i': "azure-cli-test-iaas",
             'pool_j': "azure-cli-test-json"
         })
 
-        # test create paas pool using parameters
-        self.batch_cmd('batch pool create --id {pool_p} --vm-size Standard_A1 '
-                                '--image canonical:ubuntuserver:18.04-lts --node-agent-sku-id "batch.node.ubuntu 18.04" '
-                                '--disk-encryption-targets "TemporaryDisk"')
-
-        # test create iaas pool using parameters
+        # test create pool using parameters
         self.batch_cmd('batch pool create --id {pool_i} --vm-size Standard_A1 '
                        '--image Canonical:UbuntuServer:18.04-LTS '
                        '--node-agent-sku-id "batch.node.ubuntu 18.04" '
@@ -449,27 +439,18 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
 
         # test create pool with missing parameters
         with self.assertRaises(SystemExit):
-            self.batch_cmd('batch pool create --id missing-params-test --os-family 4')
+            self.batch_cmd('batch pool create --id missing-params-test --image Canonical:UbuntuServer:18.04-LTS')
 
-        # test create pool with missing required mutually exclusive parameters
-        with self.assertRaises(SystemExit):
-            self.batch_cmd('batch pool create --id missing-required-group-test --vm-size small')
-
-        # test create pool with parameters from mutually exclusive groups
-        with self.assertRaises(SystemExit):
-            self.batch_cmd('batch pool create --id mutually-exclusive-test --vm-size small '
-                           '--os-family 4 --image Canonical:UbuntuServer:16-LTS:latest')
-
-        # test create pool with invalid vm size for IaaS
-        with self.assertRaises(SystemExit):
-            self.batch_cmd('batch pool create --id invalid-size-test --vm-size small '
+        # test create pool with invalid vm size
+        with self.assertRaisesRegex(CLIError, r"The value provided for one of the properties in the request body is invalid"):
+            self.batch_cmd('batch pool create --id invalid-size-test --vm-size thisisinvalid '
                            '--image Canonical:UbuntuServer:16.04.0-LTS --node-agent-sku-id '
                            '"batch.node.ubuntu 16.04"')
 
         # test create pool with missing optional parameters
         with self.assertRaises(SystemExit):
-            self.batch_cmd('batch pool create --id missing-optional-test --vm-size small '
-                           '--os-family 4 --start-task-wait-for-success')
+            self.batch_cmd('batch pool create --id missing-optional-test --vm-size Standard_A1 '
+                           '--start-task-wait-for-success')
 
         # test create pool from JSON file
         self.kwargs['json'] = self._get_test_data_file('batch-pool-create.json').replace('\\', '\\\\')
@@ -498,22 +479,24 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         # test list pools
         pool_list = self.batch_cmd('batch pool list')
         pool_list = pool_list.get_output_in_json()
-        self.assertEqual(len(pool_list), 3)
+        self.assertEqual(len(pool_list), 2)
         pool_ids = sorted([p['id'] for p in pool_list])
-        self.assertEqual(pool_ids, ["azure-cli-test-iaas", "azure-cli-test-json", "azure-cli-test-paas"])
+        self.assertEqual(pool_ids, ["azure-cli-test-iaas", "azure-cli-test-json"])
 
         # test list pools with select
-        pool_list = self.batch_cmd('batch pool list --filter "id eq \'{pool_p}\'"').get_output_in_json()
+        pool_list = self.batch_cmd('batch pool list --filter "id eq \'{pool_i}\'"').get_output_in_json()
         self.assertEqual(len(pool_list), 1)
 
+        self.wait_for_pool_steady("azure-cli-test-iaas")
+
         # test resize pool
-        self.batch_cmd('batch pool resize --pool-id {pool_p} --target-dedicated-nodes 0 --target-low-priority-nodes 5')
-        self.batch_cmd('batch pool show --pool-id {pool_p} '
+        self.batch_cmd('batch pool resize --pool-id {pool_i} --target-dedicated-nodes 0 --target-low-priority-nodes 5')
+        self.batch_cmd('batch pool show --pool-id {pool_i} '
                        '--select "allocationState, targetLowPriorityNodes"').assert_with_checks([
                            self.check('targetLowPriorityNodes', 5)])
 
         # test cancel pool resize
-        self.batch_cmd('batch pool resize --pool-id {pool_p} --abort')
+        self.batch_cmd('batch pool resize --pool-id {pool_i} --abort')
 
         # test enable autoscale
         self.batch_cmd('batch pool autoscale enable --pool-id {pool_i} '
@@ -530,8 +513,10 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         self.batch_cmd('batch pool show --pool-id {pool_i} --select "enableAutoScale"').assert_with_checks([
             self.check('enableAutoScale', False)])
 
-        # test list usage metrics
-        self.batch_cmd('batch pool usage-metrics list')
+        # Pool list usage metrics command exists but the API is retired
+        # TODO: Remove this test when the usage metrics CLI command is removed
+        with self.assertRaisesRegex(CLIError, r".*Pool list usage metrics API was retired.*"):
+            self.batch_cmd('batch pool usage-metrics list')
 
         # TODO: Test update pool from JSON file
 
@@ -550,13 +535,23 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         # test list node agent skus
         self.batch_cmd('batch pool supported-images list')
 
-        # test delete iaas pool
-        self.batch_cmd('batch pool delete --pool-id {pool_i} --yes')
-
         # test app package reference
-        self.batch_cmd('batch pool create --id app_package_test --vm-size small --os-family 4 '
-                       '--application-package-references does-not-exist', expect_failure=True)
-        self.batch_cmd('batch pool set --pool-id {pool_p} --application-package-references does-not-exist',
+        self.batch_cmd('batch pool set --pool-id {pool_i} --application-package-references does-not-exist',
                        expect_failure=True)#
 
+        # test delete
+        self.batch_cmd('batch pool delete --pool-id {pool_i} --yes')
+
         # TODO: Test node commands
+
+    def wait_for_pool_steady(self, pool_id, timeout_seconds=120):
+        if self.is_live or self.in_recording:
+            start_time = time.time()
+            while True:
+                pool = self.batch_cmd(f"batch pool show --pool-id {pool_id}").get_output_in_json()
+                if pool["allocationState"] == "steady":
+                    return
+                elapsed_seconds = time.time() - start_time
+                if elapsed_seconds > timeout_seconds:
+                    raise TimeoutError("Timed out waiting for pool to reach steady state")
+                time.sleep(2)

@@ -290,15 +290,15 @@ def load_arguments(self, _):
 
     for command in ['job list', 'pool list','job-schedule list', 'task list' ,'job show','pool show','task show','job-schedule show']:
         with self.argument_context(f'batch {command}') as c:
-            c.extra('select', help=' An OData $select clause.', arg_group='Pre-condition and Query')
-            c.extra('expand', help=' An OData $expand clause.', arg_group='Pre-condition and Query')
+            c.extra('select', nargs='+', help='An OData $select clause.', arg_group='Pre-condition and Query')
+            c.extra('expand', help='An OData $expand clause.', arg_group='Pre-condition and Query')
 
     with self.argument_context('batch job list') as c:
         c.argument('job_schedule_id', help='The ID of the job schedule from which you want to get a list of jobs. If omitted, lists all jobs in the account.')
 
     for command in ['node list', 'node show', 'job prep-release-status list','task subtask list']:
         with self.argument_context(f'batch {command}') as c:
-            c.extra('select', help=' An OData $select clause.', arg_group='Pre-condition and Query')
+            c.extra('select', nargs='+', help='An OData $select clause.', arg_group='Pre-condition and Query')
 
     with self.argument_context('batch job stop') as c:
         c.extra('reason',options_list=['--terminate-reason'], help='Termination reason. The text you want to appear as the job\'s TerminateReason. The default is \'UserTerminate\'.')

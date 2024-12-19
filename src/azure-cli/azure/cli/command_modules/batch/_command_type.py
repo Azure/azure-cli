@@ -384,37 +384,6 @@ class BatchArgumentTree:
         """
         return name in self._arg_tree
 
-    def parse_mutually_exclusive(self, namespace, required, params):
-        """Validate whether two or more mutually exclusive arguments or
-        argument groups have been set correctly.
-        :param bool required: Whether one of the parameters must be set.
-        :param list params: List of namespace paths for mutually exclusive
-         request properties.
-        """
-        argtree = self._arg_tree.items()
-        ex_arg_names = [a for a, v in argtree if full_name(v) in params]
-        ex_args = [getattr(namespace, a) for a, v in argtree if a in ex_arg_names]
-        ex_args = [x for x in ex_args if x is not None]
-        ex_group_names = []
-        ex_groups = []
-        for arg_group in params:
-            child_args = self._get_children(arg_group)
-            if child_args:
-                ex_group_names.append(group_title(arg_group))
-                if any(getattr(namespace, arg) for arg in child_args):
-                    ex_groups.append(ex_group_names[-1])
-
-        message = None
-        if not ex_groups and not ex_args and required:
-            message = "One of the following arguments, or argument groups are required: \n"
-        elif len(ex_groups) > 1 or len(ex_args) > 1 or (ex_groups and ex_args):
-            message = ("The follow arguments or argument groups are mutually "
-                       "exclusive and cannot be combined: \n")
-        if message:
-            missing = [arg_name(n) for n in ex_arg_names] + ex_group_names
-            message += '\n'.join(missing)
-            raise ValueError(message)
-
     def parse(self, namespace):
         """Parse all arguments in the namespace to validate whether all required
         arguments have been set.
