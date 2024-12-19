@@ -40,7 +40,7 @@ def load_arguments(self, _):
                         'Also known as App ID URI, this value is set when an application is used as a resource app. '
                         'The identifierUris acts as the prefix for the scopes you\'ll reference in your API\'s code, '
                         'and it must be globally unique. You can use the default value provided, which is in the '
-                        'form api://<application-client-id>, or specify a more readable URI like '
+                        'form `api://<application-client-id>`, or specify a more readable URI like '
                         'https://contoso.com/api.')
 
         c.argument('is_fallback_public_client', arg_type=get_three_state_flag(),

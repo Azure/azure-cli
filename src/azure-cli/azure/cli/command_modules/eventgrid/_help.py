@@ -742,9 +742,9 @@ parameters:
     long-summary: |
       Add authorized partner information. Multiple authorized partners can be specified by using more than one `--authorized-partner` argument. `partner-name` represents the verified partner resource name corresponding to the partner if it is a verified publisher. `partner-registration-immutable-id` represents the immutable id of the publisher registration ARM resource. `partner-name` and `partner-registration-immutable-id` are optional parameters but at least one parameter should be specified when authorizing a partner. When both are present, they both should correspond to the same verified parner information.
 
-      Usage:                     --authorized-partner [partner-name=<name>] \\
-                                        [partner-registration-immutable-id=<id>] \\
-                                        [expiration-time=<timestamp>]
+      Usage:                     --authorized-partner [partner-name={name}] \\
+                                        [partner-registration-immutable-id={id}] \\
+                                        [expiration-time={timestamp}]
       Partner Name:              --authorized-partner partner-name=somename \\
                                         expiration-time=2022-06-14T05:37:51.272Z
       Partner Registration ID:   --authorized-partner \\
@@ -833,8 +833,8 @@ parameters:
   - name: --inline-event-type
     short-summary: Create a channel for an existing partner namespace, either of type partner topic or partner destination. You can also add inline event type info if channel type is partner topic. Multiple attributes can be specified by using more than one `--inline-event-type` argument.
     long-summary: |
-      Usage:       --inline-event-type KEY [description=<description>] [documentation-url=<url>] \\
-                     [data-schema-url=<url>]
+      Usage:       --inline-event-type KEY [description={description}] [documentation-url={url}] \\
+                     [data-schema-url={url}]
       Example:     --inline-event-type event1 \\
                      description="My inline event type." \\
                      documentation-url=https://www.microsoft.com \\
@@ -893,8 +893,8 @@ parameters:
   - name: --inline-event-type
     short-summary: Add inline event type info. Multiple attributes can be specified by using more than one `--inline-event-type` argument.
     long-summary: |
-      Usage:       --inline-event-type KEY [description=<description>] [documentation-url=<url>] \\
-                     [data-schema-url=<url>]
+      Usage:       --inline-event-type KEY [description={description}] [documentation-url={url}] \\
+                     [data-schema-url={url}]
       Example:     --inline-event-type event1 \\
                      description="My inline event type." \\
                      documentation-url=https://www.microsoft.com \\
