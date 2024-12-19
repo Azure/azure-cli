@@ -1494,7 +1494,7 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         ctx_1.attach_agentpool(agentpool_1)
         self.assertEqual(ctx_1.get_drain_timeout(), 123)
     
-    def test_get_if_match(self):
+    def get_if_match(self):
         ctx_1 = AKSAgentPoolContext(
             self.cmd,
             AKSAgentPoolParamDict({}),
@@ -1522,7 +1522,7 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         )
         self.assertEqual(ctx_3.get_if_match(), "")
 
-    def test_get_if_none_match(self):
+    def get_if_none_match(self):
         ctx_1 = AKSAgentPoolContext(
             self.cmd,
             AKSAgentPoolParamDict({}),
@@ -1749,10 +1749,10 @@ class AKSAgentPoolContextStandaloneModeTestCase(AKSAgentPoolContextCommonTestCas
         self.common_get_enable_secure_boot()
 
     def test_get_if_match(self):
-        self.test_get_if_match()
+        self.get_if_match()
 
     def test_get_if_none_match(self):
-        self.test_get_if_none_match()
+        self.get_if_none_match()
 
 class AKSAgentPoolContextManagedClusterModeTestCase(AKSAgentPoolContextCommonTestCase):
     def setUp(self):
