@@ -7,7 +7,7 @@ import requests
 from knack.log import get_logger
 from msrestazure.azure_active_directory import MSIAuthentication
 
-from .util import _normalize_scopes, scopes_to_resource, AccessToken
+from .util import scopes_to_resource, AccessToken
 
 logger = get_logger(__name__)
 
@@ -39,7 +39,7 @@ class MSIAuthenticationWrapper(MSIAuthentication):
             raise AuthenticationError("VM SSH currently doesn't support managed identity.")
 
         # Use msrestazure to get access token
-        resource = scopes_to_resource(_normalize_scopes(scopes))
+        resource = scopes_to_resource(scopes)
         if resource:
             # If available, use resource provided by SDK
             self.resource = resource

@@ -108,19 +108,19 @@ def load_arguments(self, _):
         c.argument('optional_claims', arg_group='JSON property', type=validate_file_or_dict,
                    help="Application developers can configure optional claims in their Microsoft Entra applications to "
                         "specify the claims that are sent to their application by the Microsoft security token "
-                        "service. For more information, see https://docs.microsoft.com/azure/active-directory/develop"
+                        "service. For more information, see https://learn.microsoft.com/azure/active-directory/develop"
                         "/active-directory-optional-claims. " + JSON_PROPERTY_HELP)
 
     with self.argument_context('ad app owner list') as c:
         c.argument('identifier', options_list=['--id'], help='identifier uri, application id, or object id of the application')
 
     with self.argument_context('ad app permission') as c:
-        # https://docs.microsoft.com/en-us/graph/api/resources/requiredresourceaccess
+        # https://learn.microsoft.com/en-us/graph/api/resources/requiredresourceaccess
         c.argument('api',
                    help='requiredResourceAccess.resourceAppId - '
                         'The unique identifier for the resource that the application requires access to. '
                         'This should be equal to the appId declared on the target resource application.')
-        # https://docs.microsoft.com/en-us/graph/api/resources/resourceaccess
+        # https://learn.microsoft.com/en-us/graph/api/resources/resourceaccess
         c.argument('api_permissions', nargs='+',
                    help='Space-separated list of {id}={type}. '
                         "{id} is resourceAccess.id - The unique identifier for one of the oauth2PermissionScopes or "
@@ -205,7 +205,7 @@ def load_arguments(self, _):
             c.argument('cert', arg_group='keyCredential', validator=validate_cert,
                        help='Certificate to use for credentials. When used with `--keyvault,`, indicates the name of the '
                             'cert to use or create. Otherwise, supply a PEM or DER formatted public certificate string. '
-                            'Use `@{path}` to load from a file. Do not include private key info.')
+                            'Use `@{path}` to load from a file. Do not include the private key.')
             c.argument('create_cert', arg_group='keyCredential', action='store_true',
                        help='Create a self-signed certificate to use for the credential. Only the current OS user has '
                             'read/write permission to this certificate. Use with `--keyvault` to create the certificate in '
@@ -326,7 +326,7 @@ def load_arguments(self, _):
         c.argument('assignment_name', name_arg_type,
                    help='A GUID for the role assignment. It must be unique and different for each role assignment. If omitted, a new GUID is generated.')
 
-    time_help = ('The {} of the query in the format of %Y-%m-%dT%H:%M:%SZ, e.g. 2000-12-31T12:59:59Z. Defaults to {}')
+    time_help = 'The {} of the query in the format of %Y-%m-%dT%H:%M:%SZ, e.g. 2000-12-31T12:59:59Z. Defaults to {}'
     with self.argument_context('role assignment list-changelogs') as c:
         c.argument('start_time', help=time_help.format('start time', '1 Hour prior to the current time'))
         c.argument('end_time', help=time_help.format('end time', 'the current time'))

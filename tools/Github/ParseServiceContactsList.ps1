@@ -82,20 +82,6 @@ if ($null -ne $contactsList) {
                 $serviceContacts.Add($serviceTeamLabel, [PSCustomObject]@{
                     if   = @(
                         [PSCustomObject]@{
-                            or  = @(
-                                [PSCustomObject]@{
-                                    labelAdded = [PSCustomObject]@{
-                                        label = 'Service Attention'
-                                    }
-                                },
-                                [PSCustomObject]@{
-                                    labelAdded = [PSCustomObject]@{
-                                        label = $serviceTeamLabel
-                                    }
-                                }
-                            )
-                        },
-                        [PSCustomObject]@{
                             hasLabel = [PSCustomObject]@{
                                 label = 'Service Attention'
                             }

@@ -8,21 +8,21 @@ from unittest import mock
 
 from knack.util import CLIError
 
-from azure.cli.command_modules.vm.custom import (enable_boot_diagnostics, disable_boot_diagnostics,
-                                                 _merge_secrets, BootLogStreamWriter,
-                                                 _get_access_extension_upgrade_info,
-                                                 _LINUX_ACCESS_EXT,
-                                                 _WINDOWS_ACCESS_EXT,
-                                                 _get_extension_instance_name,
-                                                 get_boot_log)
-from azure.cli.command_modules.vm.custom import \
+from azure.cli.command_modules.vm.azure_stack.custom import (enable_boot_diagnostics, disable_boot_diagnostics,
+                                                             _merge_secrets, BootLogStreamWriter,
+                                                             _get_access_extension_upgrade_info,
+                                                             _LINUX_ACCESS_EXT,
+                                                             _WINDOWS_ACCESS_EXT,
+                                                             _get_extension_instance_name,
+                                                             get_boot_log)
+from azure.cli.command_modules.vm.azure_stack.custom import \
     (attach_unmanaged_data_disk, detach_unmanaged_data_disk, get_vmss_instance_view)
 
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core.commands import AzCliCommand
 
-
-from azure.cli.command_modules.vm.disk_encryption import (encrypt_vm, decrypt_vm, encrypt_vmss, decrypt_vmss)
+from azure.cli.command_modules.vm.azure_stack.disk_encryption import (encrypt_vm, decrypt_vm, encrypt_vmss,
+                                                                      decrypt_vmss)
 from azure.cli.core.profiles import get_sdk, ResourceType
 
 from azure.cli.core.mock import DummyCli
@@ -88,8 +88,8 @@ class TestVmCustom(unittest.TestCase):
         self.assertEqual('1.5', version)
         self.assertEqual(True, auto_upgrade)
 
-    @mock.patch('azure.cli.command_modules.vm.custom.get_vm_to_update', autospec=True)
-    @mock.patch('azure.cli.command_modules.vm.custom.set_vm', autospec=True)
+    @mock.patch('azure.cli.command_modules.vm.azure_stack.custom.get_vm_to_update', autospec=True)
+    @mock.patch('azure.cli.command_modules.vm.azure_stack.custom.set_vm', autospec=True)
     def test_enable_boot_diagnostics_on_vm_never_enabled(self, mock_vm_set, mock_vm_get_to_update):
         vm_fake = mock.MagicMock()
         cmd = _get_test_cmd()
@@ -101,8 +101,8 @@ class TestVmCustom(unittest.TestCase):
         self.assertTrue(mock_vm_get_to_update.called)
         mock_vm_set.assert_called_once_with(cmd, vm_fake, mock.ANY)
 
-    # @mock.patch('azure.cli.command_modules.vm.custom.get_vm', autospec=True)
-    # @mock.patch('azure.cli.command_modules.vm.custom.set_vm', autospec=True)
+    # @mock.patch('azure.cli.command_modules.vm.azure_stack.custom.get_vm', autospec=True)
+    # @mock.patch('azure.cli.command_modules.vm.azure_stack.custom.set_vm', autospec=True)
     # def test_enable_boot_diagnostics_skip_when_enabled_already(self, mock_vm_set, mock_vm_get):
     #     vm_fake = mock.MagicMock()
     #     cmd = _get_test_cmd()
@@ -113,8 +113,8 @@ class TestVmCustom(unittest.TestCase):
     #     self.assertTrue(mock_vm_get.called)
     #     self.assertFalse(mock_vm_set.called)
 
-    @mock.patch('azure.cli.command_modules.vm.custom.get_vm_to_update', autospec=True)
-    @mock.patch('azure.cli.command_modules.vm.custom.set_vm', autospec=True)
+    @mock.patch('azure.cli.command_modules.vm.azure_stack.custom.get_vm_to_update', autospec=True)
+    @mock.patch('azure.cli.command_modules.vm.azure_stack.custom.set_vm', autospec=True)
     def test_disable_boot_diagnostics_on_vm(self, mock_vm_set, mock_vm_get_to_update):
         vm_fake = mock.MagicMock()
         cmd = _get_test_cmd()
@@ -127,8 +127,8 @@ class TestVmCustom(unittest.TestCase):
         self.assertTrue(mock_vm_get_to_update.called)
         mock_vm_set.assert_called_once_with(cmd, vm_fake, mock.ANY)
 
-    @mock.patch('azure.cli.command_modules.vm.custom.get_vm_to_update', autospec=True)
-    @mock.patch('azure.cli.command_modules.vm.custom.set_vm', autospec=True)
+    @mock.patch('azure.cli.command_modules.vm.azure_stack.custom.get_vm_to_update', autospec=True)
+    @mock.patch('azure.cli.command_modules.vm.azure_stack.custom.set_vm', autospec=True)
     def test_attach_new_datadisk_default_on_vm(self, mock_vm_set, mock_vm_get_to_update):
         # pylint: disable=line-too-long
         faked_vhd_uri = 'https://your_stoage_account_name.blob.core.windows.net/vhds/d1.vhd'
@@ -153,8 +153,8 @@ class TestVmCustom(unittest.TestCase):
         self.assertTrue(data_disk.name.startswith('vm1-'))
         self.assertEqual(data_disk.vhd.uri, faked_vhd_uri)
 
-    @mock.patch('azure.cli.command_modules.vm.custom.get_vm_to_update', autospec=True)
-    @mock.patch('azure.cli.command_modules.vm.custom.set_vm', autospec=True)
+    @mock.patch('azure.cli.command_modules.vm.azure_stack.custom.get_vm_to_update', autospec=True)
+    @mock.patch('azure.cli.command_modules.vm.azure_stack.custom.set_vm', autospec=True)
     def test_attach_new_datadisk_custom_on_vm(self, mock_vm_set, mock_vm_get_to_update):
         # pylint: disable=line-too-long
         faked_vhd_uri = 'https://your_stoage_account_name.blob.core.windows.net/vhds/d1.vhd'
@@ -180,8 +180,8 @@ class TestVmCustom(unittest.TestCase):
         self.assertEqual(data_disk.lun, 0)  # the existing disk has '1', so it verifes the second one be picked as '0'
         self.assertEqual(data_disk.vhd.uri, faked_vhd_uri2)
 
-    @mock.patch('azure.cli.command_modules.vm.custom.get_vm_to_update', autospec=True)
-    @mock.patch('azure.cli.command_modules.vm.custom.set_vm', autospec=True)
+    @mock.patch('azure.cli.command_modules.vm.azure_stack.custom.get_vm_to_update', autospec=True)
+    @mock.patch('azure.cli.command_modules.vm.azure_stack.custom.set_vm', autospec=True)
     def test_attach_existing_datadisk_on_vm(self, mock_vm_set, mock_vm_get_to_update):
         # pylint: disable=line-too-long
         faked_vhd_uri = 'https://your_stoage_account_name.blob.core.windows.net/vhds/d1.vhd'
@@ -206,8 +206,8 @@ class TestVmCustom(unittest.TestCase):
         self.assertEqual(data_disk.name, 'd1')
         self.assertEqual(data_disk.vhd.uri, faked_vhd_uri)
 
-    @mock.patch('azure.cli.command_modules.vm.custom.get_vm_to_update', autospec=True)
-    @mock.patch('azure.cli.command_modules.vm.custom.set_vm', autospec=True)
+    @mock.patch('azure.cli.command_modules.vm.azure_stack.custom.get_vm_to_update', autospec=True)
+    @mock.patch('azure.cli.command_modules.vm.azure_stack.custom.set_vm', autospec=True)
     def test_deattach_disk_on_vm(self, mock_vm_set, mock_vm_get_to_update):
         # pylint: disable=line-too-long
         # stub to get the vm which has no datadisks
@@ -225,7 +225,7 @@ class TestVmCustom(unittest.TestCase):
         mock_vm_set.assert_called_once_with(cmd, vm)
         self.assertEqual(len(vm.storage_profile.data_disks), 0)
 
-    @mock.patch('azure.cli.command_modules.vm.custom._compute_client_factory')
+    @mock.patch('azure.cli.command_modules.vm.azure_stack.custom._compute_client_factory')
     def test_show_vmss_instance_view(self, factory_mock):
         vm_client = mock.MagicMock()
         cmd = _get_test_cmd()
@@ -239,8 +239,8 @@ class TestVmCustom(unittest.TestCase):
             select='instanceView', expand='instanceView')
 
     # pylint: disable=line-too-long
-    @mock.patch('azure.cli.command_modules.vm.disk_encryption._compute_client_factory', autospec=True)
-    @mock.patch('azure.cli.command_modules.vm.disk_encryption._get_keyvault_key_url', autospec=True)
+    @mock.patch('azure.cli.command_modules.vm.azure_stack.disk_encryption._compute_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.vm.azure_stack.disk_encryption._get_keyvault_key_url', autospec=True)
     def test_enable_encryption_error_cases_handling(self, mock_get_keyvault_key_url, mock_compute_client_factory):
         faked_keyvault = '/subscriptions/01234567-1bf0-4dda-aec3-cb9272f09590/resourceGroups/rg1/providers/Microsoft.KeyVault/vaults/v1'
         os_disk = OSDisk(create_option=None, os_type=OperatingSystemTypes.linux)
@@ -266,8 +266,8 @@ class TestVmCustom(unittest.TestCase):
 
         self.assertTrue("--aad-client-cert-thumbprint or --aad-client-secret" in str(context.exception))
 
-    @mock.patch('azure.cli.command_modules.vm.disk_encryption.set_vm', autospec=True)
-    @mock.patch('azure.cli.command_modules.vm.disk_encryption._compute_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.vm.azure_stack.disk_encryption.set_vm', autospec=True)
+    @mock.patch('azure.cli.command_modules.vm.azure_stack.disk_encryption._compute_client_factory', autospec=True)
     def test_disable_encryption_error_cases_handling(self, mock_compute_client_factory, mock_vm_set):  # pylint: disable=unused-argument
         os_disk = OSDisk(create_option=None, os_type=OperatingSystemTypes.linux)
         existing_disk = DataDisk(lun=1, vhd='https://someuri', name='d1', create_option=DiskCreateOptionTypes.empty)
@@ -375,7 +375,7 @@ class TestVmCustom(unittest.TestCase):
 
 class TestVMBootLog(unittest.TestCase):
 
-    @mock.patch('azure.cli.command_modules.vm.custom.logger.warning')
+    @mock.patch('azure.cli.command_modules.vm.azure_stack.custom.logger.warning')
     def test_vm_boot_log_handle_unicode(self, logger_warning__mock):
         import sys
         writer = BootLogStreamWriter(sys.stdout)
@@ -402,7 +402,7 @@ class TestVMBootLog(unittest.TestCase):
             get_sdk_mock.assert_called_with(cli_ctx_mock, ResourceType.DATA_STORAGE, 'blob.blockblobservice#BlockBlobService')
 
 
-class FakedVM(object):  # pylint: disable=too-few-public-methods
+class FakedVM:  # pylint: disable=too-few-public-methods
     def __init__(self, nics=None, disks=None, os_disk=None):
         self.network_profile = NetworkProfile(network_interfaces=nics)
         self.storage_profile = StorageProfile(data_disks=disks, os_disk=os_disk)
@@ -414,7 +414,7 @@ class FakedVM(object):  # pylint: disable=too-few-public-methods
         self.instance_view.extensions = [ext]
 
 
-class FakedAccessExtensionEntity(object):  # pylint: disable=too-few-public-methods
+class FakedAccessExtensionEntity:  # pylint: disable=too-few-public-methods
     def __init__(self, is_linux, version):
         self.name = 'VMAccessForLinux' if is_linux else 'VMAccessAgent'
         self.type_handler_version = version

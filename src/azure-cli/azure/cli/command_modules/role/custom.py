@@ -4,11 +4,11 @@
 # --------------------------------------------------------------------------------------------
 
 """
-`az ad` module has been migrated to use Microsoft Graph API: https://docs.microsoft.com/en-us/graph/api/overview
+`az ad` module has been migrated to use Microsoft Graph API: https://learn.microsoft.com/en-us/graph/api/overview
 
 See:
 Property differences between Azure AD Graph and Microsoft Graph
-https://docs.microsoft.com/en-us/graph/migrate-azure-ad-graph-property-differences
+https://learn.microsoft.com/en-us/graph/migrate-azure-ad-graph-property-differences
 """
 
 import base64
@@ -374,14 +374,14 @@ def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):  # py
         # Only query Role Definitions and Graph when there are events returned
         role_defs = {d.name: worker.get_role_property(d, 'role_name') for d in list_role_definitions(cmd)}
 
-        for op_id in start_events:
-            e = end_events.get(op_id, None)
+        for k, v in start_events.items():
+            e = end_events.get(k, None)
             if not e:
                 continue
 
             entry = {}
             if e.status.value == 'Succeeded':
-                s, payload = start_events[op_id], None
+                s, payload = v, None
                 entry = dict.fromkeys(
                     ['principalId', 'principalName', 'scope', 'scopeName', 'scopeType', 'roleDefinitionId', 'roleName'],
                     None)
@@ -553,7 +553,7 @@ def _search_role_assignments(cli_ctx, assignments_client, definitions_client,
     if assignee:
         assignee_object_id = _resolve_object_id(cli_ctx, assignee, fallback_to_object_id=True)
 
-    # https://docs.microsoft.com/en-us/azure/role-based-access-control/role-assignments-list-rest
+    # https://learn.microsoft.com/en-us/azure/role-based-access-control/role-assignments-list-rest
     # "atScope()" and "principalId eq '{value}'" query cannot be used together (API limitation).
     # always use "scope" if provided, so we can get assignments beyond subscription e.g. management groups
     if scope:
@@ -707,7 +707,7 @@ def create_application(cmd, client, display_name, identifier_uris=None,
         result = graph_client.application_create(body)
     except GraphError as ex:
         if 'insufficient privileges' in str(ex).lower():
-            link = 'https://docs.microsoft.com/azure/azure-resource-manager/resource-group-create-service-principal-portal'  # pylint: disable=line-too-long
+            link = 'https://learn.microsoft.com/azure/azure-resource-manager/resource-group-create-service-principal-portal'  # pylint: disable=line-too-long
             raise CLIError("Directory permission is needed for the current user to register the application. "
                            "For how to configure, please refer '{}'. Original error: {}".format(link, ex))
         raise
@@ -1202,7 +1202,7 @@ def create_service_principal_for_rbac(
 
     if cert or create_cert:
         # Key credential is created *at the same time* of application creation.
-        # https://docs.microsoft.com/en-us/graph/application-rollkey-prooftoken
+        # https://learn.microsoft.com/en-us/graph/application-rollkey-prooftoken
         use_cert = True
         public_cert_string, cert_file, cert_start_date, cert_end_date = \
             _process_certificate(
@@ -1227,7 +1227,7 @@ def create_service_principal_for_rbac(
         graph_client.application_remove_password(aad_application[ID], body)
 
     # Password credential is created *after* application creation.
-    # https://docs.microsoft.com/en-us/graph/api/resources/passwordcredential
+    # https://learn.microsoft.com/en-us/graph/api/resources/passwordcredential
     if not use_cert:
         result = _application_add_password(graph_client, aad_application, 'rbac', app_start_date, app_end_date)
         password = result['secretText']
@@ -1302,14 +1302,10 @@ def create_service_principal_for_rbac(
     }
     if cert_file:
         logger.warning(
-            "Please copy %s to a safe place. When you run 'az login', provide the file path in the --password argument",
+            "Please copy %s to a safe place. When you run `az login`, provide the file path in the --certificate "
+            "argument",
             cert_file)
         result['fileWithCertAndPrivateKey'] = cert_file
-
-    login_hint = ('To log in with this service principal, run:\n'
-                  f'az login --service-principal --username {app_id} --password {password or cert_file} '
-                  f'--tenant {graph_client.tenant}')
-    logger.info(login_hint)
     return result
 
 
@@ -1583,12 +1579,12 @@ def _resolve_object_id_and_type(cli_ctx, assignee, fallback_to_object_id=False):
 def _get_object_stubs(graph_client, assignees):
     result = []
     assignees = list(assignees)  # callers could pass in a set
-    # Per https://docs.microsoft.com/en-us/graph/api/directoryobject-getbyids
+    # Per https://learn.microsoft.com/en-us/graph/api/directoryobject-getbyids
     # > You can specify up to 1000 IDs.
     for i in range(0, len(assignees), 1000):
         body = {
             "ids": assignees[i:i + 1000],
-            # According to https://docs.microsoft.com/en-us/graph/api/directoryobject-getbyids,
+            # According to https://learn.microsoft.com/en-us/graph/api/directoryobject-getbyids,
             # directoryObject should work as all of the resource types defined in the directory, but it doesn't.
             "types": ['user', 'group', 'servicePrincipal', 'directoryObjectPartnerReference']
         }
@@ -1626,7 +1622,7 @@ def _datetime_to_utc(dt):
 
 
 def _build_required_resource_accesses(required_resource_accesses):
-    # https://docs.microsoft.com/en-us/graph/api/resources/requiredresourceaccess
+    # https://learn.microsoft.com/en-us/graph/api/resources/requiredresourceaccess
     if isinstance(required_resource_accesses, dict):
         logger.info('Getting "requiredResourceAccess" from a full manifest')
         required_resource_accesses = required_resource_accesses.get('requiredResourceAccess', [])
@@ -1634,7 +1630,7 @@ def _build_required_resource_accesses(required_resource_accesses):
 
 
 def _build_app_roles(app_roles):
-    # https://docs.microsoft.com/en-us/graph/api/resources/approle
+    # https://learn.microsoft.com/en-us/graph/api/resources/approle
     if isinstance(app_roles, dict):
         logger.info('Getting "appRoles" from a full manifest')
         app_roles = app_roles.get('appRoles', [])
@@ -1646,8 +1642,8 @@ def _build_app_roles(app_roles):
 
 
 def _build_optional_claims(optional_claims):
-    # https://docs.microsoft.com/en-us/graph/api/resources/optionalclaim
-    # https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-optional-claims#configuring-optional-claims
+    # https://learn.microsoft.com/en-us/graph/api/resources/optionalclaim
+    # https://learn.microsoft.com/en-us/azure/active-directory/develop/active-directory-optional-claims#configuring-optional-claims
     if 'optionalClaims' in optional_claims:
         logger.info('Getting "optionalClaims" from a full manifest')
         optional_claims = optional_claims.get('optionalClaims', [])
@@ -1655,7 +1651,7 @@ def _build_optional_claims(optional_claims):
 
 
 def _build_add_password_credential_body(display_name, start_datetime, end_datetime):
-    # https://docs.microsoft.com/en-us/graph/api/resources/passwordcredential
+    # https://learn.microsoft.com/en-us/graph/api/resources/passwordcredential
     body = {
         "passwordCredential": {
             "displayName": display_name,
@@ -1685,7 +1681,7 @@ def _build_key_credentials(key_value=None, key_type=None, key_usage=None,
     key_type = key_type or 'AsymmetricX509Cert'
     key_usage = key_usage or 'Verify'
 
-    # https://docs.microsoft.com/en-us/graph/api/resources/keycredential
+    # https://learn.microsoft.com/en-us/graph/api/resources/keycredential
     key_credential = {
         "@odata.type": "#microsoft.graph.keyCredential",
         "displayName": display_name,
@@ -1712,8 +1708,8 @@ def _reset_credential(cmd, graph_object, add_password_func, remove_password_func
     :param patch_func: Patch API function. Used to update keyCredentials.
     """
 
-    # https://docs.microsoft.com/en-us/graph/api/resources/passwordcredential
-    # https://docs.microsoft.com/en-us/graph/api/resources/keycredential
+    # https://learn.microsoft.com/en-us/graph/api/resources/passwordcredential
+    # https://learn.microsoft.com/en-us/graph/api/resources/keycredential
     # Only displayName should be set.
     # For passwordCredential, customKeyIdentifier is not applicable.
     # For keyCredential, customKeyIdentifier is automatically computed by Graph service as certificate thumbprint.
@@ -2008,7 +2004,7 @@ def _build_directory_object_json(client, object_id):
 
 def _get_member_groups(get_member_group_func, identifier, security_enabled_only):
     """Call 'directoryObject: getMemberGroups' API with specified get_member_group_func.
-    https://docs.microsoft.com/en-us/graph/api/directoryobject-getmembergroups
+    https://learn.microsoft.com/en-us/graph/api/directoryobject-getmembergroups
     """
     body = {
         "securityEnabledOnly": security_enabled_only
