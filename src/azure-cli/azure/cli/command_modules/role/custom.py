@@ -631,6 +631,8 @@ def create_application(cmd, client, display_name, identifier_uris=None,
                        is_fallback_public_client=None,
                        service_management_reference=None,
                        sign_in_audience=None,
+                       # api
+                       requested_access_token_version=None,
                        # keyCredentials
                        key_value=None, key_type=None, key_usage=None, start_date=None, end_date=None,
                        key_display_name=None,
@@ -660,6 +662,8 @@ def create_application(cmd, client, display_name, identifier_uris=None,
                 is_fallback_public_client=is_fallback_public_client,
                 service_management_reference=service_management_reference,
                 sign_in_audience=sign_in_audience,
+                # api
+                requested_access_token_version=requested_access_token_version,
                 # keyCredentials
                 key_value=key_value, key_type=key_type, key_usage=key_usage,
                 start_date=start_date, end_date=end_date,
@@ -691,6 +695,8 @@ def create_application(cmd, client, display_name, identifier_uris=None,
         is_fallback_public_client=is_fallback_public_client,
         service_management_reference=service_management_reference,
         sign_in_audience=sign_in_audience,
+        # api
+        requested_access_token_version=requested_access_token_version,
         # keyCredentials
         key_credentials=key_credentials,
         # web
@@ -718,6 +724,8 @@ def update_application(instance, display_name=None, identifier_uris=None,  # pyl
                        is_fallback_public_client=None,
                        service_management_reference=None,
                        sign_in_audience=None,
+                       # api
+                       requested_access_token_version=None,
                        # keyCredentials
                        key_value=None, key_type=None, key_usage=None, start_date=None, end_date=None,
                        key_display_name=None,
@@ -741,6 +749,8 @@ def update_application(instance, display_name=None, identifier_uris=None,  # pyl
         is_fallback_public_client=is_fallback_public_client,
         service_management_reference=service_management_reference,
         sign_in_audience=sign_in_audience,
+        # api
+        requested_access_token_version=requested_access_token_version,
         # keyCredentials
         key_credentials=key_credentials,
         # web
