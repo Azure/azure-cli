@@ -88,8 +88,8 @@ def load_arguments(self, _):
         c.argument('scale_rule_name', options_list=['--scale-rule-name', '--srn'], help="The name of the scale rule.")
         c.argument('scale_rule_type', options_list=['--scale-rule-type', '--srt'], help="The type of the scale rule. Default: http. For more information please visit https://learn.microsoft.com/azure/container-apps/scale-app#scale-triggers")
         c.argument('scale_rule_http_concurrency', type=int, options_list=['--scale-rule-http-concurrency', '--srhc', '--srtc', '--scale-rule-tcp-concurrency'], help="The maximum number of concurrent requests before scale out. Only supported for http and tcp scale rules.")
-        c.argument('scale_rule_metadata', nargs="+", options_list=['--scale-rule-metadata', '--srm'], help="Scale rule metadata. Metadata must be in format \"`<key>=<value>` `<key>=<value>` ...\".")
-        c.argument('scale_rule_auth', nargs="+", options_list=['--scale-rule-auth', '--sra'], help="Scale rule auth parameters. Auth parameters must be in format \"`<triggerParameter>=<secretRef>` `<triggerParameter>=<secretRef>` ...\".")
+        c.argument('scale_rule_metadata', nargs="+", options_list=['--scale-rule-metadata', '--srm'], help="Scale rule metadata. Metadata must be in format \"{key}={value} {key}={value}` ...\".")
+        c.argument('scale_rule_auth', nargs="+", options_list=['--scale-rule-auth', '--sra'], help="Scale rule auth parameters. Auth parameters must be in format \"{triggerParameter>=<secretRef} {triggerParameter>=<secretRef} ...\".")
 
     # Dapr
     with self.argument_context('containerapp', arg_group='Dapr') as c:
