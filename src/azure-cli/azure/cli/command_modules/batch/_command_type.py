@@ -469,72 +469,55 @@ class AzureBatchDataPlaneCommand:
         def _execute_command(kwargs):
             from msrest.paging import Paged
             from msrest.exceptions import ValidationError, ClientRequestError
-            from azure.core.exceptions import HttpResponseError, ResourceExistsError
-            # from azure.batch.models import BatchError
-            #from azure.batch.models import BatchErrorException
             from knack.util import CLIError
             cmd = kwargs.pop('cmd')
 
-            try:
-                client = self.client_factory(cmd.cli_ctx, kwargs)
-                #self._build_options(kwargs)
+            client = self.client_factory(cmd.cli_ctx, kwargs)
 
-                stream_output = kwargs.pop('destination', None)
-                json_file = kwargs.pop('json_file', None)
+            stream_output = kwargs.pop('destination', None)
+            json_file = kwargs.pop('json_file', None)
 
-                # Build the request parameters from command line arguments
-                if json_file:
-                    self.parser.deserialize_json(kwargs, json_file)
-                    for arg, _ in self.parser:
-                        del kwargs[arg]
-                else:
-                    for arg, details in self.parser:
-                        try:
-                            param_value = kwargs.pop(arg)
-                            if param_value is None:
-                                continue
-                            self._build_parameters(
-                                details['restpath'],
-                                kwargs,
-                                details['restname'],
-                                param_value)
-                        except KeyError:
+            # Build the request parameters from command line arguments
+            if json_file:
+                self.parser.deserialize_json(kwargs, json_file)
+                for arg, _ in self.parser:
+                    del kwargs[arg]
+            else:
+                for arg, details in self.parser:
+                    try:
+                        param_value = kwargs.pop(arg)
+                        if param_value is None:
                             continue
-                self.filter_args(kwargs)
-                # Make request
-                if self._head_cmd:
-                    kwargs['raw'] = True
-                result = _get_operation()(client, **kwargs)
-               
-
-                # Head output
-                if self._head_cmd: # todo: need to figure out why i'm not calling transformers.transform_response_headers(result)
-                    return result
-
-                # File download
-                if stream_output:
-                    with open(stream_output, "wb") as file_handle:
-                        for data in result:
-                            file_handle.write(data)
-                    return
-
-                # Otherwise handle based on return type of results
-                if _is_paged(result):
-                    return list(result)
-
-                return result
+                        self._build_parameters(
+                            details['restpath'],
+                            kwargs,
+                            details['restname'],
+                            param_value)
+                    except KeyError:
+                        continue
+            self.filter_args(kwargs)
+            # Make request
+            if self._head_cmd:
+                kwargs['raw'] = True
+            result = _get_operation()(client, **kwargs)
             
-            except HttpResponseError as ex:
-                try:
-                    message = ex.model.message.value
-                    if ex.model.values_property:
-                        for detail in ex.model.values_property:
-                            message += f"\n{detail.key}: {detail.value}"
-                    raise CLIError(message)
-                except AttributeError: 
-                    raise CLIError(ex)
-            except (ValidationError, ClientRequestError) as ex:
-                raise CLIError(ex)
+
+            # Head output
+            if self._head_cmd:
+                return result
+
+            # File download
+            if stream_output:
+                with open(stream_output, "wb") as file_handle:
+                    for data in result:
+                        file_handle.write(data)
+                return
+
+            # Otherwise handle based on return type of results
+            if _is_paged(result):
+                return list(result)
+
+            return result
 
         self.table_transformer = None
         try:
