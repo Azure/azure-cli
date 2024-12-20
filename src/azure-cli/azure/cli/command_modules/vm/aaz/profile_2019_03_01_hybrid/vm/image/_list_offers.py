@@ -167,7 +167,42 @@ class ListOffers(AAZCommand):
             _element.name = AAZStrType(
                 flags={"required": True},
             )
+            _element.properties = AAZObjectType()
             _element.tags = AAZDictType()
+
+            properties = cls._schema_on_200.Element.properties
+            properties.data_disk_images = AAZListType(
+                serialized_name="dataDiskImages",
+            )
+            properties.os_disk_image = AAZObjectType(
+                serialized_name="osDiskImage",
+            )
+            properties.plan = AAZObjectType()
+
+            data_disk_images = cls._schema_on_200.Element.properties.data_disk_images
+            data_disk_images.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.Element.properties.data_disk_images.Element
+            _element.lun = AAZIntType(
+                flags={"read_only": True},
+            )
+
+            os_disk_image = cls._schema_on_200.Element.properties.os_disk_image
+            os_disk_image.operating_system = AAZStrType(
+                serialized_name="operatingSystem",
+                flags={"required": True},
+            )
+
+            plan = cls._schema_on_200.Element.properties.plan
+            plan.name = AAZStrType(
+                flags={"required": True},
+            )
+            plan.product = AAZStrType(
+                flags={"required": True},
+            )
+            plan.publisher = AAZStrType(
+                flags={"required": True},
+            )
 
             tags = cls._schema_on_200.Element.tags
             tags.Element = AAZStrType()

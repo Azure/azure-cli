@@ -130,9 +130,8 @@ def load_images_thru_services(cli_ctx, publisher, offer, sku, location, edge_zon
                         'offer': o['name'],
                         'sku': s['name'],
                         'version': i['name'],
-                        'architecture': i.get('additional_properties', {}).get("properties", {}).get("architecture", None) or "",
-                        'imageDeprecationStatus': i.get('additional_properties', {}).get(
-                            "properties", {}).get("imageDeprecationStatus", {}) or ""
+                        'architecture': i.get("properties", {}).get("architecture", None) or "",
+                        'imageDeprecationStatus': i.get("properties", {}).get("imageDeprecationStatus", {}) or ""
                     }
                     if edge_zone is not None:
                         image_info['edge_zone'] = edge_zone
