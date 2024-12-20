@@ -70,7 +70,7 @@ def is_sql(resource_type):
 
 
 def is_hana(resource_type):
-    return resource_type.lower() == 'saphanadatabase'
+    return resource_type.lower() == 'saphanadatabase' or resource_type.lower() == "saphanadbinstance"
 
 
 def is_wl_container(name):
