@@ -3,13 +3,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import os
-import unittest
+from unittest import mock
 
 from azure.cli.core.util import run_cmd
+from azure.cli.testsdk import ScenarioTest
 
 
-class ArgcompleteScenarioTest(unittest.TestCase):
+class ArgcompleteScenarioTest(ScenarioTest):
 
     def argcomplete_env(self, comp_line, comp_point):
         return {
@@ -22,24 +22,40 @@ class ArgcompleteScenarioTest(unittest.TestCase):
             '_ARGCOMPLETE_STDOUT_FILENAME': './argcomplete.out', }
 
     def test_completion(self):
+        import os
         import sys
+
+        from azure.cli.core.parser import AzCompletionFinder
 
         if sys.platform == 'win32':
             self.skipTest('Skip argcomplete test on Windows')
 
-        run_cmd(['az'], capture_output=True, env=self.argcomplete_env('az account sh', '13'))
+        run_cmd(['az'], env=self.argcomplete_env('az account sh', '13'))
         with open('argcomplete.out') as f:
-            assert f.read() == 'show '
+            self.assertEqual(f.read(), 'show ')
         os.remove('argcomplete.out')
 
         run_cmd(['az'], capture_output=True, env=self.argcomplete_env('az account s', '12'))
         with open('argcomplete.out') as f:
-            completion = f.read()
-            self.assertEqual('set show', completion)
+            self.assertEqual(f.read(), 'set show')
         os.remove('argcomplete.out')
 
-        run_cmd(['az'], capture_output=True, env=self.argcomplete_env('az account szzz', '15'))
+        run_cmd(['az'], env=self.argcomplete_env('az account szzz', '15'))
         with open('argcomplete.out') as f:
-            completion = f.read()
-            self.assertFalse(completion)
+            self.assertFalse(f.read())
+        os.remove('argcomplete.out')
+
+        class MockCompletionFinder(AzCompletionFinder):
+            def __call__(self, *args, **kwargs):
+                import sys
+                return super().__call__(*args, exit_method=sys.exit, **kwargs)
+
+        # argcomplete uses os._exit to exit, which is also used by pytest. Patch AzCompletionFinder to use sys.exit
+        with mock.patch('azure.cli.core.parser.AzCompletionFinder', MockCompletionFinder):
+            env = self.argcomplete_env('az storage blob list -c test --account-name hang', '48')
+            for k, v in env.items():
+                os.environ[k] = v
+            self.assertRaises(SystemExit, self.cmd, 'az')
+        with open('argcomplete.out') as f:
+            self.assertEqual(f.read(), 'hangstorage ')
         os.remove('argcomplete.out')
