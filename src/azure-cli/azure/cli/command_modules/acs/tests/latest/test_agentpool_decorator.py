@@ -1924,7 +1924,7 @@ class AKSAgentPoolContextManagedClusterModeTestCase(AKSAgentPoolContextCommonTes
         self.common_get_enable_secure_boot()
 
     def test_get_if_match(self):
-        self.test_get_if_match()
+        self.get_if_match()
 
     def test_get_if_none_match(self):
         self.test_get_if_none_match()
