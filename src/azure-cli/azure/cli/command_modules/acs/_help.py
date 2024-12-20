@@ -1647,6 +1647,14 @@ examples:
 helps['aks nodepool delete'] = """
 type: command
 short-summary: Delete the agent pool in the managed Kubernetes cluster.
+parameters:
+    - name: --ignore-pdb --ignore-pod-disruption-budget
+      type: bool
+      short-summary: ignore-pdb deletes an existing nodepool without considering Pod Disruption Budget.
+
+examples:
+    - name: Delete an agent pool with ignore-pdb
+      text: az aks nodepool delete --resource-group MyResourceGroup --cluster-name MyManagedCluster --name nodepool1 --ignore-pdb
 """
 
 helps['aks nodepool get-upgrades'] = """
