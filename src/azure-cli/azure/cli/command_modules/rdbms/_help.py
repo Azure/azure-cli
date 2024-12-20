@@ -857,7 +857,7 @@ examples:
 
 helps['postgres server'] = """
 type: group
-short-summary: Manage PostgreSQL servers.
+short-summary: Manage Azure Database for PostgreSQL Single Server. Is scheduled to retire by March 28, 2025. If you currently have an Azure Database for PostgreSQL Single Server service hosting production servers, you can migrate to the Azure Database for PostgreSQL - Flexible Server.
 """
 
 helps['postgres server configuration'] = """
@@ -895,7 +895,7 @@ examples:
 
 helps['postgres server create'] = """
 type: command
-short-summary: Create a server.
+short-summary: Create a server. Azure Database for PostgreSQL Flexible Server is the next generation of the service. Please use 'az postgres flexible-server create' for new deployments
 examples:
   - name: Create a PostgreSQL server in North Europe with sku GP_Gen5_2 (General Purpose, Gen 5 hardware, 2 vCores).
     text: |
