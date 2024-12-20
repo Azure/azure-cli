@@ -1927,7 +1927,7 @@ class AKSAgentPoolContextManagedClusterModeTestCase(AKSAgentPoolContextCommonTes
         self.get_if_match()
 
     def test_get_if_none_match(self):
-        self.test_get_if_none_match()
+        self.get_if_none_match()
     
 class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
     def _remove_defaults_in_agentpool(self, agentpool):
