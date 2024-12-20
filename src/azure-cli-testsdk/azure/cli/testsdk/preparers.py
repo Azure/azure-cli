@@ -103,12 +103,11 @@ class ResourceGroupPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
 
     def remove_resource(self, name, **kwargs):
         # delete group if test is being recorded and if the group is not a dev rg
-        # if not self.dev_setting_name:
-        #     template = 'az group delete --name {} --yes --no-wait '
-        #     if self.subscription:
-        #         template += ' --subscription {} '.format(self.subscription)
-        #     self.live_only_execute(self.cli_ctx, template.format(name))
-        return
+        if not self.dev_setting_name:
+            template = 'az group delete --name {} --yes --no-wait '
+            if self.subscription:
+                template += ' --subscription {} '.format(self.subscription)
+            self.live_only_execute(self.cli_ctx, template.format(name))
 
 
 # Storage Account Preparer and its shorthand decorator
