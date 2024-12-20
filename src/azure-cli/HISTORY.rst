@@ -3,6 +3,86 @@
 Release History
 ===============
 
+2.67.0
+++++++
+
+**AKS**
+
+* [BREAKING CHANGE] `az aks create/update`: Remove `--uptime-sla` and `--no-uptime-sla` parameters (#30221)
+* [BREAKING CHANGE] `az aks create`: Remove `--aad-client-app-id`, `--aad-server-app-id` and `--aad-server-app-secret` parameters (#30251)
+* [BREAKING CHANGE] `az aks trustedaccess rolebinding create`: Remove deprecated '-r' options (#30253)
+* `az aks create/update`: Fix storage pool name validation for Azure Container Storage (#30258)
+* `az aks enable-addon`: Update AGIC addon to use Network Contributor instead of Contributor (#29989)
+
+**App Config**
+
+* `az appconfig create/update`: Add new parameters `--arm-auth-mode` and `--enable-arm-private-network-access` to support data plane proxy settings (#30228)
+
+**Compute**
+
+* `az vm disk attach/detach`: Add new parameter `--disk-ids` to support setting multiple disks by disk ids (#30236)
+
+**Compute Fleet**
+
+* `az compute-fleet`: Add `create/update/show/delete/list/list-vmss` commands for manage Azure Compute Fleet (#30223)
+
+**Container**
+
+* `az container container-group-profile`: Add new command group to manage Azure Container Instance Container Group Profile(#30260)
+
+**DataLake**
+
+* [BREAKING CHANGE] `az dla`: Remove dla module since it has been deprecated (#30249)
+
+**DLS**
+
+* [BREAKING CHANGE] `az dls account network-rule`: Remove this command group as no server support anymore (#30094)
+
+**Eventhub**
+
+* `az eventhubs eventhub`: Add new parameters `--timestamp-type` and `--min-compaction-lag-in-mins` (#29957)
+* `az eventhubs namespace replica`: Add new commands to support adding/removing replicas (#29957)
+
+**Extension**
+
+* [BREAKING CHANGE] `az extension add/update`: Set default `--allow-preview` value from `True` to be `False` for extensions installation and remain `True` for extensions without stable releases (#30163)
+
+**Kusto**
+
+* [BREAKING CHANGE] `az kusto`: Remove kusto from CLI as it has been moved to CLI extensions (#30250)
+
+**Network**
+
+* [BREAKING CHANGE] `az network public-ip ddos-protection-statu`: Remove misspelled command group (#30265)
+
+**Packaging**
+
+* Drop Python 3.8 support (#30225)
+
+**Profile**
+
+* [BREAKING CHANGE] `az login`: `--password` no longer accepts a service principal certificate. Use `--certificate` to pass a service principal certificate (#30092)
+
+**RDBMS**
+
+* `az postgres flexible-server long-term-retention start/pre-check/list/show`: New commands to support long-term-retention backups on PostgreSql Flex Server (#30272)
+* `az postgres flexible-server create`: Support provisioning postgres flexible servers with version 17 (#30298)
+
+**Service Connector**
+
+* `az connection create mysql-flexible`: Add `--private-endpoint` parameter (#30287)
+
+**SQL**
+
+* [BREAKING CHANGE] `az sql mi link create`: Rename input from `--source-endpoint` to `--partner-endpoint`, `--primary-availability-group-name` to `--partner-availability-group-name`, `--secondary-availability-group-name` to `--instance-availability-group-name`, `--target-database` to `--databases` (#30234)
+* [BREAKING CHANGE] `az sql mi link create/show/list/update`: Rename output from `targetDatabase`, `primaryAvailabilityGroupName`, `secondaryAvailabilityGroupNamesourceEndpoint`, `sourceReplicaId`, `targetReplicaId`, `linkState`, `lastHardenedLsn` to `databases`, `partnerAvailabilityGroupName`, `instanceAvailabilityGroupName`, `partnerEndpoint`, `distributedAvailabilityGroupName`, `instanceLinkRole`, `partnerLinkRole`, `failoverMode`, `seedingMode` (#30234)
+* [BREAKING CHANGE] `az sql failover-group create`: Change default failover policy to manual (#30177)
+* `az sql mi link failover`: Support performing requested failover type in this Managed Instance link (#30234)
+
+**Upgrade**
+
+* [BREAKING CHANGE] `az upgrade`: Set default `--allow-preview` value from `True` to be `False` for extensions installation and remain `True` for extensions without stable releases (#30163)
+
 2.66.0
 ++++++
 
@@ -76,7 +156,7 @@ Release History
 
 **Profile**
 
-* `az login`: Passing the service principal certificate with `--password` is deprecated and will be removed by version 2.74. Please use `--certificate` instead. (#30091)
+* `az login`: Passing the service principal certificate with `--password` is deprecated and will be removed in version 2.67.0. Please use `--certificate` instead. (#30091)
 
 **RDBMS**
 
@@ -3487,7 +3567,7 @@ This version is only available on CentOS 7 and RHEL 7.
 
 **Role**
 
-* [BREAKING CHANGE] `az az/role`: Migrate the underlying API of `az ad` and `az role` from AD Graph API to Microsoft Graph API. For more details, see [Microsoft Graph migration](https://docs.microsoft.com/en-us/cli/azure/microsoft-graph-migration) (#22432)
+* [BREAKING CHANGE] `az az/role`: Migrate the underlying API of `az ad` and `az role` from AD Graph API to Microsoft Graph API. For more details, see [Microsoft Graph migration](https://learn.microsoft.com/en-us/cli/azure/microsoft-graph-migration) (#22432)
 
 **Security**
 
@@ -5221,7 +5301,7 @@ Workload container registration fix, SDK upgraded to 0.12.0, Fixed and Re-ran te
 
 **Service Fabric**
 
-* [BREAKING CHANGE] `az sf cluster certificate`: Remove all commands under this group. Please follow the instructions here to add/remove cluster certificates: https://docs.microsoft.com/en-us/azure/service-fabric/service-fabric-cluster-security-update-certs-azure#add-a-secondary-certificate-using-azure-resource-manager. (#18056)
+* [BREAKING CHANGE] `az sf cluster certificate`: Remove all commands under this group. Please follow the instructions here to add/remove cluster certificates: https://learn.microsoft.com/en-us/azure/service-fabric/service-fabric-cluster-security-update-certs-azure#add-a-secondary-certificate-using-azure-resource-manager. (#18056)
 * [BREAKING CHANGE] `az sf managed-service update`: Remove deprecated parameter --drop-source-replica-on-move. (#18056)
 * [BREAKING CHANGE] `az sf managed-service create`: Remove deprecated parameters --service-dns-name, --drop-source-replica-on-move and -instance-close-delay-duration. (#18056)
 * [BREAKING CHANGE] `az sf cluster`: Rename parameter --vault-resource-group to --vault-rg. (#18056)
@@ -8662,8 +8742,8 @@ Added Cluster commands and trusted_service_access_enabled parameter for Networkr
 
 **Batch**
 
-* Expanded `--json-file` capabilities of `az batch pool create` to allow for specifying MountConfigurations for file system mounts(see https://docs.microsoft.com/en-us/rest/api/batchservice/pool/add#request-body for structure)
-* Expanded `--json-file` capabilities of `az batch pool create` with the optional property publicIPs on NetworkConfiguration. This allows specifying publicIPs to be used when deploying pools (see https://docs.microsoft.com/en-us/rest/api/batchservice/pool/add#request-body for structure)
+* Expanded `--json-file` capabilities of `az batch pool create` to allow for specifying MountConfigurations for file system mounts(see https://learn.microsoft.com/en-us/rest/api/batchservice/pool/add#request-body for structure)
+* Expanded `--json-file` capabilities of `az batch pool create` with the optional property publicIPs on NetworkConfiguration. This allows specifying publicIPs to be used when deploying pools (see https://learn.microsoft.com/en-us/rest/api/batchservice/pool/add#request-body for structure)
 * Expanded `--image` capabilities to support Shared Image Galleries images. Similar to the commands support for Managed Images, to use a Shared Image Gallery image simply use the ARM ID as the value to the argument.
 * [BREAKING CHANGE] When not specified, the default value for `--start-task-wait-for-success` on `az batch pool create` is now true (was false).
 * [BREAKING CHANGE] The default value for Scope on AutoUserSpecification is now always Pool (was Task on Windows nodes, Pool on Linux nodes). This argument is not exposed via the commandline, but can be set in the `--json-file` arguments.

@@ -65,7 +65,7 @@ def _whl_download_from_url(url_parse_result, ext_file):
     import requests
     from azure.cli.core.util import should_disable_connection_verify
     url = url_parse_result.geturl()
-    r = requests.get(url, stream=True, verify=(not should_disable_connection_verify()))
+    r = requests.get(url, stream=True, verify=not should_disable_connection_verify())
     if r.status_code != 200:
         raise CLIError("Request to {} failed with {}".format(url, r.status_code))
     with open(ext_file, 'wb') as f:
@@ -306,12 +306,6 @@ def check_version_compatibility(azext_metadata):
 def add_extension(cmd=None, source=None, extension_name=None, index_url=None, yes=None,  # pylint: disable=unused-argument, too-many-statements
                   pip_extra_index_urls=None, pip_proxy=None, system=None,
                   version=None, cli_ctx=None, upgrade=None, allow_preview=None):
-    if allow_preview is None:
-        logger.warning("Default enabled including preview versions for extension installation now. "
-                       "Disabled in future release. "
-                       "Use '--allow-preview true' to enable it specifically if needed. "
-                       "Use '--allow-preview false' to install stable version only. ")
-        allow_preview = True
     ext_sha256 = None
     update_to_latest = version == 'latest' and not source
 
@@ -405,12 +399,6 @@ def show_extension(extension_name):
 
 
 def update_extension(cmd=None, extension_name=None, index_url=None, pip_extra_index_urls=None, pip_proxy=None, allow_preview=None, cli_ctx=None, version=None, download_url=None, ext_sha256=None):
-    if allow_preview is None:
-        logger.warning("Default enabled including preview versions for extension installation now. "
-                       "Disabled in future release. "
-                       "Use '--allow-preview true' to enable it specifically if needed. "
-                       "Use '--allow-preview false' to install stable version only. ")
-        allow_preview = True
     try:
         cmd_cli_ctx = cli_ctx or cmd.cli_ctx
         ext = get_extension(extension_name, ext_type=WheelExtension)

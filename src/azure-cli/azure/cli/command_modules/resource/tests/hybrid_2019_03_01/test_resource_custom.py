@@ -329,8 +329,7 @@ class TestCustom(unittest.TestCase):
         result_parameters = _process_parameters(template, parameter_list)
         missing_parameters = _find_missing_parameters(result_parameters, template)
 
-        param_file_order = ["[u'secureParam', u'boolParam', u'enumParam', u'arrayParam', u'objectParam']",
-                            "['secureParam', 'boolParam', 'enumParam', 'arrayParam', 'objectParam']"]
+        param_file_order = ["['secureParam', 'boolParam', 'enumParam', 'arrayParam', 'objectParam']"]
         results = _prompt_for_parameters(missing_parameters, fail_on_no_tty=False)
         self.assertTrue(str(list(results.keys())) in param_file_order)
 
@@ -347,8 +346,7 @@ class TestCustom(unittest.TestCase):
         result_parameters = _process_parameters(template, parameter_list)
         missing_parameters = _find_missing_parameters(result_parameters, template)
 
-        param_alpha_order = ["[u'arrayParam', u'boolParam', u'enumParam', u'objectParam', u'secureParam']",
-                             "['arrayParam', 'boolParam', 'enumParam', 'objectParam', 'secureParam']"]
+        param_alpha_order = ["['arrayParam', 'boolParam', 'enumParam', 'objectParam', 'secureParam']"]
         results = _prompt_for_parameters(dict(missing_parameters), fail_on_no_tty=False)
         self.assertTrue(str(list(results.keys())) in param_alpha_order)
 

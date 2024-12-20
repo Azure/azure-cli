@@ -92,6 +92,13 @@ def retention_validator(ns):
             raise CLIError('incorrect usage: --backup-retention. Range is 7 to 35 days.')
 
 
+def node_count_validator(ns):
+    if ns.cluster_size is not None:
+        val = ns.cluster_size
+        if not 1 <= int(val) <= 10:
+            raise CLIError('incorrect usage: --node-count. Range is 1 to 10 for an elastic cluster.')
+
+
 # Validates if a subnet id or name have been given by the user. If subnet id is given, vnet-name should not be provided.
 def validate_subnet(cmd, namespace):
 
@@ -301,9 +308,10 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
                            version=None, instance=None, geo_redundant_backup=None,
                            byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None,
                            auto_grow=None, performance_tier=None,
-                           storage_type=None, iops=None, throughput=None):
+                           storage_type=None, iops=None, throughput=None, create_cluster=None, cluster_size=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
-    if not instance:
+    is_create = not instance
+    if is_create:
         list_location_capability_info = get_postgres_location_capability_info(
             db_context.cmd,
             location)
@@ -316,6 +324,8 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
     sku_info = {k.lower(): v for k, v in sku_info.items()}
     single_az = list_location_capability_info['single_az']
     geo_backup_supported = list_location_capability_info['geo_backup_supported']
+    _cluster_validator(create_cluster, cluster_size, auto_grow, geo_redundant_backup, version, tier,
+                       byok_identity, byok_key, backup_byok_identity, backup_byok_key, instance)
     _network_arg_validator(subnet, public_access)
     _pg_tier_validator(tier, sku_info)  # need to be validated first
     if tier is None and instance is not None:
@@ -336,8 +346,39 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
     _pg_storage_validator(storage_gb, sku_info, tier, storage_type, iops, throughput, instance)
     _pg_sku_name_validator(sku_name, sku_info, tier, instance)
     _pg_high_availability_validator(high_availability, standby_availability_zone, zone, tier, single_az, instance)
-    _pg_version_validator(version, list_location_capability_info['server_versions'])
+    _pg_version_validator(version, list_location_capability_info['server_versions'], is_create)
     pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup, instance)
+
+
+def _cluster_validator(create_cluster, cluster_size, auto_grow, geo_redundant_backup, version, tier,
+                       byok_identity, byok_key, backup_byok_identity, backup_byok_key, instance):
+    if create_cluster == 'ElasticCluster' or (instance and instance.cluster and instance.cluster.cluster_size > 0):
+        if instance is None and version == '17':
+            raise ValidationError("PostgreSQL version 17 is currently not supported for elastic cluster.")
+
+        if cluster_size and instance and instance.cluster.cluster_size > cluster_size:
+            raise ValidationError('Updating node count cannot be less than the current size of {} nodes.'
+                                  .format(instance.cluster.cluster_size))
+        if auto_grow and auto_grow.lower() != 'disabled':
+            raise ValidationError("Storage Auto-grow is currently not supported for elastic cluster.")
+        if geo_redundant_backup and geo_redundant_backup.lower() != 'disabled':
+            raise ValidationError("Geo-redundancy is currently not supported for elastic cluster.")
+        if byok_identity or byok_key or backup_byok_identity or backup_byok_key:
+            raise ValidationError("Data encryption is currently not supported for elastic cluster.")
+        if tier == 'Burstable':
+            raise ValidationError("Burstable tier is currently not supported for elastic cluster.")
+
+    if cluster_size and instance and not instance.cluster:
+        raise ValidationError("Node count can only be specified for an elastic cluster.")
+
+
+def cluster_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key,
+                           geo_redundant_backup, instance):
+    if instance and instance.cluster and instance.cluster.cluster_size > 0:
+        if geo_redundant_backup and geo_redundant_backup.lower() != 'disabled':
+            raise ValidationError("Geo-redundancy is currently not supported for elastic cluster.")
+        if byok_identity or byok_key or backup_byok_identity or backup_byok_key:
+            raise ValidationError("Data encryption is currently not supported for elastic cluster.")
 
 
 def _pg_storage_validator(storage_gb, sku_info, tier, storage_type, iops, throughput, instance):
@@ -371,7 +412,7 @@ def _valid_ssdv2_range(storage_gb, sku_info, tier, iops, throughput, instance):
     supported_storageV2_size = sku_info[sku_tier]["supported_storageV2_size"]
     min_storage = instance.storage.storage_size_gb if instance is not None else supported_storageV2_size
     max_storage = sku_info[sku_tier]["supported_storageV2_size_max"]
-    if not (min_storage <= storage_gib <= max_storage):
+    if not min_storage <= storage_gib <= max_storage:
         raise CLIError('The requested value for storage size does not fall between {} and {} GiB.'
                        .format(min_storage, max_storage))
 
@@ -383,7 +424,7 @@ def _valid_ssdv2_range(storage_gb, sku_info, tier, iops, throughput, instance):
     else:
         max_iops = math.floor(max(0, storage - 6) * 500 + min_iops)
 
-    if not (min_iops <= storage_iops <= max_iops):
+    if not min_iops <= storage_iops <= max_iops:
         raise CLIError('The requested value for IOPS does not fall between {} and {} operations/sec.'
                        .format(min_iops, max_iops))
 
@@ -398,7 +439,7 @@ def _valid_ssdv2_range(storage_gb, sku_info, tier, iops, throughput, instance):
     else:
         max_throughout = max_storage_throughout
 
-    if not (min_throughout <= storage_throughput <= max_throughout):
+    if not min_throughout <= storage_throughput <= max_throughout:
         raise CLIError('The requested value for throughput does not fall between {} and {} MB/sec.'
                        .format(min_throughout, max_throughout))
 
@@ -438,10 +479,20 @@ def _pg_storage_performance_tier_validator(performance_tier, sku_info, tier=None
                                ' Allowed values : {}'.format(storage_size, performance_tiers))
 
 
-def _pg_version_validator(version, versions):
+def _pg_version_validator(version, versions, is_create):
     if version:
         if version not in versions:
             raise CLIError('Incorrect value for --version. Allowed values : {}'.format(versions))
+        if version == '12':
+            logger.warning("Support for PostgreSQL 12 has officially ended. As a result, "
+                           "the option to select version 12 will be removed in the near future. "
+                           "We recommend selecting PostgreSQL 13 or a later version for "
+                           "all future operations.")
+
+    if is_create:
+        # Warning for upcoming breaking change to default value of pg version
+        logger.warning("The default value for the PostgreSQL server major version "
+                       "will be updating to 17 in the near future.")
 
 
 def _pg_high_availability_validator(high_availability, standby_availability_zone, zone, tier, single_az, instance):
@@ -738,6 +789,18 @@ def validate_and_format_restore_point_in_time(restore_time):
                               "Please use ISO format e.g., 2021-10-22T00:08:23+00:00.")
 
 
+def is_citus_cluster(cmd, resource_group_name, server_name):
+    server_operations_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
+    server = server_operations_client.get(resource_group_name, server_name)
+
+    return server.cluster and server.cluster.cluster_size > 0
+
+
+def validate_citus_cluster(cmd, resource_group_name, server_name):
+    if is_citus_cluster(cmd, resource_group_name, server_name):
+        raise ValidationError("Elastic cluster does not currently support this operation.")
+
+
 def validate_public_access_server(cmd, client, resource_group_name, server_name):
     if isinstance(client, MySqlFirewallRulesOperations):
         server_operations_client = cf_mysql_flexible_servers(cmd.cli_ctx, '_')
@@ -813,13 +876,20 @@ def _pg_storage_type_validator(storage_type, auto_grow, high_availability, geo_r
 
 
 def check_resource_group(resource_group_name):
+    # check if rg is already null originally
+    if not resource_group_name:
+        return False
+
+    # replace single and double quotes with empty string
     resource_group_name = resource_group_name.replace("'", '')
     resource_group_name = resource_group_name.replace('"', '')
-    if (not resource_group_name):
+
+    # check if rg is empty after removing quotes
+    if not resource_group_name:
         return False
     return True
 
 
 def validate_resource_group(resource_group_name):
-    if (not check_resource_group(resource_group_name)):
+    if not check_resource_group(resource_group_name):
         raise CLIError('Resource group name cannot be empty.')

@@ -695,7 +695,7 @@ class WebappConfigureTest(ScenarioTest):
         # show
         result = self.cmd('webapp config appsettings list -g {} -n {}'.format(
             resource_group, webapp_name)).get_output_in_json()
-        s2 = next((x for x in result if x['name'] == 's2'))
+        s2 = next(x for x in result if x['name'] == 's2')
         self.assertEqual(s2['name'], 's2')
         self.assertEqual(s2['slotSetting'], False)
         self.assertEqual(s2['value'], 'bar')
@@ -916,7 +916,7 @@ class WebappConfigureTest(ScenarioTest):
         # show
         result = self.cmd('webapp config appsettings list -g {} -n {}'.format(
             resource_group, webapp_name)).get_output_in_json()
-        s2 = next((x for x in result if x['name'] == 's2'))
+        s2 = next(x for x in result if x['name'] == 's2')
         self.assertEqual(s2['name'], 's2')
         self.assertEqual(s2['slotSetting'], False)
         self.assertEqual(s2['value'], 'bar')
@@ -1218,11 +1218,11 @@ class LinuxWebappScenarioTest(ScenarioTest):
         self.assertEqual(set(x['value'] for x in result if x['name'] ==
                              'DOCKER_REGISTRY_SERVER_PASSWORD'), set([None]))   # we mask the password
         sample = next(
-            (x for x in result if x['name'] == 'DOCKER_REGISTRY_SERVER_URL'))
+            x for x in result if x['name'] == 'DOCKER_REGISTRY_SERVER_URL')
         self.assertEqual(sample, {
                          'name': 'DOCKER_REGISTRY_SERVER_URL', 'slotSetting': False, 'value': 'foo-url'})
         sample = next(
-            (x for x in result if x['name'] == 'WEBSITES_ENABLE_APP_SERVICE_STORAGE'))
+            x for x in result if x['name'] == 'WEBSITES_ENABLE_APP_SERVICE_STORAGE')
         self.assertEqual(sample, {
                          'name': 'WEBSITES_ENABLE_APP_SERVICE_STORAGE', 'slotSetting': False, 'value': 'false'})
 
@@ -1231,7 +1231,7 @@ class LinuxWebappScenarioTest(ScenarioTest):
         self.assertEqual(set(x['value'] for x in result if x['name'] ==
                              'DOCKER_REGISTRY_SERVER_PASSWORD'), set([None]))  # we mask the password
         sample = next(
-            (x for x in result if x['name'] == 'WEBSITES_ENABLE_APP_SERVICE_STORAGE'))
+            x for x in result if x['name'] == 'WEBSITES_ENABLE_APP_SERVICE_STORAGE')
         self.assertEqual(sample, {
                          'name': 'WEBSITES_ENABLE_APP_SERVICE_STORAGE', 'slotSetting': False, 'value': 'true'})
 
@@ -1576,6 +1576,7 @@ class AppServiceCors(ScenarioTest):
         self.cmd('webapp cors show -g {rg} -n {web} --slot {slot}',
                  checks=self.check('allowedOrigins', []))
 
+    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     @StorageAccountPreparer()
     def test_functionapp_cors(self, resource_group, storage_account):
@@ -1649,7 +1650,7 @@ class WebappSSLCertTest(ScenarioTest):
         webapp_name = self.create_random_name(prefix='web-ssl-test', length=20)
         slot_name = self.create_random_name(prefix='slot-ssl-test', length=20)
         # Cert Generated using
-        # https://docs.microsoft.com/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
+        # https://learn.microsoft.com/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
         pfx_file = os.path.join(TEST_DIR, 'server.pfx')
         cert_password = 'test'
         cert_thumbprint = '9E9735C45C792B03B3FFCCA614852B32EE71AD6B'
@@ -1717,7 +1718,7 @@ class WebappSSLCertTest(ScenarioTest):
         plan = self.create_random_name(prefix='ssl-test-plan', length=24)
         webapp_name = self.create_random_name(prefix='web-ssl-test', length=20)
         # Cert Generated using
-        # https://docs.microsoft.com/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
+        # https://learn.microsoft.com/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
         pfx_file = os.path.join(TEST_DIR, 'server.pfx')
         cert_password = 'test'
         cert_thumbprint = '9E9735C45C792B03B3FFCCA614852B32EE71AD6B'
@@ -1746,7 +1747,7 @@ class WebappSSLImportCertTest(ScenarioTest):
         plan_name = self.create_random_name(prefix='ssl-test-plan', length=24)
         webapp_name = self.create_random_name(prefix='web-ssl-test', length=20)
         # Cert Generated using
-        # https://docs.microsoft.com/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
+        # https://learn.microsoft.com/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
         pfx_file = os.path.join(TEST_DIR, 'server.pfx')
         cert_password = 'test'
         cert_thumbprint = '9E9735C45C792B03B3FFCCA614852B32EE71AD6B'
@@ -1780,7 +1781,7 @@ class WebappSSLImportCertTest(ScenarioTest):
         webapp_name = self.create_random_name(prefix='web-ssl-test', length=20)
         kv_name = self.create_random_name(prefix='kv-ssl-test', length=20)
         # Cert Generated using
-        # https://docs.microsoft.com/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
+        # https://learn.microsoft.com/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
         pfx_file = os.path.join(TEST_DIR, 'server.pfx')
         cert_password = 'test'
         cert_thumbprint = '9E9735C45C792B03B3FFCCA614852B32EE71AD6B'

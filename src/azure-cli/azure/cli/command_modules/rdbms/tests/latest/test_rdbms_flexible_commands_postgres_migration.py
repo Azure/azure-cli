@@ -3,31 +3,14 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import os
-import time
-import pathlib
-import getopt
 import uuid
-import sys
 from knack.log import get_logger
 
-from datetime import datetime
-from time import sleep
-from dateutil.tz import tzutc  # pylint: disable=import-error
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.core.util import CLIError
-from azure.cli.core.util import parse_proxy_resource_id
-from azure.cli.testsdk.base import execute
-from azure.cli.testsdk.exceptions import CliTestError  # pylint: disable=unused-import
+from azure.cli.testsdk.scenario_tests.const import ENV_LIVE_TEST
 from azure.cli.testsdk import (
     JMESPathCheck,
-    NoneCheck,
-    ResourceGroupPreparer,
-    ScenarioTest,
-    StringContainCheck,
-    live_only)
-from azure.cli.testsdk.preparers import (
-    AbstractPreparer,
-    SingleValueReplacer)
+    ScenarioTest)
 
 logger = get_logger(__name__)
 
@@ -39,13 +22,13 @@ class MigrationScenarioTest(ScenarioTest):
         self._test_server_migration('postgres')
 
     def test_postgres_flexible_server_onpremise_migration(self):
-        self._test_server_migration_onpremise('postgres', True, "f31b6595-74d4-4d3c-91bd-fb93af61d8f9")
-        self._test_server_migration_onpremise('postgres', False, "c73c308e-1e4e-4cfd-bc1f-7db572422598")
+        self._test_server_migration_onpremise('postgres', True, "8e73acbf-9ce7-47e4-ac22-71c9e0b04bb6")
+        self._test_server_migration_onpremise('postgres', False, "bba425ca-e823-46bf-ad5a-6b5a41229ee2")
 
     def _test_server_migration(self, database_engine):
         # Set this to True or False depending on whether we are in live mode or test mode
         # livemode = True
-        livemode = False
+        livemode = os.environ.get(ENV_LIVE_TEST, False)
 
         if livemode:
             # Live mode values
@@ -54,7 +37,7 @@ class MigrationScenarioTest(ScenarioTest):
         else:
             # Mock test mode values
             target_subscription_id = "00000000-0000-0000-0000-000000000000"
-            migration_name = "d2419e1d-4e05-4149-95d9-1d1c094e5ac5"
+            migration_name = "f656f0d0-9ba0-4abe-b9ac-77057316363c"
 
         target_resource_group_name = "autobot-resourcegroup-pg-eastus2euap"
         target_server_name = "autobot-e2e-pg-fs-eastus2euap"
@@ -98,7 +81,7 @@ class MigrationScenarioTest(ScenarioTest):
     def _test_server_migration_onpremise(self, database_engine, validateOnly=False, migration_name=None):
         # Set this to True or False depending on whether we are in live mode or test mode
         # livemode = True
-        livemode = False
+        livemode = os.environ.get(ENV_LIVE_TEST, False)
 
         if livemode:
             # Live mode values

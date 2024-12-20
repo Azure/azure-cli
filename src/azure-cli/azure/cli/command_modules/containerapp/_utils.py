@@ -102,7 +102,7 @@ def _create_application(client, display_name):
         result = client.application_create(body)
     except GraphError as ex:
         if 'insufficient privileges' in str(ex).lower():
-            link = 'https://docs.microsoft.com/azure/azure-resource-manager/resource-group-create-service-principal-portal'  # pylint: disable=line-too-long
+            link = 'https://learn.microsoft.com/azure/azure-resource-manager/resource-group-create-service-principal-portal'  # pylint: disable=line-too-long
             raise ValidationError("Directory permission is needed for the current user to register the application. "
                                   "For how to configure, please refer '{}'. Original error: {}".format(link, ex)) from ex
         raise
@@ -1584,7 +1584,7 @@ def set_managed_identity(cmd, resource_group_name, containerapp_def, system_assi
         containerapp_def["identity"] = {}
         containerapp_def["identity"]["type"] = "None"
 
-    if assign_system_identity and containerapp_def["identity"]["type"].__contains__("SystemAssigned"):
+    if assign_system_identity and "SystemAssigned" in containerapp_def["identity"]["type"]:
         logger.warning("System identity is already assigned to containerapp")
 
     # Assign correct type
@@ -1974,7 +1974,14 @@ def parse_oryx_mariner_tag(tag: str) -> OryxMarinerRunImgTagProperty:
         if len(re_matches) == 0:
             tag_obj = None
         else:
-            tag_obj = dict(fullTag=tag, version=SemVer.parse(re_matches[0][0]), framework=tag_split[2], marinerVersion=re_matches[0][2], architectures=None, support="lts")
+            tag_obj = {
+                "fullTag": tag,
+                "version": SemVer.parse(re_matches[0][0]),
+                "framework": tag_split[2],
+                "marinerVersion": re_matches[0][2],
+                "architectures": None,
+                "support": "lts",
+            }
     else:
         tag_obj = None
     return tag_obj

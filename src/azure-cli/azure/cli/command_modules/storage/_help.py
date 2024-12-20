@@ -85,7 +85,7 @@ long-summary: >
     Sharing) rules.
 parameters:
   - name: --enable-change-feed
-    short-summary: 'Indicate whether change feed event logging is enabled. If it is true, you enable the storage account to begin capturing changes. The default value is true. You can see more details in https://docs.microsoft.com/azure/storage/blobs/storage-blob-change-feed?tabs=azure-portal#register-by-using-azure-cli'
+    short-summary: 'Indicate whether change feed event logging is enabled. If it is true, you enable the storage account to begin capturing changes. The default value is true. You can see more details in https://learn.microsoft.com/azure/storage/blobs/storage-blob-change-feed?tabs=azure-portal#register-by-using-azure-cli'
   - name: --enable-delete-retention
     short-summary: 'Indicate whether delete retention policy is enabled for the blob service.'
   - name: --delete-retention-days
@@ -229,7 +229,7 @@ short-summary: Failover request can be triggered for a storage account in case o
 long-summary: |
     The failover occurs from the storage account's primary cluster to secondary cluster for (RA-)GRS/GZRS accounts. The secondary
     cluster will become primary after failover. For more information, please refer to
-    https://docs.microsoft.com/azure/storage/common/storage-disaster-recovery-guidance.
+    https://learn.microsoft.com/azure/storage/common/storage-disaster-recovery-guidance.
 examples:
   - name: Failover a storage account.
     text: |
@@ -856,7 +856,7 @@ parameters:
     short-summary: The blob container where the selected source files or blobs will be copied to.
   - name: --pattern
     type: string
-    short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3.7/library/fnmatch.html.
+    short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3/library/fnmatch.html.
     long-summary: When you use '*' in --pattern, it will match any character including the the directory separator '/'.
   - name: --dryrun
     type: bool
@@ -923,7 +923,7 @@ parameters:
     long-summary: The source can be the container URL or the container name. When the source is the container URL, the storage account name will be parsed from the URL.
   - name: --pattern
     type: string
-    short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3.7/library/fnmatch.html.
+    short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3/library/fnmatch.html.
     long-summary: When you use '*' in --pattern, it will match any character including the the directory separator '/'. You can also try "az storage remove" command with --include and --exclude with azure cli >= 2.0.70 to match multiple patterns.
   - name: --dryrun
     type: bool
@@ -965,7 +965,7 @@ parameters:
     short-summary: The existing destination folder for this download operation.
   - name: --pattern
     type: string
-    short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3.7/library/fnmatch.html.
+    short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3/library/fnmatch.html.
     long-summary: When you use '*' in --pattern, it will match any character including the the directory separator '/'.
   - name: --dryrun
     type: bool
@@ -1293,7 +1293,7 @@ parameters:
     long-summary: The destination can be the container URL or the container name. When the destination is the container URL, the storage account name will be parsed from the URL.
   - name: --pattern
     type: string
-    short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3.7/library/fnmatch.html.
+    short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3/library/fnmatch.html.
     long-summary: When you use '*' in --pattern, it will match any character including the the directory separator '/'.
   - name: --dryrun
     type: bool
@@ -1950,7 +1950,7 @@ parameters:
     short-summary: The directory where the source data is copied to. If omitted, data is copied to the root directory.
   - name: --pattern
     type: string
-    short-summary: The pattern used for globbing files and blobs. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3.7/library/fnmatch.html.
+    short-summary: The pattern used for globbing files and blobs. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3/library/fnmatch.html.
     long-summary: When you use '*' in --pattern, it will match any character including the the directory separator '/'.
   - name: --dryrun
     type: bool
@@ -1992,7 +1992,7 @@ parameters:
     short-summary: The source of the file delete operation. The source can be the file share URL or the share name.
   - name: --pattern
     type: string
-    short-summary: The pattern used for file globbing. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3.7/library/fnmatch.html.
+    short-summary: The pattern used for file globbing. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3/library/fnmatch.html.
     long-summary: When you use '*' in --pattern, it will match any character including the the directory separator '/'.
   - name: --dryrun
     type: bool
@@ -2026,7 +2026,7 @@ parameters:
     short-summary: The local directory where the files are downloaded to. This directory must already exist.
   - name: --pattern
     type: string
-    short-summary: The pattern used for file globbing. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3.7/library/fnmatch.html.
+    short-summary: The pattern used for file globbing. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3/library/fnmatch.html.
     long-summary: When you use '*' in --pattern, it will match any character including the the directory separator '/'.
   - name: --dryrun
     type: bool
@@ -2181,7 +2181,7 @@ parameters:
     short-summary: The directory where the source data is copied to. If omitted, data is copied to the root directory.
   - name: --pattern
     type: string
-    short-summary: The pattern used for file globbing. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3.7/library/fnmatch.html.
+    short-summary: The pattern used for file globbing. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3/library/fnmatch.html.
     long-summary: When you use '*' in --pattern, it will match any character including the the directory separator '/'.
   - name: --dryrun
     type: bool
@@ -2256,7 +2256,7 @@ parameters:
         For example, the following ACL grants read, write, and execute rights to the file owner an
         john.doe@contoso, the read right to the owning group, and nothing to everyone else:
         "user::rwx,user:john.doe@contoso:rwx,group::r--,other::---,mask::rwx".
-        For more information, please refer to https://docs.microsoft.com/azure/storage/blobs/data-lake-storage-access-control.
+        For more information, please refer to https://learn.microsoft.com/azure/storage/blobs/data-lake-storage-access-control.
     - name: --permissions
       short-summary: >
         Invalid in conjunction with acl. POSIX access permissions for the file owner, the file owning group, and others.
@@ -2266,12 +2266,12 @@ parameters:
       short-summary: >
         The owning user of the file or directory. The user Azure Active Directory object ID or user principal name to
         set as the owner. For more information, please refer to
-        https://docs.microsoft.com/azure/storage/blobs/data-lake-storage-access-control#the-owning-user.
+        https://learn.microsoft.com/azure/storage/blobs/data-lake-storage-access-control#the-owning-user.
     - name: --group
       short-summary: >
         The owning group of the file or directory. The group Azure Active Directory object ID or user principal name to
         set as the owning group. For more information, please refer to
-        https://docs.microsoft.com/azure/storage/blobs/data-lake-storage-access-control#changing-the-owning-group.
+        https://learn.microsoft.com/azure/storage/blobs/data-lake-storage-access-control#changing-the-owning-group.
 examples:
     - name: Set the access control list of a path.
       text: az storage fs access set --acl "user::rwx,group::r--,other::---" -p dir -f myfilesystem --account-name mystorageaccount --account-key 0000-0000

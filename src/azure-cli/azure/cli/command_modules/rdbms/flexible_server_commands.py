@@ -13,6 +13,8 @@ from azure.cli.command_modules.rdbms._client_factory import (
     cf_postgres_flexible_db,
     cf_postgres_flexible_location_capabilities,
     cf_postgres_flexible_backups,
+    cf_postgres_flexible_ltr_backups,
+    cf_postgres_flexible_operations,
     cf_postgres_flexible_replica,
     cf_postgres_flexible_adadmin,
     cf_postgres_flexible_migrations,
@@ -59,13 +61,23 @@ def load_flexibleserver_command_table(self, _):
     )
 
     postgres_flexible_location_capabilities_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms..postgresql_flexibleservers.operations#LocationBasedCapabilitiesOperations.{}',
+        operations_tmpl='azure.mgmt.rdbms.postgresqlflexibleservers.operations#LocationBasedCapabilitiesOperations.{}',
         client_factory=cf_postgres_flexible_location_capabilities
     )
 
     postgres_flexible_backups_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.postgresqlflexibleservers.operations#BackupsOperations.{}',
         client_factory=cf_postgres_flexible_backups
+    )
+
+    postgres_flexible_ltr_backup_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.postgresqlflexibleservers.operations#LtrBackupOperationsOperations.{}',
+        client_factory=cf_postgres_flexible_ltr_backups
+    )
+
+    postgres_flexible_operations_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.postgresqlflexibleservers.operations#FlexibleServerOperations.{}',
+        client_factory=cf_postgres_flexible_operations
     )
 
     postgres_flexible_replica_sdk = CliCommandType(
@@ -207,8 +219,20 @@ def load_flexibleserver_command_table(self, _):
         g.custom_command('create', 'backup_create_func', custom_command_type=flexible_servers_custom_postgres)
         g.custom_command('delete', 'backup_delete_func', custom_command_type=flexible_servers_custom_postgres)
 
-    with self.command_group('postgres flexible-server replica', postgres_flexible_replica_sdk) as g:
-        g.command('list', 'list_by_server')
+    with self.command_group('postgres flexible-server long-term-retention', postgres_flexible_ltr_backup_sdk,
+                            client_factory=cf_postgres_flexible_ltr_backups) as g:
+        g.command('list', 'list_by_server', transform=transform_backups_list)
+        g.show_command('show', 'get', transform=transform_backup)
+
+    with self.command_group('postgres flexible-server long-term-retention', postgres_flexible_operations_sdk,
+                            client_factory=cf_postgres_flexible_operations) as g:
+        g.custom_command('pre-check', 'ltr_precheck_func', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_command('start', 'ltr_start_func', custom_command_type=flexible_servers_custom_postgres)
+
+    with self.command_group('postgres flexible-server replica', postgres_flexible_replica_sdk,
+                            custom_command_type=flexible_servers_custom_postgres,
+                            client_factory=cf_postgres_flexible_replica) as g:
+        g.custom_command('list', 'flexible_replica_list_by_server')
 
     with self.command_group('postgres flexible-server replica', postgres_flexible_servers_sdk,
                             custom_command_type=flexible_servers_custom_postgres,
@@ -220,6 +244,7 @@ def load_flexibleserver_command_table(self, _):
     with self.command_group('postgres flexible-server identity', postgres_flexible_servers_sdk,
                             custom_command_type=flexible_servers_custom_postgres,
                             client_factory=cf_postgres_flexible_servers) as g:
+        g.custom_command('update', 'flexible_server_identity_update', supports_no_wait=True)
         g.custom_command('assign', 'flexible_server_identity_assign', supports_no_wait=True)
         g.custom_command('remove', 'flexible_server_identity_remove', supports_no_wait=True, confirmation=True)
         g.custom_show_command('show', 'flexible_server_identity_show')
@@ -264,3 +289,10 @@ def load_flexibleserver_command_table(self, _):
                             client_factory=cf_postgres_flexible_private_link_resources) as g:
         g.command('list', 'list_by_server')
         g.custom_show_command('show', 'flexible_server_private_link_resource_get', custom_command_type=flexible_servers_custom_postgres)
+
+    with self.command_group('postgres flexible-server fabric-mirroring', postgres_flexible_config_sdk,
+                            custom_command_type=flexible_servers_custom_postgres,
+                            client_factory=cf_postgres_flexible_config) as g:
+        g.custom_command('start', 'flexible_server_fabric_mirroring_start')
+        g.custom_command('stop', 'flexible_server_fabric_mirroring_stop')
+        g.custom_command('update-databases', 'flexible_server_fabric_mirroring_update_databases')
