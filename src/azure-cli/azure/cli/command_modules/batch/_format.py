@@ -4,13 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import json
-
-from enum import Enum
-import time
-import datetime
-import re
 from collections import OrderedDict
-
 from urllib.parse import unquote
 
 HEAD_PROPERTIES = {  # Convert response headers to properties.

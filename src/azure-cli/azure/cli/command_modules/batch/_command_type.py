@@ -549,8 +549,6 @@ class AzureBatchDataPlaneCommand:
             kwargs['etag'] = kwargs['if_none_match']
             kwargs['match_condition'] = MatchConditions.IfModified
             del kwargs['if_none_match']
- 
-
 
     def get_kwargs(self):
         args = {
@@ -701,7 +699,6 @@ class AzureBatchDataPlaneCommand:
                   continue
       return filtered_members
 
-    
     def convert_to_track1_type (self, original_type):
         if original_type is not None and "ForwardRef" in original_type:
            pattern = r"ForwardRef\('_models\.(.*?)'\)"
@@ -709,9 +706,9 @@ class AzureBatchDataPlaneCommand:
         if original_type is not None and "_models." in original_type:
            original_type = original_type.replace("_models.", "")
         if original_type is not None and "typing.List" in original_type:
-           original_type = original_type.replace("typing.List", "")
+           original_type = original_type.replace("typing.List", "List")
         if original_type is not None and "typing.Dict" in original_type:
-           original_type = original_type.replace("typing.Dict", "")
+           original_type = original_type.replace("typing.Dict", "Dict")
         if original_type is not None and "typing.Union" in original_type:
            pattern = r"typing\.Union\[\w+, (\w+), \w+\]"
            match = re.search(pattern, original_type)
@@ -771,7 +768,6 @@ class AzureBatchDataPlaneCommand:
               print("none")
           member_types[name] = {'key' : rest_names[name], 'type' : track1_type}
       return member_types
-    
 
     """
     Method that will go through a class and return a list of its memember variables and there required status
@@ -821,10 +817,10 @@ class AzureBatchDataPlaneCommand:
                 if details['type'] in pformat.BASIC_TYPES:
                     self._resolve_conflict(param_attr, param_attr, path, options,
                                            details['type'], required_attrs, conflict_names, details['key'],restpath)
-                elif details['type'].startswith('[') or details['type'].startswith('{'):
+                elif details['type'].startswith('List['):
                     # We only expose a list arg if there's a validator for it
                     # This will fail for 2D arrays - though Batch doesn't have any yet
-                    inner_type = details['type'][1:-1]
+                    inner_type = details['type'][5:-1]
                     if inner_type in pformat.BASIC_TYPES:
                         options['help'] += " Space-separated values."
                         self._resolve_conflict(
@@ -841,6 +837,14 @@ class AzureBatchDataPlaneCommand:
                                 details['type'], required_attrs, conflict_names, details['key'], restpath)
                         except AttributeError:
                             continue
+                elif details['type'] == 'Dict[str, str]':
+                    # Only string dictionaries are currently supported, but right now
+                    # Batch doesn't have any other kind
+                    options['help'] += " Space-separated values in 'key=value' format."
+                    options['type'] = validators.string_dictionary_format
+                    self._resolve_conflict(
+                            param_attr, param_attr, path, options,
+                            details['type'], required_attrs, conflict_names, details['key'], restpath)
                 else:
                     attr_model = _load_model(details['type'])
                     if issubclass(attr_model, Enum):  # Must be an enum
