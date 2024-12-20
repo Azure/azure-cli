@@ -63,6 +63,21 @@ def metadata_item_format(value):
         raise ValueError(message)
     return {'name': data_name, 'value': data_value}
 
+def string_dictionary_format(values):
+    """Space-separated values in 'key=value' format."""
+    if not values:
+        raise ValueError("No values found. "
+                         "Argument values should be in the format a=b c=d")
+    result = {}
+    try:
+        for value in values.split(' '):
+            k, v = value.split('=')
+            result[k] = v
+    except ValueError:
+        message = ("Incorrectly formatted values. "
+                   "Argument values should be in the format a=b c=d")
+        raise ValueError(message)
+    return result
 
 def resource_tag_format(values):
     """Space-separated values in 'key=value' format."""

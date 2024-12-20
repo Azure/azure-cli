@@ -390,7 +390,7 @@ def load_arguments(self, _):
 
     with self.argument_context('batch pool create') as c:
         c.argument('json_file', help='The file containing pool create properties parameter specification in JSON(formatted to match REST API request body). If this parameter is specified, all \'Pool Create Properties Parameter Arguments\' are ignored.  See https://docs.microsoft.com/rest/api/batchservice/pool/add?tabs=HTTP#request-body')
-        c.extra('resource_tags', arg_group='Pool', type=resource_tag_format, help="User is able to specify resource tags for the pool. Any resource created for the pool will then also be tagged by the same resource tags")
+        c.argument('resource_tags', arg_group='Pool', type=resource_tag_format, help="User is able to specify resource tags for the pool. Any resource created for the pool will then also be tagged by the same resource tags")
         c.argument('target_node_communication_mode', options_list=['--target-communication'],
                    help="The desired node communication mode for the pool. If this element is present, it replaces the existing targetNodeCommunicationMode configured on the Pool. If omitted, any existing metadata is left unchanged.",
                    arg_type=get_enum_type(BatchNodeCommunicationMode))

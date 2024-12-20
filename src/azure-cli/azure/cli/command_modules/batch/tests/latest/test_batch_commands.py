@@ -515,8 +515,6 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
             if not (classx.__module__ == 'azure.batch.models._enums' or classx.__module__ == 'azure.batch.models._patch'):
               attribute_maps[classx.__name__] = self.command_delete.get_track1_attribute_map(classx)
               validations[classx.__name__] = self.command_delete.get_track1_validations(classx)
-              lenth = len(validations)
-        
 
         # verify that every attribute_map has a key and type
         for attribute_map in attribute_maps:
@@ -525,7 +523,6 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
                 self.assertTrue(value is not None)
                 self.assertTrue('key' in value and value['key'])
                 self.assertTrue('type' in value and value['type'])
-
 
         # verify that every validation is one of three expected values
         for validation in validations:
