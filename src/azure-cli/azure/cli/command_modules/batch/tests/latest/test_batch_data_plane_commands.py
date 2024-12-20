@@ -359,7 +359,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
                                 '--disk-encryption-targets "TemporaryDisk"')
 
         # test create job with missing parameters
-        self.kwargs['start'] = datetime.datetime.utcnow().isoformat()
+        self.kwargs['start'] = datetime.datetime.now(datetime.timezone.utc).isoformat()
         with self.assertRaises(SystemExit):
             self.batch_cmd('batch job create --id {j_id} --metadata test=value '
                            '--job-manager-task-environment-settings a=b '

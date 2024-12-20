@@ -219,8 +219,8 @@ class BatchArgumentTree:
 
     def _is_list(self, name):
         """Whether argument value is a list"""
-        return self._arg_tree[name]['type'].startswith('[') or self._arg_tree[name]['type'] == '{str}'
-
+        return self._arg_tree[name]['type'].startswith('List[') or self._arg_tree[name]['type'] == '{str}'
+    
     def _is_datetime(self, name):
         """Whether argument value is a timestamp"""
         return self._arg_tree[name]['type'] in ['iso-8601', 'rfc-1123']
