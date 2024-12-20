@@ -7,7 +7,7 @@ trigger:
     include:
     - '*'
     exclude:
-    - 'release'
+    - 'release*'
 
 pr:
   branches:
@@ -208,7 +208,7 @@ jobs:
       artifactName: metadata
 
   - task: PipAuthenticate@1
-    condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
+    condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/release')
     displayName: 'Pip Authenticate'
     inputs:
       artifactFeeds: $(AZURE_ARTIFACTS_FEEDS)
@@ -252,7 +252,7 @@ jobs:
         artifactName: metadata
 
     - task: PipAuthenticate@1
-      condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
+      condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/release')
       displayName: 'Pip Authenticate'
       inputs:
         artifactFeeds: $(AZURE_ARTIFACTS_FEEDS)
@@ -442,7 +442,7 @@ jobs:
       versionSpec: 3.12
 
   - task: PipAuthenticate@1
-    condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
+    condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/release')
     displayName: 'Pip Authenticate'
     inputs:
       artifactFeeds: $(AZURE_ARTIFACTS_FEEDS)
@@ -730,7 +730,7 @@ jobs:
     displayName: Install Docker
 
   - task: PipAuthenticate@1
-    condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
+    condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/release')
     displayName: 'Pip Authenticate'
     inputs:
       artifactFeeds: $(AZURE_ARTIFACTS_FEEDS)
@@ -826,7 +826,7 @@ jobs:
   - bash: ./scripts/ci/install_docker.sh
     displayName: Install Docker
   - task: PipAuthenticate@1
-    condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
+    condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/release')
     displayName: 'Pip Authenticate'
     inputs:
       artifactFeeds: $(AZURE_ARTIFACTS_FEEDS)
@@ -948,7 +948,7 @@ jobs:
   - bash: ./scripts/ci/install_docker.sh
     displayName: Install Docker
   - task: PipAuthenticate@1
-    condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
+    condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/release')
     displayName: 'Pip Authenticate'
     inputs:
       artifactFeeds: $(AZURE_ARTIFACTS_FEEDS)
