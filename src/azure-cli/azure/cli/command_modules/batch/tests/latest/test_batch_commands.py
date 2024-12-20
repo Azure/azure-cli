@@ -546,7 +546,7 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
         # pylint: disable=too-many-statements
         handler = azure.batch._client.BatchClient.create_pool
         args = list(self.command_pool._load_transformed_arguments(handler))
-        self.assertEqual(len(args), 47)
+        self.assertEqual(len(args), 48)
         self.assertFalse('yes' in [a for a, _ in args])
         self.assertTrue('json_file' in [a for a, _ in args])
         self.assertFalse('destination' in [a for a, _ in args])
