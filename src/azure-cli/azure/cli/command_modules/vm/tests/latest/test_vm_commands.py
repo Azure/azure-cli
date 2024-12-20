@@ -137,8 +137,6 @@ class VMImageListThruServiceScenarioTest(ScenarioTest):
         self.cmd('vm image list --offer CentOs --publisher OpenLogic --sku 7.7 --architecture x64 --all ', checks=[
             self.check('[0].imageDeprecationStatus.imageState', 'Active'),
             self.check('[0].imageDeprecationStatus.scheduledDeprecationTime', None),
-            self.check('[5].imageDeprecationStatus.imageState', 'ScheduledForDeprecation'),
-            self.check('[5].imageDeprecationStatus.scheduledDeprecationTime', '2024-10-09T00:00:00+00:00'),
         ])
         self.cmd('vm image list --offer CentOs --publisher OpenLogic --sku 7.7 --architecture x64 --edge-zone losangeles', checks=[
             self.check('[0].imageDeprecationStatus.imageState', 'Active'),

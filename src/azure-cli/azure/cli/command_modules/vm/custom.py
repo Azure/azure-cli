@@ -2263,33 +2263,50 @@ def list_vm_images(cmd, image_location=None, publisher_name=None, offer=None, sk
 
 def list_offers(cmd, publisher_name, location, edge_zone=None):
     if edge_zone is not None:
-        edge_zone_client = get_mgmt_service_client(cmd.cli_ctx,
-                                                   ResourceType.MGMT_COMPUTE).virtual_machine_images_edge_zone
-        return edge_zone_client.list_offers(location=location, edge_zone=edge_zone, publisher_name=publisher_name)
+        from .aaz.latest.vm.image.edge_zone import ListOffers
+        return ListOffers(cli_ctx=cmd.cli_ctx)(command_args={
+            'location': location,
+            'edge_zone': edge_zone,
+            'publisher': publisher_name
+        })
     else:
-        client = _compute_client_factory(cmd.cli_ctx).virtual_machine_images
-        return client.list_offers(location=location, publisher_name=publisher_name)
+        from .aaz.latest.vm.image import ListOffers
+        return ListOffers(cli_ctx=cmd.cli_ctx)(command_args={
+            'location': location,
+            'publisher': publisher_name
+        })
 
 
 def list_publishers(cmd, location, edge_zone=None):
     if edge_zone is not None:
-        edge_zone_client = get_mgmt_service_client(cmd.cli_ctx,
-                                                   ResourceType.MGMT_COMPUTE).virtual_machine_images_edge_zone
-        return edge_zone_client.list_publishers(location=location, edge_zone=edge_zone)
+        from .aaz.latest.vm.image.edge_zone import ListPublishers
+        return ListPublishers(cli_ctx=cmd.cli_ctx)(command_args={
+            'location': location,
+            'edge_zone': edge_zone,
+        })
     else:
-        client = _compute_client_factory(cmd.cli_ctx).virtual_machine_images
-        return client.list_publishers(location=location)
+        from .aaz.latest.vm.image import ListPublishers
+        return ListPublishers(cli_ctx=cmd.cli_ctx)(command_args={
+            'location': location,
+        })
 
 
 def list_sku(cmd, location, publisher_name, offer, edge_zone=None,):
     if edge_zone is not None:
-        edge_zone_client = get_mgmt_service_client(cmd.cli_ctx,
-                                                   ResourceType.MGMT_COMPUTE).virtual_machine_images_edge_zone
-        return edge_zone_client.list_skus(location=location, edge_zone=edge_zone,
-                                          publisher_name=publisher_name, offer=offer)
+        from .aaz.latest.vm.image.edge_zone import ListSkus
+        return ListSkus(cli_ctx=cmd.cli_ctx)(command_args={
+            'location': location,
+            'edge_zone': edge_zone,
+            'publisher': publisher_name,
+            'offer': offer,
+        })
     else:
-        client = _compute_client_factory(cmd.cli_ctx).virtual_machine_images
-        return client.list_skus(location=location, publisher_name=publisher_name, offer=offer)
+        from .aaz.latest.vm.image import ListSkus
+        return ListSkus(cli_ctx=cmd.cli_ctx)(command_args={
+            'location': location,
+            'publisher': publisher_name,
+            'offer': offer,
+        })
 
 
 def show_vm_image(cmd, urn=None, publisher=None, offer=None, sku=None, version=None, location=None, edge_zone=None):
@@ -2317,14 +2334,24 @@ def show_vm_image(cmd, urn=None, publisher=None, offer=None, sku=None, version=N
     elif not publisher or not offer or not sku or not version:
         raise RequiredArgumentMissingError(error_msg)
     if edge_zone is not None:
-        edge_zone_client = get_mgmt_service_client(cmd.cli_ctx,
-                                                   ResourceType.MGMT_COMPUTE).virtual_machine_images_edge_zone
-        return edge_zone_client.get(location=location, edge_zone=edge_zone, publisher_name=publisher, offer=offer,
-                                    skus=sku, version=version)
+        from .aaz.latest.vm.image.edge_zone import Show
+        return Show(cli_ctx=cmd.cli_ctx)(command_args={
+            'location': location,
+            'edge_zone': edge_zone,
+            'publisher': publisher,
+            'offer': offer,
+            'sku': sku,
+            'version': version,
+        })
     else:
-        client = _compute_client_factory(cmd.cli_ctx)
-        return client.virtual_machine_images.get(location=location, publisher_name=publisher,
-                                                 offer=offer, skus=sku, version=version)
+        from .aaz.latest.vm.image import Show
+        return Show(cli_ctx=cmd.cli_ctx)(command_args={
+            'location': location,
+            'publisher': publisher,
+            'offer': offer,
+            'sku': sku,
+            'version': version,
+        })
 
 
 def accept_market_ordering_terms(cmd, urn=None, publisher=None, offer=None, plan=None):
@@ -2343,10 +2370,10 @@ def accept_market_ordering_terms(cmd, urn=None, publisher=None, offer=None, plan
             raise InvalidArgumentValueError('--urn should be in the format of publisher:offer:sku:version')
         publisher, offer, _, _ = items
         image = show_vm_image(cmd, urn)
-        if not image.plan:
+        if not image.get('plan', None):
             logger.warning("Image '%s' has no terms to accept.", urn)
             return
-        plan = image.plan.name
+        plan = image['plan']['name']
     else:
         if not publisher or not offer or not plan:
             raise RequiredArgumentMissingError(error_msg)
@@ -2375,9 +2402,9 @@ def _terms_prepare(cmd, urn, publisher, offer, plan):
             raise CLIError('usage error: urn should be in the format of publisher:offer:sku:version.')
         publisher, offer = terms[0], terms[1]
         image = show_vm_image(cmd, urn)
-        if not image.plan:
+        if not image.get('plan', None):
             raise CLIError("Image '%s' has no terms to accept." % urn)
-        plan = image.plan.name
+        plan = image['plan']['name']
     else:
         if not all([publisher, offer, plan]):
             raise CLIError(
