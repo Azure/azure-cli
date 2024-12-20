@@ -118,3 +118,13 @@ class TestIdentity(ScenarioTest):
                      self.check('type(@)', 'array'),
                      self.check('length(@)', 0)
                  ])
+    @ResourceGroupPreparer(name_prefix='cli_test_revoke_token_', location='eastus2euap')
+    def test_revoke_token(self, resource_group):
+        self.kwargs.update({
+            'identity': 'ide'
+        })
+
+        self.cmd('identity create -n {identity} -g {rg}')
+
+        # Revoke the identity
+        self.cmd('identity revoke --resource-name {identity} --resource-group {rg}')
