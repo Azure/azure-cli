@@ -2022,8 +2022,9 @@ def _urlopen_read(url, context=None):
         context = _ssl_context()
     try:
         return urlopen(url, context=context).read()
-    except Exception as ex:
-        if "[SSL: CERTIFICATE_VERIFY_FAILED]" in ex and "unable to get local issuer certificate" in ex:
+    except URLError as ex:
+        error_msg = str(ex)
+        if "[SSL: CERTIFICATE_VERIFY_FAILED]" in error_msg and "unable to get local issuer certificate" in error_msg:
             raise ClientRequestError(
                 "SSL certificate verification failed. Please ensure that the python interpreter used by azure-cli uses "
                 "the appropriate cert store when making requests. For more details, please refer to "
