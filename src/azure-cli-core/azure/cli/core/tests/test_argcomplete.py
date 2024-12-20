@@ -53,9 +53,8 @@ class ArgcompleteScenarioTest(ScenarioTest):
         # argcomplete uses os._exit to exit, which is also used by pytest. Patch AzCompletionFinder to use sys.exit
         with mock.patch('azure.cli.core.parser.AzCompletionFinder', MockCompletionFinder):
             env = self.argcomplete_env('az storage blob list -c test --account-name hang', '48')
-            for k, v in env.items():
-                os.environ[k] = v
-            self.assertRaises(SystemExit, self.cmd, 'az')
+            with mock.patch.dict(os.environ, env):
+                self.assertRaises(SystemExit, self.cmd, 'az')
         with open('argcomplete.out') as f:
             self.assertEqual(f.read(), 'hangstorage ')
         os.remove('argcomplete.out')
