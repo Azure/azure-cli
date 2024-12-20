@@ -601,17 +601,13 @@ def _verify_keyvault_good_for_encryption(cli_ctx, disk_vault_id, kek_vault_id, v
     key_vault = client.get(disk_vault_resource_info['resource_group'], disk_vault_resource_info['name'])
 
     # ensure vault has 'EnabledForDiskEncryption' permission or VM has encryption identity set for ADE operation
-    if resource_type == 'VM':
-        if vm_or_vmss.security_profile and vm_or_vmss.security_profile.encryption_identity and \
-                vm_or_vmss.security_profile.encryption_identity.user_assigned_identity_resource_id:
-            pass
-        elif not key_vault.properties or not key_vault.properties.enabled_for_disk_encryption:
-            _report_client_side_validation_error(
-                "Keyvault '{}' is not enabled for disk encryption.".format(disk_vault_resource_info['resource_name']))
-    else:
-        if not key_vault.properties or not key_vault.properties.enabled_for_disk_encryption:
-            _report_client_side_validation_error(
-                "Keyvault '{}' is not enabled for disk encryption.".format(disk_vault_resource_info['resource_name']))
+    if vm_or_vmss.security_profile and vm_or_vmss.security_profile.encryption_identity and \
+            vm_or_vmss.security_profile.encryption_identity.user_assigned_identity_resource_id:
+        pass
+    elif not key_vault.properties or not key_vault.properties.enabled_for_disk_encryption:
+        _report_client_side_validation_error(
+            "Keyvault '{}' is not enabled for disk encryption.".format(disk_vault_resource_info['resource_name']))
+
     if kek_vault_id:
         kek_vault_info = parse_resource_id(kek_vault_id)
         if disk_vault_resource_info['name'].lower() != kek_vault_info['name'].lower():
