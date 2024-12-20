@@ -42,7 +42,7 @@ KUSTO_CLIENT_SECRET = os.environ.get('KUSTO_CLIENT_SECRET')
 KUSTO_CLUSTER = os.environ.get('KUSTO_CLUSTER')
 KUSTO_DATABASE = os.environ.get('KUSTO_DATABASE')
 KUSTO_TABLE = os.environ.get('KUSTO_TABLE')
-# get tenant id from https://docs.microsoft.com/en-us/onedrive/find-your-office-365-tenant-id
+# get tenant id from https://learn.microsoft.com/en-us/onedrive/find-your-office-365-tenant-id
 KUSTO_TENANT_ID = os.environ.get('KUSTO_TENANT_ID')
 PYTHON_VERSION = os.environ.get('PYTHON_VERSION')
 USER_BRANCH = os.environ.get('USER_BRANCH')

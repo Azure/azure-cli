@@ -5,7 +5,6 @@
 
 # pylint: disable=line-too-long,too-many-nested-blocks,too-many-lines,too-many-return-statements
 
-import io
 import json
 from itertools import chain
 from json import JSONDecodeError
@@ -91,7 +90,7 @@ def __read_with_appropriate_encoding(file_path, format_):
     detected_encoding = __check_file_encoding(file_path)
 
     try:
-        with io.open(file_path, 'r', encoding=default_encoding) as config_file:
+        with open(file_path, 'r', encoding=default_encoding) as config_file:
             if format_ == 'json':
                 config_data = json.load(config_file)
                 # Only accept json objects
@@ -110,7 +109,7 @@ def __read_with_appropriate_encoding(file_path, format_):
         if detected_encoding == default_encoding:
             raise
 
-        with io.open(file_path, 'r', encoding=detected_encoding) as config_file:
+        with open(file_path, 'r', encoding=detected_encoding) as config_file:
             if format_ == 'json':
                 config_data = json.load(config_file)
 

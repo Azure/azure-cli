@@ -64,7 +64,7 @@ class TestGenerateSSHKeys(unittest.TestCase):
         with mock.patch('azure.cli.core.keys.open') as mocked_open:
             # mock failed call to read
             mocked_f = mocked_open.return_value.__enter__.return_value
-            mocked_f.read = mock.MagicMock(side_effect=IOError("Mocked IOError"))
+            mocked_f.read = mock.MagicMock(side_effect=OSError("Mocked IOError"))
 
             # assert that CLIError raised when generate_ssh_keys is called
             with self.assertRaises(CLIError):
