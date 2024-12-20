@@ -462,7 +462,7 @@ def wait_then_open(url):
     """
     for _ in range(1, 10):
         try:
-            urlopen(url, context=_ssl_context())
+            _urlopen_read(url)
         except URLError:
             time.sleep(1)
         break
@@ -1888,7 +1888,7 @@ def k8s_install_kubectl(cmd, client_version='latest', install_location=None, sou
     if client_version == 'latest':
         latest_version_url = source_url + '/stable.txt'
         logger.warning('No version specified, will get the latest version of kubectl from "%s"', latest_version_url)
-        version = urlopen(source_url + '/stable.txt', context=_ssl_context()).read()
+        version = _urlopen_read(source_url + '/stable.txt')
         client_version = version.decode('UTF-8').strip()
     else:
         client_version = "v%s" % client_version
@@ -1954,7 +1954,7 @@ def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, s
         if cloud_name.lower() == 'azurechinacloud':
             latest_release_url = 'https://mirror.azure.cn/kubernetes/kubelogin/latest'
         logger.warning('No version specified, will get the latest version of kubelogin from "%s"', latest_release_url)
-        latest_release = urlopen(latest_release_url, context=_ssl_context()).read()
+        latest_release = _urlopen_read(latest_release_url)
         client_version = json.loads(latest_release)['tag_name'].strip()
     else:
         client_version = "v%s" % client_version
@@ -2017,10 +2017,25 @@ def _ssl_context():
     return ssl.create_default_context()
 
 
+def _urlopen_read(url, context=None):
+    if context is None:
+        context = _ssl_context()
+    try:
+        return urlopen(url, context=context).read()
+    except URLError as ex:
+        error_msg = str(ex)
+        if "[SSL: CERTIFICATE_VERIFY_FAILED]" in error_msg and "unable to get local issuer certificate" in error_msg:
+            raise ClientRequestError(
+                "SSL certificate verification failed. Please ensure that the python interpreter used by azure-cli uses "
+                "the appropriate cert store when making requests. For more details, please refer to "
+                "https://github.com/Azure/azure-cli/issues/19305"
+            )
+        raise ex
+
+
 def _urlretrieve(url, filename):
-    req = urlopen(url, context=_ssl_context())
     with open(filename, "wb") as f:
-        f.write(req.read())
+        f.write(_urlopen_read(url))
 
 
 def _unzip(src, dest):
