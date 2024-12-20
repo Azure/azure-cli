@@ -545,13 +545,12 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         # TODO: Test node commands
 
     def wait_for_pool_steady(self, pool_id, timeout_seconds=120):
-        if self.is_live or self.in_recording:
-            start_time = time.time()
-            while True:
-                pool = self.batch_cmd(f"batch pool show --pool-id {pool_id}").get_output_in_json()
-                if pool["allocationState"] == "steady":
-                    return
-                elapsed_seconds = time.time() - start_time
-                if elapsed_seconds > timeout_seconds:
-                    raise TimeoutError("Timed out waiting for pool to reach steady state")
-                time.sleep(2)
+        start_time = time.time()
+        while True:
+            pool = self.batch_cmd(f"batch pool show --pool-id {pool_id}").get_output_in_json()
+            if pool["allocationState"] == "steady":
+                return
+            elapsed_seconds = time.time() - start_time
+            if elapsed_seconds > timeout_seconds:
+                raise TimeoutError("Timed out waiting for pool to reach steady state")
+            time.sleep(2)
