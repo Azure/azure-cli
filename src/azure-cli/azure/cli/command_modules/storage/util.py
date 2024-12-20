@@ -288,7 +288,7 @@ def _get_prefix(p):
         return p
     pattern_start = len(p)
     for index, ch in enumerate(p):
-        if ch == '*' or ch == '?' or ch == '[':
+        if ch in ('*', '?', '['):
             pattern_start = index
             break
     if pattern_start == len(p):

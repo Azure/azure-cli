@@ -547,7 +547,7 @@ def _get_subnet_id(cmd, location, resource_group_name, vnet, vnet_address_prefix
             "resource_group": resource_group_name
         })
     except HttpResponseError as ex:
-        if ex.error.code == "NotFound" or ex.error.code == "ResourceNotFound":
+        if ex.error.code in ('NotFound', 'ResourceNotFound'):
             subnet = None
         else:
             raise
@@ -580,7 +580,7 @@ def _get_subnet_id(cmd, location, resource_group_name, vnet, vnet_address_prefix
                 "resource_group": resource_group_name
             })
         except HttpResponseError as ex:
-            if ex.error.code == "NotFound" or ex.error.code == "ResourceNotFound":
+            if ex.error.code in ('NotFound', 'ResourceNotFound'):
                 vnet = None
             else:
                 raise
@@ -1176,7 +1176,7 @@ def _is_container_terminated(client, resource_group_name, name, container_name):
 
     # If a container group is terminated, assume the container is also terminated.
     if container_group.instance_view and container_group.instance_view.state:
-        if container_group.instance_view.state == 'Succeeded' or container_group.instance_view.state == 'Failed':
+        if container_group.instance_view.state in ('Succeeded', 'Failed'):
             return True
 
     # If the restart policy is Always, assume the container will be restarted.

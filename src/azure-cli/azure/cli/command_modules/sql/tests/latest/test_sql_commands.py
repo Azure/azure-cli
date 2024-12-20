@@ -143,7 +143,7 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
         if self.minimalTlsVersion:
             template += f" --minimal-tls-version {self.minimalTlsVersion}"
 
-        if self.identityType == ResourceIdType.system_assigned_user_assigned.value or self.identityType == ResourceIdType.user_assigned.value:
+        if self.identityType in (ResourceIdType.system_assigned_user_assigned.value, ResourceIdType.user_assigned.value):
             template += f" --assign-identity --user-assigned-identity-id {self.userAssignedIdentityId} --identity-type {self.identityType} --pid {self.pid}"
 
         if self.identityType == ResourceIdType.system_assigned.value:
