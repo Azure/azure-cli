@@ -342,7 +342,7 @@ type: command
 short-summary: Wait for the flexible server to satisfy certain conditions.
 example:
   - name: Wait for the flexible server to satisfy certain conditions.
-    text: az postgres server wait --exists --resource-group testGroup --name testserver
+    text: az postgres flexible-server wait --exists --resource-group testGroup --name testserver
 """
 
 helps['postgres flexible-server delete'] = """
@@ -425,9 +425,9 @@ type: command
 short-summary: List all firewall rules for a flexible server.
 example:
   - name: List all firewall rules for a server.
-    text: az postgres server firewall-rule list --resource-group testGroup --name testserver
+    text: az postgres flexible-server firewall-rule list --resource-group testGroup --name testserver
   - name: List all firewall rules for a server in table format.
-    text: az postgres server firewall-rule list --resource-group testGroup --name testserver --output table
+    text: az postgres flexible-server firewall-rule list --resource-group testGroup --name testserver --output table
 """
 
 helps['postgres flexible-server firewall-rule show'] = """
