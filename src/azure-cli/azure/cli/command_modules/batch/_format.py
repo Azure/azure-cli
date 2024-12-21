@@ -4,9 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import json
-
 from collections import OrderedDict
-
 from urllib.parse import unquote
 
 HEAD_PROPERTIES = {  # Convert response headers to properties.

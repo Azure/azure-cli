@@ -4,25 +4,26 @@
 # --------------------------------------------------------------------------------------------
 
 from knack.util import CLIError
-
+from azure.batch.models import BatchError
 
 def batch_exception_handler(ex):
     from msrest.exceptions import ValidationError, ClientRequestError
     from azure.core.exceptions import HttpResponseError
-    from azure.batch.models import BatchErrorException
 
-    if isinstance(ex, BatchErrorException):
-        try:
-            message = ex.error.message.value
-            if ex.error.values:
-                for detail in ex.error.values:
-                    message += f"\n{detail.key}: {detail.value}"
-            raise CLIError(message)
-        except AttributeError:
-            raise CLIError(ex)
+    if isinstance(ex, HttpResponseError):
+        if ex.model and isinstance(ex, BatchError) and ex.model.code:
+            _handle_batch_exception(ex.model)
     elif isinstance(ex, (ValidationError, ClientRequestError)):
         raise CLIError(ex)
-    elif isinstance(ex, HttpResponseError):
-        raise CLIError(ex)
-    else:
-        raise ex
+    
+    raise CLIError(ex)
+
+def _handle_batch_exception(err):
+    """Handle a BatchError from the data plane and raise a CLI exception"""
+    message = f"({err.code})"
+    if err.message and err.message.value:
+        message += f" {err.message.value}"
+    if err.values_property:
+        for detail in err.values_property:
+            message += f"\n{detail.key}: {detail.value}"
+    return CLIError(message)
