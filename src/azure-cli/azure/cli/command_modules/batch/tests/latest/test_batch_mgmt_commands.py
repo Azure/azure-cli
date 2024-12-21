@@ -5,12 +5,10 @@
 
 import tempfile
 import time
-import sys
 from azure.cli.testsdk import (
-    ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, live_only, LiveScenarioTest)
+    ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer)
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.core.profiles import ResourceType, get_sdk
-from .batch_preparers import BatchScenarioMixin, BatchMgmtScenarioMixin
+from .batch_preparers import BatchMgmtScenarioMixin
 
 from .recording_processors import BatchAccountKeyReplacer, StorageSASReplacer
 
@@ -338,7 +336,6 @@ class BatchMgmtByosScenarioTests(BatchMgmtScenarioMixin,ScenarioTest):
         super().__init__(method_name)
 
     # Note for this test to run you subscrition needs to give access to batch https://learn.microsoft.com/azure/batch/batch-account-create-portal#allow-batch-to-access-the-subscription
-    @live_only()
     @ResourceGroupPreparer(location='eastus2')
     def test_batch_byos_account_cmd(self, resource_group):
         account_name = self.create_random_name(prefix='clibatchtestacct', length=24)
