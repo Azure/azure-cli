@@ -70,7 +70,8 @@ def show_subscription(cmd, subscription=None):
     return profile.get_subscription(subscription)
 
 
-def get_access_token(cmd, subscription=None, resource=None, scopes=None, resource_type=None, tenant=None):
+def get_access_token(cmd, subscription=None, resource=None, scopes=None, resource_type=None, tenant=None,
+                     client_id=None):
     """
     get AAD token to access to a specified resource.
     Use 'az cloud show' command for other Azure resources
@@ -80,8 +81,8 @@ def get_access_token(cmd, subscription=None, resource=None, scopes=None, resourc
         resource = getattr(cmd.cli_ctx.cloud.endpoints, endpoints_attr_name)
 
     profile = Profile(cli_ctx=cmd.cli_ctx)
-    creds, subscription, tenant = profile.get_raw_token(subscription=subscription, resource=resource, scopes=scopes,
-                                                        tenant=tenant)
+    creds, subscription, tenant = profile.get_raw_token(
+        subscription=subscription, resource=resource, scopes=scopes, tenant=tenant, client_id=client_id)
 
     result = {
         'tokenType': creds[0],
