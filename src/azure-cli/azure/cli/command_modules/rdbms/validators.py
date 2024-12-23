@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 from dateutil import parser
+from functools import cmp_to_key
 import re
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
@@ -451,6 +452,16 @@ def _pg_tier_validator(tier, sku_info):
             raise CLIError('Incorrect value for --tier. Allowed values : {}'.format(tiers))
 
 
+def compare_sku_names(sku_1, sku_2):
+    regex_pattern = r"_v(\d)"
+
+    sku_1_match = re.search(regex_pattern, sku_1)
+    sku_2_match = re.search(regex_pattern, sku_2)
+
+    return (int(sku_2_match.group(1)) if sku_2_match else 0) - \
+        (int(sku_1_match.group(1)) if sku_1_match else 0)
+
+
 def _pg_sku_name_validator(sku_name, sku_info, tier, instance):
     if instance is not None:
         tier = instance.sku.tier if tier is None else tier
@@ -459,7 +470,7 @@ def _pg_sku_name_validator(sku_name, sku_info, tier, instance):
         if sku_name.lower() not in skus:
             raise CLIError('Incorrect value for --sku-name. The SKU name does not match {} tier. '
                            'Specify --tier if you did not. Or CLI will set GeneralPurpose as the default tier. '
-                           'Allowed values : {}'.format(tier, skus))
+                           'Allowed values : {}'.format(tier, sorted(skus, key=cmp_to_key(compare_sku_names))))
 
 
 def _pg_storage_performance_tier_validator(performance_tier, sku_info, tier=None, storage_size=None):
