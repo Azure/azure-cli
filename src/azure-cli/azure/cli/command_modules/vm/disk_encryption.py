@@ -605,15 +605,15 @@ def _verify_keyvault_good_for_encryption(cli_ctx, disk_vault_id, kek_vault_id, v
         vm_encryption_identity = vm_or_vmss
     else:
         vm_encryption_identity = vm_or_vmss.virtual_machine_profile
-        
+
     if vm_encryption_identity and vm_encryption_identity.security_profile and \
         vm_encryption_identity.security_profile.encryption_identity and \
-        vm_encryption_identity.security_profile.encryption_identity.user_assigned_identity_resource_id:
+            vm_encryption_identity.security_profile.encryption_identity.user_assigned_identity_resource_id:
         pass
     elif not key_vault.properties or not key_vault.properties.enabled_for_disk_encryption:
         _report_client_side_validation_error(
-        "Keyvault '{}' is not enabled for disk encryption.".format(disk_vault_resource_info['resource_name']))
-    
+            "Keyvault '{}' is not enabled for disk encryption.".format(disk_vault_resource_info['resource_name']))
+
     if kek_vault_id:
         kek_vault_info = parse_resource_id(kek_vault_id)
         if disk_vault_resource_info['name'].lower() != kek_vault_info['name'].lower():
