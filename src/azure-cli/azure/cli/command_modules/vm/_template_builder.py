@@ -383,6 +383,9 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
             if patch_mode.lower() not in ['automaticbyplatform', 'imagedefault']:
                 raise ValidationError(
                     'Invalid value of --patch-mode for Linux VM. Valid values are AutomaticByPlatform, ImageDefault.')
+
+            if 'linuxConfiguration' not in os_profile:
+                os_profile['linuxConfiguration'] = {}
             os_profile['linuxConfiguration']['patchSettings'] = {
                 'patchMode': patch_mode
             }
