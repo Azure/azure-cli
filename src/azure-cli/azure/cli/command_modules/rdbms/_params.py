@@ -346,6 +346,13 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             validator=node_count_validator
         )
 
+        update_node_count_arg_type = CLIArgumentType(
+            type=int,
+            options_list=['--node-count'],
+            help='The number of nodes for elastic cluster. Range of 1 to 10.',
+            validator=node_count_validator
+        )
+
         auto_grow_arg_type = CLIArgumentType(
             arg_type=get_enum_type(['Enabled', 'Disabled']),
             options_list=['--storage-auto-grow'],
@@ -733,6 +740,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('active_directory_auth', arg_type=active_directory_auth_arg_type)
                 c.argument('password_auth', arg_type=password_auth_arg_type)
                 c.argument('private_dns_zone_arguments', private_dns_zone_arguments_arg_type)
+                c.argument('cluster_size', default=None, arg_type=update_node_count_arg_type)
                 c.argument('yes', arg_type=yes_arg_type)
 
         with self.argument_context('{} flexible-server upgrade'.format(command_group)) as c:
