@@ -74,7 +74,7 @@ def validate_cert(namespace):
         namespace.cert = x509
 
 
-def process_assignment_namespace(cmd, namespace):  # pylint: disable=unused-argument
+def process_assignment_namespace(cmd, namespace):
     # Make sure these arguments are non-empty strings.
     # When they are accidentally provided as an empty string "", they won't take effect when filtering the role
     # assignments, causing all matched role assignments to be listed/deleted. For example,

@@ -233,7 +233,7 @@ class AAZCompoundTypeArgAction(AAZArgAction):  # pylint: disable=abstract-method
         return tuple(valid_key_items), schema
 
     @classmethod
-    def _decode_value(cls, schema, value):  # pylint: disable=unused-argument
+    def _decode_value(cls, schema, value):
         from ._arg import AAZSimpleTypeArg
         from azure.cli.core.util import get_file_json, shell_safe_json_parse, get_file_yaml
 
