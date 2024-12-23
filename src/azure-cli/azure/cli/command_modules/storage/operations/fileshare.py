@@ -101,7 +101,7 @@ def _get_client(client, kwargs):
         directory_path = directory_path.replace('./', '', 1)
     dir_client = client.get_directory_client(directory_path=directory_path)
     file_name = kwargs.pop("file_name", None)
-    if file_name:
+    if file_name and file_name != '*':
         total_path = directory_path + '/' + file_name if directory_path else file_name
         dir_client = client.get_directory_client(directory_path=total_path)
         exists = False

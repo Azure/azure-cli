@@ -881,6 +881,19 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         self.assertEqual(3, sum(len(d) for r, d, f in os.walk(local_folder)))
         self.assertEqual(21, sum(len(f) for r, d, f in os.walk(local_folder)))
 
+        # Copy with wildcard *
+        self.cmd('storage directory create -s {} -n {} --account-name {}'.format(share, 'parent', storage_account))
+        self.cmd('storage directory create -s {} -n {} --account-name {}'
+                 .format(share, 'parent/source', storage_account))
+        self.cmd('storage copy --source-local-path "{}" --destination-account-name {} --destination-share {} '
+                 '--destination-file-path {} --recursive'
+                 .format(os.path.join(test_dir, 'butter/file_*'), storage_account, share, 'parent/source'))
+        self.cmd('storage copy --source-account-name {} --source-share {} --source-file-path {} --account-name {} '
+                 '--destination-share {} --destination-file-path {} --recursive -- --as-subdir=false'
+                 .format(storage_account, share, 'parent/source/*', storage_account, share, 'parent/target'))
+        self.cmd('storage file list -s {} --path {} --account-name {}'.format(
+            share, 'parent/target', storage_account), checks=JMESPathCheck('length(@)', 10))
+
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='first_account', allow_shared_key_access=False)
     @StorageAccountPreparer(parameter_name='second_account', sku='Premium_LRS', kind='BlockBlobStorage',
