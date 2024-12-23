@@ -360,6 +360,8 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
             os_profile['secrets'] = secrets
 
         if enable_auto_update is not None and custom_image_os_type.lower() == 'windows':
+            if 'windowsConfiguration' not in os_profile:
+                os_profile['windowsConfiguration'] = {}
             os_profile['windowsConfiguration']['enableAutomaticUpdates'] = enable_auto_update
 
         # Windows patch settings
@@ -368,6 +370,9 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
                 raise ValidationError(
                     'Invalid value of --patch-mode for Windows VM. Valid values are AutomaticByOS, '
                     'AutomaticByPlatform, Manual.')
+
+            if 'windowsConfiguration' not in os_profile:
+                os_profile['windowsConfiguration'] = {}
             os_profile['windowsConfiguration']['patchSettings'] = {
                 'patchMode': patch_mode,
                 'enableHotpatching': enable_hotpatching
