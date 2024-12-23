@@ -6329,7 +6329,7 @@ class VMSecurityProfileTestForDiskEncryption(ScenarioTest):
         message = 'Encryption Identity should be an ARM Resource ID of one of the user assigned identities associated to the resource'
         with self.assertRaisesRegex(CLIError, message) as context:
             self.cmd('vm create -g {rg} -n {vm} --image win2022datacenter --admin-username clitester1 --admin-password Test123456789! --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --encryption-identity {encryptionIdentityId} --assign-identity {emsi}')
-        
+    
         
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='test_vm_null_encryption_identity_for_disk_encryption', location='westus')
@@ -6546,9 +6546,9 @@ class VMDiskEncryptionTest(ScenarioTest):
         self.cmd('keyvault set-policy -n {vault} -g {rg} --object-id {principalId1} --key-permissions all --secret-permissions all')
                         
         time.sleep(15)
-        from knack.util import CLIError
+        from azure.cli.core.azclierror import ArgumentUsageError
         message = 'Encryption Identity should be an ARM Resource ID of one of the user assigned identities associated to the resource'
-        with self.assertRaisesRegex(CLIError, message) as context:
+        with self.assertRaisesRegex(ArgumentUsageError, message) as context:
             self.cmd('vm encryption enable -g {rg} -n {vm} --disk-encryption-keyvault {vault} --encryption-identity {encryptionIdentityId1}')
 
     @AllowLargeResponse(size_kb=99999)

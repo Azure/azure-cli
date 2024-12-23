@@ -62,11 +62,11 @@ def _detect_ade_status(vm):
 
 
 def updateVmEncryptionSetting(cmd, vm, resource_group_name, vm_name, encryption_identity):
-    from knack.util import CLIError
+    from azure.cli.core.azclierror import ArgumentUsageError
     if vm.identity is None or vm.identity.user_assigned_identities is None or encryption_identity.lower() not in \
             (k.lower() for k in vm.identity.user_assigned_identities.keys()):
-        raise CLIError("Encryption Identity should be an ARM Resource ID of one of the "
-                       "user assigned identities associated to the resource")
+        raise ArgumentUsageError("Encryption Identity should be an ARM Resource ID of one of the "
+                                 "user assigned identities associated to the resource")
 
     SecurityProfile, EncryptionIdentity = cmd.get_models('SecurityProfile', 'EncryptionIdentity')
     updateVm = False
