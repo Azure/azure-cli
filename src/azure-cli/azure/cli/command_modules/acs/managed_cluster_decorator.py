@@ -2161,7 +2161,6 @@ class AKSManagedClusterContext(BaseAKSContext):
         self,
         enable_validation: bool = False,
         read_only: bool = False,
-        load_balancer_profile: ManagedClusterLoadBalancerProfile = None,
     ) -> Union[str, None]:
         """Internal function to dynamically obtain the value of outbound_type according to the context.
 
@@ -2202,6 +2201,7 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         # dynamic completion
         if (
+            self.decorator_mode == DecoratorMode.CREATE and
             not read_from_mc and
             outbound_type != CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY and
             outbound_type != CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY and
@@ -2232,17 +2232,7 @@ class AKSManagedClusterContext(BaseAKSContext):
                             "be pre-configured with a route table with egress rules"
                         )
 
-                if outbound_type == CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING:
-                    if load_balancer_profile:
-                        if (
-                            load_balancer_profile.managed_outbound_i_ps or
-                            load_balancer_profile.outbound_i_ps or
-                            load_balancer_profile.outbound_ip_prefixes
-                        ):
-                            raise MutuallyExclusiveArgumentError(
-                                "userDefinedRouting doesn't support customizing \
-                                a standard load balancer with IP addresses"
-                            )
+                if outbound_type != CONST_OUTBOUND_TYPE_LOAD_BALANCER:
                     if (
                         self.get_load_balancer_managed_outbound_ip_count() or
                         self.get_load_balancer_managed_outbound_ipv6_count() or
@@ -2250,15 +2240,21 @@ class AKSManagedClusterContext(BaseAKSContext):
                         self.get_load_balancer_outbound_ip_prefixes()
                     ):
                         raise MutuallyExclusiveArgumentError(
-                            "userDefinedRouting doesn't support customizing \
-                            a standard load balancer with IP addresses"
+                            outbound_type + " doesn't support customizing "
+                            "a standard load balancer with IP addresses"
                         )
-
+                if outbound_type != CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY:
+                    if (
+                        self.get_nat_gateway_managed_outbound_ip_count()
+                    ):
+                        raise MutuallyExclusiveArgumentError(
+                            outbound_type + " doesn't support customizing "
+                            "a standard nat gateway with IP addresses"
+                        )
         return outbound_type
 
     def get_outbound_type(
         self,
-        load_balancer_profile: ManagedClusterLoadBalancerProfile = None
     ) -> Union[str, None]:
         """Dynamically obtain the value of outbound_type according to the context.
 
@@ -2280,7 +2276,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         :return: string or None
         """
         return self._get_outbound_type(
-            enable_validation=True, load_balancer_profile=load_balancer_profile
+            enable_validation=True
         )
 
     def _get_network_plugin_mode(self, enable_validation: bool = False) -> Union[str, None]:
@@ -5694,9 +5690,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         # verify outbound type
         # Note: Validation internally depends on load_balancer_sku, which is a temporary value that is
         # dynamically completed.
-        outbound_type = self.context.get_outbound_type(
-            load_balancer_profile=load_balancer_profile
-        )
+        outbound_type = self.context.get_outbound_type()
 
         # verify load balancer sku
         load_balancer_sku = safe_lower(self.context.get_load_balancer_sku())
