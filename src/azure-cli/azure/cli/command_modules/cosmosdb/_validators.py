@@ -455,7 +455,7 @@ def _validate_included_paths_in_cep(partition_key_path, includedPaths, policyFor
             raise InvalidArgumentValueError("Invalid encryptionType included in Client Encryption Policy. "
                                             "encryptionType cannot be null or empty.")
 
-        if (encryptionType != "Deterministic" and encryptionType != "Randomized"):
+        if (encryptionType not in ('Deterministic', 'Randomized')):
             raise InvalidArgumentValueError(f"Invalid Encryption Type {encryptionType} used. "
                                             "Supported types are Deterministic or Randomized.")
 

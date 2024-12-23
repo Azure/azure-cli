@@ -39,7 +39,7 @@ def create_spark_batch_job(cmd, workspace_name, spark_pool_name, job_name, main_
     class_name = main_class_name
     final_command_line_arguments = []
     if main_class_name is None:
-        if language == SparkBatchLanguage.SparkDotNet or language == SparkBatchLanguage.Spark:
+        if language in (SparkBatchLanguage.SparkDotNet, SparkBatchLanguage.Spark):
             raise CLIError('Cannot perform the requested operation because main class name'
                            ' is not provided. Please specify --main-class-name for Spark job or '
                            ' .NET Spark job')

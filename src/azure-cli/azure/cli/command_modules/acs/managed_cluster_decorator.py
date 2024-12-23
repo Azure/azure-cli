@@ -2202,10 +2202,7 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         # dynamic completion
         if (
-            not read_from_mc and
-            outbound_type != CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY and
-            outbound_type != CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY and
-            outbound_type != CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING
+            not read_from_mc and outbound_type not in (CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY, CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY, CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING)
         ):
             outbound_type = CONST_OUTBOUND_TYPE_LOAD_BALANCER
 

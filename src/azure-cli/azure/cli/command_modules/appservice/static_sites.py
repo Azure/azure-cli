@@ -242,8 +242,7 @@ def remove_identity(cmd, resource_group_name, name, remove_identities=None):
         staticsite.identity.user_assigned_identities = None
         if remove_local_identity:
             staticsite.identity.type = (IdentityType.none
-                                        if staticsite.identity.type == IdentityType.system_assigned or
-                                        staticsite.identity.type == IdentityType.none
+                                        if staticsite.identity.type in (IdentityType.system_assigned, IdentityType.none)
                                         else IdentityType.user_assigned)
 
         if staticsite.identity.type not in [IdentityType.none, IdentityType.system_assigned]:

@@ -1323,8 +1323,7 @@ def remove_identity(cmd, resource_group_name, name, remove_identities=None, slot
         webapp.identity.user_assigned_identities = None
         if remove_local_identity:
             webapp.identity.type = (IdentityType.none
-                                    if webapp.identity.type == IdentityType.system_assigned or
-                                    webapp.identity.type == IdentityType.none
+                                    if webapp.identity.type in (IdentityType.system_assigned, IdentityType.none)
                                     else IdentityType.user_assigned)
 
         if webapp.identity.type not in [IdentityType.none, IdentityType.system_assigned]:
@@ -7119,7 +7118,7 @@ def _make_onedeploy_request(params):
 
     # check the status of deployment
     # pylint: disable=too-many-nested-blocks
-    if response.status_code == 202 or response.status_code == 200:
+    if response.status_code in (202, 200):
         response_body = None
         if poll_async_deployment_for_debugging:
             if params.track_status is not None and params.track_status:
@@ -7290,8 +7289,7 @@ def _verify_hostname_binding(cmd, resource_group_name, name, hostname, slot=None
     verified_hostname_found = False
     for hostname_binding in hostname_bindings:
         binding_name = hostname_binding.name.split('/')[-1]
-        if binding_name.lower() == hostname and (hostname_binding.host_name_type == 'Verified' or
-                                                 hostname_binding.host_name_type == 'Managed'):
+        if binding_name.lower() == hostname and (hostname_binding.host_name_type in ('Verified', 'Managed')):
             verified_hostname_found = True
 
     return verified_hostname_found

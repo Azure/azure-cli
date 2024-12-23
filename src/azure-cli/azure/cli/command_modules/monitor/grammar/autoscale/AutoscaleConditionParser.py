@@ -428,7 +428,7 @@ class AutoscaleConditionParser ( Parser ):
             self.state = 71 
             self._errHandler.sync(self)
             _alt = 1
-            while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
+            while _alt not in (2, ATN.INVALID_ALT_NUMBER):
                 if _alt == 1:
                     self.state = 70
                     _la = self._input.LA(1)
@@ -685,7 +685,7 @@ class AutoscaleConditionParser ( Parser ):
             self.state = 93
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==11 or _la==17:
+            while _la in (11, 17):
                 self.state = 88
                 self.dim_separator()
                 self.state = 89
@@ -793,7 +793,7 @@ class AutoscaleConditionParser ( Parser ):
             self.enterOuterAlt(localctx, 1)
             self.state = 100
             _la = self._input.LA(1)
-            if not(_la==11 or _la==17):
+            if not(_la in (11, 17)):
                 self._errHandler.recoverInline(self)
             else:
                 self._errHandler.reportMatch(self)
@@ -842,7 +842,7 @@ class AutoscaleConditionParser ( Parser ):
             self.enterOuterAlt(localctx, 1)
             self.state = 103
             _la = self._input.LA(1)
-            if not(_la==13 or _la==14):
+            if not(_la in (13, 14)):
                 self._errHandler.recoverInline(self)
             else:
                 self._errHandler.reportMatch(self)
@@ -894,7 +894,7 @@ class AutoscaleConditionParser ( Parser ):
             self.enterOuterAlt(localctx, 1)
             self.state = 106
             _la = self._input.LA(1)
-            if not(_la==11 or _la==20):
+            if not(_la in (11, 20)):
                 self._errHandler.recoverInline(self)
             else:
                 self._errHandler.reportMatch(self)
@@ -1002,7 +1002,7 @@ class AutoscaleConditionParser ( Parser ):
             self.state = 118
             self._errHandler.sync(self)
             _alt = self._interp.adaptivePredict(self._input,6,self._ctx)
-            while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
+            while _alt not in (2, ATN.INVALID_ALT_NUMBER):
                 if _alt==1:
                     self.state = 113
                     self.dim_val_separator()
@@ -1070,7 +1070,7 @@ class AutoscaleConditionParser ( Parser ):
             self.state = 122 
             self._errHandler.sync(self)
             _alt = 1
-            while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
+            while _alt not in (2, ATN.INVALID_ALT_NUMBER):
                 if _alt == 1:
                     self.state = 121
                     _la = self._input.LA(1)

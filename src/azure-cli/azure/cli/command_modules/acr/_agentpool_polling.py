@@ -84,7 +84,7 @@ class RunPolling(PollingMethod):  # pylint: disable=too-many-instance-attributes
 
     def _set_operation_status(self, response):
         AgentPoolStatus = self._cmd.get_models('ProvisioningState')
-        if response.http_response.status_code == 200 or response.http_response.status_code == 404:
+        if response.http_response.status_code in (200, 404):
             self.operation_result = self._deserialize(response)
             self.operation_status = self.operation_result.provisioning_state or AgentPoolStatus.succeeded.value
             return

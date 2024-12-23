@@ -310,8 +310,7 @@ def validate_priority(namespace):
     if namespace.priority is not None:
         if namespace.priority == '':
             return
-        if namespace.priority != "Spot" and \
-                namespace.priority != "Regular":
+        if namespace.priority not in ('Spot', 'Regular'):
             raise CLIError("--priority can only be Spot or Regular")
 
 
@@ -320,8 +319,7 @@ def validate_eviction_policy(namespace):
     if namespace.eviction_policy is not None:
         if namespace.eviction_policy == '':
             return
-        if namespace.eviction_policy != "Delete" and \
-                namespace.eviction_policy != "Deallocate":
+        if namespace.eviction_policy not in ('Delete', 'Deallocate'):
             raise CLIError("--eviction-policy can only be Delete or Deallocate")
 
 

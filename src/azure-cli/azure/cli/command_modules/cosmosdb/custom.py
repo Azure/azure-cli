@@ -1572,7 +1572,7 @@ def cli_cosmosdb_identity_assign(client,
         new_user_identities = [x for x in identities if x != SYSTEM_ID]
 
     only_enabling_system = enable_system and len(new_user_identities) == 0
-    system_already_added = existing.identity.type == ResourceIdentityType.system_assigned or existing.identity.type == ResourceIdentityType.system_assigned_user_assigned
+    system_already_added = existing.identity.type in (ResourceIdentityType.system_assigned, ResourceIdentityType.system_assigned_user_assigned)
     if only_enabling_system and system_already_added:
         return existing.identity
 
@@ -2766,7 +2766,7 @@ def process_restorable_databases(restorable_databases, database_name):
             if resource.operation_type == "Delete" and latest_database_delete_time < event_timestamp:
                 latest_database_delete_time = event_timestamp
 
-            if (resource.operation_type == "Create" or resource.operation_type == "Recreate") and latest_database_create_or_recreate_time < event_timestamp:
+            if (resource.operation_type in ("Create", "Recreate")) and latest_database_create_or_recreate_time < event_timestamp:
                 latest_database_create_or_recreate_time = event_timestamp
 
     if database_rid is None:
@@ -2793,7 +2793,7 @@ def process_restorable_collections(restorable_collections, collection_name, data
             if resource.operation_type == "Delete" and latest_collection_delete_time < event_timestamp:
                 latest_collection_delete_time = event_timestamp
 
-            if (resource.operation_type == "Create" or resource.operation_type == "Recreate") and latest_collection_create_or_recreate_time < event_timestamp:
+            if (resource.operation_type in ("Create", "Recreate")) and latest_collection_create_or_recreate_time < event_timestamp:
                 latest_collection_create_or_recreate_time = event_timestamp
 
     if collection_rid is None:

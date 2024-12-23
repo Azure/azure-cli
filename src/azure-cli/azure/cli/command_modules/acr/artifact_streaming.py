@@ -168,7 +168,7 @@ def _get_last_streaming_operation(cmd,
 
 
 def _is_ongoing_streaming_status(status):
-    res = status == ArtifactStreamingStatus.Running.value or status == ArtifactStreamingStatus.NotStarted.value
+    res = status in (ArtifactStreamingStatus.Running.value, ArtifactStreamingStatus.NotStarted.value)
     return res
 
 

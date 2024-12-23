@@ -75,7 +75,7 @@ def insert_entity(client, entity, if_exists='fail'):
             return client.create_entity(entity)
         except ResourceExistsError:
             raise ResourceExistsError("The specified entity already exists.")
-    if if_exists == 'merge' or if_exists == 'replace':
+    if if_exists in ('merge', 'replace'):
         return client.upsert_entity(entity, mode=if_exists)
     from knack.util import CLIError
     raise CLIError("Unrecognized value '{}' for --if-exists".format(if_exists))

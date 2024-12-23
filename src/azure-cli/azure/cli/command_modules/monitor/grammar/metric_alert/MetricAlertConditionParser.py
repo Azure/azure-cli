@@ -263,7 +263,7 @@ class MetricAlertConditionParser ( Parser ):
             self.state = 58
             self._errHandler.sync(self)
             _alt = self._interp.adaptivePredict(self._input,0,self._ctx)
-            while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
+            while _alt not in (2, ATN.INVALID_ALT_NUMBER):
                 if _alt==1:
                     self.state = 53
                     self.namespace()
@@ -312,7 +312,7 @@ class MetricAlertConditionParser ( Parser ):
             self.state = 78
             self._errHandler.sync(self)
             _alt = self._interp.adaptivePredict(self._input,3,self._ctx)
-            while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
+            while _alt not in (2, ATN.INVALID_ALT_NUMBER):
                 if _alt==1:
                     self.state = 74
                     self.match(MetricAlertConditionParser.WHITESPACE)
@@ -440,7 +440,7 @@ class MetricAlertConditionParser ( Parser ):
             self.state = 95 
             self._errHandler.sync(self)
             _alt = 1
-            while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
+            while _alt not in (2, ATN.INVALID_ALT_NUMBER):
                 if _alt == 1:
                     self.state = 94
                     _la = self._input.LA(1)
@@ -750,7 +750,7 @@ class MetricAlertConditionParser ( Parser ):
             self.state = 123
             self._errHandler.sync(self)
             _alt = self._interp.adaptivePredict(self._input,8,self._ctx)
-            while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
+            while _alt not in (2, ATN.INVALID_ALT_NUMBER):
                 if _alt==1:
                     self.state = 117
                     self.match(MetricAlertConditionParser.WHITESPACE)
@@ -1161,7 +1161,7 @@ class MetricAlertConditionParser ( Parser ):
             self.state = 155
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==8 or _la==16:
+            while _la in (8, 16):
                 self.state = 150
                 self.dim_separator()
                 self.state = 151
@@ -1269,7 +1269,7 @@ class MetricAlertConditionParser ( Parser ):
             self.enterOuterAlt(localctx, 1)
             self.state = 162
             _la = self._input.LA(1)
-            if not(_la==8 or _la==16):
+            if not(_la in (8, 16)):
                 self._errHandler.recoverInline(self)
             else:
                 self._errHandler.reportMatch(self)
@@ -1324,7 +1324,7 @@ class MetricAlertConditionParser ( Parser ):
             self.enterOuterAlt(localctx, 1)
             self.state = 165
             _la = self._input.LA(1)
-            if not(_la==17 or _la==18):
+            if not(_la in (17, 18)):
                 self._errHandler.recoverInline(self)
             else:
                 self._errHandler.reportMatch(self)
@@ -1376,7 +1376,7 @@ class MetricAlertConditionParser ( Parser ):
             self.enterOuterAlt(localctx, 1)
             self.state = 168
             _la = self._input.LA(1)
-            if not(_la==8 or _la==19):
+            if not(_la in (8, 19)):
                 self._errHandler.recoverInline(self)
             else:
                 self._errHandler.reportMatch(self)
@@ -1484,7 +1484,7 @@ class MetricAlertConditionParser ( Parser ):
             self.state = 180
             self._errHandler.sync(self)
             _alt = self._interp.adaptivePredict(self._input,11,self._ctx)
-            while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
+            while _alt not in (2, ATN.INVALID_ALT_NUMBER):
                 if _alt==1:
                     self.state = 175
                     self.dim_val_separator()
@@ -1552,7 +1552,7 @@ class MetricAlertConditionParser ( Parser ):
             self.state = 184 
             self._errHandler.sync(self)
             _alt = 1
-            while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
+            while _alt not in (2, ATN.INVALID_ALT_NUMBER):
                 if _alt == 1:
                     self.state = 183
                     _la = self._input.LA(1)
