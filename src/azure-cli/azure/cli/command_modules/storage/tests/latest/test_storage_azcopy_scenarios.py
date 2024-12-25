@@ -615,9 +615,8 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         local_file = self.create_temp_file(20480.5)
         self.cmd('disk create -n {} -g {} --for-upload --upload-size-bytes 20972032'
                  .format(diskname, resource_group))
-        sasURL = self.cmd(
-            'disk grant-access --access-level Write --duration-in-seconds 3600 -n {} -g {} --query accessSas -o tsv'
-            .format(diskname, resource_group)).output.strip('\n')
+        sasURL = self.cmd('disk grant-access --access-level Write --duration-in-seconds 3600 -n {} -g {} -o tsv'
+                          .format(diskname, resource_group)).output.strip('\n')
         self.cmd('storage copy -s "{}" -d "{}" --blob-type PageBlob'
                  .format(local_file, sasURL))
 
@@ -893,6 +892,13 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
                  .format(storage_account, share, 'parent/source/*', storage_account, share, 'parent/target'))
         self.cmd('storage file list -s {} --path {} --account-name {}'.format(
             share, 'parent/target', storage_account), checks=JMESPathCheck('length(@)', 10))
+        self.cmd('storage copy --source-account-name {} --source-share {} --source-file-path {} --account-name {} '
+                 '--destination-share {} --destination-file-path {} --recursive -- --as-subdir=false'
+                 .format(storage_account, share, 'parent/*', storage_account, share, 'parentdst'))
+        self.cmd('storage file list -s {} --path {} --account-name {}'
+                 .format(share, 'parentdst/source', storage_account), checks=JMESPathCheck('length(@)', 10))
+        self.cmd('storage file list -s {} --path {} --account-name {}'
+                 .format(share, 'parentdst/target', storage_account), checks=JMESPathCheck('length(@)', 10))
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='first_account', allow_shared_key_access=False)
@@ -985,9 +991,8 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         local_file = self.create_temp_file(20480.5)
         self.cmd('disk create -n {} -g {} --for-upload --upload-size-bytes 20972032'
                  .format(diskname, resource_group))
-        sasURL = self.cmd(
-            'disk grant-access --access-level Write --duration-in-seconds 3600 -n {} -g {} --query accessSas -o tsv'
-            .format(diskname, resource_group)).output.strip('\n')
+        sasURL = self.cmd('disk grant-access --access-level Write --duration-in-seconds 3600 -n {} -g {} -o tsv'
+                          .format(diskname, resource_group)).output.strip('\n')
         self.oauth_cmd('storage copy -s "{}" -d "{}" --blob-type PageBlob'.format(
             local_file, sasURL))
 
@@ -1249,3 +1254,24 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
             storage_account, share, local_folder))
         self.assertEqual(3, sum(len(d) for r, d, f in os.walk(local_folder)))
         self.assertEqual(21, sum(len(f) for r, d, f in os.walk(local_folder)))
+
+        # Copy with wildcard *
+        self.file_oauth_cmd('storage directory create -s {} -n {} --account-name {}'
+                            .format(share, 'parent', storage_account))
+        self.file_oauth_cmd('storage directory create -s {} -n {} --account-name {}'
+                            .format(share, 'parent/source', storage_account))
+        self.oauth_cmd('storage copy --source-local-path "{}" --destination-account-name {} --destination-share {} '
+                       '--destination-file-path {} --recursive'
+                       .format(os.path.join(test_dir, 'butter/file_*'), storage_account, share, 'parent/source'))
+        self.cmd('storage copy --source-account-name {} --source-share {} --source-file-path {} --account-name {} '
+                 '--destination-share {} --destination-file-path {} --recursive --auth-mode login -- --as-subdir=false'
+                 .format(storage_account, share, 'parent/source/*', storage_account, share, 'parent/target'))
+        self.file_oauth_cmd('storage file list -s {} --path {} --account-name {}'
+                            .format(share, 'parent/target', storage_account), checks=JMESPathCheck('length(@)', 10))
+        self.cmd('storage copy --source-account-name {} --source-share {} --source-file-path {} --account-name {} '
+                 '--destination-share {} --destination-file-path {} --recursive --auth-mode login -- --as-subdir=false'
+                 .format(storage_account, share, 'parent/*', storage_account, share, 'parentdst'))
+        self.file_oauth_cmd('storage file list -s {} --path {} --account-name {}'
+                            .format(share, 'parentdst/source', storage_account), checks=JMESPathCheck('length(@)', 10))
+        self.file_oauth_cmd('storage file list -s {} --path {} --account-name {}'
+                            .format(share, 'parentdst/target', storage_account), checks=JMESPathCheck('length(@)', 10))
