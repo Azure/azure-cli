@@ -2025,8 +2025,14 @@ def get_url_with_sas(cmd, namespace, url=None, container=None, blob=None, share=
         client = cf_blob_service(cmd.cli_ctx, kwargs)
         if blob is None:
             blob = ''
-        from .operations.blob import create_blob_url
-        url = create_blob_url(client, container, blob, snapshot=None)
+        if '*' in container or '*' in blob:
+            url = client.url
+            if not url.endswith('/'):
+                url = url + '/'
+            url = url + container + '/' + blob
+        else:
+            from .operations.blob import create_blob_url
+            url = create_blob_url(client, container, blob, snapshot=None)
         service = 'blob'
     elif share:
         if hasattr(namespace, 'enable_file_backup_request_intent'):

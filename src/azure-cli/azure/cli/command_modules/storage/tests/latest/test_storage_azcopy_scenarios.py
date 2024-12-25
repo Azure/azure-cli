@@ -631,6 +631,7 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
 
         first_container = self.create_container(first_account_info)
         second_container = self.create_container(second_account_info)
+        third_container = self.create_container(second_account_info)
 
         first_account_url = 'https://{}.blob.core.windows.net'.format(first_account)
 
@@ -707,12 +708,19 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
                  .format(second_container, second_account), checks=JMESPathCheck('length(@)', 11))
 
         # Copy an entire storage account data to another blob account
-        self.cmd('storage copy --source-account-name {} --destination-account-name {} --recursive --preserve-s2s-access-tier false'
-                 .format(first_account, second_account))
+        self.cmd('storage copy --source-account-name {} --destination-account-name {} --recursive '
+                 '--preserve-s2s-access-tier false'.format(first_account, second_account))
         self.cmd('storage container list --account-name {}'
-                 .format(second_account), checks=JMESPathCheck('length(@)', 2))
+                 .format(second_account), checks=JMESPathCheck('length(@)', 3))
         self.cmd('storage blob list -c {} --account-name {}'
                  .format(first_container, second_account), checks=JMESPathCheck('length(@)', 22))
+
+        # Copy an entire directory from blob virtual directory to another blob virtual directory with wildcard
+        self.cmd('storage copy --source-account-name {} --source-container {} --source-blob {} '
+                 '--destination-account-name {} --destination-container {} --recursive --preserve-s2s-access-tier false'
+                 .format(second_account, second_container, 'apple/*', second_account, third_container))
+        self.cmd('storage blob list -c {} --account-name {}'
+                 .format(third_container, second_account), checks=JMESPathCheck('length(@)', 10))
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='first_account')
@@ -1004,8 +1012,10 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
     def test_storage_azcopy_blob_account_oauth(self, resource_group, first_account, second_account, test_dir):
         first_container = self.create_random_name(prefix='container', length=24)
         second_container = self.create_random_name(prefix='container', length=24)
+        third_container = self.create_random_name(prefix='container', length=24)
         self.oauth_cmd('storage container create -n {} --account-name {}', first_container, first_account)
         self.oauth_cmd('storage container create -n {} --account-name {}', second_container, second_account)
+        self.oauth_cmd('storage container create -n {} --account-name {}', third_container, second_account)
 
         first_account_url = 'https://{}.blob.core.windows.net'.format(first_account)
 
@@ -1090,9 +1100,17 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
                        '--preserve-s2s-access-tier false'.format(
             first_account, second_account))
         self.oauth_cmd('storage container list --account-name {}'.format(
-            second_account), checks=JMESPathCheck('length(@)', 2))
+            second_account), checks=JMESPathCheck('length(@)', 3))
         self.oauth_cmd('storage blob list -c {} --account-name {}'.format(
             first_container, second_account), checks=JMESPathCheck('length(@)', 22))
+
+        # Copy an entire directory from blob virtual directory to another blob virtual directory with wildcard
+        self.oauth_cmd('storage copy --source-account-name {} --source-container {} --source-blob {} '
+                       '--destination-account-name {} --destination-container {} --recursive '
+                       '--preserve-s2s-access-tier false'
+                       .format(second_account, second_container, 'apple/*', second_account, third_container))
+        self.oauth_cmd('storage blob list -c {} --account-name {}'
+                       .format(third_container, second_account), checks=JMESPathCheck('length(@)', 10))
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='first_account', allow_shared_key_access=False)
