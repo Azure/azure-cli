@@ -12,24 +12,23 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "sig image-definition list",
+    "sig image-definition show-community",
 )
-class List(AAZCommand):
-    """List gallery image definitions in a gallery.
+class ShowCommunity(AAZCommand):
+    """Get a community gallery image.
     """
 
     _aaz_info = {
-        "version": "2021-10-01",
+        "version": "2023-07-03",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/galleries/{}/images", "2021-10-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/locations/{}/communitygalleries/{}/images/{}", "2023-07-03"],
         ]
     }
 
-    AZ_SUPPORT_PAGINATION = True
-
     def _handler(self, command_args):
         super()._handler(command_args)
-        return self.build_paging(self._execute_operations, self._output)
+        self._execute_operations()
+        return self._output()
 
     _args_schema = None
 
@@ -42,19 +41,27 @@ class List(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.gallery_name = AAZStrArg(
-            options=["-r", "--gallery-name"],
-            help="The name of the Shared Image Gallery from which Image Definitions are to be listed.",
+        _args_schema.gallery_image_definition = AAZStrArg(
+            options=["-i", "--gallery-image-definition"],
+            help="The name of the community gallery image definition from which the image versions are to be listed.",
             required=True,
+            id_part="child_name_2",
         )
-        _args_schema.resource_group = AAZResourceGroupNameArg(
+        _args_schema.location = AAZResourceLocationArg(
             required=True,
+            id_part="name",
+        )
+        _args_schema.public_gallery_name = AAZStrArg(
+            options=["--public-gallery-name"],
+            help="The public name of the community gallery.",
+            required=True,
+            id_part="child_name_1",
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.GalleryImagesListByGallery(ctx=self.ctx)()
+        self.CommunityGalleryImagesGet(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -66,11 +73,10 @@ class List(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
-        next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
-        return result, next_link
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
 
-    class GalleryImagesListByGallery(AAZHttpOperation):
+    class CommunityGalleryImagesGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -84,7 +90,7 @@ class List(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/galleries/{galleryName}/images",
+                "/subscriptions/{subscriptionId}/providers/Microsoft.Compute/locations/{location}/communityGalleries/{publicGalleryName}/images/{galleryImageName}",
                 **self.url_parameters
             )
 
@@ -100,11 +106,15 @@ class List(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "galleryName", self.ctx.args.gallery_name,
+                    "galleryImageName", self.ctx.args.gallery_image_definition,
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.resource_group,
+                    "location", self.ctx.args.location,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "publicGalleryName", self.ctx.args.public_gallery_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -118,7 +128,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2021-10-01",
+                    "api-version", "2023-07-03",
                     required=True,
                 ),
             }
@@ -151,38 +161,34 @@ class List(AAZCommand):
             cls._schema_on_200 = AAZObjectType()
 
             _schema_on_200 = cls._schema_on_200
-            _schema_on_200.next_link = AAZStrType(
-                serialized_name="nextLink",
-            )
-            _schema_on_200.value = AAZListType(
-                flags={"required": True},
-            )
-
-            value = cls._schema_on_200.value
-            value.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element
-            _element.id = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.location = AAZStrType(
-                flags={"required": True},
-            )
-            _element.name = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.properties = AAZObjectType(
+            _schema_on_200.identifier = AAZObjectType(
                 flags={"client_flatten": True},
             )
-            _element.tags = AAZDictType()
-            _element.type = AAZStrType(
+            _schema_on_200.location = AAZStrType(
+                flags={"read_only": True},
+            )
+            _schema_on_200.name = AAZStrType(
+                flags={"read_only": True},
+            )
+            _schema_on_200.properties = AAZObjectType(
+                flags={"client_flatten": True},
+            )
+            _schema_on_200.type = AAZStrType(
                 flags={"read_only": True},
             )
 
-            properties = cls._schema_on_200.value.Element.properties
+            identifier = cls._schema_on_200.identifier
+            identifier.unique_id = AAZStrType(
+                serialized_name="uniqueId",
+            )
+
+            properties = cls._schema_on_200.properties
             properties.architecture = AAZStrType()
-            properties.description = AAZStrType()
+            properties.artifact_tags = AAZDictType(
+                serialized_name="artifactTags",
+            )
             properties.disallowed = AAZObjectType()
+            properties.disclaimer = AAZStrType()
             properties.end_of_life_date = AAZStrType(
                 serialized_name="endOfLifeDate",
             )
@@ -205,65 +211,52 @@ class List(AAZCommand):
             properties.privacy_statement_uri = AAZStrType(
                 serialized_name="privacyStatementUri",
             )
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-                flags={"read_only": True},
-            )
             properties.purchase_plan = AAZObjectType(
                 serialized_name="purchasePlan",
             )
             properties.recommended = AAZObjectType()
-            properties.release_note_uri = AAZStrType(
-                serialized_name="releaseNoteUri",
-            )
 
-            disallowed = cls._schema_on_200.value.Element.properties.disallowed
+            artifact_tags = cls._schema_on_200.properties.artifact_tags
+            artifact_tags.Element = AAZStrType()
+
+            disallowed = cls._schema_on_200.properties.disallowed
             disallowed.disk_types = AAZListType(
                 serialized_name="diskTypes",
             )
 
-            disk_types = cls._schema_on_200.value.Element.properties.disallowed.disk_types
+            disk_types = cls._schema_on_200.properties.disallowed.disk_types
             disk_types.Element = AAZStrType()
 
-            features = cls._schema_on_200.value.Element.properties.features
+            features = cls._schema_on_200.properties.features
             features.Element = AAZObjectType()
 
-            _element = cls._schema_on_200.value.Element.properties.features.Element
+            _element = cls._schema_on_200.properties.features.Element
             _element.name = AAZStrType()
             _element.value = AAZStrType()
 
-            identifier = cls._schema_on_200.value.Element.properties.identifier
-            identifier.offer = AAZStrType(
-                flags={"required": True},
-            )
-            identifier.publisher = AAZStrType(
-                flags={"required": True},
-            )
-            identifier.sku = AAZStrType(
-                flags={"required": True},
-            )
+            identifier = cls._schema_on_200.properties.identifier
+            identifier.offer = AAZStrType()
+            identifier.publisher = AAZStrType()
+            identifier.sku = AAZStrType()
 
-            purchase_plan = cls._schema_on_200.value.Element.properties.purchase_plan
+            purchase_plan = cls._schema_on_200.properties.purchase_plan
             purchase_plan.name = AAZStrType()
             purchase_plan.product = AAZStrType()
             purchase_plan.publisher = AAZStrType()
 
-            recommended = cls._schema_on_200.value.Element.properties.recommended
+            recommended = cls._schema_on_200.properties.recommended
             recommended.memory = AAZObjectType()
-            _ListHelper._build_schema_resource_range_read(recommended.memory)
+            _ShowCommunityHelper._build_schema_resource_range_read(recommended.memory)
             recommended.v_cp_us = AAZObjectType(
                 serialized_name="vCPUs",
             )
-            _ListHelper._build_schema_resource_range_read(recommended.v_cp_us)
-
-            tags = cls._schema_on_200.value.Element.tags
-            tags.Element = AAZStrType()
+            _ShowCommunityHelper._build_schema_resource_range_read(recommended.v_cp_us)
 
             return cls._schema_on_200
 
 
-class _ListHelper:
-    """Helper class for List"""
+class _ShowCommunityHelper:
+    """Helper class for ShowCommunity"""
 
     _schema_resource_range_read = None
 
@@ -284,4 +277,4 @@ class _ListHelper:
         _schema.min = cls._schema_resource_range_read.min
 
 
-__all__ = ["List"]
+__all__ = ["ShowCommunity"]
