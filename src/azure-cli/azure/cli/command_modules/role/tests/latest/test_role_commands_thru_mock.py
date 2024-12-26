@@ -383,14 +383,12 @@ class TestRoleMocked(unittest.TestCase):
         assert len(result) == 1
         assert result[0]['id'] == MOCKED_USER_ID
 
-    @mock.patch('azure.cli.command_modules.role.custom._auth_client_factory', autospec=True)
-    @mock.patch('knack.prompting.prompt_y_n', autospec=True)
-    def test_role_assignment_delete_prompt(self, prompt_mock, client_mock):
-        prompt_mock.return_value = False
-        # action
-        delete_role_assignments(mock.MagicMock())
-        # assert
-        prompt_mock.assert_called_once_with(mock.ANY, 'n')
+    def test_role_assignment_delete_no_args_raise_error(self):
+        from azure.cli.core.azclierror import ArgumentUsageError
+        with self.assertRaises(ArgumentUsageError):
+            delete_role_assignments(mock.MagicMock())
+        with self.assertRaises(ArgumentUsageError):
+            delete_role_assignments(mock.MagicMock(), yes=True)
 
     @mock.patch('azure.cli.command_modules.role.custom._graph_client_factory', autospec=True)
     def test_role_list_app_owner(self, graph_client_mock):
