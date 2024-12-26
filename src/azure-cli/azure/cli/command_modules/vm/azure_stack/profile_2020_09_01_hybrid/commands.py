@@ -31,3 +31,6 @@ def load_command_table(self, _):
 
     from .operations.capacity_reservation_group import CapacityReservationGroupList
     self.command_table['capacity reservation group list'] = CapacityReservationGroupList(loader=self)
+
+    from .operations.sig_image_definition import SigImageDefinitionUpdate
+    self.command_table['sig image-definition update'] = SigImageDefinitionUpdate(loader=self)

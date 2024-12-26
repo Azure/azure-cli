@@ -506,7 +506,6 @@ def load_command_table(self, _):
         g.custom_command('list-community', 'sig_community_gallery_list')
 
     with self.command_group('sig image-definition', community_gallery_image_sdk, client_factory=cf_community_gallery_image, operation_group='shared_galleries', min_api='2022-01-03') as g:
-        g.command('show-community', 'get')
         g.custom_command('list-community', 'sig_community_image_definition_list')
 
     with self.command_group('sig image-version', community_gallery_image_version_sdk, client_factory=cf_community_gallery_image_version, operation_group='shared_galleries', min_api='2022-01-03') as g:
@@ -514,7 +513,8 @@ def load_command_table(self, _):
 
     with self.command_group('sig image-definition', compute_gallery_images_sdk, operation_group='gallery_images', min_api='2018-06-01') as g:
         g.custom_command('create', 'create_gallery_image')
-        g.generic_update_command('update', setter_name='begin_create_or_update', setter_arg_name='gallery_image')
+        from .operations.sig_image_definition import SigImageDefinitionUpdate
+        self.command_table['sig image-definition update'] = SigImageDefinitionUpdate(loader=self)
 
     with self.command_group('sig image-version', compute_gallery_image_versions_sdk, operation_group='gallery_image_versions', min_api='2018-06-01') as g:
         g.show_command('show', 'get', table_transformer='{Name:name, ResourceGroup:resourceGroup, ProvisioningState:provisioningState, TargetRegions: publishingProfile.targetRegions && join(`, `, publishingProfile.targetRegions[*].name), EdgeZones: publishingProfile.targetExtendedLocations && join(`, `, publishingProfile.targetExtendedLocations[*].name), ReplicationState:replicationStatus.aggregatedState}')
