@@ -56,6 +56,16 @@ CLASSIC_ADMINISTRATOR_WARNING = (
     "Delete classic administrators who no longer need access or assign an Azure RBAC role for fine-grained access "
     "control. Learn more: https://go.microsoft.com/fwlink/?linkid=2238474")
 
+ROLE_ASSIGNMENT_LIST_SCOPE_WARNING = (
+    "--scope argument will become required for listing role assignments "
+    "in the breaking change release of the spring of 2025. "
+    "Please explicitly specify --scope.")
+
+ROLE_ASSIGNMENT_DELETE_SCOPE_WARNING = (
+    "When --ids is not provided, --scope argument will become required for deleting role assignments "
+    "in the breaking change release of the spring of 2025. "
+    "Please explicitly specify --scope.")
+
 logger = get_logger(__name__)
 
 # pylint: disable=too-many-lines, protected-access
@@ -219,6 +229,9 @@ def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=Non
     :param include_groups: include extra assignments to the groups of which the user is a
     member(transitively).
     '''
+    if not scope:
+        logger.warning(ROLE_ASSIGNMENT_LIST_SCOPE_WARNING)
+
     if include_classic_administrators:
         logger.warning(CLASSIC_ADMINISTRATOR_WARNING)
 
@@ -502,6 +515,9 @@ def _get_displayable_name(graph_object):
 
 def delete_role_assignments(cmd, ids=None, assignee=None, role=None, resource_group_name=None,
                             scope=None, include_inherited=False, yes=None):
+    if not ids and not scope:
+        logger.warning(ROLE_ASSIGNMENT_DELETE_SCOPE_WARNING)
+
     factory = _auth_client_factory(cmd.cli_ctx, scope)
     assignments_client = factory.role_assignments
     definitions_client = factory.role_definitions
