@@ -11,19 +11,18 @@ def batch_exception_handler(ex):
     from azure.core.exceptions import HttpResponseError
 
     if isinstance(ex, HttpResponseError):
-        if ex.model and isinstance(ex, BatchError) and ex.model.code:
-            _handle_batch_exception(ex.model)
-    elif isinstance(ex, (ValidationError, ClientRequestError)):
-        raise CLIError(ex)
+        if ex.model and isinstance(ex.model, BatchError) and ex.model.code:
+            _raise_batch_error(ex.model)
     
     raise CLIError(ex)
 
-def _handle_batch_exception(err):
-    """Handle a BatchError from the data plane and raise a CLI exception"""
+
+def _raise_batch_error(err):
+    """Handle a BatchError from the data plane and raise a CLI error"""
     message = f"({err.code})"
     if err.message and err.message.value:
         message += f" {err.message.value}"
     if err.values_property:
         for detail in err.values_property:
             message += f"\n{detail.key}: {detail.value}"
-    return CLIError(message)
+    raise CLIError(message)
