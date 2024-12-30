@@ -582,7 +582,7 @@ class CosmosDBTests(ScenarioTest):
 
         assert not self.cmd('az cosmosdb sql container exists -g {rg} -a {acc} -d {db_name} -n {ctn_name}').get_output_in_json()
 
-        container_create = self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {ctn_name} -p {part} --ttl {ttl} --unique-key-policy {unique_key} --vector-embedding-policy {vector_embedding} --conflict-resolution-policy {conflict_resolution} --idx {indexing}').get_output_in_json()
+        container_create = self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {ctn_name} -p {part} --ttl {ttl} --unique-key-policy {unique_key} --vector-embeddings {vector_embedding} --conflict-resolution-policy {conflict_resolution} --idx {indexing}').get_output_in_json()
 
         assert container_create["name"] == ctn_name
         assert container_create["resource"]["partitionKey"]["paths"][0] == partition_key
