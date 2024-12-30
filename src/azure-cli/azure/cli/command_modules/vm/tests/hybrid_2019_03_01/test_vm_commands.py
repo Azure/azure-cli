@@ -49,7 +49,7 @@ class VMImageListByAliasesScenarioTest(ScenarioTest):
         result = self.cmd('vm image list --offer ubuntu').get_output_in_json()
         self.assertTrue(len(result) >= 1)
         self.assertEqual(result[0]['publisher'], 'Canonical')
-        self.assertTrue(result[0]['sku'].endswith('LTS'))
+        self.assertTrue('lts' in result[0]['sku'].lower())
 
 
 class VMUsageScenarioTest(ScenarioTest):
@@ -192,8 +192,8 @@ class VMImageShowScenarioTest(ScenarioTest):
             'loc': 'westus',
             'pub': 'Canonical',
             'offer': 'UbuntuServer',
-            'sku': '14.04.2-LTS',
-            'ver': '14.04.201503090'
+            'sku': '18.04-LTS',
+            'ver': '18.04.202002180'
         })
 
         self.cmd('vm image show --location {loc} --publisher {pub} --offer {offer} --sku {sku} --version {ver}', checks=[

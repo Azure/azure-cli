@@ -843,24 +843,6 @@ examples:
         --location myLocation --shared-to tenant
 """
 
-helps['sig image-definition update'] = """
-type: command
-short-summary: Update a VM Image definition.
-examples:
-  - name: Change the shared image definition's recommended configuration
-    text: |-
-        az sig image-definition update --resource-group MyResourceGroup \\
-        --gallery-name MyGallery --gallery-image-definition MyImage \\
-        --resource-group MyResourceGroup --set recommended.vCpUs.min=myNewvCpUsMin \\
-        recommended.vCpUs.max=myNewvCpUsMax recommended.memory.min=myNewMemoryMin \\
-        recommended.memory.max=myNewMemoryMax description="newDescription"
-  - name: Remove a shared image definition's configuration property
-    text: |-
-        az sig image-definition update --resource-group MyResourceGroup \\
-        --gallery-name MyGallery --gallery-image-definition MyImage \\
-        --resource-group MyResourceGroup --remove recommended.vCpUs.min
-"""
-
 helps['sig image-definition list-community'] = """
 type: command
 short-summary: List VM Image definitions in a gallery community

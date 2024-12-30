@@ -357,13 +357,10 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_vm_extension_images')
 
     with self.command_group('vm image', compute_vm_image_sdk) as g:
-        g.custom_command('list-offers', 'list_offers')
-        g.custom_command('list-publishers', 'list_publishers')
-        g.custom_command('list-skus', 'list_sku')
         g.custom_command('list', 'list_vm_images')
+        g.custom_show_command('show', 'show_vm_image')
         g.custom_command('accept-terms', 'accept_market_ordering_terms',
                          deprecate_info=g.deprecate(redirect='az vm image terms accept', expiration='3.0.0'))
-        g.custom_show_command('show', 'show_vm_image')
 
     with self.command_group('vm image terms', compute_vm_image_term_sdk, validator=None) as g:
         g.custom_command('accept', 'accept_terms')
@@ -477,7 +474,6 @@ def load_command_table(self, _):
 
     with self.command_group('sig image-definition', compute_gallery_images_sdk, operation_group='gallery_images', min_api='2018-06-01') as g:
         g.custom_command('create', 'create_gallery_image')
-        g.generic_update_command('update', setter_name='begin_create_or_update', setter_arg_name='gallery_image')
 
     with self.command_group('sig image-version', compute_gallery_image_versions_sdk, operation_group='gallery_image_versions', min_api='2018-06-01') as g:
         g.show_command('show', 'get', table_transformer='{Name:name, ResourceGroup:resourceGroup, ProvisioningState:provisioningState, TargetRegions: publishingProfile.targetRegions && join(`, `, publishingProfile.targetRegions[*].name), EdgeZones: publishingProfile.targetExtendedLocations && join(`, `, publishingProfile.targetExtendedLocations[*].name), ReplicationState:replicationStatus.aggregatedState}')
