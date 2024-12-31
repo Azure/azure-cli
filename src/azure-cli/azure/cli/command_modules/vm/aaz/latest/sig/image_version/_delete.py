@@ -19,9 +19,9 @@ class Delete(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-03-03",
+        "version": "2023-07-03",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/galleries/{}/images/{}/versions/{}", "2022-03-03"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/galleries/{}/images/{}/versions/{}", "2023-07-03"],
         ]
     }
 
@@ -48,8 +48,8 @@ class Delete(AAZCommand):
             required=True,
             id_part="child_name_1",
         )
-        _args_schema.gallery_image_version_name = AAZStrArg(
-            options=["-e", "--gallery-image-version", "--gallery-image-version-name"],
+        _args_schema.gallery_image_version = AAZStrArg(
+            options=["-e", "--gallery-image-version"],
             help="The name of the gallery image version to be deleted.",
             required=True,
             id_part="child_name_2",
@@ -137,7 +137,7 @@ class Delete(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "galleryImageVersionName", self.ctx.args.gallery_image_version_name,
+                    "galleryImageVersionName", self.ctx.args.gallery_image_version,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -159,7 +159,7 @@ class Delete(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-03-03",
+                    "api-version", "2023-07-03",
                     required=True,
                 ),
             }
