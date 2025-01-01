@@ -4,53 +4,69 @@
 # --------------------------------------------------------------------------------------------
 
 from knack.util import todict
+from azure.core.paging import ItemPaged
 import unittest
 
-class Transformer:
+transform_map = {
+    "etag": "eTag",
+    "logicalUnitNumber": "lun"
+}
 
-    transform_map = {
-        "etag": "eTag",
-        "logicalUnitNumber": "lun"
+def transform_object(result):
+
+    new_dict = {}
+
+    # print(result)
+    
+    for key, value in result.items():
+                    
+        new_key = transform_map[key] if key in transform_map else key
+
+        if isinstance(value, dict):
+            new_dict[new_key] = transform_object(value)
+        elif isinstance(value, list): # if another dictionary is in a list then we should check to transform
+            new_dict[new_key] = transform_object_list(value)
+        else:
+            new_dict[new_key] = value
+
+    return new_dict
+
+def transform_object_list(result):
+    new_result = []
+    result_list = list(result) if isinstance(result, ItemPaged) else result
+    for item in result_list:
+        updated_obj = transform_object(item)
+
+        # print(updated_obj)
+
+        new_result.append(updated_obj)
+    return new_result
+
+
+# Quick tests
+
+fake_etag_json = {
+    "etag": {
+        "id": "task_123",
+        "displayName": "example",
+        "etag": [
+            {"etag": "tag"}
+        ],
+        "requiredSlots": 2
     }
+}
 
-    def transform_take2(self, result):
-
-        new_dict = {}
-        
-        for key, value in result.items():
-                        
-            new_key = self.transform_map[key] if key in self.transform_map else key
-
-            if isinstance(value, dict):
-                transformed_dict = self.transform_take2(value)
-                new_dict[new_key] = transformed_dict
-            else:
-                new_dict[new_key] = value
-
-        return new_dict
-
-
-    fake_t2_json_result = {
-        "etag": {
-            "id": "task_123",
-            "displayName": "example",
-            "etag": "tag",
-            "requiredSlots": 2
-        }
+fake_lun_json = {
+    "logicalUnitNumber": {
+        "potato": "french fries",
+        "logicalUnitNumber": 123
     }
-
-    fake_t2_take2 = {
-        "logicalUnitNumber": {
-            "potato": "french fries",
-            "logicalUnitNumber": 123
-        }
-    }
-
+}
 
 class TestTransform(unittest.TestCase):
     def test_transform(self):
-        update_etag = Transformer().transform_take2(Transformer().fake_t2_json_result)
-        update_lun = Transformer().transform_take2(Transformer().fake_t2_take2)
+        update_etag = transform_object(fake_etag_json)
+        update_lun = transform_object(fake_lun_json)
 
         # self.assertEqual(
         #     {
