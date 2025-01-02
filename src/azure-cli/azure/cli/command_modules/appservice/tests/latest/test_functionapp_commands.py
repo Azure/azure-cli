@@ -2769,6 +2769,28 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
         ])
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    def test_consumption_functionapp_disabled_public_network_access_storage(self, resource_group):
+        functionapp_name = self.create_random_name('functionapp', 24)
+        storage_account = self.create_random_name('funcstorage1', 24)
+
+        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS --public-network-access Disabled'.format(storage_account, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
+
+        with self.assertRaises(ValidationError):
+            self.cmd('functionapp create -g {} -n {} -s {} --consumption-plan-location {} --functions-version 4'.format(resource_group, functionapp_name, storage_account, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
+
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    def test_consumption_functionapp_restricted_public_network_access_storage(self, resource_group):
+        functionapp_name = self.create_random_name('functionapp', 24)
+        storage_account = self.create_random_name('funcstorage', 24)
+
+        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS --default-action Deny --public-network-access Enabled'.format(storage_account, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
+
+        with self.assertRaises(ValidationError):
+            self.cmd('functionapp create -g {} -n {} -s {} --consumption-plan-location {} --functions-version 4'.format(resource_group, functionapp_name, storage_account, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
+
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_create_with_vnet_consumption_plan(self, resource_group, storage_account):
         functionapp_name = self.create_random_name('swiftfunctionapp', 24)
