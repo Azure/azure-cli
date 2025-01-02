@@ -1778,7 +1778,7 @@ class FunctionAppOnLinux(ScenarioTest):
         self.assertTrue('functionapp,linux' in result[0]['kind'])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'Node|18')])
+            JMESPathCheck('linuxFxVersion', 'Node|20')])
 
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp))
 
