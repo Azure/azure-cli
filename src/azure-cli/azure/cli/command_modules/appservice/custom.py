@@ -5002,6 +5002,12 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         else SiteConfigPropertiesDictionary()
     app_settings_dict = matched_runtime.app_settings_dict if not flexconsumption_location else {}
 
+    if is_storage_account_network_restricted(cmd.cli_ctx, resource_group_name, storage_account):
+        if consumption_plan_location is not None:
+            raise ValidationError('The Consumption plan does not support storage accounts with network restrictions. '
+                                  'If you wish to use virtual networks, please create your app on a different hosting '
+                                  'plan.')
+
     con_string = _validate_and_get_connection_string(cmd.cli_ctx, resource_group_name, storage_account)
 
     if environment is not None:
@@ -5713,6 +5719,19 @@ def _validate_and_get_connection_string(cli_ctx, resource_group_name, storage_ac
         keys[0])  # pylint: disable=no-member
 
     return connection_string
+
+
+def is_storage_account_network_restricted(cli_ctx, resource_group_name, storage_account):
+    sa_resource_group = resource_group_name
+    if is_valid_resource_id(storage_account):
+        sa_resource_group = parse_resource_id(storage_account)['resource_group']
+        storage_account = parse_resource_id(storage_account)['name']
+    storage_client = get_mgmt_service_client(cli_ctx, StorageManagementClient)
+    storage_properties = storage_client.storage_accounts.get_properties(sa_resource_group,
+                                                                        storage_account)
+    return storage_properties.public_network_access == 'Disabled' or \
+        (storage_properties.public_network_access == 'Enabled' and
+         storage_properties.network_rule_set.default_action == 'Deny')
 
 
 def list_consumption_locations(cmd):
