@@ -27,6 +27,8 @@ from azure.core.exceptions import HttpResponseError
 
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import get_file_json, shell_safe_json_parse, is_guid
+from azure.cli.core.azclierror import ArgumentUsageError
+
 from ._client_factory import _auth_client_factory, _graph_client_factory
 from ._multi_api_adaptor import MultiAPIAdaptor
 from ._msgrpah import GraphError, set_object_properties
@@ -501,7 +503,13 @@ def _get_displayable_name(graph_object):
 
 
 def delete_role_assignments(cmd, ids=None, assignee=None, role=None, resource_group_name=None,
-                            scope=None, include_inherited=False, yes=None):
+                            scope=None, include_inherited=False,
+                            yes=None):  # pylint: disable=unused-argument
+    # yes is currently a no-op
+    if not any((ids, assignee, role, resource_group_name, scope)):
+        raise ArgumentUsageError('Please provide at least one of these arguments: '
+                                 '--ids, --assignee, --role, --resource-group, --scope')
+
     factory = _auth_client_factory(cmd.cli_ctx, scope)
     assignments_client = factory.role_assignments
     definitions_client = factory.role_definitions
@@ -528,11 +536,6 @@ def delete_role_assignments(cmd, ids=None, assignee=None, role=None, resource_gr
         for i in ids:
             assignments_client.delete_by_id(i)
         return
-    if not any([ids, assignee, role, resource_group_name, scope, assignee, yes]):
-        from knack.prompting import prompt_y_n
-        msg = 'This will delete all role assignments under the subscription. Are you sure?'
-        if not prompt_y_n(msg, default="n"):
-            return
 
     scope = _build_role_scope(resource_group_name, scope,
                               assignments_client._config.subscription_id)
@@ -905,7 +908,6 @@ def add_permission(client, identifier, api, api_permissions):
         try:
             access_id, access_type = e.split('=')
         except ValueError as ex:
-            from azure.cli.core.azclierror import ArgumentUsageError
             raise ArgumentUsageError('Usage error: Please provide both permission id and type, such as '
                                      '`--api-permissions e1fe6dd8-ba31-4d61-89e7-88639da4683d=Scope`') from ex
         resource_access = {
@@ -1184,7 +1186,6 @@ def create_service_principal_for_rbac(
     import time
 
     if role and not scopes or not role and scopes:
-        from azure.cli.core.azclierror import ArgumentUsageError
         raise ArgumentUsageError("Usage error: To create role assignments, specify both --role and --scopes.")
 
     graph_client = _graph_client_factory(cmd.cli_ctx)
