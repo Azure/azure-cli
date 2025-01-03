@@ -60,7 +60,6 @@ DEPENDENCIES = [
     # psutil can't install on cygwin: https://github.com/Azure/azure-cli/issues/9399
     'psutil>=5.9; sys_platform != "cygwin"',
     'PyJWT>=2.1.0',
-    'pyopenssl>=17.1.0',  # https://github.com/pyca/pyopenssl/pull/612
     'requests[socks]',
     'microsoft-security-utilities-secret-masker~=1.0.0b2',
 ]
