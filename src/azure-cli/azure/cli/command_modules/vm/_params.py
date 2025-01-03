@@ -1253,23 +1253,6 @@ def load_arguments(self, _):
         c.argument('gallery_image_name', options_list=['--gallery-image-definition', '-i'], help='gallery image definition')
         c.argument('gallery_image_version', options_list=['--gallery-image-version', '-e'], help='gallery image version')
 
-    for scope in ['sig share add', 'sig share remove']:
-        with self.argument_context(scope) as c:
-            c.argument('gallery_name', type=str, help='The name of the Shared Image Gallery.', id_part='name')
-            c.argument('subscription_ids', nargs='+', help='A list of subscription ids to share the gallery.')
-            c.argument('tenant_ids', nargs='+', help='A list of tenant ids to share the gallery.')
-
-    with self.argument_context('sig share add') as c:
-        c.argument('op_type', default='Add', deprecate_info=c.deprecate(hide=True),
-                   help='distinguish add operation and remove operation')
-
-    with self.argument_context('sig share remove') as c:
-        c.argument('op_type', default='Remove', deprecate_info=c.deprecate(hide=True),
-                   help='distinguish add operation and remove operation')
-
-    with self.argument_context('sig share reset') as c:
-        c.argument('gallery_name', type=str, help='The name of the Shared Image Gallery.', id_part='name')
-
     with self.argument_context('sig image-definition create') as c:
         c.argument('offer', options_list=['--offer', '-f'], help='image offer')
         c.argument('sku', options_list=['--sku', '-s'], help='image sku')
@@ -1413,13 +1396,6 @@ def load_arguments(self, _):
         c.argument('gallery_image_name', gallery_image_name_type)
         c.argument('marker', arg_type=marker_type)
         c.argument('show_next_marker', action='store_true', help='Show nextMarker in result when specified.')
-
-    with self.argument_context('sig share enable-community') as c:
-        c.argument('gallery_name', type=str, help='The name of the Shared Image Gallery.', id_part='name')
-        c.argument('subscription_ids', nargs='+', help='A list of subscription ids to share the gallery.')
-        c.argument('tenant_ids', nargs='+', help='A list of tenant ids to share the gallery.')
-        c.argument('op_type', default='EnableCommunity', deprecate_info=c.deprecate(hide=True),
-                   help='distinguish add operation and remove operation')
 
     # endregion
 

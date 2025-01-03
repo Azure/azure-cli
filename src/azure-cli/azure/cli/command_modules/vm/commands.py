@@ -13,7 +13,7 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set,
                                                           cf_dedicated_hosts, cf_dedicated_host_groups,
                                                           cf_log_analytics_data_plane,
                                                           cf_disk_encryption_set,
-                                                          cf_gallery_sharing_profile, cf_shared_gallery_image,
+                                                          cf_shared_gallery_image,
                                                           cf_shared_gallery_image_version,
                                                           cf_capacity_reservation_groups, cf_capacity_reservations,
                                                           cf_vmss_run_commands, cf_gallery_application,
@@ -527,18 +527,15 @@ def load_command_table(self, _):
         operations_tmpl=(
             'azure.mgmt.compute.operations._gallery_sharing_profile_operations#GallerySharingProfileOperations.{}'
         ),
-        client_factory=cf_gallery_sharing_profile,
         operation_group='shared_galleries'
     )
-    with self.command_group('sig share', vm_gallery_sharing_profile,
-                            client_factory=cf_gallery_sharing_profile,
-                            operation_group='shared_galleries',
-                            min_api='2020-09-30') as g:
-        g.custom_command('add', 'sig_share_update', supports_no_wait=True)
-        g.custom_command('remove', 'sig_share_update', supports_no_wait=True)
-        g.custom_command('reset', 'sig_share_reset', supports_no_wait=True)
-        g.custom_command('enable-community', 'sig_share_update', supports_no_wait=True)
-        g.wait_command('wait', getter_name='get_gallery_instance', getter_type=compute_custom)
+    with self.command_group('sig share', vm_gallery_sharing_profile, operation_group='shared_galleries'):
+        from .operations.sig_share import SigShareAdd, SigShareRemove, SigShareReset, SigShareEnableCommunity, SigShareWait
+        self.command_table['sig share add'] = SigShareAdd(loader=self)
+        self.command_table['sig share remove'] = SigShareRemove(loader=self)
+        self.command_table['sig share reset'] = SigShareReset(loader=self)
+        self.command_table['sig share enable-community'] = SigShareEnableCommunity(loader=self)
+        self.command_table['sig share wait'] = SigShareWait(loader=self)
 
     vm_shared_gallery_image = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations._shared_gallery_images_operations#SharedGalleryImagesOperations.'
