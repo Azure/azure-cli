@@ -62,4 +62,4 @@ class TestBatchExceptionHandler(unittest.TestCase):
         with self.assertRaises(CLIError) as context:
             batch_exception_handler(err)
         
-        self.assertEquals(str(context.exception), "(explosion) Blew up\nkey1: value1\nNone: value2\nkey3: None\nNone: None")
+        self.assertEqual(str(context.exception), "(explosion) Blew up\nkey1: value1\nNone: value2\nkey3: None\nNone: None")
