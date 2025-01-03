@@ -19,7 +19,7 @@ from azure.cli.core.util import CLIError
 from azure.cli.command_modules.backup._client_factory import protection_containers_cf, protectable_containers_cf, \
     protection_policies_cf, backup_protection_containers_cf, backup_protectable_items_cf, \
     resources_cf, backup_protected_items_cf
-from azure.cli.core.azclierror import ArgumentUsageError
+from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueError
 
 from azure.mgmt.recoveryservicesbackup.activestamp import RecoveryServicesBackupClient
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -302,7 +302,10 @@ def list_recovery_points(cmd, client, resource_group_name, vault_name, item, sta
             elif 'HardenedRP' in rp_tier_types:
                 rp_tier = 'VaultStandard'
             else:
-                rp_tier = 'Unknown'
+                raise InvalidArgumentValueError("""
+                    The rp_tier specified is incorrect. Please correct it and retry the
+                    operation. Allowed values are: 'Snapshot', 'VaultStandard', 'SnapshotAndVaultStandard'.
+                    """)
 
             # Compare with the tier parameter and add to filtered list if matched
             if rp_tier == tier:
