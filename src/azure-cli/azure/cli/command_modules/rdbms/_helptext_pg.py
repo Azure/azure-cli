@@ -52,7 +52,7 @@ examples:
         az postgres flexible-server create
   - name: >
       Create a PostgreSQL flexible server with public access and add the range of IP address to have access to this server.
-      The --public-access parameter can be 'All', 'None', <startIpAddress>, or <startIpAddress>-<endIpAddress>
+      The --public-access parameter can be 'Disabled', 'Enabled', 'All', 'None', <startIpAddress>, or <startIpAddress>-<endIpAddress>
     text: >
       az postgres flexible-server create --resource-group testGroup --name testserver --public-access 125.23.54.31-125.23.54.35
   - name: >
