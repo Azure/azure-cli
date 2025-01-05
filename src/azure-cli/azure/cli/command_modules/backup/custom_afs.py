@@ -24,6 +24,9 @@ from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueEr
 from azure.mgmt.recoveryservicesbackup.activestamp import RecoveryServicesBackupClient
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
+from knack.log import get_logger
+logger = get_logger(__name__)
+
 fabric_name = "Azure"
 backup_management_type = "AzureStorage"
 workload_type = "AzureFileShare"
@@ -302,10 +305,11 @@ def list_recovery_points(cmd, client, resource_group_name, vault_name, item, sta
             elif 'HardenedRP' in rp_tier_types:
                 rp_tier = 'VaultStandard'
             else:
-                raise InvalidArgumentValueError("""
-                    The rp_tier specified is incorrect. Please correct it and retry the
-                    operation. Allowed values are: 'Snapshot', 'VaultStandard', 'SnapshotAndVaultStandard'.
-                    """)
+                logger.warning(
+                    "Warning: Unrecognized Recovery Point tier received. If you see this message, please contact Microsoft Support "
+                    "so we can investigate further. The recognized tiers for AzureFileShare are: 'Snapshot', 'VaultStandard', or "
+                    "'SnapshotAndVaultStandard'."
+                )
 
             # Compare with the tier parameter and add to filtered list if matched
             if rp_tier == tier:
