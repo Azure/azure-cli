@@ -978,8 +978,8 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         security_posture_reference_id=None, security_posture_reference_exclude_extensions=None,
                         enable_resilient_vm_creation=None, enable_resilient_vm_deletion=None,
                         additional_scheduled_events=None, enable_user_reboot_scheduled_events=None,
-                        enable_user_redeploy_scheduled_events=None,
-                        skuprofile_vmsizes=None, skuprofile_allostrat=None):
+                        enable_user_redeploy_scheduled_events=None, skuprofile_vmsizes=None, skuprofile_allostrat=None,
+                        security_posture_reference_is_overridable=None):
 
     # Build IP configuration
     ip_configuration = {}
@@ -1525,6 +1525,11 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
     if security_posture_reference_exclude_extensions:
         security_posture_reference = virtual_machine_profile.get('securityPostureReference', {})
         security_posture_reference['excludeExtensions'] = security_posture_reference_exclude_extensions
+        virtual_machine_profile['securityPostureReference'] = security_posture_reference
+
+    if security_posture_reference_is_overridable is not None:
+        security_posture_reference = virtual_machine_profile.get('securityPostureReference', {})
+        security_posture_reference['isOverridable'] = security_posture_reference_is_overridable
         virtual_machine_profile['securityPostureReference'] = security_posture_reference
 
     if virtual_machine_profile:

@@ -767,13 +767,6 @@ def load_arguments(self, _):
         c.argument('enable_vtpm', enable_vtpm_type)
         c.argument('os_disk_delete_option', arg_type=get_enum_type(self.get_models('DiskDeleteOptionTypes')), min_api='2022-03-01', arg_group='Storage', help='Specify whether OS disk should be deleted or detached upon VMSS Flex deletion (This feature is only for VMSS with flexible orchestration mode).')
         c.argument('data_disk_delete_option', arg_type=get_enum_type(self.get_models('DiskDeleteOptionTypes')), min_api='2022-03-01', arg_group='Storage', help='Specify whether data disk should be deleted or detached upon VMSS Flex deletion (This feature is only for VMSS with flexible orchestration mode)')
-        c.argument('security_posture_reference_id', min_api='2023-03-01',
-                   options_list=['--security-posture-reference-id', '--security-posture-id'],
-                   help='The security posture reference id in the form of /CommunityGalleries/{communityGalleryName}/securityPostures/{securityPostureName}/versions/{major.minor.patch}|{major.*}|latest')
-        c.argument('security_posture_reference_exclude_extensions', min_api='2023-03-01', type=validate_file_or_dict,
-                   options_list=['--security-posture-reference-exclude-extensions', '--exclude-extensions'],
-                   help='List of virtual machine extensions to exclude when applying the Security Posture. Either a Json string or a file path is acceptable. '
-                        'Please refer to https://learn.microsoft.com/rest/api/compute/virtualmachinescalesets/get#virtualmachineextension for the data format.')
         c.argument('skuprofile_vmsizes', nargs='+', min_api='2024-07-01', help='A list of VM sizes in the scale set. See https://azure.microsoft.com/pricing/details/virtual-machines/ for size info.')
         c.argument('skuprofile_allostrat', options_list=['--skuprofile-allocation-strategy', '--sku-allocat-strat'], arg_type=get_enum_type(['LowestPrice', 'CapacityOptimized']), min_api='2024-07-01', help='Allocation strategy for vm sizes in SKU profile.')
 
@@ -821,13 +814,6 @@ def load_arguments(self, _):
         c.argument('enable_vtpm', enable_vtpm_type)
         c.argument('custom_data', help='Custom init script file or text (cloud-init, cloud-config, etc..)', completer=FilesCompleter(), type=file_type)
         c.argument('security_type', arg_type=get_enum_type(["TrustedLaunch", "Standard"]), min_api='2020-06-01', help='Specify the security type of the virtual machine scale set.')
-        c.argument('security_posture_reference_id', min_api='2023-03-01',
-                   options_list=['--security-posture-reference-id', '--security-posture-id'],
-                   help='The security posture reference id in the form of /CommunityGalleries/{communityGalleryName}/securityPostures/{securityPostureName}/versions/{major.minor.patch}|{major.*}|latest')
-        c.argument('security_posture_reference_exclude_extensions', min_api='2023-03-01', type=validate_file_or_dict,
-                   options_list=['--security-posture-reference-exclude-extensions', '--exclude-extensions'],
-                   help='List of virtual machine extensions to exclude when applying the Security Posture. Either a Json string or a file path is acceptable. '
-                        'Please refer to https://learn.microsoft.com/rest/api/compute/virtualmachinescalesets/get#virtualmachineextension for the data format.')
         c.argument('ephemeral_os_disk', arg_type=get_three_state_flag(), min_api='2024-03-01', help='Allow you to specify the ephemeral disk settings for the operating system disk. Specify it to false to set ephemeral disk setting as empty and migrate it to non ephemeral')
         c.argument('ephemeral_os_disk_option', options_list=['--ephemeral-os-disk-option', '--ephemeral-option'], arg_type=get_enum_type(self.get_models('DiffDiskOptions')), min_api='2024-03-01', help='Specify the ephemeral disk settings for operating system disk.')
         c.argument('zones', zones_type, min_api='2023-03-01')
@@ -871,6 +857,14 @@ def load_arguments(self, _):
             c.argument('enable_user_redeploy_scheduled_events', options_list=['--enable-user-redeploy-scheduled-events', '--enable-redeploy'], arg_type=get_three_state_flag(), min_api='2024-03-01', help='The configuration parameter used while creating user initiated redeploy scheduled event setting creation.')
             c.argument('enable_auto_os_upgrade', enable_auto_os_upgrade_type)
             c.argument('upgrade_policy_mode', help='Specify the mode of an upgrade to virtual machines in the scale set.', arg_type=get_enum_type(UpgradeMode))
+            c.argument('security_posture_reference_id', min_api='2023-03-01',
+                       options_list=['--security-posture-reference-id', '--security-posture-id'],
+                       help='The security posture reference id in the form of /CommunityGalleries/{communityGalleryName}/securityPostures/{securityPostureName}/versions/{major.minor.patch}|{major.*}|latest')
+            c.argument('security_posture_reference_exclude_extensions', min_api='2023-03-01', nargs='*',
+                       options_list=['--security-posture-reference-exclude-extensions', '--exclude-extensions'],
+                       help='List of virtual machine extensions to exclude when applying the Security Posture. Either a Json string or a file path is acceptable. '
+                            'Please refer to https://docs.microsoft.com/rest/api/compute/virtualmachinescalesets/get#virtualmachineextension for the data format.')
+            c.argument('security_posture_reference_is_overridable', arg_type=get_three_state_flag(), min_api='2024-03-01', options_list=['--security-posture-reference-is-overridable', '--is-overridable'], help='Whether the security posture can be overridden by the user.')
 
     with self.argument_context('vmss update') as c:
         c.argument('instance_id', id_part='child_name_1', help="Update the VM instance with this ID. If missing, update the VMSS.")
