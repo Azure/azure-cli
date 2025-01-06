@@ -307,7 +307,8 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
         enable_vtpm=None, count=None, edge_zone=None, os_disk_delete_option=None, user_data=None,
         capacity_reservation_group=None, enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None,
         os_disk_security_encryption_type=None, os_disk_secure_vm_disk_encryption_set=None, disk_controller_type=None,
-        enable_proxy_agent=None, proxy_agent_mode=None):
+        enable_proxy_agent=None, proxy_agent_mode=None, additional_scheduled_events=None,
+        enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None):
 
     os_caching = disk_info['os'].get('caching')
 
@@ -575,6 +576,30 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
 
     vm_properties = {'hardwareProfile': {'vmSize': size}, 'networkProfile': {'networkInterfaces': nics},
                      'storageProfile': _build_storage_profile()}
+
+    scheduled_events_policy = {}
+    if additional_scheduled_events is not None:
+        scheduled_events_policy.update({
+            "scheduledEventsAdditionalPublishingTargets": {
+                "eventGridAndResourceGraph": {
+                    "enable": additional_scheduled_events
+                }
+            }
+        })
+    if enable_user_redeploy_scheduled_events is not None:
+        scheduled_events_policy.update({
+            "userInitiatedRedeploy": {
+                "automaticallyApprove": enable_user_redeploy_scheduled_events
+            }
+        })
+    if enable_user_reboot_scheduled_events is not None:
+        scheduled_events_policy.update({
+            "userInitiatedReboot": {
+                "automaticallyApprove": enable_user_reboot_scheduled_events
+            }
+        })
+    if scheduled_events_policy:
+        vm_properties['scheduledEventsPolicy'] = scheduled_events_policy
 
     vm_size_properties = {}
     if v_cpus_available is not None:

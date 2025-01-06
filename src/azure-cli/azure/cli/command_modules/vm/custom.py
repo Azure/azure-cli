@@ -822,7 +822,9 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               os_disk_security_encryption_type=None, os_disk_secure_vm_disk_encryption_set=None,
               disk_controller_type=None, disable_integrity_monitoring_autoupgrade=False, enable_proxy_agent=None,
               proxy_agent_mode=None, source_snapshots_or_disks=None, source_snapshots_or_disks_size_gb=None,
-              source_disk_restore_point=None, source_disk_restore_point_size_gb=None, ssh_key_type=None):
+              source_disk_restore_point=None, source_disk_restore_point_size_gb=None, ssh_key_type=None,
+              additional_scheduled_events=None, enable_user_reboot_scheduled_events=None,
+              enable_user_redeploy_scheduled_events=None):
 
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
@@ -1044,7 +1046,9 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         os_disk_security_encryption_type=os_disk_security_encryption_type,
         os_disk_secure_vm_disk_encryption_set=os_disk_secure_vm_disk_encryption_set,
         disk_controller_type=disk_controller_type, enable_proxy_agent=enable_proxy_agent,
-        proxy_agent_mode=proxy_agent_mode)
+        proxy_agent_mode=proxy_agent_mode, additional_scheduled_events=additional_scheduled_events,
+        enable_user_reboot_scheduled_events=enable_user_reboot_scheduled_events,
+        enable_user_redeploy_scheduled_events=enable_user_redeploy_scheduled_events)
 
     vm_resource['dependsOn'] = vm_dependencies
 
@@ -1563,7 +1567,8 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
               enable_vtpm=None, user_data=None, capacity_reservation_group=None,
               dedicated_host=None, dedicated_host_group=None, size=None, ephemeral_os_disk_placement=None,
               enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None, disk_controller_type=None,
-              security_type=None, enable_proxy_agent=None, proxy_agent_mode=None, **kwargs):
+              security_type=None, enable_proxy_agent=None, proxy_agent_mode=None, additional_scheduled_events=None,
+              enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None, **kwargs):
     from azure.mgmt.core.tools import parse_resource_id, resource_id, is_valid_resource_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching
     SecurityProfile, UefiSettings = cmd.get_models('SecurityProfile', 'UefiSettings')
@@ -1725,6 +1730,38 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
                                   "creating VM with the option '--ephemeral-os-disk true'")
     if disk_controller_type is not None:
         vm.storage_profile.disk_controller_type = disk_controller_type
+
+    if additional_scheduled_events is not None or \
+            enable_user_reboot_scheduled_events is not None or enable_user_redeploy_scheduled_events is not None:
+        if vm.scheduled_events_policy is None:
+            ScheduledEventsPolicy = cmd.get_models('ScheduledEventsPolicy')
+            UserInitiatedRedeploy = cmd.get_models('UserInitiatedRedeploy')
+            UserInitiatedReboot = cmd.get_models('UserInitiatedReboot')
+            EventGridAndResourceGraph = cmd.get_models('EventGridAndResourceGraph')
+            ScheduledEventsAdditionalPublishingTargets = cmd.get_models('ScheduledEventsAdditionalPublishingTargets')
+            vm.scheduled_events_policy = ScheduledEventsPolicy()
+            vm.scheduled_events_policy.scheduled_events_additional_publishing_targets = \
+                ScheduledEventsAdditionalPublishingTargets()
+            vm.scheduled_events_policy.scheduled_events_additional_publishing_targets.\
+                event_grid_and_resource_graph = EventGridAndResourceGraph()
+            vm.scheduled_events_policy.user_initiated_reboot = UserInitiatedReboot()
+            vm.scheduled_events_policy.user_initiated_redeploy = UserInitiatedRedeploy()
+            vm.scheduled_events_policy.scheduled_events_additional_publishing_targets.event_grid_and_resource_graph.\
+                enable = additional_scheduled_events if additional_scheduled_events is not None else False
+            vm.scheduled_events_policy.user_initiated_redeploy.automatically_approve = \
+                enable_user_redeploy_scheduled_events if enable_user_redeploy_scheduled_events is not None else False
+            vm.scheduled_events_policy.user_initiated_reboot.automatically_approve = \
+                enable_user_reboot_scheduled_events if enable_user_reboot_scheduled_events is not None else False
+        else:
+            if additional_scheduled_events is not None:
+                vm.scheduled_events_policy.scheduled_events_additional_publishing_targets.\
+                    event_grid_and_resource_graph.enable = additional_scheduled_events
+            if enable_user_redeploy_scheduled_events is not None:
+                vm.scheduled_events_policy.user_initiated_redeploy.automatically_approve = \
+                    enable_user_redeploy_scheduled_events
+            if enable_user_reboot_scheduled_events is not None:
+                vm.scheduled_events_policy.user_initiated_reboot.automatically_approve = \
+                    enable_user_reboot_scheduled_events
 
     client = _compute_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions)
     return sdk_no_wait(no_wait, client.virtual_machines.begin_create_or_update, resource_group_name, vm_name, **kwargs)
