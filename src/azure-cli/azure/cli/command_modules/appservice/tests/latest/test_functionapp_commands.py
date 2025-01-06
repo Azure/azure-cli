@@ -513,6 +513,33 @@ class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
             JMESPathCheck('name', functionapp_name)
         ])
 
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_consumption_plan_creation(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(
+            'functionappconsumption', 40)
+
+        functionapp = self.cmd('functionapp create -g {} -n {} -c {} -s {} --functions-version 4 --runtime node'
+                               .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).get_output_in_json()
+
+        server_farm_id = functionapp['serverFarmId']
+
+        self.cmd('az functionapp plan show --ids {}'.format(server_farm_id), checks=[
+            JMESPathCheck('sku.name', 'Y1')
+        ])
+
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_consumption_plan_creation(self, resource_group):
+        plan_name = self.create_random_name('functionappplan', 40)
+
+        self.cmd('functionapp plan create -g {} -n {} --sku Y1 --is-linux --location southcentralus'.format(resource_group, plan_name))
+
+        self.cmd('functionapp plan show -g {} -n {}'.format(resource_group, plan_name), checks=[
+            JMESPathCheck('sku.name', 'Y1'),
+        ])
+
 
 class FunctionWorkloadProfile(ScenarioTest):
     @AllowLargeResponse(8192)

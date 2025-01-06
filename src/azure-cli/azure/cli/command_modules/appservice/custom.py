@@ -4924,6 +4924,11 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         functionapp_def.kind = 'functionapp'
         # if os_type is None, the os type is windows
         is_linux = bool(os_type and os_type.lower() == LINUX_OS_NAME)
+        plan_name = generatePlanName(resource_group_name)
+        poller = create_functionapp_app_service_plan(cmd, resource_group_name, plan_name, is_linux,
+                                                     'Y1', location=consumption_plan_location)
+        plan_info = LongRunningOperation(cmd.cli_ctx)(poller)
+        functionapp_def.server_farm_id = plan_info.id
 
     elif plan:  # apps with SKU based plan
         if is_valid_resource_id(plan):
