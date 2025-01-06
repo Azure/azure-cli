@@ -5,6 +5,9 @@ trigger:
     exclude:
     - '*'
 
+variables:
+- template: ${{ variables.Pipeline.Workspace }}/.azure-pipelines/templates/variables.yml
+
 schedules:
 - cron: "0 18 * * 5"
   displayName: Weekly Friday test
@@ -25,7 +28,7 @@ jobs:
         Target: {{module}}
     {% endfor %}
   pool:
-    vmImage: 'Ubuntu-20.04'
+    name: ${{ variables.ubuntu_pool }}
   steps:
     - task: UsePythonVersion@0
       inputs:
@@ -59,20 +62,20 @@ jobs:
     - task: PublishTestResults@2
       condition: succeededOrFailed()
       inputs:
-        testResultsFiles: '/home/vsts/.azdev/env_config/home/vsts/work/1/env/test_results.xml'
+        testResultsFiles: '/mnt/vss/.azdev/env_config/mnt/vss/_work/1/env/test_results.xml'
         testRunTitle: 'Azure CLI live test results of $(Target)'
         # mergeTestResults: true
         # testResultsFormat: 'JUnit'
     - task: PublishBuildArtifacts@1
       condition: succeededOrFailed()
       inputs:
-        PathtoPublish: '/home/vsts/work/1/$(Target).report.json'
+        PathtoPublish: '/mnt/vss/_work/1/$(Target).report.json'
         ArtifactName: '$(Target).report.json'
         publishLocation: 'Container'
     - task: PublishBuildArtifacts@1
       condition: succeededOrFailed()
       inputs:
-        PathtoPublish: '/home/vsts/work/1/$(Target).report.html'
+        PathtoPublish: '/mnt/vss/_work/1/$(Target).report.html'
         ArtifactName: '$(Target).report.html'
         publishLocation: 'Container'
 
@@ -81,7 +84,7 @@ jobs:
   dependsOn: LiveTestPython38
   condition: succeededOrFailed()
   pool:
-    vmImage: 'Ubuntu-20.04'
+    name: ${{ variables.ubuntu_pool }}
   steps:
     - task: UsePythonVersion@0
       inputs:
@@ -100,4 +103,4 @@ jobs:
         commit_id=`git ls-remote https://github.com/Azure/azure-cli.git HEAD`
         pip install sendgrid
         # Send notification
-        python /home/vsts/work/1/s/scripts/live_test/sendemail.py "$(SENDGRID_KEY)" "$(Build.BuildId)" "$(USER_REPO)" "$(USER_BRANCH)" "$(USER_TARGET)" "$(USER_LIVE)" "$(System.ArtifactsDirectory)" "$(Build.RequestedForEmail)"
+        python /mnt/vss/_work/1/s/scripts/live_test/sendemail.py "$(SENDGRID_KEY)" "$(Build.BuildId)" "$(USER_REPO)" "$(USER_BRANCH)" "$(USER_TARGET)" "$(USER_LIVE)" "$(System.ArtifactsDirectory)" "$(Build.RequestedForEmail)"

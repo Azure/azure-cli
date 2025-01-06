@@ -8,13 +8,7 @@ export USERNAME=azureuser
 apt update
 apt install -y apt-transport-https git gcc python3-dev
 
-# The distros that need libssl1.1
-case ${DISTRO} in
-    bionic|buster|focal) apt install -y libssl1.1;;
-    *)                        :;;
-esac
-
-dpkg -i /mnt/artifacts/azure-cli_$CLI_VERSION-1~${DISTRO}_all.deb
+dpkg -i /mnt/artifacts/azure-cli_$CLI_VERSION-1~${DISTRO}_*.deb
 
 time az self-test
 time az --version
@@ -26,6 +20,7 @@ ln -sf /opt/az/bin/python3 /usr/bin/python
 
 /opt/az/bin/python3 -m pip install pytest
 /opt/az/bin/python3 -m pip install pytest-xdist
+/opt/az/bin/python3 -m pip install pytest-forked
 
 find /azure-cli/artifacts/build -name "azure_cli_testsdk*" | xargs /opt/az/bin/python3 -m pip install --upgrade --ignore-installed
 find /azure-cli/artifacts/build -name "azure_cli_fulltest*" | xargs /opt/az/bin/python3 -m pip install --upgrade --ignore-installed --no-deps

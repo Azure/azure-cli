@@ -12,7 +12,7 @@ Design spec:
 https://devdivdesignguide.azurewebsites.net/command-line-interface/color-guidelines-for-command-line-interface/
 
 Console Virtual Terminal Sequences:
-https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences#text-formatting
+https://learn.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences#text-formatting
 
 For a complete demo, see `src/azure-cli/azure/cli/command_modules/util/custom.py` and run `az demo style`.
 """
@@ -30,6 +30,7 @@ logger = get_logger(__name__)
 class Style(str, Enum):
     PRIMARY = "primary"
     SECONDARY = "secondary"
+    HIGHLIGHT = "highlight"
     IMPORTANT = "important"
     ACTION = "action"  # name TBD
     HYPERLINK = "hyperlink"
@@ -65,6 +66,7 @@ THEME_NONE = None
 THEME_DARK = {
     Style.PRIMARY: DEFAULT,
     Style.SECONDARY: '\x1b[90m',  # Bright Foreground Black
+    Style.HIGHLIGHT: '\x1b[96m',  # Bright Foreground Cyan
     Style.IMPORTANT: '\x1b[95m',  # Bright Foreground Magenta
     Style.ACTION: '\x1b[94m',  # Bright Foreground Blue
     Style.HYPERLINK: '\x1b[96m',  # Bright Foreground Cyan
@@ -77,6 +79,7 @@ THEME_DARK = {
 THEME_LIGHT = {
     Style.PRIMARY: DEFAULT,
     Style.SECONDARY: '\x1b[90m',  # Bright Foreground Black
+    Style.HIGHLIGHT: '\x1b[36m',  # Foreground Cyan
     Style.IMPORTANT: '\x1b[35m',  # Foreground Magenta
     Style.ACTION: '\x1b[34m',  # Foreground Blue
     Style.HYPERLINK: '\x1b[36m',  # Foreground Cyan
@@ -90,6 +93,7 @@ THEME_LIGHT = {
 THEME_CLOUD_SHELL = {
     Style.PRIMARY: _rgb_hex('#ffffff'),
     Style.SECONDARY: _rgb_hex('#bcbcbc'),
+    Style.HIGHLIGHT: _rgb_hex('#72d7d8'),  # Same as Style.HYPERLINK, for now
     Style.IMPORTANT: _rgb_hex('#f887ff'),
     Style.ACTION: _rgb_hex('#6cb0ff'),
     Style.HYPERLINK: _rgb_hex('#72d7d8'),
@@ -185,8 +189,12 @@ def format_styled_text(styled_text, theme=None):
             try:
                 escape_seq = theme[style]
             except KeyError:
-                from azure.cli.core.azclierror import CLIInternalError
-                raise CLIInternalError("Invalid style. Only use pre-defined style in Style enum.")
+                if style.startswith('\x1b['):
+                    escape_seq = style
+                else:
+                    from azure.cli.core.azclierror import CLIInternalError
+                    raise CLIInternalError("Invalid style. Please use pre-defined style in Style enum "
+                                           "or give a valid ANSI code.")
             # Replace blue in powershell.exe
             if is_legacy_powershell and escape_seq in POWERSHELL_COLOR_REPLACEMENT:
                 escape_seq = POWERSHELL_COLOR_REPLACEMENT[escape_seq]

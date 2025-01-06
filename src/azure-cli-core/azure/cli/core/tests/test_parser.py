@@ -160,7 +160,7 @@ class TestParser(unittest.TestCase):
 
         class TestCommandsLoader(AzCommandsLoader):
             def load_command_table(self, args):
-                super(TestCommandsLoader, self).load_command_table(args)
+                super().load_command_table(args)
                 command = AzCliCommand(loader, 'test module', test_handler)
                 command.add_argument('opt', '--opt', required=True, **enum_choice_list(TestEnum))
                 self.command_table['test module'] = command
@@ -170,7 +170,7 @@ class TestParser(unittest.TestCase):
         class ExtCommandsLoader(AzCommandsLoader):
 
             def load_command_table(self, args):
-                super(ExtCommandsLoader, self).load_command_table(args)
+                super().load_command_table(args)
                 command = AzCliCommand(loader, 'test extension', test_handler)
                 command.add_argument('opt', '--opt', required=True, **enum_choice_list(TestEnum))
                 self.command_table['test extension'] = command
@@ -196,6 +196,8 @@ class TestParser(unittest.TestCase):
     @mock.patch('azure.cli.core.extension.get_extension_modname', _mock_extension_modname)
     @mock.patch('azure.cli.core.extension.get_extensions', _mock_get_extensions)
     def test_parser_error_spellchecker(self):
+        import logging
+        import azure
         cli = DummyCli()
         main_loader = MainCommandsLoader(cli)
         cli.loader = main_loader
@@ -224,8 +226,8 @@ class TestParser(unittest.TestCase):
             pass
 
         # run multiple faulty commands and save error logs, as well as close matches
-        with mock.patch('logging.Logger.error', mock_log_error), \
-                mock.patch('difflib.get_close_matches', mock_get_close_matches):
+        with mock.patch.object(logging.Logger, 'error', mock_log_error), \
+                mock.patch.object(difflib, 'get_close_matches', mock_get_close_matches):
             faulty_cmd_args = [
                 'test module1 --opt enum_1',
                 'test extension1 --opt enum_1',
@@ -256,11 +258,14 @@ class TestParser(unittest.TestCase):
                 self.assertIn(choice, choices)
 
         # test dynamic extension install
-        with mock.patch('logging.Logger.error', mock_log_error), \
-                mock.patch('azure.cli.core.extension.operations.add_extension', mock_add_extension), \
-                mock.patch('azure.cli.core.extension.dynamic_install._get_extension_command_tree', mock_ext_cmd_tree_load), \
-                mock.patch('azure.cli.core.extension.dynamic_install._get_extension_use_dynamic_install_config', return_value='yes_without_prompt'), \
-                mock.patch('azure.cli.core.extension.dynamic_install._get_extension_run_after_dynamic_install_config', return_value=False):
+        with mock.patch.object(logging.Logger, 'error', mock_log_error), \
+                mock.patch.object(azure.cli.core.extension.operations, 'add_extension', mock_add_extension), \
+                mock.patch.object(azure.cli.core.extension.dynamic_install, '_get_extension_command_tree',
+                                  mock_ext_cmd_tree_load), \
+                mock.patch.object(azure.cli.core.extension.dynamic_install, '_get_extension_use_dynamic_install_config',
+                                  return_value='yes_without_prompt'), \
+                mock.patch.object(azure.cli.core.extension.dynamic_install,
+                                  '_get_extension_run_after_dynamic_install_config', return_value=False):
             with self.assertRaises(SystemExit):
                 parser.parse_args('test new-ext create --opt enum_2'.split())
             self.assertIn("Extension new-ext-name installed. Please rerun your command.", logger_msgs[5])
@@ -269,7 +274,7 @@ class TestParser(unittest.TestCase):
             self.assertIn("Extension another-ext-name installed. Please rerun your command.", logger_msgs[6])
 
 
-class VerifyError(object):  # pylint: disable=too-few-public-methods
+class VerifyError:  # pylint: disable=too-few-public-methods
 
     def __init__(self, test, substr=None):
         self.test = test

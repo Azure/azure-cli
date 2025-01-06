@@ -256,10 +256,10 @@ class TagScenarioTest(ScenarioTest):
         self.cmd('tag add-value -n {tag} --value test')
         self.cmd('tag add-value -n {tag} --value test2')
         self.cmd('tag list --query "[?tagName == \'{tag}\']"',
-                 checks=self.check('[].values[].tagValue', [u'test', u'test2']))
+                 checks=self.check('[].values[].tagValue', ['test', 'test2']))
         self.cmd('tag remove-value -n {tag} --value test')
         self.cmd('tag list --query "[?tagName == \'{tag}\']"',
-                 checks=self.check('[].values[].tagValue', [u'test2']))
+                 checks=self.check('[].values[].tagValue', ['test2']))
         self.cmd('tag remove-value -n {tag} --value test2')
         self.cmd('tag list --query "[?tagName == \'{tag}\']"',
                  checks=self.check('[].values[].tagValue', []))
@@ -954,7 +954,7 @@ class InvokeActionTest(ScenarioTest):
             'pass': self.create_random_name('Longpassword#1', 30)
         })
 
-        self.kwargs['vm_id'] = self.cmd('vm create -g {rg} -n {vm} --use-unmanaged-disk --image UbuntuLTS --admin-username {user} --admin-password {pass} --authentication-type password --nsg-rule None').get_output_in_json()['id']
+        self.kwargs['vm_id'] = self.cmd('vm create -g {rg} -n {vm} --use-unmanaged-disk --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username {user} --admin-password {pass} --authentication-type password --nsg-rule None').get_output_in_json()['id']
 
         self.cmd('resource invoke-action --action powerOff --ids {vm_id}')
         self.cmd('resource invoke-action --action generalize --ids {vm_id}')

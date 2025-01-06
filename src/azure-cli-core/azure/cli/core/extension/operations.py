@@ -20,8 +20,7 @@ from packaging.version import parse
 from azure.cli.core import CommandIndex
 from azure.cli.core.util import CLIError, reload_module, rmtree_with_retry
 from azure.cli.core.extension import (extension_exists, build_extension_path, get_extensions, get_extension_modname,
-                                      get_extension, ext_compat_with_cli,
-                                      EXT_METADATA_ISPREVIEW, EXT_METADATA_ISEXPERIMENTAL,
+                                      get_extension, ext_compat_with_cli, is_preview_from_extension_meta,
                                       WheelExtension, DevExtension, ExtensionNotInstalledException, WHEEL_INFO_RE)
 from azure.cli.core.telemetry import set_extension_management_detail
 
@@ -47,7 +46,7 @@ LSB_RELEASE_FILE = os.path.join(os.sep, 'etc', 'lsb-release')
 
 
 def _run_pip(pip_exec_args, extension_path=None):
-    cmd = [sys.executable, '-m', 'pip'] + pip_exec_args + ['-vv', '--disable-pip-version-check', '--no-cache-dir']
+    cmd = [sys.executable, '-m', 'pip'] + pip_exec_args + ['--disable-pip-version-check', '--no-cache-dir']
     logger.debug('Running: %s', cmd)
     try:
         log_output = check_output(cmd, stderr=STDOUT, universal_newlines=True)
@@ -66,7 +65,7 @@ def _whl_download_from_url(url_parse_result, ext_file):
     import requests
     from azure.cli.core.util import should_disable_connection_verify
     url = url_parse_result.geturl()
-    r = requests.get(url, stream=True, verify=(not should_disable_connection_verify()))
+    r = requests.get(url, stream=True, verify=not should_disable_connection_verify())
     if r.status_code != 200:
         raise CLIError("Request to {} failed with {}".format(url, r.status_code))
     with open(ext_file, 'wb') as f:
@@ -111,7 +110,7 @@ def _add_whl_ext(cli_ctx, source, ext_sha256=None, pip_extra_index_urls=None, pi
         raise CLIError('Unable to determine extension name from {}. Is the file name correct?'.format(source))
     if extension_exists(extension_name, ext_type=WheelExtension):
         raise CLIError('The extension {} already exists.'.format(extension_name))
-    if extension_name == 'rdbms-connect':
+    if extension_name == 'rdbms-connect' or extension_name == 'serviceconnector-passwordless':
         _install_deps_for_psycopg2()
     ext_file = None
     if is_url:
@@ -306,39 +305,41 @@ def check_version_compatibility(azext_metadata):
 
 def add_extension(cmd=None, source=None, extension_name=None, index_url=None, yes=None,  # pylint: disable=unused-argument, too-many-statements
                   pip_extra_index_urls=None, pip_proxy=None, system=None,
-                  version=None, cli_ctx=None, upgrade=None):
+                  version=None, cli_ctx=None, upgrade=None, allow_preview=None):
     ext_sha256 = None
+    update_to_latest = version == 'latest' and not source
 
     version = None if version == 'latest' else version
     cmd_cli_ctx = cli_ctx or cmd.cli_ctx
     if extension_name:
         cmd_cli_ctx.get_progress_controller().add(message='Searching')
-        ext = None
-        set_extension_management_detail(extension_name, version)
         try:
-            ext = get_extension(extension_name)
-        except ExtensionNotInstalledException:
-            pass
-        if ext:
-            if isinstance(ext, WheelExtension):
-                if not upgrade:
-                    logger.warning("Extension '%s' is already installed.", extension_name)
-                    return
-                logger.warning("Extension '%s' %s is already installed.", extension_name, ext.get_version())
-                if version and version == ext.get_version():
-                    return
-                logger.warning("It will be overridden with version {}.".format(version) if version else "It will be updated if available.")
-                update_extension(cmd=cmd, extension_name=extension_name, index_url=index_url, pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy, cli_ctx=cli_ctx, version=version)
-                return
-            logger.warning("Overriding development version of '%s' with production version.", extension_name)
-        try:
-            source, ext_sha256 = resolve_from_index(extension_name, index_url=index_url, target_version=version, cli_ctx=cmd_cli_ctx)
+            source, ext_sha256 = resolve_from_index(extension_name, index_url=index_url, target_version=version, cli_ctx=cmd_cli_ctx, allow_preview=allow_preview)
         except NoExtensionCandidatesError as err:
             logger.debug(err)
             err = "{}\n\nUse --debug for more information".format(err.args[0])
             raise CLIError(err)
-    ext_name, ext_version = _get_extension_info_from_source(source)
-    set_extension_management_detail(extension_name if extension_name else ext_name, ext_version)
+    extension_name, ext_version = _get_extension_info_from_source(source)
+    set_extension_management_detail(extension_name, ext_version)
+    ext = None
+    try:
+        ext = get_extension(extension_name)
+    except ExtensionNotInstalledException:
+        pass
+    if ext:
+        if isinstance(ext, WheelExtension):
+            logger.warning("Extension '%s' %s is already installed.", extension_name, ext.get_version())
+            if not upgrade:
+                return
+            if ext_version == ext.get_version():
+                if update_to_latest:
+                    logger.warning("Latest version of '%s' is already installed.", extension_name)
+                return
+
+            logger.warning("It will be overridden with version %s.", ext_version)
+            update_extension(cmd=cmd, extension_name=extension_name, index_url=index_url, pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy, cli_ctx=cli_ctx, version=ext_version, download_url=source, ext_sha256=ext_sha256)
+            return
+        logger.warning("Overriding development version of '%s' with production version.", extension_name)
     extension_name = _add_whl_ext(cli_ctx=cmd_cli_ctx, source=source, ext_sha256=ext_sha256,
                                   pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy, system=system)
     try:
@@ -353,6 +354,14 @@ def add_extension(cmd=None, source=None, extension_name=None, index_url=None, ye
         pass
 
 
+def is_cloud_shell_system_extension(ext_path):
+    from azure.cli.core.util import in_cloud_console
+    if in_cloud_console():
+        if ext_path.startswith('/usr/lib/python3'):
+            return True
+    return False
+
+
 def remove_extension(extension_name):
     try:
         # Get the extension and it will raise an error if it doesn't exist
@@ -361,6 +370,8 @@ def remove_extension(extension_name):
             raise CLIError(
                 "Extension '{name}' was installed in development mode. Remove using "
                 "`azdev extension remove {name}`".format(name=extension_name))
+        if is_cloud_shell_system_extension(ext.path):
+            raise CLIError(f"Cannot remove system extension {extension_name} in Cloud Shell.")
         # We call this just before we remove the extension so we can get the metadata before it is gone
         _augment_telemetry_with_ext_info(extension_name, ext)
         rmtree_with_retry(ext.path)
@@ -387,13 +398,17 @@ def show_extension(extension_name):
         raise CLIError(e)
 
 
-def update_extension(cmd=None, extension_name=None, index_url=None, pip_extra_index_urls=None, pip_proxy=None, cli_ctx=None, version=None):
+def update_extension(cmd=None, extension_name=None, index_url=None, pip_extra_index_urls=None, pip_proxy=None, allow_preview=None, cli_ctx=None, version=None, download_url=None, ext_sha256=None):
     try:
         cmd_cli_ctx = cli_ctx or cmd.cli_ctx
         ext = get_extension(extension_name, ext_type=WheelExtension)
+        if is_cloud_shell_system_extension(ext.path):
+            raise CLIError(
+                f"Cannot update system extension {extension_name}, please wait until Cloud Shell updates it in the next release.")
         cur_version = ext.get_version()
         try:
-            download_url, ext_sha256 = resolve_from_index(extension_name, cur_version=cur_version, index_url=index_url, target_version=version, cli_ctx=cmd_cli_ctx)
+            if not download_url:
+                download_url, ext_sha256 = resolve_from_index(extension_name, cur_version=cur_version, index_url=index_url, target_version=version, cli_ctx=cmd_cli_ctx, allow_preview=allow_preview)
             _, ext_version = _get_extension_info_from_source(download_url)
             set_extension_management_detail(extension_name, ext_version)
         except NoExtensionCandidatesError as err:
@@ -449,8 +464,8 @@ def list_available_extensions(index_url=None, show_details=False, cli_ctx=None):
             'name': name,
             'version': latest['metadata']['version'],
             'summary': latest['metadata']['summary'],
-            'preview': latest['metadata'].get(EXT_METADATA_ISPREVIEW, False),
-            'experimental': latest['metadata'].get(EXT_METADATA_ISEXPERIMENTAL, False),
+            'preview': is_preview_from_extension_meta(latest['metadata']),
+            'experimental': False,
             'installed': installed
         })
     return results
@@ -486,8 +501,8 @@ def list_versions(extension_name, index_url=None, cli_ctx=None):
         results.append({
             'name': extension_name,
             'version': version,
-            'preview': ext['metadata'].get(EXT_METADATA_ISPREVIEW, False),
-            'experimental': ext['metadata'].get(EXT_METADATA_ISEXPERIMENTAL, False),
+            'preview': is_preview_from_extension_meta(ext['metadata']),
+            'experimental': False,
             'installed': installed,
             'compatible': compatible
         })

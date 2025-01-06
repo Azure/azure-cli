@@ -8,10 +8,10 @@
 import re
 from knack.log import get_logger
 from knack.util import CLIError
-from msrestazure.tools import parse_resource_id
 from dateutil.parser import parse   # pylint: disable=import-error,relative-import
 
 from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
+from azure.mgmt.core.tools import parse_resource_id
 from azure.mgmt.eventgrid.models import (
     EventSubscription,
     EventSubscriptionUpdateParameters,
@@ -2130,6 +2130,7 @@ def update_event_subscription(
         storage_queue_msg_ttl=None,
         enable_advanced_filtering_on_arrays=None,
         delivery_attribute_mapping=None):
+
     return _update_event_subscription_internal(
         instance=instance,
         endpoint=endpoint,
@@ -2177,7 +2178,7 @@ def _update_event_subscription_internal(  # pylint: disable=too-many-locals,too-
 
     _validate_deadletter_identity_args(
         deadletter_identity,
-        deadletter_endpoint)
+        deadletter_identity_endpoint)
 
     if (endpoint_type is not None and
             endpoint_type.lower() != WEBHOOK_DESTINATION.lower() and

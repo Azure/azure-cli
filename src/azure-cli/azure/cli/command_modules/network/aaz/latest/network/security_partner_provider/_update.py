@@ -70,13 +70,10 @@ class Update(AAZCommand):
             nullable=True,
             enum={"Checkpoint": "Checkpoint", "IBoss": "IBoss", "ZScaler": "ZScaler"},
         )
-        _args_schema.vhub = AAZResourceIdArg(
+        _args_schema.vhub = AAZStrArg(
             options=["--vhub"],
             help="Name or ID of the virtual hub to which the Security Partner Provider belongs.",
             nullable=True,
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualHubs/{}",
-            ),
         )
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
@@ -93,10 +90,30 @@ class Update(AAZCommand):
         return cls._args_schema
 
     def _execute_operations(self):
+        self.pre_operations()
         self.SecurityPartnerProvidersGet(ctx=self.ctx)()
+        self.pre_instance_update(self.ctx.vars.instance)
         self.InstanceUpdateByJson(ctx=self.ctx)()
         self.InstanceUpdateByGeneric(ctx=self.ctx)()
+        self.post_instance_update(self.ctx.vars.instance)
         yield self.SecurityPartnerProvidersCreateOrUpdate(ctx=self.ctx)()
+        self.post_operations()
+
+    @register_callback
+    def pre_operations(self):
+        pass
+
+    @register_callback
+    def post_operations(self):
+        pass
+
+    @register_callback
+    def pre_instance_update(self, instance):
+        pass
+
+    @register_callback
+    def post_instance_update(self, instance):
+        pass
 
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
@@ -181,7 +198,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _build_schema_security_partner_provider_read(cls._schema_on_200)
+            _UpdateHelper._build_schema_security_partner_provider_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
@@ -292,7 +309,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200_201
 
             cls._schema_on_200_201 = AAZObjectType()
-            _build_schema_security_partner_provider_read(cls._schema_on_200_201)
+            _UpdateHelper._build_schema_security_partner_provider_read(cls._schema_on_200_201)
 
             return cls._schema_on_200_201
 
@@ -335,69 +352,71 @@ class Update(AAZCommand):
             )
 
 
-_schema_security_partner_provider_read = None
+class _UpdateHelper:
+    """Helper class for Update"""
 
+    _schema_security_partner_provider_read = None
 
-def _build_schema_security_partner_provider_read(_schema):
-    global _schema_security_partner_provider_read
-    if _schema_security_partner_provider_read is not None:
-        _schema.etag = _schema_security_partner_provider_read.etag
-        _schema.id = _schema_security_partner_provider_read.id
-        _schema.location = _schema_security_partner_provider_read.location
-        _schema.name = _schema_security_partner_provider_read.name
-        _schema.properties = _schema_security_partner_provider_read.properties
-        _schema.tags = _schema_security_partner_provider_read.tags
-        _schema.type = _schema_security_partner_provider_read.type
-        return
+    @classmethod
+    def _build_schema_security_partner_provider_read(cls, _schema):
+        if cls._schema_security_partner_provider_read is not None:
+            _schema.etag = cls._schema_security_partner_provider_read.etag
+            _schema.id = cls._schema_security_partner_provider_read.id
+            _schema.location = cls._schema_security_partner_provider_read.location
+            _schema.name = cls._schema_security_partner_provider_read.name
+            _schema.properties = cls._schema_security_partner_provider_read.properties
+            _schema.tags = cls._schema_security_partner_provider_read.tags
+            _schema.type = cls._schema_security_partner_provider_read.type
+            return
 
-    _schema_security_partner_provider_read = AAZObjectType()
+        cls._schema_security_partner_provider_read = _schema_security_partner_provider_read = AAZObjectType()
 
-    security_partner_provider_read = _schema_security_partner_provider_read
-    security_partner_provider_read.etag = AAZStrType(
-        flags={"read_only": True},
-    )
-    security_partner_provider_read.id = AAZStrType()
-    security_partner_provider_read.location = AAZStrType()
-    security_partner_provider_read.name = AAZStrType(
-        flags={"read_only": True},
-    )
-    security_partner_provider_read.properties = AAZObjectType(
-        flags={"client_flatten": True},
-    )
-    security_partner_provider_read.tags = AAZDictType()
-    security_partner_provider_read.type = AAZStrType(
-        flags={"read_only": True},
-    )
+        security_partner_provider_read = _schema_security_partner_provider_read
+        security_partner_provider_read.etag = AAZStrType(
+            flags={"read_only": True},
+        )
+        security_partner_provider_read.id = AAZStrType()
+        security_partner_provider_read.location = AAZStrType()
+        security_partner_provider_read.name = AAZStrType(
+            flags={"read_only": True},
+        )
+        security_partner_provider_read.properties = AAZObjectType(
+            flags={"client_flatten": True},
+        )
+        security_partner_provider_read.tags = AAZDictType()
+        security_partner_provider_read.type = AAZStrType(
+            flags={"read_only": True},
+        )
 
-    properties = _schema_security_partner_provider_read.properties
-    properties.connection_status = AAZStrType(
-        serialized_name="connectionStatus",
-        flags={"read_only": True},
-    )
-    properties.provisioning_state = AAZStrType(
-        serialized_name="provisioningState",
-        flags={"read_only": True},
-    )
-    properties.security_provider_name = AAZStrType(
-        serialized_name="securityProviderName",
-    )
-    properties.virtual_hub = AAZObjectType(
-        serialized_name="virtualHub",
-    )
+        properties = _schema_security_partner_provider_read.properties
+        properties.connection_status = AAZStrType(
+            serialized_name="connectionStatus",
+            flags={"read_only": True},
+        )
+        properties.provisioning_state = AAZStrType(
+            serialized_name="provisioningState",
+            flags={"read_only": True},
+        )
+        properties.security_provider_name = AAZStrType(
+            serialized_name="securityProviderName",
+        )
+        properties.virtual_hub = AAZObjectType(
+            serialized_name="virtualHub",
+        )
 
-    virtual_hub = _schema_security_partner_provider_read.properties.virtual_hub
-    virtual_hub.id = AAZStrType()
+        virtual_hub = _schema_security_partner_provider_read.properties.virtual_hub
+        virtual_hub.id = AAZStrType()
 
-    tags = _schema_security_partner_provider_read.tags
-    tags.Element = AAZStrType()
+        tags = _schema_security_partner_provider_read.tags
+        tags.Element = AAZStrType()
 
-    _schema.etag = _schema_security_partner_provider_read.etag
-    _schema.id = _schema_security_partner_provider_read.id
-    _schema.location = _schema_security_partner_provider_read.location
-    _schema.name = _schema_security_partner_provider_read.name
-    _schema.properties = _schema_security_partner_provider_read.properties
-    _schema.tags = _schema_security_partner_provider_read.tags
-    _schema.type = _schema_security_partner_provider_read.type
+        _schema.etag = cls._schema_security_partner_provider_read.etag
+        _schema.id = cls._schema_security_partner_provider_read.id
+        _schema.location = cls._schema_security_partner_provider_read.location
+        _schema.name = cls._schema_security_partner_provider_read.name
+        _schema.properties = cls._schema_security_partner_provider_read.properties
+        _schema.tags = cls._schema_security_partner_provider_read.tags
+        _schema.type = cls._schema_security_partner_provider_read.type
 
 
 __all__ = ["Update"]

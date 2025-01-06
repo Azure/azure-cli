@@ -5,15 +5,14 @@
 
 import json
 
-from azure.cli.command_modules.network._client_factory import network_client_factory
 from azure.cli.core.azclierror import (ResourceNotFoundError, ArgumentUsageError, InvalidArgumentValueError,
                                        MutuallyExclusiveArgumentError)
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_subscription_id
-from azure.mgmt.network.models import ServiceEndpointPropertiesFormat
+from azure.mgmt.core.tools import is_valid_resource_id, resource_id, parse_resource_id
 from azure.mgmt.web.models import IpSecurityRestriction
+from importlib import import_module
 from knack.log import get_logger
-from msrestazure.tools import is_valid_resource_id, resource_id, parse_resource_id
 
 from ._appservice_utils import _generic_site_operation
 from .custom import get_site_configs
@@ -29,6 +28,8 @@ def show_webapp_access_restrictions(cmd, resource_group_name, name, slot=None):
     scm_access_restrictions = json.dumps(configs.scm_ip_security_restrictions, default=lambda x: x.__dict__)
     access_rules = {
         "scmIpSecurityRestrictionsUseMain": configs.scm_ip_security_restrictions_use_main,
+        "ipSecurityRestrictionsDefaultAction": configs.ip_security_restrictions_default_action,
+        "scmIpSecurityRestrictionsDefaultAction": configs.scm_ip_security_restrictions_default_action,
         "ipSecurityRestrictions": json.loads(access_restrictions),
         "scmIpSecurityRestrictions": json.loads(scm_access_restrictions)
     }
@@ -40,12 +41,14 @@ def add_webapp_access_restriction(
         action='Allow', ip_address=None, subnet=None,
         vnet_name=None, description=None, scm_site=False,
         ignore_missing_vnet_service_endpoint=False, slot=None, vnet_resource_group=None,
-        service_tag=None, http_headers=None):
+        service_tag=None, http_headers=None, skip_service_tag_validation=None):
     configs = get_site_configs(cmd, resource_group_name, name, slot)
     if (int(service_tag is not None) + int(ip_address is not None) +
             int(subnet is not None) != 1):
         err_msg = 'Please specify either: --subnet or --ip-address or --service-tag'
         raise MutuallyExclusiveArgumentError(err_msg)
+    if skip_service_tag_validation is not None:
+        logger.warning('Skipping service tag validation.')
 
     # get rules list
     access_rules = configs.scm_ip_security_restrictions if scm_site else configs.ip_security_restrictions
@@ -88,13 +91,16 @@ def add_webapp_access_restriction(
 
 def remove_webapp_access_restriction(cmd, resource_group_name, name, rule_name=None, action='Allow',
                                      ip_address=None, subnet=None, vnet_name=None, scm_site=False, slot=None,
-                                     service_tag=None):
+                                     service_tag=None, skip_service_tag_validation=None):
     configs = get_site_configs(cmd, resource_group_name, name, slot)
     input_rule_types = (int(service_tag is not None) + int(ip_address is not None) +
                         int(subnet is not None))
     if input_rule_types > 1:
         err_msg = 'Please specify either: --subnet or --ip-address or --service-tag'
         raise MutuallyExclusiveArgumentError(err_msg)
+    if skip_service_tag_validation is not None:
+        logger.warning('Skipping service tag validation.')
+
     rule_instance = None
     # get rules list
     access_rules = configs.scm_ip_security_restrictions if scm_site else configs.ip_security_restrictions
@@ -137,17 +143,29 @@ def remove_webapp_access_restriction(cmd, resource_group_name, name, rule_name=N
     return result.scm_ip_security_restrictions if scm_site else result.ip_security_restrictions
 
 
-def set_webapp_access_restriction(cmd, resource_group_name, name, use_same_restrictions_for_scm_site, slot=None):
+def set_webapp_access_restriction(cmd, resource_group_name, name, use_same_restrictions_for_scm_site=None,
+                                  default_action=None, scm_default_action=None, slot=None):
     configs = get_site_configs(cmd, resource_group_name, name, slot)
-    setattr(configs, 'scm_ip_security_restrictions_use_main', bool(use_same_restrictions_for_scm_site))
 
-    use_main = _generic_site_operation(
+    if use_same_restrictions_for_scm_site is not None:
+        setattr(configs, 'scm_ip_security_restrictions_use_main', bool(use_same_restrictions_for_scm_site))
+    if default_action is not None:
+        setattr(configs, 'ip_security_restrictions_default_action', default_action)
+    if scm_default_action is not None:
+        setattr(configs, 'scm_ip_security_restrictions_default_action', scm_default_action)
+
+    app_config = _generic_site_operation(
         cmd.cli_ctx, resource_group_name, name, 'update_configuration',
-        slot, configs).scm_ip_security_restrictions_use_main
-    use_main_json = {
-        "scmIpSecurityRestrictionsUseMain": use_main
+        slot, configs)
+    app_use_main = app_config.scm_ip_security_restrictions_use_main
+    app_default_action = app_config.ip_security_restrictions_default_action
+    app_scm_default_action = app_config.scm_ip_security_restrictions_default_action
+    config_json = {
+        "scmIpSecurityRestrictionsUseMain": app_use_main,
+        "ipSecurityRestrictionsDefaultAction": app_default_action,
+        "scmIpSecurityRestrictionsDefaultAction": app_scm_default_action
     }
-    return use_main_json
+    return config_json
 
 
 def _validate_subnet(cli_ctx, subnet, vnet_name, resource_group_name):
@@ -168,7 +186,6 @@ def _validate_subnet(cli_ctx, subnet, vnet_name, resource_group_name):
 
 
 def _ensure_subnet_service_endpoint(cli_ctx, subnet_id):
-    from azure.cli.core.profiles import AD_HOC_API_VERSIONS, ResourceType
     subnet_id_parts = parse_resource_id(subnet_id)
     subnet_subscription_id = subnet_id_parts['subscription']
     subnet_resource_group = subnet_id_parts['resource_group']
@@ -179,24 +196,32 @@ def _ensure_subnet_service_endpoint(cli_ctx, subnet_id):
         raise ArgumentUsageError('Cannot validate subnet in different subscription for missing service endpoint.'
                                  ' Use --ignore-missing-endpoint or -i to'
                                  ' skip validation and manually verify service endpoint.')
-
-    vnet_client = network_client_factory(cli_ctx, api_version=AD_HOC_API_VERSIONS[ResourceType.MGMT_NETWORK]
-                                         ['appservice_ensure_subnet'])
-    subnet_obj = vnet_client.subnets.get(subnet_resource_group, subnet_vnet_name, subnet_name)
-    subnet_obj.service_endpoints = subnet_obj.service_endpoints or []
+    # ad-hoc api version 2019-02-01
+    Subnet = import_module("azure.cli.command_modules.appservice.aaz.profile_2019_03_01_hybrid.network.vnet.subnet")
+    subnet_obj = Subnet.Show(cli_ctx=cli_ctx)(command_args={
+        "name": subnet_name,
+        "vnet_name": subnet_vnet_name,
+        "resource_group": subnet_resource_group
+    })
+    service_endpoints = subnet_obj.get("serviceEndpoints", [])
     service_endpoint_exists = False
-    for s in subnet_obj.service_endpoints:
-        if s.service == "Microsoft.Web":
+    for s in service_endpoints:
+        if s["service"] == "Microsoft.Web":
             service_endpoint_exists = True
             break
 
     if not service_endpoint_exists:
-        web_service_endpoint = ServiceEndpointPropertiesFormat(service="Microsoft.Web")
-        subnet_obj.service_endpoints.append(web_service_endpoint)
-        poller = vnet_client.subnets.begin_create_or_update(
-            subnet_resource_group, subnet_vnet_name,
-            subnet_name, subnet_parameters=subnet_obj)
-        # Ensure subnet is updated to avoid update conflict
+        class SubnetUpdate(Subnet.Update):  # pylint: disable=too-few-public-methods
+            @staticmethod
+            def pre_instance_update(instance):
+                instance.properties.service_endpoints.append({"service": "Microsoft.Web"})
+
+        poller = SubnetUpdate(cli_ctx=cli_ctx)(command_args={
+            "name": subnet_name,
+            "vnet_name": subnet_vnet_name,
+            "resource_group": subnet_resource_group
+        })
+        # ensure subnet is updated to avoid update conflict
         LongRunningOperation(cli_ctx)(poller)
 
 

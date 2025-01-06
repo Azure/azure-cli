@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-# pylint: disable=too-many-statements, line-too-long, too-many-branches
+# pylint: disable=too-many-statements, line-too-long, too-many-branches, option-length-too-long
 from knack.arguments import CLIArgumentType
 from argcomplete import FilesCompleter
 from azure.mgmt.synapse.models import TransparentDataEncryptionStatus, SecurityAlertPolicyState, BlobAuditingPolicyState
@@ -91,10 +91,10 @@ def load_arguments(self, _):
             c.argument('sql_admin_login_password', options_list=['--sql-admin-login-password', '-p'],
                        help='The sql administrator login password.')
             c.argument('tags', arg_type=tags_type)
-            c.argument('allowed_aad_tenant_ids', options_list=['--allowed-tenant-ids'], nargs='+', help="The approved Azure AD tenants which outbound data traffic allowed to. The Azure AD tenant of the current user will be included by default. Use ""(\'""\' in PowerShell) to disable all allowed tenant ids.")
+            c.argument('allowed_aad_tenant_ids', options_list=['--allowed-tenant-ids'], nargs='+', help="The approved Azure AD tenants which outbound data traffic allowed to. The Azure AD tenant of the current user will be included by default. Use \"\" or '' ('\"\"' in PowerShell) to disable all allowed tenant ids.")
             c.argument('key_name', help='The workspace customer-managed key display name. All existing keys can be found using "az synapse workspace key list" cmdlet.')
             c.argument('repository_type', arg_group=repository_arg_group, arg_type=get_enum_type(['AzureDevOpsGit', 'GitHub']), validator=validate_repository_type, help='The repository configuration type.')
-            c.argument('host_name', arg_group=repository_arg_group, help='If using github Enterprise Server, provide sever URL like https://github.mydomain.com.Do not use this option with GitHub Enterprise Cloud.')
+            c.argument('host_name', arg_group=repository_arg_group, help='If using github Enterprise Server, provide sever URL. Do not use this option with GitHub Enterprise Cloud.')
             c.argument('account_name', arg_group=repository_arg_group, help='GitHub account name used for the repository or Azure devops organization name')
             c.argument('collaboration_branch', arg_group=repository_arg_group, help='The branch name where you will collaborate with others and from which you will publish.')
             c.argument('repository_name', arg_group=repository_arg_group, help='The name of the repository to which you are connecting.')
@@ -102,6 +102,9 @@ def load_arguments(self, _):
             c.argument('project_name', arg_group=repository_arg_group, help='The project name to which you are connecting.')
             c.argument('tenant_id', arg_group=repository_arg_group, help='The tenant id used to connect Azure devops')
             c.argument('last_commit_id', arg_group=repository_arg_group, help='The last commit ID.')
+            c.argument('user_assigned_identity_id', options_list=['--uami-id'], nargs='+', help='The list of User-assigned Managed Identity Id for workspace.')
+            c.argument('user_assigned_identity_in_encryption', options_list=['--uami-id-in-encrypt'], help='User assigned identity resource Id used in Workspace Encryption')
+            c.argument('use_system_assigned_identity_in_encryption', options_list=['--use-sami-in-encrypt'], help='Whether use System assigned identity in Workspace Encryption. If use uami, please set True.If not, set False')
 
     with self.argument_context('synapse workspace create') as c:
         c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
@@ -117,6 +120,11 @@ def load_arguments(self, _):
         c.argument('prevent_data_exfiltration', arg_type=get_three_state_flag(),
                    help='The flag indicates whether enable data exfiltration.', options_list=['--prevent-exfiltration', '--prevent-data-exfiltration'])
         c.argument('key_identifier', help='The customer-managed key used to encrypt all data at rest in the workspace. Key identifier should be in the format of: https://{keyvaultname}.vault.azure.net/keys/{keyname}.', options_list=['--key-identifier', '--cmk'])
+        c.argument('managed_resource_group_name', options_list=['--managed-rg-name'],
+                   help=' Workspace managed resource group. The resource group name uniquely identifies the resource group within the user subscriptionId.')
+
+    with self.argument_context('synapse workspace update') as c:
+        c.argument('user_assigned_identity_action', options_list=['--uami-action'], arg_type=get_enum_type(['Add', 'Remove', 'Set']), help='Action must be specified when you add/remove/set user assigned managed identities for workspace.The supported actions are:Add,Remove,Set.Add means to add user assigned managed identities for workspace, Remove means to remove user assigned managed identities from workspace, Set can be used when you want to add and remove user assigned managed identities at the same time, current identities will be coverd by specified ones.')
 
     with self.argument_context('synapse workspace check-name') as c:
         c.argument('name', arg_type=name_type, help='The name you wanted to check.')
@@ -140,9 +148,10 @@ def load_arguments(self, _):
     with self.argument_context('synapse spark pool create') as c:
         # Node
         c.argument('node_count', type=int, arg_group='Node', help='The number of node.')
-        c.argument('node_size_family', arg_group='Node', help='The node size family.')
-        c.argument('node_size', arg_group='Node', arg_type=get_enum_type(['Small', 'Medium', 'Large']),
-                   help='The node size.')
+        c.argument('node_size_family', arg_group='Node', arg_type=get_enum_type(['None', 'MemoryOptimized', 'HardwareAcceleratedFPGA', 'HardwareAcceleratedGPU']),
+                   help='The kind of nodes that the Big Data pool provides')
+        c.argument('node_size', arg_group='Node', arg_type=get_enum_type(['None', 'Small', 'Medium', 'Large', 'XLarge', 'XXLarge', 'XXXLarge']),
+                   help='The level of compute power that each node in the Big Data pool has..')
 
         # AutoScale
         c.argument('enable_auto_scale', arg_type=get_three_state_flag(), arg_group='AutoScale',
@@ -169,16 +178,23 @@ def load_arguments(self, _):
         # Spark config file
         c.argument('spark_config_file_path', arg_group='Environment Configuration', help='Absolute path of Spark pool properties configuration file.')
 
+        # Dynamic executor allocation
+        c.argument('enable_dynamic_executor_allocation', arg_type=get_three_state_flag(), arg_group='DynamicExecutor',
+                   options_list=['--enable-dynamic-exec'], help='Indicates whether Dynamic Executor Allocation is enabled or not.')
+        c.argument('max_executors', type=int, arg_group='DynamicExecutor', help='The maximum number of executors alloted.')
+        c.argument('min_executors', type=int, arg_group='DynamicExecutor', help='The minimum number of executors alloted.')
+
         c.argument('tags', arg_type=tags_type)
 
     with self.argument_context('synapse spark pool update') as c:
         c.argument('tags', arg_type=tags_type)
         # Node
         c.argument('node_count', type=int, arg_group='Node', help='The number of node.')
-        c.argument('node_size_family', arg_group='Node', help='The node size family.')
+        c.argument('node_size_family', arg_group='Node', arg_type=get_enum_type(['None', 'MemoryOptimized', 'HardwareAcceleratedFPGA', 'HardwareAcceleratedGPU']),
+                   help='The kind of nodes that the Big Data pool provides')
 
-        c.argument('node_size', arg_group='Node', arg_type=get_enum_type(['Small', 'Medium', 'Large']),
-                   help='The node size.')
+        c.argument('node_size', arg_group='Node', arg_type=get_enum_type(['None', 'Small', 'Medium', 'Large', 'XLarge', 'XXLarge', 'XXXLarge']),
+                   help='The level of compute power that each node in the Big Data pool has..')
         # AutoScale
         c.argument('enable_auto_scale', arg_type=get_three_state_flag(), arg_group='AutoScale',
                    help='The flag of enabling auto scale.')
@@ -202,6 +218,12 @@ def load_arguments(self, _):
 
         # Spark config file
         c.argument('spark_config_file_path', arg_group='Environment Configuration', help='Absolute path of Spark pool properties configuration file.')
+
+        # Dynamic executor allocation
+        c.argument('enable_dynamic_executor_allocation', arg_type=get_three_state_flag(), arg_group='DynamicExecutor',
+                   options_list=['--enable-dynamic-exec'], help='Indicates whether Dynamic Executor Allocation is enabled or not.')
+        c.argument('max_executors', type=int, arg_group='DynamicExecutor', help='The maximum number of executors alloted.')
+        c.argument('min_executors', type=int, arg_group='DynamicExecutor', help='The minimum number of executors alloted.')
 
     # synapse sql pool
     with self.argument_context('synapse sql pool') as c:
@@ -550,6 +572,8 @@ def load_arguments(self, _):
                    help='Optional arguments to the job (Note: please use storage URIs for file arguments).')
         c.argument('archives', nargs='+', help='The array of archives.')
         c.argument('job_name', arg_type=name_type, help='The Spark job name.')
+        c.argument('python_files', nargs='+',
+                   help='The array of files used for refenence in the main python definition file.  Examples include custom whl files and custom python files.  May pass multiple files such as `az synapse spark job sumbit <other_args> --python_files abfss://file1 abss://file2`')
         c.argument('reference_files', nargs='+',
                    help='Additional files used for reference in the main definition file.')
         c.argument('configuration', type=shell_safe_json_parse, help='The configuration of Spark job.')

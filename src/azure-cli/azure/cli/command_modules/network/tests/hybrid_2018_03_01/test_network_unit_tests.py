@@ -12,7 +12,7 @@ from knack.util import CLIError
 
 class TestNetworkUnitTests(unittest.TestCase):
     def test_network_get_nic_ip_config(self):
-        from azure.cli.command_modules.network.custom import _get_nic_ip_config
+        from azure.cli.command_modules.network.azure_stack.custom import _get_nic_ip_config
 
         # 1 -  Test that if ip_configurations property is null, error is thrown
         nic = mock.MagicMock()

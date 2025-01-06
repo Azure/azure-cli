@@ -5,6 +5,9 @@
 # pylint: disable=line-too-long, too-few-public-methods
 
 import abc
+import base64
+import json
+import os.path
 import re
 import math
 
@@ -12,7 +15,7 @@ from knack.log import get_logger
 
 from ._command_ctx import AAZCommandCtx
 from ._field_type import AAZSimpleType
-from ._field_value import AAZUndefined, AAZSimpleValue, AAZDict, AAZList, AAZObject
+from ._field_value import AAZUndefined, AAZSimpleValue, AAZDict, AAZFreeFormDict, AAZList, AAZObject
 from .exceptions import AAZInvalidArgValueError
 
 logger = get_logger(__name__)
@@ -463,6 +466,34 @@ class AAZDictArgFormat(AAZBaseArgFormat):
         return value
 
 
+class AAZFreeFormDictArgFormat(AAZBaseArgFormat):
+
+    def __init__(self, max_properties=None, min_properties=None):
+        self._max_properties = max_properties
+        self._min_properties = min_properties
+
+    def __call__(self, ctx, value):
+        assert isinstance(value, AAZFreeFormDict)
+        data = value._data
+        if data == AAZUndefined or data is None:
+            return value
+
+        assert isinstance(data, dict)
+
+        if value._is_patch:
+            return value
+
+        if self._min_properties and len(value) < self._min_properties:
+            raise AAZInvalidArgValueError(
+                f"Invalid format: dict length is less than {self._min_properties}")
+
+        if self._max_properties and len(value) > self._max_properties:
+            raise AAZInvalidArgValueError(
+                f"Invalid format: dict length is greater than {self._max_properties}")
+
+        return value
+
+
 class AAZListArgFormat(AAZBaseArgFormat):
 
     def __init__(self, unique=None, max_length=None, min_length=None):
@@ -689,4 +720,88 @@ class AAZSubscriptionIdArgFormat(AAZBaseArgFormat):
             value._data = sub_id
         else:
             logger.warning("Subscription '%s' not recognized.", value._data)
+        return value
+
+
+class AAZFileArgFormat(AAZBaseArgFormat):
+
+    def __call__(self, ctx, value):
+        assert isinstance(value, AAZSimpleValue)
+        data = value._data
+        if data == AAZUndefined or data is None or value._is_patch:
+            return value
+
+        assert isinstance(data, str)
+
+        if not os.path.isfile(data):
+            raise AAZInvalidArgValueError("File '{}' doesn't exist".format(data))
+
+        data = self.read_file(data)
+        value._data = data
+        return value
+
+    @abc.abstractmethod
+    def read_file(self, file_path):
+        raise NotImplementedError()
+
+
+class AAZFileArgTextFormat(AAZFileArgFormat):
+
+    def __init__(self, encoding=None):
+        self._encoding = encoding  # use platform default encoding when it's None
+
+    def read_file(self, file_path):
+        with open(file_path, 'r', encoding=self._encoding) as f:
+            data = f.read()
+        return data
+
+
+class AAZFileArgBase64EncodeFormat(AAZFileArgFormat):
+
+    def read_file(self, file_path):
+        with open(file_path, 'rb') as f:
+            contents = f.read()
+            base64_data = base64.b64encode(contents)
+            try:
+                data = base64_data.decode('utf-8')
+            except UnicodeDecodeError:
+                data = str(base64_data)
+        return data
+
+
+class AAZPaginationTokenArgFormat(AAZBaseArgFormat):
+    def __call__(self, ctx, value):
+        def validate_json(s):
+            try:
+                obj = json.loads(s)
+            except json.JSONDecodeError:
+                raise AAZInvalidArgValueError("Invalid JSON object.")
+
+            if not isinstance(obj, dict):
+                raise AAZInvalidArgValueError("Decoded object is not a dictionary.")
+
+            try:
+                _, _ = obj["next_link"], obj["offset"]
+            except KeyError:
+                raise AAZInvalidArgValueError("`next_link` or `offset` doesn't exist.")
+
+        assert isinstance(value, AAZSimpleValue)
+        data = value._data
+        if data == AAZUndefined or data is None or value._is_patch:
+            return value
+
+        assert isinstance(data, str)
+        try:
+            decoded_bytes = base64.b64decode(data)
+        except base64.binascii.Error:
+            raise AAZInvalidArgValueError("Invalid Base64 string.")
+
+        try:
+            decoded_string = decoded_bytes.decode("utf-8")
+        except UnicodeDecodeError:
+            raise AAZInvalidArgValueError("Error decoding UTF-8.")
+
+        validate_json(decoded_string)
+        value._data = decoded_string
+
         return value

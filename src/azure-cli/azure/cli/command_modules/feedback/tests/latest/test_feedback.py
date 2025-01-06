@@ -29,10 +29,11 @@ from azure.cli.testsdk.reverse_dependency import get_dummy_cli
 logger = logging.getLogger(__name__)
 
 
+@unittest.skip('alias extension is not working: https://github.com/Azure/azure-cli/issues/29422')
 class TestCommandLogFile(ScenarioTest):
 
     def __init__(self, *args, **kwargs):
-        super(TestCommandLogFile, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self.disable_recording = True
         self.is_live = True
@@ -44,7 +45,7 @@ class TestCommandLogFile(ScenarioTest):
             self.cmd("az extension add -n alias")
             logger.warning("Adding whl ext alias")
 
-        super(TestCommandLogFile, self).setUp()
+        super().setUp()
         self.temp_command_log_dir = self.create_temp_dir()
 
         # if alias is installed as a wheel extension. Remove it for now and re-install it later.
@@ -79,7 +80,7 @@ class TestCommandLogFile(ScenarioTest):
         self.assertTrue(_is_valid_github_project_url('https://github.com/azure/devops-extension'))
         self.assertFalse(_is_valid_github_project_url('https://github.com/'))
         self.assertFalse(_is_valid_github_project_url('https://github.com/Azure/azure-cli-extensions/tree/master/src/vm-repair'))
-        self.assertFalse(_is_valid_github_project_url('https://docs.microsoft.com/azure/machine-learning/service/'))
+        self.assertFalse(_is_valid_github_project_url('https://learn.microsoft.com/azure/machine-learning/service/'))
 
     def _helper_test_get_repository_url_pretty(self):
         # default behaviour is pretty url
@@ -138,7 +139,7 @@ class TestCommandLogFile(ScenarioTest):
         # check failed cli command:
         data_dict = command_log_files[0].command_data_dict
         self.assertTrue(data_dict["success"] is False)
-        self.assertEqual("The extension alias is not installed.", data_dict["errors"][0].strip())
+        self.assertEqual("The extension alias is not installed. Please install the extension via `az extension add -n alias`.", data_dict["errors"][0].strip())
         self.assertEqual(data_dict["command_args"], "extension remove -n {}")
 
         # check successful cli command
@@ -182,7 +183,6 @@ class TestCommandLogFile(ScenarioTest):
         for log_file, original_issue_body in items:
             self.assertTrue(log_file.get_command_name_str() in original_issue_body)
             self.assertTrue(log_file.command_data_dict["command_args"] in original_issue_body)
-            self.assertTrue(log_file.command_data_dict["errors"][0] in original_issue_body)
 
     @staticmethod
     def _ext_installed(ext):

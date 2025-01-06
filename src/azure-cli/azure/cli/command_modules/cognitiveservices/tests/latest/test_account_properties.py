@@ -8,7 +8,7 @@ import unittest
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 
 
-class CognitiveServicesApiPropertiesTests(ScenarioTest):
+class CognitiveServicesPropertiesTests(ScenarioTest):
     @ResourceGroupPreparer()
     def test_cognitiveservices_account_capabilities(self, resource_group):
         sname = self.create_random_name(prefix='cs_cli_test_', length=16)
@@ -16,8 +16,8 @@ class CognitiveServicesApiPropertiesTests(ScenarioTest):
         self.kwargs.update({
             'sname': sname,
             'kind': 'FormRecognizer',
-            'sku': 'F0',
-            'location': 'centraluseuap'
+            'sku': 'S0',
+            'location': 'SOUTHCENTRALUS'
         })
 
         # test to create cognitive services account
@@ -43,7 +43,7 @@ class CognitiveServicesApiPropertiesTests(ScenarioTest):
             'sname': sname,
             'kind': 'Face',
             'sku': 'S0',
-            'location': 'centraluseuap'
+            'location': 'SOUTHCENTRALUS'
         })
 
         # test to create cognitive services account
@@ -55,12 +55,6 @@ class CognitiveServicesApiPropertiesTests(ScenarioTest):
         print(account)
         self.assertEqual(account['properties']['publicNetworkAccess'], 'Enabled')
 
-        import time
-        for i in range(10):
-            time.sleep(15)
-            account = self.cmd('az cognitiveservices account show -n {sname} -g {rg}').get_output_in_json()
-            if 'Creating' != account['properties']['provisioningState']:
-                break
 
         # delete the cognitive services account
         ret = self.cmd('az cognitiveservices account delete -n {sname} -g {rg}')

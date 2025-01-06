@@ -15,7 +15,7 @@ The document provides instructions and guidelines on how to author command modul
 
 **Test Authoring**:<br>https://github.com/Azure/azure-cli/blob/dev/doc/authoring_tests.md
 
-**Generating Documentation**:<br>https://review.docs.microsoft.com/help/onboard/admin/reference/cli/azure-cli-ci?branch=master#documenting-a-new-azure-cli-module
+**Generating Documentation**:<br>https://review.learn.microsoft.com/help/onboard/admin/reference/cli/azure-cli-ci?branch=master#documenting-a-new-azure-cli-module
 
 <a name="heading_set_up"></a>Set Up
 ------
@@ -47,7 +47,7 @@ thrown whilst attempting to load your module.
 ------
 
 There are two options to initialize a command module:
-1. Use [Azure CLI Code Generator tool](https://github.com/Azure/autorest.az#how-does-azure-cli-code-generator-work) to generate code automatically.
+1. Use [aaz-dev-tools](https://github.com/Azure/aaz-dev-tools) to generate code automatically.
 2. [Create a module with `azdev cli create`](https://azurecliprod.blob.core.windows.net/videos/04%20-%20AzdevCliCreate.mp4).
 
 **Create an \_\_init__.py for your module**
@@ -160,7 +160,7 @@ Style Checks
 ------------
 
 ```
-azdev style --module <module> [--pylint] [--pep8]
+azdev style <module> [--pylint] [--pep8]
 ```
 
 Submitting Pull Requests

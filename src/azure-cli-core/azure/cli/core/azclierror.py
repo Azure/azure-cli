@@ -62,6 +62,11 @@ class AzCLIError(CLIError):
     def print_error(self):
         from azure.cli.core.azlogging import CommandLoggerContext
         from azure.cli.core.style import print_styled_text
+
+        # Print the traceback and exception message to debug log
+        import traceback
+        logger.debug(traceback.format_exc())
+
         with CommandLoggerContext(logger):
             # print error message
             logger.error(self.error_msg)
@@ -266,6 +271,9 @@ class RecommendationError(ClientError):
 
 class AuthenticationError(ServiceError):
     """ Raised when AAD authentication fails. """
+    def __init__(self, error_msg, msal_error=None, **kwargs):
+        super().__init__(error_msg, **kwargs)
+        self.msal_error = msal_error
 
 
 class HTTPError(CLIError):

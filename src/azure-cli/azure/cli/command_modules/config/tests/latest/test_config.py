@@ -13,6 +13,9 @@ from knack.util import CLIError
 
 class ConfigTest(ScenarioTest):
 
+    def __init__(self, *arg, **kwargs):
+        super().__init__(*arg, random_config_dir=True, **kwargs)
+
     def test_config(self):
 
         # [test_section1]
@@ -28,8 +31,9 @@ class ConfigTest(ScenarioTest):
         os.chdir(tempdir)
         print("Using temp dir: {}".format(tempdir))
 
-        global_test_args = {"source": os.path.expanduser(os.path.join('~', '.azure', 'config')), "flag": ""}
-        local_test_args = {"source": os.path.join(tempdir, '.azure', 'config'), "flag": " --local"}
+        global_test_args = {"source": os.path.join(self.cli_ctx.config.config_dir, 'config'), "flag": ""}
+        local_test_args = {"source": os.path.join(tempdir, os.path.basename(self.cli_ctx.config.config_dir), 'config'),
+                           "flag": " --local"}
 
         for args in (global_test_args, local_test_args):
             print("Testing for {}".format(args))
@@ -75,7 +79,6 @@ class ConfigTest(ScenarioTest):
             self.cmd('config unset test_section1.test_option1' + args['flag'])
             # Test unsetting multiple options
             self.cmd('config unset test_section2.test_option21 test_section2.test_option22' + args['flag'])
-
         os.chdir(original_path)
 
 

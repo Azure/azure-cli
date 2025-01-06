@@ -88,6 +88,40 @@ class TestClientFactory(unittest.TestCase):
             get_mgmt_service_client(cli, ResourceType.MGMT_RESOURCE_RESOURCES,
                                     aux_subscriptions=[AUX_SUBSCRIPTION], aux_tenants=[AUX_TENANT])
 
+    def test_custom_credential(self):
+        from azure.cli.core.auth.util import AccessToken
+
+        class AccessTokenCredential:
+            """Simple access token authentication. Return the access token as-is.
+            """
+            def __init__(self, access_token):
+                self.access_token = access_token
+                self.get_token_called = False
+
+            def get_token(self, *scopes, **kwargs):
+                self.get_token_called = True
+                import time
+                # Assume the access token expires in 1 year
+                return AccessToken(self.access_token, int(time.time()) + 31536000)
+
+        cli = DummyCli()
+        cred = AccessTokenCredential("mock_token")
+        client = get_mgmt_service_client(cli, ResourceType.MGMT_RESOURCE_RESOURCES,
+                                         subscription_id=MOCKED_SUBSCRIPTION_ID, credential=cred)
+        assert isinstance(client._config.credential, AccessTokenCredential)
+
+        from azure.core.exceptions import ResourceNotFoundError
+        try:
+            client.resource_groups.get('test_rg')
+        except ResourceNotFoundError:
+            # Error is expected since we are using a dummy subscription ID
+            pass
+        assert cred.get_token_called
+
+        # Error if no subscription is provided
+        with self.assertRaises(ValueError):
+            get_mgmt_service_client(cli, ResourceType.MGMT_RESOURCE_RESOURCES, credential=cred)
+
 
 if __name__ == '__main__':
     unittest.main()

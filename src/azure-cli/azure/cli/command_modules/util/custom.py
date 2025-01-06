@@ -39,7 +39,7 @@ def show_version(cmd):  # pylint: disable=unused-argument
     return versions
 
 
-def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many-locals, too-many-statements, too-many-branches, no-member, unused-argument
+def upgrade_version(cmd, update_all=None, yes=None, allow_preview=None):  # pylint: disable=too-many-locals, too-many-statements, too-many-branches, no-member, unused-argument
     import platform
     import sys
     import subprocess
@@ -51,15 +51,17 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
 
     update_cli = True
     from azure.cli.core.util import get_latest_from_github
-    try:
-        latest_version = get_latest_from_github()
-        if latest_version and parse(latest_version) <= parse(local_version):
-            logger.warning("You already have the latest azure-cli version: %s", local_version)
-            update_cli = False
-            if not update_all:
-                return
-    except Exception as ex:  # pylint: disable=broad-except
-        logger.debug("Failed to get the latest version. %s", str(ex))
+    latest_version = get_latest_from_github()
+    if not latest_version:
+        logger.warning("Failed to get the latest azure-cli version.")
+        update_cli = False
+        if not update_all:
+            return
+    elif parse(latest_version) <= parse(local_version):
+        logger.warning("You already have the latest azure-cli version: %s", local_version)
+        update_cli = False
+        if not update_all:
+            return
     exts = [ext.name for ext in get_extensions(ext_type=WheelExtension)] if update_all else []
 
     exit_code = 0
@@ -71,7 +73,7 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
         logger.warning("Your current Azure CLI version is %s. %s", local_version, latest_version_msg)
         from knack.prompting import prompt_y_n, NoTTYException
         if not yes:
-            logger.warning("Please check the release notes first: https://docs.microsoft.com/"
+            logger.warning("Please check the release notes first: https://learn.microsoft.com/"
                            "cli/azure/release-notes-azure-cli")
             try:
                 confirmation = prompt_y_n("Do you want to continue?", default='y')
@@ -137,7 +139,11 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
             logger.warning("Exit the container to pull latest image with 'docker pull mcr.microsoft.com/azure-cli' "
                            "or run 'pip install --upgrade azure-cli' in this container")
         elif installer == 'MSI':
-            exit_code = _upgrade_on_windows()
+            _upgrade_on_windows()
+        elif installer == 'ZIP':
+            zip_url = 'https://aka.ms/installazurecliwindowszipx64'
+            logger.warning("Please download the latest ZIP from %s, delete the old installation folder and extract the "
+                           "new version to the same location", zip_url)
         else:
             logger.warning(UPGRADE_MSG)
     if exit_code:
@@ -169,13 +175,15 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
     for ext_name in exts:
         try:
             logger.warning("Checking update for %s", ext_name)
-            subprocess.call(['az', 'extension', 'update', '-n', ext_name],
-                            shell=platform.system() == 'Windows')
+            cmds = ['az', 'extension', 'update', '-n', ext_name]
+            if allow_preview is not None:
+                cmds += ["--allow-preview", str(allow_preview)]
+            subprocess.call(cmds, shell=platform.system() == 'Windows')
         except Exception as ex:  # pylint: disable=broad-except
             msg = "Extension {} update failed during az upgrade. {}".format(ext_name, str(ex))
             raise CLIError(msg)
     auto_upgrade_msg = "You can enable auto-upgrade with 'az config set auto-upgrade.enable=yes'. " \
-        "More details in https://docs.microsoft.com/cli/azure/update-azure-cli#automatic-update"
+        "More details in https://learn.microsoft.com/cli/azure/update-azure-cli#automatic-update"
     logger.warning("Upgrade finished.%s", "" if cmd.cli_ctx.config.getboolean('auto-upgrade', 'enable', False)
                    else auto_upgrade_msg)
 
@@ -185,44 +193,49 @@ def _upgrade_on_windows():
     Directly installing from URL may be blocked by policy: https://github.com/Azure/azure-cli/issues/19171
     This also gives the user a chance to manually install the MSI in case of msiexec.exe failure.
     """
-    logger.warning("Updating Azure CLI with MSI from https://aka.ms/installazurecliwindows")
-    tmp_dir, msi_path = _download_from_url('https://aka.ms/installazurecliwindows')
-
-    logger.warning("Installing MSI")
+    import platform
     import subprocess
-    exit_code = subprocess.call(['msiexec.exe', '/i', msi_path])
+    import sys
+    import tempfile
 
-    if exit_code:
-        logger.warning("Installation Failed. You may manually install %s", msi_path)
+    from azure.cli.core.util import rmtree_with_retry
+
+    if platform.architecture()[0] == '32bit':
+        msi_url = 'https://aka.ms/installazurecliwindows'
     else:
-        from azure.cli.core.util import rmtree_with_retry
-        logger.warning("Succeeded. Deleting %s", tmp_dir)
-        rmtree_with_retry(tmp_dir)
-    return exit_code
+        msi_url = 'https://aka.ms/installazurecliwindowsx64'
+    logger.warning("Updating Azure CLI with MSI from %s", msi_url)
+
+    # Save MSI to ~\AppData\Local\Temp\azure-cli-msi, clean up the folder first
+    msi_dir = os.path.join(tempfile.gettempdir(), 'azure-cli-msi')
+    rmtree_with_retry(msi_dir)
+    os.makedirs(msi_dir, exist_ok=True)
+
+    msi_path = _download_from_url(msi_url, msi_dir)
+
+    subprocess.Popen(['msiexec.exe', '/i', msi_path])
+    logger.warning("Installation started. Please complete the upgrade in the opened window.\nTo update extensions, "
+                   "please run `az upgrade` again after completing the upgrade.")
+    sys.exit(0)
 
 
-def _download_from_url(url):
+def _download_from_url(url, target_dir):
     import requests
     from azure.cli.core.util import should_disable_connection_verify
-    r = requests.get(url, stream=True, verify=(not should_disable_connection_verify()))
+    r = requests.get(url, stream=True, verify=not should_disable_connection_verify())
     if r.status_code != 200:
         raise CLIError("Request to {} failed with {}".format(url, r.status_code))
 
     # r.url is the real path of the msi, like'https://azcliprod.blob.core.windows.net/msi/azure-cli-2.27.1.msi'
     file_name = r.url.rsplit('/')[-1]
-    import tempfile
-    tmp_dir = tempfile.mkdtemp()
-    msi_path = os.path.join(tmp_dir, file_name)
+    msi_path = os.path.join(target_dir, file_name)
     logger.warning("Downloading MSI to %s", msi_path)
 
     with open(msi_path, 'wb') as f:
         for chunk in r.iter_content(chunk_size=1024):
             f.write(chunk)
 
-    # Return both the temp directory and MSI path, like
-    # 'C:\Users\<name>\AppData\Local\Temp\tmpzv4pelsf',
-    # 'C:\Users\<name>\AppData\Local\Temp\tmpzv4pelsf\azure-cli-2.27.1.msi'
-    return tmp_dir, msi_path
+    return msi_path
 
 
 def demo_style(cmd, theme=None):  # pylint: disable=unused-argument
@@ -246,6 +259,7 @@ def demo_style(cmd, theme=None):  # pylint: disable=unused-argument
     styled_text = [
         (Style.PRIMARY, placeholder.format("White", "Primary text color")),
         (Style.SECONDARY, placeholder.format("Grey", "Secondary text color")),
+        (Style.HIGHLIGHT, placeholder.format("Cyan", "Highlight text color")),
         (Style.IMPORTANT, placeholder.format("Magenta", "Important text color")),
         (Style.ACTION, placeholder.format(
             "Blue", "Commands, parameters, and system inputs (White in legacy powershell terminal)")),
@@ -297,7 +311,7 @@ def demo_style(cmd, theme=None):  # pylint: disable=unused-argument
         (Style.ACTION, "--resource-group"),
         (Style.PRIMARY, " MyResourceGroup\n"),
         (Style.SECONDARY, "Create a storage account. For more detail, see "),
-        (Style.HYPERLINK, "https://docs.microsoft.com/azure/storage/common/storage-account-create?"
+        (Style.HYPERLINK, "https://learn.microsoft.com/azure/storage/common/storage-account-create?"
                           "tabs=azure-cli#create-a-storage-account-1"),
         (Style.SECONDARY, "\n"),
     ]
@@ -337,3 +351,25 @@ def secret_store_load(cmd):
     from azure.cli.core.util import get_secret_store
     store = get_secret_store(cmd.cli_ctx, SECRET_STORE_DEMO)
     return store.load()
+
+
+def byo_access_token(cmd, access_token, subscription_id):
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.cli.core.profiles import ResourceType
+    credential = AccessTokenCredential(access_token)
+    client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
+                                     subscription_id=subscription_id, credential=credential)
+    return client.resource_groups.list()
+
+
+class AccessTokenCredential:  # pylint: disable=too-few-public-methods
+    """Simple access token authentication. Return the access token as-is.
+    """
+    def __init__(self, access_token):
+        self.access_token = access_token
+
+    def get_token(self, *scopes, **kwargs):  # pylint: disable=unused-argument
+        import time
+        from azure.cli.core.auth.util import AccessToken
+        # Assume the access token expires in 1 year / 31536000 seconds
+        return AccessToken(self.access_token, int(time.time()) + 31536000)

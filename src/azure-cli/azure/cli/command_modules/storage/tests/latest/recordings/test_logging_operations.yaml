@@ -15,12 +15,12 @@ interactions:
       ParameterSetName:
       - -g -n -o
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-storage/20.0.0 Python/3.9.12 (macOS-12.3.1-arm64-arm-64bit)
+      - AZURECLI/2.61.0 azsdk-python-core/1.28.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2021-09-01&$expand=kerb
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2023-05-01&$expand=kerb
   response:
     body:
-      string: '{"keys":[{"creationTime":"2022-05-13T02:24:47.4426795Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2022-05-13T02:24:47.4426795Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+      string: '{"keys":[{"creationTime":"2024-06-19T10:39:01.6328187Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2024-06-19T10:39:01.6328187Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
     headers:
       cache-control:
       - no-cache
@@ -29,7 +29,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Fri, 13 May 2022 02:25:09 GMT
+      - Wed, 19 Jun 2024 10:39:26 GMT
       expires:
       - '-1'
       pragma:
@@ -38,14 +38,12 @@ interactions:
       - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/f36a3424-c950-40c2-9337-2ea313afb710
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11999'
+      - '11996'
     status:
       code: 200
       message: OK
@@ -63,21 +61,21 @@ interactions:
       ParameterSetName:
       - -g -n -o
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-azure-mgmt-storage/20.0.0 Python/3.9.12 (macOS-12.3.1-arm64-arm-64bit)
+      - AZURECLI/2.61.0 azsdk-python-core/1.28.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2021-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2023-05-01
   response:
     body:
-      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"keyCreationTime":{"key1":"2022-05-13T02:24:47.4426795Z","key2":"2022-05-13T02:24:47.4426795Z"},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":true,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2022-05-13T02:24:47.4582743Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2022-05-13T02:24:47.4582743Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2022-05-13T02:24:47.3645259Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"keyCreationTime":{"key1":"2024-06-19T10:39:01.6328187Z","key2":"2024-06-19T10:39:01.6328187Z"},"allowCrossTenantReplication":false,"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":false,"networkAcls":{"ipv6Rules":[],"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2024-06-19T10:39:03.0859605Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2024-06-19T10:39:03.0859605Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2024-06-19T10:39:01.5078148Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1269'
+      - '1321'
       content-type:
       - application/json
       date:
-      - Fri, 13 May 2022 02:25:09 GMT
+      - Wed, 19 Jun 2024 10:39:26 GMT
       expires:
       - '-1'
       pragma:
@@ -86,12 +84,10 @@ interactions:
       - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
     status:
       code: 200
       message: OK
@@ -109,11 +105,11 @@ interactions:
       ParameterSetName:
       - --connection-string
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-storage-blob/12.10.0 Python/3.9.12 (macOS-12.3.1-arm64-arm-64bit)
+      - AZURECLI/2.61.0 azsdk-python-storage-blob/12.16.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 13 May 2022 02:25:10 GMT
+      - Wed, 19 Jun 2024 10:39:27 GMT
       x-ms-version:
-      - '2021-04-10'
+      - '2022-11-02'
     method: GET
     uri: https://clitest000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -124,13 +120,13 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Fri, 13 May 2022 02:25:10 GMT
+      - Wed, 19 Jun 2024 10:39:28 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2021-04-10'
+      - '2022-11-02'
     status:
       code: 200
       message: OK
@@ -146,13 +142,13 @@ interactions:
       Connection:
       - keep-alive
       Date:
-      - Fri, 13 May 2022 02:25:11 GMT
+      - Wed, 19 Jun 2024 10:39:28 GMT
       ParameterSetName:
       - --connection-string
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-data-tables/12.2.0 Python/3.9.12 (macOS-12.3.1-arm64-arm-64bit)
+      - AZURECLI/2.61.0 azsdk-python-data-tables/12.4.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 13 May 2022 02:25:11 GMT
+      - Wed, 19 Jun 2024 10:39:28 GMT
       x-ms-version:
       - '2019-02-02'
     method: GET
@@ -165,7 +161,7 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Fri, 13 May 2022 02:25:12 GMT
+      - Wed, 19 Jun 2024 10:39:29 GMT
       server:
       - Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -189,9 +185,9 @@ interactions:
       ParameterSetName:
       - --connection-string
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-storage-queue/12.2.0 Python/3.9.12 (macOS-12.3.1-arm64-arm-64bit)
+      - AZURECLI/2.61.0 azsdk-python-storage-queue/12.3.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 13 May 2022 02:25:12 GMT
+      - Wed, 19 Jun 2024 10:39:30 GMT
       x-ms-version:
       - '2021-02-12'
     method: GET
@@ -206,7 +202,7 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Fri, 13 May 2022 02:25:13 GMT
+      - Wed, 19 Jun 2024 10:39:30 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -236,11 +232,11 @@ interactions:
       ParameterSetName:
       - --services --log --retention --service --connection-string
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-storage-blob/12.10.0 Python/3.9.12 (macOS-12.3.1-arm64-arm-64bit)
+      - AZURECLI/2.61.0 azsdk-python-storage-blob/12.16.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 13 May 2022 02:25:13 GMT
+      - Wed, 19 Jun 2024 10:39:31 GMT
       x-ms-version:
-      - '2021-04-10'
+      - '2022-11-02'
     method: PUT
     uri: https://clitest000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -250,11 +246,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 13 May 2022 02:25:14 GMT
+      - Wed, 19 Jun 2024 10:39:32 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
-      - '2021-04-10'
+      - '2022-11-02'
     status:
       code: 202
       message: Accepted
@@ -272,11 +268,11 @@ interactions:
       ParameterSetName:
       - --connection-string
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-storage-blob/12.10.0 Python/3.9.12 (macOS-12.3.1-arm64-arm-64bit)
+      - AZURECLI/2.61.0 azsdk-python-storage-blob/12.16.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 13 May 2022 02:25:15 GMT
+      - Wed, 19 Jun 2024 10:39:33 GMT
       x-ms-version:
-      - '2021-04-10'
+      - '2022-11-02'
     method: GET
     uri: https://clitest000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -287,13 +283,13 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Fri, 13 May 2022 02:25:16 GMT
+      - Wed, 19 Jun 2024 10:39:33 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2021-04-10'
+      - '2022-11-02'
     status:
       code: 200
       message: OK
@@ -309,13 +305,13 @@ interactions:
       Connection:
       - keep-alive
       Date:
-      - Fri, 13 May 2022 02:25:16 GMT
+      - Wed, 19 Jun 2024 10:39:34 GMT
       ParameterSetName:
       - --connection-string
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-data-tables/12.2.0 Python/3.9.12 (macOS-12.3.1-arm64-arm-64bit)
+      - AZURECLI/2.61.0 azsdk-python-data-tables/12.4.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 13 May 2022 02:25:16 GMT
+      - Wed, 19 Jun 2024 10:39:34 GMT
       x-ms-version:
       - '2019-02-02'
     method: GET
@@ -328,7 +324,7 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Fri, 13 May 2022 02:25:17 GMT
+      - Wed, 19 Jun 2024 10:39:34 GMT
       server:
       - Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -352,9 +348,9 @@ interactions:
       ParameterSetName:
       - --connection-string
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-storage-queue/12.2.0 Python/3.9.12 (macOS-12.3.1-arm64-arm-64bit)
+      - AZURECLI/2.61.0 azsdk-python-storage-queue/12.3.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 13 May 2022 02:25:17 GMT
+      - Wed, 19 Jun 2024 10:39:35 GMT
       x-ms-version:
       - '2021-02-12'
     method: GET
@@ -369,7 +365,7 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Fri, 13 May 2022 02:25:18 GMT
+      - Wed, 19 Jun 2024 10:39:35 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -399,11 +395,11 @@ interactions:
       ParameterSetName:
       - --services --log --retention --service --connection-string
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-storage-blob/12.10.0 Python/3.9.12 (macOS-12.3.1-arm64-arm-64bit)
+      - AZURECLI/2.61.0 azsdk-python-storage-blob/12.16.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 13 May 2022 02:25:18 GMT
+      - Wed, 19 Jun 2024 10:39:36 GMT
       x-ms-version:
-      - '2021-04-10'
+      - '2022-11-02'
     method: PUT
     uri: https://clitest000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -413,11 +409,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 13 May 2022 02:25:20 GMT
+      - Wed, 19 Jun 2024 10:39:36 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
-      - '2021-04-10'
+      - '2022-11-02'
     status:
       code: 202
       message: Accepted
@@ -435,11 +431,11 @@ interactions:
       ParameterSetName:
       - --connection-string
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-storage-blob/12.10.0 Python/3.9.12 (macOS-12.3.1-arm64-arm-64bit)
+      - AZURECLI/2.61.0 azsdk-python-storage-blob/12.16.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 13 May 2022 02:25:20 GMT
+      - Wed, 19 Jun 2024 10:39:37 GMT
       x-ms-version:
-      - '2021-04-10'
+      - '2022-11-02'
     method: GET
     uri: https://clitest000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -450,13 +446,13 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Fri, 13 May 2022 02:25:21 GMT
+      - Wed, 19 Jun 2024 10:39:37 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2021-04-10'
+      - '2022-11-02'
     status:
       code: 200
       message: OK
@@ -472,13 +468,13 @@ interactions:
       Connection:
       - keep-alive
       Date:
-      - Fri, 13 May 2022 02:25:21 GMT
+      - Wed, 19 Jun 2024 10:39:38 GMT
       ParameterSetName:
       - --connection-string
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-data-tables/12.2.0 Python/3.9.12 (macOS-12.3.1-arm64-arm-64bit)
+      - AZURECLI/2.61.0 azsdk-python-data-tables/12.4.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 13 May 2022 02:25:21 GMT
+      - Wed, 19 Jun 2024 10:39:38 GMT
       x-ms-version:
       - '2019-02-02'
     method: GET
@@ -491,7 +487,7 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Fri, 13 May 2022 02:25:21 GMT
+      - Wed, 19 Jun 2024 10:39:39 GMT
       server:
       - Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -515,9 +511,9 @@ interactions:
       ParameterSetName:
       - --connection-string
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-storage-queue/12.2.0 Python/3.9.12 (macOS-12.3.1-arm64-arm-64bit)
+      - AZURECLI/2.61.0 azsdk-python-storage-queue/12.3.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 13 May 2022 02:25:22 GMT
+      - Wed, 19 Jun 2024 10:39:39 GMT
       x-ms-version:
       - '2021-02-12'
     method: GET
@@ -532,7 +528,7 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Fri, 13 May 2022 02:25:23 GMT
+      - Wed, 19 Jun 2024 10:39:40 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -562,11 +558,11 @@ interactions:
       ParameterSetName:
       - --connection-string
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-storage-blob/12.10.0 Python/3.9.12 (macOS-12.3.1-arm64-arm-64bit)
+      - AZURECLI/2.61.0 azsdk-python-storage-blob/12.16.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 13 May 2022 02:25:23 GMT
+      - Wed, 19 Jun 2024 10:39:40 GMT
       x-ms-version:
-      - '2021-04-10'
+      - '2022-11-02'
     method: PUT
     uri: https://clitest000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -576,11 +572,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 13 May 2022 02:25:24 GMT
+      - Wed, 19 Jun 2024 10:39:42 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
-      - '2021-04-10'
+      - '2022-11-02'
     status:
       code: 202
       message: Accepted
@@ -602,13 +598,13 @@ interactions:
       Content-Type:
       - application/xml
       Date:
-      - Fri, 13 May 2022 02:25:25 GMT
+      - Wed, 19 Jun 2024 10:39:42 GMT
       ParameterSetName:
       - --connection-string
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-data-tables/12.2.0 Python/3.9.12 (macOS-12.3.1-arm64-arm-64bit)
+      - AZURECLI/2.61.0 azsdk-python-data-tables/12.4.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 13 May 2022 02:25:25 GMT
+      - Wed, 19 Jun 2024 10:39:42 GMT
       x-ms-version:
       - '2019-02-02'
     method: PUT
@@ -618,7 +614,7 @@ interactions:
       string: ''
     headers:
       date:
-      - Fri, 13 May 2022 02:25:26 GMT
+      - Wed, 19 Jun 2024 10:39:42 GMT
       server:
       - Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -648,9 +644,9 @@ interactions:
       ParameterSetName:
       - --connection-string
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-storage-queue/12.2.0 Python/3.9.12 (macOS-12.3.1-arm64-arm-64bit)
+      - AZURECLI/2.61.0 azsdk-python-storage-queue/12.3.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 13 May 2022 02:25:26 GMT
+      - Wed, 19 Jun 2024 10:39:43 GMT
       x-ms-version:
       - '2021-02-12'
     method: PUT
@@ -662,7 +658,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 13 May 2022 02:25:27 GMT
+      - Wed, 19 Jun 2024 10:39:44 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
@@ -684,11 +680,11 @@ interactions:
       ParameterSetName:
       - --connection-string
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-storage-blob/12.10.0 Python/3.9.12 (macOS-12.3.1-arm64-arm-64bit)
+      - AZURECLI/2.61.0 azsdk-python-storage-blob/12.16.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 13 May 2022 02:25:28 GMT
+      - Wed, 19 Jun 2024 10:39:45 GMT
       x-ms-version:
-      - '2021-04-10'
+      - '2022-11-02'
     method: GET
     uri: https://clitest000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -699,13 +695,13 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Fri, 13 May 2022 02:25:28 GMT
+      - Wed, 19 Jun 2024 10:39:45 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2021-04-10'
+      - '2022-11-02'
     status:
       code: 200
       message: OK
@@ -721,13 +717,13 @@ interactions:
       Connection:
       - keep-alive
       Date:
-      - Fri, 13 May 2022 02:25:29 GMT
+      - Wed, 19 Jun 2024 10:39:46 GMT
       ParameterSetName:
       - --connection-string
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-data-tables/12.2.0 Python/3.9.12 (macOS-12.3.1-arm64-arm-64bit)
+      - AZURECLI/2.61.0 azsdk-python-data-tables/12.4.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 13 May 2022 02:25:29 GMT
+      - Wed, 19 Jun 2024 10:39:46 GMT
       x-ms-version:
       - '2019-02-02'
     method: GET
@@ -740,7 +736,7 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Fri, 13 May 2022 02:25:29 GMT
+      - Wed, 19 Jun 2024 10:39:46 GMT
       server:
       - Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -764,9 +760,9 @@ interactions:
       ParameterSetName:
       - --connection-string
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-storage-queue/12.2.0 Python/3.9.12 (macOS-12.3.1-arm64-arm-64bit)
+      - AZURECLI/2.61.0 azsdk-python-storage-queue/12.3.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 13 May 2022 02:25:30 GMT
+      - Wed, 19 Jun 2024 10:39:47 GMT
       x-ms-version:
       - '2021-02-12'
     method: GET
@@ -781,7 +777,7 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Fri, 13 May 2022 02:25:30 GMT
+      - Wed, 19 Jun 2024 10:39:48 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -809,13 +805,13 @@ interactions:
       Content-Type:
       - application/xml
       Date:
-      - Fri, 13 May 2022 02:25:31 GMT
+      - Wed, 19 Jun 2024 10:39:48 GMT
       ParameterSetName:
       - --services --log --retention --version --connection-string
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-data-tables/12.2.0 Python/3.9.12 (macOS-12.3.1-arm64-arm-64bit)
+      - AZURECLI/2.61.0 azsdk-python-data-tables/12.4.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 13 May 2022 02:25:31 GMT
+      - Wed, 19 Jun 2024 10:39:48 GMT
       x-ms-version:
       - '2019-02-02'
     method: PUT
@@ -825,7 +821,7 @@ interactions:
       string: ''
     headers:
       date:
-      - Fri, 13 May 2022 02:25:32 GMT
+      - Wed, 19 Jun 2024 10:39:49 GMT
       server:
       - Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -849,11 +845,11 @@ interactions:
       ParameterSetName:
       - --connection-string
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-storage-blob/12.10.0 Python/3.9.12 (macOS-12.3.1-arm64-arm-64bit)
+      - AZURECLI/2.61.0 azsdk-python-storage-blob/12.16.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 13 May 2022 02:26:32 GMT
+      - Wed, 19 Jun 2024 10:40:50 GMT
       x-ms-version:
-      - '2021-04-10'
+      - '2022-11-02'
     method: GET
     uri: https://clitest000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -864,13 +860,13 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Fri, 13 May 2022 02:26:33 GMT
+      - Wed, 19 Jun 2024 10:40:51 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2021-04-10'
+      - '2022-11-02'
     status:
       code: 200
       message: OK
@@ -886,13 +882,13 @@ interactions:
       Connection:
       - keep-alive
       Date:
-      - Fri, 13 May 2022 02:26:33 GMT
+      - Wed, 19 Jun 2024 10:40:51 GMT
       ParameterSetName:
       - --connection-string
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-data-tables/12.2.0 Python/3.9.12 (macOS-12.3.1-arm64-arm-64bit)
+      - AZURECLI/2.61.0 azsdk-python-data-tables/12.4.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 13 May 2022 02:26:33 GMT
+      - Wed, 19 Jun 2024 10:40:51 GMT
       x-ms-version:
       - '2019-02-02'
     method: GET
@@ -905,7 +901,7 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Fri, 13 May 2022 02:26:34 GMT
+      - Wed, 19 Jun 2024 10:40:51 GMT
       server:
       - Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -929,9 +925,9 @@ interactions:
       ParameterSetName:
       - --connection-string
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-storage-queue/12.2.0 Python/3.9.12 (macOS-12.3.1-arm64-arm-64bit)
+      - AZURECLI/2.61.0 azsdk-python-storage-queue/12.3.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 13 May 2022 02:26:34 GMT
+      - Wed, 19 Jun 2024 10:40:52 GMT
       x-ms-version:
       - '2021-02-12'
     method: GET
@@ -946,7 +942,7 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Fri, 13 May 2022 02:26:35 GMT
+      - Wed, 19 Jun 2024 10:40:52 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -974,13 +970,13 @@ interactions:
       Content-Type:
       - application/xml
       Date:
-      - Fri, 13 May 2022 02:26:36 GMT
+      - Wed, 19 Jun 2024 10:40:54 GMT
       ParameterSetName:
       - --services --log --retention --connection-string
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-data-tables/12.2.0 Python/3.9.12 (macOS-12.3.1-arm64-arm-64bit)
+      - AZURECLI/2.61.0 azsdk-python-data-tables/12.4.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 13 May 2022 02:26:36 GMT
+      - Wed, 19 Jun 2024 10:40:54 GMT
       x-ms-version:
       - '2019-02-02'
     method: PUT
@@ -990,7 +986,7 @@ interactions:
       string: ''
     headers:
       date:
-      - Fri, 13 May 2022 02:26:36 GMT
+      - Wed, 19 Jun 2024 10:40:54 GMT
       server:
       - Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -1014,11 +1010,11 @@ interactions:
       ParameterSetName:
       - --connection-string
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-storage-blob/12.10.0 Python/3.9.12 (macOS-12.3.1-arm64-arm-64bit)
+      - AZURECLI/2.61.0 azsdk-python-storage-blob/12.16.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 13 May 2022 02:26:47 GMT
+      - Wed, 19 Jun 2024 10:41:05 GMT
       x-ms-version:
-      - '2021-04-10'
+      - '2022-11-02'
     method: GET
     uri: https://clitest000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -1029,13 +1025,13 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Fri, 13 May 2022 02:26:47 GMT
+      - Wed, 19 Jun 2024 10:41:05 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2021-04-10'
+      - '2022-11-02'
     status:
       code: 200
       message: OK
@@ -1051,13 +1047,13 @@ interactions:
       Connection:
       - keep-alive
       Date:
-      - Fri, 13 May 2022 02:26:48 GMT
+      - Wed, 19 Jun 2024 10:41:06 GMT
       ParameterSetName:
       - --connection-string
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-data-tables/12.2.0 Python/3.9.12 (macOS-12.3.1-arm64-arm-64bit)
+      - AZURECLI/2.61.0 azsdk-python-data-tables/12.4.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 13 May 2022 02:26:48 GMT
+      - Wed, 19 Jun 2024 10:41:06 GMT
       x-ms-version:
       - '2019-02-02'
     method: GET
@@ -1070,7 +1066,7 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Fri, 13 May 2022 02:26:48 GMT
+      - Wed, 19 Jun 2024 10:41:07 GMT
       server:
       - Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -1094,9 +1090,9 @@ interactions:
       ParameterSetName:
       - --connection-string
       User-Agent:
-      - AZURECLI/2.36.0 azsdk-python-storage-queue/12.2.0 Python/3.9.12 (macOS-12.3.1-arm64-arm-64bit)
+      - AZURECLI/2.61.0 azsdk-python-storage-queue/12.3.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 13 May 2022 02:26:49 GMT
+      - Wed, 19 Jun 2024 10:41:07 GMT
       x-ms-version:
       - '2021-02-12'
     method: GET
@@ -1111,7 +1107,7 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Fri, 13 May 2022 02:26:49 GMT
+      - Wed, 19 Jun 2024 10:41:07 GMT
       server:
       - Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:

@@ -8,7 +8,7 @@ import os
 import traceback
 import json
 import re
-from distutils.sysconfig import get_python_lib
+from sysconfig import get_path
 
 import pkginfo
 from knack.config import CLIConfig
@@ -22,7 +22,7 @@ _CUSTOM_EXT_SYS_DIR = az_config.get('extension', 'sys_dir', None)
 EXTENSIONS_DIR = os.path.expanduser(_CUSTOM_EXT_DIR) if _CUSTOM_EXT_DIR else os.path.join(GLOBAL_CONFIG_DIR,
                                                                                           'cliextensions')
 DEV_EXTENSION_SOURCES = _DEV_EXTENSION_SOURCES.split(',') if _DEV_EXTENSION_SOURCES else []
-EXTENSIONS_SYS_DIR = os.path.expanduser(_CUSTOM_EXT_SYS_DIR) if _CUSTOM_EXT_SYS_DIR else os.path.join(get_python_lib(), 'azure-cli-extensions')
+EXTENSIONS_SYS_DIR = os.path.expanduser(_CUSTOM_EXT_SYS_DIR) if _CUSTOM_EXT_SYS_DIR else os.path.join(get_path("purelib"), 'azure-cli-extensions')
 
 EXTENSIONS_MOD_PREFIX = 'azext_'
 
@@ -51,11 +51,11 @@ logger = get_logger(__name__)
 
 class ExtensionNotInstalledException(Exception):
     def __init__(self, extension_name):
-        super(ExtensionNotInstalledException, self).__init__(extension_name)
+        super().__init__(extension_name)
         self.extension_name = extension_name
 
     def __str__(self):
-        return "The extension {} is not installed.".format(self.extension_name)
+        return f"The extension {self.extension_name} is not installed. Please install the extension via `az extension add -n {self.extension_name}`."
 
 
 class Extension:
@@ -101,7 +101,7 @@ class Extension:
         """
         try:
             if not isinstance(self._preview, bool):
-                self._preview = bool(self.metadata.get(EXT_METADATA_ISPREVIEW))
+                self._preview = is_preview_from_extension_meta(self.metadata)
         except Exception:  # pylint: disable=broad-except
             logger.debug("Unable to get extension preview status: %s", traceback.format_exc())
         return self._preview
@@ -109,15 +109,9 @@ class Extension:
     @property
     def experimental(self):
         """
-        Lazy load experimental status.
-        Returns the experimental status of the extension.
+        In extension semantic versioning, experimental = preview, experimental deprecated
         """
-        try:
-            if not isinstance(self._experimental, bool):
-                self._experimental = bool(self.metadata.get(EXT_METADATA_ISEXPERIMENTAL))
-        except Exception:  # pylint: disable=broad-except
-            logger.debug("Unable to get extension experimental status: %s", traceback.format_exc())
-        return self._experimental
+        return False
 
     def get_version(self):
         raise NotImplementedError()
@@ -133,7 +127,7 @@ class Extension:
 class WheelExtension(Extension):
 
     def __init__(self, name, path=None):
-        super(WheelExtension, self).__init__(name, 'whl', path)
+        super().__init__(name, 'whl', path)
 
     def get_version(self):
         return self.metadata.get('version')
@@ -205,12 +199,15 @@ class WheelExtension(Extension):
                     ext = WheelExtension(ext_name, ext_path)
                     if ext not in exts:
                         exts.append(ext)
+        # https://docs.python.org/3/library/os.html#os.listdir, listdir is in arbitrary order.
+        # Sort the extensions by name to support overwrite extension feature: https://github.com/Azure/azure-cli/issues/25782.
+        exts.sort(key=lambda ext: ext.name)
         return exts
 
 
 class DevExtension(Extension):
     def __init__(self, name, path):
-        super(DevExtension, self).__init__(name, 'dev', path)
+        super().__init__(name, 'dev', path)
 
     def get_version(self):
         return self.metadata.get('version')
@@ -272,6 +269,9 @@ class DevExtension(Extension):
                     _collect(os.path.join(path, item), depth + 1, max_depth)
         for source in DEV_EXTENSION_SOURCES:
             _collect(source)
+        # https://docs.python.org/3/library/os.html#os.listdir, listdir is in arbitrary order.
+        # Sort the extensions by name to support overwrite extension feature: https://github.com/Azure/azure-cli/issues/25782.
+        exts.sort(key=lambda ext: ext.name)
         return exts
 
 
@@ -305,8 +305,8 @@ def get_extension_modname(ext_name=None, ext_dir=None):
     pos_mods = [n for n in os.listdir(ext_dir)
                 if n.startswith(EXTENSIONS_MOD_PREFIX) and os.path.isdir(os.path.join(ext_dir, n))]
     if len(pos_mods) != 1:
-        raise AssertionError("Expected 1 module to load starting with "
-                             "'{}': got {}".format(EXTENSIONS_MOD_PREFIX, pos_mods))
+        raise AssertionError("Expected 1 module to load starting with '{}': got {}. Please delete {} and "
+                             "install the extension again.".format(EXTENSIONS_MOD_PREFIX, pos_mods, ext_dir))
     return pos_mods[0]
 
 
@@ -353,3 +353,36 @@ def get_extension_names(ext_type=None):
     Returns the extension names of extensions installed in the extensions directory.
     """
     return [ext.name for ext in get_extensions(ext_type=ext_type)]
+
+
+def is_preview_from_extension_meta(extension_meta):
+    return (bool(extension_meta.get(EXT_METADATA_ISPREVIEW, False)) or
+            bool(extension_meta.get(EXT_METADATA_ISEXPERIMENTAL, False)) or
+            is_preview_from_semantic_version(extension_meta.get('version')))
+
+
+def is_preview_from_semantic_version(version):
+    """
+    pre = [a, b] -> preview
+    >>> print(parse("1.2.3").pre)
+    None
+    >>> parse("1.2.3a1").pre
+    ('a', 1)
+    >>> parse("1.2.3b1").pre
+    ('b', 1)
+    """
+    from packaging.version import parse
+    parsed_version = parse(version)
+    return bool(parsed_version.pre and parsed_version.pre[0] in ["a", "b"])
+
+
+def is_stable_from_metadata(item):
+    return not (item["metadata"].get(EXT_METADATA_ISPREVIEW, False) or
+                item["metadata"].get(EXT_METADATA_ISEXPERIMENTAL, False) or
+                is_preview_from_semantic_version(item["metadata"]['version']))
+
+
+def is_preview_from_metadata(item):
+    return bool(item["metadata"].get(EXT_METADATA_ISPREVIEW, False) or
+                item["metadata"].get(EXT_METADATA_ISEXPERIMENTAL, False) or
+                is_preview_from_semantic_version(item["metadata"]['version']))

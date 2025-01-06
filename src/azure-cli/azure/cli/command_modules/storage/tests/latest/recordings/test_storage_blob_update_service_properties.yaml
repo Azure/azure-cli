@@ -13,31 +13,81 @@ interactions:
       ParameterSetName:
       - -n -g --kind
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.9.12 (macOS-12.4-arm64-arm-64bit)
+      - AZURECLI/2.67.0 (PIP) azsdk-python-core/1.31.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-05-26T03:19:53Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","test":"test_storage_blob_update_service_properties","date":"2024-12-12T08:46:21Z","module":"storage","Creator":"zhiyihuang@microsoft.com","DateCreated":"2024-12-12T08:46:25Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '310'
+      - '456'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 May 2022 03:19:58 GMT
+      - Thu, 12 Dec 2024 08:46:27 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"name": "account000002", "type": "Microsoft.Storage/storageAccounts"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '70'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --kind
+      User-Agent:
+      - AZURECLI/2.67.0 (PIP) azsdk-python-core/1.31.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/checkNameAvailability?api-version=2023-05-01
+  response:
+    body:
+      string: '{"nameAvailable":true}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json
+      date:
+      - Thu, 12 Dec 2024 08:46:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/6eed7690-2d21-4aee-8ae0-b8d359ef25a8
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
     status:
       code: 200
       message: OK
@@ -60,9 +110,9 @@ interactions:
       ParameterSetName:
       - -n -g --kind
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-storage/20.0.0 Python/3.9.12 (macOS-12.4-arm64-arm-64bit)
+      - AZURECLI/2.67.0 (PIP) azsdk-python-core/1.31.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/account000002?api-version=2021-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/account000002?api-version=2023-05-01
   response:
     body:
       string: ''
@@ -74,11 +124,11 @@ interactions:
       content-type:
       - text/plain; charset=utf-8
       date:
-      - Thu, 26 May 2022 03:20:07 GMT
+      - Thu, 12 Dec 2024 08:46:38 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/ff5e5da9-30b2-4318-8006-657b7e1a99fe?monitor=true&api-version=2021-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/ac467393-3fed-49a2-8a74-8cf0a6639806?monitor=true&api-version=2023-05-01&t=638695899990166017&c=MIIHpDCCBoygAwIBAgITfwR9aF61vN1fmBzWPwAEBH1oXjANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDIwHhcNMjQxMTI0MTE0NzIzWhcNMjUwMjIyMTE0NzIzWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALuLjvgBki3J2F02eLI0Ue_mnx-xpdgkQLmLDR_vHDzb5j-t90CpaEDQKPwPNvv28Bccb1Uo3G3MoI0Q79jgICmZpYGxdkMZoM6GX3jMNRZAbDtlzUaKW7wyBI4zFYtESxrolzHuINTdWsOeGAXH6PJ2YgDiYiq4Zns8FsngUwkfv42Ft7zomij9yvSP5nuVFivqBrYjd2UNK3BfaD4x1Ng5lEarTerVa9ZPsEkmx-tS-cKZ-wcEwiBwe0bxyk_KjKRUwnV0_aDYBEI2Qgs_pIA2vpm51p1xRONn0HnFV1fzk3CEhAMaNHwb-3aRxwAGveUN2KjJh-H4TColLKvqlhkCAwEAAaOCBJEwggSNMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwIwCgYIKwYBBQUHAwEwPAYJKwYBBAGCNxUHBC8wLQYlKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFgh8fIENbYcQIBZAIBBjCCAdoGCCsGAQUFBwEBBIIBzDCCAcgwZgYIKwYBBQUHMAKGWmh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9wa2lpbmZyYS9DZXJ0cy9CTDJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDAyKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDEuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwyLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMy5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDAyKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDQuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwHQYDVR0OBBYEFB397v0dagsUEpPTIi-zaCGx8TjWMA4GA1UdDwEB_wQEAwIFoDCCATUGA1UdHwSCASwwggEoMIIBJKCCASCgggEchkJodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ1JML0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcmyGNGh0dHA6Ly9jcmwxLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcmyGNGh0dHA6Ly9jcmwyLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcmyGNGh0dHA6Ly9jcmwzLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcmyGNGh0dHA6Ly9jcmw0LmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcmwwgZ0GA1UdIASBlTCBkjAMBgorBgEEAYI3ewEBMGYGCisGAQQBgjd7AgIwWDBWBggrBgEFBQcCAjBKHkgAMwAzAGUAMAAxADkAMgAxAC0ANABkADYANAAtADQAZgA4AGMALQBhADAANQA1AC0ANQBiAGQAYQBmAGYAZAA1AGUAMwAzAGQwDAYKKwYBBAGCN3sDATAMBgorBgEEAYI3ewQCMB8GA1UdIwQYMBaAFK55wmtdJYgTBvYHCcOXfHuXjx1VMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDATANBgkqhkiG9w0BAQsFAAOCAQEAUnTi3rvLq3zXPwQbR0EQf11BD9WwNZ00WlmUlFoZo9zjK5B-5PoPHivE-UtqdGf_rRIONyhoH5k-AssCFx0exCUfEHnygyXktLffJjo-85mmeWHsGbQ-pTHUq6JsDwSUv-Rh5yYlvU6BU4FZrPYfCss5cpJQi3OTegnUy-hjPl1bK_lQtN-B7JIYuMfkeUHnoICcXT9DCAu6S0yuzQtLNH_OGiTP_sV7gLRgsmtBmLDwAWIHew4hH6WZrLvCQ4jiUpQ5KAUsKFzlLI30PTCSnEg43HpLjgNtHNsbzwxznYMUsjy4kFrqOWlHQCcuOg_HfGKnmZ5ErVHZBVisDC5SuQ&s=kjUszk6pNzaIaVu6C_5Zl6oVhZcSVBajH1c6xgTk60OwDVflLUvPvKXujIURrXIV15J2unbb3gPX0E4cqQ3xX4_c_8seMzRzyJnsEtv3n_mLDIsyjZ9JOe4H8VXVwVa8iuEk2h5Igwo4N5BHOlQegqmRgwi1xLRfJiC_2OMzZzrFThql1Bw1mN0luMLaz3w_DELbt7_dvKReVJVnFqAbpPZw9fuk3JMOd1ptIUJE65jemes0id83OEMcHmDAjndM86_-PjIideYzNZhKeOsj3WxrdlpbfqrJrMIFn3ZAx5tQZf18Mx7d6BoklY3_v71lobAErWMhH_HZkO3ocZJeAw&h=mqyWJcOwhjiVQNZhsZL7oFxImoGonUZjlSIi52bNHHc
       pragma:
       - no-cache
       server:
@@ -87,8 +137,12 @@ interactions:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/1e7223da-45ee-4c28-8088-3d339fba4444
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '199'
     status:
       code: 202
       message: Accepted
@@ -106,21 +160,69 @@ interactions:
       ParameterSetName:
       - -n -g --kind
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-storage/20.0.0 Python/3.9.12 (macOS-12.4-arm64-arm-64bit)
+      - AZURECLI/2.67.0 (PIP) azsdk-python-core/1.31.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/ff5e5da9-30b2-4318-8006-657b7e1a99fe?monitor=true&api-version=2021-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/ac467393-3fed-49a2-8a74-8cf0a6639806?monitor=true&api-version=2023-05-01&t=638695899990166017&c=MIIHpDCCBoygAwIBAgITfwR9aF61vN1fmBzWPwAEBH1oXjANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDIwHhcNMjQxMTI0MTE0NzIzWhcNMjUwMjIyMTE0NzIzWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALuLjvgBki3J2F02eLI0Ue_mnx-xpdgkQLmLDR_vHDzb5j-t90CpaEDQKPwPNvv28Bccb1Uo3G3MoI0Q79jgICmZpYGxdkMZoM6GX3jMNRZAbDtlzUaKW7wyBI4zFYtESxrolzHuINTdWsOeGAXH6PJ2YgDiYiq4Zns8FsngUwkfv42Ft7zomij9yvSP5nuVFivqBrYjd2UNK3BfaD4x1Ng5lEarTerVa9ZPsEkmx-tS-cKZ-wcEwiBwe0bxyk_KjKRUwnV0_aDYBEI2Qgs_pIA2vpm51p1xRONn0HnFV1fzk3CEhAMaNHwb-3aRxwAGveUN2KjJh-H4TColLKvqlhkCAwEAAaOCBJEwggSNMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwIwCgYIKwYBBQUHAwEwPAYJKwYBBAGCNxUHBC8wLQYlKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFgh8fIENbYcQIBZAIBBjCCAdoGCCsGAQUFBwEBBIIBzDCCAcgwZgYIKwYBBQUHMAKGWmh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9wa2lpbmZyYS9DZXJ0cy9CTDJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDAyKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDEuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwyLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMy5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDAyKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDQuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwHQYDVR0OBBYEFB397v0dagsUEpPTIi-zaCGx8TjWMA4GA1UdDwEB_wQEAwIFoDCCATUGA1UdHwSCASwwggEoMIIBJKCCASCgggEchkJodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ1JML0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcmyGNGh0dHA6Ly9jcmwxLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcmyGNGh0dHA6Ly9jcmwyLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcmyGNGh0dHA6Ly9jcmwzLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcmyGNGh0dHA6Ly9jcmw0LmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcmwwgZ0GA1UdIASBlTCBkjAMBgorBgEEAYI3ewEBMGYGCisGAQQBgjd7AgIwWDBWBggrBgEFBQcCAjBKHkgAMwAzAGUAMAAxADkAMgAxAC0ANABkADYANAAtADQAZgA4AGMALQBhADAANQA1AC0ANQBiAGQAYQBmAGYAZAA1AGUAMwAzAGQwDAYKKwYBBAGCN3sDATAMBgorBgEEAYI3ewQCMB8GA1UdIwQYMBaAFK55wmtdJYgTBvYHCcOXfHuXjx1VMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDATANBgkqhkiG9w0BAQsFAAOCAQEAUnTi3rvLq3zXPwQbR0EQf11BD9WwNZ00WlmUlFoZo9zjK5B-5PoPHivE-UtqdGf_rRIONyhoH5k-AssCFx0exCUfEHnygyXktLffJjo-85mmeWHsGbQ-pTHUq6JsDwSUv-Rh5yYlvU6BU4FZrPYfCss5cpJQi3OTegnUy-hjPl1bK_lQtN-B7JIYuMfkeUHnoICcXT9DCAu6S0yuzQtLNH_OGiTP_sV7gLRgsmtBmLDwAWIHew4hH6WZrLvCQ4jiUpQ5KAUsKFzlLI30PTCSnEg43HpLjgNtHNsbzwxznYMUsjy4kFrqOWlHQCcuOg_HfGKnmZ5ErVHZBVisDC5SuQ&s=kjUszk6pNzaIaVu6C_5Zl6oVhZcSVBajH1c6xgTk60OwDVflLUvPvKXujIURrXIV15J2unbb3gPX0E4cqQ3xX4_c_8seMzRzyJnsEtv3n_mLDIsyjZ9JOe4H8VXVwVa8iuEk2h5Igwo4N5BHOlQegqmRgwi1xLRfJiC_2OMzZzrFThql1Bw1mN0luMLaz3w_DELbt7_dvKReVJVnFqAbpPZw9fuk3JMOd1ptIUJE65jemes0id83OEMcHmDAjndM86_-PjIideYzNZhKeOsj3WxrdlpbfqrJrMIFn3ZAx5tQZf18Mx7d6BoklY3_v71lobAErWMhH_HZkO3ocZJeAw&h=mqyWJcOwhjiVQNZhsZL7oFxImoGonUZjlSIi52bNHHc
   response:
     body:
-      string: '{"sku":{"name":"Standard_RAGRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/account000002","name":"account000002","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"keyCreationTime":{"key1":"2022-05-26T03:20:06.0733347Z","key2":"2022-05-26T03:20:06.0733347Z"},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":true,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2022-05-26T03:20:06.0889508Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2022-05-26T03:20:06.0889508Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2022-05-26T03:20:05.9795918Z","primaryEndpoints":{"dfs":"https://account000002.dfs.core.windows.net/","web":"https://account000002.z22.web.core.windows.net/","blob":"https://account000002.blob.core.windows.net/","queue":"https://account000002.queue.core.windows.net/","table":"https://account000002.table.core.windows.net/","file":"https://account000002.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available","secondaryLocation":"eastus","statusOfSecondary":"available","secondaryEndpoints":{"dfs":"https://account000002-secondary.dfs.core.windows.net/","web":"https://account000002-secondary.z22.web.core.windows.net/","blob":"https://account000002-secondary.blob.core.windows.net/","queue":"https://account000002-secondary.queue.core.windows.net/","table":"https://account000002-secondary.table.core.windows.net/"}}}'
+      string: ''
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1808'
+      - '0'
+      content-type:
+      - text/plain; charset=utf-8
+      date:
+      - Thu, 12 Dec 2024 08:46:38 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/ac467393-3fed-49a2-8a74-8cf0a6639806?monitor=true&api-version=2023-05-01&t=638695899994228532&c=MIIHpDCCBoygAwIBAgITfwR9aF61vN1fmBzWPwAEBH1oXjANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDIwHhcNMjQxMTI0MTE0NzIzWhcNMjUwMjIyMTE0NzIzWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALuLjvgBki3J2F02eLI0Ue_mnx-xpdgkQLmLDR_vHDzb5j-t90CpaEDQKPwPNvv28Bccb1Uo3G3MoI0Q79jgICmZpYGxdkMZoM6GX3jMNRZAbDtlzUaKW7wyBI4zFYtESxrolzHuINTdWsOeGAXH6PJ2YgDiYiq4Zns8FsngUwkfv42Ft7zomij9yvSP5nuVFivqBrYjd2UNK3BfaD4x1Ng5lEarTerVa9ZPsEkmx-tS-cKZ-wcEwiBwe0bxyk_KjKRUwnV0_aDYBEI2Qgs_pIA2vpm51p1xRONn0HnFV1fzk3CEhAMaNHwb-3aRxwAGveUN2KjJh-H4TColLKvqlhkCAwEAAaOCBJEwggSNMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwIwCgYIKwYBBQUHAwEwPAYJKwYBBAGCNxUHBC8wLQYlKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFgh8fIENbYcQIBZAIBBjCCAdoGCCsGAQUFBwEBBIIBzDCCAcgwZgYIKwYBBQUHMAKGWmh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9wa2lpbmZyYS9DZXJ0cy9CTDJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDAyKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDEuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwyLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMy5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDAyKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDQuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwHQYDVR0OBBYEFB397v0dagsUEpPTIi-zaCGx8TjWMA4GA1UdDwEB_wQEAwIFoDCCATUGA1UdHwSCASwwggEoMIIBJKCCASCgggEchkJodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ1JML0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcmyGNGh0dHA6Ly9jcmwxLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcmyGNGh0dHA6Ly9jcmwyLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcmyGNGh0dHA6Ly9jcmwzLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcmyGNGh0dHA6Ly9jcmw0LmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcmwwgZ0GA1UdIASBlTCBkjAMBgorBgEEAYI3ewEBMGYGCisGAQQBgjd7AgIwWDBWBggrBgEFBQcCAjBKHkgAMwAzAGUAMAAxADkAMgAxAC0ANABkADYANAAtADQAZgA4AGMALQBhADAANQA1AC0ANQBiAGQAYQBmAGYAZAA1AGUAMwAzAGQwDAYKKwYBBAGCN3sDATAMBgorBgEEAYI3ewQCMB8GA1UdIwQYMBaAFK55wmtdJYgTBvYHCcOXfHuXjx1VMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDATANBgkqhkiG9w0BAQsFAAOCAQEAUnTi3rvLq3zXPwQbR0EQf11BD9WwNZ00WlmUlFoZo9zjK5B-5PoPHivE-UtqdGf_rRIONyhoH5k-AssCFx0exCUfEHnygyXktLffJjo-85mmeWHsGbQ-pTHUq6JsDwSUv-Rh5yYlvU6BU4FZrPYfCss5cpJQi3OTegnUy-hjPl1bK_lQtN-B7JIYuMfkeUHnoICcXT9DCAu6S0yuzQtLNH_OGiTP_sV7gLRgsmtBmLDwAWIHew4hH6WZrLvCQ4jiUpQ5KAUsKFzlLI30PTCSnEg43HpLjgNtHNsbzwxznYMUsjy4kFrqOWlHQCcuOg_HfGKnmZ5ErVHZBVisDC5SuQ&s=WuUnGlO960H8-PKP2YaEJntyoZpKSx4psGRM-8P1KGCtWx73uw_C4sVjqpR0Oj4kKXKMiUE3I5kjvWMhFuP0cR-utJJCSVdLpArvWglb0U22PrROYMOK1r5DMo96wgnyQo2d5QDIBRGZavHeYXh2wdgXlzuGrOZoWwAD-GvxLLEE8dmVOwxcndiXfz15MXHP6txFxaRTddfFBXZdE21rgqWczsxBSNUwu4pM_IJbupOl3ojSnG7YJMgeCVpKlT_C_gdsTIWKenfTflQdWYzXXXk9himNUQ53bx_KVdACKq-a_bOjNfd4hK00ci8ba3X1nM3CS_5KhLP4FeHdUjyokQ&h=N2JK3Zh9QWPnFrGmYQX7pedKLtdwlARyRwB0Sol8sNg
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/56d5c439-89c3-41e9-af5f-222b453edcd3
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3748'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --kind
+      User-Agent:
+      - AZURECLI/2.67.0 (PIP) azsdk-python-core/1.31.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/ac467393-3fed-49a2-8a74-8cf0a6639806?monitor=true&api-version=2023-05-01&t=638695899994228532&c=MIIHpDCCBoygAwIBAgITfwR9aF61vN1fmBzWPwAEBH1oXjANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDIwHhcNMjQxMTI0MTE0NzIzWhcNMjUwMjIyMTE0NzIzWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALuLjvgBki3J2F02eLI0Ue_mnx-xpdgkQLmLDR_vHDzb5j-t90CpaEDQKPwPNvv28Bccb1Uo3G3MoI0Q79jgICmZpYGxdkMZoM6GX3jMNRZAbDtlzUaKW7wyBI4zFYtESxrolzHuINTdWsOeGAXH6PJ2YgDiYiq4Zns8FsngUwkfv42Ft7zomij9yvSP5nuVFivqBrYjd2UNK3BfaD4x1Ng5lEarTerVa9ZPsEkmx-tS-cKZ-wcEwiBwe0bxyk_KjKRUwnV0_aDYBEI2Qgs_pIA2vpm51p1xRONn0HnFV1fzk3CEhAMaNHwb-3aRxwAGveUN2KjJh-H4TColLKvqlhkCAwEAAaOCBJEwggSNMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwIwCgYIKwYBBQUHAwEwPAYJKwYBBAGCNxUHBC8wLQYlKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFgh8fIENbYcQIBZAIBBjCCAdoGCCsGAQUFBwEBBIIBzDCCAcgwZgYIKwYBBQUHMAKGWmh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9wa2lpbmZyYS9DZXJ0cy9CTDJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDAyKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDEuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwyLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDIoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMy5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDAyKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDQuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcnQwHQYDVR0OBBYEFB397v0dagsUEpPTIi-zaCGx8TjWMA4GA1UdDwEB_wQEAwIFoDCCATUGA1UdHwSCASwwggEoMIIBJKCCASCgggEchkJodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ1JML0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcmyGNGh0dHA6Ly9jcmwxLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcmyGNGh0dHA6Ly9jcmwyLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcmyGNGh0dHA6Ly9jcmwzLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcmyGNGh0dHA6Ly9jcmw0LmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwMig0KS5jcmwwgZ0GA1UdIASBlTCBkjAMBgorBgEEAYI3ewEBMGYGCisGAQQBgjd7AgIwWDBWBggrBgEFBQcCAjBKHkgAMwAzAGUAMAAxADkAMgAxAC0ANABkADYANAAtADQAZgA4AGMALQBhADAANQA1AC0ANQBiAGQAYQBmAGYAZAA1AGUAMwAzAGQwDAYKKwYBBAGCN3sDATAMBgorBgEEAYI3ewQCMB8GA1UdIwQYMBaAFK55wmtdJYgTBvYHCcOXfHuXjx1VMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDATANBgkqhkiG9w0BAQsFAAOCAQEAUnTi3rvLq3zXPwQbR0EQf11BD9WwNZ00WlmUlFoZo9zjK5B-5PoPHivE-UtqdGf_rRIONyhoH5k-AssCFx0exCUfEHnygyXktLffJjo-85mmeWHsGbQ-pTHUq6JsDwSUv-Rh5yYlvU6BU4FZrPYfCss5cpJQi3OTegnUy-hjPl1bK_lQtN-B7JIYuMfkeUHnoICcXT9DCAu6S0yuzQtLNH_OGiTP_sV7gLRgsmtBmLDwAWIHew4hH6WZrLvCQ4jiUpQ5KAUsKFzlLI30PTCSnEg43HpLjgNtHNsbzwxznYMUsjy4kFrqOWlHQCcuOg_HfGKnmZ5ErVHZBVisDC5SuQ&s=WuUnGlO960H8-PKP2YaEJntyoZpKSx4psGRM-8P1KGCtWx73uw_C4sVjqpR0Oj4kKXKMiUE3I5kjvWMhFuP0cR-utJJCSVdLpArvWglb0U22PrROYMOK1r5DMo96wgnyQo2d5QDIBRGZavHeYXh2wdgXlzuGrOZoWwAD-GvxLLEE8dmVOwxcndiXfz15MXHP6txFxaRTddfFBXZdE21rgqWczsxBSNUwu4pM_IJbupOl3ojSnG7YJMgeCVpKlT_C_gdsTIWKenfTflQdWYzXXXk9himNUQ53bx_KVdACKq-a_bOjNfd4hK00ci8ba3X1nM3CS_5KhLP4FeHdUjyokQ&h=N2JK3Zh9QWPnFrGmYQX7pedKLtdwlARyRwB0Sol8sNg
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_RAGRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/account000002","name":"account000002","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"keyCreationTime":{"key1":"2024-12-12T08:46:34.8230391Z","key2":"2024-12-12T08:46:34.8230391Z"},"allowCrossTenantReplication":false,"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":false,"networkAcls":{"ipv6Rules":[],"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2024-12-12T08:46:36.7917391Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2024-12-12T08:46:36.7917391Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2024-12-12T08:46:34.6979853Z","primaryEndpoints":{"dfs":"https://account000002.dfs.core.windows.net/","web":"https://account000002.z22.web.core.windows.net/","blob":"https://account000002.blob.core.windows.net/","queue":"https://account000002.queue.core.windows.net/","table":"https://account000002.table.core.windows.net/","file":"https://account000002.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available","secondaryLocation":"eastus","statusOfSecondary":"available","secondaryEndpoints":{"dfs":"https://account000002-secondary.dfs.core.windows.net/","web":"https://account000002-secondary.z22.web.core.windows.net/","blob":"https://account000002-secondary.blob.core.windows.net/","queue":"https://account000002-secondary.queue.core.windows.net/","table":"https://account000002-secondary.table.core.windows.net/"}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1860'
       content-type:
       - application/json
       date:
-      - Thu, 26 May 2022 03:20:25 GMT
+      - Thu, 12 Dec 2024 08:46:56 GMT
       expires:
       - '-1'
       pragma:
@@ -129,12 +231,12 @@ interactions:
       - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/bf22f17f-9734-472a-b983-41bf5ce18193
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
     status:
       code: 200
       message: OK
@@ -154,12 +256,12 @@ interactions:
       ParameterSetName:
       - -n -g --query -o
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-azure-mgmt-storage/20.0.0 Python/3.9.12 (macOS-12.4-arm64-arm-64bit)
+      - AZURECLI/2.67.0 (PIP) azsdk-python-core/1.31.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/account000002/listKeys?api-version=2021-09-01&$expand=kerb
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/account000002/listKeys?api-version=2023-05-01&$expand=kerb
   response:
     body:
-      string: '{"keys":[{"creationTime":"2022-05-26T03:20:06.0733347Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2022-05-26T03:20:06.0733347Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+      string: '{"keys":[{"creationTime":"2024-12-12T08:46:34.8230391Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2024-12-12T08:46:34.8230391Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
     headers:
       cache-control:
       - no-cache
@@ -168,7 +270,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 26 May 2022 03:20:27 GMT
+      - Thu, 12 Dec 2024 08:46:58 GMT
       expires:
       - '-1'
       pragma:
@@ -177,14 +279,12 @@ interactions:
       - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/a46af3a1-4ccd-432d-9f7d-2b173bc1ae2b
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11998'
+      - '11997'
     status:
       code: 200
       message: OK
@@ -202,11 +302,11 @@ interactions:
       ParameterSetName:
       - --account-name --account-key
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-storage-blob/12.12.0 Python/3.9.12 (macOS-12.4-arm64-arm-64bit)
+      - AZURECLI/2.67.0 (PIP) azsdk-python-storage-blob/12.16.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Thu, 26 May 2022 03:20:29 GMT
+      - Thu, 12 Dec 2024 08:46:59 GMT
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     method: GET
     uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -217,13 +317,13 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Thu, 26 May 2022 03:20:31 GMT
+      - Thu, 12 Dec 2024 08:47:00 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     status:
       code: 200
       message: OK
@@ -241,11 +341,11 @@ interactions:
       ParameterSetName:
       - --static-website --index-document --404-document --account-name --account-key
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-storage-blob/12.12.0 Python/3.9.12 (macOS-12.4-arm64-arm-64bit)
+      - AZURECLI/2.67.0 (PIP) azsdk-python-storage-blob/12.16.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Thu, 26 May 2022 03:20:31 GMT
+      - Thu, 12 Dec 2024 08:47:00 GMT
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     method: GET
     uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -256,13 +356,13 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Thu, 26 May 2022 03:20:32 GMT
+      - Thu, 12 Dec 2024 08:47:01 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     status:
       code: 200
       message: OK
@@ -287,11 +387,11 @@ interactions:
       ParameterSetName:
       - --static-website --index-document --404-document --account-name --account-key
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-storage-blob/12.12.0 Python/3.9.12 (macOS-12.4-arm64-arm-64bit)
+      - AZURECLI/2.67.0 (PIP) azsdk-python-storage-blob/12.16.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Thu, 26 May 2022 03:20:32 GMT
+      - Thu, 12 Dec 2024 08:47:01 GMT
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     method: PUT
     uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -301,11 +401,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 26 May 2022 03:20:35 GMT
+      - Thu, 12 Dec 2024 08:47:02 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     status:
       code: 202
       message: Accepted
@@ -323,11 +423,11 @@ interactions:
       ParameterSetName:
       - --static-website --index-document --404-document --account-name --account-key
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-storage-blob/12.12.0 Python/3.9.12 (macOS-12.4-arm64-arm-64bit)
+      - AZURECLI/2.67.0 (PIP) azsdk-python-storage-blob/12.16.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Thu, 26 May 2022 03:20:36 GMT
+      - Thu, 12 Dec 2024 08:47:02 GMT
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     method: GET
     uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -338,13 +438,13 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Thu, 26 May 2022 03:20:35 GMT
+      - Thu, 12 Dec 2024 08:47:02 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     status:
       code: 200
       message: OK
@@ -362,11 +462,11 @@ interactions:
       ParameterSetName:
       - --delete-retention --delete-retention-period --account-name --account-key
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-storage-blob/12.12.0 Python/3.9.12 (macOS-12.4-arm64-arm-64bit)
+      - AZURECLI/2.67.0 (PIP) azsdk-python-storage-blob/12.16.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Thu, 26 May 2022 03:20:36 GMT
+      - Thu, 12 Dec 2024 08:47:03 GMT
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     method: GET
     uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -377,13 +477,13 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Thu, 26 May 2022 03:20:37 GMT
+      - Thu, 12 Dec 2024 08:47:03 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     status:
       code: 200
       message: OK
@@ -408,11 +508,11 @@ interactions:
       ParameterSetName:
       - --delete-retention --delete-retention-period --account-name --account-key
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-storage-blob/12.12.0 Python/3.9.12 (macOS-12.4-arm64-arm-64bit)
+      - AZURECLI/2.67.0 (PIP) azsdk-python-storage-blob/12.16.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Thu, 26 May 2022 03:20:38 GMT
+      - Thu, 12 Dec 2024 08:47:04 GMT
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     method: PUT
     uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -422,11 +522,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 26 May 2022 03:20:40 GMT
+      - Thu, 12 Dec 2024 08:47:04 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     status:
       code: 202
       message: Accepted
@@ -444,11 +544,11 @@ interactions:
       ParameterSetName:
       - --delete-retention --delete-retention-period --account-name --account-key
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-storage-blob/12.12.0 Python/3.9.12 (macOS-12.4-arm64-arm-64bit)
+      - AZURECLI/2.67.0 (PIP) azsdk-python-storage-blob/12.16.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Thu, 26 May 2022 03:20:41 GMT
+      - Thu, 12 Dec 2024 08:47:05 GMT
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     method: GET
     uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -459,13 +559,13 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Thu, 26 May 2022 03:20:41 GMT
+      - Thu, 12 Dec 2024 08:47:04 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     status:
       code: 200
       message: OK
@@ -483,11 +583,11 @@ interactions:
       ParameterSetName:
       - --set --account-name --account-key
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-storage-blob/12.12.0 Python/3.9.12 (macOS-12.4-arm64-arm-64bit)
+      - AZURECLI/2.67.0 (PIP) azsdk-python-storage-blob/12.16.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Thu, 26 May 2022 03:20:42 GMT
+      - Thu, 12 Dec 2024 08:47:06 GMT
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     method: GET
     uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -498,13 +598,13 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Thu, 26 May 2022 03:20:43 GMT
+      - Thu, 12 Dec 2024 08:47:06 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     status:
       code: 200
       message: OK
@@ -529,11 +629,11 @@ interactions:
       ParameterSetName:
       - --set --account-name --account-key
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-storage-blob/12.12.0 Python/3.9.12 (macOS-12.4-arm64-arm-64bit)
+      - AZURECLI/2.67.0 (PIP) azsdk-python-storage-blob/12.16.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Thu, 26 May 2022 03:20:44 GMT
+      - Thu, 12 Dec 2024 08:47:07 GMT
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     method: PUT
     uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -543,11 +643,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 26 May 2022 03:20:45 GMT
+      - Thu, 12 Dec 2024 08:47:08 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     status:
       code: 202
       message: Accepted
@@ -565,11 +665,11 @@ interactions:
       ParameterSetName:
       - --set --account-name --account-key
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-storage-blob/12.12.0 Python/3.9.12 (macOS-12.4-arm64-arm-64bit)
+      - AZURECLI/2.67.0 (PIP) azsdk-python-storage-blob/12.16.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Thu, 26 May 2022 03:20:46 GMT
+      - Thu, 12 Dec 2024 08:47:08 GMT
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     method: GET
     uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -580,13 +680,13 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Thu, 26 May 2022 03:20:46 GMT
+      - Thu, 12 Dec 2024 08:47:08 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     status:
       code: 200
       message: OK
@@ -604,11 +704,11 @@ interactions:
       ParameterSetName:
       - --set --account-name --account-key
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-storage-blob/12.12.0 Python/3.9.12 (macOS-12.4-arm64-arm-64bit)
+      - AZURECLI/2.67.0 (PIP) azsdk-python-storage-blob/12.16.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Thu, 26 May 2022 03:20:46 GMT
+      - Thu, 12 Dec 2024 08:47:09 GMT
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     method: GET
     uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -619,13 +719,13 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Thu, 26 May 2022 03:20:50 GMT
+      - Thu, 12 Dec 2024 08:47:09 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     status:
       code: 200
       message: OK
@@ -650,11 +750,11 @@ interactions:
       ParameterSetName:
       - --set --account-name --account-key
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-storage-blob/12.12.0 Python/3.9.12 (macOS-12.4-arm64-arm-64bit)
+      - AZURECLI/2.67.0 (PIP) azsdk-python-storage-blob/12.16.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Thu, 26 May 2022 03:20:51 GMT
+      - Thu, 12 Dec 2024 08:47:10 GMT
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     method: PUT
     uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -664,11 +764,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 26 May 2022 03:20:52 GMT
+      - Thu, 12 Dec 2024 08:47:10 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     status:
       code: 202
       message: Accepted
@@ -686,11 +786,11 @@ interactions:
       ParameterSetName:
       - --set --account-name --account-key
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-storage-blob/12.12.0 Python/3.9.12 (macOS-12.4-arm64-arm-64bit)
+      - AZURECLI/2.67.0 (PIP) azsdk-python-storage-blob/12.16.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Thu, 26 May 2022 03:20:53 GMT
+      - Thu, 12 Dec 2024 08:47:11 GMT
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     method: GET
     uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -701,13 +801,13 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Thu, 26 May 2022 03:20:52 GMT
+      - Thu, 12 Dec 2024 08:47:10 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     status:
       code: 200
       message: OK
@@ -725,11 +825,11 @@ interactions:
       ParameterSetName:
       - --set --account-name --account-key
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-storage-blob/12.12.0 Python/3.9.12 (macOS-12.4-arm64-arm-64bit)
+      - AZURECLI/2.67.0 (PIP) azsdk-python-storage-blob/12.16.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Thu, 26 May 2022 03:20:53 GMT
+      - Thu, 12 Dec 2024 08:47:12 GMT
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     method: GET
     uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -740,13 +840,13 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Thu, 26 May 2022 03:20:55 GMT
+      - Thu, 12 Dec 2024 08:47:12 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     status:
       code: 200
       message: OK
@@ -771,11 +871,11 @@ interactions:
       ParameterSetName:
       - --set --account-name --account-key
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-storage-blob/12.12.0 Python/3.9.12 (macOS-12.4-arm64-arm-64bit)
+      - AZURECLI/2.67.0 (PIP) azsdk-python-storage-blob/12.16.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Thu, 26 May 2022 03:20:55 GMT
+      - Thu, 12 Dec 2024 08:47:13 GMT
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     method: PUT
     uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -785,11 +885,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 26 May 2022 03:20:56 GMT
+      - Thu, 12 Dec 2024 08:47:13 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     status:
       code: 202
       message: Accepted
@@ -807,11 +907,11 @@ interactions:
       ParameterSetName:
       - --set --account-name --account-key
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-storage-blob/12.12.0 Python/3.9.12 (macOS-12.4-arm64-arm-64bit)
+      - AZURECLI/2.67.0 (PIP) azsdk-python-storage-blob/12.16.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Thu, 26 May 2022 03:20:57 GMT
+      - Thu, 12 Dec 2024 08:47:14 GMT
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     method: GET
     uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -822,13 +922,13 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Thu, 26 May 2022 03:20:56 GMT
+      - Thu, 12 Dec 2024 08:47:13 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     status:
       code: 200
       message: OK
@@ -846,11 +946,11 @@ interactions:
       ParameterSetName:
       - --account-name --account-key
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-storage-blob/12.12.0 Python/3.9.12 (macOS-12.4-arm64-arm-64bit)
+      - AZURECLI/2.67.0 (PIP) azsdk-python-storage-blob/12.16.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Thu, 26 May 2022 03:20:57 GMT
+      - Thu, 12 Dec 2024 08:47:14 GMT
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     method: GET
     uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -861,13 +961,255 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Thu, 26 May 2022 03:21:00 GMT
+      - Thu, 12 Dec 2024 08:47:15 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage blob service-properties update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --index-document --404-document --account-name --account-key
+      User-Agent:
+      - AZURECLI/2.67.0 (PIP) azsdk-python-storage-blob/12.16.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
+      x-ms-date:
+      - Thu, 12 Dec 2024 08:47:15 GMT
+      x-ms-version:
+      - '2022-11-02'
+    method: GET
+    uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
+  response:
+    body:
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><StorageServiceProperties><Logging><Version>1.0</Version><Read>false</Read><Write>false</Write><Delete>true</Delete><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></Logging><HourMetrics><Version>1.0</Version><Enabled>false</Enabled><RetentionPolicy><Enabled>true</Enabled><Days>7</Days></RetentionPolicy></HourMetrics><MinuteMetrics><Version>1.0</Version><Enabled>true</Enabled><IncludeAPIs>true</IncludeAPIs><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></MinuteMetrics><Cors
+        /><DeleteRetentionPolicy><Enabled>true</Enabled><Days>1</Days><AllowPermanentDelete>false</AllowPermanentDelete></DeleteRetentionPolicy><StaticWebsite><Enabled>true</Enabled><IndexDocument>index.html</IndexDocument><ErrorDocument404Path>error.html</ErrorDocument404Path></StaticWebsite></StorageServiceProperties>"
+    headers:
+      content-type:
+      - application/xml
+      date:
+      - Thu, 12 Dec 2024 08:47:15 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      transfer-encoding:
+      - chunked
+      x-ms-version:
+      - '2022-11-02'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '<?xml version=''1.0'' encoding=''utf-8''?>
+
+      <StorageServiceProperties><Logging><Version>1.0</Version><Delete>true</Delete><Read>false</Read><Write>false</Write><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></Logging><HourMetrics><Version>1.0</Version><Enabled>false</Enabled><RetentionPolicy><Enabled>true</Enabled><Days>7</Days></RetentionPolicy></HourMetrics><MinuteMetrics><Version>1.0</Version><Enabled>true</Enabled><IncludeAPIs>true</IncludeAPIs><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></MinuteMetrics><Cors
+      /><DeleteRetentionPolicy><Enabled>true</Enabled><Days>1</Days></DeleteRetentionPolicy><StaticWebsite><Enabled>true</Enabled><IndexDocument>index1.html</IndexDocument><ErrorDocument404Path>error2.html</ErrorDocument404Path></StaticWebsite></StorageServiceProperties>'
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage blob service-properties update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '806'
+      Content-Type:
+      - application/xml
+      ParameterSetName:
+      - --index-document --404-document --account-name --account-key
+      User-Agent:
+      - AZURECLI/2.67.0 (PIP) azsdk-python-storage-blob/12.16.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
+      x-ms-date:
+      - Thu, 12 Dec 2024 08:47:16 GMT
+      x-ms-version:
+      - '2022-11-02'
+    method: PUT
+    uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      date:
+      - Thu, 12 Dec 2024 08:47:17 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-version:
+      - '2022-11-02'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage blob service-properties update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --index-document --404-document --account-name --account-key
+      User-Agent:
+      - AZURECLI/2.67.0 (PIP) azsdk-python-storage-blob/12.16.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
+      x-ms-date:
+      - Thu, 12 Dec 2024 08:47:18 GMT
+      x-ms-version:
+      - '2022-11-02'
+    method: GET
+    uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
+  response:
+    body:
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><StorageServiceProperties><Logging><Version>1.0</Version><Read>false</Read><Write>false</Write><Delete>true</Delete><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></Logging><HourMetrics><Version>1.0</Version><Enabled>false</Enabled><RetentionPolicy><Enabled>true</Enabled><Days>7</Days></RetentionPolicy></HourMetrics><MinuteMetrics><Version>1.0</Version><Enabled>true</Enabled><IncludeAPIs>true</IncludeAPIs><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></MinuteMetrics><Cors
+        /><DeleteRetentionPolicy><Enabled>true</Enabled><Days>1</Days><AllowPermanentDelete>false</AllowPermanentDelete></DeleteRetentionPolicy><StaticWebsite><Enabled>true</Enabled><IndexDocument>index1.html</IndexDocument><ErrorDocument404Path>error2.html</ErrorDocument404Path></StaticWebsite></StorageServiceProperties>"
+    headers:
+      content-type:
+      - application/xml
+      date:
+      - Thu, 12 Dec 2024 08:47:18 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      transfer-encoding:
+      - chunked
+      x-ms-version:
+      - '2022-11-02'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage blob service-properties update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --static-website --account-name --account-key
+      User-Agent:
+      - AZURECLI/2.67.0 (PIP) azsdk-python-storage-blob/12.16.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
+      x-ms-date:
+      - Thu, 12 Dec 2024 08:47:18 GMT
+      x-ms-version:
+      - '2022-11-02'
+    method: GET
+    uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
+  response:
+    body:
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><StorageServiceProperties><Logging><Version>1.0</Version><Read>false</Read><Write>false</Write><Delete>true</Delete><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></Logging><HourMetrics><Version>1.0</Version><Enabled>false</Enabled><RetentionPolicy><Enabled>true</Enabled><Days>7</Days></RetentionPolicy></HourMetrics><MinuteMetrics><Version>1.0</Version><Enabled>true</Enabled><IncludeAPIs>true</IncludeAPIs><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></MinuteMetrics><Cors
+        /><DeleteRetentionPolicy><Enabled>true</Enabled><Days>1</Days><AllowPermanentDelete>false</AllowPermanentDelete></DeleteRetentionPolicy><StaticWebsite><Enabled>true</Enabled><IndexDocument>index1.html</IndexDocument><ErrorDocument404Path>error2.html</ErrorDocument404Path></StaticWebsite></StorageServiceProperties>"
+    headers:
+      content-type:
+      - application/xml
+      date:
+      - Thu, 12 Dec 2024 08:47:18 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      transfer-encoding:
+      - chunked
+      x-ms-version:
+      - '2022-11-02'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '<?xml version=''1.0'' encoding=''utf-8''?>
+
+      <StorageServiceProperties><Logging><Version>1.0</Version><Delete>true</Delete><Read>false</Read><Write>false</Write><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></Logging><HourMetrics><Version>1.0</Version><Enabled>false</Enabled><RetentionPolicy><Enabled>true</Enabled><Days>7</Days></RetentionPolicy></HourMetrics><MinuteMetrics><Version>1.0</Version><Enabled>true</Enabled><IncludeAPIs>true</IncludeAPIs><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></MinuteMetrics><Cors
+      /><DeleteRetentionPolicy><Enabled>true</Enabled><Days>1</Days></DeleteRetentionPolicy><StaticWebsite><Enabled>false</Enabled></StaticWebsite></StorageServiceProperties>'
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage blob service-properties update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '709'
+      Content-Type:
+      - application/xml
+      ParameterSetName:
+      - --static-website --account-name --account-key
+      User-Agent:
+      - AZURECLI/2.67.0 (PIP) azsdk-python-storage-blob/12.16.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
+      x-ms-date:
+      - Thu, 12 Dec 2024 08:47:19 GMT
+      x-ms-version:
+      - '2022-11-02'
+    method: PUT
+    uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      date:
+      - Thu, 12 Dec 2024 08:47:19 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-version:
+      - '2022-11-02'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage blob service-properties update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --static-website --account-name --account-key
+      User-Agent:
+      - AZURECLI/2.67.0 (PIP) azsdk-python-storage-blob/12.16.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
+      x-ms-date:
+      - Thu, 12 Dec 2024 08:47:20 GMT
+      x-ms-version:
+      - '2022-11-02'
+    method: GET
+    uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
+  response:
+    body:
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><StorageServiceProperties><Logging><Version>1.0</Version><Read>false</Read><Write>false</Write><Delete>true</Delete><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></Logging><HourMetrics><Version>1.0</Version><Enabled>false</Enabled><RetentionPolicy><Enabled>true</Enabled><Days>7</Days></RetentionPolicy></HourMetrics><MinuteMetrics><Version>1.0</Version><Enabled>true</Enabled><IncludeAPIs>true</IncludeAPIs><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></MinuteMetrics><Cors
+        /><DeleteRetentionPolicy><Enabled>true</Enabled><Days>1</Days><AllowPermanentDelete>false</AllowPermanentDelete></DeleteRetentionPolicy><StaticWebsite><Enabled>false</Enabled></StaticWebsite></StorageServiceProperties>"
+    headers:
+      content-type:
+      - application/xml
+      date:
+      - Thu, 12 Dec 2024 08:47:19 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      transfer-encoding:
+      - chunked
+      x-ms-version:
+      - '2022-11-02'
     status:
       code: 200
       message: OK
@@ -885,28 +1227,28 @@ interactions:
       ParameterSetName:
       - --days --account-name --account-key
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-storage-blob/12.12.0 Python/3.9.12 (macOS-12.4-arm64-arm-64bit)
+      - AZURECLI/2.67.0 (PIP) azsdk-python-storage-blob/12.16.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Thu, 26 May 2022 03:21:00 GMT
+      - Thu, 12 Dec 2024 08:47:21 GMT
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     method: GET
     uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
   response:
     body:
       string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><StorageServiceProperties><Logging><Version>1.0</Version><Read>false</Read><Write>false</Write><Delete>true</Delete><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></Logging><HourMetrics><Version>1.0</Version><Enabled>false</Enabled><RetentionPolicy><Enabled>true</Enabled><Days>7</Days></RetentionPolicy></HourMetrics><MinuteMetrics><Version>1.0</Version><Enabled>true</Enabled><IncludeAPIs>true</IncludeAPIs><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></MinuteMetrics><Cors
-        /><DeleteRetentionPolicy><Enabled>true</Enabled><Days>1</Days><AllowPermanentDelete>false</AllowPermanentDelete></DeleteRetentionPolicy><StaticWebsite><Enabled>true</Enabled><IndexDocument>index.html</IndexDocument><ErrorDocument404Path>error.html</ErrorDocument404Path></StaticWebsite></StorageServiceProperties>"
+        /><DeleteRetentionPolicy><Enabled>true</Enabled><Days>1</Days><AllowPermanentDelete>false</AllowPermanentDelete></DeleteRetentionPolicy><StaticWebsite><Enabled>false</Enabled></StaticWebsite></StorageServiceProperties>"
     headers:
       content-type:
       - application/xml
       date:
-      - Thu, 26 May 2022 03:21:00 GMT
+      - Thu, 12 Dec 2024 08:47:21 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     status:
       code: 200
       message: OK
@@ -930,11 +1272,11 @@ interactions:
       ParameterSetName:
       - --days --account-name --account-key
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-storage-blob/12.12.0 Python/3.9.12 (macOS-12.4-arm64-arm-64bit)
+      - AZURECLI/2.67.0 (PIP) azsdk-python-storage-blob/12.16.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Thu, 26 May 2022 03:21:01 GMT
+      - Thu, 12 Dec 2024 08:47:22 GMT
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     method: PUT
     uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -944,11 +1286,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 26 May 2022 03:21:01 GMT
+      - Thu, 12 Dec 2024 08:47:21 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     status:
       code: 202
       message: Accepted
@@ -966,28 +1308,28 @@ interactions:
       ParameterSetName:
       - --days --account-name --account-key
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-storage-blob/12.12.0 Python/3.9.12 (macOS-12.4-arm64-arm-64bit)
+      - AZURECLI/2.67.0 (PIP) azsdk-python-storage-blob/12.16.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Thu, 26 May 2022 03:21:02 GMT
+      - Thu, 12 Dec 2024 08:47:22 GMT
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     method: GET
     uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
   response:
     body:
       string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><StorageServiceProperties><Logging><Version>1.0</Version><Read>false</Read><Write>false</Write><Delete>true</Delete><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></Logging><HourMetrics><Version>1.0</Version><Enabled>false</Enabled><RetentionPolicy><Enabled>true</Enabled><Days>7</Days></RetentionPolicy></HourMetrics><MinuteMetrics><Version>1.0</Version><Enabled>true</Enabled><IncludeAPIs>true</IncludeAPIs><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></MinuteMetrics><Cors
-        /><DeleteRetentionPolicy><Enabled>true</Enabled><Days>2</Days><AllowPermanentDelete>false</AllowPermanentDelete></DeleteRetentionPolicy><StaticWebsite><Enabled>true</Enabled><IndexDocument>index.html</IndexDocument><ErrorDocument404Path>error.html</ErrorDocument404Path></StaticWebsite></StorageServiceProperties>"
+        /><DeleteRetentionPolicy><Enabled>true</Enabled><Days>2</Days><AllowPermanentDelete>false</AllowPermanentDelete></DeleteRetentionPolicy><StaticWebsite><Enabled>false</Enabled></StaticWebsite></StorageServiceProperties>"
     headers:
       content-type:
       - application/xml
       date:
-      - Thu, 26 May 2022 03:21:01 GMT
+      - Thu, 12 Dec 2024 08:47:22 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     status:
       code: 200
       message: OK
@@ -1005,28 +1347,28 @@ interactions:
       ParameterSetName:
       - --account-name --account-key
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-storage-blob/12.12.0 Python/3.9.12 (macOS-12.4-arm64-arm-64bit)
+      - AZURECLI/2.67.0 (PIP) azsdk-python-storage-blob/12.16.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Thu, 26 May 2022 03:21:03 GMT
+      - Thu, 12 Dec 2024 08:47:23 GMT
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     method: GET
     uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
   response:
     body:
       string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><StorageServiceProperties><Logging><Version>1.0</Version><Read>false</Read><Write>false</Write><Delete>true</Delete><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></Logging><HourMetrics><Version>1.0</Version><Enabled>false</Enabled><RetentionPolicy><Enabled>true</Enabled><Days>7</Days></RetentionPolicy></HourMetrics><MinuteMetrics><Version>1.0</Version><Enabled>true</Enabled><IncludeAPIs>true</IncludeAPIs><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></MinuteMetrics><Cors
-        /><DeleteRetentionPolicy><Enabled>true</Enabled><Days>2</Days><AllowPermanentDelete>false</AllowPermanentDelete></DeleteRetentionPolicy><StaticWebsite><Enabled>true</Enabled><IndexDocument>index.html</IndexDocument><ErrorDocument404Path>error.html</ErrorDocument404Path></StaticWebsite></StorageServiceProperties>"
+        /><DeleteRetentionPolicy><Enabled>true</Enabled><Days>2</Days><AllowPermanentDelete>false</AllowPermanentDelete></DeleteRetentionPolicy><StaticWebsite><Enabled>false</Enabled></StaticWebsite></StorageServiceProperties>"
     headers:
       content-type:
       - application/xml
       date:
-      - Thu, 26 May 2022 03:21:03 GMT
+      - Thu, 12 Dec 2024 08:47:23 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2021-06-08'
+      - '2022-11-02'
     status:
       code: 200
       message: OK

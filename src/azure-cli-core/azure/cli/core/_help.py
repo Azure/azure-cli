@@ -50,7 +50,7 @@ Here are the base commands:
 # Most of these methods override print methods in CLIHelp
 class CLIPrintMixin(CLIHelp):
     def _print_header(self, cli_name, help_file):
-        super(CLIPrintMixin, self)._print_header(cli_name, help_file)
+        super()._print_header(cli_name, help_file)
 
         links = help_file.links
         if links:
@@ -61,7 +61,7 @@ class CLIPrintMixin(CLIHelp):
 
     def _print_detailed_help(self, cli_name, help_file):
         CLIPrintMixin._print_extensions_msg(help_file)
-        super(CLIPrintMixin, self)._print_detailed_help(cli_name, help_file)
+        super()._print_detailed_help(cli_name, help_file)
         self._print_az_find_message(help_file.command)
 
     @staticmethod
@@ -131,12 +131,11 @@ class CLIPrintMixin(CLIHelp):
 class AzCliHelp(CLIPrintMixin, CLIHelp):
 
     def __init__(self, cli_ctx):
-        super(AzCliHelp, self).__init__(cli_ctx,
-                                        privacy_statement=PRIVACY_STATEMENT,
-                                        welcome_message=WELCOME_MESSAGE,
-                                        command_help_cls=CliCommandHelpFile,
-                                        group_help_cls=CliGroupHelpFile,
-                                        help_cls=CliHelpFile)
+        super().__init__(cli_ctx, privacy_statement=PRIVACY_STATEMENT,
+                         welcome_message=WELCOME_MESSAGE,
+                         command_help_cls=CliCommandHelpFile,
+                         group_help_cls=CliGroupHelpFile,
+                         help_cls=CliHelpFile)
         from knack.help import HelpObject
 
         # TODO: This workaround is used to avoid a bizarre bug in Python 2.7. It
@@ -171,13 +170,6 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
         self._print_detailed_help(cli_name, help_file)
         from azure.cli.core.util import show_updates_available
         show_updates_available(new_line_after=True)
-        show_link = self.cli_ctx.config.getboolean('output', 'show_survey_link', True)
-        from azure.cli.core.commands.constants import (SURVEY_PROMPT_STYLED, UX_SURVEY_PROMPT_STYLED)
-        from azure.cli.core.style import print_styled_text
-        if show_link:
-            print_styled_text(SURVEY_PROMPT_STYLED)
-            if not nouns:
-                print_styled_text(UX_SURVEY_PROMPT_STYLED)
 
     def get_examples(self, command, parser, is_group):
         """Get examples of a certain command from the help file.
@@ -254,8 +246,78 @@ class CliHelpFile(KnackHelpFile):
 
     def __init__(self, help_ctx, delimiters):
         # Each help file (for a command or group) has a version denoting the source of its data.
-        super(CliHelpFile, self).__init__(help_ctx, delimiters)
+        super().__init__(help_ctx, delimiters)
         self.links = []
+
+        from knack.deprecation import resolve_deprecate_info, ImplicitDeprecated, Deprecated
+        from azure.cli.core.breaking_change import UpcomingBreakingChangeTag, MergedStatusTag
+        direct_deprecate_info = None
+        breaking_changes = []
+        deprecate_info = resolve_deprecate_info(help_ctx.cli_ctx, delimiters)
+        if isinstance(deprecate_info, Deprecated):
+            direct_deprecate_info = deprecate_info
+        elif isinstance(deprecate_info, UpcomingBreakingChangeTag):
+            breaking_changes.append(deprecate_info)
+        # If there are more than two `deprecate_info` and/or upcoming breaking changes,
+        # extract them and store separately from the merged status tag.
+        elif isinstance(deprecate_info, MergedStatusTag):
+            depr, bcs = CliHelpFile.classify_merged_status_tag(deprecate_info)
+            direct_deprecate_info = depr[0] if depr else None
+            breaking_changes.extend(bcs)
+
+        # search for implicit deprecation
+        path_comps = delimiters.split()[:-1]
+        implicit_deprecate_info = None
+        while path_comps:
+            deprecate_info = resolve_deprecate_info(help_ctx.cli_ctx, ' '.join(path_comps))
+            if isinstance(deprecate_info, Deprecated) and implicit_deprecate_info is None:
+                implicit_deprecate_info = deprecate_info
+            elif isinstance(deprecate_info, UpcomingBreakingChangeTag):
+                breaking_changes.append(deprecate_info)
+            # If there are more than two `deprecate_info` and/or upcoming breaking changes,
+            # extract them and store separately from the merged status tag.
+            elif isinstance(deprecate_info, MergedStatusTag):
+                depr, bcs = CliHelpFile.classify_merged_status_tag(deprecate_info)
+                if depr and implicit_deprecate_info is None:
+                    implicit_deprecate_info = depr[0]
+                breaking_changes.extend(bcs)
+            del path_comps[-1]
+
+        if implicit_deprecate_info:
+            deprecate_kwargs = implicit_deprecate_info.__dict__.copy()
+            deprecate_kwargs['object_type'] = 'command' if delimiters in \
+                help_ctx.cli_ctx.invocation.commands_loader.command_table else 'command group'
+            del deprecate_kwargs['_get_tag']
+            del deprecate_kwargs['_get_message']
+            self.deprecate_info = ImplicitDeprecated(cli_ctx=help_ctx.cli_ctx, **deprecate_kwargs)
+        else:
+            self.deprecate_info = direct_deprecate_info
+
+        all_deprecate_info = [self.deprecate_info] if self.deprecate_info else []
+        all_deprecate_info.extend(breaking_changes)
+        if len(all_deprecate_info) > 1:
+            # Merge multiple `deprecate_info` and/or breaking changes so their messages can be displayed together.
+            self.deprecate_info = MergedStatusTag(help_ctx.cli_ctx, *all_deprecate_info)
+        elif all_deprecate_info:
+            self.deprecate_info = all_deprecate_info[0]
+
+    @staticmethod
+    def classify_merged_status_tag(merged_status_tag):
+        from knack.deprecation import Deprecated
+        from azure.cli.core.breaking_change import UpcomingBreakingChangeTag, MergedStatusTag
+
+        deprecate_info = []
+        breaking_changes = []
+        for tag in merged_status_tag.tags:
+            if isinstance(tag, Deprecated):
+                deprecate_info.append(tag)
+            elif isinstance(tag, UpcomingBreakingChangeTag):
+                breaking_changes.append(tag)
+            elif isinstance(tag, MergedStatusTag):
+                depr, bcs = CliHelpFile.classify_merged_status_tag(tag)
+                deprecate_info.extend(depr)
+                breaking_changes.extend(bcs)
+        return deprecate_info, breaking_changes
 
     def _should_include_example(self, ex):
         supported_profiles = ex.get('supported-profiles')
@@ -313,7 +375,7 @@ class CliGroupHelpFile(KnackGroupHelpFile, CliHelpFile):
 class CliCommandHelpFile(KnackCommandHelpFile, CliHelpFile):
 
     def __init__(self, help_ctx, delimiters, parser):
-        super(CliCommandHelpFile, self).__init__(help_ctx, delimiters, parser)
+        super().__init__(help_ctx, delimiters, parser)
         self.type = 'command'
         self.command_source = getattr(parser, 'command_source', None)
 
@@ -346,7 +408,7 @@ class CliCommandHelpFile(KnackCommandHelpFile, CliHelpFile):
             param.__class__ = HelpParameter
 
     def _load_from_data(self, data):
-        super(CliCommandHelpFile, self)._load_from_data(data)
+        super()._load_from_data(data)
 
         if isinstance(data, str) or not self.parameters or not data.get('parameters'):
             return
@@ -370,7 +432,7 @@ class ArgumentGroupRegistry(KnackArgumentGroupRegistry):  # pylint: disable=too-
 
     def __init__(self, group_list):
 
-        super(ArgumentGroupRegistry, self).__init__(group_list)
+        super().__init__(group_list)
         self.priorities = {
             None: 0,
             'Resource Id Arguments': 1,
@@ -391,7 +453,7 @@ class HelpExample(KnackHelpExample):  # pylint: disable=too-few-public-methods
         # Old attributes
         _data['name'] = _data.get('name', '')
         _data['text'] = _data.get('text', '')
-        super(HelpExample, self).__init__(_data)
+        super().__init__(_data)
 
         self.name = _data.get('summary', '') if _data.get('summary', '') else self.name
         self.text = _data.get('command', '') if _data.get('command', '') else self.text
@@ -420,11 +482,8 @@ class HelpExample(KnackHelpExample):  # pylint: disable=too-few-public-methods
 
 class HelpParameter(KnackHelpParameter):  # pylint: disable=too-many-instance-attributes
 
-    def __init__(self, **kwargs):
-        super(HelpParameter, self).__init__(**kwargs)
-
     def update_from_data(self, data):
-        super(HelpParameter, self).update_from_data(data)
+        super().update_from_data(data)
         # original help.py value_sources are strings, update command strings to value-source dict
         if self.value_sources:
             self.value_sources = [str_or_dict if isinstance(str_or_dict, dict) else {"link": {"command": str_or_dict}}

@@ -8,6 +8,7 @@ import base64
 import binascii
 import getpass
 import json
+import yaml
 import logging
 import os
 import platform
@@ -17,7 +18,7 @@ import sys
 from urllib.request import urlopen
 
 from knack.log import get_logger
-from knack.util import CLIError, to_snake_case
+from knack.util import CLIError, to_snake_case, to_camel_case
 
 logger = get_logger(__name__)
 
@@ -27,10 +28,10 @@ COMPONENT_PREFIX = 'azure-cli-'
 SSLERROR_TEMPLATE = ('Certificate verification failed. This typically happens when using Azure CLI behind a proxy '
                      'that intercepts traffic with a self-signed certificate. '
                      # pylint: disable=line-too-long
-                     'Please add this certificate to the trusted CA bundle. More info: https://docs.microsoft.com/cli/azure/use-cli-effectively#work-behind-a-proxy.')
+                     'Please add this certificate to the trusted CA bundle. More info: https://learn.microsoft.com/cli/azure/use-cli-effectively#work-behind-a-proxy.')
 
 QUERY_REFERENCE = ("To learn more about --query, please visit: "
-                   "'https://docs.microsoft.com/cli/azure/query-azure-cli'")
+                   "'https://learn.microsoft.com/cli/azure/query-azure-cli'")
 
 
 _PROXYID_RE = re.compile(
@@ -55,18 +56,12 @@ DISALLOWED_USER_NAMES = [
 def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statements, too-many-branches
     # For error code, follow guidelines at https://docs.python.org/2/library/sys.html#sys.exit,
     from jmespath.exceptions import JMESPathError
-    from msrestazure.azure_exceptions import CloudError
     from msrest.exceptions import HttpOperationError, ValidationError, ClientRequestError
     from azure.common import AzureException
-    from azure.core.exceptions import AzureError, ServiceRequestError
+    from azure.core.exceptions import AzureError, ServiceRequestError, HttpResponseError
     from requests.exceptions import SSLError, HTTPError
     from azure.cli.core import azclierror
     from msal_extensions.persistence import PersistenceError
-    import traceback
-
-    logger.debug("azure.cli.core.util.handle_exception is called with an exception:")
-    # Print the traceback and exception message
-    logger.debug(traceback.format_exc())
 
     error_msg = getattr(ex, 'message', str(ex))
     exit_code = 1
@@ -87,7 +82,7 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
         az_error = azclierror.AzureConnectionError(error_msg)
         az_error.set_recommendation(SSLERROR_TEMPLATE)
 
-    elif isinstance(ex, CloudError):
+    elif isinstance(ex, HttpResponseError):
         if extract_common_error_message(ex):
             error_msg = extract_common_error_message(ex)
         status_code = str(getattr(ex, 'status_code', 'Unknown Code'))
@@ -96,6 +91,14 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
 
     elif isinstance(ex, ValidationError):
         az_error = azclierror.ValidationError(error_msg)
+
+    elif isinstance(ex, azclierror.HTTPError):
+        # For resources that don't support CAE - 401 can't be handled
+        if ex.response.status_code == 401 and 'WWW-Authenticate' in ex.response.headers:
+            az_error = azclierror.AuthenticationError(ex)
+            az_error.set_recommendation("Interactive authentication is needed. Please run:\naz logout\naz login")
+        else:
+            az_error = azclierror.UnclassifiedUserFault(ex)
 
     elif isinstance(ex, CLIError):
         # TODO: Fine-grained analysis here
@@ -158,7 +161,8 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
         error_msg = "The command failed with an unexpected error. Here is the traceback:"
         az_error = azclierror.CLIInternalError(error_msg)
         az_error.set_exception_trace(ex)
-        az_error.set_recommendation("To open an issue, please run: 'az feedback'")
+        az_error.set_recommendation(
+            "To check existing issues, please visit: https://github.com/Azure/azure-cli/issues")
 
     if isinstance(az_error, azclierror.ResourceNotFoundError):
         exit_code = 3
@@ -308,7 +312,7 @@ def get_latest_from_github(package_path='azure-cli'):
 
 
 def _update_latest_from_github(versions):
-    if not check_connectivity(max_retries=0):
+    if not check_connectivity(url='https://raw.githubusercontent.com', max_retries=0):
         return versions, False
     success = True
     for pkg in ['azure-cli-core', 'azure-cli-telemetry']:
@@ -490,9 +494,9 @@ def show_updates(updates_available_components, only_show_when_updates_available=
             logger.warning('Unable to check if your CLI is up-to-date. Check your internet connection.')
     elif updates_available_components:  # pylint: disable=too-many-nested-blocks
         if in_cloud_console():
-            warning_msg = 'You have %i updates available. They will be updated with the next build of Cloud Shell.'
+            warning_msg = 'You have %i update(s) available. They will be updated with the next build of Cloud Shell.'
         else:
-            warning_msg = "You have %i updates available."
+            warning_msg = "You have %i update(s) available."
             if CLI_PACKAGE_NAME in updates_available_components:
                 warning_msg = "{} Consider updating your CLI installation with 'az upgrade'".format(warning_msg)
         logger.warning(warning_msg, len(updates_available_components))
@@ -525,6 +529,18 @@ def get_file_json(file_path, throw_on_empty=True, preserve_order=False):
     except CLIError as ex:
         # Reading file bypasses shell interpretation, so we discard the recommendation for shell quoting.
         raise CLIError("Failed to parse file '{}' with exception:\n{}".format(file_path, ex))
+
+
+def get_file_yaml(file_path, throw_on_empty=True):
+    content = read_file_content(file_path)
+    if not content:
+        if throw_on_empty:
+            raise CLIError("Failed to parse file '{}' with exception:\nNo content in the file.".format(file_path))
+        return None
+    try:
+        return yaml.safe_load(content)
+    except yaml.parser.ParserError as ex:
+        raise CLIError("Failed to parse file '{}' with exception:\n{}".format(file_path, ex)) from ex
 
 
 def read_file_content(file_path, allow_binary=False):
@@ -571,7 +587,7 @@ def shell_safe_json_parse(json_or_dict_string, preserve_order=False, strict=True
             # Recommendation for all shells
             from azure.cli.core.azclierror import InvalidArgumentValueError
             recommendation = "The provided JSON string may have been parsed by the shell. See " \
-                             "https://docs.microsoft.com/cli/azure/use-cli-effectively#use-quotation-marks-in-arguments"
+                             "https://learn.microsoft.com/cli/azure/use-azure-cli-successfully-quoting#json-strings"
 
             # Recommendation especially for PowerShell
             parent_proc = get_parent_proc_name()
@@ -608,6 +624,40 @@ def b64_to_hex(s):
     return hex_data
 
 
+def todict(obj, post_processor=None):
+    """
+    Convert an object to a dictionary. Use 'post_processor(original_obj, dictionary)' to update the
+    dictionary in the process
+    """
+    from datetime import date, time, datetime, timedelta
+    from enum import Enum
+    if isinstance(obj, dict):
+        result = {k: todict(v, post_processor) for (k, v) in obj.items()}
+        return post_processor(obj, result) if post_processor else result
+    if isinstance(obj, list):
+        return [todict(a, post_processor) for a in obj]
+    if isinstance(obj, Enum):
+        return obj.value
+    if isinstance(obj, (date, time, datetime)):
+        return obj.isoformat()
+    if isinstance(obj, timedelta):
+        return str(obj)
+    # This is the only difference with knack.util.todict because for typespec generated SDKs
+    # The base model stores data in obj.__dict__['_data'] instead of in obj.__dict__
+    # We need to call obj.as_dict() to extract data for this kind of model
+    if hasattr(obj, 'as_dict') and not hasattr(obj, '_attribute_map'):
+        result = {to_camel_case(k): todict(v, post_processor) for k, v in obj.as_dict().items()}
+        return post_processor(obj, result) if post_processor else result
+    if hasattr(obj, '_asdict'):
+        return todict(obj._asdict(), post_processor)
+    if hasattr(obj, '__dict__'):
+        result = {to_camel_case(k): todict(v, post_processor)
+                  for k, v in obj.__dict__.items()
+                  if not callable(v) and not k.startswith('_')}
+        return post_processor(obj, result) if post_processor else result
+    return obj
+
+
 def random_string(length=16, force_lower=False, digits_only=False):
     from string import ascii_letters, digits, ascii_lowercase
     from random import choice
@@ -638,14 +688,8 @@ def in_cloud_console():
 
 def get_arg_list(op):
     import inspect
-
-    try:
-        # only supported in python3 - falling back to argspec if not available
-        sig = inspect.signature(op)
-        return sig.parameters
-    except AttributeError:
-        sig = inspect.getargspec(op)  # pylint: disable=deprecated-method
-        return sig.args
+    sig = inspect.signature(op)
+    return sig.parameters
 
 
 def is_track2(client_class):
@@ -665,11 +709,10 @@ def should_disable_connection_verify():
 
 
 def poller_classes():
-    from msrestazure.azure_operation import AzureOperationPoller
     from msrest.polling.poller import LROPoller
     from azure.core.polling import LROPoller as AzureCoreLROPoller
     from azure.cli.core.aaz._poller import AAZLROPoller
-    return (AzureOperationPoller, LROPoller, AzureCoreLROPoller, AAZLROPoller)
+    return (LROPoller, AzureCoreLROPoller, AAZLROPoller)
 
 
 def augment_no_wait_handler_args(no_wait_enabled, handler, handler_args):
@@ -706,7 +749,7 @@ def open_page_in_browser(url):
 
     if is_wsl():   # windows 10 linux subsystem
         try:
-            # https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_powershell_exe
+            # https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_powershell_exe
             # Ampersand (&) should be quoted
             return subprocess.Popen(
                 ['powershell.exe', '-NoProfile', '-Command', 'Start-Process "{}"'.format(url)]).wait()
@@ -741,6 +784,11 @@ def is_wsl():
 def is_windows():
     platform_name, _ = _get_platform_info()
     return platform_name == 'windows'
+
+
+def is_github_codespaces():
+    # https://docs.github.com/en/codespaces/developing-in-a-codespace/default-environment-variables-for-your-codespace
+    return os.environ.get('CODESPACES') == 'true'
 
 
 def can_launch_browser():
@@ -886,6 +934,9 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
     if 'User-Agent' in headers:
         agents.append(headers['User-Agent'])
     headers['User-Agent'] = ' '.join(agents)
+
+    from azure.cli.core.telemetry import set_user_agent
+    set_user_agent(headers['User-Agent'])
 
     if generated_client_request_id_name:
         headers[generated_client_request_id_name] = str(uuid.uuid4())
@@ -1342,3 +1393,36 @@ def should_encrypt_token_cache(cli_ctx):
     encrypt = cli_ctx.config.getboolean('core', 'encrypt_token_cache', fallback=fallback)
 
     return encrypt
+
+
+def run_cmd(args, *, capture_output=False, timeout=None, check=False, encoding=None, env=None):
+    """Run command in a subprocess. It reduces (not eliminates) shell injection by forcing args to be a list
+    and shell=False. Other arguments are keyword-only. For their documentation, see
+    https://docs.python.org/3/library/subprocess.html#subprocess.run
+    """
+    if not isinstance(args, list):
+        from azure.cli.core.azclierror import ArgumentUsageError
+        raise ArgumentUsageError("Invalid args. run_cmd args must be a list")
+
+    import subprocess
+    return subprocess.run(args, capture_output=capture_output, timeout=timeout, check=check,
+                          encoding=encoding, env=env)
+
+
+def run_az_cmd(args, out_file=None):
+    """
+    run_az_cmd would run az related cmds during command execution
+    :param args: cmd to be executed, array of string, like `["az", "version"]`, "az" is optional
+    :param out_file: The file to send output to. file-like object
+    :return: cmd execution result object, containing `result`, `error`, `exit_code`
+    """
+    from azure.cli.core.azclierror import ArgumentUsageError
+    if not isinstance(args, list):
+        raise ArgumentUsageError("Invalid args. run_az_cmd args must be a list")
+    if args[0] == "az":
+        args = args[1:]
+
+    from azure.cli.core import get_default_cli
+    cli = get_default_cli()
+    cli.invoke(args, out_file=out_file)
+    return cli.result

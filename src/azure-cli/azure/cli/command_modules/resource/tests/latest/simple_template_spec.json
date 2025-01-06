@@ -1,0 +1,57 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.10.61.36676",
+      "templateHash": "11934527272858304086"
+    }
+  },
+  "parameters": {
+    "name": {
+      "type": "string"
+    },
+    "specVersionName": {
+      "type": "string",
+      "defaultValue": "v1"
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/templateSpecs",
+      "apiVersion": "2022-02-01",
+      "name": "[parameters('name')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "displayName": "DanteTemplateSpec",
+        "description": "Template Spec for testing stacks."
+      }
+    },
+    {
+      "type": "Microsoft.Resources/templateSpecs/versions",
+      "apiVersion": "2022-02-01",
+      "name": "[format('{0}/{1}', parameters('name'), parameters('specVersionName'))]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "description": "generated version number for testing stacks",
+        "mainTemplate": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {},
+          "functions": [],
+          "variables": {},
+          "resources": [],
+          "outputs": {}
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/templateSpecs', parameters('name'))]"
+      ]
+    }
+  ]
+}

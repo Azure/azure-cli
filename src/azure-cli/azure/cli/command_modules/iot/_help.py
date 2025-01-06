@@ -10,7 +10,6 @@ from knack.help_files import helps  # pylint: disable=unused-import
 helps['iot'] = """
 type: group
 short-summary: Manage Internet of Things (IoT) assets.
-long-summary: Comprehensive IoT data-plane functionality is available in the Azure IoT CLI Extension. For more info and install guide go to https://github.com/Azure/azure-iot-cli-extension
 """
 
 helps['iot dps'] = """
@@ -66,6 +65,9 @@ examples:
   - name: Update shared access policy 'MyPolicy' in an Azure IoT Hub Device Provisioning Service instance with EnrollmentWrite right
     text: >
         az iot dps policy update --dps-name MyDps --resource-group MyResourceGroup --policy-name MyPolicy --rights EnrollmentWrite
+  - name: Regenerate keys for access policy 'MyPolicy' by updating keys to empty values
+    text: >
+        az iot dps policy update --dps-name MyDps --resource-group MyResourceGroup --policy-name MyPolicy --primary-key "" --secondary-key ""
 """
 
 helps['iot dps certificate'] = """
@@ -151,7 +153,7 @@ examples:
 helps['iot dps create'] = """
 type: command
 short-summary: Create an Azure IoT Hub Device Provisioning Service instance.
-long-summary: For an introduction to Azure IoT Hub Device Provisioning Service, see https://docs.microsoft.com/azure/iot-dps/about-iot-dps
+long-summary: For an introduction to Azure IoT Hub Device Provisioning Service, see https://learn.microsoft.com/azure/iot-dps/about-iot-dps
 examples:
   - name: Create an Azure IoT Hub Device Provisioning Service with the standard pricing tier S1, in the region of the resource group.
     text: >
@@ -184,10 +186,10 @@ short-summary: Create a linked IoT hub in an Azure IoT Hub Device Provisioning S
 examples:
   - name: Create a linked IoT hub in an Azure IoT Hub Device Provisioning Service instance
     text: >
-        az iot dps linked-hub create --dps-name MyDps --resource-group MyResourceGroup --connection-string HostName=test.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=XNBhoasdfhqRlgGnasdfhivtshcwh4bJwe7c0RIGuWsirW0= --location westus
+        az iot dps linked-hub create --dps-name MyDps --resource-group MyResourceGroup --location westus --connection-string 'HostName=myhub.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=12345'
   - name: Create a linked IoT hub in an Azure IoT Hub Device Provisioning Service which applies allocation weight and weight being 10
     text: >
-        az iot dps linked-hub create --dps-name MyDps --resource-group MyResourceGroup --connection-string HostName=test.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=XNBhoasdfhqRlgGnasdfhivtshcwh4bJwe7c0RIGuWsirW0= --location westus --allocation-weight 10 --apply-allocation-policy True
+        az iot dps linked-hub create --dps-name MyDps --resource-group MyResourceGroup --location westus --allocation-weight 10 --apply-allocation-policy True --connection-string 'HostName=myhub.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=12345'
 """
 
 helps['iot dps linked-hub delete'] = """
@@ -269,7 +271,7 @@ short-summary: Manage IoT Hub certificates.
 helps['iot hub certificate create'] = """
 type: command
 short-summary: Create/upload an Azure IoT Hub certificate.
-long-summary: For a detailed explanation of CA certificates in Azure IoT Hub, see https://docs.microsoft.com/azure/iot-hub/iot-hub-x509ca-overview
+long-summary: For a detailed explanation of CA certificates in Azure IoT Hub, see https://learn.microsoft.com/azure/iot-hub/iot-hub-x509ca-overview
 examples:
   - name: Uploads a verified CA certificate PEM file to an IoT hub.
     text: >
@@ -285,7 +287,7 @@ examples:
 helps['iot hub certificate delete'] = """
 type: command
 short-summary: Deletes an Azure IoT Hub certificate.
-long-summary: For a detailed explanation of CA certificates in Azure IoT Hub, see https://docs.microsoft.com/azure/iot-hub/iot-hub-x509ca-overview
+long-summary: For a detailed explanation of CA certificates in Azure IoT Hub, see https://learn.microsoft.com/azure/iot-hub/iot-hub-x509ca-overview
 examples:
   - name: Deletes MyCertificate
     text: >
@@ -295,7 +297,7 @@ examples:
 helps['iot hub certificate generate-verification-code'] = """
 type: command
 short-summary: Generates a verification code for an Azure IoT Hub certificate.
-long-summary: This verification code is used to complete the proof of possession step for a certificate. Use this verification code as the CN of a new certificate signed with the root certificates private key. For a detailed explanation of CA certificates in Azure IoT Hub, see https://docs.microsoft.com/azure/iot-hub/iot-hub-x509ca-overview
+long-summary: This verification code is used to complete the proof of possession step for a certificate. Use this verification code as the CN of a new certificate signed with the root certificates private key. For a detailed explanation of CA certificates in Azure IoT Hub, see https://learn.microsoft.com/azure/iot-hub/iot-hub-x509ca-overview
 examples:
   - name: Generates a verification code for MyCertificate
     text: >
@@ -308,7 +310,7 @@ examples:
 helps['iot hub certificate list'] = """
 type: command
 short-summary: Lists all certificates contained within an Azure IoT Hub
-long-summary: For a detailed explanation of CA certificates in Azure IoT Hub, see https://docs.microsoft.com/azure/iot-hub/iot-hub-x509ca-overview
+long-summary: For a detailed explanation of CA certificates in Azure IoT Hub, see https://learn.microsoft.com/azure/iot-hub/iot-hub-x509ca-overview
 examples:
   - name: List all certificates in MyIotHub
     text: >
@@ -318,7 +320,7 @@ examples:
 helps['iot hub certificate show'] = """
 type: command
 short-summary: Shows information about a particular Azure IoT Hub certificate.
-long-summary: For a detailed explanation of CA certificates in Azure IoT Hub, see https://docs.microsoft.com/azure/iot-hub/iot-hub-x509ca-overview
+long-summary: For a detailed explanation of CA certificates in Azure IoT Hub, see https://learn.microsoft.com/azure/iot-hub/iot-hub-x509ca-overview
 examples:
   - name: Show details about MyCertificate
     text: >
@@ -331,7 +333,7 @@ examples:
 helps['iot hub certificate update'] = """
 type: command
 short-summary: Update an Azure IoT Hub certificate.
-long-summary: Uploads a new certificate to replace the existing certificate with the same name. For a detailed explanation of CA certificates in Azure IoT Hub, see https://docs.microsoft.com/azure/iot-hub/iot-hub-x509ca-overview
+long-summary: Uploads a new certificate to replace the existing certificate with the same name. For a detailed explanation of CA certificates in Azure IoT Hub, see https://learn.microsoft.com/azure/iot-hub/iot-hub-x509ca-overview
 examples:
   - name: Updates a CA certificate in an IoT hub by uploading a new PEM file.
     text: >
@@ -344,7 +346,7 @@ examples:
 helps['iot hub certificate verify'] = """
 type: command
 short-summary: Verifies an Azure IoT Hub certificate.
-long-summary: Verifies a certificate by uploading a verification certificate containing the verification code obtained by calling generate-verification-code. This is the last step in the proof of possession process. For a detailed explanation of CA certificates in Azure IoT Hub, see https://docs.microsoft.com/azure/iot-hub/iot-hub-x509ca-overview
+long-summary: Verifies a certificate by uploading a verification certificate containing the verification code obtained by calling generate-verification-code. This is the last step in the proof of possession process. For a detailed explanation of CA certificates in Azure IoT Hub, see https://learn.microsoft.com/azure/iot-hub/iot-hub-x509ca-overview
 examples:
   - name: Verifies ownership of the MyCertificate private key.
     text: >
@@ -397,7 +399,7 @@ examples:
 helps['iot hub create'] = """
 type: command
 short-summary: Create an Azure IoT hub.
-long-summary: For an introduction to Azure IoT Hub, see https://docs.microsoft.com/azure/iot-hub/
+long-summary: For an introduction to Azure IoT Hub, see https://learn.microsoft.com/azure/iot-hub/
 examples:
   - name: Create an IoT Hub with the free pricing tier F1, in the region of the resource group.
     text: >
@@ -699,10 +701,10 @@ examples:
   - name: Add a new endpoint "E2" of type EventHub to "MyIotHub" IoT Hub.
     text: >
         az iot hub routing-endpoint create --resource-group MyResourceGroup --hub-name MyIotHub --endpoint-name E2 --endpoint-type eventhub --endpoint-resource-group {ResourceGroup} --endpoint-subscription-id {SubscriptionId} --connection-string {ConnectionString}
-  - name: Add a new endpoint "S1" of type AzureStorageContainer to "MyIotHub" IoT Hub.
+  - name: Add a new endpoint "S1" of type AzureStorageContainer to the "MyIotHub" IoT Hub within the endpoint resource group "MyEndpointResourceGroup".
     text: |
         az iot hub routing-endpoint create --resource-group MyResourceGroup --hub-name MyIotHub \\
-        --endpoint-name S1 --endpoint-type azurestoragecontainer --endpoint-resource-group "[Resource Group]" \\
+        --endpoint-name S1 --endpoint-type azurestoragecontainer --endpoint-resource-group MyEndpointResourceGroup \\
         --endpoint-subscription-id {SubscriptionId} --connection-string {ConnectionString} \\
         --container-name {ContainerName} --batch-frequency 100 --chunk-size 100 \\
         --ff {iothub}-{partition}-{YYYY}-{MM}-{DD}-{HH}-{mm}
@@ -842,6 +844,21 @@ examples:
   - name: Update the IoT Hub local authentication, device SAS, and module SAS settings
     text: >
         az iot hub update -n MyIoTHub --disable-local-auth --disable-device-sas false --disable-module-sas true
+"""
+
+helps['iot hub wait'] = """
+type: command
+short-summary: Wait until an operation on an IoT Hub instance is complete.
+examples:
+  - name: Wait until an existing IoT Hub instance is created
+    text: >
+        az iot hub wait -n MyIoTHub --created
+  - name: Wait until an IoT Hub instance is deleted
+    text: >
+        az iot hub wait -n MyIoTHub --deleted
+  - name: Wait until an existing IoT Hub instance has an Active state
+    text: >
+        az iot hub wait -n MyIoTHub --custom "properties.state=='Active'"
 """
 
 helps['iot central'] = """

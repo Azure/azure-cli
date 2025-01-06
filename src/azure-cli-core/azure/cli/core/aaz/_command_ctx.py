@@ -12,13 +12,14 @@ from ._arg_action import AAZArgActionOperations, AAZGenericUpdateAction
 from ._base import AAZUndefined
 from ._field_type import AAZObjectType
 from ._field_value import AAZObject
+from ._selector import AAZSelectors
 from .exceptions import AAZInvalidArgValueError
 
 
 class AAZCommandCtx:
 
     def __init__(self, cli_ctx, schema, command_args, no_wait_arg=None):
-        self._cli_ctx = cli_ctx
+        self.cli_ctx = cli_ctx
         self._profile = Profile(cli_ctx=cli_ctx)
         self._subscription_id = None
         self.args = schema()
@@ -29,9 +30,15 @@ class AAZCommandCtx:
                     cmd_arg.apply(self.args, dest)
                 elif cmd_arg != AAZUndefined:
                     self.args[dest] = cmd_arg
+            elif dest == "subscription":
+                # support to specify the command's subscription when call AAZCommand directly in code
+                if isinstance(cmd_arg, str):
+                    self._subscription_id = cmd_arg
+
         self._clients = {}
         self._vars_schema = AAZObjectType()
         self.vars = AAZObject(schema=self._vars_schema, data={})
+        self.selectors = AAZSelectors()
         self.generic_update_args = command_args.get(AAZGenericUpdateAction.DEST, None)
         # support no wait
         self.lro_no_wait = command_args.get(no_wait_arg, False) if no_wait_arg else False
@@ -64,9 +71,9 @@ class AAZCommandCtx:
             assert client_type
             client_cls = registered_clients[client_type]
             credential = self.get_login_credential()
-            client_kwargs = _prepare_client_kwargs_track2(self._cli_ctx)
+            client_kwargs = _prepare_client_kwargs_track2(self.cli_ctx)
             client_kwargs['user_agent'] += " (AAZ)"  # Add AAZ label in user agent
-            self._clients[client_type] = client_cls(self._cli_ctx, credential, **client_kwargs)
+            self._clients[client_type] = client_cls(self, credential=credential, **client_kwargs)
 
         return self._clients[client_type]
 
@@ -87,7 +94,7 @@ class AAZCommandCtx:
     def subscription_id(self):
         from azure.cli.core.commands.client_factory import get_subscription_id
         if self._subscription_id is None:
-            self._subscription_id = get_subscription_id(cli_ctx=self._cli_ctx)
+            self._subscription_id = get_subscription_id(cli_ctx=self.cli_ctx)
         return self._subscription_id
 
     @property
@@ -113,7 +120,7 @@ class AAZCommandCtx:
 
 def get_subscription_locations(ctx: AAZCommandCtx):
     from azure.cli.core.commands.parameters import get_subscription_locations as _get_subscription_locations
-    return _get_subscription_locations(ctx._cli_ctx)
+    return _get_subscription_locations(ctx.cli_ctx)
 
 
 def get_resource_group_location(ctx: AAZCommandCtx, rg_name: str):
@@ -121,7 +128,7 @@ def get_resource_group_location(ctx: AAZCommandCtx, rg_name: str):
     from azure.cli.core.profiles import ResourceType
     from azure.core.exceptions import ResourceNotFoundError
 
-    resource_client = get_mgmt_service_client(ctx._cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+    resource_client = get_mgmt_service_client(ctx.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
     try:
         rg = resource_client.resource_groups.get(rg_name)
     except ResourceNotFoundError:

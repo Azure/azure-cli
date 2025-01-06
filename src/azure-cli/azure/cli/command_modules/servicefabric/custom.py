@@ -8,22 +8,18 @@
 import os
 import time
 
+from urllib.parse import urlparse
+
 from OpenSSL import crypto
-
-try:
-    from urllib.parse import urlparse
-except ImportError:
-    from urlparse import urlparse  # pylint: disable=import-error
-
-from msrestazure.azure_exceptions import CloudError
+from cryptography.hazmat.primitives.serialization import pkcs12
+from cryptography.hazmat.primitives import hashes
 
 from azure.cli.core.util import CLIError, get_file_json, b64_to_hex, sdk_no_wait
 from azure.cli.core.commands import LongRunningOperation
-from azure.graphrbac import GraphRbacManagementClient
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.command_modules.servicefabric._arm_deployment_utils import validate_and_deploy_arm_template
 from azure.cli.command_modules.servicefabric._sf_utils import _get_resource_group_by_name, _create_resource_group_name
-from azure.core.exceptions import ResourceNotFoundError
+from azure.core.exceptions import ResourceNotFoundError, HttpResponseError
 
 from azure.mgmt.servicefabric.models import (ClusterUpdateParameters,
                                              ClientCertificateThumbprint,
@@ -32,16 +28,6 @@ from azure.mgmt.servicefabric.models import (ClusterUpdateParameters,
                                              SettingsParameterDescription,
                                              NodeTypeDescription,
                                              EndpointRangeDescription)
-from azure.mgmt.network.models import (PublicIPAddress,
-                                       Subnet,
-                                       SubResource as NetworkSubResource,
-                                       InboundNatPool,
-                                       Probe,
-                                       PublicIPAddressDnsSettings,
-                                       LoadBalancer,
-                                       FrontendIPConfiguration,
-                                       BackendAddressPool,
-                                       LoadBalancingRule)
 from azure.mgmt.compute.models import (VaultCertificate,
                                        Sku as ComputeSku,
                                        UpgradePolicy,
@@ -66,8 +52,7 @@ from knack.log import get_logger
 from ._client_factory import (resource_client_factory,
                               keyvault_client_factory,
                               compute_client_factory,
-                              storage_client_factory,
-                              network_client_factory)
+                              storage_client_factory)
 logger = get_logger(__name__)
 
 DEFAULT_ADMIN_USER_NAME = "adminuser"
@@ -487,7 +472,7 @@ def remove_cluster_node(cmd, client, resource_group_name, cluster_name, node_typ
     compute_client = compute_client_factory(cli_ctx)
     cluster = client.get(resource_group_name, cluster_name)
     node_types = [n for n in cluster.node_types if n.name.lower() == node_type.lower()]
-    if node_types is None:
+    if node_types is None or len(node_types) == 0:
         raise CLIError("Failed to find the node type in the cluster")
 
     node_type = node_types[0]
@@ -737,14 +722,21 @@ def _add_node_type_to_sfrp(cmd, client, resource_group_name, cluster_name, clust
 
 
 def _create_vmss(cmd, resource_group_name, cluster_name, cluster, node_type_name, durability_level, vm_password, vm_user_name, vm_sku, vm_tier, capacity):
+    from .aaz.latest.network.lb import Create as LBCreate, Show as LBShow
+    from .aaz.latest.network.public_ip import Create as PublicIPCreate
+    from .aaz.latest.network.vnet import List as VNetList
+    from .aaz.latest.network.vnet.subnet import Create as SubnetCreate, List as SubnetList
+
     cli_ctx = cmd.cli_ctx
     subnet_name = "subnet_{}".format(1)
-    network_client = network_client_factory(cli_ctx)
     location = _get_resource_group_by_name(cli_ctx, resource_group_name).location
-    virtual_network = list(
-        network_client.virtual_networks.list(resource_group_name))[0]
-    subnets = list(network_client.subnets.list(
-        resource_group_name, virtual_network.name))
+    virtual_network = list(VNetList(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name
+    }))[0]
+    subnets = SubnetList(cli_ctx=cli_ctx)(command_args={
+        "vnet_name": virtual_network["name"],
+        "resource_group": resource_group_name
+    })
     address_prefix = None
     index = None
     for x in range(1, 255):
@@ -752,123 +744,117 @@ def _create_vmss(cmd, resource_group_name, cluster_name, cluster, node_type_name
         index = x
         found = False
         for s in subnets:
-            if address_prefix == s.address_prefix:
+            if address_prefix == s["addressPrefix"]:
                 found = True
-            if subnet_name.lower() == s.name.lower():
+            if subnet_name.lower() == s["name"].lower():
                 subnet_name = "subnet_{}".format(x)
         if found is False:
             break
 
     if address_prefix is None:
         raise CLIError("Failed to generate the address prefix")
-    poller = network_client.subnets.begin_create_or_update(resource_group_name,
-                                                           virtual_network.name,
-                                                           subnet_name,
-                                                           Subnet(address_prefix=address_prefix))
 
+    poller = SubnetCreate(cli_ctx=cli_ctx)(command_args={
+        "name": subnet_name,
+        "vnet_name": virtual_network["name"],
+        "resource_group": resource_group_name,
+        "address_prefix": address_prefix
+    })
     subnet = LongRunningOperation(cli_ctx)(poller)
 
-    public_address_name = 'LBIP-{}-{}{}'.format(
-        cluster_name.lower(), node_type_name.lower(), index)
-    dns_label = '{}-{}{}'.format(cluster_name.lower(),
-                                 node_type_name.lower(), index)
-    lb_name = 'LB-{}-{}{}'.format(cluster_name.lower(),
-                                  node_type_name.lower(), index)
+    public_address_name = 'LBIP-{}-{}{}'.format(cluster_name.lower(), node_type_name.lower(), index)
+    dns_label = '{}-{}{}'.format(cluster_name.lower(), node_type_name.lower(), index)
+    lb_name = 'LB-{}-{}{}'.format(cluster_name.lower(), node_type_name.lower(), index)
     if len(lb_name) >= 24:
         lb_name = '{}{}'.format(lb_name[0:21], index)
-    poller = network_client.public_ip_addresses.begin_create_or_update(resource_group_name,
-                                                                       public_address_name,
-                                                                       PublicIPAddress(public_ip_allocation_method='Dynamic',
-                                                                                       location=location,
-                                                                                       dns_settings=PublicIPAddressDnsSettings(domain_name_label=dns_label)))
 
-    publicIp = LongRunningOperation(cli_ctx)(poller)
+    poller = PublicIPCreate(cli_ctx=cli_ctx)(command_args={
+        "name": public_address_name,
+        "resource_group": resource_group_name,
+        "location": location,
+        "allocation_method": "Dynamic",
+        "dns_name": dns_label
+    })
+    public_ip = LongRunningOperation(cli_ctx)(poller)
+
     from azure.cli.core.commands.client_factory import get_subscription_id
     subscription_id = get_subscription_id(cli_ctx)
-    new_load_balancer_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/loadBalancers/{}'.format(
-        subscription_id, resource_group_name, lb_name)
-    backend_address_poll_name = "LoadBalancerBEAddressPool"
+    backend_address_pool_name = "LoadBalancerBEAddressPool"
     frontendip_configuration_name = "LoadBalancerIPConfig"
     probe_name = "FabricGatewayProbe"
     probe_http_name = "FabricHttpGatewayProbe"
     inbound_nat_pools_name = "LoadBalancerBEAddressNatPool"
 
-    new_load_balancer = LoadBalancer(id=new_load_balancer_id,
-                                     location=location,
-                                     frontend_ip_configurations=[FrontendIPConfiguration(name=frontendip_configuration_name,
-                                                                                         public_ip_address=PublicIPAddress(id=publicIp.id))],
-                                     backend_address_pools=[BackendAddressPool(
-                                         name=backend_address_poll_name)],
-                                     load_balancing_rules=[LoadBalancingRule(name='LBRule',
-                                                                             backend_address_pool=NetworkSubResource(id='/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/loadBalancers/{}/backendAddressPools/{}'.
-                                                                                                                     format(subscription_id,
-                                                                                                                            resource_group_name,
-                                                                                                                            lb_name,
-                                                                                                                            backend_address_poll_name)),
-                                                                             backend_port=DEFAULT_TCP_PORT,
-                                                                             enable_floating_ip=False,
-                                                                             frontend_ip_configuration=NetworkSubResource(id='/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/loadBalancers/{}/frontendIPConfigurations/{}'.format(subscription_id,
-                                                                                                                                                                                                                                                   resource_group_name,
-                                                                                                                                                                                                                                                   lb_name,
-                                                                                                                                                                                                                                                   frontendip_configuration_name)),
-                                                                             frontend_port=DEFAULT_TCP_PORT,
-                                                                             idle_timeout_in_minutes=5,
-                                                                             protocol='tcp',
-                                                                             probe=NetworkSubResource(id='/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/loadBalancers/{}/probes/{}'.format(subscription_id,
-                                                                                                                                                                                                             resource_group_name,
-                                                                                                                                                                                                             lb_name,
-                                                                                                                                                                                                             probe_name))),
-                                                           LoadBalancingRule(name='LBHttpRule',
-                                                                             backend_address_pool=NetworkSubResource(id='/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/loadBalancers/{}/backendAddressPools/{}'.format(subscription_id,
-                                                                                                                                                                                                                                         resource_group_name,
-                                                                                                                                                                                                                                         lb_name,
-                                                                                                                                                                                                                                         backend_address_poll_name)),
-                                                                             backend_port=DEFAULT_HTTP_PORT,
-                                                                             enable_floating_ip=False,
-                                                                             frontend_ip_configuration=NetworkSubResource(id='/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/loadBalancers/{}/frontendIPConfigurations/{}'.format(subscription_id,
-                                                                                                                                                                                                                                                   resource_group_name,
-                                                                                                                                                                                                                                                   lb_name,
-                                                                                                                                                                                                                                                   frontendip_configuration_name)),
-                                                                             frontend_port=DEFAULT_HTTP_PORT,
-                                                                             idle_timeout_in_minutes=5,
-                                                                             protocol='tcp',
-                                                                             probe=NetworkSubResource(id='/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/loadBalancers/{}/probes/{}'.format(subscription_id,
-                                                                                                                                                                                                             resource_group_name,
-                                                                                                                                                                                                             lb_name,
-                                                                                                                                                                                                             probe_http_name)))],
-                                     probes=[Probe(protocol='tcp',
-                                                   name=probe_name,
-                                                   interval_in_seconds=5,
-                                                   number_of_probes=2,
-                                                   port=DEFAULT_TCP_PORT),
-                                             Probe(protocol='tcp',
-                                                   name=probe_http_name,
-                                                   interval_in_seconds=5,
-                                                   number_of_probes=2,
-                                                   port=DEFAULT_HTTP_PORT)],
-
-                                     inbound_nat_pools=[InboundNatPool(protocol='tcp',
-                                                                       name=inbound_nat_pools_name,
-                                                                       backend_port=DEFAULT_BACKEND_PORT,
-                                                                       frontend_ip_configuration=NetworkSubResource(id='/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/loadBalancers/{}/frontendIPConfigurations/{}'.format(subscription_id,
-                                                                                                                                                                                                                                             resource_group_name,
-                                                                                                                                                                                                                                             lb_name,
-                                                                                                                                                                                                                                             frontendip_configuration_name)),
-                                                                       frontend_port_range_start=DEFAULT_FRONTEND_PORT_RANGE_START,
-                                                                       frontend_port_range_end=DEFAULT_FRONTEND_PORT_RANGE_END)])
-
-    poller = network_client.load_balancers.begin_create_or_update(
-        resource_group_name, lb_name, new_load_balancer)
+    poller = LBCreate(cli_ctx=cli_ctx)(command_args={
+        "name": lb_name,
+        "resource_group": resource_group_name,
+        "location": location,
+        "frontend_ip_configurations": [{
+            "name": frontendip_configuration_name,
+            "public_ip_address": {"id": public_ip["id"]}
+        }],
+        "backend_address_pools": [{"name": backend_address_pool_name}],
+        "load_balancing_rules": [
+            {
+                "name": "LBRule",
+                "backend_address_pool": {"id": f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Network/loadBalancers/{lb_name}/backendAddressPools/{backend_address_pool_name}"},
+                "backend_port": DEFAULT_TCP_PORT,
+                "enable_floating_ip": False,
+                "frontend_ip_configuration": {"id": f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Network/loadBalancers/{lb_name}/frontendIPConfigurations/{frontendip_configuration_name}"},
+                "frontend_port": DEFAULT_TCP_PORT,
+                "idle_timeout_in_minutes": 5,
+                "protocol": "Tcp",
+                "probe": {"id": f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Network/loadBalancers/{lb_name}/probes/{probe_name}"}
+            },
+            {
+                "name": "LBHttpRule",
+                "backend_address_pool": {"id": f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Network/loadBalancers/{lb_name}/backendAddressPools/{backend_address_pool_name}"},
+                "backend_port": DEFAULT_HTTP_PORT,
+                "enable_floating_ip": False,
+                "frontend_ip_configuration": {"id": f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Network/loadBalancers/{lb_name}/frontendIPConfigurations/{frontendip_configuration_name}"},
+                "frontend_port": DEFAULT_HTTP_PORT,
+                "idle_timeout_in_minutes": 5,
+                "protocol": "Tcp",
+                "probe": {"id": f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Network/loadBalancers/{lb_name}/probes/{probe_http_name}"}
+            }
+        ],
+        "probes": [
+            {
+                "name": probe_name,
+                "protocol": "Tcp",
+                "interval_in_seconds": 5,
+                "number_of_probes": 2,
+                "port": DEFAULT_TCP_PORT
+            },
+            {
+                "name": probe_http_name,
+                "protocol": "Tcp",
+                "interval_in_seconds": 5,
+                "number_of_probes": 2,
+                "port": DEFAULT_HTTP_PORT
+            }
+        ],
+        "inbound_nat_pools": [{
+            "name": inbound_nat_pools_name,
+            "protocol": "Tcp",
+            "backend_port": DEFAULT_BACKEND_PORT,
+            "frontend_ip_configuration": {"id": f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Network/loadBalancers/{lb_name}/frontendIPConfigurations/{frontendip_configuration_name}"},
+            "frontend_port_range_start": DEFAULT_FRONTEND_PORT_RANGE_START,
+            "frontend_port_range_end": DEFAULT_FRONTEND_PORT_RANGE_END
+        }]
+    })
     LongRunningOperation(cli_ctx)(poller)
 
-    new_load_balancer = network_client.load_balancers.get(
-        resource_group_name, lb_name)
+    new_load_balancer = LBShow(cli_ctx=cli_ctx)(command_args={
+        "name": lb_name,
+        "resource_group": resource_group_name
+    })
     backend_address_pools = []
     inbound_nat_pools = []
-    for p in new_load_balancer.backend_address_pools:
-        backend_address_pools.append(SubResource(id=p.id))
-    for p in new_load_balancer.inbound_nat_pools:
-        inbound_nat_pools.append(SubResource(id=p.id))
+    for p in new_load_balancer["backendAddressPools"]:
+        backend_address_pools.append(SubResource(id=p["id"]))
+    for p in new_load_balancer["inboundNatPools"]:
+        inbound_nat_pools.append(SubResource(id=p["id"]))
 
     network_config_name = 'NIC-{}-{}'.format(node_type_name.lower(), node_type_name.lower())
     if len(network_config_name) >= 24:
@@ -882,7 +868,7 @@ def _create_vmss(cmd, resource_group_name, cluster_name, cluster, node_type_name
                                                                                                                                            ip_configurations=[VirtualMachineScaleSetIPConfiguration(name=ip_config_name,
                                                                                                                                                                                                     load_balancer_backend_address_pools=backend_address_pools,
                                                                                                                                                                                                     load_balancer_inbound_nat_pools=inbound_nat_pools,
-                                                                                                                                                                                                    subnet=ApiEntityReference(id=subnet.id))])])
+                                                                                                                                                                                                    subnet=ApiEntityReference(id=subnet["id"]))])])
     compute_client = compute_client_factory(cli_ctx)
 
     node_type_name_ref = cluster.node_types[0].name
@@ -1115,10 +1101,10 @@ def _create_certificate(cmd,
             result = import_certificate(
                 cli_ctx, vault_uri, certificate_name, certificate_file, password=certificate_password)
             vault_id = vault.id
-            secret_url = result.sid
+            secret_url = result.secret_id
             import base64
             certificate_thumbprint = b64_to_hex(
-                base64.b64encode(result.x509_thumbprint))
+                base64.b64encode(result.properties.x509_thumbprint))
 
         else:
             if vault is None:
@@ -1129,18 +1115,20 @@ def _create_certificate(cmd,
             vault_uri = vault.properties.vault_uri
             certificate_name = _get_certificate_name(certificate_subject_name, resource_group_name)
 
-            policy = _get_default_policy(cli_ctx, certificate_subject_name)
+            from azure.cli.command_modules.keyvault._validators import build_certificate_policy
+            from knack.util import todict
+            policy = _get_default_policy(certificate_subject_name)
+            policyObj = build_certificate_policy(cli_ctx, todict(policy))
             logger.info("Creating self-signed certificate")
-            _create_self_signed_key_vault_certificate.__doc__ = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'key_vault_client#KeyVaultClient').__doc__
             result = _create_self_signed_key_vault_certificate(
-                cli_ctx, vault_uri, certificate_name, policy, certificate_output_folder=certificate_output_folder)
+                cli_ctx, vault_uri, certificate_name, policyObj, certificate_output_folder=certificate_output_folder)
             kv_result = result[0]
             output_file = result[1]
             vault_id = vault.id
-            secret_url = kv_result.sid
+            secret_url = kv_result.secret_id
             import base64
             certificate_thumbprint = b64_to_hex(
-                base64.b64encode(kv_result.x509_thumbprint))
+                base64.b64encode(kv_result.properties.x509_thumbprint))
 
     return vault_id, secret_url, certificate_thumbprint, output_file
 
@@ -1366,8 +1354,8 @@ def _safe_get_vault(cli_ctx, resource_group_name, vault_name):
         return vault
     except ResourceNotFoundError:
         return None
-    except CloudError as ex:
-        if ex.error.error == 'ResourceNotFound':
+    except HttpResponseError as ex:
+        if ex.status_code == '404':
             return None
         raise
 
@@ -1387,24 +1375,23 @@ def _get_thumbprint_from_secret_identifier(cli_ctx, vault, secret_identifier):
     secret_version = segment[3]
     vault_uri_group = _get_vault_uri_and_resource_group_name(cli_ctx, vault)
     vault_uri = vault_uri_group[0]
-    client_not_arm = _get_keyVault_not_arm_client(cli_ctx)
-    secret = client_not_arm.get_secret(vault_uri, secret_name, secret_version)
+    client_not_arm = _get_keyvault_secret_client(cli_ctx, vault_uri)
+    secret = client_not_arm.get_secret(secret_name, secret_version)
     cert_bytes = secret.value
     x509 = None
+    thumbprint = None
     import base64
     decoded = base64.b64decode(cert_bytes)
     try:
-        x509 = crypto.load_pkcs12(decoded).get_certificate()
+        p12 = pkcs12.load_pkcs12(decoded, None)
     except (ValueError, crypto.Error):
         pass
 
-    if not x509:
-        x509 = crypto.load_certificate(crypto.FILETYPE_PEM, cert_bytes)
+    if p12.cert is None:
+        raise Exception("certificate is None")  # pylint: disable=broad-exception-raised
 
-    if not x509:
-        raise Exception('invalid certificate')
-
-    thumbprint = x509.digest("sha1").decode("utf-8").replace(':', '')
+    x509 = p12.cert.certificate
+    thumbprint = x509.fingerprint(hashes.SHA1()).hex().upper()
     return thumbprint
 
 
@@ -1416,10 +1403,7 @@ def _get_certificate(client, vault_base_url, certificate_name):
 
 def import_certificate(cli_ctx, vault_base_url, certificate_name, certificate_data,
                        disabled=False, password=None, certificate_policy=None, tags=None):
-    CertificateAttributes = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.certificate_attributes#CertificateAttributes')
-    CertificatePolicy = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.certificate_policy#CertificatePolicy')
-    SecretProperties = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.secret_properties#SecretProperties')
-    import binascii
+    from azure.cli.command_modules.keyvault._validators import build_certificate_policy
     certificate_data = open(certificate_data, 'rb').read()
     x509 = None
     content_type = None
@@ -1427,63 +1411,28 @@ def import_certificate(cli_ctx, vault_base_url, certificate_name, certificate_da
         x509 = crypto.load_certificate(crypto.FILETYPE_PEM, certificate_data)
         # if we get here, we know it was a PEM file
         content_type = 'application/x-pem-file'
-        try:
-            # for PEM files (including automatic endline conversion for
-            # Windows)
-            certificate_data = certificate_data.decode(
-                'utf-8').replace('\r\n', '\n')
-        except UnicodeDecodeError:
-            certificate_data = binascii.b2a_base64(
-                certificate_data).decode('utf-8')
     except (ValueError, crypto.Error):
         pass
 
     if not x509:
-        try:
-            if password:
-                x509 = crypto.load_pkcs12(
-                    certificate_data, password).get_certificate()
-            else:
-                x509 = crypto.load_pkcs12(certificate_data).get_certificate()
-            content_type = 'application/x-pkcs12'
-            certificate_data = binascii.b2a_base64(
-                certificate_data).decode('utf-8')
-        except crypto.Error:
-            raise CLIError(
-                'We could not parse the provided certificate as .pem or .pfx. '
-                'Please verify the certificate with OpenSSL.')
-
-    not_before, not_after = None, None
-
-    if x509.get_notBefore():
-        not_before = _asn1_to_iso8601(x509.get_notBefore())
-
-    if x509.get_notAfter():
-        not_after = _asn1_to_iso8601(x509.get_notAfter())
-
-    cert_attrs = CertificateAttributes(enabled=not disabled,
-                                       not_before=not_before,
-                                       expires=not_after)
+        content_type = 'application/x-pkcs12'
 
     if certificate_policy:
         secret_props = certificate_policy.get('secret_properties')
         if secret_props:
             secret_props['content_type'] = content_type
         elif certificate_policy and not secret_props:
-            certificate_policy['secret_properties'] = SecretProperties(
-                content_type=content_type)
+            certificate_policy['secret_properties'] = {'content_type': content_type}
     else:
-        certificate_policy = CertificatePolicy(
-            secret_properties=SecretProperties(content_type=content_type))
+        certificate_policy = {'secret_properties': {'content_type': content_type}}
 
+    policyObj = build_certificate_policy(cli_ctx, certificate_policy)
     logger.info("Starting 'keyvault certificate import'")
-    client_not_arm = _get_keyVault_not_arm_client(cli_ctx)
-    result = client_not_arm.import_certificate(cli_ctx=cli_ctx,
-                                               vault_base_url=vault_base_url,
-                                               certificate_name=certificate_name,
-                                               base64_encoded_certificate=certificate_data,
-                                               certificate_attributes=cert_attrs,
-                                               certificate_policy=certificate_policy,
+    client_not_arm = _get_keyvault_cert_client(cli_ctx, vault_base_url)
+    result = client_not_arm.import_certificate(certificate_name=certificate_name,
+                                               certificate_bytes=certificate_data,
+                                               enabled=not disabled,
+                                               policy=policyObj,
                                                tags=tags,
                                                password=password)
 
@@ -1492,19 +1441,19 @@ def import_certificate(cli_ctx, vault_base_url, certificate_name, certificate_da
 
 
 def _download_secret(cli_ctx, vault_base_url, secret_name, pem_path, pfx_path, secret_version=''):
-    client = _get_keyVault_not_arm_client(cli_ctx)
-    secret = client.get_secret(vault_base_url, secret_name, secret_version)
+    client = _get_keyvault_secret_client(cli_ctx, vault_base_url)
+    secret = client.get_secret(secret_name, secret_version)
     secret_value = secret.value
     if pem_path:
         try:
             import base64
             decoded = base64.b64decode(secret_value)
-            p12 = crypto.load_pkcs12(decoded)
+            p12 = pkcs12.load_pkcs12(decoded, None)
             f_pem = open(pem_path, 'wb')
             f_pem.write(crypto.dump_privatekey(
-                crypto.FILETYPE_PEM, p12.get_privatekey()))
+                crypto.FILETYPE_PEM, p12.key))
             f_pem.write(crypto.dump_certificate(
-                crypto.FILETYPE_PEM, p12.get_certificate()))
+                crypto.FILETYPE_PEM, p12.cert))
             ca = p12.get_ca_certificates()
             if ca is not None:
                 for cert in ca:
@@ -1520,7 +1469,7 @@ def _download_secret(cli_ctx, vault_base_url, secret_name, pem_path, pfx_path, s
         try:
             import base64
             decoded = base64.b64decode(secret_value)
-            p12 = crypto.load_pkcs12(decoded)
+            p12 = pkcs12.load_pkcs12(decoded, None)
             with open(pfx_path, 'wb') as f:
                 f.write(decoded)
         except Exception as ex:  # pylint: disable=broad-except
@@ -1529,80 +1478,52 @@ def _download_secret(cli_ctx, vault_base_url, secret_name, pem_path, pfx_path, s
             raise ex
 
 
-def _get_default_policy(cli_ctx, subject):
+def _get_default_policy(subject):
     if subject.lower().startswith('cn') is not True:
         subject = "CN={0}".format(subject)
-    return _default_certificate_profile(cli_ctx, subject)
-
-
-def _default_certificate_profile(cli_ctx, subject):
-    CertificateAttributes = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.certificate_attributes#CertificateAttributes')
-    CertificatePolicy = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.certificate_policy#CertificatePolicy')
-    ActionType = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.key_vault_client_enums#ActionType')
-    KeyUsageType = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.key_vault_client_enums#KeyUsageType')
-    IssuerParameters = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.issuer_parameters#IssuerParameters')
-    KeyProperties = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.key_properties#KeyProperties')
-    LifetimeAction = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.lifetime_action#LifetimeAction')
-    SecretProperties = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.secret_properties#SecretProperties')
-    X509CertificateProperties = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.x509_certificate_properties#X509CertificateProperties')
-    Trigger = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.trigger#Trigger')
-    Action = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.action#Action')
-    template = CertificatePolicy(key_properties=KeyProperties(exportable=True,
-                                                              key_type=u'RSA',
-                                                              key_size=2048,
-                                                              reuse_key=True),
-                                 secret_properties=SecretProperties(
-                                     content_type=u'application/x-pkcs12'),
-                                 x509_certificate_properties=X509CertificateProperties(key_usage=[KeyUsageType.c_rl_sign,
-                                                                                                  KeyUsageType.data_encipherment,
-                                                                                                  KeyUsageType.digital_signature,
-                                                                                                  KeyUsageType.key_encipherment,
-                                                                                                  KeyUsageType.key_agreement,
-                                                                                                  KeyUsageType.key_cert_sign],
-                                                                                       subject=subject,
-                                                                                       validity_in_months=12),
-                                 lifetime_actions=[LifetimeAction(trigger=Trigger(days_before_expiry=90),
-                                                                  action=Action(action_type=ActionType.auto_renew))],
-                                 issuer_parameters=IssuerParameters(
-                                     name=u'Self',),
-                                 attributes=CertificateAttributes(enabled=True))
-
-    return template
+    cert_policy = {
+        'issuer_parameters': {
+            'name': 'Self'
+        },
+        'key_properties': {
+            'exportable': True,
+            'key_size': 2048,
+            'key_type': 'RSA',
+            'reuse_key': True
+        },
+        'lifetime_actions': [{
+            'action': {
+                'action_type': 'AutoRenew'
+            },
+            'trigger': {
+                'days_before_expiry': 90
+            }
+        }],
+        'secret_properties': {
+            'content_type': 'application/x-pkcs12'
+        },
+        'x509_certificate_properties': {
+            'key_usage': [
+                'cRLSign',
+                'dataEncipherment',
+                'digitalSignature',
+                'keyEncipherment',
+                'keyAgreement',
+                'keyCertSign'
+            ],
+            'subject': subject,
+            'validity_in_months': 12
+        }
+    }
+    return cert_policy
 
 
 def _create_self_signed_key_vault_certificate(cli_ctx, vault_base_url, certificate_name, certificate_policy, certificate_output_folder=None, disabled=False, tags=None, validity=None):
-    CertificateAttributes = get_sdk(cli_ctx, ResourceType.DATA_KEYVAULT, 'models.certificate_attributes#CertificateAttributes')
-    cert_attrs = CertificateAttributes(enabled=not disabled)
     logger.info("Starting long-running operation 'keyvault certificate create'")
-    if validity is not None:
-        certificate_policy['x509_certificate_properties']['validity_in_months'] = validity
-    client = _get_keyVault_not_arm_client(cli_ctx)
-    client.create_certificate(
-        vault_base_url, certificate_name, certificate_policy, cert_attrs, tags)
-
-    # otherwise loop until the certificate creation is complete
-    while True:
-        check = client.get_certificate_operation(
-            vault_base_url, certificate_name)
-        if check.status != 'inProgress':
-            logger.info("Long-running operation 'keyvault certificate create' finished with result %s.",
-                        check)
-            break
-        try:
-            time.sleep(10)
-        except KeyboardInterrupt:
-            logger.info("Long-running operation wait cancelled.")
-            raise
-        except Exception as client_exception:
-            message = getattr(client_exception, 'message', client_exception)
-            import json
-            try:
-                message = str(message) + ' ' + json.loads(
-                    client_exception.response.text)['error']['details'][0]['message']   # pylint: disable=no-member
-            except:  # pylint: disable=bare-except
-                pass
-
-            raise CLIError('{}'.format(message))
+    if validity:
+        certificate_policy._validity_in_months = validity  # pylint: disable=protected-access
+    client = _get_keyvault_cert_client(cli_ctx, vault_base_url)
+    client.begin_create_certificate(certificate_name, certificate_policy, enabled=not disabled, tags=tags).result()
 
     pem_output_folder = None
     if certificate_output_folder is not None:
@@ -1613,12 +1534,19 @@ def _create_self_signed_key_vault_certificate(cli_ctx, vault_base_url, certifica
             certificate_output_folder, certificate_name + '.pfx')
         _download_secret(cli_ctx, vault_base_url, certificate_name,
                          pem_output_folder, pfx_output_folder)
-    return client.get_certificate(vault_base_url, certificate_name, ''), pem_output_folder
+    return client.get_certificate(certificate_name), pem_output_folder
 
 
-def _get_keyVault_not_arm_client(cli_ctx):
-    from azure.cli.command_modules.keyvault._client_factory import keyvault_data_plane_factory
-    return keyvault_data_plane_factory(cli_ctx)
+def _get_keyvault_secret_client(cli_ctx, vault_base_url):
+    from azure.cli.command_modules.keyvault._client_factory import data_plane_azure_keyvault_secret_client
+    command_args = {'vault_base_url': vault_base_url}
+    return data_plane_azure_keyvault_secret_client(cli_ctx, command_args)
+
+
+def _get_keyvault_cert_client(cli_ctx, vault_base_url):
+    from azure.cli.command_modules.keyvault._client_factory import data_plane_azure_keyvault_certificate_client
+    command_args = {'vault_base_url': vault_base_url}
+    return data_plane_azure_keyvault_certificate_client(cli_ctx, command_args)
 
 
 def _create_keyvault(cmd,
@@ -1631,16 +1559,6 @@ def _create_keyvault(cmd,
                      enabled_for_disk_encryption=None,
                      enabled_for_template_deployment=None,
                      no_self_perms=None, tags=None):
-
-    from azure.cli.core._profile import Profile
-    from azure.graphrbac.models import GraphErrorException
-    profile = Profile(cli_ctx=cli_ctx)
-    cred, _, tenant_id = profile.get_login_credentials(
-        resource=cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
-    graph_client = GraphRbacManagementClient(cred,
-                                             tenant_id,
-                                             base_url=cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
-    subscription = profile.get_subscription()
     VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters', resource_type=ResourceType.MGMT_KEYVAULT, operation_group='vaults')
     VaultProperties = cmd.get_models('VaultProperties', resource_type=ResourceType.MGMT_KEYVAULT, operation_group='vaults')
     KeyVaultSku = cmd.get_models('Sku', resource_type=ResourceType.MGMT_KEYVAULT, operation_group='vaults')
@@ -1650,6 +1568,11 @@ def _create_keyvault(cmd,
     KeyPermissions = get_sdk(cli_ctx, ResourceType.MGMT_KEYVAULT, 'models#KeyPermissions', operation_group='vaults')
     SecretPermissions = get_sdk(cli_ctx, ResourceType.MGMT_KEYVAULT, 'models#SecretPermissions', operation_group='vaults')
     KeyVaultSkuName = cmd.get_models('SkuName', resource_type=ResourceType.MGMT_KEYVAULT, operation_group='vaults')
+
+    from azure.cli.core._profile import Profile, _TENANT_ID
+    profile = Profile(cli_ctx=cmd.cli_ctx)
+    subscription = profile.get_subscription(subscription=cmd.cli_ctx.data.get('subscription_id', None))
+    tenant_id = subscription[_TENANT_ID]
 
     if not sku:
         sku = KeyVaultSkuName.standard.value
@@ -1685,10 +1608,9 @@ def _create_keyvault(cmd,
                                                 CertificatePermissions.deleteissuers,
                                                 CertificatePermissions.manageissuers,
                                                 CertificatePermissions.recover])
-        try:
-            object_id = _get_current_user_object_id(graph_client)
-        except GraphErrorException:
-            object_id = _get_object_id(graph_client, subscription=subscription)
+
+        from azure.cli.command_modules.role.util import get_current_identity_object_id
+        object_id = get_current_identity_object_id(cli_ctx)
         if not object_id:
             raise CLIError('Cannot create vault.\n'
                            'Unable to query active directory for information '
@@ -1725,7 +1647,7 @@ def _get_current_user_object_id(graph_client):
         current_user = graph_client.signed_in_user.get()
         if current_user and current_user.object_id:  # pylint:disable=no-member
             return current_user.object_id  # pylint:disable=no-member
-    except CloudError:
+    except HttpResponseError:
         pass
 
 

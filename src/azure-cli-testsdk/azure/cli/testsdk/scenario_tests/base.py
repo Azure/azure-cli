@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from __future__ import print_function
 import unittest
 import os
 import inspect
@@ -22,7 +21,7 @@ from .recording_processors import ContentLengthProcessor
 
 class IntegrationTestBase(unittest.TestCase):
     def __init__(self, method_name):
-        super(IntegrationTestBase, self).__init__(method_name)
+        super().__init__(method_name)
         self.diagnose = os.environ.get(ENV_TEST_DIAGNOSE, None) == 'True'
         self.logger = logging.getLogger('azure.cli.testsdk.scenario_tests')
 
@@ -92,7 +91,7 @@ class ReplayableTest(IntegrationTestBase):  # pylint: disable=too-many-instance-
     def __init__(self,  # pylint: disable=too-many-arguments
                  method_name, config_file=None, recording_dir=None, recording_name=None, recording_processors=None,
                  replay_processors=None, recording_patches=None, replay_patches=None):
-        super(ReplayableTest, self).__init__(method_name)
+        super().__init__(method_name)
 
         self.recording_processors = recording_processors or []
         # Processors that will be called when all self.recording_processors finishes
@@ -124,20 +123,24 @@ class ReplayableTest(IntegrationTestBase):  # pylint: disable=too-many-instance-
             recording_dir,
             '{}.yaml'.format(recording_name or method_name)
         )
-        if self.is_live and os.path.exists(self.recording_file):
-            os.remove(self.recording_file)
+        self.temp_recording_file = os.path.join(
+            recording_dir,
+            '{}.temp.yaml'.format(recording_name or method_name)
+        )
 
         self.in_recording = self.is_live or not os.path.exists(self.recording_file)
         self.test_resources_count = 0
         self.original_env = os.environ.copy()
 
     def setUp(self):
-        super(ReplayableTest, self).setUp()
+        super().setUp()
 
         # set up cassette
-        cm = self.vcr.use_cassette(self.recording_file)
+        cm = self.vcr.use_cassette(self.temp_recording_file if self.in_recording else self.recording_file)
         self.cassette = cm.__enter__()
         self.addCleanup(cm.__exit__)
+        if self.in_recording:
+            self.addCleanup(self._save_recording_file)
 
         # set up mock patches
         if self.in_recording:
@@ -149,12 +152,27 @@ class ReplayableTest(IntegrationTestBase):  # pylint: disable=too-many-instance-
 
     def tearDown(self):
         os.environ = self.original_env
-        # Autorest.Python 2.x
-        assert not [t for t in threading.enumerate() if t.name.startswith("AzureOperationPoller")], \
-            "You need to call 'result' or 'wait' on all AzureOperationPoller you have created"
         # Autorest.Python 3.x
         assert not [t for t in threading.enumerate() if t.name.startswith("LROPoller")], \
             "You need to call 'result' or 'wait' on all LROPoller you have created"
+
+    def _save_recording_file(self, *args):  # pylint: disable=unused-argument
+        if self.in_recording and self.cassette.dirty:
+            self.cassette._save()  # pylint: disable=protected-access
+
+            # Since Python 3.11, unittest.case._Outcome no longer has 'errors' attribute.
+            # The below statements only work in Python <= 3.10.
+            # https://github.com/Azure/azure-cli/issues/27641
+            if hasattr(self._outcome, 'errors') and (self._outcome.errors or self._outcome.skipped):   # pylint: disable=protected-access
+                # remove temp file
+                # to keep the temp_recording_file for debug, a switch logic can add here
+                os.remove(self.temp_recording_file)
+                return
+
+            # replace recording_file by temp_recording_file
+            if os.path.exists(self.recording_file):
+                os.remove(self.recording_file)
+            os.rename(self.temp_recording_file, self.recording_file)
 
     def _process_request_recording(self, request):
         if self.disable_recording:

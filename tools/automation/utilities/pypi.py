@@ -3,10 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-try:
-    import xmlrpclib
-except ImportError:
-    import xmlrpc.client as xmlrpclib  # pylint: disable=import-error
+import xmlrpc.client as xmlrpclib  # pylint: disable=import-error
 
 
 def is_available_on_pypi(module_name, module_version):

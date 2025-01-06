@@ -5,7 +5,7 @@
 
 import os
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.core.util import sdk_no_wait
@@ -88,16 +88,12 @@ def create_container_rm(cmd, client, container_name, resource_group_name, accoun
 
 
 def update_container_rm(cmd, instance, metadata=None, public_access=None,
-                        default_encryption_scope=None, deny_encryption_scope_override=None,
                         enable_nfs_v3_root_squash=None, enable_nfs_v3_all_squash=None):
     BlobContainer = cmd.get_models('BlobContainer', resource_type=ResourceType.MGMT_STORAGE)
+
     blob_container = BlobContainer(
         metadata=metadata if metadata is not None else instance.metadata,
         public_access=public_access if public_access is not None else instance.public_access,
-        default_encryption_scope=default_encryption_scope
-        if default_encryption_scope is not None else instance.default_encryption_scope,
-        deny_encryption_scope_override=deny_encryption_scope_override
-        if deny_encryption_scope_override is not None else instance.deny_encryption_scope_override,
         enable_nfs_v3_all_squash=enable_nfs_v3_all_squash
         if enable_nfs_v3_all_squash is not None else instance.enable_nfs_v3_all_squash,
         enable_nfs_v3_root_squash=enable_nfs_v3_root_squash
@@ -167,7 +163,10 @@ def delete_container(client, container_name, fail_not_exist=False, lease_id=None
 
 def set_container_permission(client, public_access=None, **kwargs):
     acl_response = client.get_container_access_policy()
-    signed_identifiers = {} if not acl_response.get('signed_identifiers', None) else acl_response['signed_identifiers']
+    signed_identifiers = {}
+    if acl_response.get('signed_identifiers'):
+        for identifier in acl_response["signed_identifiers"]:
+            signed_identifiers[identifier.id] = identifier.access_policy
     return client.set_container_access_policy(signed_identifiers=signed_identifiers,
                                               public_access=public_access, **kwargs)
 
@@ -330,12 +329,15 @@ def set_service_properties_track2(client, parameters, delete_retention=None, del
 
     if hasattr(parameters, 'static_website'):
         kwargs['static_website'] = parameters.static_website
-    if static_website is not None:
-        parameters.static_website.enabled = static_website
     if index_document is not None:
         parameters.static_website.index_document = index_document
     if error_document_404_path is not None:
         parameters.static_website.error_document404_path = error_document_404_path
+    if static_website is not None:
+        parameters.static_website.enabled = static_website
+        if not static_website:
+            parameters.static_website.index_document = None
+            parameters.static_website.error_document404_path = None
     if hasattr(parameters, 'hour_metrics'):
         kwargs['hour_metrics'] = parameters.hour_metrics
     if hasattr(parameters, 'logging'):
@@ -361,7 +363,7 @@ def set_service_properties_track2(client, parameters, delete_retention=None, del
 
 def storage_blob_copy_batch(cmd, client, source_client, container_name=None, destination_path=None,
                             source_container=None, source_share=None, source_sas=None, pattern=None, dryrun=False,
-                            source_account_name=None, source_account_key=None):
+                            source_account_name=None, source_account_key=None, **kwargs):
     """Copy a group of blob or files to a blob container."""
     if dryrun:
         logger.warning('copy files or blobs to blob container')
@@ -384,7 +386,8 @@ def storage_blob_copy_batch(cmd, client, source_client, container_name=None, des
                                                     destination_path=destination_path,
                                                     source_container=source_container,
                                                     source_blob_name=blob_name,
-                                                    source_sas=source_sas)
+                                                    source_sas=source_sas,
+                                                    **kwargs)
         return list(filter_none(action_blob_copy(blob) for blob in collect_blobs(source_client,
                                                                                  source_container,
                                                                                  pattern)))
@@ -563,12 +566,21 @@ def transform_blob_type(cmd, blob_type):
 
 # pylint: disable=protected-access
 def _adjust_block_blob_size(client, blob_type, length):
-    if not blob_type or blob_type != 'block' or length is None:
+    if not blob_type or blob_type == 'page' or length is None:
         return
+
+    # increase the block size to 8MB when blob size is >= 8MB to enable high throughput block/append blob
+    if length >= 8 * 1024 * 1024:
+        client._config.max_block_size = 8 * 1024 * 1024
+        client._config.max_single_put_size = 256 * 1024 * 1024
+
     # increase the block size to 100MB when the block list will contain more than 50,000 blocks(each block 4MB)
     if length > 50000 * 4 * 1024 * 1024:
         client._config.max_block_size = 100 * 1024 * 1024
         client._config.max_single_put_size = 256 * 1024 * 1024
+
+    if blob_type == 'append':
+        return
 
     # increase the block size to 4000MB when the block list will contain more than 50,000 blocks(each block 100MB)
     if length > 50000 * 100 * 1024 * 1024:
@@ -616,6 +628,7 @@ def upload_blob(cmd, client, file_path=None, container_name=None, blob_name=None
     if blob_type == 'append':
         if client.exists(timeout=timeout):
             client.get_blob_properties(lease=lease_id, timeout=timeout, **check_blob_args)
+        upload_args['max_concurrency'] = 1
     else:
         upload_args['if_modified_since'] = if_modified_since
         upload_args['if_unmodified_since'] = if_unmodified_since
@@ -742,13 +755,17 @@ def show_blob(cmd, client, container_name, blob_name, snapshot=None, lease_id=No
         if_modified_since=if_modified_since, if_unmodified_since=if_unmodified_since, if_match=if_match,
         if_none_match=if_none_match, timeout=timeout)
 
-    page_ranges = None
-    if blob.properties.blob_type == cmd.get_models('blob.models#_BlobTypes').PageBlob:
-        page_ranges = client.get_page_ranges(
-            container_name, blob_name, snapshot=snapshot, lease_id=lease_id, if_modified_since=if_modified_since,
-            if_unmodified_since=if_unmodified_since, if_match=if_match, if_none_match=if_none_match, timeout=timeout)
+    try:
+        page_ranges = None
+        if blob.properties.blob_type == cmd.get_models('blob.models#_BlobTypes').PageBlob:
+            page_ranges = client.get_page_ranges(
+                container_name, blob_name, snapshot=snapshot, lease_id=lease_id, if_modified_since=if_modified_since,
+                if_unmodified_since=if_unmodified_since, if_match=if_match, if_none_match=if_none_match,
+                timeout=timeout)
 
-    blob.properties.page_ranges = page_ranges
+        blob.properties.page_ranges = page_ranges
+    except HttpResponseError as ex:
+        logger.warning("GetPageRanges failed with status code: %d, message: %s", ex.status_code, ex.message)
 
     return blob
 
@@ -757,6 +774,12 @@ def storage_blob_delete_batch(client, source, source_container_name, pattern=Non
                               delete_snapshots=None, if_modified_since=None, if_unmodified_since=None, if_match=None,
                               if_none_match=None, timeout=None, dryrun=False):
     container_client = client.get_container_client(source_container_name)
+
+    from datetime import timezone
+    if if_modified_since and not if_modified_since.tzinfo:
+        if_modified_since = if_modified_since.replace(tzinfo=timezone.utc)
+    if if_unmodified_since and not if_unmodified_since.tzinfo:
+        if_unmodified_since = if_unmodified_since.replace(tzinfo=timezone.utc)
 
     @check_precondition_success
     def _delete_blob(blob_name):
@@ -780,13 +803,10 @@ def storage_blob_delete_batch(client, source, source_container_name, pattern=Non
     source_blobs = list(collect_blob_objects(client, source_container_name, pattern))
 
     if dryrun:
-        from datetime import timezone
         delete_blobs = []
-        if_modified_since_utc = if_modified_since.replace(tzinfo=timezone.utc) if if_modified_since else None
-        if_unmodified_since_utc = if_unmodified_since.replace(tzinfo=timezone.utc) if if_unmodified_since else None
         for blob in source_blobs:
-            if not if_modified_since or blob[1].last_modified >= if_modified_since_utc:
-                if not if_unmodified_since or blob[1].last_modified <= if_unmodified_since_utc:
+            if not if_modified_since or blob[1].last_modified >= if_modified_since:
+                if not if_unmodified_since or blob[1].last_modified <= if_unmodified_since:
                     delete_blobs.append(blob[0])
         logger.warning('delete action: from %s', source)
         logger.warning('    pattern %s', pattern)
@@ -882,15 +902,23 @@ def create_blob_url(client, container_name, blob_name, snapshot, protocol='https
         url = blob_client.url
     else:
         container_client = client.get_container_client(container=container_name)
-        url = container_client.url + '/'
+        url = container_client.url if '?' in container_client.url else container_client.url + '/'
     if protocol == 'http':
         return url.replace('https', 'http', 1)
     return url
 
 
 def _copy_blob_to_blob_container(cmd, blob_service, source_blob_service, destination_container, destination_path,
-                                 source_container, source_blob_name, source_sas):
+                                 source_container, source_blob_name, source_sas, **kwargs):
     t_blob_client = cmd.get_models('_blob_client#BlobClient')
+    # generate sas for oauth copy source
+    if not source_sas:
+        from ..util import create_short_lived_blob_sas_v2
+        start = datetime.utcnow()
+        expiry = datetime.utcnow() + timedelta(hours=1)
+        source_user_delegation_key = source_blob_service.get_user_delegation_key(start, expiry)
+        source_sas = create_short_lived_blob_sas_v2(cmd, source_blob_service.account_name, source_container,
+                                                    source_blob_name, user_delegation_key=source_user_delegation_key)
     source_client = t_blob_client(account_url=source_blob_service.url, container_name=source_container,
                                   blob_name=source_blob_name, credential=source_sas)
     source_blob_url = source_client.url
@@ -898,7 +926,8 @@ def _copy_blob_to_blob_container(cmd, blob_service, source_blob_service, destina
     destination_blob_name = normalize_blob_file_path(destination_path, source_blob_name)
     try:
         blob_client = blob_service.get_blob_client(container=destination_container, blob=destination_blob_name)
-        blob_client.start_copy_from_url(source_url=source_blob_url, incremental_copy=False)
+        copy_blob(cmd, blob_client, source_blob_url, source_client=source_client, metadata=None, requires_sync=False,
+                  **kwargs)
         return blob_client.url
     except HttpResponseError as ex:
         if 'One of the request inputs is not valid' in str(ex):
@@ -913,7 +942,10 @@ def _copy_file_to_blob_container(blob_service, source_file_service, destination_
                                  source_share, source_sas, source_file_dir, source_file_name):
     t_share_client = source_file_service.get_share_client(source_share)
     t_file_client = t_share_client.get_file_client(os.path.join(source_file_dir, source_file_name))
-    source_file_url = '{}?{}'.format(t_file_client.url, source_sas)
+    if '?' not in t_file_client.url:
+        source_file_url = '{}?{}'.format(t_file_client.url, source_sas)
+    else:
+        source_file_url = t_file_client.url
 
     source_path = os.path.join(source_file_dir, source_file_name) if source_file_dir else source_file_name
     destination_blob_name = normalize_blob_file_path(destination_path, source_path)
@@ -929,11 +961,14 @@ def _copy_file_to_blob_container(blob_service, source_file_service, destination_
 def show_blob_v2(cmd, client, **kwargs):
     blob = client.get_blob_properties(**kwargs)
 
-    page_ranges = None
-    if blob.blob_type == cmd.get_models('_models#BlobType', resource_type=ResourceType.DATA_STORAGE_BLOB).PageBlob:
-        page_ranges = client.get_page_ranges(**kwargs)
+    try:
+        page_ranges = None
+        if blob.blob_type == cmd.get_models('_models#BlobType', resource_type=ResourceType.DATA_STORAGE_BLOB).PageBlob:
+            page_ranges = client.get_page_ranges(**kwargs)
 
-    blob.page_ranges = page_ranges
+        blob.page_ranges = page_ranges
+    except HttpResponseError as ex:
+        logger.warning("GetPageRanges failed with status code: %d, message: %s", ex.status_code, ex.message)
 
     return blob
 
@@ -993,9 +1028,61 @@ def query_blob(client, query_expression, input_config=None, output_config=None, 
     return reader.readall().decode("utf-8")
 
 
-def copy_blob(client, source_url, metadata=None, **kwargs):
+def copy_blob(cmd, client, source_url, metadata=None, **kwargs):
     if not kwargs['requires_sync']:
         kwargs.pop('requires_sync')
+    blob_type = kwargs.pop('destination_blob_type', None)
+    src_client = kwargs.pop('source_client', None)
+    if src_client is None:
+        src_client = client.from_blob_url(source_url)
+        if src_client.account_name == client.account_name:
+            src_client = client.from_blob_url(source_url, credential=client.credential)
+    StandardBlobTier = cmd.get_models('_models#StandardBlobTier')
+    if blob_type is not None and blob_type != 'Detect':
+        blob_service_client = src_client._get_container_client()._get_blob_service_client()
+        if blob_service_client.credential is not None:
+            as_user = True
+            if hasattr(blob_service_client.credential, 'account_key'):
+                as_user = False
+            expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+            source_url = generate_sas_blob_uri(cmd, blob_service_client, full_uri=True, blob_url=source_url,
+                                               blob_name=None, container_name=None, as_user=as_user,
+                                               expiry=expiry, permission='r')
+
+        params = {"source_if_modified_since": kwargs.get("source_if_modified_since"),
+                  "source_if_unmodified_since": kwargs.get("source_if_unmodified_since"),
+                  "if_modified_since": kwargs.get("if_modified_since"),
+                  "if_unmodified_since": kwargs.get("if_unmodified_since"),
+                  "timeout": kwargs.get("timeout")}
+
+        if blob_type == 'AppendBlob':
+            params.update({"lease": kwargs.get("destination_lease")})
+            client.create_append_blob()
+            res = client.append_block_from_url(copy_source_url=source_url, **params)
+            return transform_response_with_bytearray(res)
+        if blob_type == 'BlockBlob':
+            standard_blob_tier = getattr(StandardBlobTier, (kwargs.get("tier"))) if (kwargs.get("tier")) else None
+            params.update({"overwrite": True, "tags": kwargs.get("tags"),
+                           "destination_lease": kwargs.get("destination_lease"),
+                           "standard_blob_tier": standard_blob_tier})
+            return client.upload_blob_from_url(source_url=source_url, **params)
+        if blob_type == 'PageBlob':
+            params.update({"lease": kwargs.get("destination_lease")})
+            source_blob_client = client.from_blob_url(source_url)
+            blob_length = source_blob_client.get_blob_properties().size
+            if blob_length % 512 != 0:
+                raise ValueError("Source blob size must be an integer that aligns with 512 page size")
+            client.create_page_blob(size=blob_length)
+            res = client.upload_pages_from_url(source_url=source_url, offset=0, length=blob_length,
+                                               source_offset=0, **params)
+            return transform_response_with_bytearray(res)
+    if kwargs.get('tier') is not None:
+        tier = kwargs.pop('tier')
+        try:
+            kwargs["standard_blob_tier"] = getattr(StandardBlobTier, tier)
+        except AttributeError:
+            PremiumPageBlobTier = cmd.get_models('_models#PremiumPageBlobTier')
+            kwargs["premium_page_blob_tier"] = getattr(PremiumPageBlobTier, tier)
     return client.start_copy_from_url(source_url=source_url, metadata=metadata, incremental_copy=False, **kwargs)
 
 

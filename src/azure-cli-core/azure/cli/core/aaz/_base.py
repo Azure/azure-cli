@@ -65,6 +65,12 @@ class _AAZUndefinedType:
     def __bool__(self):
         return False
 
+    def __copy__(self):
+        return self
+
+    def __deepcopy__(self, *args, **kwargs):
+        return self
+
     def __lt__(self, other):
         self._cmp_err(other, '<')
 
@@ -119,6 +125,12 @@ class _AAZBlankArgValueType:
     def __bool__(self):
         return False
 
+    def __copy__(self):
+        return self
+
+    def __deepcopy__(self, *args, **kwargs):
+        return self
+
     def __lt__(self, other):
         self._cmp_err(other, '<')
 
@@ -139,3 +151,10 @@ class _AAZBlankArgValueType:
 # In order to different with `None` value
 # This value is used in aaz package only.
 AAZBlankArgValue = _AAZBlankArgValueType()
+
+
+def has_value(arg_value):
+    if isinstance(arg_value, AAZBaseValue):
+        # handle patch value for list, object, dict
+        return arg_value.to_serialized_data() != AAZUndefined
+    return arg_value != AAZUndefined

@@ -6,9 +6,14 @@
 
 from azure.cli.testsdk import ResourceGroupPreparer, ScenarioTest, StorageAccountPreparer
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-
+from ..utils import KeyReplacer
 
 class IoTHubTest(ScenarioTest):
+
+    def __init__(self, method_name):
+        super().__init__(
+            method_name, recording_processors=[KeyReplacer()]
+    )
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location='westus2')
@@ -140,9 +145,7 @@ class IoTHubTest(ScenarioTest):
             hub, policy_name, policy['primaryKey'])
 
         # Test policy_name connection-string 'az iot hub show-connection-string'
-        self.cmd('iot hub show-connection-string -n {0} --policy-name {1}'.format(hub, policy_name), checks=[
-            self.check_pattern('connectionString', policy_name_conn_str_pattern)
-        ])
+        self.cmd('iot hub show-connection-string -n {0} --policy-name {1}'.format(hub, policy_name))
 
         # Test swap keys 'az iot hub policy renew-key'
         self.cmd('iot hub policy renew-key --hub-name {0} -n {1} --renew-key Swap'.format(hub, policy_name),

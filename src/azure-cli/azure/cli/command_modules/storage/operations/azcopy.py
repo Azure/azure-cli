@@ -7,12 +7,16 @@ from ..azcopy.util import AzCopy, client_auth_for_azcopy, login_auth_for_azcopy,
 
 
 # pylint: disable=too-many-statements, too-many-locals, unused-argument
-def storage_copy(source, destination, put_md5=None, recursive=None, blob_type=None,
+def storage_copy(cmd, source, destination, put_md5=None, recursive=None, blob_type=None,
                  preserve_s2s_access_tier=None, content_type=None, follow_symlinks=None,
                  exclude_pattern=None, include_pattern=None, exclude_path=None, include_path=None,
                  cap_mbps=None, extra_options=None, **kwargs):
 
     azcopy = AzCopy()
+
+    if kwargs.get('token_credential'):
+        azcopy = _azcopy_login_client(cmd)
+
     flags = []
     if recursive is not None:
         flags.append('--recursive')
@@ -59,6 +63,11 @@ def storage_remove(cmd, client, service, target, recursive=None, exclude_pattern
     if exclude_path is not None:
         flags.append('--exclude-path=' + exclude_path)
 
+    if service == 'file':
+        flags.append('--from-to=FileTrash')
+    elif service == 'blob':
+        flags.append('--from-to=BlobTrash')
+
     sas_token = client.sas_token
 
     if not sas_token and client.account_key:
@@ -82,7 +91,7 @@ def storage_fs_directory_copy(cmd, source, destination, recursive=None, **kwargs
 
 
 def storage_blob_sync(cmd, client, source, destination, delete_destination='true', exclude_pattern=None,
-                      include_pattern=None, exclude_path=None):
+                      include_pattern=None, exclude_path=None, extra_options=None):
     azcopy = _azcopy_blob_client(cmd, client)
     flags = []
     if delete_destination is not None:
@@ -93,6 +102,8 @@ def storage_blob_sync(cmd, client, source, destination, delete_destination='true
         flags.append('--exclude-pattern=' + exclude_pattern)
     if exclude_path is not None:
         flags.append('--exclude-path=' + exclude_path)
+    if extra_options is not None:
+        flags.extend(extra_options)
 
     sas_token = client.sas_token
 
@@ -113,6 +124,8 @@ def storage_run_command(cmd, command_args):
 
 def _add_url_sas(url, sas):
     if not sas:
+        return url
+    if '?' in url:
         return url
     return '{}?{}'.format(url, sas)
 

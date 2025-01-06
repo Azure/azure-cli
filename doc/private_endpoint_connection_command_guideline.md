@@ -4,7 +4,7 @@ There are two things you need to do.
 - Register your service into generic implementation
 - Add test case for new command
 
-#### Register the service into `az ntwork private-endpoint-connection`
+#### Register the service into `az network private-endpoint-connection`
 You need provide the service's namespace, type, api-version and 
 whether the service supports list private endpoint connection operation or not in to this [file](https://github.com/Azure/azure-cli/blob/49c0e1adc873581311406a11b04715af732cf4f8/src/azure-cli/azure/cli/command_modules/network/private_link_resource_and_endpoint_connections/custom.py#L14-L23).
 
@@ -123,7 +123,7 @@ del namespace.connection_id
 In order to transform the output of the `list` command, we provide a transform function `gen_dict_to_list_transform`. The key's value depends on each service's response.
 ```
 from azure.cli.core.commands.transform import gen_dict_to_list_transform
-g.command('list', transform=gen_dict_to_list_transform(key='values')) #  defalut key is `value`
+g.command('list', transform=gen_dict_to_list_transform(key='values')) #  default key is `value`
 ```
 
 #### Test

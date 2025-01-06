@@ -114,12 +114,24 @@ def process_cname(io, data, name, print_name=False):
     return process_rr(io, data, 'CNAME', 'alias', name, print_name)
 
 
+def process_ds(io, data, name, print_name=False):
+    return process_rr(io, data, 'DS', ['key_tag', 'algorithm', 'digest_type', 'digest'], name, print_name)
+
+
 def process_mx(io, data, name, print_name=False):
     return process_rr(io, data, 'MX', ['preference', 'host'], name, print_name)
 
 
+def process_naptr(io, data, name, print_name=False):
+    return process_rr(io, data, 'NAPTR', ['order', 'preference', 'flags', 'services', 'regexp', 'replacement'], name, print_name)
+
+
 def process_ptr(io, data, name, print_name=False):
     return process_rr(io, data, 'PTR', 'host', name, print_name)
+
+
+def process_tlsa(io, data, name, print_name=False):
+    return process_rr(io, data, 'TLSA', ['usage', 'selector', 'matching_type', 'certificate'], name, print_name)
 
 
 def process_txt(io, data, name, print_name=False):

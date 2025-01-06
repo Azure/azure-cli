@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, KeyVaultPreparer, record_only
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, KeyVaultPreparer, record_only, live_only
 from azure.cli.command_modules.acr.custom import DEF_DIAG_SETTINGS_NAME_TEMPLATE
 
 
@@ -49,6 +49,15 @@ class AcrCommandsTests(ScenarioTest):
 
         self.cmd('acr config content-trust show -n {}'.format(registry_name),
                  checks=[self.check('status', "enabled")])
+
+        # test soft-delete
+        self.cmd('acr config soft-delete update -r {} --status enabled --days 30 --yes'.format(registry_name),
+                checks=[self.check('status', 'enabled'),
+                        self.check('retentionDays', 30)])
+
+        self.cmd('acr config soft-delete show -r {}'.format(registry_name),
+                checks=[self.check('status', 'enabled'),
+                        self.check('retentionDays', 30)])
 
         # test credential module
         credential = self.cmd(
@@ -181,6 +190,73 @@ class AcrCommandsTests(ScenarioTest):
         # test acr delete
         self.cmd('acr delete -n {registry_name} -g {rg} -y')
 
+    @ResourceGroupPreparer()
+    def test_acr_cache(self, resource_group, resource_group_location):
+        registry_name = self.create_random_name('clireg', 20)
+
+        self.kwargs.update({
+            'registry_name': registry_name,
+            'rg_loc': resource_group_location,
+            'sku': 'Standard',
+            'cr_name': 'test1',
+            'cs_name': 'test1',
+            'source_repo': 'docker.io/library/ubuntu',
+            'target_repo': 'ubuntu',
+            'user_id': 'https://cliimportkv73021.vault.azure.net/secrets/SPusername',
+            'pass_id': 'https://cliimportkv73021.vault.azure.net/secrets/SPpassword',
+            'new_pass_id': 'https://cliimportkv73021.vault.azure.net/secrets/SPusername',
+            'upstream': 'docker.io'
+
+        })
+
+        self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku}',
+                 checks=[self.check('name', '{registry_name}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('adminUserEnabled', False),
+                         self.check('sku.name', 'Standard'),
+                         self.check('sku.tier', 'Standard'),
+                         self.check('provisioningState', 'Succeeded')])
+
+
+        self.cmd('acr credential-set create -n {cs_name} -r {registry_name} -l {upstream} -u {user_id} -p {pass_id}',
+                 checks=[self.check('name', '{cs_name}'),
+                         self.check('provisioningState', 'Succeeded')])
+
+        self.cmd('acr credential-set list -r {registry_name} -g {rg}',
+                 checks=[self.check('[0].name', '{cs_name}'),
+                         self.check('[0].provisioningState', 'Succeeded')])
+
+        self.cmd('acr credential-set show -n {cs_name} -r {registry_name} -g {rg}',
+                 checks=[self.check('name', '{cs_name}'),
+                         self.check('provisioningState', 'Succeeded')])
+
+        self.cmd('acr credential-set update -n {cs_name} -r {registry_name} -p {new_pass_id}',
+                 checks=[self.check('name', '{cs_name}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('authCredentials[0].passwordSecretIdentifier', '{new_pass_id}')])
+
+        self.cmd('acr cache create -n {cr_name} -r {registry_name} -s {source_repo} -t {target_repo} -c {cs_name}',
+                 checks=[self.check('name', '{cr_name}'),
+                         self.check('provisioningState', 'Succeeded')])
+
+        self.cmd('acr cache list -r {registry_name} -g {rg}',
+                 checks=[self.check('[0].name', '{cr_name}'),
+                         self.check('[0].provisioningState', 'Succeeded')])
+
+        self.cmd('acr cache show -n {cr_name} -r {registry_name} -g {rg}',
+                 checks=[self.check('name', '{cr_name}'),
+                         self.check('provisioningState', 'Succeeded')])
+
+        self.cmd('acr cache update -n {cr_name} -r {registry_name} --remove-cred-set',
+                 checks=[self.check('name', '{cr_name}'),
+                         self.check('provisioningState', 'Succeeded')])
+
+        self.cmd('acr cache delete -n {cr_name} -r {registry_name} -y')
+
+        self.cmd('acr credential-set delete -n {cs_name} -r {registry_name} -y')
+
+        self.cmd('acr delete -n {registry_name} -g {rg} -y')
+
     @AllowLargeResponse()
     @ResourceGroupPreparer()
     def test_acr_create_replication(self, resource_group, resource_group_location):
@@ -261,7 +337,7 @@ class AcrCommandsTests(ScenarioTest):
         # create a resource group for the source registry
         self.cmd('group create -n {source_registry_rg} -l {source_loc}')
 
-        # create a source registry 
+        # create a source registry
         self.cmd('acr create -n {source_registry_name} -g {source_registry_rg} -l {source_loc} --sku {sku}',
                  checks=[self.check('name', '{source_registry_name}'),
                          self.check('location', '{source_loc}'),
@@ -294,8 +370,8 @@ class AcrCommandsTests(ScenarioTest):
         token = self.cmd('account get-access-token').get_output_in_json()['accessToken']
 
         # service principal creds to support import from resource_imageV1
-        service_principal_username = self.cmd('keyvault secret show --id https://cliimportkv73021.vault.azure.net/secrets/SPusername').get_output_in_json()['value']
-        service_principal_password = self.cmd('keyvault secret show --id https://cliimportkv73021.vault.azure.net/secrets/SPpassword').get_output_in_json()['value']
+        #service_principal_username = self.cmd('keyvault secret show --id https://cliimportkv73021.vault.azure.net/secrets/SPusername').get_output_in_json()['value']
+        #service_principal_password = self.cmd('keyvault secret show --id https://cliimportkv73021.vault.azure.net/secrets/SPpassword').get_output_in_json()['value']
 
         self.kwargs.update({
             'resource_id': '/subscriptions/dfb63c8c-7c89-4ef8-af13-75c1d873c895/resourcegroups/resourcegroupdiffsub/providers/Microsoft.ContainerRegistry/registries/sourceregistrydiffsub',
@@ -316,8 +392,8 @@ class AcrCommandsTests(ScenarioTest):
             'tag_same_registry': 'repository_same_registry:tag_same_registry',
             'tag_by_digest': 'repository_by_digest:tag_by_digest',
             'source_image_public_registry_dockerhub': 'registry.hub.docker.com/library/hello-world',
-            'application_ID': service_principal_username,
-            'service_principal_password': service_principal_password,
+           # 'application_ID': service_principal_username,
+            #'service_principal_password': service_principal_password,
             'token': token
         })
 
@@ -364,7 +440,7 @@ class AcrCommandsTests(ScenarioTest):
         self.cmd('acr import -n {registry_name} --source {source_image_public_registry_dockerhub}')
 
         # Case 8: Import image from an Azure Container Registry with Service Principal's credentials
-        self.cmd('acr import -n {registry_name} --source {resource_imageV1} -u {application_ID} -p {service_principal_password}')
+        #self.cmd('acr import -n {registry_name} --source {resource_imageV1} -u {application_ID} -p {service_principal_password}')
 
         # Case 9: Import image from an Azure Container Registry with personal access token
         self.cmd('acr import -n {registry_name} --source {resource_imageV2} -p {token}')
@@ -440,7 +516,7 @@ class AcrCommandsTests(ScenarioTest):
         ])
 
     @ResourceGroupPreparer()
-    @KeyVaultPreparer()
+    @KeyVaultPreparer(additional_params='--enable-purge-protection')
     def test_acr_encryption_with_cmk(self, key_vault, resource_group):
         self.kwargs.update({
             'key_vault': key_vault,
@@ -451,8 +527,7 @@ class AcrCommandsTests(ScenarioTest):
             'registry_name': self.create_random_name('testreg', 20),
         })
 
-        # update kv key protection settings and create a new key
-        self.cmd('keyvault update --name {key_vault} --enable-soft-delete --enable-purge-protection')
+        # create a new key
         result = self.cmd('keyvault key create --name {key_name} --vault-name {key_vault}')
         self.kwargs['key_id'] = result.get_output_in_json()['key']['kid']
 
@@ -510,7 +585,7 @@ class AcrCommandsTests(ScenarioTest):
         self.assertTrue('systemAssigned' in result['type'])
         self.assertTrue('userAssigned' in result['type'])
         self.assertTrue(len(result['userAssignedIdentities']) == 1)
-        self.assertEquals(list(result['userAssignedIdentities'].keys())[0].lower(), self.kwargs['identity_id'].lower())
+        self.assertEqual(list(result['userAssignedIdentities'].keys())[0].lower(), self.kwargs['identity_id'].lower())
 
         # remove identities
         import time
@@ -599,8 +674,8 @@ class AcrCommandsTests(ScenarioTest):
         self.cmd('acr create --name {registry_2_name} --resource-group {rg} --sku premium --public-network-enabled false --allow-trusted-services false',
                  checks=[self.check('publicNetworkAccess', 'Disabled'),
                          self.check('networkRuleBypassOptions', 'None')])
-        
-        
+
+
     @ResourceGroupPreparer()
     def test_acr_with_public_network_access_disabled(self, resource_group, resource_group_location):
         self.kwargs.update({
@@ -637,6 +712,21 @@ class AcrCommandsTests(ScenarioTest):
                  checks=[self.check('anonymousPullEnabled', True)])
         self.cmd('acr update --name {registry_name} --resource-group {rg} --anonymous-pull-enabled false',
                  checks=[self.check('anonymousPullEnabled', False)])
+
+    @ResourceGroupPreparer()
+    @live_only()
+    def test_acr_create_invalid_name(self, resource_group):
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+
+        # Block registry creation if there is '-'.
+        self.kwargs.update({
+           'registry_name': self.create_random_name('testreg', 20) + '-' + self.create_random_name('dnlhash', 20)
+        })   
+
+        with self.assertRaises(Exception) as ex:
+            self.cmd('acr create --name {registry_name} --resource-group {rg} --sku premium -l eastus')
+
+        self.assertTrue(InvalidArgumentValueError, ex.exception)
 
     @ResourceGroupPreparer(location='eastus2')
     def test_acr_with_private_endpoint(self, resource_group):
@@ -734,3 +824,60 @@ class AcrCommandsTests(ScenarioTest):
         result_identities = [identity.lower() for identity in result['userAssignedIdentities'].keys()]
         self.assertEqual(len(result['userAssignedIdentities']), len(query_identities))
         self.assertEqual(sorted(result_identities), sorted(query_identities))
+
+    @ResourceGroupPreparer()
+    def test_acr_create_with_metadata_search_enabled(self, resource_group, resource_group_location):
+        registry_name = self.create_random_name('clireg', 20)
+
+        self.kwargs.update({
+            'registry_name': registry_name,
+            'rg_loc': resource_group_location,
+            'sku': 'Premium'
+        })
+
+        self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku} --allow-metadata-search',
+                 checks=[self.check('name', '{registry_name}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('adminUserEnabled', False),
+                         self.check('sku.name', 'Premium'),
+                         self.check('sku.tier', 'Premium'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('metadataSearch', 'Enabled')])
+
+        self.cmd('acr update -n {registry_name} -g {rg} --sku {sku} --allow-metadata-search false',
+            checks=[self.check('name', '{registry_name}'),
+                    self.check('provisioningState', 'Succeeded'),
+                    self.check('metadataSearch', 'Disabled')])
+
+        self.cmd('acr update -n {registry_name} -g {rg} --sku {sku} --allow-metadata-search',
+            checks=[self.check('name', '{registry_name}'),
+                    self.check('provisioningState', 'Succeeded'),
+                    self.check('metadataSearch', 'Enabled')])
+
+        self._core_registry_scenario(registry_name, resource_group, resource_group_location)
+
+    @ResourceGroupPreparer()
+    def test_acr_create_with_metadata_search_disabled(self, resource_group, resource_group_location):
+        registry_name = self.create_random_name('clireg', 20)
+
+        self.kwargs.update({
+            'registry_name': registry_name,
+            'rg_loc': resource_group_location,
+            'sku': 'Premium'
+        })
+
+        self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku}',
+                 checks=[self.check('name', '{registry_name}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('adminUserEnabled', False),
+                         self.check('sku.name', 'Premium'),
+                         self.check('sku.tier', 'Premium'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('metadataSearch', 'Disabled')])
+
+        self.cmd('acr update -n {registry_name} -g {rg} --sku {sku} --allow-metadata-search',
+            checks=[self.check('name', '{registry_name}'),
+                    self.check('provisioningState', 'Succeeded'),
+                    self.check('metadataSearch', 'Enabled')])
+
+        self._core_registry_scenario(registry_name, resource_group, resource_group_location)

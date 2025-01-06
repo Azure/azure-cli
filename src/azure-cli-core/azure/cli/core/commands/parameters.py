@@ -248,7 +248,7 @@ resource_group_name_type = CLIArgumentType(
 
 name_type = CLIArgumentType(options_list=['--name', '-n'], help='the primary resource name')
 
-edge_zone_type = CLIArgumentType(options_list='--edge-zone', help='The name of edge zone.', is_preview=True)
+edge_zone_type = CLIArgumentType(options_list='--edge-zone', help='The name of edge zone.')
 
 
 def get_location_type(cli_ctx):
@@ -299,14 +299,12 @@ no_wait_type = CLIArgumentType(
 zones_type = CLIArgumentType(
     options_list=['--zones', '-z'],
     nargs='+',
-    help='Space-separated list of availability zones into which to provision the resource.',
-    choices=['1', '2', '3']
+    help='Space-separated list of availability zones into which to provision the resource.'
 )
 
 zone_type = CLIArgumentType(
     options_list=['--zone', '-z'],
     help='Availability zone into which to provision the resource.',
-    choices=['1', '2', '3'],
     nargs=1
 )
 
@@ -337,7 +335,7 @@ class AzArgumentContext(ArgumentsContext):
 
     def __init__(self, command_loader, scope, **kwargs):
         from azure.cli.core.commands import _merge_kwargs as merge_kwargs
-        super(AzArgumentContext, self).__init__(command_loader, scope)
+        super().__init__(command_loader, scope)
         self.scope = scope  # this is called "command" in knack, but that is not an accurate name
         self.group_kwargs = merge_kwargs(kwargs, command_loader.module_kwargs, CLI_PARAM_KWARGS)
 
@@ -365,10 +363,9 @@ class AzArgumentContext(ArgumentsContext):
         arg_registry = self.command_loader.argument_registry
         match = arg_registry.arguments[scope].get(dest, {})
         if not match:
-            super(AzArgumentContext, self).argument(dest, arg_type=ignore_type)
+            super().argument(dest, arg_type=ignore_type)
 
-    # pylint: disable=arguments-differ
-    def argument(self, dest, arg_type=None, **kwargs):
+    def argument(self, argument_dest, arg_type=None, **kwargs):
         self._check_stale()
         if not self._applicable():
             return
@@ -386,11 +383,11 @@ class AzArgumentContext(ArgumentsContext):
                                                      min_api=min_api,
                                                      max_api=max_api,
                                                      operation_group=operation_group):
-            super(AzArgumentContext, self).argument(dest, **merged_kwargs)
+            super().argument(argument_dest, **merged_kwargs)
         else:
-            self._ignore_if_not_registered(dest)
+            self._ignore_if_not_registered(argument_dest)
 
-    def positional(self, dest, arg_type=None, **kwargs):
+    def positional(self, argument_dest, arg_type=None, **kwargs):
         self._check_stale()
         if not self._applicable():
             return
@@ -407,9 +404,9 @@ class AzArgumentContext(ArgumentsContext):
                                                      min_api=min_api,
                                                      max_api=max_api,
                                                      operation_group=operation_group):
-            super(AzArgumentContext, self).positional(dest, **merged_kwargs)
+            super().positional(argument_dest, **merged_kwargs)
         else:
-            self._ignore_if_not_registered(dest)
+            self._ignore_if_not_registered(argument_dest)
 
     def expand(self, dest, model_type, group_name=None, patches=None):
         # TODO:
@@ -422,7 +419,7 @@ class AzArgumentContext(ArgumentsContext):
             return
 
         if not patches:
-            patches = dict()
+            patches = {}
 
         # fetch the documentation for model parameters first. for models, which are the classes
         # derive from msrest.serialization.Model and used in the SDK API to carry parameters, the
@@ -442,7 +439,7 @@ class AzArgumentContext(ArgumentsContext):
                 :return: The argument of specific type.
                 """
                 ns = vars(namespace)
-                kwargs = dict((k, ns[k]) for k in ns if k in set(expanded_arguments))
+                kwargs = {k: ns[k] for k in ns if k in set(expanded_arguments)}
 
                 setattr(namespace, assigned_arg, model_type(**kwargs))
 
@@ -469,15 +466,17 @@ class AzArgumentContext(ArgumentsContext):
                       options_list=dest_option,
                       validator=get_complex_argument_processor(expanded_arguments, dest, model_type))
 
-    def ignore(self, *args):
+    def ignore(self, *args):  # pylint: disable=arguments-differ
+        # It is expected that this method's signature differs from its base class, as it can be used to ignore
+        # multiple arguments in one method call.
         self._check_stale()
         if not self._applicable():
             return
 
         for arg in args:
-            super(AzArgumentContext, self).ignore(arg)
+            super().ignore(arg)
 
-    def extra(self, dest, arg_type=None, **kwargs):
+    def extra(self, argument_dest, arg_type=None, **kwargs):
 
         merged_kwargs = self._flatten_kwargs(kwargs, arg_type)
         resource_type = merged_kwargs.get('resource_type', None)
@@ -489,8 +488,8 @@ class AzArgumentContext(ArgumentsContext):
                                                      max_api=max_api,
                                                      operation_group=operation_group):
             # Restore when knack #132 is fixed
-            # merged_kwargs.pop('dest', None)
-            # super(AzArgumentContext, self).extra(dest, **merged_kwargs)
+            # merged_kwargs.pop('argument_dest', None)
+            # super(AzArgumentContext, self).extra(argument_dest, **merged_kwargs)
             from knack.arguments import CLICommandArgument
             self._check_stale()
             if not self._applicable():
@@ -499,11 +498,11 @@ class AzArgumentContext(ArgumentsContext):
             if self.command_scope in self.command_loader.command_group_table:
                 raise ValueError("command authoring error: extra argument '{}' cannot be registered to a group-level "
                                  "scope '{}'. It must be registered to a specific command.".format(
-                                     dest, self.command_scope))
+                                     argument_dest, self.command_scope))
 
-            deprecate_action = self._handle_deprecations(dest, **merged_kwargs)
+            deprecate_action = self._handle_deprecations(argument_dest, **merged_kwargs)
             if deprecate_action:
                 merged_kwargs['action'] = deprecate_action
             merged_kwargs.pop('dest', None)
-            self.command_loader.extra_argument_registry[self.command_scope][dest] = CLICommandArgument(
-                dest, **merged_kwargs)
+            self.command_loader.extra_argument_registry[self.command_scope][argument_dest] = CLICommandArgument(
+                argument_dest, **merged_kwargs)

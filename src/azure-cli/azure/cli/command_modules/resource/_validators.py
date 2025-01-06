@@ -6,13 +6,11 @@
 import os
 import re
 import argparse
+from urllib.parse import urlparse, urlsplit
+
 from azure.cli.core.azclierror import ArgumentUsageError
 
 from knack.util import CLIError
-try:
-    from urllib.parse import urlparse, urlsplit
-except ImportError:
-    from urlparse import urlparse, urlsplit  # pylint: disable=import-error
 
 MSI_LOCAL_ID = '[system]'
 
@@ -42,6 +40,14 @@ def _validate_template_spec_out(namespace):
         raise CLIError('Please enter a valid output folder')
 
 
+def validate_deployment_stack_files(namespace):
+    from azure.cli.core.commands.validators import validate_tags
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+    validate_tags(namespace)
+    if namespace.template_file and not os.path.isfile(namespace.template_file):
+        raise InvalidArgumentValueError('Please enter a valid template file path')
+
+
 def _validate_deployment_name_with_template_specs(namespace):
     # If missing,try come out with a name associated with the template name
     if namespace.deployment_name is None:
@@ -55,7 +61,7 @@ def _validate_deployment_name_with_template_specs(namespace):
             namespace.template_spec = namespace.template_spec.strip("\"")
             if not is_valid_resource_id(namespace.template_spec):
                 raise CLIError('--template-spec is not a valid resource ID.')
-            if namespace.template_spec.__contains__("versions") is False:
+            if 'versions' not in namespace.template_spec:
                 raise CLIError('Please enter a valid template spec version ID.')
             template_filename = parse_resource_id(namespace.template_spec).get('resource_name')
         if template_filename:
@@ -83,14 +89,15 @@ def _validate_deployment_name(namespace):
 def process_deployment_create_namespace(namespace):
     try:
         if [bool(namespace.template_uri), bool(namespace.template_file),
-                bool(namespace.template_spec)].count(True) != 1:
-            raise CLIError('incorrect usage: Chose only one of'
+                bool(namespace.template_spec)].count(True) > 1:
+            raise CLIError('incorrect usage: Choose only one of'
                            ' --template-file FILE | --template-uri URI | --template-spec ID to pass in')
     except Exception:  # pylint: disable=broad-except
-        if [bool(namespace.template_uri), bool(namespace.template_file)].count(True) != 1:
-            raise CLIError('incorrect usage: Chose only one of'
+        if [bool(namespace.template_uri), bool(namespace.template_file)].count(True) > 1:
+            raise CLIError('incorrect usage: Choose only one of'
                            ' --template-file FILE | --template-uri URI')
-    if(bool(namespace.template_uri) or bool(namespace.template_file)):
+
+    if (bool(namespace.template_uri) or bool(namespace.template_file)):
         _validate_deployment_name(namespace)
     else:
         _validate_deployment_name_with_template_specs(namespace)
@@ -100,7 +107,7 @@ def internal_validate_lock_parameters(namespace, resource_group, resource_provid
                                       parent_resource_path, resource_type, resource_name):
     if resource_group is None:
         if resource_name is not None:
-            from msrestazure.tools import parse_resource_id, is_valid_resource_id
+            from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id
             if not is_valid_resource_id(resource_name):
                 raise CLIError('--resource is not a valid resource ID. '
                                '--resource as a resource name is ignored if --resource-group is not given.')
@@ -129,12 +136,12 @@ def internal_validate_lock_parameters(namespace, resource_group, resource_provid
         return
 
     if not resource_type:
-        raise CLIError('--resource-type is required if the name, --resource, is present')
+        raise CLIError('--resource-type is required if the --name, --resource, --resource-group is present')
 
     parts = resource_type.split('/')
     if resource_provider_namespace is None:
         if len(parts) == 1:
-            raise CLIError('A resource namespace is required if the name, --resource, is present.'
+            raise CLIError('A resource namespace is required if the --name, --resource, --resource-group is present.'
                            'Expected <namespace>/<type> or --namespace=<namespace>')
     elif len(parts) != 1:
         raise CLIError('Resource namespace specified in both --resource-type and --namespace')

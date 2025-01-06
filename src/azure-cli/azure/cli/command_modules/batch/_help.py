@@ -7,6 +7,13 @@
 from knack.help_files import helps  # pylint: disable=unused-import
 # pylint: disable=line-too-long, too-many-lines
 
+OUTPUT_WITH_SECRET = (
+    'The output includes secrets that you must protect. Be sure that you do not include these secrets in your '
+    'source control. Also verify that no secrets are present in the logs of your command or script. '
+    'For additional information, see http://aka.ms/clisecrets.')
+
+OUTPUT_WITH_SECRET_HELP = f'[WARNING] {OUTPUT_WITH_SECRET}'
+
 helps['batch'] = """
 type: group
 short-summary: Manage Azure Batch.
@@ -51,12 +58,25 @@ examples:
     crafted: true
 """
 
-helps['batch account keys renew'] = """
+helps['batch account keys renew'] = f"""
 type: command
 short-summary: Renew keys for a Batch account.
+long-summary: >
+    {OUTPUT_WITH_SECRET_HELP}
 examples:
   - name: Renew keys for a Batch account.
     text: az batch account keys renew --name MyBatchAccount --resource-group MyResourceGroup --key-name primary
+"""
+
+helps['batch account keys list'] = f"""
+type: command
+short-summary: Gets the account keys for the specified Batch account.
+        This operation applies only to Batch accounts with allowedAuthenticationModes containing
+        'SharedKey'. If the Batch account doesn't contain 'SharedKey' in its
+        allowedAuthenticationMode, clients cannot use shared keys to authenticate, and must use
+        another allowedAuthenticationModes instead. In this case, getting the keys will fail.
+long-summary: >
+    {OUTPUT_WITH_SECRET_HELP}
 """
 
 helps['batch account show'] = """
@@ -71,7 +91,7 @@ examples:
 helps['batch account outbound-endpoints'] = """
 type: command
 short-summary: List an account's outbound network dependencies.
-long-summary: List the endpoints that a Batch Compute Node under this Batch Account may call as part of Batch service administration. If you are deploying a Pool inside of a virtual network that you specify, you must make sure your network allows outbound access to these endpoints. Failure to allow access to these endpoints may cause Batch to mark the affected nodes as unusable. For more information about creating a pool inside of a virtual network, see https://docs.microsoft.com/azure/batch/batch-virtual-network."
+long-summary: List the endpoints that a Batch Compute Node under this Batch Account may call as part of Batch service administration. If you are deploying a Pool inside of a virtual network that you specify, you must make sure your network allows outbound access to these endpoints. Failure to allow access to these endpoints may cause Batch to mark the affected nodes as unusable. For more information about creating a pool inside of a virtual network, see https://learn.microsoft.com/azure/batch/batch-virtual-network."
 """
 
 helps['batch account identity'] = """
@@ -106,9 +126,11 @@ examples:
         az batch account identity remove --name MyBatchAccount --resource-group MyResourceGroup --user-assigned
 """
 
-helps['batch account identity show'] = """
+helps['batch account identity show'] = f"""
 type: command
 short-summary: Display managed identities of a batch account.
+long-summary: >
+    {OUTPUT_WITH_SECRET_HELP}
 examples:
   - name: Display managed identities of a batch account.
     text: |
@@ -232,17 +254,6 @@ short-summary: Delete a certificate from a Batch account.
 helps['batch job'] = """
 type: group
 short-summary: Manage Batch jobs.
-"""
-
-helps['batch job all-statistics'] = """
-type: group
-short-summary: View statistics of all jobs under a Batch account.
-"""
-
-helps['batch job all-statistics show'] = """
-type: command
-short-summary: Get lifetime summary statistics for all of the jobs in a Batch account.
-long-summary: Statistics are aggregated across all jobs that have ever existed in the account, from account creation to the last update time of the statistics.
 """
 
 helps['batch job create'] = """
@@ -406,17 +417,6 @@ short-summary: Update the properties of a user account on a Batch compute node. 
 helps['batch pool'] = """
 type: group
 short-summary: Manage Batch pools.
-"""
-
-helps['batch pool all-statistics'] = """
-type: group
-short-summary: View statistics of all pools under a Batch account.
-"""
-
-helps['batch pool all-statistics show'] = """
-type: command
-short-summary: Get lifetime summary statistics for all of the pools in a Batch account.
-long-summary: Statistics are aggregated across all pools that have ever existed in the account, from account creation to the last update time of the statistics.
 """
 
 helps['batch pool autoscale'] = """

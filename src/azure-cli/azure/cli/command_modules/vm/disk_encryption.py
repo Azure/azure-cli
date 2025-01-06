@@ -10,7 +10,7 @@ from knack.log import get_logger
 from azure.cli.core.commands import LongRunningOperation
 
 from azure.cli.command_modules.vm.custom import set_vm, _compute_client_factory, _is_linux_os
-from azure.cli.command_modules.vm._vm_utils import get_key_vault_base_url, create_keyvault_data_plane_client
+from azure.cli.command_modules.vm._vm_utils import get_key_vault_base_url, create_data_plane_keyvault_key_client
 
 _DATA_VOLUME_TYPE = 'DATA'
 _ALL_VOLUME_TYPE = 'ALL'
@@ -55,10 +55,51 @@ def _detect_ade_status(vm):
     ade = _find_existing_ade(vm, ade_ext_info=ade_ext_info)
     if ade is None:
         return False, False
-    if ade.type_handler_version.split('.')[0] == ade_ext_info['legacy_version'].split('.')[0]:
+    if ade.type_handler_version.split('.')[0] == ade_ext_info['legacy_version'].split('.', maxsplit=1)[0]:
         return False, True
 
     return True, False   # we believe impossible to have both old & new ADE
+
+
+def updateVmEncryptionSetting(cmd, vm, resource_group_name, vm_name, encryption_identity):
+    from azure.cli.core.azclierror import ArgumentUsageError
+    if vm.identity is None or vm.identity.user_assigned_identities is None or encryption_identity.lower() not in \
+            (k.lower() for k in vm.identity.user_assigned_identities.keys()):
+        raise ArgumentUsageError("Encryption Identity should be an ARM Resource ID of one of the "
+                                 "user assigned identities associated to the resource")
+
+    SecurityProfile, EncryptionIdentity = cmd.get_models('SecurityProfile', 'EncryptionIdentity')
+    updateVm = False
+
+    if vm.security_profile is None:
+        vm.security_profile = SecurityProfile()
+    if vm.security_profile.encryption_identity is None:
+        vm.security_profile.encryption_identity = EncryptionIdentity()
+    if vm.security_profile.encryption_identity.user_assigned_identity_resource_id is None \
+            or vm.security_profile.encryption_identity.user_assigned_identity_resource_id.lower() \
+            != encryption_identity:
+        vm.security_profile.encryption_identity.user_assigned_identity_resource_id = encryption_identity
+        updateVm = True
+
+    if updateVm:
+        compute_client = _compute_client_factory(cmd.cli_ctx)
+        updateEncryptionIdentity \
+            = compute_client.virtual_machines.begin_create_or_update(resource_group_name, vm_name, vm)
+        LongRunningOperation(cmd.cli_ctx)(updateEncryptionIdentity)
+        result = updateEncryptionIdentity.result()
+        return result is not None and result.provisioning_state == 'Succeeded'
+    logger.info("No changes in identity")
+    return True
+
+
+def isVersionSuppprtedForEncryptionIdentity(cmd):
+    from azure.cli.core.profiles import ResourceType
+    from knack.util import CLIError
+    if not cmd.supported_api_version(min_api='2023-09-01', resource_type=ResourceType.MGMT_COMPUTE):
+        raise CLIError("Usage error: Encryption Identity required API version 2023-09-01 or higher."
+                       "You can set the cloud's profile to use the required API Version with:"
+                       "az cloud set --profile latest --name <cloud name>")
+    return True
 
 
 def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-locals, too-many-statements
@@ -70,8 +111,8 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
                key_encryption_algorithm='RSA-OAEP',
                volume_type=None,
                encrypt_format_all=False,
-               force=False):
-    from msrestazure.tools import parse_resource_id
+               force=False, encryption_identity=None):
+    from azure.mgmt.core.tools import parse_resource_id
     from knack.util import CLIError
 
     # pylint: disable=no-member
@@ -109,6 +150,12 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
     # disk encryption key itself can be further protected, so let us verify
     if key_encryption_key:
         key_encryption_keyvault = key_encryption_keyvault or disk_encryption_keyvault
+    if encryption_identity and isVersionSuppprtedForEncryptionIdentity(cmd):
+        result = updateVmEncryptionSetting(cmd, vm, resource_group_name, vm_name, encryption_identity)
+        if result:
+            logger.info("Encryption Identity successfully set in virtual machine")
+        else:
+            raise CLIError("Failed to update encryption Identity to the VM")
 
     #  to avoid bad server errors, ensure the vault has the right configurations
     _verify_keyvault_good_for_encryption(cmd.cli_ctx, disk_encryption_keyvault, key_encryption_keyvault, vm, force)
@@ -163,7 +210,7 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
 
     # verify the extension was ok
     extension_result = compute_client.virtual_machine_extensions.get(
-        resource_group_name, vm_name, extension['name'], 'instanceView')
+        resource_group_name, vm_name, extension['name'], expand='instanceView')
     if extension_result.provisioning_state != 'Succeeded':
         raise CLIError('Extension needed for disk encryption was not provisioned correctly')
 
@@ -260,7 +307,7 @@ def decrypt_vm(cmd, resource_group_name, vm_name, volume_type=None, force=False)
     poller.result()
     extension_result = compute_client.virtual_machine_extensions.get(resource_group_name, vm_name,
                                                                      extension['name'],
-                                                                     'instanceView')
+                                                                     expand='instanceView')
     if extension_result.provisioning_state != 'Succeeded':
         raise CLIError("Extension updating didn't succeed")
 
@@ -298,7 +345,7 @@ def show_vm_encryption_status(cmd, resource_group_name, vm_name):
         'osType': None
     }
     compute_client = _compute_client_factory(cmd.cli_ctx)
-    vm = compute_client.virtual_machines.get(resource_group_name, vm_name, 'instanceView')
+    vm = compute_client.virtual_machines.get(resource_group_name, vm_name, expand='instanceView')
     has_new_ade, has_old_ade = _detect_ade_status(vm)
     if not has_new_ade and not has_old_ade:
         logger.warning('Azure Disk Encryption is not enabled')
@@ -315,7 +362,7 @@ def show_vm_encryption_status(cmd, resource_group_name, vm_name):
     extension_result = compute_client.virtual_machine_extensions.get(resource_group_name,
                                                                      vm_name,
                                                                      extension['name'],
-                                                                     'instanceView')
+                                                                     expand='instanceView')
     logger.debug(extension_result)
     if extension_result.instance_view and extension_result.instance_view.statuses:
         encryption_status['progressMessage'] = extension_result.instance_view.statuses[0].message
@@ -362,9 +409,10 @@ def show_vm_encryption_status(cmd, resource_group_name, vm_name):
 
 
 def _get_keyvault_key_url(cli_ctx, keyvault_name, key_name):
-    client = create_keyvault_data_plane_client(cli_ctx)
-    result = client.get_key(get_key_vault_base_url(cli_ctx, keyvault_name), key_name, '')
-    return result.key.kid  # pylint: disable=no-member
+    vault_base_url = get_key_vault_base_url(cli_ctx, keyvault_name)
+    client = create_data_plane_keyvault_key_client(cli_ctx, vault_base_url)
+    key = client.get_key(key_name)
+    return key.id
 
 
 def _handles_default_volume_type_for_vmss_encryption(is_linux, volume_type, force):
@@ -389,7 +437,7 @@ def encrypt_vmss(cmd, resource_group_name, vmss_name,  # pylint: disable=too-man
                  key_encryption_algorithm='RSA-OAEP',
                  volume_type=None,
                  force=False):
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
 
     # pylint: disable=no-member
     UpgradeMode, VirtualMachineScaleSetExtension, VirtualMachineScaleSetExtensionProfile = cmd.get_models(
@@ -546,16 +594,25 @@ def _verify_keyvault_good_for_encryption(cli_ctx, disk_vault_id, kek_vault_id, v
 
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.cli.core.profiles import ResourceType
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
 
     client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_KEYVAULT).vaults
     disk_vault_resource_info = parse_resource_id(disk_vault_id)
     key_vault = client.get(disk_vault_resource_info['resource_group'], disk_vault_resource_info['name'])
 
-    # ensure vault has 'EnabledForDiskEncryption' permission
-    if not key_vault.properties or not key_vault.properties.enabled_for_disk_encryption:
-        _report_client_side_validation_error("Keyvault '{}' is not enabled for disk encryption.".format(
-            disk_vault_resource_info['resource_name']))
+    # ensure vault has 'EnabledForDiskEncryption' permission or VM has encryption identity set for ADE operation
+    if resource_type == 'VM':
+        vm_encryption_identity = vm_or_vmss
+    else:
+        vm_encryption_identity = vm_or_vmss.virtual_machine_profile
+
+    if vm_encryption_identity and vm_encryption_identity.security_profile and \
+        vm_encryption_identity.security_profile.encryption_identity and \
+            vm_encryption_identity.security_profile.encryption_identity.user_assigned_identity_resource_id:
+        pass
+    elif not key_vault.properties or not key_vault.properties.enabled_for_disk_encryption:
+        _report_client_side_validation_error(
+            "Keyvault '{}' is not enabled for disk encryption.".format(disk_vault_resource_info['resource_name']))
 
     if kek_vault_id:
         kek_vault_info = parse_resource_id(kek_vault_id)

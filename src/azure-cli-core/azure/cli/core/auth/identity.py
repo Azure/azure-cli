@@ -6,21 +6,26 @@
 import json
 import os
 import re
+import sys
 
 from azure.cli.core._environment import get_config_dir
 from knack.log import get_logger
 from knack.util import CLIError
-from msal import PublicClientApplication
+from msal import PublicClientApplication, ConfidentialClientApplication
 
-# Service principal entry properties
-from .msal_authentication import _CLIENT_ID, _TENANT, _CLIENT_SECRET, _CERTIFICATE, _CLIENT_ASSERTION, \
-    _USE_CERT_SN_ISSUER
-from .msal_authentication import UserCredential, ServicePrincipalCredential
+from .constants import AZURE_CLI_CLIENT_ID
+from .msal_credentials import UserCredential, ServicePrincipalCredential
 from .persistence import load_persisted_token_cache, file_extensions, load_secret_store
 from .util import check_result
 
-AZURE_CLI_CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
-
+# Service principal entry properties. Names are taken from OAuth 2.0 client credentials flow parameters:
+# https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-client-creds-grant-flow
+_TENANT = 'tenant'
+_CLIENT_ID = 'client_id'
+_CLIENT_SECRET = 'client_secret'
+_CERTIFICATE = 'certificate'
+_USE_CERT_SN_ISSUER = 'use_cert_sn_issuer'
+_CLIENT_ASSERTION = 'client_assertion'
 
 # For environment credential
 AZURE_AUTHORITY_HOST = "AZURE_AUTHORITY_HOST"
@@ -28,6 +33,9 @@ AZURE_TENANT_ID = "AZURE_TENANT_ID"
 AZURE_CLIENT_ID = "AZURE_CLIENT_ID"
 AZURE_CLIENT_SECRET = "AZURE_CLIENT_SECRET"
 
+WAM_PROMPT = (
+    "Select the account you want to log in with. "
+    "For more information on login with Azure CLI, see https://go.microsoft.com/fwlink/?linkid=2271136")
 
 logger = get_logger(__name__)
 
@@ -52,7 +60,8 @@ class Identity:  # pylint: disable=too-many-instance-attributes
     # It follows singleton pattern so that _secret_file is read only once.
     _service_principal_store_instance = None
 
-    def __init__(self, authority, tenant_id=None, client_id=None, encrypt=False, use_msal_http_cache=True):
+    def __init__(self, authority, tenant_id=None, client_id=None, encrypt=False, use_msal_http_cache=True,
+                 enable_broker_on_windows=None, instance_discovery=None):
         """
         :param authority: Authentication authority endpoint. For example,
             - AAD: https://login.microsoftonline.com
@@ -67,6 +76,8 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         self.client_id = client_id or AZURE_CLI_CLIENT_ID
         self._encrypt = encrypt
         self._use_msal_http_cache = use_msal_http_cache
+        self._enable_broker_on_windows = enable_broker_on_windows
+        self._instance_discovery = instance_discovery
 
         # Build the authority in MSAL style
         self._msal_authority, self._is_adfs = _get_authority_url(authority, tenant_id)
@@ -82,7 +93,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
 
     @property
     def _msal_app_kwargs(self):
-        """kwargs for creating UserCredential or ServicePrincipalCredential.
+        """kwargs for creating ClientApplication (including its subclass ConfidentialClientApplication).
         MSAL token cache and HTTP cache are lazily created.
         """
         if not Identity._msal_token_cache:
@@ -94,8 +105,17 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         return {
             "authority": self._msal_authority,
             "token_cache": Identity._msal_token_cache,
-            "http_cache": Identity._msal_http_cache
+            "http_cache": Identity._msal_http_cache,
+            "instance_discovery": self._instance_discovery,
+            # CP1 means we can handle claims challenges (CAE)
+            "client_capabilities": None if "AZURE_IDENTITY_DISABLE_CP1" in os.environ else ["CP1"]
         }
+
+    @property
+    def _msal_public_app_kwargs(self):
+        """kwargs for creating PublicClientApplication."""
+        # enable_broker_on_windows can only be used on PublicClientApplication.
+        return {**self._msal_app_kwargs, "enable_broker_on_windows": self._enable_broker_on_windows}
 
     @property
     def _msal_app(self):
@@ -103,7 +123,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         The instance is lazily created.
         """
         if not self._msal_app_instance:
-            self._msal_app_instance = PublicClientApplication(self.client_id, **self._msal_app_kwargs)
+            self._msal_app_instance = PublicClientApplication(self.client_id, **self._msal_public_app_kwargs)
         return self._msal_app_instance
 
     def _load_msal_token_cache(self):
@@ -129,9 +149,15 @@ class Identity:  # pylint: disable=too-many-instance-attributes
     def login_with_auth_code(self, scopes, **kwargs):
         # Emit a warning to inform that a browser is opened.
         # Only show the path part of the URL and hide the query string.
-        logger.warning("A web browser has been opened at %s. Please continue the login in the web browser. "
-                       "If no web browser is available or if the web browser fails to open, use device code flow "
-                       "with `az login --use-device-code`.", self._msal_app.authority.authorization_endpoint)
+
+        def _prompt_launching_ui(ui=None, **_):
+            if ui == 'browser':
+                logger.warning("A web browser has been opened at %s. Please continue the login in the web browser. "
+                               "If no web browser is available or if the web browser fails to open, use device code "
+                               "flow with `az login --use-device-code`.",
+                               self._msal_app.authority.authorization_endpoint)
+            elif ui == 'broker':
+                logger.warning(WAM_PROMPT)
 
         from .util import read_response_templates
         success_template, error_template = read_response_templates()
@@ -140,7 +166,10 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         # on port 8400 from the old design. However, ADFS only allows port 8400.
         result = self._msal_app.acquire_token_interactive(
             scopes, prompt='select_account', port=8400 if self._is_adfs else None,
-            success_template=success_template, error_template=error_template, **kwargs)
+            success_template=success_template, error_template=error_template,
+            parent_window_handle=self._msal_app.CONSOLE_WINDOW_HANDLE, on_before_launching_ui=_prompt_launching_ui,
+            enable_msa_passthrough=True,
+            **kwargs)
         return check_result(result)
 
     def login_with_device_code(self, scopes, **kwargs):
@@ -148,7 +177,8 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         if "user_code" not in flow:
             raise ValueError(
                 "Fail to create device flow. Err: %s" % json.dumps(flow, indent=4))
-        logger.warning(flow["message"])
+        from azure.cli.core.style import print_styled_text, Style
+        print_styled_text((Style.WARNING, flow["message"]), file=sys.stderr)
         result = self._msal_app.acquire_token_by_device_flow(flow, **kwargs)  # By default it will block
         return check_result(result)
 
@@ -161,10 +191,9 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         `credential` is a dict returned by ServicePrincipalAuth.build_credential
         """
         sp_auth = ServicePrincipalAuth.build_from_credential(self.tenant_id, client_id, credential)
-
-        # This cred means SDK credential object
-        cred = ServicePrincipalCredential(sp_auth, **self._msal_app_kwargs)
-        result = cred.acquire_token_for_client(scopes)
+        client_credential = sp_auth.get_msal_client_credential()
+        cca = ConfidentialClientApplication(client_id, client_credential=client_credential, **self._msal_app_kwargs)
+        result = cca.acquire_token_for_client(scopes)
         check_result(result)
 
         # Only persist the service principal after a successful login
@@ -177,21 +206,37 @@ class Identity:  # pylint: disable=too-many-instance-attributes
     def login_in_cloud_shell(self, scopes):
         raise NotImplementedError
 
-    def logout_user(self, user):
-        accounts = self._msal_app.get_accounts(user)
+    def logout_user(self, username):
+        # If username is an SP client ID, it is ignored
+        accounts = self._msal_app.get_accounts(username)
         for account in accounts:
             self._msal_app.remove_account(account)
 
     def logout_all_users(self):
+        # Remove users from MSAL
+        accounts = self._msal_app.get_accounts()
+        for account in accounts:
+            self._msal_app.remove_account(account)
+
+        # Also remove token cache file
         for e in file_extensions.values():
             _try_remove(self._token_cache_file + e)
 
-    def logout_service_principal(self, sp):
-        # remove service principal secrets
-        self._service_principal_store.remove_entry(sp)
+    def logout_service_principal(self, client_id):
+        # If client_id is a username, it is ignored
+
+        # Step 1: Remove SP from MSAL token cache
+        # Note that removing SP access tokens shouldn't rely on SP store
+        cca = ConfidentialClientApplication(client_id, **self._msal_app_kwargs)
+        cca.remove_tokens_for_client()
+
+        # Step 2: Remove SP from SP store
+        self._service_principal_store.remove_entry(client_id)
 
     def logout_all_service_principal(self):
         # remove service principal secrets
+        # TODO: As MSAL provides no interface to get all service principals in its token cache, this method can't
+        #   clear all service principals' access tokens from MSAL token cache.
         for e in file_extensions.values():
             _try_remove(self._secret_file + e)
 
@@ -200,36 +245,51 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         return accounts
 
     def get_user_credential(self, username):
-        return UserCredential(self.client_id, username, **self._msal_app_kwargs)
+        return UserCredential(self.client_id, username, **self._msal_public_app_kwargs)
 
     def get_service_principal_credential(self, client_id):
         entry = self._service_principal_store.load_entry(client_id, self.tenant_id)
-        sp_auth = ServicePrincipalAuth(entry)
-        return ServicePrincipalCredential(sp_auth, **self._msal_app_kwargs)
+        client_credential = ServicePrincipalAuth(entry).get_msal_client_credential()
+        return ServicePrincipalCredential(client_id, client_credential, **self._msal_app_kwargs)
 
     def get_managed_identity_credential(self, client_id=None):
         raise NotImplementedError
 
 
-class ServicePrincipalAuth:
-
+class ServicePrincipalAuth:  # pylint: disable=too-many-instance-attributes
     def __init__(self, entry):
+        # Initialize all attributes first, so that we don't need to call getattr to check their existence
+        self.client_id = None
+        self.tenant = None
+        # secret
+        self.client_secret = None
+        # certificate
+        self.certificate = None
+        self.use_cert_sn_issuer = None
+        # federated identity credential
+        self.client_assertion = None
+
+        # Internal attributes for certificate
+        # They are computed at runtime and not persisted in the service principal entry.
+        self._certificate_string = None
+        self._thumbprint = None
+        self._public_certificate = None
+
         self.__dict__.update(entry)
 
-        if _CERTIFICATE in entry:
+        if self.certificate:
             from OpenSSL.crypto import load_certificate, FILETYPE_PEM, Error
-            self.public_certificate = None
             try:
                 with open(self.certificate, 'r') as file_reader:
-                    self.certificate_string = file_reader.read()
-                    cert = load_certificate(FILETYPE_PEM, self.certificate_string)
-                    self.thumbprint = cert.digest("sha1").decode().replace(':', '')
+                    self._certificate_string = file_reader.read()
+                    cert = load_certificate(FILETYPE_PEM, self._certificate_string)
+                    self._thumbprint = cert.digest("sha1").decode().replace(':', '')
                     if entry.get(_USE_CERT_SN_ISSUER):
                         # low-tech but safe parsing based on
                         # https://github.com/libressl-portable/openbsd/blob/master/src/lib/libcrypto/pem/pem.h
                         match = re.search(r'-----BEGIN CERTIFICATE-----(?P<cert_value>[^-]+)-----END CERTIFICATE-----',
-                                          self.certificate_string, re.I)
-                        self.public_certificate = match.group()
+                                          self._certificate_string, re.I)
+                        self._public_certificate = match.group()
             except (UnicodeDecodeError, Error) as ex:
                 raise CLIError('Invalid certificate, please use a valid PEM file. Error detail: {}'.format(ex))
 
@@ -243,7 +303,9 @@ class ServicePrincipalAuth:
         return ServicePrincipalAuth(entry)
 
     @classmethod
-    def build_credential(cls, secret_or_certificate=None, client_assertion=None, use_cert_sn_issuer=None):
+    def build_credential(cls, client_secret=None,
+                         certificate=None, use_cert_sn_issuer=None,
+                         client_assertion=None):
         """Build credential from user input. The credential looks like below, but only one key can exist.
         {
             'client_secret': 'my_secret',
@@ -252,21 +314,53 @@ class ServicePrincipalAuth:
         }
         """
         entry = {}
-        if secret_or_certificate:
-            user_expanded = os.path.expanduser(secret_or_certificate)
-            if os.path.isfile(user_expanded):
-                entry[_CERTIFICATE] = user_expanded
-                if use_cert_sn_issuer:
-                    entry[_USE_CERT_SN_ISSUER] = use_cert_sn_issuer
-            else:
-                entry[_CLIENT_SECRET] = secret_or_certificate
+        if client_secret:
+            entry[_CLIENT_SECRET] = client_secret
+        elif certificate:
+            entry[_CERTIFICATE] = os.path.expanduser(certificate)
+            if use_cert_sn_issuer:
+                entry[_USE_CERT_SN_ISSUER] = use_cert_sn_issuer
         elif client_assertion:
             entry[_CLIENT_ASSERTION] = client_assertion
         return entry
 
     def get_entry_to_persist(self):
+        """Get a service principal entry that can be persisted by ServicePrincipalStore."""
         persisted_keys = [_CLIENT_ID, _TENANT, _CLIENT_SECRET, _CERTIFICATE, _USE_CERT_SN_ISSUER, _CLIENT_ASSERTION]
-        return {k: v for k, v in self.__dict__.items() if k in persisted_keys}
+        # Only persist certain attributes whose values are not None
+        return {k: v for k, v in self.__dict__.items() if k in persisted_keys and v}
+
+    def get_msal_client_credential(self):
+        """Get a client_credential that can be consumed by msal.ConfidentialClientApplication."""
+        client_credential = None
+
+        # client_secret
+        # "your client secret"
+        if self.client_secret:
+            client_credential = self.client_secret
+
+        # certificate
+        # {
+        #     "private_key": "...-----BEGIN PRIVATE KEY-----... in PEM format",
+        #     "thumbprint": "A1B2C3D4E5F6...",
+        #     "public_certificate": "...-----BEGIN CERTIFICATE-----...",
+        # }
+        if self.certificate:
+            client_credential = {
+                "private_key": self._certificate_string,
+                "thumbprint": self._thumbprint
+            }
+            if self._public_certificate:
+                client_credential['public_certificate'] = self._public_certificate
+
+        # client_assertion
+        # {
+        #     "client_assertion": "...a JWT with claims aud, exp, iss, jti, nbf, and sub..."
+        # }
+        if self.client_assertion:
+            client_credential = {'client_assertion': self.client_assertion}
+
+        return client_credential
 
 
 class ServicePrincipalStore:

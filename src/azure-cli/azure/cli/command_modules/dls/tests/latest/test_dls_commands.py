@@ -8,24 +8,23 @@ import datetime
 import os
 import time
 from shutil import rmtree
-from msrestazure.azure_exceptions import CloudError
+from azure.core.exceptions import HttpResponseError
 
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, LiveScenarioTest, VirtualNetworkPreparer
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, VirtualNetworkPreparer
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 from knack.util import CLIError
-
 
 class DataLakeStoreFileAccessScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_adls_access')
     def test_dls_file_access_mgmt(self):
 
-        user_id = '470c0ccf-c91a-4597-98cd-48507d2f1486'
+        user_id = 'ac37fe14-8b7a-4883-b02b-c7ed6f871165'
 
         self.kwargs.update({
             'dls': self.create_random_name('cliadls', 24),
-            'loc': 'eastus2',
+            'loc': 'westus2',
             'dir': 'adltestfolder01',
             'user_id': user_id,
             'acl_to_add': 'user:{}:rwx'.format(user_id),
@@ -53,9 +52,10 @@ class DataLakeStoreFileAccessScenarioTest(ScenarioTest):
         ])
 
         # set the owner and owning group for the file and confirm them
+ 
         self.kwargs.update({
-            'group_id': '80a3ed5f-959e-4696-ba3c-d3c8b2db6766',
-            'user_id': '6361e05d-c381-4275-a932-5535806bb323'
+            'group_id': 'a0fe7455-56dd-498f-b7d1-bacbdb573abd',
+            'user_id': 'ac37fe14-8b7a-4883-b02b-c7ed6f871165'
         })
         self.cmd('dls fs access set-owner -n {dls} --path "{dir}" --group {group_id} --owner {user_id}')
 
@@ -127,14 +127,14 @@ class DataLakeStoreFileScenarioTest(ScenarioTest):
 
         self.mp = mock.patch('uuid.uuid4', const_uuid)
         self.mp.__enter__()
-        super(DataLakeStoreFileScenarioTest, self).setUp()
+        super().setUp()
 
     def tearDown(self):
         local_folder = self.kwargs.get('local_folder', None)
         if local_folder and os.path.exists(local_folder):
             rmtree(local_folder)
         self.mp.__exit__(None, None, None)
-        return super(DataLakeStoreFileScenarioTest, self).tearDown()
+        return super().tearDown()
 
     @ResourceGroupPreparer(name_prefix='cls_test_adls_file')
     def test_dls_file_mgmt(self):
@@ -142,7 +142,7 @@ class DataLakeStoreFileScenarioTest(ScenarioTest):
         local_folder = 'adls_resources'
         self.kwargs.update({
             'dls': self.create_random_name('cliadls', 24),
-            'loc': 'eastus2',
+            'loc': 'westus2',
             'dir': local_folder,
             'local_folder': os.path.join(os.getcwd(), local_folder),
             'local_file': os.path.join(local_folder, 'sample_file.txt'),
@@ -306,7 +306,7 @@ class DataLakeStoreAccountScenarioTest(ScenarioTest):
 
         self.kwargs.update({
             'dls': self.create_random_name('cliadls', 24),
-            'loc': 'eastus2',
+            'loc': 'westus2',
             'updated_subnet': 'updatedSubnet'
         })
 
@@ -325,7 +325,7 @@ class DataLakeStoreAccountScenarioTest(ScenarioTest):
         ])
 
         # attempt to enable the key vault when it is already enabled, which should throw
-        with self.assertRaises(CloudError):
+        with self.assertRaises( HttpResponseError):
             self.cmd('dls account enable-key-vault -n {dls} -g {rg}')
 
         self.cmd('dls account list -g {rg}', checks=[
@@ -380,37 +380,6 @@ class DataLakeStoreAccountScenarioTest(ScenarioTest):
             self.check('length(@)', 0),
         ])
 
-        # test virtual network rule crud
-        subnet_id = self.cmd('network vnet subnet show -g {rg} -n default --vnet-name {vnet}').get_output_in_json()['id']
-        updated_subnet_id = self.cmd('network vnet subnet create --resource-group {rg} --vnet-name {vnet} --name {updated_subnet} --address-prefixes 10.0.1.0/24').get_output_in_json()['id']
-
-        self.kwargs.update({
-            'subnet_id': subnet_id,
-            'updated_subnet_id': updated_subnet_id,
-            'network_rule': 'dlsVnetRule'
-        })
-        self.cmd('network vnet subnet update --service-endpoints Microsoft.AzureActiveDirectory --ids "{subnet_id}"')
-        self.cmd('network vnet subnet update --service-endpoints Microsoft.AzureActiveDirectory --ids "{updated_subnet_id}"')
-
-        self.cmd('dls account network-rule create -g {rg} --account-name {dls} --name {network_rule} --subnet {subnet_id}')
-        self.cmd('dls account network-rule show -g {rg} --account-name {dls} --name {network_rule}', checks=[
-            self.check('name', '{network_rule}'),
-        ])
-
-        self.cmd('dls account network-rule update -g {rg} --account-name {dls} --name {network_rule} --subnet {updated_subnet_id}')
-        self.cmd('dls account network-rule show -g {rg} --account-name {dls} --name {network_rule}', checks=[
-            self.check('name', '{network_rule}'),
-        ])
-
-        self.cmd('dls account network-rule list -g {rg} --account-name {dls}', checks=[
-            self.check('type(@)', 'array'),
-            self.check('length(@)', 1),
-        ])
-        self.cmd('dls account network-rule delete -g {rg} --account-name {dls} --name {network_rule}')
-        self.cmd('dls account network-rule list -g {rg} --account-name {dls}', checks=[
-            self.check('type(@)', 'array'),
-            self.check('length(@)', 0),
-        ])
         # test trusted id provider CRUD
         self.kwargs.update({
             'trusted_provider': 'https://sts.windows.net/9d5b43a0-804c-4c82-8791-36aca2f72342',

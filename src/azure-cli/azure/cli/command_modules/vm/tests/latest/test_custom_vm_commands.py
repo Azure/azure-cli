@@ -222,8 +222,9 @@ class TestVmCustom(unittest.TestCase):
         # execute
         get_vmss_instance_view(cmd, 'rg1', 'vmss1', '*')
         # assert
-        vm_client.virtual_machine_scale_set_vms.list.assert_called_once_with('rg1', 'vmss1', expand='instanceView',
-                                                                             select='instanceView')
+        vm_client.virtual_machine_scale_set_vms.list.assert_called_once_with(
+            resource_group_name='rg1', virtual_machine_scale_set_name='vmss1',
+            select='instanceView', expand='instanceView')
 
     # pylint: disable=line-too-long
     @mock.patch('azure.cli.command_modules.vm.disk_encryption._compute_client_factory', autospec=True)
@@ -389,7 +390,7 @@ class TestVMBootLog(unittest.TestCase):
             get_sdk_mock.assert_called_with(cli_ctx_mock, ResourceType.DATA_STORAGE, 'blob.blockblobservice#BlockBlobService')
 
 
-class FakedVM(object):  # pylint: disable=too-few-public-methods
+class FakedVM:  # pylint: disable=too-few-public-methods
     def __init__(self, nics=None, disks=None, os_disk=None):
         self.network_profile = NetworkProfile(network_interfaces=nics)
         self.storage_profile = StorageProfile(data_disks=disks, os_disk=os_disk)
@@ -401,7 +402,7 @@ class FakedVM(object):  # pylint: disable=too-few-public-methods
         self.instance_view.extensions = [ext]
 
 
-class FakedAccessExtensionEntity(object):  # pylint: disable=too-few-public-methods
+class FakedAccessExtensionEntity:  # pylint: disable=too-few-public-methods
     def __init__(self, is_linux, version):
         self.name = 'VMAccessForLinux' if is_linux else 'VMAccessAgent'
         self.type_handler_version = version

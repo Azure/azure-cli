@@ -6,14 +6,14 @@
 
 from azure.cli.testsdk import ResourceGroupPreparer, ScenarioTest, StorageAccountPreparer
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from .recording_processors import KeyReplacer
+from ..utils import KeyReplacer
 import unittest
 
 
 class IoTHubTest(ScenarioTest):
 
     def __init__(self, method_name):
-        super(IoTHubTest, self).__init__(
+        super().__init__(
             method_name, recording_processors=[KeyReplacer()]
         )
 

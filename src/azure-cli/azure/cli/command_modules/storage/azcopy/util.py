@@ -3,20 +3,19 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-
 import os
-import json
 import platform
 import subprocess
 import datetime
-import sys
 import zipfile
 import stat
 from urllib.parse import urlparse
 from urllib.request import urlopen
 from azure.cli.core._profile import Profile
+from azure.cli.core.api import get_config_dir
 from knack.log import get_logger
 from knack.util import CLIError
+from packaging.version import parse as parse_version
 
 logger = get_logger(__name__)
 
@@ -30,10 +29,28 @@ class AzCopy:
     def __init__(self, creds=None):
         self.system = platform.system()
         install_location = _get_default_install_location()
-        self.executable = install_location
+        self.executable = None
+        if os.path.isfile(install_location):
+            self.executable = install_location
+            version = self.check_version()
+            if not version or parse_version(version) < parse_version(AZCOPY_VERSION):
+                self.executable = None
+        else:
+            try:
+                import re
+                args = ["azcopy", "--version"]
+                out_bytes = subprocess.check_output(args)
+                out_text = out_bytes.decode('utf-8')
+                version = re.findall(r"azcopy version (.+?)\n", out_text)[0]
+                if version and parse_version(version) >= parse_version(AZCOPY_VERSION):
+                    self.executable = "azcopy"
+            except Exception:  # pylint: disable=broad-except
+                self.executable = None
         self.creds = creds
-        if not os.path.isfile(install_location) or self.check_version() != AZCOPY_VERSION:
+        if not self.executable:
+            logger.warning("Azcopy not found, installing at %s", install_location)
             self.install_azcopy(install_location)
+            self.executable = install_location
 
     def install_azcopy(self, install_location):
         install_dir = os.path.dirname(install_location)
@@ -57,7 +74,7 @@ class AzCopy:
             _urlretrieve(file_url, install_location)
             os.chmod(install_location,
                      os.stat(install_location).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
-        except IOError as err:
+        except OSError as err:
             raise CLIError('Connection error while attempting to download azcopy {}. You could also install the '
                            'specified azcopy version to {} manually. ({})'.format(AZCOPY_VERSION, install_dir, err))
 
@@ -75,13 +92,14 @@ class AzCopy:
     def run_command(self, args):
         args = [self.executable] + args
         args_hides = args.copy()
-        for i in range(len(args_hides)):
-            if args_hides[i].find('sig') > 0:
-                args_hides[i] = args_hides[i][0:args_hides[i].index('sig') + 4]
+        for i, v in enumerate(args_hides):
+            if v.find('sig') > 0:
+                args_hides[i] = v[0:v.index('sig') + 4]
         logger.warning("Azcopy command: %s", args_hides)
         env_kwargs = {}
-        if self.creds and self.creds.token_info:
-            env_kwargs = {'AZCOPY_OAUTH_TOKEN_INFO': json.dumps(self.creds.token_info)}
+        if self.creds and self.creds.tenant_id:
+            env_kwargs = {'AZCOPY_TENANT_ID': self.creds.tenant_id,
+                          'AZCOPY_AUTO_LOGIN_TYPE': 'AzCLI'}
         result = subprocess.call(args, env=dict(os.environ, **env_kwargs))
         if result > 0:
             raise CLIError('Failed to perform {} operation.'.format(args[1]))
@@ -100,41 +118,48 @@ class AzCopy:
 
 
 class AzCopyCredentials:  # pylint: disable=too-few-public-methods
-    def __init__(self, sas_token=None, token_info=None):
+    def __init__(self, sas_token=None, token_info=None, tenant_id=None):
         self.sas_token = sas_token
         self.token_info = token_info
+        self.tenant_id = tenant_id
 
 
 def login_auth_for_azcopy(cmd):
-    token_info = Profile(cli_ctx=cmd.cli_ctx).get_raw_token(resource=STORAGE_RESOURCE_ENDPOINT)[0][2]
+    raw_token = Profile(cli_ctx=cmd.cli_ctx).get_raw_token(resource=STORAGE_RESOURCE_ENDPOINT)
+    token_info = raw_token[0][2]
     try:
         token_info = _unserialize_non_msi_token_payload(token_info)
     except KeyError:  # unserialized MSI token payload
-        raise Exception('MSI auth not yet supported.')
+        # if msi token, only get the tenant_id, AzCopy will get the account token from AzCLI directly
+        tenant_id = raw_token[2]
+        return AzCopyCredentials(tenant_id=tenant_id)
     return AzCopyCredentials(token_info=token_info)
 
 
 def client_auth_for_azcopy(cmd, client, service='blob'):
+    # prefer oauth mode
+    if client.token_credential:
+        raw_token = Profile(cli_ctx=cmd.cli_ctx).get_raw_token(resource=STORAGE_RESOURCE_ENDPOINT)
+        token_info = raw_token[0][2]
+        try:
+            token_info = _unserialize_non_msi_token_payload(token_info)
+        except KeyError:  # unserialized token payload
+            # if msi token, only get the tenant_id, AzCopy will get the account token from AzCLI directly
+            tenant_id = raw_token[2]
+            return AzCopyCredentials(tenant_id=tenant_id)
+        return AzCopyCredentials(token_info=token_info)
+
+    # try to get sas
     azcopy_creds = storage_client_auth_for_azcopy(client, service)
     if azcopy_creds is not None:
         return azcopy_creds
-
-    # oauth mode
-    if client.token_credential:
-        token_info = Profile(cli_ctx=cmd.cli_ctx).get_raw_token(resource=STORAGE_RESOURCE_ENDPOINT)[0][2]
-        try:
-            token_info = _unserialize_non_msi_token_payload(token_info)
-        except KeyError as ex:  # unserialized token payload
-            from azure.cli.core.azclierror import ValidationError
-            raise ValidationError('No {}. MSI auth and service principal are not yet supported.'.format(ex))
-        return AzCopyCredentials(token_info=token_info)
 
     return None
 
 
 def storage_client_auth_for_azcopy(client, service):
     if service not in SERVICES:
-        raise Exception('{} not one of: {}'.format(service, str(SERVICES)))
+        raise Exception('{} not one of: {}'.format(service, str(SERVICES)))  # pylint: disable=broad-exception-raised
 
     if client.sas_token:
         return AzCopyCredentials(sas_token=client.sas_token)
@@ -162,38 +187,32 @@ def _unserialize_non_msi_token_payload(token_info):
 
 
 def _generate_sas_token(cmd, account_name, account_key, service, resource_types='sco', permissions='rwdlacup'):
-    from .._client_factory import cloud_storage_account_service_factory
-    from .._validators import resource_type_type, services_type
-
     kwargs = {
         'account_name': account_name,
-        'account_key': account_key
+        'account_key': account_key,
+        'resource_types': resource_types,
+        'permission': permissions
     }
-    cloud_storage_client = cloud_storage_account_service_factory(cmd.cli_ctx, kwargs)
-    t_account_permissions = cmd.loader.get_sdk('common.models#AccountPermissions')
-
-    return cloud_storage_client.generate_shared_access_signature(
-        services_type(cmd.loader)(service[0]),
-        resource_type_type(cmd.loader)(resource_types),
-        t_account_permissions(_str=permissions),
-        datetime.datetime.utcnow() + datetime.timedelta(days=1)
-    )
+    from ..util import create_short_lived_blob_service_sas_track2, create_short_lived_file_service_sas_track2
+    if service == 'blob':
+        sas_token = create_short_lived_blob_service_sas_track2(cmd, **kwargs)
+    elif service == 'file':
+        sas_token = create_short_lived_file_service_sas_track2(cmd, **kwargs)
+    return sas_token
 
 
 def _get_default_install_location():
     system = platform.system()
+    _config_dir = get_config_dir()
+    _azcopy_installation_dir = os.path.join(_config_dir, "bin")
     if system == 'Windows':
-        home_dir = os.environ.get('USERPROFILE')
-        if not home_dir:
-            raise CLIError('In the Windows platform, please specify the environment variable "USERPROFILE" '
-                           'as the installation location.')
-        install_location = os.path.join(home_dir, r'.azcopy\azcopy.exe')
+        install_location = os.path.join(_azcopy_installation_dir, 'azcopy.exe')
     elif system in ('Linux', 'Darwin'):
-        install_location = os.path.expanduser(os.path.join('~', 'bin/azcopy'))
+        install_location = os.path.join(_azcopy_installation_dir, 'azcopy')
     else:
         raise CLIError('The {} platform is not currently supported. If you want to know which platforms are supported, '
                        'please refer to the document for supported platforms: '
-                       'https://docs.microsoft.com/en-us/azure/storage/common/storage-use-azcopy-v10#download-azcopy'
+                       'https://learn.microsoft.com/en-us/azure/storage/common/storage-use-azcopy-v10#download-azcopy'
                        .format(system))
     return install_location
 
@@ -203,12 +222,7 @@ def _urlretrieve(url, install_location):
     req = urlopen(url)
     compressedFile = io.BytesIO(req.read())
     if url.endswith('zip'):
-        if sys.version_info.major >= 3:
-            zip_file = zipfile.ZipFile(compressedFile)
-        else:
-            # If Python version is 2.X, use StringIO instead.
-            import StringIO  # pylint: disable=import-error
-            zip_file = zipfile.ZipFile(StringIO.StringIO(req.read()))
+        zip_file = zipfile.ZipFile(compressedFile)
         for fileName in zip_file.namelist():
             if fileName.endswith('azcopy') or fileName.endswith('azcopy.exe'):
                 with open(install_location, 'wb') as f:

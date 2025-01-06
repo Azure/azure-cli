@@ -9,6 +9,18 @@ from azure.cli.core.profiles import ResourceType
 from ..util import get_datetime_from_string
 
 
+def create_file_system(cmd, client, metadata=None, public_access=None,
+                       default_encryption_scope=None, prevent_encryption_scope_override=None, **kwargs):
+    encryption_scope = None
+    if default_encryption_scope is not None or prevent_encryption_scope_override is not None:
+        EncryptionScopeOptions = cmd.get_models('_models#EncryptionScopeOptions',
+                                                resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE)
+        encryption_scope = EncryptionScopeOptions(default_encryption_scope=default_encryption_scope,
+                                                  prevent_encryption_scope_override=prevent_encryption_scope_override)
+    return client.create_file_system(metadata=metadata, public_access=public_access,
+                                     encryption_scope_options=encryption_scope, **kwargs)
+
+
 def exists(cmd, client, timeout=None):
     from azure.core.exceptions import HttpResponseError
     try:
@@ -26,7 +38,7 @@ def generate_sas_fs_uri(client, cmd, file_system, permission=None,
                         expiry=None, start=None, id=None, ip=None,  # pylint: disable=redefined-builtin
                         protocol=None, cache_control=None, content_disposition=None,
                         content_encoding=None, content_language=None,
-                        content_type=None, full_uri=False, as_user=False):
+                        content_type=None, full_uri=False, as_user=False, encryption_scope=None):
     generate_file_system_sas = cmd.get_models('_shared_access_signature#generate_file_system_sas')
 
     sas_kwargs = {}
@@ -41,7 +53,7 @@ def generate_sas_fs_uri(client, cmd, file_system, permission=None,
                                          ip=ip, protocol=protocol,
                                          cache_control=cache_control, content_disposition=content_disposition,
                                          content_encoding=content_encoding, content_language=content_language,
-                                         content_type=content_type, **sas_kwargs)
+                                         content_type=content_type, encryption_scope=encryption_scope, **sas_kwargs)
 
     if full_uri:
         t_file_system_client = cmd.get_models('_file_system_client#FileSystemClient')

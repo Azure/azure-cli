@@ -25,12 +25,14 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2021-06-01",
+        "version": "2022-10-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.operationalinsights/clusters", "2021-06-01"],
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/clusters", "2021-06-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.operationalinsights/clusters", "2022-10-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/clusters", "2022-10-01"],
         ]
     }
+
+    AZ_SUPPORT_PAGINATION = True
 
     def _handler(self, command_args):
         super()._handler(command_args)
@@ -51,12 +53,22 @@ class List(AAZCommand):
         return cls._args_schema
 
     def _execute_operations(self):
+        self.pre_operations()
         condition_0 = has_value(self.ctx.args.resource_group) and has_value(self.ctx.subscription_id)
         condition_1 = has_value(self.ctx.subscription_id) and has_value(self.ctx.args.resource_group) is not True
         if condition_0:
             self.ClustersListByResourceGroup(ctx=self.ctx)()
         if condition_1:
             self.ClustersList(ctx=self.ctx)()
+        self.post_operations()
+
+    @register_callback
+    def pre_operations(self):
+        pass
+
+    @register_callback
+    def post_operations(self):
+        pass
 
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
@@ -107,7 +119,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2021-06-01",
+                    "api-version", "2022-10-01",
                     required=True,
                 ),
             }
@@ -185,7 +197,9 @@ class List(AAZCommand):
             )
 
             user_assigned_identities = cls._schema_on_200.value.Element.identity.user_assigned_identities
-            user_assigned_identities.Element = AAZObjectType()
+            user_assigned_identities.Element = AAZObjectType(
+                nullable=True,
+            )
 
             _element = cls._schema_on_200.value.Element.identity.user_assigned_identities.Element
             _element.client_id = AAZStrType(
@@ -200,7 +214,6 @@ class List(AAZCommand):
             properties = cls._schema_on_200.value.Element.properties
             properties.associated_workspaces = AAZListType(
                 serialized_name="associatedWorkspaces",
-                flags={"read_only": True},
             )
             properties.billing_type = AAZStrType(
                 serialized_name="billingType",
@@ -218,6 +231,9 @@ class List(AAZCommand):
             )
             properties.is_availability_zones_enabled = AAZBoolType(
                 serialized_name="isAvailabilityZonesEnabled",
+            )
+            properties.is_double_encryption_enabled = AAZBoolType(
+                serialized_name="isDoubleEncryptionEnabled",
             )
             properties.key_vault_properties = AAZObjectType(
                 serialized_name="keyVaultProperties",
@@ -325,7 +341,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2021-06-01",
+                    "api-version", "2022-10-01",
                     required=True,
                 ),
             }
@@ -403,7 +419,9 @@ class List(AAZCommand):
             )
 
             user_assigned_identities = cls._schema_on_200.value.Element.identity.user_assigned_identities
-            user_assigned_identities.Element = AAZObjectType()
+            user_assigned_identities.Element = AAZObjectType(
+                nullable=True,
+            )
 
             _element = cls._schema_on_200.value.Element.identity.user_assigned_identities.Element
             _element.client_id = AAZStrType(
@@ -418,7 +436,6 @@ class List(AAZCommand):
             properties = cls._schema_on_200.value.Element.properties
             properties.associated_workspaces = AAZListType(
                 serialized_name="associatedWorkspaces",
-                flags={"read_only": True},
             )
             properties.billing_type = AAZStrType(
                 serialized_name="billingType",
@@ -436,6 +453,9 @@ class List(AAZCommand):
             )
             properties.is_availability_zones_enabled = AAZBoolType(
                 serialized_name="isAvailabilityZonesEnabled",
+            )
+            properties.is_double_encryption_enabled = AAZBoolType(
+                serialized_name="isDoubleEncryptionEnabled",
             )
             properties.key_vault_properties = AAZObjectType(
                 serialized_name="keyVaultProperties",
@@ -502,6 +522,10 @@ class List(AAZCommand):
             tags.Element = AAZStrType()
 
             return cls._schema_on_200
+
+
+class _ListHelper:
+    """Helper class for List"""
 
 
 __all__ = ["List"]

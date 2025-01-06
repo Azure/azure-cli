@@ -14,10 +14,16 @@ logger = get_logger(__name__)
 AccessToken = namedtuple("AccessToken", ["token", "expires_on"])
 
 
+PASSWORD_CERTIFICATE_WARNING = (
+    "The error may be caused by passing a service principal certificate with --password. "
+    "Please note that --password no longer accepts a service principal certificate. "
+    "To pass a service principal certificate, use --certificate instead.")
+
+
 def aad_error_handler(error, **kwargs):
     """ Handle the error from AAD server returned by ADAL or MSAL. """
 
-    # https://docs.microsoft.com/en-us/azure/active-directory/develop/reference-aadsts-error-codes
+    # https://learn.microsoft.com/en-us/azure/active-directory/develop/reference-aadsts-error-codes
     # Search for an error code at https://login.microsoftonline.com/error
 
     # To trigger this function for testing, simply provide an invalid scope:
@@ -30,25 +36,34 @@ def aad_error_handler(error, **kwargs):
                        "below, please mention the hostname '%s'", socket.gethostname())
 
     error_description = error.get('error_description')
+    error_codes = error.get('error_codes')
 
     # Build recommendation message
-    login_command = _generate_login_command(**kwargs)
-    login_message = (
-        # Cloud Shell uses IMDS-like interface for implicit login. If getting token/cert failed,
-        # we let the user explicitly log in to AAD with MSAL.
-        "Please explicitly log in with:\n{}" if error.get('error') == 'broker_error'
-        else "To re-authenticate, please run:\n{}").format(login_command)
+    if error_codes and 7000215 in error_codes:
+        recommendation = PASSWORD_CERTIFICATE_WARNING
+    else:
+        login_command = _generate_login_command(**kwargs)
+        recommendation = (
+            # Cloud Shell uses IMDS-like interface for implicit login. If getting token/cert failed,
+            # we let the user explicitly log in to AAD with MSAL.
+            "Please explicitly log in with:\n{}" if error.get('error') == 'broker_error'
+            else "Interactive authentication is needed. Please run:\n{}").format(login_command)
 
     from azure.cli.core.azclierror import AuthenticationError
-    raise AuthenticationError(error_description, recommendation=login_message)
+    raise AuthenticationError(error_description, msal_error=error, recommendation=recommendation)
 
 
-def _generate_login_command(scopes=None):
+def _generate_login_command(scopes=None, claims=None):
     login_command = ['az login']
 
     # Rejected by Conditional Access policy, like MFA
     if scopes:
         login_command.append('--scope {}'.format(' '.join(scopes)))
+
+    # Rejected by CAE
+    if claims:
+        # Explicit logout is needed: https://github.com/AzureAD/microsoft-authentication-library-for-python/issues/335
+        return 'az logout\n' + ' '.join(login_command)
 
     return ' '.join(login_command)
 
@@ -62,7 +77,7 @@ def resource_to_scopes(resource):
     :param resource: The ADAL resource ID
     :return: A list of scopes
     """
-    # https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-permissions-and-consent#trailing-slash-and-default
+    # https://learn.microsoft.com/en-us/azure/active-directory/develop/v2-permissions-and-consent#trailing-slash-and-default
     # We should not trim the trailing slash, like in https://management.azure.com/
     # In other word, the trailing slash should be preserved and scope should be https://management.azure.com//.default
     scope = resource + '/.default'
@@ -91,27 +106,6 @@ def scopes_to_resource(scopes):
     return scope
 
 
-def _normalize_scopes(scopes):
-    """Normalize scopes to workaround some SDK issues."""
-
-    # Track 2 SDKs generated before https://github.com/Azure/autorest.python/pull/239 don't maintain
-    # credential_scopes and call `get_token` with empty scopes.
-    # As a workaround, return None so that the CLI-managed resource is used.
-    if not scopes:
-        logger.debug("No scope is provided by the SDK, use the CLI-managed resource.")
-        return None
-
-    # Track 2 SDKs generated before https://github.com/Azure/autorest.python/pull/745 extend default
-    # credential_scopes with custom credential_scopes. Instead, credential_scopes should be replaced by
-    # custom credential_scopes. https://github.com/Azure/azure-sdk-for-python/issues/12947
-    # As a workaround, remove the first one if there are multiple scopes provided.
-    if len(scopes) > 1:
-        logger.debug("Multiple scopes are provided by the SDK, discarding the first one: %s", scopes[0])
-        return scopes[1:]
-
-    return scopes
-
-
 def check_result(result, **kwargs):
     """Parse the result returned by MSAL:
 
@@ -124,6 +118,12 @@ def check_result(result, **kwargs):
     if not result:
         raise AuthenticationError("Can't find token from MSAL cache.",
                                   recommendation="To re-authenticate, please run:\naz login")
+
+    # msal_telemetry should be sent no matter if the MSAL response is a success or an error
+    if 'msal_telemetry' in result:
+        from azure.cli.core.telemetry import set_msal_telemetry
+        set_msal_telemetry(result['msal_telemetry'])
+
     if 'error' in result:
         aad_error_handler(result, **kwargs)
 

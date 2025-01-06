@@ -24,14 +24,6 @@ def cf_security_alerts_suppression_rule(cli_ctx, _):
     return _cf_security(cli_ctx).alerts_suppression_rules
 
 
-def cf_security_settings(cli_ctx, _):
-    return _cf_security(cli_ctx).settings
-
-
-def cf_security_contacts(cli_ctx, _):
-    return _cf_security(cli_ctx).security_contacts
-
-
 def cf_security_auto_provisioning_settings(cli_ctx, _):
     return _cf_security(cli_ctx).auto_provisioning_settings
 
@@ -150,5 +142,13 @@ def cf_security_secure_score_control_definitions(cli_ctx, _):
     return _cf_security(cli_ctx).secure_score_control_definitions
 
 
+def cf_security_security_solutions_reference_data(cli_ctx, _):
+    return _cf_security(cli_ctx).security_solutions_reference_data
+
+
 def cf_security_automations(cli_ctx, _):
     return _cf_security(cli_ctx).automations
+
+
+def cf_security_security_solutions(cli_ctx, _):
+    return _cf_security(cli_ctx)

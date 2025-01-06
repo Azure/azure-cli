@@ -31,12 +31,12 @@ def get_k8s_versions_completion_list(cmd, prefix, namespace, **kwargs):  # pylin
 
 def get_k8s_versions(cli_ctx, location):
     """Return a list of Kubernetes versions available for a new cluster."""
-    from azure.cli.command_modules.acs._client_factory import cf_container_services
+    from azure.cli.command_modules.acs._client_factory import cf_managed_clusters
     from jmespath import search
 
-    results = cf_container_services(cli_ctx).list_orchestrators(location, resource_type='managedClusters').as_dict()
+    results = cf_managed_clusters(cli_ctx).list_kubernetes_versions(location).as_dict()
     # Flatten all the "orchestrator_version" fields into one array
-    return search('orchestrators[*].orchestrator_version', results)
+    return search("values[*].patchVersions.keys(@)[]", results)
 
 
 @Completer
@@ -72,12 +72,12 @@ def _get_location(cli_ctx, namespace):
 
 def _get_location_from_resource_group(cli_ctx, resource_group_name):
     from azure.cli.command_modules.acs._client_factory import get_resource_groups_client
-    from msrestazure.azure_exceptions import CloudError
+    from azure.core.exceptions import HttpResponseError
 
     try:
         rg = get_resource_groups_client(cli_ctx).get(resource_group_name)
         return rg.location
-    except CloudError as err:
+    except HttpResponseError as err:
         # Print a warning if the user hit [TAB] but the `--resource-group` argument was incorrect.
         # For example: "Warning: Resource group 'bogus' could not be found."
         from argcomplete import warn

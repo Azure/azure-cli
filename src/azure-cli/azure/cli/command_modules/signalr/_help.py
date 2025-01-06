@@ -22,6 +22,11 @@ type: group
 short-summary: Manage network rules.
 """
 
+helps['signalr network-rule ip-rule'] = """
+type: group
+short-summary: Manage SignalR Service IP rules.
+"""
+
 helps['signalr upstream'] = """
 type: group
 short-summary: Manage upstream settings.
@@ -30,6 +35,21 @@ short-summary: Manage upstream settings.
 helps['signalr identity'] = """
 type: group
 short-summary: Manage managed identity settings.
+"""
+
+helps['signalr custom-domain'] = """
+type: group
+short-summary: Manage custom domain settings.
+"""
+
+helps['signalr custom-certificate'] = """
+type: group
+short-summary: Manage custom certificate settings.
+"""
+
+helps['signalr replica'] = """
+type: group
+short-summary: Manage replica settings.
 """
 
 helps['signalr cors add'] = """
@@ -68,9 +88,12 @@ helps['signalr create'] = """
 type: command
 short-summary: Creates a SignalR Service.
 examples:
-  - name: Create a SignalR Service with the Standard SKU and serverless mode and enable messaging logs.
+  - name: Create a SignalR Service with the Premium SKU and default mode
     text: >
-        az signalr create -n MySignalR -g MyResourceGroup --sku Standard_S1 --unit-count 1 --service-mode Serverless --enable-message-logs True
+        az signalr create -n MySignalR -g MyResourceGroup --sku Premium_P1
+  - name: Create a SignalR Service with the Premium SKU and serverless mode and enable messaging logs.
+    text: >
+        az signalr create -n MySignalR -g MyResourceGroup --sku Premium_P1 --unit-count 1 --service-mode Serverless --enable-message-logs True
 """
 
 helps['signalr delete'] = """
@@ -117,6 +140,24 @@ examples:
         az signalr list -g MySignalR -o table
 """
 
+helps['signalr start'] = """
+type: command
+short-summary: Start an existing SignalR Service.
+examples:
+  - name: Start a SignalR Service instance.
+    text: >
+        az signalr start -n MySignalR -g MyResourceGroup
+"""
+
+helps['signalr stop'] = """
+type: command
+short-summary: Stop an existing SignalR Service.
+examples:
+  - name: Stop a SignalR Service instance.
+    text: >
+        az signalr stop -n MySignalR -g MyResourceGroup
+"""
+
 helps['signalr restart'] = """
 type: command
 short-summary: Restart an existing SignalR Service.
@@ -148,6 +189,15 @@ examples:
   - name: Update for enabling messaging logs in the service.
     text: >
         az signalr update -n MySignalR -g MyResourceGroup --enable-message-logs True
+  - name: Enable or disable client certificate authentication for a SignalR Service
+    text: >
+        az signalr update -n MySignalR -g MyResourceGroup --client-cert-enabled False
+  - name: Enable or disable local auth for a SignalR Service
+    text: >
+        az signalr update -n MySignalR -g MyResourceGroup --disable-local-auth True
+  - name: Enable or disable region endpoint for a SignalR Service
+    text: >
+        az signalr update -n MySignalR -g MyResourceGroup --region-endpoint-enabled False
 """
 
 helps['signalr upstream list'] = """
@@ -169,7 +219,7 @@ examples:
 
 helps['signalr upstream clear'] = """
 type: command
-short-summary: List upstream settings of an existing SignalR Service.
+short-summary: Clear upstream settings of an existing SignalR Service.
 """
 
 helps['signalr network-rule list'] = """
@@ -192,6 +242,24 @@ examples:
         az signalr network-rule update --public-network --connection-name MyPrivateEndpointConnection1 MyPrivateEndpointConnection2 -n MySignalR -g MyResourceGroup --deny ClientConnection
 """
 
+helps['signalr network-rule ip-rule add'] = """
+type: command
+short-summary: Add IP rule to SignalR Service.
+examples:
+  - name: Add IP rule
+    text: >
+        az signalr network-rule ip-rule add -n MySignalR -g MyResourceGroup --ip-rule value="10.0.0.24" action="Allow" --ip-rule value="192.168.0.0/24" action="Deny"
+"""
+
+helps['signalr network-rule ip-rule remove'] = """
+type: command
+short-summary: Remove IP rule from SignalR Service.
+examples:
+  - name: Remove IP rule
+    text: >
+        az signalr network-rule ip-rule remove -n MySignalR -g MyResourceGroup --ip-rule value="10.0.0.24" action="Allow" --ip-rule value="192.168.0.0/24" action="Deny"
+"""
+
 helps['signalr identity assign'] = """
 type: command
 short-summary: Assign managed identity for SignalR Service.
@@ -212,4 +280,129 @@ short-summary: Remove managed identity for SignalR Service.
 helps['signalr identity show'] = """
 type: command
 short-summary: Show managed identity for SignalR Service.
+"""
+
+helps['signalr custom-domain create'] = """
+type: command
+short-summary: Create a custom domain of SignalR Service.
+"""
+
+helps['signalr custom-domain delete'] = """
+type: command
+short-summary: Delete a custom domain of SignalR Service.
+"""
+
+helps['signalr custom-domain update'] = """
+type: command
+short-summary: Update a custom domain of SignalR Service.
+"""
+
+helps['signalr custom-domain list'] = """
+type: command
+short-summary: List custom domains of SignalR Service.
+"""
+
+helps['signalr custom-domain show'] = """
+type: command
+short-summary: Show the detail of a custom domain of SignalR Service.
+"""
+
+helps['signalr custom-certificate create'] = """
+type: command
+short-summary: Create a custom certificate of SignalR Service.
+"""
+
+helps['signalr custom-certificate delete'] = """
+type: command
+short-summary: Delete a custom certificate of SignalR Service.
+"""
+
+helps['signalr custom-certificate update'] = """
+type: command
+short-summary: Update a custom certificate of SignalR Service.
+"""
+
+helps['signalr custom-certificate list'] = """
+type: command
+short-summary: List custom certificate of SignalR Service.
+"""
+
+helps['signalr custom-certificate show'] = """
+type: command
+short-summary: Show the detail of a custom certificate of SignalR Service.
+"""
+
+helps['signalr replica start'] = """
+type: command
+short-summary: Start a replica of SignalR Service.
+examples:
+  - name: Start a replica
+    text: >
+        az signalr replica start --replica-name MyReplica --signalr-name MySignalR -g MyResourceGroup
+"""
+
+helps['signalr replica stop'] = """
+type: command
+short-summary: Stop a replica of SignalR Service.
+examples:
+  - name: Stop a replica
+    text: >
+        az signalr replica stop --replica-name MyReplica --signalr-name MySignalR -g MyResourceGroup
+"""
+
+helps['signalr replica restart'] = """
+type: command
+short-summary: Restart a replica of SignalR Service.
+examples:
+  - name: Restart a replica
+    text: >
+        az signalr replica restart --replica-name MyReplica --signalr-name MySignalR -g MyResourceGroup
+"""
+
+helps['signalr replica show'] = """
+type: command
+short-summary: Show the details of a replica
+examples:
+  - name: Get the detail of a replica
+    text: >
+        az signalr replica show --replica-name MyReplica --signalr-name MySignalR -g MyResourceGroup
+"""
+
+helps['signalr replica delete'] = """
+type: command
+short-summary: Delete a replica of SignalR Service.
+examples:
+  - name: Delete a replica
+    text: >
+        az signalr replica delete --replica-name MyReplica --signalr-name MySignalR -g MyResourceGroup
+"""
+
+helps['signalr replica list'] = """
+type: command
+short-summary: List replicas of SignalR Service.
+examples:
+  - name: Get the detail of a replica
+    text: >
+        az signalr replica list --signalr-name MySignalR -g MyResourceGroup -o table
+"""
+
+helps['signalr replica create'] = """
+type: command
+short-summary: Create a replica of SignalR Service.
+examples:
+  - name: Get the detail of a replica
+    text: >
+        az signalr replica create --sku Premium_P1 -l eastus --replica-name MyReplica --signalr-name MySignalR -g MyResourceGroup
+"""
+
+helps['signalr replica update'] = """
+type: command
+short-summary: Update a replica of SignalR Service.
+examples:
+  - name: Enable or disable region endpoint for the replica of SignalR Service
+    text: >
+        az signalr replica update --replica-name MyReplica --signalr-name MySignalR -g MyResourceGroup --region-endpoint-enabled true
+  - name: Update the unit count of the replica of SignalR Service
+    text: >
+        az signalr replica update --replica-name MyReplica --signalr-name MySignalR -g MyResourceGroup --unit-count 2
 """

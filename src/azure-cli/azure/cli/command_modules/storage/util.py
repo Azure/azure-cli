@@ -38,7 +38,11 @@ def collect_blob_objects(blob_service, container, pattern=None):
             blobs = blob_service.list_blobs(container)
         else:
             container_client = blob_service.get_container_client(container=container)
-            blobs = container_client.list_blobs()
+            prefix = _get_prefix(pattern)
+            if prefix:
+                blobs = container_client.list_blobs(name_starts_with=prefix)
+            else:
+                blobs = container_client.list_blobs()
         for blob in blobs:
             try:
                 blob_name = blob.name.encode('utf-8') if isinstance(blob.name, unicode) else blob.name
@@ -130,14 +134,16 @@ def glob_files_remotely(cmd, client, share_name, pattern, snapshot=None):
                 queue.appendleft(os.path.join(current_dir, f.name))
 
 
-def glob_files_remotely_track2(client, share_name, pattern, snapshot=None):
+def glob_files_remotely_track2(client, share_name, pattern, snapshot=None, is_share_client=False):
     """glob the files in remote file share based on the given pattern"""
     from collections import deque
 
+    if not is_share_client:
+        client = client.get_share_client(share_name, snapshot=snapshot)
     queue = deque([""])
     while queue:
         current_dir = queue.pop()
-        for f in client.get_share_client(share_name, snapshot=snapshot).list_directories_and_files(current_dir):
+        for f in client.list_directories_and_files(current_dir):
             if not f['is_directory']:
                 if not pattern or _match_path(os.path.join(current_dir, f['name']), pattern):
                     yield current_dir, f['name']
@@ -158,7 +164,7 @@ def create_short_lived_blob_sas(cmd, account_name, account_key, container, blob)
     return sas.generate_blob(container, blob, permission=t_blob_permissions(read=True), expiry=expiry, protocol='https')
 
 
-def create_short_lived_blob_sas_v2(cmd, account_name, account_key, container, blob):
+def create_short_lived_blob_sas_v2(cmd, account_name, container, blob, account_key=None, user_delegation_key=None):
     from datetime import timedelta
 
     t_sas = cmd.get_models('_shared_access_signature#BlobSharedAccessSignature',
@@ -166,7 +172,12 @@ def create_short_lived_blob_sas_v2(cmd, account_name, account_key, container, bl
 
     t_blob_permissions = cmd.get_models('_models#BlobSasPermissions', resource_type=ResourceType.DATA_STORAGE_BLOB)
     expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
-    sas = t_sas(account_name, account_key)
+    if account_key:
+        sas = t_sas(account_name, account_key=account_key)
+    elif user_delegation_key:
+        sas = t_sas(account_name, user_delegation_key=user_delegation_key)
+    else:
+        raise ValueError("Either account key or user delegation key need to be provided.")
     return sas.generate_blob(container, blob, permission=t_blob_permissions(read=True), expiry=expiry, protocol='https')
 
 
@@ -242,6 +253,21 @@ def create_short_lived_share_sas_track2(cmd, account_name, account_key, share):
                                 protocol='https')
 
 
+def create_short_lived_blob_service_sas_track2(cmd, account_name, account_key, resource_types, permission='r'):
+    from datetime import timedelta
+    t_generate_blob_service_sas = cmd.get_models('#generate_account_sas', resource_type=ResourceType.DATA_STORAGE_BLOB)
+    expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
+    return t_generate_blob_service_sas(account_name, account_key, resource_types, permission=permission, expiry=expiry)
+
+
+def create_short_lived_file_service_sas_track2(cmd, account_name, account_key, resource_types, permission='r'):
+    from datetime import timedelta
+    t_generate_file_service_sas = cmd.get_models('#generate_account_sas',
+                                                 resource_type=ResourceType.DATA_STORAGE_FILESHARE)
+    expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
+    return t_generate_file_service_sas(account_name, account_key, resource_types, permission=permission, expiry=expiry)
+
+
 def mkdir_p(path):
     import errno
     try:
@@ -255,6 +281,19 @@ def mkdir_p(path):
 
 def _pattern_has_wildcards(p):
     return not p or p.find('*') != -1 or p.find('?') != -1 or p.find('[') != -1
+
+
+def _get_prefix(p):
+    if not p:
+        return p
+    pattern_start = len(p)
+    for index, ch in enumerate(p):
+        if ch == '*' or ch == '?' or ch == '[':
+            pattern_start = index
+            break
+    if pattern_start == len(p):
+        return None
+    return p[:pattern_start]
 
 
 def _match_path(path, pattern):

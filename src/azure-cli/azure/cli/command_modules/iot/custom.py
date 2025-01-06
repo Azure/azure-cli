@@ -4,11 +4,12 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=no-self-use,no-member,line-too-long,too-few-public-methods,too-many-lines,too-many-arguments,too-many-locals
 
+import json
 import re
 from enum import Enum
 from knack.log import get_logger
 from knack.util import CLIError
-from msrestazure.azure_exceptions import CloudError
+from azure.core.exceptions import HttpResponseError
 from azure.cli.core.azclierror import (
     ArgumentUsageError,
     BadRequestError,
@@ -197,8 +198,12 @@ def iot_dps_policy_update(
         if policy.key_name == access_policy_name:
             if primary_key is not None:
                 policy.primary_key = primary_key
+                if policy.primary_key == '':
+                    policy.primary_key = None
             if secondary_key is not None:
                 policy.secondary_key = secondary_key
+                if policy.secondary_key == '':
+                    policy.secondary_key = None
             if rights is not None:
                 policy.rights = _convert_rights_to_access_rights(rights)
 
@@ -278,7 +283,10 @@ def iot_dps_linked_hub_create(
                 raise InvalidArgumentValueError("Please provide a valid IoT Hub connection string.")
 
         hub_client = iot_hub_service_factory(cmd.cli_ctx)
-        location = iot_hub_get(cmd, hub_client, hub_name=hub_name, resource_group_name=hub_resource_group).location
+        try:
+            location = iot_hub_get(cmd, hub_client, hub_name=hub_name, resource_group_name=hub_resource_group).location
+        except CLIError:
+            raise RequiredArgumentMissingError("Please provide the IoT Hub location.")
 
     resource_group_name = _ensure_dps_resource_group_name(client, resource_group_name, dps_name)
 
@@ -468,6 +476,7 @@ def iot_hub_certificate_verify(client, hub_name, certificate_name, certificate_p
     return client.certificates.verify(resource_group_name, hub_name, certificate_name, etag, certificate_verify_body)
 
 
+# pylint: disable=too-many-statements
 def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
                    sku=IotHubSku.s1.value,
                    unit=1,
@@ -490,7 +499,6 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
                    fileupload_storage_container_name=None,
                    fileupload_sas_ttl=1,
                    fileupload_storage_authentication_type=None,
-                   fileupload_storage_container_uri=None,
                    fileupload_storage_identity=None,
                    min_tls_version=None,
                    tags=None,
@@ -517,6 +525,13 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
         if fileupload_storage_identity and fileupload_storage_identity != SYSTEM_ASSIGNED_IDENTITY and not user_identities:
             raise ArgumentUsageError('User identity [--mi-user-assigned] must be added in order to use it for file upload')
     location = _ensure_location(cli_ctx, resource_group_name, location)
+
+    if location.lower() == 'qatarcentral' and not enable_data_residency:
+        raise InvalidArgumentValueError(
+            "Data Residency enforcement must be enabled for IoT Hubs created in this region. Please use the '--enforce-data-residency' (--edr) argument "
+            "to enable it. Check command help (-h) for more information on this property's usage and implications."
+        )
+
     sku = IotHubSkuInfo(name=sku, capacity=unit)
 
     event_hub_dic = {}
@@ -538,7 +553,6 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
         connection_string=fileupload_storage_connectionstring if fileupload_storage_connectionstring else '',
         container_name=fileupload_storage_container_name if fileupload_storage_container_name else '',
         authentication_type=fileupload_storage_authentication_type if fileupload_storage_authentication_type else None,
-        container_uri=fileupload_storage_container_uri if fileupload_storage_container_uri else '',
         identity=ManagedIdentity(user_assigned_identity=fileupload_storage_identity) if fileupload_storage_identity else None)
 
     properties = IotHubProperties(event_hub_endpoints=event_hub_dic,
@@ -572,10 +586,10 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
                     hub_description.identity.principal_id = principal_id
                     for scope in identity_scopes:
                         assign_identity(cmd.cli_ctx, lambda: hub_description, lambda hub: hub_description, identity_role=identity_role, identity_scope=scope)
-        except CloudError as e:
+        except HttpResponseError as e:
             raise e
 
-    create = client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, hub_description, polling=True)
+    create = client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, hub_description)
     if identity_role and identity_scopes:
         create.add_done_callback(identity_assignment)
     return create
@@ -694,12 +708,12 @@ def update_iot_hub_custom(instance,
 
 def iot_hub_update(client, hub_name, parameters, resource_group_name=None):
     resource_group_name = _ensure_hub_resource_group_name(client, resource_group_name, hub_name)
-    return client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, parameters, {'IF-MATCH': parameters.etag}, polling=True)
+    return client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, parameters, parameters.etag)
 
 
 def iot_hub_delete(client, hub_name, resource_group_name=None):
     resource_group_name = _ensure_hub_resource_group_name(client, resource_group_name, hub_name)
-    return client.iot_hub_resource.begin_delete(resource_group_name, hub_name, polling=True)
+    return client.iot_hub_resource.begin_delete(resource_group_name, hub_name)
 
 
 # pylint: disable=inconsistent-return-statements
@@ -783,7 +797,7 @@ def iot_hub_identity_assign(cmd, client, hub_name, system_identity=None, user_id
         else:
             hub.identity.type = IdentityType.user_assigned.value if hub.identity.user_assigned_identities else IdentityType.none.value
 
-        poller = client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
+        poller = client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, hub, hub.etag)
         return LongRunningOperation(cmd.cli_ctx)(poller)
 
     if bool(identity_role) ^ bool(identity_scopes):
@@ -843,7 +857,7 @@ def iot_hub_identity_remove(cmd, client, hub_name, system_identity=None, user_id
     hub.identity = hub_identity
     if not getattr(hub.identity, 'user_assigned_identities', None):
         hub.identity.user_assigned_identities = None
-    poller = client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
+    poller = client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, hub, hub.etag)
     lro = LongRunningOperation(cmd.cli_ctx)(poller)
     return lro.identity
 
@@ -867,7 +881,7 @@ def iot_hub_policy_create(cmd, client, hub_name, policy_name, permissions, resou
         raise CLIError("Policy {0} already existed.".format(policy_name))
     policies.append(SharedAccessSignatureAuthorizationRule(key_name=policy_name, rights=rights))
     hub.properties.authorization_policies = policies
-    return client.iot_hub_resource.begin_create_or_update(hub.additional_properties['resourcegroup'], hub_name, hub, {'IF-MATCH': hub.etag})
+    return client.iot_hub_resource.begin_create_or_update(hub.additional_properties['resourcegroup'], hub_name, hub, hub.etag)
 
 
 def iot_hub_policy_delete(cmd, client, hub_name, policy_name, resource_group_name=None):
@@ -878,7 +892,7 @@ def iot_hub_policy_delete(cmd, client, hub_name, policy_name, resource_group_nam
         raise CLIError("Policy {0} not found.".format(policy_name))
     updated_policies = [p for p in policies if p.key_name.lower() != policy_name.lower()]
     hub.properties.authorization_policies = updated_policies
-    return client.iot_hub_resource.begin_create_or_update(hub.additional_properties['resourcegroup'], hub_name, hub, {'IF-MATCH': hub.etag})
+    return client.iot_hub_resource.begin_create_or_update(hub.additional_properties['resourcegroup'], hub_name, hub, hub.etag)
 
 
 def iot_hub_policy_key_renew(cmd, client, hub_name, policy_name, regenerate_key, resource_group_name=None, no_wait=False):
@@ -903,8 +917,8 @@ def iot_hub_policy_key_renew(cmd, client, hub_name, policy_name, regenerate_key,
                                                                    secondary_key=requested_policy[0].secondary_key))
     hub.properties.authorization_policies = updated_policies
     if no_wait:
-        return client.iot_hub_resource.begin_create_or_update(hub.additional_properties['resourcegroup'], hub_name, hub, {'IF-MATCH': hub.etag})
-    LongRunningOperation(cmd.cli_ctx)(client.iot_hub_resource.begin_create_or_update(hub.additional_properties['resourcegroup'], hub_name, hub, {'IF-MATCH': hub.etag}))
+        return client.iot_hub_resource.begin_create_or_update(hub.additional_properties['resourcegroup'], hub_name, hub, hub.etag)
+    LongRunningOperation(cmd.cli_ctx)(client.iot_hub_resource.begin_create_or_update(hub.additional_properties['resourcegroup'], hub_name, hub, hub.etag))
     return iot_hub_policy_get(client, hub_name, policy_name, resource_group_name)
 
 
@@ -930,11 +944,11 @@ def iot_hub_get_stats(client, hub_name, resource_group_name=None):
 
 def validate_authentication_type_input(endpoint_type, connection_string=None, authentication_type=None, endpoint_uri=None, entity_path=None):
     is_keyBased = (AuthenticationType.KeyBased.value == authentication_type) or (authentication_type is None)
-    has_connection_string = (connection_string is not None)
+    has_connection_string = connection_string is not None
     if is_keyBased and not has_connection_string:
         raise CLIError("Please provide a connection string '--connection-string/-c'")
 
-    has_endpoint_uri = (endpoint_uri is not None)
+    has_endpoint_uri = endpoint_uri is not None
     has_endpoint_uri_and_path = (has_endpoint_uri) and (entity_path is not None)
     if EndpointType.AzureStorageContainer.value == endpoint_type.lower() and not has_endpoint_uri:
         raise CLIError("Please provide an endpoint uri '--endpoint-uri'")
@@ -1013,7 +1027,7 @@ def iot_hub_routing_endpoint_create(cmd, client, hub_name, endpoint_name, endpoi
             )
         )
 
-    return client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
+    return client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, hub, hub.etag)
 
 
 def iot_hub_routing_endpoint_list(cmd, client, hub_name, endpoint_type=None, resource_group_name=None):
@@ -1053,7 +1067,7 @@ def iot_hub_routing_endpoint_delete(cmd, client, hub_name, endpoint_name=None, e
     resource_group_name = _ensure_hub_resource_group_name(client, resource_group_name, hub_name)
     hub = iot_hub_get(cmd, client, hub_name, resource_group_name)
     hub.properties.routing.endpoints = _delete_routing_endpoints(endpoint_name, endpoint_type, hub.properties.routing.endpoints)
-    return client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
+    return client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, hub, hub.etag)
 
 
 def iot_hub_route_create(cmd, client, hub_name, route_name, source_type, endpoint_name, enabled=None, condition=None,
@@ -1069,7 +1083,7 @@ def iot_hub_route_create(cmd, client, hub_name, route_name, source_type, endpoin
             is_enabled=(True if enabled is None else enabled)
         )
     )
-    return client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
+    return client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, hub, hub.etag)
 
 
 def iot_hub_route_list(cmd, client, hub_name, source_type=None, resource_group_name=None):
@@ -1100,7 +1114,7 @@ def iot_hub_route_delete(cmd, client, hub_name, route_name=None, source_type=Non
     if source_type:
         hub.properties.routing.routes = [route for route in hub.properties.routing.routes
                                          if route.source.lower() != source_type.lower()]
-    return client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
+    return client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, hub, hub.etag)
 
 
 def iot_hub_route_update(cmd, client, hub_name, route_name, source_type=None, endpoint_name=None, enabled=None,
@@ -1116,11 +1130,15 @@ def iot_hub_route_update(cmd, client, hub_name, route_name, source_type=None, en
         updated_route.is_enabled = updated_route.is_enabled if enabled is None else enabled
     else:
         raise CLIError("No route found.")
-    return client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
+    return client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, hub, hub.etag)
 
 
 def iot_hub_route_test(cmd, client, hub_name, route_name=None, source_type=None, body=None, app_properties=None,
                        system_properties=None, resource_group_name=None):
+    if app_properties:
+        app_properties = json.loads(app_properties)
+    if system_properties:
+        system_properties = json.loads(system_properties)
     resource_group_name = _ensure_hub_resource_group_name(client, resource_group_name, hub_name)
     route_message = RoutingMessage(
         body=body,
@@ -1150,7 +1168,7 @@ def iot_message_enrichment_create(cmd, client, hub_name, key, value, endpoints, 
     if hub.properties.routing.enrichments is None:
         hub.properties.routing.enrichments = []
     hub.properties.routing.enrichments.append(EnrichmentProperties(key=key, value=value, endpoint_names=endpoints))
-    return client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
+    return client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, hub, hub.etag)
 
 
 def iot_message_enrichment_update(cmd, client, hub_name, key, value, endpoints, resource_group_name=None):
@@ -1161,7 +1179,7 @@ def iot_message_enrichment_update(cmd, client, hub_name, key, value, endpoints, 
         to_update.key = key
         to_update.value = value
         to_update.endpoint_names = endpoints
-        return client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
+        return client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, hub, hub.etag)
     raise CLIError('No message enrichment with that key exists')
 
 
@@ -1171,7 +1189,7 @@ def iot_message_enrichment_delete(cmd, client, hub_name, key, resource_group_nam
     to_remove = next((endpoint for endpoint in hub.properties.routing.enrichments if endpoint.key == key), None)
     if to_remove:
         hub.properties.routing.enrichments.remove(to_remove)
-        return client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
+        return client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, hub, hub.etag)
     raise CLIError('No message enrichment with that key exists')
 
 
@@ -1511,7 +1529,6 @@ def get_private_endpoint_connection(client, resource_group_name=None, connection
 
 
 def _update_private_endpoint_connection_status(client, resource_group_name, account_name, connection_id, private_endpoint_connection_name, is_approved=True, description=None):  # pylint: disable=unused-argument
-    from azure.core.exceptions import HttpResponseError
     getInfoArr = get_private_endpoint_connection(client,
                                                  resource_group_name=resource_group_name,
                                                  connection_id=connection_id,

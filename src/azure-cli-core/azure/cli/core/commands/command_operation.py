@@ -68,8 +68,7 @@ class BaseCommandOperation:
     def load_getter_op_arguments(self, getter_op_path, cmd_args=None):
         """ Load arguments from function signature of getter command op """
         op = self.get_op_handler(getter_op_path)
-        getter_args = dict(
-            extract_args_from_signature(op, excluded_params=EXCLUDED_PARAMS))
+        getter_args = dict(extract_args_from_signature(op, excluded_params=EXCLUDED_PARAMS))
         cmd_args = cmd_args or {}
         cmd_args.update(getter_args)
         # The cmd argument is required when calling self.handler function.
@@ -98,7 +97,7 @@ class CommandOperation(BaseCommandOperation):
     def __init__(self, command_loader, op_path, **merged_kwargs):
         if not isinstance(op_path, str):
             raise TypeError("Operation must be a string. Got '{}'".format(op_path))
-        super(CommandOperation, self).__init__(command_loader, **merged_kwargs)
+        super().__init__(command_loader, **merged_kwargs)
         self.op_path = op_path
 
     def handler(self, command_args):
@@ -151,7 +150,7 @@ class GenericUpdateCommandOperation(BaseCommandOperation):     # pylint: disable
             raise TypeError("Setter operation must be a string. Got '{}'".format(setter_op_path))
         if custom_function_op_path and not isinstance(custom_function_op_path, str):
             raise TypeError("Custom function operation must be a string. Got '{}'".format(custom_function_op_path))
-        super(GenericUpdateCommandOperation, self).__init__(command_loader, **merged_kwargs)
+        super().__init__(command_loader, **merged_kwargs)
 
         self.getter_op_path = getter_op_path
         self.setter_op_path = setter_op_path
@@ -166,7 +165,7 @@ class GenericUpdateCommandOperation(BaseCommandOperation):     # pylint: disable
         from knack.util import CLIError
         from azure.cli.core.commands import cached_get, cached_put, _is_poller
         from azure.cli.core.util import find_child_item, augment_no_wait_handler_args
-        from azure.cli.core.commands.arm import add_usage, remove_usage, set_usage,\
+        from azure.cli.core.commands.arm import add_usage, remove_usage, set_usage, \
             add_properties, remove_properties, set_properties
 
         self.cmd = command_args.get('cmd')
@@ -335,7 +334,7 @@ class ShowCommandOperation(BaseCommandOperation):
     def __init__(self, command_loader, op_path, **merged_kwargs):
         if not isinstance(op_path, str):
             raise TypeError("operation must be a string. Got '{}'".format(op_path))
-        super(ShowCommandOperation, self).__init__(command_loader, **merged_kwargs)
+        super().__init__(command_loader, **merged_kwargs)
         self.op_path = op_path
 
     def handler(self, command_args):
@@ -378,7 +377,7 @@ class WaitCommandOperation(BaseCommandOperation):
     def __init__(self, command_loader, op_path, **merged_kwargs):
         if not isinstance(op_path, str):
             raise TypeError("operation must be a string. Got '{}'".format(op_path))
-        super(WaitCommandOperation, self).__init__(command_loader, **merged_kwargs)
+        super().__init__(command_loader, **merged_kwargs)
         self.op_path = op_path
 
     def handler(self, command_args):    # pylint: disable=too-many-statements, too-many-locals

@@ -31,8 +31,8 @@ Known limitations:
     * only the IN class is supported
     * PTR records must have a non-empty name
     * currently only supports the following:
-    '$ORIGIN', '$TTL', 'SOA', 'NS', 'A', 'AAAA', 'CNAME', 'MX', 'PTR',
-    'TXT', 'SRV', 'SPF', 'URI', 'CAA'
+    '$ORIGIN', '$TTL', 'SOA', 'NS', 'A', 'AAAA', 'CNAME', 'DS', 'MX', 'NAPTR', 'PTR',
+    'TLSA', 'TXT', 'SRV', 'SPF', 'URI', 'CAA'
 """
 
 import copy
@@ -66,7 +66,10 @@ _REGEX = {
     'aaaa': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>aaaa)\s+(?P<ip>[\w:]+)',
     'caa': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>caa)\s+(?P<flags>\d+)\s+(?P<tag>\w+)\s+(?P<val>.+)',
     'cname': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>cname)\s+(?P<alias>[@\w\.-]+)',
+    'ds': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>ds)\s+(?P<key_tag>\d+)\s+(?P<algorithm>\d+)\s+(?P<digest_type>\d+)\s+(?P<digest>.+)',
     'mx': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>mx)\s+(?P<preference>\d+)\s+(?P<host>[@\w\.-]+)',
+    'naptr': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>naptr)\s+(?P<order>\d+)\s+(?P<preference>\d+)\s+(?P<flags>\w+)\s+(?P<services>\S+)\s+(?P<regexp>\S+)\s+(?P<replacement>.*)',
+    'tlsa': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>tlsa)\s+(?P<usage>\d+)\s+(?P<selector>\d+)\s+(?P<matching_type>\d+)\s+(?P<certificate>.+)',
     'txt': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>txt)\s+(?P<txt>.+)',
     'ptr': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>ptr)\s+(?P<host>[\w\.-]+)',
     'srv': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>srv)\s+(?P<priority>\d+)\s+(?P<weight>\d+)\s+(?P<port>\d+)\s+(?P<target>[@\w\.-]+)',
@@ -205,6 +208,8 @@ def _serialize(tokens):
     for tok in tokens:
         if tok is None:
             continue
+        elif tok == '':
+            tok = 'EMPTY'
         elif " " in tok:
             tok = '"%s"' % tok
 
@@ -391,6 +396,14 @@ def _post_process_caa_record(record):
         record['val'] = record['val'][1:-1]
 
 
+def _post_process_naptr_record(record):
+    # strip EMPTY part of regexp
+    if record['regexp'] == 'EMPTY':
+        record['regexp'] = ''
+    if '\\\\' in record['regexp']:
+        record['regexp'] = record['regexp'].replace('\\\\', '\\')
+
+
 def _post_check_names(zone):
 
     # get the origin name that has the SOA record
@@ -477,6 +490,9 @@ def parse_zone_file(text, zone_name, ignore_invalid=False):
             elif record_type == 'txt':
                 # handle TXT concatenation and splitting separately
                 _post_process_txt_record(record)
+            elif record_type == 'naptr':
+                # handle NAPTR empty regexp separately
+                _post_process_naptr_record(record)
 
             if record_name not in zone_obj:
                 zone_obj[record_name] = OrderedDict()

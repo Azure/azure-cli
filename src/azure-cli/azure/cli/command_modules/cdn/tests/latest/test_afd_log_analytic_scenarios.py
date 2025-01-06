@@ -9,7 +9,7 @@ import datetime
 
 
 class CdnAfdLogAnalyticScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
     def test_afd_log_analytic(self, resource_group):
         profile_name = 'profile123'
         self.afd_profile_create_cmd(resource_group, profile_name)
@@ -28,7 +28,7 @@ class CdnAfdLogAnalyticScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
 
         start_time = datetime.datetime.now().astimezone().replace(microsecond=0)
         if self.is_playback_mode():
-            start_time = datetime.datetime(2022, 3, 24, 7, 14, 35, tzinfo=datetime.timezone.utc)
+            start_time = datetime.datetime(2024, 11, 25, 3, 32, 41, tzinfo=datetime.timezone.utc)
 
         end_time = start_time + datetime.timedelta(seconds=300)
 
@@ -48,7 +48,7 @@ class CdnAfdLogAnalyticScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
 
         self.afd_endpoint_delete_cmd(resource_group, endpoint_name, profile_name)
 
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
     def test_afd_waf_log_analytic(self, resource_group):
         profile_name = 'profile123'
         self.afd_profile_create_cmd(resource_group, profile_name, sku="Premium_AzureFrontDoor")
@@ -64,7 +64,7 @@ class CdnAfdLogAnalyticScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
 
         start_time = datetime.datetime.now().astimezone().replace(microsecond=0)
         if self.is_playback_mode():
-            start_time = datetime.datetime(2022, 3, 24, 7, 14, 34, tzinfo=datetime.timezone.utc)
+            start_time = datetime.datetime(2024, 11, 25, 3, 35, 45, tzinfo=datetime.timezone.utc)
 
         end_time = start_time + datetime.timedelta(seconds=300)
 

@@ -11,7 +11,7 @@ from azure.core.exceptions import (HttpResponseError)
 
 # This tests relies on a specific subscription with existing resources
 class CdnAfdSecretScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
     def test_afd_secret_specific_version_crud(self, resource_group):
         profile_name = self.create_random_name(prefix='profile', length=24)
         self.afd_secret_list_cmd(resource_group, profile_name, expect_failure=True)
@@ -23,18 +23,18 @@ class CdnAfdSecretScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
 
         # Create a secret with expired certificate
         secret_name = self.create_random_name(prefix='secret', length=24)
-        secret_source = f"/subscriptions/{self.get_subscription_id()}/resourceGroups/CliDevReservedGroup/providers/Microsoft.KeyVault/vaults/clibyoc-int/secrets/localdev-multi"
-        secret_version = "5f652542f6ef46ef9fc4ed8af07c54f1"
+        secret_source = "/subscriptions/3c0124f9-e564-4c42-86f7-fa79457aedc3/resourceGroups/byoc/providers/Microsoft.KeyVault/vaults/Azure-CDN-BYOC/secrets/afde2e-root-azfdtest-xyz"
+        secret_version = "31c11b17a98f464b875c322ccc58a9a4"
 
-        with self.assertRaisesRegexp(HttpResponseError, "The server \\(leaf\\) certificate isn't within the validity period"):
+        with self.assertRaisesRegex(HttpResponseError, "The server \\(leaf\\) certificate isn't within the validity period"):
             self.afd_secret_create_cmd(resource_group,
-                               profile_name,
-                               secret_name,
-                               secret_source,
-                               use_latest_version=False,
-                               secret_version=secret_version)
+                                       profile_name,
+                                       secret_name,
+                                       secret_source,
+                                       use_latest_version=False,
+                                       secret_version=secret_version)
 
-        secret_version = "255adcc454844929a2f95c2aa3b6c61f"
+        secret_version = "341da32dcfec4b4cb3f3f3a410ca7a13"
         checks = [JMESPathCheck('provisioningState', 'Succeeded')]
         self.afd_secret_create_cmd(resource_group,
                                    profile_name,
@@ -61,7 +61,7 @@ class CdnAfdSecretScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
         list_checks = [JMESPathCheck('length(@)', 0)]
         self.afd_secret_list_cmd(resource_group, profile_name, checks=list_checks)
 
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
     def test_afd_secret_latest_version_crud(self, resource_group):
         # Create a standard Azure frontdoor profile
         profile_name = self.create_random_name(prefix='profile', length=24)
@@ -71,8 +71,8 @@ class CdnAfdSecretScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
 
         # Create a secret
         secret_name = self.create_random_name(prefix='secret', length=24)
-        secret_source = f"/subscriptions/{self.get_subscription_id()}/resourceGroups/CliDevReservedGroup/providers/Microsoft.KeyVault/vaults/clibyoc-int/secrets/localdev-multi"
-        latest_version = "255adcc454844929a2f95c2aa3b6c61f"
+        secret_source = "/subscriptions/3c0124f9-e564-4c42-86f7-fa79457aedc3/resourceGroups/byoc/providers/Microsoft.KeyVault/vaults/Azure-CDN-BYOC/secrets/afde2e-root-azfdtest-xyz"
+        latest_version = "341da32dcfec4b4cb3f3f3a410ca7a13"
         checks = [JMESPathCheck('provisioningState', 'Succeeded')]
         self.afd_secret_create_cmd(resource_group,
                                    profile_name,
@@ -85,7 +85,6 @@ class CdnAfdSecretScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
         show_checks = [JMESPathCheck('name', secret_name),
                        JMESPathCheck('provisioningState', 'Succeeded'),
                        JMESPathCheck('parameters.type', 'CustomerCertificate'),
-                       JMESPathCheck('parameters.secretSource.id', secret_source, False),
                        JMESPathCheck('parameters.secretVersion', latest_version),
                        JMESPathCheck('parameters.useLatestVersion', True)]
         self.afd_secret_show_cmd(resource_group, profile_name, secret_name, checks=show_checks)

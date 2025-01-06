@@ -64,6 +64,23 @@ def metadata_item_format(value):
     return {'name': data_name, 'value': data_value}
 
 
+def resource_tag_format(values):
+    """Space-separated values in 'key=value' format."""
+    if not values:
+        raise ValueError("No values in resource tags. "
+                         "Argument values should be in the format a=b c=d")
+    result = {}
+    try:
+        for value in values.split(' '):
+            k, v = value.split('=')
+            result[k] = v
+    except ValueError:
+        message = ("Incorrectly formatted resource tags. "
+                   "Argument values should be in the format a=b c=d")
+        raise ValueError(message)
+    return result
+
+
 def environment_setting_format(value):
     """Space-separated values in 'key=value' format."""
     try:
@@ -187,7 +204,7 @@ def validate_json_file(namespace):
     if namespace.json_file:
         try:
             get_file_json(namespace.json_file)
-        except EnvironmentError:
+        except OSError:
             raise ValueError("Cannot access JSON request file: " + namespace.json_file)
         except ValueError as err:
             raise ValueError(f"Invalid JSON file: {err}")
@@ -198,7 +215,7 @@ def validate_cert_file(namespace):
     try:
         with open(namespace.certificate_file, "rb"):
             pass
-    except EnvironmentError:
+    except OSError:
         raise ValueError("Cannot access certificate file: " + namespace.certificate_file)
 
 
@@ -209,14 +226,13 @@ def validate_options(namespace):
         end = namespace.end_range
     except AttributeError:
         return
-    else:
-        namespace.ocp_range = None
-        del namespace.start_range
-        del namespace.end_range
-        if start or end:
-            start = start if start else 0
-            end = end if end else ""
-            namespace.ocp_range = f"bytes={start}-{end}"
+    namespace.ocp_range = None
+    del namespace.start_range
+    del namespace.end_range
+    if start or end:
+        start = start if start else 0
+        end = end if end else ""
+        namespace.ocp_range = f"bytes={start}-{end}"
 
 
 def validate_file_destination(namespace):
@@ -225,22 +241,21 @@ def validate_file_destination(namespace):
         path = namespace.destination
     except AttributeError:
         return
-    else:
-        # TODO: Need to confirm this logic...
-        file_path = path
-        file_dir = os.path.dirname(path)
-        if os.path.isdir(path):
-            file_name = os.path.basename(namespace.file_name)
-            file_path = os.path.join(path, file_name)
-        elif not os.path.isdir(file_dir):
-            try:
-                os.mkdir(file_dir)
-            except EnvironmentError as exp:
-                message = "Directory {} does not exist, and cannot be created: {}"
-                raise ValueError(message.format(file_dir, exp))
-        if os.path.isfile(file_path):
-            raise ValueError(f"File {file_path} already exists.")
-        namespace.destination = file_path
+    # TODO: Need to confirm this logic...
+    file_path = path
+    file_dir = os.path.dirname(path)
+    if os.path.isdir(path):
+        file_name = os.path.basename(namespace.file_name)
+        file_path = os.path.join(path, file_name)
+    elif not os.path.isdir(file_dir):
+        try:
+            os.mkdir(file_dir)
+        except OSError as exp:
+            message = "Directory {} does not exist, and cannot be created: {}"
+            raise ValueError(message.format(file_dir, exp))
+    if os.path.isfile(file_path):
+        raise ValueError(f"File {file_path} already exists.")
+    namespace.destination = file_path
 
 # CUSTOM REQUEST VALIDATORS
 
@@ -304,10 +319,10 @@ def validate_client_parameters(cmd, namespace):
         namespace.account_endpoint = cmd.cli_ctx.config.get('batch', 'endpoint', None)
 
     # Simple validation for account_endpoint
-    if not (namespace.account_endpoint.startswith('https://') or
-            namespace.account_endpoint.startswith('http://')):
+    if namespace.account_endpoint and not (namespace.account_endpoint.startswith('https://') or
+                                           namespace.account_endpoint.startswith('http://')):
         namespace.account_endpoint = 'https://' + namespace.account_endpoint
-    namespace.account_endpoint = namespace.account_endpoint.rstrip('/')
+        namespace.account_endpoint = namespace.account_endpoint.rstrip('/')
     # if account name is specified but no key, attempt to query if we use shared key auth
     if namespace.account_name and namespace.account_endpoint and not namespace.account_key:
         if cmd.cli_ctx.config.get('batch', 'auth_mode', 'shared_key') == 'shared_key':
@@ -317,7 +332,7 @@ def validate_client_parameters(cmd, namespace):
             acc = next((x for x in client.batch_account.list()
                         if x.name == namespace.account_name and x.account_endpoint == host), None)
             if acc:
-                from msrestazure.tools import parse_resource_id
+                from azure.mgmt.core.tools import parse_resource_id
                 rg = parse_resource_id(acc.id)['resource_group']
                 namespace.account_key = \
                     client.batch_account.get_keys(rg,  # pylint: disable=no-member

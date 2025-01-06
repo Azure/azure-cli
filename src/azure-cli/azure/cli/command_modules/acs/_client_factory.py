@@ -27,6 +27,10 @@ def cf_managed_clusters(cli_ctx, *_):
     return get_container_service_client(cli_ctx).managed_clusters
 
 
+def cf_maintenance_configurations(cli_ctx, *_):
+    return get_container_service_client(cli_ctx).maintenance_configurations
+
+
 def cf_agent_pools(cli_ctx, *_):
     return get_container_service_client(cli_ctx).agent_pools
 
@@ -37,6 +41,14 @@ def cf_snapshots(cli_ctx, *_):
 
 def get_snapshots_client(cli_ctx, subscription_id=None):
     return get_container_service_client(cli_ctx, subscription_id=subscription_id).snapshots
+
+
+def cf_trustedaccess_role(cli_ctx, *_):
+    return get_container_service_client(cli_ctx).trusted_access_roles
+
+
+def cf_trustedaccess_role_binding(cli_ctx, *_):
+    return get_container_service_client(cli_ctx).trusted_access_role_bindings
 
 
 # dependent clients
@@ -77,23 +89,6 @@ def get_graph_client(cli_ctx):
     return graph_client_factory(cli_ctx)
 
 
-# TODO: deprecated, will remove this after container service commands (acs) are removed during
-# the next breaking change window.
-def get_graph_rbac_management_client(cli_ctx, **_):
-    from azure.cli.core.commands.client_factory import configure_common_settings
-    from azure.cli.core._profile import Profile
-    from azure.graphrbac import GraphRbacManagementClient
-
-    profile = Profile(cli_ctx=cli_ctx)
-    cred, _, tenant_id = profile.get_login_credentials(
-        resource=cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
-    client = GraphRbacManagementClient(
-        cred, tenant_id,
-        base_url=cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
-    configure_common_settings(cli_ctx, client)
-    return client
-
-
 def get_resource_by_name(cli_ctx, resource_name, resource_type):
     """Returns the ARM resource in the current subscription with resource_name.
     :param str resource_name: The name of resource
@@ -128,3 +123,7 @@ def get_resource_by_name(cli_ctx, resource_name, resource_type):
 def get_msi_client(cli_ctx, subscription_id=None):
     return get_mgmt_service_client(cli_ctx, ManagedServiceIdentityClient,
                                    subscription_id=subscription_id)
+
+
+def get_keyvault_client(cli_ctx, subscription_id=None):
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_KEYVAULT, subscription_id=subscription_id).vaults

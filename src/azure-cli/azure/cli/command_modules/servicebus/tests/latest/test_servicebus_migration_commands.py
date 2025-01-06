@@ -18,7 +18,6 @@ class SBNSMigrationCRUDScenarioTest(ScenarioTest):
     from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
     # Test playback fails and the live-only flag will be removed once it is addressed
-    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_sb_migration')
     def test_sb_migration(self, resource_group):
@@ -28,6 +27,8 @@ class SBNSMigrationCRUDScenarioTest(ScenarioTest):
             'loc_north': 'NorthCentralUS',
             'namespacenamestandard': self.create_random_name(prefix='sb-std-nscli', length=20),
             'namespacenamepremium': self.create_random_name(prefix='sb-pre-nscli', length=20),
+            'namespacenamestandard1': self.create_random_name(prefix='sb-pre-nscli', length=20),
+            'namespacenamepremium1': self.create_random_name(prefix='sb-pre-nscli', length=20),
             'tags': {'tag1: value1', 'tag2: value2'},
             'sku': 'Premium',
             'sku_std': 'Standard',
@@ -37,8 +38,11 @@ class SBNSMigrationCRUDScenarioTest(ScenarioTest):
             'primary': 'PrimaryKey',
             'secondary': 'SecondaryKey',
             'postmigrationname': self.create_random_name(prefix='clipostmigration', length=20),
+            'postmigrationname1': self.create_random_name(prefix='clipostmigration', length=20),
             'alternatename': self.create_random_name(prefix='cliAlter', length=20),
-            'id': '',
+            'id1': '',
+            'id2': '',
+            'partnernamesapceid2': '',
             'test': '',
             'queuename': '',
             'topicname': '',
@@ -73,7 +77,7 @@ class SBNSMigrationCRUDScenarioTest(ScenarioTest):
             checks=[self.check('name', '{authoname}')])
 
         partnernamespaceid = getnamespace2result['id']
-        self.kwargs.update({'id': partnernamespaceid})
+        self.kwargs.update({'id1': partnernamespaceid})
 
         # Get Create Authorization Rule
         self.cmd(
@@ -99,13 +103,17 @@ class SBNSMigrationCRUDScenarioTest(ScenarioTest):
         time.sleep(10)
 
         # Create Migration
-        self.cmd(
-            'servicebus migration start  --resource-group {rg} --name {namespacenamestandard} --target-namespace {id} --post-migration-name {postmigrationname}')
+        namespace = self.cmd(
+            'servicebus migration start  --resource-group {rg} --name {namespacenamestandard} --target-namespace {id1} --post-migration-name {postmigrationname}').get_output_in_json()
+        self.assertEqual(namespace["targetNamespace"],  self.kwargs['id1'])
+        self.assertEqual(namespace["postMigrationName"], self.kwargs['postmigrationname'])
+        self.assertEqual(namespace["provisioningState"], 'Succeeded')
 
         # get Migration
         getmigration = self.cmd(
             'servicebus migration show  --resource-group {rg} --name {namespacenamestandard}').get_output_in_json()
 
+        time.sleep(30)
         # Complete Migration
         self.cmd(
             'servicebus migration complete  --resource-group {rg} --name {namespacenamestandard}')
@@ -145,6 +153,7 @@ class SBNSMigrationCRUDScenarioTest(ScenarioTest):
 
         time.sleep(30)
 
+
         # get namespace
         getnamespace = self.cmd(
             'servicebus namespace show  --resource-group {rg} --name {namespacenamestandard}').get_output_in_json()
@@ -156,7 +165,7 @@ class SBNSMigrationCRUDScenarioTest(ScenarioTest):
                 'servicebus namespace show  --resource-group {rg} --name {namespacenamestandard}').get_output_in_json()
 
         # Delete Namespace - Standard
-        self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacenamestandard}')
+        self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacenamestandard} ')
 
         # get namespace
         getnamespace = self.cmd(
@@ -167,3 +176,35 @@ class SBNSMigrationCRUDScenarioTest(ScenarioTest):
             time.sleep(30)
             getnamespace = self.cmd(
                 'servicebus namespace show  --resource-group {rg} --name {namespacenamepremium}').get_output_in_json()
+
+        # Create Namespace - Standard
+        self.cmd(
+            'servicebus namespace create --resource-group {rg} --name {namespacenamestandard1} --location {loc_south} --tags {tags} --sku {sku_std}',
+            checks=[self.check('sku.name', '{sku_std}')])
+
+        # Create Namespace - Primary
+        self.cmd(
+            'servicebus namespace create --resource-group {rg} --name {namespacenamepremium1} --location {loc_north} --tags {tags} --sku {sku}',
+            checks=[self.check('sku.name', '{sku}')])
+        # Get Created Namespace - Primary
+        getnamespace3result = self.cmd(
+            'servicebus namespace show --resource-group {rg} --name {namespacenamepremium1}',
+            checks=[self.check('sku.name', '{sku}')]).get_output_in_json()
+
+        partnernamespaceid = getnamespace3result['id']
+        self.kwargs.update({'id2': partnernamespaceid})
+
+        # Create Migration
+        namespace = self.cmd(
+            'servicebus migration start  --resource-group {rg} --name {namespacenamestandard1} --target-namespace {id2} --post-migration-name {postmigrationname1}').get_output_in_json()
+        self.assertEqual(namespace["postMigrationName"], self.kwargs['postmigrationname1'])
+        self.assertEqual(namespace["migrationState"], 'Active')
+        self.assertEqual(namespace["provisioningState"], 'Succeeded')
+
+        # Stop Migration
+        self.cmd('servicebus migration abort --resource-group {rg} --name {namespacenamestandard1}')
+        time.sleep(45)
+        while getmigration['migrationState'] != 'Active':
+            time.sleep(30)
+            getmigration = self.cmd(
+                'servicebus migration show  --resource-group {rg} --name {namespacenamestandard1}').get_output_in_json()

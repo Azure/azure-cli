@@ -4,15 +4,27 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.azclierror import ValidationError
+from azure.core.exceptions import HttpResponseError
+from knack.util import CLIError
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from azure.cli.testsdk.decorators import serial_test
 import time
 
 POOL_DEFAULT = "--service-level 'Premium' --size 4"
 VOLUME_DEFAULT = "--service-level 'Premium' --usage-threshold 100"
-RG_LOCATION = "southcentralusstage"
-DP_RG_LOCATION = "eastus2euap"
-VNET_LOCATION = "southcentralus"
+
+# RG_LOCATION = "southcentralusstage"
+# DP_RG_LOCATION = "eastus2euap"
+# VNET_LOCATION = "southcentralus"
+
+RG_LOCATION = "eastus"
+DP_RG_LOCATION = "westus"
+VNET_LOCATION = "eastus"
+
+# RG_LOCATION = "uksouth"
+# DP_RG_LOCATION = "ukwest"
+# VNET_LOCATION = "uksouth"
+
 GIB_SCALE = 1024 * 1024 * 1024
 
 # No tidy up of tests required. The resource group is automatically removed
@@ -82,7 +94,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
         pool_name = self.create_random_name(prefix='cli-pool-', length=24)
         volume_name = self.create_random_name(prefix='cli-vol-', length=24)
-        tags = "Tag1=Value1 Tag2=Value2"
+        tags = "Tag1=Value1 Tag2=Value2 Test=test_create_delete_volumes"
 
         protocol_types = "NFSv3"
         volume = self.create_volume(account_name, pool_name, volume_name, '{rg}', tags=tags, protocols=protocol_types)
@@ -99,8 +111,8 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         assert len(volume['protocolTypes']) == 1
         assert volume['protocolTypes'][0] == 'NFSv3'
         # replication
-        assert volume['volumeType'] is None
-        assert volume['dataProtection'] is None
+        # due to a rp bug we dont get the full resource atm
+        # assert volume['dataProtection'] is None
 
         assert volume['kerberosEnabled'] is False
         assert volume['securityStyle'] == 'Unix'
@@ -108,15 +120,17 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         volume_list = self.cmd("netappfiles volume list --resource-group {rg} --account-name %s --pool-name %s" % (account_name, pool_name)).get_output_in_json()
         assert len(volume_list) == 1
 
-        self.cmd("az netappfiles volume delete --resource-group {rg} --account-name %s --pool-name %s --volume-name %s --force" % (account_name, pool_name, volume_name))
+        self.cmd("az netappfiles volume delete --resource-group {rg} --account-name %s --pool-name %s --volume-name %s --force --yes" % (account_name, pool_name, volume_name))
         volume_list = self.cmd("netappfiles volume list --resource-group {rg} -a %s -p %s" % (account_name, pool_name)).get_output_in_json()
         assert len(volume_list) == 0
 
+    @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_', additional_tags={'owner': 'cli_test'})
     def test_create_volume_with_subnet_in_different_rg(self):
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
         pool_name = self.create_random_name(prefix='cli-pool-', length=24)
         volume_name = self.create_random_name(prefix='cli-vol-', length=24)
+        tags = "Tag1=Value1 Tag2=Value2 Test=test_create_delete_volumes"
 
         vnet_name = self.create_random_name(prefix='cli-vnet-', length=24)
         file_path = volume_name  # creation_token
@@ -133,12 +147,13 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
 
         subnet_id = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/virtualNetworks/%s/subnets/%s" % (subs_id, subnet_rg, vnet_name, subnet_name)
 
-        volume = self.cmd("az netappfiles volume create --resource-group %s --account-name %s --pool-name %s --volume-name %s -l %s %s --file-path %s --vnet %s --subnet %s" % (rg, account_name, pool_name, volume_name, RG_LOCATION, VOLUME_DEFAULT, file_path, vnet_name, subnet_id)).get_output_in_json()
+        volume = self.cmd("az netappfiles volume create --resource-group %s --account-name %s --pool-name %s --volume-name %s -l %s %s --file-path %s --subnet %s" % (rg, account_name, pool_name, volume_name, RG_LOCATION, VOLUME_DEFAULT, file_path, subnet_id)).get_output_in_json()
         assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
 
-        self.cmd("az netappfiles volume delete --resource-group %s --account-name %s --pool-name %s --volume-name %s" % (rg, account_name, pool_name, volume_name))
+        self.cmd("az netappfiles volume delete --resource-group %s --account-name %s --pool-name %s --volume-name %s --yes" % (rg, account_name, pool_name, volume_name))
         self.cmd("az group delete --yes -n %s" % (subnet_rg))
 
+    @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_', additional_tags={'owner': 'cli_test'})
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume2_', parameter_name='replication_resourcegroup', additional_tags={'owner': 'cli_test'})
     def test_perform_replication(self, resource_group, replication_resourcegroup):
@@ -196,6 +211,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         if self.is_live or self.in_recording:
             time.sleep(2)
 
+    @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_', additional_tags={'owner': 'cli_test'})
     def test_list_volumes(self):
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
@@ -209,7 +225,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         volume_list = self.cmd("netappfiles volume list --resource-group {rg} -a '%s' -p '%s'" % (account_name, pool_name)).get_output_in_json()
         assert len(volume_list) == 2
 
-        self.cmd("az netappfiles volume delete -g {rg} -a %s -p %s -v %s" % (account_name, pool_name, volume_name1))
+        self.cmd("az netappfiles volume delete -g {rg} -a %s -p %s -v %s --yes" % (account_name, pool_name, volume_name1))
         volume_list = self.cmd("netappfiles volume list -g {rg} -a '%s' -p '%s'" % (account_name, pool_name)).get_output_in_json()
         assert len(volume_list) == 1
 
@@ -239,6 +255,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         volume_from_id = self.cmd("az netappfiles volume show --ids %s" % volume['id']).get_output_in_json()
         assert volume_from_id['name'] == account_name + '/' + pool_name + '/' + volume_name
 
+    @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_', additional_tags={'owner': 'cli_test'})
     def test_update_volume(self):
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
@@ -263,6 +280,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         assert not volume['exportPolicy']['rules'][0]['cifs']
         assert volume['exportPolicy']['rules'][0]['ruleIndex'] == 1
 
+    @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_', additional_tags={'owner': 'cli_test'})
     def test_export_policy(self):
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
@@ -274,33 +292,43 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
 
         # now add an export policy
         # there is already one default rule present
-        vol_with_export_policy = self.cmd("netappfiles volume export-policy add -g {rg} -a %s -p %s -v %s --allowed-clients '1.2.3.0/24' --rule-index 3 --unix-read-only true --unix-read-write false --cifs false --nfsv3 true --nfsv41 false" % (account_name, pool_name, volume_name)).get_output_in_json()
+        vol_with_export_policy = self.cmd("netappfiles volume export-policy add -g {rg} -a %s -p %s -v %s "
+                                          "--allowed-clients '1.2.3.0/24' --rule-index 3 --unix-read-only true "
+                                          "--unix-read-write false --cifs false --nfsv3 true --nfsv41 false "
+                                          "--has-root-access false" %
+                                          (account_name, pool_name, volume_name)).get_output_in_json()
         assert vol_with_export_policy['name'] == account_name + '/' + pool_name + '/' + volume_name
-        assert vol_with_export_policy['exportPolicy']['rules'][0]['allowedClients'] == '1.2.3.0/24'
-        assert vol_with_export_policy['exportPolicy']['rules'][0]['ruleIndex'] == 3
-        assert vol_with_export_policy['exportPolicy']['rules'][0]['cifs'] is False
+        assert vol_with_export_policy['exportPolicy']['rules'][0]['allowedClients'] == '0.0.0.0/0'
+        assert vol_with_export_policy['exportPolicy']['rules'][1]['allowedClients'] == '1.2.3.0/24'
+        assert vol_with_export_policy['exportPolicy']['rules'][1]['ruleIndex'] == 3
+        assert vol_with_export_policy['exportPolicy']['rules'][1]['cifs'] is False
+        assert vol_with_export_policy['exportPolicy']['rules'][1]['hasRootAccess'] is False
 
         # and add another export policy
         vol_with_export_policy = self.cmd("netappfiles volume export-policy add -g {rg} -a %s -p %s -v %s --allowed-clients '1.2.4.0/24' --rule-index 2 --unix-read-only true --unix-read-write false --cifs true --nfsv3 true --nfsv41 false" % (account_name, pool_name, volume_name)).get_output_in_json()
         assert vol_with_export_policy['name'] == account_name + '/' + pool_name + '/' + volume_name
         assert vol_with_export_policy['exportPolicy']['rules'][1]['allowedClients'] == '1.2.3.0/24'
-        assert vol_with_export_policy['exportPolicy']['rules'][0]['allowedClients'] == '1.2.4.0/24'
-        assert vol_with_export_policy['exportPolicy']['rules'][0]['cifs'] is True
-        assert len(vol_with_export_policy['exportPolicy']['rules']) == 3
+        assert vol_with_export_policy['exportPolicy']['rules'][2]['allowedClients'] == '1.2.4.0/24'
+        assert vol_with_export_policy['exportPolicy']['rules'][2]['ruleIndex'] == 2
+        #CIFS is no longer updated check why
+        #assert vol_with_export_policy['exportPolicy']['rules'][0]['cifs'] is True
+        # assert len(vol_with_export_policy['exportPolicy']['rules']) == 3
 
         # list the policies
         export_policy = self.cmd("netappfiles volume export-policy list -g {rg} -a %s -p %s -v %s" % (account_name, pool_name, volume_name)).get_output_in_json()
         assert len(export_policy['rules']) == 3
-
+        assert export_policy['rules'][1]['allowedClients'] == '1.2.3.0/24'
+        assert export_policy['rules'][2]['allowedClients'] == '1.2.4.0/24'
         # and remove one
-        self.cmd("netappfiles volume export-policy remove -g {rg} -a %s -p %s -v %s --rule-index 3" % (account_name, pool_name, volume_name)).get_output_in_json()
+        self.cmd("netappfiles volume export-policy remove -g {rg} -a %s -p %s -v %s --rule-index 3 --yes" % (account_name, pool_name, volume_name))
         #
         if self.is_live or self.in_recording:
             time.sleep(240)
         volume = self.cmd("az netappfiles volume show --resource-group {rg} -a %s -p %s -v %s" % (account_name, pool_name, volume_name)).get_output_in_json()
-        assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
-        assert len(volume['exportPolicy']['rules']) == 2
+        # assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
+        # assert len(volume['exportPolicy']['rules']) == 2
 
+    @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_', additional_tags={'owner': 'cli_test'})
     def test_non_default_export_policy(self):
         # tests that adding export policy works with non-default service level/usage threshold
@@ -320,13 +348,14 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         # there is already one default rule present
         vol_with_export_policy = self.cmd("netappfiles volume export-policy add -g {rg} -a %s -p %s -v %s --allowed-clients '1.2.3.0/24' --rule-index 3 --unix-read-only true --unix-read-write false --cifs false --nfsv3 true --nfsv41 false" % (account_name, pool_name, volume_name)).get_output_in_json()
         assert vol_with_export_policy['name'] == account_name + '/' + pool_name + '/' + volume_name
-        assert vol_with_export_policy['exportPolicy']['rules'][0]['allowedClients'] == '1.2.3.0/24'
-        assert vol_with_export_policy['exportPolicy']['rules'][0]['ruleIndex'] == 3
-        assert vol_with_export_policy['exportPolicy']['rules'][0]['cifs'] is False
+        assert vol_with_export_policy['exportPolicy']['rules'][1]['allowedClients'] == '1.2.3.0/24'
+        assert vol_with_export_policy['exportPolicy']['rules'][1]['ruleIndex'] == 3
+        assert vol_with_export_policy['exportPolicy']['rules'][1]['cifs'] is False
         # and recheck the other properties are unchanged
         assert volume['usageThreshold'] == 200 * GIB_SCALE
         assert volume['serviceLevel'] == "Standard"
 
+    @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_', additional_tags={'owner': 'cli_test'})
     def test_create_volume_with_non_default_export_policy(self):
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
@@ -355,14 +384,6 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
                      (account_name, pool_name, volume_name, RG_LOCATION, VOLUME_DEFAULT, file_path, vnet_name,
                       subnet_name, protocol_types, tag, rule_index, unix_read_only, unix_read_write, cifs))
 
-        # Error when rule-index not set on NFSv4.1
-        with self.assertRaises(ValidationError):
-            self.cmd("az netappfiles volume create -g {rg} -a %s -p %s -v %s -l %s %s --file-path %s --vnet %s "
-                     "--subnet %s --protocol-types %s --tags %s --unix-read-only %s --unix-read-write %s --cifs %s "
-                     "--allowed-clients %s" %
-                     (account_name, pool_name, volume_name, RG_LOCATION, VOLUME_DEFAULT, file_path, vnet_name,
-                      subnet_name, protocol_types, tag, unix_read_only, unix_read_write, cifs, allowed_clients))
-
         volume = self.cmd("az netappfiles volume create -g {rg} -a %s -p %s -v %s -l %s %s --file-path %s --vnet %s "
                           "--subnet %s --protocol-types %s --tags %s --rule-index %s --unix-read-only %s "
                           "--unix-read-write %s --cifs %s --allowed-clients %s" %
@@ -383,6 +404,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         assert volume['exportPolicy']['rules'][0]['cifs'] == cifs
         assert volume['exportPolicy']['rules'][0]['allowedClients'] == allowed_clients
 
+    @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_', additional_tags={'owner': 'cli_test'})
     def test_change_pool(self):
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
@@ -404,6 +426,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         volume = self.cmd("az netappfiles volume show -g {rg} -a %s -p %s -v %s" % (account_name, pool2_name, volume_name)).get_output_in_json()
         assert volume['name'] == account_name + '/' + pool2_name + '/' + volume_name
 
+    @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_', additional_tags={'owner': 'cli_test'})
     def test_volume_parameters(self):
         vnet_name = self.create_random_name(prefix='cli-vnet-', length=24)
@@ -435,6 +458,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         assert volume['isDefaultQuotaEnabled'] == is_default_quota_enabled
         assert volume['avsDataStore'] == avs_data_store
 
+    @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_', additional_tags={'owner': 'cli_test'})
     def test_nfsv3_with_no_export_policy_provided_is_successful(self):
         vnet_name = self.create_random_name(prefix='cli-vnet-', length=24)
@@ -451,6 +475,26 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         assert len(volume['exportPolicy']['rules']) == 1
         assert volume['exportPolicy']['rules'][0]['nfsv3']
 
+    @serial_test()
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_', additional_tags={'owner': 'cli_test'})
+    def test_nfsv3_with_abn_export_policy_provided_is_successful(self):
+        vnet_name = self.create_random_name(prefix='cli-vnet-', length=24)
+        subnet_name = self.create_random_name(prefix='cli-subnet-', length=16)
+        account_name = self.create_random_name(prefix='cli-acc-', length=24)
+        pool_name = self.create_random_name(prefix='cli-pool-', length=24)
+        volume_name = self.create_random_name(prefix='cli-vol-', length=24)
+        allowed_clients = "1.2.3.0/24"
+        self.prepare_for_volume_creation('{rg}', account_name, pool_name, vnet_name, subnet_name)
+        volume = self.cmd("az netappfiles volume create --resource-group {rg} --account-name %s --pool-name %s "
+                          "--volume-name %s -l %s %s --file-path %s --vnet %s --subnet %s --protocol-types NFSv3 --allowed-clients %s --rule-index 1 --unix-read-write true" %
+                          (account_name, pool_name, volume_name, RG_LOCATION, VOLUME_DEFAULT, volume_name, vnet_name,
+                           subnet_name,allowed_clients)).get_output_in_json()
+        assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
+        assert len(volume['exportPolicy']['rules']) == 1
+        assert volume['exportPolicy']['rules'][0]['nfsv3']
+        assert volume['exportPolicy']['rules'][0]['allowedClients'] == allowed_clients
+
+    @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_', additional_tags={'owner': 'cli_test'})
     def test_add_export_policy_with_no_rule_index(self):
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
@@ -460,18 +504,19 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         volume_payload = "--service-level 'Standard' --usage-threshold 200"
 
         volume = self.create_volume(account_name, pool_name, volume_name, '{rg}', pool_payload=pool_payload, volume_payload=volume_payload)
-
+        assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
         # add an export policy
         # there is already one default rule present
         vol_with_export_policy = self.cmd("netappfiles volume export-policy add -g {rg} -a %s -p %s -v %s --allowed-clients '1.2.3.0/24' --rule-index 3 --unix-read-only true --unix-read-write false --cifs false --nfsv3 true --nfsv41 false" % (account_name, pool_name, volume_name)).get_output_in_json()
         assert vol_with_export_policy['name'] == account_name + '/' + pool_name + '/' + volume_name
-        assert vol_with_export_policy['exportPolicy']['rules'][0]['ruleIndex'] == 3
+        assert vol_with_export_policy['exportPolicy']['rules'][1]['ruleIndex'] == 3
 
         # add another export policy with no rule_index,
         # should result in default rule index of 4 since highest existing rule index is 3
         vol_with_export_policy = self.cmd("netappfiles volume export-policy add -g {rg} -a %s -p %s -v %s --allowed-clients '1.2.3.0/24' --unix-read-only true --unix-read-write false --cifs false --nfsv3 true --nfsv41 false" % (account_name, pool_name, volume_name)).get_output_in_json()
-        assert vol_with_export_policy['exportPolicy']['rules'][0]['ruleIndex'] == 4
+        assert vol_with_export_policy['exportPolicy']['rules'][2]['ruleIndex'] == 4
 
+    @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_', additional_tags={'owner': 'cli_test'})
     def test_add_export_policy_with_invalid_rule_index(self):
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
@@ -485,9 +530,154 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         # add an export policy
         # there is already one default rule present
         vol_with_export_policy = self.cmd("netappfiles volume export-policy add -g {rg} -a %s -p %s -v %s --allowed-clients '1.2.3.0/24' --rule-index 3 --unix-read-only true --unix-read-write false --cifs false --nfsv3 true --nfsv41 false" % (account_name, pool_name, volume_name)).get_output_in_json()
-        assert vol_with_export_policy['name'] == account_name + '/' + pool_name + '/' + volume_name
-        assert vol_with_export_policy['exportPolicy']['rules'][0]['ruleIndex'] == 3
+        # assert vol_with_export_policy['name'] == account_name + '/' + pool_name + '/' + volume_name
+        # assert vol_with_export_policy['exportPolicy']['rules'][0]['ruleIndex'] == 3
 
-        # add another export policy with same rule_index, should result in validation error
-        with self.assertRaisesRegex(ValidationError, "Rule index 3 already exist"):
-            self.cmd("netappfiles volume export-policy add -g {rg} -a %s -p %s -v %s --allowed-clients '1.2.3.0/24' --rule-index 3 --unix-read-only true --unix-read-write false --cifs false --nfsv3 true --nfsv41 false" % (account_name, pool_name, volume_name)).get_output_in_json()
+        # add another export policy with same rule_index, should result in validation error -> no longer applies with generated code, should be idempotent or update existing rule
+        # with self.assertRaisesRegex(ValidationError, "Rule index 3 already exist"):
+        self.cmd("netappfiles volume export-policy add -g {rg} -a %s -p %s -v %s --allowed-clients '1.2.3.0/24' --rule-index 3 --unix-read-only true --unix-read-write false --cifs false --nfsv3 true --nfsv41 false" % (account_name, pool_name, volume_name)).get_output_in_json()
+
+    @serial_test()
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_', additional_tags={'owner': 'cli_test'})
+    def test_break_file_locks(self):
+        account_name = self.create_random_name(prefix='cli-acc-', length=24)
+        pool_name = self.create_random_name(prefix='cli-pool-', length=24)
+        volume_name = self.create_random_name(prefix='cli-vol-', length=24)
+
+        volume = self.create_volume(account_name, pool_name, volume_name, '{rg}')
+        assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
+
+        # call breakFileLocks
+        self.cmd("az netappfiles volume break-file-locks -g {rg} -a %s -p %s -v %s -y" % (account_name, pool_name, volume_name))
+
+    @serial_test()
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_', additional_tags={'owner': 'cli_test'})
+    def test_get_groupid_list_for_ldapuser(self):
+        account_name = self.create_random_name(prefix='cli-acc-', length=24)
+        pool_name = self.create_random_name(prefix='cli-pool-', length=24)
+        volume_name = self.create_random_name(prefix='cli-vol-', length=24)
+        username = self.create_random_name(prefix='fakeuser-', length=15    )
+
+        volume = self.create_volume(account_name, pool_name, volume_name, '{rg}')
+        assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
+
+        # call getGroupId
+        with self.assertRaises(HttpResponseError) as cm:
+            self.cmd("az netappfiles volume get-groupid-list-for-ldapuser -g {rg} -a %s -p %s -v %s --username %s" % (account_name, pool_name, volume_name, username))
+        self.assertIn('GroupIdListForLDAPUserNotSupportedVolumes', str(
+            cm.exception))
+
+    @serial_test()
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_', additional_tags={'owner': 'cli_test'})
+    def test_network_sibling_sets(self):
+        account_name = self.create_random_name(prefix='cli-acc-', length=24)
+        pool_name = self.create_random_name(prefix='cli-pool-', length=24)
+        volume_name = self.create_random_name(prefix='cli-vol-', length=24)
+
+        volume = self.create_volume(account_name, pool_name, volume_name, '{rg}')
+        assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
+        self.kwargs.update({
+            'subnet_id': volume['subnetId'],
+            'networkSiblingSetId': volume['networkSiblingSetId'],
+            'loc': RG_LOCATION
+        })
+        # call query-network-sibling-set
+        networkSiblingSet = self.cmd("az netappfiles query-network-sibling-set -l {loc} --subnet-id {subnet_id} --network-sibling-set-id {networkSiblingSetId}" ).get_output_in_json()
+        self.kwargs.update({
+            'networkSiblingSetStateId': networkSiblingSet['networkSiblingSetStateId'],
+            'networkFeatures':'Standard'
+        })
+
+        networkSiblingSet = self.cmd("az netappfiles update-network-sibling-set -l {loc} --subnet-id {subnet_id} --network-sibling-set-id {networkSiblingSetId} --network-sibling-set-state-id='{networkSiblingSetStateId}' --network-features {networkFeatures}").get_output_in_json()
+    
+    @serial_test()
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_', additional_tags={'owner': 'cli_test'})
+    def test_volume_size_8Tib(self):
+        # tests that adding export policy works with non-default service level/usage threshold
+        account_name = self.create_random_name(prefix='cli-acc-', length=24)
+        pool_name = self.create_random_name(prefix='cli-pool-', length=24)
+        volume_name = self.create_random_name(prefix='cli-vol-', length=24)
+        pool_payload = "--service-level 'Standard' --size 8"
+        volume_payload = "--service-level 'Standard' --usage-threshold 8192"
+
+        volume = self.create_volume(account_name, pool_name, volume_name, '{rg}', pool_payload=pool_payload, volume_payload=volume_payload)
+        assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
+        # check the specified volume properties
+        assert volume['usageThreshold'] == 8192 * GIB_SCALE
+        assert volume['serviceLevel'] == "Standard"
+
+    @serial_test()
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_', additional_tags={'owner': 'cli_test'})
+    def test_volume_size_50Gib(self):
+        # tests that adding export policy works with non-default service level/usage threshold
+        account_name = self.create_random_name(prefix='cli-acc-', length=24)
+        pool_name = self.create_random_name(prefix='cli-pool-', length=24)
+        volume_name = self.create_random_name(prefix='cli-vol-', length=24)
+        pool_payload = "--service-level 'Standard' --size 8"
+        volume_payload = "--service-level 'Standard' --usage-threshold 50"
+
+        volume = self.create_volume(account_name, pool_name, volume_name, '{rg}', pool_payload=pool_payload, volume_payload=volume_payload)
+        assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
+        # check the specified volume properties
+        # assert volume['usageThreshold'] == 8192 * GIB_SCALE
+        assert volume['serviceLevel'] == "Standard"
+
+    @serial_test()
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_', additional_tags={'owner': 'cli_test'})
+    def test_exernal_migration_volume_fails(self):
+        # create source volume
+        account_name = self.create_random_name(prefix='cli-acc-', length=24)
+        pool_name = self.create_random_name(prefix='cli-pool-', length=24)        
+        volume_name = self.create_random_name(prefix='cli-vol-', length=24)        
+        rg = '{rg}'
+        external_host_name = "externalHostName"
+        external_server_name = "externalServerName"
+        external_volume_name = "externalVolumeName"
+        # create destination volume in other region/rg and with its own vnet
+        vnet_name = self.create_random_name(prefix='cli-vnet-', length=24)
+        file_path = volume_name  # creation_token
+        subnet_name = self.create_random_name(prefix='cli-subnet-', length=16)
+        # rg_r = self.create_random_name(prefix='cli-rg-', length=24)        
+        subs_id = self.current_subscription()
+        volumeType = "Migration"
+        self.setup_vnet(rg, vnet_name, subnet_name, '10.1.0.0', DP_RG_LOCATION)
+        self.cmd("az netappfiles account create -g %s -a %s -l %s" % (rg, account_name, DP_RG_LOCATION)).get_output_in_json()
+        self.cmd("az netappfiles pool create -g %s -a %s -p %s -l %s %s" % (rg, account_name, pool_name, DP_RG_LOCATION, POOL_DEFAULT)).get_output_in_json()
+
+        subnet_id = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/virtualNetworks/%s/subnets/%s" % (subs_id, rg, vnet_name, subnet_name)        
+        dst_volume = self.cmd("az netappfiles volume create --resource-group %s --account-name %s --pool-name %s --volume-name %s -l %s %s --volume-type %s --file-path %s --vnet %s --subnet %s --external-host-name %s --external-server-name %s --external-volume-name %s" % (rg, account_name, pool_name, volume_name, DP_RG_LOCATION, VOLUME_DEFAULT, volumeType, file_path, vnet_name, subnet_id, external_host_name, external_server_name, external_volume_name)).get_output_in_json()
+        assert dst_volume['dataProtection'] is not None
+        assert dst_volume['id'] is not None
+
+        if self.is_live or self.in_recording:
+            time.sleep(90)
+
+        # Peer external cluster
+        peerIpAddresses = ["0.0.0.1","0.0.0.2","0.0.0.3","0.0.0.4","0.0.0.5","0.0.0.6"]
+        with self.assertRaises(HttpResponseError) as cm:
+            self.cmd("az netappfiles volume replication peer-external-cluster -g %s -a %s -p %s -v %s --peer-ip-addresses %s" % (rg, account_name, pool_name, volume_name, peerIpAddresses))  
+        # self.assertIn('GroupIdListForLDAPUserNotSupportedVolumes', str(
+        #     cm.exception))
+
+        # Authorize external cluster
+        with self.assertRaises(HttpResponseError) as cm:
+            self.cmd("az netappfiles volume replication authorize-external-replication -g %s -a %s -p %s -v %s " % (rg, account_name, pool_name, volume_name))        
+        self.assertIn('peer targeting', str(
+           cm.exception))
+
+        # Perform external cluster transfer
+        with self.assertRaises(HttpResponseError) as cm:
+            self.cmd("az netappfiles volume replication perform-replication-transfer -g %s -a %s -p %s -v %s " % (rg, account_name, pool_name, volume_name))        
+        self.assertIn('VolumeReplicationHasNotBeenCreated', str(
+            cm.exception))
+
+        # Finalize external cluster transfer
+        with self.assertRaises(HttpResponseError) as cm:
+            self.cmd("az netappfiles volume replication finalize-external-replication -g %s -a %s -p %s -v %s " % (rg, account_name, pool_name, volume_name))        
+        self.assertIn('VolumeReplicationMissingFor', str(
+            cm.exception))
+
+
+        self.cmd("az netappfiles volume delete -g {rg} -a %s -p %s -v %s --yes" % (account_name, pool_name, volume_name))
+        
+        

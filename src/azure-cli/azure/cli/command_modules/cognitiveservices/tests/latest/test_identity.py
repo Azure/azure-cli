@@ -18,9 +18,9 @@ class CognitiveServicesByoxTests(ScenarioTest):
 
         self.kwargs.update({
             'sname': sname,
-            'kind': 'Face',
-            'sku': 'E0',
-            'location': 'centraluseuap'
+            'kind': 'FormRecognizer',
+            'sku': 'S0',
+            'location': 'SOUTHCENTRALUS'
         })
 
         # test to create cognitive services account
@@ -46,9 +46,9 @@ class CognitiveServicesByoxTests(ScenarioTest):
 
         self.kwargs.update({
             'sname': sname,
-            'kind': 'Face',
-            'sku': 'E0',
-            'location': 'centraluseuap'
+            'kind': 'FormRecognizer',
+            'sku': 'S0',
+            'location': 'SOUTHCENTRALUS'
         })
 
         # test to create cognitive services account

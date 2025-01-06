@@ -98,15 +98,22 @@ def validate_crr(target_rg_id, rehydration_priority):
         raise MutuallyExclusiveArgumentError("Archive restore isn't supported for secondary region.")
 
 
-def validate_czr(backup_config_response, recovery_point):
+def validate_czr(backup_config_response, recovery_point, use_secondary_region):
     backup_storage_redundancy = backup_config_response.properties.storage_type
     cross_region_restore_flag = backup_config_response.properties.cross_region_restore_flag
     if (cross_region_restore_flag or backup_storage_redundancy == StorageType.ZONE_REDUNDANT):
         if recovery_point.tier_type is not None and recovery_point.tier_type == "VaultStandard":
-            if recovery_point.properties.zones is None:
-                raise ArgumentUsageError("""
-                Please ensure that the recovery point is zone pinned or remove --target-zone argument.
-                """)
+            if backup_storage_redundancy != StorageType.ZONE_REDUNDANT:
+                if recovery_point.properties.zones is None:
+                    raise ArgumentUsageError("""
+                    Please ensure that either the vault storage redundancy is ZoneRedundant or the recovery
+                    point is zone pinned, or remove --target-zone argument.
+                    """)
+                if not use_secondary_region:
+                    raise ArgumentUsageError("""
+                    Please ensure that either the vault storage redundancy is ZoneRedundant or the restore
+                    is not to the primary region, or remove --target-zone argument.
+                    """)
         else:
             raise ArgumentUsageError("""
             Please ensure that the given RP tier type is 'VaultStandard' or remove --target-zone argument.

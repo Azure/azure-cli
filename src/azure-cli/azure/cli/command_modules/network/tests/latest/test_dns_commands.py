@@ -98,39 +98,47 @@ class DnsZoneImportTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_dns_zone1_import')
     def test_dns_zone1_import(self, resource_group):
-        self._test_zone('zone1.com', 'zone1.txt')
+        self._test_zone('dnstestzone1.com', 'zone1.txt')
 
     @ResourceGroupPreparer(name_prefix='cli_dns_zone2_import')
     def test_dns_zone2_import(self, resource_group):
-        self._test_zone('zone2.com', 'zone2.txt')
+        self._test_zone('dnstestzone2.com', 'zone2.txt')
 
     @ResourceGroupPreparer(name_prefix='cli_dns_zone3_import')
     def test_dns_zone3_import(self, resource_group):
-        self._test_zone('zone3.com', 'zone3.txt')
+        self._test_zone('dnstestzone3.com', 'zone3.txt')
 
     @ResourceGroupPreparer(name_prefix='cli_dns_zone4_import')
     def test_dns_zone4_import(self, resource_group):
-        self._test_zone('zone4.com', 'zone4.txt')
+        self._test_zone('dnstestzone4.com', 'zone4.txt')
 
     @ResourceGroupPreparer(name_prefix='cli_dns_zone5_import')
     def test_dns_zone5_import(self, resource_group):
-        self._test_zone('zone5.com', 'zone5.txt')
+        self._test_zone('dnstestzone5.com', 'zone5.txt')
 
     @ResourceGroupPreparer(name_prefix='cli_dns_zone6_import')
     def test_dns_zone6_import(self, resource_group):
-        self._test_zone('zone6.com', 'zone6.txt')
+        self._test_zone('dnstestzone6.com', 'zone6.txt')
 
     @ResourceGroupPreparer(name_prefix='cli_dns_zone7_import')
     def test_dns_zone7_import(self, resource_group):
-        self._test_zone('zone7.com', 'zone7.txt')
+        self._test_zone('dnstestzone7.com', 'zone7.txt')
 
     @ResourceGroupPreparer(name_prefix='cli_dns_zone8_import')
     def test_dns_zone8_import(self, resource_group):
-        self._test_zone('zone8.com', 'zone8.txt')
+        self._test_zone('dnstestzone8.com', 'zone8.txt')
 
     @ResourceGroupPreparer(name_prefix='cli_dns_zone9_import')
     def test_dns_zone9_import(self, resource_group):
-        self._test_zone('zone9.com', 'zone9.txt')
+        self._test_zone('dnstestzone9.com', 'zone9.txt')
+
+    @ResourceGroupPreparer(name_prefix='cli_dns_zone10_import')
+    def test_dns_zone10_import(self, resource_group):
+        self._test_zone('dnstestzone10.com', 'zone10.txt')
+
+    @ResourceGroupPreparer(name_prefix='cli_dns_zone11_import')
+    def test_dns_zone11_import(self, resource_group):
+        self._test_zone('dnstestzone11.com', 'zone11.txt')
 
 
 class DnsScenarioTest(ScenarioTest):
@@ -144,7 +152,6 @@ class DnsScenarioTest(ScenarioTest):
         self.cmd('network dns zone create -n {zone} -g {rg}')
         self.cmd('network dns zone list -g {rg}',
                  checks=self.check('length(@)', 1))
-
         base_record_sets = 2
         self.cmd('network dns zone show -n {zone} -g {rg}',
                  checks=self.check('numberOfRecordSets', base_record_sets))
@@ -154,15 +161,18 @@ class DnsScenarioTest(ScenarioTest):
             'aaaa': '--ipv6-address 2001:db8:0:1:1:1:1:1',
             'caa': '--flags 0 --tag foo --value "my value"',
             'cname': '--cname mycname',
+            'ds': '--key-tag 15288 --algorithm 5 --digest-type 2 --digest 49FD46E6C4B45C55D4AC',
             'mx': '--exchange 12 --preference 13',
             'ns': '--nsdname foobar.com',
+            'naptr': '--flags "U" --order 10 --preference 20 --services "E2U+sip" --regexp "!^.*$!sip:customer-service@example.com!" --replacement .',
             'ptr': '--ptrdname foobar.com',
             'soa': '--email foo.com --expire-time 30 --minimum-ttl 20 --refresh-time 60 --retry-time 90 --serial-number 123',
             'srv': '--port 1234 --priority 1 --target target.com --weight 50',
+            'tlsa': '--certificate-usage 3 --selector 1 --matching-type 1 --certificate-data 0C72AC70B745AC19998811B131D662C9AC69DBDBE7CB23E5B514B56664C5D3D6',
             'txt': '--value some_text'
         }
 
-        record_types = ['a', 'aaaa', 'caa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']
+        record_types = ['a', 'aaaa', 'caa', 'cname', 'ds', 'mx', 'naptr', 'ns', 'ptr', 'srv', 'tlsa', 'txt']
 
         for t in record_types:
             # test creating the record set and then adding records
@@ -176,6 +186,7 @@ class DnsScenarioTest(ScenarioTest):
 
         self.cmd('network dns record-set a add-record -g {rg} --zone-name {zone} --record-set-name myrsa --ipv4-address 10.0.0.11')
         self.cmd('network dns record-set soa update -g {{rg}} --zone-name {{zone}} {0}'.format(args['soa']))
+        self.cmd('network dns record-set soa show -g {rg} --zone-name {zone}')
 
         long_value = '0123456789' * 50
         self.cmd('network dns record-set txt add-record -g {{rg}} -z {{zone}} -n longtxt -v {0}'.format(long_value))
@@ -184,7 +195,7 @@ class DnsScenarioTest(ScenarioTest):
         self.cmd('network dns zone show -n {zone} -g {rg}',
                  checks=self.check('numberOfRecordSets', base_record_sets + typed_record_sets))
         self.cmd('network dns record-set a show -n myrsa -g {rg} --zone-name {zone}',
-                 checks=self.check('length(aRecords)', 2))
+                 checks=self.check('length(ARecords)', 2))
 
         # test list vs. list type
         self.cmd('network dns record-set list -g {rg} -z {zone}',
@@ -197,13 +208,15 @@ class DnsScenarioTest(ScenarioTest):
             self.cmd('network dns record-set {0} remove-record -g {{rg}} --zone-name {{zone}} --record-set-name myrs{0} {1}'.format(t, args[t]))
 
         self.cmd('network dns record-set a show -n myrsa -g {rg} --zone-name {zone}',
-                 checks=self.check('length(aRecords)', 1))
+                 checks=self.check('length(ARecords)', 1))
 
         self.cmd('network dns record-set a remove-record -g {rg} --zone-name {zone} --record-set-name myrsa --ipv4-address 10.0.0.11')
 
         self.cmd('network dns record-set a show -n myrsa -g {rg} --zone-name {zone}', expect_failure=True)
 
         self.cmd('network dns record-set a delete -n myrsa -g {rg} --zone-name {zone} -y')
+
+        self.cmd('network dns record-set cname set-record -n myrscname -g {rg} -z {zone} -c www.contoso.com --ttl 60')
 
         self.cmd('network dns record-set cname delete -n myrscname -g {rg} --zone-name {zone} -y')
 
@@ -229,15 +242,18 @@ class DnsScenarioTest(ScenarioTest):
             'aaaa': '--ipv6-address 2001:db8:0:1:1:1:1:1',
             'caa': '--flags 0 --tag foo --value "my value"',
             'cname': '--cname mycname',
+            'ds': '--key-tag 15288 --algorithm 5 --digest-type 2 --digest 49FD46E6C4B45C55D4AC',
             'mx': '--exchange 12 --preference 13',
+            'naptr': '--flags "U" --order 10 --preference 20 --services "E2U+sip" --regexp "!^.*$!sip:customer-service@example.com!" --replacement .',
             'ns': '--nsdname foobar.com',
             'ptr': '--ptrdname foobar.com',
             'soa': '--email foo.com --expire-time 30 --minimum-ttl 20 --refresh-time 60 --retry-time 90 --serial-number 123',
             'srv': '--port 1234 --priority 1 --target target.com --weight 50',
+            'tlsa': '--certificate-usage 3 --selector 1 --matching-type 1 --certificate-data 0C72AC70B745AC19998811B131D662C9AC69DBDBE7CB23E5B514B56664C5D3D6',
             'txt': '--value some_text'
         }
 
-        record_types = ['a', 'aaaa', 'caa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']
+        record_types = ['a', 'aaaa', 'caa', 'cname', 'ds', 'mx', 'naptr', 'ns', 'ptr', 'srv', 'tlsa', 'txt']
 
         for t in record_types:
             add_command = 'set-record' if t == 'cname' else 'add-record'
@@ -254,7 +270,7 @@ class DnsScenarioTest(ScenarioTest):
         self.cmd('network dns zone show -n {zone} -g {rg}',
                  checks=self.check('numberOfRecordSets', base_record_sets + typed_record_sets))
         self.cmd('network dns record-set a show -n myrsa -g {rg} --zone-name {zone}',
-                 checks=self.check('length(aRecords)', 2))
+                 checks=self.check('length(ARecords)', 2))
 
         # test list vs. list type
         self.cmd('network dns record-set list -g {rg} -z {zone}',
@@ -267,7 +283,7 @@ class DnsScenarioTest(ScenarioTest):
             self.cmd('network dns record-set {0} remove-record -g {{rg}} --zone-name {{zone}} --record-set-name myrs{0} {1}'.format(t, args[t]))
 
         self.cmd('network dns record-set a show -n myrsa -g {rg} --zone-name {zone}',
-                 checks=self.check('length(aRecords)', 1))
+                 checks=self.check('length(ARecords)', 1))
 
         self.cmd('network dns record-set a remove-record -g {rg} --zone-name {zone} --record-set-name myrsa --ipv4-address 10.0.0.11')
 
@@ -300,7 +316,7 @@ class DnsScenarioTest(ScenarioTest):
         record_set_name = self.kwargs['child_zone_name'].replace('.' + self.kwargs['parent_zone_name'], '')
         self.kwargs['record_set_name'] = record_set_name
         self.cmd('network dns record-set ns show -n {record_set_name} -g {rg} --zone-name {parent_zone_name}',
-                 checks=self.check('length(nsRecords)', child_name_server_count))
+                 checks=self.check('length(NSRecords)', child_name_server_count))
 
         # clean up by deleting the created resources
         self.cmd('network dns zone delete -g {rg} -n {parent_zone_name} -y',
@@ -308,6 +324,14 @@ class DnsScenarioTest(ScenarioTest):
 
         self.cmd('network dns zone delete -g {rg} -n {child_zone_name} -y',
                  checks=self.is_empty())
+
+    @ResourceGroupPreparer(name_prefix='cli_test_dnssec')
+    def test_dns_dnssec(self, resource_group):
+        self.kwargs["zone"] = "myzone.com"
+        self.cmd('network dns zone create -g {rg} -n {zone}').get_output_in_json()
+        self.cmd('network dns dnssec-config create -g {rg} -z {zone}', checks=self.check('provisioningState', 'Succeeded'))
+        self.cmd('network dns dnssec-config show -g {rg} -z {zone}', checks=self.check('length(signingKeys)', 2))
+        self.cmd('network dns dnssec-config delete -g {rg} -z {zone} -y', checks=self.is_empty())
 
     @ResourceGroupPreparer(name_prefix='cli_test_dns_alias')
     def test_dns_alias(self, resource_group):
@@ -319,14 +343,116 @@ class DnsScenarioTest(ScenarioTest):
         })
 
         self.cmd('network dns zone create -g {rg} -n {zone}')
-        tm = self.cmd('network traffic-manager profile create -g {rg} -n {tm} --unique-dns-name {tm_dns} --routing-method geographic').get_output_in_json()
+        tm = self.cmd('network traffic-manager profile create -g {rg} -n {tm} --unique-dns-name {tm_dns} --routing-method performance').get_output_in_json()
 
         self.kwargs['tm_id'] = tm['TrafficManagerProfile']['id']
 
-        self.cmd('network dns record-set a create -g {rg} -z {zone} -n a1 --target-resource {tm_id}',
-                 checks=self.check("targetResource.id.contains(@, '{tm}')", True))
-        self.cmd('network dns record-set a update -g {rg} -z {zone} -n a1 --target-resource ""',
-                 checks=self.check('targetResource.id', None))
+        record = self.cmd('network dns record-set a create -g {rg} -z {zone} -n a1 --target-resource {tm_id}',
+                 checks=[
+                     self.check("targetResource.id.contains(@, '{tm}')", True),
+                     self.check('trafficManagementProfile.id', None)
+                 ]).get_output_in_json()
+
+        references = self.cmd('az network dns list-references --parameters {tm_id}',
+                 checks=self.check('length(dnsResourceReferences)', 1)).get_output_in_json()
+
+        self.assertEqual(references['dnsResourceReferences'][0]['dnsResources'][0]['id'].lower(), record['id'].lower())
+
+        self.cmd('network dns record-set a update -g {rg} -z {zone} -n a1 --remove targetResource',
+                 checks=[
+                     self.check('targetResource.id', None),
+                     self.check('trafficManagementProfile.id', None)
+                 ])
+
+
+    @ResourceGroupPreparer(name_prefix='cli_test_dns_tmlink')
+    def test_dns_tmlink(self, resource_group):
+
+        self.kwargs.update({
+            'zone': 'mytestzone2.com',
+            'tm_dns': 'mytesttrafficmanager2',
+            'tm': 'tm2'
+        })
+
+        self.cmd('network dns zone create -g {rg} -n {zone}')
+        tm = self.cmd('network traffic-manager profile create -g {rg} -n {tm} --unique-dns-name {tm_dns} --routing-method performance').get_output_in_json()
+
+        self.kwargs['tm_id'] = tm['TrafficManagerProfile']['id']
+
+        record = self.cmd('network dns record-set a create -g {rg} -z {zone} -n tmlink --traffic-management-profile {tm_id}',
+                 checks=[
+                     self.check("trafficManagementProfile.id.contains(@, '{tm}')", True),
+                     self.check('targetResource.id', None)
+                 ]).get_output_in_json()
+
+        references = self.cmd('az network dns list-references --parameters {tm_id}',
+                 checks=self.check('length(dnsResourceReferences)', 1)).get_output_in_json()
+
+        self.assertEqual(references['dnsResourceReferences'][0]['dnsResources'][0]['id'].lower(), record['id'].lower())
+
+        self.cmd('network dns record-set a update -g {rg} -z {zone} -n tmlink --remove trafficManagementProfile',
+                 checks=[
+                     self.check('trafficManagementProfile.id', None),
+                     self.check('targetResource.id', None)
+                 ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_dns_zone_update')
+    def test_dns_zone_update(self, resource_group):
+        self.kwargs['zone'] = 'myzonex.com'
+
+        self.cmd('network dns zone create -n {zone} -g {rg}')
+        self.cmd('network dns zone update -n {zone} -g {rg} --tags tag1=foo',
+                 checks=self.check('tags.tag1', 'foo'))
+        self.cmd('network dns zone update -n {zone} -g {rg} --set tags.tag1=bar --set tags.tag2=foo',
+                 checks=[
+                     self.check('tags.tag1', 'bar'),
+                     self.check('tags.tag2', 'foo')
+                ])
+        self.cmd('network dns zone update -n {zone} -g {rg} --remove tags.tag1',
+                 checks=self.check('tags.tag1', None))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_dns_zone_commands_with_dnssec_zone')
+    def test_dns_zone_commands_with_dnssec_zone(self, resource_group):
+        self.kwargs['zone'] = 'myzonex.com'
+
+        self.cmd('network dns zone create -n {zone} -g {rg}')
+        self.cmd('network dns dnssec-config create -g {rg} -z {zone}', checks=self.check('provisioningState', 'Succeeded'))
+
+        self.cmd('network dns zone create -n {zone} -g {rg} --tags "foo=bar"',
+                 checks=[
+                     self.check('tags.foo', 'bar'),
+                     self.check('length(signingKeys)', 2)
+                ])
+        self.cmd('network dns zone update -n {zone} -g {rg} --set tags.tag1=bar --set tags.tag2=foo',
+                 checks=[
+                     self.check('tags.tag1', 'bar'),
+                     self.check('tags.tag2', 'foo'),
+                     self.check('length(signingKeys)', 2)
+                ])
+        self.cmd('network dns zone update -n {zone} -g {rg} --remove tags.tag1',
+                 checks=[
+                     self.check('tags.tag1', None),
+                     self.check('tags.tag2', 'foo'),
+                     self.check('length(signingKeys)', 2)
+                ])
+        self.cmd('network dns zone show -n {zone} -g {rg}',
+                 checks=self.check('length(signingKeys)', 2))
+        self.cmd('network dns zone delete -g {rg} -n {zone} -y',
+                 checks=self.is_empty())
+
+    @ResourceGroupPreparer(name_prefix='cli_test_dns_zone_update_if_match')
+    def test_dns_zone_update_if_match(self, resource_group):
+        self.kwargs['zone'] = 'myzonex.com'
+
+        create_response = self.cmd('network dns zone create -n {zone} -g {rg}').get_output_in_json()
+        self.kwargs['etag'] = create_response['etag']
+        self.cmd('network dns zone update -n {zone} -g {rg} --if-match {etag} --tags tag1=foo',
+                 checks=self.check('tags.tag1', 'foo'))
+
+        self.kwargs['etag'] = 'dummy'
+        from azure.core.exceptions import HttpResponseError
+        with self.assertRaisesRegex(HttpResponseError, 'PreconditionFailed'):
+            self.cmd('network dns zone update -n {zone} -g {rg} --if-match {etag} --tags tag2=foo')
 
 
 class DnsParseZoneFiles(unittest.TestCase):
@@ -403,6 +529,17 @@ class DnsParseZoneFiles(unittest.TestCase):
             self.assertEqual(int(record['weight']), records_to_check[i][2])
             self.assertEqual(int(record['port']), records_to_check[i][3])
             self.assertEqual(record['target'], records_to_check[i][4])
+    
+    def _check_naptr(self, zone, name, records_to_check):
+        self.assertEqual(len(records_to_check), len(zone[name]['naptr']))
+        for i, record in enumerate(zone[name]['naptr']):
+            self.assertEqual(record['ttl'], records_to_check[i][0])
+            self.assertEqual(int(record['order']), records_to_check[i][1])
+            self.assertEqual(int(record['preference']), records_to_check[i][2])
+            self.assertEqual(record['flags'], records_to_check[i][3])
+            self.assertEqual(record['services'], records_to_check[i][4])
+            self.assertEqual(record['regexp'], records_to_check[i][5])
+            self.assertEqual(record['replacement'], records_to_check[i][6])
 
     def _check_ttl(self, zone, name, rec_type, ttl):
         for record in zone[name][rec_type]:
@@ -416,7 +553,7 @@ class DnsParseZoneFiles(unittest.TestCase):
         return parse_zone_file(file_text, zone_name)
 
     def test_zone_file_1(self):
-        zn = 'zone1.com.'
+        zn = 'dnstestzone1.com.'
         zone = self._get_zone_object('zone1.txt', zn)
         self._check_soa(zone, zn, 3600, 1, 3600, 300, 2419200, 300)
         self._check_ns(zone, zn, [
@@ -457,11 +594,11 @@ class DnsParseZoneFiles(unittest.TestCase):
         ])
 
     def test_zone_file_2(self):
-        zn = 'zone2.com.'
+        zn = 'dnstestzone2.com.'
         zone = self._get_zone_object('zone2.txt', zn)
         self._check_txt(zone, 'spaces.' + zn, [(3600, 5, None)])
         self._check_soa(zone, zn, 3600, 10, 900, 600, 86400, 3600)
-        self._check_ns(zone, zn, [(3600, 'zone2.com.')])
+        self._check_ns(zone, zn, [(3600, 'dnstestzone2.com.')])
         self._check_a(zone, 'a2.' + zn, [
             (3600, '1.2.3.4'),
             (3600, '2.3.4.5')
@@ -532,7 +669,7 @@ class DnsParseZoneFiles(unittest.TestCase):
         self._check_txt(zone, 'even.' + zn, [(3600, None, 'v=spf1 mx include:_spf4.xgn.de include:_spf6.xgn.de -all')])  # pylint: disable=line-too-long
 
     def test_zone_file_3(self):
-        zn = 'zone3.com.'
+        zn = 'dnstestzone3.com.'
         zone = self._get_zone_object('zone3.txt', zn)
         self._check_soa(zone, zn, 86400, 2003080800, 43200, 900, 1814400, 10800)
         self._check_ns(zone, zn, [(86400, 'ns1.com.')])
@@ -573,7 +710,7 @@ class DnsParseZoneFiles(unittest.TestCase):
         ])
 
     def test_zone_file_4(self):
-        zn = 'zone4.com.'
+        zn = 'dnstestzone4.com.'
         zone = self._get_zone_object('zone4.txt', zn)
         self._check_soa(zone, zn, 3600, 2003080800, 43200, 900, 1814400, 10800)
         self._check_ns(zone, zn, [(100, 'ns1.' + zn)])
@@ -604,7 +741,7 @@ class DnsParseZoneFiles(unittest.TestCase):
         ])
 
     def test_zone_file_5(self):
-        zn = 'zone5.com.'
+        zn = 'dnstestzone5.com.'
         zone = self._get_zone_object('zone5.txt', zn)
         self._check_soa(zone, zn, 3600, 2003080800, 43200, 900, 1814400, 10800)
         self._check_a(zone, 'default.' + zn, [(3600, '0.1.2.3')])
@@ -626,7 +763,7 @@ class DnsParseZoneFiles(unittest.TestCase):
         self._check_a(zone, 'test.' + zn, [(3600, '7.8.9.0')])
 
     def test_zone_file_6(self):
-        zn = 'zone6.com.'
+        zn = 'dnstestzone6.com.'
         zone = self._get_zone_object('zone6.txt', zn)
         self._check_soa(zone, zn, 3600, 1, 3600, 300, 2419200, 300)
         self._check_a(zone, 'www.' + zn, [(3600, '1.1.1.1')])
@@ -639,7 +776,7 @@ class DnsParseZoneFiles(unittest.TestCase):
         ])
 
     def test_zone_file_7(self):
-        zn = 'zone7.com.'
+        zn = 'dnstestzone7.com.'
         zone = self._get_zone_object('zone7.txt', zn)
         self._check_soa(zone, zn, 3600, 1, 3600, 300, 2419200, 300)
         self._check_txt(zone, zn, [(60, None, 'a\\\\b\\255\\000\\;\\"\\"\\"testtesttest\\"\\"\\"')])
@@ -653,7 +790,7 @@ class DnsParseZoneFiles(unittest.TestCase):
         ])
 
     def test_zone_file_8(self):
-        zn = 'zone8.com.'
+        zn = 'dnstestzone8.com.'
         zone = self._get_zone_object('zone8.txt', zn)
         self._check_soa(zone, zn, 3600, 1, 3600, 300, 2419200, 300)
         self._check_a(zone, 'ns.' + zn, [(3600, '1.2.3.4')])
@@ -664,6 +801,21 @@ class DnsParseZoneFiles(unittest.TestCase):
             (172800, 'ns4-03.azure-dns.info.'),
         ])
         self._check_a(zone, '*.' + zn, [(3600, '2.3.4.5')])
+
+    def test_zone_file_11(self):
+        zn = 'dnstestzone11.com.'
+        zone = self._get_zone_object('zone11.txt', zn)
+        self._check_soa(zone, zn, 3600, 1, 3600, 300, 2419200, 300)
+        self._check_ns(zone, zn, [
+            (172800, 'ns0-00.azure-dns.com.'),
+            (172800, 'ns0-00.azure-dns.net.'),
+            (172800, 'ns0-00.azure-dns.org.'),
+            (172800, 'ns0-00.azure-dns.info.')
+        ])
+        self._check_naptr(zone, 'mynaptr.' + zn, [
+            (3600, 10, 20, 'A', 'EAU+SIP', '', 'domain.com.'),
+            (3600, 20, 20, 'U', 'SIP+D2U', '!^(\\+441632960083)$!sip:\\1@example.com!', '.')
+        ])
 
     def test_zone_import_errors(self):
         from knack.util import CLIError

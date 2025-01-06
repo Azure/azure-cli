@@ -467,8 +467,9 @@ class TestAAZArg(unittest.TestCase):
             parse_partial_value_key("b.a.'/bc sef'/.sss[2]")
 
     def test_aaz_str_arg(self):
-        from azure.cli.core.aaz._arg import AAZStrArg, AAZArgumentsSchema
+        from azure.cli.core.aaz._arg import AAZStrArg, AAZArgumentsSchema, AAZListArg
         from azure.cli.core.aaz._arg_action import AAZArgActionOperations
+        from azure.cli.core.aaz import has_value
         schema = AAZArgumentsSchema()
         v = schema()
 
@@ -493,6 +494,16 @@ class TestAAZArg(unittest.TestCase):
             nullable=True,
             blank="Sunday"
         )
+        schema.tasks = AAZListArg(
+            options=["--tasks"],
+            singular_options=["--task", "-t"],
+        )
+        schema.tasks.Element = AAZStrArg(
+            enum={"task1", "task2"},
+            enum_support_extension=True,
+        )
+        self.assertFalse(has_value(v.work_day))
+
         arg = schema.work_day.to_cmd_arg("work_day")
         self.assertEqual(len(arg.choices), 14)
         action = arg.type.settings["action"]
@@ -545,6 +556,18 @@ class TestAAZArg(unittest.TestCase):
         dest_ops.apply(v, "work_day")
         self.assertEqual(v.work_day, None)
 
+        # Task argument
+        arg = schema.tasks.to_cmd_arg("tasks")
+        action = arg.type.settings["action"]
+
+        dest_ops = AAZArgActionOperations()
+        self.assertEqual(len(dest_ops._ops), 0)
+
+        action.setup_operations(dest_ops, ["[task1,task2,task_ext]"])
+        self.assertEqual(len(dest_ops._ops), 1)
+        dest_ops.apply(v, "tasks")
+        self.assertEqual(v.tasks.to_serialized_data(), ["task1", "task2", "task_ext"])
+
         # New argument
         schema.name = AAZStrArg(options=["--name", "-n"])
         arg = schema.name.to_cmd_arg("work_day")
@@ -581,6 +604,7 @@ class TestAAZArg(unittest.TestCase):
     def test_aaz_int_arg(self):
         from azure.cli.core.aaz._arg import AAZIntArg, AAZArgumentsSchema
         from azure.cli.core.aaz._arg_action import AAZArgActionOperations
+        from azure.cli.core.aaz import has_value
         schema = AAZArgumentsSchema()
         v = schema()
 
@@ -592,11 +616,15 @@ class TestAAZArg(unittest.TestCase):
                 "C": 80,
                 "D": 0,
             },
+            enum_support_extension=True,
             nullable=True,
             blank=0
         )
+
+        self.assertFalse(has_value(v.score))
+
         arg = schema.score.to_cmd_arg("score")
-        self.assertEqual(len(arg.choices), 4)
+        self.assertEqual(arg.choices, None)
         action = arg.type.settings["action"]
 
         dest_ops = AAZArgActionOperations()
@@ -624,6 +652,16 @@ class TestAAZArg(unittest.TestCase):
         self.assertEqual(len(dest_ops._ops), 4)
         dest_ops.apply(v, "score")
         self.assertEqual(v.score, None)
+
+         # extension value
+        action.setup_operations(dest_ops, "1234")
+        self.assertEqual(len(dest_ops._ops), 5)
+        dest_ops.apply(v, "score")
+        self.assertEqual(v.score, 1234)
+
+        # extension invalid value
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
+            action.setup_operations(dest_ops, "12A34")
 
         # credit argument
         schema.credit = AAZIntArg(options=["--credit", "-c"])
@@ -670,6 +708,7 @@ class TestAAZArg(unittest.TestCase):
     def test_aaz_float_arg(self):
         from azure.cli.core.aaz._arg import AAZFloatArg, AAZArgumentsSchema
         from azure.cli.core.aaz._arg_action import AAZArgActionOperations
+        from azure.cli.core.aaz import has_value
         schema = AAZArgumentsSchema()
         v = schema()
 
@@ -681,11 +720,14 @@ class TestAAZArg(unittest.TestCase):
                 "C": 80.0,
                 "D": 0.0,
             },
+            enum_support_extension=True,
             nullable=True,
             blank=0.0
         )
+        self.assertFalse(has_value(v.score))
+
         arg = schema.score.to_cmd_arg("score")
-        self.assertEqual(len(arg.choices), 4)
+        self.assertEqual(arg.choices, None)
         action = arg.type.settings["action"]
 
         dest_ops = AAZArgActionOperations()
@@ -713,6 +755,21 @@ class TestAAZArg(unittest.TestCase):
         self.assertEqual(len(dest_ops._ops), 4)
         dest_ops.apply(v, "score")
         self.assertEqual(v.score, None)
+        
+        # extension value
+        from unittest import mock
+        with mock.patch('azure.cli.core.aaz._arg.logger') as mock_logger:
+            action.setup_operations(dest_ops, "1234")
+            self.assertEqual(len(dest_ops._ops), 5)
+            dest_ops.apply(v, "score")
+            self.assertEqual(v.score, 1234.0)
+            call_args = mock_logger.warning.call_args
+            self.assertEqual("Use extended value '%s' outside choices %s.", call_args[0][0])
+            self.assertEqual("1234.0", call_args[0][1])
+
+        # extension invalid value
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
+            action.setup_operations(dest_ops, "12A34")
 
         # credit argument
         schema.credit = AAZFloatArg(options=["--credit", "-c"])
@@ -756,10 +813,13 @@ class TestAAZArg(unittest.TestCase):
     def test_aaz_bool_arg(self):
         from azure.cli.core.aaz._arg import AAZBoolArg, AAZArgumentsSchema
         from azure.cli.core.aaz._arg_action import AAZArgActionOperations
+        from azure.cli.core.aaz import has_value
         schema = AAZArgumentsSchema()
         v = schema()
 
         schema.enable = AAZBoolArg(options=["--enable", "-e"])
+        self.assertFalse(has_value(v.enable))
+
         arg = schema.enable.to_cmd_arg("enable")
         self.assertEqual(len(arg.choices), 10)
         action = arg.type.settings["action"]
@@ -869,8 +929,9 @@ class TestAAZArg(unittest.TestCase):
         # self.assertEqual(v.enable, True)
 
     def test_aaz_list_arg(self):
-        from azure.cli.core.aaz._arg import AAZListArg, AAZStrArg, AAZArgumentsSchema
+        from azure.cli.core.aaz._arg import AAZListArg, AAZStrArg, AAZArgumentsSchema, AAZObjectArg
         from azure.cli.core.aaz._arg_action import AAZArgActionOperations, _ELEMENT_APPEND_KEY
+        from azure.cli.core.aaz import has_value
         schema = AAZArgumentsSchema()
         v = schema()
 
@@ -882,6 +943,21 @@ class TestAAZArg(unittest.TestCase):
             nullable=True,
             blank="a blank value"
         )
+        schema.user_assigned = AAZListArg(
+            options=["--user-assigned"],
+            blank=["1", "2"],
+        )
+        schema.user_assigned.Element = AAZStrArg(
+        )
+        schema.objs = AAZListArg(
+            options=["--objs"],
+            singular_options=["--obj"]
+        )
+        element = schema.objs.Element = AAZObjectArg()
+        element.attr = AAZStrArg(options=["--attr"])
+        element.prop = AAZStrArg(options=["--prop"])
+
+        self.assertFalse(has_value(v.names))
 
         arg = schema.names.to_cmd_arg("names")
         action = arg.type.settings["action"]
@@ -962,19 +1038,43 @@ class TestAAZArg(unittest.TestCase):
         dest_ops.apply(v, "names")
         self.assertEqual(v.names, ["a", "b", "a blank value", ""])
 
+        dest_ops = AAZArgActionOperations()
+        self.assertEqual(len(dest_ops._ops), 0)
+        singular_action = schema.objs.Element._build_cmd_action()
+        singular_action.setup_operations(dest_ops, ["attr=a"], prefix_keys=[_ELEMENT_APPEND_KEY])
+        singular_action.setup_operations(dest_ops, ["prop=b"], prefix_keys=[-1])
+        dest_ops.apply(v, "objs")
+        self.assertEqual(v.objs, [{"attr": "a", "prop": "b"}])
+
+        dest_ops = AAZArgActionOperations()
+        self.assertEqual(len(dest_ops._ops), 0)
+        action = schema.user_assigned._build_cmd_action()
+        action.setup_operations(dest_ops, [])
+        dest_ops.apply(v, "user_assigned")
+        self.assertEqual(v.user_assigned, ["1", "2"])
+
+        action.setup_operations(dest_ops, None)
+        self.assertEqual(len(dest_ops._ops), 2)
+        dest_ops.apply(v, "user_assigned")
+        self.assertEqual(v.user_assigned, ["1", "2"])
+
     def test_aaz_dict_arg(self):
         from azure.cli.core.aaz._arg import AAZDictArg, AAZStrArg, AAZArgumentsSchema
         from azure.cli.core.aaz._arg_action import AAZArgActionOperations
+        from azure.cli.core.aaz import has_value
         schema = AAZArgumentsSchema()
         v = schema()
 
         schema.tags = AAZDictArg(
             options=["--tags", "-t"],
+            blank={"ab": '1', "bc": '2'},
         )
         schema.tags.Element = AAZStrArg(
             nullable=True,
             blank="a blank value"
         )
+
+        self.assertFalse(has_value(v.tags))
 
         arg = schema.tags.to_cmd_arg("tags")
         action = arg.type.settings["action"]
@@ -1003,6 +1103,17 @@ class TestAAZArg(unittest.TestCase):
         dest_ops.apply(v, "tags")
         self.assertEqual(v.tags, {})
 
+        # blank value
+        action.setup_operations(dest_ops, [])
+        self.assertEqual(len(dest_ops._ops), 7)
+        dest_ops.apply(v, "tags")
+        self.assertEqual(v.tags, {"ab": '1', "bc": '2'})
+
+        action.setup_operations(dest_ops, None)
+        self.assertEqual(len(dest_ops._ops), 8)
+        dest_ops.apply(v, "tags")
+        self.assertEqual(v.tags, {"ab": '1', "bc": '2'})
+
         with self.assertRaises(aazerror.AAZInvalidValueError):
             action.setup_operations(dest_ops, ["=1"])
 
@@ -1015,10 +1126,68 @@ class TestAAZArg(unittest.TestCase):
         with self.assertRaises(aazerror.AAZInvalidShorthandSyntaxError):
             action.setup_operations(dest_ops, ["{c:}"])
 
+    def test_aaz_freeform_dict_arg(self):
+        from azure.cli.core.aaz._arg import AAZFreeFormDictArg, AAZArgumentsSchema
+        from azure.cli.core.aaz._arg_action import AAZArgActionOperations
+        from azure.cli.core.aaz import has_value
+        schema = AAZArgumentsSchema()
+        v = schema()
+
+        schema.tags = AAZFreeFormDictArg(
+            options=["--tags", "-t"],
+            nullable=True,
+            blank={"blank": True}
+        )
+
+        self.assertFalse(has_value(v.tags))
+
+        arg = schema.tags.to_cmd_arg("tags")
+        action = arg.type.settings["action"]
+
+        dest_ops = AAZArgActionOperations()
+        self.assertEqual(len(dest_ops._ops), 0)
+
+        # null value
+        action.setup_operations(dest_ops, "null")
+        self.assertEqual(len(dest_ops._ops), 1)
+        dest_ops.apply(v, "tags")
+        self.assertEqual(v.tags, None)
+
+        # empty dict
+        action.setup_operations(dest_ops, "{}")
+        self.assertEqual(len(dest_ops._ops), 2)
+        dest_ops.apply(v, "tags")
+        self.assertEqual(v.tags, {})
+
+        # freeform dict
+        action.setup_operations(dest_ops, '{"a": 1, "b": null, "c": false, "d": "string", "e": [1, "str", null]}')
+        self.assertEqual(len(dest_ops._ops), 3)
+        dest_ops.apply(v, "tags")
+        self.assertEqual(v.tags, {"a": 1, "b": None, "c": False, "d": "string", "e": [1, "str", None]})
+
+        # blank value
+        action.setup_operations(dest_ops, None)
+        self.assertEqual(len(dest_ops._ops), 4)
+        dest_ops.apply(v, "tags")
+        self.assertEqual(v.tags, {"blank": True})
+
+        with self.assertRaises(aazerror.AAZInvalidValueError):
+            action.setup_operations(dest_ops, "'null'")
+
+        with self.assertRaises(aazerror.AAZInvalidValueError):
+            action.setup_operations(dest_ops, "'123'")
+
+        with self.assertRaises(aazerror.AAZInvalidValueError):
+            action.setup_operations(dest_ops, "123")
+
+        with self.assertRaises(aazerror.AAZInvalidValueError):
+            action.setup_operations(dest_ops, "[1, 2, 3]")
+
     def test_aaz_object_arg(self):
         from azure.cli.core.aaz._arg import AAZDictArg, AAZListArg, AAZObjectArg, AAZIntArg, AAZBoolArg, AAZFloatArg, \
             AAZStrArg, AAZArgumentsSchema
         from azure.cli.core.aaz._arg_action import AAZArgActionOperations
+        from azure.cli.core.aaz import has_value
         schema = AAZArgumentsSchema()
         v = schema()
 
@@ -1047,6 +1216,7 @@ class TestAAZArg(unittest.TestCase):
         )
         schema.properties.vnets = AAZListArg(
             options=["vnets"],
+            singular_options=["vnet"],
             nullable=True
         )
         schema.properties.vnets.Element = AAZObjectArg()
@@ -1055,11 +1225,20 @@ class TestAAZArg(unittest.TestCase):
             blank="666"
         )
 
+        schema.properties.new_i_pv6 = AAZStrArg(
+            options=["new_ipv6"],
+        )
+
         schema.properties.pt = AAZFloatArg(
             options=["pt"],
             nullable=True,
             blank="0.1"
         )
+
+        self.assertFalse(has_value(v.properties.identities))
+        self.assertFalse(has_value(v.properties.vnets))
+        self.assertFalse(has_value(v.properties.pt))
+        self.assertFalse(has_value(v.properties))
 
         arg = schema.properties.to_cmd_arg("properties")
         action = arg.type.settings["action"]
@@ -1082,8 +1261,25 @@ class TestAAZArg(unittest.TestCase):
             "pt": 12.123
         })
 
+        action.setup_operations(dest_ops, ["vnet.id=223", "vnet={id:456}"])
+        self.assertEqual(len(dest_ops._ops), 3)
+        dest_ops.apply(v, "properties")
+        self.assertEqual(v.properties.to_serialized_data(), {
+            "enable": False,
+            "tags": {
+                "a": 1,
+                "3": 2,
+            },
+            "vnets": [
+                {"id": "/123"},
+                {"id": "223"},
+                {"id": "456"}
+            ],
+            "pt": 12.123
+        })
+
         action.setup_operations(dest_ops, ["pt=", "enable=null", "vnets=[]"])
-        self.assertEqual(len(dest_ops._ops), 4)
+        self.assertEqual(len(dest_ops._ops), 6)
         dest_ops.apply(v, "properties")
         self.assertEqual(v.properties, {
             "enable": None,
@@ -1096,7 +1292,7 @@ class TestAAZArg(unittest.TestCase):
         })
 
         action.setup_operations(dest_ops, ["{enable:false,pt,tags:{a:1,3:2,c},vnets:[{id}],identities:{a:{},'http://b/c/d/e'}}"])
-        self.assertEqual(len(dest_ops._ops), 5)
+        self.assertEqual(len(dest_ops._ops), 7)
         dest_ops.apply(v, "properties")
         self.assertEqual(v.properties, {
             "enable": False,
@@ -1116,7 +1312,7 @@ class TestAAZArg(unittest.TestCase):
         })
 
         action.setup_operations(dest_ops, ["identities.'http://b.p['/]/c'=", "identities.a=null"])
-        self.assertEqual(len(dest_ops._ops), 7)
+        self.assertEqual(len(dest_ops._ops), 9)
         dest_ops.apply(v, "properties")
         self.assertEqual(v.properties, {
             "enable": False,
@@ -1137,21 +1333,366 @@ class TestAAZArg(unittest.TestCase):
         })
 
         action.setup_operations(dest_ops, ["{}"])
-        self.assertEqual(len(dest_ops._ops), 8)
+        self.assertEqual(len(dest_ops._ops), 10)
         dest_ops.apply(v, "properties")
         self.assertEqual(v.properties, {})
 
         action.setup_operations(dest_ops, ["null"])
-        self.assertEqual(len(dest_ops._ops), 9)
+        self.assertEqual(len(dest_ops._ops), 11)
         dest_ops.apply(v, "properties")
         self.assertEqual(v.properties, None)
 
-        action.setup_operations(dest_ops, ["{enable:True,tags:null,vnets:null,pt:12.123}"])
-        self.assertEqual(len(dest_ops._ops), 10)
+        action.setup_operations(dest_ops, ["{enable:True,tags:null,vnets:null,pt:12.123,newIPv6:'00:00:00'}"])
+        self.assertEqual(len(dest_ops._ops), 12)
         dest_ops.apply(v, "properties")
         self.assertEqual(v.properties, {
             "enable": True,
             "tags": None,
             "vnets": None,
-            "pt": 12.123
+            "pt": 12.123,
+            "new_i_pv6": '00:00:00'
         })
+
+    def test_aaz_has_value_for_buildin(self):
+        from azure.cli.core.aaz import has_value, AAZUndefined
+        self.assertTrue(has_value(0))
+        self.assertTrue(has_value(""))
+        self.assertTrue(has_value(False))
+        self.assertTrue(has_value(None))
+
+        self.assertFalse(has_value(AAZUndefined))
+
+    def test_aaz_registered_arg(self):
+        from azure.cli.core.aaz._arg import AAZStrArg, AAZObjectArg, AAZBoolArg, AAZArgumentsSchema
+        from azure.cli.core.aaz._arg_action import AAZArgActionOperations
+        from azure.cli.core.aaz import has_value
+        from azure.cli.core.aaz.exceptions import AAZUnregisteredArg
+        schema = AAZArgumentsSchema()
+        v = schema()
+
+        schema.work_day = AAZStrArg(
+            options=["--work-day", "-d"],
+            enum={
+                "1": "Monday",
+                "2": "Tuesday",
+                "3": "Wednesday",
+                "4": "Thursday",
+                "5": "Friday",
+                "6": "Saturday",
+                "7": "Sunday",
+                "Mon": "Monday",
+                "Tue": "Tuesday",
+                "Wed": "Wednesday",
+                "Thu": "Thursday",
+                "Fri": "Friday",
+                "Sat": "Saturday",
+                "Sun": "Sunday",
+            },
+            nullable=True,
+            blank="Sunday"
+        )
+        self.assertTrue(schema.work_day._registered)
+
+        arg = schema.work_day.to_cmd_arg("work_day")
+
+        schema.work_day._registered = False
+        with self.assertRaises(AAZUnregisteredArg):
+            schema.work_day.to_cmd_arg("work_day")
+
+        schema.properties = AAZObjectArg(
+            options=["--prop", "-p"],
+            nullable=True
+        )
+
+        schema.properties.enable = AAZBoolArg(
+            options=["enable"],
+            nullable=True,
+        )
+
+        self.assertTrue(schema.properties._registered)
+        arg = schema.properties.to_cmd_arg("properties")
+
+        schema.properties._registered = False
+        with self.assertRaises(AAZUnregisteredArg):
+            schema.properties.to_cmd_arg("properties")
+
+    def test_aaz_configured_default_arg(self):
+        from azure.cli.core.aaz._arg import AAZResourceGroupNameArg, AAZResourceLocationArg, AAZStrArg, AAZIntArg,\
+            AAZArgumentsSchema
+        schema = AAZArgumentsSchema()
+        v = schema()
+
+        schema.resource_group = AAZResourceGroupNameArg()
+        schema.location = AAZResourceLocationArg()
+        schema.name = AAZStrArg(configured_default="specialname")
+        schema.count = AAZIntArg(configured_default="specialcount")
+        arg = schema.resource_group.to_cmd_arg("resource_group")
+        self.assertEqual(arg.type.settings['configured_default'], 'group')
+        arg = schema.location.to_cmd_arg("location")
+        self.assertEqual(arg.type.settings['configured_default'], 'location')
+        arg = schema.name.to_cmd_arg("name")
+        self.assertEqual(arg.type.settings['configured_default'], 'specialname')
+        arg = schema.count.to_cmd_arg("count")
+        self.assertEqual(arg.type.settings['configured_default'], 'specialcount')
+
+    def test_aaz_generic_update_arg(self):
+        from azure.cli.core.aaz._arg import (AAZGenericUpdateAddArg, AAZGenericUpdateSetArg, AAZGenericUpdateRemoveArg,
+                                             AAZArgumentsSchema)
+        schema = AAZArgumentsSchema()
+        schema.generic_update_add = AAZGenericUpdateAddArg()
+        schema.generic_update_set = AAZGenericUpdateSetArg()
+        schema.generic_update_remove = AAZGenericUpdateRemoveArg()
+        arg = schema.generic_update_add.to_cmd_arg("add")
+        self.assertEqual(arg.type.settings['help'], 'Add an object to a list of objects by specifying a path and key value pairs.  Example: `--add property.listProperty <key=value, string or JSON string>`')
+        arg = schema.generic_update_set.to_cmd_arg("set")
+        self.assertEqual(arg.type.settings['help'], 'Update an object by specifying a property path and value to set.  Example: `--set property1.property2=<value>`')
+        arg = schema.generic_update_remove.to_cmd_arg("remove")
+        self.assertEqual(arg.type.settings['help'], 'Remove a property or an element from a list.  Example: `--remove property.list <indexToRemove>` OR `--remove propertyToRemove`')
+
+
+class TestAAZArgUtils(unittest.TestCase):
+
+    def test_assign_aaz_list_arg(self):
+        from azure.cli.core.aaz.utils import assign_aaz_list_arg
+        from azure.cli.core.aaz._arg import AAZListArg, AAZStrArg, AAZObjectArg, AAZArgumentsSchema
+        from azure.cli.core.aaz._arg_action import AAZArgActionOperations
+        from azure.cli.core.aaz import has_value, AAZUndefined
+        schema = AAZArgumentsSchema()
+        v = schema()
+
+        schema.names = AAZListArg(
+            options=["--names", "--ns"],
+            singular_options=["--name", "-n"],
+            nullable=True
+        )
+        schema.names.Element = AAZStrArg(
+            nullable=True,
+            blank="a blank value"
+        )
+        schema.items = AAZListArg(
+            nullable=True,
+        )
+        schema.items.Element = AAZObjectArg(
+            nullable=True,
+        )
+        schema.items.Element.name = AAZStrArg()
+
+        # AAZUndefined
+        self.assertFalse(has_value(v.names))
+        v.items = assign_aaz_list_arg(v.items, v.names, element_transformer=lambda _, name: {"name": name})
+        self.assertFalse(has_value(v.items))
+
+        v.items = [{"name": "1"}]
+        v.items = assign_aaz_list_arg(v.items, v.names, element_transformer=lambda _, name: {"name": name})
+        self.assertEqual(v.items, [{"name": "1"}])
+
+        arg = schema.names.to_cmd_arg("names")
+        action = arg.type.settings["action"]
+
+        # null value
+        v = schema()
+        dest_ops = AAZArgActionOperations()
+
+        action.setup_operations(dest_ops, ["null"])
+        dest_ops.apply(v, "names")
+        self.assertEqual(v.names, None)
+
+        v.items = assign_aaz_list_arg(v.items, v.names, element_transformer=lambda _, name: {"name": name})
+        self.assertEqual(v.items, None)
+
+        # null element value
+        v = schema()
+        dest_ops = AAZArgActionOperations()
+
+        action.setup_operations(dest_ops, ["[0]=null"])
+        dest_ops.apply(v, "names")
+        self.assertEqual(v.names, [None, ])
+
+        v.items = assign_aaz_list_arg(v.items, v.names, element_transformer=lambda _, name: {"name": name})
+        self.assertEqual(v.items, [None, ])
+
+        # element
+        v = schema()
+        dest_ops = AAZArgActionOperations()
+
+        action.setup_operations(dest_ops, ["1", "2", "3"])
+        dest_ops.apply(v, "names")
+        self.assertEqual(v.names, ['1', '2', '3'])
+        self.assertFalse(v.names._is_patch)
+
+        v.items = assign_aaz_list_arg(v.items, v.names, element_transformer=lambda _, name: {"name": name})
+        self.assertEqual(v.items, [{"name": '1'}, {"name": '2'}, {"name": "3"}])
+        self.assertFalse(v.items._is_patch)
+
+        # patch element
+        v = schema()
+        dest_ops = AAZArgActionOperations()
+
+        action.setup_operations(dest_ops, ["[3]=n5"])
+        dest_ops.apply(v, "names")
+        self.assertTrue(v.names._is_patch)
+        self.assertEqual(len(v.names), 4)
+        self.assertFalse(has_value(v.items[0]))
+        self.assertFalse(has_value(v.items[1]))
+        self.assertFalse(has_value(v.items[2]))
+        self.assertEqual(v.names[3], 'n5')
+        v.items = assign_aaz_list_arg(v.items, v.names, element_transformer=lambda _, name: {"name": name})
+        self.assertTrue(v.items._is_patch)
+        self.assertEqual(len(v.items), 4)
+        self.assertFalse(has_value(v.items[0]))
+        self.assertFalse(has_value(v.items[1]))
+        self.assertFalse(has_value(v.items[2]))
+        self.assertEqual(v.items[3], {"name": 'n5'})
+
+    def test_assign_aaz_dict_arg(self):
+        from azure.cli.core.aaz.utils import assign_aaz_dict_arg
+        from azure.cli.core.aaz._arg import AAZDictArg, AAZStrArg, AAZObjectArg, AAZArgumentsSchema
+        from azure.cli.core.aaz._arg_action import AAZArgActionOperations
+        from azure.cli.core.aaz import has_value, AAZUndefined
+        schema = AAZArgumentsSchema()
+        v = schema()
+
+        schema.names = AAZDictArg(
+            options=["--names", "--ns"],
+            nullable=True
+        )
+        schema.names.Element = AAZStrArg(
+            nullable=True,
+            blank="a blank value"
+        )
+        schema.items = AAZDictArg(
+            nullable=True,
+        )
+        schema.items.Element = AAZObjectArg(
+            nullable=True,
+        )
+        schema.items.Element.name = AAZStrArg()
+
+        # AAZUndefined
+        self.assertFalse(has_value(v.names))
+        v.items = assign_aaz_dict_arg(v.items, v.names, element_transformer=lambda _, name: {"name": name})
+        self.assertFalse(has_value(v.items))
+
+        v.items = {"a": {"name": "1"}}
+        v.items = assign_aaz_dict_arg(v.items, v.names, element_transformer=lambda _, name: {"name": name})
+        self.assertEqual(v.items, {"a": {"name": "1"}})
+
+        arg = schema.names.to_cmd_arg("names")
+        action = arg.type.settings["action"]
+
+        # null value
+        v = schema()
+        dest_ops = AAZArgActionOperations()
+
+        action.setup_operations(dest_ops, ["null"])
+        dest_ops.apply(v, "names")
+        self.assertEqual(v.names, None)
+
+        v.items = assign_aaz_dict_arg(v.items, v.names, element_transformer=lambda _, name: {"name": name})
+        self.assertEqual(v.items, None)
+
+        # null element value
+        v = schema()
+        dest_ops = AAZArgActionOperations()
+
+        action.setup_operations(dest_ops, ["a=null"])
+        dest_ops.apply(v, "names")
+        self.assertEqual(v.names, {'a': None})
+
+        v.items = assign_aaz_dict_arg(v.items, v.names, element_transformer=lambda _, name: {"name": name})
+        self.assertEqual(v.items, {'a': None})
+
+        # element
+        v = schema()
+        dest_ops = AAZArgActionOperations()
+
+        action.setup_operations(dest_ops, ["{a:a1,b:b2}"])
+        dest_ops.apply(v, "names")
+        self.assertEqual(v.names, {'a': 'a1', 'b': 'b2'})
+        self.assertFalse(v.names._is_patch)
+
+        v.items = assign_aaz_dict_arg(v.items, v.names, element_transformer=lambda _, name: {"name": name})
+        self.assertFalse(v.items._is_patch)
+        self.assertEqual(v.items, {'a': {"name": 'a1'}, 'b': {"name": 'b2'}})
+
+        # element with patch
+        v = schema()
+        dest_ops = AAZArgActionOperations()
+
+        action.setup_operations(dest_ops, ["a=1", "b=2", "c=3"])
+        dest_ops.apply(v, "names")
+        self.assertEqual(v.names, {'a': '1', 'b': '2', 'c': '3'})
+        self.assertTrue(v.names._is_patch)
+
+        v.items = assign_aaz_dict_arg(v.items, v.names, element_transformer=lambda _, name: {"name": name})
+        self.assertTrue(v.items._is_patch)
+        self.assertEqual(v.items, {'a': {"name": '1'}, 'b': {"name": '2'}, 'c': {"name": "3"}})
+
+
+class TestAazArgCompleter(unittest.TestCase):
+    from azure.cli.core.decorators import Completer
+
+    @staticmethod
+    @Completer
+    def custom_completer(cmd, prefix, namespace):
+        return ['a', 'b']
+
+    def test_custom_completer(self):
+        from azure.cli.core.aaz._arg import AAZStrArg, AAZArgumentsSchema, AAZUnregisteredArg
+
+        schema = AAZArgumentsSchema()
+        v = schema()
+
+        schema.foo = AAZStrArg(
+            options=['foo'],
+            nullable=True,
+            completer=self.custom_completer
+        )
+        args = {}
+        for name, field in schema._fields.items():
+            # generate command arguments from argument schema.
+            try:
+                args[name] = field.to_cmd_arg(name)
+            except AAZUnregisteredArg:
+                continue
+        self.assertEqual(args['foo'].completer, schema.foo._completer)
+        self.assertEqual(args['foo'].completer, self.custom_completer)
+
+    def test_completer_override(self):
+        from azure.cli.core.aaz._arg import (AAZResourceLocationArg, AAZArgumentsSchema, AAZUnregisteredArg,
+                                             AAZSubscriptionIdArg)
+        from azure.cli.core.commands.parameters import get_location_completion_list
+        from azure.cli.core._completers import get_subscription_id_list
+
+        schema = AAZArgumentsSchema()
+        v = schema()
+
+        schema.foo = AAZResourceLocationArg(
+            options=['foo'],
+            completer=self.custom_completer
+        )
+        schema.bar = AAZResourceLocationArg(
+            options=['bar']
+        )
+        schema.sub = AAZSubscriptionIdArg(
+            options=["--subscription-id"],
+            help="subscription id",
+            required=True,
+            id_part="subscription")
+        self.assertEqual(schema.foo._completer, self.custom_completer)
+        self.assertEqual(schema.bar._completer, get_location_completion_list)
+        self.assertEqual(schema.sub._completer, get_subscription_id_list)
+
+        args = {}
+        for name, field in schema._fields.items():
+            # generate command arguments from argument schema.
+            try:
+                args[name] = field.to_cmd_arg(name)
+            except AAZUnregisteredArg:
+                continue
+        self.assertEqual(args['foo'].completer, self.custom_completer)
+        self.assertEqual(args['bar'].completer, get_location_completion_list)
+        self.assertEqual(args['sub'].completer, get_subscription_id_list)
+        schema.bar._completer = self.custom_completer
+        new_arg = schema.bar.to_cmd_arg('bar')
+        self.assertEqual(new_arg.completer, self.custom_completer)

@@ -9,6 +9,7 @@ from unittest import mock
 
 from azure.cli.core.cloud import CloudEndpointNotSetException
 from azure.cli.core.mock import DummyCli
+from azure.cli.testsdk import LiveScenarioTest
 
 from knack.util import CLIError
 
@@ -26,10 +27,10 @@ def _get_test_cmd():
     return cmd
 
 
-class TestVMImage(unittest.TestCase):
+class VMImageLiveScenarioTest(LiveScenarioTest):
 
     def test_read_images_from_alias_doc(self):
-        from azure.cli.command_modules.vm.custom import list_vm_images
+        from azure.cli.command_modules.vm.azure_stack.custom import list_vm_images
         cmd = _get_test_cmd()
 
         # action
@@ -40,17 +41,19 @@ class TestVMImage(unittest.TestCase):
         self.assertTrue(len(win_images) > 0)
         ubuntu_image = next(i for i in images if i['publisher'] == 'Canonical')
         self.assertEqual(ubuntu_image['publisher'], 'Canonical')
-        self.assertEqual(ubuntu_image['offer'], 'UbuntuServer')
-        self.assertEqual(ubuntu_image['urnAlias'], 'UbuntuLTS')
+        self.assertEqual(ubuntu_image['offer'], '0001-com-ubuntu-server-jammy')
+        self.assertEqual(ubuntu_image['urnAlias'], 'Ubuntu2204')
         parts = ubuntu_image['urn'].split(':')
         self.assertEqual(parts[0], ubuntu_image['publisher'])
         self.assertEqual(parts[1], ubuntu_image['offer'])
         self.assertEqual(parts[2], ubuntu_image['sku'])
         self.assertEqual(parts[3], ubuntu_image['version'])
 
+
+class TestVMImage(unittest.TestCase):
     @mock.patch('azure.cli.core.cloud.get_active_cloud', autospec=True)
     def test_when_alias_doc_is_missing(self, mock_get_active_cloud):
-        from azure.cli.command_modules.vm._actions import load_images_from_aliases_doc
+        from azure.cli.command_modules.vm.azure_stack._actions import load_images_from_aliases_doc
         p = mock.PropertyMock(side_effect=CloudEndpointNotSetException(''))
         mock_cloud = mock.MagicMock()
         type(mock_cloud.endpoints).vm_image_alias_doc = p
@@ -59,8 +62,8 @@ class TestVMImage(unittest.TestCase):
         cli_ctx = DummyCli()
         cli_ctx.cloud = mock_cloud
         images = load_images_from_aliases_doc(cli_ctx)
-        self.assertEqual(images[0], {'urnAlias': 'CentOS', 'publisher': 'OpenLogic',
-                                     'offer': 'CentOS', 'sku': '7.5', 'version': 'latest',
+        self.assertEqual(images[0], {'urnAlias': 'CentOS85Gen2', 'publisher': 'OpenLogic',
+                                     'offer': 'CentOS', 'sku': '8_5-gen2', 'version': 'latest',
                                      'architecture': 'x64'})
 
 

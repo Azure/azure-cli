@@ -19,20 +19,18 @@ def update_nat_gateway_profile(managed_outbound_ip_count, idle_timeout, profile,
     """parse and update an existing NAT gateway profile"""
     if not is_nat_gateway_profile_provided(managed_outbound_ip_count, idle_timeout):
         return profile
-
+    if not profile:
+        profile = models.ManagedClusterNATGatewayProfile()
     return configure_nat_gateway_profile(managed_outbound_ip_count, idle_timeout, profile, models)
 
 
 def is_nat_gateway_profile_provided(managed_outbound_ip_count, idle_timeout):
-    return any([managed_outbound_ip_count, idle_timeout])
+    return any([managed_outbound_ip_count is not None, idle_timeout])
 
 
 def configure_nat_gateway_profile(managed_outbound_ip_count, idle_timeout, profile, models: SimpleNamespace):
     """configure a NAT Gateway with customer supplied values"""
-    if not profile:
-        return profile
-
-    if managed_outbound_ip_count:
+    if managed_outbound_ip_count is not None:
         ManagedClusterManagedOutboundIPProfile = models.ManagedClusterManagedOutboundIPProfile
         profile.managed_outbound_ip_profile = ManagedClusterManagedOutboundIPProfile(
             count=managed_outbound_ip_count

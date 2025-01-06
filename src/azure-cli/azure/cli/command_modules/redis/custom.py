@@ -6,6 +6,7 @@
 from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.command_modules.redis._client_factory import cf_redis
+from azure.cli.core.util import sdk_no_wait
 
 logger = get_logger(__name__)
 
@@ -14,14 +15,19 @@ allowed_p_family_sizes = ['p1', 'p2', 'p3', 'p4', 'p5']
 wrong_vmsize_error = CLIError('Invalid VM size. Example for Valid values: '
                               'For Standard Sku : (C0, C1, C2, C3, C4, C5, C6), '
                               'for Premium Sku : (P1, P2, P3, P4, P5)')
+allowed_auth_methods = ['SAS', 'ManagedIdentity']
+
 
 # region Custom Commands
 
 
 # pylint: disable=unused-argument
-def cli_redis_export(cmd, client, resource_group_name, name, prefix, container, file_format=None):
+def cli_redis_export(cmd, client, resource_group_name, name, prefix, container,
+                     preferred_data_archive_auth_method=None, file_format=None, storage_subscription_id=None):
     from azure.mgmt.redis.models import ExportRDBParameters
-    parameters = ExportRDBParameters(prefix=prefix, container=container, format=file_format)
+    parameters = ExportRDBParameters(prefix=prefix, container=container, format=file_format,
+                                     preferred_data_archive_auth_method=preferred_data_archive_auth_method,
+                                     storage_subscription_id=storage_subscription_id)
     return client.begin_export_data(resource_group_name, name, parameters)
 
 
@@ -66,10 +72,20 @@ def cli_redis_update(cmd, instance, sku=None, vm_size=None):
         shard_count=instance.shard_count,
         minimum_tls_version=instance.minimum_tls_version,
         redis_version=instance.redis_version,
+        public_network_access=instance.public_network_access,
         sku=instance.sku,
-        tags=instance.tags
+        tags=instance.tags,
+        update_channel=instance.update_channel,
+        disable_access_key_authentication=instance.disable_access_key_authentication
     )
     return update_params
+
+
+def custom_update_setter(client, resource_group_name, name, parameters, no_wait=True):
+    if no_wait is None:
+        no_wait = True
+    # Custom update setter is used to match behavior from when update was not a LRO
+    return sdk_no_wait(no_wait, client.begin_update, resource_group_name, name, parameters)
 
 
 # pylint: disable=unused-argument
@@ -79,9 +95,10 @@ def cli_redis_create(cmd, client,
                      redis_configuration=None, enable_non_ssl_port=None, tenant_settings=None,
                      shard_count=None, minimum_tls_version=None, subnet_id=None, static_ip=None,
                      zones=None, replicas_per_master=None, redis_version=None, mi_system_assigned=None,
-                     mi_user_assigned=None):
+                     mi_user_assigned=None, update_channel=None, disable_access_key_authentication=None):
     # pylint:disable=line-too-long
-    if ((sku.lower() in ['standard', 'basic'] and vm_size.lower() not in allowed_c_family_sizes) or (sku.lower() in ['premium'] and vm_size.lower() not in allowed_p_family_sizes)):
+    if ((sku.lower() in ['standard', 'basic'] and vm_size.lower() not in allowed_c_family_sizes) or (
+            sku.lower() in ['premium'] and vm_size.lower() not in allowed_p_family_sizes)):
         raise wrong_vmsize_error
     tenant_settings_in_json = {}
     if tenant_settings is not None:
@@ -107,7 +124,10 @@ def cli_redis_create(cmd, client,
         redis_version=redis_version,
         identity=identity,
         public_network_access=None,
-        tags=tags)
+        tags=tags,
+        update_channel=update_channel,
+        disable_access_key_authentication=disable_access_key_authentication
+    )
     return client.begin_create(resource_group_name, name, params)
 
 
@@ -123,7 +143,7 @@ def get_key_value_pair(string):
 def cli_redis_create_server_link(cmd, client, resource_group_name, name, server_to_link, replication_role):
     redis_client = cf_redis(cmd.cli_ctx)
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import is_valid_resource_id, resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id, resource_id
     if not is_valid_resource_id(server_to_link):
         server_to_link = resource_id(
             subscription=get_subscription_id(cmd.cli_ctx),
@@ -162,7 +182,7 @@ def cli_redis_list_cache(client, resource_group_name=None):
 
 
 def get_cache_from_resource_id(client, cache_resource_id):
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
     id_comps = parse_resource_id(cache_resource_id)
     return client.get(id_comps['resource_group'], id_comps['name'])
 
@@ -178,9 +198,12 @@ def cli_redis_regenerate_key(client, resource_group_name, name, key_type):
     return client.regenerate_key(resource_group_name, name, RedisRegenerateKeyParameters(key_type=key_type))
 
 
-def cli_redis_import(client, resource_group_name, name, files, file_format=None):
+def cli_redis_import(client, resource_group_name, name, files,
+                     preferred_data_archive_auth_method=None, file_format=None, storage_subscription_id=None):
     from azure.mgmt.redis.models import ImportRDBParameters
-    return client.begin_import_data(resource_group_name, name, ImportRDBParameters(files=files, format=file_format))
+    return client.begin_import_data(resource_group_name, name, ImportRDBParameters(files=files, format=file_format,
+                                    preferred_data_archive_auth_method=preferred_data_archive_auth_method,
+                                    storage_subscription_id=storage_subscription_id))
 
 
 def cli_redis_force_reboot(client, resource_group_name, name, reboot_type, shard_id=None):
@@ -213,8 +236,10 @@ def cli_redis_identity_assign(client, resource_group_name, cache_name, mi_system
             for user_id in old_user_identity:
                 mi_user_assigned.append(user_id)
     update_params = RedisUpdateParameters(
-        identity=build_identity(mi_system_assigned, mi_user_assigned))
-    redis_resourse = client.update(resource_group_name, cache_name, update_params)
+        identity=build_identity(mi_system_assigned, mi_user_assigned),
+        public_network_access=None
+    )
+    redis_resourse = client.begin_update(resource_group_name, cache_name, update_params).result()
     return redis_resourse.identity
 
 
@@ -244,9 +269,10 @@ def cli_redis_identity_remove(client, resource_group_name, cache_name, mi_system
         if len(user_assigned) == 0:
             user_assigned = None
     update_params = RedisUpdateParameters(
-        identity=build_identity(system_assigned, user_assigned)
+        identity=build_identity(system_assigned, user_assigned),
+        public_network_access=None
     )
-    updated_resourse = client.update(resource_group_name, cache_name, update_params)
+    updated_resourse = client.begin_update(resource_group_name, cache_name, update_params).result()
     if updated_resourse.identity is None:
         updated_resourse.identity = none_identity
     return updated_resourse.identity
@@ -267,5 +293,20 @@ def build_identity(mi_system_assigned, mi_user_assigned):
     return ManagedServiceIdentity(
         type=identityType.value,
         user_assigned_identities=userIdentities)
+
+
+def cli_redis_access_policy_create(client, resource_group_name, cache_name, access_policy_name, permissions):
+    from azure.mgmt.redis.models import RedisCacheAccessPolicy
+    param = RedisCacheAccessPolicy(permissions=permissions)
+    return client.begin_create_update(resource_group_name, cache_name, access_policy_name, param)
+
+
+def cli_redis_access_policy_assignment_create(client, resource_group_name, cache_name, access_policy_assignment_name,
+                                              access_policy_name, object_id, object_id_alias):
+    from azure.mgmt.redis.models import RedisCacheAccessPolicyAssignment
+    param = RedisCacheAccessPolicyAssignment(object_id=object_id,
+                                             object_id_alias=object_id_alias,
+                                             access_policy_name=access_policy_name)
+    return client.begin_create_update(resource_group_name, cache_name, access_policy_assignment_name, param)
 
 # endregion

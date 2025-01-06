@@ -30,9 +30,9 @@ logger = get_logger(__name__)
 EXTENSION_REFERENCE = ("If the command is from an extension, "
                        "please make sure the corresponding extension is installed. "
                        "To learn more about extensions, please visit "
-                       "'https://docs.microsoft.com/cli/azure/azure-cli-extensions-overview'")
+                       "'https://learn.microsoft.com/cli/azure/azure-cli-extensions-overview'")
 
-OVERVIEW_REFERENCE = ("https://aka.ms/cli_ref")
+OVERVIEW_REFERENCE = "https://aka.ms/cli_ref"
 
 
 class IncorrectUsageError(CLIError):
@@ -54,10 +54,10 @@ class AzCompletionFinder(argcomplete.CompletionFinder):
                                          cword_prequote=cword_prequote,
                                          last_wordbreak_pos=last_wordbreak_pos)
 
-        return external_completions + super(AzCompletionFinder, self)._get_completions(comp_words,
-                                                                                       cword_prefix,
-                                                                                       cword_prequote,
-                                                                                       last_wordbreak_pos)
+        return external_completions + super()._get_completions(comp_words,
+                                                               cword_prefix,
+                                                               cword_prequote,
+                                                               last_wordbreak_pos)
 
 
 class AzCliCommandParser(CLICommandParser):
@@ -70,7 +70,7 @@ class AzCliCommandParser(CLICommandParser):
         self._suggestion_msg = []
         self.subparser_map = {}
         self.specified_arguments = []
-        super(AzCliCommandParser, self).__init__(cli_ctx, cli_help=cli_help, **kwargs)
+        super().__init__(cli_ctx, cli_help=cli_help, **kwargs)
 
     def load_command_table(self, command_loader):
         """Load a command table into our parser."""
@@ -90,9 +90,6 @@ class AzCliCommandParser(CLICommandParser):
                 continue
 
             command_verb = command_name.split()[-1]
-            # To work around http://bugs.python.org/issue9253, we artificially add any new
-            # parsers we add to the "choices" section of the subparser.
-            subparser.choices[command_verb] = command_verb
 
             # inject command_module designer's help formatter -- default is HelpFormatter
             fc = metadata.formatter_class or argparse.HelpFormatter
@@ -192,7 +189,7 @@ class AzCliCommandParser(CLICommandParser):
             extension_name=extension_name,
             extension_version=extension_version)
         telemetry.set_success(summary='show help')
-        super(AzCliCommandParser, self).format_help()
+        super().format_help()
 
     def get_examples(self, command):
         if not self.cli_help:
@@ -272,7 +269,7 @@ class AzCliCommandParser(CLICommandParser):
         return command, self._raw_arguments, extension
 
     def _get_values(self, action, arg_strings):
-        value = super(AzCliCommandParser, self)._get_values(action, arg_strings)
+        value = super()._get_values(action, arg_strings)
         if action.dest and isinstance(action.dest, str) and not action.dest.startswith('_'):
             self.specified_arguments.append(action.dest)
         return value
@@ -308,7 +305,7 @@ class AzCliCommandParser(CLICommandParser):
                 if candidates:
                     # use the most likely candidate to replace the misspelled command
                     args_inferred = [item if item != value else candidates[0] for item in args]
-                    command_name_inferred = ' '.join(args_inferred).split('-')[0]
+                    command_name_inferred = ' '.join(args_inferred).split('-', maxsplit=1)[0]
             else:
                 # `command_source` indicates command values have been parsed, value is an argument
                 parameter = action.option_strings[0] if action.option_strings else action.dest

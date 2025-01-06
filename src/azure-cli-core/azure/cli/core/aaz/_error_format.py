@@ -52,12 +52,12 @@ class AAZODataV4Format:
 
         # details is recursive of this very format
         self.details = []
-        for detail_node in self.get_object_prop(json_object, cls.DETAILS_LABEL, default=[]):
+        for detail_node in self.get_object_prop(json_object, cls.DETAILS_LABEL) or []:
             try:
                 self.details.append(self.__class__(detail_node))
             except Exception:  # pylint: disable=broad-except
                 pass
-        self.innererror = self.get_object_prop(json_object, cls.INNERERROR_LABEL, default={})
+        self.innererror = self.get_object_prop(json_object, cls.INNERERROR_LABEL) or {}
 
     @property
     def error(self):

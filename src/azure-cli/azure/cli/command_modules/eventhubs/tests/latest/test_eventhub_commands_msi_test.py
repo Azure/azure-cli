@@ -65,7 +65,7 @@ class EHNamespaceMSITesting(ScenarioTest):
 
         #5
         namespace = self.cmd('eventhubs namespace identity remove --resource-group {rg} --namespace-name {namespacename} --system-assigned').get_output_in_json()
-        self.assertEqual(namespace['identity'], None)
+        self.assertEqual('identity' in namespace, False)
 
         #1
         namespace = self.cmd('eventhubs namespace identity assign --resource-group {rg} --namespace-name {namespacename} --system-assigned').get_output_in_json()
@@ -79,7 +79,7 @@ class EHNamespaceMSITesting(ScenarioTest):
 
         #9
         namespace = self.cmd('eventhubs namespace identity remove --resource-group {rg} --namespace-name {namespacename} --system-assigned --user-assigned {id1} {id2}').get_output_in_json()
-        self.assertEqual(namespace['identity'], None)
+        self.assertEqual('identity' in namespace, False)
 
         #3
         namespace = self.cmd('eventhubs namespace identity assign --resource-group {rg} --namespace-name {namespacename} --user-assigned {id1} {id2} {id3}').get_output_in_json()
@@ -111,7 +111,7 @@ class EHNamespaceMSITesting(ScenarioTest):
 
         #7
         namespace = self.cmd('eventhubs namespace identity remove --resource-group {rg} --namespace-name {namespacename} --user-assigned {id1}').get_output_in_json()
-        self.assertEqual(namespace['identity'], None)
+        self.assertEqual('identity' in namespace, False)
 
         # Create Namespace
         #self.cmd('eventhubs namespace create --resource-group {rg} --name {namespacename1} --location {loc} --tags {tags} --sku {sku} --enable-auto-inflate {isautoinflateenabled} --maximum-throughput-units {maximumthroughputunits} --cluster-arm-id {clusterarmid}')

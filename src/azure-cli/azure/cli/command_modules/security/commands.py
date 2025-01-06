@@ -7,8 +7,6 @@ from azure.cli.core.commands import CliCommandType
 from ._client_factory import (cf_security_tasks,
                               cf_security_alerts,
                               cf_security_alerts_suppression_rule,
-                              cf_security_settings,
-                              cf_security_contacts,
                               cf_security_auto_provisioning_settings,
                               cf_security_discovered_security_solutions,
                               cf_security_external_security_solutions,
@@ -37,7 +35,9 @@ from ._client_factory import (cf_security_tasks,
                               cf_security_secure_scores,
                               cf_security_secure_score_controls,
                               cf_security_secure_score_control_definitions,
-                              cf_security_automations)
+                              cf_security_automations,
+                              cf_security_security_solutions,
+                              cf_security_security_solutions_reference_data)
 
 
 # pylint: disable=line-too-long
@@ -75,6 +75,11 @@ def load_command_table(self, _):
         client_factory=cf_security_regulatory_compliance_assessment
     )
 
+    security_security_solutions_reference_data_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.security.operations#SecuritySolutionsReferenceDataOperations.{}',
+        client_factory=cf_security_security_solutions_reference_data
+    )
+
     security_tasks_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.security.operations#TasksOperations.{}',
         client_factory=cf_security_tasks,
@@ -91,18 +96,6 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.security.operations#AlertsSuppressionRulesOperations.{}',
         client_factory=cf_security_alerts_suppression_rule,
         operation_group='security_alerts_suppression_rule'
-    )
-
-    security_settings_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.security.operations#SettingsOperations.{}',
-        client_factory=cf_security_settings,
-        operation_group='security_settings'
-    )
-
-    security_contacts_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.security.operations#SecurityContactsOperations.{}',
-        client_factory=cf_security_contacts,
-        operation_group='security_contacts'
     )
 
     security_auto_provisioning_settings_sdk = CliCommandType(
@@ -232,6 +225,11 @@ def load_command_table(self, _):
         operation_group='security_automations'
     )
 
+    security_solutions_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.security.operations#SecuritySolutionsOperations.{}',
+        client_factory=cf_security_security_solutions
+    )
+
     with self.command_group('security secure-scores',
                             security_secure_scores_sdk,
                             client_factory=cf_security_secure_scores) as g:
@@ -254,6 +252,11 @@ def load_command_table(self, _):
                             client_factory=cf_security_regulatory_compliance_standards) as g:
         g.custom_command('list', 'list_regulatory_compliance_standards')
         g.custom_show_command('show', 'get_regulatory_compliance_standard')
+
+    with self.command_group('security security-solutions-reference-data',
+                            security_security_solutions_reference_data_sdk,
+                            client_factory=cf_security_security_solutions_reference_data) as g:
+        g.custom_command('list', 'list_security_solutions_reference_data')
 
     with self.command_group('security regulatory-compliance-controls',
                             security_regulatory_compliance_controls_sdk,
@@ -317,21 +320,6 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_security_alerts')
         g.custom_show_command('show', 'get_security_alert')
         g.custom_command('update', 'update_security_alert')
-
-    with self.command_group('security setting',
-                            security_settings_sdk,
-                            client_factory=cf_security_settings) as g:
-        g.custom_command('list', 'list_security_settings')
-        g.custom_show_command('show', 'get_security_setting')
-        g.custom_command('update', 'update_security_setting')
-
-    with self.command_group('security contact',
-                            security_contacts_sdk,
-                            client_factory=cf_security_contacts) as g:
-        g.custom_command('list', 'list_security_contacts')
-        g.custom_show_command('show', 'get_security_contact')
-        g.custom_command('create', 'create_security_contact')
-        g.custom_command('delete', 'delete_security_contact')
 
     with self.command_group('security auto-provisioning-setting',
                             security_auto_provisioning_settings_sdk,
@@ -485,15 +473,22 @@ def load_command_table(self, _):
     with self.command_group('security automation-action-logic-app',
                             security_automations_sdk,
                             client_factory=cf_security_automations) as g:
+
         g.custom_command('create', 'create_security_automation_action_logic_app')
     with self.command_group('security automation-action-event-hub',
                             security_automations_sdk,
                             client_factory=cf_security_automations) as g:
+
         g.custom_command('create', 'create_security_automation_action_event_hub')
     with self.command_group('security automation-action-workspace',
                             security_automations_sdk,
                             client_factory=cf_security_automations) as g:
         g.custom_command('create', 'create_security_automation_action_workspace')
+
+    with self.command_group('security security-solutions',
+                            security_solutions_sdk,
+                            client_factory=cf_security_security_solutions) as g:
+        g.custom_command('list', 'list_security_security_solutions')
 
     with self.command_group('security'):
         pass

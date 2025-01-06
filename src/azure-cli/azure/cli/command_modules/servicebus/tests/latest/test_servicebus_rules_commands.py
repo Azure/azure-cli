@@ -83,7 +83,7 @@ class SBRulesCRUDScenarioTest(ScenarioTest):
 
         # Create Rules
         rule = self.cmd(
-            'servicebus topic subscription rule create --resource-group {rg} --namespace-name {namespacename} --topic-name {topicname} --subscription-name {subscriptionname} --name {rulename} --filter-type CorrelationFilter --correlation-id r00012d --label myvalue --message-id mid --reply-to reply --session-id ids --reply-to-session-id hi --content-type hi --to hi',
+            'servicebus topic subscription rule create --resource-group {rg} --namespace-name {namespacename} --topic-name {topicname} --subscription-name {subscriptionname} --name {rulename} --filter-type CorrelationFilter --correlation-id r00012d --label myvalue --message-id mid --reply-to reply --session-id ids --reply-to-session-id hi --content-type hi --to hi --correlation-filter-property key1=value1',
             checks=[self.check('name', '{rulename}')]).get_output_in_json()
         self.assertEqual(rule['filterType'], 'CorrelationFilter')
         self.assertEqual(rule['correlationFilter']['contentType'], 'hi')
@@ -94,6 +94,7 @@ class SBRulesCRUDScenarioTest(ScenarioTest):
         self.assertEqual(rule['correlationFilter']['replyToSessionId'], 'hi')
         self.assertEqual(rule['correlationFilter']['sessionId'], 'ids')
         self.assertEqual(rule['correlationFilter']['to'], 'hi')
+        self.assertEqual(rule['correlationFilter']['properties'], {'key1': 'value1'})
 
         # Get Created Rules
         self.cmd(

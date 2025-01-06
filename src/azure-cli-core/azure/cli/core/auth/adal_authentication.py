@@ -7,7 +7,7 @@ import requests
 from knack.log import get_logger
 from msrestazure.azure_active_directory import MSIAuthentication
 
-from .util import _normalize_scopes, scopes_to_resource, AccessToken
+from .util import scopes_to_resource, AccessToken
 
 logger = get_logger(__name__)
 
@@ -24,7 +24,7 @@ class MSIAuthenticationWrapper(MSIAuthentication):
                 # Use MSAL to get VM SSH certificate
                 import msal
                 from .util import check_result, build_sdk_access_token
-                from .identity import AZURE_CLI_CLIENT_ID
+                from .constants import AZURE_CLI_CLIENT_ID
                 app = msal.PublicClientApplication(
                     AZURE_CLI_CLIENT_ID,  # Use a real client_id, so that cache would work
                     # TODO: This PoC does not currently maintain a token cache;
@@ -39,7 +39,7 @@ class MSIAuthenticationWrapper(MSIAuthentication):
             raise AuthenticationError("VM SSH currently doesn't support managed identity.")
 
         # Use msrestazure to get access token
-        resource = scopes_to_resource(_normalize_scopes(scopes))
+        resource = scopes_to_resource(scopes)
         if resource:
             # If available, use resource provided by SDK
             self.resource = resource
@@ -97,6 +97,12 @@ class MSIAuthenticationWrapper(MSIAuthentication):
     def signed_session(self, session=None):
         logger.debug("MSIAuthenticationWrapper.signed_session invoked by Track 1 SDK")
         super().signed_session(session)
+
+    def get_auxiliary_tokens(self, *scopes, **kwargs):  # pylint:disable=no-self-use,unused-argument
+        """This method is added to align with CredentialAdaptor.get_auxiliary_tokens
+        Since managed identity belongs to a single tenant and currently doesn't support cross-tenant authentication,
+        simply return None."""
+        return None
 
 
 def _normalize_expires_on(expires_on):

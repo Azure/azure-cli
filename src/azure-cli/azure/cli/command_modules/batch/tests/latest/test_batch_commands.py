@@ -16,7 +16,7 @@ from azure.cli.command_modules.batch import _validators
 from azure.cli.command_modules.batch import _command_type
 
 
-class TestObj(object):  # pylint: disable=too-few-public-methods
+class TestObj:  # pylint: disable=too-few-public-methods
     pass
 
 
@@ -24,7 +24,7 @@ class TestBatchValidators(unittest.TestCase):
     # pylint: disable=protected-access
 
     def __init__(self, methodName):
-        super(TestBatchValidators, self).__init__(methodName)
+        super().__init__(methodName)
 
     def test_batch_datetime_format(self):
         obj = _validators.datetime_format("2017-01-24T15:47:24Z")
@@ -49,6 +49,19 @@ class TestBatchValidators(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             _validators.metadata_item_format("name=value=other")
+    
+    def test_batch_resource_tag_format(self):
+        resource_tag = _validators.resource_tag_format("name=value")
+        self.assertEqual(resource_tag, {'name': 'value'})
+
+        with self.assertRaises(ValueError):
+            _validators.resource_tag_format("test")
+
+        with self.assertRaises(ValueError):
+            _validators.resource_tag_format("name=value=other")
+
+        with self.assertRaises(ValueError):
+            _validators.resource_tag_format("")
 
     def test_batch_environment_setting_format(self):
         env = _validators.environment_setting_format("name=value")
@@ -475,7 +488,7 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
             'azure.batch.operations._job_schedule_operations#JobScheduleOperations.add',
             operations._job_schedule_operations.JobScheduleOperations.add,
             client_factory=get_client, flatten=4)
-        return super(TestBatchLoader, self).setUp()
+        return super().setUp()
 
     def test_batch_build_parameters(self):
         kwargs = {
@@ -554,13 +567,13 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
         attrs = list(self.command_job._get_attrs(models.JobManagerTask, 'job.job_manager_task'))
         self.assertEqual(len(attrs), 7)
         attrs = list(self.command_job._get_attrs(models.JobAddParameter, 'job'))
-        self.assertEqual(len(attrs), 9)
+        self.assertEqual(len(attrs), 10)
 
     def test_batch_load_arguments(self):
         # pylint: disable=too-many-statements
         handler = operations._pool_operations.PoolOperations.add
         args = list(self.command_pool._load_transformed_arguments(handler))
-        self.assertEqual(len(args), 30)
+        self.assertEqual(len(args), 50)
         self.assertFalse('yes' in [a for a, _ in args])
         self.assertTrue('json_file' in [a for a, _ in args])
         self.assertFalse('destination' in [a for a, _ in args])

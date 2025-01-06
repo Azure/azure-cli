@@ -5,7 +5,7 @@
 
 import collections
 
-from msrestazure.tools import parse_resource_id
+from azure.mgmt.core.tools import parse_resource_id
 
 
 def aro_list_table_format(results):
@@ -24,4 +24,14 @@ def aro_show_table_format(result):
         ProvisioningState=result['provisioningState'],
         WorkerCount=sum(wp['count'] or 0 for wp in worker_profiles),
         URL=result['consoleProfile']['url'],
+    )
+
+
+def aro_version_table_format(result):
+    return [aro_build_version_table(r) for r in result]
+
+
+def aro_build_version_table(result):
+    return collections.OrderedDict(
+        Version=result
     )

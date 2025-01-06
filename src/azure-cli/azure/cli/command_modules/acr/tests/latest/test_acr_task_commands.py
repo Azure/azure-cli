@@ -18,7 +18,7 @@ class AcrTaskCommandsTests(ScenarioTest):
             'rg_loc': 'westus',
             'sku': 'Standard',
             'no_context': '/dev/null',
-            'context': 'https://github.com/SteveLasker/node-helloworld',
+            'context': 'https://github.com/Azure-Samples/acr-build-helloworld-node',
             'file': 'Dockerfile',
             'image': 'testtask:v1',
             'existing_image': 'bash',
@@ -109,6 +109,9 @@ class AcrTaskCommandsTests(ScenarioTest):
         # Update credential for the task
         self.cmd('acr task credential update -n {task_name} -r {registry_name} --login-server {loginServer} -u testuser -p random',
                  checks=[self.check('{loginServer}', None)])
+
+        # Remove credential for the task
+        self.cmd('acr task credential remove -n {task_name} -r {registry_name} --login-server {loginServer}')
 
         # test task delete
         self.cmd('acr task delete -n {task_name} -r {registry_name} -y')

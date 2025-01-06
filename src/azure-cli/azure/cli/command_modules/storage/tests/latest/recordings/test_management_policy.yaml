@@ -13,21 +13,21 @@ interactions:
       ParameterSetName:
       - --enable-last-access-tracking -n -g
       User-Agent:
-      - AZURECLI/2.35.0 azsdk-python-azure-mgmt-storage/20.0.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.61.0 azsdk-python-core/1.28.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default?api-version=2021-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default?api-version=2023-05-01
   response:
     body:
-      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default","name":"default","type":"Microsoft.Storage/storageAccounts/blobServices","properties":{"cors":{"corsRules":[]},"deleteRetentionPolicy":{"enabled":false}}}'
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default","name":"default","type":"Microsoft.Storage/storageAccounts/blobServices","properties":{"cors":{"corsRules":[]},"deleteRetentionPolicy":{"allowPermanentDelete":false,"enabled":false}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '373'
+      - '402'
       content-type:
       - application/json
       date:
-      - Mon, 11 Apr 2022 13:03:15 GMT
+      - Wed, 19 Jun 2024 10:40:26 GMT
       expires:
       - '-1'
       pragma:
@@ -36,18 +36,19 @@ interactions:
       - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/f8c1c476-010c-4c8a-bb59-d3bf1a467ebe
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3748'
     status:
       code: 200
       message: OK
 - request:
     body: '{"properties": {"cors": {"corsRules": []}, "deleteRetentionPolicy": {"enabled":
-      false}, "lastAccessTimeTrackingPolicy": {"enable": true}}}'
+      false, "allowPermanentDelete": false}, "lastAccessTimeTrackingPolicy": {"enable":
+      true}}}'
     headers:
       Accept:
       - application/json
@@ -58,27 +59,27 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '138'
+      - '169'
       Content-Type:
       - application/json
       ParameterSetName:
       - --enable-last-access-tracking -n -g
       User-Agent:
-      - AZURECLI/2.35.0 azsdk-python-azure-mgmt-storage/20.0.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.61.0 azsdk-python-core/1.28.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default?api-version=2021-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default?api-version=2023-05-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default","name":"default","type":"Microsoft.Storage/storageAccounts/blobServices","properties":{"lastAccessTimeTrackingPolicy":{"enable":true,"name":"AccessTimeTracking","trackingGranularityInDays":1,"blobType":["blockBlob"]},"cors":{"corsRules":[]},"deleteRetentionPolicy":{"enabled":false}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default","name":"default","type":"Microsoft.Storage/storageAccounts/blobServices","properties":{"lastAccessTimeTrackingPolicy":{"enable":true,"name":"AccessTimeTracking","trackingGranularityInDays":1,"blobType":["blockBlob"]},"cors":{"corsRules":[]},"deleteRetentionPolicy":{"allowPermanentDelete":false,"enabled":false}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '455'
+      - '484'
       content-type:
       - application/json
       date:
-      - Mon, 11 Apr 2022 13:03:17 GMT
+      - Wed, 19 Jun 2024 10:40:28 GMT
       expires:
       - '-1'
       pragma:
@@ -87,14 +88,14 @@ interactions:
       - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/002f7c79-c9f6-4302-9cf8-b3e19212134d
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '199'
     status:
       code: 200
       message: OK
@@ -123,12 +124,12 @@ interactions:
       ParameterSetName:
       - --account-name -g --policy
       User-Agent:
-      - AZURECLI/2.35.0 azsdk-python-azure-mgmt-storage/20.0.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.61.0 azsdk-python-core/1.28.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/managementPolicies/default?api-version=2021-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/managementPolicies/default?api-version=2023-05-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/managementPolicies/default","name":"DefaultManagementPolicy","type":"Microsoft.Storage/storageAccounts/managementPolicies","properties":{"policy":{"rules":[{"enabled":true,"name":"olcmtest","type":"Lifecycle","definition":{"actions":{"baseBlob":{"tierToCool":{"daysAfterLastAccessTimeGreaterThan":30.0},"tierToArchive":{"daysAfterModificationGreaterThan":90.0},"delete":{"daysAfterModificationGreaterThan":1000.0}},"snapshot":{"tierToCool":{"daysAfterCreationGreaterThan":30.0},"tierToArchive":{"daysAfterCreationGreaterThan":90.0},"delete":{"daysAfterCreationGreaterThan":1000.0}},"version":{"tierToCool":{"daysAfterCreationGreaterThan":30.0},"tierToArchive":{"daysAfterCreationGreaterThan":90.0},"delete":{"daysAfterCreationGreaterThan":1000.0}}},"filters":{"blobTypes":["blockBlob"],"prefixMatch":["olcmtestcontainer1"]}}}]},"lastModifiedTime":"2022-04-11T13:03:18.5974748Z"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/managementPolicies/default","name":"DefaultManagementPolicy","type":"Microsoft.Storage/storageAccounts/managementPolicies","properties":{"policy":{"rules":[{"enabled":true,"name":"olcmtest","type":"Lifecycle","definition":{"actions":{"version":{"tierToCool":{"daysAfterCreationGreaterThan":30.0},"tierToArchive":{"daysAfterCreationGreaterThan":90.0},"delete":{"daysAfterCreationGreaterThan":1000.0}},"baseBlob":{"tierToCool":{"daysAfterLastAccessTimeGreaterThan":30.0},"tierToArchive":{"daysAfterModificationGreaterThan":90.0},"delete":{"daysAfterModificationGreaterThan":1000.0}},"snapshot":{"tierToCool":{"daysAfterCreationGreaterThan":30.0},"tierToArchive":{"daysAfterCreationGreaterThan":90.0},"delete":{"daysAfterCreationGreaterThan":1000.0}}},"filters":{"blobTypes":["blockBlob"],"prefixMatch":["olcmtestcontainer1"]}}}]},"lastModifiedTime":"2024-06-19T10:40:31.0714783Z"}}'
     headers:
       cache-control:
       - no-cache
@@ -137,7 +138,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 11 Apr 2022 13:03:18 GMT
+      - Wed, 19 Jun 2024 10:40:31 GMT
       expires:
       - '-1'
       pragma:
@@ -146,14 +147,14 @@ interactions:
       - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/f5c14601-8794-4de5-a94e-fe7cee3bbf8d
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
+      - '199'
     status:
       code: 200
       message: OK
@@ -171,12 +172,12 @@ interactions:
       ParameterSetName:
       - --account-name -g --set
       User-Agent:
-      - AZURECLI/2.35.0 azsdk-python-azure-mgmt-storage/20.0.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.61.0 azsdk-python-core/1.28.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/managementPolicies/default?api-version=2021-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/managementPolicies/default?api-version=2023-05-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/managementPolicies/default","name":"DefaultManagementPolicy","type":"Microsoft.Storage/storageAccounts/managementPolicies","properties":{"policy":{"rules":[{"enabled":true,"name":"olcmtest","type":"Lifecycle","definition":{"actions":{"baseBlob":{"tierToCool":{"daysAfterLastAccessTimeGreaterThan":30.0},"tierToArchive":{"daysAfterModificationGreaterThan":90.0},"delete":{"daysAfterModificationGreaterThan":1000.0}},"snapshot":{"tierToCool":{"daysAfterCreationGreaterThan":30.0},"tierToArchive":{"daysAfterCreationGreaterThan":90.0},"delete":{"daysAfterCreationGreaterThan":1000.0}},"version":{"tierToCool":{"daysAfterCreationGreaterThan":30.0},"tierToArchive":{"daysAfterCreationGreaterThan":90.0},"delete":{"daysAfterCreationGreaterThan":1000.0}}},"filters":{"blobTypes":["blockBlob"],"prefixMatch":["olcmtestcontainer1"]}}}]},"lastModifiedTime":"2022-04-11T13:03:18.5974748Z"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/managementPolicies/default","name":"DefaultManagementPolicy","type":"Microsoft.Storage/storageAccounts/managementPolicies","properties":{"policy":{"rules":[{"enabled":true,"name":"olcmtest","type":"Lifecycle","definition":{"actions":{"version":{"tierToCool":{"daysAfterCreationGreaterThan":30.0},"tierToArchive":{"daysAfterCreationGreaterThan":90.0},"delete":{"daysAfterCreationGreaterThan":1000.0}},"baseBlob":{"tierToCool":{"daysAfterLastAccessTimeGreaterThan":30.0},"tierToArchive":{"daysAfterModificationGreaterThan":90.0},"delete":{"daysAfterModificationGreaterThan":1000.0}},"snapshot":{"tierToCool":{"daysAfterCreationGreaterThan":30.0},"tierToArchive":{"daysAfterCreationGreaterThan":90.0},"delete":{"daysAfterCreationGreaterThan":1000.0}}},"filters":{"blobTypes":["blockBlob"],"prefixMatch":["olcmtestcontainer1"]}}}]},"lastModifiedTime":"2024-06-19T10:40:31.0714783Z"}}'
     headers:
       cache-control:
       - no-cache
@@ -185,7 +186,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 11 Apr 2022 13:03:19 GMT
+      - Wed, 19 Jun 2024 10:40:32 GMT
       expires:
       - '-1'
       pragma:
@@ -194,12 +195,12 @@ interactions:
       - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/ff04d532-9901-4d70-a1e2-ae77cfb26d21
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
     status:
       code: 200
       message: OK
@@ -228,12 +229,12 @@ interactions:
       ParameterSetName:
       - --account-name -g --set
       User-Agent:
-      - AZURECLI/2.35.0 azsdk-python-azure-mgmt-storage/20.0.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.61.0 azsdk-python-core/1.28.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/managementPolicies/default?api-version=2021-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/managementPolicies/default?api-version=2023-05-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/managementPolicies/default","name":"DefaultManagementPolicy","type":"Microsoft.Storage/storageAccounts/managementPolicies","properties":{"policy":{"rules":[{"enabled":true,"name":"newname","type":"Lifecycle","definition":{"actions":{"baseBlob":{"tierToCool":{"daysAfterLastAccessTimeGreaterThan":30.0},"tierToArchive":{"daysAfterModificationGreaterThan":90.0},"delete":{"daysAfterModificationGreaterThan":1000.0}},"snapshot":{"tierToCool":{"daysAfterCreationGreaterThan":30.0},"tierToArchive":{"daysAfterCreationGreaterThan":90.0},"delete":{"daysAfterCreationGreaterThan":1000.0}},"version":{"tierToCool":{"daysAfterCreationGreaterThan":30.0},"tierToArchive":{"daysAfterCreationGreaterThan":90.0},"delete":{"daysAfterCreationGreaterThan":1000.0}}},"filters":{"blobTypes":["blockBlob"],"prefixMatch":["olcmtestcontainer1"]}}}]},"lastModifiedTime":"2022-04-11T13:03:20.2845092Z"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/managementPolicies/default","name":"DefaultManagementPolicy","type":"Microsoft.Storage/storageAccounts/managementPolicies","properties":{"policy":{"rules":[{"enabled":true,"name":"newname","type":"Lifecycle","definition":{"actions":{"version":{"tierToCool":{"daysAfterCreationGreaterThan":30.0},"tierToArchive":{"daysAfterCreationGreaterThan":90.0},"delete":{"daysAfterCreationGreaterThan":1000.0}},"baseBlob":{"tierToCool":{"daysAfterLastAccessTimeGreaterThan":30.0},"tierToArchive":{"daysAfterModificationGreaterThan":90.0},"delete":{"daysAfterModificationGreaterThan":1000.0}},"snapshot":{"tierToCool":{"daysAfterCreationGreaterThan":30.0},"tierToArchive":{"daysAfterCreationGreaterThan":90.0},"delete":{"daysAfterCreationGreaterThan":1000.0}}},"filters":{"blobTypes":["blockBlob"],"prefixMatch":["olcmtestcontainer1"]}}}]},"lastModifiedTime":"2024-06-19T10:40:34.5089500Z"}}'
     headers:
       cache-control:
       - no-cache
@@ -242,7 +243,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 11 Apr 2022 13:03:19 GMT
+      - Wed, 19 Jun 2024 10:40:33 GMT
       expires:
       - '-1'
       pragma:
@@ -251,14 +252,14 @@ interactions:
       - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/de775ebe-e350-49ba-aab8-f0288ca31824
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
+      - '199'
     status:
       code: 200
       message: OK
@@ -276,12 +277,12 @@ interactions:
       ParameterSetName:
       - --account-name -g
       User-Agent:
-      - AZURECLI/2.35.0 azsdk-python-azure-mgmt-storage/20.0.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.61.0 azsdk-python-core/1.28.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/managementPolicies/default?api-version=2021-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/managementPolicies/default?api-version=2023-05-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/managementPolicies/default","name":"DefaultManagementPolicy","type":"Microsoft.Storage/storageAccounts/managementPolicies","properties":{"policy":{"rules":[{"enabled":true,"name":"newname","type":"Lifecycle","definition":{"actions":{"baseBlob":{"tierToCool":{"daysAfterLastAccessTimeGreaterThan":30.0},"tierToArchive":{"daysAfterModificationGreaterThan":90.0},"delete":{"daysAfterModificationGreaterThan":1000.0}},"snapshot":{"tierToCool":{"daysAfterCreationGreaterThan":30.0},"tierToArchive":{"daysAfterCreationGreaterThan":90.0},"delete":{"daysAfterCreationGreaterThan":1000.0}},"version":{"tierToCool":{"daysAfterCreationGreaterThan":30.0},"tierToArchive":{"daysAfterCreationGreaterThan":90.0},"delete":{"daysAfterCreationGreaterThan":1000.0}}},"filters":{"blobTypes":["blockBlob"],"prefixMatch":["olcmtestcontainer1"]}}}]},"lastModifiedTime":"2022-04-11T13:03:20.2845092Z"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/managementPolicies/default","name":"DefaultManagementPolicy","type":"Microsoft.Storage/storageAccounts/managementPolicies","properties":{"policy":{"rules":[{"enabled":true,"name":"newname","type":"Lifecycle","definition":{"actions":{"version":{"tierToCool":{"daysAfterCreationGreaterThan":30.0},"tierToArchive":{"daysAfterCreationGreaterThan":90.0},"delete":{"daysAfterCreationGreaterThan":1000.0}},"baseBlob":{"tierToCool":{"daysAfterLastAccessTimeGreaterThan":30.0},"tierToArchive":{"daysAfterModificationGreaterThan":90.0},"delete":{"daysAfterModificationGreaterThan":1000.0}},"snapshot":{"tierToCool":{"daysAfterCreationGreaterThan":30.0},"tierToArchive":{"daysAfterCreationGreaterThan":90.0},"delete":{"daysAfterCreationGreaterThan":1000.0}}},"filters":{"blobTypes":["blockBlob"],"prefixMatch":["olcmtestcontainer1"]}}}]},"lastModifiedTime":"2024-06-19T10:40:34.5089500Z"}}'
     headers:
       cache-control:
       - no-cache
@@ -290,7 +291,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 11 Apr 2022 13:03:21 GMT
+      - Wed, 19 Jun 2024 10:40:36 GMT
       expires:
       - '-1'
       pragma:
@@ -299,12 +300,12 @@ interactions:
       - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/44617159-f170-4712-9608-3cf81fbc9159
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3747'
     status:
       code: 200
       message: OK
@@ -324,9 +325,9 @@ interactions:
       ParameterSetName:
       - --account-name -g
       User-Agent:
-      - AZURECLI/2.35.0 azsdk-python-azure-mgmt-storage/20.0.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.61.0 azsdk-python-core/1.28.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/managementPolicies/default?api-version=2021-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/managementPolicies/default?api-version=2023-05-01
   response:
     body:
       string: ''
@@ -338,7 +339,7 @@ interactions:
       content-type:
       - text/plain; charset=utf-8
       date:
-      - Mon, 11 Apr 2022 13:03:22 GMT
+      - Wed, 19 Jun 2024 10:40:38 GMT
       expires:
       - '-1'
       pragma:
@@ -349,8 +350,12 @@ interactions:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/456e7379-b987-47f1-b541-b5db12168a76
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
+      - '199'
+      x-ms-ratelimit-remaining-subscription-global-deletes:
+      - '2999'
     status:
       code: 200
       message: OK
@@ -368,9 +373,9 @@ interactions:
       ParameterSetName:
       - --account-name -g
       User-Agent:
-      - AZURECLI/2.35.0 azsdk-python-azure-mgmt-storage/20.0.0 Python/3.9.6 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.61.0 azsdk-python-core/1.28.0 Python/3.9.13 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/managementPolicies/default?api-version=2021-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/managementPolicies/default?api-version=2023-05-01
   response:
     body:
       string: '{"error":{"code":"ManagementPolicyNotFound","message":"No ManagementPolicy
@@ -383,7 +388,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 11 Apr 2022 13:03:22 GMT
+      - Wed, 19 Jun 2024 10:40:40 GMT
       expires:
       - '-1'
       pragma:
@@ -394,6 +399,10 @@ interactions:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/b0009ed0-7b30-459b-b537-966d8c5dcb0e
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
     status:
       code: 404
       message: Not Found

@@ -30,10 +30,11 @@ def load_arguments(self, _):
     from ._completers import subnet_completion_list, cluster_admin_account_completion_list, \
         cluster_user_group_completion_list, get_resource_name_completion_list_under_subscription
     from knack.arguments import CLIArgumentType
-    from azure.mgmt.hdinsight.models import Tier, JsonWebKeyEncryptionAlgorithm, ResourceProviderConnection
+    from azure.mgmt.hdinsight.models import Tier, JsonWebKeyEncryptionAlgorithm
+    from azure.mgmt.hdinsight.models import ResourceProviderConnection, OutboundDependenciesManagedType
     from argcomplete.completers import FilesCompleter
     node_size_type = CLIArgumentType(arg_group='Node',
-                                     help='The size of the node. See also: https://docs.microsoft.com/azure/'
+                                     help='The size of the node. See also: https://learn.microsoft.com/azure/'
                                           'hdinsight/hdinsight-hadoop-provision-linux-clusters#configure-cluster-size')
 
     # cluster
@@ -47,25 +48,25 @@ def load_arguments(self, _):
                    help='Permit timeout error during argument validation phase. If omitted, '
                         'validation timeout error will be permitted.')
         c.argument('cluster_version', options_list=['--version', '-v'], arg_group='Cluster',
-                   help='The HDInsight cluster version. See also: https://docs.microsoft.com/azure/'
+                   help='The HDInsight cluster version. See also: https://learn.microsoft.com/azure/'
                         'hdinsight/hdinsight-component-versioning#supported-hdinsight-versions')
         c.argument('cluster_type', options_list=['--type', '-t'], arg_group='Cluster',
                    completer=get_generic_completion_list(known_cluster_types),
                    help='Type of HDInsight cluster, like: {}. '
-                        'See also: https://docs.microsoft.com/azure/hdinsight/hdinsight-'
+                        'See also: https://learn.microsoft.com/azure/hdinsight/hdinsight-'
                         'hadoop-provision-linux-clusters#cluster-types'.format(', '.join(known_cluster_types)))
         c.argument('component_version', arg_group='Cluster', nargs='*', validator=validate_component_version,
                    help='The versions of various Hadoop components, in space-'
                         'separated versions in \'component=version\' format. Example: '
                         'Spark=2.0 Hadoop=2.7.3 '
-                        'See also: https://docs.microsoft.com/azure/hdinsight/hdinsight'
+                        'See also: https://learn.microsoft.com/azure/hdinsight/hdinsight'
                         '-component-versioning#hadoop-components-available-with-different-'
                         'hdinsight-versions')
         c.argument('cluster_configurations', arg_group='Cluster', type=shell_safe_json_parse,
                    completer=FilesCompleter(),
                    help='Extra configurations of various components. '
                         'Configurations may be supplied from a file using the `@{path}` syntax or a JSON string. '
-                        'See also: https://docs.microsoft.com/azure/hdinsight/'
+                        'See also: https://learn.microsoft.com/azure/hdinsight/'
                         'hdinsight-hadoop-customize-cluster-bootstrap')
         c.argument('cluster_tier', arg_type=get_enum_type(Tier), arg_group='Cluster',
                    help='The tier of the cluster')
@@ -75,7 +76,7 @@ def load_arguments(self, _):
         c.argument('idbroker', arg_group='Cluster', action='store_true',
                    help='Specify to create ESP cluster with HDInsight ID Broker. If omitted, '
                         'creating ESP cluster with HDInsight ID Broker will not not allowed.')
-        c.argument('minimal_tls_version', arg_type=get_enum_type(['1.0', '1.1', '1.2']),
+        c.argument('minimal_tls_version', arg_type=get_enum_type(['1.2']),
                    arg_group='Cluster', help='The minimal supported TLS version.')
 
         # HTTP
@@ -94,10 +95,10 @@ def load_arguments(self, _):
 
         # Node
         c.argument('headnode_size', arg_type=node_size_type,
-                   help='The size of the node. See also: https://docs.microsoft.com/azure/'
+                   help='The size of the node. See also: https://learn.microsoft.com/azure/'
                         'hdinsight/hdinsight-hadoop-provision-linux-clusters#configure-cluster-size')
         c.argument('workernode_size', arg_type=node_size_type,
-                   help='The size of the node. See also: https://docs.microsoft.com/azure/'
+                   help='The size of the node. See also: https://learn.microsoft.com/azure/'
                         'hdinsight/hdinsight-hadoop-provision-linux-clusters#configure-cluster-size')
         c.argument('workernode_data_disks_per_node', arg_group='Node',
                    help='The number of data disks to use per worker node.')
@@ -183,10 +184,11 @@ def load_arguments(self, _):
                    help='The client AAD security group name for Kafka Rest Proxy')
 
         # Managed Service Identity
-        c.argument('assign_identity', arg_group='Managed Service Identity', validator=validate_msi,
+        c.argument('assign_identity', nargs='*', arg_group='Managed Service Identity', validator=validate_msi,
                    completer=get_resource_name_completion_list_under_subscription(
                        'Microsoft.ManagedIdentity/userAssignedIdentities'),
-                   help="The name or ID of user assigned identity.")
+                   help=("The name or ID of user assigned identity. "
+                         "Skip this field when assign_identity_type is SystemAssigned."))
 
         # Encryption In Transit
         c.argument('encryption_in_transit', arg_group='Encryption In Transit', arg_type=get_three_state_flag(),
@@ -227,6 +229,17 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(ResourceProviderConnection), help='The resource provider connection type')
         c.argument('enable_private_link', arg_group='Private Link', arg_type=get_three_state_flag(),
                    help='Indicate whether enable the private link or not.')
+        c.argument('outbound_dependencies_managed_type',
+                   options_list=['--outbound-dependencies-managed-type', '--outbound-managed-type'],
+                   arg_group='Private Link',
+                   arg_type=get_enum_type(OutboundDependenciesManagedType),
+                   help='The direction for the resource provider connection.')
+
+        c.argument('public_ip_tag_type', arg_group='Private Link',
+                   help='Gets or sets the ipTag type: Example FirstPartyUsage.')
+        c.argument('public_ip_tag_value', arg_group='Private Link',
+                   help='Gets or sets value of the IpTag associated with the public IP.'
+                   'Example HDInsight, SQL, Storage etc')
 
         c.argument('private_link_configurations',
                    options_list=['--private-link-config', '--private-link-configurations'],
@@ -251,6 +264,14 @@ def load_arguments(self, _):
         with self.argument_context('hdinsight resize') as c:
             c.argument('target_instance_count', options_list=['--workernode-count', '-c'],
                        help='The target worker node instance count for the operation.', required=True)
+
+        # update
+        with self.argument_context('hdinsight update') as c:
+            c.argument('tags', tags_type)
+            c.argument('assign_identity_type', arg_group='Managed Service Identity',
+                       help=("The type of identity used for the cluster. "
+                             "Allowed values: `None`, `SystemAssigned`, "
+                             "`SystemAssigned,UserAssigned`, `UserAssigned`."))
 
         # application
         with self.argument_context('hdinsight application') as c:
@@ -309,6 +330,16 @@ def load_arguments(self, _):
 
         # Azure Monitor
         with self.argument_context('hdinsight azure-monitor') as c:
+            c.argument('workspace', validator=validate_workspace,
+                       completer=get_resource_name_completion_list_under_subscription(
+                           'Microsoft.OperationalInsights/workspaces'),
+                       help='The name, resource ID or workspace ID of Log Analytics workspace.')
+            c.argument('primary_key', help='The certificate for the Log Analytics workspace. '
+                                           'Required when workspace ID is provided.')
+            c.ignore('workspace_type')
+
+        # Azure Monitor Agent
+        with self.argument_context('hdinsight azure-monitor-agent') as c:
             c.argument('workspace', validator=validate_workspace,
                        completer=get_resource_name_completion_list_under_subscription(
                            'Microsoft.OperationalInsights/workspaces'),

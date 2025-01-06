@@ -5,7 +5,6 @@
 
 import base64
 from collections import Counter
-import sys
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
 from azure.cli.core._profile import Profile
@@ -91,8 +90,8 @@ class BotJsonFormatter:  # pylint:disable=too-few-public-methods
             'appPassword': app_password,
             'endpoint': raw_bot_properties.properties.endpoint,
             'resourceGroup': str(resource_group_name),
-            'tenantId': profile.get_subscription(subscription=client.config.subscription_id)['tenantId'],
-            'subscriptionId': client.config.subscription_id,
+            'tenantId': profile.get_subscription(subscription=client._config.subscription_id)['tenantId'],  # pylint:disable=protected-access
+            'subscriptionId': client._config.subscription_id,  # pylint:disable=protected-access
             'serviceName': resource_name
         }
 
@@ -107,10 +106,7 @@ class BotJsonFormatter:  # pylint:disable=too-few-public-methods
         """
         services = bot_file_data['services']
 
-        if sys.version_info.major >= 3:
-            decrypt = BotJsonFormatter.__decrypt_py3
-        else:
-            decrypt = BotJsonFormatter.__decrypt_py2
+        decrypt = BotJsonFormatter.__decrypt
 
         if password_only:
             # Get all endpoints that have potentially valid appPassword values
@@ -171,7 +167,7 @@ class BotJsonFormatter:  # pylint:disable=too-few-public-methods
         return services
 
     @staticmethod
-    def __decrypt_py3(secret, encrypted_value, logger):
+    def __decrypt(secret, encrypted_value, logger):
         # If the string length is 0 or no secret was passed in, return the empty string.
         if not encrypted_value or not secret:
             return encrypted_value
@@ -198,34 +194,4 @@ class BotJsonFormatter:  # pylint:disable=too-few-public-methods
         decrypted_bytes = decryptor.update(base64.standard_b64decode(str.encode(encrypted_text))) + decryptor.finalize()
 
         decrypted_string = decrypted_bytes.decode('utf-8')
-        return ''.join([char for char in decrypted_string if ord(char) > 31])
-
-    @staticmethod
-    def __decrypt_py2(secret, encrypted_value, logger):
-        # If the string length is 0 or no secret was passed in, return the empty string.
-        if not encrypted_value or not secret:
-            return encrypted_value
-
-        parts = encrypted_value.split("!")
-        if len(parts) != 2:
-            logger.warn('Encrypted value "%s" not in standard encrypted format, decryption skipped.' % encrypted_value)
-            return encrypted_value
-
-        iv_text = parts[0]
-        encrypted_text = parts[1]
-        iv_bytes = base64.standard_b64decode(iv_text)
-        secret_bytes = base64.standard_b64decode(secret)
-
-        if len(iv_bytes) != 16:
-            logger.warn('Initialization Vector for "%s" not valid, decryption skipped.' % encrypted_value)
-            return encrypted_value
-        if len(secret_bytes) != 32:
-            logger.warn('Passed in secret length is invalid, decryption skipped.')
-            return encrypted_value
-
-        cipher = Cipher(algorithms.AES(secret_bytes), modes.CBC(iv_bytes), backend=default_backend())
-        decryptor = cipher.decryptor()
-        decrypted_bytes = decryptor.update(base64.standard_b64decode(encrypted_text)) + decryptor.finalize()
-
-        decrypted_string = decrypted_bytes.encode('utf-8')
         return ''.join([char for char in decrypted_string if ord(char) > 31])

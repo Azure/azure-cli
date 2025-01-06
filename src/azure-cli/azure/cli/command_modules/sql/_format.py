@@ -27,7 +27,7 @@ def _bytes_to_friendly_string(b):
     unit = next(u for u in _units if (b % u[0]) == 0)
 
     # Format the value with the chosen unit
-    return str((b // unit[0])) + unit[1]
+    return str(b // unit[0]) + unit[1]
 
 
 class LongRunningOperationResultTransform(LongRunningOperation):  # pylint: disable=too-few-public-methods
@@ -35,7 +35,7 @@ class LongRunningOperationResultTransform(LongRunningOperation):  # pylint: disa
     Long-running operation poller that also transforms the json response.
     '''
     def __init__(self, cli_ctx, transform_func):
-        super(LongRunningOperationResultTransform, self).__init__(cli_ctx)
+        super().__init__(cli_ctx)
         self._transform_func = transform_func
 
     def __call__(self, result):
@@ -50,7 +50,7 @@ class LongRunningOperationResultTransform(LongRunningOperation):  # pylint: disa
         from azure.cli.core.util import poller_classes
         if isinstance(result, poller_classes()):
             # Poll for long-running operation result result by calling base class
-            result = super(LongRunningOperationResultTransform, self).__call__(result)
+            result = super().__call__(result)
 
         # Apply transform function
         return self._transform_func(result)
@@ -371,6 +371,31 @@ def firewall_rule_table_format(result):
         ])
 
     return _apply_format(result, _firewall_rule_table_format)
+
+
+###############################################
+#           sql server ipv6-firewall-rule     #
+###############################################
+
+
+def ipv6_firewall_rule_table_format(result):
+    '''
+    Formats a single or list of server ipv6 firewall rules as summary results for display with "-o table".
+    '''
+
+    def _ipv6_firewall_rule_table_format(result):
+        '''
+        Formats a server ipv6 firewall rule as summary results for display with "-o table".
+        '''
+        from collections import OrderedDict
+
+        return OrderedDict([
+            ('name', result['name']),
+            ('startIPv6Address', result['startIPv6Address']),
+            ('endIPv6Address', result['endIPv6Address'])
+        ])
+
+    return _apply_format(result, _ipv6_firewall_rule_table_format)
 
 
 ########################################################

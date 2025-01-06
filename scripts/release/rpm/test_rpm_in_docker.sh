@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# This script should be run in a centos7 docker.
+# This script should be run in a ubi8, ubi9 docker.
 set -exv
 
 export USERNAME=azureuser
@@ -15,7 +15,7 @@ time az self-test
 time az --version
 
 cd /azure-cli/
-pip install wheel
+python -m pip install --upgrade pip setuptools
 ./scripts/ci/build.sh
 
 # From Fedora36, when using `pip install --prefix` with root privileges, the package is installed into `{prefix}/local/lib`.
@@ -25,6 +25,7 @@ export RPM_BUILD_ROOT=/
 
 pip install pytest --prefix /usr/lib64/az
 pip install pytest-xdist --prefix /usr/lib64/az
+pip install pytest-forked --prefix /usr/lib64/az
 
 find /azure-cli/artifacts/build -name "azure_cli_testsdk*" | xargs pip install --prefix /usr/lib64/az --upgrade --ignore-installed
 find /azure-cli/artifacts/build -name "azure_cli_fulltest*" | xargs pip install --prefix /usr/lib64/az --upgrade --ignore-installed --no-deps

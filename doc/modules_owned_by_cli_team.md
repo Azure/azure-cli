@@ -41,7 +41,6 @@ This document lists modules owned by CLI team.
 |peering|az peering|
 |portal|az portal|
 |powerbi-dedicated|az powerbi|
-|reservations|az reservations|
 |resource|az resource, az group, az provider, az feature, az deployment, az policy, az ts, az lock, az managedapp, az account, az bicep, az tag|
 |resource-graph|az graph|
 |resource-mover|az resource-mover|

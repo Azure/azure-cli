@@ -8,7 +8,7 @@ import base64
 from knack.introspection import extract_full_summary_from_signature, extract_args_from_signature
 from knack.util import CLIError
 
-from azure.cli.core.commands import LongRunningOperation, AzCommandGroup, AzArgumentContext
+from azure.cli.core.commands import LongRunningOperation, AzCommandGroup
 
 
 def _encode_hex(item):
@@ -29,11 +29,9 @@ def _encode_hex(item):
     return item
 
 
-def keyvault_exception_handler(cmd, ex):
+def keyvault_exception_handler(ex):
     from msrest.exceptions import ValidationError, ClientRequestError
-    from azure.cli.core.profiles import ResourceType
-    KeyVaultErrorException = cmd.get_models('KeyVaultErrorException', resource_type=ResourceType.DATA_KEYVAULT)
-    if isinstance(ex, (ValidationError, KeyVaultErrorException)):
+    if isinstance(ex, ValidationError):
         try:
             raise CLIError(ex.inner_exception.error.message)
         except AttributeError:
@@ -54,11 +52,10 @@ def keyvault_exception_handler(cmd, ex):
 class KeyVaultCommandGroup(AzCommandGroup):
 
     def __init__(self, command_loader, group_name, **kwargs):
-        from azure.cli.command_modules.keyvault._client_factory import keyvault_data_plane_factory
-        # all regular and custom commands should use the keyvault data plane client
+        from azure.cli.command_modules.keyvault._client_factory import keyvault_mgmt_client_factory
         merged_kwargs = self._merge_kwargs(kwargs, base_kwargs=command_loader.module_kwargs)
-        merged_kwargs['custom_command_type'].settings['client_factory'] = keyvault_data_plane_factory
-        super(KeyVaultCommandGroup, self).__init__(command_loader, group_name, **kwargs)
+        merged_kwargs['custom_command_type'].settings['client_factory'] = keyvault_mgmt_client_factory
+        super().__init__(command_loader, group_name, **kwargs)
 
     def _create_keyvault_command(self, name, method_name=None, command_type_name=None, **kwargs):
         self._check_stale()
@@ -135,7 +132,7 @@ class KeyVaultCommandGroup(AzCommandGroup):
                         show_exception_handler(ex)
                     except Exception:  # pylint: disable=broad-except
                         pass
-                return keyvault_exception_handler(self.command_loader, ex)
+                return keyvault_exception_handler(ex)
 
         self.command_loader._cli_command(command_name, handler=keyvault_command_handler,  # pylint: disable=protected-access
                                          argument_loader=keyvault_arguments_loader,
@@ -155,26 +152,3 @@ class KeyVaultCommandGroup(AzCommandGroup):
         if command_type:
             kwargs[command_type_name] = command_type
         self._create_keyvault_command(name, method_name, command_type_name, **kwargs)
-
-
-class KeyVaultArgumentContext(AzArgumentContext):
-
-    def attributes_argument(self, name, attr_class, create=False, ignore=None):
-        from azure.cli.command_modules.keyvault._validators import get_attribute_validator, datetime_type
-        from azure.cli.core.commands.parameters import get_three_state_flag
-
-        from knack.arguments import ignore_type
-
-        ignore = ignore or []
-        self.argument('{}_attributes'.format(name), ignore_type,
-                      validator=get_attribute_validator(name, attr_class, create))
-        if create:
-            self.extra('disabled', help='Create {} in disabled state.'.format(name), arg_type=get_three_state_flag())
-        else:
-            self.extra('enabled', help='Enable the {}.'.format(name), arg_type=get_three_state_flag())
-        if 'expires' not in ignore:
-            self.extra('expires', default=None, help='Expiration UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').',
-                       type=datetime_type)
-        if 'not_before' not in ignore:
-            self.extra('not_before', default=None, type=datetime_type,
-                       help='Key not usable before the provided UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').')

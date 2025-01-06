@@ -20,12 +20,13 @@ MAX_INT = 9223372036854775807
 
 class IotHubCertificateTest(ScenarioTest):
     def __init__(self, test_method):
-        super(IotHubCertificateTest, self).__init__('test_certificate_lifecycle')
+        super().__init__('test_certificate_lifecycle')
         self.hub_name = 'iot-hub-for-cert-test'
         _create_test_cert(CERT_FILE, KEY_FILE, self.create_random_name(prefix='TESTCERT', length=24), 3, random.randint(0, MAX_INT))
 
-    def __del__(self):
-        _delete_test_cert(CERT_FILE, KEY_FILE, VERIFICATION_FILE)
+    def tearDown(self):
+        _delete_test_cert([CERT_FILE, KEY_FILE, VERIFICATION_FILE])
+        super().tearDown()
 
     @ResourceGroupPreparer()
     def test_certificate_lifecycle(self, resource_group):

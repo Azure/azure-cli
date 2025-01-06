@@ -83,4 +83,3 @@ class EHNamespaceSchemaRegistry(ScenarioTest):
 
         self.assertEqual(len(sg), 0)
 
-

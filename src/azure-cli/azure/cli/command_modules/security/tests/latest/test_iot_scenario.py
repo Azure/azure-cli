@@ -15,12 +15,12 @@ class SecurityCenterIotTests(ScenarioTest):
         self.kwargs.update({
             'iot_hub_name': self.create_random_name(prefix='azurecli-hub', length=24)
         })
-        iot_hub_id = self.cmd('az iot hub create -n {iot_hub_name} -g {rg}').get_output_in_json()['id']
+        iot_hub_id = self.cmd('az iot hub create -n {iot_hub_name} -g {rg} -l westeurope').get_output_in_json()['id']
         self.kwargs.update({
             'iot_hub_id': iot_hub_id
         })
 
-        self.cmd('az security iot-solution create --solution-name "azurecli-hub" --resource-group {rg} --iot-hubs {iot_hub_id} --display-name "Solution Default" --location "east us"')
+        self.cmd('az security iot-solution create --solution-name "azurecli-hub" --resource-group {rg} --iot-hubs {iot_hub_id} --display-name "Solution Default" --location "west europe"')
         azure_cli_new_iot_security_solution = self.cmd('az security iot-solution list --resource-group {rg}').get_output_in_json()
         assert len(azure_cli_new_iot_security_solution) == 1
 

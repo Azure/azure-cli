@@ -12,7 +12,6 @@ from azure.cli.core.azclierror import CLIInternalError
 from azure.cli.core.commands import AzCliCommand
 from azure.cli.core.profiles import ResourceType
 from knack.log import get_logger
-from msrest import Serializer
 
 logger = get_logger(__name__)
 
@@ -26,14 +25,7 @@ def validate_decorator_mode(decorator_mode) -> bool:
 
     :return: bool
     """
-    is_valid_decorator_mode = False
-    try:
-        is_valid_decorator_mode = decorator_mode in DecoratorMode
-    # will raise TypeError in Python >= 3.8
-    except TypeError:
-        pass
-
-    return is_valid_decorator_mode
+    return isinstance(decorator_mode, DecoratorMode) and decorator_mode in DecoratorMode
 
 
 # pylint: disable=too-few-public-methods
@@ -50,7 +42,6 @@ class BaseAKSModels:
         self.__cmd = cmd
         self.__model_module = None
         self.__model_dict = None
-        self.__serializer = None
         self.resource_type = resource_type
         self.__set_up_base_aks_models()
 
@@ -86,16 +77,6 @@ class BaseAKSModels:
         """
         for model_name, model_class in self.models_dict.items():
             setattr(self, model_name, model_class)
-
-    def serialize(self, data: Any, model_type: str) -> Dict:
-        """Serialize the data according to the provided model type.
-
-        :return: dictionary
-        """
-        if self.__serializer is None:
-            self.__serializer = Serializer(self.models_dict)
-        # will also perfrom client side validation
-        return self.__serializer.body(data, model_type)
 
 
 class BaseAKSParamDict:
@@ -133,7 +114,7 @@ class BaseAKSParamDict:
         return self.__store.items()
 
     def __format_count(self):
-        untouched_keys = [x for x in self.__store.keys() if x not in self.__count.keys()]
+        untouched_keys = [x for x in self.__store if x not in self.__count]
         for k in untouched_keys:
             self.__count[k] = 0
 
@@ -174,7 +155,7 @@ class BaseAKSContext:
         self.raw_param = raw_parameters
         self.models = models
         self.decorator_mode = decorator_mode
-        self.intermediates = dict()
+        self.intermediates = {}
 
     def get_intermediate(self, variable_name: str, default_value: Any = None) -> Any:
         """Get the value of an intermediate by its name.

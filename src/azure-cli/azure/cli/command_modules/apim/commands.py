@@ -10,7 +10,8 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.command_modules.apim._format import (service_output_format)
 from azure.cli.command_modules.apim._client_factory import (cf_service, cf_api, cf_product, cf_nv, cf_apiops,
                                                             cf_apirelease, cf_apirevision, cf_apiversionset,
-                                                            cf_apischema, cf_ds)
+                                                            cf_apischema, cf_ds, cf_graphqlapiresolver,
+                                                            cf_graphqlapiresolverpolicy)
 
 
 def load_command_table(self, _):
@@ -64,6 +65,16 @@ def load_command_table(self, _):
         client_factory=cf_ds
     )
 
+    graphql_api_resolver = CliCommandType(
+        operations_tmpl='azure.mgmt.apimanagement.operations#GraphQLApiResolverOperations.{}',
+        client_factory=cf_graphqlapiresolver
+    )
+
+    graphql_api_resolver_policy = CliCommandType(
+        operations_tmpl='azure.mgmt.apimanagement.operations#GraphQLApiResolverPolicyOperations.{}',
+        client_factory=cf_graphqlapiresolverpolicy
+    )
+
     # pylint: disable=line-too-long
     with self.command_group('apim', service_sdk) as g:
         g.custom_command('create', 'apim_create', supports_no_wait=True,
@@ -85,6 +96,7 @@ def load_command_table(self, _):
 
     with self.command_group('apim api', api_sdk) as g:
         g.custom_command('import', 'apim_api_import', supports_no_wait=True)
+        g.custom_command('export', 'apim_api_export')
         g.custom_command('create', 'apim_api_create', supports_no_wait=True)
         g.custom_show_command('show', 'apim_api_get')
         g.custom_command('list', 'apim_api_list')
@@ -154,3 +166,15 @@ def load_command_table(self, _):
         g.custom_command('list', 'apim_ds_list')
         g.custom_show_command('show', 'apim_ds_get')
         g.custom_command('purge', 'apim_ds_purge')
+
+    with self.command_group('apim graphql resolver', graphql_api_resolver) as g:
+        g.custom_command('create', 'apim_graphql_resolver_create')
+        g.custom_command('delete', 'apim_graphql_resolver_delete', confirmation=True)
+        g.custom_show_command('show', 'apim_graphql_resolver_show')
+        g.custom_command('list', 'apim_graphql_resolver_list')
+
+    with self.command_group('apim graphql resolver policy', graphql_api_resolver_policy) as g:
+        g.custom_command('create', 'apim_graphql_resolver_policy_create')
+        g.custom_command('delete', 'apim_graphql_resolver_policy_delete', confirmation=True)
+        g.custom_show_command('show', 'apim_graphql_resolver_policy_show')
+        g.custom_command('list', 'apim_graphql_resolver_policy_list')
