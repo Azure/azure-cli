@@ -153,12 +153,40 @@ class SigShareEnableCommunity(_SigShareUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.subscription_ids = AAZListArg(
+            options=["--subscription-ids"],
+            help="A list of subscription ids to share the gallery with.",
+        )
+        subscription_ids = args_schema.subscription_ids
+        subscription_ids.Element = AAZStrArg()
+
+        args_schema.tenant_ids = AAZListArg(
+            options=["--tenant-ids"],
+            help="A list of tenant ids to share the gallery with.",
+        )
+        tenant_ids = args_schema.tenant_ids
+        tenant_ids.Element = AAZStrArg()
+
         args_schema.operation_type._required = False
         args_schema.operation_type._registered = False
         args_schema.operation_type._default = 'EnableCommunity'
         args_schema.groups._registered = False
 
         return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        args.groups = []
+        if args.subscription_ids:
+            args.groups.append({
+                'type': 'Subscriptions',
+                'ids': args.subscription_ids
+            })
+        if args.tenant_ids:
+            args.groups.append({
+                'type': 'AADTenants',
+                'ids': args.tenant_ids
+            })
 
 
 @register_command(
