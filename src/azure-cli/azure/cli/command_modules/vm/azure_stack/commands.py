@@ -14,7 +14,6 @@ from azure.cli.command_modules.vm.azure_stack._client_factory import (cf_vm, cf_
                                                                       cf_dedicated_hosts, cf_dedicated_host_groups,
                                                                       cf_log_analytics_data_plane,
                                                                       cf_disk_encryption_set,
-                                                                      cf_gallery_sharing_profile,
                                                                       cf_shared_gallery_image,
                                                                       cf_shared_gallery_image_version,
                                                                       cf_capacity_reservation_groups,

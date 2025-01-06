@@ -5395,15 +5395,6 @@ def list_generator(pages, num_results=50):
     return result
 
 
-def sig_share_reset(cmd, client, resource_group_name, gallery_name):
-    SharingUpdate, SharingUpdateOperationTypes = cmd.get_models('SharingUpdate', 'SharingUpdateOperationTypes',
-                                                                operation_group='shared_galleries')
-    sharing_update = SharingUpdate(operation_type=SharingUpdateOperationTypes.RESET)
-    return client.begin_update(resource_group_name=resource_group_name,
-                               gallery_name=gallery_name,
-                               sharing_update=sharing_update)
-
-
 def sig_shared_image_definition_list(client, location, gallery_unique_name,
                                      shared_to=None, marker=None, show_next_marker=None):
     # Keep it here as it will add subscription in the future and we need to set it to None to make it work
