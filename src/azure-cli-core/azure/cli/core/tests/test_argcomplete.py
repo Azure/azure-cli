@@ -3,13 +3,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from unittest import mock
+from unittest import mock, TestCase
 
+from azure.cli.core.mock import DummyCli
 from azure.cli.core.util import run_cmd
-from azure.cli.testsdk import ScenarioTest
 
 
-class ArgcompleteScenarioTest(ScenarioTest):
+class ArgcompleteScenarioTest(TestCase):
 
     def argcomplete_env(self, comp_line, comp_point):
         return {
@@ -53,13 +53,14 @@ class ArgcompleteScenarioTest(ScenarioTest):
         def dummy_completor(*args, **kwargs):
             return ['dummystorage']
 
+        cli = DummyCli()
         # argcomplete uses os._exit to exit, which is also used by pytest. Patch AzCompletionFinder to use sys.exit
         # There is no recording for this test case, as completer is mocked.
         with mock.patch('azure.cli.core.parser.AzCompletionFinder', MockCompletionFinder):
             with mock.patch('azure.cli.core.commands.parameters.get_resource_name_completion_list', lambda _: dummy_completor):
                 env = self.argcomplete_env('az storage blob list -c test --account-name dumm', '48')
                 with mock.patch.dict(os.environ, env):
-                    self.assertRaises(SystemExit, self.cmd, 'az')
+                    self.assertRaises(SystemExit, cli.invoke, ['az'])
         with open('argcomplete.out') as f:
             self.assertEqual(f.read(), 'dummystorage ')
         os.remove('argcomplete.out')
