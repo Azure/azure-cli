@@ -326,20 +326,29 @@ def validate_client_parameters(cmd, namespace):
         namespace.account_endpoint = namespace.account_endpoint.rstrip('/')
     # if account name is specified but no key, attempt to query if we use shared key auth
     if namespace.account_name and namespace.account_endpoint and not namespace.account_key:
-        if cmd.cli_ctx.config.get('batch', 'auth_mode', 'shared_key') == 'shared_key':
-            endpoint = urlsplit(namespace.account_endpoint)
-            host = endpoint.netloc
-            client = get_mgmt_service_client(cmd.cli_ctx, BatchManagementClient)
-            acc = next((x for x in client.batch_account.list()
+
+        # check to see if we are using the default credentials
+        from azure.cli.core._profile import Profile
+        profile = Profile(cli_ctx=cmd.cli_ctx)
+        resource = cmd.cli_ctx.cloud.endpoints.batch_resource_id
+        token_credential, _, _ = profile.get_login_credentials(resource=resource)
+
+        # if not we query for the account key
+        if token_credential is None:
+            if cmd.cli_ctx.config.get('batch', 'auth_mode', 'shared_key') == 'shared_key':
+                endpoint = urlsplit(namespace.account_endpoint)
+                host = endpoint.netloc
+                client = get_mgmt_service_client(cmd.cli_ctx, BatchManagementClient)
+                acc = next((x for x in client.batch_account.list()
                         if x.name == namespace.account_name and x.account_endpoint == host), None)
-            if acc:
-                from azure.mgmt.core.tools import parse_resource_id
-                rg = parse_resource_id(acc.id)['resource_group']
-                namespace.account_key = \
-                    client.batch_account.get_keys(rg,  # pylint: disable=no-member
+                if acc:
+                    from azure.mgmt.core.tools import parse_resource_id
+                    rg = parse_resource_id(acc.id)['resource_group']
+                    namespace.account_key = \
+                        client.batch_account.get_keys(rg,  # pylint: disable=no-member
                                                   namespace.account_name).primary
-            else:
-                raise ValueError(f"Batch account '{namespace.account_name}' not found.")
+                else:
+                    raise ValueError(f"Batch account '{namespace.account_name}' not found.")
     else:
         if not namespace.account_name:
             raise ValueError("Specify batch account in command line or environment variable.")
