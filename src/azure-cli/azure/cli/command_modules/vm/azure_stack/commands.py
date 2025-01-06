@@ -482,23 +482,6 @@ def load_command_table(self, _):
         g.generic_update_command('update', getter_name='get_image_version_to_update', setter_arg_name='gallery_image_version', setter_name='update_image_version', setter_type=compute_custom, command_type=compute_custom, supports_no_wait=True, validator=process_image_version_update_namespace)
         g.wait_command('wait')
 
-    vm_gallery_sharing_profile = CliCommandType(
-        operations_tmpl=(
-            'azure.mgmt.compute.operations._gallery_sharing_profile_operations#GallerySharingProfileOperations.{}'
-        ),
-        client_factory=cf_gallery_sharing_profile,
-        operation_group='shared_galleries'
-    )
-    with self.command_group('sig share', vm_gallery_sharing_profile,
-                            client_factory=cf_gallery_sharing_profile,
-                            operation_group='shared_galleries',
-                            min_api='2020-09-30') as g:
-        g.custom_command('add', 'sig_share_update', supports_no_wait=True)
-        g.custom_command('remove', 'sig_share_update', supports_no_wait=True)
-        g.custom_command('reset', 'sig_share_reset', supports_no_wait=True)
-        g.custom_command('enable-community', 'sig_share_update', supports_no_wait=True)
-        g.wait_command('wait', getter_name='get_gallery_instance', getter_type=compute_custom)
-
     vm_shared_gallery_image = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations._shared_gallery_images_operations#SharedGalleryImagesOperations.'
         '{}',
