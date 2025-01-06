@@ -6,7 +6,7 @@
 from knack.log import get_logger
 
 from azure.cli.core.aaz import register_command, AAZListArg, AAZStrArg
-from azure.cli.core.azclierror import CLIError
+from azure.cli.core.azclierror import ArgumentUsageError
 from ..aaz.latest.sig.share import Update as _SigShareUpdate
 from ..aaz.latest.sig import Wait as _SigWait
 
@@ -43,7 +43,6 @@ class SigShareAdd(_SigShareUpdate):
 
         args_schema.operation_type._required = False
         args_schema.operation_type._registered = False
-        args_schema.groups._required = False
         args_schema.groups._registered = False
 
         return args_schema
@@ -51,7 +50,7 @@ class SigShareAdd(_SigShareUpdate):
     def pre_operations(self):
         args = self.ctx.args
         if not args.subscription_ids and not args.tenant_ids:
-            raise CLIError('At least one of subscription ids or tenant ids must be provided.')
+            raise ArgumentUsageError('At least one of subscription ids or tenant ids must be provided.')
 
         args.operation_type = 'Add'
         args.groups = []
@@ -97,7 +96,6 @@ class SigShareRemove(_SigShareUpdate):
 
         args_schema.operation_type._required = False
         args_schema.operation_type._registered = False
-        args_schema.groups._required = False
         args_schema.groups._registered = False
 
         return args_schema
@@ -106,7 +104,7 @@ class SigShareRemove(_SigShareUpdate):
         args = self.ctx.args
 
         if not args.subscription_ids and not args.tenant_ids:
-            raise CLIError('At least one of subscription ids or tenant ids must be provided.')
+            raise ArgumentUsageError('At least one of subscription ids or tenant ids must be provided.')
         args.operation_type = 'Remove'
         args.groups = []
         if args.subscription_ids:
@@ -137,7 +135,6 @@ class SigShareReset(_SigShareUpdate):
         args_schema.operation_type._required = False
         args_schema.operation_type._registered = False
         args_schema.operation_type._default = 'Reset'
-        args_schema.groups._required = False
         args_schema.groups._registered = False
 
         return args_schema
@@ -159,7 +156,6 @@ class SigShareEnableCommunity(_SigShareUpdate):
         args_schema.operation_type._required = False
         args_schema.operation_type._registered = False
         args_schema.operation_type._default = 'EnableCommunity'
-        args_schema.groups._required = False
         args_schema.groups._registered = False
 
         return args_schema
