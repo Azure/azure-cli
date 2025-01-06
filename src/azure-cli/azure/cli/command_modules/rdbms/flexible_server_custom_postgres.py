@@ -982,6 +982,11 @@ def flexible_server_identity_remove(cmd, client, resource_group_name, server_nam
         if primary_id and primary_id.lower() in [identity.lower() for identity in identities]:
             raise CLIError("Cannot remove identity {} because it's used for data encryption.".format(primary_id))
 
+        geo_backup_id = instance.data_encryption.geo_backup_user_assigned_identity_id
+
+        if geo_backup_id and geo_backup_id.lower() in [identity.lower() for identity in identities]:
+            raise CLIError("Cannot remove identity {} because it's used for geo backup data encryption.".format(geo_backup_id))
+
     identities_map = {}
     for identity in identities:
         identities_map[identity] = None

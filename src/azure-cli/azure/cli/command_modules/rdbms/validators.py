@@ -453,13 +453,24 @@ def _pg_tier_validator(tier, sku_info):
 
 
 def compare_sku_names(sku_1, sku_2):
-    regex_pattern = r"_v(\d)"
+    regex_pattern = r"\D+(?P<core_number>\d+)\D+(?P<version>\d*)"
 
     sku_1_match = re.search(regex_pattern, sku_1)
     sku_2_match = re.search(regex_pattern, sku_2)
 
-    return (int(sku_2_match.group(1)) if sku_2_match else 0) - \
-        (int(sku_1_match.group(1)) if sku_1_match else 0)
+    # the case where version number is different, sort by the version number first
+    if sku_1_match.group('version') and int(sku_2_match.group('version')) > int(sku_1_match.group('version')):
+        return 1
+    if sku_1_match.group('version') and int(sku_2_match.group('version')) < int(sku_1_match.group('version')):
+        return -1
+
+    # the case where version number is the same, we want to sort by the core number
+    if int(sku_2_match.group('core_number')) > int(sku_1_match.group('core_number')):
+        return 1
+    if int(sku_2_match.group('core_number')) < int(sku_1_match.group('core_number')):
+        return -1
+
+    return 0
 
 
 def _pg_sku_name_validator(sku_name, sku_info, tier, instance):
@@ -601,11 +612,11 @@ def ip_address_validator(ns):
 def public_access_validator(ns):
     if ns.public_access:
         val = ns.public_access.lower()
-        if not (ns.public_access == 'Disabled' or ns.public_access == 'Enabled' or
-                val == 'all' or val == 'none' or (len(val.split('-')) == 1 and _validate_ip(val)) or
+        if not (val in ['disabled', 'enabled', 'all', 'none'] or
+                (len(val.split('-')) == 1 and _validate_ip(val)) or
                 (len(val.split('-')) == 2 and _validate_ip(val))):
             raise CLIError('incorrect usage: --public-access. '
-                           'Acceptable values are \'Disabled\', \'Enabled\', \'all\', \'none\',\'<startIP>\' and '
+                           'Acceptable values are \'Disabled\', \'Enabled\', \'All\', \'None\',\'<startIP>\' and '
                            '\'<startIP>-<destinationIP>\' where startIP and destinationIP ranges from '
                            '0.0.0.0 to 255.255.255.255')
         if len(val.split('-')) == 2:

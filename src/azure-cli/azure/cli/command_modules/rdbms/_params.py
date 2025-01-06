@@ -433,7 +433,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             help='Determines the public access. Enter single or range of IP addresses to be included in the allowed list of IPs. '
                  'IP address ranges must be dash-separated and not contain any spaces. '
                  'Specifying 0.0.0.0 allows public access from any resources deployed within Azure to access your server. '
-                 'Setting it to "None" sets the server in public access mode but does not create a firewall rule. ',
+                 'Setting it to "None" sets the server in public access mode but does not create a firewall rule. '
+                 'Acceptable values are \'Disabled\', \'Enabled\', \'All\', \'None\',\'<startIP>\' and '
+                 '\'<startIP>-<destinationIP>\' where startIP and destinationIP ranges from '
+                 '0.0.0.0 to 255.255.255.255. ',
             validator=public_access_validator
         )
 
