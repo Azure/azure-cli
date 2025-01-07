@@ -134,10 +134,14 @@ class SigShareReset(_SigShareUpdate):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.operation_type._required = False
         args_schema.operation_type._registered = False
-        args_schema.operation_type._default = 'Reset'
         args_schema.groups._registered = False
 
         return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        args.operation_type = 'Reset'
+        args.groups = []
 
 
 @register_command(
@@ -169,13 +173,13 @@ class SigShareEnableCommunity(_SigShareUpdate):
 
         args_schema.operation_type._required = False
         args_schema.operation_type._registered = False
-        args_schema.operation_type._default = 'EnableCommunity'
         args_schema.groups._registered = False
 
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
+        args.operation_type = 'EnableCommunity'
         args.groups = []
         if args.subscription_ids:
             args.groups.append({
