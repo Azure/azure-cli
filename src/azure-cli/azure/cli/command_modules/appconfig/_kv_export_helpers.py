@@ -295,28 +295,34 @@ def __export_feature_to_new_ms_schema(feature):
 
         feature_dict = {}
         feature_dict[FeatureFlagConstants.ID] = feature.name
-        feature_dict[FeatureFlagConstants.DESCRIPTION] = feature.description
-        feature_dict[FeatureFlagConstants.ENABLED] = enabled
-        feature_dict[FeatureFlagConstants.CONDITIONS] = custom_serialize_conditions(
-            feature.conditions
-        )
 
-        if feature.allocation is not None:
+        # No need to write null/empty values to file
+        if feature.description:
+            feature_dict[FeatureFlagConstants.DESCRIPTION] = feature.description
+
+        feature_dict[FeatureFlagConstants.ENABLED] = enabled
+
+        if feature.conditions:
+            feature_dict[FeatureFlagConstants.CONDITIONS] = custom_serialize_conditions(
+                feature.conditions
+            )
+
+        if feature.allocation:
             feature_dict[FeatureFlagConstants.ALLOCATION] = custom_serialize_allocation(
                 feature.allocation
             )
 
-        if feature.variants is not None:
+        if feature.variants:
             feature_dict[FeatureFlagConstants.VARIANTS] = custom_serialize_variants(
                 feature.variants
             )
 
-        if feature.telemetry is not None:
+        if feature.telemetry:
             feature_dict[FeatureFlagConstants.TELEMETRY] = custom_serialize_telemetry(
                 feature.telemetry
             )
 
-        if feature.display_name is not None:
+        if feature.display_name:
             feature_dict[FeatureFlagConstants.DISPLAY_NAME] = feature.display_name
 
         return feature_dict

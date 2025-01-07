@@ -39,6 +39,11 @@ class FeatureQueryFields(Enum):
     ALL = KEY | LABEL | NAME | LAST_MODIFIED | LOCKED | STATE | DESCRIPTION | CONDITIONS
 
 
+class FeatureFlagVersion(Enum):
+    V1 = 1
+    V2 = 2
+
+
 class FeatureFlagValue:
     """
     Schema of Value inside KeyValue when key is a Feature Flag.
@@ -72,12 +77,11 @@ class FeatureFlagValue:
         allocation=None,
         telemetry=None,
     ):
-        default_conditions = {FeatureFlagConstants.CLIENT_FILTERS: []}
 
         self.id = id_
-        self.description = "" if description is None else description
-        self.enabled = enabled if enabled else False
-        self.conditions = conditions if conditions else default_conditions
+        self.description = description
+        self.enabled = enabled
+        self.conditions = conditions
         self.allocation = allocation
         self.variants = variants
         self.telemetry = telemetry
@@ -94,7 +98,6 @@ class FeatureFlagValue:
             FeatureFlagConstants.VARIANTS: custom_serialize_variants(self.variants),
             FeatureFlagConstants.TELEMETRY: custom_serialize_telemetry(self.telemetry)
         }
-
         return json.dumps(featureflagvalue, indent=2, ensure_ascii=False)
 
 
@@ -110,6 +113,8 @@ class FeatureFlag:
         Label of the feature flag.
     :ivar str state:
         Represents if the Feature flag is On/Off/Conditionally On
+    :ivar bool enabled:
+        Represents if the Feature flag is On/Off
     :ivar str description:
         Description of Feature Flag
     :ivar bool locked:
@@ -136,6 +141,7 @@ class FeatureFlag:
         key=None,
         label=None,
         state=None,
+        enabled=None,
         description=None,
         conditions=None,
         locked=None,
@@ -148,6 +154,7 @@ class FeatureFlag:
         self.name = name
         self.key = key
         self.label = label
+        self.enabled = enabled
         self.state = state.name.lower()
         self.description = description
         self.conditions = conditions
@@ -164,6 +171,7 @@ class FeatureFlag:
             "Key": self.key,
             "Label": self.label,
             "State": self.state,
+            "Enabled": self.enabled,
             "Locked": self.locked,
             "Description": self.description,
             "Last Modified": self.last_modified,
@@ -220,7 +228,7 @@ class FeatureVariant:
     @classmethod
     def convert_from_dict(cls, variant_dict):
         """
-        Convert JSON string to FeatureVariant object
+        Convert dict to FeatureVariant object
 
         Args:
             dictionary - {string, Any}
@@ -274,7 +282,7 @@ class FeatureUserAllocation:
     @classmethod
     def convert_from_dict(cls, user_allocation_dict):
         """
-        Convert JSON string to FeatureUserAllocation object
+        Convert dict to FeatureUserAllocation object
 
         Args:
             dictionary - {string, Any}
@@ -322,7 +330,7 @@ class FeatureGroupAllocation:
     @classmethod
     def convert_from_dict(cls, group_allocation_dict):
         """
-        Convert JSON string to FeatureGroupAllocation object
+        Convert dict to FeatureGroupAllocation object
 
         Args:
             dictionary - {string, Any}
@@ -371,7 +379,7 @@ class FeaturePercentileAllocation:
     @classmethod
     def convert_from_dict(cls, percentile_allocation_dict):
         """
-        Convert JSON string to FeaturePercentileAllocation object
+        Convert dict to FeaturePercentileAllocation object
 
         Args:
             dictionary - {string, Any}
@@ -426,7 +434,7 @@ class FeaturePercentileAllocation:
     def __repr__(self):
         feature_percentile_allocation = {
             FeatureFlagConstants.VARIANT: self.variant,
-            FeatureFlagConstants.FROM: self.From,
+            FeatureFlagConstants.FROM: self.from_,
             FeatureFlagConstants.TO: self.to,
         }
 
@@ -472,7 +480,7 @@ class FeatureAllocation:
     @classmethod
     def convert_from_dict(cls, allocation_dict):
         """
-        Convert JSON string to FeatureAllocation object
+        Convert dict to FeatureAllocation object
 
         Args:
             dict {string, Any}
@@ -486,14 +494,17 @@ class FeatureAllocation:
         default_when_enabled = allocation_dict.get(
             FeatureFlagConstants.DEFAULT_WHEN_ENABLED, None
         )
+        seed = allocation_dict.get(
+            FeatureFlagConstants.SEED, None
+        )
 
         allocation = cls(
             default_when_enabled=default_when_enabled,
             default_when_disabled=default_when_disabled,
+            seed=seed
         )
 
         allocation_user = allocation_dict.get(FeatureFlagConstants.USER, None)
-
         # Convert all users to FeatureUserAllocation object
         if allocation_user:
             allocation_user_list = []
@@ -558,9 +569,9 @@ class FeatureTelemetry:
         self.metadata = metadata
 
     @classmethod
-    def convert_from_dict(cls, feature_telemetry_dict):
+    def convert_from_dict(cls, feature_telemetry_dict, feature_name):
         """
-        Convert JSON string to FeatureTelemetry object
+        Convert dict to FeatureTelemetry object
 
         Args:
             dictionary - {string, Any}
@@ -568,7 +579,11 @@ class FeatureTelemetry:
         Return:
             FeatureTelemetry object
         """
-        enabled = feature_telemetry_dict.get(FeatureFlagConstants.ENABLED, False)
+        enabled = None
+        telemetry_enabled = feature_telemetry_dict.get(FeatureFlagConstants.ENABLED, None)
+        if telemetry_enabled is not None:
+            enabled = convert_boolean_value(telemetry_enabled, feature_name)
+
         metadata = feature_telemetry_dict.get(FeatureFlagConstants.METADATA, None)
 
         return cls(enabled=enabled, metadata=metadata)
@@ -597,9 +612,10 @@ def custom_serialize_conditions(conditions_dict):
 
     for key, value in conditions_dict.items():
         if key == FeatureFlagConstants.CLIENT_FILTERS:
-            featurefilterdict[key] = [
-                feature_filter.__dict__ for feature_filter in value
-            ]
+            if value is not None:
+                featurefilterdict[key] = [
+                    feature_filter.__dict__ for feature_filter in value
+                ]
         else:
             featurefilterdict[key] = value
 
@@ -682,8 +698,8 @@ def custom_serialize_telemetry(telemetry):
 
     feature_telemetry_dict = {}
 
-    if telemetry.enabled:
-        feature_telemetry_dict[FeatureFlagConstants.TELEMETRY] = telemetry.enabled
+    if telemetry.enabled is not None:
+        feature_telemetry_dict[FeatureFlagConstants.ENABLED] = telemetry.enabled
 
     if telemetry.metadata:
         feature_telemetry_dict[FeatureFlagConstants.METADATA] = telemetry.metadata
@@ -760,11 +776,18 @@ def map_keyvalue_to_featureflag(keyvalue, show_all_details=True):
         state = FeatureState.ON
 
     conditions = feature_flag_value.conditions
+    filters = None
 
     # if conditions["client_filters"] list is not empty, make state conditional
-    filters = conditions[FeatureFlagConstants.CLIENT_FILTERS]
+    if conditions and FeatureFlagConstants.CLIENT_FILTERS in conditions:
+        filters = conditions[FeatureFlagConstants.CLIENT_FILTERS]
 
-    if filters and state == FeatureState.ON:
+    if (
+        filters or
+        feature_flag_value.allocation or
+        feature_flag_value.variants or
+        feature_flag_value.telemetry
+    ) and state == FeatureState.ON:
         state = FeatureState.CONDITIONAL
 
     feature_flag = FeatureFlag(
@@ -772,6 +795,7 @@ def map_keyvalue_to_featureflag(keyvalue, show_all_details=True):
         key=keyvalue.key,
         label=keyvalue.label,
         state=state,
+        enabled=feature_flag_value.enabled,
         description=feature_flag_value.description,
         conditions=conditions,
         locked=keyvalue.locked,
@@ -809,6 +833,7 @@ def map_keyvalue_to_featureflagvalue(keyvalue):
     try:
         # Make sure value string is a valid json
         feature_flag_dict = shell_safe_json_parse(keyvalue.value)
+        feature_flag_version = FeatureFlagVersion.V1  # Default to v1 feature flags
 
         # Make sure value json has all the fields we support in the backend
         valid_fields = {
@@ -828,32 +853,48 @@ def map_keyvalue_to_featureflagvalue(keyvalue):
                 "unsupported values. Unsupported values will be ignored.\n",
             )
 
+        # check if feature flag is version v1 or v2.
+        # We always default values for v1 feature flags but avoid defaults for v2 feature flags.
+        if (
+            FeatureFlagConstants.ALLOCATION in feature_flag_dict or
+            FeatureFlagConstants.VARIANTS in feature_flag_dict or
+            FeatureFlagConstants.TELEMETRY in feature_flag_dict
+        ):
+            feature_flag_version = FeatureFlagVersion.V2
+
         feature_name = feature_flag_dict.get(FeatureFlagConstants.ID, "")
+        if feature_flag_version == FeatureFlagVersion.V1:
+            description = feature_flag_dict.get(FeatureFlagConstants.DESCRIPTION, "")  # assign empty string as default
+            feature_flag_dict[FeatureFlagConstants.DESCRIPTION] = description
+
         if not feature_name:
             raise ValueError("Feature flag 'id' cannot be empty.")
 
         conditions = feature_flag_dict.get(FeatureFlagConstants.CONDITIONS, None)
+        default_conditions = {FeatureFlagConstants.CLIENT_FILTERS: []}
+
         if conditions:
-            client_filters = conditions.get(FeatureFlagConstants.CLIENT_FILTERS, [])
+            client_filters = conditions.get(FeatureFlagConstants.CLIENT_FILTERS, None)
 
             # Convert all filters to FeatureFilter objects
-            client_filters_list = []
-            for client_filter in client_filters:
-                # If there is a filter, it should always have a name
-                # In case it doesn't, ignore this filter
-                lowercase_filter = {k.lower(): v for k, v in client_filter.items()}
-                name = lowercase_filter.get(FeatureFlagConstants.NAME, None)
-                if name:
-                    params = lowercase_filter.get(
-                        FeatureFlagConstants.FILTER_PARAMETERS, {}
-                    )
-                    client_filters_list.append(FeatureFilter(name, params))
-                else:
-                    logger.warning("Ignoring this filter without the %s attribute:\n%s",
-                                   FeatureFlagConstants.FILTER_NAME,
-                                   json.dumps(client_filter, indent=2, ensure_ascii=False))
+            if client_filters:
+                client_filters_list = []
+                for client_filter in client_filters:
+                    # If there is a filter, it should always have a name
+                    # In case it doesn't, ignore this filter
+                    lowercase_filter = {k.lower(): v for k, v in client_filter.items()}
+                    name = lowercase_filter.get(FeatureFlagConstants.NAME, None)
+                    if name:
+                        params = lowercase_filter.get(
+                            FeatureFlagConstants.FILTER_PARAMETERS, {}
+                        )
+                        client_filters_list.append(FeatureFilter(name, params))
+                    else:
+                        logger.warning("Ignoring this filter without the %s attribute:\n%s",
+                                    FeatureFlagConstants.FILTER_NAME,
+                                    json.dumps(client_filter, indent=2, ensure_ascii=False))
 
-            conditions[FeatureFlagConstants.CLIENT_FILTERS] = client_filters_list
+                conditions[FeatureFlagConstants.CLIENT_FILTERS] = client_filters_list
 
             requirement_type = conditions.get(
                 FeatureFlagConstants.REQUIREMENT_TYPE, None
@@ -867,6 +908,15 @@ def map_keyvalue_to_featureflagvalue(keyvalue):
                         f"Feature '{feature_name}' must have an any/all requirement type."
                     )
                 conditions[FeatureFlagConstants.REQUIREMENT_TYPE] = requirement_type
+
+            # Backend returns conditions: {client_filters: None} for flags with no conditions.
+            # No need to write empty conditions to key-values.
+            if conditions.get(FeatureFlagConstants.CLIENT_FILTERS, None) is None and conditions.get(FeatureFlagConstants.REQUIREMENT_TYPE, None) is None:
+                feature_flag_dict[FeatureFlagConstants.CONDITIONS] = None if feature_flag_version == FeatureFlagVersion.V2 else default_conditions
+            else:
+                feature_flag_dict[FeatureFlagConstants.CONDITIONS] = conditions
+        elif feature_flag_version == FeatureFlagVersion.V1:
+            feature_flag_dict[FeatureFlagConstants.CONDITIONS] = default_conditions
 
         # Allocation
         allocation = feature_flag_dict.get(FeatureFlagConstants.ALLOCATION, None)
@@ -887,11 +937,11 @@ def map_keyvalue_to_featureflagvalue(keyvalue):
         # Telemetry
         telemetry = feature_flag_dict.get(FeatureFlagConstants.TELEMETRY, None)
         if telemetry:
-            feature_flag_dict[FeatureFlagConstants.TELEMETRY] = FeatureTelemetry.convert_from_dict(telemetry)
+            feature_flag_dict[FeatureFlagConstants.TELEMETRY] = FeatureTelemetry.convert_from_dict(telemetry, feature_name)
 
         feature_flag_value = FeatureFlagValue(
             id_=feature_name,
-            description=feature_flag_dict.get(FeatureFlagConstants.DESCRIPTION, ""),
+            description=feature_flag_dict.get(FeatureFlagConstants.DESCRIPTION, None),
             enabled=feature_flag_dict.get(FeatureFlagConstants.ENABLED, False),
             display_name=feature_flag_dict.get(FeatureFlagConstants.DISPLAY_NAME, None),
             conditions=feature_flag_dict.get(FeatureFlagConstants.CONDITIONS, None),
@@ -937,6 +987,25 @@ def is_feature_flag(kv):
             kv.content_type == FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE
         )
     return False
+
+
+def convert_boolean_value(enabled, feature_name):
+    """
+    Convert the value to a boolean if it is a string.
+
+    :param Union[str, bool] enabled: Value to be converted.
+    :return: Converted value.
+    :rtype: bool
+    """
+    if isinstance(enabled, bool):
+        return enabled
+    if enabled.lower() == "true":
+        return True
+    if enabled.lower() == "false":
+        return False
+    raise ValueError(
+        f"Invalid setting 'enabled' with value '{enabled}' for feature '{feature_name}'."
+    )
 
 
 class FeatureManagementReservedKeywords:

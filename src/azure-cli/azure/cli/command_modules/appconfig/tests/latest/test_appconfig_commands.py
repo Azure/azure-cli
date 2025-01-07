@@ -1722,7 +1722,7 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
 
         # # Duplicate features in both schemas
         imported_duplicate_features_both_schemas_file_path = os.path.join(TEST_DIR, 'import_duplicate_features_both_schemas.json')
-        exported_duplicate_features_both_schemas_file_path = os.path.join(TEST_DIR, 'export_features_both_schema_underscore_case_file_path.json')
+        exported_duplicate_features_both_schemas_file_path = os.path.join(TEST_DIR, 'export_features_duplicate_features_both_schemas_path.json')
         expected_export_duplicate_features_both_schemas_file_path = os.path.join(TEST_DIR, 'expected_export_duplicate_features_both_schemas.json')
 
         self.kwargs.update({

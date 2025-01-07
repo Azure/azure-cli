@@ -56,9 +56,11 @@ from ._featuremodels import (
     FeatureAllocation,
     FeatureFilter,
     FeatureVariant,
+    FeatureTelemetry,
     is_feature_flag,
     FeatureFlagValue,
     FeatureManagementReservedKeywords,
+    convert_boolean_value
 )
 
 logger = get_logger(__name__)
@@ -125,7 +127,6 @@ def __read_with_appropriate_encoding(file_path, format_):
 
 
 def __read_features_from_file(file_path, format_):
-    config_data = {}
     features_dict = {}
 
     if format_ == "properties":
@@ -295,37 +296,36 @@ def __read_features_from_msfm_schema(feature_flags_list):
             feature_id = feature[FeatureFlagConstants.ID]
 
             new_feature = FeatureFlagValue(
-                id_=str(feature.get(FeatureFlagConstants.ID)),
-                enabled=_convert_boolean_value(
+                id_=str(feature_id),
+                enabled=convert_boolean_value(
                     feature.get(FeatureFlagConstants.ENABLED, False), feature_id
                 ),
                 description=feature.get(FeatureFlagConstants.DESCRIPTION, None),
             )
-
             if conditions := feature.get(FeatureFlagConstants.CONDITIONS, None):
-                client_filters = conditions.get(FeatureFlagConstants.CLIENT_FILTERS, [])
+                new_feature.conditions = conditions
+                client_filters = conditions.get(FeatureFlagConstants.CLIENT_FILTERS, None)
 
                 # Convert all filters to FeatureFilter objects
-                client_filters_list = []
-                for client_filter in client_filters:
-                    # If there is a filter, it should always have a name
-                    # In case it doesn't, ignore this filter
-                    lowercase_filter = {k.lower(): v for k, v in client_filter.items()}
-                    name = lowercase_filter.get(FeatureFlagConstants.NAME)
-                    if name:
-                        params = lowercase_filter.get(
-                            FeatureFlagConstants.FILTER_PARAMETERS, {}
-                        )
-                        client_filters_list.append(FeatureFilter(name, params))
-                    else:
-                        logger.warning(
-                            "Ignoring this filter without the %s attribute:\n%s",
-                            FeatureFlagConstants.FILTER_NAME,
-                            json.dumps(client_filter, indent=2, ensure_ascii=False),
-                        )
-
-                new_feature.conditions[FeatureFlagConstants.CLIENT_FILTERS] = client_filters_list
-
+                if client_filters:
+                    client_filters_list = []
+                    for client_filter in client_filters:
+                        # If there is a filter, it should always have a name
+                        # In case it doesn't, ignore this filter
+                        lowercase_filter = {k.lower(): v for k, v in client_filter.items()}
+                        name = lowercase_filter.get(FeatureFlagConstants.NAME)
+                        if name:
+                            params = lowercase_filter.get(
+                                FeatureFlagConstants.FILTER_PARAMETERS, {}
+                            )
+                            client_filters_list.append(FeatureFilter(name, params))
+                        else:
+                            logger.warning(
+                                "Ignoring this filter without the %s attribute:\n%s",
+                                FeatureFlagConstants.FILTER_NAME,
+                                json.dumps(client_filter, indent=2, ensure_ascii=False),
+                            ) 
+                    new_feature.conditions[FeatureFlagConstants.CLIENT_FILTERS] = client_filters_list
                 requirement_type = conditions.get(
                     FeatureFlagConstants.REQUIREMENT_TYPE, None
                 )
@@ -350,7 +350,7 @@ def __read_features_from_msfm_schema(feature_flags_list):
                     new_feature.variants.append(FeatureVariant.convert_from_dict(variant))
 
             if telemetry := feature.get(FeatureFlagConstants.TELEMETRY, None):
-                new_feature.telemetry = telemetry
+                new_feature.telemetry = FeatureTelemetry.convert_from_dict(telemetry, feature_id)
 
             feature_flags.append(new_feature)
 
@@ -452,25 +452,6 @@ def __read_features_from_dotnet_schema(features_dict, feature_management_keyword
             feature_flags.append(feature_flag_value)
 
     return feature_flags
-
-
-def _convert_boolean_value(enabled, feature_name):
-    """
-    Convert the value to a boolean if it is a string.
-
-    :param Union[str, bool] enabled: Value to be converted.
-    :return: Converted value.
-    :rtype: bool
-    """
-    if isinstance(enabled, bool):
-        return enabled
-    if enabled.lower() == "true":
-        return True
-    if enabled.lower() == "false":
-        return False
-    raise ValueError(
-        f"Invalid setting 'enabled' with value '{enabled}' for feature '{feature_name}'."
-    )
 
 
 def __import_kvset_from_file(
