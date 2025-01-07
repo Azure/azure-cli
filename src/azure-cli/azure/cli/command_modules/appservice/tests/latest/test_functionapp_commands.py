@@ -2769,7 +2769,7 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
         ])
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
-    def test_consumption_functionapp_disabled_public_network_access_storage(self, resource_group):
+    def test_functionapp_consumption_disabled_public_network_access_storage(self, resource_group):
         functionapp_name = self.create_random_name('functionapp', 24)
         storage_account = self.create_random_name('funcstorage1', 24)
 
@@ -2780,7 +2780,7 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
 
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
-    def test_consumption_functionapp_restricted_public_network_access_storage(self, resource_group):
+    def test_functionapp_consumption_restricted_public_network_access_storage(self, resource_group):
         functionapp_name = self.create_random_name('functionapp', 24)
         storage_account = self.create_random_name('funcstorage', 24)
 
@@ -2791,7 +2791,7 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
 
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
-    def test_elastic_premium_functionapp_restricted_public_network_access_storage_no_vnet(self, resource_group):
+    def test_functionapp_elastic_premium_restricted_public_network_access_storage_no_vnet(self, resource_group):
         functionapp_name = self.create_random_name('functionapp', 24)
         storage_account = self.create_random_name('funcstorage', 24)
         ep_plan_name = self.create_random_name('epplan', 24)
@@ -2805,7 +2805,7 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
 
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
-    def test_elastic_premium_functionapp_restricted_public_network_access_storage_mutually_exclusive_flags(self, resource_group):
+    def test_functionapp_elastic_premium_restricted_public_network_access_storage_mutually_exclusive_flags(self, resource_group):
         functionapp_name = self.create_random_name('functionapp', 24)
         storage_account = self.create_random_name('funcstorage', 24)
         ep_plan_name = self.create_random_name('epplan', 24)
@@ -2821,6 +2821,41 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
 
         with self.assertRaises(ValidationError):
             self.cmd('functionapp create -g {} -n {} -s {} -p {} --functions-version 4 --vnet {} --subnet {} --configure-networking-later'.format(resource_group, functionapp_name, storage_account, ep_plan_name, vnet_name, subnet_name))
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    def test_functionapp_elastic_premium_restricted_public_network_access_storage_vnet(self, resource_group):
+        functionapp_name = self.create_random_name('functionapp', 24)
+        storage_account = self.create_random_name('funcstorage', 24)
+        ep_plan_name = self.create_random_name('epplan', 24)
+        subnet_name = self.create_random_name('swiftsubnet', 24)
+        vnet_name = self.create_random_name('swiftname', 24)
+
+        self.cmd('functionapp plan create -g {} -n {} --sku EP1'.format(resource_group, ep_plan_name))
+
+        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS --default-action Deny --public-network-access Enabled'.format(storage_account, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
+
+        subnet_id = self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(
+            resource_group, vnet_name, subnet_name)).get_output_in_json()['newVNet']['subnets'][0]['id']
+
+        self.cmd('functionapp create -g {} -n {} -s {} -p {} --functions-version 4 --vnet {} --subnet {}'.format(resource_group, functionapp_name, storage_account, ep_plan_name, vnet_name, subnet_name)).assert_with_checks([
+            JMESPathCheck('vnetContentShareEnabled', True),
+            JMESPathCheck('vnetRouteAllEnabled', True),
+            JMESPathCheck('virtualNetworkSubnetId', subnet_id)
+        ])
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    def test_functionapp_elastic_premium_restricted_public_network_access_storage_configure_vnet_later(self, resource_group):
+        functionapp_name = self.create_random_name('functionapp', 24)
+        storage_account = self.create_random_name('funcstorage', 24)
+        ep_plan_name = self.create_random_name('epplan', 24)
+
+        self.cmd('functionapp plan create -g {} -n {} --sku EP1'.format(resource_group, ep_plan_name))
+
+        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS --default-action Deny --public-network-access Enabled'.format(storage_account, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
+
+        self.cmd('functionapp create -g {} -n {} -s {} -p {} --functions-version 4 --cnl'.format(resource_group, functionapp_name, storage_account, ep_plan_name)).assert_with_checks([
+            JMESPathCheck('vnetContentShareEnabled', True),
+        ])
 
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
