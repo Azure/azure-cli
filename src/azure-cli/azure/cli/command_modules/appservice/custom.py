@@ -4785,7 +4785,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        always_ready_instances=None, maximum_instance_count=None, instance_memory=None,
                        flexconsumption_location=None, deployment_storage_name=None,
                        deployment_storage_container_name=None, deployment_storage_auth_type=None,
-                       deployment_storage_auth_value=None, zone_redundant=False):
+                       deployment_storage_auth_value=None, zone_redundant=False, configure_networking_later=None):
     # pylint: disable=too-many-statements, too-many-branches
 
     if functions_version is None and flexconsumption_location is None:
@@ -5007,6 +5007,15 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
             raise ValidationError('The Consumption plan does not support storage accounts with network restrictions. '
                                   'If you wish to use virtual networks, please create your app on a different hosting '
                                   'plan.')
+
+        if not vnet and not configure_networking_later:
+            raise ValidationError('The storage account you selected "{}" has networking restrictions. No virtual '
+                                  'networking was configured so your app will not start. Please try again with '
+                                  'virtual networking integration by adding the --vnet and --subnet flags. If '
+                                  'you wish to do this at a later time, use the --configure-networking-later '
+                                  'flag instead.'.format(storage_account))
+        if vnet and configure_networking_later:
+            raise ValidationError('The --vnet and --configure-networking-later flags are mutually exclusive.')
 
     con_string = _validate_and_get_connection_string(cmd.cli_ctx, resource_group_name, storage_account)
 

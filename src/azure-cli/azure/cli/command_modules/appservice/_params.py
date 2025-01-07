@@ -828,6 +828,8 @@ subscription than the app service environment, please use the resource ID for --
                    "string. For the system assigned managed-identity authentication type, this parameter is not applicable and should be left empty.", is_preview=True)
         c.argument('zone_redundant', arg_type=get_three_state_flag(),
                    help='Enable zone redundancy for high availability. Applies to Flex Consumption SKU only.', is_preview=True)
+        c.argument('configure_networking_later', options_list=['--configure-networking-later', '--cnl'], arg_type=get_three_state_flag(),
+                   help='Use this option if you want to configure networking later for an app using network-restricted storage.')
 
     with self.argument_context('functionapp deployment config set') as c:
         c.argument('deployment_storage_name', options_list=['--deployment-storage-name', '--dsn'], help="The deployment storage account name.", is_preview=True)
