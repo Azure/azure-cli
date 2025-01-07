@@ -324,7 +324,7 @@ def __read_features_from_msfm_schema(feature_flags_list):
                                 "Ignoring this filter without the %s attribute:\n%s",
                                 FeatureFlagConstants.FILTER_NAME,
                                 json.dumps(client_filter, indent=2, ensure_ascii=False),
-                            ) 
+                            )
                     new_feature.conditions[FeatureFlagConstants.CLIENT_FILTERS] = client_filters_list
                 requirement_type = conditions.get(
                     FeatureFlagConstants.REQUIREMENT_TYPE, None

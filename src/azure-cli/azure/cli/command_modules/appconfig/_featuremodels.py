@@ -15,6 +15,7 @@ from ._constants import FeatureFlagConstants
 # pylint: disable=too-few-public-methods
 # pylint: disable=too-many-instance-attributes
 # pylint: disable=line-too-long
+# pylint: disable=too-many-branches
 
 logger = get_logger(__name__)
 
@@ -890,9 +891,11 @@ def map_keyvalue_to_featureflagvalue(keyvalue):
                         )
                         client_filters_list.append(FeatureFilter(name, params))
                     else:
-                        logger.warning("Ignoring this filter without the %s attribute:\n%s",
-                                    FeatureFlagConstants.FILTER_NAME,
-                                    json.dumps(client_filter, indent=2, ensure_ascii=False))
+                        logger.warning(
+                            "Ignoring this filter without the %s attribute:\n%s",
+                            FeatureFlagConstants.FILTER_NAME,
+                            json.dumps(client_filter, indent=2, ensure_ascii=False)
+                        )
 
                 conditions[FeatureFlagConstants.CLIENT_FILTERS] = client_filters_list
 
