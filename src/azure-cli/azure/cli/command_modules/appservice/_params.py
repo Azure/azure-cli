@@ -667,7 +667,7 @@ subscription than the app service environment, please use the resource ID for --
                    arg_group='Azure Active Directory', help="One or more token audiences (comma-delimited).")
         c.argument('issuer', options_list=['--aad-token-issuer-url'],
                    help='This url can be found in the JSON output returned from your active directory endpoint using your tenantID. The endpoint can be queried from `az cloud show` at \"endpoints.activeDirectory\". '
-                        'The tenantID can be found using `az account show`. Get the \"issuer\" from the JSON at <active directory endpoint>/<tenantId>/.well-known/openid-configuration.',
+                        'The tenantID can be found using `az account show`. Get the \"issuer\" from the JSON at `<active directory endpoint>/<tenantId>/.well-known/openid-configuration`.',
                    arg_group='Azure Active Directory')
         c.argument('facebook_app_id', arg_group='Facebook',
                    help="Application ID to integrate Facebook Sign-in into your web app")
