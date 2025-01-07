@@ -758,14 +758,14 @@ def map_featureflag_to_keyvalue(featureflag):
     return set_kv
 
 
-def map_keyvalue_to_featureflag(keyvalue, show_all_details=True):
+def map_keyvalue_to_featureflag(keyvalue, show_all_details=True, hide_enabled=True):
     """
     Helper Function to convert KeyValue object to FeatureFlag object for display
 
     Args:
         keyvalue - KeyValue object to be converted
         show_all_details - Boolean for controlling whether we want to display "Conditions", "Allocation", "Variants", "Telemetry" or not
-
+        hide_enabled - Boolean for controlling whether we want to hide the "Enabled" field or not
     Return:
         FeatureFlag object
     """
@@ -816,6 +816,11 @@ def map_keyvalue_to_featureflag(keyvalue, show_all_details=True):
         del feature_flag.allocation
         del feature_flag.variants
         del feature_flag.telemetry
+
+    if hide_enabled:
+        del feature_flag.enabled
+    else:
+        del feature_flag.state
     return feature_flag
 
 

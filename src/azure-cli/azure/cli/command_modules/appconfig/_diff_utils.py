@@ -154,9 +154,6 @@ def get_serializer(level):
 
         # Feature flag format: {"feature": <feature-name>, "state": <on/off>, "conditions": <conditions-dict>}
         if is_feature_flag(obj):
-            feature = map_keyvalue_to_featureflag(obj)
-            # name
-            feature_json = {'feature': feature.name}
 
             # State property doesn't make sense in feature flag version 2 schema beacuse of the added properties - variants, allocation, telemetry
             # The State property only exists in the CLI, we should move to showing enabled property instead as the other clients
@@ -164,11 +161,14 @@ def get_serializer(level):
             env_compatibility_mode = os.environ.get("AZURE_APPCONFIG_FM_COMPATIBLE", True)
             compatibility_mode = str(env_compatibility_mode).lower() == "true"
 
-            if compatibility_mode:
-                # state
+            feature = map_keyvalue_to_featureflag(obj, hide_enabled=compatibility_mode)
+            # name
+            feature_json = {'feature': feature.name}
+            # state
+            if hasattr(feature, 'state'):
                 feature_json['state'] = feature.state
-            elif feature.enabled is not None:
-                # enabled
+            # enabled
+            if hasattr(feature, 'enabled'):
                 feature_json['enabled'] = feature.enabled
             # description
             if feature.description is not None:
