@@ -2265,7 +2265,15 @@ def process_gallery_image_version_namespace(cmd, namespace):
                         lun = data_disk_images[j * 2]
                         des_id = data_disk_images[j * 2 + 1]
                         des_id = _disk_encryption_set_format(cmd, namespace, des_id)
-                        data_disk_image_encryption_list.append({"lun": lun, "disk_encryption_set_id": des_id})
+                        try:
+                            data_disk_image_encryption_list.append({"lun": int(lun), "disk_encryption_set_id": des_id})
+                        except ValueError:
+                            raise ArgumentUsageError(
+                                "usage error: {} is an invalid target region encryption argument. "
+                                "LUN and disk encryption set for data disk should appear in pair in "
+                                "--target-region-encryption. Example: osdes,0,datades0,1,datades1"
+                            )
+
                     data_disk_images = data_disk_image_encryption_list
 
             if hasattr(namespace, 'target_region_cvm_encryption') and namespace.target_region_cvm_encryption:
@@ -2393,7 +2401,14 @@ def process_gallery_image_version_namespace(cmd, namespace):
                         lun = data_disk_images[j * 2]
                         des_id = data_disk_images[j * 2 + 1]
                         des_id = _disk_encryption_set_format(cmd, namespace, des_id)
-                        data_disk_image_encryption_list.append({"lun": lun, "disk_encryption_set_id": des_id})
+                        try:
+                            data_disk_image_encryption_list.append({"lun": int(lun), "disk_encryption_set_id": des_id})
+                        except ValueError:
+                            raise ArgumentUsageError(
+                                "usage error: {} is an invalid target edge zone encryption. "
+                                "LUN and disk encryption set for data disk should appear in pair in "
+                                "--target-edge-zone-encryption. Example: 1,osdes,0,datades0,1,datades1"
+                            )
                     data_disk_images = data_disk_image_encryption_list
 
             if os_disk_image or data_disk_images:

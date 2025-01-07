@@ -4882,7 +4882,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                 data_snapshot_luns = list(range(len(data_snapshots)))
             data_disk_images = []
             for i, s in enumerate(data_snapshots):
-                data_disk_images.append({"source": {"id": s}, "lun": data_snapshot_luns[i]})
+                data_disk_images.append({"source": {"id": s}, "lun": int(data_snapshot_luns[i])})
         # from vhd, only support os image now
         if cmd.supported_api_version(min_api='2020-09-30', operation_group='gallery_image_versions'):
             # OS disk
@@ -4961,7 +4961,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
 
 def undelete_image_version(cmd, resource_group_name, gallery_name, gallery_image_name, gallery_image_version,
                            location=None, tags=None, allow_replicated_location_deletion=None):
-    ImageVersion = cmd.get_models('GalleryImageVersion')
+    # ImageVersion = cmd.get_models('GalleryImageVersion')
     client = _compute_client_factory(cmd.cli_ctx)
 
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
@@ -4972,21 +4972,35 @@ def undelete_image_version(cmd, resource_group_name, gallery_name, gallery_image
         from azure.cli.core.azclierror import InvalidArgumentValueError
         raise InvalidArgumentValueError('soft-deletion is not enabled in Gallery \'{}\''.format(gallery_name))
 
-    image_version = ImageVersion(publishing_profile=None, location=location, tags=(tags or {}),
-                                 storage_profile=None)
+    args = {
+        "publishing_profile": None,
+        "location": location,
+        "tags": tags or {},
+        "storage_profile": None,
+    }
+    # image_version = ImageVersion(publishing_profile=None, location=location, tags=(tags or {}),
+    #                              storage_profile=None)
     if allow_replicated_location_deletion is not None:
-        GalleryImageVersionSafetyProfile = cmd.get_models('GalleryImageVersionSafetyProfile',
-                                                          operation_group='gallery_image_versions')
-        image_version.safety_profile = GalleryImageVersionSafetyProfile(
-            allow_deletion_of_replicated_locations=allow_replicated_location_deletion)
+        # GalleryImageVersionSafetyProfile = cmd.get_models('GalleryImageVersionSafetyProfile',
+        #                                                   operation_group='gallery_image_versions')
+        args["safety_profile"] = {
+            "allow_deletion_of_replicated_locations": allow_replicated_location_deletion
+        }
 
-    return client.gallery_image_versions.begin_create_or_update(
-        resource_group_name=resource_group_name,
-        gallery_name=gallery_name,
-        gallery_image_name=gallery_image_name,
-        gallery_image_version_name=gallery_image_version,
-        gallery_image_version=image_version
-    )
+    # return client.gallery_image_versions.begin_create_or_update(
+    #     resource_group_name=resource_group_name,
+    #     gallery_name=gallery_name,
+    #     gallery_image_name=gallery_image_name,
+    #     gallery_image_version_name=gallery_image_version,
+    #     gallery_image_version=image_version
+    # )
+    args["resource_group"] = resource_group_name
+    args["gallery_name"] = gallery_name
+    args["gallery_image_definition"] = gallery_image_name
+    args["gallery_image_version"] = gallery_image_version
+
+    from .aaz.latest.sig.image_version import Create
+    return Create(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 
 def fix_gallery_image_date_info(date_info):

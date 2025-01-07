@@ -19,9 +19,9 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-03-03",
+        "version": "2023-07-03",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/galleries/{}/images/{}/versions", "2022-03-03"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/galleries/{}/images/{}/versions", "2023-07-03"],
         ]
     }
 
@@ -43,7 +43,7 @@ class List(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.gallery_image_definition = AAZStrArg(
-            options=["-i", "--gallery-image-name", "--gallery-image-definition"],
+            options=["-i", "--gallery-image-definition"],
             help="Gallery image definition.",
             required=True,
         )
@@ -127,7 +127,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-03-03",
+                    "api-version", "2023-07-03",
                     required=True,
                 ),
             }
@@ -198,9 +198,13 @@ class List(AAZCommand):
             )
             properties.replication_status = AAZObjectType(
                 serialized_name="replicationStatus",
+                flags={"read_only": True},
             )
             properties.safety_profile = AAZObjectType(
                 serialized_name="safetyProfile",
+            )
+            properties.security_profile = AAZObjectType(
+                serialized_name="securityProfile",
             )
             properties.storage_profile = AAZObjectType(
                 serialized_name="storageProfile",
@@ -320,6 +324,41 @@ class List(AAZCommand):
             _element.category = AAZStrType()
             _element.details = AAZStrType()
 
+            security_profile = cls._schema_on_200.value.Element.properties.security_profile
+            security_profile.uefi_settings = AAZObjectType(
+                serialized_name="uefiSettings",
+            )
+
+            uefi_settings = cls._schema_on_200.value.Element.properties.security_profile.uefi_settings
+            uefi_settings.additional_signatures = AAZObjectType(
+                serialized_name="additionalSignatures",
+            )
+            uefi_settings.signature_template_names = AAZListType(
+                serialized_name="signatureTemplateNames",
+            )
+
+            additional_signatures = cls._schema_on_200.value.Element.properties.security_profile.uefi_settings.additional_signatures
+            additional_signatures.db = AAZListType()
+            additional_signatures.dbx = AAZListType()
+            additional_signatures.kek = AAZListType()
+            additional_signatures.pk = AAZObjectType()
+            _ListHelper._build_schema_uefi_key_read(additional_signatures.pk)
+
+            db = cls._schema_on_200.value.Element.properties.security_profile.uefi_settings.additional_signatures.db
+            db.Element = AAZObjectType()
+            _ListHelper._build_schema_uefi_key_read(db.Element)
+
+            dbx = cls._schema_on_200.value.Element.properties.security_profile.uefi_settings.additional_signatures.dbx
+            dbx.Element = AAZObjectType()
+            _ListHelper._build_schema_uefi_key_read(dbx.Element)
+
+            kek = cls._schema_on_200.value.Element.properties.security_profile.uefi_settings.additional_signatures.kek
+            kek.Element = AAZObjectType()
+            _ListHelper._build_schema_uefi_key_read(kek.Element)
+
+            signature_template_names = cls._schema_on_200.value.Element.properties.security_profile.uefi_settings.signature_template_names
+            signature_template_names.Element = AAZStrType()
+
             storage_profile = cls._schema_on_200.value.Element.properties.storage_profile
             storage_profile.data_disk_images = AAZListType(
                 serialized_name="dataDiskImages",
@@ -362,6 +401,9 @@ class List(AAZCommand):
                 serialized_name="communityGalleryImageId",
             )
             source.id = AAZStrType()
+            source.virtual_machine_id = AAZStrType(
+                serialized_name="virtualMachineId",
+            )
 
             tags = cls._schema_on_200.value.Element.tags
             tags.Element = AAZStrType()
@@ -443,6 +485,27 @@ class _ListHelper:
         _schema.id = cls._schema_gallery_disk_image_source_read.id
         _schema.storage_account_id = cls._schema_gallery_disk_image_source_read.storage_account_id
         _schema.uri = cls._schema_gallery_disk_image_source_read.uri
+
+    _schema_uefi_key_read = None
+
+    @classmethod
+    def _build_schema_uefi_key_read(cls, _schema):
+        if cls._schema_uefi_key_read is not None:
+            _schema.type = cls._schema_uefi_key_read.type
+            _schema.value = cls._schema_uefi_key_read.value
+            return
+
+        cls._schema_uefi_key_read = _schema_uefi_key_read = AAZObjectType()
+
+        uefi_key_read = _schema_uefi_key_read
+        uefi_key_read.type = AAZStrType()
+        uefi_key_read.value = AAZListType()
+
+        value = _schema_uefi_key_read.value
+        value.Element = AAZStrType()
+
+        _schema.type = cls._schema_uefi_key_read.type
+        _schema.value = cls._schema_uefi_key_read.value
 
 
 __all__ = ["List"]
