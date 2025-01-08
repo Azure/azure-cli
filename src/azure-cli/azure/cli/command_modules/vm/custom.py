@@ -806,8 +806,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               storage_account_type=None, vnet_type=None, nsg_type=None, public_ip_address_type=None, nic_type=None,
               validate=False, custom_data=None, secrets=None, plan_name=None, plan_product=None, plan_publisher=None,
               plan_promotion_code=None, license_type=None, assign_identity=None, identity_scope=None,
-              identity_role=None, identity_role_id=None, application_security_groups=None, zone=None,
-              boot_diagnostics_storage=None, ultra_ssd_enabled=None,
+              identity_role=None, identity_role_id=None, encryption_identity=None,
+              application_security_groups=None, zone=None, boot_diagnostics_storage=None, ultra_ssd_enabled=None,
               ephemeral_os_disk=None, ephemeral_os_disk_placement=None,
               proximity_placement_group=None, dedicated_host=None, dedicated_host_group=None, aux_subscriptions=None,
               priority=None, max_price=None, eviction_policy=None, enable_agent=None, workspace=None, vmss=None,
@@ -822,7 +822,9 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               os_disk_security_encryption_type=None, os_disk_secure_vm_disk_encryption_set=None,
               disk_controller_type=None, disable_integrity_monitoring_autoupgrade=False, enable_proxy_agent=None,
               proxy_agent_mode=None, source_snapshots_or_disks=None, source_snapshots_or_disks_size_gb=None,
-              source_disk_restore_point=None, source_disk_restore_point_size_gb=None, ssh_key_type=None):
+              source_disk_restore_point=None, source_disk_restore_point_size_gb=None, ssh_key_type=None,
+              additional_scheduled_events=None, enable_user_reboot_scheduled_events=None,
+              enable_user_redeploy_scheduled_events=None):
 
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
@@ -1044,7 +1046,9 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         os_disk_security_encryption_type=os_disk_security_encryption_type,
         os_disk_secure_vm_disk_encryption_set=os_disk_secure_vm_disk_encryption_set,
         disk_controller_type=disk_controller_type, enable_proxy_agent=enable_proxy_agent,
-        proxy_agent_mode=proxy_agent_mode)
+        proxy_agent_mode=proxy_agent_mode, additional_scheduled_events=additional_scheduled_events,
+        enable_user_reboot_scheduled_events=enable_user_reboot_scheduled_events,
+        enable_user_redeploy_scheduled_events=enable_user_redeploy_scheduled_events)
 
     vm_resource['dependsOn'] = vm_dependencies
 
@@ -1064,6 +1068,30 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
             role_assignment_guid = str(_gen_guid())
             master_template.add_resource(build_msi_role_assignment(vm_name, vm_id, identity_role_id,
                                                                    role_assignment_guid, identity_scope))
+
+    if encryption_identity:
+        if not cmd.supported_api_version(min_api='2023-09-01', resource_type=ResourceType.MGMT_COMPUTE):
+            raise CLIError("Usage error: Encryption Identity required API version 2023-09-01 or higher."
+                           "You can set the cloud's profile to use the required API Version with:"
+                           "az cloud set --profile latest --name <cloud name>")
+
+        if 'identity' in vm_resource and 'userAssignedIdentities' in vm_resource['identity'] \
+            and encryption_identity.lower() in \
+                (k.lower() for k in vm_resource['identity']['userAssignedIdentities'].keys()):
+            if 'securityProfile' not in vm_resource['properties']:
+                vm_resource['properties']['securityProfile'] = {}
+            if 'encryptionIdentity' not in vm_resource['properties']['securityProfile']:
+                vm_resource['properties']['securityProfile']['encryptionIdentity'] = {}
+
+            vm_securityProfile_EncryptionIdentity = vm_resource['properties']['securityProfile']['encryptionIdentity']
+
+            if 'userAssignedIdentityResourceId' not in vm_securityProfile_EncryptionIdentity or \
+                    vm_securityProfile_EncryptionIdentity['userAssignedIdentityResourceId'] != encryption_identity:
+                vm_resource['properties']['securityProfile']['encryptionIdentity']['userAssignedIdentityResourceId'] \
+                    = encryption_identity
+        else:
+            raise CLIError("Encryption Identity should be an ARM Resource ID of one of the "
+                           "user assigned identities associated to the resource")
 
     if workspace is not None:
         workspace_id = _prepare_workspace(cmd, resource_group_name, workspace)
@@ -1539,7 +1567,8 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
               enable_vtpm=None, user_data=None, capacity_reservation_group=None,
               dedicated_host=None, dedicated_host_group=None, size=None, ephemeral_os_disk_placement=None,
               enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None, disk_controller_type=None,
-              security_type=None, enable_proxy_agent=None, proxy_agent_mode=None, **kwargs):
+              security_type=None, enable_proxy_agent=None, proxy_agent_mode=None, additional_scheduled_events=None,
+              enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None, **kwargs):
     from azure.mgmt.core.tools import parse_resource_id, resource_id, is_valid_resource_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching
     SecurityProfile, UefiSettings = cmd.get_models('SecurityProfile', 'UefiSettings')
@@ -1701,6 +1730,38 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
                                   "creating VM with the option '--ephemeral-os-disk true'")
     if disk_controller_type is not None:
         vm.storage_profile.disk_controller_type = disk_controller_type
+
+    if additional_scheduled_events is not None or \
+            enable_user_reboot_scheduled_events is not None or enable_user_redeploy_scheduled_events is not None:
+        if vm.scheduled_events_policy is None:
+            ScheduledEventsPolicy = cmd.get_models('ScheduledEventsPolicy')
+            UserInitiatedRedeploy = cmd.get_models('UserInitiatedRedeploy')
+            UserInitiatedReboot = cmd.get_models('UserInitiatedReboot')
+            EventGridAndResourceGraph = cmd.get_models('EventGridAndResourceGraph')
+            ScheduledEventsAdditionalPublishingTargets = cmd.get_models('ScheduledEventsAdditionalPublishingTargets')
+            vm.scheduled_events_policy = ScheduledEventsPolicy()
+            vm.scheduled_events_policy.scheduled_events_additional_publishing_targets = \
+                ScheduledEventsAdditionalPublishingTargets()
+            vm.scheduled_events_policy.scheduled_events_additional_publishing_targets.\
+                event_grid_and_resource_graph = EventGridAndResourceGraph()
+            vm.scheduled_events_policy.user_initiated_reboot = UserInitiatedReboot()
+            vm.scheduled_events_policy.user_initiated_redeploy = UserInitiatedRedeploy()
+            vm.scheduled_events_policy.scheduled_events_additional_publishing_targets.event_grid_and_resource_graph.\
+                enable = additional_scheduled_events if additional_scheduled_events is not None else False
+            vm.scheduled_events_policy.user_initiated_redeploy.automatically_approve = \
+                enable_user_redeploy_scheduled_events if enable_user_redeploy_scheduled_events is not None else False
+            vm.scheduled_events_policy.user_initiated_reboot.automatically_approve = \
+                enable_user_reboot_scheduled_events if enable_user_reboot_scheduled_events is not None else False
+        else:
+            if additional_scheduled_events is not None:
+                vm.scheduled_events_policy.scheduled_events_additional_publishing_targets.\
+                    event_grid_and_resource_graph.enable = additional_scheduled_events
+            if enable_user_redeploy_scheduled_events is not None:
+                vm.scheduled_events_policy.user_initiated_redeploy.automatically_approve = \
+                    enable_user_redeploy_scheduled_events
+            if enable_user_reboot_scheduled_events is not None:
+                vm.scheduled_events_policy.user_initiated_reboot.automatically_approve = \
+                    enable_user_reboot_scheduled_events
 
     client = _compute_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions)
     return sdk_no_wait(no_wait, client.virtual_machines.begin_create_or_update, resource_group_name, vm_name, **kwargs)
@@ -3172,8 +3233,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 security_posture_reference_id=None, security_posture_reference_exclude_extensions=None,
                 enable_resilient_creation=None, enable_resilient_deletion=None,
                 additional_scheduled_events=None, enable_user_reboot_scheduled_events=None,
-                enable_user_redeploy_scheduled_events=None,
-                skuprofile_vmsizes=None, skuprofile_allostrat=None):
+                enable_user_redeploy_scheduled_events=None, skuprofile_vmsizes=None, skuprofile_allostrat=None,
+                security_posture_reference_is_overridable=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -3487,8 +3548,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             additional_scheduled_events=additional_scheduled_events,
             enable_user_reboot_scheduled_events=enable_user_reboot_scheduled_events,
             enable_user_redeploy_scheduled_events=enable_user_redeploy_scheduled_events,
-            skuprofile_vmsizes=skuprofile_vmsizes,
-            skuprofile_allostrat=skuprofile_allostrat)
+            skuprofile_vmsizes=skuprofile_vmsizes, skuprofile_allostrat=skuprofile_allostrat,
+            security_posture_reference_is_overridable=security_posture_reference_is_overridable)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -3927,8 +3988,8 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 max_surge=None, enable_resilient_creation=None, enable_resilient_deletion=None,
                 ephemeral_os_disk=None, ephemeral_os_disk_option=None, zones=None, additional_scheduled_events=None,
                 enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None,
-                upgrade_policy_mode=None, enable_auto_os_upgrade=None,
-                skuprofile_vmsizes=None, skuprofile_allostrat=None, **kwargs):
+                upgrade_policy_mode=None, enable_auto_os_upgrade=None, skuprofile_vmsizes=None,
+                skuprofile_allostrat=None, security_posture_reference_is_overridable=None, **kwargs):
     vmss = kwargs['parameters']
     aux_subscriptions = None
     # pylint: disable=too-many-boolean-expressions
@@ -4206,7 +4267,8 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
         else:
             vmss.additional_capabilities.hibernation_enabled = enable_hibernation
 
-    if security_posture_reference_id is not None or security_posture_reference_exclude_extensions is not None:
+    if security_posture_reference_id is not None or security_posture_reference_exclude_extensions is not None or \
+            security_posture_reference_is_overridable is not None:
         security_posture_reference = vmss.virtual_machine_profile.security_posture_reference
         if security_posture_reference is None:
             SecurityPostureReference = cmd.get_models('SecurityPostureReference')
@@ -4216,6 +4278,8 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             security_posture_reference.id = security_posture_reference_id
         if security_posture_reference_exclude_extensions is not None:
             security_posture_reference.exclude_extensions = security_posture_reference_exclude_extensions
+        if security_posture_reference_is_overridable is not None:
+            security_posture_reference.is_overridable = security_posture_reference_is_overridable
 
         vmss.virtual_machine_profile.security_posture_reference = security_posture_reference
 
