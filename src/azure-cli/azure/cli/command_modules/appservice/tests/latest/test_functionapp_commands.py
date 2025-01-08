@@ -210,6 +210,41 @@ class FunctionAppHttpsOnlyTest(ScenarioTest):
         functionapp_name = self.create_random_name('function', 40)
         self.cmd(f'functionapp create -g {resource_group} -n {functionapp_name} --plan {linux_plan} --os-type linux --runtime python -s {storage_account} --https-only false --functions-version 4').assert_with_checks([JMESPathCheck('httpsOnly', False)])
 
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_create_slot_https_only_default_true(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name('function', 40)
+        slot_name = self.create_random_name('slot', 40)
+        ep_plan_name = self.create_random_name('epplan', 40)
+
+        self.cmd('functionapp plan create -g {} -n {} --sku EP1'.format(resource_group, ep_plan_name))
+        self.cmd('functionapp create -g {} -n {} -s {} -p {} --functions-version 4 --runtime node --https-only=False'.format(resource_group, functionapp_name, storage_account, ep_plan_name))
+        self.cmd('functionapp deployment slot create -g {} -n {} --slot {}'.format(resource_group, functionapp_name, slot_name)).assert_with_checks([
+            JMESPathCheck('httpsOnly', True)])
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_create_slot_https_only_true(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name('function', 40)
+        slot_name = self.create_random_name('slot', 40)
+        ep_plan_name = self.create_random_name('epplan', 40)
+
+        self.cmd('functionapp plan create -g {} -n {} --sku EP1'.format(resource_group, ep_plan_name))
+        self.cmd('functionapp create -g {} -n {} -s {} -p {} --functions-version 4 --runtime node --https-only=False'.format(resource_group, functionapp_name, storage_account, ep_plan_name))
+        self.cmd('functionapp deployment slot create -g {} -n {} --slot {} --https-only'.format(resource_group, functionapp_name, slot_name)).assert_with_checks([
+            JMESPathCheck('httpsOnly', True)])
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_create_slot_https_only_false(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name('function', 40)
+        slot_name = self.create_random_name('slot', 40)
+        ep_plan_name = self.create_random_name('epplan', 40)
+
+        self.cmd('functionapp plan create -g {} -n {} --sku EP1'.format(resource_group, ep_plan_name))
+        self.cmd('functionapp create -g {} -n {} -s {} -p {} --functions-version 4 --runtime node --https-only=False'.format(resource_group, functionapp_name, storage_account, ep_plan_name))
+        self.cmd('functionapp deployment slot create -g {} -n {} --slot {} --https-only=False'.format(resource_group, functionapp_name, slot_name)).assert_with_checks([
+            JMESPathCheck('httpsOnly', False)])
 
 class FunctionAppWithPlanE2ETest(ScenarioTest):
     @live_only()  # TODO to be fixed
