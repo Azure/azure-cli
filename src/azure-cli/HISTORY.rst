@@ -9,7 +9,7 @@ Release History
 **ACR**
 
 * `az acr agentpool`: Fix delete polling (#30485)
-* Add validation for registry name to support domain name label (#30404)
+* `az acr create`: Add validation for registry name to support domain name label (#30404)
 
 **AKS**
 
