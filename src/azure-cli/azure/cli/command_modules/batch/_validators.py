@@ -269,7 +269,7 @@ def validate_file_destination(namespace):
 # CUSTOM REQUEST VALIDATORS
 
 
-def validate_pool_settings(namespace, parser):
+def validate_pool_settings(namespace, _):
     """Custom parsing to enfore that either PaaS or IaaS instances are configured
     in the add pool request body.
     """

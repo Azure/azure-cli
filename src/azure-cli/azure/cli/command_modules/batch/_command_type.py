@@ -9,6 +9,7 @@ import re
 from enum import Enum
 from typing import get_args, get_type_hints
 
+from azure.batch._model_base import _RestField
 from azure.cli.command_modules.batch import _format as transformers
 from azure.cli.command_modules.batch import _parameter_format as pformat
 from azure.cli.command_modules.batch import _validators as validators
@@ -693,18 +694,14 @@ class AzureBatchDataPlaneCommand:
         filtered_members = self.get_optional_state(cls)
         for name, value in inspect.getmembers(cls):
             if not name.startswith('__') and not inspect.isroutine(value):
-                str_value =  str(value)
-                try:
-                    if (str_value is not None
-                        and "_RestField" in str_value
-                        and hasattr(value,"_visibility")
-                        and value._visibility is not None
-                        and len(value._visibility) > 0
-                    ):
-                        read_only = value._visibility[0] == "read"
-                        filtered_members[name] = {'readonly': read_only}
-                except:
-                    continue
+                if (value is not None
+                    and isinstance(value, _RestField)
+                    and hasattr(value, "_visibility")
+                    and value._visibility is not None
+                    and len(value._visibility) > 0
+                ):
+                    read_only = value._visibility[0] == "read"
+                    filtered_members[name] = {'readonly': read_only}
         return filtered_members
 
     def convert_to_track1_type (self, original_type):
@@ -742,17 +739,16 @@ class AzureBatchDataPlaneCommand:
         for name, value in inspect.getmembers(cls):
             rest_name = name
             if not name.startswith('_') and not inspect.isroutine(value):
-                str_value =  str(value)
                 try:
-                    if (str_value is not None
-                        and "_RestField" in str_value
-                        and hasattr(value,"_rest_name")
+                    if (value is not None
+                        and isinstance(value, _RestField)
+                        and hasattr(value, "_rest_name")
                         and value._rest_name is not None
                         and len(value._rest_name) > 0
                     ):
                         rest_name = value._rest_name
                 except ValueError:
-                    pass # hasattr throws ValueError if you ask for _rest_name and its not present
+                    pass # The _rest_name property can throw a ValueError when calling hasattr()
                 rest_names[name] = rest_name
         return rest_names
 
@@ -802,13 +798,7 @@ class AzureBatchDataPlaneCommand:
             filtered_members[name] =  {'required': not is_optional}
         return filtered_members
 
-    def get_class_from_string(self, class_path):
-        module_path, cls_name = class_path.rsplit('.', 1)
-        module = importlib.import_module(module_path)
-        cls = getattr(module, cls_name)
-        return cls
-
-    def _flatten_object(self, path, param_model, class_path, conflict_names=None, restpath=None):
+    def _flatten_object(self, path, param_model, conflict_names=None, restpath=None):
         """Flatten a complex parameter object into command line arguments.
         :param str path: The complex parameter namespace.
         :param class param_model: The complex parameter class.
@@ -876,7 +866,6 @@ class AzureBatchDataPlaneCommand:
                     else:
                         self._flatten_object(path='.'.join([path, param_attr]),
                                              param_model=attr_model,
-                                             class_path=details['type'],
                                              restpath='.'.join([restpath, details['key']]))
 
     def extract_full_summary_from_signature(self, operation):
@@ -923,7 +912,7 @@ class AzureBatchDataPlaneCommand:
                 param_type = class_name(arg_type)
                 self.parser.set_request_param(arg[0], param_type)
                 param_model = _load_model(param_type)
-                self._flatten_object(path=arg[0], param_model=param_model,class_path=param_type,restpath=arg[0])
+                self._flatten_object(path=arg[0], param_model=param_model, restpath=arg[0])
                 for flattened_arg in self.parser.compile_args():
                     args.append(flattened_arg)
                 param = 'json_file'

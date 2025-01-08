@@ -431,13 +431,14 @@ def activate_application_package(client, resource_group_name, account_name, appl
 # Data plane custom commands
 
 def list_jobs(client, job_schedule_id=None, filter=None,  # pylint: disable=redefined-builtin
-             select=None, expand=None):
+              select=None, expand=None):
     if job_schedule_id:
-        return client.list_jobs_from_schedule(job_schedule_id=job_schedule_id,filter=filter,select=select,expand=expand)
+        return client.list_jobs_from_schedule(job_schedule_id=job_schedule_id,
+                                              filter=filter,select=select,expand=expand)
 
     return client.list_jobs(filter=filter,select=select,expand=expand)
 
-def reset_task(client, job_id=None, task_id=None, json_file=None, # pylint: disable=redefined-builtin
+def reset_task(client, job_id=None, task_id=None, json_file=None,
                max_task_retry_count=None, retention_time=None, max_wall_clock_time=None,
                if_match=None, if_none_match=None, if_modified_since=None, if_unmodified_since=None):
 
@@ -455,7 +456,14 @@ def reset_task(client, job_id=None, task_id=None, json_file=None, # pylint: disa
         param = BatchTask(
             constraints=constrants)
 
-    return client.replace_task(job_id=job_id, task_id=task_id,task=param)
+    match_conditions = None
+    if if_match:
+        match_conditions = MatchConditions.IfNotModified
+    if if_none_match:
+        match_conditions = MatchConditions.IfModified
+
+    return client.replace_task(job_id=job_id, task_id=task_id,task=param, if_modified_since=if_modified_since,
+                               if_unmodified_since=if_unmodified_since, match_condition=match_conditions)
 
 
 

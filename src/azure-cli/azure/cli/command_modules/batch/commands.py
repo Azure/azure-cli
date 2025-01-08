@@ -8,7 +8,7 @@ from azure.cli.core.profiles import ResourceType
 
 from azure.cli.command_modules.batch import _client_factory as factories
 from azure.cli.command_modules.batch._validators import (
-    validate_pool_settings, validate_cert_settings, validate_options)
+    validate_pool_settings, validate_options)
 from azure.cli.command_modules.batch._exception_handler import batch_exception_handler
 from azure.cli.command_modules.batch._format import (
     job_list_table_format,
