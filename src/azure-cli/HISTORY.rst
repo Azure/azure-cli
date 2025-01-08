@@ -80,7 +80,7 @@ Release History
 **RDBMS**
 
 * `az postgres flexible-server create`: Create elastic cluster by setting `--cluster-option` to ElasticCluster (#30435)
-* `az postgres flexible-server list`: Add --show-cluster argument to list elastic clusters (#30398)
+* `az postgres flexible-server list`: Add `--show-cluster` argument to list elastic clusters (#30398)
 * `az postgres flexible-server fabric-mirroring/identity`: Support system assigned managed identity and fabric mirroring of databases (#30421)
 * `az postgres flexible-server update`: Add `--node-count` argument to scale up elastic clusters (#30572)
 
