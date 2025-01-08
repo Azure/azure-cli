@@ -2267,7 +2267,7 @@ def process_gallery_image_version_namespace(cmd, namespace):
                         des_id = _disk_encryption_set_format(cmd, namespace, des_id)
                         try:
                             data_disk_image_encryption_list.append({"lun": int(lun), "disk_encryption_set_id": des_id})
-                        except ValueError:
+                        except:
                             raise ArgumentUsageError(
                                 "usage error: {} is an invalid target region encryption argument. "
                                 "LUN and disk encryption set for data disk should appear in pair in "
@@ -2403,7 +2403,7 @@ def process_gallery_image_version_namespace(cmd, namespace):
                         des_id = _disk_encryption_set_format(cmd, namespace, des_id)
                         try:
                             data_disk_image_encryption_list.append({"lun": int(lun), "disk_encryption_set_id": des_id})
-                        except ValueError:
+                        except:
                             raise ArgumentUsageError(
                                 "usage error: {} is an invalid target edge zone encryption. "
                                 "LUN and disk encryption set for data disk should appear in pair in "
