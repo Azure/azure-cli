@@ -549,6 +549,15 @@ class AzureBatchDataPlaneCommand:
             kwargs['etag'] = kwargs['if_none_match']
             kwargs['match_condition'] = MatchConditions.IfModified
             del kwargs['if_none_match']
+        
+        # in track1 we had --start-range and --end-range, in track2 they are packaged in a ocp_range param        
+        if kwargs.get('start-range') or kwargs.get('end-range'):
+            start = kwargs.get('start-range') if kwargs.get('start-range') else 0
+            end = kwargs.get('end-range') if kwargs.get('end-range') else ""
+            if kwargs.get('start-range') : del kwargs['start-range']
+            if kwargs.get('end-range'): del kwargs['end-range']
+            kwargs['ocp_range'] = f"bytes={start}-{end}"
+
 
     def get_kwargs(self):
         args = {

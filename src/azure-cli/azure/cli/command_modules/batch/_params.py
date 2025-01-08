@@ -368,7 +368,7 @@ def load_arguments(self, _):
                 'used in combination with the filter parameter to list specific type of files.')
 
 
-    for command in ['file download','task file download']:
+    for command in ['node file download','task file download']:
         with self.argument_context(f'batch {command}') as c:
             c.extra('end-range', arg_group='Pre-condition and Query', 
                        help='The byte range to be retrieved. If not set the file will be retrieved to the end.')

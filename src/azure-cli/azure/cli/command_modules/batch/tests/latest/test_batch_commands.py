@@ -12,6 +12,7 @@ from unittest import mock
 import importlib
 import inspect
 import azure.batch
+from azure.core import MatchConditions
 #from azure.batch._client import BatchClientOperationsMixin
 from azure.batch import models, BatchClient
 from azure.core.credentials import AzureNamedKeyCredential
@@ -503,6 +504,63 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
         self.assertFalse(self.command_job._should_flatten(
             'job.job_manager_task.constraints.something'))
         self.assertTrue(self.command_job._should_flatten('job.job_manager_task.constraints'))
+
+    def test_filter_args(self):
+        
+        # testing null removal
+        kwargs = {
+            'nullvalue': None,
+            'valid': '20'
+        }
+        self.command_delete.filter_args(kwargs)
+        self.assertEqual(kwargs, {'valid': '20'})
+
+        # testing range
+        # both start-range and end-range are present
+        kwargs = {
+            'start-range': '10',
+            'end-range': '20'
+        }
+        self.command_delete.filter_args(kwargs)
+        self.assertEqual(kwargs, {'ocp_range': 'bytes=10-20'})
+
+        # only start-range is present
+        kwargs = {
+            'end-range': '20'
+        }
+        self.command_delete.filter_args(kwargs)
+        self.assertEqual(kwargs, {'ocp_range': 'bytes=0-20'})
+
+        # only end-range is present
+        kwargs = {
+            'start-range': '10'
+        }
+        self.command_delete.filter_args(kwargs)
+        self.assertEqual(kwargs, {'ocp_range': 'bytes=10-'})
+
+        # testing match conditions
+
+        #testing if-match *
+        kwargs = {
+            'if-match': '*'
+        }
+        self.command_delete.filter_args(kwargs)
+        self.assertEqual(kwargs, {'match_condition': MatchConditions.IfPresent})
+
+        # testing if-match value
+        kwargs = {
+            'if-match': 'test'
+        }
+        self.command_delete.filter_args(kwargs)
+        self.assertEqual(kwargs, {'etag': 'test', 'match_condition': MatchConditions.IfNotModified})
+
+        # testing if-none-match value
+        kwargs = {
+            'if_none_match': 'test'
+        }
+        self.command_delete.filter_args(kwargs)
+        self.assertEqual(kwargs, {'etag': 'test', 'match_condition': MatchConditions.IfModified})
+        
 
     def test_batch_attribute_map(self):
         module = importlib.import_module("azure.batch.models")

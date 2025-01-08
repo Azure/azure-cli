@@ -8,7 +8,7 @@ from azure.cli.core.profiles import ResourceType
 
 from azure.cli.command_modules.batch import _client_factory as factories
 from azure.cli.command_modules.batch._validators import (
-    validate_pool_settings, validate_cert_settings)
+    validate_pool_settings, validate_cert_settings, validate_options)
 from azure.cli.command_modules.batch._exception_handler import batch_exception_handler
 from azure.cli.command_modules.batch._format import (
     job_list_table_format,
@@ -172,13 +172,13 @@ def load_command_table(self, _):
     file_type = get_data_type()
     with self.command_group('batch task file', file_type) as g:
         g.batch_command('delete', 'delete_task_file')
-        g.batch_command('download', 'get_task_file')
+        g.batch_command('download', 'get_task_file', validator=validate_options)
         g.batch_command('show', 'get_task_file_properties')
         g.batch_command('list', 'list_task_files')
     
     with self.command_group('batch node file', file_type) as g:
         g.batch_command('delete', 'delete_node_file')
-        g.batch_command('download', 'get_node_file')
+        g.batch_command('download', 'get_node_file', validator=validate_options)
         g.batch_command('show', 'get_node_file_properties')
         g.batch_command('list', 'list_node_files')
 

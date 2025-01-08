@@ -344,6 +344,62 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         self.assertEqual(len(result), 3)
         self.assertTrue(any([i for i in result if i['taskId'] == 'xplatTask1']))
 
+
+    @ResourceGroupPreparer()
+    @BatchAccountPreparer(location='eastus2')
+    def test_batch_file_download_cmd(self, resource_group, batch_account_name):
+        self.set_account_info(batch_account_name, resource_group)
+        self.kwargs.update({
+            'j_id': 'xplatJobForTaskTests',
+            't_id': 'xplatTask1',
+            'p_id': 'xplatTestPool',
+            'j_file': self._get_test_data_file('batchCreateJobForTaskTests.json'),
+            'p_file': self._get_test_data_file('batchCreateTestPool.json'),
+            'ts_file': self._get_test_data_file('batchCreateMultiTasks.json')
+        })
+        # create a pool, job and task
+        self.batch_cmd('batch pool create --json-file "{p_file}"')
+        self.batch_cmd('batch job create --json-file "{j_file}"')
+        self.batch_cmd('batch task create --job-id {j_id} --json-file "{ts_file}"')
+
+        self.wait_for_task_complete("xplatJobForTaskTests",3)
+
+        # verify task file download
+        if os.path.isfile('c:/temp/stdout.txt'): os.remove('c:/temp/stdout.txt')
+        self.batch_cmd('batch task file download --destination c:/temp/stdout.txt --file-path stdout.txt --job-id {j_id} --task-id {t_id}')
+        self.assertTrue(os.path.isfile('c:/temp/stdout.txt'), 'File c:/temp/stdout.txt does not exist.')
+        self.assertGreater(os.path.getsize('c:/temp/stdout.txt'), 0, 'File c:/temp/stdout.txt is empty.')
+        
+        if os.path.isfile('c:/temp/stdout_range.txt'): os.remove('c:/temp/stdout_range.txt')
+        self.batch_cmd('batch task file download --destination c:/temp/stdout_range.txt --file-path stdout.txt --job-id {j_id} --task-id {t_id} --start-range 10 --end-range 20')
+        self.assertTrue(os.path.isfile('c:/temp/stdout_range.txt'), 'File c:/temp/stdout_range.txt does not exist.')
+        self.assertGreater(os.path.getsize('c:/temp/stdout.txt'), os.path.getsize('c:/temp/stdout_range.txt'), 'File c:/temp/stdout_range.txt should be smaller due to range limits.')
+        
+        # clean up
+        os.remove('c:/temp/stdout.txt')
+        os.remove('c:/temp/stdout_range.txt')
+
+        # verify node file download
+        nodes = self.batch_cmd('batch node list --pool-id {p_id}').get_output_in_json()  
+        self.assertTrue(len(nodes) > 0)
+        self.kwargs.update({'node1': nodes[0]['id']})
+
+        self.batch_cmd('batch node file download --destination c:/temp/stdout.txt --file-path startup/stdout.txt --node-id {node1} --pool-id {p_id}')
+        self.assertTrue(os.path.isfile('c:/temp/stdout.txt'), 'File c:/temp/stdout.txt does not exist.')
+        self.assertGreater(os.path.getsize('c:/temp/stdout.txt'), 0, 'File c:/temp/stdout.txt is empty.')
+
+        self.batch_cmd('batch node file download --destination c:/temp/stdout_range.txt --file-path startup/stdout.txt --node-id {node1} --pool-id {p_id} --end-range 2')
+        self.assertTrue(os.path.isfile('c:/temp/stdout_range.txt'), 'File c:/temp/stdout_range.txt does not exist.')
+        self.assertGreater(os.path.getsize('c:/temp/stdout.txt'), os.path.getsize('c:/temp/stdout_range.txt'), 'File c:/temp/stdout_range.txt should be smaller due to range limits.')
+        
+        # clean up
+        os.remove('c:/temp/stdout.txt')
+        os.remove('c:/temp/stdout_range.txt')
+
+
+
+
+
     @ResourceGroupPreparer()
     @BatchAccountPreparer(location='eastus2')
     def test_batch_jobs_and_tasks(self, resource_group, batch_account_name):
@@ -554,3 +610,17 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
             if elapsed_seconds > timeout_seconds:
                 raise TimeoutError("Timed out waiting for pool to reach steady state")
             time.sleep(2)
+
+    def wait_for_task_complete(self, job_id,tasks=0, timeout_seconds=300):
+        start_time = time.time()
+
+        while True:
+            task_result = self.batch_cmd(f"batch job task-counts show --job-id {job_id}").get_output_in_json()
+            if task_result["taskCounts"]["completed"] == tasks:
+                return
+            elapsed_seconds = time.time() - start_time
+            if elapsed_seconds > timeout_seconds:
+                raise TimeoutError("Timed out waiting for pool to reach steady state")
+            
+            if self.is_live or self.in_recording:
+                time.sleep(30)
