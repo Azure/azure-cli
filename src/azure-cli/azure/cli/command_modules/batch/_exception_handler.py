@@ -6,6 +6,7 @@
 from knack.util import CLIError
 from azure.batch.models import BatchError
 
+
 def batch_exception_handler(ex):
     from azure.core.exceptions import HttpResponseError
 

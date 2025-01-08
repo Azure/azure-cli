@@ -12,7 +12,6 @@ class Transformer:
     def __init__(self, transform_mapping):
         self.transform_mapping = transform_mapping
 
-
     def transform_object(self, result):
 
         new_dict = {}

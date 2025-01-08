@@ -188,7 +188,6 @@ def load_arguments(self, _):
         with self.argument_context(f'batch application {command}') as c:
             c.argument('account_name', batch_name_type, options_list=('--name', '-n'), validator=application_enabled)
 
-
     # TODO: Refactor so the help text can be extracted automatically
     with self.argument_context('batch pool resize') as c:
         c.argument('if_modified_since', help='The operation will be performed only if the resource has been modified since the specified timestamp.', type=datetime_format, arg_group='Pre-condition and Query')
@@ -199,9 +198,9 @@ def load_arguments(self, _):
         c.argument('abort', action='store_true', help='Stop the pool resize operation.', validator=validate_pool_resize_parameters)
         c.argument('node_deallocation_option', options_list=('--node-deallocation-option',), help='When nodes may be removed from the pool, if the pool size is decreasing.', arg_type=get_enum_type(BatchNodeDeallocationOption))
         c.argument('resize_timeout', help='The default value is 15 minutes. The minimum value is 5 minutes.'
-                                  'If you specify a value less than 5 minutes, the Batch service'
-                                  'returns an error; if you are calling the REST API directly, the'
-                                  'HTTP status code is 400 (Bad Request).')
+                                          'If you specify a value less than 5 minutes, the Batch service'
+                                          'returns an error; if you are calling the REST API directly, the'
+                                          'HTTP status code is 400 (Bad Request).')
         c.argument('target_dedicated_nodes', help='The desired number of dedicated Compute Nodes in the Pool.')
         c.argument('target_low_priority_nodes', help='The desired number of Spot/Low-priority Compute Nodes in the Pool.')
 
@@ -210,18 +209,18 @@ def load_arguments(self, _):
         c.argument('json_file', type=file_type, help='The file containing pool update properties parameter specification in JSON(formatted to match REST API request body). If this parameter is specified, all \'Pool Update Properties Parameter Arguments\' are ignored.', validator=validate_json_file, completer=FilesCompleter())
         c.argument('pool_id', help='The ID of the pool to update.')
         c.argument('application_package_references', nargs='+', type=batch_application_package_reference_format, arg_group='Pool', help='Required. The list replaces any existing Application Package'
-                                        'references on the Pool. Changes to Application Package'
-                                        'references affect all new Compute Nodes joining the Pool,'
-                                        'but do not affect Compute Nodes that are already in the Pool'
-                                        'until they are rebooted or reimaged. There is a maximum of'
-                                        '10 Application Package references on any given Pool. If'
-                                        'omitted, or if you specify an empty collection, any existing'
-                                        'Application Packages references are removed from the Pool. A'
-                                        'maximum of 10 references may be specified on a given Pool.')
+                                                                                                                                        'references on the Pool. Changes to Application Package'
+                                                                                                                                        'references affect all new Compute Nodes joining the Pool,'
+                                                                                                                                        'but do not affect Compute Nodes that are already in the Pool'
+                                                                                                                                        'until they are rebooted or reimaged. There is a maximum of'
+                                                                                                                                        '10 Application Package references on any given Pool. If'
+                                                                                                                                        'omitted, or if you specify an empty collection, any existing'
+                                                                                                                                        'Application Packages references are removed from the Pool. A'
+                                                                                                                                        'maximum of 10 references may be specified on a given Pool.')
         c.argument('metadata', nargs='+', type=metadata_item_format, arg_group='Pool', help='Required. This list replaces any existing metadata'
-                                        'configured on the Pool. If omitted, or if you specify an'
-                                        'empty collection, any existing metadata is removed from the'
-                                        'Pool.')
+                                                                                            'configured on the Pool. If omitted, or if you specify an'
+                                                                                            'empty collection, any existing metadata is removed from the'
+                                                                                            'Pool.')
         c.argument('start_task_command_line', arg_group='Pool: Start Task',
                    help='The command line of the start task. The command line does not run under a shell, and therefore cannot take advantage of shell features such as environment variable expansion. If you want to take advantage of such features, you should invoke the shell in the command line, for example using "cmd /c MyCommand" in Windows or "/bin/sh -c MyCommand" in Linux.')
         c.argument('start_task_wait_for_success', action='store_true', arg_group='Pool: Start Task',
@@ -239,12 +238,12 @@ def load_arguments(self, _):
                      'For more information about specifying this formula, see Automatically scale Compute Nodes in an Azure Batch Pool '
                      '(https://azure.microsoft.com/documentation/articles/batch-automatic-scaling).')
         c.extra('auto_scale_evaluation_interval',
-                   help='The time interval at which to automatically adjust the Pool size according to the autoscale formula. '
-                        'The default value is 15 minutes. The minimum and maximum value are 5 minutes and 168 hours respectively. '
-                        'If you specify a value less than 5 minutes or greater than 168 hours, the Batch service rejects the request '
-                        'with an invalid property value error; if you are calling the REST API directly, the HTTP status code is 400 (Bad Request). '
-                        'If you specify a new interval, then the existing autoscale evaluation schedule will be stopped and a new autoscale evaluation '
-                        'schedule will be started, with its starting time being the time when this request was issued.')
+                help='The time interval at which to automatically adjust the Pool size according to the autoscale formula. '
+                     'The default value is 15 minutes. The minimum and maximum value are 5 minutes and 168 hours respectively. '
+                     'If you specify a value less than 5 minutes or greater than 168 hours, the Batch service rejects the request '
+                     'with an invalid property value error; if you are calling the REST API directly, the HTTP status code is 400 (Bad Request). '
+                     'If you specify a new interval, then the existing autoscale evaluation schedule will be stopped and a new autoscale evaluation '
+                     'schedule will be started, with its starting time being the time when this request was issued.')
 
     with self.argument_context('batch private-endpoint-connection show') as c:
         c.argument('private_endpoint_connection_name', options_list=['--name', '-n'],
@@ -264,28 +263,28 @@ def load_arguments(self, _):
     ]:
         with self.argument_context(f'batch {command}') as c:
             c.extra('if-match', arg_group='Pre-condition and Query',
-                       help='An ETag value associated with the version of the resource known to the client. '
-                            'The operation will be performed only if the resource\'s current ETag on the service '
-                            'exactly matches the value specified by the client.')
+                    help='An ETag value associated with the version of the resource known to the client. '
+                         'The operation will be performed only if the resource\'s current ETag on the service '
+                         'exactly matches the value specified by the client.')
             c.extra('if-modified-since', arg_group='Pre-condition and Query',
-                       help='A timestamp indicating the last modified time of the resource known to the client. '
-                            'The operation will be performed only if the resource on the service has been modified '
-                            'since the specified time.',)
+                    help='A timestamp indicating the last modified time of the resource known to the client. '
+                         'The operation will be performed only if the resource on the service has been modified '
+                         'since the specified time.',)
             c.extra('if-none-match', arg_group='Pre-condition and Query',
-                       help='An ETag value associated with the version of the resource known to the client. '
-                            'The operation will be performed only if the resource\'s current ETag on the service '
-                            'does not match the value specified by the client.')
+                    help='An ETag value associated with the version of the resource known to the client. '
+                         'The operation will be performed only if the resource\'s current ETag on the service '
+                         'does not match the value specified by the client.')
             c.extra('if-unmodified-since', arg_group='Pre-condition and Query',
-                       help='A timestamp indicating the last modified time of the resource known to the client. '
-                            'The operation will be performed only if the resource on the service has been modified '
-                            'since the specified time.')
+                    help='A timestamp indicating the last modified time of the resource known to the client. '
+                         'The operation will be performed only if the resource on the service has been modified '
+                         'since the specified time.')
 
-    for command in ['pool node-counts list', 'pool supported-images list', 'job list', 'pool list','job-schedule list', 'task list', 'job prep-release-status list','node list','node file list','task file list','pool usage-metrics list']:
+    for command in ['pool node-counts list', 'pool supported-images list', 'job list', 'pool list', 'job-schedule list', 'task list', 'job prep-release-status list', 'node list', 'node file list', 'task file list', 'pool usage-metrics list']:
         with self.argument_context(f'batch {command}') as c:
-            c.extra('filter', arg_group='Pre-condition and Query',  help='An OData $filter clause. For more information on constructing this filter,'
-                         'see https://docs.microsoft.com/rest/api/batchservice/odata-filters-in-batch.')
+            c.extra('filter', arg_group='Pre-condition and Query', help='An OData $filter clause. For more information on constructing this filter,'
+                                                                        'see https://docs.microsoft.com/rest/api/batchservice/odata-filters-in-batch.')
 
-    for command in ['job list', 'pool list','job-schedule list', 'task list' ,'job show','pool show','task show','job-schedule show']:
+    for command in ['job list', 'pool list', 'job-schedule list', 'task list', 'job show', 'pool show', 'task show', 'job-schedule show']:
         with self.argument_context(f'batch {command}') as c:
             c.extra('select', nargs='+', help='An OData $select clause.', arg_group='Pre-condition and Query')
             c.extra('expand', help='An OData $expand clause.', arg_group='Pre-condition and Query')
@@ -293,12 +292,12 @@ def load_arguments(self, _):
     with self.argument_context('batch job list') as c:
         c.argument('job_schedule_id', help='The ID of the job schedule from which you want to get a list of jobs. If omitted, lists all jobs in the account.')
 
-    for command in ['node list', 'node show', 'job prep-release-status list','task subtask list']:
+    for command in ['node list', 'node show', 'job prep-release-status list', 'task subtask list']:
         with self.argument_context(f'batch {command}') as c:
             c.extra('select', nargs='+', help='An OData $select clause.', arg_group='Pre-condition and Query')
 
     with self.argument_context('batch job stop') as c:
-        c.extra('reason',options_list=['--terminate-reason'], help='Termination reason. The text you want to appear as the job\'s TerminateReason. The default is \'UserTerminate\'.')
+        c.extra('reason', options_list=['--terminate-reason'], help='Termination reason. The text you want to appear as the job\'s TerminateReason. The default is \'UserTerminate\'.')
 
     for command in ['node file delete', 'task file delete']:
         with self.argument_context(f'batch {command}') as c:
@@ -316,62 +315,61 @@ def load_arguments(self, _):
         c.argument('if_unmodified_since', help='The operation will not be performed only if the resource has been modified since the specified timestamp.', type=datetime_format, arg_group='Pre-condition and Query')
         c.argument('if_match', help='The operation will be performed only if the resource\'s current ETag exactly matches the specified value.', arg_group='Pre-condition and Query')
         c.argument('if_none_match', help='The operation will not be performed only if the resource\'s current ETag exactly matches the specified value.', arg_group='Pre-condition and Query')
-        c.argument('job_id', help='The ID of the Job containing the Task.',required=True)
-        c.argument('task_id', help='The ID of the Task to update.',required=True)
+        c.argument('job_id', help='The ID of the Job containing the Task.', required=True)
+        c.argument('task_id', help='The ID of the Task to update.', required=True)
         c.argument('json_file', type=file_type, help='The file containing pool update properties parameter specification in JSON(formatted to match REST API request body). If this parameter is specified, all \'Pool Update Properties Parameter Arguments\' are ignored.', validator=validate_json_file, completer=FilesCompleter())
         c.argument('max_task_retry_count', arg_group='Constraints',
                    help='The maximum number of times the Task may be retried. The Batch service'
-                             'retries a Task if its exit code is nonzero. Note that this value'
-                             'specifically controls the number of retries for the Task executable due'
-                             'to a nonzero exit code. The Batch service will try the Task once, and'
-                             'may then retry up to this limit. For example, if the maximum retry'
-                             'count is 3, Batch tries the Task up to 4 times (one initial try and 3'
-                             'retries). If the maximum retry count is 0, the Batch service does not'
-                             'retry the Task after the first attempt. If the maximum retry count is'
-                             '-1, the Batch service retries the Task without limit, however this is'
-                             'not recommended for a start task or any task. The default value is 0'
-                             '(no retries).')
+                        'retries a Task if its exit code is nonzero. Note that this value'
+                        'specifically controls the number of retries for the Task executable due'
+                        'to a nonzero exit code. The Batch service will try the Task once, and'
+                        'may then retry up to this limit. For example, if the maximum retry'
+                        'count is 3, Batch tries the Task up to 4 times (one initial try and 3'
+                        'retries). If the maximum retry count is 0, the Batch service does not'
+                        'retry the Task after the first attempt. If the maximum retry count is'
+                        '-1, the Batch service retries the Task without limit, however this is'
+                        'not recommended for a start task or any task. The default value is 0'
+                        '(no retries).')
         c.argument('max_wall_clock_time', arg_group='Constraints',
                    help='If this is not specified, there is no time limit on how long the Task'
-                             'may run. Expected format is an ISO-8601 duration.')
+                        'may run. Expected format is an ISO-8601 duration.')
         c.argument('retention_time', arg_group='Constraints',
                    help='The default is 7 days, i.e. the Task directory will be retained for 7'
-                             'days unless the Compute Node is removed or the Job is deleted. Expected'
-                             'format is an ISO-8601 duration.')
+                        'days unless the Compute Node is removed or the Job is deleted. Expected'
+                        'format is an ISO-8601 duration.')
 
     with self.argument_context('batch pool usage-metrics list') as c:
         c.extra('endtime', options_list=['--end-time'], arg_group='Pre-condition and Query',
-                help=' The latest time from which to include metrics. This must be at least two'
-                'hours before the current time. If not specified this defaults to the end'
-                'time of the last aggregation interval currently available.')
+                help='The latest time from which to include metrics. This must be at least two'
+                     'hours before the current time. If not specified this defaults to the end'
+                     'time of the last aggregation interval currently available.')
         c.extra('starttime', options_list=['--start-time'], arg_group='Pre-condition and Query',
                 help='The earliest time from which to include metrics. This must be at least two'
-                'and a half hours before the current time. If not specified this defaults to'
-                'the start time of the last aggregation interval currently available.')
+                     'and a half hours before the current time. If not specified this defaults to'
+                     'the start time of the last aggregation interval currently available.')
 
     with self.argument_context('batch task file list') as c:
         c.extra('recursive', arg_type=get_three_state_flag(),
                 help='Whether to list children of the Task directory. This parameter can be'
                 'used in combination with the filter parameter to list specific type of files.')
 
-
-    for command in ['node file download','task file download']:
+    for command in ['node file download', 'task file download']:
         with self.argument_context(f'batch {command}') as c:
             c.extra('end-range', arg_group='Pre-condition and Query',
-                       help='The byte range to be retrieved. If not set the file will be retrieved to the end.')
+                    help='The byte range to be retrieved. If not set the file will be retrieved to the end.')
             c.extra('start-range', arg_group='Pre-condition and Query',
-                       help='The byte range to be retrieved. If not set the file will be retrieved from the beginning.')
+                    help='The byte range to be retrieved. If not set the file will be retrieved from the beginning.')
 
     for command in ['node file download', 'node file show', 'task file show', 'task file download']:
         with self.argument_context(f'batch {command}') as c:
             c.extra('if-modified-since', arg_group='Pre-condition and Query',
-                       help='A timestamp indicating the last modified time of the resource known to the client. '
-                            'The operation will be performed only if the resource on the service has been modified '
-                            'since the specified time.',)
+                    help='A timestamp indicating the last modified time of the resource known to the client. '
+                         'The operation will be performed only if the resource on the service has been modified '
+                         'since the specified time.',)
             c.extra('if-unmodified-since', arg_group='Pre-condition and Query',
-                       help='A timestamp indicating the last modified time of the resource known to the client. '
-                            'The operation will be performed only if the resource on the service has been modified '
-                            'since the specified time.')
+                    help='A timestamp indicating the last modified time of the resource known to the client. '
+                         'The operation will be performed only if the resource on the service has been modified '
+                         'since the specified time.')
 
     with self.argument_context('batch pool create') as c:
         c.argument('json_file', help='The file containing pool create properties parameter specification in JSON(formatted to match REST API request body). If this parameter is specified, all \'Pool Create Properties Parameter Arguments\' are ignored.  See https://docs.microsoft.com/rest/api/batchservice/pool/add?tabs=HTTP#request-body')
@@ -380,7 +378,7 @@ def load_arguments(self, _):
                    help="The desired node communication mode for the pool. If this element is present, it replaces the existing targetNodeCommunicationMode configured on the Pool. If omitted, any existing metadata is left unchanged.",
                    arg_type=get_enum_type(BatchNodeCommunicationMode))
         c.argument('enable_accelerated_networking', arg_type=get_three_state_flag(), options_list=['--accelerated-networking'], arg_group="Pool: Network Configuration",
-                help='Whether this pool should enable accelerated networking. Accelerated networking enables single root I/O virtualization (SR-IOV) to a VM, which may lead to improved networking performance. For more details, see: https://learn.microsoft.com/azure/virtual- network/accelerated-networking-overview. Set true to enable.')
+                   help='Whether this pool should enable accelerated networking. Accelerated networking enables single root I/O virtualization (SR-IOV) to a VM, which may lead to improved networking performance. For more details, see: https://learn.microsoft.com/azure/virtual- network/accelerated-networking-overview. Set true to enable.')
         c.argument('caching',
                    options_list=('--os-disk-caching'),
                    arg_type=get_enum_type(CachingType),
@@ -445,22 +443,22 @@ def load_arguments(self, _):
                                        'busy or unavailable at the time the Task is scheduled, then'
                                        'the Task will be scheduled elsewhere.')
         c.argument('max_task_retry_count', help='The maximum number of times the Task may be retried. The'
-                                       'Batch service retries a Task if its exit code is nonzero.'
-                                       'Note that this value specifically controls the number of'
-                                       'retries for the Task executable due to a nonzero exit code.'
-                                       'The Batch service will try the Task once, and may then retry'
-                                       'up to this limit. For example, if the maximum retry count is'
-                                       '3, Batch tries the Task up to 4 times (one initial try and 3'
-                                       'retries). If the maximum retry count is 0, the Batch service'
-                                       'does not retry the Task after the first attempt. If the'
-                                       'maximum retry count is -1, the Batch service retries the Task'
-                                       'without limit, however this is not recommended for a start'
-                                       'task or any task. The default value is 0 (no retries).')
+                                                'Batch service retries a Task if its exit code is nonzero.'
+                                                'Note that this value specifically controls the number of'
+                                                'retries for the Task executable due to a nonzero exit code.'
+                                                'The Batch service will try the Task once, and may then retry'
+                                                'up to this limit. For example, if the maximum retry count is'
+                                                '3, Batch tries the Task up to 4 times (one initial try and 3'
+                                                'retries). If the maximum retry count is 0, the Batch service'
+                                                'does not retry the Task after the first attempt. If the'
+                                                'maximum retry count is -1, the Batch service retries the Task'
+                                                'without limit, however this is not recommended for a start'
+                                                'task or any task. The default value is 0 (no retries).')
         c.argument('max_wall_clock_time', help='If this is not specified, there is no time limit on how long'
-                                       'the Task may run.')
+                                               'the Task may run.')
         c.argument('retention_time', help='The default is 7 days, i.e. the Task directory will be'
-                                       'retained for 7 days unless the Compute Node is removed or the'
-                                       'Job is deleted.')
+                                          'retained for 7 days unless the Compute Node is removed or the'
+                                          'Job is deleted.')
 
     for item in ['batch pool resize', 'batch pool reset', 'batch job list', 'batch task create', 'batch task reset']:
         with self.argument_context(item) as c:

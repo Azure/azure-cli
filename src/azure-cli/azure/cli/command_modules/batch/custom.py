@@ -434,9 +434,10 @@ def list_jobs(client, job_schedule_id=None, filter=None,  # pylint: disable=rede
               select=None, expand=None):
     if job_schedule_id:
         return client.list_jobs_from_schedule(job_schedule_id=job_schedule_id,
-                                              filter=filter,select=select,expand=expand)
+                                              filter=filter, select=select, expand=expand)
 
-    return client.list_jobs(filter=filter,select=select,expand=expand)
+    return client.list_jobs(filter=filter, select=select, expand=expand)
+
 
 def reset_task(client, job_id=None, task_id=None, json_file=None,
                max_task_retry_count=None, retention_time=None, max_wall_clock_time=None,
@@ -462,9 +463,8 @@ def reset_task(client, job_id=None, task_id=None, json_file=None,
     if if_none_match:
         match_conditions = MatchConditions.IfModified
 
-    return client.replace_task(job_id=job_id, task_id=task_id,task=param, if_modified_since=if_modified_since,
+    return client.replace_task(job_id=job_id, task_id=task_id, task=param, if_modified_since=if_modified_since,
                                if_unmodified_since=if_unmodified_since, match_condition=match_conditions)
-
 
 
 @transfer_doc(BatchPoolResizeContent)
@@ -476,9 +476,9 @@ def resize_pool(client, pool_id, target_dedicated_nodes=None, target_low_priorit
         return client.stop_pool_resize(pool_id=pool_id)
 
     param = BatchPoolResizeContent(target_dedicated_nodes=target_dedicated_nodes,
-                                target_low_priority_nodes=target_low_priority_nodes,
-                                resize_timeout=resize_timeout,
-                                node_deallocation_option=node_deallocation_option)
+                                   target_low_priority_nodes=target_low_priority_nodes,
+                                   resize_timeout=resize_timeout,
+                                   node_deallocation_option=node_deallocation_option)
 
     match_conditions = None
     if if_match:
@@ -488,7 +488,6 @@ def resize_pool(client, pool_id, target_dedicated_nodes=None, target_low_priorit
 
     return client.resize_pool(pool_id=pool_id, content=param, if_modified_since=if_modified_since,
                               if_unmodified_since=if_unmodified_since, match_condition=match_conditions)
-
 
 
 @transfer_doc(BatchPoolUpdateContent, BatchStartTask)
@@ -522,15 +521,11 @@ def update_pool(client,
 
         if start_task_command_line:
             param.start_task = BatchStartTask(command_line=start_task_command_line,
-                                         environment_settings=start_task_environment_settings,
-                                         wait_for_success=start_task_wait_for_success,
-                                         max_task_retry_count=start_task_max_task_retry_count)
+                                              environment_settings=start_task_environment_settings,
+                                              wait_for_success=start_task_wait_for_success,
+                                              max_task_retry_count=start_task_max_task_retry_count)
     client.update_pool(pool_id=pool_id, pool=param)
     return client.get_pool(pool_id)
-
-
-
-
 
 
 @transfer_doc(BatchTaskCreateContent, BatchTaskConstraints, AffinityInfo)
@@ -555,7 +550,7 @@ def create_task(client,
                 try:
                     task_collection = BatchTaskGroup(json_obj)
                     tasks = task_collection.value
-                except (DeserializationError, TypeError,AttributeError):
+                except (DeserializationError, TypeError, AttributeError):
                     raise ValueError(f"JSON file '{json_file}' is not formatted correctly.")
     else:
         if command_line is None or task_id is None:
@@ -571,9 +566,8 @@ def create_task(client,
         if max_wall_clock_time is not None or retention_time is not None \
                 or max_task_retry_count is not None:
             task.constraints = BatchTaskConstraints(max_wall_clock_time=max_wall_clock_time,
-                                               retention_time=retention_time,
-                                               max_task_retry_count=max_task_retry_count)
-
+                                                    retention_time=retention_time,
+                                                    max_task_retry_count=max_task_retry_count)
 
     if task is not None:
         client.create_task(job_id=job_id, task=task)

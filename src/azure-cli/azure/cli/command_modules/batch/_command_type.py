@@ -283,7 +283,6 @@ class BatchArgumentTree:
         self._request_param['name'] = name
         self._request_param['model'] = model.split('.')[-1]
 
-
     def deserialize_json(self, kwargs, json_obj):
         """Deserialize the contents of a JSON file into the request body
         parameter.
@@ -297,22 +296,19 @@ class BatchArgumentTree:
                 """Recursively remove None values from dictionaries."""
                 if isinstance(d, dict):
                     return {k: remove_none_values(v) for k, v in d.items() if v is not None}
-                elif isinstance(d, list):
+                if isinstance(d, list):
                     return [remove_none_values(v) for v in d if v is not None]
-                else:
-                    return d
+                return d
 
             json_obj = remove_none_values(json_obj)
             import azure.batch.models
             model_type = getattr(azure.batch.models, self._request_param['model'])
             # Use from_dict in order to deserialize with case insensitive
             kwargs[self._request_param['name']] = model_type(json_obj).as_dict(exclude_readonly=True)
-
-
-
         except DeserializationError as error:
             message += f": {error}"
             raise ValueError(message.format(self._request_param['model']))
+
         if kwargs[self._request_param['name']] is None:
             raise ValueError(message.format(self._request_param['model']))
 
@@ -432,7 +428,7 @@ class AzureBatchDataPlaneCommand:
         self._operation_func = None
 
         # The name of the request options parameter
-        #self._options_param = format_options_name(operation)
+        # self._options_param = format_options_name(operation)
         # Arguments used for request options
         self._options_attrs = []
         # The loaded options model to populate for the request
@@ -495,7 +491,6 @@ class AzureBatchDataPlaneCommand:
                 kwargs['raw'] = True
             result = _get_operation()(client, **kwargs)
 
-
             # Head output
             if self._head_cmd:
                 return result
@@ -532,7 +527,7 @@ class AzureBatchDataPlaneCommand:
 
         # in track1 we had --if-match and --if-none-match, in track2 they are packaged in a match-condition param
         if kwargs.get('if-match') is not None:
-            if kwargs['if-match']  == '*':
+            if kwargs['if-match'] == '*':
                 kwargs['match_condition'] = MatchConditions.IfPresent
             else:
                 kwargs['etag'] = kwargs['if-match']
@@ -553,7 +548,6 @@ class AzureBatchDataPlaneCommand:
             if kwargs.get('end-range'):
                 del kwargs['end-range']
             kwargs['ocp_range'] = f"bytes={start}-{end}"
-
 
     def get_kwargs(self):
         args = {
@@ -682,7 +676,7 @@ class AzureBatchDataPlaneCommand:
             else:
                 options['options_list'] = [arg_name(new)]
                 self._resolve_conflict(new, param, path, options,
-                                       typestr, dependencies, conflicting, restname,restpath)
+                                       typestr, dependencies, conflicting, restname, restpath)
         else:
             self.parser.queue_argument(arg, path, param, options, typestr, dependencies, restname, restpath)
 
@@ -694,17 +688,16 @@ class AzureBatchDataPlaneCommand:
         filtered_members = self.get_optional_state(cls)
         for name, value in inspect.getmembers(cls):
             if not name.startswith('__') and not inspect.isroutine(value):
-                if (value is not None
-                    and isinstance(value, _RestField)
-                    and hasattr(value, "_visibility")
-                    and value._visibility is not None
-                    and len(value._visibility) > 0
-                ):
+                if (value is not None and
+                        isinstance(value, _RestField) and
+                        hasattr(value, "_visibility") and
+                        value._visibility is not None and
+                        len(value._visibility) > 0):
                     read_only = value._visibility[0] == "read"
                     filtered_members[name] = {'readonly': read_only}
         return filtered_members
 
-    def convert_to_track1_type (self, original_type):
+    def convert_to_track1_type(self, original_type):
         if original_type is not None and "ForwardRef" in original_type:
             pattern = r"ForwardRef\('_models\.(.*?)'\)"
             original_type = re.sub(pattern, r'\1', original_type)
@@ -724,7 +717,7 @@ class AzureBatchDataPlaneCommand:
             match = re.search(pattern, original_type)
             if match:
                 pattern = r"typing\.Union\[str, (.+?)\]"
-                original_type= re.sub(pattern, r"\1", original_type)
+                original_type = re.sub(pattern, r"\1", original_type)
 
         if original_type is not None and "<class" in original_type:
             pattern = r"<class '([\w\.]+)'>"
@@ -733,26 +726,25 @@ class AzureBatchDataPlaneCommand:
                 original_type = match.group(1)
         return original_type
 
-    def get_track1_rest_names(self,cls):
+    def get_track1_rest_names(self, cls):
         # pylint: disable=protected-access
         rest_names = {}
         for name, value in inspect.getmembers(cls):
             rest_name = name
             if not name.startswith('_') and not inspect.isroutine(value):
                 try:
-                    if (value is not None
-                        and isinstance(value, _RestField)
-                        and hasattr(value, "_rest_name")
-                        and value._rest_name is not None
-                        and len(value._rest_name) > 0
-                    ):
+                    if (value is not None and
+                            isinstance(value, _RestField) and
+                            hasattr(value, "_rest_name") and
+                            value._rest_name is not None and
+                            len(value._rest_name) > 0):
                         rest_name = value._rest_name
                 except ValueError:
-                    pass # The _rest_name property can throw a ValueError when calling hasattr()
+                    pass  # The _rest_name property can throw a ValueError when calling hasattr()
                 rest_names[name] = rest_name
         return rest_names
 
-    def get_track1_attribute_map (self, cls):
+    def get_track1_attribute_map(self, cls):
         # pylint: disable=protected-access
         member_types = {}
         pattern1 = r"^typing\.Union\[str, (.+), NoneType\]$"
@@ -777,7 +769,7 @@ class AzureBatchDataPlaneCommand:
 
             if rest_names[name] is None:
                 print("none")
-            member_types[name] = {'key' : rest_names[name], 'type' : track1_type}
+            member_types[name] = {'key': rest_names[name], 'type': track1_type}
 
         return member_types
 
@@ -795,7 +787,7 @@ class AzureBatchDataPlaneCommand:
         for name, type_hint in members.items():
             is_optional = (type_hint._name == 'Optional' or type_hint._name is None
                            if hasattr(type_hint, '_name') else False)
-            filtered_members[name] =  {'required': not is_optional}
+            filtered_members[name] = {'required': not is_optional}
         return filtered_members
 
     def _flatten_object(self, path, param_model, conflict_names=None, restpath=None):
@@ -822,7 +814,7 @@ class AzureBatchDataPlaneCommand:
 
                 if details['type'] in pformat.BASIC_TYPES:
                     self._resolve_conflict(param_attr, param_attr, path, options,
-                                           details['type'], required_attrs, conflict_names, details['key'],restpath)
+                                           details['type'], required_attrs, conflict_names, details['key'], restpath)
                 elif details['type'].startswith('List['):
                     # We only expose a list arg if there's a validator for it
                     # This will fail for 2D arrays - though Batch doesn't have any yet
@@ -849,8 +841,8 @@ class AzureBatchDataPlaneCommand:
                     options['help'] += " Space-separated values in 'key=value' format."
                     options['type'] = validators.string_dictionary_format
                     self._resolve_conflict(
-                            param_attr, param_attr, path, options,
-                            details['type'], required_attrs, conflict_names, details['key'], restpath)
+                        param_attr, param_attr, path, options,
+                        details['type'], required_attrs, conflict_names, details['key'], restpath)
                 else:
                     attr_model = _load_model(details['type'])
                     if issubclass(attr_model, Enum):  # Must be an enum
@@ -887,14 +879,15 @@ class AzureBatchDataPlaneCommand:
         from argcomplete.completers import DirectoriesCompleter, FilesCompleter
         from azure.cli.core.commands.parameters import file_type
         self.parser = BatchArgumentTree(self.validator)
-        #self._load_options_model(handler)
+        # self._load_options_model(handler)
         args = []
 
         for arg in extract_args_from_signature(handler, excluded_params=EXCLUDED_PARAMS):
             arg_type = find_param_type(handler, arg[0])
             if arg_type is None:
-                continue # we get into this case for keyword params that we want to skip
-            elif arg_type.startswith("str or"):
+                continue  # we get into this case for keyword params that we want to skip
+
+            if arg_type.startswith("str or"):
                 docstring = find_param_help(handler, arg[0])
                 choices = []
                 values_index = docstring.find(' Possible values include')
@@ -930,7 +923,7 @@ class AzureBatchDataPlaneCommand:
             elif arg[0] not in pformat.IGNORE_PARAMETERS:
                 args.append(arg)
         return_type = find_return_type(handler)
-        if return_type and return_type.startswith('bytes'):# track2 bytes
+        if return_type and return_type.startswith('bytes'):  # track2 bytes
             param = 'destination'
             docstring = "The path to the destination file or directory."
             args.append((param, CLICommandArgument(param,

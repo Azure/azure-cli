@@ -4,12 +4,12 @@
 # --------------------------------------------------------------------------------------------
 
 import os
-#import azure.batch.models
 from azure.cli.core.util import get_file_json
 from urllib.parse import urlsplit
 from azure.batch.models import (DiskEncryptionTarget)
 
 # TYPES VALIDATORS
+
 
 def datetime_format(value):
     """Validate the correct format of a datetime string and deserialize."""
@@ -63,6 +63,7 @@ def metadata_item_format(value):
         raise ValueError(message)
     return {'name': data_name, 'value': data_value}
 
+
 def string_dictionary_format(values):
     """Space-separated values in 'key=value' format."""
     if not values:
@@ -78,6 +79,7 @@ def string_dictionary_format(values):
                    "Argument values should be in the format a=b c=d")
         raise ValueError(message)
     return result
+
 
 def resource_tag_format(values):
     """Space-separated values in 'key=value' format."""
@@ -340,13 +342,13 @@ def validate_client_parameters(cmd, namespace):
                 host = endpoint.netloc
                 client = get_mgmt_service_client(cmd.cli_ctx, BatchManagementClient)
                 acc = next((x for x in client.batch_account.list()
-                        if x.name == namespace.account_name and x.account_endpoint == host), None)
+                           if x.name == namespace.account_name and x.account_endpoint == host), None)
                 if acc:
                     from azure.mgmt.core.tools import parse_resource_id
                     rg = parse_resource_id(acc.id)['resource_group']
                     namespace.account_key = \
                         client.batch_account.get_keys(rg,  # pylint: disable=no-member
-                                                  namespace.account_name).primary
+                                                      namespace.account_name).primary
                 else:
                     raise ValueError(f"Batch account '{namespace.account_name}' not found.")
     else:

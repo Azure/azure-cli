@@ -5,6 +5,7 @@
 
 from azure.cli.core.decorators import Completer
 
+
 @Completer
 def load_supported_images(cmd, prefix, namespace):  # pylint: disable=unused-argument
     from msrest.exceptions import ClientRequestError

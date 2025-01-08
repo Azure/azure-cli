@@ -27,7 +27,7 @@ def _operation(name):
 def load_command_table(self, _):
 
     data_path = 'azure.batch._operations._patch#BatchClientOperationsMixin.{}'
-    #data_path = 'azure.batch._client#BatchClient.{}'
+    # data_path = 'azure.batch._client#BatchClient.{}'
     mgmt_path = 'azure.mgmt.batch.operations._{}_operations#{}.'
 
     def get_data_type():
@@ -145,8 +145,6 @@ def load_command_table(self, _):
         g.batch_command('autoscale enable', 'enable_pool_auto_scale')
         g.batch_command('autoscale evaluate', 'evaluate_pool_auto_scale')
 
-
-
     with self.command_group('batch job-schedule', get_data_type()) as g:
         g.batch_command('create', 'create_job_schedule')
         g.batch_command('delete', 'delete_job_schedule')
@@ -163,7 +161,6 @@ def load_command_table(self, _):
         g.batch_command('list', 'list_tasks')
         g.batch_command('delete', 'delete_task')
         g.batch_command('show', 'get_task')
-        #g.batch_command('reset', 'replace_task', flatten=2)
         g.custom_command('reset', 'reset_task')
         g.batch_command('reactivate', 'reactivate_task')
         g.batch_command('stop', 'terminate_task')
