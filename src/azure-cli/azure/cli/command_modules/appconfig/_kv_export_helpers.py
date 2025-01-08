@@ -204,9 +204,9 @@ def __export_features(retrieved_features, naming_convention):
                         }
 
                     feature_entry = __export_feature_to_new_ms_schema(feature)
-                    exported_dict[new_ms_featuremanagement_keyword][
-                        feature_flags_keyword
-                    ].append(feature_entry)
+                    if feature_flags_keyword not in exported_dict[new_ms_featuremanagement_keyword]:
+                        exported_dict[new_ms_featuremanagement_keyword][feature_flags_keyword] = []
+                    exported_dict[new_ms_featuremanagement_keyword][feature_flags_keyword].append(feature_entry)
                 else:
                     if (
                         feature_reserved_keywords.feature_management not in exported_dict
