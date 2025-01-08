@@ -217,6 +217,7 @@ def login_account(cmd, client, resource_group_name, account_name, shared_key_aut
             }
     else:
         cmd.cli_ctx.config.set_value('batch', 'auth_mode', 'aad')
+        cmd.cli_ctx.config.remove_option('batch', 'access_key')
         if show:
             resource = cmd.cli_ctx.cloud.endpoints.batch_resource_id
             profile = Profile(cli_ctx=cmd.cli_ctx)
