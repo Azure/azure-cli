@@ -70,7 +70,7 @@ Release History
 **Network**
 
 * `az network vnet-gateway create/update`: Add parameter `--resiliency-model` (#30410)
-* `az network vnet create/update`: Add param `--ipam-pool-prefix-allocations` (#30455)
+* `az network vnet create/update`: Add parameter `--ipam-pool-prefix-allocations` (#30455)
 * Fix #30535: `az network lb address-pool address add`: Address level may not have virtual network property (#30592)
 
 **Profile**
