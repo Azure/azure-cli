@@ -58,4 +58,9 @@ def batch_data_client_factory(cli_ctx, kwargs):
         credential = AzureNamedKeyCredential(name=account_name, key=account_key)
     else:
         credential = token_credential
+    
+    if not (account_endpoint.startswith('https://') or
+            account_endpoint.startswith('http://')):
+        account_endpoint = 'https://' + account_endpoint
+    
     return BatchClient(credential=credential, endpoint=account_endpoint.rstrip('/'))
