@@ -48,7 +48,7 @@ Release History
 **Container app**
 
 * `az containerapp exec`: Fix `ResourceNotFound` error (#30351)
-* `az containeapp ingress enable`: Fix issue about labels being deleted (#30385)
+* `az containerapp ingress enable`: Fix issue about labels being deleted (#30385)
 * Fix #29238: `az containerapp secret set`: Add description about `identityref` for parameter `--secrets` (#30418)
 
 **Cosmos DB**
