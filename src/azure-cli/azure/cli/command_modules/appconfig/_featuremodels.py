@@ -510,8 +510,9 @@ class FeatureAllocation:
         if allocation_user:
             allocation_user_list = []
             for user in allocation_user:
-                feature_user_allocation = FeatureUserAllocation.convert_from_dict(user)
-                allocation_user_list.append(feature_user_allocation)
+                if user:
+                    feature_user_allocation = FeatureUserAllocation.convert_from_dict(user)
+                    allocation_user_list.append(feature_user_allocation)
 
             allocation.user = allocation_user_list
 
@@ -520,8 +521,9 @@ class FeatureAllocation:
         if allocation_group:
             allocation_group_list = []
             for group in allocation_group:
-                feature_group_allocation = FeatureGroupAllocation.convert_from_dict(group)
-                allocation_group_list.append(feature_group_allocation)
+                if group:
+                    feature_group_allocation = FeatureGroupAllocation.convert_from_dict(group)
+                    allocation_group_list.append(feature_group_allocation)
 
             allocation.group = allocation_group_list
 
@@ -532,12 +534,9 @@ class FeatureAllocation:
         if allocation_percentile:
             allocation_percentile_list = []
             for percentile in allocation_percentile:
-                feature_percentile_allocation = (
-                    FeaturePercentileAllocation.convert_from_dict(
-                        json.dumps(percentile, ensure_ascii=False)
-                    )
-                )
-                allocation_percentile_list.append(feature_percentile_allocation)
+                if percentile:
+                    feature_percentile_allocation = FeaturePercentileAllocation.convert_from_dict(percentile)
+                    allocation_percentile_list.append(feature_percentile_allocation)
 
             allocation.percentile = allocation_percentile_list
 
@@ -583,7 +582,7 @@ class FeatureTelemetry:
         enabled = None
         telemetry_enabled = feature_telemetry_dict.get(FeatureFlagConstants.ENABLED, None)
         if telemetry_enabled is not None:
-            enabled = convert_boolean_value(telemetry_enabled, feature_name)
+            enabled = convert_string_to_bool(telemetry_enabled, feature_name)
 
         metadata = feature_telemetry_dict.get(FeatureFlagConstants.METADATA, None)
 
@@ -852,7 +851,7 @@ def map_keyvalue_to_featureflagvalue(keyvalue):
             FeatureFlagConstants.TELEMETRY,
             FeatureFlagConstants.DISPLAY_NAME
         }
-        if valid_fields.union(feature_flag_dict.keys()) == valid_fields:
+        if valid_fields.union(feature_flag_dict.keys()) != valid_fields:
             logger.debug(
                 "'%s' feature flag is missing required values or it contains ",
                 keyvalue.key +
@@ -870,8 +869,7 @@ def map_keyvalue_to_featureflagvalue(keyvalue):
 
         feature_name = feature_flag_dict.get(FeatureFlagConstants.ID, "")
         if feature_flag_version == FeatureFlagVersion.V1:
-            description = feature_flag_dict.get(FeatureFlagConstants.DESCRIPTION, "")  # assign empty string as default
-            feature_flag_dict[FeatureFlagConstants.DESCRIPTION] = description
+            feature_flag_dict[FeatureFlagConstants.DESCRIPTION] = feature_flag_dict.get(FeatureFlagConstants.DESCRIPTION, "")  # assign empty string as default
 
         if not feature_name:
             raise ValueError("Feature flag 'id' cannot be empty.")
@@ -919,10 +917,10 @@ def map_keyvalue_to_featureflagvalue(keyvalue):
 
             # Backend returns conditions: {client_filters: None} for flags with no conditions.
             # No need to write empty conditions to key-values.
-            if conditions.get(FeatureFlagConstants.CLIENT_FILTERS, None) is None and conditions.get(FeatureFlagConstants.REQUIREMENT_TYPE, None) is None:
-                feature_flag_dict[FeatureFlagConstants.CONDITIONS] = None if feature_flag_version == FeatureFlagVersion.V2 else default_conditions
-            else:
+            if client_filters or requirement_type:
                 feature_flag_dict[FeatureFlagConstants.CONDITIONS] = conditions
+            else:
+                feature_flag_dict[FeatureFlagConstants.CONDITIONS] = default_conditions
         elif feature_flag_version == FeatureFlagVersion.V1:
             feature_flag_dict[FeatureFlagConstants.CONDITIONS] = default_conditions
 
@@ -933,11 +931,11 @@ def map_keyvalue_to_featureflagvalue(keyvalue):
 
         # Variants
         variants = feature_flag_dict.get(FeatureFlagConstants.VARIANTS, None)
-        variant_list = []
         if variants:
+            variant_list = []
             for variant in variants:
-                feature_variant = FeatureVariant.convert_from_dict(variant)
-                if feature_variant:
+                if variant:
+                    feature_variant = FeatureVariant.convert_from_dict(variant)
                     variant_list.append(feature_variant)
 
             feature_flag_dict[FeatureFlagConstants.VARIANTS] = variant_list
@@ -997,7 +995,7 @@ def is_feature_flag(kv):
     return False
 
 
-def convert_boolean_value(enabled, feature_name):
+def convert_string_to_bool(value, feature_name):
     """
     Convert the value to a boolean if it is a string.
 
@@ -1005,14 +1003,14 @@ def convert_boolean_value(enabled, feature_name):
     :return: Converted value.
     :rtype: bool
     """
-    if isinstance(enabled, bool):
-        return enabled
-    if enabled.lower() == "true":
+    if isinstance(value, bool):
+        return value
+    if value.lower() == "true":
         return True
-    if enabled.lower() == "false":
+    if value.lower() == "false":
         return False
     raise ValueError(
-        f"Invalid setting 'enabled' with value '{enabled}' for feature '{feature_name}'."
+        f"Invalid setting 'enabled' with value '{value}' for feature '{feature_name}'."
     )
 
 

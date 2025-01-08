@@ -60,7 +60,7 @@ from ._featuremodels import (
     is_feature_flag,
     FeatureFlagValue,
     FeatureManagementReservedKeywords,
-    convert_boolean_value
+    convert_string_to_bool
 )
 
 logger = get_logger(__name__)
@@ -297,7 +297,7 @@ def __read_features_from_msfm_schema(feature_flags_list):
 
             new_feature = FeatureFlagValue(
                 id_=str(feature_id),
-                enabled=convert_boolean_value(
+                enabled=convert_string_to_bool(
                     feature.get(FeatureFlagConstants.ENABLED, False), feature_id
                 ),
                 description=feature.get(FeatureFlagConstants.DESCRIPTION, None),
@@ -347,7 +347,8 @@ def __read_features_from_msfm_schema(feature_flags_list):
             if variants := feature.get(FeatureFlagConstants.VARIANTS, None):
                 new_feature.variants = []
                 for variant in variants:
-                    new_feature.variants.append(FeatureVariant.convert_from_dict(variant))
+                    if variant:
+                        new_feature.variants.append(FeatureVariant.convert_from_dict(variant))
 
             if telemetry := feature.get(FeatureFlagConstants.TELEMETRY, None):
                 new_feature.telemetry = FeatureTelemetry.convert_from_dict(telemetry, feature_id)
