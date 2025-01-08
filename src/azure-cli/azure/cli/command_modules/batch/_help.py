@@ -236,21 +236,6 @@ short-summary: Gets information about the specified application.
 long-summary: This operation returns only applications and versions that are available for use on compute nodes; that is, that can be used in an application package reference. For administrator information about applications and versions that are not yet available to compute nodes, use the Azure portal or the 'az batch application list' command.
 """
 
-helps['batch certificate'] = """
-type: group
-short-summary: Manage Batch certificates.
-"""
-
-helps['batch certificate create'] = """
-type: command
-short-summary: Add a certificate to a Batch account.
-"""
-
-helps['batch certificate delete'] = """
-type: command
-short-summary: Delete a certificate from a Batch account.
-"""
-
 helps['batch job'] = """
 type: group
 short-summary: Manage Batch jobs.
@@ -377,11 +362,6 @@ short-summary: Manage Batch compute node files.
 helps['batch node file download'] = """
 type: command
 short-summary: Download the content of the a node file.
-"""
-
-helps['batch node remote-desktop'] = """
-type: group
-short-summary: Retrieve the remote desktop protocol file for a Batch compute node.
 """
 
 helps['batch node remote-login-settings'] = """
