@@ -29,7 +29,7 @@ Release History
 
 * [BREAKING CHANGE] `az disk`: Refine output fields to align with backend service (#30430)
 * [BREAKING CHANGE] `az snapshot`: Refine output fields to align with backend service (#30486)
-* Fix #30009: `az vm install-patches`: Fix errors due to typos in install_patches function (#30011)
+* Fix #30009: `az vm install-patches`: Fix errors due to typos in `install_vm_patches` function (#30011)
 * `az vm/vmss create`: Fix help message for `--public-ip-address` parameter (#30412)
 * Fix #30565: `az vm create`: Fix creating VM with `--patch-mode` parameter (#30568)
 * Fix #30564: `az vm create`: Fix creating VM with `--enable-auto-update` parameter (#30568)
