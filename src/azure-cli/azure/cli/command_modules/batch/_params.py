@@ -311,8 +311,6 @@ def load_arguments(self, _):
     with self.argument_context('batch node file list') as c:
         c.extra('recursive', arg_type=get_three_state_flag(), help='Whether to list children of a directory.')
 
-
-
     with self.argument_context('batch task reset') as c:
         c.argument('if_modified_since', help='The operation will be performed only if the resource has been modified since the specified timestamp.', type=datetime_format, arg_group='Pre-condition and Query')
         c.argument('if_unmodified_since', help='The operation will not be performed only if the resource has been modified since the specified timestamp.', type=datetime_format, arg_group='Pre-condition and Query')
@@ -341,14 +339,6 @@ def load_arguments(self, _):
                              'days unless the Compute Node is removed or the Job is deleted. Expected'
                              'format is an ISO-8601 duration.')
 
-
-
-    '''
-    with self.argument_context('batch task reset') as c:
-        c.extra('max_task_retry_count', options_list=['--max-task-retry-count'], arg_group='Task: Constraints',help="hi")
-        c.extra('max_wall_clock_time', options_list=['--max-wall-clock-time'], arg_group='Task: Constraints')
-        c.extra('retention_time', options_list=['--retention-time'], arg_group='Constraints')
-    '''
     with self.argument_context('batch pool usage-metrics list') as c:
         c.extra('endtime', options_list=['--end-time'], arg_group='Pre-condition and Query',
                 help=' The latest time from which to include metrics. This must be at least two'
@@ -372,7 +362,6 @@ def load_arguments(self, _):
             c.extra('start-range', arg_group='Pre-condition and Query',
                        help='The byte range to be retrieved. If not set the file will be retrieved from the beginning.')
 
-
     for command in ['node file download', 'node file show', 'task file show', 'task file download']:
         with self.argument_context(f'batch {command}') as c:
             c.extra('if-modified-since', arg_group='Pre-condition and Query',
@@ -383,7 +372,6 @@ def load_arguments(self, _):
                        help='A timestamp indicating the last modified time of the resource known to the client. '
                             'The operation will be performed only if the resource on the service has been modified '
                             'since the specified time.')
-
 
     with self.argument_context('batch pool create') as c:
         c.argument('json_file', help='The file containing pool create properties parameter specification in JSON(formatted to match REST API request body). If this parameter is specified, all \'Pool Create Properties Parameter Arguments\' are ignored.  See https://docs.microsoft.com/rest/api/batchservice/pool/add?tabs=HTTP#request-body')
@@ -438,17 +426,10 @@ def load_arguments(self, _):
         c.argument('prioritize_unhealthy_instances', arg_type=get_three_state_flag())
         c.argument('rollback_failed_instances_on_policy_breach', arg_type=get_three_state_flag())
 
-    '''
-    for command in ['job create', 'job set', 'job reset', 'job-schedule create', 'job-schedule set', 'job-schedule reset']:
-        with self.argument_context(f'batch {command}') as c:
-            c.argument('pool_id', options_list=('--pool-id',), help='The id of an existing pool. All the tasks of the job will run on the specified pool.')
-    '''
-
     with self.argument_context('batch pool set') as c:
         c.argument('target_node_communication_mode', options_list=['--target-communication'],
                    help="The desired node communication mode for the pool. If this element is present, it replaces the existing targetNodeCommunicationMode configured on the Pool. If omitted, any existing metadata is left unchanged.",
                    arg_type=get_enum_type(BatchNodeCommunicationMode))
-
 
     with self.argument_context('batch task create') as c:
         c.argument('json_file', type=file_type, help='The file containing the task(s) to create in JSON(formatted to match REST API request body). When submitting multiple tasks, accepts either an array of tasks or a TaskAddCollectionParamater. If this parameter is specified, all other parameters are ignored.', validator=validate_json_file, completer=FilesCompleter())
@@ -480,7 +461,6 @@ def load_arguments(self, _):
         c.argument('retention_time', help='The default is 7 days, i.e. the Task directory will be'
                                        'retained for 7 days unless the Compute Node is removed or the'
                                        'Job is deleted.')
-
 
     for item in ['batch pool resize', 'batch pool reset', 'batch job list', 'batch task create', 'batch task reset']:
         with self.argument_context(item) as c:
