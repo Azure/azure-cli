@@ -3,13 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import base64
 from urllib.parse import urlsplit
 import configparser
-from enum import Enum
-import time
-import datetime
-import re
 from knack.log import get_logger
 
 from msrest.exceptions import DeserializationError
@@ -25,14 +20,9 @@ from azure.mgmt.batch.models import (BatchAccountCreateParameters, BatchAccountU
                                      ResourceIdentityType, UserAssignedIdentities)
 from azure.mgmt.batch.operations import (ApplicationPackageOperations)
 
-import azure.batch.models as models
+from azure.batch.models import (AffinityInfo, BatchPoolResizeContent, BatchStartTask, BatchTaskConstraints, BatchTask,
+                                BatchTaskGroup, BatchPoolUpdateContent, BatchTaskCreateContent)
 
-from azure.batch.models import (BatchPoolResizeContent, BatchStartTask, BatchTaskConstraints, BatchTask,
-                                BatchPoolUpdateContent, BatchTaskCreateContent, BatchTaskConstraints, AffinityInfo,
-                                BatchPoolResizeContent, BatchTaskCreateContent, BatchTaskGroup, AffinityInfo,
-                                BatchTaskConstraints)
-from azure.cli.command_modules.batch import _format as transformers
-                                
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import get_sdk, ResourceType
 from azure.cli.core._profile import Profile
@@ -443,13 +433,12 @@ def list_jobs(client, job_schedule_id=None, filter=None,  # pylint: disable=rede
              select=None, expand=None):
     if job_schedule_id:
         return client.list_jobs_from_schedule(job_schedule_id=job_schedule_id,filter=filter,select=select,expand=expand)
-  
+
     return client.list_jobs(filter=filter,select=select,expand=expand)
 
 def reset_task(client, job_id=None, task_id=None, json_file=None, # pylint: disable=redefined-builtin
                max_task_retry_count=None, retention_time=None, max_wall_clock_time=None,
-             if_match=None, if_none_match=None, if_modified_since=None,
-                if_unmodified_since=None):
+               if_match=None, if_none_match=None, if_modified_since=None, if_unmodified_since=None):
 
     if json_file:
         json_obj = get_file_json(json_file)
@@ -464,7 +453,7 @@ def reset_task(client, job_id=None, task_id=None, json_file=None, # pylint: disa
         constrants = BatchTaskConstraints(max_wall_clock_time, retention_time, max_task_retry_count)
         param = BatchTask(
             constraints=constrants)
-  
+
     return client.replace_task(job_id=job_id, task_id=task_id,task=param)
 
 
@@ -488,9 +477,9 @@ def resize_pool(client, pool_id, target_dedicated_nodes=None, target_low_priorit
     if if_none_match:
         match_conditions = MatchConditions.IfModified
 
-    return client.resize_pool(pool_id=pool_id, content=param, if_modified_since=if_modified_since, 
-                              if_unmodified_since=if_unmodified_since, match_condition=match_conditions) 
-    
+    return client.resize_pool(pool_id=pool_id, content=param, if_modified_since=if_modified_since,
+                              if_unmodified_since=if_unmodified_since, match_condition=match_conditions)
+
 
 
 @transfer_doc(BatchPoolUpdateContent, BatchStartTask)
@@ -529,7 +518,7 @@ def update_pool(client,
                                          max_task_retry_count=start_task_max_task_retry_count)
     client.update_pool(pool_id=pool_id, pool=param)
     return client.get_pool(pool_id)
-    
+
 
 
 
@@ -541,7 +530,7 @@ def create_task(client,
                 environment_settings=None, affinity_id=None, max_wall_clock_time=None,
                 retention_time=None, max_task_retry_count=None,
                 application_package_references=None):
-    
+
     task = None
     tasks = []
     if json_file:
@@ -550,7 +539,7 @@ def create_task(client,
         if isinstance(json_obj, list):
             for json_task in json_obj:
                 tasks.append(BatchTaskCreateContent(json_task).as_dict())
-        else:  
+        else:
             try:
                 task = BatchTaskCreateContent(json_obj)
             except (DeserializationError, TypeError, AttributeError):
@@ -558,7 +547,7 @@ def create_task(client,
                     task_collection = BatchTaskGroup(json_obj)
                     tasks = task_collection.value
                 except (DeserializationError, TypeError,AttributeError):
-                        raise ValueError(f"JSON file '{json_file}' is not formatted correctly.")
+                    raise ValueError(f"JSON file '{json_file}' is not formatted correctly.")
     else:
         if command_line is None or task_id is None:
             raise ValueError("Missing required arguments.\nEither --json-file, "
@@ -575,7 +564,7 @@ def create_task(client,
             task.constraints = BatchTaskConstraints(max_wall_clock_time=max_wall_clock_time,
                                                retention_time=retention_time,
                                                max_task_retry_count=max_task_retry_count)
-    
+
 
     if task is not None:
         client.create_task(job_id=job_id, task=task)

@@ -7,13 +7,12 @@ from knack.util import CLIError
 from azure.batch.models import BatchError
 
 def batch_exception_handler(ex):
-    from msrest.exceptions import ValidationError, ClientRequestError
     from azure.core.exceptions import HttpResponseError
 
     if isinstance(ex, HttpResponseError):
         if ex.model and isinstance(ex.model, BatchError) and ex.model.code:
             _raise_batch_error(ex.model)
-    
+
     raise CLIError(ex)
 
 

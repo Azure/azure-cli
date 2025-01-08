@@ -3,12 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from collections.abc import Mapping, Iterable
-from knack.util import todict
+from collections.abc import Mapping
 from azure.core.paging import ItemPaged
-from msrest.serialization import Model
-import unittest
-import json
+
 
 class Transformer:
 
@@ -23,9 +20,9 @@ class Transformer:
         # print(type(result))
         # print(result)
         # print("before for loop")
-        
+
         for key, value in result.items():
-                        
+
             new_key = self.transform_mapping[key] if key in self.transform_mapping else key
 
             # print(new_key)

@@ -24,4 +24,3 @@ def load_supported_images(cmd, prefix, namespace):  # pylint: disable=unused-arg
         return all_images
     except (ClientRequestError, HttpResponseError):
         return []
-

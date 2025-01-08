@@ -41,12 +41,9 @@ from azure.cli.command_modules.batch._validators import (
     resource_file_format,
     resource_tag_format,
     storage_account_id,
-    validate_cert_file,
-    validate_cert_settings,
     validate_client_parameters,
     validate_json_file,
     validate_pool_resize_parameters)
-from pkg_resources import require
 
 
 class NetworkProfile(Enum):
@@ -191,7 +188,7 @@ def load_arguments(self, _):
         with self.argument_context(f'batch application {command}') as c:
             c.argument('account_name', batch_name_type, options_list=('--name', '-n'), validator=application_enabled)
 
-    
+
     # TODO: Refactor so the help text can be extracted automatically
     with self.argument_context('batch pool resize') as c:
         c.argument('if_modified_since', help='The operation will be performed only if the resource has been modified since the specified timestamp.', type=datetime_format, arg_group='Pre-condition and Query')
@@ -207,7 +204,7 @@ def load_arguments(self, _):
                                   'HTTP status code is 400 (Bad Request).')
         c.argument('target_dedicated_nodes', help='The desired number of dedicated Compute Nodes in the Pool.')
         c.argument('target_low_priority_nodes', help='The desired number of Spot/Low-priority Compute Nodes in the Pool.')
-    
+
     # TODO: Refactor so the help text can be extracted automatically
     with self.argument_context('batch pool reset') as c:
         c.argument('json_file', type=file_type, help='The file containing pool update properties parameter specification in JSON(formatted to match REST API request body). If this parameter is specified, all \'Pool Update Properties Parameter Arguments\' are ignored.', validator=validate_json_file, completer=FilesCompleter())
@@ -235,13 +232,13 @@ def load_arguments(self, _):
                    help='A list of environment variable settings for the start task. Space-separated values in \'key=value\' format.')
 
     with self.argument_context('batch pool autoscale enable') as c:
-        c.extra('auto_scale_formula', 
+        c.extra('auto_scale_formula',
                 help='The formula for the desired number of Compute Nodes in the Pool. '
                      'The formula is checked for validity before it is applied to the Pool. '
                      'If the formula is not valid, the Batch service rejects the request with detailed error information. '
                      'For more information about specifying this formula, see Automatically scale Compute Nodes in an Azure Batch Pool '
                      '(https://azure.microsoft.com/documentation/articles/batch-automatic-scaling).')
-        c.extra('auto_scale_evaluation_interval', 
+        c.extra('auto_scale_evaluation_interval',
                    help='The time interval at which to automatically adjust the Pool size according to the autoscale formula. '
                         'The default value is 15 minutes. The minimum and maximum value are 5 minutes and 168 hours respectively. '
                         'If you specify a value less than 5 minutes or greater than 168 hours, the Batch service rejects the request '
@@ -266,23 +263,23 @@ def load_arguments(self, _):
         'node delete'
     ]:
         with self.argument_context(f'batch {command}') as c:
-            c.extra('if-match', arg_group='Pre-condition and Query', 
+            c.extra('if-match', arg_group='Pre-condition and Query',
                        help='An ETag value associated with the version of the resource known to the client. '
                             'The operation will be performed only if the resource\'s current ETag on the service '
                             'exactly matches the value specified by the client.')
-            c.extra('if-modified-since', arg_group='Pre-condition and Query', 
+            c.extra('if-modified-since', arg_group='Pre-condition and Query',
                        help='A timestamp indicating the last modified time of the resource known to the client. '
                             'The operation will be performed only if the resource on the service has been modified '
                             'since the specified time.',)
-            c.extra('if-none-match', arg_group='Pre-condition and Query', 
+            c.extra('if-none-match', arg_group='Pre-condition and Query',
                        help='An ETag value associated with the version of the resource known to the client. '
                             'The operation will be performed only if the resource\'s current ETag on the service '
                             'does not match the value specified by the client.')
-            c.extra('if-unmodified-since', arg_group='Pre-condition and Query', 
+            c.extra('if-unmodified-since', arg_group='Pre-condition and Query',
                        help='A timestamp indicating the last modified time of the resource known to the client. '
                             'The operation will be performed only if the resource on the service has been modified '
                             'since the specified time.')
-    
+
     for command in ['pool node-counts list', 'pool supported-images list', 'job list', 'pool list','job-schedule list', 'task list', 'job prep-release-status list','node list','node file list','task file list','pool usage-metrics list']:
         with self.argument_context(f'batch {command}') as c:
             c.extra('filter', arg_group='Pre-condition and Query',  help='An OData $filter clause. For more information on constructing this filter,'
@@ -302,20 +299,20 @@ def load_arguments(self, _):
 
     with self.argument_context('batch job stop') as c:
         c.extra('reason',options_list=['--terminate-reason'], help='Termination reason. The text you want to appear as the job\'s TerminateReason. The default is \'UserTerminate\'.')
-    
+
     for command in ['node file delete', 'task file delete']:
         with self.argument_context(f'batch {command}') as c:
-            c.extra('recursive', arg_type=get_three_state_flag(), 
+            c.extra('recursive', arg_type=get_three_state_flag(),
                     help='Whether to delete children of a directory. If the filePath parameter'
                     'represents a directory instead of a file, you can set recursive to true to delete the'
                     'directory and all of the files and subdirectories in it. If recursive is false'
                     'then the directory must be empty or deletion will fail. Default value is None.')
-    
+
     with self.argument_context('batch node file list') as c:
         c.extra('recursive', arg_type=get_three_state_flag(), help='Whether to list children of a directory.')
 
-    
-    
+
+
     with self.argument_context('batch task reset') as c:
         c.argument('if_modified_since', help='The operation will be performed only if the resource has been modified since the specified timestamp.', type=datetime_format, arg_group='Pre-condition and Query')
         c.argument('if_unmodified_since', help='The operation will not be performed only if the resource has been modified since the specified timestamp.', type=datetime_format, arg_group='Pre-condition and Query')
@@ -345,7 +342,7 @@ def load_arguments(self, _):
                              'format is an ISO-8601 duration.')
 
 
-        
+
     '''
     with self.argument_context('batch task reset') as c:
         c.extra('max_task_retry_count', options_list=['--max-task-retry-count'], arg_group='Task: Constraints',help="hi")
@@ -353,40 +350,40 @@ def load_arguments(self, _):
         c.extra('retention_time', options_list=['--retention-time'], arg_group='Constraints')
     '''
     with self.argument_context('batch pool usage-metrics list') as c:
-        c.extra('endtime', options_list=['--end-time'], arg_group='Pre-condition and Query', 
+        c.extra('endtime', options_list=['--end-time'], arg_group='Pre-condition and Query',
                 help=' The latest time from which to include metrics. This must be at least two'
                 'hours before the current time. If not specified this defaults to the end'
                 'time of the last aggregation interval currently available.')
-        c.extra('starttime', options_list=['--start-time'], arg_group='Pre-condition and Query', 
+        c.extra('starttime', options_list=['--start-time'], arg_group='Pre-condition and Query',
                 help='The earliest time from which to include metrics. This must be at least two'
                 'and a half hours before the current time. If not specified this defaults to'
                 'the start time of the last aggregation interval currently available.')
 
     with self.argument_context('batch task file list') as c:
-        c.extra('recursive', arg_type=get_three_state_flag(), 
+        c.extra('recursive', arg_type=get_three_state_flag(),
                 help='Whether to list children of the Task directory. This parameter can be'
                 'used in combination with the filter parameter to list specific type of files.')
 
 
     for command in ['node file download','task file download']:
         with self.argument_context(f'batch {command}') as c:
-            c.extra('end-range', arg_group='Pre-condition and Query', 
+            c.extra('end-range', arg_group='Pre-condition and Query',
                        help='The byte range to be retrieved. If not set the file will be retrieved to the end.')
-            c.extra('start-range', arg_group='Pre-condition and Query', 
+            c.extra('start-range', arg_group='Pre-condition and Query',
                        help='The byte range to be retrieved. If not set the file will be retrieved from the beginning.')
-    
+
 
     for command in ['node file download', 'node file show', 'task file show', 'task file download']:
         with self.argument_context(f'batch {command}') as c:
-            c.extra('if-modified-since', arg_group='Pre-condition and Query', 
+            c.extra('if-modified-since', arg_group='Pre-condition and Query',
                        help='A timestamp indicating the last modified time of the resource known to the client. '
                             'The operation will be performed only if the resource on the service has been modified '
                             'since the specified time.',)
-            c.extra('if-unmodified-since', arg_group='Pre-condition and Query', 
+            c.extra('if-unmodified-since', arg_group='Pre-condition and Query',
                        help='A timestamp indicating the last modified time of the resource known to the client. '
                             'The operation will be performed only if the resource on the service has been modified '
                             'since the specified time.')
-    
+
 
     with self.argument_context('batch pool create') as c:
         c.argument('json_file', help='The file containing pool create properties parameter specification in JSON(formatted to match REST API request body). If this parameter is specified, all \'Pool Create Properties Parameter Arguments\' are ignored.  See https://docs.microsoft.com/rest/api/batchservice/pool/add?tabs=HTTP#request-body')
@@ -440,18 +437,18 @@ def load_arguments(self, _):
         c.argument('enable_cross_zone_upgrade', arg_type=get_three_state_flag())
         c.argument('prioritize_unhealthy_instances', arg_type=get_three_state_flag())
         c.argument('rollback_failed_instances_on_policy_breach', arg_type=get_three_state_flag())
-       
+
     '''
     for command in ['job create', 'job set', 'job reset', 'job-schedule create', 'job-schedule set', 'job-schedule reset']:
         with self.argument_context(f'batch {command}') as c:
             c.argument('pool_id', options_list=('--pool-id',), help='The id of an existing pool. All the tasks of the job will run on the specified pool.')
     '''
-    
+
     with self.argument_context('batch pool set') as c:
         c.argument('target_node_communication_mode', options_list=['--target-communication'],
                    help="The desired node communication mode for the pool. If this element is present, it replaces the existing targetNodeCommunicationMode configured on the Pool. If omitted, any existing metadata is left unchanged.",
                    arg_type=get_enum_type(BatchNodeCommunicationMode))
-        
+
 
     with self.argument_context('batch task create') as c:
         c.argument('json_file', type=file_type, help='The file containing the task(s) to create in JSON(formatted to match REST API request body). When submitting multiple tasks, accepts either an array of tasks or a TaskAddCollectionParamater. If this parameter is specified, all other parameters are ignored.', validator=validate_json_file, completer=FilesCompleter())

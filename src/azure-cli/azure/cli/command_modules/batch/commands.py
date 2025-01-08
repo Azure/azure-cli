@@ -31,7 +31,7 @@ def load_command_table(self, _):
     mgmt_path = 'azure.mgmt.batch.operations._{}_operations#{}.'
 
     def get_data_type():
-         return CliCommandType(
+        return CliCommandType(
             operations_tmpl=data_path,
             client_factory=get_data_factory(),
             exception_handler=batch_exception_handler,
@@ -125,13 +125,13 @@ def load_command_table(self, _):
     with self.command_group('batch application summary', get_data_type()) as g:
         g.batch_command('list', 'list_applications')
         g.batch_command('show', 'get_application')
-    
+
     with self.command_group('batch pool supported-images', get_data_type()) as g:
         g.batch_command('list', 'list_supported_images')
-    
+
     with self.command_group('batch pool node-counts', get_data_type()) as g:
         g.batch_command('list', 'list_pool_node_counts')
-    
+
     with self.command_group('batch pool', get_data_type(), client_factory=get_data_factory()) as g:
         g.batch_command('usage-metrics list', 'list_pool_usage_metrics')
         g.batch_command('create', 'create_pool', validator=validate_pool_settings, flatten=10)
@@ -144,9 +144,9 @@ def load_command_table(self, _):
         g.batch_command('autoscale disable', 'disable_pool_auto_scale')
         g.batch_command('autoscale enable', 'enable_pool_auto_scale')
         g.batch_command('autoscale evaluate', 'evaluate_pool_auto_scale')
-    
-    
-    
+
+
+
     with self.command_group('batch job-schedule', get_data_type()) as g:
         g.batch_command('create', 'create_job_schedule')
         g.batch_command('delete', 'delete_job_schedule')
@@ -157,7 +157,7 @@ def load_command_table(self, _):
         g.batch_command('enable', 'enable_job_schedule')
         g.batch_command('stop', 'terminate_job_schedule')
         g.batch_command('list', 'list_job_schedules')
-    
+
     with self.command_group('batch task', get_data_type(), client_factory=get_data_factory()) as g:
         g.custom_command('create', 'create_task', table_transformer=task_create_table_format)
         g.batch_command('list', 'list_tasks')
@@ -175,7 +175,7 @@ def load_command_table(self, _):
         g.batch_command('download', 'get_task_file', validator=validate_options)
         g.batch_command('show', 'get_task_file_properties')
         g.batch_command('list', 'list_task_files')
-    
+
     with self.command_group('batch node file', file_type) as g:
         g.batch_command('delete', 'delete_node_file')
         g.batch_command('download', 'get_node_file', validator=validate_options)

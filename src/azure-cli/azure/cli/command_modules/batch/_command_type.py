@@ -3,25 +3,21 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import re
-import inspect
 import importlib
-
+import inspect
+import re
 from enum import Enum
-from tokenize import String
-from typing import Optional, get_type_hints, get_origin, get_args
-from azure.core import MatchConditions
-from knack.arguments import CLICommandArgument, IgnoreAction
-from knack.introspection import extract_full_summary_from_signature, extract_args_from_signature
+from typing import get_args, get_type_hints
 
-from azure.cli.command_modules.batch import _validators as validators
 from azure.cli.command_modules.batch import _format as transformers
 from azure.cli.command_modules.batch import _parameter_format as pformat
-
+from azure.cli.command_modules.batch import _validators as validators
 from azure.cli.core import EXCLUDED_PARAMS
-from azure.cli.core.commands import CONFIRM_PARAM_NAME
-from azure.cli.core.commands import AzCommandGroup
+from azure.cli.core.commands import CONFIRM_PARAM_NAME, AzCommandGroup
 from azure.cli.core.util import get_file_json
+from azure.core import MatchConditions
+from knack.arguments import CLICommandArgument, IgnoreAction
+from knack.introspection import extract_args_from_signature
 
 _CLASS_NAME = re.compile(r"~(.*)")  # Strip model name from class docstring
 _UNDERSCORE_CASE = re.compile('(?!^)([A-Z]+)')  # Convert from CamelCase to underscore_case
@@ -91,7 +87,7 @@ def find_param_type(model, param):
     param_type = re.search(pattern, model.__doc__, re.DOTALL)
     if param_type is None:
         return None
-    
+
     return re.sub(r"\n\s*", "", param_type.group(1).strip())
 
 
@@ -220,7 +216,7 @@ class BatchArgumentTree:
     def _is_list(self, name):
         """Whether argument value is a list"""
         return self._arg_tree[name]['type'].startswith('List[') or self._arg_tree[name]['type'] == '{str}'
-    
+
     def _is_datetime(self, name):
         """Whether argument value is a timestamp"""
         return self._arg_tree[name]['type'] in ['iso-8601', 'rfc-1123']
@@ -286,7 +282,7 @@ class BatchArgumentTree:
         self._request_param['name'] = name
         self._request_param['model'] = model.split('.')[-1]
 
-    
+
     def deserialize_json(self, kwargs, json_obj):
         """Deserialize the contents of a JSON file into the request body
         parameter.
@@ -297,14 +293,14 @@ class BatchArgumentTree:
         message = "Failed to deserialized JSON file into object {}"
         try:
             def remove_none_values(d):
-                    """Recursively remove None values from dictionaries."""
-                    if isinstance(d, dict):
-                        return {k: remove_none_values(v) for k, v in d.items() if v is not None}
-                    elif isinstance(d, list):
-                        return [remove_none_values(v) for v in d if v is not None]
-                    else:
-                        return d
-            
+                """Recursively remove None values from dictionaries."""
+                if isinstance(d, dict):
+                    return {k: remove_none_values(v) for k, v in d.items() if v is not None}
+                elif isinstance(d, list):
+                    return [remove_none_values(v) for v in d if v is not None]
+                else:
+                    return d
+
             json_obj = remove_none_values(json_obj)
             import azure.batch.models
             model_type = getattr(azure.batch.models, self._request_param['model'])
@@ -312,7 +308,7 @@ class BatchArgumentTree:
             kwargs[self._request_param['name']] = model_type(json_obj).as_dict(exclude_readonly=True)
 
 
-            
+
         except DeserializationError as error:
             message += f": {error}"
             raise ValueError(message.format(self._request_param['model']))
@@ -459,17 +455,14 @@ class AzureBatchDataPlaneCommand:
             if isinstance(obj, Iterable) \
                     and not isinstance(obj, list) \
                     and not isinstance(obj, dict):
-                from msrest.paging import Paged
-                from azure.core.paging import ItemPaged as AzureCorePaged
                 from azure.cli.core.aaz._paging import AAZPaged
+                from azure.core.paging import ItemPaged as AzureCorePaged
+                from msrest.paging import Paged
                 return isinstance(obj, (AzureCorePaged, Paged, AAZPaged))
             return False
 
         # pylint: disable=inconsistent-return-statements
         def _execute_command(kwargs):
-            from msrest.paging import Paged
-            from msrest.exceptions import ValidationError, ClientRequestError
-            from knack.util import CLIError
             cmd = kwargs.pop('cmd')
 
             client = self.client_factory(cmd.cli_ctx, kwargs)
@@ -500,7 +493,7 @@ class AzureBatchDataPlaneCommand:
             if self._head_cmd:
                 kwargs['raw'] = True
             result = _get_operation()(client, **kwargs)
-            
+
 
             # Head output
             if self._head_cmd:
@@ -530,12 +523,12 @@ class AzureBatchDataPlaneCommand:
         self.argument_loader = _load_arguments
         self.description_loader = _load_descriptions
         self.merged_kwargs = kwargs
-    
+
     def filter_args(self, kwargs):
         for key in list(kwargs.keys()):
             if kwargs[key] is None:
                 del kwargs[key]
-        
+
         # in track1 we had --if-match and --if-none-match, in track2 they are packaged in a match-condition param
         if kwargs.get('if-match') is not None:
             if kwargs['if-match']  == '*':
@@ -544,18 +537,20 @@ class AzureBatchDataPlaneCommand:
                 kwargs['etag'] = kwargs['if-match']
                 kwargs['match_condition'] = MatchConditions.IfNotModified
             del kwargs['if-match']
-        
+
         if kwargs.get('if_none_match') is not None:
             kwargs['etag'] = kwargs['if_none_match']
             kwargs['match_condition'] = MatchConditions.IfModified
             del kwargs['if_none_match']
-        
-        # in track1 we had --start-range and --end-range, in track2 they are packaged in a ocp_range param        
+
+        # in track1 we had --start-range and --end-range, in track2 they are packaged in a ocp_range param
         if kwargs.get('start-range') or kwargs.get('end-range'):
             start = kwargs.get('start-range') if kwargs.get('start-range') else 0
             end = kwargs.get('end-range') if kwargs.get('end-range') else ""
-            if kwargs.get('start-range') : del kwargs['start-range']
-            if kwargs.get('end-range'): del kwargs['end-range']
+            if kwargs.get('start-range'):
+                del kwargs['start-range']
+            if kwargs.get('end-range'):
+                del kwargs['end-range']
             kwargs['ocp_range'] = f"bytes={start}-{end}"
 
 
@@ -626,7 +621,7 @@ class AzureBatchDataPlaneCommand:
         """
         attribute_map = self.get_track1_attribute_map(model)
         validations = self.get_track1_validations(model)
-        
+
         for attr, details in attribute_map.items():  # pylint: disable=protected-access
             conditions = []
             full_path = '.'.join([self.parser._request_param['name'], path, attr])  # pylint: disable=protected-access
@@ -690,116 +685,128 @@ class AzureBatchDataPlaneCommand:
         else:
             self.parser.queue_argument(arg, path, param, options, typestr, dependencies, restname, restpath)
 
-    """
-    Method that takes in a class and a list of membembers from get_optional_state and overrides any values that have a readyonly field.  This
-    to match track1's _validation model structure
-    """
     def get_track1_validations(self, cls):
-      
-      filtered_members = self.get_optional_state(cls)
-      for name, value in inspect.getmembers(cls):
-          if not name.startswith('__') and not inspect.isroutine(value):
-              str_value =  str(value)
-              try:
-                if str_value is not None and "_RestField" in str_value and hasattr(value,"_visibility") and value._visibility is not None and len(value._visibility) > 0:
-                    read_only = value._visibility[0] == "read"
-                    filtered_members[name] = {'readonly': read_only}
-              except:
-                  continue
-      return filtered_members
+        """Method that takes in a class and a list of members from get_optional_state and overrides any values that have
+        a readyonly field.  This matches track1's _validation model structure
+        """
+        # pylint: disable=protected-access
+        filtered_members = self.get_optional_state(cls)
+        for name, value in inspect.getmembers(cls):
+            if not name.startswith('__') and not inspect.isroutine(value):
+                str_value =  str(value)
+                try:
+                    if (str_value is not None
+                        and "_RestField" in str_value
+                        and hasattr(value,"_visibility")
+                        and value._visibility is not None
+                        and len(value._visibility) > 0
+                    ):
+                        read_only = value._visibility[0] == "read"
+                        filtered_members[name] = {'readonly': read_only}
+                except:
+                    continue
+        return filtered_members
 
     def convert_to_track1_type (self, original_type):
         if original_type is not None and "ForwardRef" in original_type:
-           pattern = r"ForwardRef\('_models\.(.*?)'\)"
-           original_type = re.sub(pattern, r'\1', original_type)
+            pattern = r"ForwardRef\('_models\.(.*?)'\)"
+            original_type = re.sub(pattern, r'\1', original_type)
         if original_type is not None and "_models." in original_type:
-           original_type = original_type.replace("_models.", "")
+            original_type = original_type.replace("_models.", "")
         if original_type is not None and "typing.List" in original_type:
-           original_type = original_type.replace("typing.List", "List")
+            original_type = original_type.replace("typing.List", "List")
         if original_type is not None and "typing.Dict" in original_type:
-           original_type = original_type.replace("typing.Dict", "Dict")
+            original_type = original_type.replace("typing.Dict", "Dict")
         if original_type is not None and "typing.Union" in original_type:
-           pattern = r"typing\.Union\[\w+, (\w+), \w+\]"
-           match = re.search(pattern, original_type)
-           if match:
-             original_type = match.group(1)
+            pattern = r"typing\.Union\[\w+, (\w+), \w+\]"
+            match = re.search(pattern, original_type)
+            if match:
+                original_type = match.group(1)
         if original_type is not None and "typing.Union" in original_type:
-           pattern = r"typing\.Union\[str, (\w+)\]"
-           match = re.search(pattern, original_type)
-           if match:
-             pattern = r"typing\.Union\[str, (.+?)\]"
-             original_type= re.sub(pattern, r"\1", original_type)
-              
+            pattern = r"typing\.Union\[str, (\w+)\]"
+            match = re.search(pattern, original_type)
+            if match:
+                pattern = r"typing\.Union\[str, (.+?)\]"
+                original_type= re.sub(pattern, r"\1", original_type)
+
         if original_type is not None and "<class" in original_type:
-           pattern = r"<class '([\w\.]+)'>"
-           match = re.search(pattern, original_type)
-           if match:
-             original_type = match.group(1)
+            pattern = r"<class '([\w\.]+)'>"
+            match = re.search(pattern, original_type)
+            if match:
+                original_type = match.group(1)
         return original_type
 
     def get_track1_rest_names(self,cls):
+        # pylint: disable=protected-access
         rest_names = {}
         for name, value in inspect.getmembers(cls):
             rest_name = name
             if not name.startswith('_') and not inspect.isroutine(value):
                 str_value =  str(value)
                 try:
-                  if str_value is not None and "_RestField" in str_value and hasattr(value,"_rest_name") and value._rest_name is not None and len(value._rest_name) > 0:
-                      rest_name = value._rest_name
+                    if (str_value is not None
+                        and "_RestField" in str_value
+                        and hasattr(value,"_rest_name")
+                        and value._rest_name is not None
+                        and len(value._rest_name) > 0
+                    ):
+                        rest_name = value._rest_name
                 except ValueError:
-                    pass # hasattr throws ValueError if you ask for_rest_name and its not present
+                    pass # hasattr throws ValueError if you ask for _rest_name and its not present
                 rest_names[name] = rest_name
         return rest_names
 
     def get_track1_attribute_map (self, cls):
-      member_types = {}
-      pattern1 = r"^typing\.Union\[str, (.+), NoneType\]$"
-      pattern2 = r"^typing\.Union\[(.+), NoneType\]$"
-      pattern3 = r"^typing\.Optional\[(.+)\]$"
+        # pylint: disable=protected-access
+        member_types = {}
+        pattern1 = r"^typing\.Union\[str, (.+), NoneType\]$"
+        pattern2 = r"^typing\.Union\[(.+), NoneType\]$"
+        pattern3 = r"^typing\.Optional\[(.+)\]$"
 
-      rest_names = self.get_track1_rest_names(cls)
-      for name, typ in cls.__annotations__.items():    
-          if hasattr(typ, '_name') and typ._name is not None and typ._name == 'Optional':
-              track1_type = self.convert_to_track1_type(str(get_args(typ)[0]))
-          else:
-              track1_type = str(typ)
-              
-              if re.match(pattern1, track1_type):
-                  track1_type = self.convert_to_track1_type(str(get_args(typ)[1]))
-              elif re.match(pattern2, track1_type):
-                  track1_type = self.convert_to_track1_type(str(get_args(typ)[0]))
-              elif re.match(pattern3, track1_type):
-                  track1_type = self.convert_to_track1_type(str(get_args(typ)[0]))
-              else:
-                  track1_type = self.convert_to_track1_type(track1_type)
-         
-          if rest_names[name] == None:
-              print("none")
-          member_types[name] = {'key' : rest_names[name], 'type' : track1_type}
-      return member_types
+        rest_names = self.get_track1_rest_names(cls)
+        for name, typ in cls.__annotations__.items():
+            if hasattr(typ, '_name') and typ._name is not None and typ._name == 'Optional':
+                track1_type = self.convert_to_track1_type(str(get_args(typ)[0]))
+            else:
+                track1_type = str(typ)
 
-    """
-    Method that will go through a class and return a list of its memember variables and there required status
-    """
+                if re.match(pattern1, track1_type):
+                    track1_type = self.convert_to_track1_type(str(get_args(typ)[1]))
+                elif re.match(pattern2, track1_type):
+                    track1_type = self.convert_to_track1_type(str(get_args(typ)[0]))
+                elif re.match(pattern3, track1_type):
+                    track1_type = self.convert_to_track1_type(str(get_args(typ)[0]))
+                else:
+                    track1_type = self.convert_to_track1_type(track1_type)
+
+            if rest_names[name] is None:
+                print("none")
+            member_types[name] = {'key' : rest_names[name], 'type' : track1_type}
+
+        return member_types
+
     def get_optional_state(self, cls):
-      globalns = {}
-      # Add the global namespace of the module where the class is defined
-      globalns.update(vars(importlib.import_module(cls.__module__)))
-      # azure batch models uses an alias _models which throws off the get_type_hints eval, need this to correct
-      globalns['_models'] = importlib.import_module('azure.batch.models')
-      
-      members = get_type_hints(cls, globalns=globalns)
-      filtered_members = {}
-      for name, type_hint in members.items():
-          is_optional = type_hint._name == 'Optional' or type_hint._name is None if hasattr(type_hint, '_name') else False
-          filtered_members[name] =  {'required': not is_optional}
-      return filtered_members
+        """Method that will go through a class and return a list of its member variables and their required status"""
+        # pylint: disable=protected-access
+        globalns = {}
+        # Add the global namespace of the module where the class is defined
+        globalns.update(vars(importlib.import_module(cls.__module__)))
+        # azure batch models uses an alias _models which throws off the get_type_hints eval, need this to correct
+        globalns['_models'] = importlib.import_module('azure.batch.models')
+
+        members = get_type_hints(cls, globalns=globalns)
+        filtered_members = {}
+        for name, type_hint in members.items():
+            is_optional = (type_hint._name == 'Optional' or type_hint._name is None
+                           if hasattr(type_hint, '_name') else False)
+            filtered_members[name] =  {'required': not is_optional}
+        return filtered_members
 
     def get_class_from_string(self, class_path):
-      module_path, class_name = class_path.rsplit('.', 1)
-      module = importlib.import_module(module_path)
-      cls = getattr(module, class_name)
-      return cls
+        module_path, cls_name = class_path.rsplit('.', 1)
+        module = importlib.import_module(module_path)
+        cls = getattr(module, cls_name)
+        return cls
 
     def _flatten_object(self, path, param_model, class_path, conflict_names=None, restpath=None):
         """Flatten a complex parameter object into command line arguments.
@@ -812,7 +819,7 @@ class AzureBatchDataPlaneCommand:
         if self._should_flatten(path):
             validations = self.get_track1_validations(param_model)
             required_attrs = [key for key, val in validations.items() if val.get('required')]
-            
+
             for param_attr, details in self._get_attrs(param_model, path):
                 options = {}
                 options['options_list'] = [arg_name(param_attr)]
@@ -864,28 +871,32 @@ class AzureBatchDataPlaneCommand:
                                                   for c in choices if enum_value(c) != "unmapped"]
                             options['help'] = options['help'][0:values_index]
                         self._resolve_conflict(param_attr, param_attr, path, options,
-                                               details['type'], required_attrs, conflict_names, details['key'], restpath)
+                                               details['type'], required_attrs, conflict_names,
+                                               details['key'], restpath)
                     else:
-                        self._flatten_object( path='.'.join([path, param_attr]), param_model=attr_model, class_path=details['type'], restpath='.'.join([restpath, details['key']]) )
+                        self._flatten_object(path='.'.join([path, param_attr]),
+                                             param_model=attr_model,
+                                             class_path=details['type'],
+                                             restpath='.'.join([restpath, details['key']]))
 
     def extract_full_summary_from_signature(self, operation):
-      """ Extract the summary from the docstring of the command. """
-      lines = inspect.getdoc(operation)
-      regex = r'\s*(:param|:keyword)\s+(.+?)\s*:(.*)'
-      summary = ''
-      if lines:
-          match = re.search(regex, lines)
-          summary = lines[:match.regs[0][0]] if match else lines
+        """ Extract the summary from the docstring of the command. """
+        lines = inspect.getdoc(operation)
+        regex = r'\s*(:param|:keyword)\s+(.+?)\s*:(.*)'
+        summary = ''
+        if lines:
+            match = re.search(regex, lines)
+            summary = lines[:match.regs[0][0]] if match else lines
 
-      summary = summary.replace('\n', ' ').replace('\r', '')
-      return summary
+        summary = summary.replace('\n', ' ').replace('\r', '')
+        return summary
 
     def _load_transformed_arguments(self, handler):
         """Load all the command line arguments from the request parameters.
         :param func handler: The operation function.
         """
+        from argcomplete.completers import DirectoriesCompleter, FilesCompleter
         from azure.cli.core.commands.parameters import file_type
-        from argcomplete.completers import FilesCompleter, DirectoriesCompleter
         self.parser = BatchArgumentTree(self.validator)
         #self._load_options_model(handler)
         args = []

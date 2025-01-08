@@ -45,7 +45,7 @@ def batch_data_client_factory(cli_ctx, kwargs):
     account_endpoint = kwargs.pop('account_endpoint', None)
     token_credential = kwargs.pop('token_credential', None)
 
-    credentials = None
+    credential = None
 
     if not token_credential and not account_key:
         from azure.cli.core._profile import Profile
