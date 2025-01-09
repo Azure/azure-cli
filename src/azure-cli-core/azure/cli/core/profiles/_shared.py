@@ -278,6 +278,10 @@ AZURE_API_PROFILES = {
 # We should avoid using ad hoc API versions,
 # use the version in a profile as much as possible.
 AD_HOC_API_VERSIONS = {
+    ResourceType.MGMT_IOTHUB: {
+        # src/azure-cli/azure/cli/command_modules/iot/custom.py:1206
+        'iot_hub_resource': '2019-07-01-preview',
+    },
     ResourceType.MGMT_APPSERVICE: {
         # src/azure-cli/azure/cli/command_modules/appservice/_constants.py:68
         'app_service_certificate_orders': '2022-09-01'

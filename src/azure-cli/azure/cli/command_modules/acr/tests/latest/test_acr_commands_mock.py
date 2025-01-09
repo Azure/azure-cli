@@ -9,7 +9,7 @@ import unittest
 from unittest import mock
 import sys
 
-from azure.mgmt.containerregistry.v2019_05_01.models import Registry, Sku
+from azure.mgmt.containerregistry.v2023_11_01_preview.models import Registry, Sku
 
 from azure.cli.command_modules.acr.repository import (
     acr_repository_list,
