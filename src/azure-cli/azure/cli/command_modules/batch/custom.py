@@ -21,7 +21,7 @@ from azure.mgmt.batch.models import (BatchAccountCreateParameters, BatchAccountU
 from azure.mgmt.batch.operations import (ApplicationPackageOperations)
 
 from azure.batch.models import (AffinityInfo, BatchPoolResizeContent, BatchStartTask, BatchTaskConstraints, BatchTask,
-                                BatchTaskGroup, BatchPoolUpdateContent, BatchTaskCreateContent)
+                                BatchTaskGroup, BatchPoolReplaceContent, BatchTaskCreateContent)
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import get_sdk, ResourceType
@@ -439,9 +439,9 @@ def list_jobs(client, job_schedule_id=None, filter=None,  # pylint: disable=rede
     return client.list_jobs(filter=filter, select=select, expand=expand)
 
 
-def reset_task(client, job_id=None, task_id=None, json_file=None,
-               max_task_retry_count=None, retention_time=None, max_wall_clock_time=None,
-               if_match=None, if_none_match=None, if_modified_since=None, if_unmodified_since=None):
+def replace_task(client, job_id=None, task_id=None, json_file=None, max_task_retry_count=None, retention_time=None,
+                 max_wall_clock_time=None, if_match=None, if_none_match=None, if_modified_since=None,
+                 if_unmodified_since=None):
 
     if json_file:
         json_obj = get_file_json(json_file)
@@ -490,17 +490,16 @@ def resize_pool(client, pool_id, target_dedicated_nodes=None, target_low_priorit
                               if_unmodified_since=if_unmodified_since, match_condition=match_conditions)
 
 
-@transfer_doc(BatchPoolUpdateContent, BatchStartTask)
-def update_pool(client,
-                pool_id, json_file=None, start_task_command_line=None,
-                application_package_references=None, metadata=None,
-                start_task_environment_settings=None, start_task_wait_for_success=None,
-                start_task_max_task_retry_count=None):
+def replace_pool(client,
+                 pool_id, json_file=None, application_package_references=None,
+                 metadata=None, target_node_communication_mode=None, start_task_command_line=None,
+                 start_task_environment_settings=None, start_task_max_task_retry_count=None,
+                 start_task_resource_files=None, start_task_wait_for_success=None):
     if json_file:
         json_obj = get_file_json(json_file)
         param = None
         try:
-            param = BatchPoolUpdateContent(json_obj)
+            param = BatchPoolReplaceContent(json_obj)
         except DeserializationError:
             pass
         if not param:
@@ -510,23 +509,26 @@ def update_pool(client,
             param.metadata = []
         if param.application_package_references is None:
             param.application_package_references = []
+        if param.start_task_resource_files is None:
+            param.start_task_resource_files = []
     else:
         if metadata is None:
             metadata = []
         if application_package_references is None:
             application_package_references = []
-        param = BatchPoolUpdateContent(
+        param = BatchPoolReplaceContent(
             application_package_references=application_package_references,
-            metadata=metadata)
+            metadata=metadata,
+            target_node_communication_mode=target_node_communication_mode)
 
         if start_task_command_line:
             param.start_task = BatchStartTask(command_line=start_task_command_line,
                                               environment_settings=start_task_environment_settings,
                                               wait_for_success=start_task_wait_for_success,
-                                              max_task_retry_count=start_task_max_task_retry_count)
-    client.update_pool(pool_id=pool_id, pool=param)
+                                              max_task_retry_count=start_task_max_task_retry_count,
+                                              resource_files=start_task_resource_files)
+    client.replace_pool_properties(pool_id=pool_id, pool=param)
     return client.get_pool(pool_id)
-
 
 @transfer_doc(BatchTaskCreateContent, BatchTaskConstraints, AffinityInfo)
 def create_task(client,

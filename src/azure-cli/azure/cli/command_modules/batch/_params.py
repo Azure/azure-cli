@@ -221,12 +221,20 @@ def load_arguments(self, _):
                                                                                             'configured on the Pool. If omitted, or if you specify an'
                                                                                             'empty collection, any existing metadata is removed from the'
                                                                                             'Pool.')
+        c.argument('target_node_communication_mode', options_list=['--target-communication'], arg_group='Pool',
+                   help="The desired node communication mode for the pool. If this element is present, it replaces the existing targetNodeCommunicationMode configured on the Pool. If omitted, any existing metadata is left unchanged.",
+                   arg_type=get_enum_type(BatchNodeCommunicationMode))
         c.argument('start_task_command_line', arg_group='Pool: Start Task',
                    help='The command line of the start task. The command line does not run under a shell, and therefore cannot take advantage of shell features such as environment variable expansion. If you want to take advantage of such features, you should invoke the shell in the command line, for example using "cmd /c MyCommand" in Windows or "/bin/sh -c MyCommand" in Linux.')
         c.argument('start_task_wait_for_success', action='store_true', arg_group='Pool: Start Task',
                    help='Whether the Batch service should wait for the start task to complete successfully (that is, to exit with exit code 0) before scheduling any tasks on the compute node. True if flag present, otherwise defaults to False.')
         c.argument('start_task_max_task_retry_count', arg_group='Pool: Start Task',
                    help='The maximum number of times the task may be retried.')
+        c.argument('start_task_resource_files', nargs='+', type=resource_file_format, arg_group='Pool: Start Task',
+                   help='A list of files that the Batch service will download to the '
+                        'Compute Node before running the command line. Files listed under this element are '
+                        'located in the Task\'s working directory. Space-separated '
+                        'resource references in filename=httpurl format.')
         c.argument('start_task_environment_settings', nargs='+', type=environment_setting_format, arg_group='Pool: Start Task',
                    help='A list of environment variable settings for the start task. Space-separated values in \'key=value\' format.')
 
