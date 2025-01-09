@@ -763,37 +763,6 @@ class TestProfile(unittest.TestCase):
         # verify serialization works
         self.assertIsNotNone(json.dumps(consolidated[0]))
 
-    def test_normalize_v2016_06_01(self):
-        cli = DummyCli()
-        storage_mock = {'subscriptions': None}
-        profile = Profile(cli_ctx=cli, storage=storage_mock)
-        from azure.mgmt.resource.subscriptions.v2016_06_01.models import Subscription \
-            as Subscription_v2016_06_01
-        subscription = Subscription_v2016_06_01()
-        subscription.id = self.id1
-        subscription.display_name = self.display_name1
-        subscription.state = self.state1
-        subscription.tenant_id = self.tenant_id
-
-        consolidated = profile._normalize_properties(self.user1, [subscription], False)
-
-        # The subscription shouldn't have managed_by_tenants and home_tenant_id
-        expected = {
-            'id': '1',
-            'name': self.display_name1,
-            'state': 'Enabled',
-            'user': {
-                'name': 'foo@foo.com',
-                'type': 'user'
-            },
-            'isDefault': False,
-            'tenantId': self.tenant_id,
-            'environmentName': 'AzureCloud'
-        }
-        self.assertEqual(expected, consolidated[0])
-        # verify serialization works
-        self.assertIsNotNone(json.dumps(consolidated[0]))
-
     def test_update_add_two_different_subscriptions(self):
         cli = DummyCli()
         storage_mock = {'subscriptions': []}
@@ -1537,12 +1506,6 @@ class TenantStub:  # pylint: disable=too-few-public-methods
 
 
 class TestUtils(unittest.TestCase):
-    def test_attach_token_tenant_v2016_06_01(self):
-        from azure.mgmt.resource.subscriptions.v2016_06_01.models import Subscription
-        subscription = Subscription()
-        _attach_token_tenant(subscription, "token_tenant_1")
-        self.assertEqual(subscription.tenant_id, "token_tenant_1")
-        self.assertFalse(hasattr(subscription, "home_tenant_id"))
 
     def test_attach_token_tenant_v2022_12_01(self):
         from azure.mgmt.resource.subscriptions.v2022_12_01.models import Subscription
