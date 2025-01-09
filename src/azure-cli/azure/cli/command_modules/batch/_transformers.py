@@ -6,6 +6,7 @@
 from collections.abc import Mapping
 from azure.core.paging import ItemPaged
 
+
 class Transformer:
 
     def __init__(self, transform_mapping):

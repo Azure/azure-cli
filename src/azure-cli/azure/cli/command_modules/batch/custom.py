@@ -530,6 +530,7 @@ def replace_pool(client,
     client.replace_pool_properties(pool_id=pool_id, pool=param)
     return client.get_pool(pool_id)
 
+
 @transfer_doc(BatchTaskCreateContent, BatchTaskConstraints, AffinityInfo)
 def create_task(client,
                 job_id, json_file=None, task_id=None, command_line=None, resource_files=None,

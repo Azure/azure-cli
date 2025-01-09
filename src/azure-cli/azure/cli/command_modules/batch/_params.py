@@ -244,7 +244,7 @@ def load_arguments(self, _):
                      'The formula is checked for validity before it is applied to the Pool. '
                      'If the formula is not valid, the Batch service rejects the request with detailed error information. '
                      'For more information about specifying this formula, see Automatically scale Compute Nodes in an Azure Batch Pool '
-                     '(https://azure.microsoft.com/documentation/articles/batch-automatic-scaling).')
+                     '(https://learn.microsoft.com/azure/batch/batch-automatic-scaling).')
         c.extra('auto_scale_evaluation_interval',
                 help='The time interval at which to automatically adjust the Pool size according to the autoscale formula. '
                      'The default value is 15 minutes. The minimum and maximum value are 5 minutes and 168 hours respectively. '
