@@ -290,7 +290,7 @@ def load_arguments(self, _):
     for command in ['pool node-counts list', 'pool supported-images list', 'job list', 'pool list', 'job-schedule list', 'task list', 'job prep-release-status list', 'node list', 'node file list', 'task file list', 'pool usage-metrics list']:
         with self.argument_context(f'batch {command}') as c:
             c.extra('filter', arg_group='Pre-condition and Query', help='An OData $filter clause. For more information on constructing this filter,'
-                                                                        'see https://docs.microsoft.com/rest/api/batchservice/odata-filters-in-batch.')
+                                                                        'see https://learn.microsoft.com/rest/api/batchservice/odata-filters-in-batch.')
 
     for command in ['job list', 'pool list', 'job-schedule list', 'task list', 'job show', 'pool show', 'task show', 'job-schedule show']:
         with self.argument_context(f'batch {command}') as c:
@@ -380,7 +380,7 @@ def load_arguments(self, _):
                          'since the specified time.')
 
     with self.argument_context('batch pool create') as c:
-        c.argument('json_file', help='The file containing pool create properties parameter specification in JSON(formatted to match REST API request body). If this parameter is specified, all \'Pool Create Properties Parameter Arguments\' are ignored.  See https://docs.microsoft.com/rest/api/batchservice/pool/add?tabs=HTTP#request-body')
+        c.argument('json_file', help='The file containing pool create properties parameter specification in JSON(formatted to match REST API request body). If this parameter is specified, all \'Pool Create Properties Parameter Arguments\' are ignored.  See https://learn.microsoft.com/rest/api/batchservice/pool/add?tabs=HTTP#request-body')
         c.argument('resource_tags', arg_group='Pool', type=resource_tag_format, help="User is able to specify resource tags for the pool. Any resource created for the pool will then also be tagged by the same resource tags")
         c.argument('target_node_communication_mode', options_list=['--target-communication'],
                    help="The desired node communication mode for the pool. If this element is present, it replaces the existing targetNodeCommunicationMode configured on the Pool. If omitted, any existing metadata is left unchanged.",
