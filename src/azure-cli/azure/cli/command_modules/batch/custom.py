@@ -509,8 +509,8 @@ def replace_pool(client,
             param.metadata = []
         if param.application_package_references is None:
             param.application_package_references = []
-        if param.start_task_resource_files is None:
-            param.start_task_resource_files = []
+        if param.start_task and param.start_task.resource_files is None:
+            param.start_task.resource_files = []
     else:
         if metadata is None:
             metadata = []

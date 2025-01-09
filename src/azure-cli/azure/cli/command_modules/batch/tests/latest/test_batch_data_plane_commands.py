@@ -86,17 +86,26 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
             self.check('length(@)', 2),
             self.check('[1].poolId', 'xplatCreatedPool')])
 
-
         self.batch_cmd('batch pool show --pool-id {p_id}').assert_with_checks([
             self.check('allocationState', 'steady'),
             self.check('id', 'xplatCreatedPool'),
             self.check('currentLowPriorityNodes', target),
-            self.check('targetLowPriorityNodes', 3)])
+            self.check('targetLowPriorityNodes', 3),
+            self.check('metadata', None)])
+
+        # Set a property which will be cleared by the subsequent reset command
+        self.batch_cmd('batch pool set --pool-id {p_id} --metadata foo=bar')
+        self.batch_cmd('batch pool show --pool-id {p_id}').assert_with_checks([
+            self.check('id', 'xplatCreatedPool'),
+            self.check('length(metadata)', 1),
+            self.check('metadata[0].name', 'foo'),
+            self.check('metadata[0].value', 'bar')])
 
         self.batch_cmd('batch pool reset --pool-id {p_id} --json-file "{u_file}"').assert_with_checks([
             self.check('allocationState', 'steady'),
             self.check('id', 'xplatCreatedPool'),
-            self.check('startTask.commandLine', "cmd /c echo updated")])
+            self.check('startTask.commandLine', "cmd /c echo updated"),
+            self.check('metadata', None)])
 
         self.batch_cmd('batch pool reset --pool-id {p_id} --start-task-command-line hostname '
                        '--metadata a=b c=d').assert_with_checks([
@@ -180,7 +189,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
 
         self.assertTrue(res['virtualMachineConfiguration']['osDisk']['caching'])
         self.assertTrue(res['virtualMachineConfiguration']['osDisk']['managedDisk']['storageAccountType'])
-        self.assertTrue(res['virtualMachineConfiguration']['osDisk']['diskSizeGB'])
+        self.assertTrue(res['virtualMachineConfiguration']['osDisk']['diskSizeGb'])
 
         self.batch_cmd('batch pool delete --pool-id {p_id} --yes')
 
