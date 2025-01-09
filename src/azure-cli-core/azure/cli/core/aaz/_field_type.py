@@ -107,8 +107,7 @@ class AAZFloatType(AAZSimpleType):
                 json_data = float(json_data)
             if not isinstance(json_data, self.DataType):
                 raise AAZInvalidValueError('Expect {}, got {} ({})'.format(self.DataType, data, type(data)))
-            else:
-                data = json_data
+            data = json_data
 
         return data
 
