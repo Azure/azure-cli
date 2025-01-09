@@ -17,6 +17,7 @@ from azure.cli.command_modules.batch._format import (
     account_list_table_format,
     application_list_table_format,
     account_keys_renew_table_format)
+from azure.cli.command_modules.batch._transformers import batch_transformer
 
 
 def _operation(name):
@@ -137,7 +138,7 @@ def load_command_table(self, _):
         g.batch_command('create', 'create_pool', validator=validate_pool_settings, flatten=10)
         g.batch_command('list', 'list_pools')
         g.batch_command('delete', 'delete_pool')
-        g.batch_command('show', 'get_pool')
+        g.batch_command('show', 'get_pool', transform=batch_transformer.transform_object)
         g.batch_command('set', 'update_pool')
         g.custom_command('reset', 'update_pool')
         g.custom_command('resize', 'resize_pool')
