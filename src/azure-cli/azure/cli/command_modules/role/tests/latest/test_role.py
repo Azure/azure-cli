@@ -199,7 +199,26 @@ class CreateForRbacScenarioTest(RoleScenarioTestBase):
 class RoleDefinitionScenarioTest(RoleScenarioTestBase):
 
     @AllowLargeResponse()
-    def test_role_definition_scenario(self):
+    def test_built_in_role_definition_scenario(self):
+        # List Reader built-in role definition by roleName
+        self.cmd('role definition list --name Reader',
+                 checks=[
+                     self.check("length([])", 1),
+                     self.check('[0].name', 'acdd72a7-3385-48ef-bd42-f606fba81ae7'),
+                     self.check('[0].roleName', 'Reader'),
+                     self.check('[0].roleType', 'BuiltInRole')
+                 ])
+
+        # List Reader built-in role definition by name
+        self.cmd('role definition list --name acdd72a7-3385-48ef-bd42-f606fba81ae7',
+                 checks=[
+                     self.check("length([])", 1),
+                     self.check('[0].name', 'acdd72a7-3385-48ef-bd42-f606fba81ae7'),
+                     self.check('[0].roleName', 'Reader'),
+                     self.check('[0].roleType', 'BuiltInRole')
+                 ])
+
+    def test_custom_role_definition_scenario(self):
         subscription_id = self.get_subscription_id()
         role_name = self.create_random_name('cli-test-role', 20)
         template = {
