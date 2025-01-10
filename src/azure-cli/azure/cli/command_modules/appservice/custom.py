@@ -4442,7 +4442,8 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
     def get_default_version(self, runtime, functions_version, linux=False):
         runtimes = [r for r in self.stacks if r.linux == linux and r.name == runtime]
         # sort runtimes by end of life date
-        runtimes.sort(key=lambda r: r.end_of_life_date or datetime.datetime.min, reverse=True)
+        runtimes.sort(key=lambda r: r.end_of_life_date or
+                      datetime.datetime.min.replace(tzinfo=datetime.timezone.utc), reverse=True)
         for r in runtimes:
             if functions_version in r.supported_func_versions:
                 return r
