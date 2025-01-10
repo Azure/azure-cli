@@ -419,6 +419,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         self.kwargs.update({
             'p_id': 'xplatJobForTaskTests',
             'j_id': "cli-test-job-1",
+            't_id': 'cli-test-task-1'
         })
 
         # test create pool using parameters
@@ -482,7 +483,49 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         job = job.get_output_in_json()
         self.assertFalse(job['constraints']['maxWallClockTime'] == '1279 days, 12:30:05')
 
-        # TODO: test task commands
+        # task list (already have a job manager task)
+        task_list = self.batch_cmd('batch task list --job-id {j_id}').get_output_in_json()
+        self.assertEqual(len(task_list), 1)
+
+        # task create
+        self.batch_cmd('batch task create --job-id {j_id} --task-id {t_id} --command-line "sleep 60"').assert_with_checks([
+            self.check('id', 'cli-test-task-1'),
+            self.check('commandLine', 'sleep 60'),
+            self.check('constraints.maxTaskRetryCount', 0)])
+
+        # task show
+        self.batch_cmd('batch task show --job-id {j_id} --task-id {t_id}').assert_with_checks([
+            self.check('id', 'cli-test-task-1'),
+            self.check('userIdentity.autoUser.scope', 'pool'),
+            self.check('requiredSlots', 1),
+            self.check('constraints.maxTaskRetryCount', 0)])
+
+        # task list shows 2nd task
+        task_list = self.batch_cmd('batch task list --job-id {j_id}').get_output_in_json()
+        self.assertEqual(len(task_list), 2)
+
+        # task reset
+        self.batch_cmd('batch task reset --job-id {j_id} --task-id {t_id} --max-task-retry-count 3')
+        self.batch_cmd('batch task show --job-id {j_id} --task-id {t_id}').assert_with_checks([
+            self.check('id', 'cli-test-task-1'),
+            self.check('constraints.maxTaskRetryCount', 3)])
+
+        # task stop
+        self.batch_cmd('batch task stop --job-id {j_id} --task-id {t_id}')
+        self.batch_cmd('batch task show --job-id {j_id} --task-id {t_id}').assert_with_checks([
+            self.check('id', 'cli-test-task-1'),
+            self.check('state', 'completed'),
+            self.check('executionInfo.failureInfo.category', 'UserError')])
+
+        # task reactivate
+        self.batch_cmd('batch task reactivate --job-id {j_id} --task-id {t_id}')
+        self.batch_cmd('batch task show --job-id {j_id} --task-id {t_id}').assert_with_checks([
+            self.check('id', 'cli-test-task-1'),
+            self.check('state', 'active')])
+
+        # task delete
+        self.batch_cmd('batch task delete --job-id {j_id} --task-id {t_id} --yes')
+
 
     @ResourceGroupPreparer()
     @BatchAccountPreparer()

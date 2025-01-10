@@ -453,9 +453,10 @@ def replace_task(client, job_id=None, task_id=None, json_file=None, max_task_ret
         if not param:
             raise ValueError(f"JSON file '{json_file}' is not in correct format.")
     else:
-        constrants = BatchTaskConstraints(max_wall_clock_time, retention_time, max_task_retry_count)
-        param = BatchTask(
-            constraints=constrants)
+        constrants = BatchTaskConstraints(max_wall_clock_time=max_wall_clock_time,
+                                          retention_time=retention_time,
+                                          max_task_retry_count=max_task_retry_count)
+        param = BatchTask(constraints=constrants)
 
     match_conditions = None
     if if_match:
