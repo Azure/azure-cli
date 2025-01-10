@@ -103,6 +103,7 @@ from humanfriendly.terminal.spinners import Spinner
 from knack.log import get_logger
 from knack.prompting import NoTTYException, prompt_y_n
 from knack.util import CLIError
+from azure.cli.core.cloud import get_active_cloud
 
 logger = get_logger(__name__)
 
@@ -2643,7 +2644,7 @@ def aks_agentpool_stop(cmd,   # pylint: disable=unused-argument
 
 
 def aks_agentpool_delete(cmd, client, resource_group_name, cluster_name,
-                         nodepool_name,
+                         nodepool_name, ignore_pod_disruption_budget=False,
                          no_wait=False):
     agentpool_exists = False
     instances = client.list(resource_group_name, cluster_name)
@@ -2656,7 +2657,23 @@ def aks_agentpool_delete(cmd, client, resource_group_name, cluster_name,
         raise CLIError("Node pool {} doesnt exist, "
                        "use 'aks nodepool list' to get current node pool list".format(nodepool_name))
 
-    return sdk_no_wait(no_wait, client.begin_delete, resource_group_name, cluster_name, nodepool_name)
+    active_cloud = get_active_cloud(cmd.cli_ctx)
+    if active_cloud.profile != "latest":
+        return sdk_no_wait(
+            no_wait,
+            client.begin_delete,
+            resource_group_name,
+            cluster_name,
+            nodepool_name,
+        )
+    return sdk_no_wait(
+        no_wait,
+        client.begin_delete,
+        resource_group_name,
+        cluster_name,
+        nodepool_name,
+        ignore_pod_disruption_budget=ignore_pod_disruption_budget,
+    )
 
 
 def aks_agentpool_operation_abort(cmd,
