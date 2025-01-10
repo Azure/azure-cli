@@ -295,7 +295,7 @@ def load_arguments(self, _):
     for command in ['job list', 'pool list', 'job-schedule list', 'task list', 'job show', 'pool show', 'task show', 'job-schedule show']:
         with self.argument_context(f'batch {command}') as c:
             c.extra('select', nargs='+', help='An OData $select clause.', arg_group='Pre-condition and Query')
-            c.extra('expand', help='An OData $expand clause.', arg_group='Pre-condition and Query')
+            c.extra('expand', nargs='+', help='An OData $expand clause.', arg_group='Pre-condition and Query')
 
     with self.argument_context('batch job list') as c:
         c.argument('job_schedule_id', help='The ID of the job schedule from which you want to get a list of jobs. If omitted, lists all jobs in the account.')
