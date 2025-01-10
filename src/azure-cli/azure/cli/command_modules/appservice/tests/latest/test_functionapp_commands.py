@@ -975,11 +975,7 @@ class FunctionAppFlex(LiveScenarioTest):
 
 
 class FunctionAppManagedEnvironment(ScenarioTest):
-    def __init__(self, method_name, config_file=None, recording_name=None, recording_processors=None, replay_processors=None, recording_patches=None, replay_patches=None, random_config_dir=False):
-        super().__init__(method_name, config_file, recording_name, recording_processors, replay_processors, recording_patches, replay_patches, random_config_dir)
-        self.cmd('extension add -n application-insights')
-
-    @live_only()  # TODO to be fixed
+    @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location='westeurope')
     @StorageAccountPreparer()
     def test_functionapp_create_with_appcontainer_managed_environment(self, resource_group, storage_account):
@@ -1553,14 +1549,12 @@ class FunctionAppWithAppInsightsKey(ScenarioTest):
 
 
 class FunctionAppWithAppInsightsConnString(ScenarioTest):
-    def __init__(self, method_name, config_file=None, recording_name=None, recording_processors=None, replay_processors=None, recording_patches=None, replay_patches=None, random_config_dir=False):
-        super().__init__(method_name, config_file, recording_name, recording_processors, replay_processors, recording_patches, replay_patches, random_config_dir)
-        self.cmd('extension add -n application-insights')
-
-    @live_only()  # TODO to be fixed
+    @live_only()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_with_app_insights_conn_string(self, resource_group, storage_account):
+        self.cmd('extension add -n application-insights')
+
         functionapp_name = self.create_random_name(prefix='functionappwithappinsights', length=40)
         workspace_name = self.create_random_name(prefix='existingworkspace', length=40)
         app_insights_name = self.create_random_name(prefix='existingappinsights', length=40)
@@ -1679,14 +1673,12 @@ class FunctionAppWithAppInsightsDefault(ScenarioTest):
 
 
 class FunctionappAppInsightsWorkspace(ScenarioTest):
-    def __init__(self, method_name, config_file=None, recording_name=None, recording_processors=None, replay_processors=None, recording_patches=None, replay_patches=None, random_config_dir=False):
-        super().__init__(method_name, config_file, recording_name, recording_processors, replay_processors, recording_patches, replay_patches, random_config_dir)
-        self.cmd('extension add -n application-insights')
-
-    @live_only()  # TODO to be fixed
+    @live_only()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_create_default_rg_and_workspace(self, resource_group, storage_account):
+        self.cmd('extension add -n application-insights')
+
         functionapp_name = self.create_random_name(prefix='functionappworkspaceai', length=40)
         self.cmd('functionapp create -g {} -n {} -c {} -s {} --functions-version 4'.format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account))
         subscription_id = 'dbf67cc6-6c57-44b8-97fc-4356f0d555b3'
@@ -1701,10 +1693,12 @@ class FunctionappAppInsightsWorkspace(ScenarioTest):
             self.check('workspaceResourceId', workspace_id)
         ])
 
-    @live_only()  # TODO to be fixed
+    @live_only()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_existing_workspace(self, resource_group, storage_account):
+        self.cmd('extension add -n application-insights')
+
         functionapp_name = self.create_random_name(prefix='functionappworkspaceai', length=40)
         existing_workspace_name = 'ExistingWorkspace-PAR'
         workspace = self.cmd('monitor log-analytics workspace create -g {} -n {} -l {}'.format(resource_group, existing_workspace_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP)).get_output_in_json()
@@ -1713,10 +1707,12 @@ class FunctionappAppInsightsWorkspace(ScenarioTest):
             self.check('workspaceResourceId', workspace['id'])
         ])
 
-    @live_only()  # TODO to be fixed
+    @live_only()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_existing_default_rg(self, resource_group, storage_account):
+        self.cmd('extension add -n application-insights')
+
         functionapp_name = self.create_random_name(prefix='functionappworkspaceai', length=40)
         subscription_id = 'dbf67cc6-6c57-44b8-97fc-4356f0d555b3'
         default_rg_name = 'DefaultResourceGroup-PAR'
