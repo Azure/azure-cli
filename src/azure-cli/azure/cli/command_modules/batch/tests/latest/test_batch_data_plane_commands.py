@@ -182,14 +182,17 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
                         '--target-dedicated-nodes 2 '
                         '--os-disk-size 100 '
                         '--os-disk-caching ReadWrite '
+                        '--placement "CacheDisk" '
                         '--storage-account-type "StandardSSD_LRS" ')
 
         res = self.batch_cmd('batch pool show --pool-id {p_id}').get_output_in_json()
         print(res)
 
+        self.assertTrue(res['virtualMachineConfiguration']['nodeAgentSkuId'])
         self.assertTrue(res['virtualMachineConfiguration']['osDisk']['caching'])
         self.assertTrue(res['virtualMachineConfiguration']['osDisk']['managedDisk']['storageAccountType'])
         self.assertTrue(res['virtualMachineConfiguration']['osDisk']['diskSizeGb'])
+        self.assertTrue(res['virtualMachineConfiguration']['osDisk']['ephemeralOsDiskSettings']['placement'])
 
         self.batch_cmd('batch pool delete --pool-id {p_id} --yes')
 
