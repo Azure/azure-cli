@@ -250,6 +250,15 @@ examples:
         az batch job create --id job1 --pool-id pool1
 """
 
+helps['batch job delete'] = """
+type: command
+short-summary: Deletes a job from a Batch account.
+examples:
+  - name: Delete a job using the job id without prompt for confirmation.
+    text: >
+        az batch job delete --job-id job1 --yes
+"""
+
 helps['batch job disable'] = """
 type: command
 short-summary: Disable a Batch job.
@@ -271,6 +280,13 @@ examples:
 helps['batch job list'] = """
 type: command
 short-summary: List all of the jobs or job schedule in a Batch account.
+examples:
+  - name: List all of the jobs in a Batch account
+    text: >
+        az batch job list
+  - name: List all of the job schedule in a Batch account
+    text: >
+        az batch job list --job-schedule-id jobschedule1
 """
 
 helps['batch job prep-release-status'] = """
@@ -287,6 +303,24 @@ examples:
         az batch job reset --job-id job1 --priority 100
 """
 
+helps['batch job set'] = """
+type: command
+short-summary: Update the properties of a Batch job. Updating a property in a subgroup will reset the unspecified properties of that group.
+examples:
+  - name: Update job priority.
+    text: >
+        az batch job set --job-id job1 --priority 100
+"""
+
+helps['batch job show'] = """
+type: command
+short-summary: Gets information about the specified Batch job.
+examples:
+  - name: Shows information details about a job.
+    text: >
+        az batch show --job-id job1
+"""
+
 helps['batch job stop'] = """
 type: command
 short-summary: Stop a running Batch job.
@@ -300,15 +334,6 @@ examples:
   - name: Stop a job and give a termination reason
     text: >
         az batch job stop --job-id job1 --terminate-reason "Completed workflow"
-"""
-
-helps['batch job set'] = """
-type: command
-short-summary: Update the properties of a Batch job. Updating a property in a subgroup will reset the unspecified properties of that group.
-examples:
-  - name: Update job priority.
-    text: >
-        az batch job set --job-id job1 --priority 100
 """
 
 helps['batch job task-counts'] = """
