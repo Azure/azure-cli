@@ -274,7 +274,7 @@ def load_arguments(self, _):
                     help='An ETag value associated with the version of the resource known to the client. '
                          'The operation will be performed only if the resource\'s current ETag on the service '
                          'exactly matches the value specified by the client.')
-            c.extra('if-modified-since', arg_group='Pre-condition and Query',
+            c.extra('if_modified_since', arg_group='Pre-condition and Query', type=datetime_format,
                     help='A timestamp indicating the last modified time of the resource known to the client. '
                          'The operation will be performed only if the resource on the service has been modified '
                          'since the specified time.',)
@@ -282,7 +282,7 @@ def load_arguments(self, _):
                     help='An ETag value associated with the version of the resource known to the client. '
                          'The operation will be performed only if the resource\'s current ETag on the service '
                          'does not match the value specified by the client.')
-            c.extra('if-unmodified-since', arg_group='Pre-condition and Query',
+            c.extra('if_unmodified_since', arg_group='Pre-condition and Query', type=datetime_format,
                     help='A timestamp indicating the last modified time of the resource known to the client. '
                          'The operation will be performed only if the resource on the service has been modified '
                          'since the specified time.')
@@ -370,11 +370,11 @@ def load_arguments(self, _):
 
     for command in ['node file download', 'node file show', 'task file show', 'task file download']:
         with self.argument_context(f'batch {command}') as c:
-            c.extra('if-modified-since', arg_group='Pre-condition and Query',
+            c.extra('if_modified_since', arg_group='Pre-condition and Query', type=datetime_format,
                     help='A timestamp indicating the last modified time of the resource known to the client. '
                          'The operation will be performed only if the resource on the service has been modified '
                          'since the specified time.',)
-            c.extra('if-unmodified-since', arg_group='Pre-condition and Query',
+            c.extra('if_unmodified_since', arg_group='Pre-condition and Query', type=datetime_format,
                     help='A timestamp indicating the last modified time of the resource known to the client. '
                          'The operation will be performed only if the resource on the service has been modified '
                          'since the specified time.')
