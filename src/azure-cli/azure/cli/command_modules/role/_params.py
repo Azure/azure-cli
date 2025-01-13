@@ -372,4 +372,5 @@ def load_arguments(self, _):
         c.argument('role_definition_id', options_list=['--name', '-n'], help='the role definition name')
         c.argument('custom_role_only', arg_type=get_three_state_flag(), help='custom roles only(vs. build-in ones)')
         c.argument('role_definition', help="json formatted content which defines the new role.")
-        c.argument('name', arg_type=name_arg_type, completer=get_role_definition_name_completion_list, help="the role's name")
+        c.argument('name', arg_type=name_arg_type, completer=get_role_definition_name_completion_list,
+                   help="Matches the role definition's name (GUID) or roleName (e.g. 'Reader') property.")
