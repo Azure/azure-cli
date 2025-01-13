@@ -7414,45 +7414,44 @@ class VMGalleryImage(ScenarioTest):
         # Creates an image version and replicates it to the first edge zone
         self.cmd(
             'sig image-version create --resource-group {rg} --gallery-name {gallery} --gallery-image-definition {image}'
-            ' --gallery-image-version {version} --os-snapshot {disk_id}',
-            # checks=[
-                # self.check('length(publishingProfile.targetExtendedLocations)', 1),
-                # self.check('publishingProfile.targetExtendedLocations[0].name', 'South Central US'),
-                # self.check('publishingProfile.targetExtendedLocations[0].extendedLocation.name', '{edge_zone1}'),
-                # self.check('publishingProfile.targetExtendedLocations[0].extendedLocation.type', 'EdgeZone'),
-                # self.check('publishingProfile.targetExtendedLocations[0].extendedLocationReplicaCount', 1),
-            # ]
-        )
+            ' --gallery-image-version {version} --os-snapshot {disk_id} --target-edge-zones "{region1}={edge_zone1}=1"',
+            checks=[
+                self.check('length(publishingProfile.targetExtendedLocations)', 1),
+                self.check('publishingProfile.targetExtendedLocations[0].name', 'South Central US'),
+                self.check('publishingProfile.targetExtendedLocations[0].extendedLocation.name', '{edge_zone1}'),
+                self.check('publishingProfile.targetExtendedLocations[0].extendedLocation.type', 'EdgeZone'),
+                self.check('publishingProfile.targetExtendedLocations[0].extendedLocationReplicaCount', 1),
+            ])
 
         # Replicate to two edge zones with different storage types
         self.cmd(
             'sig image-version update --resource-group {rg} --gallery-name {gallery} --gallery-image-definition {image} '
-            '--gallery-image-version {version} --target-edge-zones "{region2}={edge_zone2}=1=premium_lrs"',    # "{region1}={edge_zone1}=1=standardssd_lrs"
+            '--gallery-image-version {version} --target-edge-zones "{region1}={edge_zone1}=1=standardssd_lrs" "{region2}={edge_zone2}=1=premium_lrs"',
             checks=[
-                self.check('length(publishingProfile.targetExtendedLocations)', 1),
-                # self.check('publishingProfile.targetExtendedLocations[0].name', 'South Central US'),
-                # self.check('publishingProfile.targetExtendedLocations[0].extendedLocation.name', '{edge_zone1}'),
-                # self.check('publishingProfile.targetExtendedLocations[0].extendedLocationReplicaCount', 1),
-                # self.check('publishingProfile.targetExtendedLocations[0].storageAccountType', 'StandardSSD_LRS'),
-                self.check('publishingProfile.targetExtendedLocations[0].name', 'West US'),
-                self.check('publishingProfile.targetExtendedLocations[0].extendedLocation.name', '{edge_zone2}'),
+                self.check('length(publishingProfile.targetExtendedLocations)', 2),
+                self.check('publishingProfile.targetExtendedLocations[0].name', 'South Central US'),
+                self.check('publishingProfile.targetExtendedLocations[0].extendedLocation.name', '{edge_zone1}'),
                 self.check('publishingProfile.targetExtendedLocations[0].extendedLocationReplicaCount', 1),
-                self.check('publishingProfile.targetExtendedLocations[0].storageAccountType', 'Premium_LRS'),
+                self.check('publishingProfile.targetExtendedLocations[0].storageAccountType', 'StandardSSD_LRS'),
+                self.check('publishingProfile.targetExtendedLocations[1].name', 'West US'),
+                self.check('publishingProfile.targetExtendedLocations[1].extendedLocation.name', '{edge_zone2}'),
+                self.check('publishingProfile.targetExtendedLocations[1].extendedLocationReplicaCount', 1),
+                self.check('publishingProfile.targetExtendedLocations[1].storageAccountType', 'Premium_LRS'),
             ])
 
         # Target extended locations will not be updated if --target-edge-zones is not specified
         self.cmd(
             'sig image-version update --resource-group {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version}',
             checks=[
-                self.check('length(publishingProfile.targetExtendedLocations)', 1),
-                # self.check('publishingProfile.targetExtendedLocations[0].name', 'South Central US'),
-                # self.check('publishingProfile.targetExtendedLocations[0].extendedLocation.name', '{edge_zone1}'),
-                # self.check('publishingProfile.targetExtendedLocations[0].extendedLocationReplicaCount', 1),
-                # self.check('publishingProfile.targetExtendedLocations[0].storageAccountType', 'StandardSSD_LRS'),
-                self.check('publishingProfile.targetExtendedLocations[0].name', 'West US'),
-                self.check('publishingProfile.targetExtendedLocations[0].extendedLocation.name', '{edge_zone2}'),
+                self.check('length(publishingProfile.targetExtendedLocations)', 2),
+                self.check('publishingProfile.targetExtendedLocations[0].name', 'South Central US'),
+                self.check('publishingProfile.targetExtendedLocations[0].extendedLocation.name', '{edge_zone1}'),
                 self.check('publishingProfile.targetExtendedLocations[0].extendedLocationReplicaCount', 1),
-                self.check('publishingProfile.targetExtendedLocations[0].storageAccountType', 'Premium_LRS'),
+                self.check('publishingProfile.targetExtendedLocations[0].storageAccountType', 'StandardSSD_LRS'),
+                self.check('publishingProfile.targetExtendedLocations[1].name', 'West US'),
+                self.check('publishingProfile.targetExtendedLocations[1].extendedLocation.name', '{edge_zone2}'),
+                self.check('publishingProfile.targetExtendedLocations[1].extendedLocationReplicaCount', 1),
+                self.check('publishingProfile.targetExtendedLocations[1].storageAccountType', 'Premium_LRS'),
             ])
 
         # Target extended locations will be updated to None if '--target-edge-zones None' is specified
