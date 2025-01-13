@@ -958,7 +958,6 @@ def validate_service_state(linker_parameters):
         if matched:
             target_type = target
 
-    auth_type = linker_parameters.get('auth_info', {}).get('auth_type')
     if target_type == RESOURCE.AppConfig and linker_parameters.get('auth_info', {}).get('auth_type') == 'secret':
         segments = parse_resource_id(target_id)
         rg = segments.get('resource_group')
@@ -973,7 +972,8 @@ def validate_service_state(linker_parameters):
                                   'specified appconfig, you may use service principal or managed identity.')
 
     if target_type == RESOURCE.Redis:
-        if auth_type == AUTH_TYPE.Secret or auth_type == AUTH_TYPE.SecretAuto:
+        auth_type = linker_parameters.get('auth_info', {}).get('auth_type')
+        if auth_type == AUTH_TYPE.Secret.value or auth_type == AUTH_TYPE.SecretAuto.value:
             return
         redis = run_cli_cmd('az redis show --ids "{}"'.format(target_id))
         if redis.get('redisConfiguration', {}).get('aadEnabled', 'False') != "True":
