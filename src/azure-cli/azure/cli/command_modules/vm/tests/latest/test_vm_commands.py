@@ -7382,6 +7382,7 @@ class VMGalleryImage(ScenarioTest):
             self.check('safetyProfile.allowDeletionOfReplicatedLocations', False)
         ])
 
+    @live_only()  # The value of Edge Zone name 'attdallas1' and 'microsoftlosangeles1' are invalid.
     @ResourceGroupPreparer(name_prefix='cli_test_target_extended_locations', location='southcentralus')
     def test_image_version_with_target_extended_locations(self):
         self.kwargs.update({
