@@ -977,7 +977,10 @@ def validate_service_state(linker_parameters):
             return
         redis = run_cli_cmd('az redis show --ids "{}"'.format(target_id))
         if redis.get('redisConfiguration', {}).get('aadEnabled', 'False') != "True":
-            raise ValidationError('Please enable Microsoft Entra Authentication on your Redis first. Note that it will cause your cache instances to reboot to load new configuration and result in a failover. Consider performing the operation during low traffic or outside of business hours.')
+            raise ValidationError('Please enable Microsoft Entra Authentication on your Redis first. '
+                                  'Note that it will cause your cache instances to reboot to load new '
+                                  'configuration and result in a failover. Consider performing the '
+                                  'operation during low traffic or outside of business hours.')
 
 
 def get_default_object_id_of_current_user(cmd, namespace):  # pylint: disable=unused-argument
