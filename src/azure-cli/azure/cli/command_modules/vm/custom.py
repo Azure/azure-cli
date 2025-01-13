@@ -4872,12 +4872,6 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
     from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
-    # ImageVersionPublishingProfile, GalleryArtifactSource, ManagedArtifact, ImageVersion, TargetRegion = cmd.get_models(
-    #     'GalleryImageVersionPublishingProfile', 'GalleryArtifactSource', 'ManagedArtifact', 'GalleryImageVersion',
-    #     'TargetRegion')
-    aux_subscriptions = _get_image_version_aux_subscription(managed_image, os_snapshot, data_snapshots)
-    # client = _compute_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions)
-
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     end_of_life_date = fix_gallery_image_date_info(end_of_life_date)
     if managed_image and not is_valid_resource_id(managed_image):
@@ -4892,11 +4886,6 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                 data_snapshots[i] = resource_id(
                     subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
                     namespace='Microsoft.Compute', type='snapshots', name=s)
-
-    # profile = ImageVersionPublishingProfile(exclude_from_latest=exclude_from_latest,
-    #                                         end_of_life_date=end_of_life_date,
-    #                                         target_regions=target_regions or [TargetRegion(name=location)],
-    #                                         replica_count=replica_count, storage_account_type=storage_account_type)
 
     profile = {
         "exclude_from_latest": exclude_from_latest,
@@ -4918,15 +4907,6 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
     if cmd.supported_api_version(min_api='2019-07-01', operation_group='gallery_image_versions'):
         if managed_image is None and os_snapshot is None and os_vhd_uri is None:
             raise RequiredArgumentMissingError('usage error: Please provide --managed-image or --os-snapshot or --vhd')
-        # GalleryImageVersionStorageProfile = cmd.get_models('GalleryImageVersionStorageProfile')
-        # GalleryOSDiskImage = cmd.get_models('GalleryOSDiskImage')
-        # GalleryDataDiskImage = cmd.get_models('GalleryDataDiskImage')
-        # if cmd.supported_api_version(min_api='2022-03-03', operation_group='gallery_image_versions'):
-            # GalleryArtifactVersionFullSource = cmd.get_models('GalleryArtifactVersionFullSource')
-            # GalleryDiskImageSource = cmd.get_models('GalleryDiskImageSource')
-        # else:
-            # GalleryArtifactVersionFullSource = cmd.get_models('GalleryArtifactVersionSource')
-            # GalleryDiskImageSource = cmd.get_models('GalleryArtifactVersionSource')
 
         source = os_disk_image = data_disk_images = None
         if virtual_machine is not None and cmd.supported_api_version(min_api='2023-07-03',
@@ -4996,8 +4976,6 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
             "storage_profile": storage_profile
         }
         if allow_replicated_location_deletion is not None:
-            # GalleryImageVersionSafetyProfile = cmd.get_models('GalleryImageVersionSafetyProfile',
-            #                                                   operation_group='gallery_image_versions')
             args["safety_profile"] = {
                 "allow_deletion_of_replicated_locations": allow_replicated_location_deletion
             }
@@ -5011,26 +4989,13 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
     args["gallery_image_definition"] = gallery_image_name
     args["gallery_image_version"] = gallery_image_version
 
-    # return client.gallery_image_versions.begin_create_or_update(
-    #     resource_group_name=resource_group_name,
-    #     gallery_name=gallery_name,
-    #     gallery_image_name=gallery_image_name,
-    #     gallery_image_version_name=gallery_image_version,
-    #     gallery_image_version=image_version
-    # )
-
     from .aaz.latest.sig.image_version import Create
     return Create(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 
 def undelete_image_version(cmd, resource_group_name, gallery_name, gallery_image_name, gallery_image_version,
                            location=None, tags=None, allow_replicated_location_deletion=None):
-    # ImageVersion = cmd.get_models('GalleryImageVersion')
-    # client = _compute_client_factory(cmd.cli_ctx)
-
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
-
-    # gallery = client.galleries.get(resource_group_name, gallery_name)
 
     from .aaz.latest.sig import Show as _SigShow
     gallery = _SigShow(cli_ctx=cmd.cli_ctx)(command_args={
@@ -5053,22 +5018,11 @@ def undelete_image_version(cmd, resource_group_name, gallery_name, gallery_image
         "tags": tags or {},
         "storage_profile": None,
     }
-    # image_version = ImageVersion(publishing_profile=None, location=location, tags=(tags or {}),
-    #                              storage_profile=None)
     if allow_replicated_location_deletion is not None:
-        # GalleryImageVersionSafetyProfile = cmd.get_models('GalleryImageVersionSafetyProfile',
-        #                                                   operation_group='gallery_image_versions')
         args["safety_profile"] = {
             "allow_deletion_of_replicated_locations": allow_replicated_location_deletion
         }
 
-    # return client.gallery_image_versions.begin_create_or_update(
-    #     resource_group_name=resource_group_name,
-    #     gallery_name=gallery_name,
-    #     gallery_image_name=gallery_image_name,
-    #     gallery_image_version_name=gallery_image_version,
-    #     gallery_image_version=image_version
-    # )
     args["resource_group"] = resource_group_name
     args["gallery_name"] = gallery_name
     args["gallery_image_definition"] = gallery_image_name
@@ -5134,11 +5088,6 @@ def update_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
         if "safety_profile" not in args:
             args["safety_profile"] = {}
         args["safety_profile"]["allow_deletion_of_replicated_locations"] = allow_replicated_location_deletion
-
-    # client = _compute_client_factory(cmd.cli_ctx)
-    #
-    # return sdk_no_wait(no_wait, client.gallery_image_versions.begin_create_or_update, resource_group_name, gallery_name,
-    #                    gallery_image_name, gallery_image_version_name, **kwargs)
 
     args["resource_group"] = resource_group_name
     args["gallery_name"] = gallery_name
