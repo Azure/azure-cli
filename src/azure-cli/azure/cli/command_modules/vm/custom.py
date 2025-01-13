@@ -4987,7 +4987,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
     args["resource_group"] = resource_group_name
     args["gallery_name"] = gallery_name
     args["gallery_image_definition"] = gallery_image_name
-    args["gallery_image_version"] = gallery_image_version
+    args["gallery_image_version_name"] = gallery_image_version
 
     from .aaz.latest.sig.image_version import Create
     return Create(cli_ctx=cmd.cli_ctx)(command_args=args)
@@ -5026,7 +5026,7 @@ def undelete_image_version(cmd, resource_group_name, gallery_name, gallery_image
     args["resource_group"] = resource_group_name
     args["gallery_name"] = gallery_name
     args["gallery_image_definition"] = gallery_image_name
-    args["gallery_image_version"] = gallery_image_version
+    args["gallery_image_version_name"] = gallery_image_version
 
     from .aaz.latest.sig.image_version import Create
     return Create(cli_ctx=cmd.cli_ctx)(command_args=args)
@@ -5046,7 +5046,7 @@ def get_image_version_to_update(cmd, resource_group_name, gallery_name, gallery_
         "resource_group": resource_group_name,
         "gallery_name": gallery_name,
         "gallery_image_definition": gallery_image_name,
-        "gallery_image_version": gallery_image_version_name,
+        "gallery_image_version_name": gallery_image_version_name,
     })
 
     # To avoid unnecessary permission check of image
@@ -5092,7 +5092,7 @@ def update_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
     args["resource_group"] = resource_group_name
     args["gallery_name"] = gallery_name
     args["gallery_image_definition"] = gallery_image_name
-    args["gallery_image_version"] = gallery_image_version_name
+    args["gallery_image_version_name"] = gallery_image_version_name
 
     from .aaz.latest.sig.image_version import Update
     return Update(cli_ctx=cmd.cli_ctx)(command_args=args)

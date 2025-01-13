@@ -47,8 +47,8 @@ class Update(AAZCommand):
             required=True,
             id_part="child_name_1",
         )
-        _args_schema.gallery_image_version = AAZStrArg(
-            options=["-e", "--gallery-image-version"],
+        _args_schema.gallery_image_version_name = AAZStrArg(
+            options=["-e", "--gallery-image-version", "--gallery-image-version-name"],
             help="The name of the gallery image version to be deleted.",
             required=True,
             id_part="child_name_2",
@@ -336,7 +336,7 @@ class Update(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "galleryImageVersionName", self.ctx.args.gallery_image_version,
+                    "galleryImageVersionName", self.ctx.args.gallery_image_version_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -443,7 +443,7 @@ class Update(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "galleryImageVersionName", self.ctx.args.gallery_image_version,
+                    "galleryImageVersionName", self.ctx.args.gallery_image_version_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
