@@ -5003,8 +5003,8 @@ def undelete_image_version(cmd, resource_group_name, gallery_name, gallery_image
         "gallery_name": gallery_name
     })
 
-    if gallery.get("soft_delete_policy", None) and gallery["soft_delete_policy"].get("is_soft_delete_enabled", None):
-        soft_delete = gallery["soft_delete_policy"]["is_soft_delete_enabled"]
+    if gallery.get("softDeletePolicy", None) and gallery["softDeletePolicy"].get("isSoftDeleteEnabled", None):
+        soft_delete = gallery["softDeletePolicy"]["isSoftDeleteEnabled"]
     else:
         soft_delete = None
 
