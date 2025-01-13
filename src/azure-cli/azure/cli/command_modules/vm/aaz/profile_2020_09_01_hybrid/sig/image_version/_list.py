@@ -43,7 +43,7 @@ class List(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.gallery_image_definition = AAZStrArg(
-            options=["-i", "--gallery-image-definition"],
+            options=["-i", "--gallery-image-name", "--gallery-image-definition"],
             help="Gallery image definition.",
             required=True,
         )

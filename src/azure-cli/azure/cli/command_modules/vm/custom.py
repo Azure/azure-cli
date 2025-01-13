@@ -5026,12 +5026,23 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
 def undelete_image_version(cmd, resource_group_name, gallery_name, gallery_image_name, gallery_image_version,
                            location=None, tags=None, allow_replicated_location_deletion=None):
     # ImageVersion = cmd.get_models('GalleryImageVersion')
-    client = _compute_client_factory(cmd.cli_ctx)
+    # client = _compute_client_factory(cmd.cli_ctx)
 
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
 
-    gallery = client.galleries.get(resource_group_name, gallery_name)
-    soft_delete = gallery.soft_delete_policy.is_soft_delete_enabled
+    # gallery = client.galleries.get(resource_group_name, gallery_name)
+
+    from .aaz.latest.sig import Show as _SigShow
+    gallery = _SigShow(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "gallery_name": gallery_name
+    })
+
+    if gallery.get("soft_delete_policy", None) and gallery["soft_delete_policy"].get("is_soft_delete_enabled", None):
+        soft_delete = gallery["soft_delete_policy"]["is_soft_delete_enabled"]
+    else:
+        soft_delete = None
+
     if not soft_delete:
         from azure.cli.core.azclierror import InvalidArgumentValueError
         raise InvalidArgumentValueError('soft-deletion is not enabled in Gallery \'{}\''.format(gallery_name))
