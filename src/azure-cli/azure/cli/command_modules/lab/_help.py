@@ -5,3 +5,11 @@
 # --------------------------------------------------------------------------------------------
 
 from knack.help_files import helps  # pylint: disable=unused-import
+
+helps['lab vm hibernate'] = """
+type: command
+short-summary: Hibernate a virtual machine.
+examples:
+  - name: Hibernate a virtual machine.
+    text: az lab vm hibernate --resource-group MyResourceGroup --lab-name MyLab --name MyVM
+"""
