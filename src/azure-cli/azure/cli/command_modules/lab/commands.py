@@ -17,7 +17,7 @@ def load_command_table(self, _):
 
     with self.command_group('lab vm'):
         from .custom import LabVmCreate, LabVmList, LabVmShow, LabVmDelete, LabVmStart, LabVmStop, \
-            LabVmApplyArtifacts
+            LabVmApplyArtifacts, LabVmHibernate
         self.command_table['lab vm create'] = LabVmCreate(loader=self)
         self.command_table['lab vm list'] = LabVmList(loader=self, table_transformer=transform_vm_list)
         self.command_table['lab vm show'] = LabVmShow(loader=self, table_transformer=transform_vm)
