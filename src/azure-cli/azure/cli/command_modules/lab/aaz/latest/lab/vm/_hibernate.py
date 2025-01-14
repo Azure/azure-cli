@@ -16,7 +16,11 @@ from azure.cli.core.aaz import *
 )
 class Hibernate(AAZCommand):
     """Hibernate a virtual machine This operation can take a while to complete.
+    :example: Hibernate a virtual machine.
+        az lab vm hibernate --resource-group MyResourceGroup --lab-name MyLab --name MyVM
     """
+
+    
 
     _aaz_info = {
         "version": "2018-09-15",
