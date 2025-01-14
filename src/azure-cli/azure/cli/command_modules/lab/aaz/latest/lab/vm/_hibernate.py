@@ -12,11 +12,11 @@ from azure.cli.core.aaz import *
 
 @register_example(
     "Hibernate a virtual machine",
-    "az lab vm hibernate --resource-group MyResourceGroup --lab-name MyLab --name MyVM"
+    "lab vm hibernate --resource-group MyResourceGroup --lab-name MyLab --name MyVM"
 )
 @register_command(
     "lab vm hibernate",
-    is_preview=True,
+    is_preview=True
 )
 class Hibernate(AAZCommand):
     """Hibernate a virtual machine This operation can take a while to complete.
