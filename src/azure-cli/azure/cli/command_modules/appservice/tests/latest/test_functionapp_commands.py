@@ -2822,6 +2822,7 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
         with self.assertRaises(ValidationError):
             self.cmd('functionapp create -g {} -n {} -s {} -p {} --functions-version 4 --vnet {} --subnet {} --configure-networking-later'.format(resource_group, functionapp_name, storage_account, ep_plan_name, vnet_name, subnet_name))
 
+    @live_only()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     def test_functionapp_elastic_premium_restricted_public_network_access_storage_vnet(self, resource_group):
         functionapp_name = self.create_random_name('functionapp', 24)
@@ -2843,6 +2844,7 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
             JMESPathCheck('virtualNetworkSubnetId', subnet_id)
         ])
 
+    @live_only()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     def test_functionapp_elastic_premium_restricted_public_network_access_storage_configure_vnet_later(self, resource_group):
         functionapp_name = self.create_random_name('functionapp', 24)

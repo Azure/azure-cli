@@ -5158,7 +5158,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                                                       value=con_string))
         content_share_name = _get_content_share_name(name)
         site_config.app_settings.append(NameValuePair(name='WEBSITE_CONTENTSHARE', value=content_share_name))
-        create_file_share(cmd.cli_ctx, resource_group_name, storage_account, content_share_name)
+        if is_storage_account_network_restricted(cmd.cli_ctx, resource_group_name, storage_account):
+            create_file_share(cmd.cli_ctx, resource_group_name, storage_account, content_share_name)
 
     create_app_insights = False
 
