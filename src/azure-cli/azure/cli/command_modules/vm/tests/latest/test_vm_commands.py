@@ -7053,7 +7053,7 @@ class VMGalleryImage(ScenarioTest):
                  ])
 
     @ResourceGroupPreparer(location='eastus2')
-    @KeyVaultPreparer(name_prefix='vault-', name_len=20, key='vault', location='eastus2', additional_params='--enable-purge-protection true')
+    @KeyVaultPreparer(name_prefix='vault-', name_len=20, key='vault', location='eastus2', additional_params='--enable-purge-protection true --enable-rbac-authorization false')
     def test_gallery_e2e(self, resource_group, resource_group_location, key_vault):
         self.kwargs.update({
             'vm': 'vm1',
@@ -7073,7 +7073,7 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('sig create -g {rg} --gallery-name {gallery}', checks=self.check('name', self.kwargs['gallery']))
         self.cmd('sig list -g {rg}', checks=self.check('length(@)', 1))
         self.cmd('sig show -g {rg} --gallery-name {gallery}', checks=self.check('name', self.kwargs['gallery']))
-        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux -p publisher1 -f offer1 -s sku1',
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux -p publisher1 -f offer1 -s sku1 --hyper-v-generation V1',
                  checks=self.check('name', self.kwargs['image']))
         self.cmd('sig image-definition list -g {rg} --gallery-name {gallery}', checks=self.check('length(@)', 1))
         res = self.cmd('sig image-definition show -g {rg} --gallery-name {gallery} --gallery-image-definition {image}',
@@ -7152,7 +7152,7 @@ class VMGalleryImage(ScenarioTest):
 
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_image_update_add_set_', location='westus')
-    def test_image_update_add_set(self, resource_group, resource_group_location):
+    def test_image_update_add_set(self, resource_group: object, resource_group_location: object) -> object:
         self.kwargs.update({
             'vm': 'vm1',
             'gallery': self.create_random_name(prefix='gallery_', length=20),
@@ -7285,7 +7285,7 @@ class VMGalleryImage(ScenarioTest):
 
     @ResourceGroupPreparer(random_name_length=15, location='CentralUSEUAP')
     @KeyVaultPreparer(name_prefix='vault-', name_len=20, key='vault', location='CentralUSEUAP',
-                      additional_params='--enable-purge-protection true')
+                      additional_params='--enable-purge-protection true --enable-rbac-authorization false')
     def test_create_image_version_with_region_cvm_encryption(self, resource_group, resource_group_location, key_vault):
         self.kwargs.update({
             'vm': 'vm1',
@@ -7382,6 +7382,7 @@ class VMGalleryImage(ScenarioTest):
             self.check('safetyProfile.allowDeletionOfReplicatedLocations', False)
         ])
 
+    @unittest.skip("The value of Edge Zone name 'attdallas1' and 'microsoftlosangeles1' are invalid.")
     @ResourceGroupPreparer(name_prefix='cli_test_target_extended_locations', location='southcentralus')
     def test_image_version_with_target_extended_locations(self):
         self.kwargs.update({
@@ -7547,7 +7548,7 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --target-regions {location} --target-region-cvm-encryption EncryptedWithPmk, --os-snapshot {snapshot1} --replica-count 1', checks=[
             self.check('publishingProfile.targetRegions[0].name', 'Central US EUAP'),
             self.check('publishingProfile.targetRegions[0].regionalReplicaCount', 1),
-            self.check('publishingProfile.targetRegions[0].encryption.osDiskImage.securityProfile.confidentialVmEncryptionType', 'EncryptedWithPmk'),
+            self.check('publishingProfile.targetRegions[0].encryption.osDiskImage.securityProfile.confidentialVMEncryptionType', 'EncryptedWithPmk'),
         ])
 
         self.cmd('sig image-version delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version}')
