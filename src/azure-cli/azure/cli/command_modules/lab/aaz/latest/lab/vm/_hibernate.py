@@ -10,7 +10,10 @@
 
 from azure.cli.core.aaz import *
 
-
+@register_example(
+    "Hibernate a virtual machine",
+    "az lab vm hibernate --resource-group MyResourceGroup --lab-name MyLab --name MyVM"
+)
 @register_command(
     "lab vm hibernate",
     is_preview=True,
