@@ -34,3 +34,6 @@ def load_command_table(self, _):
 
     from .operations.sig_image_definition import SigImageDefinitionUpdate
     self.command_table['sig image-definition update'] = SigImageDefinitionUpdate(loader=self)
+
+    from .operations.vm import VMListSizes
+    self.command_table['vm list-sizes'] = VMListSizes(loader=self)
