@@ -122,7 +122,7 @@ def job_list_table_format(result):
         table_row['Job Id'] = item.get('id', None)
         table_row['State'] = item.get('state', None)
         table_row['Previous State'] = item.get('previousState', None)
-        table_row['Execution Pool'] = item.get('executionInfo').get('poolId',None) \
+        table_row['Execution Pool'] = item.get('executionInfo').get('poolId', None) \
             if item.get('executionInfo', None) else ""
         table_output.append(table_row)
     return table_output
@@ -250,14 +250,22 @@ def list_pool_node_counts_table_format(result):
     for item in result:
         table_row = OrderedDict()
         table_row['Pool Id'] = item.get('poolId', None)
-        table_row['Dedicated Starting'] = str(item.get('dedicated').get('starting', None)) if item.get('dedicated', None) else ""
-        table_row['Dedicated Idle'] = str(item.get('dedicated').get('idle', None)) if item.get('dedicated', None) else ""
-        table_row['Dedicated Running'] = str(item.get('dedicated').get('running', None)) if item.get('dedicated', None) else ""
-        table_row['Dedicated Total'] = str(item.get('dedicated').get('total', None)) if item.get('dedicated', None) else ""
-        table_row['LowPri Starting'] = str(item.get('lowPriority').get('starting', None)) if item.get('lowPriority', None) else ""
-        table_row['LowPri Idle'] = str(item.get('lowPriority').get('idle', None)) if item.get('lowPriority', None) else ""
-        table_row['LowPri Running'] = str(item.get('lowPriority').get('running', None)) if item.get('lowPriority', None) else ""
-        table_row['LowPri Total'] = str(item.get('lowPriority').get('total', None)) if item.get('lowPriority', None) else ""
+        table_row['Dedicated Starting'] = str(item.get('dedicated').get('starting', None)) \
+            if item.get('dedicated', None) else ""
+        table_row['Dedicated Idle'] = str(item.get('dedicated').get('idle', None)) \
+            if item.get('dedicated', None) else ""
+        table_row['Dedicated Running'] = str(item.get('dedicated').get('running', None)) \
+            if item.get('dedicated', None) else ""
+        table_row['Dedicated Total'] = str(item.get('dedicated').get('total', None)) \
+            if item.get('dedicated', None) else ""
+        table_row['LowPri Starting'] = str(item.get('lowPriority').get('starting', None)) \
+            if item.get('lowPriority', None) else ""
+        table_row['LowPri Idle'] = str(item.get('lowPriority').get('idle', None)) \
+            if item.get('lowPriority', None) else ""
+        table_row['LowPri Running'] = str(item.get('lowPriority').get('running', None)) \
+            if item.get('lowPriority', None) else ""
+        table_row['LowPri Total'] = str(item.get('lowPriority').get('total', None)) \
+            if item.get('lowPriority', None) else ""
         table_output.append(table_row)
     return table_output
 
@@ -269,10 +277,14 @@ def list_supported_images_table_format(result):
         table_row = OrderedDict()
         table_row['OS Type'] = item.get('osType', None)
         table_row['Node Agent Sku'] = item.get('nodeAgentSkuId', None)
-        table_row['Publisher'] = item.get('imageReference').get('publisher', None) if item.get('imageReference', None) else ""
-        table_row['Offer'] = item.get('imageReference').get('offer', None) if item.get('imageReference', None) else ""
-        table_row['Sku'] = item.get('imageReference').get('sku', None) if item.get('imageReference', None) else ""
-        table_row['Version'] = item.get('imageReference').get('version', None) if item.get('imageReference', None) else ""
+        table_row['Publisher'] = item.get('imageReference').get('publisher', None) \
+            if item.get('imageReference', None) else ""
+        table_row['Offer'] = item.get('imageReference').get('offer', None) \
+            if item.get('imageReference', None) else ""
+        table_row['Sku'] = item.get('imageReference').get('sku', None) \
+            if item.get('imageReference', None) else ""
+        table_row['Version'] = item.get('imageReference').get('version', None) \
+            if item.get('imageReference', None) else ""
         table_row['VerificationType'] = item.get('verificationType', None)
         table_output.append(table_row)
     return table_output

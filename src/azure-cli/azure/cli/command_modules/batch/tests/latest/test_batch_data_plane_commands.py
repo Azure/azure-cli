@@ -72,7 +72,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
             self.check('startTask.userIdentity.autoUser.elevationLevel', "admin")])
 
         target = result.get_output_in_json()['currentLowPriorityNodes']
-        self.batch_cmd('batch pool resize --pool-id {p_id} --target-dedicated-nodes 0 --target-low-priority-nodes 3')
+        self.batch_cmd('batch pool resize --pool-id {p_id} --target-dedicated-nodes 0 --target-low-priority-nodes 3 --resize-timeout PT0H20M')
         self.batch_cmd('batch pool show --pool-id {p_id}').assert_with_checks([
             self.check('allocationState', 'resizing'),
             self.check('targetLowPriorityNodes', 3),

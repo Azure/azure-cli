@@ -80,13 +80,13 @@ class TestBatchValidators(unittest.TestCase):
 
     def test_batch_application_package_reference_format(self):
         ref = _validators.batch_application_package_reference_format("app_1")
-        self.assertEqual(ref, {'application_id': 'app_1'})
+        self.assertEqual(ref, {'applicationId': 'app_1'})
 
         ref = _validators.batch_application_package_reference_format("app#1")
-        self.assertEqual(ref, {'application_id': 'app', 'version': '1'})
+        self.assertEqual(ref, {'applicationId': 'app', 'version': '1'})
 
         ref = _validators.batch_application_package_reference_format("app#1#RC")
-        self.assertEqual(ref, {'application_id': 'app', 'version': '1#RC'})
+        self.assertEqual(ref, {'applicationId': 'app', 'version': '1#RC'})
 
     def test_batch_task_id_ranges_format(self):
         id_range = _validators.batch_task_id_ranges_format("5-10")
@@ -109,14 +109,14 @@ class TestBatchValidators(unittest.TestCase):
 
     def test_batch_resource_file_format(self):
         meta = _validators.resource_file_format("file=source")
-        self.assertEqual(meta, {'file_path': 'file', 'http_url': 'source'})
+        self.assertEqual(meta, {'filePath': 'file', 'httpUrl': 'source'})
 
         meta = _validators.resource_file_format("TestData.zip=https://teststorage.blob.core.windows.net/fgrp-47197bb4/"
                                                 "TestData.zip?sv=2015-04-05&sr=b&sig=lk72w%3D&se="
                                                 "2017-07-28T21%3A14%3A12Z&sp=rwd")
         self.assertEqual(meta, {
-            'file_path': 'TestData.zip',
-            'http_url': ("https://teststorage.blob.core.windows.net/fgrp-47197bb4/"
+            'filePath': 'TestData.zip',
+            'httpUrl': ("https://teststorage.blob.core.windows.net/fgrp-47197bb4/"
                          "TestData.zip?sv=2015-04-05&sr=b&sig=lk72w%3D&se=2017-07-28T21%3A14%3A12Z&sp=rwd")})
 
         with self.assertRaises(ValueError):

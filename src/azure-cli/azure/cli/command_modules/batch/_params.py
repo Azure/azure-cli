@@ -40,6 +40,7 @@ from azure.cli.command_modules.batch._validators import (
     metadata_item_format,
     resource_file_format,
     resource_tag_format,
+    duration_format,
     storage_account_id,
     validate_client_parameters,
     validate_json_file,
@@ -197,10 +198,10 @@ def load_arguments(self, _):
         c.argument('pool_id', help='The ID of the pool.')
         c.argument('abort', action='store_true', help='Stop the pool resize operation.', validator=validate_pool_resize_parameters)
         c.argument('node_deallocation_option', options_list=('--node-deallocation-option',), help='When nodes may be removed from the pool, if the pool size is decreasing.', arg_type=get_enum_type(BatchNodeDeallocationOption))
-        c.argument('resize_timeout', help='The default value is 15 minutes. The minimum value is 5 minutes.'
-                                          'If you specify a value less than 5 minutes, the Batch service'
-                                          'returns an error; if you are calling the REST API directly, the'
-                                          'HTTP status code is 400 (Bad Request).')
+        c.argument('resize_timeout', type=duration_format, help='The default value is 15 minutes. The minimum value is 5 minutes.'
+                                                                'If you specify a value less than 5 minutes, the Batch service'
+                                                                'returns an error; if you are calling the REST API directly, the'
+                                                                'HTTP status code is 400 (Bad Request). ISO-8601 duration format')
         c.argument('target_dedicated_nodes', help='The desired number of dedicated Compute Nodes in the Pool.')
         c.argument('target_low_priority_nodes', help='The desired number of Spot/Low-priority Compute Nodes in the Pool.')
 

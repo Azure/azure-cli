@@ -139,7 +139,7 @@ def resource_file_format(value):
         message = ("Incorrectly formatted resource reference. "
                    "Argument values should be in the format filename=httpurl")
         raise ValueError(message)
-    return {'file_path': file_name, 'http_url': http_url}
+    return {'filePath': file_name, 'httpUrl': http_url}
 
 
 # COMMAND NAMESPACE VALIDATORS
