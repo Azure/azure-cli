@@ -248,11 +248,26 @@ class RoleDefinitionScenarioTest(RoleScenarioTestBase):
         self.kwargs.update({
             'sub': subscription_id,
             'role': role_name,
-            'template': temp_file.replace('\\', '\\\\')
+            'template': temp_file.replace('\\', '\\\\'),
+            'scope': "/subscriptions/{}".format(subscription_id)
         })
 
         # a few 'sleep' here to handle server replicate latency. It is no-op under playback
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            # Operate on name (GUID)
+            role = self.cmd('role definition create --role-definition {template}', checks=[
+                self.check('permissions[0].dataActions[0]',
+                           'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/*'),
+                self.check('permissions[0].notDataActions[0]',
+                           'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write'),
+            ]).get_output_in_json()
+            self.kwargs['name'] = role['name']
+            retry(lambda: self.cmd('role definition show --scope {scope} --name {name}',
+                                   checks=self.check('[0].roleName', '{role}'))).get_output_in_json()
+            retry(lambda: self.cmd('role definition delete -n {name}', checks=self.is_empty()))
+            retry(lambda: self.cmd('role definition show -n {name}', checks=self.is_empty()))
+
+            # Operate on roleName
             self.cmd('role definition create --role-definition {template}', checks=[
                 self.check('permissions[0].dataActions[0]', 'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/*'),
                 self.check('permissions[0].notDataActions[0]', 'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write'),
