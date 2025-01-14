@@ -71,6 +71,20 @@ def list_role_definitions(cmd, name=None, resource_group_name=None, scope=None,
     return _search_role_definitions(cmd.cli_ctx, definitions_client, name, [scope], custom_role_only)
 
 
+def show_role_definition(cmd, scope=None, name=None, role_id=None):
+    if not any((scope, name, role_id)):
+        raise CLIError('Usage error: Provide --scope and --name, or --id')
+    if not role_id and not (name and scope):
+        raise CLIError('Usage error: Provide both --scope and --name')
+
+    definitions_client = _auth_client_factory(cmd.cli_ctx, scope).role_definitions
+    # https://learn.microsoft.com/en-us/rest/api/authorization/role-definitions/get-by-id?view=rest-authorization-2022-04-01&tabs=HTTP
+    if role_id:
+        return definitions_client.get_by_id(role_id)
+    # https://learn.microsoft.com/en-us/rest/api/authorization/role-definitions/get?view=rest-authorization-2022-04-01&tabs=HTTP
+    return definitions_client.get(scope, name)
+
+
 def create_role_definition(cmd, role_definition):
     return _create_update_role_definition(cmd, role_definition, for_update=False)
 
