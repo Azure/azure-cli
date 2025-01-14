@@ -2356,7 +2356,7 @@ helps['aks mesh upgrade rollback'] = """
 
 helps['aks approuting'] = """
     type: group
-    short-summary: Commands to manage App Routing aadon.
+    short-summary: Commands to manage App Routing addon.
     long-summary: A group of commands to manage App Routing in given cluster.
 """
 
