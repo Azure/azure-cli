@@ -49,17 +49,17 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
             'acc_u': endpoint
         })
         self.batch_cmd('batch pool create --json-file "{c_file}"')
-        result = self.batch_cmd('batch pool create --id pool_image1 --vm-size Standard_A1 '
+        result = self.batch_cmd('batch pool create --id pool_image1 --vm-size Standard_DS1_v2 '
                                 '--image a:b:c --node-agent-sku-id "batch.node.windows amd64"',
                                 expect_failure=True)
 
-        result = self.batch_cmd('batch pool create --id pool_image1 --vm-size Standard_A1 '
+        result = self.batch_cmd('batch pool create --id pool_image1 --vm-size Standard_DS1_v2 '
                                 '--image /subscriptions/11111111-1111-1111-1111-111111111111'
                                 '/resourceGroups/test_rg/providers/Microsoft.Compute/images/custom_image '
                                 '--node-agent-sku-id "batch.node.windows amd64"',
                                 expect_failure=True)
 
-        result = self.batch_cmd('batch pool create --id pool_image1 --vm-size Standard_A1 '
+        result = self.batch_cmd('batch pool create --id pool_image1 --vm-size Standard_DS1_v2 '
                                 '--image canonical:ubuntuserver:18.04-lts --node-agent-sku-id "batch.node.ubuntu 18.04" '
                                 '--disk-encryption-targets "TemporaryDisk"')
 
@@ -108,7 +108,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
             self.check('metadata', None)])
 
         self.batch_cmd('batch pool reset --pool-id {p_id} --start-task-command-line hostname '
-                       '--metadata a=b c=d').assert_with_checks([
+                       '--start-task-resource-files hello.txt=https://contoso.net/hello.txt --metadata a=b c=d').assert_with_checks([
                            self.check('allocationState', 'steady'),
                            self.check('id', 'xplatCreatedPool'),
                            self.check('startTask.commandLine', "hostname"),
@@ -423,7 +423,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         })
 
         # test create pool using parameters
-        self.batch_cmd('batch pool create --id {p_id} --vm-size Standard_A1 '
+        self.batch_cmd('batch pool create --id {p_id} --vm-size Standard_DS1_v2 '
                                 '--image canonical:ubuntuserver:18.04-lts --node-agent-sku-id "batch.node.ubuntu 18.04" '
                                 '--disk-encryption-targets "TemporaryDisk"')
 
@@ -540,7 +540,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         })
 
         # test create pool using parameters
-        self.batch_cmd('batch pool create --id {pool_i} --vm-size Standard_A1 '
+        self.batch_cmd('batch pool create --id {pool_i} --vm-size Standard_DS1_v2 '
                        '--image Canonical:UbuntuServer:18.04-LTS '
                        '--node-agent-sku-id "batch.node.ubuntu 18.04" '
                        '--target-communication classic')
@@ -560,7 +560,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
 
         # test create pool with missing optional parameters
         with self.assertRaises(SystemExit):
-            self.batch_cmd('batch pool create --id missing-optional-test --vm-size Standard_A1 '
+            self.batch_cmd('batch pool create --id missing-optional-test --vm-size Standard_DS1_v2 '
                            '--start-task-wait-for-success')
 
         # test create pool from JSON file
@@ -648,12 +648,35 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
 
         # test app package reference
         self.batch_cmd('batch pool set --pool-id {pool_i} --application-package-references does-not-exist',
-                       expect_failure=True)#
+                       expect_failure=True)
 
-        # test delete
+        self.wait_for_pool_steady("azure-cli-test-iaas")
+
+        # scale up to test node commands
+        self.batch_cmd('batch pool resize --pool-id {pool_i} --target-dedicated-nodes 1')
+        self.wait_for_pool_steady("azure-cli-test-iaas")
+
+        # node list
+        node_list = self.batch_cmd("batch node list --pool-id {pool_i}").get_output_in_json()
+        self.assertEqual(len(node_list), 1)
+        self.kwargs.update({'node1': node_list[0]['id']})
+
+        # node show
+        self.batch_cmd('batch node show --pool-id {pool_i} --node-id {node1}').assert_with_checks([
+            self.check('id', self.kwargs['node1']),
+            self.check('isDedicated', True)])
+
+        # node reboot
+        self.batch_cmd('batch node reboot --pool-id {pool_i} --node-id {node1}')
+        self.batch_cmd('batch node show --pool-id {pool_i} --node-id {node1}').assert_with_checks([
+            self.check('id', self.kwargs['node1']),
+            self.check('state', 'rebooting')])
+
+        # node delete
+        self.batch_cmd('batch node delete --pool-id {pool_i} --node-list {node1}')
+
+        # pool delete
         self.batch_cmd('batch pool delete --pool-id {pool_i} --yes')
-
-        # TODO: Test node commands
 
     def wait_for_pool_steady(self, pool_id, timeout_seconds=120):
         start_time = time.time()

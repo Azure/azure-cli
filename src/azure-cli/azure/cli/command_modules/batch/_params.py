@@ -386,7 +386,7 @@ def load_arguments(self, _):
                    help="The desired node communication mode for the pool. If this element is present, it replaces the existing targetNodeCommunicationMode configured on the Pool. If omitted, any existing metadata is left unchanged.",
                    arg_type=get_enum_type(BatchNodeCommunicationMode))
         c.argument('enable_accelerated_networking', arg_type=get_three_state_flag(), options_list=['--accelerated-networking'], arg_group="Pool: Network Configuration",
-                   help='Whether this pool should enable accelerated networking. Accelerated networking enables single root I/O virtualization (SR-IOV) to a VM, which may lead to improved networking performance. For more details, see: https://learn.microsoft.com/azure/virtual- network/accelerated-networking-overview. Set true to enable.')
+                   help='Whether this pool should enable accelerated networking. Accelerated networking enables single root I/O virtualization (SR-IOV) to a VM, which may lead to improved networking performance. For more details, see: https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview. Set true to enable.')
         c.argument('caching',
                    options_list=('--os-disk-caching'),
                    arg_type=get_enum_type(CachingType),

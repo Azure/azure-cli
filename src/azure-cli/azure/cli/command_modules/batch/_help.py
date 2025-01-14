@@ -318,7 +318,7 @@ short-summary: Gets information about the specified Batch job.
 examples:
   - name: Shows information details about a job.
     text: >
-        az batch show --job-id job1
+        az batch job show --job-id job1
 """
 
 helps['batch job stop'] = """
@@ -472,6 +472,15 @@ type: group
 short-summary: Manage the service log files of a Batch compute node.
 """
 
+helps['batch node service-logs upload'] = """
+type: command
+short-summary: Upload service logs from a specified Batch compute node.
+examples:
+  - name: Upload logs to a storage account SAS URL
+    text: >
+        az batch node service-logs upload --pool-id pool1 --node-id node1 --start-time 2025-01-13T00:00:00Z --container-url sas_url
+"""
+
 helps['batch node user'] = """
 type: group
 short-summary: Manage the user accounts of a Batch compute node.
@@ -480,11 +489,19 @@ short-summary: Manage the user accounts of a Batch compute node.
 helps['batch node user create'] = """
 type: command
 short-summary: Add a user account to a Batch compute node.
+examples:
+  - name: Create a regular (non-admin) user with a public SSH key.
+    text: >
+        az batch node user create --pool-id pool1 --node-id node1 --name example_user --ssh-public-key example_public_key
 """
 
 helps['batch node user reset'] = """
 type: command
 short-summary: Update the properties of a user account on a Batch compute node. Unspecified properties which can be updated are reset to their defaults.
+examples:
+  - name: Set a new SSH public key on an existing user and reset all other properties to their defaults.
+    text: >
+        az batch node user reset --pool-id pool1 --node-id node1 --user-name example_user --ssh-public-key new_public_key
 """
 
 helps['batch pool'] = """
@@ -545,6 +562,10 @@ short-summary: Manage Batch tasks.
 helps['batch task create'] = """
 type: command
 short-summary: Create Batch tasks.
+examples:
+  - name: Create a task which sleeps for 1 minute.
+    text: >
+        az batch task create --task-id task1 --job-id job1 --command-line "sleep 60"
 """
 
 helps['batch task file'] = """
@@ -560,6 +581,10 @@ short-summary: Download the content of a Batch task file.
 helps['batch task reset'] = """
 type: command
 short-summary: Reset the properties of a Batch task.
+examples:
+  - name: Set max retry count to 3 and reset other properties to their defaults
+    text: >
+        az batch task reset --task-id task1 --job-id job1 --max-task-retry-count 3
 """
 
 helps['batch task subtask'] = """
