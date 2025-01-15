@@ -4,25 +4,40 @@
 # --------------------------------------------------------------------------------------------
 
 from knack.util import CLIError
-from azure.batch.models import BatchError
+from knack.log import get_logger
+from json import JSONDecodeError
+
+logger = get_logger(__name__)
 
 
 def batch_exception_handler(ex):
     from azure.core.exceptions import HttpResponseError
 
+    # TODO: Convert to the new error handling method.
+    #       See: https://github.com/Azure/azure-cli/blob/dev/doc/error_handling_guidelines.md
     if isinstance(ex, HttpResponseError):
-        if ex.model and isinstance(ex.model, BatchError) and ex.model.code:
-            _raise_batch_error(ex.model)
+        batch_msg = _parse_batch_error_msg(ex)
+        if batch_msg:
+            raise CLIError(batch_msg)
 
+    # TODO: Should this just raise the original exception?
     raise CLIError(ex)
 
 
-def _raise_batch_error(err):
-    """Handle a BatchError from the data plane and raise a CLI error"""
-    message = f"({err.code})"
-    if err.message and err.message.value:
-        message += f" {err.message.value}"
-    if err.values_property:
-        for detail in err.values_property:
-            message += f"\n{detail.key}: {detail.value}"
-    raise CLIError(message)
+def _parse_batch_error_msg(ex):
+    """Try to Parse out a BatchError message from the response body. Returns
+       None if no message could be parsed"""
+    message = None
+    if ex.response:
+        try:
+            err = ex.response.json()
+            if err.get('code'):
+                message = f"({err.get('code')})"
+                if err.get('message') and err.get('message').get('value'):
+                    message += f" {err.get('message').get('value')}"
+                if err.get('values'):
+                    for detail in err.get('values'):
+                        message += f"\n{detail.get('key')}: {detail.get('value')}"
+        except JSONDecodeError as e:
+            logger.debug("Failed to parse Batch error JSON. Exception: %s", e)
+    return message
