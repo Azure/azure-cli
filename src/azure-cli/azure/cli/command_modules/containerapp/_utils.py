@@ -509,12 +509,15 @@ def _update_revision_env_secretrefs(containers, name):
 
 
 def store_as_secret_and_return_secret_ref(secrets_list, registry_user, registry_server, registry_pass, update_existing_secret=False, disable_warnings=False):
+    def make_dns1123_compliant(name):
+        # Replace invalid characters with a hyphen and ensure lowercase
+        return re.sub(r'[^a-z0-9\-]', '-', name.lower())
+
     if registry_pass.startswith("secretref:"):
         # If user passed in registry password using a secret
-
         registry_pass = registry_pass.split("secretref:")
         if len(registry_pass) <= 1:
-            raise ValidationError("Invalid registry password secret. Value must be a non-empty value starting with \'secretref:\'.")
+            raise ValidationError("Invalid registry password secret. Value must be a non-empty value starting with 'secretref:'.")
         registry_pass = registry_pass[1:]
         registry_pass = ''.join(registry_pass)
 
@@ -526,9 +529,15 @@ def store_as_secret_and_return_secret_ref(secrets_list, registry_user, registry_
         # If user passed in registry password
         registry_server = registry_server.replace(':', '-')
         if urlparse(registry_server).hostname is not None:
-            registry_secret_name = "{server}-{user}".format(server=urlparse(registry_server).hostname.replace('.', ''), user=registry_user.lower())
+            registry_secret_name = "{server}-{user}".format(
+                server=urlparse(registry_server).hostname.replace('.', ''), 
+                user=make_dns1123_compliant(registry_user)
+            )
         else:
-            registry_secret_name = "{server}-{user}".format(server=registry_server.replace('.', ''), user=registry_user.lower())
+            registry_secret_name = "{server}-{user}".format(
+                server=registry_server.replace('.', ''), 
+                user=make_dns1123_compliant(registry_user)
+            )
 
         for secret in secrets_list:
             if secret['name'].lower() == registry_secret_name.lower():
@@ -547,7 +556,6 @@ def store_as_secret_and_return_secret_ref(secrets_list, registry_user, registry_
         })
 
         return registry_secret_name
-
 
 def parse_list_of_strings(comma_separated_string):
     comma_separated = comma_separated_string.split(',')
