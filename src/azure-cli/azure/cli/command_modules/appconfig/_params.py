@@ -257,6 +257,7 @@ def load_arguments(self, _):
         c.argument('skip_keyvault', help="Export items excluding all key vault references. By default, all key vault references with the specified label will be exported.", arg_type=get_three_state_flag())
         c.argument('snapshot', validator=validate_snapshot_export,
                    help="Export all keys in a given snapshot of the App Configuration store. If no snapshot is specified, the keys currently in the store are exported based on the specified key and label filters.")
+        c.argument('tags', arg_type=tags_type, help="If no tags are specified, return all key-values with all tags. Support space-separated tags: key[=value] [key[=value] ...].")
 
     with self.argument_context('appconfig kv export', arg_group='File') as c:
         c.argument('path', help='Local configuration file path. Required for file arguments.')
@@ -302,16 +303,19 @@ def load_arguments(self, _):
     with self.argument_context('appconfig kv show') as c:
         c.argument('key', help='Key to be showed.')
         c.argument('label', help="If no label specified, show entry with null label. Filtering is not supported.")
+        c.argument('tags', arg_type=tags_type, help="If no tags are specified, show entry with any tags. Support space-separated tags: key[=value] [key[=value] ...].")
 
     with self.argument_context('appconfig kv list') as c:
         c.argument('key', help='If no key specified, return all keys by default. Support star sign as filters, for instance abc* means keys with abc as prefix.')
         c.argument('label', help="If no label specified, list all labels. Support star sign as filters, for instance abc* means labels with abc as prefix. Use '\\0' for null label.")
+        c.argument('tags', arg_type=tags_type, help="If no tags are specified, return all key-values with all tags. Support space-separated tags: key[=value] [key[=value] ...].")
         c.argument('snapshot', help="List all keys in a given snapshot of the App Configuration store. If no snapshot is specified, the keys currently in the store are listed.")
         c.argument('resolve_keyvault', arg_type=get_three_state_flag(), help="Resolve the content of key vault reference. This argument should NOT be specified along with --fields. Instead use --query for customized query.")
 
     with self.argument_context('appconfig kv restore') as c:
         c.argument('key', help='If no key specified, restore all keys by default. Support star sign as filters, for instance abc* means keys with abc as prefix.')
         c.argument('label', help="If no label specified, restore all key-value pairs with all labels. Support star sign as filters, for instance abc* means labels with abc as prefix. Use '\\0' for null label.")
+        c.argument('tags', arg_type=tags_type, help="If no tags are specified, restore all key-values with all tags. Support space-separated tags: key[=value] [key[=value] ...].")
 
     with self.argument_context('appconfig kv lock') as c:
         c.argument('key', help='Key to be locked.')
@@ -325,7 +329,8 @@ def load_arguments(self, _):
         c.argument('name', arg_type=data_plane_name_arg_type)
         c.argument('key', help='If no key specified, return all keys by default. Support star sign as filters, for instance abc* means keys with abc as prefix.')
         c.argument('label', help="If no label specified, list all labels. Support star sign as filters, for instance abc* means labels with abc as prefix. Use '\\0' for null label.")
-
+        c.argument('tags', arg_type=tags_type, help="If no tags are specified, return all key-values with all tags. Support space-separated tags: key[=value] [key[=value] ...].")
+        
     with self.argument_context('appconfig feature') as c:
         c.argument('name', arg_type=data_plane_name_arg_type)
         c.argument('key', validator=validate_feature_key, help='Key of the feature flag. Key must start with the ".appconfig.featureflag/" prefix. Key cannot contain the "%" character. If both key and feature arguments are provided, only key will be used. Default key is the reserved prefix ".appconfig.featureflag/" + feature name.')
@@ -333,6 +338,7 @@ def load_arguments(self, _):
     with self.argument_context('appconfig feature show') as c:
         c.argument('feature', help='Name of the feature flag to be retrieved. If the feature flag key is different from the default key, provide the `--key` argument instead.')
         c.argument('label', help="If no label specified, show entry with null label. Filtering is not supported.")
+        c.argument('tags', arg_type=tags_type, help="If no tags are specified, return entry with any tags. Support space-separated tags: key[=value] [key[=value] ...].")
         c.argument('fields', arg_type=feature_fields_arg_type)
 
     with self.argument_context('appconfig feature set') as c:
@@ -354,6 +360,7 @@ def load_arguments(self, _):
         c.argument('fields', arg_type=feature_fields_arg_type)
         c.argument('all_', help="List all feature flags.")
         c.argument('key', validator=validate_feature_key, help='Key of the feature flag. Key must start with the ".appconfig.featureflag/" prefix. Key cannot contain the "%" character. If both key and feature arguments are provided, only key will be used. Support star sign as filters, for instance ".appconfig.featureflag/*" means all features and ".appconfig.featureflag/abc*" means features with abc as prefix. Comma separated features are not supported. Please provide escaped string if your feature name contains comma.')
+        c.argument('tags', arg_type=tags_type, help="If no tags are specified, return all features with all tags. Support space-separated tags: key[=value] [key[=value] ...].")
 
     with self.argument_context('appconfig feature lock') as c:
         c.argument('feature', help='Name of the feature to be locked. If the feature flag key is different from the default key, provide the `--key` argument instead.')

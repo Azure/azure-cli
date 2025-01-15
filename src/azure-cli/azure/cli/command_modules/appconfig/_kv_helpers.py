@@ -262,6 +262,7 @@ def __map_to_appservice_config_reference(key_value, endpoint, prefix):
 def __read_kv_from_config_store(azconfig_client,
                                 key=None,
                                 label=None,
+                                tags=None,
                                 snapshot=None,
                                 datetime=None,
                                 fields=None,
@@ -304,6 +305,7 @@ def __read_kv_from_config_store(azconfig_client,
         try:
             configsetting_iterable = azconfig_client.list_configuration_settings(key_filter=key,
                                                                                  label_filter=label,
+                                                                                 tags_filter=tags,
                                                                                  accept_datetime=datetime,
                                                                                  fields=query_fields,
                                                                                  headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id}
