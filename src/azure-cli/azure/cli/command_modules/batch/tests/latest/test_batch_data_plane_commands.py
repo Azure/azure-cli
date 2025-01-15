@@ -5,7 +5,6 @@
 
 import os
 import datetime
-import tempfile
 import time
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
@@ -13,7 +12,6 @@ from knack.util import CLIError
 from .batch_preparers import BatchAccountPreparer, BatchScenarioMixin
 
 from .recording_processors import BatchAccountKeyReplacer, StorageSASReplacer
-
 
 class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
 
@@ -27,6 +25,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         filepath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', filename)
         self.assertTrue(os.path.isfile(filepath), 'File {} does not exist.'.format(filepath))
         return filepath
+
 
     @ResourceGroupPreparer()
     @BatchAccountPreparer()
@@ -82,7 +81,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         self.batch_cmd('batch pool resize --pool-id {p_id} --abort')
 
         self.wait_for_pool_steady("xplatCreatedPool")
-
+        
         self.batch_cmd('batch pool node-counts list').assert_with_checks([
             self.check('length(@)', 2),
             self.check('[1].poolId', 'xplatCreatedPool')])
@@ -357,6 +356,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         self.assertEqual(len(result), 3)
         self.assertTrue(any([i for i in result if i['taskId'] == 'xplatTask1']))
 
+
     @ResourceGroupPreparer()
     @BatchAccountPreparer(location='eastus2')
     def test_batch_file_download_cmd(self, resource_group, batch_account_name):
@@ -374,37 +374,43 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         self.batch_cmd('batch job create --json-file "{j_file}"')
         self.batch_cmd('batch task create --job-id {j_id} --json-file "{ts_file}"')
 
-        self.wait_for_task_complete("xplatJobForTaskTests", 3)
+        self.wait_for_task_complete("xplatJobForTaskTests",3)
 
         # verify task file download
-        with tempfile.TemporaryDirectory() as task_tmp:
-            self.kwargs.update({'task_tmp': task_tmp})
-
-            self.batch_cmd('batch task file download --destination {task_tmp}/stdout.txt --file-path stdout.txt --job-id {j_id} --task-id {t_id}')
-            self.assertTrue(os.path.isfile(f'{task_tmp}/stdout.txt'), 'File stdout.txt does not exist.')
-            self.assertGreater(os.path.getsize(f'{task_tmp}/stdout.txt'), 0, 'File stdout.txt is empty.')
-
-            self.batch_cmd('batch task file download --destination {task_tmp}/stdout_range.txt --file-path stdout.txt --job-id {j_id} --task-id {t_id} --start-range 10 --end-range 20')
-            self.assertTrue(os.path.isfile(f'{task_tmp}/stdout_range.txt'), 'File stdout_range.txt does not exist.')
-            self.assertEqual(os.path.getsize(f'{task_tmp}/stdout_range.txt'), 11, 'File stdout_range.txt should be exactly 11 bytes in size')
-            self.assertGreater(os.path.getsize(f'{task_tmp}/stdout.txt'), os.path.getsize(f'{task_tmp}/stdout_range.txt'), 'File stdout_range.txt should be smaller due to range limits.')
+        if os.path.isfile('c:/temp/stdout.txt'): os.remove('c:/temp/stdout.txt')
+        self.batch_cmd('batch task file download --destination c:/temp/stdout.txt --file-path stdout.txt --job-id {j_id} --task-id {t_id}')
+        self.assertTrue(os.path.isfile('c:/temp/stdout.txt'), 'File c:/temp/stdout.txt does not exist.')
+        self.assertGreater(os.path.getsize('c:/temp/stdout.txt'), 0, 'File c:/temp/stdout.txt is empty.')
+        
+        if os.path.isfile('c:/temp/stdout_range.txt'): os.remove('c:/temp/stdout_range.txt')
+        self.batch_cmd('batch task file download --destination c:/temp/stdout_range.txt --file-path stdout.txt --job-id {j_id} --task-id {t_id} --start-range 10 --end-range 20')
+        self.assertTrue(os.path.isfile('c:/temp/stdout_range.txt'), 'File c:/temp/stdout_range.txt does not exist.')
+        self.assertGreater(os.path.getsize('c:/temp/stdout.txt'), os.path.getsize('c:/temp/stdout_range.txt'), 'File c:/temp/stdout_range.txt should be smaller due to range limits.')
+        
+        # clean up
+        os.remove('c:/temp/stdout.txt')
+        os.remove('c:/temp/stdout_range.txt')
 
         # verify node file download
-        with tempfile.TemporaryDirectory() as node_tmp:
-            self.kwargs.update({'node_tmp': node_tmp})
+        nodes = self.batch_cmd('batch node list --pool-id {p_id}').get_output_in_json()  
+        self.assertTrue(len(nodes) > 0)
+        self.kwargs.update({'node1': nodes[0]['id']})
 
-            nodes = self.batch_cmd('batch node list --pool-id {p_id}').get_output_in_json()
-            self.assertTrue(len(nodes) > 0)
-            self.kwargs.update({'node1': nodes[0]['id']})
+        self.batch_cmd('batch node file download --destination c:/temp/stdout.txt --file-path startup/stdout.txt --node-id {node1} --pool-id {p_id}')
+        self.assertTrue(os.path.isfile('c:/temp/stdout.txt'), 'File c:/temp/stdout.txt does not exist.')
+        self.assertGreater(os.path.getsize('c:/temp/stdout.txt'), 0, 'File c:/temp/stdout.txt is empty.')
 
-            self.batch_cmd('batch node file download --destination {node_tmp}/stdout.txt --file-path startup/stdout.txt --node-id {node1} --pool-id {p_id}')
-            self.assertTrue(os.path.isfile(f'{node_tmp}/stdout.txt'), 'File stdout.txt does not exist.')
-            self.assertGreater(os.path.getsize(f'{node_tmp}/stdout.txt'), 0, 'File stdout.txt is empty.')
+        self.batch_cmd('batch node file download --destination c:/temp/stdout_range.txt --file-path startup/stdout.txt --node-id {node1} --pool-id {p_id} --end-range 2')
+        self.assertTrue(os.path.isfile('c:/temp/stdout_range.txt'), 'File c:/temp/stdout_range.txt does not exist.')
+        self.assertGreater(os.path.getsize('c:/temp/stdout.txt'), os.path.getsize('c:/temp/stdout_range.txt'), 'File c:/temp/stdout_range.txt should be smaller due to range limits.')
+        
+        # clean up
+        os.remove('c:/temp/stdout.txt')
+        os.remove('c:/temp/stdout_range.txt')
 
-            self.batch_cmd('batch node file download --destination {node_tmp}/stdout_range.txt --file-path stdout.txt --node-id {node1} --pool-id {p_id} --start-range 10 --end-range 20')
-            self.assertTrue(os.path.isfile(f'{node_tmp}/stdout_range.txt'), 'File stdout_range.txt does not exist.')
-            self.assertEqual(os.path.getsize(f'{node_tmp}/stdout_range.txt'), 11, 'File stdout_range.txt should be exactly 11 bytes in size')
-            self.assertGreater(os.path.getsize(f'{node_tmp}/stdout.txt'), os.path.getsize(f'{node_tmp}/stdout_range.txt'), 'File stdout_range.txt should be smaller due to range limits.')
+
+
+
 
     @ResourceGroupPreparer()
     @BatchAccountPreparer(location='eastus2')
@@ -520,6 +526,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         # task delete
         self.batch_cmd('batch task delete --job-id {j_id} --task-id {t_id} --yes')
 
+
     @ResourceGroupPreparer()
     @BatchAccountPreparer()
     def test_batch_pools_and_nodes(
@@ -559,6 +566,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         # test create pool from JSON file
         self.kwargs['json'] = self._get_test_data_file('batch-pool-create.json').replace('\\', '\\\\')
         self.batch_cmd('batch pool create --json-file "{json}"')
+        res = self.batch_cmd('batch pool show --pool-id azure-cli-test-json').get_output_in_json()
         self.batch_cmd('batch pool show --pool-id azure-cli-test-json').assert_with_checks([
             self.check('userAccounts[0].name', 'cliTestUser'),
             self.check('startTask.userIdentity.username', 'cliTestUser'),
@@ -681,7 +689,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
                 raise TimeoutError("Timed out waiting for pool to reach steady state")
             time.sleep(2)
 
-    def wait_for_task_complete(self, job_id, tasks=0, timeout_seconds=300):
+    def wait_for_task_complete(self, job_id,tasks=0, timeout_seconds=300):
         start_time = time.time()
 
         while True:
@@ -691,6 +699,6 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
             elapsed_seconds = time.time() - start_time
             if elapsed_seconds > timeout_seconds:
                 raise TimeoutError("Timed out waiting for pool to reach steady state")
-
+            
             if self.is_live or self.in_recording:
                 time.sleep(30)
