@@ -1438,7 +1438,7 @@ def backup_delete_func(client, resource_group_name, server_name, backup_name, ye
 
     if not yes:
         user_confirmation(
-            "Are you sure you want to delete the backup '{0}' in resource group '{1}'".format(backup_name, resource_group_name), yes=yes)
+            "Are you sure you want to delete the backup '{0}' in server '{1}'".format(backup_name, server_name), yes=yes)
 
     return client.begin_delete(
         resource_group_name,
