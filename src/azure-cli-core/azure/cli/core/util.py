@@ -906,6 +906,7 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
     import uuid
     from requests import Session, Request
     from requests.structures import CaseInsensitiveDict
+    from azure.cli.core.ssl_context_adaptor import SSLContextAdapter
 
     result = CaseInsensitiveDict()
     for s in headers or []:
@@ -1027,6 +1028,7 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
 
     # https://requests.readthedocs.io/en/latest/user/advanced/#prepared-requests
     s = Session()
+    s.mount(url, SSLContextAdapter())
     req = Request(method=method, url=url, headers=headers, params=uri_parameters, data=body)
     prepped = s.prepare_request(req)
 
