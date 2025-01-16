@@ -2833,10 +2833,18 @@ class CitusOnFlexMgmtScenarioTest(ScenarioTest):
         # test failures
         self.cmd('{} flexible-server update -g {} -n {} --storage-auto-grow Enabled'
                  .format(database_engine, resource_group, cluster_name), expect_failure=True)
+        self.cmd('{} flexible-server update -g {} -n {} --node-count {}'
+                 .format(database_engine, resource_group, cluster_name, cluster_size - 1), expect_failure=True)
         self.cmd('{} flexible-server replica list -g {} -n {}'
                  .format(database_engine, resource_group, cluster_name), expect_failure=True)
         self.cmd('{} flexible-server db create -g {} -s {} -d dbclusterfail'
                  .format(database_engine, resource_group, cluster_name), expect_failure=True)
+
+        # update cluster
+        update_cluster_size = cluster_size + 1
+        update_info = self.cmd('{} flexible-server update -g {} -n {} --node-count {}'
+                               .format(database_engine, resource_group, cluster_name, update_cluster_size)).get_output_in_json()
+        self.assertEqual(update_info['cluster']['clusterSize'], update_cluster_size)
 
         # Wait until snapshot is created
         os.environ.get(ENV_LIVE_TEST, False) and sleep(1800)
@@ -2846,7 +2854,7 @@ class CitusOnFlexMgmtScenarioTest(ScenarioTest):
         restore_result = self.cmd('{} flexible-server restore -g {} --name {} --source-server {}'
                                   .format(database_engine, resource_group, cluster_restore_name, basic_info['id'])).get_output_in_json()
         self.assertEqual(restore_result['name'], cluster_restore_name)
-        self.assertEqual(restore_result['cluster']['clusterSize'], cluster_size)
+        self.assertEqual(restore_result['cluster']['clusterSize'], update_cluster_size)
 
         # delete everything
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, cluster_name))

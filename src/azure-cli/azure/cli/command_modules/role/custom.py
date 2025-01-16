@@ -27,6 +27,8 @@ from azure.core.exceptions import HttpResponseError
 
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import get_file_json, shell_safe_json_parse, is_guid
+from azure.cli.core.azclierror import ArgumentUsageError
+
 from ._client_factory import _auth_client_factory, _graph_client_factory
 from ._multi_api_adaptor import MultiAPIAdaptor
 from ._msgrpah import GraphError, set_object_properties
@@ -139,7 +141,11 @@ def delete_role_definition(cmd, name, resource_group_name=None, scope=None,
 
 def _search_role_definitions(cli_ctx, definitions_client, name, scopes, custom_role_only=False):
     for scope in scopes:
-        roles = list(definitions_client.list(scope))
+        # name argument matches the role definition's name (GUID) or roleName (e.g. 'Reader') property.
+        # Only roleName can be used as a filter in Role Definitions - List API.
+        # If name is a GUID, the filtering is performed on the client side.
+        filter_query = f"roleName eq '{name}'" if name and not is_guid(name) else None
+        roles = list(definitions_client.list(scope, filter=filter_query))
         worker = MultiAPIAdaptor(cli_ctx)
         if name:
             roles = [r for r in roles if r.name == name or worker.get_role_property(r, 'role_name') == name]
@@ -501,7 +507,13 @@ def _get_displayable_name(graph_object):
 
 
 def delete_role_assignments(cmd, ids=None, assignee=None, role=None, resource_group_name=None,
-                            scope=None, include_inherited=False, yes=None):
+                            scope=None, include_inherited=False,
+                            yes=None):  # pylint: disable=unused-argument
+    # yes is currently a no-op
+    if not any((ids, assignee, role, resource_group_name, scope)):
+        raise ArgumentUsageError('Please provide at least one of these arguments: '
+                                 '--ids, --assignee, --role, --resource-group, --scope')
+
     factory = _auth_client_factory(cmd.cli_ctx, scope)
     assignments_client = factory.role_assignments
     definitions_client = factory.role_definitions
@@ -528,11 +540,6 @@ def delete_role_assignments(cmd, ids=None, assignee=None, role=None, resource_gr
         for i in ids:
             assignments_client.delete_by_id(i)
         return
-    if not any([ids, assignee, role, resource_group_name, scope, assignee, yes]):
-        from knack.prompting import prompt_y_n
-        msg = 'This will delete all role assignments under the subscription. Are you sure?'
-        if not prompt_y_n(msg, default="n"):
-            return
 
     scope = _build_role_scope(resource_group_name, scope,
                               assignments_client._config.subscription_id)
@@ -631,6 +638,8 @@ def create_application(cmd, client, display_name, identifier_uris=None,
                        is_fallback_public_client=None,
                        service_management_reference=None,
                        sign_in_audience=None,
+                       # api
+                       requested_access_token_version=None,
                        # keyCredentials
                        key_value=None, key_type=None, key_usage=None, start_date=None, end_date=None,
                        key_display_name=None,
@@ -660,6 +669,8 @@ def create_application(cmd, client, display_name, identifier_uris=None,
                 is_fallback_public_client=is_fallback_public_client,
                 service_management_reference=service_management_reference,
                 sign_in_audience=sign_in_audience,
+                # api
+                requested_access_token_version=requested_access_token_version,
                 # keyCredentials
                 key_value=key_value, key_type=key_type, key_usage=key_usage,
                 start_date=start_date, end_date=end_date,
@@ -691,6 +702,8 @@ def create_application(cmd, client, display_name, identifier_uris=None,
         is_fallback_public_client=is_fallback_public_client,
         service_management_reference=service_management_reference,
         sign_in_audience=sign_in_audience,
+        # api
+        requested_access_token_version=requested_access_token_version,
         # keyCredentials
         key_credentials=key_credentials,
         # web
@@ -718,6 +731,8 @@ def update_application(instance, display_name=None, identifier_uris=None,  # pyl
                        is_fallback_public_client=None,
                        service_management_reference=None,
                        sign_in_audience=None,
+                       # api
+                       requested_access_token_version=None,
                        # keyCredentials
                        key_value=None, key_type=None, key_usage=None, start_date=None, end_date=None,
                        key_display_name=None,
@@ -741,6 +756,8 @@ def update_application(instance, display_name=None, identifier_uris=None,  # pyl
         is_fallback_public_client=is_fallback_public_client,
         service_management_reference=service_management_reference,
         sign_in_audience=sign_in_audience,
+        # api
+        requested_access_token_version=requested_access_token_version,
         # keyCredentials
         key_credentials=key_credentials,
         # web
@@ -895,7 +912,6 @@ def add_permission(client, identifier, api, api_permissions):
         try:
             access_id, access_type = e.split('=')
         except ValueError as ex:
-            from azure.cli.core.azclierror import ArgumentUsageError
             raise ArgumentUsageError('Usage error: Please provide both permission id and type, such as '
                                      '`--api-permissions e1fe6dd8-ba31-4d61-89e7-88639da4683d=Scope`') from ex
         resource_access = {
@@ -1174,7 +1190,6 @@ def create_service_principal_for_rbac(
     import time
 
     if role and not scopes or not role and scopes:
-        from azure.cli.core.azclierror import ArgumentUsageError
         raise ArgumentUsageError("Usage error: To create role assignments, specify both --role and --scopes.")
 
     graph_client = _graph_client_factory(cmd.cli_ctx)

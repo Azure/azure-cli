@@ -346,6 +346,13 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             validator=node_count_validator
         )
 
+        update_node_count_arg_type = CLIArgumentType(
+            type=int,
+            options_list=['--node-count'],
+            help='The number of nodes for elastic cluster. Range of 1 to 10.',
+            validator=node_count_validator
+        )
+
         auto_grow_arg_type = CLIArgumentType(
             arg_type=get_enum_type(['Enabled', 'Disabled']),
             options_list=['--storage-auto-grow'],
@@ -426,7 +433,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             help='Determines the public access. Enter single or range of IP addresses to be included in the allowed list of IPs. '
                  'IP address ranges must be dash-separated and not contain any spaces. '
                  'Specifying 0.0.0.0 allows public access from any resources deployed within Azure to access your server. '
-                 'Setting it to "None" sets the server in public access mode but does not create a firewall rule. ',
+                 'Setting it to "None" sets the server in public access mode but does not create a firewall rule. '
+                 'Acceptable values are \'Disabled\', \'Enabled\', \'All\', \'None\',\'{startIP}\' and '
+                 '\'{startIP}-{destinationIP}\' where startIP and destinationIP ranges from '
+                 '0.0.0.0 to 255.255.255.255. ',
             validator=public_access_validator
         )
 
@@ -733,6 +743,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('active_directory_auth', arg_type=active_directory_auth_arg_type)
                 c.argument('password_auth', arg_type=password_auth_arg_type)
                 c.argument('private_dns_zone_arguments', private_dns_zone_arguments_arg_type)
+                c.argument('cluster_size', default=None, arg_type=update_node_count_arg_type)
                 c.argument('yes', arg_type=yes_arg_type)
 
         with self.argument_context('{} flexible-server upgrade'.format(command_group)) as c:
