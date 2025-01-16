@@ -15,6 +15,11 @@ from json import JSONDecodeError
 
 class TestBatchExceptionHandler(unittest.TestCase):
 
+    def test_non_batch_err(self):
+        err = ValueError("Not a Batch error")
+        with self.assertRaisesRegex(CLIError, r"^Not a Batch error$"):
+            batch_exception_handler(err)
+    
     def test_response_err(self):
         err = batch_err(500, HttpResponseError, "Kaboom")
         with self.assertRaisesRegex(CLIError, r"^Kaboom$"):

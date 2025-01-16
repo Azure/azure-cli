@@ -28,7 +28,7 @@ def _parse_batch_error_msg(ex):
     """Try to Parse out a BatchError message from the response body. Returns
        None if no message could be parsed"""
     message = None
-    if ex.response:
+    if getattr(ex, 'response', None) and getattr(ex.response, 'json', None):
         try:
             err = ex.response.json()
             if err.get('code'):
