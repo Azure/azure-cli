@@ -59,6 +59,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'new_cluster')
         g.custom_command('client-certificate add', 'add_client_cert')
         g.custom_command('client-certificate remove', 'remove_client_cert')
+        g.custom_command('update', 'update_cluster')
         g.custom_command('setting set', 'set_cluster_setting')
         g.custom_command('setting remove', 'remove_cluster_setting')
         g.custom_command('reliability update', 'update_cluster_reliability_level')
