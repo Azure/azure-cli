@@ -88,15 +88,15 @@ class ProfileCommandTest(unittest.TestCase):
         get_raw_token_mock.assert_called_with(mock.ANY, None, None, None, tenant_id)
 
     @mock.patch('azure.cli.command_modules.profile.custom.Profile', autospec=True)
-    def test_get_login(self, profile_mock):
+    def test_login_with_mi(self, profile_mock):
         invoked = []
 
-        def test_login(msi_port, identity_id=None):
+        def login_with_managed_identity_mock(*args, **kwargs):
             invoked.append(True)
 
         # mock the instance
         profile_instance = mock.MagicMock()
-        profile_instance.login_with_managed_identity = test_login
+        profile_instance.login_with_managed_identity = login_with_managed_identity_mock
         # mock the constructor
         profile_mock.return_value = profile_instance
 

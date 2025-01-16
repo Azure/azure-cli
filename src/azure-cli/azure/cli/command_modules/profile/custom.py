@@ -114,14 +114,14 @@ def account_clear(cmd):
     profile.logout_all()
 
 
-# pylint: disable=inconsistent-return-statements, too-many-branches
+# pylint: disable=too-many-branches, too-many-locals
 def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_subscriptions=False,
           # Device code flow
           use_device_code=False,
           # Service principal
           service_principal=None, certificate=None, use_cert_sn_issuer=None, client_assertion=None,
           # Managed identity
-          identity=False):
+          identity=False, client_id=None, object_id=None, resource_id=None):
     """Log in to access Azure subscriptions"""
 
     # quick argument usage check
@@ -143,7 +143,9 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
     if identity:
         if in_cloud_console():
             return profile.login_in_cloud_shell()
-        return profile.login_with_managed_identity(username, allow_no_subscriptions)
+        return profile.login_with_managed_identity(
+            identity_id=username, client_id=client_id, object_id=object_id, resource_id=resource_id,
+            allow_no_subscriptions=allow_no_subscriptions)
     if in_cloud_console():  # tell users they might not need login
         logger.warning(_CLOUD_CONSOLE_LOGIN_WARNING)
 
