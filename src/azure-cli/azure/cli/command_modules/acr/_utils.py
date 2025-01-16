@@ -263,11 +263,11 @@ def get_yaml_template(cmd_value, timeout, file):
                 yaml_template += s
         else:
             if os.path.exists(file):
-                f = open(file, 'r')
-                for line in f:
-                    yaml_template += line
+                with open(file, 'r') as f:
+                    for line in f:
+                        yaml_template += line
             else:
-                raise CLIError("{0} does not exist.".format(file))
+                raise CLIError(f"{file} does not exist.")
 
     if not yaml_template:
         raise CLIError("Failed to initialize yaml template.")

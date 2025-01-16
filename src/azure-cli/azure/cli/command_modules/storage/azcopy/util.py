@@ -221,11 +221,11 @@ def _urlretrieve(url, install_location):
     req = urlopen(url)
     compressedFile = io.BytesIO(req.read())
     if url.endswith('zip'):
-        zip_file = zipfile.ZipFile(compressedFile)
-        for fileName in zip_file.namelist():
-            if fileName.endswith('azcopy') or fileName.endswith('azcopy.exe'):
-                with open(install_location, 'wb') as f:
-                    f.write(zip_file.read(fileName))
+        with zipfile.ZipFile(compressedFile) as zip_file:
+            for fileName in zip_file.namelist():
+                if fileName.endswith('azcopy') or fileName.endswith('azcopy.exe'):
+                    with open(install_location, 'wb') as f:
+                        f.write(zip_file.read(fileName))
     elif url.endswith('gz'):
         import tarfile
         with tarfile.open(fileobj=compressedFile, mode="r:gz") as tar:

@@ -71,9 +71,8 @@ class KuduClient:  # pylint:disable=too-many-instance-attributes
         download_path = os.path.join(file_save_path, 'download.zip')
         with open(os.path.join(file_save_path, 'download.zip'), 'wb') as f:
             f.write(response.content)
-        zip_ref = zipfile.ZipFile(download_path)
-        zip_ref.extractall(folder_path)
-        zip_ref.close()
+        with zipfile.ZipFile(download_path) as zip_ref:
+            zip_ref.extractall(folder_path)
         os.remove(download_path)
 
     def get_bot_file(self, bot_file):

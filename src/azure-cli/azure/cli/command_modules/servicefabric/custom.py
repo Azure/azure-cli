@@ -1404,7 +1404,8 @@ def _get_certificate(client, vault_base_url, certificate_name):
 def import_certificate(cli_ctx, vault_base_url, certificate_name, certificate_data,
                        disabled=False, password=None, certificate_policy=None, tags=None):
     from azure.cli.command_modules.keyvault._validators import build_certificate_policy
-    certificate_data = open(certificate_data, 'rb').read()
+    with open(certificate_data, 'rb') as fp:
+        certificate_data = fp.read()
     x509 = None
     content_type = None
     try:
@@ -1449,17 +1450,15 @@ def _download_secret(cli_ctx, vault_base_url, secret_name, pem_path, pfx_path, s
             import base64
             decoded = base64.b64decode(secret_value)
             p12 = pkcs12.load_pkcs12(decoded, None)
-            f_pem = open(pem_path, 'wb')
-            f_pem.write(crypto.dump_privatekey(
-                crypto.FILETYPE_PEM, p12.key))
-            f_pem.write(crypto.dump_certificate(
-                crypto.FILETYPE_PEM, p12.cert))
-            ca = p12.get_ca_certificates()
-            if ca is not None:
-                for cert in ca:
-                    f_pem.write(crypto.dump_certificate(
-                        crypto.FILETYPE_PEM, cert))
-            f_pem.close()
+            with open(pem_path, 'wb') as f_pem:
+                f_pem.write(crypto.dump_privatekey(
+                    crypto.FILETYPE_PEM, p12.key))
+                f_pem.write(crypto.dump_certificate(
+                    crypto.FILETYPE_PEM, p12.cert))
+                ca = p12.get_ca_certificates()
+                if ca is not None:
+                    for cert in ca:
+                        f_pem.write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert))
         except Exception as ex:  # pylint: disable=broad-except
             if os.path.isfile(pem_path):
                 os.remove(pem_path)
@@ -1469,7 +1468,6 @@ def _download_secret(cli_ctx, vault_base_url, secret_name, pem_path, pfx_path, s
         try:
             import base64
             decoded = base64.b64decode(secret_value)
-            p12 = pkcs12.load_pkcs12(decoded, None)
             with open(pfx_path, 'wb') as f:
                 f.write(decoded)
         except Exception as ex:  # pylint: disable=broad-except

@@ -48,8 +48,9 @@ def run_command_coverage(modules):
             run_nose(name, path)
 
         print('BEGIN: Full executed commands list')
-        for line in open(context.coverage_file_path):
-            sys.stdout.write(line)
+        with open(context.coverage_file_path) as fp:
+            for line in fp:
+                sys.stdout.write(line)
         print('END: Full executed commands list')
 
 
@@ -92,10 +93,11 @@ def coverage_command_rundown(log_file_path):
     existing_commands = set(config.get_command_table().keys())
 
     command_counter = collections.defaultdict(lambda: 0)
-    for line in open(log_file_path, 'r'):
-        command = line.split(' -', 1)[0].strip()
-        if command:
-            command_counter[command] += 1
+    with open(log_file_path, 'r') as fp:
+        for line in fp:
+            command = line.split(' -', 1)[0].strip()
+            if command:
+                command_counter[command] += 1
 
     print('COUNT\tCOMMAND')
     for c in sorted(command_counter.keys()):

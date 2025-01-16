@@ -11,7 +11,7 @@ import codecs
 import requests
 from knack.log import get_logger
 from azure.core.exceptions import HttpResponseError
-from azure.cli.core.azclierror import (CLIInternalError)
+from azure.cli.core.azclierror import CLIInternalError
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.command_modules.acr._constants import TASK_VALID_VSTS_URLS
 
@@ -159,7 +159,8 @@ def _load_dockerignore_file(source_location, original_docker_file_name):
         return None, 0
 
     encoding = "utf-8"
-    header = open(docker_ignore_file, "rb").read(len(codecs.BOM_UTF8))
+    with open(docker_ignore_file, "rb") as f:
+        header = f.read(len(codecs.BOM_UTF8))
     if header.startswith(codecs.BOM_UTF8):
         encoding = "utf-8-sig"
 
@@ -167,15 +168,16 @@ def _load_dockerignore_file(source_location, original_docker_file_name):
     if docker_ignore_file == docker_ignore_file_override:
         ignore_list.append(IgnoreRule(".dockerignore"))
 
-    for line in open(docker_ignore_file, 'r', encoding=encoding).readlines():
-        rule = line.rstrip()
+    with open(docker_ignore_file, 'r', encoding=encoding) as fp:
+        for line in fp:
+            rule = line.rstrip()
 
-        # skip empty line and comment
-        if not rule or rule.startswith('#'):
-            continue
+            # skip empty line and comment
+            if not rule or rule.startswith('#'):
+                continue
 
-        # the ignore rule at the end has higher priority
-        ignore_list = [IgnoreRule(rule)] + ignore_list
+            # the ignore rule at the end has higher priority
+            ignore_list = [IgnoreRule(rule)] + ignore_list
 
     return ignore_list, len(ignore_list)
 
@@ -216,7 +218,7 @@ def check_remote_source_code(source_location):
 
     # http
     if lower_source_location.startswith("https://") or lower_source_location.startswith("http://") \
-       or lower_source_location.startswith("github.com/"):
+            or lower_source_location.startswith("github.com/"):
         isVSTS = any(url in lower_source_location for url in TASK_VALID_VSTS_URLS)
         if isVSTS or re.search(r"\.git(?:#.+)?$", lower_source_location):
             # git url must contain ".git" or be from VSTS/Azure DevOps.

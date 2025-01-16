@@ -2,15 +2,16 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+# pylint: disable=line-too-long
 
 import json
 import os
+import pathlib
 from datetime import datetime, timedelta
 
 from azure.cli.testsdk import CliTestError, ResourceGroupPreparer
 from azure.cli.testsdk.preparers import AbstractPreparer, SingleValueReplacer, KeyVaultPreparer
 from azure.cli.testsdk.base import execute
-# pylint: disable=line-too-long
 
 from knack.log import get_logger
 logger = get_logger(__name__)
@@ -90,7 +91,7 @@ class VMPreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix='clitest-vm', parameter_name='vm_name',
                  resource_group_location_parameter_name='resource_group_location',
                  resource_group_parameter_name='resource_group', dev_setting_name='AZURE_CLI_TEST_DEV_BACKUP_VM_NAME'):
-        super().__init__(name_prefix, 15)
+        super(VMPreparer, self).__init__(name_prefix, 15)
         from azure.cli.core.mock import DummyCli
         self.cli_ctx = DummyCli()
         self.parameter_name = parameter_name
@@ -201,7 +202,7 @@ class PolicyPreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix='clitest-item', parameter_name='policy_name', vault_parameter_name='vault_name',
                  resource_group_parameter_name='resource_group',
                  instant_rp_days=None):
-        super().__init__(name_prefix, 24)
+        super(PolicyPreparer, self).__init__(name_prefix, 24)
         from azure.cli.core.mock import DummyCli
         self.cli_ctx = DummyCli()
         self.parameter_name = parameter_name
@@ -256,7 +257,7 @@ class RPPreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix='clitest-rp', parameter_name='rp_name', vm_parameter_name='vm_name',
                  vault_parameter_name='vault_name',
                  resource_group_parameter_name='resource_group', dev_setting_name='AZURE_CLI_TEST_DEV_BACKUP_RP_NAME'):
-        super().__init__(name_prefix, 24)
+        super(RPPreparer, self).__init__(name_prefix, 24)
         from azure.cli.core.mock import DummyCli
         self.cli_ctx = DummyCli()
         self.parameter_name = parameter_name
@@ -713,8 +714,7 @@ class FilePreparer(AbstractPreparer, SingleValueReplacer):
 
     def create_resource(self, name, **kwargs):
         if not os.environ.get('AZURE_CLI_TEST_DEV_BACKUP_RP_NAME', None):
-            f = open(name, "a")
-            f.close()
+            pathlib.Path(name).touch(exist_ok=True)
             return {self.parameter_name: name}
         return {self.parameter_name: os.environ.get('AZURE_CLI_TEST_DEV_BACKUP_RP_NAME', None)}
 

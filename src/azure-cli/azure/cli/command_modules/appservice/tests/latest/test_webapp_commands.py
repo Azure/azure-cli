@@ -451,8 +451,8 @@ class AppServiceLogTest(ScenarioTest):
         log_dir = log_file + '-dir'
         self.cmd('webapp log download -g {} -n {} --log-file "{}"'.format(
             resource_group, webapp_name, log_file))
-        zip_ref = zipfile.ZipFile(log_file, 'r')
-        zip_ref.extractall(log_dir)
+        with zipfile.ZipFile(log_file, 'r') as zip_ref:
+            zip_ref.extractall(log_dir)
         self.assertTrue(os.path.isdir(os.path.join(
             log_dir, 'LogFiles', 'kudu', 'trace')))
 
@@ -3069,8 +3069,7 @@ class TunnelProxyTest(unittest.TestCase):
         )
 
     def test_proxy_custom_ca_bundle(self):
-        with tempfile.TemporaryFile() as file:
-            file = tempfile.NamedTemporaryFile(suffix='-ca-certificates.crt')
+        with tempfile.TemporaryFile() as _, tempfile.NamedTemporaryFile(suffix='-ca-certificates.crt') as file:
             os.environ['REQUESTS_CA_BUNDLE'] = file.name
             http = get_pool_manager('https://scm.azurewebsites.net')
 

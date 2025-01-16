@@ -345,8 +345,8 @@ def _ssl_context():
 
 def _urlretrieve(url):
     try:
-        req = urlopen(url, context=_ssl_context())
-        return req.read()
+        with urlopen(url, context=_ssl_context()) as req:
+            return req.read()
     except Exception:  # pylint: disable=broad-except
         raise CLIError('Unable to retrieve url {}'.format(url))
 
@@ -1372,7 +1372,8 @@ def _prepare_stacks_templates_and_parameters(cmd, rcf, deployment_scope, deploym
 
             deployment_stack_model.template = json.loads(json.dumps(template_obj))
         else:
-            deployment_stack_model.template = json.load(open(template_file))
+            with open(template_file, "r") as fp:
+                deployment_stack_model.template = json.load(fp)
 
     template_obj['resources'] = template_obj.get('resources', [])
 
@@ -1569,10 +1570,9 @@ def _load_file_string_or_uri(file_or_string_or_uri, name, required=True):
         return None
     url = urlparse(file_or_string_or_uri)
     if url.scheme == 'http' or url.scheme == 'https' or url.scheme == 'file':
-        response = urlopen(file_or_string_or_uri)
-        reader = codecs.getreader('utf-8')
-        result = json.load(reader(response))
-        response.close()
+        with urlopen(file_or_string_or_uri) as response:
+            reader = codecs.getreader('utf-8')
+            result = json.load(reader(response))
         return result
     if os.path.exists(file_or_string_or_uri):
         return get_file_json(file_or_string_or_uri)

@@ -49,7 +49,6 @@ def __prepare_configuration_file(cmd, resource_group_name, kudu_client, folder_p
             for setting in app_settings:
                 if setting['name'] not in ignorable_settings:
                     f.write('{0}={1}\n'.format(setting['name'], setting['value']))
-            f.close()
 
     else:
         app_settings_path = os.path.join(folder_path, 'appsettings.json')

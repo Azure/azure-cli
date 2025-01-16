@@ -317,22 +317,22 @@ def acr_login(cmd,
     from subprocess import PIPE, Popen
     logger.debug("Invoking '%s login --username %s --password <redacted> %s'",
                  docker_command, username, login_server)
-    p = Popen([docker_command, "login",
+    with Popen([docker_command, "login",
                "--username", username,
                "--password", password,
-               login_server], stderr=PIPE)
-    _, stderr = p.communicate()
-    return_code = p.returncode
+               login_server], stderr=PIPE) as p:
+        _, stderr = p.communicate()
+        return_code = p.returncode
 
     if stderr:
         if b'error storing credentials' in stderr and b'stub received bad data' in stderr \
            and _check_wincred(login_server):
             # Retry once after disabling wincred
-            p = Popen([docker_command, "login",
+            with Popen([docker_command, "login",
                        "--username", username,
                        "--password", password,
-                       login_server])
-            p.wait()
+                       login_server]) as p:
+                p.wait()
         else:
             stderr_messages = stderr.decode()
             # Dismiss the '--password-stdin' warning
@@ -412,7 +412,6 @@ def _check_wincred(login_server):
         if isfile(config_path):
             with open(config_path) as input_file:
                 content = json.load(input_file)
-                input_file.close()
             wincred = content.pop('credsStore', None)
             if wincred and wincred.lower() == 'wincred':
                 # Ask for confirmation
@@ -424,7 +423,6 @@ def _check_wincred(login_server):
                     if prompt_y_n(message):
                         with open(config_path, 'w') as output_file:
                             json.dump(content, output_file, indent=4)
-                            output_file.close()
                         return True
                     return False
                 except NoTTYException:

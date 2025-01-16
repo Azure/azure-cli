@@ -60,8 +60,9 @@ def main(args):
         for _, path in gen:
             exclusion_path = os.path.join(path, 'linter_exclusions.yml')
             if os.path.isfile(exclusion_path):
-                mod_exclusions = yaml.safe_load(open(exclusion_path))
-                exclusions.update(mod_exclusions)
+                with open(exclusion_path, "r") as fp:
+                    mod_exclusions = yaml.safe_load(fp)
+                    exclusions.update(mod_exclusions)
 
     # only run linter on modules and extensions specified
     if args.modules or args.extensions:

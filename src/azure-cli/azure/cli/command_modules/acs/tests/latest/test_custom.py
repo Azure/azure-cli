@@ -59,12 +59,9 @@ class AcsCustomCommandTest(unittest.TestCase):
         self.assertRaises(CLIError, merge_kubernetes_configurations, 'non', 'existent', False)
 
     def test_merge_credentials_broken_yaml(self):
-        existing = tempfile.NamedTemporaryFile(delete=False)
-        existing.close()
-        addition = tempfile.NamedTemporaryFile(delete=False)
-        addition.close()
-        with open(existing.name, 'w+') as stream:
-            stream.write('{ broken')
+        with tempfile.NamedTemporaryFile(delete=False) as existing:
+            with open(existing.name, 'w+') as stream:
+                stream.write('{ broken')
         self.addCleanup(os.remove, existing.name)
 
         obj2 = {
@@ -80,17 +77,14 @@ class AcsCustomCommandTest(unittest.TestCase):
             'current-context': 'cluster2',
         }
 
-        with open(addition.name, 'w+') as stream:
-            yaml.safe_dump(obj2, stream)
+        with tempfile.NamedTemporaryFile(delete=False) as addition:
+            with open(addition.name, 'w+') as stream:
+                yaml.safe_dump(obj2, stream)
         self.addCleanup(os.remove, addition.name)
 
         self.assertRaises(CLIError, merge_kubernetes_configurations, existing.name, addition.name, False)
 
     def test_merge_credentials(self):
-        existing = tempfile.NamedTemporaryFile(delete=False)
-        existing.close()
-        addition = tempfile.NamedTemporaryFile(delete=False)
-        addition.close()
         obj1 = {
             'clusters': [
                 {
@@ -124,8 +118,9 @@ class AcsCustomCommandTest(unittest.TestCase):
                 }
             ]
         }
-        with open(existing.name, 'w+') as stream:
-            yaml.safe_dump(obj1, stream)
+        with tempfile.NamedTemporaryFile(delete=False) as existing:
+            with open(existing.name, 'w+') as stream:
+                yaml.safe_dump(obj1, stream)
         self.addCleanup(os.remove, existing.name)
 
         obj2 = {
@@ -162,14 +157,16 @@ class AcsCustomCommandTest(unittest.TestCase):
             ]
         }
 
-        with open(addition.name, 'w+') as stream:
-            yaml.safe_dump(obj2, stream)
+        with tempfile.NamedTemporaryFile(delete=False) as addition:
+            with open(addition.name, 'w+') as stream:
+                yaml.safe_dump(obj2, stream)
         self.addCleanup(os.remove, addition.name)
 
         merge_kubernetes_configurations(existing.name, addition.name, False)
 
-        with open(existing.name, 'r') as stream:
-            merged = yaml.safe_load(stream)
+        with tempfile.NamedTemporaryFile(delete=False) as existing:
+            with open(existing.name, 'r') as stream:
+                merged = yaml.safe_load(stream)
         self.assertEqual(len(merged['clusters']), 2)
         self.assertEqual(merged['clusters'], [obj1['clusters'][0], obj2['clusters'][0]])
         self.assertEqual(len(merged['contexts']), 2)
@@ -179,10 +176,6 @@ class AcsCustomCommandTest(unittest.TestCase):
         self.assertEqual(merged['current-context'], obj2['current-context'])
 
     def test_merge_admin_credentials(self):
-        existing = tempfile.NamedTemporaryFile(delete=False)
-        existing.close()
-        addition = tempfile.NamedTemporaryFile(delete=False)
-        addition.close()
         obj1 = {
             'apiVersion': 'v1',
             'clusters': [
@@ -217,8 +210,9 @@ class AcsCustomCommandTest(unittest.TestCase):
                 }
             ]
         }
-        with open(existing.name, 'w+') as stream:
-            yaml.safe_dump(obj1, stream)
+        with tempfile.NamedTemporaryFile(delete=False) as existing:
+            with open(existing.name, 'w+') as stream:
+                yaml.safe_dump(obj1, stream)
         self.addCleanup(os.remove, existing.name)
         obj2 = {
             'apiVersion': 'v1',
@@ -254,8 +248,9 @@ class AcsCustomCommandTest(unittest.TestCase):
                 }
             ]
         }
-        with open(addition.name, 'w+') as stream:
-            yaml.safe_dump(obj2, stream)
+        with tempfile.NamedTemporaryFile(delete=False) as addition:
+            with open(addition.name, 'w+') as stream:
+                yaml.safe_dump(obj2, stream)
         self.addCleanup(os.remove, addition.name)
 
         merge_kubernetes_configurations(existing.name, addition.name, False)
@@ -278,10 +273,6 @@ class AcsCustomCommandTest(unittest.TestCase):
         self.assertEqual(merged['current-context'], 'aztest-admin')
 
     def test_merge_credentials_missing(self):
-        existing = tempfile.NamedTemporaryFile(delete=False)
-        existing.close()
-        addition = tempfile.NamedTemporaryFile(delete=False)
-        addition.close()
         obj1 = {
             'clusters': None,
             'contexts': [
@@ -307,8 +298,9 @@ class AcsCustomCommandTest(unittest.TestCase):
                 }
             ]
         }
-        with open(existing.name, 'w+') as stream:
-            yaml.safe_dump(obj1, stream)
+        with tempfile.NamedTemporaryFile(delete=False) as existing:
+            with open(existing.name, 'w+') as stream:
+                yaml.safe_dump(obj1, stream)
         self.addCleanup(os.remove, existing.name)
 
         obj2 = {
@@ -336,8 +328,9 @@ class AcsCustomCommandTest(unittest.TestCase):
             'users': None
         }
 
-        with open(addition.name, 'w+') as stream:
-            yaml.safe_dump(obj2, stream)
+        with tempfile.NamedTemporaryFile(delete=False) as addition:
+            with open(addition.name, 'w+') as stream:
+                yaml.safe_dump(obj2, stream)
         self.addCleanup(os.remove, addition.name)
 
         merge_kubernetes_configurations(existing.name, addition.name, False)
@@ -353,10 +346,6 @@ class AcsCustomCommandTest(unittest.TestCase):
         self.assertEqual(merged['current-context'], obj2['current-context'])
 
     def test_merge_credentials_already_present(self):
-        existing = tempfile.NamedTemporaryFile(delete=False)
-        existing.close()
-        addition = tempfile.NamedTemporaryFile(delete=False)
-        addition.close()
         obj1 = {
             'clusters': [
                 {
@@ -410,8 +399,10 @@ class AcsCustomCommandTest(unittest.TestCase):
             ],
             'current-context': 'context1',
         }
-        with open(existing.name, 'w+') as stream:
-            yaml.safe_dump(obj1, stream)
+
+        with tempfile.NamedTemporaryFile(delete=False) as existing:
+            with open(existing.name, 'w+') as stream:
+                yaml.safe_dump(obj1, stream)
 
         obj2 = {
             'clusters': [
@@ -445,8 +436,9 @@ class AcsCustomCommandTest(unittest.TestCase):
             'current-context': 'some-context',
         }
 
-        with open(addition.name, 'w+') as stream:
-            yaml.safe_dump(obj2, stream)
+        with tempfile.NamedTemporaryFile(delete=False) as addition:
+            with open(addition.name, 'w+') as stream:
+                yaml.safe_dump(obj2, stream)
         with self.assertRaises(CLIError):
             merge_kubernetes_configurations(existing.name, addition.name, False)
 
@@ -501,9 +493,9 @@ class AcsCustomCommandTest(unittest.TestCase):
         instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
                                   'clitest000001', 'clitest000001', 'monitoring', enable=True)
         monitoring_addon_profile = instance.addon_profiles[CONST_MONITORING_ADDON_NAME]
-        self.assertTrue(monitoring_addon_profile.enabled)
+        self.assertIs(monitoring_addon_profile.enabled, True)
         routing_addon_profile = instance.addon_profiles[CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME]
-        self.assertFalse(routing_addon_profile.enabled)
+        self.assertIs(routing_addon_profile.enabled, False)
 
         # monitoring disabled, routing enabled
         instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
@@ -511,9 +503,9 @@ class AcsCustomCommandTest(unittest.TestCase):
         instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
                                   'clitest000001', 'clitest000001', 'http_application_routing', enable=True)
         monitoring_addon_profile = instance.addon_profiles[CONST_MONITORING_ADDON_NAME]
-        self.assertFalse(monitoring_addon_profile.enabled)
+        self.assertIs(monitoring_addon_profile.enabled, False)
         routing_addon_profile = instance.addon_profiles[CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME]
-        self.assertTrue(routing_addon_profile.enabled)
+        self.assertIs(routing_addon_profile.enabled, True)
         self.assertEqual(sorted(list(instance.addon_profiles)), [CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME, CONST_MONITORING_ADDON_NAME])
 
         # azurepolicy added
@@ -534,9 +526,9 @@ class AcsCustomCommandTest(unittest.TestCase):
         azurepolicy_addon_profile = instance.addon_profiles[CONST_AZURE_POLICY_ADDON_NAME]
         self.assertFalse(azurepolicy_addon_profile.enabled)
         monitoring_addon_profile = instance.addon_profiles[CONST_MONITORING_ADDON_NAME]
-        self.assertFalse(monitoring_addon_profile.enabled)
+        self.assertIs(monitoring_addon_profile.enabled, False)
         routing_addon_profile = instance.addon_profiles[CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME]
-        self.assertTrue(routing_addon_profile.enabled)
+        self.assertIs(routing_addon_profile.enabled, True)
         self.assertEqual(sorted(list(instance.addon_profiles)), [CONST_AZURE_POLICY_ADDON_NAME, CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME, CONST_MONITORING_ADDON_NAME])
 
         # kube-dashboard disabled, no existing dashboard addon profile
@@ -576,7 +568,7 @@ class AcsCustomCommandTest(unittest.TestCase):
         instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
                                   'clitest000001', 'clitest000001', 'monitoring', enable=True)
         with self.assertRaises(CLIError):
-            instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
+            _ = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
                                       'clitest000001', 'clitest000001', 'monitoring', enable=True)
 
         # virtual-node enabled
@@ -613,27 +605,21 @@ class AcsCustomCommandTest(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.acs.custom.logger')
     def test_k8s_install_kubectl_emit_warnings(self, logger_mock, mock_url_retrieve):
         mock_url_retrieve.side_effect = lambda _, install_location: open(install_location, 'a').close()
-        try:
-            temp_dir = tempfile.mkdtemp()  # tempfile.TemporaryDirectory() is no available on 2.7
+        with tempfile.TemporaryDirectory() as temp_dir:
             test_location = os.path.join(temp_dir, 'kubectl')
             k8s_install_kubectl(mock.MagicMock(), client_version='1.2.3', install_location=test_location)
-            self.assertEqual(mock_url_retrieve.call_count, 1)
-            # 3 warnings, 1st for arch, 2nd for download result, 3rd for updating PATH
-            self.assertEqual(logger_mock.warning.call_count, 3)  # 3 warnings, one for download result
-        finally:
-            shutil.rmtree(temp_dir)
+        self.assertEqual(mock_url_retrieve.call_count, 1)
+        # 3 warnings, 1st for arch, 2nd for download result, 3rd for updating PATH
+        self.assertEqual(logger_mock.warning.call_count, 3)  # 3 warnings, one for download result
 
     @mock.patch('azure.cli.command_modules.acs.custom._urlretrieve')
     @mock.patch('azure.cli.command_modules.acs.custom.logger')
     def test_k8s_install_kubectl_create_installation_dir(self, logger_mock, mock_url_retrieve):
         mock_url_retrieve.side_effect = lambda _, install_location: open(install_location, 'a').close()
-        try:
-            temp_dir = tempfile.mkdtemp()  # tempfile.TemporaryDirectory() is no available on 2.7
+        with tempfile.TemporaryDirectory() as temp_dir:
             test_location = os.path.join(temp_dir, 'foo', 'kubectl')
             k8s_install_kubectl(mock.MagicMock(), client_version='1.2.3', install_location=test_location)
-            self.assertTrue(os.path.exists(test_location))
-        finally:
-            shutil.rmtree(temp_dir)
+        self.assertIs(os.path.exists(test_location), True)
 
     @mock.patch('azure.cli.command_modules.acs.custom._urlretrieve')
     @mock.patch('azure.cli.command_modules.acs.custom.logger')
@@ -653,42 +639,35 @@ class AcsCustomCommandTest(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.acs.custom.logger')
     def test_k8s_install_kubelogin_create_installation_dir(self, logger_mock, mock_url_retrieve):
         mock_url_retrieve.side_effect = create_kubelogin_zip
-        try:
-            temp_dir = tempfile.mkdtemp()  # tempfile.TemporaryDirectory() is no available on 2.7
+        with tempfile.TemporaryDirectory() as temp_dir:
             test_location = os.path.join(temp_dir, 'foo', 'kubelogin')
-            k8s_install_kubelogin(mock.MagicMock(), client_version='0.0.4', install_location=test_location, arch="amd64")
-            self.assertTrue(os.path.exists(test_location))
-        finally:
-            shutil.rmtree(temp_dir)
+            k8s_install_kubelogin(mock.MagicMock(), client_version='0.0.4',
+                                  install_location=test_location, arch="amd64")
+        self.assertIs(os.path.exists(test_location), True)
 
     @mock.patch('azure.cli.command_modules.acs.custom._urlretrieve')
     @mock.patch('azure.cli.command_modules.acs.custom.logger')
     def test_k8s_install_kubectl_with_custom_source_url(self, logger_mock, mock_url_retrieve):
         mock_url_retrieve.side_effect = lambda _, install_location: open(install_location, 'a').close()
-        try:
-            temp_dir = tempfile.mkdtemp()
+        with tempfile.TemporaryDirectory() as temp_dir:
             test_location = os.path.join(temp_dir, 'foo', 'kubectl')
             test_ver = '1.2.5'
             test_source_url = 'http://url1'
-            k8s_install_kubectl(mock.MagicMock(), client_version=test_ver, install_location=test_location, source_url=test_source_url)
-            mock_url_retrieve.assert_called_with(MockUrlretrieveUrlValidator(test_source_url, test_ver), mock.ANY)
-        finally:
-            shutil.rmtree(temp_dir)
+            k8s_install_kubectl(mock.MagicMock(), client_version=test_ver,
+                                install_location=test_location, source_url=test_source_url)
+        mock_url_retrieve.assert_called_with(MockUrlretrieveUrlValidator(test_source_url, test_ver), mock.ANY)
 
     @unittest.skip('No such file or directory')
     @mock.patch('azure.cli.command_modules.acs.custom._urlretrieve')
     @mock.patch('azure.cli.command_modules.acs.custom.logger')
     def test_k8s_install_kubelogin_with_custom_source_url(self, logger_mock, mock_url_retrieve):
         mock_url_retrieve.side_effect = create_kubelogin_zip
-        try:
-            temp_dir = tempfile.mkdtemp()
+        with tempfile.TemporaryDirectory() as temp_dir:
             test_location = os.path.join(temp_dir, 'foo', 'kubelogin')
             test_ver = '1.2.6'
             test_source_url = 'http://url2'
             k8s_install_kubelogin(mock.MagicMock(), client_version=test_ver, install_location=test_location, source_url=test_source_url, arch="amd64")
             mock_url_retrieve.assert_called_with(MockUrlretrieveUrlValidator(test_source_url, test_ver), mock.ANY)
-        finally:
-            shutil.rmtree(temp_dir)
 
     @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_rg_location', return_value='eastus')
     @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resource_groups_client', autospec=True)
@@ -763,7 +742,7 @@ class AcsCustomCommandTest(unittest.TestCase):
         with self.assertRaises(InvalidArgumentValueError):
             _update_upgrade_settings(MockCmd(self.cli), instance, enable_force_upgrade=False, disable_force_upgrade=False, upgrade_override_until="abc")
 
-         # Set both force_upgrade and until 
+        # Set both force_upgrade and until
         instance.upgrade_settings = None
         instance = _update_upgrade_settings(MockCmd(self.cli), instance, enable_force_upgrade=True, disable_force_upgrade=False, upgrade_override_until="2024-01-01T13:00:00Z")
         self.assertTrue(instance.upgrade_settings.override_settings.force_upgrade)
@@ -805,7 +784,7 @@ class TestAKSCommand(unittest.TestCase):
         self.client.begin_stop = mock.Mock(
             return_value=None
         )
-        self.assertEqual(aks_stop(self.cmd, self.client, "rg", "name"), None)
+        self.assertIs(aks_stop(self.cmd, self.client, "rg", "name"), None)
 
         # private cluster: call begin_stop
         mc_2 = self.models.ManagedCluster(location="test_location")
@@ -818,7 +797,7 @@ class TestAKSCommand(unittest.TestCase):
         self.client.begin_stop = mock.Mock(
             return_value=None
         )
-        self.assertEqual(aks_stop(self.cmd, self.client, "rg", "name", False), None)
+        self.assertIs(aks_stop(self.cmd, self.client, "rg", "name", False), None)
 
 
 class TestRunCommand(unittest.TestCase):

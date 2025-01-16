@@ -12,7 +12,6 @@ from azure.cli.core.azclierror import (
     ValidationError,
     CLIInternalError
 )
-# from azure.cli.core._profile import Profile
 from ._resource_config import (
     SOURCE_RESOURCES_USERTOKEN,
     TARGET_RESOURCES_USERTOKEN,
@@ -104,7 +103,8 @@ def _in_process_execute(command):
         command = command[3:]
 
     cli = get_default_cli()
-    cli.invoke(shlex.split(command), out_file=open(os.devnull, 'w'))  # Don't print output
+    with open(os.devnull, "w") as devnull:
+        cli.invoke(shlex.split(command), out_file=devnull)
     return cli.result
 
 

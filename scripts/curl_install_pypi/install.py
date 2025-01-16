@@ -15,6 +15,7 @@
 #pylint: disable=line-too-long
 
 import os
+import pathlib
 import sys
 import platform
 import stat
@@ -115,17 +116,16 @@ def is_valid_sha256sum(a_file, expected_sum):
 def create_virtualenv(tmp_dir, install_dir):
     download_location = os.path.join(tmp_dir, VIRTUALENV_ARCHIVE)
     print_status('Downloading virtualenv package from {}.'.format(VIRTUALENV_DOWNLOAD_URL))
-    response = urlopen(VIRTUALENV_DOWNLOAD_URL)
-    with open(download_location, 'wb') as f: f.write(response.read())
+    with urlopen(VIRTUALENV_DOWNLOAD_URL) as response, open(download_location, 'wb') as f:
+        f.write(response.read())
     print_status("Downloaded virtualenv package to {}.".format(download_location))
     if is_valid_sha256sum(download_location, VIRTUALENV_ARCHIVE_SHA256):
         print_status("Checksum of {} OK.".format(download_location))
     else:
         raise CLIInstallError("The checksum of the downloaded virtualenv package does not match.")
     print_status("Extracting '{}' to '{}'.".format(download_location, tmp_dir))
-    package_tar = tarfile.open(download_location)
-    package_tar.extractall(path=tmp_dir)
-    package_tar.close()
+    with tarfile.open(download_location) as package_tar:
+        package_tar.extractall(path=tmp_dir)
     virtualenv_dir_name = 'virtualenv-'+VIRTUALENV_VERSION
     working_dir = os.path.join(tmp_dir, virtualenv_dir_name)
     cmd = [sys.executable, 'virtualenv.py', '--python', sys.executable, install_dir]
@@ -210,7 +210,7 @@ def _default_rc_file_creation_step():
     rcfile = USER_BASH_PROFILE if platform.system().lower() == 'darwin' else USER_BASH_RC
     ans_yes = prompt_y_n('Could not automatically find a suitable file to use. Create {} now?'.format(rcfile), default='y')
     if ans_yes:
-        open(rcfile, 'a').close()
+        pathlib.Path(rcfile).touch()
         return rcfile
     return None
 

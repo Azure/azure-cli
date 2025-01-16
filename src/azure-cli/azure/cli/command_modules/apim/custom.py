@@ -216,8 +216,8 @@ def apim_api_schema_create(client, resource_group_name, service_name, api_id, sc
     """creates or updates an API Schema. """
 
     if schema_path is not None and schema_content is None:
-        api_file = open(schema_path, 'r')
-        content_value = api_file.read()
+        with open(schema_path, 'r') as api_file:
+            content_value = api_file.read()
         value = content_value
     elif schema_content is not None and schema_path is None:
         value = schema_content
@@ -446,8 +446,8 @@ def apim_api_import(
         api_id = uuid.uuid4().hex
 
     if specification_path is not None and specification_url is None:
-        api_file = open(specification_path, 'r')
-        content_value = api_file.read()
+        with open(specification_path, 'r') as api_file:
+            content_value = api_file.read()
         parameters.value = content_value
     elif specification_url is not None and specification_path is None:
         parameters.value = specification_url
@@ -1118,8 +1118,8 @@ def apim_graphql_resolver_list(client, resource_group_name, service_name, api_id
 def apim_graphql_resolver_policy_create(
         client, resource_group_name, service_name, api_id, resolver_id, value_path, policy_format=None, no_wait=False):
     """Creates a new Resolver policy. """
-    api_file = open(value_path, 'r')
-    content_value = api_file.read()
+    with open(value_path, 'r') as api_file:
+        content_value = api_file.read()
     value = content_value
 
     parameters = PolicyContract(

@@ -161,7 +161,8 @@ def _load_dockerignore_file(source_location, original_docker_file_name):
         return None, 0
 
     encoding = "utf-8"
-    header = open(docker_ignore_file, "rb").read(len(codecs.BOM_UTF8))
+    with open(docker_ignore_file, "rb") as fp:
+        header = fp.read(len(codecs.BOM_UTF8))
     if header.startswith(codecs.BOM_UTF8):
         encoding = "utf-8-sig"
 
@@ -169,15 +170,16 @@ def _load_dockerignore_file(source_location, original_docker_file_name):
     if docker_ignore_file == docker_ignore_file_override:
         ignore_list.append(IgnoreRule(".dockerignore"))
 
-    for line in open(docker_ignore_file, 'r', encoding=encoding).readlines():
-        rule = line.rstrip()
+    with open(docker_ignore_file, 'r', encoding=encoding) as fp:
+        for line in fp:
+            rule = line.rstrip()
 
-        # skip empty line and comment
-        if not rule or rule.startswith('#'):
-            continue
+            # skip empty line and comment
+            if not rule or rule.startswith('#'):
+                continue
 
-        # the ignore rule at the end has higher priority
-        ignore_list = [IgnoreRule(rule)] + ignore_list
+            # the ignore rule at the end has higher priority
+            ignore_list = [IgnoreRule(rule)] + ignore_list
 
     return ignore_list, len(ignore_list)
 

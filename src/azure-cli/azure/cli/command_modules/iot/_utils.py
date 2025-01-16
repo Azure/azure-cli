@@ -47,8 +47,10 @@ def create_self_signed_certificate(device_id, valid_days, cert_output_dir):
     thumbprint = cert.fingerprint(hashes.SHA1()).hex().upper()
 
     if cert_output_dir is not None and exists(cert_output_dir):
-        open(join(cert_output_dir, cert_file), "wt").write(cert_dump)
-        open(join(cert_output_dir, key_file), "wt").write(key_dump)
+        with open(join(cert_output_dir, cert_file), "wt") as fp:
+            cert_file.write(cert_dump)
+        with open(join(cert_output_dir, key_file), "wt") as fp:
+            fp.write(key_dump)
     return {
         'certificate': cert_dump,
         'privateKey': key_dump,
