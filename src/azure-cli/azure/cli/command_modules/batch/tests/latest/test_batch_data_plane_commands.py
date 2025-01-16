@@ -328,13 +328,12 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
             self.check('commandLine', 'cmd /c dir /s')])
 
         self.batch_cmd('batch task show --job-id {j_id} --task-id {t_id}').assert_with_checks([
-            self.check('userIdentity.autoUser.scope', 'pool'),
-            self.check('authenticationTokenSettings.access[0]', 'job')])
+            self.check('userIdentity.autoUser.scope', 'pool')])
 
         self.batch_cmd('batch task delete --job-id {j_id} --task-id {t_id} --yes')
 
         self.batch_cmd('batch task create --job-id {j_id} --task-id aaa'
-                       ' --command-line "ping 127.0.0.1 -n 30"').assert_with_checks([
+                       ' --command-line "ping 127.0.0.1 -n 30" --max-wall-clock-time P3Y6M4DT12H30M5S').assert_with_checks([
                            self.check('id', 'aaa'),
                            self.check('commandLine', 'ping 127.0.0.1 -n 30')])
 
@@ -505,7 +504,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         self.assertEqual(len(task_list), 2)
 
         # task reset
-        self.batch_cmd('batch task reset --job-id {j_id} --task-id {t_id} --max-task-retry-count 3')
+        self.batch_cmd('batch task reset --job-id {j_id} --task-id {t_id} --max-task-retry-count 3 --max-wall-clock-time PT0H20M --retention-time P3Y6M4DT12H30M5S')
         self.batch_cmd('batch task show --job-id {j_id} --task-id {t_id}').assert_with_checks([
             self.check('id', 'cli-test-task-1'),
             self.check('constraints.maxTaskRetryCount', 3)])

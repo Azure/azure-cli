@@ -198,9 +198,9 @@ def load_arguments(self, _):
         c.argument('pool_id', help='The ID of the pool.')
         c.argument('abort', action='store_true', help='Stop the pool resize operation.', validator=validate_pool_resize_parameters)
         c.argument('node_deallocation_option', options_list=('--node-deallocation-option',), help='When nodes may be removed from the pool, if the pool size is decreasing.', arg_type=get_enum_type(BatchNodeDeallocationOption))
-        c.argument('resize_timeout', type=duration_format, help='The default value is 15 minutes. The minimum value is 5 minutes.'
-                                                                'If you specify a value less than 5 minutes, the Batch service'
-                                                                'returns an error; if you are calling the REST API directly, the'
+        c.argument('resize_timeout', type=duration_format, help='The default value is 15 minutes. The minimum value is 5 minutes. '
+                                                                'If you specify a value less than 5 minutes, the Batch service '
+                                                                'returns an error; if you are calling the REST API directly, the '
                                                                 'HTTP status code is 400 (Bad Request). ISO-8601 duration format')
         c.argument('target_dedicated_nodes', help='The desired number of dedicated Compute Nodes in the Pool.')
         c.argument('target_low_priority_nodes', help='The desired number of Spot/Low-priority Compute Nodes in the Pool.')
@@ -209,14 +209,14 @@ def load_arguments(self, _):
     with self.argument_context('batch pool reset') as c:
         c.argument('json_file', type=file_type, help='The file containing pool update properties parameter specification in JSON(formatted to match REST API request body). If this parameter is specified, all \'Pool Update Properties Parameter Arguments\' are ignored.', validator=validate_json_file, completer=FilesCompleter())
         c.argument('pool_id', help='The ID of the pool to update.')
-        c.argument('application_package_references', nargs='+', type=batch_application_package_reference_format, arg_group='Pool', help='Required. The list replaces any existing Application Package'
-                                                                                                                                        'references on the Pool. Changes to Application Package'
-                                                                                                                                        'references affect all new Compute Nodes joining the Pool,'
-                                                                                                                                        'but do not affect Compute Nodes that are already in the Pool'
-                                                                                                                                        'until they are rebooted or reimaged. There is a maximum of'
-                                                                                                                                        '10 Application Package references on any given Pool. If'
-                                                                                                                                        'omitted, or if you specify an empty collection, any existing'
-                                                                                                                                        'Application Packages references are removed from the Pool. A'
+        c.argument('application_package_references', nargs='+', type=batch_application_package_reference_format, arg_group='Pool', help='Required. The list replaces any existing Application Package '
+                                                                                                                                        'references on the Pool. Changes to Application Package '
+                                                                                                                                        'references affect all new Compute Nodes joining the Pool, '
+                                                                                                                                        'but do not affect Compute Nodes that are already in the Pool '
+                                                                                                                                        'until they are rebooted or reimaged. There is a maximum of '
+                                                                                                                                        '10 Application Package references on any given Pool. If '
+                                                                                                                                        'omitted, or if you specify an empty collection, any existing '
+                                                                                                                                        'Application Packages references are removed from the Pool. A '
                                                                                                                                         'maximum of 10 references may be specified on a given Pool.')
         c.argument('metadata', nargs='+', type=metadata_item_format, arg_group='Pool', help='Required. This list replaces any existing metadata'
                                                                                             'configured on the Pool. If omitted, or if you specify an'
@@ -311,9 +311,9 @@ def load_arguments(self, _):
     for command in ['node file delete', 'task file delete']:
         with self.argument_context(f'batch {command}') as c:
             c.extra('recursive', arg_type=get_three_state_flag(),
-                    help='Whether to delete children of a directory. If the filePath parameter'
-                    'represents a directory instead of a file, you can set recursive to true to delete the'
-                    'directory and all of the files and subdirectories in it. If recursive is false'
+                    help='Whether to delete children of a directory. If the filePath parameter '
+                    'represents a directory instead of a file, you can set recursive to true to delete the '
+                    'directory and all of the files and subdirectories in it. If recursive is false '
                     'then the directory must be empty or deletion will fail. Default value is None.')
 
     with self.argument_context('batch node file list') as c:
@@ -328,38 +328,38 @@ def load_arguments(self, _):
         c.argument('task_id', help='The ID of the Task to update.', required=True)
         c.argument('json_file', type=file_type, help='The file containing pool update properties parameter specification in JSON(formatted to match REST API request body). If this parameter is specified, all \'Pool Update Properties Parameter Arguments\' are ignored.', validator=validate_json_file, completer=FilesCompleter())
         c.argument('max_task_retry_count', arg_group='Constraints',
-                   help='The maximum number of times the Task may be retried. The Batch service'
-                        'retries a Task if its exit code is nonzero. Note that this value'
-                        'specifically controls the number of retries for the Task executable due'
-                        'to a nonzero exit code. The Batch service will try the Task once, and'
-                        'may then retry up to this limit. For example, if the maximum retry'
-                        'count is 3, Batch tries the Task up to 4 times (one initial try and 3'
-                        'retries). If the maximum retry count is 0, the Batch service does not'
-                        'retry the Task after the first attempt. If the maximum retry count is'
-                        '-1, the Batch service retries the Task without limit, however this is'
-                        'not recommended for a start task or any task. The default value is 0'
+                   help='The maximum number of times the Task may be retried. The Batch service '
+                        'retries a Task if its exit code is nonzero. Note that this value '
+                        'specifically controls the number of retries for the Task executable due '
+                        'to a nonzero exit code. The Batch service will try the Task once, and '
+                        'may then retry up to this limit. For example, if the maximum retry '
+                        'count is 3, Batch tries the Task up to 4 times (one initial try and 3 '
+                        'retries). If the maximum retry count is 0, the Batch service does not '
+                        'retry the Task after the first attempt. If the maximum retry count is '
+                        '-1, the Batch service retries the Task without limit, however this is '
+                        'not recommended for a start task or any task. The default value is 0 '
                         '(no retries).')
         c.argument('max_wall_clock_time', arg_group='Constraints',
-                   help='If this is not specified, there is no time limit on how long the Task'
+                   help='If this is not specified, there is no time limit on how long the Task '
                         'may run. Expected format is an ISO-8601 duration.')
         c.argument('retention_time', arg_group='Constraints',
-                   help='The default is 7 days, i.e. the Task directory will be retained for 7'
-                        'days unless the Compute Node is removed or the Job is deleted. Expected'
+                   help='The default is 7 days, i.e. the Task directory will be retained for 7 '
+                        'days unless the Compute Node is removed or the Job is deleted. Expected '
                         'format is an ISO-8601 duration.')
 
     with self.argument_context('batch pool usage-metrics list') as c:
         c.extra('endtime', options_list=['--end-time'], arg_group='Pre-condition and Query',
-                help='The latest time from which to include metrics. This must be at least two'
-                     'hours before the current time. If not specified this defaults to the end'
+                help='The latest time from which to include metrics. This must be at least two '
+                     'hours before the current time. If not specified this defaults to the end '
                      'time of the last aggregation interval currently available.')
         c.extra('starttime', options_list=['--start-time'], arg_group='Pre-condition and Query',
-                help='The earliest time from which to include metrics. This must be at least two'
-                     'and a half hours before the current time. If not specified this defaults to'
+                help='The earliest time from which to include metrics. This must be at least two '
+                     'and a half hours before the current time. If not specified this defaults to '
                      'the start time of the last aggregation interval currently available.')
 
     with self.argument_context('batch task file list') as c:
         c.extra('recursive', arg_type=get_three_state_flag(),
-                help='Whether to list children of the Task directory. This parameter can be'
+                help='Whether to list children of the Task directory. This parameter can be '
                 'used in combination with the filter parameter to list specific type of files.')
 
     for command in ['node file download', 'task file download']:
@@ -446,28 +446,28 @@ def load_arguments(self, _):
         c.argument('command_line', help='The command line of the task. The command line does not run under a shell, and therefore cannot take advantage of shell features such as environment variable expansion. If you want to take advantage of such features, you should invoke the shell in the command line, for example using "cmd /c MyCommand" in Windows or "/bin/sh -c MyCommand" in Linux.')
         c.argument('environment_settings', nargs='+', help='A list of environment variable settings for the task. Space-separated values in \'key=value\' format.', type=environment_setting_format)
         c.argument('resource_files', nargs='+', help='A list of files that the Batch service will download to the compute node before running the command line. Space-separated resource references in filename=httpurl format, with httpurl being any HTTP url with public access or a SAS url with read access.', type=resource_file_format)
-        c.argument('affinity_id', help='Required. You can pass the affinityId of a Node to indicate'
-                                       'that this Task needs to run on that Compute Node. Note that'
-                                       'this is just a soft affinity. If the target Compute Node is'
-                                       'busy or unavailable at the time the Task is scheduled, then'
+        c.argument('affinity_id', help='Required. You can pass the affinityId of a Node to indicate '
+                                       'that this Task needs to run on that Compute Node. Note that '
+                                       'this is just a soft affinity. If the target Compute Node is '
+                                       'busy or unavailable at the time the Task is scheduled, then '
                                        'the Task will be scheduled elsewhere.')
-        c.argument('max_task_retry_count', help='The maximum number of times the Task may be retried. The'
-                                                'Batch service retries a Task if its exit code is nonzero.'
-                                                'Note that this value specifically controls the number of'
-                                                'retries for the Task executable due to a nonzero exit code.'
-                                                'The Batch service will try the Task once, and may then retry'
-                                                'up to this limit. For example, if the maximum retry count is'
-                                                '3, Batch tries the Task up to 4 times (one initial try and 3'
-                                                'retries). If the maximum retry count is 0, the Batch service'
-                                                'does not retry the Task after the first attempt. If the'
-                                                'maximum retry count is -1, the Batch service retries the Task'
-                                                'without limit, however this is not recommended for a start'
+        c.argument('max_task_retry_count', help='The maximum number of times the Task may be retried. The '
+                                                'Batch service retries a Task if its exit code is nonzero. '
+                                                'Note that this value specifically controls the number of '
+                                                'retries for the Task executable due to a nonzero exit code. '
+                                                'The Batch service will try the Task once, and may then retry '
+                                                'up to this limit. For example, if the maximum retry count is '
+                                                '3, Batch tries the Task up to 4 times (one initial try and 3 '
+                                                'retries). If the maximum retry count is 0, the Batch service '
+                                                'does not retry the Task after the first attempt. If the '
+                                                'maximum retry count is -1, the Batch service retries the Task '
+                                                'without limit, however this is not recommended for a start '
                                                 'task or any task. The default value is 0 (no retries).')
-        c.argument('max_wall_clock_time', help='If this is not specified, there is no time limit on how long'
-                                               'the Task may run.')
-        c.argument('retention_time', help='The default is 7 days, i.e. the Task directory will be'
-                                          'retained for 7 days unless the Compute Node is removed or the'
-                                          'Job is deleted.')
+        c.argument('max_wall_clock_time', type=duration_format, help='If this is not specified, there is no time limit on how long '
+                                                                     'the Task may run.')
+        c.argument('retention_time', type=duration_format, help='The default is 7 days, i.e. the Task directory will be '
+                                                                'retained for 7 days unless the Compute Node is removed or the '
+                                                                'Job is deleted.')
 
     for item in ['batch pool resize', 'batch pool reset', 'batch job list', 'batch task create', 'batch task reset']:
         with self.argument_context(item) as c:
