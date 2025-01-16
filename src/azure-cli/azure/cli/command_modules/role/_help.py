@@ -864,6 +864,16 @@ type: command
 short-summary: List role definitions.
 """
 
+helps['role definition show'] = """
+type: command
+short-summary: Show a role definition.
+examples:
+  - name: Show the 'Reader' role definition with its name (GUID).
+    text: az role definition show --scope /subscriptions/00000000-0000-0000-0000-000000000000 --name acdd72a7-3385-48ef-bd42-f606fba81ae7
+  - name: Show the 'Reader' role definition with its resource ID.
+    text: az role definition show --id /subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7
+"""
+
 helps['role definition update'] = """
 type: command
 short-summary: Update a role definition.
