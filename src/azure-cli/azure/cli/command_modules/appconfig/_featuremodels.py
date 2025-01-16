@@ -391,8 +391,8 @@ class FeaturePercentileAllocation:
 
         variant = percentile_allocation_dict.get(FeatureFlagConstants.VARIANT, None)
         percentile_from = percentile_allocation_dict.get(FeatureFlagConstants.FROM, None)
-        perecentile_to = percentile_allocation_dict.get(FeatureFlagConstants.TO, None)
-        if not variant or not percentile_from or not perecentile_to:
+        percentile_to = percentile_allocation_dict.get(FeatureFlagConstants.TO, None)
+        if variant is None or percentile_from is None or percentile_to is None:
             raise ValidationError(
                 "Percentile allocation must contain required '%s', '%s' and '%s' attributes: \n%s"
                 % (FeatureFlagConstants.VARIANT,
@@ -401,7 +401,7 @@ class FeaturePercentileAllocation:
                    json.dumps(percentile_allocation_dict, indent=2, ensure_ascii=False))
             )
 
-        if not isinstance(percentile_from, int) or not isinstance(perecentile_to, int):
+        if not isinstance(percentile_from, int) or not isinstance(percentile_to, int):
             raise ValidationError(
                 "Percentile allocation '%s' and '%s' must be integers: \n%s"
                 % (FeatureFlagConstants.FROM,
@@ -412,8 +412,8 @@ class FeaturePercentileAllocation:
         if (
             percentile_from < 0 or
             percentile_from > 100 or
-            perecentile_to < 0 or
-            perecentile_to > 100
+            percentile_to < 0 or
+            percentile_to > 100
         ):
             raise ValidationError(
                 "Percentile allocation '%s' and '%s' must be between 0 and 100: \n%s"
@@ -422,7 +422,7 @@ class FeaturePercentileAllocation:
                    json.dumps(percentile_allocation_dict, indent=2, ensure_ascii=False))
             )
 
-        if percentile_from >= perecentile_to:
+        if percentile_from >= percentile_to:
             raise ValidationError(
                 "Percentile allocation '%s' must be less than '%s': \n%s"
                 % (FeatureFlagConstants.FROM,
@@ -430,7 +430,7 @@ class FeaturePercentileAllocation:
                    json.dumps(percentile_allocation_dict, indent=2, ensure_ascii=False))
             )
 
-        return cls(variant=variant, from_=percentile_from, to=perecentile_to)
+        return cls(variant=variant, from_=percentile_from, to=percentile_to)
 
     def __repr__(self):
         feature_percentile_allocation = {
