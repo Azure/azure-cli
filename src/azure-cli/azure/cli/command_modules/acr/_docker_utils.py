@@ -10,6 +10,7 @@ from json import loads
 from enum import Enum
 from base64 import b64encode
 import requests
+from requests import Session
 from requests import RequestException
 from requests.utils import to_native_string
 from msrest.http_logger import log_request, log_response
@@ -34,6 +35,7 @@ from ._errors import CONNECTIVITY_TOOMANYREQUESTS_ERROR
 
 
 logger = get_logger(__name__)
+session = requests.Session()
 
 
 EMPTY_GUID = '00000000-0000-0000-0000-000000000000'
@@ -593,7 +595,7 @@ def request_data_from_registry(http_method,
             if file_payload:
                 with open(file_payload, 'rb') as data_payload:
                     logger.debug(add_timestamp("Sending a HTTP {} request to {}".format(http_method, url)))
-                    response = requests.request(
+                    response = session.request(
                         method=http_method,
                         url=url,
                         headers=headers,
@@ -604,7 +606,7 @@ def request_data_from_registry(http_method,
                     )
             else:
                 logger.debug(add_timestamp("Sending a HTTP {} request to {}".format(http_method, url)))
-                response = requests.request(
+                response = session.request(
                     method=http_method,
                     url=url,
                     headers=headers,
