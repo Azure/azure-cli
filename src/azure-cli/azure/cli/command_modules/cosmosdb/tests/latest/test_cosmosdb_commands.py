@@ -1945,9 +1945,9 @@ class CosmosDBTests(ScenarioTest):
             self.check('principalId', principal_id)
         ])
 
-        assert self.cmd('az cosmosdb sql role assignment exists -g {rg} -a {acc} -i {role_assignment_id3}').get_output_in_json() == False
+        assert self.cmd('az cosmosdb sql role assignment exists -g {rg} -a {acc} -i {role_assignment_id3}').get_output_in_json() is False
         self.cmd('az cosmosdb sql role assignment create -g {rg} -a {acc} -s {scope} -p {principal_id} -n roleName2 -i {role_assignment_id3} --no-wait')
-        assert self.cmd('az cosmosdb sql role assignment exists -g {rg} -a {acc} -i {role_assignment_id3}').get_output_in_json() == False
+        assert self.cmd('az cosmosdb sql role assignment exists -g {rg} -a {acc} -i {role_assignment_id3}').get_output_in_json() is False
         self.cmd('az cosmosdb sql role assignment wait -g {rg} -a {acc} -i {role_assignment_id3} --exists')
         assert self.cmd('az cosmosdb sql role assignment exists -g {rg} -a {acc} -i {role_assignment_id3}').get_output_in_json()
 
@@ -2619,7 +2619,7 @@ class CosmosDBTests(ScenarioTest):
 
         assert restored_account['restoreParameters']['restoreSource'] == restorable_database_account['id']
         assert restored_account['restoreParameters']['restoreTimestampInUtc'] == restore_ts_string
-        assert restored_account['restoreParameters']['restoreWithTtlDisabled'] == True
+        assert restored_account['restoreParameters']['restoreWithTtlDisabled'] is True
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_table_restorable_commands', location='eastus2')
     @AllowLargeResponse(size_kb=9999)
@@ -2795,26 +2795,26 @@ class CosmosDBTests(ScenarioTest):
         locations_list = self.cmd('az cosmosdb locations list').get_output_in_json()
         assert len(locations_list) > 0
         for location_val in locations_list:
-            assert location_val['id'] != None
-            assert location_val['name'] != None
-            assert location_val['type'] != None
-            assert location_val['properties']['backupStorageRedundancies'] != None
-            assert location_val['properties']['isResidencyRestricted'] != None
-            assert location_val['properties']['supportsAvailabilityZone'] != None
-            assert location_val['properties']['isSubscriptionRegionAccessAllowedForRegular'] != None
-            assert location_val['properties']['isSubscriptionRegionAccessAllowedForAz'] != None
-            assert location_val['properties']['status'] != None
+            assert location_val['id'] is not None
+            assert location_val['name'] is not None
+            assert location_val['type'] is not None
+            assert location_val['properties']['backupStorageRedundancies'] is not None
+            assert location_val['properties']['isResidencyRestricted'] is not None
+            assert location_val['properties']['supportsAvailabilityZone'] is not None
+            assert location_val['properties']['isSubscriptionRegionAccessAllowedForRegular'] is not None
+            assert location_val['properties']['isSubscriptionRegionAccessAllowedForAz'] is not None
+            assert location_val['properties']['status'] is not None
 
         locations_show = self.cmd('az cosmosdb locations show --location {loc}').get_output_in_json()
-        assert locations_show['id'] != None
-        assert locations_show['name'] != None
-        assert locations_show['type'] != None
-        assert locations_show['properties']['backupStorageRedundancies'] != None
-        assert locations_show['properties']['isResidencyRestricted'] != None
-        assert locations_show['properties']['supportsAvailabilityZone'] != None
-        assert locations_show['properties']['isSubscriptionRegionAccessAllowedForRegular'] != None
-        assert locations_show['properties']['isSubscriptionRegionAccessAllowedForAz'] != None
-        assert locations_show['properties']['status'] != None
+        assert locations_show['id'] is not None
+        assert locations_show['name'] is not None
+        assert locations_show['type'] is not None
+        assert locations_show['properties']['backupStorageRedundancies'] is not None
+        assert locations_show['properties']['isResidencyRestricted'] is not None
+        assert locations_show['properties']['supportsAvailabilityZone'] is not None
+        assert locations_show['properties']['isSubscriptionRegionAccessAllowedForRegular'] is not None
+        assert locations_show['properties']['isSubscriptionRegionAccessAllowedForAz'] is not None
+        assert locations_show['properties']['status'] is not None
     
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_service', location='eastus2')
     def test_cosmosdb_service(self, resource_group):
@@ -3002,7 +3002,7 @@ class CosmosDBTests(ScenarioTest):
 
         container_show = self.cmd('az cosmosdb sql container show -g {rg} -a {acc} -d {db_name} -n {ctn_name}').get_output_in_json()
         assert container_show["name"] == ctn_name
-        assert container_show["resource"]["defaultTtl"] == None
+        assert container_show["resource"]["defaultTtl"] is None
 
         self.cmd('az cosmosdb sql database delete -g {rg} -a {acc} -n {db_name} --yes')
         database_list = self.cmd('az cosmosdb sql database list -g {rg} -a {acc}').get_output_in_json()
