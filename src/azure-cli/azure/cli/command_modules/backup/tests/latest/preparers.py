@@ -395,7 +395,7 @@ class DESPreparer(AbstractPreparer, SingleValueReplacer):
 class AFSPolicyPreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix='clitest-item', parameter_name='policy_name', vault_parameter_name='vault_name',
                  resource_group_parameter_name='resource_group',
-                 instant_rp_days=None):
+                 backup_tier="Snapshot"):
         super().__init__(name_prefix, 24)
         from azure.cli.core.mock import DummyCli
         self.cli_ctx = DummyCli()
@@ -404,7 +404,7 @@ class AFSPolicyPreparer(AbstractPreparer, SingleValueReplacer):
         self.resource_group_parameter_name = resource_group_parameter_name
         self.vault = None
         self.vault_parameter_name = vault_parameter_name
-        self.instant_rp_days = instant_rp_days
+        self.backup_tier = backup_tier
 
     def create_resource(self, name, **kwargs):
         if not os.environ.get('AZURE_CLI_TEST_DEV_BACKUP_POLICY_NAME', None):
@@ -413,10 +413,46 @@ class AFSPolicyPreparer(AbstractPreparer, SingleValueReplacer):
 
             policy_json = execute(self.cli_ctx, 'az backup policy show -g {} -v {} -n {}'
                                   .format(self.resource_group, self.vault, 'DefaultPolicy')).get_output_in_json()
+            
+            # Remove unwanted keys from default AzureVM policy
+            keys_to_remove = [
+                'instantRpDetails',
+                'instantRpRetentionRangeInDays',
+                'policyType',
+                'snapshotConsistencyType',
+                'tieringPolicy'
+            ]
+
+            for key in keys_to_remove:
+                policy_json['properties'].pop(key, None)
+
             policy_json['name'] = name
-            if self.instant_rp_days:
-                policy_json['properties']['instantRpRetentionRangeInDays'] = self.instant_rp_days
+           
             policy_json['properties']['backupManagementType'] = "AzureStorage"
+            policy_json['properties']['workLoadType'] = "AzureFileShare"
+
+            # Modify the policy based on the backup tier
+            if self.backup_tier.lower() == 'vaultstandard':
+                # Set retentionPolicy to null
+                policy_json['properties'].pop('retentionPolicy', None)
+
+                # Add vaultRetentionPolicy with the required properties
+                policy_json['properties']['vaultRetentionPolicy'] = {
+                    "snapshotRetentionInDays": 5,
+                    "vaultRetention": {
+                        "dailySchedule": {
+                            "retentionDuration": {
+                                "count": 30,
+                                "durationType": "Days"
+                            },
+                            "retentionTimes": policy_json['properties']['schedulePolicy']['scheduleRunTimes']
+                        },
+                        "monthlySchedule": None,
+                        "retentionPolicyType": "LongTermRetentionPolicy",
+                        "weeklySchedule": None,
+                        "yearlySchedule": None
+                    }
+                }
             policy_json = json.dumps(policy_json)
 
             command_string = 'az backup policy create -g {} -v {} --policy \'{}\' -n {} --backup-management-type {}'
