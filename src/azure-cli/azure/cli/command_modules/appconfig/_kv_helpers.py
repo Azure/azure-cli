@@ -31,7 +31,7 @@ from azure.cli.core.azclierror import (FileOperationError,
 
 from ._constants import (FeatureFlagConstants, KeyVaultConstants, SearchFilterOptions, KVSetConstants, ImportExportProfiles, AppServiceConstants, JsonDiff, CompareFieldsMap, StatusCodes, ImportMode)
 from ._diff_utils import get_serializer, KVComparer, print_preview, __print_diff
-from ._utils import prep_label_filter_for_url_encoding, is_json_content_type, validate_feature_flag_name, validate_feature_flag_key
+from ._utils import prep_label_filter_for_url_encoding, is_json_content_type, validate_feature_flag_name, validate_feature_flag_key, format_tags_filter
 from ._models import (KeyValue, convert_configurationsetting_to_keyvalue,
                       convert_keyvalue_to_configurationsetting, QueryFields)
 from ._featuremodels import (map_featureflag_to_keyvalue, is_feature_flag, FeatureFlagValue, FeatureManagementReservedKeywords)
@@ -280,6 +280,7 @@ def __read_kv_from_config_store(azconfig_client,
     # In list, restore & list_revision commands, we treat missing --label as all labels
 
     label = prep_label_filter_for_url_encoding(label)
+    tags = format_tags_filter(tags)
 
     query_fields = []
     if fields:
@@ -367,6 +368,7 @@ def __write_kv_and_features_to_config_store(azconfig_client,
                                             key_values,
                                             features=None,
                                             label=None,
+                                            tags=None,
                                             preserve_labels=False,
                                             content_type=None,
                                             correlation_request_id=None):
@@ -378,10 +380,13 @@ def __write_kv_and_features_to_config_store(azconfig_client,
     if features:
         key_values.extend(__convert_featureflag_list_to_keyvalue_list(features))
 
+    logger.warning(tags)
+    breakpoint()
     for kv in key_values:
         set_kv = convert_keyvalue_to_configurationsetting(kv)
         if not preserve_labels:
             set_kv.label = label
+            set_kv.tags = tags
 
         # Don't overwrite the content type of feature flags or key vault references
         if content_type and not is_feature_flag(set_kv) and not __is_key_vault_ref(set_kv):

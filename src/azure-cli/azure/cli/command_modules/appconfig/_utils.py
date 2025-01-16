@@ -230,3 +230,14 @@ def validate_feature_flag_key(key):
         raise InvalidArgumentValueError("Feature flag key must start with the reserved prefix '{0}'.".format(FeatureFlagConstants.FEATURE_FLAG_PREFIX))
     if len(input_key) == len(FeatureFlagConstants.FEATURE_FLAG_PREFIX):
         raise InvalidArgumentValueError("Feature flag key must contain more characters after the reserved prefix '{0}'.".format(FeatureFlagConstants.FEATURE_FLAG_PREFIX))
+
+
+def format_tags_filter(tags):
+    if tags is None:
+        return None
+
+    tags_list = []
+    for key, value in tags.items():
+        tags_list.append(f"{key}={value}")
+    
+    return tags_list

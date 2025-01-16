@@ -28,7 +28,7 @@ from ._constants import (FeatureFlagConstants, SearchFilterOptions, StatusCodes)
 from ._models import (KeyValue,
                       convert_configurationsetting_to_keyvalue,
                       convert_keyvalue_to_configurationsetting)
-from ._utils import (get_appconfig_data_client,
+from ._utils import (format_tags_filter, get_appconfig_data_client,
                      prep_label_filter_for_url_encoding,
                      validate_feature_flag_name)
 from ._featuremodels import (map_keyvalue_to_featureflag,
@@ -247,8 +247,7 @@ def show_feature(cmd,
                  fields=None,
                  connection_string=None,
                  auth_mode="key",
-                 endpoint=None,
-                 tags=None):
+                 endpoint=None):
     if key is None and feature is None:
         raise CLIErrors.RequiredArgumentMissingError("Please provide either `--key` or `--feature` value.")
     if key and feature:
@@ -261,7 +260,7 @@ def show_feature(cmd,
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     try:
-        config_setting = azconfig_client.get_configuration_setting(key=key, label=label, tags=tags)
+        config_setting = azconfig_client.get_configuration_setting(key=key, label=label)
         if config_setting is None or config_setting.content_type != FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE:
             raise CLIErrors.ResourceNotFoundError("The feature flag does not exist.")
 
@@ -1261,6 +1260,7 @@ def __list_all_keyvalues(azconfig_client,
         raise CLIError("Comma separated feature names are not supported. Please provide escaped string if your feature name contains comma. \nSee \"az appconfig feature list -h\" for correct usage.")
 
     label = prep_label_filter_for_url_encoding(label)
+    tags = format_tags_filter(tags)
 
     try:
         configsetting_iterable = azconfig_client.list_configuration_settings(key_filter=key_filter, label_filter=label, tags_filter=tags, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
