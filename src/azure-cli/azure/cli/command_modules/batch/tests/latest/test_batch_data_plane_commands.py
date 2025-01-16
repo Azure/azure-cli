@@ -684,7 +684,8 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
             elapsed_seconds = time.time() - start_time
             if elapsed_seconds > timeout_seconds:
                 raise TimeoutError("Timed out waiting for pool to reach steady state")
-            time.sleep(2)
+            if self.is_live or self.in_recording:
+                time.sleep(2)
 
     def wait_for_task_complete(self, job_id, tasks=0, timeout_seconds=300):
         start_time = time.time()
