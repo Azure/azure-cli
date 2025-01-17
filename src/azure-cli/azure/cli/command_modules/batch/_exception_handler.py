@@ -3,9 +3,14 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.util import CLIError
-from knack.log import get_logger
 from json import JSONDecodeError
+from knack.log import get_logger
+from azure.cli.core.azclierror import (
+    AzureResponseError,
+    CLIInternalError,
+    ResourceNotFoundError,
+    UnauthorizedError,
+)
 
 logger = get_logger(__name__)
 
@@ -13,15 +18,16 @@ logger = get_logger(__name__)
 def batch_exception_handler(ex):
     from azure.core.exceptions import HttpResponseError
 
-    # TODO: Convert to the new error handling method.
-    #       See: https://github.com/Azure/azure-cli/blob/dev/doc/error_handling_guidelines.md
     if isinstance(ex, HttpResponseError):
         batch_msg = _parse_batch_error_msg(ex)
         if batch_msg:
-            raise CLIError(batch_msg)
+            if ex.status_code == 401:
+                raise UnauthorizedError(batch_msg)
+            if ex.status_code == 404:
+                raise ResourceNotFoundError(batch_msg)
+            raise AzureResponseError(batch_msg)
 
-    # TODO: Should this just raise the original exception?
-    raise CLIError(ex)
+    raise CLIInternalError(ex)
 
 
 def _parse_batch_error_msg(ex):
