@@ -524,15 +524,14 @@ class AzureBatchDataPlaneCommand:
         for key in list(kwargs.keys()):
             if kwargs[key] is None:
                 del kwargs[key]
-
         # in track1 we had --if-match and --if-none-match, in track2 they are packaged in a match-condition param
-        if kwargs.get('if-match') is not None:
-            if kwargs['if-match'] == '*':
+        if kwargs.get('if_match') is not None:
+            if kwargs['if_match'] == '*':
                 kwargs['match_condition'] = MatchConditions.IfPresent
             else:
-                kwargs['etag'] = kwargs['if-match']
+                kwargs['etag'] = kwargs['if_match']
                 kwargs['match_condition'] = MatchConditions.IfNotModified
-            del kwargs['if-match']
+            del kwargs['if_match']
 
         if kwargs.get('if_none_match') is not None:
             kwargs['etag'] = kwargs['if_none_match']
@@ -540,13 +539,13 @@ class AzureBatchDataPlaneCommand:
             del kwargs['if_none_match']
 
         # in track1 we had --start-range and --end-range, in track2 they are packaged in a ocp_range param
-        if kwargs.get('start-range') or kwargs.get('end-range'):
-            start = kwargs.get('start-range') if kwargs.get('start-range') else 0
-            end = kwargs.get('end-range') if kwargs.get('end-range') else ""
-            if kwargs.get('start-range'):
-                del kwargs['start-range']
-            if kwargs.get('end-range'):
-                del kwargs['end-range']
+        if kwargs.get('start_range') or kwargs.get('end_range'):
+            start = kwargs.get('start_range') if kwargs.get('start_range') else 0
+            end = kwargs.get('end_range') if kwargs.get('end_range') else ""
+            if kwargs.get('start_range'):
+                del kwargs['start_range']
+            if kwargs.get('end_range'):
+                del kwargs['end_range']
             kwargs['ocp_range'] = f"bytes={start}-{end}"
 
     def get_kwargs(self):
