@@ -4,12 +4,11 @@
 # --------------------------------------------------------------------------------------------
 
 from json import JSONDecodeError
-from knack.util import CLIError
 from knack.log import get_logger
 from azure.cli.core.azclierror import (
-    AzureResponseError, 
-    CLIInternalError, 
-    ResourceNotFoundError, 
+    AzureResponseError,
+    CLIInternalError,
+    ResourceNotFoundError,
     UnauthorizedError,
 )
 
@@ -24,10 +23,9 @@ def batch_exception_handler(ex):
         if batch_msg:
             if ex.status_code == 401:
                 raise UnauthorizedError(batch_msg)
-            elif ex.status_code == 404:
+            if ex.status_code == 404:
                 raise ResourceNotFoundError(batch_msg)
-            else:
-                raise AzureResponseError(batch_msg)
+            raise AzureResponseError(batch_msg)
 
     raise CLIInternalError(ex)
 
