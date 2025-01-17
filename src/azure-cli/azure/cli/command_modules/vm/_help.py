@@ -2643,7 +2643,7 @@ examples:
   - name: Create a Debian11 VM scaleset with a user assigned identity.
     text: >
         az vmss create -n MyVmss -g rg1 --image Debian11 --assign-identity  /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
-  - name: Create a vm with user assigned identity and add encryption identity for Azure disk encryption
+  - name: Create a vmss with user assigned identity and add encryption identity for Azure disk encryption
     text: >
         az vmss create -n MyVm -g rg1 --image Debian11 --assign-identity myID --encryption-identity /subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID --orchestration-mode Uniform --lb-sku Standard
   - name: Create a Debian11 VM scaleset with both system and user assigned identity.

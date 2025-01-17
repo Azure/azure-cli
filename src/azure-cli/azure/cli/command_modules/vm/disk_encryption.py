@@ -501,7 +501,7 @@ def encrypt_vmss(cmd, resource_group_name, vmss_name,  # pylint: disable=too-man
         if result:
             logger.info("Encryption Identity successfully set in virtual machine scale set")
         else:
-            raise CLIError("Failed to update encryption Identity to the VM")
+            raise CLIError("Failed to update encryption Identity to the VMSS")
 
     #  to avoid bad server errors, ensure the vault has the right configurations
     _verify_keyvault_good_for_encryption(cmd.cli_ctx, disk_encryption_keyvault, key_encryption_keyvault, vmss, force)
