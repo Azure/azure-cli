@@ -3,26 +3,47 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.util import CLIError
+from json import JSONDecodeError
+from knack.log import get_logger
+from azure.cli.core.azclierror import (
+    AzureResponseError,
+    CLIInternalError,
+    ResourceNotFoundError,
+    UnauthorizedError,
+)
+
+logger = get_logger(__name__)
 
 
 def batch_exception_handler(ex):
-    from msrest.exceptions import ValidationError, ClientRequestError
     from azure.core.exceptions import HttpResponseError
-    from azure.batch.models import BatchErrorException
 
-    if isinstance(ex, BatchErrorException):
+    if isinstance(ex, HttpResponseError):
+        batch_msg = _parse_batch_error_msg(ex)
+        if batch_msg:
+            if ex.status_code == 401:
+                raise UnauthorizedError(batch_msg)
+            if ex.status_code == 404:
+                raise ResourceNotFoundError(batch_msg)
+            raise AzureResponseError(batch_msg)
+
+    raise CLIInternalError(ex)
+
+
+def _parse_batch_error_msg(ex):
+    """Try to Parse out a BatchError message from the response body. Returns
+       None if no message could be parsed"""
+    message = None
+    if getattr(ex, 'response', None) and getattr(ex.response, 'json', None):
         try:
-            message = ex.error.message.value
-            if ex.error.values:
-                for detail in ex.error.values:
-                    message += f"\n{detail.key}: {detail.value}"
-            raise CLIError(message)
-        except AttributeError:
-            raise CLIError(ex)
-    elif isinstance(ex, (ValidationError, ClientRequestError)):
-        raise CLIError(ex)
-    elif isinstance(ex, HttpResponseError):
-        raise CLIError(ex)
-    else:
-        raise ex
+            err = ex.response.json()
+            if err.get('code'):
+                message = f"({err.get('code')})"
+                if err.get('message') and err.get('message').get('value'):
+                    message += f" {err.get('message').get('value')}"
+                if err.get('values'):
+                    for detail in err.get('values'):
+                        message += f"\n{detail.get('key')}: {detail.get('value')}"
+        except JSONDecodeError as e:
+            logger.debug("Failed to parse Batch error JSON. Exception: %s", e)
+    return message
