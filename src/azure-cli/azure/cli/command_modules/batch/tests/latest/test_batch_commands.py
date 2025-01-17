@@ -518,22 +518,22 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
         # testing range
         # both start-range and end-range are present
         kwargs = {
-            'start-range': '10',
-            'end-range': '20'
+            'start_range': '10',
+            'end_range': '20'
         }
         self.command_delete.filter_args(kwargs)
         self.assertEqual(kwargs, {'ocp_range': 'bytes=10-20'})
 
         # only start-range is present
         kwargs = {
-            'end-range': '20'
+            'end_range': '20'
         }
         self.command_delete.filter_args(kwargs)
         self.assertEqual(kwargs, {'ocp_range': 'bytes=0-20'})
 
         # only end-range is present
         kwargs = {
-            'start-range': '10'
+            'start_range': '10'
         }
         self.command_delete.filter_args(kwargs)
         self.assertEqual(kwargs, {'ocp_range': 'bytes=10-'})
@@ -542,14 +542,14 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
 
         #testing if-match *
         kwargs = {
-            'if-match': '*'
+            'if_match': '*'
         }
         self.command_delete.filter_args(kwargs)
         self.assertEqual(kwargs, {'match_condition': MatchConditions.IfPresent})
 
         # testing if-match value
         kwargs = {
-            'if-match': 'test'
+            'if_match': 'test'
         }
         self.command_delete.filter_args(kwargs)
         self.assertEqual(kwargs, {'etag': 'test', 'match_condition': MatchConditions.IfNotModified})

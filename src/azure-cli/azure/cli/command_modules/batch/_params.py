@@ -339,10 +339,10 @@ def load_arguments(self, _):
                         '-1, the Batch service retries the Task without limit, however this is '
                         'not recommended for a start task or any task. The default value is 0 '
                         '(no retries).')
-        c.argument('max_wall_clock_time', arg_group='Constraints',
+        c.argument('max_wall_clock_time', type=duration_format, arg_group='Constraints',
                    help='If this is not specified, there is no time limit on how long the Task '
                         'may run. Expected format is an ISO-8601 duration.')
-        c.argument('retention_time', arg_group='Constraints',
+        c.argument('retention_time', type=duration_format, arg_group='Constraints',
                    help='The default is 7 days, i.e. the Task directory will be retained for 7 '
                         'days unless the Compute Node is removed or the Job is deleted. Expected '
                         'format is an ISO-8601 duration.')
