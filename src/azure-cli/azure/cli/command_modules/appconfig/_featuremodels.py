@@ -392,7 +392,7 @@ class FeaturePercentileAllocation:
         variant = percentile_allocation_dict.get(FeatureFlagConstants.VARIANT, None)
         percentile_from = percentile_allocation_dict.get(FeatureFlagConstants.FROM, None)
         percentile_to = percentile_allocation_dict.get(FeatureFlagConstants.TO, None)
-        if variant is None or percentile_from is None or percentile_to is None:
+        if not variant or percentile_from is None or percentile_to is None:
             raise ValidationError(
                 "Percentile allocation must contain required '%s', '%s' and '%s' attributes: \n%s"
                 % (FeatureFlagConstants.VARIANT,
