@@ -447,7 +447,7 @@ def load_arguments(self, _):
         c.argument('request', help='Query inbound NAT rule port mapping request.', action=AddMappingRequest, nargs='*')
 
     with self.argument_context('network lb create') as c:
-        c.argument('frontend_ip_zone', zone_type, options_list=['--frontend-ip-zone'], help='used to create internal facing Load balancer')
+        c.argument('frontend_ip_zone', zones_type, options_list=['--frontend-ip-zone'], help='used to create internal facing Load balancer')
         c.argument('validate', help='Generate and validate the ARM template without creating any resources.', action='store_true')
         c.argument('sku', help='Load balancer SKU', arg_type=get_enum_type(['Basic', 'Gateway', 'Standard'], default='Standard'))
         c.argument('edge_zone', edge_zone)

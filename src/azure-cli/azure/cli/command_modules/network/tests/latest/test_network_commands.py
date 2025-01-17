@@ -501,12 +501,20 @@ class NetworkLoadBalancerWithZone(ScenarioTest):
     def test_network_lb_frontend_ip_zone(self, resource_group):
         self.kwargs.update({
             'location': 'eastus2',
+            'lb1': self.create_random_name('lb', 10),
+            'lb2': self.create_random_name('lb', 10),
+            'vnet1': self.create_random_name('vnet', 10),
+            'vnet2': self.create_random_name('vnet', 10),
+            'pool': self.create_random_name('poll', 10)
         })
 
         # LB with subnet : internal LB
-        self.cmd('network lb create -g {rg} -l {location} -n lb --vnet-name vnet --subnet subnet --sku Standard')
-        self.cmd('network lb frontend-ip create -g {rg} --lb-name lb -n LoadBalancerFrontEnd2 -z 1 2 3 --vnet-name vnet --subnet subnet', checks=[
+        self.cmd('network lb create -g {rg} -l {location} -n {lb1} --vnet-name {vnet1} --subnet subnet --sku Standard')
+        self.cmd('network lb frontend-ip create -g {rg} --lb-name {lb1} -n LoadBalancerFrontEnd2 -z 1 2 3 --vnet-name {vnet1} --subnet subnet', checks=[
             self.check("length(zones)", 3)
+        ])
+        self.cmd('network lb create -g {rg} -n {lb2} --sku standard --vnet-name {vnet2} --subnet default --frontend-ip-zone 1 2 3 --backend-pool-name {pool}', checks=[
+            self.check("loadBalancer.frontendIPConfigurations[0].zones", ['1', '2', '3'])
         ])
 
 
