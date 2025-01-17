@@ -220,7 +220,8 @@ class BatchArgumentTree:
 
     def _is_datetime(self, name):
         """Whether argument value is a timestamp"""
-        return self._arg_tree[name]['type'] in ['iso-8601', 'rfc-1123'] or self._arg_tree[name]['type'] == 'datetime.datetime'
+        return self._arg_tree[name]['type'] in ['iso-8601', 'rfc-1123'] or \
+            self._arg_tree[name]['type'] == 'datetime.datetime'
 
     def _is_duration(self, name):
         """Whether argument is value is a duration"""
