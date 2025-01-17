@@ -5721,6 +5721,13 @@ def list_consumption_locations(cmd):
     return [{'name': x.name.lower().replace(' ', '')} for x in regions]
 
 
+def get_subscription_locations(cli_ctx):
+    from azure.cli.core.commands.client_factory import get_subscription_service_client
+    subscription_client, subscription_id = get_subscription_service_client(cli_ctx)
+    result = list(subscription_client.subscriptions.list_locations(subscription_id))
+    return [item.name for item in result]
+
+
 def list_flexconsumption_locations(cmd, zone_redundant=False):
     if zone_redundant:
         return list_flexconsumption_zone_redundant_locations(cmd)
@@ -5729,8 +5736,10 @@ def list_flexconsumption_locations(cmd, zone_redundant=False):
     sub_id = get_subscription_id(cmd.cli_ctx)
     geo_regions_api = 'subscriptions/{}/providers/Microsoft.Web/geoRegions?sku=FlexConsumption&api-version=2023-01-01'
     request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + geo_regions_api.format(sub_id)
-    regions = send_raw_request(cmd.cli_ctx, "GET", request_url).json()['value']
-    return [{'name': x['name'].lower().replace(' ', '')} for x in regions]
+    flex_regions = send_raw_request(cmd.cli_ctx, "GET", request_url).json()['value']
+    flex_regions_list = [{'name': x['name'].lower().replace(' ', '')} for x in flex_regions]
+    sub_regions_list = get_subscription_locations(cmd.cli_ctx)
+    return [x for x in flex_regions_list if x['name'] in sub_regions_list]
 
 
 def list_locations(cmd, sku, linux_workers_enabled=None, hyperv_workers_enabled=None):
