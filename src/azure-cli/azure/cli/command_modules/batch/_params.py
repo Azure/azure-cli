@@ -271,7 +271,7 @@ def load_arguments(self, _):
         'node delete'
     ]:
         with self.argument_context(f'batch {command}') as c:
-            c.extra('if-match', arg_group='Pre-condition and Query',
+            c.extra('if_match', arg_group='Pre-condition and Query',
                     help='An ETag value associated with the version of the resource known to the client. '
                          'The operation will be performed only if the resource\'s current ETag on the service '
                          'exactly matches the value specified by the client.')
@@ -279,7 +279,7 @@ def load_arguments(self, _):
                     help='A timestamp indicating the last modified time of the resource known to the client. '
                          'The operation will be performed only if the resource on the service has been modified '
                          'since the specified time.',)
-            c.extra('if-none-match', arg_group='Pre-condition and Query',
+            c.extra('if_none_match', arg_group='Pre-condition and Query',
                     help='An ETag value associated with the version of the resource known to the client. '
                          'The operation will be performed only if the resource\'s current ETag on the service '
                          'does not match the value specified by the client.')
@@ -364,9 +364,9 @@ def load_arguments(self, _):
 
     for command in ['node file download', 'task file download']:
         with self.argument_context(f'batch {command}') as c:
-            c.extra('end-range', arg_group='Pre-condition and Query',
+            c.extra('end_range', arg_group='Pre-condition and Query',
                     help='The byte range to be retrieved. If not set the file will be retrieved to the end.')
-            c.extra('start-range', arg_group='Pre-condition and Query',
+            c.extra('start_range', arg_group='Pre-condition and Query',
                     help='The byte range to be retrieved. If not set the file will be retrieved from the beginning.')
 
     for command in ['node file download', 'node file show', 'task file show', 'task file download']:

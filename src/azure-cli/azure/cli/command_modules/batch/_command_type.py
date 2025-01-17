@@ -224,7 +224,7 @@ class BatchArgumentTree:
 
     def _is_duration(self, name):
         """Whether argument is value is a duration"""
-        return self._arg_tree[name]['type'] == 'duration'
+        return self._arg_tree[name]['type'] == 'duration' or self._arg_tree[name]['type'] == 'datetime.timedelta'
 
     def _help(self, name, text):
         """Append phrase to existing help text"""
