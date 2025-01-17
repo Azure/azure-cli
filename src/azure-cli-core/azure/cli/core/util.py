@@ -1284,11 +1284,14 @@ def handle_version_update():
     because of a version update of Azure CLI
     """
     try:
+        import datetime
         from azure.cli.core._session import VERSIONS
         from packaging.version import parse  # pylint: disable=import-error,no-name-in-module
         from azure.cli.core import __version__
         if not VERSIONS['versions']:
-            get_cached_latest_versions()
+            versions = _get_local_versions()
+            VERSIONS['versions'] = versions
+            VERSIONS[_VERSION_UPDATE_TIME] = str(datetime.datetime.now())
         elif parse(VERSIONS['versions']['core']['local']) != parse(__version__):
             logger.debug("Azure CLI has been updated.")
             logger.debug("Clean up versions and refresh cloud endpoints information in local files.")
