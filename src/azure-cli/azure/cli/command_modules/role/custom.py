@@ -134,6 +134,9 @@ def delete_role_definition(cmd, name, resource_group_name=None, scope=None,
     definitions_client = _auth_client_factory(cmd.cli_ctx, scope).role_definitions
     scope = _build_role_scope(resource_group_name, scope,
                               definitions_client._config.subscription_id)
+    if is_guid(name):
+        definitions_client.delete(scope, name)
+        return
     roles = _search_role_definitions(cmd.cli_ctx, definitions_client, name, [scope], custom_role_only)
     for r in roles:
         definitions_client.delete(role_definition_id=r.name, scope=scope)
