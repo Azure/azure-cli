@@ -1110,53 +1110,6 @@ type: group
 short-summary: Manage gallery sharing profile
 """
 
-helps['sig share add'] = """
-type: command
-short-summary: Share gallery with subscriptions and tenants
-examples:
-  - name: Share entire gallery with all members of a subscription and/or tenant.
-    text: |
-        az sig share add --resource-group MyResourceGroup --gallery-name MyGallery \\
-        --subscription-ids subId1 subId2 --tenant-ids tenantId1 tenantId2
-"""
-
-helps['sig share remove'] = """
-type: command
-short-summary: stop sharing gallery with a subscription or tenant
-examples:
-  - name: Stop sharing with a subscription or tenant ID
-    text: |
-        az sig share remove --resource-group MyResourceGroup --gallery-name MyGallery \\
-        --subscription-ids subId1 subId2 --tenant-ids tenantId1 tenantId2
-"""
-
-helps['sig share reset'] = """
-type: command
-short-summary: disable gallery from being shared with subscription or tenant
-examples:
-  - name: Reset sharing profile of a gallery.
-    text: |
-        az sig share reset --resource-group MyResourceGroup --gallery-name MyGallery
-"""
-
-helps['sig share enable-community'] = """
-type: command
-short-summary: Allow to share gallery to the community
-examples:
-  - name: Allow to share gallery to the community
-    text: |
-        az sig share enable-community --resource-group MyResourceGroup --gallery-name MyGallery
-"""
-
-helps['sig share wait'] = """
-type: command
-short-summary: Place the CLI in a waiting state until a condition of a shared gallery is met.
-examples:
-  - name: Place the CLI in a waiting state until the gallery sharing object is updated.
-    text: |
-        az sig share wait --updated --resource-group MyResourceGroup --gallery-name Gallery
-"""
-
 helps['sig gallery-application'] = """
     type: group
     short-summary: Manage gallery application

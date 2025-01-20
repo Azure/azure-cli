@@ -4872,12 +4872,6 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
     from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
-    ImageVersionPublishingProfile, GalleryArtifactSource, ManagedArtifact, ImageVersion, TargetRegion = cmd.get_models(
-        'GalleryImageVersionPublishingProfile', 'GalleryArtifactSource', 'ManagedArtifact', 'GalleryImageVersion',
-        'TargetRegion')
-    aux_subscriptions = _get_image_version_aux_subscription(managed_image, os_snapshot, data_snapshots)
-    client = _compute_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions)
-
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     end_of_life_date = fix_gallery_image_date_info(end_of_life_date)
     if managed_image and not is_valid_resource_id(managed_image):
@@ -4893,41 +4887,35 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                     subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
                     namespace='Microsoft.Compute', type='snapshots', name=s)
 
-    profile = ImageVersionPublishingProfile(exclude_from_latest=exclude_from_latest,
-                                            end_of_life_date=end_of_life_date,
-                                            target_regions=target_regions or [TargetRegion(name=location)],
-                                            replica_count=replica_count, storage_account_type=storage_account_type)
+    profile = {
+        "exclude_from_latest": exclude_from_latest,
+        "end_of_life_date": end_of_life_date,
+        "target_regions": target_regions or [{"name": location}],
+        "replica_count": replica_count,
+        "storage_account_type": storage_account_type
+    }
 
     if target_edge_zones:
-        profile.target_extended_locations = target_edge_zones
+        profile["target_extended_locations"] = target_edge_zones
 
     if replication_mode is not None:
-        profile.replication_mode = replication_mode
+        profile["replication_mode"] = replication_mode
     if not cmd.supported_api_version(min_api='2022-03-03', operation_group='gallery_image_versions'):
-        source = GalleryArtifactSource(managed_image=ManagedArtifact(id=managed_image))
-        profile.source = source
+        source = {"managed_image": {"id": managed_image}}
+        profile["source"] = source
 
     if cmd.supported_api_version(min_api='2019-07-01', operation_group='gallery_image_versions'):
         if managed_image is None and os_snapshot is None and os_vhd_uri is None:
             raise RequiredArgumentMissingError('usage error: Please provide --managed-image or --os-snapshot or --vhd')
-        GalleryImageVersionStorageProfile = cmd.get_models('GalleryImageVersionStorageProfile')
-        GalleryOSDiskImage = cmd.get_models('GalleryOSDiskImage')
-        GalleryDataDiskImage = cmd.get_models('GalleryDataDiskImage')
-        if cmd.supported_api_version(min_api='2022-03-03', operation_group='gallery_image_versions'):
-            GalleryArtifactVersionFullSource = cmd.get_models('GalleryArtifactVersionFullSource')
-            GalleryDiskImageSource = cmd.get_models('GalleryDiskImageSource')
-        else:
-            GalleryArtifactVersionFullSource = cmd.get_models('GalleryArtifactVersionSource')
-            GalleryDiskImageSource = cmd.get_models('GalleryArtifactVersionSource')
 
         source = os_disk_image = data_disk_images = None
         if virtual_machine is not None and cmd.supported_api_version(min_api='2023-07-03',
                                                                      operation_group='gallery_image_versions'):
-            source = GalleryArtifactVersionFullSource(virtual_machine_id=virtual_machine)
+            source = {"virtual_machine_id": virtual_machine}
         elif managed_image is not None:
-            source = GalleryArtifactVersionFullSource(id=managed_image)
+            source = {"id": managed_image}
         if os_snapshot is not None:
-            os_disk_image = GalleryOSDiskImage(source=GalleryDiskImageSource(id=os_snapshot))
+            os_disk_image = {"source": {"id": os_snapshot}}
         if data_snapshot_luns and not data_snapshots:
             raise ArgumentUsageError('usage error: --data-snapshot-luns must be used together with --data-snapshots')
         if data_snapshots:
@@ -4938,8 +4926,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                 data_snapshot_luns = list(range(len(data_snapshots)))
             data_disk_images = []
             for i, s in enumerate(data_snapshots):
-                data_disk_images.append(GalleryDataDiskImage(source=GalleryDiskImageSource(id=s),
-                                                             lun=data_snapshot_luns[i]))
+                data_disk_images.append({"source": {"id": s}, "lun": int(data_snapshot_luns[i])})
         # from vhd, only support os image now
         if cmd.supported_api_version(min_api='2020-09-30', operation_group='gallery_image_versions'):
             # OS disk
@@ -4950,8 +4937,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                     os_vhd_storage_account = resource_id(
                         subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
                         namespace='Microsoft.Storage', type='storageAccounts', name=os_vhd_storage_account)
-                os_disk_image = GalleryOSDiskImage(source=GalleryDiskImageSource(
-                    id=os_vhd_storage_account, uri=os_vhd_uri))
+                os_disk_image = {"source": {"id": os_vhd_storage_account, "uri": os_vhd_uri}}
 
             # Data disks
             if data_vhds_uris and data_vhds_storage_accounts is None or \
@@ -4980,60 +4966,70 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                 if data_disk_images is None:
                     data_disk_images = []
                 for uri, lun, account in zip(data_vhds_uris, data_vhds_luns, data_vhds_storage_accounts):
-                    data_disk_images.append(GalleryDataDiskImage(
-                        source=GalleryDiskImageSource(id=account, uri=uri), lun=lun))
+                    data_disk_images.append({"source": {"id": account, "uri": uri}, "lun": lun})
 
-        storage_profile = GalleryImageVersionStorageProfile(source=source, os_disk_image=os_disk_image,
-                                                            data_disk_images=data_disk_images)
-        image_version = ImageVersion(publishing_profile=profile, location=location, tags=(tags or {}),
-                                     storage_profile=storage_profile)
+        storage_profile = {"source": source, "os_disk_image": os_disk_image, "data_disk_images": data_disk_images}
+        args = {
+            "publishing_profile": profile,
+            "location": location,
+            "tags": tags or {},
+            "storage_profile": storage_profile
+        }
         if allow_replicated_location_deletion is not None:
-            GalleryImageVersionSafetyProfile = cmd.get_models('GalleryImageVersionSafetyProfile',
-                                                              operation_group='gallery_image_versions')
-            image_version.safety_profile = GalleryImageVersionSafetyProfile(
-                allow_deletion_of_replicated_locations=allow_replicated_location_deletion)
+            args["safety_profile"] = {
+                "allow_deletion_of_replicated_locations": allow_replicated_location_deletion
+            }
     else:
         if managed_image is None:
             raise RequiredArgumentMissingError('usage error: Please provide --managed-image')
-        image_version = ImageVersion(publishing_profile=profile, location=location, tags=(tags or {}))
+        args = {"publishing_profile": profile, "location": location, "tags": tags or {}}
 
-    return client.gallery_image_versions.begin_create_or_update(
-        resource_group_name=resource_group_name,
-        gallery_name=gallery_name,
-        gallery_image_name=gallery_image_name,
-        gallery_image_version_name=gallery_image_version,
-        gallery_image_version=image_version
-    )
+    args["resource_group"] = resource_group_name
+    args["gallery_name"] = gallery_name
+    args["gallery_image_definition"] = gallery_image_name
+    args["gallery_image_version_name"] = gallery_image_version
+
+    from .aaz.latest.sig.image_version import Create
+    return Create(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 
 def undelete_image_version(cmd, resource_group_name, gallery_name, gallery_image_name, gallery_image_version,
                            location=None, tags=None, allow_replicated_location_deletion=None):
-    ImageVersion = cmd.get_models('GalleryImageVersion')
-    client = _compute_client_factory(cmd.cli_ctx)
-
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
 
-    gallery = client.galleries.get(resource_group_name, gallery_name)
-    soft_delete = gallery.soft_delete_policy.is_soft_delete_enabled
+    from .aaz.latest.sig import Show as _SigShow
+    gallery = _SigShow(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "gallery_name": gallery_name
+    })
+
+    if gallery.get("softDeletePolicy", None) and gallery["softDeletePolicy"].get("isSoftDeleteEnabled", None):
+        soft_delete = gallery["softDeletePolicy"]["isSoftDeleteEnabled"]
+    else:
+        soft_delete = None
+
     if not soft_delete:
         from azure.cli.core.azclierror import InvalidArgumentValueError
         raise InvalidArgumentValueError('soft-deletion is not enabled in Gallery \'{}\''.format(gallery_name))
 
-    image_version = ImageVersion(publishing_profile=None, location=location, tags=(tags or {}),
-                                 storage_profile=None)
+    args = {
+        "publishing_profile": None,
+        "location": location,
+        "tags": tags or {},
+        "storage_profile": None,
+    }
     if allow_replicated_location_deletion is not None:
-        GalleryImageVersionSafetyProfile = cmd.get_models('GalleryImageVersionSafetyProfile',
-                                                          operation_group='gallery_image_versions')
-        image_version.safety_profile = GalleryImageVersionSafetyProfile(
-            allow_deletion_of_replicated_locations=allow_replicated_location_deletion)
+        args["safety_profile"] = {
+            "allow_deletion_of_replicated_locations": allow_replicated_location_deletion
+        }
 
-    return client.gallery_image_versions.begin_create_or_update(
-        resource_group_name=resource_group_name,
-        gallery_name=gallery_name,
-        gallery_image_name=gallery_image_name,
-        gallery_image_version_name=gallery_image_version,
-        gallery_image_version=image_version
-    )
+    args["resource_group"] = resource_group_name
+    args["gallery_name"] = gallery_name
+    args["gallery_image_definition"] = gallery_image_name
+    args["gallery_image_version_name"] = gallery_image_version
+
+    from .aaz.latest.sig.image_version import Create
+    return Create(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 
 def fix_gallery_image_date_info(date_info):
@@ -5045,41 +5041,61 @@ def fix_gallery_image_date_info(date_info):
 
 # pylint: disable=line-too-long
 def get_image_version_to_update(cmd, resource_group_name, gallery_name, gallery_image_name, gallery_image_version_name):
-    client = _compute_client_factory(cmd.cli_ctx)
-    version = client.gallery_image_versions.get(resource_group_name, gallery_name, gallery_image_name, gallery_image_version_name)
+    from .aaz.latest.sig.image_version import Show as _SigImageVersionShow
+    version = _SigImageVersionShow(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "gallery_name": gallery_name,
+        "gallery_image_definition": gallery_image_name,
+        "gallery_image_version_name": gallery_image_version_name,
+    })
+
     # To avoid unnecessary permission check of image
-    version.storage_profile.source = None
-    if version.storage_profile.os_disk_image and version.storage_profile.os_disk_image.source:
-        version.storage_profile.os_disk_image.source = None
-    if version.storage_profile.data_disk_images:
-        for v in version.storage_profile.data_disk_images:
-            if v.source:
-                v.source = None
+    if "storage_profile" not in version:
+        version["storage_profile"] = {}
+    version["storage_profile"]["source"] = None
+    if version["storage_profile"].get("os_disk_image", None) and \
+            version["storage_profile"]["os_disk_image"].get("source", None):
+        version["storage_profile"]["os_disk_image"]["source"] = None
+    if version["storage_profile"].get("data_disk_images", None):
+        for v in version["storage_profile"]["data_disk_images"]:
+            if v.get("source", None):
+                v["source"] = None
     return version
 
 
 def update_image_version(cmd, resource_group_name, gallery_name, gallery_image_name, gallery_image_version_name,
                          target_regions=None, replica_count=None, allow_replicated_location_deletion=None,
                          target_edge_zones=None, no_wait=False, **kwargs):
-    image_version = kwargs['gallery_image_version']
+    args = kwargs['gallery_image_version']
 
     if target_regions:
-        image_version.publishing_profile.target_regions = target_regions
+        if "publishing_profile" not in args:
+            args["publishing_profile"] = {}
+        args["publishing_profile"]["target_regions"] = target_regions
     if replica_count:
-        image_version.publishing_profile.replica_count = replica_count
-    if image_version.storage_profile.source is not None:
-        image_version.storage_profile.os_disk_image = image_version.storage_profile.data_disk_images = None
+        if "publishing_profile" not in args:
+            args["publishing_profile"] = {}
+        args["publishing_profile"]["replica_count"] = replica_count
+    if args.get("storage_profile", None) and args["storage_profile"].get("source", None) is not None:
+        args["storage_profile"]["os_disk_image"] = args["storage_profile"]["data_disk_images"] = None
     # target extended locations will be updated when --target-edge-zones is specified
     if target_edge_zones is not None:
-        image_version.publishing_profile.target_extended_locations = target_edge_zones \
+        if "publishing_profile" not in args:
+            args["publishing_profile"] = {}
+        args["publishing_profile"]["target_extended_locations"] = target_edge_zones \
             if len(target_edge_zones) > 0 else None
     if allow_replicated_location_deletion is not None:
-        image_version.safety_profile.allow_deletion_of_replicated_locations = allow_replicated_location_deletion
+        if "safety_profile" not in args:
+            args["safety_profile"] = {}
+        args["safety_profile"]["allow_deletion_of_replicated_locations"] = allow_replicated_location_deletion
 
-    client = _compute_client_factory(cmd.cli_ctx)
+    args["resource_group"] = resource_group_name
+    args["gallery_name"] = gallery_name
+    args["gallery_image_definition"] = gallery_image_name
+    args["gallery_image_version_name"] = gallery_image_version_name
 
-    return sdk_no_wait(no_wait, client.gallery_image_versions.begin_create_or_update, resource_group_name, gallery_name,
-                       gallery_image_name, gallery_image_version_name, **kwargs)
+    from .aaz.latest.sig.image_version import Update
+    return Update(cli_ctx=cmd.cli_ctx)(command_args=args)
 # endregion
 
 
@@ -5459,33 +5475,6 @@ def list_generator(pages, num_results=50):
     return result
 
 
-def sig_share_update(cmd, client, resource_group_name, gallery_name, subscription_ids=None, tenant_ids=None,
-                     op_type=None):
-    SharingProfileGroup, SharingUpdate, SharingProfileGroupTypes = cmd.get_models(
-        'SharingProfileGroup', 'SharingUpdate', 'SharingProfileGroupTypes', operation_group='shared_galleries')
-    if op_type != 'EnableCommunity':
-        if subscription_ids is None and tenant_ids is None:
-            raise RequiredArgumentMissingError('At least one of subscription ids or tenant ids must be provided')
-    groups = []
-    if subscription_ids:
-        groups.append(SharingProfileGroup(type=SharingProfileGroupTypes.SUBSCRIPTIONS, ids=subscription_ids))
-    if tenant_ids:
-        groups.append(SharingProfileGroup(type=SharingProfileGroupTypes.AAD_TENANTS, ids=tenant_ids))
-    sharing_update = SharingUpdate(operation_type=op_type, groups=groups)
-    return client.begin_update(resource_group_name=resource_group_name,
-                               gallery_name=gallery_name,
-                               sharing_update=sharing_update)
-
-
-def sig_share_reset(cmd, client, resource_group_name, gallery_name):
-    SharingUpdate, SharingUpdateOperationTypes = cmd.get_models('SharingUpdate', 'SharingUpdateOperationTypes',
-                                                                operation_group='shared_galleries')
-    sharing_update = SharingUpdate(operation_type=SharingUpdateOperationTypes.RESET)
-    return client.begin_update(resource_group_name=resource_group_name,
-                               gallery_name=gallery_name,
-                               sharing_update=sharing_update)
-
-
 def sig_shared_image_definition_list(client, location, gallery_unique_name,
                                      shared_to=None, marker=None, show_next_marker=None):
     # Keep it here as it will add subscription in the future and we need to set it to None to make it work
@@ -5644,13 +5633,6 @@ def gallery_application_version_update(client,
                        gallery_application_name=gallery_application_name,
                        gallery_application_version_name=gallery_application_version_name,
                        gallery_application_version=gallery_application_version)
-
-
-def get_gallery_instance(cmd, resource_group_name, gallery_name):
-    from ._client_factory import cf_vm_cl
-    client = cf_vm_cl(cmd.cli_ctx)
-    SelectPermissions = cmd.get_models('SelectPermissions', operation_group='shared_galleries')
-    return client.galleries.get(resource_group_name, gallery_name, select=SelectPermissions.PERMISSIONS)
 
 
 def create_capacity_reservation_group(cmd, client, resource_group_name, capacity_reservation_group_name, location=None,

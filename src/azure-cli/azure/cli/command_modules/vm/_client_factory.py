@@ -161,10 +161,6 @@ def cf_shared_galleries(cli_ctx, *_):
     return cf_vm_cl(cli_ctx).shared_galleries
 
 
-def cf_gallery_sharing_profile(cli_ctx, *_):
-    return cf_vm_cl(cli_ctx).gallery_sharing_profile
-
-
 def cf_shared_gallery_image(cli_ctx, *_):
     return cf_vm_cl(cli_ctx).shared_gallery_images
 

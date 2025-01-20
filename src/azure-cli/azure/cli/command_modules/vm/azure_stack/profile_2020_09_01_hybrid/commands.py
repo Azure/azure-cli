@@ -34,3 +34,11 @@ def load_command_table(self, _):
 
     from .operations.sig_image_definition import SigImageDefinitionUpdate
     self.command_table['sig image-definition update'] = SigImageDefinitionUpdate(loader=self)
+
+    from .operations.vm import VMListSizes
+    self.command_table['vm list-sizes'] = VMListSizes(loader=self)
+
+    # pylint: disable=line-too-long
+    SigImageVersion = import_aaz_by_profile("sig.image_version")
+    self.command_table['sig image-version show'] = SigImageVersion.Show(loader=self,
+                                                                        table_transformer='{Name:name, ResourceGroup:resourceGroup, ProvisioningState:provisioningState, TargetRegions: publishingProfile.targetRegions && join(`, `, publishingProfile.targetRegions[*].name), EdgeZones: publishingProfile.targetExtendedLocations && join(`, `, publishingProfile.targetExtendedLocations[*].name), ReplicationState:replicationStatus.aggregatedState}')

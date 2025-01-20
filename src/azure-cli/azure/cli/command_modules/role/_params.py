@@ -369,7 +369,23 @@ def load_arguments(self, _):
         c.argument('yes', options_list=['--yes', '-y'], action='store_true', help='Currently no-op.')
 
     with self.argument_context('role definition') as c:
-        c.argument('role_definition_id', options_list=['--name', '-n'], help='the role definition name')
         c.argument('custom_role_only', arg_type=get_three_state_flag(), help='custom roles only(vs. build-in ones)')
         c.argument('role_definition', help="json formatted content which defines the new role.")
-        c.argument('name', arg_type=name_arg_type, completer=get_role_definition_name_completion_list, help="the role's name")
+
+    with self.argument_context('role definition list') as c:
+        c.argument('name', arg_type=name_arg_type, completer=get_role_definition_name_completion_list,
+                   help="Matches the role definition's name (GUID) or roleName (e.g. 'Reader') property. "
+                        "If a GUID is provided, for better performance, use `az role definition show` command.")
+
+    with self.argument_context('role definition show') as c:
+        c.argument('name', arg_type=name_arg_type, help="The role definition's name (GUID)")
+        c.argument('role_id', options_list=['--id'],
+                   help='The fully qualified role definition ID. Use the format, '
+                        '/subscriptions/{guid}/providers/Microsoft.Authorization/roleDefinitions/{roleDefinitionId} '
+                        'for subscription level role definitions, or '
+                        '/providers/Microsoft.Authorization/roleDefinitions/{roleDefinitionId} '
+                        'for tenant level role definitions.')
+
+    with self.argument_context('role definition delete') as c:
+        c.argument('name', arg_type=name_arg_type, completer=get_role_definition_name_completion_list,
+                   help="Matches the role definition's name (GUID) or roleName (e.g. 'Reader') property.")
