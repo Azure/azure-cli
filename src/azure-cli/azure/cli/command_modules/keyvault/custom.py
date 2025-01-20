@@ -311,11 +311,12 @@ def _create_network_rule_set(cmd, bypass=None, default_action=None):
     NetworkRuleBypassOptions = cmd.get_models('NetworkRuleBypassOptions', resource_type=ResourceType.MGMT_KEYVAULT)
     NetworkRuleAction = cmd.get_models('NetworkRuleAction', resource_type=ResourceType.MGMT_KEYVAULT)
 
+    # We actually should not set any default value from client side
+    # Keep this 'if' section to avoid breaking change
     if not bypass and not default_action:
         return NetworkRuleSet(bypass=NetworkRuleBypassOptions.azure_services.value,
                               default_action=NetworkRuleAction.allow.value)
-    else:
-        return NetworkRuleSet(bypass=bypass, default_action=default_action)
+    return NetworkRuleSet(bypass=bypass, default_action=default_action)
 
 
 # region KeyVault Vault
