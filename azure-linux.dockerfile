@@ -11,7 +11,7 @@ FROM $IMAGE
 RUN --mount=type=bind,target=/azure-cli.rpm,source=./docker-temp/azure-cli.rpm \
     tdnf install ca-certificates jq /azure-cli.rpm -y && \
     # Run az version to generate the commandIndex.json and speed up the following az commands
-    az version && cd ~/.azure && ls | grep -v commandIndex.json | xargs rm -rf && \
+    az version && cd ~/.azure && ls | grep --invert-match commandIndex.json | xargs rm -rf && \
     tdnf clean all && rm -rf /var/cache/tdnf
 
 # See https://github.com/Azure/azure-cli/issues/29828 for background on this
