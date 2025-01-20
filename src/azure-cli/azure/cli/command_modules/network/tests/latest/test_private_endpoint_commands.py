@@ -4890,16 +4890,18 @@ class NetworkPrivateLinkPostgreSQLFlexibleServerScenarioTest(ScenarioTest):
             self.cmd('az network private-endpoint-connection delete --id {pec_id} -y')
 
 class NetworkPrivateLinkDeidServiceScenarioTest(ScenarioTest):
-    
+
+    @AllowLargeResponse(size_kb=8024) # set size to 8024KB 'az extension add' has a rather large index
     @ResourceGroupPreparer(name_prefix='cli_test_deidservice_plr')
     def test_private_link_resource_deidservice(self, resource_group):
-        """Test for private link resource deidservice""" 
+        """Test for private link resource deidservice"""
         self.kwargs.update({
             'serviceName': self.create_random_name('cli-test-deid-plr-', 24),
             'loc': 'eastus',
             'rg': resource_group
         })
-
+       
+        self.cmd('az extension add -n healthcareapis')
         self.cmd(
             'az healthcareapis deidservice create --name {serviceName} -g {rg} --location {loc}'
         )
@@ -4908,14 +4910,15 @@ class NetworkPrivateLinkDeidServiceScenarioTest(ScenarioTest):
             'az network private-link-resource list --name {serviceName} --resource-group {rg} '
             '--type Microsoft.HealthDataAiservices/deidservices',
             checks=[
-                self.check('length(@)', 1), 
+                self.check('length(@)', 1),
                 self.check('[0].properties.groupId', 'deid')
             ]
         )
 
+    @AllowLargeResponse(size_kb=8024) # set size to 8024KB ad extension has a rather large index
     @ResourceGroupPreparer(name_prefix='cli_test_deidservice_pe')
     def test_private_endpoint_connection_deidservice(self, resource_group):
-        """Test for private endpoint connection to the deidservice"""  
+        """Test for private endpoint connection to the deidservice"""
         self.kwargs.update({
             'serviceName': self.create_random_name('cli-test-deid-pe-', 24),
             'loc': 'eastus',
@@ -4927,6 +4930,7 @@ class NetworkPrivateLinkDeidServiceScenarioTest(ScenarioTest):
         })
 
         # Prepare deidservice and network
+        self.cmd('az extension add -n healthcareapis')
         service = self.cmd(
             'az healthcareapis deidservice create --name {serviceName} -g {rg} --location {loc}'
         ).get_output_in_json()
@@ -4951,7 +4955,7 @@ class NetworkPrivateLinkDeidServiceScenarioTest(ScenarioTest):
             '--group-id deid'
         ).get_output_in_json()
         print(f"Private endpoint created: {pe}", flush=True) #< Does not return the full connection ID
-            
+
         # Show the connection at deidservice side
         list_result = self.cmd(
             'az network private-endpoint-connection list --name {serviceName} -g {rg} '
@@ -4961,9 +4965,9 @@ class NetworkPrivateLinkDeidServiceScenarioTest(ScenarioTest):
 
         # Find the private endpoint ID
         # << Bug Workaround >>
-        # Workaround for obtaining the full private endpoint connection ID.   
-        # The command 'az network private-endpoint create' does not return the full ID,   
-        # as it lacks the unique identifier at the end. The following code remedies this issue.  
+        # Workaround for obtaining the full private endpoint connection ID.
+        # The command 'az network private-endpoint create' does not return the full ID,
+        # as it lacks the unique identifier at the end. The following code remedies this issue.
         pe_connection_id = None
         pe_connection_name = None
         for connection in list_result:
@@ -4975,7 +4979,7 @@ class NetworkPrivateLinkDeidServiceScenarioTest(ScenarioTest):
         if pe_connection_id:
             # Show the private endpoint connection details
             show_result = self.cmd(
-                f'az network private-endpoint-connection show --id {pe_connection_id}', 
+                f'az network private-endpoint-connection show --id {pe_connection_id}',
                 checks=self.check(
                     'properties.privateLinkServiceConnectionState.status', 'Approved'
                 )
@@ -4991,23 +4995,23 @@ class NetworkPrivateLinkDeidServiceScenarioTest(ScenarioTest):
             print(f"delete_cmd: {delete_cmd}", flush=True)
             delete_result = self.cmd(delete_cmd)
             print(f"delete_result: {delete_result}", flush=True)
-        
-            # Wait for deletion to complete try for up to 60 seconds  
-            for _ in range(60):  
+
+            # Wait for deletion to complete try for up to 60 seconds
+            for _ in range(60):
                 # Verify deletion via list command
                 connections = self.cmd(
                     'az network private-endpoint-connection list --name {serviceName} -g {rg} '
                     '--type Microsoft.HealthDataAiservices/deidservices'
-                ).get_output_in_json()  
+                ).get_output_in_json()
                 if len(connections) == 0:
                     print('Private endpoint connection deleted successfully')
-                    break 
+                    break
 
                 print(f"Connections still exist: {connections}", flush=True)
-                time.sleep(1)  
-            else:  # This block runs if the for loop completes without breaking (i.e., if the deletion didn't complete in time)  
-                self.fail("Private endpoint connection deletion did not complete in time") 
-            
+                time.sleep(1)
+            else:  # This block runs if the for loop completes without breaking (i.e., if the deletion didn't complete in time)
+                self.fail("Private endpoint connection deletion did not complete in time")
+
             self.assertEqual(len(connections), 0)
         else:
             self.fail("Created private endpoint connection not found, could not proceed with further tests")
