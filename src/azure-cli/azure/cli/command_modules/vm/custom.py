@@ -5494,53 +5494,6 @@ def sig_shared_image_version_list(client, location, gallery_unique_name, gallery
     return get_page_result(generator, marker, show_next_marker)
 
 
-def gallery_application_create(client,
-                               resource_group_name,
-                               gallery_name,
-                               gallery_application_name,
-                               os_type,
-                               location,
-                               tags=None,
-                               description=None,
-                               no_wait=False):
-    gallery_application = {}
-    gallery_application['location'] = location
-    if tags is not None:
-        gallery_application['tags'] = tags
-    if description is not None:
-        gallery_application['description'] = description
-    if os_type is not None:
-        gallery_application['supported_os_type'] = os_type
-    return sdk_no_wait(no_wait,
-                       client.begin_create_or_update,
-                       resource_group_name=resource_group_name,
-                       gallery_name=gallery_name,
-                       gallery_application_name=gallery_application_name,
-                       gallery_application=gallery_application)
-
-
-def gallery_application_update(client,
-                               resource_group_name,
-                               gallery_name,
-                               gallery_application_name,
-                               location,
-                               tags=None,
-                               description=None,
-                               no_wait=False):
-    gallery_application = {}
-    gallery_application['location'] = location
-    if tags is not None:
-        gallery_application['tags'] = tags
-    if description is not None:
-        gallery_application['description'] = description
-    return sdk_no_wait(no_wait,
-                       client.begin_update,
-                       resource_group_name=resource_group_name,
-                       gallery_name=gallery_name,
-                       gallery_application_name=gallery_application_name,
-                       gallery_application=gallery_application)
-
-
 def gallery_application_version_create(client,
                                        resource_group_name,
                                        gallery_name,

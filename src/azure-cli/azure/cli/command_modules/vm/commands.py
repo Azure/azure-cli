@@ -16,7 +16,7 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set,
                                                           cf_shared_gallery_image,
                                                           cf_shared_gallery_image_version,
                                                           cf_capacity_reservation_groups, cf_capacity_reservations,
-                                                          cf_vmss_run_commands, cf_gallery_application,
+                                                          cf_vmss_run_commands,
                                                           cf_gallery_application_version, cf_restore_point,
                                                           cf_restore_point_collection, cf_community_gallery,
                                                           cf_community_gallery_image,
@@ -154,9 +154,8 @@ def load_command_table(self, _):
         client_factory=cf_gallery_image_versions,
     )
 
-    compute_gallery_application_sdk = CliCommandType(
+    compute_gallery_application_profile = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations#GalleryApplicationsOperations.{}',
-        client_factory=cf_gallery_application,
     )
 
     compute_gallery_application_version_sdk = CliCommandType(
@@ -558,10 +557,10 @@ def load_command_table(self, _):
                             client_factory=cf_shared_gallery_image_version) as g:
         g.custom_command('list-shared', 'sig_shared_image_version_list')
 
-    with self.command_group('sig gallery-application', compute_gallery_application_sdk, client_factory=cf_gallery_application, min_api='2021-07-01', operation_group='gallery_applications') as g:
-        g.custom_command('create', 'gallery_application_create', supports_no_wait=True)
-        g.custom_command('update', 'gallery_application_update', supports_no_wait=True)
-        g.wait_command('wait')
+    with self.command_group('sig gallery-application', compute_gallery_application_profile, min_api='2021-07-01', operation_group='gallery_applications') as g:
+        from .operations.sig_gallery_application import SigGalleryApplicationCreate
+        self.command_table['sig gallery-application create'] = SigGalleryApplicationCreate(loader=self)
+        # g.wait_command('wait')
 
     with self.command_group('sig gallery-application version', compute_gallery_application_version_sdk, client_factory=cf_gallery_application_version, min_api='2021-07-01', operation_group='gallery_application_versions') as g:
         g.custom_command('create', 'gallery_application_version_create', supports_no_wait=True)

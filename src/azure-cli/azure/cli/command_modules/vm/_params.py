@@ -1404,25 +1404,6 @@ def load_arguments(self, _):
     # endregion
 
     # region Gallery applications
-    with self.argument_context('sig gallery-application') as c:
-        c.argument('gallery_application_name', options_list=['--name', '-n', '--application-name'],
-                   help='The name of the gallery Application')
-
-    with self.argument_context('sig gallery-application create') as c:
-        c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False,
-                   validator=get_default_location_from_resource_group)
-        c.argument('description', help='The description of this gallery Application Definition resource. '
-                   'This property is updatable.')
-        c.argument('os_type', arg_type=get_enum_type(['Windows', 'Linux']), help='This property allows you '
-                   'to specify the supported type of the OS that application is built for. <br><br> Possible values '
-                   'are: <br><br> **Windows** <br><br> **Linux**')
-
-    with self.argument_context('sig gallery-application update') as c:
-        c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False,
-                   validator=get_default_location_from_resource_group)
-        c.argument('description', help='The description of this gallery Application Definition resource. '
-                   'This property is updatable.')
-
     with self.argument_context('sig gallery-application version') as c:
         c.argument('gallery_application_name', options_list=['--application-name'],
                    help='The name of the gallery Application')

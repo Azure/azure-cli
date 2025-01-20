@@ -43,8 +43,8 @@ class Delete(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.gallery_application_name = AAZStrArg(
-            options=["-n", "--name", "--application-name", "--gallery-application-name"],
+        _args_schema.application_name = AAZStrArg(
+            options=["-n", "--name", "--application-name"],
             help="The name of the gallery application.",
             required=True,
             id_part="child_name_1",
@@ -56,7 +56,6 @@ class Delete(AAZCommand):
             id_part="name",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
-            help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
             required=True,
         )
         return cls._args_schema
@@ -129,7 +128,7 @@ class Delete(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "galleryApplicationName", self.ctx.args.gallery_application_name,
+                    "galleryApplicationName", self.ctx.args.application_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
