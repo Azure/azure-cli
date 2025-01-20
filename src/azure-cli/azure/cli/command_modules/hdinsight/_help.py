@@ -16,8 +16,7 @@ short-summary: Manage HDInsight resources.
 helps['hdinsight application'] = """
 type: group
 short-summary: Manage HDInsight applications.
-long-summary: Since Api-version 2018-06-01-preview has been discontinued versions before 2.30.0 will \\
-  not be available normally. Please update to the latest version to get the best service.
+long-summary: We no longer maintain module before version 2.30.0. It is recommended to upgrade to at least version 2.30.0.
 """
 
 helps['hdinsight application create'] = """
