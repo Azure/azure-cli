@@ -1514,7 +1514,7 @@ def flexible_server_fabric_mirroring_start(cmd, client, resource_group_name, ser
 
     if server.high_availability.mode != "Disabled":
         # disable fabric mirroring on HA server
-        raise CLIError("Fabric mirroring is not supported on HA servers.")
+        raise CLIError("Fabric mirroring is not supported on servers with high availability enabled.")
 
     databases = ','.join(database_names[0].split())
     user_confirmation("Are you sure you want to prepare and enable your server" +
@@ -1548,7 +1548,7 @@ def flexible_server_fabric_mirroring_stop(cmd, client, resource_group_name, serv
 
     if server.high_availability.mode != "Disabled":
         # disable fabric mirroring on HA server
-        raise CLIError("Fabric mirroring is not supported on HA servers.")
+        raise CLIError("Fabric mirroring is not supported on servers with high availability enabled.")
 
     user_confirmation("Are you sure you want to disable mirroring for server '{0}' in resource group '{1}'".format(server_name, resource_group_name), yes=yes)
 
@@ -1570,7 +1570,7 @@ def flexible_server_fabric_mirroring_update_databases(cmd, client, resource_grou
 
     if server.high_availability.mode != "Disabled":
         # disable fabric mirroring on HA server
-        raise CLIError("Fabric mirroring is not supported on HA servers.")
+        raise CLIError("Fabric mirroring is not supported on servers with high availability enabled.")
 
     databases = ','.join(database_names[0].split())
     user_confirmation("Are you sure for server '{0}' in resource group '{1}' you want to update the databases being mirrored to be '{2}'"
