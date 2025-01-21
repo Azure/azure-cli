@@ -4890,7 +4890,8 @@ class NetworkPrivateLinkPostgreSQLFlexibleServerScenarioTest(ScenarioTest):
             self.cmd('az network private-endpoint-connection delete --id {pec_id} -y')
 
 class NetworkPrivateLinkDeidServiceScenarioTest(ScenarioTest):
-
+    
+    @live_only()
     @AllowLargeResponse(size_kb=8024) # set size to 8024KB 'az extension add' has a rather large index
     @ResourceGroupPreparer(name_prefix='cli_test_deidservice_plr')
     def test_private_link_resource_deidservice(self, resource_group):
@@ -4915,6 +4916,7 @@ class NetworkPrivateLinkDeidServiceScenarioTest(ScenarioTest):
             ]
         )
 
+    @live_only()
     @AllowLargeResponse(size_kb=8024) # set size to 8024KB ad extension has a rather large index
     @ResourceGroupPreparer(name_prefix='cli_test_deidservice_pe')
     def test_private_endpoint_connection_deidservice(self, resource_group):
