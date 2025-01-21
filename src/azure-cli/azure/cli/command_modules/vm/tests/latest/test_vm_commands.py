@@ -8051,6 +8051,7 @@ class VMGalleryApplication(ScenarioTest):
             self.check('tags', None),
             self.check('type', 'Microsoft.Compute/galleries/applications')
         ])
+        self.cmd('sig gallery-application wait -n {app_name} -r {gallery} -g {rg} --exists')
         self.cmd('sig create -r {gallery} -g {rg}')
         self.cmd('sig gallery-application update -n {app_name} -r {gallery} -g {rg} --description test --tags tag=test', checks=[
             self.check('name', '{app_name}'),

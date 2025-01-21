@@ -1110,11 +1110,6 @@ type: group
 short-summary: Manage gallery sharing profile
 """
 
-helps['sig gallery-application wait'] = """
-    type: command
-    short-summary: Place the CLI in a waiting state until a condition of the sig gallery-application is met.
-"""
-
 helps['sig gallery-application version'] = """
     type: group
     short-summary: Manage gallery application version

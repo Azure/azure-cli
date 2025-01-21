@@ -188,6 +188,10 @@ class List(AAZCommand):
             properties.privacy_statement_uri = AAZStrType(
                 serialized_name="privacyStatementUri",
             )
+            properties.provisioning_state = AAZStrType(
+                serialized_name="provisioningState",
+                flags={"read_only": True},
+            )
             properties.release_note_uri = AAZStrType(
                 serialized_name="releaseNoteUri",
             )

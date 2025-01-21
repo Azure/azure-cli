@@ -12,14 +12,13 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "sig gallery-application show",
+    "sig gallery-application wait",
 )
-class Show(AAZCommand):
-    """Get information about a gallery Application Definition.
+class Wait(AAZWaitCommand):
+    """Place the CLI in a waiting state until a condition is met.
     """
 
     _aaz_info = {
-        "version": "2021-07-01",
         "resources": [
             ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/galleries/{}/applications/{}", "2021-07-01"],
         ]
@@ -72,7 +71,7 @@ class Show(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=False)
         return result
 
     class GalleryApplicationsGet(AAZHttpOperation):
@@ -204,8 +203,8 @@ class Show(AAZCommand):
             return cls._schema_on_200
 
 
-class _ShowHelper:
-    """Helper class for Show"""
+class _WaitHelper:
+    """Helper class for Wait"""
 
 
-__all__ = ["Show"]
+__all__ = ["Wait"]
