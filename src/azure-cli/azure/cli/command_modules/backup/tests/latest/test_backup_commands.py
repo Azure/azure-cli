@@ -777,6 +777,24 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("resourceGroup", '{rg}')
         ])
 
+        # Trigger Cross Zonal Restore to NoZone
+        trigger_restore_job5_json = self.cmd('backup restore restore-disks -g {rg} -v {vault} -c {vm} -i {vm} -r {rp} -t {target_rg} --storage-account {sa} --restore-to-staging-storage-account --target-zone NoZone', checks=[
+            self.check("properties.entityFriendlyName", '{vm}'),
+            self.check("properties.operation", "Restore"),
+            self.check("properties.status", "InProgress"),
+            self.check("resourceGroup", '{rg}')
+        ]).get_output_in_json()
+        self.kwargs['job'] = trigger_restore_job5_json['name']
+        self.cmd('backup job wait -g {rg} -v {vault} -n {job}')
+
+        self.cmd('backup job show -g {rg} -v {vault} -n {job}', checks=[
+            self.check("properties.entityFriendlyName", '{vm}'),
+            self.check("properties.operation", "Restore"),
+            self.check("properties.status", "Completed"),
+            self.check("resourceGroup", '{rg}')
+        ])
+
+
     @AllowLargeResponse()
     @ResourceGroupPreparer(location="centraluseuap")
     @ResourceGroupPreparer(parameter_name="target_resource_group", location="centraluseuap")
