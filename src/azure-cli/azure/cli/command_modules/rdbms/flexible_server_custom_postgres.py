@@ -915,21 +915,36 @@ def flexible_server_identity_update(cmd, client, resource_group_name, server_nam
     validate_resource_group(resource_group_name)
     validate_citus_cluster(cmd, resource_group_name, server_name)
 
-    identity_type = 'None'
-    if system_assigned.lower() == 'enabled':
-        identity_type = 'SystemAssigned'
-    else:
-        server = client.get(resource_group_name, server_name)
-        identity_type = 'UserAssigned' if (server and server.identity and server.identity.type and 'UserAssigned' in server.identity.type) else 'None'
+    server = client.get(resource_group_name, server_name)
+    identity_type = server.identity.type if (server and server.identity and server.identity.type) else 'None'
 
-    if identity_type == 'UserAssigned':
+    if system_assigned.lower() == 'enabled':
+        # user wants to enable system-assigned identity
+        if identity_type == 'None':
+            # if user-assigned identity is not enabled, then enable system-assigned identity
+            identity_type = 'SystemAssigned'
+        elif identity_type == 'UserAssigned':
+            # if user-assigned identity is enabled, then enable both system-assigned and user-assigned identity
+            identity_type = 'SystemAssigned,UserAssigned'
+    else:
+        if server.data_encryption.type == 'AzureKeyVault':
+            # if data encryption is enabled, then system-assigned identity cannot be disabled
+            raise CLIError("Cannot disable system-assigned identity because it's used for data encryption.")
+        if identity_type == 'SystemAssigned,UserAssigned':
+            # if both system-assigned and user-assigned identity is enabled, then disable system-assigned identity
+            identity_type = 'UserAssigned'
+        elif identity_type == 'SystemAssigned':
+            # if only system-assigned identity is enabled, then disable system-assigned identity
+            identity_type = 'None'
+
+    if identity_type == 'UserAssigned' or identity_type == 'SystemAssigned,UserAssigned':
         identities_map = {}
         for identity in server.identity.user_assigned_identities:
             identities_map[identity] = {}
         parameters = {
             'identity': postgresql_flexibleservers.models.UserAssignedIdentity(
                 user_assigned_identities=identities_map,
-                type="UserAssigned")}
+                type=identity_type)}
     else:
         parameters = {
             'identity': postgresql_flexibleservers.models.UserAssignedIdentity(
@@ -950,6 +965,16 @@ def flexible_server_identity_assign(cmd, client, resource_group_name, server_nam
     validate_resource_group(resource_group_name)
     validate_citus_cluster(cmd, resource_group_name, server_name)
 
+    server = client.get(resource_group_name, server_name)
+    identity_type = server.identity.type if (server and server.identity and server.identity.type) else 'None'
+
+    if identity_type == 'SystemAssigned':
+        # if system-assigned identity is enabled, then enable both system
+        identity_type = 'SystemAssigned,UserAssigned'
+    elif identity_type == 'None':
+        # if system-assigned identity is not enabled, then enable user-assigned identity
+        identity_type = 'UserAssigned'
+
     identities_map = {}
     for identity in identities:
         identities_map[identity] = {}
@@ -957,7 +982,7 @@ def flexible_server_identity_assign(cmd, client, resource_group_name, server_nam
     parameters = {
         'identity': postgresql_flexibleservers.models.UserAssignedIdentity(
             user_assigned_identities=identities_map,
-            type="UserAssigned")}
+            type=identity_type)}
 
     result = resolve_poller(
         client.begin_update(
@@ -1438,7 +1463,7 @@ def backup_delete_func(client, resource_group_name, server_name, backup_name, ye
 
     if not yes:
         user_confirmation(
-            "Are you sure you want to delete the backup '{0}' in resource group '{1}'".format(backup_name, resource_group_name), yes=yes)
+            "Are you sure you want to delete the backup '{0}' in server '{1}'".format(backup_name, server_name), yes=yes)
 
     return client.begin_delete(
         resource_group_name,
