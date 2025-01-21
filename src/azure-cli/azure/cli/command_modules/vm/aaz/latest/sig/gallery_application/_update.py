@@ -47,8 +47,8 @@ class Update(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.application_name = AAZStrArg(
-            options=["-n", "--name", "--application-name"],
+        _args_schema.gallery_application_name = AAZStrArg(
+            options=["-n", "--name", "--application-name", "--gallery-application-name"],
             help="The name of the gallery application.",
             required=True,
             id_part="child_name_1",
@@ -147,7 +147,7 @@ class Update(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "galleryApplicationName", self.ctx.args.application_name,
+                    "galleryApplicationName", self.ctx.args.gallery_application_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -250,7 +250,7 @@ class Update(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "galleryApplicationName", self.ctx.args.application_name,
+                    "galleryApplicationName", self.ctx.args.gallery_application_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
