@@ -929,7 +929,7 @@ def flexible_server_identity_update(cmd, client, resource_group_name, server_nam
     else:
         if server.data_encryption.type == 'AzureKeyVault':
             # if data encryption is enabled, then system-assigned identity cannot be disabled
-            raise CLIError("Cannot disable system-assigned identity because it's used for data encryption.")
+            raise CLIError("Disabling system-assigned identity isn't supported on servers configured to use customer managed keys for data encryption.")
         if identity_type == 'SystemAssigned,UserAssigned':
             # if both system-assigned and user-assigned identity is enabled, then disable system-assigned identity
             identity_type = 'UserAssigned'
