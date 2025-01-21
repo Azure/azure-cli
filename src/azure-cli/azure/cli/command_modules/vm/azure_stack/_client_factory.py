@@ -95,10 +95,6 @@ def cf_gallery_image_versions(cli_ctx, _):
     return _compute_client_factory(cli_ctx).gallery_image_versions
 
 
-def cf_gallery_application(cli_ctx, *_):
-    return _compute_client_factory(cli_ctx).gallery_applications
-
-
 def cf_gallery_application_version(cli_ctx, *_):
     return _compute_client_factory(cli_ctx).gallery_application_versions
 
