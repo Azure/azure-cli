@@ -1510,12 +1510,17 @@ def flexible_server_fabric_mirroring_start(cmd, client, resource_group_name, ser
     validate_resource_group(resource_group_name)
     validate_citus_cluster(cmd, resource_group_name, server_name)
     flexible_servers_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
+    server = flexible_servers_client.get(resource_group_name, server_name)
+
+    if server.high_availability.mode != "Disabled":
+        # disable fabric mirroring on HA server
+        raise CLIError("Fabric mirroring is not supported on HA servers.")
 
     databases = ','.join(database_names[0].split())
     user_confirmation("Are you sure you want to prepare and enable your server" +
                       " '{0}' in resource group '{1}' for mirroring of databases '{2}'.".format(server_name, resource_group_name, databases) +
                       " This requires restart.", yes=yes)
-    server = flexible_servers_client.get(resource_group_name, server_name)
+
     if (server.identity is None or 'SystemAssigned' not in server.identity.type):
         logger.warning('Enabling system assigned managed identity on the server.')
         flexible_server_identity_update(cmd, flexible_servers_client, resource_group_name, server_name, 'Enabled')
@@ -1537,6 +1542,14 @@ def flexible_server_fabric_mirroring_start(cmd, client, resource_group_name, ser
 def flexible_server_fabric_mirroring_stop(cmd, client, resource_group_name, server_name, yes=False):
     validate_resource_group(resource_group_name)
     validate_citus_cluster(cmd, resource_group_name, server_name)
+
+    flexible_servers_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
+    server = flexible_servers_client.get(resource_group_name, server_name)
+
+    if server.high_availability.mode != "Disabled":
+        # disable fabric mirroring on HA server
+        raise CLIError("Fabric mirroring is not supported on HA servers.")
+
     user_confirmation("Are you sure you want to disable mirroring for server '{0}' in resource group '{1}'".format(server_name, resource_group_name), yes=yes)
 
     configuration_name = "azure.fabric_mirror_enabled"
@@ -1551,6 +1564,14 @@ def flexible_server_fabric_mirroring_stop(cmd, client, resource_group_name, serv
 def flexible_server_fabric_mirroring_update_databases(cmd, client, resource_group_name, server_name, database_names, yes=False):
     validate_resource_group(resource_group_name)
     validate_citus_cluster(cmd, resource_group_name, server_name)
+
+    flexible_servers_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
+    server = flexible_servers_client.get(resource_group_name, server_name)
+
+    if server.high_availability.mode != "Disabled":
+        # disable fabric mirroring on HA server
+        raise CLIError("Fabric mirroring is not supported on HA servers.")
+
     databases = ','.join(database_names[0].split())
     user_confirmation("Are you sure for server '{0}' in resource group '{1}' you want to update the databases being mirrored to be '{2}'"
                       .format(server_name, resource_group_name, databases), yes=yes)
