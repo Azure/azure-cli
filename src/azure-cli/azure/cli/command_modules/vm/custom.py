@@ -3533,11 +3533,6 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 master_template.add_resource(build_msi_role_assignment(vmss_name, vmss_id, identity_role_id,
                                                                        role_assignment_guid, identity_scope, False))
         if encryption_identity:
-            if not cmd.supported_api_version(min_api='2023-09-01', resource_type=ResourceType.MGMT_COMPUTE):
-                raise CLIError("Usage error: Encryption Identity required API version 2023-09-01 or higher."
-                               "You can set the cloud's profile to use the required API Version with:"
-                               "az cloud set --profile latest --name <cloud name>")
-
             if 'identity' in vmss_resource and 'userAssignedIdentities' in vmss_resource['identity'] \
                 and encryption_identity.lower() in \
                     (k.lower() for k in vmss_resource['identity']['userAssignedIdentities'].keys()):

@@ -1374,6 +1374,14 @@ def _validate_trusted_launch(namespace):
         namespace.enable_secure_boot = True
 
 
+def _validate_encryption_identity(cmd):
+    from azure.cli.core.profiles import ResourceType
+    if not cmd.supported_api_version(min_api='2023-09-01', resource_type=ResourceType.MGMT_COMPUTE):
+        raise CLIError("Usage error: Encryption Identity required API version 2023-09-01 or higher."
+                       "You can set the cloud's profile to use the required API Version with:"
+                       "az cloud set --profile latest --name <cloud name>")
+
+
 def trusted_launch_set_default(namespace, generation_version, features):
     if not generation_version:
         return
@@ -1864,6 +1872,9 @@ def process_vmss_create_namespace(cmd, namespace):
 
     _validate_capacity_reservation_group(cmd, namespace)
     _validate_community_gallery_legal_agreement_acceptance(cmd, namespace)
+
+    if namespace.encryption_identity:
+        _validate_encryption_identity(cmd)
 
 
 def validate_vmss_update_namespace(cmd, namespace):  # pylint: disable=unused-argument
