@@ -96,8 +96,8 @@ class CloudTests(ScenarioTest):
         self.cmd('cloud register --name {name} --endpoint-resource-manager https://management.azure.com/')
         result = self.cmd('az cloud show --name {name}').get_output_in_json()
         assert result['name'] == 'mycloud'
-        assert result['endpoints']['activeDirectory'] == 'https://login.microsoftonline.com/'
-        assert result['endpoints']['management'] == 'https://management.azure.com/'
+        assert result['endpoints']['activeDirectory'] == 'https://login.microsoftonline.com'
+        assert result['endpoints']['management'] == 'https://management.core.windows.net/'
 
         # Update the cloud
         self.cmd('cloud update --name {name} --endpoint-active-directory https://login.myendpoint.com/ '

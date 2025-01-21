@@ -34,13 +34,14 @@ def show_cloud(cmd, cloud_name=None):
         raise CLIError(e)
 
 
-def _populate_from_metadata_endpoint(cloud, arm_endpoint, session=None):
+def _populate_from_metadata_endpoint(arm_endpoint, session=None):
     endpoints_in_metadata = ['active_directory_graph_resource_id',
                              'active_directory_resource_id', 'active_directory']
-    METADATA_ENDPOINT_SUFFIX = '/metadata/endpoints?api-version=2015-01-01'
-    if not arm_endpoint or all([cloud.endpoints.has_endpoint_set(n) for n in endpoints_in_metadata]):  # pylint: disable=use-a-generator
-        return
+    METADATA_ENDPOINT_SUFFIX = '/metadata/endpoints?api-version=2022-09-01'
+    if not arm_endpoint:  # pylint: disable=use-a-generator
+        return Cloud('')
     import requests
+    from azure.cli.core.cloud import _arm_to_cli_mapper
     error_msg_fmt = "Unable to get endpoints from the cloud.\n{}"
     try:
         session = requests.Session() if session is None else session
@@ -48,14 +49,7 @@ def _populate_from_metadata_endpoint(cloud, arm_endpoint, session=None):
         response = session.get(metadata_endpoint)
         if response.status_code == 200:
             metadata = response.json()
-            if not cloud.endpoints.has_endpoint_set('gallery'):
-                setattr(cloud.endpoints, 'gallery', metadata.get('galleryEndpoint'))
-            if not cloud.endpoints.has_endpoint_set('active_directory_graph_resource_id'):
-                setattr(cloud.endpoints, 'active_directory_graph_resource_id', metadata.get('graphEndpoint'))
-            if not cloud.endpoints.has_endpoint_set('active_directory'):
-                setattr(cloud.endpoints, 'active_directory', metadata['authentication'].get('loginEndpoint'))
-            if not cloud.endpoints.has_endpoint_set('active_directory_resource_id'):
-                setattr(cloud.endpoints, 'active_directory_resource_id', metadata['authentication']['audiences'][0])
+            return _arm_to_cli_mapper(metadata)
         else:
             msg = 'Server returned status code {} for {}'.format(response.status_code, metadata_endpoint)
             raise CLIError(error_msg_fmt.format(msg))
@@ -72,7 +66,12 @@ def _build_cloud(cli_ctx, cloud_name, cloud_config=None, cloud_args=None):
     if cloud_config:
         # Using JSON format so convert the keys to snake case
         cloud_args = {to_snake_case(k): v for k, v in cloud_config.items()}
-    c = Cloud(cloud_name)
+    if 'endpoints' in cloud_args:
+        arm_endpoint = cloud_args['endpoints'].get('resource_manager', None) or cloud_args['endpoints'].get('resourceManager', None)
+    if 'endpoint_resource_manager' in cloud_args:
+        arm_endpoint = cloud_args['endpoint_resource_manager']
+    c = _populate_from_metadata_endpoint(arm_endpoint)
+    c.name = cloud_name
     c.profile = cloud_args.get('profile', None)
     try:
         endpoints = cloud_args['endpoints']
@@ -93,12 +92,6 @@ def _build_cloud(cli_ctx, cloud_name, cloud_config=None, cloud_args=None):
         elif arg.startswith('suffix_') and cloud_args[arg] is not None:
             setattr(c.suffixes, arg.replace('suffix_', ''), cloud_args[arg])
 
-    try:
-        arm_endpoint = c.endpoints.resource_manager
-    except CloudEndpointNotSetException:
-        arm_endpoint = None
-
-    _populate_from_metadata_endpoint(c, arm_endpoint)
     required_endpoints = {'resource_manager': '--endpoint-resource-manager',
                           'active_directory': '--endpoint-active-directory',
                           'active_directory_resource_id': '--endpoint-active-directory-resource-id',
