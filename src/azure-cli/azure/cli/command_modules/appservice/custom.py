@@ -4134,7 +4134,7 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                     (linux_container_settings.java11_runtime, "11", linux_container_settings.is_auto_update),
                     (linux_container_settings.java8_runtime, "8", linux_container_settings.is_auto_update)]
                 # Remove the JBoss'_byol' entries from the output
-                runtimes = [(r, v, au) for (r, v, au) in runtimes if r is not None and not(r.endswith("_byol"))]    # pylint: disable=line-too-long
+                runtimes = [(r, v, au) for (r, v, au) in runtimes if r is not None and not r.endswith("_byol")]    # pylint: disable=line-too-long
                 for runtime_name, version, auto_update in [(r, v, au) for (r, v, au) in runtimes if r is not None]:
                     runtime = self.Runtime(display_name=runtime_name,
                                            configs={"linux_fx_version": runtime_name},
