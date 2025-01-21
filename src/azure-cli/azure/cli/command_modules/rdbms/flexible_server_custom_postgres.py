@@ -615,7 +615,7 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
 def flexible_server_georestore(cmd, client, resource_group_name, server_name, source_server, location, zone=None,
                                vnet=None, vnet_address_prefix=None, subnet=None, subnet_address_prefix=None,
                                private_dns_zone_arguments=None, geo_redundant_backup=None, no_wait=False, yes=False,
-                               byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None):
+                               byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None, restore_point_in_time=None):
     validate_resource_group(resource_group_name)
 
     server_name = server_name.lower()
@@ -631,6 +631,8 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
             raise CLIError('The provided source-server {} is invalid.'.format(source_server))
     else:
         source_server_id = source_server
+
+    restore_point_in_time = validate_and_format_restore_point_in_time(restore_point_in_time)
 
     try:
         id_parts = parse_resource_id(source_server_id)
@@ -659,7 +661,7 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
     storage = postgresql_flexibleservers.models.Storage(type=None)
 
     parameters = postgresql_flexibleservers.models.Server(
-        point_in_time_utc=get_current_time(),
+        point_in_time_utc=restore_point_in_time,
         location=location,
         source_server_resource_id=source_server_id,
         create_mode="GeoRestore",
