@@ -557,7 +557,7 @@ def load_command_table(self, _):
                             client_factory=cf_shared_gallery_image_version) as g:
         g.custom_command('list-shared', 'sig_shared_image_version_list')
 
-    with self.command_group('sig gallery-application', compute_gallery_application_profile, min_api='2021-07-01', operation_group='gallery_applications') as g:
+    with self.command_group('sig gallery-application', compute_gallery_application_profile, operation_group='gallery_applications') as g:
         from .operations.sig_gallery_application import SigGalleryApplicationCreate
         self.command_table['sig gallery-application create'] = SigGalleryApplicationCreate(loader=self)
 
