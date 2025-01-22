@@ -96,10 +96,12 @@ finally:
                         else:
                             upgrade_exit_code = subprocess.call(cmd, shell=platform.system() == 'Windows')
                     else:
-                        import os
-                        devnull = open(os.devnull, 'w')
                         cmd.append('-y')
-                        upgrade_exit_code = subprocess.call(cmd, shell=platform.system() == 'Windows', stdout=devnull)
+                        upgrade_exit_code = subprocess.call(
+                            args=cmd,
+                            shell=platform.system() == 'Windows',
+                            stdout=subprocess.DEVNULL,
+                        )
                     if az_upgrade_run and upgrade_exit_code != 0:
                         err_msg = "Auto upgrade failed with exit code {}".format(exit_code)
                         logger.warning(err_msg)

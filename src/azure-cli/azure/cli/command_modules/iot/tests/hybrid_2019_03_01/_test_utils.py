@@ -64,8 +64,8 @@ def _create_verification_cert(cert_file, key_file, verification_file, nonce, val
         key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
         # open the root cert and key
         signing_cert = x509.load_pem_x509_certificate(open(cert_file, "rb").read())
-        k = load_pem_private_key(open(key_file, "rb").read(), None)
-
+        with open(key_file, "rb") as fp:
+            k = load_pem_private_key(fp.read(), None)
 
         subject_name = x509.Name(
             [
@@ -89,4 +89,5 @@ def _create_verification_cert(cert_file, key_file, verification_file, nonce, val
 
         verification_cert_str = verification_cert.public_bytes(serialization.Encoding.PEM).decode('ascii')
 
-        open(verification_file, 'w').write(verification_cert_str)
+        with open(verification_file, 'w') as fp:
+            fp.write(verification_cert_str)

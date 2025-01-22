@@ -1159,8 +1159,8 @@ def _ssl_context():
 
 
 def urlretrieve(url):
-    req = urlopen(url, context=_ssl_context())
-    return req.read()
+    with urlopen(url, context=_ssl_context()) as req:
+        return req.read()
 
 
 def parse_proxy_resource_id(rid):

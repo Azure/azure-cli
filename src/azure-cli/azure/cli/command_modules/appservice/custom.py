@@ -3538,8 +3538,8 @@ def upload_ssl_cert(cmd, resource_group_name,
     Certificate = cmd.get_models('Certificate')
     client = web_client_factory(cmd.cli_ctx)
     webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
-    cert_file = open(certificate_file, 'rb')
-    cert_contents = cert_file.read()
+    with open(certificate_file, 'rb') as cert_file:
+        cert_contents = cert_file.read()
     hosting_environment_profile_param = (webapp.hosting_environment_profile.name
                                          if webapp.hosting_environment_profile else '')
 

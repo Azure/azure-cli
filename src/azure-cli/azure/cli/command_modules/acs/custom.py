@@ -1974,8 +1974,7 @@ def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, s
     file_url = base_url.format(client_version)
 
     # ensure installation directory exists
-    install_dir, cli = os.path.dirname(
-        install_location), os.path.basename(install_location)
+    install_dir, cli = os.path.dirname(install_location), os.path.basename(install_location)
     if not os.path.exists(install_dir):
         os.makedirs(install_dir)
 
@@ -2214,11 +2213,10 @@ def _get_command_context(command_files):
         return ""
 
     zipStream = io.BytesIO()
-    zipFile = zipfile.ZipFile(zipStream, "w")
-    for _, (osfile, zipEntry) in enumerate(filesToAttach.items()):
-        zipFile.write(osfile, zipEntry)
-    # zipFile.printdir() // use this to debug
-    zipFile.close()
+    with zipfile.ZipFile(zipStream, "w") as zipFile:
+        for osfile, zipEntry in filesToAttach.items():
+            zipFile.write(osfile, zipEntry)
+        # zipFile.printdir() // use this to debug
 
     return str(base64.encodebytes(zipStream.getbuffer()), "utf-8")
 

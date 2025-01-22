@@ -31,25 +31,22 @@ def _get_test_data_file(filename):
 def _install_test_extension1(system=None):  # pylint: disable=no-self-use
     # We extract the extension into place as we aren't testing install here
     zip_file = _get_test_data_file('{}.zip'.format(EXT_NAME))
-    zip_ref = zipfile.ZipFile(zip_file, 'r')
-    zip_ref.extractall(build_extension_path(EXT_NAME, system=system))
-    zip_ref.close()
+    with zipfile.ZipFile(zip_file, 'r') as zip_ref:
+        zip_ref.extractall(build_extension_path(EXT_NAME, system=system))
 
 
 def _install_test_extension2(system=None):  # pylint: disable=no-self-use
     # We extract the extension into place as we aren't testing install here
     zip_file = _get_test_data_file('myfirstcliextension_az_extmetadata.zip')
-    zip_ref = zipfile.ZipFile(zip_file, 'r')
-    zip_ref.extractall(build_extension_path(EXT_NAME, system=system))
-    zip_ref.close()
+    with zipfile.ZipFile(zip_file, 'r') as zip_ref:
+        zip_ref.extractall(build_extension_path(EXT_NAME, system=system))
 
 
 def _install_test_extension3(system=None):  # pylint: disable=no-self-use
     # We extract the extension into place as we aren't testing install here
     zip_file = _get_test_data_file('{}.zip'.format(SECOND_EXT_NAME))
-    zip_ref = zipfile.ZipFile(zip_file, 'r')
-    zip_ref.extractall(build_extension_path(SECOND_EXT_NAME, system=system))
-    zip_ref.close()
+    with zipfile.ZipFile(zip_file, 'r') as zip_ref:
+        zip_ref.extractall(build_extension_path(SECOND_EXT_NAME, system=system))
 
 
 def mock_ext(filename, version=None, download_url=None, digest=None, project_url=None, name=None, min_cli_version=None, max_cli_version=None):
@@ -171,7 +168,8 @@ class TestExtensions(TestExtensionsBase):
         # We should only file a module if it's a directory and not a file even if it has the prefix
         tmp_dir = tempfile.mkdtemp()
         filename = EXTENSIONS_MOD_PREFIX + 'helloworld'
-        open(os.path.join(tmp_dir, filename), 'a').close()
+        with open(os.path.join(tmp_dir, filename), 'a') as _:
+            pass
         with self.assertRaises(AssertionError):
             get_extension_modname(ext_dir=tmp_dir)
 
@@ -374,7 +372,7 @@ class TestExtensions(TestExtensionsBase):
             self.assertEqual(ext['version'], '1.4.1a1')
             remove_extension(extension_name)
 
-    def test_add_extension_preview_inavailable(self):
+    def test_add_extension_preview_unavailable(self):
         extension_name = "extension-test-pkg"
         extension1 = 'extension_test_pkg-1.0.0b1-py3-none-any.whl'
         extension2 = 'extension_test_pkg-1.2.3-py3-none-any.whl'

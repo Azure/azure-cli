@@ -7,8 +7,7 @@ import json
 from datetime import datetime, timedelta
 import unittest
 import time
-from azure.cli.testsdk import ScenarioTest, JMESPathCheckExists, ResourceGroupPreparer, \
-    StorageAccountPreparer, record_only
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
 from .preparers import VaultPreparer, FileSharePreparer, AFSPolicyPreparer, AFSItemPreparer, \
     AFSRPPreparer, FilePreparer
 
@@ -23,7 +22,6 @@ vault_name = "sarath-vault"
 
 
 class BackupTests(ScenarioTest, unittest.TestCase):
-    #@record_only()
     @ResourceGroupPreparer(location="eastus2euap", random_name_length=20)
     @VaultPreparer(soft_delete=False)
     @StorageAccountPreparer(location="eastus2euap")
@@ -56,7 +54,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup container unregister -g {rg} -v {vault} -c {container} --yes --backup-management-type AzureStorage')
         time.sleep(100)
 
-    #@record_only()
     @ResourceGroupPreparer(location="eastus2euap", random_name_length=20)
     @VaultPreparer(soft_delete=False)
     @StorageAccountPreparer(location="eastus2euap")
@@ -104,7 +101,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup container unregister -g {rg} -v {vault} -c {sa2} --yes --backup-management-type AzureStorage')
         time.sleep(100)
 
-    #@record_only()
     @ResourceGroupPreparer(location="eastus2euap", random_name_length=20)
     @VaultPreparer(soft_delete=False)
     @StorageAccountPreparer(location="eastus2euap")
@@ -172,7 +168,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup container unregister -g {rg} -v {vault} -c {container} --yes --backup-management-type AzureStorage')
         time.sleep(100)
 
-    #@record_only()
     @ResourceGroupPreparer(location="eastus2euap", random_name_length=20)
     @VaultPreparer(soft_delete=False)
     @StorageAccountPreparer(location="eastus2euap")
@@ -213,7 +208,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup container unregister -g {rg} -v {vault} -c {container} --yes --backup-management-type AzureStorage')
         time.sleep(100)
 
-    #@record_only()
     @ResourceGroupPreparer(location="eastus2euap", random_name_length=20)
     @ResourceGroupPreparer(location="centraluseuap", random_name_length=30, parameter_name="resource_group2")
     @VaultPreparer(soft_delete=False)
@@ -352,7 +346,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup container unregister -g {rg} -v {vault} -c {container} --yes --backup-management-type AzureStorage')
         time.sleep(100)
 
-    #@record_only()
     @ResourceGroupPreparer(location="eastus2euap", random_name_length=20)
     @VaultPreparer(soft_delete=False)
     @StorageAccountPreparer(location="eastus2euap")
@@ -405,7 +398,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup container unregister -g {rg} -v {vault} -c {container} --yes --backup-management-type AzureStorage')
         time.sleep(100)
 
-    #@record_only()
     @ResourceGroupPreparer(location="eastus2euap", random_name_length=20)
     @VaultPreparer(soft_delete=False)
     @StorageAccountPreparer(location="eastus2euap")
@@ -462,7 +454,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup container unregister -g {rg} -v {vault} -c {container} --yes --backup-management-type AzureStorage')
         time.sleep(100)
 
-    #@record_only()
     @ResourceGroupPreparer(location="eastus2euap", random_name_length=20)
     @VaultPreparer(soft_delete=False)
     @StorageAccountPreparer(location="eastus2euap")

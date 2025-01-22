@@ -140,7 +140,9 @@ def ensure_bicep_installation(cli_ctx, release_tag=None, target_platform=None, s
             download_url, system, machine, release_tag, target_platform,
         )
 
-        request = urlopen(download_url)
+        # called from functions that mock this, so it doesn't
+        # pylint: disable consider-using-with
+        request = urlopen(download_url)  # noqa
         with open(installation_path, "wb") as f:
             f.write(request.read())
 

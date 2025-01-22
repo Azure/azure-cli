@@ -28,8 +28,8 @@ class TestWheelTypeExtensionMetadata(ExtensionTypeTestMixin):
         # this wheel contains metadata.json and METADATA
         wheel_0_30_0_packed = get_test_data_file('wheel_0_30_0_packed_extension-0.1.0-py3-none-any.whl')
 
-        zf = zipfile.ZipFile(wheel_0_30_0_packed)
-        zf.extractall(self.ext_dir)
+        with zipfile.ZipFile(wheel_0_30_0_packed) as zf:
+            zf.extractall(self.ext_dir)
 
         ext_name, ext_version = 'hello', '0.1.0'
 
@@ -59,8 +59,8 @@ class TestWheelTypeExtensionMetadata(ExtensionTypeTestMixin):
         # this wheel contains METADATA only
         wheel_0_31_0_packed = get_test_data_file('wheel_0_31_0_packed_extension-0.1.0-py3-none-any.whl')
 
-        zf = zipfile.ZipFile(wheel_0_31_0_packed)
-        zf.extractall(self.ext_dir)
+        with zipfile.ZipFile(wheel_0_31_0_packed) as zf:
+            zf.extractall(self.ext_dir)
 
         ext_name, ext_version = 'hello', '0.1.0'
 

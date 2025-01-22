@@ -5,13 +5,11 @@
 
 import unittest
 
-from unittest import mock
 import os
 import tempfile
 
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core.commands import AzCliCommand
-from azure.cli.core.commands.validators import IterateAction
 
 from azure.cli.core.mock import DummyCli
 
@@ -83,18 +81,17 @@ class TestApplication(unittest.TestCase):
         cli.raise_event('other_handler_called', args='secret sauce')
 
     def test_expand_file_prefixed_files(self):
-        f = tempfile.NamedTemporaryFile(delete=False)
-        f.close()
-
-        f_with_bom = tempfile.NamedTemporaryFile(delete=False)
-        f_with_bom.close()
-
-        with open(f.name, 'w+') as stream:
-            stream.write('foo')
-
         from codecs import open as codecs_open
-        with codecs_open(f_with_bom.name, encoding='utf-8-sig', mode='w+') as stream:
-            stream.write('foo')
+
+        with tempfile.NamedTemporaryFile(delete=False) as f:
+            with open(f.name, 'w+') as stream:
+                stream.write('foo')
+
+        with tempfile.NamedTemporaryFile(delete=False) as f_with_bom:
+            with codecs_open(f_with_bom.name, encoding='utf-8-sig', mode='w+') as stream:
+                stream.write('foo')
+
+        self.addCleanup(os.remove, f.name)
 
         cases = [
             [['bar=baz'], ['bar=baz']],
@@ -113,11 +110,9 @@ class TestApplication(unittest.TestCase):
             try:
                 from azure.cli.core.commands import _expand_file_prefixed_files
                 args = _expand_file_prefixed_files(test_case[0])  # pylint: disable=protected-access
-                self.assertEqual(args, test_case[1], 'Failed for: {}'.format(test_case[0]))
+                self.assertEqual(args, test_case[1], f'Failed for: {test_case[0]}')
             except CLIError as ex:
                 self.fail('Unexpected error for {} ({}): {}'.format(test_case[0], args, ex))
-
-        os.remove(f.name)
 
 
 if __name__ == '__main__':

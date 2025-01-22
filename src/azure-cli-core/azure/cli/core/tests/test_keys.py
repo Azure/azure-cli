@@ -114,9 +114,8 @@ class TestGenerateSSHKeys(unittest.TestCase):
 
     def test_generate_new_private_public_key_files(self):
         # create random temp file name
-        f = tempfile.NamedTemporaryFile(mode='w', dir=self._tempdirName)
-        f.close()
-        private_key_path = f.name
+        with tempfile.NamedTemporaryFile(mode='w', dir=self._tempdirName) as f:
+            private_key_path = f.name
 
         # Call generate_ssh_keys and assert that returned public key same as original
         public_key_path = private_key_path + ".pub"
@@ -141,7 +140,7 @@ class TestGenerateSSHKeys(unittest.TestCase):
     def _create_new_temp_key_file(self, key_data, suffix=""):
         with tempfile.NamedTemporaryFile(mode='w', dir=self._tempdirName, delete=False, suffix=suffix) as f:
             f.write(key_data)
-            return f.name
+        return f.name
 
 
 if __name__ == '__main__':

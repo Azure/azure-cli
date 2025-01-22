@@ -384,10 +384,10 @@ class ApimScenarioTest(ScenarioTest):
         service_count = len(self.cmd('apim list -g {rg}').get_output_in_json())
         pythonfile = 'gql_schema.gql'
         schemapath = os.path.join(TEST_DIR, pythonfile)
-        api_file = open(schemapath, 'r')
-        content_value = api_file.read()
-        value = content_value
-        
+        with open(schemapath, 'r') as api_file:
+            content_value = api_file.read()
+            value = content_value
+
         pythonfile = 'policy.xml'
         policypath = os.path.join(TEST_DIR, pythonfile)
 

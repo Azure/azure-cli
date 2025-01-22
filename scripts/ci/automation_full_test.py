@@ -288,12 +288,13 @@ def git_restore(file_path):
     if not file_path:
         return
     logger.info(f"git restore *{file_path}")
-    out = subprocess.Popen(["git", "restore", "*" + file_path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    stdout, err = out.communicate()
-    if stdout:
-        logger.info(stdout)
-    if err:
-        logger.warning(err)
+    with subprocess.Popen(["git", "restore", "*" + file_path],
+                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT) as out:
+        stdout, err = out.communicate()
+        if stdout:
+            logger.info(stdout)
+        if err:
+            logger.warning(err)
 
 
 def git_push(message, modules=[]):

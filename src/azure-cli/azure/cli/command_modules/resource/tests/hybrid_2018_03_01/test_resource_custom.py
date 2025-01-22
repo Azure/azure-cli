@@ -29,16 +29,15 @@ class TestCustom(unittest.TestCase):
         data = '{ "some": "data here"}'
         with tempfile.NamedTemporaryFile(delete=False) as tmp:
             tmp.write(data.encode('utf-8'))
-            tmp.close()
 
-            output = _load_file_string_or_uri(tmp.name, 'test')
-            self.assertEqual(get_file_json(tmp.name), output)
+        output = _load_file_string_or_uri(tmp.name, 'test')
+        self.assertEqual(get_file_json(tmp.name), output)
 
-            uri = urljoin('file:', pathname2url(tmp.name))
-            output = _load_file_string_or_uri(uri, 'test')
-            self.assertEqual(get_file_json(tmp.name), output)
+        uri = urljoin('file:', pathname2url(tmp.name))
+        output = _load_file_string_or_uri(uri, 'test')
+        self.assertEqual(get_file_json(tmp.name), output)
 
-            os.unlink(tmp.name)
+        os.unlink(tmp.name)
 
         output = _load_file_string_or_uri(data, 'test')
         self.assertEqual(shell_safe_json_parse(data), output)
