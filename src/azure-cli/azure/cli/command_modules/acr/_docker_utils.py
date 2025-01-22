@@ -297,7 +297,7 @@ def _get_token_with_username_and_password(login_server,
     }
 
     logger.debug(add_timestamp("Sending a HTTP Post request to {}".format(authhost)))
-    response = requests.post(authhost, urlencode(content), headers=headers,
+    response = requests.post(url=authhost, data=urlencode(content), headers=headers,
                              verify=not should_disable_connection_verify())
 
     if response.status_code != 200:
