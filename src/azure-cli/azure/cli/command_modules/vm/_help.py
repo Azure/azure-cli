@@ -1110,34 +1110,6 @@ type: group
 short-summary: Manage gallery sharing profile
 """
 
-helps['sig gallery-application'] = """
-    type: group
-    short-summary: Manage gallery application
-"""
-
-helps['sig gallery-application create'] = """
-    type: command
-    short-summary: "Create a gallery Application Definition."
-    examples:
-      - name: Create a simple gallery Application.
-        text: |-
-               az sig gallery-application create --gallery-name MyGallery --name AppName -g MyResourceGroup --os-type windows
-"""
-
-helps['sig gallery-application update'] = """
-    type: command
-    short-summary: "Update a gallery Application Definition."
-    examples:
-      - name: Update a simple gallery Application.
-        text: |-
-               az sig gallery-application update --gallery-name GalleryName --name AppName -g MyResourceGroup --description Description --tags tag=MyTag
-"""
-
-helps['sig gallery-application wait'] = """
-    type: command
-    short-summary: Place the CLI in a waiting state until a condition of the sig gallery-application is met.
-"""
-
 helps['sig gallery-application version'] = """
     type: group
     short-summary: Manage gallery application version
