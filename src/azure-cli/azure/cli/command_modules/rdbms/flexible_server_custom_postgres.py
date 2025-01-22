@@ -483,23 +483,30 @@ def flexible_server_postgresql_get(cmd, resource_group_name, server_name):
 
 def flexible_parameter_update(client, server_name, configuration_name, resource_group_name, source=None, value=None):
     validate_resource_group(resource_group_name)
-    if source is None and value is None:
-        # update the command with system default
-        try:
-            parameter = client.get(resource_group_name, server_name, configuration_name)
-            value = parameter.default_value  # reset value to default
+    parameter_value = value
+    parameter_source = source
+    try:
+        # validate configuration name
+        parameter = client.get(resource_group_name, server_name, configuration_name)
 
-            # this should be 'system-default' but there is currently a bug in PG, so keeping as what it is for now
+        # update the command with system default
+        if parameter_value is None and parameter_source is None:
+            parameter_value = parameter.default_value  # reset value to default
+
+            # this should be 'system-default' but there is currently a bug in PG
             # this will reset source to be 'system-default' anyway
-            source = parameter.source
-        except HttpResponseError as e:
+            parameter_source = "user-override"
+        elif parameter_source is None:
+            parameter_source = "user-override"
+    except HttpResponseError as e:
+        if parameter_value is None and parameter_source is None:
             raise CLIError('Unable to get default parameter value: {}.'.format(str(e)))
-    elif source is None:
-        source = "user-override"
+        else:
+            raise CLIError(str(e))
 
     parameters = postgresql_flexibleservers.models.Configuration(
-        value=value,
-        source=source
+        value=parameter_value,
+        source=parameter_source
     )
 
     return client.begin_update(resource_group_name, server_name, configuration_name, parameters)
