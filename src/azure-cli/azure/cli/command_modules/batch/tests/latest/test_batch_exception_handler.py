@@ -18,7 +18,7 @@ from azure.cli.core.azclierror import (
     UnauthorizedError,
 )
 
-from knack.util import CLIError
+# from knack.util import CLIError
 from json import JSONDecodeError
 
 
@@ -26,24 +26,24 @@ class TestBatchExceptionHandler(unittest.TestCase):
 
     def test_non_batch_err(self):
         err = ValueError("Not a Batch error")
-        with self.assertRaisesRegex(CLIError, r"^Not a Batch error$"):
+        with self.assertRaisesRegex(ValueError, r"^Not a Batch error$"):
             batch_exception_handler(err)
     
     def test_response_err(self):
         err = batch_err(500, HttpResponseError, "Kaboom")
-        with self.assertRaisesRegex(CLIError, r"^Kaboom$"):
+        with self.assertRaisesRegex(HttpResponseError, r"^Kaboom$"):
             batch_exception_handler(err)
 
     def test_response_err_empty_model(self):
         err = batch_err(500, HttpResponseError, "Kaboom",
                         model=BatchError())
-        with self.assertRaisesRegex(CLIError, r"^Kaboom$"):
+        with self.assertRaisesRegex(HttpResponseError, r"^Kaboom$"):
             batch_exception_handler(err)
 
     def test_response_err_code_only(self):
-        err = batch_err(500, HttpResponseError, "Kaboom",
+        err = batch_err(504, HttpResponseError, "Kaboom",
                         model=BatchError(code="explosion"))
-        with self.assertRaisesRegex(CLIError, r"^\(explosion\)$"):
+        with self.assertRaisesRegex(AzureInternalError, r"^\(explosion\)$"):
             batch_exception_handler(err)
 
     def test_response_err_json_parsing_err(self):
@@ -51,13 +51,13 @@ class TestBatchExceptionHandler(unittest.TestCase):
                         model=BatchError(code="explosion"),
                         raise_parsing_err=True)
         # No code displayed because JSON parsing failed
-        with self.assertRaisesRegex(CLIError, r"^Kaboom$"):
+        with self.assertRaisesRegex(HttpResponseError, r"^Kaboom$"):
             batch_exception_handler(err)
 
     def test_response_err_msg_and_code(self):
-        err = batch_err(500, HttpResponseError, "Kaboom",
+        err = batch_err(501, HttpResponseError, "Kaboom",
                         model=BatchError(code="explosion", message=BatchErrorMessage(lang="en-us", value="Blew up")))
-        with self.assertRaisesRegex(CLIError, r"^\(explosion\) Blew up$"):
+        with self.assertRaisesRegex(AzureInternalError, r"^\(explosion\) Blew up$"):
             batch_exception_handler(err)
 
     def test_bad_request_err(self):
@@ -112,7 +112,7 @@ class TestBatchExceptionHandler(unittest.TestCase):
 
         # Key/value should never be null in practice, but since they are marked Optional,
         # the error handler shouldn't fail on nulls.
-        with self.assertRaises(CLIError) as context:
+        with self.assertRaises(AzureInternalError) as context:
             batch_exception_handler(err)
 
         self.assertEqual(str(context.exception), "(explosion) Blew up\nkey1: value1\nNone: value2\nkey3: None\nNone: None")
