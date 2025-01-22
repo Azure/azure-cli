@@ -3234,7 +3234,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 enable_resilient_creation=None, enable_resilient_deletion=None,
                 additional_scheduled_events=None, enable_user_reboot_scheduled_events=None,
                 enable_user_redeploy_scheduled_events=None, skuprofile_vmsizes=None, skuprofile_allostrat=None,
-                security_posture_reference_is_overridable=None):
+                security_posture_reference_is_overridable=None, zone_balance=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -3549,7 +3549,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             enable_user_reboot_scheduled_events=enable_user_reboot_scheduled_events,
             enable_user_redeploy_scheduled_events=enable_user_redeploy_scheduled_events,
             skuprofile_vmsizes=skuprofile_vmsizes, skuprofile_allostrat=skuprofile_allostrat,
-            security_posture_reference_is_overridable=security_posture_reference_is_overridable)
+            security_posture_reference_is_overridable=security_posture_reference_is_overridable,
+            zone_balance=zone_balance)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -3989,7 +3990,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 ephemeral_os_disk=None, ephemeral_os_disk_option=None, zones=None, additional_scheduled_events=None,
                 enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None,
                 upgrade_policy_mode=None, enable_auto_os_upgrade=None, skuprofile_vmsizes=None,
-                skuprofile_allostrat=None, security_posture_reference_is_overridable=None, **kwargs):
+                skuprofile_allostrat=None, security_posture_reference_is_overridable=None, zone_balance=None, **kwargs):
     vmss = kwargs['parameters']
     aux_subscriptions = None
     # pylint: disable=too-many-boolean-expressions
@@ -4292,6 +4293,9 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
 
     if zones is not None:
         vmss.zones = zones
+
+    if zone_balance is not None:
+        vmss.zone_balance = zone_balance
 
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_create_or_update,
                        resource_group_name, name, **kwargs)

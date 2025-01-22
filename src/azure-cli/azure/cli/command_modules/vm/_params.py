@@ -871,6 +871,7 @@ def load_arguments(self, _):
                        help='List of virtual machine extensions to exclude when applying the Security Posture. Either a Json string or a file path is acceptable. '
                             'Please refer to https://docs.microsoft.com/rest/api/compute/virtualmachinescalesets/get#virtualmachineextension for the data format.')
             c.argument('security_posture_reference_is_overridable', arg_type=get_three_state_flag(), min_api='2024-03-01', options_list=['--security-posture-reference-is-overridable', '--is-overridable'], help='Whether the security posture can be overridden by the user.')
+            c.argument('zone_balance', arg_type=get_three_state_flag(), min_api='2017-12-01', help='Whether to force strictly even Virtual Machine distribution cross x-zones in case there is zone outage.')
 
     with self.argument_context('vmss update') as c:
         c.argument('instance_id', id_part='child_name_1', help="Update the VM instance with this ID. If missing, update the VMSS.")
