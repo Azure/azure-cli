@@ -8,6 +8,15 @@ import unittest
 from azure.cli.command_modules.batch._exception_handler import batch_exception_handler
 from azure.core.exceptions import HttpResponseError
 from azure.batch.models import BatchError, BatchErrorMessage, BatchErrorDetail
+from azure.cli.core.azclierror import (
+    AzureInternalError,
+    AzureResponseError,
+    BadRequestError,
+    CLIInternalError,
+    ForbiddenError,
+    ResourceNotFoundError,
+    UnauthorizedError,
+)
 
 from knack.util import CLIError
 from json import JSONDecodeError
@@ -49,6 +58,30 @@ class TestBatchExceptionHandler(unittest.TestCase):
         err = batch_err(500, HttpResponseError, "Kaboom",
                         model=BatchError(code="explosion", message=BatchErrorMessage(lang="en-us", value="Blew up")))
         with self.assertRaisesRegex(CLIError, r"^\(explosion\) Blew up$"):
+            batch_exception_handler(err)
+
+    def test_bad_request_err(self):
+        err = batch_err(400, HttpResponseError, "Kaboom",
+                        model=BatchError(code="explosion", message=BatchErrorMessage(lang="en-us", value="Blew up")))
+        with self.assertRaisesRegex(BadRequestError, r"^\(explosion\) Blew up$"):
+            batch_exception_handler(err)
+
+    def test_unauthorized_err(self):
+        err = batch_err(401, HttpResponseError, "Kaboom",
+                        model=BatchError(code="explosion", message=BatchErrorMessage(lang="en-us", value="Blew up")))
+        with self.assertRaisesRegex(UnauthorizedError, r"^\(explosion\) Blew up$"):
+            batch_exception_handler(err)
+
+    def test_forbidden_err(self):
+        err = batch_err(403, HttpResponseError, "Kaboom",
+                        model=BatchError(code="explosion", message=BatchErrorMessage(lang="en-us", value="Blew up")))
+        with self.assertRaisesRegex(ForbiddenError, r"^\(explosion\) Blew up$"):
+            batch_exception_handler(err)
+    
+    def test_resource_not_found_err(self):
+        err = batch_err(404, HttpResponseError, "Kaboom",
+                        model=BatchError(code="explosion", message=BatchErrorMessage(lang="en-us", value="Blew up")))
+        with self.assertRaisesRegex(ResourceNotFoundError, r"^\(explosion\) Blew up$"):
             batch_exception_handler(err)
 
     def test_response_err_details(self):

@@ -3,11 +3,16 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+
+import re
 from json import JSONDecodeError
 from knack.log import get_logger
 from azure.cli.core.azclierror import (
+    AzureInternalError,
     AzureResponseError,
+    BadRequestError,
     CLIInternalError,
+    ForbiddenError,
     ResourceNotFoundError,
     UnauthorizedError,
 )
@@ -21,13 +26,19 @@ def batch_exception_handler(ex):
     if isinstance(ex, HttpResponseError):
         batch_msg = _parse_batch_error_msg(ex)
         if batch_msg:
+            if ex.status_code == 400:
+                raise BadRequestError(batch_msg)
             if ex.status_code == 401:
                 raise UnauthorizedError(batch_msg)
+            if ex.status_code == 403:
+                raise ForbiddenError(batch_msg)
             if ex.status_code == 404:
                 raise ResourceNotFoundError(batch_msg)
+            if re.match(r'^5\d{2}$', str(ex.status_code)):
+                raise AzureInternalError(batch_msg)
             raise AzureResponseError(batch_msg)
 
-    raise CLIInternalError(ex)
+    raise ex
 
 
 def _parse_batch_error_msg(ex):
