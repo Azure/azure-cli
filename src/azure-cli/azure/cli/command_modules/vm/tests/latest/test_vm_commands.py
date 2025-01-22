@@ -3791,13 +3791,13 @@ class VMDiskAttachDetachTest(ScenarioTest):
             'vmss2': 'vm-ultrassd2'
         })
         self.cmd('vmss create -g {rg} -n {vmss} --admin-username admin123 --admin-password testPassword0 --image Debian:debian-10:10:latest --storage-sku UltraSSD_LRS '
-                 '--data-disk-sizes-gb 4 --zone 2 --location eastus2 --vm-sku Standard_D2s_v3 --instance-count 1 --lb "" --orchestration-mode Uniform --lb-sku Standard')
+                 '--data-disk-sizes-gb 4 --zones 2 --location eastus2 --vm-sku Standard_D2s_v3 --instance-count 1 --lb "" --orchestration-mode Uniform --lb-sku Standard')
 
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
             self.check('virtualMachineProfile.storageProfile.dataDisks[0].managedDisk.storageAccountType', 'UltraSSD_LRS'),
         ])
-        self.cmd('vmss create -g {rg} -n {vmss2} --admin-username admin123 --admin-password testPassword0 --image Debian:debian-10:10:latest --ultra-ssd-enabled --zone 2 '
+        self.cmd('vmss create -g {rg} -n {vmss2} --admin-username admin123 --admin-password testPassword0 --image Debian:debian-10:10:latest --ultra-ssd-enabled --zones 2 '
                  '--location eastus2 --vm-sku Standard_D2s_v3 --lb "" --orchestration-mode Uniform --lb-sku Standard')
         self.cmd('vmss disk attach -g {rg} --vmss-name {vmss2} --size-gb 5 --sku UltraSSD_LRS')
         self.cmd('vmss show -g {rg} -n {vmss2}', checks=[
@@ -3822,7 +3822,7 @@ class VMDiskAttachDetachTest(ScenarioTest):
         ])
 
         self.cmd(
-            'vmss create -g {rg} -n {vmss} --image OpenLogic:CentOS:7.5:latest --vm-sku Standard_D2s_v3 --zone 2 --admin-username azureuser '
+            'vmss create -g {rg} -n {vmss} --image OpenLogic:CentOS:7.5:latest --vm-sku Standard_D2s_v3 --zones 2 --admin-username azureuser '
             '--admin-password testPassword0 --authentication-type password --lb "" --location eastus2 --orchestration-mode Uniform --lb-sku Standard')
         self.cmd('vmss deallocate -g {rg} -n {vmss}')
         self.cmd('vmss update -g {rg} -n {vmss} --ultra-ssd-enabled', checks=[
@@ -9837,7 +9837,7 @@ class VMSSCreateDiskOptionTest(ScenarioTest):
         })
 
         self.cmd('vmss create -g {rg} -n {vmss} --image Debian:debian-10:10:latest --data-disk-sizes-gb 10 10 --data-disk-iops 555 666 '
-                 '--data-disk-mbps 77 88 --ultra-ssd-enabled --zone 1 --vm-sku Standard_D2s_v3 --lb-sku Standard '
+                 '--data-disk-mbps 77 88 --ultra-ssd-enabled --zones 1 --vm-sku Standard_D2s_v3 --lb-sku Standard '
                  '--storage-sku UltraSSD_LRS --location eastus2 --admin-username azureuser --lb "" --orchestration-mode Uniform',
                  checks=[
                      self.check('vmss.virtualMachineProfile.storageProfile.dataDisks[0].diskIOPSReadWrite', '555'),
