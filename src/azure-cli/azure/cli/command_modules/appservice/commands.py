@@ -141,6 +141,10 @@ def load_command_table(self, _):
         g.custom_command('deploy', 'perform_onedeploy_webapp', validator=validate_onedeploy_params)
         g.generic_update_command('update', getter_name='get_webapp', setter_name='set_webapp',
                                  custom_func_name='update_webapp', command_type=appservice_custom)
+        
+    with self.command_group('webapp sitecontainers') as g:
+        g.custom_command('create', 'create_webapp_sitecontainers')
+        g.custom_command('update', 'update_webapp_sitecontainers')
 
     with self.command_group('webapp traffic-routing') as g:
         g.custom_command('set', 'set_traffic_routing')

@@ -172,6 +172,9 @@ subscription than the app service environment, please use the resource ID for --
         c.ignore('language')
         c.ignore('using_webapp_up')
 
+    with self.argument.context("webapp sitecontainers") as c:
+        c.argument("update", help='Update sitecontainers for a linux webapp')
+
     with self.argument_context('webapp show') as c:
         c.argument('name', arg_type=webapp_name_arg_type)
 

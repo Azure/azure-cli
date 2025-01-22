@@ -991,6 +991,11 @@ def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
             raise ex
 
 
+def update_webapp_sitecontainers(cmd, name, resource_group_name, container_name, image, target_port, startup_cmd=None, env_vars =None , is_main=False, system_assigned_identity=None, user_assigned_identity=None, registry_username=None, registry_password=None,
+                                sitecontainer_spec_file=None):
+
+    
+
 # for generic updater
 def get_webapp(cmd, resource_group_name, name, slot=None):
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
