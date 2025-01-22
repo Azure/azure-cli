@@ -915,3 +915,21 @@ def check_resource_group(resource_group_name):
 def validate_resource_group(resource_group_name):
     if not check_resource_group(resource_group_name):
         raise CLIError('Resource group name cannot be empty.')
+
+
+def validate_backup_name(backup_name):
+    # check if backup_name is already null originally
+    if not backup_name:
+        raise CLIError('Backup name cannot be empty.')
+
+    # replace single and double quotes with empty string
+    backup_name = backup_name.replace("'", '')
+    backup_name = backup_name.replace('"', '')
+
+    # check if backup_name is empty or contains only whitespace after removing the quote
+    if not backup_name or backup_name.isspace():
+        raise CLIError('Backup name cannot be empty or contain only whitespaces.')
+
+    # check if backup_name exceeds 128 characters
+    if len(backup_name) > 128:
+        raise CLIError('Backup name cannot exceed 128 characters.')
