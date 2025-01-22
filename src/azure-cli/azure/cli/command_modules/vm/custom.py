@@ -1165,7 +1165,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
             logger.info('Guest Attestation Extension has been successfully installed by default '
                         'when Trusted Launch configuration is met')
         except Exception as e:
-            logger.error('Failed to install Guest Attestation Extension for Trusted Launch. %s', e)
+            error_type = "Trusted Launch" if is_trusted_launch else "Confidential VM"
+            logger.error('Failed to install Guest Attestation Extension for %s. %s', error_type, e)
     if count:
         vm_names = [vm_name + str(i) for i in range(count)]
     else:
@@ -3653,7 +3654,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             LongRunningOperation(cmd.cli_ctx)(client.virtual_machine_scale_sets.begin_update_instances(
                 resource_group_name, vmss_name, instance_ids))
         except Exception as e:
-            logger.error('Failed to install Guest Attestation Extension for Trusted Launch. %s', e)
+            error_type = "Trusted Launch" if is_trusted_launch else "Confidential VM"
+            logger.error('Failed to install Guest Attestation Extension for %s. %s', error_type, e)
 
     return deployment_result
 
