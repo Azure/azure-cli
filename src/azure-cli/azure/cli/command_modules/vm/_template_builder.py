@@ -1004,7 +1004,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         enable_resilient_vm_creation=None, enable_resilient_vm_deletion=None,
                         additional_scheduled_events=None, enable_user_reboot_scheduled_events=None,
                         enable_user_redeploy_scheduled_events=None, skuprofile_vmsizes=None, skuprofile_allostrat=None,
-                        security_posture_reference_is_overridable=None):
+                        security_posture_reference_is_overridable=None, zone_balance=None):
 
     # Build IP configuration
     ip_configuration = {}
@@ -1435,6 +1435,9 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
 
     if proximity_placement_group:
         vmss_properties['proximityPlacementGroup'] = {'id': proximity_placement_group}
+
+    if zone_balance is not None:
+        vmss_properties['zoneBalance'] = zone_balance
 
     scheduled_events_profile = {}
     if terminate_notification_time is not None:

@@ -4620,6 +4620,28 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
         ])
         self.cmd('vmss list-instance-connection-info -n {vmss6} -g {rg}')
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_zone_balance', location='eastus2')
+    def test_vmss_zone_balance(self, resource_group):
+        self.kwargs.update({
+            'nsg': self.create_random_name('nsg', 10),
+            'ssh_key': TEST_SSH_KEY_PUB,
+            'vmss1': self.create_random_name('vmss', 15),
+            'vmss2': self.create_random_name('vmss', 15)
+        })
+        self.cmd('network nsg create -g {rg} -n {nsg}')
+        self.cmd('vmss create -n {vmss1} -g {rg} --image Debian:debian-10:10:latest --zone-balance true --admin-username clittester --lb-sku standard --public-ip-per-vm --dns-servers 10.0.0.6 10.0.0.5 --nsg {nsg} --admin-username vmsstest --admin-password Test123456789# --orchestration-mode Uniform  --ssh-key-value "{ssh_key}"  --zones 1 2 -l eastus2', checks=[
+            self.check('vmss.zoneBalance', True),
+        ])
+        self.cmd('vmss update -n {vmss1} -g {rg} --zone-balance false', checks=[
+            self.check('zoneBalance', False)
+        ])
+
+        self.cmd('vmss create -n {vmss2} -g {rg} --image Debian:debian-10:10:latest --admin-username clittester --lb-sku standard --public-ip-per-vm --dns-servers 10.0.0.6 10.0.0.5 --nsg {nsg} --admin-username vmsstest --admin-password Test123456789# --orchestration-mode Uniform  --ssh-key-value "{ssh_key}"  --zones 1 2 -l eastus2')
+        self.cmd('vmss update -n {vmss2} -g {rg} --zone-balance True', checks=[
+            self.check('zoneBalance', True)
+        ])
+
 
 class VMSSCreatePublicIpPerVm(ScenarioTest):  # pylint: disable=too-many-instance-attributes
 
