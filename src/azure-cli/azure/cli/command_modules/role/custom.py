@@ -234,7 +234,8 @@ def _create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, s
 
 def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=None,
                           scope=None, include_inherited=False,
-                          show_all=False, include_groups=False, include_classic_administrators=False):
+                          show_all=False, include_groups=False, include_classic_administrators=False,
+                          fill_principal_name=True):
     '''
     :param include_groups: include extra assignments to the groups of which the user is a
     member(transitively).
@@ -280,6 +281,10 @@ def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=Non
                                          role_dics[worker.get_role_property(i, 'roleDefinitionId')])
             else:
                 i['roleDefinitionName'] = None  # the role definition might have been deleted
+
+    # Opt out of filling principal name
+    if not fill_principal_name:
+        return results
 
     # fill in principal names
     principal_ids = set(worker.get_role_property(i, 'principalId')
