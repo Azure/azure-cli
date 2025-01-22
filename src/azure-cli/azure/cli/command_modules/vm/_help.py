@@ -712,20 +712,6 @@ examples:
             --intent-vm-sizes Standard_E64s_v4 Standard_M416ms_v2
 """
 
-helps['sig create'] = """
-type: command
-short-summary: Create a shared image gallery.
-examples:
-  - name: Create a shared image gallery
-    text: |
-        az sig create --resource-group MyResourceGroup --gallery-name MyGallery
-"""
-
-helps['sig show'] = """
-type: command
-short-summary: Retrieve information about a Shared Image Gallery.
-"""
-
 helps['sig image-definition create'] = """
 type: command
 short-summary: create a gallery image definition
@@ -855,24 +841,6 @@ examples:
     text: |
         az sig image-definition list-shared --gallery-unique-name galleryUniqueName \\
         --location myLocation --shared-to tenant
-"""
-
-helps['sig image-definition update'] = """
-type: command
-short-summary: Update a VM Image definition.
-examples:
-  - name: Change the shared image definition's recommended configuration
-    text: |-
-        az sig image-definition update --resource-group MyResourceGroup \\
-        --gallery-name MyGallery --gallery-image-definition MyImage \\
-        --resource-group MyResourceGroup --set recommended.vCpUs.min=myNewvCpUsMin \\
-        recommended.vCpUs.max=myNewvCpUsMax recommended.memory.min=myNewMemoryMin \\
-        recommended.memory.max=myNewMemoryMax description="newDescription"
-  - name: Remove a shared image definition's configuration property
-    text: |-
-        az sig image-definition update --resource-group MyResourceGroup \\
-        --gallery-name MyGallery --gallery-image-definition MyImage \\
-        --resource-group MyResourceGroup --remove recommended.vCpUs.min
 """
 
 helps['sig image-definition list-community'] = """
@@ -1124,19 +1092,6 @@ examples:
     crafted: true
 """
 
-helps['sig list-shared'] = """
-type: command
-short-summary: List all shared galleries shared directly to your subscription or tenant
-long-summary: List all shared galleries shared directly to your subscription or tenant
-examples:
-  - name: List shared galleries shared directly to your subscription in a given location
-    text: |
-        az sig list-shared --location myLocation
-  - name: List shared galleries shared directly to your tenant in a given location
-    text: |
-        az sig list-shared --location myLocation --shared-to tenant
-"""
-
 helps['sig list-community'] = """
 type: command
 short-summary: List all community galleries shared directly to your subscription or tenant
@@ -1153,71 +1108,6 @@ examples:
 helps['sig share'] = """
 type: group
 short-summary: Manage gallery sharing profile
-"""
-
-helps['sig share add'] = """
-type: command
-short-summary: Share gallery with subscriptions and tenants
-examples:
-  - name: Share entire gallery with all members of a subscription and/or tenant.
-    text: |
-        az sig share add --resource-group MyResourceGroup --gallery-name MyGallery \\
-        --subscription-ids subId1 subId2 --tenant-ids tenantId1 tenantId2
-"""
-
-helps['sig share remove'] = """
-type: command
-short-summary: stop sharing gallery with a subscription or tenant
-examples:
-  - name: Stop sharing with a subscription or tenant ID
-    text: |
-        az sig share remove --resource-group MyResourceGroup --gallery-name MyGallery \\
-        --subscription-ids subId1 subId2 --tenant-ids tenantId1 tenantId2
-"""
-
-helps['sig share reset'] = """
-type: command
-short-summary: disable gallery from being shared with subscription or tenant
-examples:
-  - name: Reset sharing profile of a gallery.
-    text: |
-        az sig share reset --resource-group MyResourceGroup --gallery-name MyGallery
-"""
-
-helps['sig share enable-community'] = """
-type: command
-short-summary: Allow to share gallery to the community
-examples:
-  - name: Allow to share gallery to the community
-    text: |
-        az sig share enable-community --resource-group MyResourceGroup --gallery-name MyGallery
-"""
-
-helps['sig share wait'] = """
-type: command
-short-summary: Place the CLI in a waiting state until a condition of a shared gallery is met.
-examples:
-  - name: Place the CLI in a waiting state until the gallery sharing object is updated.
-    text: |
-        az sig share wait --updated --resource-group MyResourceGroup --gallery-name Gallery
-"""
-
-helps['sig update'] = """
-type: command
-short-summary: update a share image gallery.
-parameters:
-  - name: --select
-    short-summary: The select expression to apply on the operation. "Permissions" Default value is None.
-examples:
-  - name: Enable gallery to be shared to subscription or tenant
-    text: |
-        az sig update --resource-group myResourceGroup --gallery-name myGallery \\
-        --permissions groups
-  - name: Update gallery from private to community
-    text: |
-        az sig update -g myResourceGroup --gallery-name myGallery --permissions Community \\
-        --publisher-uri myPublisherUri --publisher-email myPublisherEmail \\
-        --eula myEula --public-name-prefix myPublicNamePrefix
 """
 
 helps['sig gallery-application'] = """
@@ -1526,6 +1416,9 @@ examples:
   - name: Create a Debian11 VM with both system and user assigned identity.
     text: >
         az vm create -n MyVm -g rg1 --image Debian11 --assign-identity [system] /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
+  - name: Create a vm with user assigned identity and add encryption identity for Azure disk encryption
+    text: >
+        az vm create -n MyVm -g rg1 --image Debian11 --assign-identity myID --encryption-identity /subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
   - name: Create a VM in an availability zone in the current resource group's region.
     supported-profiles: latest
     text: >
@@ -1734,6 +1627,9 @@ examples:
   - name: Enable disk encryption on the OS disk and/or data disks. Encrypt mounted disks. (autogenerated)
     text: |
         az vm encryption enable --disk-encryption-keyvault MyVault --name MyVm --resource-group MyResourceGroup --volume-type DATA
+  - name: Add support for using managed identity to authenticate to customer's keyvault for ADE operation
+    text: >
+        az vm encryption enable --disk-encryption-keyvault MyVault --name MyVm --resource-group MyResourceGroup --encryption-identity EncryptionIdentity
     crafted: true
 """
 

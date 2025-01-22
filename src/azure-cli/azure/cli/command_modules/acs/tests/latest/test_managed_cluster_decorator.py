@@ -283,6 +283,54 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         with self.assertRaises(InvalidArgumentValueError):
             ctx._AKSManagedClusterContext__validate_gmsa_options(False, True, None, "test_gmsa_root_domain_name", False)
 
+    def test_get_if_match(self):
+        ctx_0 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({}),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_0.get_if_match(), None)
+
+        ctx_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({"if_match": "abc"}),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_1.get_if_match(), "abc")
+        ctx_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({"if_match": ""}),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_2.get_if_match(), "")
+
+    def test_get_if_none_match(self):
+        ctx_0 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({}),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_0.get_if_none_match(), None)
+
+        ctx_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({"if_none_match": "abc"}),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_1.get_if_none_match(), "abc")
+        ctx_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({"if_none_match": ""}),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_2.get_if_none_match(), "")
+
     def test_get_subscription_id(self):
         ctx_1 = AKSManagedClusterContext(self.cmd, AKSManagedClusterParamDict({}), self.models, DecoratorMode.CREATE)
         ctx_1.set_intermediate("subscription_id", "test_subscription_id")
@@ -1757,7 +1805,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             DecoratorMode.UPDATE,
         )
         self.assertEqual(ctx_1._get_outbound_type(read_only=True), None)
-        self.assertEqual(ctx_1.get_outbound_type(), "loadBalancer")
+        self.assertEqual(ctx_1.get_outbound_type(), None)
         network_profile_1 = self.models.ContainerServiceNetworkProfile(outbound_type="test_outbound_type")
         mc = self.models.ManagedCluster(location="test_location", network_profile=network_profile_1)
         ctx_1.attach_mc(mc)
@@ -1835,6 +1883,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
                 {
                     "outbound_type": CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
                     "vnet_subnet_id": "test_vnet_subnet_id",
+                    "nat_gateway_managed_outbound_ip_count": 10
                 }
             ),
             self.models,
@@ -1848,17 +1897,10 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             AgentPoolDecoratorMode.MANAGED_CLUSTER,
         )
         ctx_5.attach_agentpool_context(agentpool_ctx_5)
-        load_balancer_profile = self.models.load_balancer_models.ManagedClusterLoadBalancerProfile(
-            outbound_ip_prefixes=self.models.load_balancer_models.ManagedClusterLoadBalancerProfileOutboundIPPrefixes(
-                public_ip_prefixes=[self.models.load_balancer_models.ResourceReference(id="test_public_ip_prefix")]
-            )
-        )
         # fail on mutually exclusive outbound_type and managed_outbound_ip_count/outbound_ips/outbound_ip_prefixes of
         # load balancer
         with self.assertRaises(MutuallyExclusiveArgumentError):
-            ctx_5.get_outbound_type(
-                load_balancer_profile=load_balancer_profile,
-            )
+            ctx_5.get_outbound_type()
 
         # invalid parameter
         ctx_6 = AKSManagedClusterContext(
@@ -1885,6 +1927,46 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # load balancer
         with self.assertRaises(MutuallyExclusiveArgumentError):
             ctx_6.get_outbound_type()
+        ctx_7 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "outbound_type": CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
+                    "vnet_subnet_id": "test_vnet_subnet_id",
+                    "nat_gateway_managed_outbound_ip_count": 10,
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+        )
+        agentpool_ctx_7 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"vnet_subnet_id": "test_vnet_subnet_id"}),
+            self.models,
+            DecoratorMode.CREATE,
+            AgentPoolDecoratorMode.MANAGED_CLUSTER,
+        )
+        ctx_7.attach_agentpool_context(agentpool_ctx_7)
+        # fail on mutually exclusive outbound_type and nat_gateway_managed_outbound_ip_count on
+        # nat gateway
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_7.get_outbound_type()
+        
+        network_profile_1 = self.models.ContainerServiceNetworkProfile(outbound_type="test_outbound_type")
+        mc = self.models.ManagedCluster(location="test_location", network_profile=network_profile_1)
+        # existing value should not be validated
+        ctx_8 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                }
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        ctx_8.attach_mc(mc)
+        existingOutboundType = ctx_8.get_outbound_type()
+        self.assertEqual(existingOutboundType, "test_outbound_type")
 
     def test_get_network_plugin_mode(self):
         # default

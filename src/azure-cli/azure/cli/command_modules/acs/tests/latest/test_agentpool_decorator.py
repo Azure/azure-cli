@@ -1493,6 +1493,62 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         agentpool_1 = self.create_initialized_agentpool_instance(upgrade_settings=self.models.AgentPoolUpgradeSettings(drain_timeout_in_minutes=123))
         ctx_1.attach_agentpool(agentpool_1)
         self.assertEqual(ctx_1.get_drain_timeout(), 123)
+    
+    def get_if_match(self):
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_1.get_if_match(), None)
+
+        ctx_2 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"if_match": "abc"}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_2.get_if_match(), "abc")
+
+        ctx_3 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"if_match": ""}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_3.get_if_match(), "")
+
+    def get_if_none_match(self):
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_1.get_if_none_match(), None)
+
+        ctx_2 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"if_none_match": "abc"}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_2.get_if_none_match(), "abc")
+
+        ctx_3 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"if_none_match": ""}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_3.get_if_none_match(), "")
 
 class AKSAgentPoolContextStandaloneModeTestCase(AKSAgentPoolContextCommonTestCase):
     def setUp(self):
@@ -1692,6 +1748,12 @@ class AKSAgentPoolContextStandaloneModeTestCase(AKSAgentPoolContextCommonTestCas
     def test_get_enable_secure_boot(self):
         self.common_get_enable_secure_boot()
 
+    def test_get_if_match(self):
+        self.get_if_match()
+
+    def test_get_if_none_match(self):
+        self.get_if_none_match()
+
 class AKSAgentPoolContextManagedClusterModeTestCase(AKSAgentPoolContextCommonTestCase):
     def setUp(self):
         self.cli_ctx = MockCLI()
@@ -1861,6 +1923,12 @@ class AKSAgentPoolContextManagedClusterModeTestCase(AKSAgentPoolContextCommonTes
     def test_get_enable_secure_boot(self):
         self.common_get_enable_secure_boot()
 
+    def test_get_if_match(self):
+        self.get_if_match()
+
+    def test_get_if_none_match(self):
+        self.get_if_none_match()
+    
 class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
     def _remove_defaults_in_agentpool(self, agentpool):
         self.defaults_in_agentpool = {}
@@ -2470,6 +2538,8 @@ class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCom
             "test_cluster_name",
             "test_nodepool_name",
             agentpool_1,
+            if_match=None,
+            if_none_match=None,
             headers={},
         )
 
@@ -2977,6 +3047,8 @@ class AKSAgentPoolUpdateDecoratorStandaloneModeTestCase(AKSAgentPoolUpdateDecora
             "test_cluster_name",
             "test_nodepool_name",
             agentpool_1,
+            if_match=None,
+            if_none_match=None,
             headers={},
         )
 

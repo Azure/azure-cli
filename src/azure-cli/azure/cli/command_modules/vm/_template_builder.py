@@ -307,7 +307,8 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
         enable_vtpm=None, count=None, edge_zone=None, os_disk_delete_option=None, user_data=None,
         capacity_reservation_group=None, enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None,
         os_disk_security_encryption_type=None, os_disk_secure_vm_disk_encryption_set=None, disk_controller_type=None,
-        enable_proxy_agent=None, proxy_agent_mode=None):
+        enable_proxy_agent=None, proxy_agent_mode=None, additional_scheduled_events=None,
+        enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None):
 
     os_caching = disk_info['os'].get('caching')
 
@@ -360,6 +361,8 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
             os_profile['secrets'] = secrets
 
         if enable_auto_update is not None and custom_image_os_type.lower() == 'windows':
+            if 'windowsConfiguration' not in os_profile:
+                os_profile['windowsConfiguration'] = {}
             os_profile['windowsConfiguration']['enableAutomaticUpdates'] = enable_auto_update
 
         # Windows patch settings
@@ -368,6 +371,9 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
                 raise ValidationError(
                     'Invalid value of --patch-mode for Windows VM. Valid values are AutomaticByOS, '
                     'AutomaticByPlatform, Manual.')
+
+            if 'windowsConfiguration' not in os_profile:
+                os_profile['windowsConfiguration'] = {}
             os_profile['windowsConfiguration']['patchSettings'] = {
                 'patchMode': patch_mode,
                 'enableHotpatching': enable_hotpatching
@@ -378,6 +384,9 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
             if patch_mode.lower() not in ['automaticbyplatform', 'imagedefault']:
                 raise ValidationError(
                     'Invalid value of --patch-mode for Linux VM. Valid values are AutomaticByPlatform, ImageDefault.')
+
+            if 'linuxConfiguration' not in os_profile:
+                os_profile['linuxConfiguration'] = {}
             os_profile['linuxConfiguration']['patchSettings'] = {
                 'patchMode': patch_mode
             }
@@ -567,6 +576,30 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
 
     vm_properties = {'hardwareProfile': {'vmSize': size}, 'networkProfile': {'networkInterfaces': nics},
                      'storageProfile': _build_storage_profile()}
+
+    scheduled_events_policy = {}
+    if additional_scheduled_events is not None:
+        scheduled_events_policy.update({
+            "scheduledEventsAdditionalPublishingTargets": {
+                "eventGridAndResourceGraph": {
+                    "enable": additional_scheduled_events
+                }
+            }
+        })
+    if enable_user_redeploy_scheduled_events is not None:
+        scheduled_events_policy.update({
+            "userInitiatedRedeploy": {
+                "automaticallyApprove": enable_user_redeploy_scheduled_events
+            }
+        })
+    if enable_user_reboot_scheduled_events is not None:
+        scheduled_events_policy.update({
+            "userInitiatedReboot": {
+                "automaticallyApprove": enable_user_reboot_scheduled_events
+            }
+        })
+    if scheduled_events_policy:
+        vm_properties['scheduledEventsPolicy'] = scheduled_events_policy
 
     vm_size_properties = {}
     if v_cpus_available is not None:
@@ -970,8 +1003,8 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         security_posture_reference_id=None, security_posture_reference_exclude_extensions=None,
                         enable_resilient_vm_creation=None, enable_resilient_vm_deletion=None,
                         additional_scheduled_events=None, enable_user_reboot_scheduled_events=None,
-                        enable_user_redeploy_scheduled_events=None,
-                        skuprofile_vmsizes=None, skuprofile_allostrat=None):
+                        enable_user_redeploy_scheduled_events=None, skuprofile_vmsizes=None, skuprofile_allostrat=None,
+                        security_posture_reference_is_overridable=None):
 
     # Build IP configuration
     ip_configuration = {}
@@ -1517,6 +1550,11 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
     if security_posture_reference_exclude_extensions:
         security_posture_reference = virtual_machine_profile.get('securityPostureReference', {})
         security_posture_reference['excludeExtensions'] = security_posture_reference_exclude_extensions
+        virtual_machine_profile['securityPostureReference'] = security_posture_reference
+
+    if security_posture_reference_is_overridable is not None:
+        security_posture_reference = virtual_machine_profile.get('securityPostureReference', {})
+        security_posture_reference['isOverridable'] = security_posture_reference_is_overridable
         virtual_machine_profile['securityPostureReference'] = security_posture_reference
 
     if virtual_machine_profile:

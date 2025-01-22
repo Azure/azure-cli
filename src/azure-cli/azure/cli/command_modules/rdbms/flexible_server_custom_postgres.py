@@ -296,7 +296,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
                                        auto_grow=None,
                                        performance_tier=None,
                                        iops=None, throughput=None,
-                                       yes=False):
+                                       cluster_size=None, yes=False):
 
     # validator
     location = ''.join(instance.location.lower().split())
@@ -322,7 +322,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
                            backup_byok_identity=backup_byok_identity,
                            backup_byok_key=backup_byok_key,
                            performance_tier=performance_tier,
-                           instance=instance)
+                           cluster_size=cluster_size, instance=instance)
 
     server_module_path = instance.__module__
     module = import_module(server_module_path)
@@ -403,6 +403,9 @@ def flexible_server_update_custom_func(cmd, client, instance,
                                                                           password_auth, administrator_login, administrator_login_password)
         auth_config.password_auth = password_auth
 
+    if cluster_size:
+        instance.cluster.cluster_size = cluster_size
+
     params = ServerForUpdate(sku=instance.sku,
                              storage=instance.storage,
                              backup=instance.backup,
@@ -413,6 +416,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
                              identity=identity,
                              data_encryption=data_encryption,
                              auth_config=auth_config,
+                             cluster=instance.cluster,
                              tags=tags)
 
     # High availability can't be updated with existing properties
@@ -977,6 +981,11 @@ def flexible_server_identity_remove(cmd, client, resource_group_name, server_nam
 
         if primary_id and primary_id.lower() in [identity.lower() for identity in identities]:
             raise CLIError("Cannot remove identity {} because it's used for data encryption.".format(primary_id))
+
+        geo_backup_id = instance.data_encryption.geo_backup_user_assigned_identity_id
+
+        if geo_backup_id and geo_backup_id.lower() in [identity.lower() for identity in identities]:
+            raise CLIError("Cannot remove identity {} because it's used for geo backup data encryption.".format(geo_backup_id))
 
     identities_map = {}
     for identity in identities:
