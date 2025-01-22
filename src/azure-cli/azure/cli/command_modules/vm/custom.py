@@ -3554,8 +3554,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                     vmss_resource['properties']['virtualMachineProfile']['securityProfile']['encryptionIdentity'] \
                         = vmss_securityProfile_EncryptionIdentity
             else:
-                raise CLIError("Encryption Identity should be an ARM Resource ID of one of the "
-                               "user assigned identities associated to the resource")
+                raise ArgumentUsageError("Encryption Identity should be an ARM Resource ID of one of the "
+                                         "user assigned identities associated to the resource")
     else:
         raise CLIError('usage error: --orchestration-mode (Uniform | Flexible)')
 
