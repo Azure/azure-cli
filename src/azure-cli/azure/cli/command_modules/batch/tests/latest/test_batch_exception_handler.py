@@ -5,20 +5,19 @@
 
 import unittest
 
+from msrest.exceptions import ClientRequestError, ValidationError
 from azure.cli.command_modules.batch._exception_handler import batch_exception_handler
 from azure.core.exceptions import HttpResponseError
 from azure.batch.models import BatchError, BatchErrorMessage, BatchErrorDetail
 from azure.cli.core.azclierror import (
     AzureInternalError,
-    AzureResponseError,
     BadRequestError,
-    CLIInternalError,
     ForbiddenError,
     ResourceNotFoundError,
     UnauthorizedError,
+    ValidationError as AzCliValidationError,
 )
 
-# from knack.util import CLIError
 from json import JSONDecodeError
 
 
@@ -83,6 +82,20 @@ class TestBatchExceptionHandler(unittest.TestCase):
                         model=BatchError(code="explosion", message=BatchErrorMessage(lang="en-us", value="Blew up")))
         with self.assertRaisesRegex(ResourceNotFoundError, r"^\(explosion\) Blew up$"):
             batch_exception_handler(err)
+
+    def test_validation_error(self):
+        err = ValidationError("rule", "target", "value")
+        try:
+            batch_exception_handler(err)
+        except AzCliValidationError as e:
+            self.assertEqual(str(e), str(err))
+    
+    def test_client_request_error(self):
+        err = ClientRequestError("Kaboom")
+        try:
+            batch_exception_handler(err)
+        except AzCliValidationError as e:
+            self.assertEqual(str(e), str(err))
 
     def test_response_err_details(self):
         err = HttpResponseError("Kaboom")
