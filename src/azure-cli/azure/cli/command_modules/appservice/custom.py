@@ -2532,7 +2532,7 @@ def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_sou
 
 def create_functionapp_slot(cmd, resource_group_name, name, slot, configuration_source=None,
                             image=None, registry_password=None,
-                            registry_username=None):
+                            registry_username=None, https_only=True):
     container_args = image or registry_password or registry_username
     if container_args and not configuration_source:
         raise ArgumentUsageError("Cannot use image, password and username arguments without "
@@ -2546,7 +2546,7 @@ def create_functionapp_slot(cmd, resource_group_name, name, slot, configuration_
     if not site:
         raise ResourceNotFoundError("'{}' function app doesn't exist".format(name))
     location = site.location
-    slot_def = Site(server_farm_id=site.server_farm_id, location=location)
+    slot_def = Site(server_farm_id=site.server_farm_id, location=location, https_only=https_only)
 
     poller = client.web_apps.begin_create_or_update_slot(resource_group_name, name, site_envelope=slot_def, slot=slot)
     result = LongRunningOperation(cmd.cli_ctx)(poller)
@@ -4331,7 +4331,7 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
     class Runtime:
         def __init__(self, name=None, version=None, is_preview=False, supported_func_versions=None, linux=False,
                      app_settings_dict=None, site_config_dict=None, app_insights=False, default=False,
-                     github_actions_properties=None):
+                     github_actions_properties=None, end_of_life_date=None):
             self.name = name
             self.version = version
             self.is_preview = is_preview
@@ -4342,8 +4342,10 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
             self.app_insights = app_insights
             self.default = default
             self.github_actions_properties = github_actions_properties
+            self.end_of_life_date = end_of_life_date
 
             self.display_name = "{}|{}".format(name, version) if version else name
+            self.deprecation_link = LANGUAGE_EOL_DEPRECATION_NOTICES.get(self.display_name, '')
 
         # used for displaying stacks
         def to_dict(self):
@@ -4354,29 +4356,27 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
                 d["linux_fx_version"] = self.site_config_dict.linux_fx_version
             return d
 
-    class RuntimeEOL:
-        def __init__(self, name=None, version=None, eol=None):
-            self.name = name
-            self.version = version
-            self.eol = eol
-            self.display_name = "{}|{}".format(name, version)
-            self.deprecation_link = LANGUAGE_EOL_DEPRECATION_NOTICES.get(self.display_name)
-
     def __init__(self, cmd, linux=False, windows=False):
         self.disallowed_functions_versions = {"~1", "~2", "~3"}
         self.KEYS = FUNCTIONS_STACKS_API_KEYS()
-        self.end_of_life_dates = []
         super().__init__(cmd, linux=linux, windows=windows)
 
     def validate_end_of_life_date(self, runtime, version):
         from dateutil.relativedelta import relativedelta
+        # we would not be able to validate for a custom runtime
+        if runtime == 'custom':
+            return
+
         today = datetime.datetime.now(datetime.timezone.utc)
         six_months = today + relativedelta(months=+6)
-        runtimes_eol = [r for r in self.end_of_life_dates if runtime == r.name]
-        matched_runtime_eol = next((r for r in runtimes_eol if r.version == version), None)
-        if matched_runtime_eol:
-            eol = matched_runtime_eol.eol
-            runtime_deprecation_link = matched_runtime_eol.deprecation_link or ''
+        runtimes = [r for r in self.stacks if runtime == r.name]
+        matched_runtime = next((r for r in runtimes if r.version == version), None)
+        if matched_runtime:
+            eol = matched_runtime.end_of_life_date
+            runtime_deprecation_link = matched_runtime.deprecation_link
+
+            if eol is None:
+                return
 
             if eol < today:
                 raise ValidationError('{} has reached EOL on {} and is no longer supported. {}'
@@ -4441,7 +4441,9 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
 
     def get_default_version(self, runtime, functions_version, linux=False):
         runtimes = [r for r in self.stacks if r.linux == linux and r.name == runtime]
-        runtimes.sort(key=lambda r: r.default, reverse=True)  # make runtimes with default=True appear first
+        # sort runtimes by end of life date
+        runtimes.sort(key=lambda r: r.end_of_life_date or
+                      datetime.datetime.min.replace(tzinfo=datetime.timezone.utc), reverse=True)
         for r in runtimes:
             if functions_version in r.supported_func_versions:
                 return r
@@ -4480,8 +4482,7 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
                 valid_versions.append(self._format_version_name(v))
         return valid_versions
 
-    def _parse_minor_version(self, runtime_settings, major_version_name, minor_version_name, runtime_to_version,
-                             runtime_to_version_eol):
+    def _parse_minor_version(self, runtime_settings, major_version_name, minor_version_name, runtime_to_version):
         runtime_name = (runtime_settings.app_settings_dictionary.get(self.KEYS.FUNCTIONS_WORKER_RUNTIME) or
                         major_version_name)
         if not runtime_settings.is_deprecated:
@@ -4494,16 +4495,12 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
                     self.KEYS.APPLICATION_INSIGHTS: runtime_settings.app_insights_settings.is_supported,
                     self.KEYS.SITE_CONFIG_DICT: runtime_settings.site_config_properties_dictionary,
                     self.KEYS.IS_DEFAULT: bool(runtime_settings.is_default),
-                    self.KEYS.GIT_HUB_ACTION_SETTINGS: runtime_settings.git_hub_action_settings
+                    self.KEYS.GIT_HUB_ACTION_SETTINGS: runtime_settings.git_hub_action_settings,
+                    self.KEYS.END_OF_LIFE_DATE: runtime_settings.end_of_life_date,
                 }
 
                 runtime_to_version[runtime_name] = runtime_to_version.get(runtime_name, {})
                 runtime_to_version[runtime_name][minor_version_name] = runtime_version_properties
-
-        # obtain end of life date for all runtime versions
-        if runtime_settings.end_of_life_date is not None:
-            runtime_to_version_eol[runtime_name] = runtime_to_version_eol.get(runtime_name, {})
-            runtime_to_version_eol[runtime_name][minor_version_name] = runtime_settings.end_of_life_date
 
     def _create_runtime_from_properties(self, runtime_name, version_name, version_properties, linux):
         supported_func_versions = version_properties[self.KEYS.SUPPORTED_EXTENSION_VERSIONS]
@@ -4516,14 +4513,13 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
                             app_settings_dict=version_properties[self.KEYS.APP_SETTINGS_DICT],
                             app_insights=version_properties[self.KEYS.APPLICATION_INSIGHTS],
                             default=version_properties[self.KEYS.IS_DEFAULT],
-                            github_actions_properties=version_properties[self.KEYS.GIT_HUB_ACTION_SETTINGS]
-                            )
+                            github_actions_properties=version_properties[self.KEYS.GIT_HUB_ACTION_SETTINGS],
+                            end_of_life_date=version_properties[self.KEYS.END_OF_LIFE_DATE])
 
     def _parse_raw_stacks(self, stacks):
         # build a map of runtime -> runtime version -> runtime version properties
         runtime_to_version_linux = {}
         runtime_to_version_windows = {}
-        runtime_to_version_end_of_life = {}
         for runtime in stacks:
             for major_version in runtime.major_versions:
                 for minor_version in major_version.minor_versions:
@@ -4535,19 +4531,16 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
                         self._parse_minor_version(runtime_settings=linux_settings,
                                                   major_version_name=runtime.name,
                                                   minor_version_name=runtime_version,
-                                                  runtime_to_version=runtime_to_version_linux,
-                                                  runtime_to_version_eol=runtime_to_version_end_of_life)
+                                                  runtime_to_version=runtime_to_version_linux)
 
                     if windows_settings is not None and not windows_settings.is_hidden:
                         self._parse_minor_version(runtime_settings=windows_settings,
                                                   major_version_name=runtime.name,
                                                   minor_version_name=runtime_version,
-                                                  runtime_to_version=runtime_to_version_windows,
-                                                  runtime_to_version_eol=runtime_to_version_end_of_life)
+                                                  runtime_to_version=runtime_to_version_windows)
 
         runtime_to_version_linux = self._format_version_names(runtime_to_version_linux)
         runtime_to_version_windows = self._format_version_names(runtime_to_version_windows)
-        runtime_to_version_end_of_life = self._format_version_names(runtime_to_version_end_of_life)
 
         for runtime_name, versions in runtime_to_version_windows.items():
             for version_name, version_properties in versions.items():
@@ -4558,11 +4551,6 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
             for version_name, version_properties in versions.items():
                 r = self._create_runtime_from_properties(runtime_name, version_name, version_properties, linux=True)
                 self._stacks.append(r)
-
-        for runtime_name, versions in runtime_to_version_end_of_life.items():
-            for version_name, version_eol in versions.items():
-                r = self.RuntimeEOL(name=runtime_name, version=version_name, eol=version_eol)
-                self.end_of_life_dates.append(r)
 
 
 def get_app_insights_key(cli_ctx, resource_group, name):
@@ -5763,6 +5751,13 @@ def list_consumption_locations(cmd):
     return [{'name': x.name.lower().replace(' ', '')} for x in regions]
 
 
+def get_subscription_locations(cli_ctx):
+    from azure.cli.core.commands.client_factory import get_subscription_service_client
+    subscription_client, subscription_id = get_subscription_service_client(cli_ctx)
+    result = list(subscription_client.subscriptions.list_locations(subscription_id))
+    return [item.name for item in result]
+
+
 def list_flexconsumption_locations(cmd, zone_redundant=False):
     if zone_redundant:
         return list_flexconsumption_zone_redundant_locations(cmd)
@@ -5771,8 +5766,10 @@ def list_flexconsumption_locations(cmd, zone_redundant=False):
     sub_id = get_subscription_id(cmd.cli_ctx)
     geo_regions_api = 'subscriptions/{}/providers/Microsoft.Web/geoRegions?sku=FlexConsumption&api-version=2023-01-01'
     request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + geo_regions_api.format(sub_id)
-    regions = send_raw_request(cmd.cli_ctx, "GET", request_url).json()['value']
-    return [{'name': x['name'].lower().replace(' ', '')} for x in regions]
+    flex_regions = send_raw_request(cmd.cli_ctx, "GET", request_url).json()['value']
+    flex_regions_list = [{'name': x['name'].lower().replace(' ', '')} for x in flex_regions]
+    sub_regions_list = get_subscription_locations(cmd.cli_ctx)
+    return [x for x in flex_regions_list if x['name'] in sub_regions_list]
 
 
 def list_locations(cmd, sku, linux_workers_enabled=None, hyperv_workers_enabled=None):

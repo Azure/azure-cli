@@ -4170,6 +4170,29 @@ class VMSSCreateAndModify(ScenarioTest):
             self.check('scaleInPolicy.forceDeletion', True)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_scale_extended_location', location='westus')
+    def test_vmss_scale_extended_location(self, resource_group):
+        self.kwargs.update({
+            'nsg': self.create_random_name('nsg', 10),
+            'ssh_key': TEST_SSH_KEY_PUB,
+            'vmss': self.create_random_name('vmss', 15)
+        })
+        self.cmd('network nsg create -g {rg} -n {nsg}')
+        self.cmd('vmss create -n {vmss} -g {rg} --image OpenLogic:CentOS:7.7:latest --admin-username clittester --lb-sku standard --public-ip-per-vm --dns-servers 10.0.0.6 10.0.0.5 --nsg {nsg} --admin-username vmsstest --admin-password Test123456789# --orchestration-mode Uniform -l westus --edge-zone losangeles')
+        self.cmd('vmss show -n {vmss} -g {rg}', checks=[
+            self.check('extendedLocation.name', 'losangeles'),
+            self.check('sku.capacity', 2)
+        ])
+        self.cmd('vmss scale -n {vmss} -g {rg} --new-capacity 5', checks=[
+            self.check('extendedLocation.name', 'losangeles'),
+            self.check('extendedLocation.type', 'EdgeZone'),
+        ])
+        self.cmd('vmss show -n {vmss} -g {rg}', checks=[
+            self.check('extendedLocation.name', 'losangeles'),
+            self.check('extendedLocation.type', 'EdgeZone'),
+            self.check('sku.capacity', 5)
+        ])
+
 
 class VMSSCreateOptions(ScenarioTest):
 

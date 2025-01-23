@@ -687,6 +687,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('public_access', options_list=['--public-access'], arg_type=get_enum_type(['Enabled', 'Disabled']),
                            help='Determines the public access. ')
             elif command_group == 'postgres':
+                c.argument('restore_point_in_time', arg_type=restore_point_in_time_arg_type)
                 c.argument('geo_redundant_backup', default='Disabled', arg_type=geo_redundant_backup_arg_type)
                 c.argument('byok_key', arg_type=key_arg_type)
                 c.argument('byok_identity', arg_type=identity_arg_type)
