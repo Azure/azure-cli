@@ -11,6 +11,10 @@
 from azure.cli.core.aaz import *
 
 
+@register_command(
+    "vm disk attach-detach-data-disk",
+    is_preview=True,
+)
 class AttachDetachDataDisk(AAZCommand):
     """Attach and detach data disks to/from the virtual machine.
     """

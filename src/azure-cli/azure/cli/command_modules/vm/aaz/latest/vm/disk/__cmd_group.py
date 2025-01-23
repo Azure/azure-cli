@@ -11,6 +11,10 @@
 from azure.cli.core.aaz import *
 
 
+@register_command_group(
+    "vm disk",
+    is_preview=True,
+)
 class __CMDGroup(AAZCommandGroup):
     """Manage the managed data disks attached to a VM.
 
