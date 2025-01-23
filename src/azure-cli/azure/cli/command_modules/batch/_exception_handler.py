@@ -9,6 +9,7 @@ from azure.cli.core.azclierror import (
     AzureInternalError,
     AzureResponseError,
     BadRequestError,
+    ClientRequestError as AzCliClientRequestError,
     ForbiddenError,
     ResourceNotFoundError,
     UnauthorizedError,
@@ -24,27 +25,29 @@ def batch_exception_handler(ex):
 
     if isinstance(ex, HttpResponseError):
         batch_msg = _parse_batch_error_msg(ex)
-        if batch_msg:
-            if ex.status_code == 400:
-                raise BadRequestError(batch_msg)
-            if ex.status_code == 401:
-                raise UnauthorizedError(batch_msg)
-            if ex.status_code == 403:
-                raise ForbiddenError(batch_msg)
-            if ex.status_code == 404:
-                raise ResourceNotFoundError(batch_msg)
-            if 500 <= ex.status_code < 600:
-                raise AzureInternalError(batch_msg)
-            raise AzureResponseError(batch_msg)
-    elif isinstance(ex, (ValidationError, ClientRequestError)):
+        if ex.status_code == 400:
+            raise BadRequestError(batch_msg)
+        if ex.status_code == 401:
+            raise UnauthorizedError(batch_msg)
+        if ex.status_code == 403:
+            raise ForbiddenError(batch_msg)
+        if ex.status_code == 404:
+            raise ResourceNotFoundError(batch_msg)
+        if 500 <= ex.status_code < 600:
+            raise AzureInternalError(batch_msg)
+        raise AzureResponseError(batch_msg)
+    if isinstance(ex, ValidationError):
         raise AzCliValidationError(ex)
+    if isinstance(ex, ClientRequestError):
+        raise AzCliClientRequestError(ex)
+
     raise ex
 
 
 def _parse_batch_error_msg(ex):
     """Try to Parse out a BatchError message from the response body. Returns
-       None if no message could be parsed"""
-    message = None
+       the passed-in exception's message if a BatchError can't be parsed."""
+    message = ex.message
     if getattr(ex, 'response', None) and getattr(ex.response, 'json', None):
         try:
             err = ex.response.json()

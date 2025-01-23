@@ -7,13 +7,17 @@ import unittest
 
 from msrest.exceptions import ClientRequestError, ValidationError
 from azure.cli.command_modules.batch._exception_handler import batch_exception_handler
-from azure.core.exceptions import HttpResponseError
+from azure.core.exceptions import (
+    HttpResponseError,
+    ResourceNotFoundError
+)
 from azure.batch.models import BatchError, BatchErrorMessage, BatchErrorDetail
 from azure.cli.core.azclierror import (
     AzureInternalError,
     BadRequestError,
+    ClientRequestError as AzCliClientRequestError,
     ForbiddenError,
-    ResourceNotFoundError,
+    ResourceNotFoundError as AzCliResourceNotFoundError,
     UnauthorizedError,
     ValidationError as AzCliValidationError,
 )
@@ -30,13 +34,13 @@ class TestBatchExceptionHandler(unittest.TestCase):
     
     def test_response_err(self):
         err = batch_err(500, HttpResponseError, "Kaboom")
-        with self.assertRaisesRegex(HttpResponseError, r"^Kaboom$"):
+        with self.assertRaisesRegex(AzureInternalError, r"^Kaboom$"):
             batch_exception_handler(err)
 
     def test_response_err_empty_model(self):
         err = batch_err(500, HttpResponseError, "Kaboom",
                         model=BatchError())
-        with self.assertRaisesRegex(HttpResponseError, r"^Kaboom$"):
+        with self.assertRaisesRegex(AzureInternalError, r"^Kaboom$"):
             batch_exception_handler(err)
 
     def test_response_err_code_only(self):
@@ -46,11 +50,11 @@ class TestBatchExceptionHandler(unittest.TestCase):
             batch_exception_handler(err)
 
     def test_response_err_json_parsing_err(self):
-        err = batch_err(500, HttpResponseError, "Kaboom",
+        err = batch_err(404, ResourceNotFoundError, "Kaboom",
                         model=BatchError(code="explosion"),
                         raise_parsing_err=True)
         # No code displayed because JSON parsing failed
-        with self.assertRaisesRegex(HttpResponseError, r"^Kaboom$"):
+        with self.assertRaisesRegex(AzCliResourceNotFoundError, r"^Kaboom$"):
             batch_exception_handler(err)
 
     def test_response_err_msg_and_code(self):
@@ -78,9 +82,9 @@ class TestBatchExceptionHandler(unittest.TestCase):
             batch_exception_handler(err)
     
     def test_resource_not_found_err(self):
-        err = batch_err(404, HttpResponseError, "Kaboom",
+        err = batch_err(404, ResourceNotFoundError, "Kaboom",
                         model=BatchError(code="explosion", message=BatchErrorMessage(lang="en-us", value="Blew up")))
-        with self.assertRaisesRegex(ResourceNotFoundError, r"^\(explosion\) Blew up$"):
+        with self.assertRaisesRegex(AzCliResourceNotFoundError, r"^\(explosion\) Blew up$"):
             batch_exception_handler(err)
 
     def test_validation_error(self):
@@ -94,7 +98,7 @@ class TestBatchExceptionHandler(unittest.TestCase):
         err = ClientRequestError("Kaboom")
         try:
             batch_exception_handler(err)
-        except AzCliValidationError as e:
+        except AzCliClientRequestError as e:
             self.assertEqual(str(e), str(err))
 
     def test_response_err_details(self):
