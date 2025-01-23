@@ -652,7 +652,7 @@ class RedisCacheTests(ScenarioTest):
         }
 
         # creating a standard cache with zonal allocation policy set to Automatic
-        self.cmd('az redis create -n {name} -g {rg} -l {location} --sku {sku} --vm-size {size} --zonal-allocation-policy Automatic')
+        self.cmd('az redis create -n {name} -g {rg} -l {location} --sku {sku} --vm-size {size} --zonal-allocation Automatic')
         if self.is_live:
             time.sleep(5*60)
         self.cmd('az redis show -n {name} -g {rg}', checks=[
