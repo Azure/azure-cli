@@ -18,6 +18,7 @@ from azure.cli.core import EXCLUDED_PARAMS
 from azure.cli.core.commands import CONFIRM_PARAM_NAME, AzCommandGroup
 from azure.cli.core.util import get_file_json
 from azure.core import MatchConditions
+from azure.core.paging import ItemPaged
 from knack.arguments import CLICommandArgument, IgnoreAction
 from knack.introspection import extract_args_from_signature
 
@@ -448,18 +449,6 @@ class AzureBatchDataPlaneCommand:
         def _load_descriptions():
             return self.extract_full_summary_from_signature(_get_operation())
 
-        def _is_paged(obj):
-            # Since loading msrest is expensive, we avoid it until we have to
-            from collections.abc import Iterable
-            if isinstance(obj, Iterable) \
-                    and not isinstance(obj, list) \
-                    and not isinstance(obj, dict):
-                from azure.cli.core.aaz._paging import AAZPaged
-                from azure.core.paging import ItemPaged as AzureCorePaged
-                from msrest.paging import Paged
-                return isinstance(obj, (AzureCorePaged, Paged, AAZPaged))
-            return False
-
         # pylint: disable=inconsistent-return-statements
         def _execute_command(kwargs):
             cmd = kwargs.pop('cmd')
@@ -505,7 +494,7 @@ class AzureBatchDataPlaneCommand:
                 return
 
             # Otherwise handle based on return type of results
-            if _is_paged(result):
+            if isinstance(result, ItemPaged):
                 return list(result)
 
             return result

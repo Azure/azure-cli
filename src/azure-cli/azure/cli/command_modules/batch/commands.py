@@ -117,7 +117,7 @@ def load_command_table(self, _):
         g.batch_command('set', 'update_job', flatten=2)
         g.batch_command('reset', 'replace_job', flatten=2)
         g.batch_command('disable', 'disable_job')
-        g.custom_command('list', 'list_jobs', table_transformer=job_list_table_format, transform=batch_transformer.transform_object_list)
+        g.custom_command('list', 'list_jobs', table_transformer=job_list_table_format, transform=batch_transformer.transform_result)
         g.batch_command('enable', 'enable_job')
         g.batch_command('stop', 'terminate_job')
         g.batch_command('prep-release-status list', 'list_job_preparation_and_release_task_status')
@@ -158,7 +158,7 @@ def load_command_table(self, _):
         g.batch_command('list', 'list_job_schedules')
 
     with self.command_group('batch task', get_data_type(), client_factory=get_data_factory()) as g:
-        g.custom_command('create', 'create_task', table_transformer=task_create_table_format, transform=batch_transformer.transform_object)
+        g.custom_command('create', 'create_task', table_transformer=task_create_table_format, transform=batch_transformer.transform_result)
         g.batch_command('list', 'list_tasks')
         g.batch_command('delete', 'delete_task')
         g.batch_command('show', 'get_task')

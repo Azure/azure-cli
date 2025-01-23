@@ -8,11 +8,12 @@ import unittest
 from azure.cli.command_modules.batch._transformers import Transformer
 from azure.batch.models import BatchJobConstraints
 
+
 class TestBatchTransformers(unittest.TestCase):
 
     def test_transform_object_empty_list(self):
         fake_transformer = Transformer({"testing": "potato"})
-        result = fake_transformer.transform_object_list([])
+        result = fake_transformer.transform_result([])
         self.assertEqual(result, [])
     
     def test_transform_object(self):
@@ -26,7 +27,7 @@ class TestBatchTransformers(unittest.TestCase):
             "potato": "fake_potato"
         }
 
-        result = fake_transformer.transform_object(fake_potato_json)
+        result = fake_transformer.transform_result(fake_potato_json)
         self.assertEqual(result, transformed_potato_json)
 
     def test_transform_object_list(self):
@@ -39,7 +40,7 @@ class TestBatchTransformers(unittest.TestCase):
             "potato": "fake_potato"
         }
 
-        result = fake_transformer.transform_object_list([fake_potato_json])
+        result = fake_transformer.transform_result([fake_potato_json])
         self.assertEqual(result, [transformed_potato_json])
 
     def test_transform_nested_object(self):
@@ -62,7 +63,7 @@ class TestBatchTransformers(unittest.TestCase):
             }
         }
 
-        result = fake_transformer.transform_object_list([fake_potato_json])
+        result = fake_transformer.transform_result([fake_potato_json])
         self.assertEqual(result, [transformed_potato_json])
     
     def test_transform_model_object(self):
@@ -101,5 +102,5 @@ class TestBatchTransformers(unittest.TestCase):
             }
         }
 
-        result = fake_transformer.transform_object_list([fake_potato_json])
+        result = fake_transformer.transform_result([fake_potato_json])
         self.assertEqual(result, [transformed_potato_json])

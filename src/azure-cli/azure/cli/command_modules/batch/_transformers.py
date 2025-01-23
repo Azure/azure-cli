@@ -13,27 +13,26 @@ class Transformer:
         self.transform_mapping = transform_mapping
 
     def transform_result(self, result):
-        if result:
+        if result is not None:
+            result = list(result) if isinstance(result, ItemPaged) else result
             if isinstance(result, list):
                 return self.transform_object_list(result)
-            else:
-                return self.transform_object(result)
+            return self.transform_object(result)
 
     def transform_object(self, result):
         new_dict = {}
         for key, value in result.items():
             new_key = self.transform_mapping[key] if key in self.transform_mapping else key
             if isinstance(value, Mapping):
-                new_dict[new_key] = self.transform_object(value)
+                new_dict[new_key] = self.transform_result(value)
             else:
                 new_dict[new_key] = value
         return new_dict
 
     def transform_object_list(self, result):
         new_result = []
-        result_list = list(result) if isinstance(result, ItemPaged) else result
-        for item in result_list:
-            updated_obj = self.transform_object(item)
+        for item in result:
+            updated_obj = self.transform_result(item)
             new_result.append(updated_obj)
         return new_result
 
