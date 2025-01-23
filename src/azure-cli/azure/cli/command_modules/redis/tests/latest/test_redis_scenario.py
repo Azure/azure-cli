@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from msilib import CreateRecord
 import os
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 import time
@@ -11,12 +12,14 @@ import datetime
 location = 'WestEurope'
 seclocation = 'EastUS'
 premium_sku = 'Premium'
+standard_sku = 'Standard'
 basic_sku = 'Basic'
 premium_size = 'P1'
 basic_size = 'C0'
+standard_size = 'C1'
 name_prefix = 'cliredis'
 # These tests rely on an already existing user assigned managed identity. You will need to create it and paste the id below:
-user_identity = '/subscriptions/6b9ac7d2-7f6d-4de4-962c-43fda44bc3f2/resourcegroups/kj-aad-testing/providers/Microsoft.ManagedIdentity/userAssignedIdentities/kj-aad-testing-mi'
+user_identity = '/subscriptions/6364f508-1150-4431-b973-c3f133466e56/resourcegroups/AANDUKURIA-RG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testuaiforclitests'
 
 class RedisCacheTests(ScenarioTest):
 
@@ -60,7 +63,22 @@ class RedisCacheTests(ScenarioTest):
             self.check('sku.family', premium_size[0]),
             self.check('sku.capacity', premium_size[1:]),
             self.check('tags.test', 'tryingzones'),
-            self.check('length(zones)', 2)
+            self.check('length(zones)', 2),
+            self.check('zonalAllocationPolicy', 'UserDefined')
+        ])
+
+        if self.is_live:
+            time.sleep(5*60)
+
+        # Update the cache with zonal allocation policy set to automatic from user defined
+        self.cmd('az redis update -n {name} -g {rg} --set "zonalAllocationPolicy=Automatic" --no-wait false')
+
+        self.cmd('az redis show -n {name} -g {rg}', checks=[
+            self.check('name', '{name}'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('zones', None),
+            self.check('tags.test', 'tryingzones'),
+            self.check('zonalAllocationPolicy', 'Automatic')
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_redis')
@@ -124,7 +142,7 @@ class RedisCacheTests(ScenarioTest):
             'permissions1': "\"+get +hget\"",
             'permissions2': "+get",
             'access-policy-assignment-name': "accessPolicyAssignmentName1",
-            'object-id': "69d700c5-ca77-4335-947e-4f823dd00e1a",
+            'object-id': "a8263550-d587-4433-9eff-64020dd56c13", # replace with valid object id of the newly created user assigned managed identity while running tests in live mode
             'object-id-alias1': "kj-aad-testing",
             'object-id-alias2': "aad-testing-app"
         }
@@ -291,7 +309,7 @@ class RedisCacheTests(ScenarioTest):
             'storageName': "str"+randName[:-3],
             'containerName': "testcontainer",
             'userIdentity': user_identity,
-            'storageSubscriptionId': "6b9ac7d2-7f6d-4de4-962c-43fda44bc3f2",
+            'storageSubscriptionId': "6364f508-1150-4431-b973-c3f133466e56",  # replace it with your subscription id while running tests in live mode
             'startTime': (datetime.datetime.utcnow() - datetime.timedelta(minutes=60)).strftime(f"%Y-%m-%dT%H:%MZ"),
             'expiryTime': (datetime.datetime.utcnow() + datetime.timedelta(minutes=200)).strftime(f"%Y-%m-%dT%H:%MZ")
         }
@@ -585,4 +603,65 @@ class RedisCacheTests(ScenarioTest):
 
         result = self.cmd('az redis show -n {name} -g {rg}').get_output_in_json()
         assert result['updateChannel'] == 'Preview'
+
+    @ResourceGroupPreparer(name_prefix='cli_test_redis')
+    def test_premium_redis_cache_zonal_allocation_policy(self, resource_group):
+        self.kwargs = {
+            'rg': resource_group,
+            'name': self.create_random_name(prefix=name_prefix, length=24),
+            'location': location,
+            'sku': premium_sku,
+            'size': premium_size
+        }
+
+        # creating a premium cache with zonal allocation policy set to NoZones
+        self.cmd('az redis create -n {name} -g {rg} -l {location} --sku {sku} --vm-size {size} --zonal-allocation-policy NoZones')
+        if self.is_live:
+            time.sleep(5*60)
+        self.cmd('az redis show -n {name} -g {rg}', checks=[
+            self.check('name', '{name}'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('zones', None),
+            self.check('zonalAllocationPolicy', 'NoZones'),
+            self.check('sku.name', '{sku}'),
+            self.check('sku.family', premium_size[0]),
+            self.check('sku.capacity', premium_size[1:])
+        ])
+
+        # updating the zonal allocation policy to Automatic
+        self.cmd('az redis update -n {name} -g {rg} --set "zonalAllocationPolicy=Automatic" --no-wait false')
+
+        self.cmd('az redis show -n {name} -g {rg}', checks=[
+            self.check('name', '{name}'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('zones', None),
+            self.check('zonalAllocationPolicy', 'Automatic'),
+            self.check('sku.name', '{sku}'),
+            self.check('sku.family', premium_size[0]),
+            self.check('sku.capacity', premium_size[1:])
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_redis')
+    def test_standard_redis_cache_zonal_allocation_policy(self, resource_group):
+        self.kwargs = {
+            'rg': resource_group,
+            'name': self.create_random_name(prefix=name_prefix, length=24),
+            'location': location,
+            'sku': standard_sku,
+            'size': standard_size
+        }
+
+        # creating a standard cache with zonal allocation policy set to Automatic
+        self.cmd('az redis create -n {name} -g {rg} -l {location} --sku {sku} --vm-size {size} --zonal-allocation-policy Automatic')
+        if self.is_live:
+            time.sleep(5*60)
+        self.cmd('az redis show -n {name} -g {rg}', checks=[
+            self.check('name', '{name}'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('zones', None),
+            self.check('zonalAllocationPolicy', 'Automatic'),
+            self.check('sku.name', '{sku}'),
+            self.check('sku.family', standard_size[0]),
+            self.check('sku.capacity', standard_size[1:]),
+        ])
         
