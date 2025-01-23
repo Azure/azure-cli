@@ -616,6 +616,21 @@ def _validate_cert(namespace, param_name):
         setattr(namespace, param_name, read_base_64_file(attr))
 
 
+def auto_scale_config_validator(namespace):
+    config_props = ['min-capacity']
+    def _parse(item):
+        prop, value = item.split('=', 1)
+        if not prop in config_props:
+            raise ValidationError(f"Invalid property '{prop}' in auto-scale-config. Supported: {config_props}")
+        return {prop: value} if value else {prop: ""}
+
+    if isinstance(namespace.auto_scale_config, list):
+        auto_scale_config = {}
+        for item in namespace.auto_scale_config:
+            auto_scale_config.update(_parse(item))
+        namespace.auto_scale_config = auto_scale_config
+
+
 def process_vpn_connection_create_namespace(cmd, namespace):
     from azure.mgmt.core.tools import is_valid_resource_id, resource_id
     get_default_location_from_resource_group(cmd, namespace)
