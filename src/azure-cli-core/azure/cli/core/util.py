@@ -1436,9 +1436,9 @@ def getprop(o, name, *default):
     """
     if name.startswith('_'):
         # avoid to access the private properties or methods
-        raise KeyError(name)
+        raise AttributeError(name)
     v = getattr(o, name, *default)
     if callable(v):
         # avoid to access the methods
-        raise KeyError(name)
+        raise AttributeError(name)
     return v
