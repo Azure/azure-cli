@@ -3934,8 +3934,9 @@ def scale_vmss(cmd, resource_group_name, vm_scale_set_name, new_capacity, no_wai
         return
 
     vmss.sku.capacity = new_capacity
-    vmss_new = VirtualMachineScaleSet(location=vmss.location, sku=vmss.sku) if vmss.extended_location is None \
-        else VirtualMachineScaleSet(location=vmss.location, sku=vmss.sku, extended_location=vmss.extended_location)
+    vmss_new = VirtualMachineScaleSet(location=vmss.location, sku=vmss.sku)
+    if vmss.extended_location is not None:
+        vmss_new.extended_location = vmss.extended_location
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_create_or_update,
                        resource_group_name, vm_scale_set_name, vmss_new)
 
