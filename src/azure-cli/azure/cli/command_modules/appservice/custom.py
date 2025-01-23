@@ -2532,7 +2532,7 @@ def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_sou
 
 def create_functionapp_slot(cmd, resource_group_name, name, slot, configuration_source=None,
                             image=None, registry_password=None,
-                            registry_username=None):
+                            registry_username=None, https_only=True):
     container_args = image or registry_password or registry_username
     if container_args and not configuration_source:
         raise ArgumentUsageError("Cannot use image, password and username arguments without "
@@ -2546,7 +2546,7 @@ def create_functionapp_slot(cmd, resource_group_name, name, slot, configuration_
     if not site:
         raise ResourceNotFoundError("'{}' function app doesn't exist".format(name))
     location = site.location
-    slot_def = Site(server_farm_id=site.server_farm_id, location=location)
+    slot_def = Site(server_farm_id=site.server_farm_id, location=location, https_only=https_only)
 
     poller = client.web_apps.begin_create_or_update_slot(resource_group_name, name, site_envelope=slot_def, slot=slot)
     result = LongRunningOperation(cmd.cli_ctx)(poller)
