@@ -515,7 +515,7 @@ class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
-    def test_functionapp_consumption_plan_creation(self, resource_group, storage_account):
+    def test_functionapp_consumption_app_with_plan_creation(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'functionappconsumption', 40)
 
@@ -531,7 +531,7 @@ class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
-    def test_consumption_plan_creation(self, resource_group):
+    def test_functionapp_consumption_plan_creation(self, resource_group):
         plan_name = self.create_random_name('functionappplan', 40)
 
         self.cmd('functionapp plan create -g {} -n {} --sku Y1 --is-linux --location southcentralus'.format(resource_group, plan_name))
