@@ -10,7 +10,7 @@ from azure.cli.core.commands.parameters import get_three_state_flag
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-statements
-    from azure.mgmt.redis.models import RebootType, RedisKeyType, SkuName, TlsVersion, ReplicationRole, UpdateChannel
+    from azure.mgmt.redis.models import RebootType, RedisKeyType, SkuName, TlsVersion, ReplicationRole, UpdateChannel, ZonalAllocationPolicy
     from azure.cli.command_modules.redis._validators import JsonString, ScheduleEntryList
     from azure.cli.command_modules.redis.custom import allowed_c_family_sizes, allowed_p_family_sizes, allowed_auth_methods
     from azure.cli.core.commands.parameters import get_enum_type, tags_type, zones_type
@@ -54,6 +54,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('update_channel', arg_type=get_enum_type(UpdateChannel), help='Specifies the update channel for the monthly Redis updates your Redis Cache will receive. Caches using "Preview" update channel get latest Redis updates at least 4 weeks ahead of "Stable" channel caches. Default value is "Stable".')
         c.argument('storage_subscription_id', options_list=['--storage-subscription-id', '--storage-sub-id'], help='SubscriptionId of the storage account')
         c.argument('disable_access_key_authentication', arg_type=get_three_state_flag(), options_list=['--disable-access-keys'], help='Authentication to Redis through access keys is disabled when set as true')
+        c.argument('zonal_allocation_policy', arg_type=get_enum_type(ZonalAllocationPolicy), help='Specifies how availability zones are allocated to the Redis cache. "Automatic" enables zone redundancy and Azure will automatically select zones based on regional availability and capacity. "UserDefined" will select availability zones passed in by you using the "zones" parameter. "NoZones" will produce a non-zonal cache. If "zonal-allocation-policy" is not passed, it will be set to "UserDefined" when zones are passed in, otherwise, it will be set to "Automatic in regions where zones are supported and "NoZones" in regions where zones are not supported.')
 
     with self.argument_context('redis firewall-rules list') as c:
         c.argument('cache_name', arg_type=cache_name, id_part=None)
