@@ -1428,3 +1428,17 @@ def run_az_cmd(args, out_file=None):
     cli = get_default_cli()
     cli.invoke(args, out_file=out_file)
     return cli.result
+
+
+def getprop(o, name, *default):
+    """ This function is used to get the property of the object.
+    It will raise an error if the property is a private property or a method.
+    """
+    if name.startswith('_'):
+        # avoid to access the private properties or methods
+        raise KeyError(name)
+    v = getattr(o, name, *default)
+    if callable(v):
+        # avoid to access the methods
+        raise KeyError(name)
+    return v
