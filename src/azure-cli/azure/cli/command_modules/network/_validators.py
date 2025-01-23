@@ -617,6 +617,7 @@ def _validate_cert(namespace, param_name):
 
 
 def auto_scale_config_validator(namespace):
+    # see VirtualRouterAutoScaleConfiguration properties in swagger
     config_props = ['min-capacity']
     def _parse(item):
         prop, value = item.split('=', 1)
