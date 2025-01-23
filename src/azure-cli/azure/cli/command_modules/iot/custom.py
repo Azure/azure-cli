@@ -698,6 +698,16 @@ def update_iot_hub_custom(instance,
             fileupload_storage_identity,
         )
 
+    _update_iot_hub_auth(
+        instance=instance,
+        disable_local_auth=disable_local_auth,
+        disable_device_sas=disable_device_sas,
+        disable_module_sas=disable_module_sas
+    )
+    return instance
+
+
+def _update_iot_hub_auth(instance, disable_local_auth=None, disable_device_sas=None, disable_module_sas=None):
     # sas token authentication switches
     if disable_local_auth is not None:
         instance.properties.disable_local_auth = disable_local_auth
@@ -705,8 +715,6 @@ def update_iot_hub_custom(instance,
         instance.properties.disable_device_sas = disable_device_sas
     if disable_module_sas is not None:
         instance.properties.disable_module_sas = disable_module_sas
-
-    return instance
 
 
 def iot_hub_update(client, hub_name, parameters, resource_group_name=None):
