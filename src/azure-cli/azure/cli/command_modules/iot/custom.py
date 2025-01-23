@@ -636,6 +636,7 @@ def update_iot_hub_custom(instance,
                           fileupload_storage_authentication_type=None,
                           fileupload_storage_container_uri=None,
                           fileupload_storage_identity=None,
+                          min_tls_version=None,
                           tags=None):
     from datetime import timedelta
     if tags is not None:
@@ -668,6 +669,8 @@ def update_iot_hub_custom(instance,
     if fileupload_notification_ttl is not None:
         ttl = timedelta(hours=fileupload_notification_ttl)
         instance.properties.messaging_endpoints['fileNotifications'].ttl_as_iso8601 = ttl
+    if min_tls_version is not None:
+        instance.properties.min_tls_version = min_tls_version
     # only bother with $default storage endpoint checking if modifying fileupload params
     if any([
             fileupload_storage_connectionstring, fileupload_storage_container_name, fileupload_sas_ttl,
