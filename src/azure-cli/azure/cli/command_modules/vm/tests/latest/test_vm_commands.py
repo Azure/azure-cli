@@ -4178,9 +4178,20 @@ class VMSSCreateAndModify(ScenarioTest):
             'vmss': self.create_random_name('vmss', 15)
         })
         self.cmd('network nsg create -g {rg} -n {nsg}')
-        self.cmd('vmss create -n {vmss} -g {rg} --image Debian:debian-10:10:latest --admin-username clittester --nsg {nsg} --orchestration-mode Uniform --zones 1 2 3 --vm-sku Standard_DS1_v2 --location westus')
-        self.cmd('vmss scale -n {vmss} -g {rg} --new-capacity 5 --extended-location losangeles')
-        self.cmd('vmss show -n {vmss} -g {rg}')
+        self.cmd('vmss create -n {vmss} -g {rg} --image OpenLogic:CentOS:7.7:latest --admin-username clittester --lb-sku standard --public-ip-per-vm --dns-servers 10.0.0.6 10.0.0.5 --nsg {nsg} --admin-username vmsstest --admin-password Test123456789# --orchestration-mode Uniform -l westus --edge-zone losangeles')
+        self.cmd('vmss show -n {vmss} -g {rg}', checks=[
+            self.check('extendedLocation.name', 'losangeles'),
+            self.check('sku.capacity', 2)
+        ])
+        self.cmd('vmss scale -n {vmss} -g {rg} --new-capacity 5', checks=[
+            self.check('extendedLocation.name', 'losangeles'),
+            self.check('extendedLocation.type', 'EdgeZone'),
+        ])
+        self.cmd('vmss show -n {vmss} -g {rg}', checks=[
+            self.check('extendedLocation.name', 'losangeles'),
+            self.check('extendedLocation.type', 'EdgeZone'),
+            self.check('sku.capacity', 5)
+        ])
 
 
 class VMSSCreateOptions(ScenarioTest):
