@@ -11,6 +11,7 @@ from typing import get_args, get_type_hints
 
 from azure.batch._model_base import _RestField
 from azure.cli.command_modules.batch import _format as transformers
+from azure.cli.command_modules.batch._transformers import batch_transformer
 from azure.cli.command_modules.batch import _parameter_format as pformat
 from azure.cli.command_modules.batch import _validators as validators
 from azure.cli.core import EXCLUDED_PARAMS
@@ -554,6 +555,7 @@ class AzureBatchDataPlaneCommand:
             'handler': self.handler,
             'argument_loader': self.argument_loader,
             'description_loader': self.description_loader,
+            'transform': batch_transformer.transform_result,
             'table_transformer': self.table_transformer,
             'confirmation': self.confirmation,
             'client_factory': self.client_factory

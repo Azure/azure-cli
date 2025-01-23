@@ -12,14 +12,19 @@ class Transformer:
     def __init__(self, transform_mapping):
         self.transform_mapping = transform_mapping
 
+    def transform_result(self, result):
+        if result:
+            if isinstance(result, list):
+                return self.transform_object_list(result)
+            else:
+                return self.transform_object(result)
+
     def transform_object(self, result):
         new_dict = {}
         for key, value in result.items():
             new_key = self.transform_mapping[key] if key in self.transform_mapping else key
             if isinstance(value, Mapping):
                 new_dict[new_key] = self.transform_object(value)
-            # elif isinstance(value, Iterable): # if another dictionary is in a list then we should check to transform
-            #     new_dict[new_key] = transform_object_list(value)
             else:
                 new_dict[new_key] = value
         return new_dict
@@ -34,11 +39,33 @@ class Transformer:
 
 
 transform_map = {
-    # "etag": "eTag",
-    # "logicalUnitNumber": "lun",
-    "nodeAgentSKUId": "nodeAgentSkuId",
-    "diskSizeGB": "diskSizeGb",
-    "ephemeralOSDiskSettings": "ephemeralOsDiskSettings"
+    # cmd: az batch pool list
+    # cmd: az batch pool show
+    'diskSizeGB': 'diskSizeGb',
+    'ephemeralOSDiskSettings': 'ephemeralOsDiskSettings',
+    'nodeAgentSKUId': 'nodeAgentSkuId',
+    # cmd: az batch pool list
+    'automaticOSUpgradePolicy': 'automaticOsUpgradePolicy',
+    'dynamicVNetAssignmentScope': 'dynamicVnetAssignmentScope',
+    'enableAutomaticOSUpgrade': 'enableAutomaticOsUpgrade',
+    'publicIPAddressConfiguration': 'publicIpAddressConfiguration',
+    # cmd: az batch node remote-login-settings show
+    'remoteLoginIPAddress': 'remoteLoginIpAddress',
+    # cmd:
+    'inboundNATPools': 'inboundNatPools',
+    'publicFQDN': 'publicFqdn',
+    'publicIPAddress': 'publicIpAddress',
+    'upgradingOS': 'upgradingOs',
+    # cmd: az batch pool usage-metrics list (API was retired on 09/30/2024 so these should be removed soon)
+    'avgCPUPercentage': 'avgCpuPercentage',
+    'diskReadIOps': 'diskReadIops',
+    'diskWriteIOps': 'diskWriteIops',
+    'kernelCPUTime': 'kernelCpuTime',
+    'readIOGiB': 'readIoGiB',
+    'readIOps': 'readIops',
+    'userCPUTime': 'userCpuTime',
+    'writeIOGiB': 'writeIoGiB',
+    'writeIOps': 'writeIops',
 }
 
 batch_transformer = Transformer(transform_map)
