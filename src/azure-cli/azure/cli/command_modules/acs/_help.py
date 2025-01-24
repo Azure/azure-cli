@@ -1668,13 +1668,13 @@ parameters:
   - name: --if-match
     type: string
     short-summary: The value provided will be compared to the ETag of the node pool, if it matches the operation will proceed. If it does not match, the request will be rejected to prevent accidental overwrites. This must not be specified when creating a new agentpool.
-  - name: --ignore-pod-disruption-budget
+  - name: --ignore-pdb
     type: bool
-    short-summary: ignore-pod-disruption-budget deletes an existing nodepool without considering Pod Disruption Budget.
+    short-summary: ignore-pdb deletes an existing nodepool without considering Pod Disruption Budget.
 
 examples:
-    - name: Delete an agent pool with ignore-pod-disruption-budget
-      text: az aks nodepool delete --resource-group MyResourceGroup --cluster-name MyManagedCluster --name nodepool1 --if-match etag --ignore-pod-disruption-budget
+    - name: Delete an agent pool with ignore-pdb
+      text: az aks nodepool delete --resource-group MyResourceGroup --cluster-name MyManagedCluster --name nodepool1 --if-match etag --ignore-pdb
 """
 
 helps['aks nodepool get-upgrades'] = """
