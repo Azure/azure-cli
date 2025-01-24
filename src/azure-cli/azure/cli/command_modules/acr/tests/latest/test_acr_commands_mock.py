@@ -65,7 +65,7 @@ TEST_REPOSITORY = 'testrepository'
 class AcrMockCommandsTests(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.acr.repository.get_access_credentials', autospec=True)
-    @mock.patch('requests.request', autospec=True)
+    @mock.patch('azure.cli.command_modules.acr._docker_utils.session.request', autospec=True)
     def test_repository_list(self, mock_requests_get, mock_get_access_credentials):
         cmd = self._setup_cmd()
 
@@ -106,7 +106,7 @@ class AcrMockCommandsTests(unittest.TestCase):
             verify=mock.ANY)
 
     @mock.patch('azure.cli.command_modules.acr.repository.get_access_credentials', autospec=True)
-    @mock.patch('requests.request', autospec=True)
+    @mock.patch('azure.cli.command_modules.acr._docker_utils.session.request', autospec=True)
     def test_repository_list_deleted(self, mock_requests_get, mock_get_access_credentials):
         cmd = self._setup_cmd()
 
@@ -157,7 +157,7 @@ class AcrMockCommandsTests(unittest.TestCase):
             verify=mock.ANY)
 
     @mock.patch('azure.cli.command_modules.acr.repository.get_access_credentials', autospec=True)
-    @mock.patch('requests.request', autospec=True)
+    @mock.patch('azure.cli.command_modules.acr._docker_utils.session.request', autospec=True)
     def test_repository_show_tags(self, mock_requests_get, mock_get_access_credentials):
         cmd = self._setup_cmd()
 
@@ -213,7 +213,7 @@ class AcrMockCommandsTests(unittest.TestCase):
             verify=mock.ANY)
 
     @mock.patch('azure.cli.command_modules.acr.repository.get_access_credentials', autospec=True)
-    @mock.patch('requests.request', autospec=True)
+    @mock.patch('azure.cli.command_modules.acr._docker_utils.session.request', autospec=True)
     def test_repository_show_manifests(self, mock_requests_get, mock_get_access_credentials):
         cmd = self._setup_cmd()
 
@@ -264,7 +264,7 @@ class AcrMockCommandsTests(unittest.TestCase):
             verify=mock.ANY)
 
     @mock.patch('azure.cli.command_modules.acr.repository.get_access_credentials', autospec=True)
-    @mock.patch('requests.request', autospec=True)
+    @mock.patch('azure.cli.command_modules.acr._docker_utils.session.request', autospec=True)
     def test_repository_show(self, mock_requests_get, mock_get_access_credentials):
         cmd = self._setup_cmd()
 
@@ -319,7 +319,7 @@ class AcrMockCommandsTests(unittest.TestCase):
             verify=mock.ANY)
 
     @mock.patch('azure.cli.command_modules.acr.repository.get_access_credentials', autospec=True)
-    @mock.patch('requests.request', autospec=True)
+    @mock.patch('azure.cli.command_modules.acr._docker_utils.session.request', autospec=True)
     def test_repository_update(self, mock_requests_get, mock_get_access_credentials):
         cmd = self._setup_cmd()
 
@@ -384,7 +384,7 @@ class AcrMockCommandsTests(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.acr.repository.get_access_credentials', autospec=True)
     @mock.patch('azure.cli.command_modules.acr.repository._get_manifest_digest', autospec=True)
-    @mock.patch('requests.request', autospec=True)
+    @mock.patch('azure.cli.command_modules.acr._docker_utils.session.request', autospec=True)
     def test_repository_delete(self, mock_requests_delete, mock_get_manifest_digest, mock_get_access_credentials):
         cmd = self._setup_cmd()
 
@@ -455,7 +455,7 @@ class AcrMockCommandsTests(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.acr.manifest.get_access_credentials', autospec=True)
     @mock.patch('azure.cli.command_modules.acr.repository.get_access_credentials', autospec=True)
     @mock.patch('azure.cli.command_modules.acr.repository._get_manifest_digest', autospec=True)
-    @mock.patch('requests.request', autospec=True)
+    @mock.patch('azure.cli.command_modules.acr._docker_utils.session.request', autospec=True)
     def test_manifest_show(self, mock_requests_get, mock_get_manifest_digest, mock_get_access_credentials, mock_get_access_credentials_manifest):
         cmd = self._setup_cmd()
 
@@ -581,7 +581,7 @@ class AcrMockCommandsTests(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.acr.manifest.get_access_credentials', autospec=True)
     @mock.patch('azure.cli.command_modules.acr.repository.get_access_credentials', autospec=True)
     @mock.patch('azure.cli.command_modules.acr.repository._get_manifest_digest', autospec=True)
-    @mock.patch('requests.request', autospec=True)
+    @mock.patch('azure.cli.command_modules.acr._docker_utils.session.request', autospec=True)
     def test_manifest_list_referrers(self, mock_requests_get, mock_get_manifest_digest, mock_get_access_credentials, mock_get_access_credentials_manifest):
         cmd = self._setup_cmd()
 
@@ -646,7 +646,7 @@ class AcrMockCommandsTests(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.acr.manifest.get_access_credentials', autospec=True)
     @mock.patch('azure.cli.command_modules.acr.repository.get_access_credentials', autospec=True)
     @mock.patch('azure.cli.command_modules.acr.repository._get_manifest_digest', autospec=True)
-    @mock.patch('requests.request', autospec=True)
+    @mock.patch('azure.cli.command_modules.acr._docker_utils.session.request', autospec=True)
     def test_manifest_delete(self, mock_requests_delete, mock_get_manifest_digest, mock_get_access_credentials, mock_get_access_credentials_manifest):
         cmd = self._setup_cmd()
 
@@ -704,7 +704,7 @@ class AcrMockCommandsTests(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.acr.manifest.get_access_credentials', autospec=True)
     @mock.patch('azure.cli.command_modules.acr.repository.get_access_credentials', autospec=True)
     @mock.patch('azure.cli.command_modules.acr.repository._get_manifest_digest', autospec=True)
-    @mock.patch('requests.request', autospec=True)
+    @mock.patch('azure.cli.command_modules.acr._docker_utils.session.request', autospec=True)
     def test_manifest_metadata_show(self, mock_requests_get, mock_get_manifest_digest, mock_get_access_credentials, mock_get_access_credentials_manifest):
         cmd = self._setup_cmd()
 
@@ -764,7 +764,7 @@ class AcrMockCommandsTests(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.acr.manifest.get_access_credentials', autospec=True)
     @mock.patch('azure.cli.command_modules.acr.repository.get_access_credentials', autospec=True)
-    @mock.patch('requests.request', autospec=True)
+    @mock.patch('azure.cli.command_modules.acr._docker_utils.session.request', autospec=True)
     def test_manifest_metadata_list(self, mock_requests_get, mock_get_access_credentials, mock_get_access_credentials_manifest):
         cmd = self._setup_cmd()
 
@@ -824,7 +824,7 @@ class AcrMockCommandsTests(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.acr.manifest.get_access_credentials', autospec=True)
     @mock.patch('azure.cli.command_modules.acr.repository.get_access_credentials', autospec=True)
     @mock.patch('azure.cli.command_modules.acr.manifest._get_soft_delete_retention_days', autospec=True)
-    @mock.patch('requests.request', autospec=True)
+    @mock.patch('azure.cli.command_modules.acr._docker_utils.session.request', autospec=True)
     def test_manifest_deleted_list(self, mock_requests_get, mock_get_soft_delete_retention_days, mock_get_access_credentials, mock_get_access_credentials_manifest):
         cmd = self._setup_cmd()
 
@@ -886,7 +886,7 @@ class AcrMockCommandsTests(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.acr.manifest.get_access_credentials', autospec=True)
     @mock.patch('azure.cli.command_modules.acr.repository.get_access_credentials', autospec=True)
     @mock.patch('azure.cli.command_modules.acr.manifest._get_soft_delete_retention_days', autospec=True)
-    @mock.patch('requests.request', autospec=True)
+    @mock.patch('azure.cli.command_modules.acr._docker_utils.session.request', autospec=True)
     def test_manifest_deleted_tags_list(self, mock_requests_get, mock_get_soft_delete_retention_days, mock_get_access_credentials, mock_get_access_credentials_manifest):
         cmd = self._setup_cmd()
 
@@ -979,7 +979,7 @@ class AcrMockCommandsTests(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.acr.manifest.get_access_credentials', autospec=True)
     @mock.patch('azure.cli.command_modules.acr.repository.get_access_credentials', autospec=True)
     @mock.patch('azure.cli.command_modules.acr.manifest._obtain_data_from_registry', autospec=True)
-    @mock.patch('requests.request', autospec=True)
+    @mock.patch('azure.cli.command_modules.acr._docker_utils.session.request', autospec=True)
     def test_manifest_deleted_restore(self, mock_requests_post, mock_obtain_data_from_registry, mock_get_access_credentials, mock_get_access_credentials_manifest):
         cmd = self._setup_cmd()
 
@@ -1072,7 +1072,7 @@ class AcrMockCommandsTests(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.acr.repository.get_access_credentials', autospec=True)
     @mock.patch('azure.cli.command_modules.acr.repository._get_manifest_digest', autospec=True)
-    @mock.patch('requests.request', autospec=True)
+    @mock.patch('azure.cli.command_modules.acr._docker_utils.session.request', autospec=True)
     def test_manifest_metadata_update(self, mock_requests_patch, mock_get_manifest_digest, mock_get_access_credentials):
         cmd = self._setup_cmd()
 
@@ -1263,7 +1263,7 @@ class AcrMockCommandsTests(unittest.TestCase):
             verify=mock.ANY)
 
     @mock.patch('azure.cli.command_modules.acr.helm.get_access_credentials', autospec=True)
-    @mock.patch('requests.request', autospec=True)
+    @mock.patch('azure.cli.command_modules.acr._docker_utils.session.request', autospec=True)
     def test_helm_list(self, mock_requests_get, mock_get_access_credentials):
         cmd = self._setup_cmd()
 
@@ -1301,7 +1301,7 @@ class AcrMockCommandsTests(unittest.TestCase):
             verify=mock.ANY)
 
     @mock.patch('azure.cli.command_modules.acr.helm.get_access_credentials', autospec=True)
-    @mock.patch('requests.request', autospec=True)
+    @mock.patch('azure.cli.command_modules.acr._docker_utils.session.request', autospec=True)
     def test_helm_show(self, mock_requests_get, mock_get_access_credentials):
         cmd = self._setup_cmd()
 
@@ -1346,7 +1346,7 @@ class AcrMockCommandsTests(unittest.TestCase):
             verify=mock.ANY)
 
     @mock.patch('azure.cli.command_modules.acr.helm.get_access_credentials', autospec=True)
-    @mock.patch('requests.request', autospec=True)
+    @mock.patch('azure.cli.command_modules.acr._docker_utils.session.request', autospec=True)
     def test_helm_delete(self, mock_requests_get, mock_get_access_credentials):
         cmd = self._setup_cmd()
 
@@ -1380,7 +1380,7 @@ class AcrMockCommandsTests(unittest.TestCase):
             verify=mock.ANY)
 
     @mock.patch('azure.cli.command_modules.acr.helm.get_access_credentials', autospec=True)
-    @mock.patch('requests.request', autospec=True)
+    @mock.patch('azure.cli.command_modules.acr._docker_utils.session.request', autospec=True)
     def test_helm_push(self, mock_requests_get, mock_get_access_credentials):
         cmd = self._setup_cmd()
 
