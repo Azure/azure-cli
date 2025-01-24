@@ -677,9 +677,11 @@ def validate_update_policy_request(existing_policy, new_policy, yes=False):
     new_backup_management_type = new_policy.properties.backup_management_type
     if existing_backup_management_type != new_backup_management_type:
         raise CLIError("BackupManagementType cannot be different than the existing type.")
-    vault_to_snapshot = new_backup_management_type.lower() == 'azurestorage' and hasattr(existing_policy.properties, 'vault_retention_policy') and existing_policy.properties.vault_retention_policy is not None and hasattr(new_policy.properties, 'retention_policy') and new_policy.properties.retention_policy is not None
-    snapshot_to_vault = new_backup_management_type.lower() == 'azurestorage' and hasattr(existing_policy.properties, 'retention_policy') and existing_policy.properties.retention_policy is not None and hasattr(new_policy.properties, 'vault_retention_policy') and new_policy.properties.vault_retention_policy is not None
-    
+    vault_to_snapshot = new_backup_management_type.lower() == 'azurestorage' and hasattr(existing_policy.properties,
+                                                         'vault_retention_policy') and existing_policy.properties.vault_retention_policy is not None and hasattr(new_policy.properties, 'retention_policy') and new_policy.properties.retention_policy is not None
+    snapshot_to_vault = new_backup_management_type.lower() == 'azurestorage' and hasattr(existing_policy.properties, 'retention_policy') and existing_policy.properties.retention_policy is not None and hasattr(
+        new_policy.properties, 'vault_retention_policy') and new_policy.properties.vault_retention_policy is not None
+
     # vault -> snapshot
     if vault_to_snapshot:
         raise CLIError(
@@ -689,8 +691,8 @@ def validate_update_policy_request(existing_policy, new_policy, yes=False):
             """)
     # snapshot -> vault
     if snapshot_to_vault:
-        warning_prompt = ('Changing the backup tier keeps current snapshots as-is under the existing policy. Future backups will be stored in the vault with new retention settings. ' 
-                          'This action is irreversible and incurs additional costs. Switching from vault to snapshot requires reconfiguration.' 
+        warning_prompt = ('Changing the backup tier keeps current snapshots as-is under the existing policy. Future backups will be stored in the vault with new retention settings. '
+                          'This action is irreversible and incurs additional costs. Switching from vault to snapshot requires reconfiguration.'
                           'Learn more at https://learn.microsoft.com/en-us/azure/backup/azure-file-share-backup-overview?tabs=snapshot. Do you want to continue?')
         if not yes and not prompt_y_n(warning_prompt):
             raise CLIError('Cancelling policy update operation')

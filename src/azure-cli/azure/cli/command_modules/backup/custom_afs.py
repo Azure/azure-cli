@@ -19,7 +19,7 @@ from azure.cli.core.util import CLIError
 from azure.cli.command_modules.backup._client_factory import protection_containers_cf, protectable_containers_cf, \
     protection_policies_cf, backup_protection_containers_cf, backup_protectable_items_cf, \
     resources_cf, backup_protected_items_cf
-from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueError
+from azure.cli.core.azclierror import ArgumentUsageError
 
 from azure.mgmt.recoveryservicesbackup.activestamp import RecoveryServicesBackupClient
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -272,32 +272,32 @@ def list_recovery_points(cmd, client, resource_group_name, vault_name, item, sta
     # Get recovery points
     recovery_points = client.list(vault_name, resource_group_name, fabric_name, container_uri, item_uri, filter_string)
     paged_recovery_points = helper.get_list_from_paged_response(recovery_points)
-    
+
     if tier:
         filtered_recovery_points = []
+
         for rp in paged_recovery_points:
-            rp_tier = None
+            # Prepare to collect tier types
             rp_tier_types = []
 
-            # Safely access 'additional_properties' attribute of rp.properties
+            # Safely grab additional_properties
             additional_props = getattr(rp.properties, 'additional_properties', {})
+            if not isinstance(additional_props, dict):
+                continue
 
-            # Ensure additional_props is a dictionary before using dict.get()
-            if isinstance(additional_props, dict):
-                # Safely get 'recoveryPointTierDetails' from the dictionary
-                tier_details_list = additional_props.get("recoveryPointTierDetails", [])
-        
-                # Ensure tier_details_list is a list before iterating
-                if isinstance(tier_details_list, list):
-                    for detail in tier_details_list:
-                        # Ensure each detail is a dictionary
-                        if isinstance(detail, dict):
-                            # Safely get the 'type' from each detail
-                            rp_type = detail.get("type")
-                            if rp_type:
-                                rp_tier_types.append(rp_type)
+            # Get details list
+            tier_details_list = additional_props.get("recoveryPointTierDetails", [])
+            if not isinstance(tier_details_list, list):
+                continue
 
-            # Determine the tier of the recovery point based on the types
+            for detail in tier_details_list:
+                if not isinstance(detail, dict):
+                    continue
+                rp_type = detail.get("type")
+                if rp_type:
+                    rp_tier_types.append(rp_type)
+
+            # Map types to a tier
             if 'InstantRP' in rp_tier_types and 'HardenedRP' in rp_tier_types:
                 rp_tier = 'SnapshotAndVaultStandard'
             elif 'InstantRP' in rp_tier_types:
@@ -306,18 +306,19 @@ def list_recovery_points(cmd, client, resource_group_name, vault_name, item, sta
                 rp_tier = 'VaultStandard'
             else:
                 logger.warning(
-                    "Warning: Unrecognized Recovery Point tier received. If you see this message, please contact Microsoft Support "
-                    "so we can investigate further. The recognized tiers for AzureFileShare are: 'Snapshot', 'VaultStandard', or "
+                    "Warning: Unrecognized Recovery Point tier received. If you see this message, please contact Microsoft Support."
+                    "The recognized tiers for AzureFileShare are: 'Snapshot', 'VaultStandard', or "
                     "'SnapshotAndVaultStandard'."
                 )
+                rp_tier = None
 
-            # Compare with the tier parameter and add to filtered list if matched
+            # Filter by matching tier
             if rp_tier == tier:
                 filtered_recovery_points.append(rp)
+
         return filtered_recovery_points
 
     return paged_recovery_points
-
 
 def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, policy, tenant_id=None,
                            is_critical_operation=False, yes=False):
@@ -348,11 +349,11 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, p
                                                  aux_tenants=[tenant_id]).protected_items
             afs_item.properties.resource_guard_operation_requests = [helper.get_resource_guard_operation_request(
                 cmd.cli_ctx, resource_group_name, vault_name, "updateProtection")]
-            
+
     # Validate existing & new policy
-    existing_policy_name = item.properties.policy_id.split('/')[-1]         
+    existing_policy_name = item.properties.policy_id.split('/')[-1]
     existing_policy = common.show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name,
-                                             existing_policy_name)
+                                         existing_policy_name)
     helper.validate_update_policy_request(existing_policy, policy, yes)
 
     # Update policy
@@ -428,7 +429,7 @@ def set_policy(cmd, client, resource_group_name, vault_name, policy, policy_name
     policy_object = helper.get_policy_from_json(client, policy)
     policy_object.properties.work_load_type = workload_type
     existing_policy = common.show_policy(client, resource_group_name, vault_name, policy_name)
-    
+
     helper.validate_update_policy_request(existing_policy, policy_object, yes)
     if is_critical_operation:
         if helper.is_retention_duration_decreased(existing_policy, policy_object, "AzureStorage"):
