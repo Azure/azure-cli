@@ -35,7 +35,7 @@ from ._errors import CONNECTIVITY_TOOMANYREQUESTS_ERROR
 
 
 logger = get_logger(__name__)
-session = requests.Session()
+session = Session()
 
 
 EMPTY_GUID = '00000000-0000-0000-0000-000000000000'
