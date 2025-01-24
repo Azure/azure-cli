@@ -103,9 +103,8 @@ def validate_czr(backup_config_response, recovery_point, use_secondary_region):
     cross_region_restore_flag = backup_config_response.properties.cross_region_restore_flag
     if (cross_region_restore_flag or backup_storage_redundancy == StorageType.ZONE_REDUNDANT):
         if recovery_point.tier_type is not None and (
-           recovery_point.tier_type == "VaultStandard" or 
-           recovery_point.tier_type == "SnapshotAndVaultStandard"
-        ):
+           recovery_point.tier_type == "VaultStandard" or
+           recovery_point.tier_type == "SnapshotAndVaultStandard"):
             if backup_storage_redundancy != StorageType.ZONE_REDUNDANT:
                 if recovery_point.properties.zones is None:
                     raise ArgumentUsageError("""
