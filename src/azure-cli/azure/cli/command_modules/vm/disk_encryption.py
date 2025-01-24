@@ -496,7 +496,7 @@ def encrypt_vmss(cmd, resource_group_name, vmss_name,  # pylint: disable=too-man
     if key_encryption_key:
         key_encryption_keyvault = key_encryption_keyvault or disk_encryption_keyvault
 
-    if encryption_identity and isVersionSuppprtedForEncryptionIdentity(cmd):
+    if encryption_identity:
         result = updateVmssEncryptionSetting(cmd, vmss, resource_group_name, vmss_name, encryption_identity)
         if result:
             logger.info("Encryption Identity successfully set in virtual machine scale set")
