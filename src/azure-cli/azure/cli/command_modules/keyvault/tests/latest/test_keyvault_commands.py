@@ -900,7 +900,7 @@ class RoleDefinitionNameReplacer(RecordingProcessor):
 class KeyVaultHSMRoleDefintionTest(ScenarioTest):
 
     def __init__(self, method_name):
-        super(KeyVaultHSMRoleDefintionTest, self).__init__(
+        super().__init__(
             method_name,
             recording_processors=[RoleDefinitionNameReplacer()],
             replay_processors=[RoleDefinitionNameReplacer()]
@@ -1006,9 +1006,9 @@ class KeyVaultHSMRoleDefintionTest(ScenarioTest):
 
 class KeyVaultKeyScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_key')
-    @KeyVaultPreparer(name_prefix='cli-test-kv-key-', location='eastus2')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-key-', location='eastus2', additional_params='--enable-rbac-authorization false')
     @KeyVaultPreparer(name_prefix='cli-test-kv-key-', location='eastus2', sku='premium',
-                      parameter_name='key_vault2', key='kv2')
+                      parameter_name='key_vault2', key='kv2', additional_params='--enable-rbac-authorization false')
     def test_keyvault_key(self, resource_group, key_vault, key_vault2):
         self.kwargs.update({
             'loc': 'eastus2',
@@ -1040,7 +1040,8 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
                  checks=self.check('result', '{base64_value}'))
 
         # sign/verify
-        self.kwargs['digest'] = '12345678901234567890123456789012'
+        # generate test digest data: base64.b64encode(hashlib.sha256(b'HelloWorld').digest())
+        self.kwargs['digest'] = 'hy5OUM6ZkNiwQTMMR8nd0Rvsa1A66ThqmdqFhOm7EsQ='
         self.kwargs['sign_result'] = self.cmd('keyvault key sign -n {key} --vault-name {kv} -a RS256 --digest {digest}').get_output_in_json()['signature']
         self.cmd('keyvault key verify -n {key} --vault-name {kv} -a RS256 --digest {digest} --signature "{sign_result}"',
                  checks=self.check('isValid', True))
@@ -2265,11 +2266,11 @@ def _generate_certificate(path, keyfile=None, password=None):
     # Various details about who we are. For a self-signed certificate the
     # Subject and issuer are always the same.
     subject = issuer = x509.Name([
-        x509.NameAttribute(NameOID.COUNTRY_NAME, u'US'),
-        x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, u'WA'),
-        x509.NameAttribute(NameOID.LOCALITY_NAME, u'Redmond'),
-        x509.NameAttribute(NameOID.ORGANIZATION_NAME, u"My Company"),
-        x509.NameAttribute(NameOID.COMMON_NAME, u"mysite.com")])
+        x509.NameAttribute(NameOID.COUNTRY_NAME, 'US'),
+        x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, 'WA'),
+        x509.NameAttribute(NameOID.LOCALITY_NAME, 'Redmond'),
+        x509.NameAttribute(NameOID.ORGANIZATION_NAME, "My Company"),
+        x509.NameAttribute(NameOID.COMMON_NAME, "mysite.com")])
 
     cert = x509.CertificateBuilder().subject_name(subject) \
                                     .issuer_name(issuer) \

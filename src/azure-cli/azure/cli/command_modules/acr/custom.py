@@ -69,6 +69,9 @@ def acr_create(cmd,
     if re.match(r'\w*[A-Z]\w*', registry_name):
         raise InvalidArgumentValueError("argument error: Registry name must use only lowercase.")
 
+    if re.match(r'\w*[-]\w*', registry_name):
+        raise InvalidArgumentValueError("argument error: Registry name cannot contain dashes.")
+
     Registry, Sku, NetworkRuleSet = cmd.get_models('Registry', 'Sku', 'NetworkRuleSet')
     registry = Registry(location=location, sku=Sku(name=sku), admin_user_enabled=admin_enabled,
                         zone_redundancy=zone_redundancy, tags=tags)

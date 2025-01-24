@@ -475,7 +475,7 @@ def check_language_runtime(cmd, resource_group_name, name):
             functions_version = runtime_info['functionapp_version']
             if runtime and runtime_version:
                 if not is_flex:
-                    runtime_helper = _FunctionAppStackRuntimeHelper(cmd=cmd, linux=is_linux, windows=(not is_linux))
+                    runtime_helper = _FunctionAppStackRuntimeHelper(cmd=cmd, linux=is_linux, windows=not is_linux)
                     runtime_helper.resolve(runtime, runtime_version, functions_version, is_linux)
                 else:
                     location = app.location
@@ -929,9 +929,9 @@ def validate_zip_deploy_app_setting_exists(cmd, resource_group_name, name, slot=
             storage_connection = str(keyval['value'])
 
     if storage_connection is None:
-        raise ValidationError(('The Azure CLI does not support this deployment path. Please '
-                               'configure the app to deploy from a remote package using the steps here: '
-                               'https://aka.ms/deployfromurl'))
+        raise ValidationError('The Azure CLI does not support this deployment path. Please '
+                              'configure the app to deploy from a remote package using the steps here: '
+                              'https://aka.ms/deployfromurl')
 
 
 def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
@@ -1001,7 +1001,7 @@ def set_webapp(cmd, resource_group_name, name, slot=None, skip_dns_registration=
     instance = kwargs['parameters']
     client = web_client_factory(cmd.cli_ctx)
     updater = client.web_apps.begin_create_or_update_slot if slot else client.web_apps.begin_create_or_update
-    kwargs = dict(resource_group_name=resource_group_name, name=name, site_envelope=instance)
+    kwargs = {"resource_group_name": resource_group_name, "name": name, "site_envelope": instance}
     if slot:
         kwargs['slot'] = slot
 
@@ -1103,7 +1103,7 @@ def set_functionapp(cmd, resource_group_name, name, slot=None, **kwargs):
     instance = kwargs['parameters']
     client = web_client_factory(cmd.cli_ctx)
     updater = client.web_apps.begin_create_or_update_slot if slot else client.web_apps.begin_create_or_update
-    kwargs = dict(resource_group_name=resource_group_name, name=name, site_envelope=instance)
+    kwargs = {"resource_group_name": resource_group_name, "name": name, "site_envelope": instance}
     if slot:
         kwargs['slot'] = slot
 
@@ -2532,7 +2532,7 @@ def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_sou
 
 def create_functionapp_slot(cmd, resource_group_name, name, slot, configuration_source=None,
                             image=None, registry_password=None,
-                            registry_username=None):
+                            registry_username=None, https_only=True):
     container_args = image or registry_password or registry_username
     if container_args and not configuration_source:
         raise ArgumentUsageError("Cannot use image, password and username arguments without "
@@ -2546,7 +2546,7 @@ def create_functionapp_slot(cmd, resource_group_name, name, slot, configuration_
     if not site:
         raise ResourceNotFoundError("'{}' function app doesn't exist".format(name))
     location = site.location
-    slot_def = Site(server_farm_id=site.server_farm_id, location=location)
+    slot_def = Site(server_farm_id=site.server_farm_id, location=location, https_only=https_only)
 
     poller = client.web_apps.begin_create_or_update_slot(resource_group_name, name, site_envelope=slot_def, slot=slot)
     result = LongRunningOperation(cmd.cli_ctx)(poller)
@@ -3870,7 +3870,7 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                      linux=False,
                      is_auto_update=None):
             self.display_name = display_name
-            self.configs = configs if configs is not None else dict()
+            self.configs = configs if configs is not None else {}
             self.github_actions_properties = github_actions_properties
             self.linux = linux
             self.is_auto_update = is_auto_update
@@ -4133,6 +4133,8 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                     (linux_container_settings.additional_properties.get("java17Runtime"), "17", linux_container_settings.is_auto_update),    # pylint: disable=line-too-long
                     (linux_container_settings.java11_runtime, "11", linux_container_settings.is_auto_update),
                     (linux_container_settings.java8_runtime, "8", linux_container_settings.is_auto_update)]
+                # Remove the JBoss'_byol' entries from the output
+                runtimes = [(r, v, au) for (r, v, au) in runtimes if r is not None and not r.endswith("_byol")]    # pylint: disable=line-too-long
                 for runtime_name, version, auto_update in [(r, v, au) for (r, v, au) in runtimes if r is not None]:
                     runtime = self.Runtime(display_name=runtime_name,
                                            configs={"linux_fx_version": runtime_name},
@@ -4225,7 +4227,7 @@ class _FlexFunctionAppStackRuntimeHelper:
     def _format_version_names(self, runtime_to_version):
         formatted_runtime_to_version = {}
         for runtime, versions in runtime_to_version.items():
-            formatted_runtime_to_version[runtime] = formatted_runtime_to_version.get(runtime, dict())
+            formatted_runtime_to_version[runtime] = formatted_runtime_to_version.get(runtime, {})
             for version_name, version_info in versions.items():
                 formatted_name = self._format_version_name(version_name)
                 if formatted_name in formatted_runtime_to_version[runtime]:
@@ -4239,7 +4241,7 @@ class _FlexFunctionAppStackRuntimeHelper:
             for major_version in runtime['properties']['majorVersions']:
                 for minor_version in major_version['minorVersions']:
                     runtime_version = minor_version['value']
-                    if (minor_version['stackSettings'].get('linuxRuntimeSettings') is None):
+                    if minor_version['stackSettings'].get('linuxRuntimeSettings') is None:
                         continue
 
                     runtime_settings = minor_version['stackSettings']['linuxRuntimeSettings']
@@ -4268,7 +4270,7 @@ class _FlexFunctionAppStackRuntimeHelper:
                             'github_actions_properties': self.GithubActionsProperties(**github_actions_properties)
                         }
 
-                        runtime_to_version[runtime_name] = runtime_to_version.get(runtime_name, dict())
+                        runtime_to_version[runtime_name] = runtime_to_version.get(runtime_name, {})
                         runtime_to_version[runtime_name][runtime_version] = runtime_version_properties
 
         runtime_to_version = self._format_version_names(runtime_to_version)
@@ -4331,19 +4333,21 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
     class Runtime:
         def __init__(self, name=None, version=None, is_preview=False, supported_func_versions=None, linux=False,
                      app_settings_dict=None, site_config_dict=None, app_insights=False, default=False,
-                     github_actions_properties=None):
+                     github_actions_properties=None, end_of_life_date=None):
             self.name = name
             self.version = version
             self.is_preview = is_preview
             self.supported_func_versions = [] if not supported_func_versions else supported_func_versions
             self.linux = linux
-            self.app_settings_dict = dict() if not app_settings_dict else app_settings_dict
-            self.site_config_dict = dict() if not site_config_dict else site_config_dict
+            self.app_settings_dict = {} if not app_settings_dict else app_settings_dict
+            self.site_config_dict = {} if not site_config_dict else site_config_dict
             self.app_insights = app_insights
             self.default = default
             self.github_actions_properties = github_actions_properties
+            self.end_of_life_date = end_of_life_date
 
             self.display_name = "{}|{}".format(name, version) if version else name
+            self.deprecation_link = LANGUAGE_EOL_DEPRECATION_NOTICES.get(self.display_name, '')
 
         # used for displaying stacks
         def to_dict(self):
@@ -4354,29 +4358,27 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
                 d["linux_fx_version"] = self.site_config_dict.linux_fx_version
             return d
 
-    class RuntimeEOL:
-        def __init__(self, name=None, version=None, eol=None):
-            self.name = name
-            self.version = version
-            self.eol = eol
-            self.display_name = "{}|{}".format(name, version)
-            self.deprecation_link = LANGUAGE_EOL_DEPRECATION_NOTICES.get(self.display_name)
-
     def __init__(self, cmd, linux=False, windows=False):
         self.disallowed_functions_versions = {"~1", "~2", "~3"}
         self.KEYS = FUNCTIONS_STACKS_API_KEYS()
-        self.end_of_life_dates = []
         super().__init__(cmd, linux=linux, windows=windows)
 
     def validate_end_of_life_date(self, runtime, version):
         from dateutil.relativedelta import relativedelta
+        # we would not be able to validate for a custom runtime
+        if runtime == 'custom':
+            return
+
         today = datetime.datetime.now(datetime.timezone.utc)
         six_months = today + relativedelta(months=+6)
-        runtimes_eol = [r for r in self.end_of_life_dates if runtime == r.name]
-        matched_runtime_eol = next((r for r in runtimes_eol if r.version == version), None)
-        if matched_runtime_eol:
-            eol = matched_runtime_eol.eol
-            runtime_deprecation_link = matched_runtime_eol.deprecation_link or ''
+        runtimes = [r for r in self.stacks if runtime == r.name]
+        matched_runtime = next((r for r in runtimes if r.version == version), None)
+        if matched_runtime:
+            eol = matched_runtime.end_of_life_date
+            runtime_deprecation_link = matched_runtime.deprecation_link
+
+            if eol is None:
+                return
 
             if eol < today:
                 raise ValidationError('{} has reached EOL on {} and is no longer supported. {}'
@@ -4441,7 +4443,9 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
 
     def get_default_version(self, runtime, functions_version, linux=False):
         runtimes = [r for r in self.stacks if r.linux == linux and r.name == runtime]
-        runtimes.sort(key=lambda r: r.default, reverse=True)  # make runtimes with default=True appear first
+        # sort runtimes by end of life date
+        runtimes.sort(key=lambda r: r.end_of_life_date or
+                      datetime.datetime.min.replace(tzinfo=datetime.timezone.utc), reverse=True)
         for r in runtimes:
             if functions_version in r.supported_func_versions:
                 return r
@@ -4460,7 +4464,7 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
     def _format_version_names(self, runtime_to_version):
         formatted_runtime_to_version = {}
         for runtime, versions in runtime_to_version.items():
-            formatted_runtime_to_version[runtime] = formatted_runtime_to_version.get(runtime, dict())
+            formatted_runtime_to_version[runtime] = formatted_runtime_to_version.get(runtime, {})
             for version_name, version_info in versions.items():
                 formatted_name = self._format_version_name(version_name)
                 if formatted_name in formatted_runtime_to_version[runtime]:
@@ -4480,8 +4484,7 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
                 valid_versions.append(self._format_version_name(v))
         return valid_versions
 
-    def _parse_minor_version(self, runtime_settings, major_version_name, minor_version_name, runtime_to_version,
-                             runtime_to_version_eol):
+    def _parse_minor_version(self, runtime_settings, major_version_name, minor_version_name, runtime_to_version):
         runtime_name = (runtime_settings.app_settings_dictionary.get(self.KEYS.FUNCTIONS_WORKER_RUNTIME) or
                         major_version_name)
         if not runtime_settings.is_deprecated:
@@ -4494,16 +4497,12 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
                     self.KEYS.APPLICATION_INSIGHTS: runtime_settings.app_insights_settings.is_supported,
                     self.KEYS.SITE_CONFIG_DICT: runtime_settings.site_config_properties_dictionary,
                     self.KEYS.IS_DEFAULT: bool(runtime_settings.is_default),
-                    self.KEYS.GIT_HUB_ACTION_SETTINGS: runtime_settings.git_hub_action_settings
+                    self.KEYS.GIT_HUB_ACTION_SETTINGS: runtime_settings.git_hub_action_settings,
+                    self.KEYS.END_OF_LIFE_DATE: runtime_settings.end_of_life_date,
                 }
 
-                runtime_to_version[runtime_name] = runtime_to_version.get(runtime_name, dict())
+                runtime_to_version[runtime_name] = runtime_to_version.get(runtime_name, {})
                 runtime_to_version[runtime_name][minor_version_name] = runtime_version_properties
-
-        # obtain end of life date for all runtime versions
-        if runtime_settings.end_of_life_date is not None:
-            runtime_to_version_eol[runtime_name] = runtime_to_version_eol.get(runtime_name, dict())
-            runtime_to_version_eol[runtime_name][minor_version_name] = runtime_settings.end_of_life_date
 
     def _create_runtime_from_properties(self, runtime_name, version_name, version_properties, linux):
         supported_func_versions = version_properties[self.KEYS.SUPPORTED_EXTENSION_VERSIONS]
@@ -4516,14 +4515,13 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
                             app_settings_dict=version_properties[self.KEYS.APP_SETTINGS_DICT],
                             app_insights=version_properties[self.KEYS.APPLICATION_INSIGHTS],
                             default=version_properties[self.KEYS.IS_DEFAULT],
-                            github_actions_properties=version_properties[self.KEYS.GIT_HUB_ACTION_SETTINGS]
-                            )
+                            github_actions_properties=version_properties[self.KEYS.GIT_HUB_ACTION_SETTINGS],
+                            end_of_life_date=version_properties[self.KEYS.END_OF_LIFE_DATE])
 
     def _parse_raw_stacks(self, stacks):
         # build a map of runtime -> runtime version -> runtime version properties
         runtime_to_version_linux = {}
         runtime_to_version_windows = {}
-        runtime_to_version_end_of_life = {}
         for runtime in stacks:
             for major_version in runtime.major_versions:
                 for minor_version in major_version.minor_versions:
@@ -4535,19 +4533,16 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
                         self._parse_minor_version(runtime_settings=linux_settings,
                                                   major_version_name=runtime.name,
                                                   minor_version_name=runtime_version,
-                                                  runtime_to_version=runtime_to_version_linux,
-                                                  runtime_to_version_eol=runtime_to_version_end_of_life)
+                                                  runtime_to_version=runtime_to_version_linux)
 
                     if windows_settings is not None and not windows_settings.is_hidden:
                         self._parse_minor_version(runtime_settings=windows_settings,
                                                   major_version_name=runtime.name,
                                                   minor_version_name=runtime_version,
-                                                  runtime_to_version=runtime_to_version_windows,
-                                                  runtime_to_version_eol=runtime_to_version_end_of_life)
+                                                  runtime_to_version=runtime_to_version_windows)
 
         runtime_to_version_linux = self._format_version_names(runtime_to_version_linux)
         runtime_to_version_windows = self._format_version_names(runtime_to_version_windows)
-        runtime_to_version_end_of_life = self._format_version_names(runtime_to_version_end_of_life)
 
         for runtime_name, versions in runtime_to_version_windows.items():
             for version_name, version_properties in versions.items():
@@ -4558,11 +4553,6 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
             for version_name, version_properties in versions.items():
                 r = self._create_runtime_from_properties(runtime_name, version_name, version_properties, linux=True)
                 self._stacks.append(r)
-
-        for runtime_name, versions in runtime_to_version_end_of_life.items():
-            for version_name, version_eol in versions.items():
-                r = self.RuntimeEOL(name=runtime_name, version=version_name, eol=version_eol)
-                self.end_of_life_dates.append(r)
 
 
 def get_app_insights_key(cli_ctx, resource_group, name):
@@ -4791,7 +4781,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     if functions_version is None and flexconsumption_location is None:
         logger.warning("No functions version specified so defaulting to 4.")
         functions_version = '4'
-    enable_dapr = (enable_dapr == "true")
+    enable_dapr = enable_dapr == "true"
     if deployment_source_url and deployment_local_git:
         raise MutuallyExclusiveArgumentError('usage error: --deployment-source-url <url> | --deployment-local-git')
     if any([cpu, memory, workload_profile_name]) and environment is None:
@@ -4875,7 +4865,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     if flexconsumption_location is None:
         deployment_source_branch = deployment_source_branch or 'master'
 
-    disable_app_insights = (disable_app_insights == "true")
+    disable_app_insights = disable_app_insights == "true"
 
     site_config = SiteConfig(app_settings=[])
     client = web_client_factory(cmd.cli_ctx)
@@ -4992,7 +4982,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         runtime_helper = _FlexFunctionAppStackRuntimeHelper(cmd, flexconsumption_location, runtime, runtime_version)
         matched_runtime = runtime_helper.resolve(runtime, runtime_version)
     else:
-        runtime_helper = _FunctionAppStackRuntimeHelper(cmd, linux=is_linux, windows=(not is_linux))
+        runtime_helper = _FunctionAppStackRuntimeHelper(cmd, linux=is_linux, windows=not is_linux)
         matched_runtime = runtime_helper.resolve("dotnet" if not runtime else runtime,
                                                  runtime_version, functions_version, is_linux)
 
@@ -5000,7 +4990,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
 
     site_config_dict = matched_runtime.site_config_dict if not flexconsumption_location \
         else SiteConfigPropertiesDictionary()
-    app_settings_dict = matched_runtime.app_settings_dict if not flexconsumption_location else dict()
+    app_settings_dict = matched_runtime.app_settings_dict if not flexconsumption_location else {}
 
     con_string = _validate_and_get_connection_string(cmd.cli_ctx, resource_group_name, storage_account)
 
@@ -5082,10 +5072,10 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         # validate cpu and memory parameters.
         _validate_cpu_momory_functionapp(cpu, memory)
 
-        if (workload_profile_name is not None):
+        if workload_profile_name is not None:
             functionapp_def.workload_profile_name = workload_profile_name
 
-        if (cpu is not None and memory is not None):
+        if cpu is not None and memory is not None:
             functionapp_def.resource_config = ResourceConfig()
             functionapp_def.resource_config.cpu = cpu
             functionapp_def.resource_config.memory = memory
@@ -5105,7 +5095,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         if enable_dapr:
             logger.warning("Please note while using Dapr Extension for Azure Functions, app port is "
                            "mandatory when using Dapr triggers and should be empty when using only Dapr bindings.")
-            dapr_enable_api_logging = (dapr_enable_api_logging == "true")
+            dapr_enable_api_logging = dapr_enable_api_logging == "true"
             dapr_config = DaprConfig()
             dapr_config.enabled = True
             dapr_config.app_id = dapr_app_id
@@ -5409,7 +5399,7 @@ def _get_content_share_name(app_name):
     # content share name should be up to 63 characters long, lowercase letter and digits, and random
     # so take the first 50 characters of the app name and add the last 12 digits of a random uuid
     share_name = app_name[0:50]
-    suffix = str(uuid.uuid4()).split('-')[-1]
+    suffix = str(uuid.uuid4()).rsplit('-', maxsplit=1)[-1]
     return share_name.lower() + suffix
 
 
@@ -5721,6 +5711,13 @@ def list_consumption_locations(cmd):
     return [{'name': x.name.lower().replace(' ', '')} for x in regions]
 
 
+def get_subscription_locations(cli_ctx):
+    from azure.cli.core.commands.client_factory import get_subscription_service_client
+    subscription_client, subscription_id = get_subscription_service_client(cli_ctx)
+    result = list(subscription_client.subscriptions.list_locations(subscription_id))
+    return [item.name for item in result]
+
+
 def list_flexconsumption_locations(cmd, zone_redundant=False):
     if zone_redundant:
         return list_flexconsumption_zone_redundant_locations(cmd)
@@ -5729,8 +5726,10 @@ def list_flexconsumption_locations(cmd, zone_redundant=False):
     sub_id = get_subscription_id(cmd.cli_ctx)
     geo_regions_api = 'subscriptions/{}/providers/Microsoft.Web/geoRegions?sku=FlexConsumption&api-version=2023-01-01'
     request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + geo_regions_api.format(sub_id)
-    regions = send_raw_request(cmd.cli_ctx, "GET", request_url).json()['value']
-    return [{'name': x['name'].lower().replace(' ', '')} for x in regions]
+    flex_regions = send_raw_request(cmd.cli_ctx, "GET", request_url).json()['value']
+    flex_regions_list = [{'name': x['name'].lower().replace(' ', '')} for x in flex_regions]
+    sub_regions_list = get_subscription_locations(cmd.cli_ctx)
+    return [x for x in flex_regions_list if x['name'] in sub_regions_list]
 
 
 def list_locations(cmd, sku, linux_workers_enabled=None, hyperv_workers_enabled=None):
@@ -6577,7 +6576,7 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
             raise ValidationError("The webapp '{}' is a {} app. The code detected at '{}' will default to "
                                   "'{}'. Please create a new app "
                                   "to continue this operation. For more information on default behaviors, "
-                                  "see https://docs.microsoft.com/cli/azure/webapp?view=azure-cli-latest#az_webapp_up."
+                                  "see https://learn.microsoft.com/cli/azure/webapp?view=azure-cli-latest#az_webapp_up."
                                   .format(name, current_os, src_dir, os_name))
         _is_linux = plan_info.reserved
         # for an existing app check if the runtime version needs to be updated
@@ -8187,7 +8186,7 @@ def _remove_publish_profile_from_github(cmd, resource_group, name, repo, token, 
 
 
 def _runtime_supports_github_actions(cmd, runtime_string, is_linux):
-    helper = _StackRuntimeHelper(cmd, linux=(is_linux), windows=(not is_linux))
+    helper = _StackRuntimeHelper(cmd, linux=is_linux, windows=not is_linux)
     matched_runtime = helper.resolve(runtime_string, is_linux)
     if not matched_runtime:
         return False
@@ -8203,8 +8202,8 @@ def _get_functionapp_runtime_version(cmd, location, name, resource_group, runtim
     is_flex = is_flex_functionapp(cmd.cli_ctx, resource_group, name)
 
     try:
-        if (not is_flex):
-            helper = _FunctionAppStackRuntimeHelper(cmd, linux=(is_linux), windows=(not is_linux))
+        if not is_flex:
+            helper = _FunctionAppStackRuntimeHelper(cmd, linux=is_linux, windows=not is_linux)
             matched_runtime = helper.resolve(runtime_string, runtime_version, functionapp_version, is_linux)
         else:
             runtime_helper = _FlexFunctionAppStackRuntimeHelper(cmd, location, runtime_string, runtime_version)
@@ -8328,7 +8327,7 @@ def _get_functionapp_runtime_info(cmd, resource_group, name, slot, is_linux):  #
 
 
 def _get_app_runtime_info_helper(cmd, app_runtime, app_runtime_version, is_linux):
-    helper = _StackRuntimeHelper(cmd, linux=(is_linux), windows=(not is_linux))
+    helper = _StackRuntimeHelper(cmd, linux=is_linux, windows=not is_linux)
     if not is_linux:
         matched_runtime = helper.resolve("{}|{}".format(app_runtime, app_runtime_version), is_linux)
     else:

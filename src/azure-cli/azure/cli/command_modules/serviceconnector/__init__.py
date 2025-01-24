@@ -15,8 +15,7 @@ class MicrosoftServiceConnectorCommandsLoader(AzCommandsLoader):
         connection_custom = CliCommandType(
             operations_tmpl='azure.cli.command_modules.serviceconnector.custom#{}',
             client_factory=cf_connection_cl)
-        parent = super(MicrosoftServiceConnectorCommandsLoader, self)
-        parent.__init__(cli_ctx=cli_ctx, custom_command_type=connection_custom)
+        super().__init__(cli_ctx=cli_ctx, custom_command_type=connection_custom)
 
     def load_command_table(self, args):
         from azure.cli.command_modules.serviceconnector.commands import load_command_table as load_command_table_manual

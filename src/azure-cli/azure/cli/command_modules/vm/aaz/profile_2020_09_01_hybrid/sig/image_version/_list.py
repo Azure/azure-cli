@@ -198,6 +198,7 @@ class List(AAZCommand):
             )
             properties.replication_status = AAZObjectType(
                 serialized_name="replicationStatus",
+                flags={"read_only": True},
             )
             properties.storage_profile = AAZObjectType(
                 serialized_name="storageProfile",

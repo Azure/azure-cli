@@ -501,12 +501,20 @@ class NetworkLoadBalancerWithZone(ScenarioTest):
     def test_network_lb_frontend_ip_zone(self, resource_group):
         self.kwargs.update({
             'location': 'eastus2',
+            'lb1': self.create_random_name('lb', 10),
+            'lb2': self.create_random_name('lb', 10),
+            'vnet1': self.create_random_name('vnet', 10),
+            'vnet2': self.create_random_name('vnet', 10),
+            'pool': self.create_random_name('poll', 10)
         })
 
         # LB with subnet : internal LB
-        self.cmd('network lb create -g {rg} -l {location} -n lb --vnet-name vnet --subnet subnet --sku Standard')
-        self.cmd('network lb frontend-ip create -g {rg} --lb-name lb -n LoadBalancerFrontEnd2 -z 1 2 3 --vnet-name vnet --subnet subnet', checks=[
+        self.cmd('network lb create -g {rg} -l {location} -n {lb1} --vnet-name {vnet1} --subnet subnet --sku Standard')
+        self.cmd('network lb frontend-ip create -g {rg} --lb-name {lb1} -n LoadBalancerFrontEnd2 -z 1 2 3 --vnet-name {vnet1} --subnet subnet', checks=[
             self.check("length(zones)", 3)
+        ])
+        self.cmd('network lb create -g {rg} -n {lb2} --sku standard --vnet-name {vnet2} --subnet default --frontend-ip-zone 1 2 3 --backend-pool-name {pool}', checks=[
+            self.check("loadBalancer.frontendIPConfigurations[0].zones", ['1', '2', '3'])
         ])
 
 
@@ -1240,7 +1248,7 @@ class NetworkAppGatewayNoWaitScenarioTest(ScenarioTest):
     def test_network_app_gateway_no_wait(self, resource_group):
 
         self.kwargs.update({
-            'tags': {u'a': u'b', u'c': u'd'}
+            'tags': {'a': 'b', 'c': 'd'}
         })
 
         self.cmd('network application-gateway create -g {rg} -n ag1 --no-wait --connection-draining-timeout 180 --priority 1001', checks=self.is_empty())
@@ -4948,6 +4956,29 @@ class NetworkVNetScenarioTest(ScenarioTest):
         self.cmd('network vnet delete --resource-group {rg} --name {vnet}')
         self.cmd('network vnet list --resource-group {rg}', checks=self.is_empty())
 
+    @live_only()
+    @ResourceGroupPreparer(name_prefix='cli_vnet_with_ipam_pool_test', location='westus')
+    @AllowLargeResponse(size_kb=99999)
+    def test_network_vnet_with_ipam_pool(self, resource_group, resource_group_location):
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'location': resource_group_location,
+            'manager': 'manager1',
+            'pool': 'pool1',
+            'vnet': 'vnet1'
+        })
+        self.cmd('extension add -n virtual-network-manager')
+        self.kwargs['sub_id'] = self.get_subscription_id()
+        self.cmd('network manager create -g {rg} -n {manager} -l {location} --scope-accesses "SecurityAdmin" "Connectivity" --network-manager-scopes subscriptions="/subscriptions/{sub_id}"')
+        self.kwargs['pool_id'] = self.cmd('network manager ipam-pool create --manager-name {manager} -g {rg} --name {pool} --address-prefix 10.1.0.0/16').get_output_in_json()['id']
+
+        self.cmd('network vnet create -g {rg} -n {vnet} --ipam-allocations [0].id={pool_id} [0].number-of-ip-addresses=10', checks=[
+            self.check('newVNet.addressSpace.ipamPoolPrefixAllocations[0].id', '{pool_id}'),
+            self.check('newVNet.addressSpace.ipamPoolPrefixAllocations[0].numberOfIpAddresses', 10),
+            self.check('newVNet.addressSpace.ipamPoolPrefixAllocations[0].resourceGroup', '{rg}')
+        ])
+
     @ResourceGroupPreparer(name_prefix='cli_vnet_with_subnet_nsg_test')
     def test_network_vnet_with_subnet_nsg(self, resource_group):
 
@@ -5614,13 +5645,14 @@ class NetworkVirtualHubRouter(ScenarioTest):
             'subnet1_id': vnet['subnets'][0]['id']
         })
 
-        self.cmd('network routeserver create -g {rg} -l {location} -n {vrouter} '
+        self.cmd('network routeserver create -g {rg} -l {location} -n {vrouter} --auto-scale-config min-capacity=3 '
                  '--hosted-subnet {subnet1_id} --public-ip-address {vhr_ip1} --hub-routing-preference aspath',
                  checks=[
                      self.check('type', 'Microsoft.Network/virtualHubs'),
                      self.check('ipConfigurations', None),
                      self.check('provisioningState', 'Succeeded'),
-                     self.check("hubRoutingPreference", "ASPath")
+                     self.check("hubRoutingPreference", "ASPath"),
+                     self.check('virtualRouterAutoScaleConfiguration.minCapacity', 3)
                  ])
 
         self.cmd('network routeserver update -g {rg} --name {vrouter}  --allow-b2b-traffic --hub-routing-preference expressroute', checks=[
@@ -5907,7 +5939,7 @@ class NetworkActiveActiveVnetScenarioTest(ScenarioTest):  # pylint: disable=too-
 
     def __init__(self, method_name):
         self.sas_replacer = StorageAccountSASReplacer()
-        super(NetworkActiveActiveVnetScenarioTest, self).__init__(method_name, recording_processors=[
+        super().__init__(method_name, recording_processors=[
             self.sas_replacer
         ])
 
@@ -5981,7 +6013,7 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
 
     def __init__(self, method_name):
         self.sas_replacer = StorageAccountSASReplacer()
-        super(NetworkVpnGatewayScenarioTest, self).__init__(method_name, recording_processors=[
+        super().__init__(method_name, recording_processors=[
             self.sas_replacer
         ])
 
@@ -6088,10 +6120,11 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
         self.cmd('network vnet create -g {rg} -n {vnet1} --subnet-name GatewaySubnet --address-prefix 10.0.0.0/16 --subnet-prefix 10.0.0.0/24')
 
         self.cmd(
-            "network vnet-gateway create -n {gw1} -g {rg} --public-ip-address {ip1} --vnet {vnet1} --gateway-type ExpressRoute --sku ErGwScale --min-scale-unit 3 --max-scale-unit 5",
+            "network vnet-gateway create -n {gw1} -g {rg} --public-ip-address {ip1} --vnet {vnet1} --gateway-type ExpressRoute --resiliency-model SingleHomed --sku ErGwScale --min-scale-unit 3 --max-scale-unit 5",
             checks=[
                 self.check("vnetGateway.autoScaleConfiguration.bounds.max", 5),
                 self.check("vnetGateway.autoScaleConfiguration.bounds.min", 3),
+                self.check("vnetGateway.resiliencyModel", "SingleHomed"),
             ]
         )
         self.cmd(
@@ -6672,7 +6705,7 @@ class NetworkVirtualNetworkGatewayNatRule(ScenarioTest):
 class NetworkSecurityPartnerProviderScenarioTest(ScenarioTest):
     def __init__(self, method_name, config_file=None, recording_dir=None, recording_name=None, recording_processors=None,
                  replay_processors=None, recording_patches=None, replay_patches=None):
-        super(NetworkSecurityPartnerProviderScenarioTest, self).__init__(method_name)
+        super().__init__(method_name)
         self.cmd('extension add -n virtual-wan')
 
     @unittest.skip('Decouple with virtual-wan bump API version')
@@ -6712,13 +6745,13 @@ class NetworkSecurityPartnerProviderScenarioTest(ScenarioTest):
 
 class NetworkVirtualApplianceScenarioTest(ScenarioTest):
     def setUp(self):
-        super(NetworkVirtualApplianceScenarioTest, self).setUp()
+        super().setUp()
         self.cmd('extension add -n virtual-wan')
 
     def tearDown(self):
         # avoid influence other test when parallel run
         # self.cmd('extension remove -n virtual-wan')
-        super(NetworkVirtualApplianceScenarioTest, self).tearDown()
+        super().tearDown()
 
     @unittest.skip('GatewayError')
     @ResourceGroupPreparer(location='westcentralus', name_prefix='test_network_virtual_appliance')

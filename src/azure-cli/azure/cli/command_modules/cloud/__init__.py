@@ -16,7 +16,7 @@ import azure.cli.command_modules.cloud._help  # pylint: disable=unused-import
 class CloudCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
-        super(CloudCommandsLoader, self).__init__(cli_ctx=cli_ctx)
+        super().__init__(cli_ctx=cli_ctx)
 
     def load_command_table(self, args):
 

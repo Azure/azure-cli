@@ -60,7 +60,7 @@ def load_arguments(self, _):
     deployment_parameters_type = CLIArgumentType(options_list=['--parameters', '-p'], action='append', nargs='+', completer=FilesCompleter(), help='the deployment parameters')
     filter_type = CLIArgumentType(options_list=['--filter'], is_preview=True,
                                   help='Filter expression using OData notation. You can use --filter "provisioningState eq \'{state}\'" to filter provisioningState. '
-                                       'To get more information, please visit https://docs.microsoft.com/rest/api/resources/deployments/listatsubscriptionscope#uri-parameters')
+                                       'To get more information, please visit https://learn.microsoft.com/rest/api/resources/deployments/listatsubscriptionscope#uri-parameters')
     no_prompt = CLIArgumentType(arg_type=get_three_state_flag(), help='The option to disable the prompt of missing parameters for ARM template. '
                                 'When the value is true, the prompt requiring users to provide missing parameter will be ignored. The default value is false.')
 
@@ -739,7 +739,7 @@ def load_arguments(self, _):
                 c.argument('template_spec', arg_type=deployment_template_spec_type)
                 c.argument('template_uri', arg_type=deployment_template_uri_type)
                 c.argument('query_string', arg_type=deployment_query_string_type)
-                c.argument('parameters', arg_type=deployment_parameters_type, help='Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.')
+                c.argument('parameters', arg_type=deployment_parameters_type, help='Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.')
                 c.argument('description', arg_type=stacks_description_type)
                 c.argument('subscription', arg_type=subscription_type)
                 c.argument('action_on_unmanage', arg_type=stacks_action_on_unmanage_type)

@@ -25,7 +25,7 @@ class NoTrafficRecordingPreparer(AbstractPreparer):
     from .base import execute as _raw_execute
 
     def __init__(self, *args, **kwargs):
-        super(NoTrafficRecordingPreparer, self).__init__(disable_recording=True, *args, **kwargs)
+        super().__init__(disable_recording=True, *args, **kwargs)
 
     def live_only_execute(self, cli_ctx, command, expect_failure=False):
         # call AbstractPreparer.moniker to make resource counts and self.resource_moniker consistent between live and
@@ -56,7 +56,7 @@ class ResourceGroupPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
                  random_name_length=75, key='rg', subscription=None, additional_tags=None):
         if ' ' in name_prefix:
             raise CliTestError('Error: Space character in resource group name prefix \'%s\'' % name_prefix)
-        super(ResourceGroupPreparer, self).__init__(name_prefix, random_name_length)
+        super().__init__(name_prefix, random_name_length)
         self.cli_ctx = get_dummy_cli()
         self.location = location
         self.subscription = subscription
@@ -118,7 +118,7 @@ class StorageAccountPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
                  allow_blob_public_access=False, allow_shared_key_access=None, hns=False, length=24,
                  parameter_name='storage_account', resource_group_parameter_name='resource_group', skip_delete=True,
                  dev_setting_name='AZURE_CLI_TEST_DEV_STORAGE_ACCOUNT_NAME', key='sa'):
-        super(StorageAccountPreparer, self).__init__(name_prefix, length)
+        super().__init__(name_prefix, length)
         self.cli_ctx = get_dummy_cli()
         self.location = location
         self.sku = sku
@@ -186,7 +186,7 @@ class KeyVaultPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
                  parameter_name='key_vault', resource_group_parameter_name='resource_group', skip_delete=False,
                  skip_purge=False,
                  dev_setting_name='AZURE_CLI_TEST_DEV_KEY_VAULT_NAME', key='kv', name_len=24, additional_params=None):
-        super(KeyVaultPreparer, self).__init__(name_prefix, name_len)
+        super().__init__(name_prefix, name_len)
         self.cli_ctx = get_dummy_cli()
         self.location = location
         self.sku = sku
@@ -242,7 +242,7 @@ class ManagedHSMPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
     def __init__(self, certs_path, name_prefix='clitest', location='uksouth', key='hsm', name_len=24,
                  parameter_name='managed_hsm', resource_group_parameter_name='resource_group',
                  administrators=None, roles=[], additional_params=None, skip_delete=False, skip_purge=False):
-        super(ManagedHSMPreparer, self).__init__(name_prefix, name_len)
+        super().__init__(name_prefix, name_len)
         self.cli_ctx = get_dummy_cli()
         self.location = location
         self.resource_group_parameter_name = resource_group_parameter_name
@@ -264,7 +264,7 @@ class ManagedHSMPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
         self.live_only_execute(self.cli_ctx, template.format(name, group, self.location, administrators))
         # After creating MHSM, All data plane commands are disabled until the HSM is activated.
         # To activate the HSM, we must download the Security Domain.
-        # See https://docs.microsoft.com/en-us/azure/key-vault/managed-hsm/quick-create-cli#activate-your-managed-hsm for details
+        # See https://learn.microsoft.com/en-us/azure/key-vault/managed-hsm/quick-create-cli#activate-your-managed-hsm for details
         if self.certs_path:
             cert0 = os.path.join(self.certs_path, 'cert_0.cer').replace('\\', '\\\\')
             cert1 = os.path.join(self.certs_path, 'cert_1.cer').replace('\\', '\\\\')
@@ -320,7 +320,7 @@ class RoleBasedServicePrincipalPreparer(NoTrafficRecordingPreparer, SingleValueR
                  skip_assignment=True, parameter_name='sp_name', parameter_password='sp_password',
                  dev_setting_sp_name='AZURE_CLI_TEST_DEV_SP_NAME',
                  dev_setting_sp_password='AZURE_CLI_TEST_DEV_SP_PASSWORD', key='sp'):
-        super(RoleBasedServicePrincipalPreparer, self).__init__(name_prefix, 24)
+        super().__init__(name_prefix, 24)
         self.cli_ctx = get_dummy_cli()
         self.skip_assignment = skip_assignment
         self.result = {}
@@ -365,7 +365,7 @@ class ManagedApplicationPreparer(AbstractPreparer, SingleValueReplacer):
                  parameter_secret='aad_client_app_secret', app_name='app_name',
                  dev_setting_app_name='AZURE_CLI_TEST_DEV_APP_NAME',
                  dev_setting_app_secret='AZURE_CLI_TEST_DEV_APP_SECRET', key='app'):
-        super(ManagedApplicationPreparer, self).__init__(name_prefix, 24)
+        super().__init__(name_prefix, 24)
         self.cli_ctx = get_dummy_cli()
         self.parameter_name = parameter_name
         self.parameter_secret = parameter_secret
@@ -403,7 +403,7 @@ class VirtualNetworkPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
         if ' ' in name_prefix:
             raise CliTestError(
                 'Error: Space character in name prefix \'%s\'' % name_prefix)
-        super(VirtualNetworkPreparer, self).__init__(
+        super().__init__(
             name_prefix, random_name_length)
         self.cli_ctx = get_dummy_cli()
         self.location = location
@@ -461,7 +461,7 @@ class VnetNicPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
         if ' ' in name_prefix:
             raise CliTestError(
                 'Error: Space character in name prefix \'%s\'' % name_prefix)
-        super(VnetNicPreparer, self).__init__(name_prefix, 15)
+        super().__init__(name_prefix, 15)
         self.cli_ctx = get_dummy_cli()
         self.parameter_name = parameter_name
         self.key = key
@@ -507,7 +507,7 @@ class VnetNicPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
 class LogAnalyticsWorkspacePreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
     def __init__(self, name_prefix='laworkspace', location='eastus2euap', parameter_name='laworkspace',
                  resource_group_parameter_name='resource_group', skip_delete=False, get_shared_key=False):
-        super(LogAnalyticsWorkspacePreparer, self).__init__(name_prefix, 15)
+        super().__init__(name_prefix, 15)
         self.cli_ctx = get_dummy_cli()
         self.location = location
         self.parameter_name = parameter_name

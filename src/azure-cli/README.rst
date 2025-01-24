@@ -107,4 +107,4 @@ License
 Release History
 ===============
 
-See `Azure CLI release notes <https://docs.microsoft.com/cli/azure/release-notes-azure-cli>`__.
+See `Azure CLI release notes <https://learn.microsoft.com/cli/azure/release-notes-azure-cli>`__.

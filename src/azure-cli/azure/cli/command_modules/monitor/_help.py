@@ -80,14 +80,14 @@ helps['monitor autoscale'] = """
 type: group
 short-summary: Manage autoscale settings.
 long-summary: >
-    For more information on autoscaling, visit: https://docs.microsoft.com/azure/monitoring-and-diagnostics/monitoring-understanding-autoscale-settings
+    For more information on autoscaling, visit: https://learn.microsoft.com/azure/monitoring-and-diagnostics/monitoring-understanding-autoscale-settings
 """
 
 helps['monitor autoscale create'] = """
 type: command
 short-summary: Create new autoscale settings.
 long-summary: >
-    For more information on autoscaling, visit: https://docs.microsoft.com/azure/monitoring-and-diagnostics/monitoring-understanding-autoscale-settings
+    For more information on autoscaling, visit: https://learn.microsoft.com/azure/monitoring-and-diagnostics/monitoring-understanding-autoscale-settings
 parameters:
   - name: --action -a
     short-summary: Add an action to fire when a scaling event occurs.
@@ -121,14 +121,14 @@ helps['monitor autoscale profile'] = """
 type: group
 short-summary: Manage autoscaling profiles.
 long-summary: >
-    For more information on autoscaling, visit: https://docs.microsoft.com/azure/monitoring-and-diagnostics/monitoring-understanding-autoscale-settings
+    For more information on autoscaling, visit: https://learn.microsoft.com/azure/monitoring-and-diagnostics/monitoring-understanding-autoscale-settings
 """
 
 helps['monitor autoscale profile create'] = """
 type: command
 short-summary: Create a fixed or recurring autoscale profile.
 long-summary: >
-    For more information on autoscaling, visit: https://docs.microsoft.com/azure/monitoring-and-diagnostics/monitoring-understanding-autoscale-settings
+    For more information on autoscaling, visit: https://learn.microsoft.com/azure/monitoring-and-diagnostics/monitoring-understanding-autoscale-settings
 parameters:
   - name: --timezone
     short-summary: Timezone name.
@@ -222,7 +222,7 @@ helps['monitor autoscale rule'] = """
 type: group
 short-summary: Manage autoscale scaling rules.
 long-summary: >
-    For more information on autoscaling, visit: https://docs.microsoft.com/azure/monitoring-and-diagnostics/monitoring-understanding-autoscale-settings
+    For more information on autoscaling, visit: https://learn.microsoft.com/azure/monitoring-and-diagnostics/monitoring-understanding-autoscale-settings
 """
 
 helps['monitor autoscale rule copy'] = """
@@ -234,7 +234,7 @@ helps['monitor autoscale rule create'] = """
 type: command
 short-summary: Add a new autoscale rule.
 long-summary: >
-    For more information on autoscaling, visit: https://docs.microsoft.com/azure/monitoring-and-diagnostics/monitoring-understanding-autoscale-settings
+    For more information on autoscaling, visit: https://learn.microsoft.com/azure/monitoring-and-diagnostics/monitoring-understanding-autoscale-settings
 parameters:
   - name: --condition
     short-summary: The condition which triggers the scaling action.
@@ -419,7 +419,7 @@ parameters:
     long-summary: |
         Usage:  --condition {avg,min,max,total,count} [NAMESPACE.]METRIC
                            [{=,!=,>,>=,<,<=} THRESHOLD]
-                           [{<,>,><} dynamic SENSITIVITY VIOLATIONS of EVALUATIONS [since DATETIME]]
+                           [{>,><,<} dynamic SENSITIVITY VIOLATIONS of EVALUATIONS [since DATETIME]]
                            [where DIMENSION {includes,excludes} VALUE [or VALUE ...]
                            [and   DIMENSION {includes,excludes} VALUE [or VALUE ...] ...]]
                            [with skipmetricvalidation]
@@ -536,7 +536,7 @@ parameters:
         The interval over which to aggregate metrics, in ##h##m format.
   - name: --filter
     short-summary: A string used to reduce the set of metric data returned. eg. "BlobType eq '*'"
-    long-summary: 'For a full list of filters, see the filter string reference at https://docs.microsoft.com/rest/api/monitor/metrics/list'
+    long-summary: 'For a full list of filters, see the filter string reference at https://learn.microsoft.com/rest/api/monitor/metrics/list'
   - name: --metadata
     short-summary: Returns the metadata values instead of metric data
   - name: --dimension

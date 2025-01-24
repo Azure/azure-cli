@@ -269,8 +269,8 @@ class TestUtils(unittest.TestCase):
         expected_header_with_auth['Authorization'] = 'Bearer eyJ0eXAiOiJKV1'
 
         # Test basic usage
-        # Mock Put Blob https://docs.microsoft.com/en-us/rest/api/storageservices/put-blob
-        # Authenticate with service SAS https://docs.microsoft.com/en-us/rest/api/storageservices/create-service-sas
+        # Mock Put Blob https://learn.microsoft.com/en-us/rest/api/storageservices/put-blob
+        # Authenticate with service SAS https://learn.microsoft.com/en-us/rest/api/storageservices/create-service-sas
         sas_token = ['sv=2019-02-02', '{"srt": "s"}', "{'ss': 'bf'}"]
         send_raw_request(cli_ctx, 'PUT', 'https://myaccount.blob.core.windows.net/mycontainer/myblob?timeout=30',
                          uri_parameters=sas_token, body=test_body,
@@ -312,7 +312,7 @@ class TestUtils(unittest.TestCase):
         self.assertDictEqual(dict(request.headers), expected_header_with_auth)
 
         # Test ARM Subscriptions - List
-        # https://docs.microsoft.com/en-us/rest/api/resources/subscriptions/list
+        # https://learn.microsoft.com/en-us/rest/api/resources/subscriptions/list
         # /subscriptions?api-version=2020-01-01
         send_raw_request(cli_ctx, 'GET', '/subscriptions?api-version=2020-01-01', body=test_body,
                          generated_client_request_id_name=None)
@@ -323,7 +323,7 @@ class TestUtils(unittest.TestCase):
         self.assertDictEqual(dict(request.headers), expected_header_with_auth)
 
         # Test ARM Tenants - List
-        # https://docs.microsoft.com/en-us/rest/api/resources/tenants/list
+        # https://learn.microsoft.com/en-us/rest/api/resources/tenants/list
         # /tenants?api-version=2020-01-01
         send_raw_request(cli_ctx, 'GET', '/tenants?api-version=2020-01-01', body=test_body,
                          generated_client_request_id_name=None)
@@ -514,7 +514,7 @@ class TestHandleException(unittest.TestCase):
         # create test HttpOperationError Exception
         err_msg = "Bad Request because of some incorrect param"
         err_code = "BadRequest"
-        err = dict(error=dict(code=err_code, message=err_msg))
+        err = {"error": {"code": err_code, "message": err_msg}}
         response_text = json.dumps(err)
         mock_http_error = self._get_mock_HttpOperationError(response_text)
 
@@ -533,7 +533,7 @@ class TestHandleException(unittest.TestCase):
 
         # create test HttpOperationError Exception
         err_msg = "BadRequest"
-        err = dict(error=err_msg)
+        err = {"error": err_msg}
         response_text = json.dumps(err)
         mock_http_error = self._get_mock_HttpOperationError(response_text)
 

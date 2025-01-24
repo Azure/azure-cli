@@ -7,7 +7,8 @@ from azure.cli.core.util import get_default_admin_username
 from azure.cli.core.aaz import has_value, register_command
 from .aaz.latest.lab import Get as _LabGet, Delete as _LabDelete, CreateEnvironment as _LabVmCreate
 from .aaz.latest.lab.vm import (List as _LabVmList, Show as _LabVmShow, Delete as _LabVmDelete, Start as _LabVmStart,
-                                Stop as _LabVmStop, ApplyArtifacts as _LabVmApplyArtifacts, Claim as LabVmClaim)
+                                Stop as _LabVmStop, ApplyArtifacts as _LabVmApplyArtifacts, Claim as LabVmClaim,
+                                Hibernate as _LabVmHibernate)
 from .aaz.latest.lab.custom_image import (Show as _CustomImageShow, Delete as _CustomImageDelete,
                                           Create as _CustomImageCreate)
 from .aaz.latest.lab.artifact_source import Show as _ArtifactSourceShow
@@ -223,6 +224,15 @@ class LabVmStop(_LabVmStop):
         return args_schema
 
 
+class LabVmHibernate(_LabVmHibernate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.name._id_part = None
+        args_schema.lab_name._id_part = None
+        return args_schema
+
+
 class LabVmApplyArtifacts(_LabVmApplyArtifacts):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
@@ -264,7 +274,7 @@ def claim_vm(cmd, lab_name=None, name=None, resource_group_name=None):
 def _export_parameters(arm_template):
     parameters = []
     if arm_template and arm_template.get('contents') and arm_template['contents'].get('parameters'):
-        default_values = dict()
+        default_values = {}
         if arm_template.get('parametersValueFilesInfo'):
             for parameter_value_file_info in arm_template.get('parametersValueFilesInfo'):
                 if isinstance(parameter_value_file_info['parametersValueInfo'], dict):
@@ -273,7 +283,7 @@ def _export_parameters(arm_template):
 
         if isinstance(arm_template['contents']['parameters'], dict):
             for k in arm_template['contents']['parameters']:
-                param = dict()
+                param = {}
                 param['name'] = k
                 param['value'] = default_values.get(k, "")
                 parameters.append(param)

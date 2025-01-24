@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=too-many-lines
+import base64
 import codecs
 import hashlib
 import json
@@ -96,12 +97,12 @@ def _default_certificate_profile(cmd):
     template = CertificatePolicy(
         key_properties=KeyProperties(
             exportable=True,
-            key_type=u'RSA',
+            key_type='RSA',
             key_size=2048,
             reuse_key=True
         ),
         secret_properties=SecretProperties(
-            content_type=u'application/x-pkcs12'
+            content_type='application/x-pkcs12'
         ),
         x509_certificate_properties=X509CertificateProperties(
             key_usage=[
@@ -112,7 +113,7 @@ def _default_certificate_profile(cmd):
                 KeyUsageType.key_agreement,
                 KeyUsageType.key_cert_sign
             ],
-            subject=u'CN=CLIGetDefaultPolicy',
+            subject='CN=CLIGetDefaultPolicy',
             validity_in_months=12
         ),
         lifetime_actions=[LifetimeAction(
@@ -124,7 +125,7 @@ def _default_certificate_profile(cmd):
             )
         )],
         issuer_parameters=IssuerParameters(
-            name=u'Self',
+            name='Self',
         ),
         attributes=CertificateAttributes(
             enabled=True
@@ -159,12 +160,12 @@ def _scaffold_certificate_profile(cmd):
     template = CertificatePolicy(
         key_properties=KeyProperties(
             exportable=True,
-            key_type=u'(optional) RSA or RSA-HSM (default RSA)',
+            key_type='(optional) RSA or RSA-HSM (default RSA)',
             key_size=2048,
             reuse_key=True
         ),
         secret_properties=SecretProperties(
-            content_type=u'application/x-pkcs12 or application/x-pem-file'
+            content_type='application/x-pkcs12 or application/x-pem-file'
         ),
         x509_certificate_properties=X509CertificateProperties(
             key_usage=[
@@ -176,12 +177,12 @@ def _scaffold_certificate_profile(cmd):
                 KeyUsageType.key_cert_sign
             ],
             subject_alternative_names=SubjectAlternativeNames(
-                emails=[u'hello@contoso.com'],
-                dns_names=[u'hr.contoso.com', u'm.contoso.com'],
+                emails=['hello@contoso.com'],
+                dns_names=['hr.contoso.com', 'm.contoso.com'],
                 upns=[]
             ),
-            subject=u'C=US, ST=WA, L=Redmond, O=Contoso, OU=Contoso HR, CN=www.contoso.com',
-            ekus=[u'1.3.6.1.5.5.7.3.1'],
+            subject='C=US, ST=WA, L=Redmond, O=Contoso, OU=Contoso HR, CN=www.contoso.com',
+            ekus=['1.3.6.1.5.5.7.3.1'],
             validity_in_months=24
         ),
         lifetime_actions=[LifetimeAction(
@@ -193,8 +194,8 @@ def _scaffold_certificate_profile(cmd):
             )
         )],
         issuer_parameters=IssuerParameters(
-            name=u'Unknown, Self, or {IssuerName}',
-            certificate_type=u'(optional) DigiCert, GlobalSign or WoSign'
+            name='Unknown, Self, or {IssuerName}',
+            certificate_type='(optional) DigiCert, GlobalSign or WoSign'
         ),
         attributes=CertificateAttributes(
             enabled=True
@@ -310,8 +311,12 @@ def _create_network_rule_set(cmd, bypass=None, default_action=None):
     NetworkRuleBypassOptions = cmd.get_models('NetworkRuleBypassOptions', resource_type=ResourceType.MGMT_KEYVAULT)
     NetworkRuleAction = cmd.get_models('NetworkRuleAction', resource_type=ResourceType.MGMT_KEYVAULT)
 
-    return NetworkRuleSet(bypass=bypass or NetworkRuleBypassOptions.azure_services.value,
-                          default_action=default_action or NetworkRuleAction.allow.value)
+    # We actually should not set any default value from client side
+    # Keep this 'if' section to avoid breaking change
+    if not bypass and not default_action:
+        return NetworkRuleSet(bypass=NetworkRuleBypassOptions.azure_services.value,
+                              default_action=NetworkRuleAction.allow.value)
+    return NetworkRuleSet(bypass=bypass, default_action=default_action)
 
 
 # region KeyVault Vault
@@ -1130,16 +1135,15 @@ def sign_key(cmd, client, algorithm, digest, name=None, version=None):
     SignatureAlgorithm = cmd.loader.get_sdk('SignatureAlgorithm', mod='crypto._enums',
                                             resource_type=ResourceType.DATA_KEYVAULT_KEYS)
     crypto_client = client.get_cryptography_client(name, key_version=version)
-    return crypto_client.sign(SignatureAlgorithm(algorithm), digest.encode('utf-8'))
+    return crypto_client.sign(SignatureAlgorithm(algorithm), base64.b64decode(digest.encode('utf-8')))
 
 
 def verify_key(cmd, client, algorithm, digest, signature, name=None, version=None):
-    import base64
     SignatureAlgorithm = cmd.loader.get_sdk('SignatureAlgorithm', mod='crypto._enums',
                                             resource_type=ResourceType.DATA_KEYVAULT_KEYS)
     crypto_client = client.get_cryptography_client(name, key_version=version)
     return crypto_client.verify(SignatureAlgorithm(algorithm),
-                                digest.encode('utf-8'),
+                                base64.b64decode(digest.encode('utf-8')),
                                 base64.b64decode(signature.encode('utf-8')))
 
 
@@ -1493,7 +1497,6 @@ def download_secret(client, file_path, name=None, encoding=None, version=''):  #
                 f.write(secret_value)
         else:
             if encoding == 'base64':
-                import base64
                 decoded = base64.b64decode(secret_value)
             elif encoding == 'hex':
                 import binascii
@@ -1558,7 +1561,6 @@ def download_certificate(client, file_path, certificate_name=None, encoding='PEM
             if encoding == 'DER':
                 f.write(cert)
             else:
-                import base64
                 encoded = base64.encodebytes(cert)
                 if isinstance(encoded, bytes):
                     encoded = encoded.decode("utf-8")
@@ -1592,7 +1594,7 @@ def add_certificate_contact(cmd, client, email, name=None, phone=None):
     except ResourceNotFoundError:
         contacts = []
     contact = CertificateContact(email=email, name=name, phone=phone)
-    if any((x for x in contacts if x.email == email)):
+    if any(x for x in contacts if x.email == email):
         raise CLIError("contact '{}' already exists".format(email))
     contacts.append(contact)
     return client.set_contacts(contacts)
@@ -1646,7 +1648,7 @@ def add_certificate_issuer_admin(cmd, client, issuer_name, email, first_name=Non
                                               mod='_models')
     issuer = client.get_issuer(issuer_name)
     admins = issuer.admin_contacts
-    if any((x for x in admins if x.email == email)):
+    if any(x for x in admins if x.email == email):
         raise CLIError("admin '{}' already exists".format(email))
     new_admin = AdministratorContact(first_name=first_name, last_name=last_name, email=email, phone=phone)
     admins.append(new_admin)
