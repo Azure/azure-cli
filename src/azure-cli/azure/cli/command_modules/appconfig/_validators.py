@@ -37,7 +37,7 @@ def validate_datetime(namespace):
             if __tryparse_datetime(namespace.datetime, supported_format):
                 return
 
-        raise CLIError('The input datetime is invalid. Correct format should be YYYY-MM-DDThh:mm:ss["Z"/±hh:mm].')
+        raise InvalidArgumentValueError('The input datetime is invalid. Correct format should be YYYY-MM-DDThh:mm:ss["Z"/±hh:mm].')
 
 
 def __tryparse_datetime(datetime_string, dt_format):
