@@ -14,12 +14,11 @@ from azure.cli.command_modules.vm.azure_stack._client_factory import (cf_vm, cf_
                                                                       cf_dedicated_hosts, cf_dedicated_host_groups,
                                                                       cf_log_analytics_data_plane,
                                                                       cf_disk_encryption_set,
-                                                                      cf_gallery_sharing_profile,
                                                                       cf_shared_gallery_image,
                                                                       cf_shared_gallery_image_version,
                                                                       cf_capacity_reservation_groups,
                                                                       cf_capacity_reservations,
-                                                                      cf_vmss_run_commands, cf_gallery_application,
+                                                                      cf_vmss_run_commands,
                                                                       cf_gallery_application_version, cf_restore_point,
                                                                       cf_restore_point_collection,
                                                                       cf_community_gallery_image,
@@ -148,11 +147,6 @@ def load_command_table(self, _):
     compute_gallery_image_versions_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations#GalleryImageVersionsOperations.{}',
         client_factory=cf_gallery_image_versions,
-    )
-
-    compute_gallery_application_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations#GalleryApplicationsOperations.{}',
-        client_factory=cf_gallery_application,
     )
 
     compute_gallery_application_version_sdk = CliCommandType(
@@ -357,13 +351,10 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_vm_extension_images')
 
     with self.command_group('vm image', compute_vm_image_sdk) as g:
-        g.custom_command('list-offers', 'list_offers')
-        g.custom_command('list-publishers', 'list_publishers')
-        g.custom_command('list-skus', 'list_sku')
         g.custom_command('list', 'list_vm_images')
+        g.custom_show_command('show', 'show_vm_image')
         g.custom_command('accept-terms', 'accept_market_ordering_terms',
                          deprecate_info=g.deprecate(redirect='az vm image terms accept', expiration='3.0.0'))
-        g.custom_show_command('show', 'show_vm_image')
 
     with self.command_group('vm image terms', compute_vm_image_term_sdk, validator=None) as g:
         g.custom_command('accept', 'accept_terms')
@@ -477,31 +468,11 @@ def load_command_table(self, _):
 
     with self.command_group('sig image-definition', compute_gallery_images_sdk, operation_group='gallery_images', min_api='2018-06-01') as g:
         g.custom_command('create', 'create_gallery_image')
-        g.generic_update_command('update', setter_name='begin_create_or_update', setter_arg_name='gallery_image')
 
     with self.command_group('sig image-version', compute_gallery_image_versions_sdk, operation_group='gallery_image_versions', min_api='2018-06-01') as g:
-        g.show_command('show', 'get', table_transformer='{Name:name, ResourceGroup:resourceGroup, ProvisioningState:provisioningState, TargetRegions: publishingProfile.targetRegions && join(`, `, publishingProfile.targetRegions[*].name), EdgeZones: publishingProfile.targetExtendedLocations && join(`, `, publishingProfile.targetExtendedLocations[*].name), ReplicationState:replicationStatus.aggregatedState}')
         g.custom_command('create', 'create_image_version', supports_no_wait=True, validator=process_image_version_create_namespace)
         g.custom_command('undelete', 'undelete_image_version', supports_no_wait=True, min_api='2021-07-01', validator=process_image_version_undelete_namespace, is_preview=True)
         g.generic_update_command('update', getter_name='get_image_version_to_update', setter_arg_name='gallery_image_version', setter_name='update_image_version', setter_type=compute_custom, command_type=compute_custom, supports_no_wait=True, validator=process_image_version_update_namespace)
-        g.wait_command('wait')
-
-    vm_gallery_sharing_profile = CliCommandType(
-        operations_tmpl=(
-            'azure.mgmt.compute.operations._gallery_sharing_profile_operations#GallerySharingProfileOperations.{}'
-        ),
-        client_factory=cf_gallery_sharing_profile,
-        operation_group='shared_galleries'
-    )
-    with self.command_group('sig share', vm_gallery_sharing_profile,
-                            client_factory=cf_gallery_sharing_profile,
-                            operation_group='shared_galleries',
-                            min_api='2020-09-30') as g:
-        g.custom_command('add', 'sig_share_update', supports_no_wait=True)
-        g.custom_command('remove', 'sig_share_update', supports_no_wait=True)
-        g.custom_command('reset', 'sig_share_reset', supports_no_wait=True)
-        g.custom_command('enable-community', 'sig_share_update', supports_no_wait=True)
-        g.wait_command('wait', getter_name='get_gallery_instance', getter_type=compute_custom)
 
     vm_shared_gallery_image = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations._shared_gallery_images_operations#SharedGalleryImagesOperations.'
@@ -520,11 +491,6 @@ def load_command_table(self, _):
                             operation_group='shared_galleries',
                             client_factory=cf_shared_gallery_image_version) as g:
         g.custom_command('list-shared', 'sig_shared_image_version_list')
-
-    with self.command_group('sig gallery-application', compute_gallery_application_sdk, client_factory=cf_gallery_application, min_api='2021-07-01', operation_group='gallery_applications') as g:
-        g.custom_command('create', 'gallery_application_create', supports_no_wait=True)
-        g.custom_command('update', 'gallery_application_update', supports_no_wait=True)
-        g.wait_command('wait')
 
     with self.command_group('sig gallery-application version', compute_gallery_application_version_sdk, client_factory=cf_gallery_application_version, min_api='2021-07-01', operation_group='gallery_application_versions') as g:
         g.custom_command('create', 'gallery_application_version_create', supports_no_wait=True)

@@ -363,6 +363,7 @@ def _get_local_versions():
 
 def get_az_version_string(use_cache=False):  # pylint: disable=too-many-statements
     from azure.cli.core.extension import get_extensions, EXTENSIONS_DIR, DEV_EXTENSION_SOURCES, EXTENSIONS_SYS_DIR
+    from azure.cli.core._environment import get_config_dir
     import io
     output = io.StringIO()
     versions = _get_local_versions()
@@ -410,6 +411,7 @@ def get_az_version_string(use_cache=False):  # pylint: disable=too-many-statemen
     _print()
 
     _print("Python location '{}'".format(os.path.abspath(sys.executable)))
+    _print("Config directory '{}'".format(get_config_dir()))
     _print("Extensions directory '{}'".format(EXTENSIONS_DIR))
     if os.path.isdir(EXTENSIONS_SYS_DIR) and os.listdir(EXTENSIONS_SYS_DIR):
         _print("Extensions system directory '{}'".format(EXTENSIONS_SYS_DIR))

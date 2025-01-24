@@ -95,10 +95,6 @@ def cf_gallery_image_versions(cli_ctx, _):
     return _compute_client_factory(cli_ctx).gallery_image_versions
 
 
-def cf_gallery_application(cli_ctx, *_):
-    return _compute_client_factory(cli_ctx).gallery_applications
-
-
 def cf_gallery_application_version(cli_ctx, *_):
     return _compute_client_factory(cli_ctx).gallery_application_versions
 
@@ -159,10 +155,6 @@ def cf_vm_cl(cli_ctx, *_):
 
 def cf_shared_galleries(cli_ctx, *_):
     return cf_vm_cl(cli_ctx).shared_galleries
-
-
-def cf_gallery_sharing_profile(cli_ctx, *_):
-    return cf_vm_cl(cli_ctx).gallery_sharing_profile
 
 
 def cf_shared_gallery_image(cli_ctx, *_):

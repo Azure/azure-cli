@@ -501,12 +501,20 @@ class NetworkLoadBalancerWithZone(ScenarioTest):
     def test_network_lb_frontend_ip_zone(self, resource_group):
         self.kwargs.update({
             'location': 'eastus2',
+            'lb1': self.create_random_name('lb', 10),
+            'lb2': self.create_random_name('lb', 10),
+            'vnet1': self.create_random_name('vnet', 10),
+            'vnet2': self.create_random_name('vnet', 10),
+            'pool': self.create_random_name('poll', 10)
         })
 
         # LB with subnet : internal LB
-        self.cmd('network lb create -g {rg} -l {location} -n lb --vnet-name vnet --subnet subnet --sku Standard')
-        self.cmd('network lb frontend-ip create -g {rg} --lb-name lb -n LoadBalancerFrontEnd2 -z 1 2 3 --vnet-name vnet --subnet subnet', checks=[
+        self.cmd('network lb create -g {rg} -l {location} -n {lb1} --vnet-name {vnet1} --subnet subnet --sku Standard')
+        self.cmd('network lb frontend-ip create -g {rg} --lb-name {lb1} -n LoadBalancerFrontEnd2 -z 1 2 3 --vnet-name {vnet1} --subnet subnet', checks=[
             self.check("length(zones)", 3)
+        ])
+        self.cmd('network lb create -g {rg} -n {lb2} --sku standard --vnet-name {vnet2} --subnet default --frontend-ip-zone 1 2 3 --backend-pool-name {pool}', checks=[
+            self.check("loadBalancer.frontendIPConfigurations[0].zones", ['1', '2', '3'])
         ])
 
 
@@ -5637,13 +5645,14 @@ class NetworkVirtualHubRouter(ScenarioTest):
             'subnet1_id': vnet['subnets'][0]['id']
         })
 
-        self.cmd('network routeserver create -g {rg} -l {location} -n {vrouter} '
+        self.cmd('network routeserver create -g {rg} -l {location} -n {vrouter} --auto-scale-config min-capacity=3 '
                  '--hosted-subnet {subnet1_id} --public-ip-address {vhr_ip1} --hub-routing-preference aspath',
                  checks=[
                      self.check('type', 'Microsoft.Network/virtualHubs'),
                      self.check('ipConfigurations', None),
                      self.check('provisioningState', 'Succeeded'),
-                     self.check("hubRoutingPreference", "ASPath")
+                     self.check("hubRoutingPreference", "ASPath"),
+                     self.check('virtualRouterAutoScaleConfiguration.minCapacity', 3)
                  ])
 
         self.cmd('network routeserver update -g {rg} --name {vrouter}  --allow-b2b-traffic --hub-routing-preference expressroute', checks=[

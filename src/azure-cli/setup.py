@@ -17,7 +17,7 @@ except ImportError:
     logging.warning("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.67.0"
+VERSION = "2.68.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -52,7 +52,7 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     "antlr4-python3-runtime~=4.13.1",
     'azure-appconfiguration~=1.7.0',
-    'azure-batch~=14.2.0',
+    'azure-batch~=15.0.0b1',
     'azure-cli-core=={}'.format(VERSION),
     'azure-cosmos~=3.0,>=3.0.2',
     'azure-data-tables==12.4.0',
@@ -77,7 +77,7 @@ DEPENDENCIES = [
     'azure-mgmt-containerinstance==10.2.0b1',
     'azure-mgmt-containerregistry==10.3.0',
     'azure-mgmt-containerservice~=33.0.0',
-    'azure-mgmt-cosmosdb==9.6.0',
+    'azure-mgmt-cosmosdb==9.7.0',
     'azure-mgmt-databoxedge~=1.0.0',
     'azure-mgmt-datalake-store~=1.1.0b1',
     'azure-mgmt-datamigration~=10.0.0',
@@ -101,7 +101,7 @@ DEPENDENCIES = [
     'azure-mgmt-msi~=7.0.0',
     'azure-mgmt-netapp~=10.1.0',
     'azure-mgmt-policyinsights==1.1.0b4',
-    'azure-mgmt-postgresqlflexibleservers==1.1.0b1',
+    'azure-mgmt-postgresqlflexibleservers==1.1.0b2',
     'azure-mgmt-privatedns~=1.0.0',
     'azure-mgmt-rdbms==10.2.0b17',
     'azure-mgmt-mysqlflexibleservers==1.0.0b3',
@@ -113,7 +113,7 @@ DEPENDENCIES = [
     'azure-mgmt-search~=9.0',
     'azure-mgmt-security==6.0.0',
     'azure-mgmt-servicebus~=8.2.0',
-    'azure-mgmt-servicefabricmanagedclusters==2.0.0b6',
+    'azure-mgmt-servicefabricmanagedclusters==2.1.0b1',
     'azure-mgmt-servicelinker==1.2.0b3',
     'azure-mgmt-servicefabric~=2.1.0',
     'azure-mgmt-signalr==2.0.0b2',
@@ -139,7 +139,7 @@ DEPENDENCIES = [
     'jsondiff~=2.0.0',
     'packaging>=20.9',
     'paramiko>=2.0.8,<4.0.0',
-    'pycomposefile>=0.0.29',
+    'pycomposefile>=0.0.32',
     'PyGithub~=1.38',
     'PyNaCl~=1.5.0',
     'scp~=0.13.2',

@@ -962,13 +962,25 @@ def validate_service_state(linker_parameters):
         segments = parse_resource_id(target_id)
         rg = segments.get('resource_group')
         name = segments.get('name')
+        sub = segments.get('subscription')
         if not rg or not name:
             return
 
-        output = run_cli_cmd('az appconfig show -g "{}" -n "{}"'.format(rg, name))
+        output = run_cli_cmd('az appconfig show -g "{}" -n "{}" --subscription "{}"'.format(rg, name, sub))
         if output and output.get('disableLocalAuth') is True:
             raise ValidationError('Secret as auth type is not allowed when local auth is disabled for the '
                                   'specified appconfig, you may use service principal or managed identity.')
+
+    if target_type == RESOURCE.Redis:
+        auth_type = linker_parameters.get('auth_info', {}).get('auth_type')
+        if auth_type == AUTH_TYPE.Secret.value or auth_type == AUTH_TYPE.SecretAuto.value:
+            return
+        redis = run_cli_cmd('az redis show --ids "{}"'.format(target_id))
+        if redis.get('redisConfiguration', {}).get('aadEnabled', 'False') != "True":
+            raise ValidationError('Please enable Microsoft Entra Authentication on your Redis first. '
+                                  'Note that it will cause your cache instances to reboot to load new '
+                                  'configuration and result in a failover. Consider performing the '
+                                  'operation during low traffic or outside of business hours.')
 
 
 def get_default_object_id_of_current_user(cmd, namespace):  # pylint: disable=unused-argument
