@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from msilib import CreateRecord
 import os
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 import time
