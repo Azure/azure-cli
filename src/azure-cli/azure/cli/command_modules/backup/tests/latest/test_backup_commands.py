@@ -796,6 +796,50 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
 
     @AllowLargeResponse()
+    @ResourceGroupPreparer(location="eastus2euap")
+    @ResourceGroupPreparer(parameter_name="target_resource_group", location="eastus2euap")
+    @VaultPreparer(storageRedundancy = "ZoneRedundant")
+    @VMPreparer(image="Win2022Datacenter")
+    @ItemPreparer()
+    @RPPreparer()
+    @StorageAccountPreparer(location="eastus2euap")
+    def test_backup_CrossZonalRestore(self, resource_group, target_resource_group, vault_name, vm_name, storage_account):
+
+        self.kwargs.update({
+            'vault': vault_name,
+            'vm': vm_name,
+            'target_rg': target_resource_group,
+            'rg': resource_group,
+            'sa': storage_account,
+            'vm_id': "VM;iaasvmcontainerv2;" + resource_group + ";" + vm_name,
+            'container_id': "IaasVMContainer;iaasvmcontainerv2;" + resource_group + ";" + vm_name,
+            'vnet_name': self.create_random_name('clitest-vnet', 30),
+            'subnet_name': self.create_random_name('clitest-subnet', 30),
+            'target_vm_name': self.create_random_name('clitest-tvm', 15)
+        })
+        self.kwargs['rp'] = self.cmd('backup recoverypoint list --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {vm} -i {vm} --query [0].name').get_output_in_json()
+
+        # Trigger Cross Zonal Restore to NoZone
+        trigger_restore_job5_json = self.cmd('backup restore restore-disks -g {rg} -v {vault} -c {vm} -i {vm} -r {rp} -t {target_rg} --storage-account {sa} --restore-to-staging-storage-account --target-zone NoZone', checks=[
+            self.check("properties.entityFriendlyName", '{vm}'),
+            self.check("properties.operation", "Restore"),
+            self.check("properties.status", "InProgress"),
+            self.check("resourceGroup", '{rg}')
+        ]).get_output_in_json()
+        self.kwargs['job'] = trigger_restore_job5_json['name']
+        self.cmd('backup job wait -g {rg} -v {vault} -n {job}')
+
+        self.cmd('backup job show -g {rg} -v {vault} -n {job}', checks=[
+            self.check("properties.entityFriendlyName", '{vm}'),
+            self.check("properties.operation", "Restore"),
+            self.check("properties.status", "Completed"),
+            self.check("resourceGroup", '{rg}')
+        ])
+
+        self.cmd('az backup vault backup-properties set -n {vault} -g {rg} --soft-delete-feature-state Disable')
+
+
+    @AllowLargeResponse()
     @ResourceGroupPreparer(location="centraluseuap")
     @ResourceGroupPreparer(parameter_name="target_resource_group", location="centraluseuap")
     @ResourceGroupPreparer(parameter_name="storage_account_resource_group", location="centraluseuap")
