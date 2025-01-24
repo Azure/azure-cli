@@ -20,6 +20,7 @@ from azure.cli.command_modules.network._validators import (
     validate_dns_record_type, validate_private_ip_address,
     get_servers_validator, get_public_ip_validator, get_nsg_validator,
     get_vnet_validator, validate_ip_tags, validate_ddos_name_or_id,
+    auto_scale_config_validator,
     validate_service_endpoint_policy,
     validate_custom_error_pages,
     validate_custom_headers, validate_status_code_ranges, validate_subnet_ranges,
@@ -58,6 +59,11 @@ def load_arguments(self, _):
         help='Space-separated list of availability zones into which to provision the resource.',
     )
     edge_zone = CLIArgumentType(help='The name of edge zone.')
+    auto_scale_config = CLIArgumentType(
+        nargs='*',
+        options_list='--auto-scale-config',
+        validator=auto_scale_config_validator
+    )
 
     # region NetworkRoot
     with self.argument_context('network') as c:
@@ -789,6 +795,7 @@ def load_arguments(self, _):
 
     with self.argument_context('network routeserver create') as c:
         c.argument('virtual_hub_name', id_part=None)
+        c.argument('auto_scale_config', auto_scale_config)
     # endregion
 
     # region Remove --ids from listsaz
