@@ -11907,7 +11907,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # nodepool delete the second
         self.cmd(
-            "aks nodepool delete --resource-group={resource_group} --cluster-name={name} --name={node_pool_name_second} --ignore-pdb",
+            "aks nodepool delete --resource-group={resource_group} --cluster-name={name} --name={node_pool_name_second} --ignore-pod-disruption-budget",
             checks=[self.is_empty()],
         )
 

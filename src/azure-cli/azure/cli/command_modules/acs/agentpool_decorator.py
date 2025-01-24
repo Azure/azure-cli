@@ -1533,6 +1533,7 @@ class AKSAgentPoolContext(BaseAKSContext):
         # This parameter does not need dynamic completion.
         return ignore_pod_disruption_budget
 
+
 class AKSAgentPoolAddDecorator:
     def __init__(
         self,
