@@ -911,12 +911,23 @@ def load_arguments(self, _):
         c.argument('dns_zone_resource_ids', options_list=['--ids'], required=True)
         c.argument('attach_zones')
 
+    with self.argument_context('aks nodepool delete') as c:
+        c.argument("if_match")
+
     with self.argument_context("aks nodepool delete-machines") as c:
         c.argument(
             "machine_names",
             nargs="+",
             required=True,
             help="Space-separated machine names to delete.",
+        )
+
+    with self.argument_context("aks nodepool delete") as c:
+        c.argument(
+            "ignore_pod_disruption_budget",
+            options_list=["--ignore-pod-disruption-budget", "--ignore-pdb"],
+            action='store_true',
+            help="delete an AKS nodepool by ignoring PodDisruptionBudget setting",
         )
 
 

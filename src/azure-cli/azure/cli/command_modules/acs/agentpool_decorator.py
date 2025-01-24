@@ -1504,6 +1504,33 @@ class AKSAgentPoolContext(BaseAKSContext):
         """
         return self._get_disable_windows_outbound_nat()
 
+    def get_if_match(self) -> str:
+        """Obtain the value of if_match.
+
+        :return: string
+        """
+        return self.raw_param.get("if_match")
+
+    def get_if_none_match(self) -> str:
+        """Obtain the value of if_none_match.
+
+        :return: string
+        """
+        return self.raw_param.get("if_none_match")
+
+    def get_ignore_pod_disruption_budget(self) -> bool:
+        return self._get_ignore_pod_disruption_budget()
+
+    def _get_ignore_pod_disruption_budget(self) -> bool:
+        """Obtain the value of ignore_pod_disruption_budget, default value is False.
+
+        :return: bool
+        """
+        # read the original value passed by the command
+        ignore_pod_disruption_budget = self.raw_param.get("ignore_pod_disruption_budget", False)
+
+        # This parameter does not need dynamic completion.
+        return ignore_pod_disruption_budget
 
 class AKSAgentPoolAddDecorator:
     def __init__(
