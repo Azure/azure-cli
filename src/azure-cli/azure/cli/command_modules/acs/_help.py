@@ -1670,7 +1670,7 @@ parameters:
     short-summary: The value provided will be compared to the ETag of the node pool, if it matches the operation will proceed. If it does not match, the request will be rejected to prevent accidental overwrites. This must not be specified when creating a new agentpool.
   - name: --ignore-pdb
     type: bool
-    short-summary: ignore-pdb deletes an existing nodepool without considering Pod Disruption Budget.
+    short-summary: Delete an existing nodepool without considering Pod Disruption Budget.
 
 examples:
     - name: Delete an agent pool with ignore-pdb
