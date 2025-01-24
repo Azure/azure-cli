@@ -1192,7 +1192,7 @@ def load_arguments(self, _):
 
     for scope in ['vm create', 'vm encryption enable']:
         with self.argument_context(scope) as c:
-            c.argument('encryption_identity', help='Resource Id of the user managed identity which can be used for Azure disk encryption')
+            c.argument('encryption_identity', help='Resource Id of the user managed identity which can be used for Azure disk encryption',resource_type=ResourceType.MGMT_COMPUTE, min_api='2023-09-01')
 
     for scope in ['vmss create', 'vmss encryption enable']:
         with self.argument_context(scope) as c:
