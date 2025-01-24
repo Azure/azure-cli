@@ -102,7 +102,10 @@ def validate_czr(backup_config_response, recovery_point, use_secondary_region):
     backup_storage_redundancy = backup_config_response.properties.storage_type
     cross_region_restore_flag = backup_config_response.properties.cross_region_restore_flag
     if (cross_region_restore_flag or backup_storage_redundancy == StorageType.ZONE_REDUNDANT):
-        if recovery_point.tier_type is not None and (recovery_point.tier_type == "VaultStandard" or recovery_point.tier_type == "SnapshotAndVaultStandard"):
+        if recovery_point.tier_type is not None and (
+           recovery_point.tier_type == "VaultStandard" or 
+           recovery_point.tier_type == "SnapshotAndVaultStandard"
+        ):
             if backup_storage_redundancy != StorageType.ZONE_REDUNDANT:
                 if recovery_point.properties.zones is None:
                     raise ArgumentUsageError("""
@@ -116,8 +119,8 @@ def validate_czr(backup_config_response, recovery_point, use_secondary_region):
                     """)
         else:
             raise ArgumentUsageError("""
-            Please ensure that the given RP tier type is either 'VaultStandard' or 'SnapshotAndVaultStandard', or remove --target-zone argument.
-            """)
+            Please ensure that the given RP tier type is either 'VaultStandard' or 'SnapshotAndVaultStandard',
+            or remove --target-zone argument.""")
     else:
         raise ArgumentUsageError("""
         Please ensure either the vault storage redundancy is ZoneRedundant or the vault has CRR enabled or try
