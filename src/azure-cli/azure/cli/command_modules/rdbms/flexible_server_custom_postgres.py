@@ -501,8 +501,7 @@ def flexible_parameter_update(client, server_name, configuration_name, resource_
     except HttpResponseError as e:
         if parameter_value is None and parameter_source is None:
             raise CLIError('Unable to get default parameter value: {}.'.format(str(e)))
-        else:
-            raise CLIError(str(e))
+        raise CLIError(str(e))
 
     parameters = postgresql_flexibleservers.models.Configuration(
         value=parameter_value,
