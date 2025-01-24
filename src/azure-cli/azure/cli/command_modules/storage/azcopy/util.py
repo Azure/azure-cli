@@ -254,8 +254,7 @@ def _verify_url(url):
         response = urlopen(url)
         if response.code == 200:
             return response.url
-        else:
-            return None
-    except (HTTPError, URLError) as e:
+        return None
+    except (HTTPError, URLError):
         logger.warning('There is an error downloading from the url: %s', url)
         return None
