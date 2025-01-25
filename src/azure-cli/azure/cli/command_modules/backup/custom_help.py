@@ -684,7 +684,7 @@ def validate_update_policy_request(existing_policy, new_policy, yes=False):
         and hasattr(new_policy.properties, 'retention_policy')
         and new_policy.properties.retention_policy is not None
     )
-   
+
     snapshot_to_vault = (
         new_backup_management_type.lower() == 'azurestorage'
         and hasattr(existing_policy.properties, 'retention_policy')
