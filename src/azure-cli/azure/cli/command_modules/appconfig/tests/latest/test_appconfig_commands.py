@@ -595,7 +595,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
 
         self.kwargs.update({
             'value': entry_value,
-            'timestamp': _format_datetime(deleted_time)
+            'timestamp': deleted_time
         })
 
         credential_list = self.cmd(
@@ -3593,15 +3593,6 @@ def _setup_key_vault(test, kwargs):
     test.cmd('keyvault set-policy -n {keyvault_name} --key-permissions get wrapKey unwrapKey --object-id {identity_id}')
 
     return key_vault
-
-
-def _format_datetime(date_string):
-    from dateutil.parser import parse
-    try:
-        return parse(date_string).strftime("%Y-%m-%dT%H:%M:%SZ")
-    except ValueError:
-        print("Unable to parse date_string '%s'", date_string)
-        return date_string or ' '
 
 
 class CredentialResponseSanitizer(RecordingProcessor):
