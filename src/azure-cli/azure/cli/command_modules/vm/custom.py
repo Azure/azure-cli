@@ -3210,7 +3210,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 public_ip_address_type=None, storage_profile=None,
                 single_placement_group=None, custom_data=None, secrets=None, platform_fault_domain_count=None,
                 plan_name=None, plan_product=None, plan_publisher=None, plan_promotion_code=None, license_type=None,
-                assign_identity=None, identity_scope=None, identity_role=None,
+                assign_identity=None, identity_scope=None, identity_role=None, encryption_identity=None,
                 identity_role_id=None, zones=None, priority=None, eviction_policy=None,
                 application_security_groups=None, ultra_ssd_enabled=None,
                 ephemeral_os_disk=None, ephemeral_os_disk_placement=None,
@@ -3572,6 +3572,30 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 role_assignment_guid = str(_gen_guid())
                 master_template.add_resource(build_msi_role_assignment(vmss_name, vmss_id, identity_role_id,
                                                                        role_assignment_guid, identity_scope, False))
+        if encryption_identity:
+            if 'identity' in vmss_resource and 'userAssignedIdentities' in vmss_resource['identity'] \
+                and encryption_identity.lower() in \
+                    (k.lower() for k in vmss_resource['identity']['userAssignedIdentities'].keys()):
+
+                if 'virtualMachineProfile' not in vmss_resource['properties']:
+                    vmss_resource['properties']['virtualMachineProfile'] = {}
+                if 'securityProfile' not in vmss_resource['properties']['virtualMachineProfile']:
+                    vmss_resource['properties']['virtualMachineProfile']['securityProfile'] = {}
+                if 'encryptionIdentity' not in vmss_resource['properties']['virtualMachineProfile']['securityProfile']:
+                    vmss_resource['properties']['virtualMachineProfile']['securityProfile']['encryptionIdentity'] = {}
+
+                vmss_securityProfile_EncryptionIdentity \
+                    = vmss_resource['properties']['virtualMachineProfile']['securityProfile']['encryptionIdentity']
+
+                if 'userAssignedIdentityResourceId' not in vmss_securityProfile_EncryptionIdentity or \
+                        vmss_securityProfile_EncryptionIdentity['userAssignedIdentityResourceId'] \
+                        != encryption_identity:
+                    vmss_securityProfile_EncryptionIdentity['userAssignedIdentityResourceId'] = encryption_identity
+                    vmss_resource['properties']['virtualMachineProfile']['securityProfile']['encryptionIdentity'] \
+                        = vmss_securityProfile_EncryptionIdentity
+            else:
+                raise ArgumentUsageError("Encryption Identity should be an ARM Resource ID of one of the "
+                                         "user assigned identities associated to the resource")
     else:
         raise CLIError('usage error: --orchestration-mode (Uniform | Flexible)')
 
