@@ -306,7 +306,7 @@ def list_recovery_points(cmd, client, resource_group_name, vault_name, item, sta
                 rp_tier = 'VaultStandard'
             else:
                 logger.warning(
-                    "Warning: Unrecognized Recovery Point tier received." 
+                    "Warning: Unrecognized Recovery Point tier received."
                     "If you see this message, please contact Microsoft Support."
                     "The recognized tiers for AzureFileShare are: 'Snapshot', 'VaultStandard', or "
                     "'SnapshotAndVaultStandard'."
