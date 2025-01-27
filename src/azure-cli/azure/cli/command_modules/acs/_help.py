@@ -1671,10 +1671,9 @@ parameters:
   - name: --ignore-pdb
     type: bool
     short-summary: Delete an existing nodepool without considering Pod Disruption Budget.
-
 examples:
-    - name: Delete an agent pool with ignore-pdb
-      text: az aks nodepool delete --resource-group MyResourceGroup --cluster-name MyManagedCluster --name nodepool1 --if-match etag --ignore-pdb
+  - name: Delete an agent pool with ignore-pdb
+    text: az aks nodepool delete --resource-group MyResourceGroup --cluster-name MyManagedCluster --name nodepool1 --if-match etag --ignore-pdb
 """
 
 helps['aks nodepool get-upgrades'] = """
