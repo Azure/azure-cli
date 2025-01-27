@@ -40,6 +40,7 @@ def __read_kv_from_config_store(
     azconfig_client,
     key=None,
     label=None,
+    tags=None,
     snapshot=None,
     datetime=None,
     fields=None,
@@ -58,7 +59,6 @@ def __read_kv_from_config_store(
     # In list, restore & list_revision commands, we treat missing --label as all labels
 
     label = prep_label_filter_for_url_encoding(label)
-    tags = format_tags_filter(tags)
 
     query_fields = []
     if fields:
@@ -88,6 +88,7 @@ def __read_kv_from_config_store(
             configsetting_iterable = azconfig_client.list_configuration_settings(
                 key_filter=key,
                 label_filter=label,
+                tags_filter=tags,
                 accept_datetime=datetime,
                 fields=query_fields,
                 headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id},
@@ -154,6 +155,7 @@ def __write_kv_and_features_to_config_store(
     azconfig_client,
     key_values,
     features=None,
+    tags=None,
     label=None,
     preserve_labels=False,
     content_type=None,
@@ -167,8 +169,6 @@ def __write_kv_and_features_to_config_store(
     if features:
         key_values.extend(__convert_featureflag_list_to_keyvalue_list(features))
 
-    logger.warning(tags)
-    breakpoint()
     for kv in key_values:
         set_kv = convert_keyvalue_to_configurationsetting(kv)
         if not preserve_labels:

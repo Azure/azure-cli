@@ -52,7 +52,7 @@ from ._constants import (FeatureFlagConstants, KeyVaultConstants,
                          JsonDiff, ImportMode)
 from ._featuremodels import map_keyvalue_to_featureflag
 from ._models import (convert_configurationsetting_to_keyvalue, convert_keyvalue_to_configurationsetting)
-from ._utils import format_tags_filter, get_appconfig_data_client, prep_label_filter_for_url_encoding, resolve_store_metadata, get_store_endpoint_from_connection_string, is_json_content_type
+from ._utils import get_appconfig_data_client, prep_label_filter_for_url_encoding, resolve_store_metadata, get_store_endpoint_from_connection_string, is_json_content_type
 
 from ._diff_utils import print_preview, KVComparer
 from .feature import __list_features
@@ -302,8 +302,6 @@ def export_config(cmd,
     format_ = format_.lower() if format_ else None
     naming_convention = naming_convention.lower()
 
-    logger.warning(tags)
-    logger.warning(dest_tags)
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     # generate correlation_request_id for bulk operation
@@ -924,7 +922,6 @@ def list_revision(cmd,
     key = key if key else SearchFilterOptions.ANY_KEY
     label = label if label else SearchFilterOptions.ANY_LABEL
     label = prep_label_filter_for_url_encoding(label)
-    tags = format_tags_filter(tags)
 
     try:
         query_fields = None
