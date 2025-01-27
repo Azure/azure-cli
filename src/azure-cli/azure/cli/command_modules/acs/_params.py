@@ -46,7 +46,9 @@ from azure.cli.command_modules.acs._consts import (
     CONST_LOAD_BALANCER_BACKEND_POOL_TYPE_NODE_IP,
     CONST_LOAD_BALANCER_BACKEND_POOL_TYPE_NODE_IP_CONFIGURATION,
     CONST_AZURE_SERVICE_MESH_INGRESS_MODE_EXTERNAL,
-    CONST_AZURE_SERVICE_MESH_INGRESS_MODE_INTERNAL)
+    CONST_AZURE_SERVICE_MESH_INGRESS_MODE_INTERNAL,
+    CONST_NRG_LOCKDOWN_RESTRICTION_LEVEL_READONLY,
+    CONST_NRG_LOCKDOWN_RESTRICTION_LEVEL_UNRESTRICTED)
 from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
     CONST_ACSTOR_ALL,
     CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY,
@@ -186,6 +188,11 @@ gpu_instance_profiles = [
     CONST_GPU_INSTANCE_PROFILE_MIG7_G,
 ]
 
+nrg_lockdown_restriction_levels = [
+    CONST_NRG_LOCKDOWN_RESTRICTION_LEVEL_READONLY,
+    CONST_NRG_LOCKDOWN_RESTRICTION_LEVEL_UNRESTRICTED,
+]
+
 # consts for maintenance configuration
 schedule_types = [
     CONST_DAILY_MAINTENANCE_SCHEDULE,
@@ -306,6 +313,7 @@ def load_arguments(self, _):
         c.argument('load_balancer_outbound_ports', type=int, validator=validate_load_balancer_outbound_ports)
         c.argument('load_balancer_idle_timeout', type=int, validator=validate_load_balancer_idle_timeout)
         c.argument('load_balancer_backend_pool_type', arg_type=get_enum_type(backend_pool_types))
+        c.argument('nrg_lockdown_restriction_level', arg_type=get_enum_type(nrg_lockdown_restriction_levels))
         c.argument('nat_gateway_managed_outbound_ip_count', type=int, validator=validate_nat_gateway_managed_outbound_ip_count)
         c.argument('nat_gateway_idle_timeout', type=int, validator=validate_nat_gateway_idle_timeout)
         c.argument('outbound_type', arg_type=get_enum_type(outbound_types))
@@ -464,11 +472,18 @@ def load_arguments(self, _):
         c.argument('enable_cost_analysis', action='store_true')
         c.argument('enable_vtpm', action="store_true")
         c.argument('enable_secure_boot', action="store_true")
+        # advanced networking
+        c.argument('enable_acns', action='store_true')
+        c.argument('disable_acns_observability', action='store_true')
+        c.argument('disable_acns_security', action='store_true')
+        c.argument("if_match")
+        c.argument("if_none_match")
 
     with self.argument_context('aks update') as c:
         # managed cluster paramerters
         c.argument('disable_local_accounts', action='store_true')
         c.argument('enable_local_accounts', action='store_true')
+        c.argument('ip_families')
         c.argument('load_balancer_managed_outbound_ip_count', type=int)
         c.argument('load_balancer_managed_outbound_ipv6_count', type=int)
         c.argument('load_balancer_outbound_ips', validator=validate_load_balancer_outbound_ips)
@@ -476,6 +491,7 @@ def load_arguments(self, _):
         c.argument('load_balancer_outbound_ports', type=int, validator=validate_load_balancer_outbound_ports)
         c.argument('load_balancer_idle_timeout', type=int, validator=validate_load_balancer_idle_timeout)
         c.argument('load_balancer_backend_pool_type', arg_type=get_enum_type(backend_pool_types))
+        c.argument('nrg_lockdown_restriction_level', arg_type=get_enum_type(nrg_lockdown_restriction_levels))
         c.argument('nat_gateway_managed_outbound_ip_count', type=int, validator=validate_nat_gateway_managed_outbound_ip_count)
         c.argument('nat_gateway_idle_timeout', type=int, validator=validate_nat_gateway_idle_timeout)
         c.argument('network_dataplane', arg_type=get_enum_type(network_dataplanes))
@@ -487,6 +503,11 @@ def load_arguments(self, _):
                    help="Comma-separated list of key=value pairs for configuring cluster autoscaler. Pass an empty string to clear the profile.")
         c.argument('tier', arg_type=get_enum_type(sku_tiers), validator=validate_sku_tier)
         c.argument('api_server_authorized_ip_ranges', validator=validate_ip_ranges)
+        # advanced networking
+        c.argument('enable_acns', action='store_true')
+        c.argument('disable_acns', action='store_true')
+        c.argument('disable_acns_observability', action='store_true')
+        c.argument('disable_acns_security', action='store_true')
         # private cluster parameters
         c.argument('enable_public_fqdn', action='store_true')
         c.argument('disable_public_fqdn', action='store_true')
@@ -610,6 +631,8 @@ def load_arguments(self, _):
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
         c.argument('enable_cost_analysis', action='store_true')
         c.argument('disable_cost_analysis', action='store_true')
+        c.argument("if_match")
+        c.argument("if_none_match")
 
     with self.argument_context('aks disable-addons', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('addons', options_list=['--addons', '-a'])
@@ -763,6 +786,8 @@ def load_arguments(self, _):
                    help='space-separated tags: key[=value] [key[=value] ...].')
         c.argument('enable_vtpm', action='store_true')
         c.argument('enable_secure_boot', action='store_true')
+        c.argument("if_match")
+        c.argument("if_none_match")
 
     with self.argument_context('aks nodepool update', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='agent_pools') as c:
         c.argument('enable_cluster_autoscaler', options_list=[
@@ -790,6 +815,8 @@ def load_arguments(self, _):
         c.argument('disable_vtpm', action='store_true')
         c.argument('enable_secure_boot', action='store_true')
         c.argument('disable_secure_boot', action='store_true')
+        c.argument("if_match")
+        c.argument("if_none_match")
 
     with self.argument_context('aks nodepool upgrade') as c:
         c.argument('max_surge', validator=validate_max_surge)

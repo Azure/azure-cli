@@ -90,7 +90,7 @@ def acr_agentpool_delete(cmd,
     try:
         response = client.begin_delete(resource_group_name=resource_group_name,
                                        registry_name=registry_name,
-                                       agent_pool_name=agent_pool_name).result()
+                                       agent_pool_name=agent_pool_name)
 
         if no_wait:
             logger.warning("Started to delete the agent pool '%s': %s", agent_pool_name, response.status())

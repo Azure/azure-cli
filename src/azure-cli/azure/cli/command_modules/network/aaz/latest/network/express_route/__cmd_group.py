@@ -17,7 +17,7 @@ from azure.cli.core.aaz import *
 class __CMDGroup(AAZCommandGroup):
     """Manage dedicated private network fiber connections to Azure.
 
-    To learn more about ExpressRoute circuits visit https://docs.microsoft.com/azure/expressroute/howto-circuit-cli.
+    To learn more about ExpressRoute circuits visit https://learn.microsoft.com/azure/expressroute/howto-circuit-cli.
     """
     pass
 

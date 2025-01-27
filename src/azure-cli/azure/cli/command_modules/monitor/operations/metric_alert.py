@@ -128,7 +128,7 @@ class MetricsAlertUpdate(_MetricsAlertUpdate):
             help="Add a condition which triggers the rule.\n\n"
                  "Usage: --add-condition {avg,min,max,total,count} [NAMESPACE.]METRIC\n"
                  "[{=,!=,>,>=,<,<=} THRESHOLD]\n"
-                 "[{<,>,><} dynamic SENSITIVITY VIOLATIONS of EVALUATIONS [since DATETIME]]\n"
+                 "[{>,><,<} dynamic SENSITIVITY VIOLATIONS of EVALUATIONS [since DATETIME]]\n"
                  "[where DIMENSION {includes,excludes} VALUE [or VALUE ...]\n"
                  "[and   DIMENSION {includes,excludes} VALUE [or VALUE ...] ...]]\n\n"
                  "Sensitivity can be 'low', 'medium', 'high'.\n\n"

@@ -3,6 +3,16 @@
 Release History
 ===============
 
+2.68.0
+++++++
+* PREVIEW: Support managed identity on Azure Arc-enabled Linux server (#30267)
+* Drop old Track 2 SDK authentication support (#29690)
+* Resolve CVE-2024-50602 (#30533)
+
+2.67.0
+++++++
+* PREVIEW: Support managed identity on Azure Arc-enabled Windows server (#29187)
+
 2.66.0
 ++++++
 * `aaz`: Support managed identity (#29953)

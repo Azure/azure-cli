@@ -220,7 +220,7 @@ def validate_ssl_cert(namespace):
 
 def validate_dns_record_type(namespace):
     tokens = namespace.command.split(' ')
-    types = ['a', 'aaaa', 'caa', 'cname', 'ds', 'mx', 'ns', 'ptr', 'soa', 'srv', 'tlsa', 'txt']
+    types = ['a', 'aaaa', 'caa', 'cname', 'ds', 'mx', 'naptr', 'ns', 'ptr', 'soa', 'srv', 'tlsa', 'txt']
     for token in tokens:
         if token in types:
             if hasattr(namespace, 'record_type'):
@@ -491,7 +491,7 @@ def get_servers_validator(camel_case=False):
             try:
                 socket.inet_aton(item)  # pylint:disable=no-member
                 servers.append({'ipAddress' if camel_case else 'ip_address': item})
-            except socket.error:  # pylint:disable=no-member
+            except OSError:  # pylint:disable=no-member
                 servers.append({'fqdn': item})
         namespace.servers = servers if servers else None
 
@@ -614,6 +614,23 @@ def _validate_cert(namespace, param_name):
     attr = getattr(namespace, param_name)
     if attr and os.path.isfile(attr):
         setattr(namespace, param_name, read_base_64_file(attr))
+
+
+def auto_scale_config_validator(namespace):
+    # see VirtualRouterAutoScaleConfiguration properties in swagger
+    config_props = ['min-capacity']
+
+    def _parse(item):
+        prop, value = item.split('=', 1)
+        if prop not in config_props:
+            raise ValidationError(f"Invalid property '{prop}' in auto-scale-config. Supported: {config_props}")
+        return {prop: value} if value else {prop: ""}
+
+    if isinstance(namespace.auto_scale_config, list):
+        auto_scale_config = {}
+        for item in namespace.auto_scale_config:
+            auto_scale_config.update(_parse(item))
+        namespace.auto_scale_config = auto_scale_config
 
 
 def process_vpn_connection_create_namespace(cmd, namespace):

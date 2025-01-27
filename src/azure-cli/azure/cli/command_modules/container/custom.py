@@ -1003,10 +1003,16 @@ def _start_exec_pipe_windows(web_socket_uri, password):
 
 def _start_exec_pipe_linux(web_socket_uri, password):
     stdin_fd = sys.stdin.fileno()
-    old_tty = termios.tcgetattr(stdin_fd)
+    try:
+        old_tty = termios.tcgetattr(stdin_fd)
+        has_tty = True
+    except termios.error:
+        old_tty = None
+        has_tty = False
     old_winch_handler = signal.getsignal(signal.SIGWINCH)
-    tty.setraw(stdin_fd)
-    tty.setcbreak(stdin_fd)
+    if has_tty:
+        tty.setraw(stdin_fd)
+        tty.setcbreak(stdin_fd)
     buff = bytearray()
     lock = threading.Lock()
 
@@ -1018,7 +1024,8 @@ def _start_exec_pipe_linux(web_socket_uri, password):
         flushKeyboard.start()
     ws = websocket.WebSocketApp(web_socket_uri, on_open=_on_ws_open_linux, on_message=_on_ws_msg)
     ws.run_forever()
-    termios.tcsetattr(stdin_fd, termios.TCSADRAIN, old_tty)
+    if has_tty:
+        termios.tcsetattr(stdin_fd, termios.TCSADRAIN, old_tty)
     signal.signal(signal.SIGWINCH, old_winch_handler)
 
 
@@ -1054,7 +1061,7 @@ def _flush_stdin(ws, buff, lock):
             buff.clear()
             lock.release()
             ws.send(x, opcode=0x2)  # OPCODE_BINARY = 0x2
-        except (OSError, IOError, websocket.WebSocketConnectionClosedException) as e:
+        except (OSError, websocket.WebSocketConnectionClosedException) as e:
             if isinstance(e, websocket.WebSocketConnectionClosedException):
                 pass
             elif e.errno == 9:  # [Errno 9] Bad file descriptor

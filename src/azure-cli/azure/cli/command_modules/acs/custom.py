@@ -68,7 +68,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_AZURE_SERVICE_MESH_MODE_ISTIO,
     CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM,
 )
-
+from azure.cli.command_modules.acs._polling import RunCommandLocationPolling
 from azure.cli.command_modules.acs._helpers import get_snapshot_by_snapshot_id, check_is_private_link_cluster
 from azure.cli.command_modules.acs._resourcegroup import get_rg_location
 from azure.cli.command_modules.acs._validators import extract_comma_separated_string
@@ -92,12 +92,15 @@ from azure.cli.core.azclierror import (
     ValidationError,
     RequiredArgumentMissingError,
 )
+from azure.cli.core.cloud import get_active_cloud
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.profiles import ResourceType
+from azure.mgmt.core.polling.arm_polling import ARMPolling
 from azure.cli.core.util import in_cloud_console, sdk_no_wait
 from azure.core.exceptions import ResourceNotFoundError as ResourceNotFoundErrorAzCore
 from azure.mgmt.containerservice.models import KubernetesSupportPlan
+from humanfriendly.terminal.spinners import Spinner
 from knack.log import get_logger
 from knack.prompting import NoTTYException, prompt_y_n
 from knack.util import CLIError
@@ -215,7 +218,7 @@ def _aks_browse(
             raise ResourceNotFoundError('Could not find dashboard pod: {} Command output: {}'.format(err, err.output))
         if dashboard_pod:
             # remove any "pods/" or "pod/" prefix from the name
-            dashboard_pod = str(dashboard_pod).split('/')[-1].strip()
+            dashboard_pod = str(dashboard_pod).rsplit('/', maxsplit=1)[-1].strip()
         else:
             raise ResourceNotFoundError("Couldn't find the Kubernetes dashboard pod.")
 
@@ -239,7 +242,7 @@ def _aks_browse(
                 stderr=subprocess.STDOUT,
             )
             # output format: "'{port}'"
-            dashboard_port = int((dashboard_port.replace("'", "")))
+            dashboard_port = int(dashboard_port.replace("'", ""))
         except subprocess.CalledProcessError as err:
             raise ResourceNotFoundError('Could not find dashboard port: {} Command output: {}'.format(err, err.output))
 
@@ -460,7 +463,7 @@ def wait_then_open(url):
     """
     for _ in range(1, 10):
         try:
-            urlopen(url, context=_ssl_context())
+            _urlopen_read(url)
         except URLError:
             time.sleep(1)
         break
@@ -471,7 +474,7 @@ def wait_then_open_async(url):
     """
     Spawns a thread that waits for a bit then opens a URL.
     """
-    t = threading.Thread(target=wait_then_open, args=({url}))
+    t = threading.Thread(target=wait_then_open, args=(url,))
     t.daemon = True
     t.start()
 
@@ -544,6 +547,7 @@ def aks_create(
     attach_acr=None,
     skip_subnet_role_assignment=False,
     node_resource_group=None,
+    nrg_lockdown_restriction_level=None,
     k8s_support_plan=None,
     enable_defender=False,
     defender_config=None,
@@ -560,6 +564,10 @@ def aks_create(
     image_cleaner_interval_hours=None,
     enable_keda=False,
     enable_vpa=False,
+    # advanced networking
+    enable_acns=None,
+    disable_acns_observability=None,
+    disable_acns_security=None,
     # addons
     enable_addons=None,
     workspace_resource_id=None,
@@ -634,6 +642,8 @@ def aks_create(
     no_wait=False,
     aks_custom_headers=None,
     node_public_ip_tags=None,
+    if_match=None,
+    if_none_match=None,
     # metrics profile
     enable_cost_analysis=False,
     # trusted launch
@@ -683,6 +693,7 @@ def aks_update(
     tags=None,
     disable_local_accounts=False,
     enable_local_accounts=False,
+    ip_families=None,
     network_plugin=None,
     network_plugin_mode=None,
     network_dataplane=None,
@@ -725,6 +736,7 @@ def aks_update(
     disable_windows_gmsa=False,
     attach_acr=None,
     detach_acr=None,
+    nrg_lockdown_restriction_level=None,
     enable_defender=False,
     disable_defender=False,
     defender_config=None,
@@ -754,6 +766,11 @@ def aks_update(
     enable_force_upgrade=False,
     disable_force_upgrade=False,
     upgrade_override_until=None,
+    # advanced networking
+    disable_acns=None,
+    enable_acns=None,
+    disable_acns_observability=None,
+    disable_acns_security=None,
     # addons
     enable_secret_rotation=False,
     disable_secret_rotation=False,
@@ -788,6 +805,8 @@ def aks_update(
     yes=False,
     no_wait=False,
     aks_custom_headers=None,
+    if_match=None,
+    if_none_match=None,
     # metrics profile
     enable_cost_analysis=False,
     disable_cost_analysis=False,
@@ -826,7 +845,9 @@ def aks_upgrade(cmd,
                 upgrade_override_until=None,
                 tier=None,
                 k8s_support_plan=None,
-                yes=False):
+                yes=False,
+                if_match=None,
+                if_none_match=None):
     msg = 'Kubernetes may be unavailable during cluster upgrades.\n Are you sure you want to perform this operation?'
     if not yes and not prompt_y_n(msg, default="n"):
         return None
@@ -919,7 +940,11 @@ def aks_upgrade(cmd,
     # null out the SP profile because otherwise validation complains
     instance.service_principal_profile = None
 
-    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance)
+    active_cloud = get_active_cloud(cmd.cli_ctx)
+    if active_cloud.profile != "latest":
+        return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance)
+
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance, if_match=if_match, if_none_match=if_none_match)
 
 
 def _update_upgrade_settings(cmd, instance,
@@ -1460,7 +1485,7 @@ def load_kubernetes_configuration(filename):
     try:
         with open(filename) as stream:
             return yaml.safe_load(stream)
-    except (IOError, OSError) as ex:
+    except OSError as ex:
         if getattr(ex, 'errno', 0) == errno.ENOENT:
             raise CLIError('{} does not exist'.format(filename))
         raise
@@ -1874,7 +1899,7 @@ def k8s_install_kubectl(cmd, client_version='latest', install_location=None, sou
     if client_version == 'latest':
         latest_version_url = source_url + '/stable.txt'
         logger.warning('No version specified, will get the latest version of kubectl from "%s"', latest_version_url)
-        version = urlopen(source_url + '/stable.txt', context=_ssl_context()).read()
+        version = _urlopen_read(source_url + '/stable.txt')
         client_version = version.decode('UTF-8').strip()
     else:
         client_version = "v%s" % client_version
@@ -1911,7 +1936,7 @@ def k8s_install_kubectl(cmd, client_version='latest', install_location=None, sou
         _urlretrieve(file_url, install_location)
         os.chmod(install_location,
                  os.stat(install_location).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
-    except IOError as ex:
+    except OSError as ex:
         raise CLIError(
             'Connection error while attempting to download client ({})'.format(ex))
 
@@ -1940,7 +1965,7 @@ def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, s
         if cloud_name.lower() == 'azurechinacloud':
             latest_release_url = 'https://mirror.azure.cn/kubernetes/kubelogin/latest'
         logger.warning('No version specified, will get the latest version of kubelogin from "%s"', latest_release_url)
-        latest_release = urlopen(latest_release_url, context=_ssl_context()).read()
+        latest_release = _urlopen_read(latest_release_url)
         client_version = json.loads(latest_release)['tag_name'].strip()
     else:
         client_version = "v%s" % client_version
@@ -1975,7 +2000,7 @@ def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, s
             logger.warning('Downloading client to "%s" from "%s"',
                            download_path, file_url)
             _urlretrieve(file_url, download_path)
-        except IOError as ex:
+        except OSError as ex:
             raise CLIError(
                 'Connection error while attempting to download client ({})'.format(ex))
         _unzip(download_path, tmp_dir)
@@ -2003,10 +2028,25 @@ def _ssl_context():
     return ssl.create_default_context()
 
 
+def _urlopen_read(url, context=None):
+    if context is None:
+        context = _ssl_context()
+    try:
+        return urlopen(url, context=context).read()
+    except URLError as ex:
+        error_msg = str(ex)
+        if "[SSL: CERTIFICATE_VERIFY_FAILED]" in error_msg and "unable to get local issuer certificate" in error_msg:
+            raise ClientRequestError(
+                "SSL certificate verification failed. Please ensure that the python interpreter used by azure-cli uses "
+                "the appropriate cert store when making requests. For more details, please refer to "
+                "https://github.com/Azure/azure-cli/issues/19305"
+            )
+        raise ex
+
+
 def _urlretrieve(url, filename):
-    req = urlopen(url, context=_ssl_context())
     with open(filename, "wb") as f:
-        f.write(req.read())
+        f.write(_urlopen_read(url))
 
 
 def _unzip(src, dest):
@@ -2034,6 +2074,7 @@ def aks_runcommand(cmd, client, resource_group_name, name, command_string="", co
 
     if not command_string:
         raise ValidationError('Command cannot be empty.')
+
     RunCommandRequest = cmd.get_models('RunCommandRequest', resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                        operation_group='managed_clusters')
     request_payload = RunCommandRequest(command=command_string)
@@ -2046,8 +2087,15 @@ def aks_runcommand(cmd, client, resource_group_name, name, command_string="", co
         request_payload.cluster_token = _get_dataplane_aad_token(
             cmd.cli_ctx, "6dae42f8-4368-4678-94ff-3960e28e3630")
 
+    polling_interval = 5
+    retry_total = 0
+
     command_result_poller = sdk_no_wait(
-        no_wait, client.begin_run_command, resource_group_name, name, request_payload, polling_interval=5, retry_total=0
+        no_wait, client.begin_run_command, resource_group_name, name, request_payload,
+        # NOTE: Note sure if retry_total is used in ARMPolling
+        polling=ARMPolling(polling_interval, lro_options={"final-state-via": "location"}, lro_algorithms=[RunCommandLocationPolling()], retry_total=retry_total),
+        polling_interval=polling_interval,
+        retry_total=retry_total
     )
     if no_wait:
         # pylint: disable=protected-access
@@ -2058,7 +2106,22 @@ def aks_runcommand(cmd, client, resource_group_name, name, command_string="", co
         command_id = command_id_regex.findall(command_result_polling_url)[0]
         _aks_command_result_in_progess_helper(client, resource_group_name, name, command_id)
         return
-    return _print_command_result(cmd.cli_ctx, command_result_poller.result(300))
+
+    spinner = Spinner(label='Running', stream=sys.stderr, hide_cursor=False)
+    progress_controller = cmd.cli_ctx.get_progress_controller(det=False, spinner=spinner)
+
+    now = datetime.datetime.now()
+    progress_controller.begin()
+    while not command_result_poller.done():
+        if datetime.datetime.now() - now >= datetime.timedelta(seconds=300):
+            break
+
+        progress_controller.add(message=command_result_poller.status())
+        progress_controller.update()
+        time.sleep(0.5)
+
+    progress_controller.end()
+    return _print_command_result(cmd.cli_ctx, command_result_poller.result(timeout=0))
 
 
 def aks_command_result(cmd, client, resource_group_name, name, command_id=""):
@@ -2115,7 +2178,7 @@ def _print_command_result(cli_ctx, commandResult):
         return
 
     # *-ing state
-    print(f"{colorama.Fore.BLUE}command is in {commandResult.provisioning_state} state{colorama.Style.RESET_ALL}")
+    print(f"{colorama.Fore.BLUE}command (id: {commandResult.id}) is in {commandResult.provisioning_state} state{colorama.Style.RESET_ALL}")
     return
 
 
@@ -2339,6 +2402,9 @@ def aks_agentpool_add(
     # trusted launch
     enable_vtpm=False,
     enable_secure_boot=False,
+    # etag headers
+    if_match=None,
+    if_none_match=None,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -2394,6 +2460,9 @@ def aks_agentpool_update(
     disable_vtpm=False,
     enable_secure_boot=False,
     disable_secure_boot=False,
+    # etag headers
+    if_match=None,
+    if_none_match=None,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -2432,7 +2501,9 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
                           snapshot_id=None,
                           no_wait=False,
                           aks_custom_headers=None,
-                          yes=False):
+                          yes=False,
+                          if_match=None,
+                          if_none_match=None):
     AgentPoolUpgradeSettings = cmd.get_models(
         "AgentPoolUpgradeSettings",
         resource_type=ResourceType.MGMT_CONTAINERSERVICE,
@@ -2519,6 +2590,8 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
         nodepool_name,
         instance,
         headers=aks_custom_headers,
+        if_match=if_match,
+        if_none_match=if_none_match,
     )
 
 

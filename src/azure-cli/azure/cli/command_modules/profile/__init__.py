@@ -18,7 +18,7 @@ cloud_resource_types = ["oss-rdbms", "arm", "aad-graph", "ms-graph", "batch", "m
 class ProfileCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
-        super(ProfileCommandsLoader, self).__init__(cli_ctx=cli_ctx)
+        super().__init__(cli_ctx=cli_ctx)
 
     def load_command_table(self, args):
 
@@ -75,6 +75,12 @@ class ProfileCommandsLoader(AzCommandsLoader):
             # Managed identity
             c.argument('identity', options_list=('-i', '--identity'), action='store_true',
                        help="Log in using managed identity", arg_group='Managed Identity')
+            c.argument('client_id',
+                       help="Client ID of the user-assigned managed identity", arg_group='Managed Identity')
+            c.argument('object_id',
+                       help="Object ID of the user-assigned managed identity", arg_group='Managed Identity')
+            c.argument('resource_id',
+                       help="Resource ID of the user-assigned managed identity", arg_group='Managed Identity')
 
         with self.argument_context('logout') as c:
             c.argument('username', help='account user, if missing, logout the current active account')

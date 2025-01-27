@@ -7,10 +7,7 @@
 
 import os
 
-try:
-    from urllib.parse import urlparse
-except ImportError:
-    from urlparse import urlparse  # pylint: disable=import-error
+from urllib.parse import urlparse
 
 from knack.log import get_logger
 from knack.util import CLIError
@@ -1112,7 +1109,7 @@ def _validate_vm_nic_delete_option(namespace):
     if not namespace.nics and namespace.nic_delete_option:
         if len(namespace.nic_delete_option) == 1 and len(namespace.nic_delete_option[0].split('=')) == 1:  # pylint: disable=line-too-long
             namespace.nic_delete_option = namespace.nic_delete_option[0]
-        elif len(namespace.nic_delete_option) > 1 or any((len(delete_option.split('=')) > 1 for delete_option in namespace.nic_delete_option)):  # pylint: disable=line-too-long
+        elif len(namespace.nic_delete_option) > 1 or any(len(delete_option.split('=')) > 1 for delete_option in namespace.nic_delete_option):  # pylint: disable=line-too-long
             from azure.cli.core.parser import InvalidArgumentValueError
             raise InvalidArgumentValueError("incorrect usage: Cannot specify individual delete option when no nic is "
                                             "specified. Either specify a list of nics and their delete option like: "
@@ -1194,7 +1191,7 @@ def _validate_admin_username(username, os_type):
     import re
     if not username:
         raise CLIError("admin user name can not be empty")
-    is_linux = (os_type.lower() == 'linux')
+    is_linux = os_type.lower() == 'linux'
     # pylint: disable=line-too-long
     pattern = (r'[\\\/"\[\]:|<>+=;,?*@#()!A-Z]+' if is_linux else r'[\\\/"\[\]:|<>+=;,?*@]+')
     linux_err = r'admin user name cannot contain upper case character A-Z, special characters \/"[]:|<>+=;,?*@#()! or start with $ or -'
@@ -1212,7 +1209,7 @@ def _validate_admin_username(username, os_type):
 
 def _validate_admin_password(password, os_type):
     import re
-    is_linux = (os_type.lower() == 'linux')
+    is_linux = os_type.lower() == 'linux'
     max_length = 72 if is_linux else 123
     min_length = 12
 
@@ -2179,9 +2176,9 @@ def process_assign_identity_namespace(cmd, namespace):
 def process_remove_identity_namespace(cmd, namespace):
     if namespace.identities:
         from ._vm_utils import MSI_LOCAL_ID
-        for i in range(len(namespace.identities)):
-            if namespace.identities[i] != MSI_LOCAL_ID:
-                namespace.identities[i] = _get_resource_id(cmd.cli_ctx, namespace.identities[i],
+        for i, identity in enumerate(namespace.identities):
+            if identity != MSI_LOCAL_ID:
+                namespace.identities[i] = _get_resource_id(cmd.cli_ctx, identity,
                                                            namespace.resource_group_name,
                                                            'userAssignedIdentities',
                                                            'Microsoft.ManagedIdentity')
@@ -2193,10 +2190,6 @@ def process_set_applications_namespace(cmd, namespace):  # pylint: disable=unuse
 
 def process_gallery_image_version_namespace(cmd, namespace):
     from azure.cli.core.azclierror import InvalidArgumentValueError
-    TargetRegion, EncryptionImages, OSDiskImageEncryption, DataDiskImageEncryption, \
-        ConfidentialVMEncryptionType, GalleryTargetExtendedLocation, GalleryExtendedLocation = cmd.get_models(
-            'TargetRegion', 'EncryptionImages', 'OSDiskImageEncryption', 'DataDiskImageEncryption',
-            'ConfidentialVMEncryptionType', 'GalleryTargetExtendedLocation', 'GalleryExtendedLocation')
 
     if namespace.target_regions:
         if hasattr(namespace, 'target_region_encryption') and namespace.target_region_encryption:
@@ -2205,7 +2198,6 @@ def process_gallery_image_version_namespace(cmd, namespace):
                     'usage error: Length of --target-region-encryption should be as same as length of target regions')
 
         if hasattr(namespace, 'target_region_cvm_encryption') and namespace.target_region_cvm_encryption:
-            OSDiskImageSecurityProfile = cmd.get_models('OSDiskImageSecurityProfile')
             if len(namespace.target_regions) != len(namespace.target_region_cvm_encryption):
                 raise InvalidArgumentValueError(
                     'usage error: Length of --target_region_cvm_encryption should be as same as '
@@ -2259,7 +2251,7 @@ def process_gallery_image_version_namespace(cmd, namespace):
                     os_disk_image = None
                 else:
                     des_id = _disk_encryption_set_format(cmd, namespace, os_disk_image)
-                    os_disk_image = OSDiskImageEncryption(disk_encryption_set_id=des_id)
+                    os_disk_image = {"disk_encryption_set_id": des_id}
                 # Data disk
                 if len(terms) > 1:
                     data_disk_images = terms[1:]
@@ -2273,8 +2265,15 @@ def process_gallery_image_version_namespace(cmd, namespace):
                         lun = data_disk_images[j * 2]
                         des_id = data_disk_images[j * 2 + 1]
                         des_id = _disk_encryption_set_format(cmd, namespace, des_id)
-                        data_disk_image_encryption_list.append(DataDiskImageEncryption(
-                            lun=lun, disk_encryption_set_id=des_id))
+                        try:
+                            data_disk_image_encryption_list.append({"lun": int(lun), "disk_encryption_set_id": des_id})
+                        except:
+                            raise ArgumentUsageError(
+                                "usage error: {} is an invalid target region encryption argument. "
+                                "LUN and disk encryption set for data disk should appear in pair in "
+                                "--target-region-encryption. Example: osdes,0,datades0,1,datades1"
+                            )
+
                     data_disk_images = data_disk_image_encryption_list
 
             if hasattr(namespace, 'target_region_cvm_encryption') and namespace.target_region_cvm_encryption:
@@ -2284,7 +2283,12 @@ def process_gallery_image_version_namespace(cmd, namespace):
                         "usage error: {} is an invalid target region cvm encryption. "
                         "Both os_cvm_encryption_type and os_cvm_des parameters are required.".format(cvm_terms))
 
-                storage_profile_types = [profile_type.value for profile_type in ConfidentialVMEncryptionType]
+                storage_profile_types = [
+                    "EncryptedVMGuestStateOnlyWithPmk",
+                    "EncryptedWithPmk",
+                    "EncryptedWithCmk",
+                    "NonPersistedTPM"
+                ]
                 storage_profile_types_str = ", ".join(storage_profile_types)
                 if cvm_terms[0] not in storage_profile_types:
                     raise ArgumentUsageError(
@@ -2294,21 +2298,22 @@ def process_gallery_image_version_namespace(cmd, namespace):
                 cvm_des_id = None
                 if cvm_terms[1]:
                     cvm_des_id = _disk_encryption_set_format(cmd, namespace, cvm_terms[1])
-                security_profile = OSDiskImageSecurityProfile(confidential_vm_encryption_type=cvm_terms[0],
-                                                              secure_vm_disk_encryption_set_id=cvm_des_id)
+                security_profile = {"confidential_vm_encryption_type": cvm_terms[0],
+                                    "secure_vm_disk_encryption_set_id": cvm_des_id}
                 if os_disk_image:
-                    os_disk_image.security_profile = security_profile
+                    os_disk_image["security_profile"] = security_profile
                 else:
-                    os_disk_image = OSDiskImageEncryption(security_profile=security_profile)
+                    os_disk_image = {"security_profile": security_profile}
 
             if os_disk_image or data_disk_images:
-                encryption = EncryptionImages(os_disk_image=os_disk_image, data_disk_images=data_disk_images)
+                encryption = {"os_disk_image": os_disk_image, "data_disk_images": data_disk_images}
 
             # At least the region is specified
             if len(parts) >= 1:
-                regions_info.append(TargetRegion(name=parts[0], regional_replica_count=replica_count,
-                                                 storage_account_type=storage_account_type,
-                                                 encryption=encryption))
+                regions_info.append({"name": parts[0],
+                                     "regional_replica_count": replica_count,
+                                     "storage_account_type": storage_account_type,
+                                     "encryption": encryption})
 
         namespace.target_regions = regions_info
 
@@ -2382,7 +2387,7 @@ def process_gallery_image_version_namespace(cmd, namespace):
                     os_disk_image = None
                 else:
                     des_id = _disk_encryption_set_format(cmd, namespace, os_disk_image)
-                    os_disk_image = OSDiskImageEncryption(disk_encryption_set_id=des_id)
+                    os_disk_image = {"disk_encryption_set_id": des_id}
                 # Data disk
                 if len(terms) > 2:
                     data_disk_images = terms[2:]
@@ -2396,20 +2401,29 @@ def process_gallery_image_version_namespace(cmd, namespace):
                         lun = data_disk_images[j * 2]
                         des_id = data_disk_images[j * 2 + 1]
                         des_id = _disk_encryption_set_format(cmd, namespace, des_id)
-                        data_disk_image_encryption_list.append(DataDiskImageEncryption(
-                            lun=lun, disk_encryption_set_id=des_id))
+                        try:
+                            data_disk_image_encryption_list.append({"lun": int(lun), "disk_encryption_set_id": des_id})
+                        except:
+                            raise ArgumentUsageError(
+                                "usage error: {} is an invalid target edge zone encryption. "
+                                "LUN and disk encryption set for data disk should appear in pair in "
+                                "--target-edge-zone-encryption. Example: 1,osdes,0,datades0,1,datades1"
+                            )
                     data_disk_images = data_disk_image_encryption_list
 
             if os_disk_image or data_disk_images:
-                encryption = EncryptionImages(os_disk_image=os_disk_image, data_disk_images=data_disk_images)
+                encryption = {"os_disk_image": os_disk_image, "data_disk_images": data_disk_images}
 
-            extended_location = GalleryExtendedLocation(name=edge_zone, type='EdgeZone')
+            extended_location = {"name": edge_zone, "type": "EdgeZone"}
 
             edge_zone_info.append(
-                GalleryTargetExtendedLocation(name=region, extended_location_replica_count=replica_count,
-                                              extended_location=extended_location,
-                                              storage_account_type=storage_account_type,
-                                              encryption=encryption)
+                {
+                    "name": region,
+                    "extended_location_replica_count": replica_count,
+                    "extended_location": extended_location,
+                    "storage_account_type": storage_account_type,
+                    "encryption": encryption
+                }
             )
 
         namespace.target_edge_zones = edge_zone_info
@@ -2658,12 +2672,3 @@ def _validate_community_gallery_legal_agreement_acceptance(cmd, namespace):
     if not prompt_y_n(msg, default="y"):
         import sys
         sys.exit(0)
-
-
-def validate_secure_vm_guest_state_sas(cmd, namespace):
-    compute_client = _compute_client_factory(cmd.cli_ctx)
-    disk_info = compute_client.disks.get(namespace.resource_group_name, namespace.disk_name)
-    DiskCreateOption = cmd.get_models('DiskCreateOption')
-
-    if disk_info.creation_data and disk_info.creation_data.create_option == DiskCreateOption.upload_prepared_secure:
-        namespace.secure_vm_guest_state_sas = True

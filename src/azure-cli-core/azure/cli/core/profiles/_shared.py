@@ -16,7 +16,7 @@ logger = get_logger(__name__)
 
 class APIVersionException(Exception):
     def __init__(self, type_name, api_profile):
-        super(APIVersionException, self).__init__(type_name, api_profile)
+        super().__init__(type_name, api_profile)
         self.type_name = type_name
         self.api_profile = api_profile
 
@@ -122,6 +122,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     DATA_STORAGE_FILESHARE = ('azure.multiapi.storagev2.fileshare', None)
     DATA_STORAGE_QUEUE = ('azure.multiapi.storagev2.queue', None)
     DATA_STORAGE_TABLE = ('azure.data.tables', None)
+    DATA_BATCH = ('azure.batch', None)
 
     def __init__(self, import_prefix, client_name):
         """Constructor.

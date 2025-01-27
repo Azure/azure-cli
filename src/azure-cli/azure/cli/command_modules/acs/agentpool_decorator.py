@@ -38,6 +38,7 @@ from azure.cli.core.azclierror import (
     MutuallyExclusiveArgumentError,
     RequiredArgumentMissingError,
 )
+from azure.cli.core.cloud import get_active_cloud
 from azure.cli.core.commands import AzCliCommand
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import get_file_json, sdk_no_wait
@@ -1944,6 +1945,18 @@ class AKSAgentPoolAddDecorator:
         """
         self._ensure_agentpool(agentpool)
 
+        active_cloud = get_active_cloud(self.cmd.cli_ctx)
+        if active_cloud.profile != "latest":
+            return sdk_no_wait(
+                self.context.get_no_wait(),
+                self.client.begin_create_or_update,
+                self.context.get_resource_group_name(),
+                self.context.get_cluster_name(),
+                self.context._get_nodepool_name(enable_validation=False),
+                agentpool,
+                headers=self.context.get_aks_custom_headers(),
+            )
+
         return sdk_no_wait(
             self.context.get_no_wait(),
             self.client.begin_create_or_update,
@@ -1952,6 +1965,8 @@ class AKSAgentPoolAddDecorator:
             # validated in "init_agentpool", skip to avoid duplicate api calls
             self.context._get_nodepool_name(enable_validation=False),
             agentpool,
+            if_match=self.context.get_if_match(),
+            if_none_match=self.context.get_if_none_match(),
             headers=self.context.get_aks_custom_headers(),
         )
 
@@ -2249,6 +2264,18 @@ class AKSAgentPoolUpdateDecorator:
         """
         self._ensure_agentpool(agentpool)
 
+        active_cloud = get_active_cloud(self.cmd.cli_ctx)
+        if active_cloud.profile != "latest":
+            return sdk_no_wait(
+                self.context.get_no_wait(),
+                self.client.begin_create_or_update,
+                self.context.get_resource_group_name(),
+                self.context.get_cluster_name(),
+                self.context.get_nodepool_name(),
+                agentpool,
+                headers=self.context.get_aks_custom_headers(),
+            )
+
         return sdk_no_wait(
             self.context.get_no_wait(),
             self.client.begin_create_or_update,
@@ -2256,5 +2283,7 @@ class AKSAgentPoolUpdateDecorator:
             self.context.get_cluster_name(),
             self.context.get_nodepool_name(),
             agentpool,
+            if_match=self.context.get_if_match(),
+            if_none_match=self.context.get_if_none_match(),
             headers=self.context.get_aks_custom_headers(),
         )

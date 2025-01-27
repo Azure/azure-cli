@@ -3,12 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-
 import os
 import platform
 import subprocess
 import datetime
-import sys
 import zipfile
 import stat
 from urllib.parse import urlparse
@@ -58,17 +56,24 @@ class AzCopy:
         install_dir = os.path.dirname(install_location)
         if not os.path.exists(install_dir):
             os.makedirs(install_dir)
-        base_url = 'https://azcopyvnext.azureedge.net/release20211027/azcopy_{}_{}_{}.{}'
-
+        base_url = 'https://azcopyvnext-awgzd8g7aagqhzhe.b02.azurefd.net/release20211027/azcopy_{}_{}_{}.{}'
         if self.system == 'Windows':
             if platform.machine().endswith('64'):
                 file_url = base_url.format('windows', 'amd64', AZCOPY_VERSION, 'zip')
+                if _verify_url(file_url) is None:
+                    file_url = _verify_url('https://aka.ms/InstallAzCopyForCLIWindowsX64')
             else:
                 file_url = base_url.format('windows', '386', AZCOPY_VERSION, 'zip')
+                if _verify_url(file_url) is None:
+                    file_url = _verify_url('https://aka.ms/InstallAzCopyForCLIWindows')
         elif self.system == 'Linux':
             file_url = base_url.format('linux', 'amd64', AZCOPY_VERSION, 'tar.gz')
+            if _verify_url(file_url) is None:
+                file_url = _verify_url('https://aka.ms/InstallAzCopyForCLILinux')
         elif self.system == 'Darwin':
             file_url = base_url.format('darwin', 'amd64', AZCOPY_VERSION, 'zip')
+            if _verify_url(file_url) is None:
+                file_url = _verify_url('https://aka.ms/InstallAzCopyForCLIDarwin')
         else:
             raise CLIError('Azcopy ({}) does not exist.'.format(self.system))
         try:
@@ -76,9 +81,11 @@ class AzCopy:
             _urlretrieve(file_url, install_location)
             os.chmod(install_location,
                      os.stat(install_location).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
-        except IOError as err:
+        except OSError as err:
+            azcopy_install_guide = 'https://learn.microsoft.com/azure/storage/common/storage-use-azcopy-v10'
             raise CLIError('Connection error while attempting to download azcopy {}. You could also install the '
-                           'specified azcopy version to {} manually. ({})'.format(AZCOPY_VERSION, install_dir, err))
+                           'specified azcopy version to {} manually following the guide here: {} '
+                           '({})'.format(AZCOPY_VERSION, install_dir, azcopy_install_guide, err))
 
     def check_version(self):
         try:
@@ -94,9 +101,9 @@ class AzCopy:
     def run_command(self, args):
         args = [self.executable] + args
         args_hides = args.copy()
-        for i in range(len(args_hides)):
-            if args_hides[i].find('sig') > 0:
-                args_hides[i] = args_hides[i][0:args_hides[i].index('sig') + 4]
+        for i, v in enumerate(args_hides):
+            if v.find('sig') > 0:
+                args_hides[i] = v[0:v.index('sig') + 4]
         logger.warning("Azcopy command: %s", args_hides)
         env_kwargs = {}
         if self.creds and self.creds.tenant_id:
@@ -214,22 +221,18 @@ def _get_default_install_location():
     else:
         raise CLIError('The {} platform is not currently supported. If you want to know which platforms are supported, '
                        'please refer to the document for supported platforms: '
-                       'https://docs.microsoft.com/en-us/azure/storage/common/storage-use-azcopy-v10#download-azcopy'
+                       'https://learn.microsoft.com/en-us/azure/storage/common/storage-use-azcopy-v10#download-azcopy'
                        .format(system))
     return install_location
 
 
 def _urlretrieve(url, install_location):
     import io
+    logger.warning('Downloading AzCopy from %s', url)
     req = urlopen(url)
     compressedFile = io.BytesIO(req.read())
     if url.endswith('zip'):
-        if sys.version_info.major >= 3:
-            zip_file = zipfile.ZipFile(compressedFile)
-        else:
-            # If Python version is 2.X, use StringIO instead.
-            import StringIO  # pylint: disable=import-error
-            zip_file = zipfile.ZipFile(StringIO.StringIO(req.read()))
+        zip_file = zipfile.ZipFile(compressedFile)
         for fileName in zip_file.namelist():
             if fileName.endswith('azcopy') or fileName.endswith('azcopy.exe'):
                 with open(install_location, 'wb') as f:
@@ -243,3 +246,15 @@ def _urlretrieve(url, install_location):
                         f.write(tar.extractfile(tarinfo).read())
     else:
         raise CLIError('Invalid downloading url {}'.format(url))
+
+
+def _verify_url(url):
+    from urllib.error import HTTPError, URLError
+    try:
+        response = urlopen(url)
+        if response.code == 200:
+            return response.url
+        return None
+    except (HTTPError, URLError):
+        logger.warning('There is an error downloading from the url: %s', url)
+        return None

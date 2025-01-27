@@ -17,7 +17,7 @@ from azure.cli.core.aaz import *
 class __CMDGroup(AAZCommandGroup):
     """Manage application security groups (ASGs).
 
-    You can configure network security as a natural extension of an application's structure, ASG allows you to group virtual machines and define network security policies based on those groups. You can specify an application security group as the source and destination in a NSG security rule. For more information, visit https://docs.microsoft.com/azure/virtual-network/create-network-security-group-preview.
+    You can configure network security as a natural extension of an application's structure, ASG allows you to group virtual machines and define network security policies based on those groups. You can specify an application security group as the source and destination in a NSG security rule. For more information, visit https://learn.microsoft.com/azure/virtual-network/create-network-security-group-preview.
     """
     pass
 

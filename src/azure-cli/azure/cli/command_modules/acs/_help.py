@@ -104,7 +104,7 @@ parameters:
           - Disallowed values: "administrator", "admin", "user", "user1", "test", "user2", "test1", "user3", "admin1", "1", "123", "a", "actuser", "adm", "admin2", "aspnet", "backup", "console", "david", "guest", "john", "owner", "root", "server", "sql", "support", "support_388945a0", "sys", "test2", "test3", "user4", "user5".
           - Minimum-length: 1 character
           - Max-length: 20 characters
-      Reference: https://docs.microsoft.com/dotnet/api/microsoft.azure.management.compute.models.virtualmachinescalesetosprofile.adminusername?view=azure-dotnet
+      Reference: https://learn.microsoft.com/dotnet/api/microsoft.azure.management.compute.models.virtualmachinescalesetosprofile.adminusername?view=azure-dotnet
   - name: --windows-admin-password
     type: string
     short-summary: User account password to use on windows node VMs.
@@ -118,7 +118,7 @@ parameters:
             * Has a digit
             * Has a special character (Regex match [\\W_])
           - Disallowed values:  "abc@123", "P@$$w0rd", "P@ssw0rd", "P@ssword123", "Pa$$word", "pass@word1", "Password!", "Password1", "Password22", "iloveyou!"
-      Reference: https://docs.microsoft.com/dotnet/api/microsoft.azure.management.compute.models.virtualmachinescalesetosprofile.adminpassword?view=azure-dotnet
+      Reference: https://learn.microsoft.com/dotnet/api/microsoft.azure.management.compute.models.virtualmachinescalesetosprofile.adminpassword?view=azure-dotnet
   - name: --enable-ahub
     type: bool
     short-summary: Enable Azure Hybrid User Benefits (AHUB) for Windows VMs.
@@ -541,6 +541,25 @@ parameters:
   - name: --enable-vtpm
     type: bool
     short-summary: Enable vTPM on all node pools in the cluster. Must use VMSS agent pool type.
+  - name: --enable-acns
+    type: bool
+    short-summary: Enable advanced network functionalities on a cluster. Enabling this will incur additional costs. For non-cilium clusters, acns security will be disabled by default until further notice.
+  - name: --disable-acns-observability
+    type: bool
+    short-summary: Used to disable advanced networking observability features on a clusters when enabling advanced networking features with "--enable-acns".
+  - name: --disable-acns-security
+    type: bool
+    short-summary: Used to disable advanced networking security features on a clusters when enabling advanced networking features with "--enable-acns".
+  - name: --nrg-lockdown-restriction-level
+    type: string
+    short-summary: Restriction level on the managed node resource group.
+    long-summary: The restriction level of permissions allowed on the cluster's managed node resource group, supported values are Unrestricted, and ReadOnly (recommended ReadOnly).
+  - name: --if-match
+    type: string
+    short-summary: The value provided will be compared to the ETag of the managed cluster, if it matches the operation will proceed. If it does not match, the request will be rejected to prevent accidental overwrites. This must not be specified when creating a new cluster.
+  - name: --if-none-match
+    type: string
+    short-summary: Set to '*' to allow a new cluster to be created, but to prevent updating an existing cluster. Other values will be ignored.
 
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
@@ -641,6 +660,10 @@ parameters:
   - name: --tier
     type: string
     short-summary: Specify SKU tier for managed clusters. '--tier standard' enables a standard managed cluster service with a financially backed SLA. '--tier free' changes a standard managed cluster to a free one.
+  - name: --ip-families
+    type: string
+    short-summary: A comma-separated list of IP versions to use for cluster networking.
+    long-summary: Each IP version should be in the format IPvN. For example, IPv4.
   - name: --network-plugin
     type: string
     short-summary: The Kubernetes network plugin to use.
@@ -750,7 +773,7 @@ parameters:
             * Has a digit
             * Has a special character (Regex match [\\W_])
           - Disallowed values:  "abc@123", "P@$$w0rd", "P@ssw0rd", "P@ssword123", "Pa$$word", "pass@word1", "Password!", "Password1", "Password22", "iloveyou!"
-      Reference: https://docs.microsoft.com/dotnet/api/microsoft.azure.management.compute.models.virtualmachinescalesetosprofile.adminpassword?view=azure-dotnet
+      Reference: https://learn.microsoft.com/dotnet/api/microsoft.azure.management.compute.models.virtualmachinescalesetosprofile.adminpassword?view=azure-dotnet
   - name: --enable-managed-identity
     type: bool
     short-summary: Update current cluster to use managed identity to manage cluster resource group.
@@ -943,7 +966,28 @@ parameters:
   - name: --disable-cost-analysis
     type: bool
     short-summary: Disable exporting Kubernetes Namespace and Deployment details to the Cost Analysis views in the Azure portal.
-
+  - name: --enable-acns
+    type: bool
+    short-summary: Enable advanced network functionalities on a cluster. Enabling this will incur additional costs. For non-cilium clusters, acns security will be disabled by default until further notice.
+  - name: --disable-acns
+    type: bool
+    short-summary: Disable all advanced networking functionalities on a cluster.
+  - name: --disable-acns-observability
+    type: bool
+    short-summary: Used to disable advanced networking observability features on a clusters when enabling advanced networking features with "--enable-acns".
+  - name: --disable-acns-security
+    type: bool
+    short-summary: Used to disable advanced networking security features on a clusters when enabling advanced networking features with "--enable-acns".
+  - name: --nrg-lockdown-restriction-level
+    type: string
+    short-summary: Restriction level on the managed node resource group.
+    long-summary: The restriction level of permissions allowed on the cluster's managed node resource group, supported values are Unrestricted, and ReadOnly (recommended ReadOnly).
+  - name: --if-match
+    type: string
+    short-summary: The value provided will be compared to the ETag of the managed cluster, if it matches the operation will proceed. If it does not match, the request will be rejected to prevent accidental overwrites. This must not be specified when creating a new cluster.
+  - name: --if-none-match
+    type: string
+    short-summary: Set to '*' to allow a new cluster to be created, but to prevent updating an existing cluster. Other values will be ignored.
 examples:
   - name: Reconcile the cluster back to its current state.
     text: az aks update -g MyResourceGroup -n MyManagedCluster
@@ -1591,6 +1635,12 @@ parameters:
   - name: --enable-vtpm
     type: bool
     short-summary: Enable vTPM on agent node pool. Must use VMSS agent pool type.
+  - name: --if-match
+    type: string
+    short-summary: The value provided will be compared to the ETag of the agentpool, if it matches the operation will proceed. If it does not match, the request will be rejected to prevent accidental overwrites. This must not be specified when creating a new agentpool.
+  - name: --if-none-match
+    type: string
+    short-summary: Set to '*' to allow a new agentpool to be created, but to prevent updating an existing agentpool. Other values will be ignored.
 
 examples:
   - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.
@@ -1726,6 +1776,12 @@ parameters:
   - name: --disable-vtpm
     type: bool
     short-summary: Disable vTPM on an existing Trusted Launch enabled agent node pool.
+  - name: --if-match
+    type: string
+    short-summary: The value provided will be compared to the ETag of the node pool, if it matches the operation will proceed. If it does not match, the request will be rejected to prevent accidental overwrites. This must not be specified when creating a new agentpool.
+  - name: --if-none-match
+    type: string
+    short-summary: Set to '*' to allow a new node pool to be created, but to prevent updating an existing node pool. Other values will be ignored.
 examples:
   - name: Reconcile the nodepool back to its current state.
     text: az aks nodepool update -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster
@@ -1762,6 +1818,12 @@ parameters:
   - name: --aks-custom-headers
     type: string
     short-summary: Comma-separated key-value pairs to specify custom headers.
+  - name: --if-match
+    type: string
+    short-summary: The value provided will be compared to the ETag of the node pool, if it matches the operation will proceed. If it does not match, the request will be rejected to prevent accidental overwrites. This must not be specified when creating a new agentpool. For upgrade node image version requests this will be ignored.
+  - name: --if-none-match
+    type: string
+    short-summary: Set to '*' to allow a new node pool to be created, but to prevent updating an existing node pool. Other values will be ignored.
 """
 
 helps['aks nodepool stop'] = """
@@ -1856,7 +1918,7 @@ helps['aks stop'] = """
     long-summary: This can only be performed on Azure Virtual Machine Scale set backed clusters. Stopping a
         cluster stops the control plane and agent nodes entirely, while maintaining all object and
         cluster state. A cluster does not accrue charges while it is stopped. See `stopping a
-        cluster <https://docs.microsoft.com/azure/aks/start-stop-cluster>`_ for more details about
+        cluster <https://learn.microsoft.com/azure/aks/start-stop-cluster>`_ for more details about
         stopping a cluster.
 """
 
@@ -1930,6 +1992,12 @@ parameters:
   - name: --tier
     type: string
     short-summary: Specify SKU tier for managed clusters. '--tier standard' enables a standard managed cluster service with a financially backed SLA. '--tier free' does not have a financially backed SLA. '--tier premium' is required for '--k8s-support-plan AKSLongTermSupport'.
+  - name: --if-match
+    type: string
+    short-summary: The value provided will be compared to the ETag of the managed cluster, if it matches the operation will proceed. If it does not match, the request will be rejected to prevent accidental overwrites. This must not be specified when creating a new cluster.
+  - name: --if-none-match
+    type: string
+    short-summary: Set to '*' to allow a new cluster to be created, but to prevent updating an existing cluster. Other values will be ignored.
 
 examples:
   - name: Upgrade a managed Kubernetes cluster to a newer version. (autogenerated)
@@ -2334,7 +2402,7 @@ helps['aks mesh upgrade rollback'] = """
 
 helps['aks approuting'] = """
     type: group
-    short-summary: Commands to manage App Routing aadon.
+    short-summary: Commands to manage App Routing addon.
     long-summary: A group of commands to manage App Routing in given cluster.
 """
 

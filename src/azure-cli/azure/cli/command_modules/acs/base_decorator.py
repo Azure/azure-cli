@@ -42,7 +42,6 @@ class BaseAKSModels:
         self.__cmd = cmd
         self.__model_module = None
         self.__model_dict = None
-        self.__serializer = None
         self.resource_type = resource_type
         self.__set_up_base_aks_models()
 
@@ -156,7 +155,7 @@ class BaseAKSContext:
         self.raw_param = raw_parameters
         self.models = models
         self.decorator_mode = decorator_mode
-        self.intermediates = dict()
+        self.intermediates = {}
 
     def get_intermediate(self, variable_name: str, default_value: Any = None) -> Any:
         """Get the value of an intermediate by its name.
