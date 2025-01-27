@@ -1527,10 +1527,11 @@ class AKSAgentPoolContext(BaseAKSContext):
         :return: bool
         """
         # read the original value passed by the command
-        ignore_pod_disruption_budget = self.raw_param.get("ignore_pod_disruption_budget", False)
+        ignore_pod_disruption_budget = self.raw_param.get("ignore_pdb", False)
 
         # This parameter does not need dynamic completion.
         return ignore_pod_disruption_budget
+
 
 class AKSAgentPoolAddDecorator:
     def __init__(
