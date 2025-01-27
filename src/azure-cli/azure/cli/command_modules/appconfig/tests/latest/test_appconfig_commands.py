@@ -654,13 +654,19 @@ class AppConfigKVScenarioTest(ScenarioTest):
 
         # add a key-value with null label
         kv_with_null_label = 'KvWithNullLabel'
+        tag_key = "tag1"
+        tag_value = "value1"
+        tags = tag_key + '=' + tag_value
+        structured_tags = {tag_key: tag_value}
         self.kwargs.update({
-            'key': kv_with_null_label
+            'key': kv_with_null_label,
+            'tags': tags
         })
 
-        self.cmd('appconfig kv set --connection-string {connection_string} --key {key} -y',
+        self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --tags {tags} -y',
                  checks=[self.check('key', kv_with_null_label),
-                         self.check('label', None)])
+                         self.check('label', None),
+                         self.check('tags', structured_tags)])
 
         # List key-values with null label
         null_label_pattern = "\\0"
@@ -670,6 +676,11 @@ class AppConfigKVScenarioTest(ScenarioTest):
         list_keys = self.cmd(
             'appconfig kv list --connection-string {connection_string} --label "{null_label}"').get_output_in_json()
         assert len(list_keys) == 2
+
+        # List key-values with tags {'tag1': 'value1'}
+        list_keys = self.cmd(
+            'appconfig kv list --connection-string {connection_string} --label "{null_label}" --tags {tags}').get_output_in_json()
+        assert len(list_keys) == 1
 
         # List key-values with multiple labels
         multi_labels = entry_label + ',' + null_label_pattern
@@ -812,6 +823,29 @@ class AppConfigKVScenarioTest(ScenarioTest):
         assert 'tags' not in revisions[0]
         assert 'tags' not in revisions[1]
 
+        # add tags to new key-value entry
+        updated_label = "kv_with_tags"
+        tag_key = "tag1"
+        tag_value = "value1"
+        tags = tag_key + '=' + tag_value
+        structured_tags = {tag_key: tag_value}
+        self.kwargs.update({
+            'tags': tags,
+            'label': updated_label
+        })
+
+        self.cmd(
+            'appconfig kv set -n {config_store_name} --key {key} --value {value} --content-type {content_type} --label {label} --tags {tags} -y',
+            checks=[self.check('contentType', entry_content_type),
+                    self.check('key', entry_key),
+                    self.check('value', updated_entry_value),
+                    self.check('label', updated_label),
+                    self.check('tags', structured_tags)])
+
+        # list kv revisions with tags {'tag1': 'value1'}
+        revisions = self.cmd('appconfig revision list -n {config_store_name} --key {key} --label * --tags {tags}').get_output_in_json()
+        assert len(revisions) == 1
+
 
 class AppConfigImportExportScenarioTest(ScenarioTest):
 
@@ -859,6 +893,32 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         with open(exported_file_path) as json_file:
             exported_kvs = json.load(json_file)
         assert imported_kvs == exported_kvs
+
+        # Tag filter test
+        tag_key = "tag1"
+        tag_value = "value1"
+        tags = tag_key + '=' + tag_value
+        self.kwargs.update({
+            'import_source': 'file',
+            'imported_format': 'json',
+            'separator': '/',
+            'imported_file_path': imported_file_path,
+            'exported_file_path': exported_file_path,
+            'tags': tags
+        })
+
+        # Add tags during import
+        # Export with tags filter
+        self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --separator {separator} --tags {tags} -y')
+        self.cmd(
+            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --separator {separator} --tags {tags} -y')
+        with open(imported_file_path) as json_file:
+            imported_kvs = json.load(json_file)
+        with open(exported_file_path) as json_file:
+            exported_kvs = json.load(json_file)
+        assert imported_kvs == exported_kvs
+
 
         # ignore already existing kvs
         ignore_match_file_path = os.path.join(TEST_DIR, 'ignore_match_import.json')

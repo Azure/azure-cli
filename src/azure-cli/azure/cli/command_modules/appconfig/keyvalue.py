@@ -255,7 +255,7 @@ def import_config(cmd,
     __write_kv_and_features_to_config_store(azconfig_client,
                                             key_values=kvs_to_write,
                                             label=label,
-                                            tags=tags,    # should we have preserve tags? like preserve-labels
+                                            tags=tags,
                                             preserve_labels=preserve_labels,
                                             content_type=content_type,
                                             correlation_request_id=correlation_request_id)

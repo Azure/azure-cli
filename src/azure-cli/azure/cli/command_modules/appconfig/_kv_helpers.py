@@ -24,7 +24,7 @@ from azure.cli.core.azclierror import (
 
 from ._constants import KeyVaultConstants, StatusCodes
 from ._diff_utils import __print_diff
-from ._utils import prep_label_filter_for_url_encoding
+from ._utils import prep_label_filter_for_url_encoding, format_tags
 from ._models import (
     convert_configurationsetting_to_keyvalue,
     convert_keyvalue_to_configurationsetting,
@@ -169,6 +169,7 @@ def __write_kv_and_features_to_config_store(
     if features:
         key_values.extend(__convert_featureflag_list_to_keyvalue_list(features))
 
+    tags = format_tags(tags)
     for kv in key_values:
         set_kv = convert_keyvalue_to_configurationsetting(kv)
         if not preserve_labels:
