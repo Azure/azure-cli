@@ -1,178 +1,41 @@
 interactions:
 - request:
-    body: null
+    body: '{"location": "southcentralus", "sku": {"name": "EP1", "tier": "ElasticPremium"},
+      "properties": {"perSiteScaling": false, "isXenon": false, "zoneRedundant": false}}'
     headers:
       Accept:
       - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - functionapp create
+      - functionapp plan create
       Connection:
       - keep-alive
+      Content-Length:
+      - '163'
+      Content-Type:
+      - application/json
       ParameterSetName:
-      - -g -n -c -s --os-type --disable-app-insights --functions-version
+      - -g -n --sku --location
       User-Agent:
       - AZURECLI/2.68.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions?sku=Dynamic&api-version=2023-01-01
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/functionappplan000004?api-version=2023-01-01
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Canada
-        Central","name":"Canada Central","type":"Microsoft.Web/geoRegions","properties":{"name":"Canada
-        Central","description":"Canada Central","sortOrder":0,"displayName":"Canada
-        Central","orgDomain":"ZONEREDUNDANCY;PUBLIC;DREAMSPARK;MSFTPUBLIC;FUNCTIONS;DYNAMIC;DSERIES;LINUX;LINUXDSERIES;ELASTICPREMIUM;LINUXFREE;ELASTICLINUX;XENON;XENONV3;WINDOWSV3;LINUXV3;LINUXDYNAMIC;WINDOWSMV3;WINDOWSP0V3;LINUXMV3;LINUXP0V3;XENONMV3;MANAGEDAPP","subDomains":"canadacentral-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/North
-        Europe","name":"North Europe","type":"Microsoft.Web/geoRegions","properties":{"name":"North
-        Europe","description":"North Europe","sortOrder":1,"displayName":"North Europe","orgDomain":"ZONEREDUNDANCY;PUBLIC;DREAMSPARK;MSFTPUBLIC;FUNCTIONS;DYNAMIC;LINUX;DSERIES;LINUXDSERIES;SFCONTAINERS;LINUXDYNAMIC;ELASTICPREMIUM;LINUXFREE;ELASTICLINUX;XENON;XENONV3;WINDOWSV3;LINUXV3;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;XENONMV3;FLEXCONSUMPTION;MANAGEDAPP","subDomains":"northeurope-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/West
-        Europe","name":"West Europe","type":"Microsoft.Web/geoRegions","properties":{"name":"West
-        Europe","description":"West Europe","sortOrder":2,"displayName":"West Europe","orgDomain":"ZONEREDUNDANCY;PUBLIC;DREAMSPARK;MSFTPUBLIC;FUNCTIONS;DYNAMIC;LINUX;DSERIES;LINUXDSERIES;XENON;SFCONTAINERS;LINUXDYNAMIC;ELASTICPREMIUM;ELASTICLINUX;LINUXFREE;XENON;XENONV3;WINDOWSV3;LINUXV3;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;XENONMV3;MANAGEDAPP","subDomains":"westeurope-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Southeast
-        Asia","name":"Southeast Asia","type":"Microsoft.Web/geoRegions","properties":{"name":"Southeast
-        Asia","description":"Southeast Asia","sortOrder":3,"displayName":"Southeast
-        Asia","orgDomain":"ZONEREDUNDANCY;PUBLIC;DREAMSPARK;MSFTPUBLIC;FUNCTIONS;DYNAMIC;LINUX;DSERIES;LINUXDSERIES;XENON;ELASTICPREMIUM;LINUXFREE;ELASTICLINUX;LINUXDYNAMIC;XENON;XENONV3;WINDOWSV3;LINUXV3;WINDOWSMV3;WINDOWSP0V3;LINUXP0V3;LINUXMV3;XENONMV3;FLEXCONSUMPTION;MANAGEDAPP","subDomains":"southeastasia-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/East
-        Asia","name":"East Asia","type":"Microsoft.Web/geoRegions","properties":{"name":"East
-        Asia","description":null,"sortOrder":4,"displayName":"East Asia","orgDomain":"ZONEREDUNDANCY;PUBLIC;DREAMSPARK;MSFTPUBLIC;FUNCTIONS;DYNAMIC;LINUX;DSERIES;LINUXDSERIES;SFCONTAINERS;LINUXDYNAMIC;ELASTICPREMIUM;LINUXFREE;ELASTICLINUX;XENON;XENONV3;WINDOWSV3;LINUXV3;WINDOWSP0V3;LINUXP0V3;WINDOWSMV3;LINUXMV3;FLEXCONSUMPTION;XENONMV3;MANAGEDAPP;FCZONEREDUNDANCY","subDomains":"eastasia-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/West
-        US","name":"West US","type":"Microsoft.Web/geoRegions","properties":{"name":"West
-        US","description":"West US","sortOrder":5,"displayName":"West US","orgDomain":"PUBLIC;DREAMSPARK;MSFTPUBLIC;FUNCTIONS;DYNAMIC;LINUX;DSERIES;LINUXDSERIES;XENON;ELASTICPREMIUM;LINUXFREE;ELASTICLINUX;LINUXDYNAMIC;XENON;XENONV3;WINDOWSV3;LINUXV3;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;XENONMV3;MANAGEDAPP","subDomains":"westus-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Japan
-        West","name":"Japan West","type":"Microsoft.Web/geoRegions","properties":{"name":"Japan
-        West","description":"Japan West","sortOrder":7,"displayName":"Japan West","orgDomain":"PUBLIC;DREAMSPARK;MSFTPUBLIC;FUNCTIONS;DYNAMIC;LINUX;XENON;DSERIES;LINUXDSERIES;ELASTICPREMIUM;LINUXFREE;ELASTICLINUX;LINUXDYNAMIC;WINDOWSV3;LINUXV3;WINDOWSP0V3;LINUXP0V3;LINUXMV3;WINDOWSMV3;XENONV3;XENONMV3","subDomains":"japanwest-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Japan
-        East","name":"Japan East","type":"Microsoft.Web/geoRegions","properties":{"name":"Japan
-        East","description":"Japan East","sortOrder":8,"displayName":"Japan East","orgDomain":"ZONEREDUNDANCY;PUBLIC;DREAMSPARK;MSFTPUBLIC;FUNCTIONS;DYNAMIC;LINUX;DSERIES;LINUXDSERIES;LINUXFREE;ELASTICLINUX;ELASTICPREMIUM;LINUXDYNAMIC;XENON;XENONV3;WINDOWSV3;LINUXV3;WINDOWSP0V3;LINUXP0V3;LINUXMV3;WINDOWSMV3;MANAGEDAPP;XENONMV3","subDomains":"japaneast-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/East
-        US 2","name":"East US 2","type":"Microsoft.Web/geoRegions","properties":{"name":"East
-        US 2","description":"East US 2","sortOrder":9,"displayName":"East US 2","orgDomain":"ZONEREDUNDANCY;PUBLIC;DREAMSPARK;MSFTPUBLIC;FUNCTIONS;DYNAMIC;DSERIES;LINUX;LINUXDSERIES;ELASTICPREMIUM;LINUXFREE;LINUXDYNAMIC;ELASTICLINUX;XENON;XENONV3;WINDOWSV3;LINUXV3;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;XENONMV3;FLEXCONSUMPTION;MANAGEDAPP","subDomains":"eastus2-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/North
-        Central US","name":"North Central US","type":"Microsoft.Web/geoRegions","properties":{"name":"North
-        Central US","description":"North Central US","sortOrder":10,"displayName":"North
-        Central US","orgDomain":"PUBLIC;DREAMSPARK;MSFTPUBLIC;FUNCTIONS;DYNAMIC;LINUX;DSERIES;LINUXDSERIES;LINUXFREE;ELASTICPREMIUM;ELASTICLINUX;LINUXDYNAMIC;XENON;XENONV3;WINDOWSV3;LINUXV3;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;XENONMV3;MANAGEDAPP","subDomains":"northcentralus-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/South
-        Central US","name":"South Central US","type":"Microsoft.Web/geoRegions","properties":{"name":"South
-        Central US","description":"South Central US","sortOrder":11,"displayName":"South
-        Central US","orgDomain":"ZONEREDUNDANCY;PUBLIC;DREAMSPARK;MSFTPUBLIC;FUNCTIONS;DYNAMIC;DSERIES;LINUX;LINUXDSERIES;ELASTICPREMIUM;LINUXFREE;LINUXDYNAMIC;ELASTICLINUX;XENON;XENONV3;WINDOWSV3;LINUXV3;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;XENONMV3;FLEXCONSUMPTION;MANAGEDAPP","subDomains":"southcentralus-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Brazil
-        South","name":"Brazil South","type":"Microsoft.Web/geoRegions","properties":{"name":"Brazil
-        South","description":null,"sortOrder":12,"displayName":"Brazil South","orgDomain":"ZONEREDUNDANCY;PUBLIC;DREAMSPARK;MSFTPUBLIC;FUNCTIONS;DYNAMIC;LINUX;DSERIES;LINUXDSERIES;LINUXFREE;ELASTICPREMIUM;LINUXDYNAMIC;ELASTICLINUX;XENON;XENONV3;WINDOWSV3;LINUXV3;LINUXMV3;LINUXP0V3;WINDOWSMV3;WINDOWSP0V3;MANAGEDAPP","subDomains":"brazilsouth-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Australia
-        East","name":"Australia East","type":"Microsoft.Web/geoRegions","properties":{"name":"Australia
-        East","description":"Australia East","sortOrder":13,"displayName":"Australia
-        East","orgDomain":"ZONEREDUNDANCY;PUBLIC;DREAMSPARK;MSFTPUBLIC;FUNCTIONS;DYNAMIC;LINUX;DSERIES;LINUXDSERIES;XENON;ELASTICPREMIUM;LINUXFREE;LINUXDYNAMIC;ELASTICLINUX;XENON;XENONV3;WINDOWSV3;LINUXV3;LINUXMV3;LINUXP0V3;WINDOWSMV3;WINDOWSP0V3;XENONMV3;FLEXCONSUMPTION;MANAGEDAPP","subDomains":"australiaeast-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Australia
-        Southeast","name":"Australia Southeast","type":"Microsoft.Web/geoRegions","properties":{"name":"Australia
-        Southeast","description":"Australia Southeast","sortOrder":14,"displayName":"Australia
-        Southeast","orgDomain":"PUBLIC;DREAMSPARK;MSFTPUBLIC;FUNCTIONS;DYNAMIC;DSERIES;LINUX;LINUXDSERIES;ELASTICPREMIUM;LINUXFREE;ELASTICLINUX;XENON;XENONV3;WINDOWSV3;LINUXV3;LINUXDYNAMIC;WINDOWSMV3;LINUXMV3;LINUXP0V3;WINDOWSP0V3;XENONMV3","subDomains":"australiasoutheast-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Central
-        US","name":"Central US","type":"Microsoft.Web/geoRegions","properties":{"name":"Central
-        US","description":"Central US","sortOrder":15,"displayName":"Central US","orgDomain":"ZONEREDUNDANCY;PUBLIC;DREAMSPARK;MSFTPUBLIC;FUNCTIONS;DYNAMIC;DSERIES;LINUX;LINUXDSERIES;ELASTICPREMIUM;LINUXFREE;LINUXDYNAMIC;ELASTICLINUX;XENON;XENONV3;WINDOWSV3;LINUXV3;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;XENONMV3;MANAGEDAPP","subDomains":"centralus-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/East
-        US","name":"East US","type":"Microsoft.Web/geoRegions","properties":{"name":"East
-        US","description":null,"sortOrder":2147483647,"displayName":"East US","orgDomain":"ZONEREDUNDANCY;PUBLIC;DREAMSPARK;MSFTPUBLIC;FUNCTIONS;DYNAMIC;LINUX;DSERIES;FAKEORG;LINUXDSERIES;XENON;SFCONTAINERS;LINUXDYNAMIC;LINUXFREE;ELASTICLINUX;ELASTICPREMIUM;XENON;XENONV3;WINDOWSV3;LINUXV3;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;XENONMV3;FLEXCONSUMPTION;MANAGEDAPP","subDomains":"eastus-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/East
-        Asia (Stage)","name":"East Asia (Stage)","type":"Microsoft.Web/geoRegions","properties":{"name":"East
-        Asia (Stage)","description":null,"sortOrder":2147483647,"displayName":"East
-        Asia (Stage)","orgDomain":"ZONEREDUNDANCY;PUBLIC;DREAMSPARK;MSFTPUBLIC;FUNCTIONS;DYNAMIC;LINUX;DSERIES;LINUXDSERIES;SFCONTAINERS;LINUXDYNAMIC;ELASTICPREMIUM;LINUXFREE;ELASTICLINUX;XENON;XENONV3;WINDOWSV3;LINUXV3;WINDOWSP0V3;LINUXP0V3;WINDOWSMV3;LINUXMV3;XENONMV3","subDomains":null}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Central
-        India","name":"Central India","type":"Microsoft.Web/geoRegions","properties":{"name":"Central
-        India","description":"Central India","sortOrder":2147483647,"displayName":"Central
-        India","orgDomain":"ZONEREDUNDANCY;PUBLIC;DREAMSPARK;MSFTPUBLIC;FUNCTIONS;DYNAMIC;LINUX;DSERIES;LINUXDSERIES;LINUXDYNAMIC;ELASTICPREMIUM;ELASTICLINUX;XENON;XENONV3;WINDOWSV3;LINUXV3;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;LINUXFREE;MANAGEDAPP;XENONMV3","subDomains":"centralindia-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/West
-        India","name":"West India","type":"Microsoft.Web/geoRegions","properties":{"name":"West
-        India","description":null,"sortOrder":2147483647,"displayName":"West India","orgDomain":"PUBLIC;DREAMSPARK;MSFTPUBLIC;FUNCTIONS;DYNAMIC;LINUX;DSERIES;LINUXDSERIES;ELASTICPREMIUM;LINUXDYNAMIC;ELASTICLINUX;LINUXFREE","subDomains":"westindia-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/South
-        India","name":"South India","type":"Microsoft.Web/geoRegions","properties":{"name":"South
-        India","description":null,"sortOrder":2147483647,"displayName":"South India","orgDomain":"PUBLIC;DREAMSPARK;MSFTPUBLIC;FUNCTIONS;DYNAMIC;DSERIES;LINUX;LINUXDSERIES;ELASTICPREMIUM;LINUXFREE;ELASTICLINUX;XENON;XENONV3;WINDOWSV3;LINUXV3;LINUXDYNAMIC;WINDOWSP0V3;WINDOWSMV3;LINUXMV3;LINUXP0V3","subDomains":"southindia-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Canada
-        East","name":"Canada East","type":"Microsoft.Web/geoRegions","properties":{"name":"Canada
-        East","description":null,"sortOrder":2147483647,"displayName":"Canada East","orgDomain":"PUBLIC;DREAMSPARK;MSFTPUBLIC;FUNCTIONS;DYNAMIC;LINUX;DSERIES;LINUXDSERIES;LINUXDYNAMIC;ELASTICPREMIUM;ELASTICLINUX;WINDOWSV3;LINUXV3;XENONV3;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;LINUXFREE;MANAGEDAPP","subDomains":"canadaeast-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/West
-        Central US","name":"West Central US","type":"Microsoft.Web/geoRegions","properties":{"name":"West
-        Central US","description":null,"sortOrder":2147483647,"displayName":"West
-        Central US","orgDomain":"PUBLIC;FUNCTIONS;DYNAMIC;LINUX;DSERIES;LINUXDSERIES;ELASTICLINUX;ELASTICPREMIUM;MSFTPUBLIC;XENON;XENONV3;WINDOWSV3;LINUXV3;LINUXDYNAMIC;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;LINUXFREE;MANAGEDAPP","subDomains":"westcentralus-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/West
-        US 2","name":"West US 2","type":"Microsoft.Web/geoRegions","properties":{"name":"West
-        US 2","description":"West US 2","sortOrder":2147483647,"displayName":"West
-        US 2","orgDomain":"PUBLIC;DREAMSPARK;MSFTPUBLIC;FUNCTIONS;DYNAMIC;LINUX;DSERIES;LINUXDSERIES;LINUXFREE;LINUXDYNAMIC;ELASTICPREMIUM;ELASTICLINUX;XENON;XENONV3;WINDOWSV3;LINUXV3;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;ZONEREDUNDANCY;FLEXCONSUMPTION;XENONMV3;MANAGEDAPP","subDomains":"westus2-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/UK
-        West","name":"UK West","type":"Microsoft.Web/geoRegions","properties":{"name":"UK
-        West","description":"UK West","sortOrder":2147483647,"displayName":"UK West","orgDomain":"PUBLIC;MSFTPUBLIC;FUNCTIONS;DYNAMIC;DSERIES;LINUX;LINUXDSERIES;ELASTICPREMIUM;LINUXDYNAMIC;ELASTICLINUX;XENON;XENONV3;WINDOWSV3;LINUXV3;WINDOWSMV3;WINDOWSP0V3;LINUXP0V3;LINUXMV3;LINUXFREE;MANAGEDAPP;XENONMV3","subDomains":"ukwest-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/UK
-        South","name":"UK South","type":"Microsoft.Web/geoRegions","properties":{"name":"UK
-        South","description":"UK South","sortOrder":2147483647,"displayName":"UK South","orgDomain":"ZONEREDUNDANCY;PUBLIC;MSFTPUBLIC;DYNAMIC;DSERIES;LINUX;LINUXDSERIES;LINUXFREE;LINUXDYNAMIC;ELASTICPREMIUM;ELASTICLINUX;XENON;XENONV3;WINDOWSV3;LINUXV3;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;XENONMV3;FLEXCONSUMPTION;MANAGEDAPP","subDomains":"uksouth-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/East
-        US 2 EUAP","name":"East US 2 EUAP","type":"Microsoft.Web/geoRegions","properties":{"name":"East
-        US 2 EUAP","description":null,"sortOrder":2147483647,"displayName":"East US
-        2 EUAP","orgDomain":"ZONEREDUNDANCY;EUAP;XENON;LINUXDSERIES;ELASTICPREMIUM;FUNCTIONS;DYNAMIC;LINUX;LINUXFREE;ELASTICLINUX;WINDOWSV3;XENONV3;LINUXV3;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;XENONMV3;LINUXDYNAMIC;DSERIES;FLEXCONSUMPTION;MANAGEDAPP","subDomains":"eastus2euap-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Central
-        US EUAP","name":"Central US EUAP","type":"Microsoft.Web/geoRegions","properties":{"name":"Central
-        US EUAP","description":null,"sortOrder":2147483647,"displayName":"Central
-        US EUAP","orgDomain":"EUAP;LINUX;DSERIES;LINUXDSERIES;ELASTICPREMIUM;LINUXFREE;LINUXDYNAMIC;DYNAMIC;WINDOWSV3;WINDOWSP0V3;MANAGEDAPP","subDomains":"centraluseuap-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Korea
-        South","name":"Korea South","type":"Microsoft.Web/geoRegions","properties":{"name":"Korea
-        South","description":null,"sortOrder":2147483647,"displayName":"Korea South","orgDomain":"PUBLIC;DSERIES;LINUX;LINUXDSERIES;ELASTICPREMIUM;ELASTICLINUX;FUNCTIONS;DYNAMIC;MSFTPUBLIC;WINDOWSV3;LINUXV3;LINUXP0V3;LINUXFREE;WINDOWSP0V3;LINUXDYNAMIC","subDomains":"koreasouth-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Korea
-        Central","name":"Korea Central","type":"Microsoft.Web/geoRegions","properties":{"name":"Korea
-        Central","description":null,"sortOrder":2147483647,"displayName":"Korea Central","orgDomain":"ZONEREDUNDANCY;PUBLIC;DREAMSPARK;MSFTPUBLIC;FUNCTIONS;DYNAMIC;LINUX;LINUXDSERIES;ELASTICPREMIUM;LINUXFREE;DSERIES;LINUXDYNAMIC;ELASTICLINUX;XENON;XENONV3;WINDOWSV3;LINUXV3;WINDOWSP0V3;LINUXP0V3;LINUXMV3;WINDOWSMV3;MANAGEDAPP","subDomains":"koreacentral-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/France
-        South","name":"France South","type":"Microsoft.Web/geoRegions","properties":{"name":"France
-        South","description":null,"sortOrder":2147483647,"displayName":"France South","orgDomain":"PUBLIC;LINUX;LINUXDSERIES;DSERIES;MSFTPUBLIC;FUNCTIONS;DYNAMIC;ELASTICPREMIUM;ELASTICLINUX;LINUXDYNAMIC;XENONV3;WINDOWSV3;WINDOWSMV3;WINDOWSP0V3;LINUXFREE;LINUXV3;LINUXMV3;LINUXP0V3","subDomains":"francesouth-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/France
-        Central","name":"France Central","type":"Microsoft.Web/geoRegions","properties":{"name":"France
-        Central","description":"France Central","sortOrder":2147483647,"displayName":"France
-        Central","orgDomain":"ZONEREDUNDANCY;PUBLIC;MSFTPUBLIC;DSERIES;DYNAMIC;LINUX;LINUXDSERIES;ELASTICPREMIUM;LINUXFREE;LINUXDYNAMIC;ELASTICLINUX;XENON;XENONV3;WINDOWSV3;LINUXV3;WINDOWSP0V3;WINDOWSMV3;LINUXMV3;LINUXP0V3;XENONMV3;MANAGEDAPP","subDomains":"francecentral-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Australia
-        Central 2","name":"Australia Central 2","type":"Microsoft.Web/geoRegions","properties":{"name":"Australia
-        Central 2","description":null,"sortOrder":2147483647,"displayName":"Australia
-        Central 2","orgDomain":"PUBLIC;FUNCTIONS;DYNAMIC;DSERIES;LINUX;LINUXDSERIES;ELASTICPREMIUM;MSFTPUBLIC;WINDOWSMV3;WINDOWSP0V3;LINUXDYNAMIC;WINDOWSV3;LINUXV3;ELASTICLINUX;LINUXP0V3;LINUXFREE","subDomains":"australiacentral2-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Australia
-        Central","name":"Australia Central","type":"Microsoft.Web/geoRegions","properties":{"name":"Australia
-        Central","description":null,"sortOrder":2147483647,"displayName":"Australia
-        Central","orgDomain":"PUBLIC;FUNCTIONS;DYNAMIC;DSERIES;LINUX;LINUXDSERIES;LINUXFREE;ELASTICPREMIUM;ELASTICLINUX;MSFTPUBLIC;WINDOWSV3;LINUXV3;LINUXMV3;LINUXP0V3;LINUXDYNAMIC;WINDOWSP0V3","subDomains":"australiacentral-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/South
-        Africa North","name":"South Africa North","type":"Microsoft.Web/geoRegions","properties":{"name":"South
-        Africa North","description":"South Africa North","sortOrder":2147483647,"displayName":"South
-        Africa North","orgDomain":"ZONEREDUNDANCY;PUBLIC;MSFTPUBLIC;FUNCTIONS;DYNAMIC;LINUX;LINUXDSERIES;DSERIES;ELASTICPREMIUM;ELASTICLINUX;XENON;XENONV3;WINDOWSV3;LINUXV3;LINUXDYNAMIC;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;LINUXFREE;MANAGEDAPP;XENONMV3","subDomains":"southafricanorth-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/South
-        Africa West","name":"South Africa West","type":"Microsoft.Web/geoRegions","properties":{"name":"South
-        Africa West","description":null,"sortOrder":2147483647,"displayName":"South
-        Africa West","orgDomain":"PUBLIC;DSERIES;LINUX;LINUXDSERIES;ELASTICPREMIUM;ELASTICLINUX;FUNCTIONS;DYNAMIC;MSFTPUBLIC;WINDOWSMV3;WINDOWSP0V3;LINUXDYNAMIC;WINDOWSV3;LINUXV3;LINUXP0V3","subDomains":"southafricawest-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Switzerland
-        North","name":"Switzerland North","type":"Microsoft.Web/geoRegions","properties":{"name":"Switzerland
-        North","description":null,"sortOrder":2147483647,"displayName":"Switzerland
-        North","orgDomain":"ZONEREDUNDANCY;PUBLIC;DSERIES;LINUX;LINUXDSERIES;LINUXFREE;FUNCTIONS;DYNAMIC;LINUXDYNAMIC;ELASTICPREMIUM;ELASTICLINUX;XENON;XENONV3;WINDOWSV3;LINUXV3;MSFTPUBLIC;WINDOWSP0V3;LINUXP0V3;WINDOWSMV3;LINUXMV3;XENONMV3;MANAGEDAPP","subDomains":"switzerlandnorth-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Germany
-        West Central","name":"Germany West Central","type":"Microsoft.Web/geoRegions","properties":{"name":"Germany
-        West Central","description":null,"sortOrder":2147483647,"displayName":"Germany
-        West Central","orgDomain":"ZONEREDUNDANCY;PUBLIC;DSERIES;LINUX;LINUXDSERIES;ELASTICPREMIUM;FUNCTIONS;DYNAMIC;ELASTICLINUX;LINUXDYNAMIC;XENON;XENONV3;WINDOWSV3;LINUXV3;MSFTPUBLIC;LINUXP0V3;WINDOWSMV3;WINDOWSP0V3;LINUXFREE;LINUXMV3;MANAGEDAPP;XENONMV3","subDomains":"germanywestcentral-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Germany
-        North","name":"Germany North","type":"Microsoft.Web/geoRegions","properties":{"name":"Germany
-        North","description":null,"sortOrder":2147483647,"displayName":"Germany North","orgDomain":"PUBLIC;DSERIES;LINUX;LINUXDSERIES;LINUXV3;ELASTICPREMIUM;ELASTICLINUX;FUNCTIONS;DYNAMIC;MSFTPUBLIC;LINUXMV3;LINUXP0V3;LINUXDYNAMIC;WINDOWSV3;WINDOWSMV3;WINDOWSP0V3;LINUXFREE","subDomains":"germanynorth-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Switzerland
-        West","name":"Switzerland West","type":"Microsoft.Web/geoRegions","properties":{"name":"Switzerland
-        West","description":null,"sortOrder":2147483647,"displayName":"Switzerland
-        West","orgDomain":"PUBLIC;DSERIES;LINUX;LINUXDSERIES;LINUXFREE;FUNCTIONS;DYNAMIC;ELASTICPREMIUM;ELASTICLINUX;MSFTPUBLIC;WINDOWSP0V3;LINUXDYNAMIC;XENONV3;WINDOWSV3;LINUXV3;MANAGEDAPP;LINUXP0V3","subDomains":"switzerlandwest-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/UAE
-        Central","name":"UAE Central","type":"Microsoft.Web/geoRegions","properties":{"name":"UAE
-        Central","description":null,"sortOrder":2147483647,"displayName":"UAE Central","orgDomain":"PUBLIC;DSERIES;LINUX;LINUXDSERIES;LINUXFREE;MSFTPUBLIC;ELASTICPREMIUM;ELASTICLINUX;DYNAMIC;LINUXDYNAMIC","subDomains":"uaecentral-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/UAE
-        North","name":"UAE North","type":"Microsoft.Web/geoRegions","properties":{"name":"UAE
-        North","description":null,"sortOrder":2147483647,"displayName":"UAE North","orgDomain":"ZONEREDUNDANCY;PUBLIC;DSERIES;LINUX;LINUXDSERIES;LINUXFREE;FUNCTIONS;DYNAMIC;LINUXDYNAMIC;ELASTICPREMIUM;ELASTICLINUX;XENON;XENONV3;WINDOWSV3;LINUXV3;MSFTPUBLIC;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;MANAGEDAPP","subDomains":"uaenorth-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Norway
-        West","name":"Norway West","type":"Microsoft.Web/geoRegions","properties":{"name":"Norway
-        West","description":null,"sortOrder":2147483647,"displayName":"Norway West","orgDomain":"PUBLIC;DSERIES;MSFTPUBLIC;LINUX;LINUXDSERIES;FUNCTIONS;DYNAMIC;LINUXMV3;LINUXDYNAMIC;WINDOWSV3;WINDOWSP0V3;LINUXFREE;ELASTICLINUX","subDomains":"norwaywest-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Norway
-        East","name":"Norway East","type":"Microsoft.Web/geoRegions","properties":{"name":"Norway
-        East","description":"Norway East","sortOrder":2147483647,"displayName":"Norway
-        East","orgDomain":"ZONEREDUNDANCY;PUBLIC;LINUX;LINUXDSERIES;DSERIES;ELASTICLINUX;ELASTICPREMIUM;FUNCTIONS;DYNAMIC;XENON;XENONV3;WINDOWSV3;LINUXV3;MSFTPUBLIC;LINUXDYNAMIC;WINDOWSP0V3;LINUXP0V3;LINUXMV3;WINDOWSMV3;LINUXFREE;XENONMV3;MANAGEDAPP","subDomains":"norwayeast-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Brazil
-        Southeast","name":"Brazil Southeast","type":"Microsoft.Web/geoRegions","properties":{"name":"Brazil
-        Southeast","description":null,"sortOrder":2147483647,"displayName":"Brazil
-        Southeast","orgDomain":"PUBLIC;LINUX;LINUXDSERIES;DSERIES;LINUXFREE;FUNCTIONS;DYNAMIC;MSFTPUBLIC;LINUXDYNAMIC;ELASTICPREMIUM;ELASTICLINUX","subDomains":"brazilsoutheast-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/West
-        US 3","name":"West US 3","type":"Microsoft.Web/geoRegions","properties":{"name":"West
-        US 3","description":"West US 3","sortOrder":2147483647,"displayName":"West
-        US 3","orgDomain":"ZONEREDUNDANCY;PUBLIC;DSERIES;LINUX;LINUXDSERIES;XENON;XENONV3;WINDOWSV3;LINUXV3;ELASTICPREMIUM;ELASTICLINUX;FUNCTIONS;DYNAMIC;LINUXDYNAMIC;MSFTPUBLIC;LINUXMV3;LINUXP0V3;WINDOWSMV3;WINDOWSP0V3;LINUXFREE;XENONMV3;FLEXCONSUMPTION;MANAGEDAPP","subDomains":"westus3-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Jio
-        India West","name":"Jio India West","type":"Microsoft.Web/geoRegions","properties":{"name":"Jio
-        India West","description":null,"sortOrder":2147483647,"displayName":"Jio India
-        West","orgDomain":"PUBLIC;DSERIES;LINUX;LINUXDSERIES;ELASTICPREMIUM;ELASTICLINUX;FUNCTIONS;DYNAMIC;LINUXDYNAMIC;MSFTPUBLIC;LINUXFREE;WINDOWSV3;LINUXV3;WINDOWSP0V3;LINUXP0V3","subDomains":"jioinw-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Jio
-        India Central","name":"Jio India Central","type":"Microsoft.Web/geoRegions","properties":{"name":"Jio
-        India Central","description":null,"sortOrder":2147483647,"displayName":"Jio
-        India Central","orgDomain":"PUBLIC;DSERIES;LINUX;LINUXDSERIES;MSFTPUBLIC;DYNAMIC;FUNCTIONS;LINUXDYNAMIC;LINUXFREE;ELASTICLINUX;WINDOWSV3;LINUXV3;WINDOWSP0V3;LINUXP0V3","subDomains":"jioinc-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Sweden
-        Central","name":"Sweden Central","type":"Microsoft.Web/geoRegions","properties":{"name":"Sweden
-        Central","description":"Sweden Central","sortOrder":2147483647,"displayName":"Sweden
-        Central","orgDomain":"ZONEREDUNDANCY;PUBLIC;DSERIES;LINUX;LINUXDSERIES;XENON;XENONV3;WINDOWSV3;LINUXV3;ELASTICPREMIUM;ELASTICLINUX;FUNCTIONS;DYNAMIC;MSFTPUBLIC;LINUXDYNAMIC;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;LINUXFREE;FLEXCONSUMPTION;MANAGEDAPP;XENONMV3","subDomains":"swedencentral-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Qatar
-        Central","name":"Qatar Central","type":"Microsoft.Web/geoRegions","properties":{"name":"Qatar
-        Central","description":null,"sortOrder":2147483647,"displayName":"Qatar Central","orgDomain":"ZONEREDUNDANCY;PUBLIC;LINUX;LINUXDSERIES;XENON;XENONV3;WINDOWSV3;LINUXV3;ELASTICPREMIUM;ELASTICLINUX;FUNCTIONS;DYNAMIC;MSFTPUBLIC;LINUXDYNAMIC;WINDOWSP0V3;LINUXP0V3;LINUXFREE;DSERIES","subDomains":"qatarcentral-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Sweden
-        South","name":"Sweden South","type":"Microsoft.Web/geoRegions","properties":{"name":"Sweden
-        South","description":null,"sortOrder":2147483647,"displayName":"Sweden South","orgDomain":"PUBLIC;DSERIES;LINUX;LINUXDSERIES;XENON;XENONV3;WINDOWSV3;LINUXV3;ELASTICPREMIUM;ELASTICLINUX;FUNCTIONS;DYNAMIC;MSFTPUBLIC;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;LINUXDYNAMIC;LINUXFREE","subDomains":"swedensouth-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Poland
-        Central","name":"Poland Central","type":"Microsoft.Web/geoRegions","properties":{"name":"Poland
-        Central","description":null,"sortOrder":2147483647,"displayName":"Poland Central","orgDomain":"ZONEREDUNDANCY;PUBLIC;DSERIES;LINUX;LINUXDSERIES;XENON;XENONV3;WINDOWSV3;LINUXV3;ELASTICPREMIUM;ELASTICLINUX;FUNCTIONS;DYNAMIC;MSFTPUBLIC;LINUXDYNAMIC;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;LINUXFREE","subDomains":"polandcentral-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Italy
-        North","name":"Italy North","type":"Microsoft.Web/geoRegions","properties":{"name":"Italy
-        North","description":"Italy North","sortOrder":2147483647,"displayName":"Italy
-        North","orgDomain":"ZONEREDUNDANCY;PUBLIC;DSERIES;LINUX;LINUXDSERIES;XENON;XENONV3;WINDOWSV3;LINUXV3;ELASTICPREMIUM;ELASTICLINUX;FUNCTIONS;DYNAMIC;MSFTPUBLIC;WINDOWSMV3;LINUXMV3;LINUXDYNAMIC;XENONMV3;WINDOWSP0V3;LINUXP0V3;LINUXFREE","subDomains":"italynorth-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Israel
-        Central","name":"Israel Central","type":"Microsoft.Web/geoRegions","properties":{"name":"Israel
-        Central","description":null,"sortOrder":2147483647,"displayName":"Israel Central","orgDomain":"ZONEREDUNDANCY;PUBLIC;DSERIES;LINUX;LINUXDSERIES;XENON;XENONV3;WINDOWSV3;LINUXV3;ELASTICPREMIUM;ELASTICLINUX;FUNCTIONS;DYNAMIC;MSFTPUBLIC;LINUXDYNAMIC;XENONMV3;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;LINUXFREE","subDomains":"israelcentral-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Spain
-        Central","name":"Spain Central","type":"Microsoft.Web/geoRegions","properties":{"name":"Spain
-        Central","description":null,"sortOrder":2147483647,"displayName":"Spain Central","orgDomain":"ZONEREDUNDANCY;PUBLIC;DSERIES;LINUX;LINUXDSERIES;XENON;XENONV3;WINDOWSV3;LINUXV3;ELASTICPREMIUM;ELASTICLINUX;FUNCTIONS;DYNAMIC;MSFTPUBLIC;LINUXDYNAMIC;XENONMV3;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;LINUXFREE","subDomains":"spaincentral-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Mexico
-        Central","name":"Mexico Central","type":"Microsoft.Web/geoRegions","properties":{"name":"Mexico
-        Central","description":null,"sortOrder":2147483647,"displayName":"Mexico Central","orgDomain":"ZONEREDUNDANCY;PUBLIC;DSERIES;LINUX;LINUXDSERIES;XENON;XENONV3;WINDOWSV3;LINUXV3;ELASTICPREMIUM;ELASTICLINUX;FUNCTIONS;DYNAMIC;MSFTPUBLIC;LINUXDYNAMIC;XENONMV3;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;LINUXFREE","subDomains":"mexicocentral-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Taiwan
-        North","name":"Taiwan North","type":"Microsoft.Web/geoRegions","properties":{"name":"Taiwan
-        North","description":null,"sortOrder":2147483647,"displayName":"Taiwan North","orgDomain":"ZONEREDUNDANCY;PUBLIC;DSERIES;LINUX;LINUXDSERIES;XENON;XENONV3;WINDOWSV3;LINUXV3;ELASTICPREMIUM;ELASTICLINUX;FUNCTIONS;DYNAMIC;MSFTPUBLIC;LINUXDYNAMIC;XENONMV3;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;LINUXFREE","subDomains":"taiwannorth-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Taiwan
-        Northwest","name":"Taiwan Northwest","type":"Microsoft.Web/geoRegions","properties":{"name":"Taiwan
-        Northwest","description":null,"sortOrder":2147483647,"displayName":"Taiwan
-        Northwest","orgDomain":"ZONEREDUNDANCY;PUBLIC;DSERIES;LINUX;LINUXDSERIES;XENON;XENONV3;WINDOWSV3;LINUXV3;ELASTICPREMIUM;ELASTICLINUX;FUNCTIONS;DYNAMIC;MSFTPUBLIC;LINUXDYNAMIC;XENONMV3;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;LINUXFREE","subDomains":"taiwannorthwest-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/New
-        Zealand North","name":"New Zealand North","type":"Microsoft.Web/geoRegions","properties":{"name":"New
-        Zealand North","description":null,"sortOrder":2147483647,"displayName":"New
-        Zealand North","orgDomain":"ZONEREDUNDANCY;PUBLIC;DSERIES;LINUX;LINUXDSERIES;XENON;XENONV3;WINDOWSV3;LINUXV3;ELASTICPREMIUM;ELASTICLINUX;FUNCTIONS;DYNAMIC;MSFTPUBLIC;LINUXDYNAMIC;XENONMV3;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;LINUXFREE","subDomains":"newzealandnorth-01.azurewebsites.net"}}],"nextLink":null,"id":null}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/functionappplan000004","name":"functionappplan000004","type":"Microsoft.Web/serverfarms","kind":"elastic","location":"southcentralus","properties":{"serverFarmId":17515,"name":"functionappplan000004","sku":{"name":"EP1","tier":"ElasticPremium","size":"EP1","family":"EP","capacity":1},"workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-SouthCentralUSwebspace","subscription":"dbf67cc6-6c57-44b8-97fc-4356f0d555b3","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":0,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"South
+        Central US","perSiteScaling":false,"elasticScaleEnabled":true,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"elastic","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-sn1-209_17515","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"migrateToVMSS":null,"vnetConnectionsUsed":null,"vnetConnectionsMax":null,"createdTime":"2025-01-27T17:13:17.6833333"},"sku":{"name":"EP1","tier":"ElasticPremium","size":"EP1","family":"EP","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '31777'
+      - '1654'
       content-type:
       - application/json
       date:
-      - Thu, 09 Jan 2025 16:59:36 GMT
+      - Mon, 27 Jan 2025 17:13:19 GMT
+      etag:
+      - '"1DB70DEC3790320"'
       expires:
       - '-1'
       pragma:
@@ -185,10 +48,12 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-global-reads:
-      - '16499'
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '12000'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '800'
       x-msedge-ref:
-      - 'Ref A: 9D276895E0934AAF85BA37A9CF60C5C7 Ref B: CH1AA2020610049 Ref C: 2025-01-09T16:59:35Z'
+      - 'Ref A: 18913434B7DB450D8CCCD14A96582804 Ref B: SJC211051204019 Ref C: 2025-01-27T17:13:12Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -206,7 +71,59 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n -c -s --os-type --disable-app-insights --functions-version
+      - -g -n -p -s --os-type --disable-app-insights --functions-version
+      User-Agent:
+      - AZURECLI/2.68.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/functionappplan000004?api-version=2023-01-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/functionappplan000004","name":"functionappplan000004","type":"Microsoft.Web/serverfarms","kind":"elastic","location":"South
+        Central US","properties":{"serverFarmId":17515,"name":"functionappplan000004","workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-SouthCentralUSwebspace","subscription":"dbf67cc6-6c57-44b8-97fc-4356f0d555b3","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":20,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"South
+        Central US","perSiteScaling":false,"elasticScaleEnabled":true,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"elastic","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-sn1-209_17515","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2025-01-27T17:13:17.6833333"},"sku":{"name":"EP1","tier":"ElasticPremium","size":"EP1","family":"EP","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1566'
+      content-type:
+      - application/json
+      date:
+      - Mon, 27 Jan 2025 17:13:21 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 12E26196F7DF4E508AE50ABAB91FEBAA Ref B: SJC211051203035 Ref C: 2025-01-27T17:13:21Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - functionapp create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -p -s --os-type --disable-app-insights --functions-version
       User-Agent:
       - AZURECLI/2.68.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
@@ -251,7 +168,7 @@ interactions:
         LTS","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"~8","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"8.x"},"appSettingsDictionary":{"FUNCTIONS_WORKER_RUNTIME":"node","WEBSITE_NODE_DEFAULT_VERSION":"~8"},"siteConfigPropertiesDictionary":{"use32BitWorkerProcess":true},"supportedFunctionsExtensionVersions":["~2"],"supportedFunctionsExtensionVersionsInfo":[{"version":"~2","isDeprecated":true,"isDefault":true}],"endOfLifeDate":"2019-12-31T00:00:00Z"}}}]},{"displayText":"Node.js
         6","value":"6","minorVersions":[{"displayText":"Node.js 6 LTS","value":"6
         LTS","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"~6","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":false},"appSettingsDictionary":{"WEBSITE_NODE_DEFAULT_VERSION":"~6"},"siteConfigPropertiesDictionary":{"use32BitWorkerProcess":true},"supportedFunctionsExtensionVersions":["~1"],"supportedFunctionsExtensionVersionsInfo":[{"version":"~1","isDeprecated":true,"isDefault":true}],"endOfLifeDate":"2019-04-30T00:00:00Z"}}}]}]}},{"id":null,"name":"python","type":"Microsoft.Web/functionAppStacks?stackOsType=All","properties":{"displayText":"Python","value":"python","preferredOs":"linux","majorVersions":[{"displayText":"Python
-        3","value":"3","minorVersions":[{"displayText":"Python 3.12","value":"3.12","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"Python|3.12","remoteDebuggingSupported":false,"isPreview":true,"isDefault":false,"isHidden":true,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"3.12"},"appSettingsDictionary":{"FUNCTIONS_WORKER_RUNTIME":"python"},"siteConfigPropertiesDictionary":{"use32BitWorkerProcess":false,"linuxFxVersion":"Python|3.12"},"supportedFunctionsExtensionVersions":["~4"],"supportedFunctionsExtensionVersionsInfo":[{"version":"~4","isDeprecated":false,"isDefault":true}],"endOfLifeDate":"2028-10-31T00:00:00Z"}}},{"displayText":"Python
+        3","value":"3","minorVersions":[{"displayText":"Python 3.12","value":"3.12","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"Python|3.12","remoteDebuggingSupported":false,"isPreview":true,"isDefault":false,"isHidden":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"3.12"},"appSettingsDictionary":{"FUNCTIONS_WORKER_RUNTIME":"python"},"siteConfigPropertiesDictionary":{"use32BitWorkerProcess":false,"linuxFxVersion":"Python|3.12"},"supportedFunctionsExtensionVersions":["~4"],"supportedFunctionsExtensionVersionsInfo":[{"version":"~4","isDeprecated":false,"isDefault":true}],"endOfLifeDate":"2028-10-31T00:00:00Z"}}},{"displayText":"Python
         3.11","value":"3.11","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"Python|3.11","remoteDebuggingSupported":false,"isPreview":false,"isDefault":true,"isHidden":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"3.11"},"appSettingsDictionary":{"FUNCTIONS_WORKER_RUNTIME":"python"},"siteConfigPropertiesDictionary":{"use32BitWorkerProcess":false,"linuxFxVersion":"Python|3.11"},"supportedFunctionsExtensionVersions":["~4"],"supportedFunctionsExtensionVersionsInfo":[{"version":"~4","isDeprecated":false,"isDefault":true}],"endOfLifeDate":"2027-10-31T00:00:00Z"}}},{"displayText":"Python
         3.10","value":"3.10","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"Python|3.10","remoteDebuggingSupported":false,"isPreview":false,"isDefault":true,"isHidden":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"3.10"},"appSettingsDictionary":{"FUNCTIONS_WORKER_RUNTIME":"python"},"siteConfigPropertiesDictionary":{"use32BitWorkerProcess":false,"linuxFxVersion":"Python|3.10"},"supportedFunctionsExtensionVersions":["~4"],"supportedFunctionsExtensionVersionsInfo":[{"version":"~4","isDeprecated":false,"isDefault":true}],"endOfLifeDate":"2026-10-31T00:00:00Z"}}},{"displayText":"Python
         3.9","value":"3.9","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"Python|3.9","remoteDebuggingSupported":false,"isPreview":false,"isDefault":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"3.9"},"appSettingsDictionary":{"FUNCTIONS_WORKER_RUNTIME":"python"},"siteConfigPropertiesDictionary":{"use32BitWorkerProcess":false,"linuxFxVersion":"Python|3.9"},"supportedFunctionsExtensionVersions":["~4","~3"],"supportedFunctionsExtensionVersionsInfo":[{"version":"~4","isDeprecated":false,"isDefault":true},{"version":"~3","isDeprecated":true,"isDefault":false}],"endOfLifeDate":"2025-10-31T00:00:00Z"}}},{"displayText":"Python
@@ -273,11 +190,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '40650'
+      - '40651'
       content-type:
       - application/json
       date:
-      - Thu, 09 Jan 2025 16:59:35 GMT
+      - Mon, 27 Jan 2025 17:13:21 GMT
       expires:
       - '-1'
       pragma:
@@ -291,7 +208,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-msedge-ref:
-      - 'Ref A: 3739E687C7964314B62629020161DFB3 Ref B: CH1AA2020610021 Ref C: 2025-01-09T16:59:36Z'
+      - 'Ref A: AD84D189BA594E289AD7E6F876015378 Ref B: SJC211051203023 Ref C: 2025-01-27T17:13:21Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -309,14 +226,14 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n -c -s --os-type --disable-app-insights --functions-version
+      - -g -n -p -s --os-type --disable-app-insights --functions-version
       User-Agent:
       - AZURECLI/2.68.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2023-05-01
   response:
     body:
-      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"keyCreationTime":{"key1":"2025-01-09T16:58:57.7865517Z","key2":"2025-01-09T16:58:57.7865517Z"},"allowCrossTenantReplication":false,"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":false,"networkAcls":{"ipv6Rules":[],"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2025-01-09T16:59:12.8962721Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2025-01-09T16:59:12.8962721Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2025-01-09T16:58:57.6615484Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"keyCreationTime":{"key1":"2025-01-27T17:12:50.2882629Z","key2":"2025-01-27T17:12:50.2882629Z"},"allowCrossTenantReplication":false,"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":false,"networkAcls":{"ipv6Rules":[],"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2025-01-27T17:12:50.4601395Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2025-01-27T17:12:50.4601395Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2025-01-27T17:12:50.1945170Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'
     headers:
       cache-control:
       - no-cache
@@ -325,7 +242,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 09 Jan 2025 16:59:36 GMT
+      - Mon, 27 Jan 2025 17:13:22 GMT
       expires:
       - '-1'
       pragma:
@@ -339,7 +256,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: B162C41E695941919662E4523BD62A04 Ref B: CH1AA2020620047 Ref C: 2025-01-09T16:59:37Z'
+      - 'Ref A: C9608B60A81440F09FC3511CE28B4F72 Ref B: SJC211051201025 Ref C: 2025-01-27T17:13:22Z'
     status:
       code: 200
       message: OK
@@ -357,14 +274,14 @@ interactions:
       Content-Length:
       - '0'
       ParameterSetName:
-      - -g -n -c -s --os-type --disable-app-insights --functions-version
+      - -g -n -p -s --os-type --disable-app-insights --functions-version
       User-Agent:
       - AZURECLI/2.68.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2023-05-01&$expand=kerb
   response:
     body:
-      string: '{"keys":[{"creationTime":"2025-01-09T16:58:57.7865517Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2025-01-09T16:58:57.7865517Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+      string: '{"keys":[{"creationTime":"2025-01-27T17:12:50.2882629Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2025-01-27T17:12:50.2882629Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
     headers:
       cache-control:
       - no-cache
@@ -373,7 +290,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 09 Jan 2025 16:59:36 GMT
+      - Mon, 27 Jan 2025 17:13:22 GMT
       expires:
       - '-1'
       pragma:
@@ -385,20 +302,21 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11999'
+      - '11998'
       x-msedge-ref:
-      - 'Ref A: 729D59A41BE145A681C59FBCD2DDA452 Ref B: CH1AA2020620047 Ref C: 2025-01-09T16:59:37Z'
+      - 'Ref A: 810FB3AC116144038708C5841646A68A Ref B: SJC211051201025 Ref C: 2025-01-27T17:13:22Z'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"kind": "functionapp", "location": "francecentral", "properties": {"reserved":
-      false, "isXenon": false, "hyperV": false, "siteConfig": {"netFrameworkVersion":
-      "v8.0", "appSettings": [{"name": "FUNCTIONS_WORKER_RUNTIME", "value": "dotnet"},
-      {"name": "FUNCTIONS_INPROC_NET8_ENABLED", "value": "1"}, {"name": "FUNCTIONS_EXTENSION_VERSION",
-      "value": "~4"}, {"name": "AzureWebJobsStorage", "value": "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey=="},
+    body: '{"kind": "functionapp", "location": "South Central US", "properties": {"serverFarmId":
+      "functionappplan000004", "reserved": false, "isXenon": false, "hyperV": false,
+      "siteConfig": {"netFrameworkVersion": "v8.0", "appSettings": [{"name": "FUNCTIONS_WORKER_RUNTIME",
+      "value": "dotnet"}, {"name": "FUNCTIONS_INPROC_NET8_ENABLED", "value": "1"},
+      {"name": "FUNCTIONS_EXTENSION_VERSION", "value": "~4"}, {"name": "AzureWebJobsStorage",
+      "value": "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey=="},
       {"name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING", "value": "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey=="},
-      {"name": "WEBSITE_CONTENTSHARE", "value": "functionappwithappinsights000003d350d58d5ac9"},
+      {"name": "WEBSITE_CONTENTSHARE", "value": "functionappwithappinsights0000039924ac657247"},
       {"name": "AzureWebJobsDashboard", "value": "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey=="}],
       "use32BitWorkerProcess": true, "localMySqlEnabled": false, "http20Enabled":
       true}, "scmSiteAlsoStopped": false, "httpsOnly": false}}'
@@ -412,31 +330,32 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1123'
+      - '1167'
       Content-Type:
       - application/json
       ParameterSetName:
-      - -g -n -c -s --os-type --disable-app-insights --functions-version
+      - -g -n -p -s --os-type --disable-app-insights --functions-version
       User-Agent:
       - AZURECLI/2.68.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappwithappinsights000003?api-version=2023-01-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappwithappinsights000003","name":"functionappwithappinsights000003","type":"Microsoft.Web/sites","kind":"functionapp","location":"francecentral","properties":{"name":"functionappwithappinsights000003","state":"Running","hostNames":["functionappwithappinsights000003.azurewebsites.net"],"webSpace":"clitest.rg000001-FranceCentralwebspace","selfLink":"https://waws-prod-par-033.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-FranceCentralwebspace/sites/functionappwithappinsights000003","repositorySiteName":"functionappwithappinsights000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"siteScopedCertificatesEnabled":false,"afdEnabled":false,"enabledHostNames":["functionappwithappinsights000003.azurewebsites.net","functionappwithappinsights000003.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"functionappwithappinsights000003.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"virtualIPv6":null,"thumbprint":null,"certificateResourceId":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"functionappwithappinsights000003.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"virtualIPv6":null,"thumbprint":null,"certificateResourceId":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/FranceCentralPlan","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2025-01-09T16:59:46.6433333","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","dnsConfiguration":{},"vnetRouteAllEnabled":false,"containerAllocationSubnet":null,"useContainerLocalhostBindings":null,"vnetImagePullEnabled":false,"vnetContentShareEnabled":false,"outboundVnetRouting":{"allTraffic":false,"applicationTraffic":false,"contentShareTraffic":false,"imagePullTraffic":false,"backupRestoreTraffic":false},"siteConfig":{"numberOfWorkers":1,"defaultDocuments":null,"netFrameworkVersion":null,"phpVersion":null,"pythonVersion":null,"nodeVersion":null,"powerShellVersion":null,"linuxFxVersion":"","windowsFxVersion":null,"windowsConfiguredStacks":null,"requestTracingEnabled":null,"remoteDebuggingEnabled":null,"remoteDebuggingVersion":null,"httpLoggingEnabled":null,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":false,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":null,"detailedErrorLoggingEnabled":null,"publishingUsername":null,"publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":null,"use32BitWorkerProcess":null,"webSocketsEnabled":null,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":null,"managedPipelineMode":null,"virtualApplications":null,"winAuthAdminState":null,"winAuthTenantState":null,"customAppPoolIdentityAdminState":null,"customAppPoolIdentityTenantState":null,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":null,"routingRules":null,"experiments":null,"limits":null,"autoHealEnabled":null,"autoHealRules":null,"tracingOptions":null,"vnetName":null,"vnetRouteAllEnabled":null,"vnetPrivatePortsCount":null,"publicNetworkAccess":null,"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":null,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":2147483647,"name":"Allow
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappwithappinsights000003","name":"functionappwithappinsights000003","type":"Microsoft.Web/sites","kind":"functionapp","location":"South
+        Central US","properties":{"name":"functionappwithappinsights000003","state":"Running","hostNames":["functionappwithappinsights000003.azurewebsites.net"],"webSpace":"clitest.rg000001-SouthCentralUSwebspace","selfLink":"https://waws-prod-sn1-209.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-SouthCentralUSwebspace/sites/functionappwithappinsights000003","repositorySiteName":"functionappwithappinsights000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"siteScopedCertificatesEnabled":false,"afdEnabled":false,"enabledHostNames":["functionappwithappinsights000003.azurewebsites.net","functionappwithappinsights000003.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"functionappwithappinsights000003.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"virtualIPv6":null,"thumbprint":null,"certificateResourceId":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"functionappwithappinsights000003.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"virtualIPv6":null,"thumbprint":null,"certificateResourceId":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/functionappplan000004","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2025-01-27T17:13:27.6566667","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","dnsConfiguration":{},"vnetRouteAllEnabled":false,"containerAllocationSubnet":null,"useContainerLocalhostBindings":null,"vnetImagePullEnabled":false,"vnetContentShareEnabled":false,"outboundVnetRouting":{"allTraffic":false,"applicationTraffic":false,"contentShareTraffic":false,"imagePullTraffic":false,"backupRestoreTraffic":false},"siteConfig":{"numberOfWorkers":1,"defaultDocuments":null,"netFrameworkVersion":null,"phpVersion":null,"pythonVersion":null,"nodeVersion":null,"powerShellVersion":null,"linuxFxVersion":"","windowsFxVersion":null,"windowsConfiguredStacks":null,"requestTracingEnabled":null,"remoteDebuggingEnabled":null,"remoteDebuggingVersion":null,"httpLoggingEnabled":null,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":false,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":null,"detailedErrorLoggingEnabled":null,"publishingUsername":null,"publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":null,"use32BitWorkerProcess":null,"webSocketsEnabled":null,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":null,"managedPipelineMode":null,"virtualApplications":null,"winAuthAdminState":null,"winAuthTenantState":null,"customAppPoolIdentityAdminState":null,"customAppPoolIdentityTenantState":null,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":null,"routingRules":null,"experiments":null,"limits":null,"autoHealEnabled":null,"autoHealRules":null,"tracingOptions":null,"vnetName":null,"vnetRouteAllEnabled":null,"vnetPrivatePortsCount":null,"publicNetworkAccess":null,"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":null,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":2147483647,"name":"Allow
         all","description":"Allow all access"}],"ipSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":2147483647,"name":"Allow
-        all","description":"Allow all access"}],"scmIpSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictionsUseMain":null,"http20Enabled":false,"minTlsVersion":null,"minTlsCipherSuite":null,"scmMinTlsCipherSuite":null,"supportedTlsCipherSuites":null,"scmSupportedTlsCipherSuites":null,"scmMinTlsVersion":null,"ftpsState":null,"preWarmedInstanceCount":null,"functionAppScaleLimit":0,"elasticWebAppScaleLimit":null,"healthCheckPath":null,"fileChangeAuditEnabled":null,"functionsRuntimeScaleMonitoringEnabled":null,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":null,"http20ProxyFlag":null,"sitePort":null,"antivirusScanEnabled":null,"storageType":null,"sitePrivateLinkHostEnabled":null,"clusteringEnabled":false},"functionAppConfig":null,"daprConfig":null,"deploymentId":"functionappwithappinsights000003","slotName":null,"trafficManagerHostNames":null,"sku":"Dynamic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":false,"clientAffinityProxyEnabled":false,"blockPathTraversal":false,"clientCertEnabled":false,"clientCertMode":"Required","clientCertExclusionPaths":null,"hostNamesDisabled":false,"ipMode":"IPv4","vnetBackupRestoreEnabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"941EA3594EA040F2A7CF655746577E069DB7C02EA205BC8E6568B995AF723CE2","kind":"functionapp","managedEnvironmentId":null,"workloadProfileName":null,"resourceConfig":null,"inboundIpAddress":"20.111.1.4","possibleInboundIpAddresses":"20.111.1.4","ftpUsername":"functionappwithappinsights000003\\$functionappwithappinsights000003","ftpsHostName":"ftps://waws-prod-par-033.ftp.azurewebsites.windows.net/site/wwwroot","outboundIpAddresses":"20.74.71.192,20.74.78.150,20.74.42.48,20.74.47.48,20.74.113.20,20.74.114.6,20.74.47.204,20.74.112.135,20.74.112.229,20.74.113.113,20.74.113.127,20.74.114.85,4.176.8.173,20.199.59.142,20.199.59.187,20.199.60.190,20.199.61.0,20.199.61.183,20.199.61.196,20.111.1.4","possibleOutboundIpAddresses":"20.74.71.192,20.74.78.150,20.74.42.48,20.74.47.48,20.74.113.20,20.74.114.6,20.74.47.204,20.74.112.135,20.74.112.229,20.74.113.113,20.74.113.127,20.74.114.85,4.176.8.173,20.199.59.142,20.199.59.187,20.199.60.190,20.199.61.0,20.199.61.183,20.199.61.196,20.74.114.213,20.74.115.57,20.74.116.33,20.74.116.76,20.74.116.198,20.74.118.123,20.74.119.18,20.74.119.178,20.19.104.219,20.19.106.154,20.19.107.173,20.19.107.208,20.19.107.213,20.19.107.239,20.19.107.254,20.19.108.3,20.19.108.4,20.19.108.19,20.19.108.34,20.74.42.219,20.19.108.53,20.74.47.253,20.19.108.88,20.19.108.98,20.111.1.4","containerSize":1536,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-par-033","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"functionappwithappinsights000003.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"endToEndEncryptionEnabled":false,"functionsRuntimeAdminIsolationEnabled":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":null,"publicNetworkAccess":null,"buildVersion":null,"targetBuildVersion":null,"migrationState":null,"eligibleLogCategories":"FunctionAppLogs,AppServiceAuthenticationLogs","inFlightFeatures":null,"storageAccountRequired":false,"virtualNetworkSubnetId":null,"keyVaultReferenceIdentity":"SystemAssigned","autoGeneratedDomainNameLabelScope":null,"defaultHostNameScope":"Global","privateLinkIdentifiers":null,"sshEnabled":null}}'
+        all","description":"Allow all access"}],"scmIpSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictionsUseMain":null,"http20Enabled":false,"minTlsVersion":null,"minTlsCipherSuite":null,"scmMinTlsCipherSuite":null,"supportedTlsCipherSuites":null,"scmSupportedTlsCipherSuites":null,"scmMinTlsVersion":null,"ftpsState":null,"preWarmedInstanceCount":null,"functionAppScaleLimit":0,"elasticWebAppScaleLimit":null,"healthCheckPath":null,"fileChangeAuditEnabled":null,"functionsRuntimeScaleMonitoringEnabled":null,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":null,"http20ProxyFlag":null,"sitePort":null,"antivirusScanEnabled":null,"storageType":null,"sitePrivateLinkHostEnabled":null,"clusteringEnabled":false},"functionAppConfig":null,"daprConfig":null,"deploymentId":"functionappwithappinsights000003","slotName":null,"trafficManagerHostNames":null,"sku":"ElasticPremium","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":false,"clientAffinityProxyEnabled":false,"blockPathTraversal":false,"clientCertEnabled":false,"clientCertMode":"Required","clientCertExclusionPaths":null,"hostNamesDisabled":false,"ipMode":"IPv4","vnetBackupRestoreEnabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"941EA3594EA040F2A7CF655746577E069DB7C02EA205BC8E6568B995AF723CE2","kind":"functionapp","managedEnvironmentId":null,"workloadProfileName":null,"resourceConfig":null,"inboundIpAddress":"40.119.12.74","possibleInboundIpAddresses":"40.119.12.74","ftpUsername":"functionappwithappinsights000003\\$functionappwithappinsights000003","ftpsHostName":"ftps://waws-prod-sn1-209.ftp.azurewebsites.windows.net/site/wwwroot","outboundIpAddresses":"52.185.229.228,52.185.229.252,52.185.230.79,52.185.230.82,52.185.230.180,52.185.230.242,40.119.12.74","possibleOutboundIpAddresses":"52.185.225.38,52.185.225.67,52.185.225.83,52.185.226.7,52.185.226.234,52.185.228.117,52.185.229.228,52.185.229.252,52.185.230.79,52.185.230.82,52.185.230.180,52.185.230.242,52.185.231.53,52.185.231.80,52.152.25.52,52.152.25.191,52.152.25.218,52.152.25.248,52.152.26.227,52.152.27.6,52.152.27.8,52.152.27.127,52.152.27.132,52.152.27.136,52.152.28.117,52.152.28.159,52.152.28.190,52.152.28.224,52.152.28.227,52.152.29.27,40.119.12.74","containerSize":1536,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-sn1-209","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"functionappwithappinsights000003.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"endToEndEncryptionEnabled":false,"functionsRuntimeAdminIsolationEnabled":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":null,"publicNetworkAccess":null,"buildVersion":null,"targetBuildVersion":null,"migrationState":null,"eligibleLogCategories":"FunctionAppLogs,AppServiceAuthenticationLogs","inFlightFeatures":null,"storageAccountRequired":false,"virtualNetworkSubnetId":null,"keyVaultReferenceIdentity":"SystemAssigned","autoGeneratedDomainNameLabelScope":null,"defaultHostNameScope":"Global","privateLinkIdentifiers":null,"sshEnabled":null}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '8054'
+      - '7762'
       content-type:
       - application/json
       date:
-      - Thu, 09 Jan 2025 17:00:31 GMT
+      - Mon, 27 Jan 2025 17:13:47 GMT
       etag:
-      - '"1DB62B7E3AB818B"'
+      - '"1DB70DEC86D86B5"'
       expires:
       - '-1'
       pragma:
@@ -452,7 +371,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-resource-requests:
       - '499'
       x-msedge-ref:
-      - 'Ref A: F52EBDB167984B5FB449537A9D7D470E Ref B: CH1AA2020610049 Ref C: 2025-01-09T16:59:37Z'
+      - 'Ref A: 72F046FE01B94BABA8CEA27EB010DFFB Ref B: SJC211051203035 Ref C: 2025-01-27T17:13:23Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -479,17 +398,17 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappwithappinsights000003/config/appsettings/list?api-version=2023-01-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappwithappinsights000003/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"France
-        Central","properties":{"FUNCTIONS_WORKER_RUNTIME":"dotnet","FUNCTIONS_INPROC_NET8_ENABLED":"1","FUNCTIONS_EXTENSION_VERSION":"~4","AzureWebJobsStorage":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","WEBSITE_CONTENTAZUREFILECONNECTIONSTRING":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","WEBSITE_CONTENTSHARE":"functionappwithappinsights000003d350d58d5ac9","AzureWebJobsDashboard":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey=="}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappwithappinsights000003/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"South
+        Central US","properties":{"FUNCTIONS_WORKER_RUNTIME":"dotnet","FUNCTIONS_INPROC_NET8_ENABLED":"1","FUNCTIONS_EXTENSION_VERSION":"~4","AzureWebJobsStorage":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","WEBSITE_CONTENTAZUREFILECONNECTIONSTRING":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","WEBSITE_CONTENTSHARE":"functionappwithappinsights0000039924ac657247","AzureWebJobsDashboard":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey=="}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '933'
+      - '935'
       content-type:
       - application/json
       date:
-      - Thu, 09 Jan 2025 17:01:04 GMT
+      - Mon, 27 Jan 2025 17:14:18 GMT
       expires:
       - '-1'
       pragma:
@@ -505,7 +424,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-resource-requests:
       - '11999'
       x-msedge-ref:
-      - 'Ref A: F18F27DE8CB74FEF829A4B3120791EE2 Ref B: CH1AA2020620017 Ref C: 2025-01-09T17:01:02Z'
+      - 'Ref A: 7CE1531A8DD14E139D282902BC4B6407 Ref B: SJC211051203049 Ref C: 2025-01-27T17:14:18Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -530,19 +449,19 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappwithappinsights000003?api-version=2023-01-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappwithappinsights000003","name":"functionappwithappinsights000003","type":"Microsoft.Web/sites","kind":"functionapp","location":"France
-        Central","properties":{"name":"functionappwithappinsights000003","state":"Running","hostNames":["functionappwithappinsights000003.azurewebsites.net"],"webSpace":"clitest.rg000001-FranceCentralwebspace","selfLink":"https://waws-prod-par-033.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-FranceCentralwebspace/sites/functionappwithappinsights000003","repositorySiteName":"functionappwithappinsights000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"siteScopedCertificatesEnabled":false,"afdEnabled":false,"enabledHostNames":["functionappwithappinsights000003.azurewebsites.net","functionappwithappinsights000003.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"functionappwithappinsights000003.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"virtualIPv6":null,"thumbprint":null,"certificateResourceId":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"functionappwithappinsights000003.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"virtualIPv6":null,"thumbprint":null,"certificateResourceId":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/FranceCentralPlan","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2025-01-09T17:00:30.03","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","dnsConfiguration":{},"vnetRouteAllEnabled":false,"containerAllocationSubnet":null,"useContainerLocalhostBindings":null,"vnetImagePullEnabled":false,"vnetContentShareEnabled":false,"outboundVnetRouting":null,"siteConfig":{"numberOfWorkers":1,"defaultDocuments":null,"netFrameworkVersion":null,"phpVersion":null,"pythonVersion":null,"nodeVersion":null,"powerShellVersion":null,"linuxFxVersion":"","windowsFxVersion":null,"windowsConfiguredStacks":null,"requestTracingEnabled":null,"remoteDebuggingEnabled":null,"remoteDebuggingVersion":null,"httpLoggingEnabled":null,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":false,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":null,"detailedErrorLoggingEnabled":null,"publishingUsername":null,"publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":null,"use32BitWorkerProcess":null,"webSocketsEnabled":null,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":null,"managedPipelineMode":null,"virtualApplications":null,"winAuthAdminState":null,"winAuthTenantState":null,"customAppPoolIdentityAdminState":null,"customAppPoolIdentityTenantState":null,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":null,"routingRules":null,"experiments":null,"limits":null,"autoHealEnabled":null,"autoHealRules":null,"tracingOptions":null,"vnetName":null,"vnetRouteAllEnabled":null,"vnetPrivatePortsCount":null,"publicNetworkAccess":null,"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":null,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":null,"ipSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictions":null,"scmIpSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictionsUseMain":null,"http20Enabled":true,"minTlsVersion":null,"minTlsCipherSuite":null,"scmMinTlsCipherSuite":null,"supportedTlsCipherSuites":null,"scmSupportedTlsCipherSuites":null,"scmMinTlsVersion":null,"ftpsState":null,"preWarmedInstanceCount":null,"functionAppScaleLimit":200,"elasticWebAppScaleLimit":null,"healthCheckPath":null,"fileChangeAuditEnabled":null,"functionsRuntimeScaleMonitoringEnabled":null,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":null,"http20ProxyFlag":null,"sitePort":null,"antivirusScanEnabled":null,"storageType":null,"sitePrivateLinkHostEnabled":null,"clusteringEnabled":false},"functionAppConfig":null,"daprConfig":null,"deploymentId":"functionappwithappinsights000003","slotName":null,"trafficManagerHostNames":null,"sku":"Dynamic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":false,"clientAffinityProxyEnabled":false,"blockPathTraversal":false,"clientCertEnabled":false,"clientCertMode":"Required","clientCertExclusionPaths":null,"hostNamesDisabled":false,"ipMode":"IPv4","vnetBackupRestoreEnabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"941EA3594EA040F2A7CF655746577E069DB7C02EA205BC8E6568B995AF723CE2","kind":"functionapp","managedEnvironmentId":null,"workloadProfileName":null,"resourceConfig":null,"inboundIpAddress":"20.111.1.4","possibleInboundIpAddresses":"20.111.1.4","ftpUsername":"functionappwithappinsights000003\\$functionappwithappinsights000003","ftpsHostName":"ftps://waws-prod-par-033.ftp.azurewebsites.windows.net/site/wwwroot","outboundIpAddresses":"20.74.71.192,20.74.78.150,20.74.42.48,20.74.47.48,20.74.113.20,20.74.114.6,20.74.47.204,20.74.112.135,20.74.112.229,20.74.113.113,20.74.113.127,20.74.114.85,4.176.8.173,20.199.59.142,20.199.59.187,20.199.60.190,20.199.61.0,20.199.61.183,20.199.61.196,20.111.1.4","possibleOutboundIpAddresses":"20.74.71.192,20.74.78.150,20.74.42.48,20.74.47.48,20.74.113.20,20.74.114.6,20.74.47.204,20.74.112.135,20.74.112.229,20.74.113.113,20.74.113.127,20.74.114.85,4.176.8.173,20.199.59.142,20.199.59.187,20.199.60.190,20.199.61.0,20.199.61.183,20.199.61.196,20.74.114.213,20.74.115.57,20.74.116.33,20.74.116.76,20.74.116.198,20.74.118.123,20.74.119.18,20.74.119.178,20.19.104.219,20.19.106.154,20.19.107.173,20.19.107.208,20.19.107.213,20.19.107.239,20.19.107.254,20.19.108.3,20.19.108.4,20.19.108.19,20.19.108.34,20.74.42.219,20.19.108.53,20.74.47.253,20.19.108.88,20.19.108.98,20.111.1.4","containerSize":1536,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-par-033","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"functionappwithappinsights000003.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"endToEndEncryptionEnabled":false,"functionsRuntimeAdminIsolationEnabled":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":[],"publicNetworkAccess":null,"buildVersion":null,"targetBuildVersion":null,"migrationState":null,"eligibleLogCategories":"FunctionAppLogs,AppServiceAuthenticationLogs","inFlightFeatures":["SiteContainers"],"storageAccountRequired":false,"virtualNetworkSubnetId":null,"keyVaultReferenceIdentity":"SystemAssigned","autoGeneratedDomainNameLabelScope":null,"defaultHostNameScope":"Global","privateLinkIdentifiers":null,"sshEnabled":null}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappwithappinsights000003","name":"functionappwithappinsights000003","type":"Microsoft.Web/sites","kind":"functionapp","location":"South
+        Central US","properties":{"name":"functionappwithappinsights000003","state":"Running","hostNames":["functionappwithappinsights000003.azurewebsites.net"],"webSpace":"clitest.rg000001-SouthCentralUSwebspace","selfLink":"https://waws-prod-sn1-209.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-SouthCentralUSwebspace/sites/functionappwithappinsights000003","repositorySiteName":"functionappwithappinsights000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"siteScopedCertificatesEnabled":false,"afdEnabled":false,"enabledHostNames":["functionappwithappinsights000003.azurewebsites.net","functionappwithappinsights000003.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"functionappwithappinsights000003.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"virtualIPv6":null,"thumbprint":null,"certificateResourceId":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"functionappwithappinsights000003.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"virtualIPv6":null,"thumbprint":null,"certificateResourceId":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/functionappplan000004","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2025-01-27T17:13:47.5166667","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","dnsConfiguration":{},"vnetRouteAllEnabled":false,"containerAllocationSubnet":null,"useContainerLocalhostBindings":null,"vnetImagePullEnabled":false,"vnetContentShareEnabled":false,"outboundVnetRouting":null,"siteConfig":{"numberOfWorkers":1,"defaultDocuments":null,"netFrameworkVersion":null,"phpVersion":null,"pythonVersion":null,"nodeVersion":null,"powerShellVersion":null,"linuxFxVersion":"","windowsFxVersion":null,"windowsConfiguredStacks":null,"requestTracingEnabled":null,"remoteDebuggingEnabled":null,"remoteDebuggingVersion":null,"httpLoggingEnabled":null,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":false,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":null,"detailedErrorLoggingEnabled":null,"publishingUsername":null,"publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":null,"use32BitWorkerProcess":null,"webSocketsEnabled":null,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":null,"managedPipelineMode":null,"virtualApplications":null,"winAuthAdminState":null,"winAuthTenantState":null,"customAppPoolIdentityAdminState":null,"customAppPoolIdentityTenantState":null,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":null,"routingRules":null,"experiments":null,"limits":null,"autoHealEnabled":null,"autoHealRules":null,"tracingOptions":null,"vnetName":null,"vnetRouteAllEnabled":null,"vnetPrivatePortsCount":null,"publicNetworkAccess":null,"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":null,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":null,"ipSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictions":null,"scmIpSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictionsUseMain":null,"http20Enabled":true,"minTlsVersion":null,"minTlsCipherSuite":null,"scmMinTlsCipherSuite":null,"supportedTlsCipherSuites":null,"scmSupportedTlsCipherSuites":null,"scmMinTlsVersion":null,"ftpsState":null,"preWarmedInstanceCount":null,"functionAppScaleLimit":0,"elasticWebAppScaleLimit":null,"healthCheckPath":null,"fileChangeAuditEnabled":null,"functionsRuntimeScaleMonitoringEnabled":null,"websiteTimeZone":null,"minimumElasticInstanceCount":1,"azureStorageAccounts":null,"http20ProxyFlag":null,"sitePort":null,"antivirusScanEnabled":null,"storageType":null,"sitePrivateLinkHostEnabled":null,"clusteringEnabled":false},"functionAppConfig":null,"daprConfig":null,"deploymentId":"functionappwithappinsights000003","slotName":null,"trafficManagerHostNames":null,"sku":"ElasticPremium","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":false,"clientAffinityProxyEnabled":false,"blockPathTraversal":false,"clientCertEnabled":false,"clientCertMode":"Required","clientCertExclusionPaths":null,"hostNamesDisabled":false,"ipMode":"IPv4","vnetBackupRestoreEnabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"941EA3594EA040F2A7CF655746577E069DB7C02EA205BC8E6568B995AF723CE2","kind":"functionapp","managedEnvironmentId":null,"workloadProfileName":null,"resourceConfig":null,"inboundIpAddress":"40.119.12.74","possibleInboundIpAddresses":"40.119.12.74","ftpUsername":"functionappwithappinsights000003\\$functionappwithappinsights000003","ftpsHostName":"ftps://waws-prod-sn1-209.ftp.azurewebsites.windows.net/site/wwwroot","outboundIpAddresses":"52.185.229.228,52.185.229.252,52.185.230.79,52.185.230.82,52.185.230.180,52.185.230.242,40.119.12.74","possibleOutboundIpAddresses":"52.185.225.38,52.185.225.67,52.185.225.83,52.185.226.7,52.185.226.234,52.185.228.117,52.185.229.228,52.185.229.252,52.185.230.79,52.185.230.82,52.185.230.180,52.185.230.242,52.185.231.53,52.185.231.80,52.152.25.52,52.152.25.191,52.152.25.218,52.152.25.248,52.152.26.227,52.152.27.6,52.152.27.8,52.152.27.127,52.152.27.132,52.152.27.136,52.152.28.117,52.152.28.159,52.152.28.190,52.152.28.224,52.152.28.227,52.152.29.27,40.119.12.74","containerSize":1536,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-sn1-209","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"functionappwithappinsights000003.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"endToEndEncryptionEnabled":false,"functionsRuntimeAdminIsolationEnabled":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":[],"publicNetworkAccess":null,"buildVersion":null,"targetBuildVersion":null,"migrationState":null,"eligibleLogCategories":"FunctionAppLogs,AppServiceAuthenticationLogs","inFlightFeatures":["SiteContainers"],"storageAccountRequired":false,"virtualNetworkSubnetId":null,"keyVaultReferenceIdentity":"SystemAssigned","autoGeneratedDomainNameLabelScope":null,"defaultHostNameScope":"Global","privateLinkIdentifiers":null,"sshEnabled":null}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '7722'
+      - '7432'
       content-type:
       - application/json
       date:
-      - Thu, 09 Jan 2025 17:01:05 GMT
+      - Mon, 27 Jan 2025 17:14:19 GMT
       etag:
-      - '"1DB62B7FCF95EE0"'
+      - '"1DB70DED3BFADCB"'
       expires:
       - '-1'
       pragma:
@@ -558,7 +477,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: DD90896C82BC4820AEDED4C00D3C00A7 Ref B: CH1AA2020620039 Ref C: 2025-01-09T17:01:04Z'
+      - 'Ref A: 2BB38C5E0EAE40FD97E2AF61E7F23DC4 Ref B: SJC211051204047 Ref C: 2025-01-27T17:14:19Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -583,19 +502,19 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappwithappinsights000003?api-version=2023-12-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappwithappinsights000003","name":"functionappwithappinsights000003","type":"Microsoft.Web/sites","kind":"functionapp","location":"France
-        Central","properties":{"name":"functionappwithappinsights000003","state":"Running","hostNames":["functionappwithappinsights000003.azurewebsites.net"],"webSpace":"clitest.rg000001-FranceCentralwebspace","selfLink":"https://waws-prod-par-033.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-FranceCentralwebspace/sites/functionappwithappinsights000003","repositorySiteName":"functionappwithappinsights000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"siteScopedCertificatesEnabled":false,"afdEnabled":false,"enabledHostNames":["functionappwithappinsights000003.azurewebsites.net","functionappwithappinsights000003.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"functionappwithappinsights000003.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"virtualIPv6":null,"thumbprint":null,"certificateResourceId":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"functionappwithappinsights000003.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"virtualIPv6":null,"thumbprint":null,"certificateResourceId":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/FranceCentralPlan","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2025-01-09T17:00:30.03","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","dnsConfiguration":{},"vnetRouteAllEnabled":false,"containerAllocationSubnet":null,"useContainerLocalhostBindings":null,"vnetImagePullEnabled":false,"vnetContentShareEnabled":false,"outboundVnetRouting":null,"siteConfig":{"numberOfWorkers":1,"defaultDocuments":null,"netFrameworkVersion":null,"phpVersion":null,"pythonVersion":null,"nodeVersion":null,"powerShellVersion":null,"linuxFxVersion":"","windowsFxVersion":null,"windowsConfiguredStacks":null,"requestTracingEnabled":null,"remoteDebuggingEnabled":null,"remoteDebuggingVersion":null,"httpLoggingEnabled":null,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":false,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":null,"detailedErrorLoggingEnabled":null,"publishingUsername":null,"publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":null,"use32BitWorkerProcess":null,"webSocketsEnabled":null,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":null,"managedPipelineMode":null,"virtualApplications":null,"winAuthAdminState":null,"winAuthTenantState":null,"customAppPoolIdentityAdminState":null,"customAppPoolIdentityTenantState":null,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":null,"routingRules":null,"experiments":null,"limits":null,"autoHealEnabled":null,"autoHealRules":null,"tracingOptions":null,"vnetName":null,"vnetRouteAllEnabled":null,"vnetPrivatePortsCount":null,"publicNetworkAccess":null,"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":null,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":null,"ipSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictions":null,"scmIpSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictionsUseMain":null,"http20Enabled":true,"minTlsVersion":null,"minTlsCipherSuite":null,"scmMinTlsCipherSuite":null,"supportedTlsCipherSuites":null,"scmSupportedTlsCipherSuites":null,"scmMinTlsVersion":null,"ftpsState":null,"preWarmedInstanceCount":null,"functionAppScaleLimit":200,"elasticWebAppScaleLimit":null,"healthCheckPath":null,"fileChangeAuditEnabled":null,"functionsRuntimeScaleMonitoringEnabled":null,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":null,"http20ProxyFlag":null,"sitePort":null,"antivirusScanEnabled":null,"storageType":null,"sitePrivateLinkHostEnabled":null,"clusteringEnabled":false},"functionAppConfig":null,"daprConfig":null,"deploymentId":"functionappwithappinsights000003","slotName":null,"trafficManagerHostNames":null,"sku":"Dynamic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":false,"clientAffinityProxyEnabled":false,"blockPathTraversal":false,"clientCertEnabled":false,"clientCertMode":"Required","clientCertExclusionPaths":null,"hostNamesDisabled":false,"ipMode":"IPv4","vnetBackupRestoreEnabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"941EA3594EA040F2A7CF655746577E069DB7C02EA205BC8E6568B995AF723CE2","kind":"functionapp","managedEnvironmentId":null,"workloadProfileName":null,"resourceConfig":null,"inboundIpAddress":"20.111.1.4","possibleInboundIpAddresses":"20.111.1.4","ftpUsername":"functionappwithappinsights000003\\$functionappwithappinsights000003","ftpsHostName":"ftps://waws-prod-par-033.ftp.azurewebsites.windows.net/site/wwwroot","outboundIpAddresses":"20.74.71.192,20.74.78.150,20.74.42.48,20.74.47.48,20.74.113.20,20.74.114.6,20.74.47.204,20.74.112.135,20.74.112.229,20.74.113.113,20.74.113.127,20.74.114.85,4.176.8.173,20.199.59.142,20.199.59.187,20.199.60.190,20.199.61.0,20.199.61.183,20.199.61.196,20.111.1.4","possibleOutboundIpAddresses":"20.74.71.192,20.74.78.150,20.74.42.48,20.74.47.48,20.74.113.20,20.74.114.6,20.74.47.204,20.74.112.135,20.74.112.229,20.74.113.113,20.74.113.127,20.74.114.85,4.176.8.173,20.199.59.142,20.199.59.187,20.199.60.190,20.199.61.0,20.199.61.183,20.199.61.196,20.74.114.213,20.74.115.57,20.74.116.33,20.74.116.76,20.74.116.198,20.74.118.123,20.74.119.18,20.74.119.178,20.19.104.219,20.19.106.154,20.19.107.173,20.19.107.208,20.19.107.213,20.19.107.239,20.19.107.254,20.19.108.3,20.19.108.4,20.19.108.19,20.19.108.34,20.74.42.219,20.19.108.53,20.74.47.253,20.19.108.88,20.19.108.98,20.111.1.4","containerSize":1536,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-par-033","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"functionappwithappinsights000003.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"endToEndEncryptionEnabled":false,"functionsRuntimeAdminIsolationEnabled":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":[],"publicNetworkAccess":null,"buildVersion":null,"targetBuildVersion":null,"migrationState":null,"eligibleLogCategories":"FunctionAppLogs,AppServiceAuthenticationLogs","inFlightFeatures":["SiteContainers"],"storageAccountRequired":false,"virtualNetworkSubnetId":null,"keyVaultReferenceIdentity":"SystemAssigned","autoGeneratedDomainNameLabelScope":null,"defaultHostNameScope":"Global","privateLinkIdentifiers":null,"sshEnabled":null}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappwithappinsights000003","name":"functionappwithappinsights000003","type":"Microsoft.Web/sites","kind":"functionapp","location":"South
+        Central US","properties":{"name":"functionappwithappinsights000003","state":"Running","hostNames":["functionappwithappinsights000003.azurewebsites.net"],"webSpace":"clitest.rg000001-SouthCentralUSwebspace","selfLink":"https://waws-prod-sn1-209.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-SouthCentralUSwebspace/sites/functionappwithappinsights000003","repositorySiteName":"functionappwithappinsights000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"siteScopedCertificatesEnabled":false,"afdEnabled":false,"enabledHostNames":["functionappwithappinsights000003.azurewebsites.net","functionappwithappinsights000003.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"functionappwithappinsights000003.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"virtualIPv6":null,"thumbprint":null,"certificateResourceId":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"functionappwithappinsights000003.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"virtualIPv6":null,"thumbprint":null,"certificateResourceId":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/functionappplan000004","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2025-01-27T17:13:47.5166667","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","dnsConfiguration":{},"vnetRouteAllEnabled":false,"containerAllocationSubnet":null,"useContainerLocalhostBindings":null,"vnetImagePullEnabled":false,"vnetContentShareEnabled":false,"outboundVnetRouting":null,"siteConfig":{"numberOfWorkers":1,"defaultDocuments":null,"netFrameworkVersion":null,"phpVersion":null,"pythonVersion":null,"nodeVersion":null,"powerShellVersion":null,"linuxFxVersion":"","windowsFxVersion":null,"windowsConfiguredStacks":null,"requestTracingEnabled":null,"remoteDebuggingEnabled":null,"remoteDebuggingVersion":null,"httpLoggingEnabled":null,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":false,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":null,"detailedErrorLoggingEnabled":null,"publishingUsername":null,"publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":null,"use32BitWorkerProcess":null,"webSocketsEnabled":null,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":null,"managedPipelineMode":null,"virtualApplications":null,"winAuthAdminState":null,"winAuthTenantState":null,"customAppPoolIdentityAdminState":null,"customAppPoolIdentityTenantState":null,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":null,"routingRules":null,"experiments":null,"limits":null,"autoHealEnabled":null,"autoHealRules":null,"tracingOptions":null,"vnetName":null,"vnetRouteAllEnabled":null,"vnetPrivatePortsCount":null,"publicNetworkAccess":null,"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":null,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":null,"ipSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictions":null,"scmIpSecurityRestrictionsDefaultAction":null,"scmIpSecurityRestrictionsUseMain":null,"http20Enabled":true,"minTlsVersion":null,"minTlsCipherSuite":null,"scmMinTlsCipherSuite":null,"supportedTlsCipherSuites":null,"scmSupportedTlsCipherSuites":null,"scmMinTlsVersion":null,"ftpsState":null,"preWarmedInstanceCount":null,"functionAppScaleLimit":0,"elasticWebAppScaleLimit":null,"healthCheckPath":null,"fileChangeAuditEnabled":null,"functionsRuntimeScaleMonitoringEnabled":null,"websiteTimeZone":null,"minimumElasticInstanceCount":1,"azureStorageAccounts":null,"http20ProxyFlag":null,"sitePort":null,"antivirusScanEnabled":null,"storageType":null,"sitePrivateLinkHostEnabled":null,"clusteringEnabled":false},"functionAppConfig":null,"daprConfig":null,"deploymentId":"functionappwithappinsights000003","slotName":null,"trafficManagerHostNames":null,"sku":"ElasticPremium","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":false,"clientAffinityProxyEnabled":false,"blockPathTraversal":false,"clientCertEnabled":false,"clientCertMode":"Required","clientCertExclusionPaths":null,"hostNamesDisabled":false,"ipMode":"IPv4","vnetBackupRestoreEnabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"941EA3594EA040F2A7CF655746577E069DB7C02EA205BC8E6568B995AF723CE2","kind":"functionapp","managedEnvironmentId":null,"workloadProfileName":null,"resourceConfig":null,"inboundIpAddress":"40.119.12.74","possibleInboundIpAddresses":"40.119.12.74","ftpUsername":"functionappwithappinsights000003\\$functionappwithappinsights000003","ftpsHostName":"ftps://waws-prod-sn1-209.ftp.azurewebsites.windows.net/site/wwwroot","outboundIpAddresses":"52.185.229.228,52.185.229.252,52.185.230.79,52.185.230.82,52.185.230.180,52.185.230.242,40.119.12.74","possibleOutboundIpAddresses":"52.185.225.38,52.185.225.67,52.185.225.83,52.185.226.7,52.185.226.234,52.185.228.117,52.185.229.228,52.185.229.252,52.185.230.79,52.185.230.82,52.185.230.180,52.185.230.242,52.185.231.53,52.185.231.80,52.152.25.52,52.152.25.191,52.152.25.218,52.152.25.248,52.152.26.227,52.152.27.6,52.152.27.8,52.152.27.127,52.152.27.132,52.152.27.136,52.152.28.117,52.152.28.159,52.152.28.190,52.152.28.224,52.152.28.227,52.152.29.27,40.119.12.74","containerSize":1536,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-sn1-209","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"functionappwithappinsights000003.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"endToEndEncryptionEnabled":false,"functionsRuntimeAdminIsolationEnabled":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":[],"publicNetworkAccess":null,"buildVersion":null,"targetBuildVersion":null,"migrationState":null,"eligibleLogCategories":"FunctionAppLogs,AppServiceAuthenticationLogs","inFlightFeatures":["SiteContainers"],"storageAccountRequired":false,"virtualNetworkSubnetId":null,"keyVaultReferenceIdentity":"SystemAssigned","autoGeneratedDomainNameLabelScope":null,"defaultHostNameScope":"Global","privateLinkIdentifiers":null,"sshEnabled":null}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '7722'
+      - '7432'
       content-type:
       - application/json
       date:
-      - Thu, 09 Jan 2025 17:01:06 GMT
+      - Mon, 27 Jan 2025 17:14:19 GMT
       etag:
-      - '"1DB62B7FCF95EE0"'
+      - '"1DB70DED3BFADCB"'
       expires:
       - '-1'
       pragma:
@@ -611,7 +530,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 1BEB9299F2DC4AD0986D155A35DE5487 Ref B: CH1AA2020620019 Ref C: 2025-01-09T17:01:05Z'
+      - 'Ref A: AC83DB998AD04A01935242C3F66413D7 Ref B: SJC211051204021 Ref C: 2025-01-27T17:14:20Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -636,17 +555,17 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/functionappwithappinsights000003/config/slotConfigNames?api-version=2023-01-01
   response:
     body:
-      string: '{"id":null,"name":"functionappwithappinsights000003","type":"Microsoft.Web/sites","location":"France
-        Central","properties":{"connectionStringNames":null,"appSettingNames":null,"azureStorageConfigNames":null}}'
+      string: '{"id":null,"name":"functionappwithappinsights000003","type":"Microsoft.Web/sites","location":"South
+        Central US","properties":{"connectionStringNames":null,"appSettingNames":null,"azureStorageConfigNames":null}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '208'
+      - '210'
       content-type:
       - application/json
       date:
-      - Thu, 09 Jan 2025 17:01:06 GMT
+      - Mon, 27 Jan 2025 17:14:21 GMT
       expires:
       - '-1'
       pragma:
@@ -662,7 +581,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 862497A4005B42D58CDC7CD308317BA7 Ref B: CH1AA2020610027 Ref C: 2025-01-09T17:01:06Z'
+      - 'Ref A: A6F6BB80106E4D7BA203953241545BF5 Ref B: SJC211051205027 Ref C: 2025-01-27T17:14:21Z'
       x-powered-by:
       - ASP.NET
     status:

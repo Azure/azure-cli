@@ -1,5 +1,66 @@
 interactions:
 - request:
+    body: '{"location": "southcentralus", "sku": {"name": "EP1", "tier": "ElasticPremium"},
+      "properties": {"perSiteScaling": false, "reserved": true, "isXenon": false,
+      "zoneRedundant": false}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - functionapp plan create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '181'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --sku --is-linux --location
+      User-Agent:
+      - AZURECLI/2.68.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/functionappplan000004?api-version=2023-01-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/functionappplan000004","name":"functionappplan000004","type":"Microsoft.Web/serverfarms","kind":"elastic","location":"southcentralus","properties":{"serverFarmId":13659,"name":"functionappplan000004","sku":{"name":"EP1","tier":"ElasticPremium","size":"EP1","family":"EP","capacity":1},"workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-SouthCentralUSwebspace-Linux","subscription":"dbf67cc6-6c57-44b8-97fc-4356f0d555b3","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":0,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"South
+        Central US","perSiteScaling":false,"elasticScaleEnabled":true,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"elastic","resourceGroup":"clitest.rg000001","reserved":true,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-sn1-219_13659","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"migrateToVMSS":null,"vnetConnectionsUsed":null,"vnetConnectionsMax":null,"createdTime":"2025-01-27T16:46:39.02"},"sku":{"name":"EP1","tier":"ElasticPremium","size":"EP1","family":"EP","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1654'
+      content-type:
+      - application/json
+      date:
+      - Mon, 27 Jan 2025 16:46:41 GMT
+      etag:
+      - '"1DB70DB0AC82840"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '12000'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '800'
+      x-msedge-ref:
+      - 'Ref A: 56DBBE43D2744499900F502A464514B1 Ref B: CH1AA2020620053 Ref C: 2025-01-27T16:46:34Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
     body: null
     headers:
       Accept:
@@ -11,168 +72,25 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n -c -s --os-type --runtime --runtime-version
+      - -g -n -p -s --os-type --runtime --runtime-version
       User-Agent:
-      - AZURECLI/2.67.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.68.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions?sku=Dynamic&api-version=2023-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/functionappplan000004?api-version=2023-01-01
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Canada
-        Central","name":"Canada Central","type":"Microsoft.Web/geoRegions","properties":{"name":"Canada
-        Central","description":"Canada Central","sortOrder":0,"displayName":"Canada
-        Central","orgDomain":"ZONEREDUNDANCY;PUBLIC;DREAMSPARK;MSFTPUBLIC;FUNCTIONS;DYNAMIC;DSERIES;LINUX;LINUXDSERIES;ELASTICPREMIUM;LINUXFREE;ELASTICLINUX;XENON;XENONV3;WINDOWSV3;LINUXV3;LINUXDYNAMIC;WINDOWSMV3;WINDOWSP0V3;LINUXMV3;LINUXP0V3;XENONMV3;MANAGEDAPP","subDomains":"canadacentral-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/North
-        Europe","name":"North Europe","type":"Microsoft.Web/geoRegions","properties":{"name":"North
-        Europe","description":"North Europe","sortOrder":1,"displayName":"North Europe","orgDomain":"ZONEREDUNDANCY;PUBLIC;DREAMSPARK;MSFTPUBLIC;FUNCTIONS;DYNAMIC;LINUX;DSERIES;LINUXDSERIES;SFCONTAINERS;LINUXDYNAMIC;ELASTICPREMIUM;LINUXFREE;ELASTICLINUX;XENON;XENONV3;WINDOWSV3;LINUXV3;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;XENONMV3;FLEXCONSUMPTION;MANAGEDAPP","subDomains":"northeurope-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/West
-        Europe","name":"West Europe","type":"Microsoft.Web/geoRegions","properties":{"name":"West
-        Europe","description":"West Europe","sortOrder":2,"displayName":"West Europe","orgDomain":"ZONEREDUNDANCY;PUBLIC;DREAMSPARK;MSFTPUBLIC;FUNCTIONS;DYNAMIC;LINUX;DSERIES;LINUXDSERIES;XENON;SFCONTAINERS;LINUXDYNAMIC;ELASTICPREMIUM;ELASTICLINUX;LINUXFREE;XENON;XENONV3;WINDOWSV3;LINUXV3;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;XENONMV3;MANAGEDAPP","subDomains":"westeurope-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Southeast
-        Asia","name":"Southeast Asia","type":"Microsoft.Web/geoRegions","properties":{"name":"Southeast
-        Asia","description":"Southeast Asia","sortOrder":3,"displayName":"Southeast
-        Asia","orgDomain":"ZONEREDUNDANCY;PUBLIC;DREAMSPARK;MSFTPUBLIC;FUNCTIONS;DYNAMIC;LINUX;DSERIES;LINUXDSERIES;XENON;ELASTICPREMIUM;LINUXFREE;ELASTICLINUX;LINUXDYNAMIC;XENON;XENONV3;WINDOWSV3;LINUXV3;WINDOWSMV3;WINDOWSP0V3;LINUXP0V3;LINUXMV3;XENONMV3;FLEXCONSUMPTION;MANAGEDAPP","subDomains":"southeastasia-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/East
-        Asia","name":"East Asia","type":"Microsoft.Web/geoRegions","properties":{"name":"East
-        Asia","description":null,"sortOrder":4,"displayName":"East Asia","orgDomain":"ZONEREDUNDANCY;PUBLIC;DREAMSPARK;MSFTPUBLIC;FUNCTIONS;DYNAMIC;LINUX;DSERIES;LINUXDSERIES;SFCONTAINERS;LINUXDYNAMIC;ELASTICPREMIUM;LINUXFREE;ELASTICLINUX;XENON;XENONV3;WINDOWSV3;LINUXV3;WINDOWSP0V3;LINUXP0V3;WINDOWSMV3;LINUXMV3;FLEXCONSUMPTION;XENONMV3;MANAGEDAPP;FCZONEREDUNDANCY","subDomains":"eastasia-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/West
-        US","name":"West US","type":"Microsoft.Web/geoRegions","properties":{"name":"West
-        US","description":"West US","sortOrder":5,"displayName":"West US","orgDomain":"PUBLIC;DREAMSPARK;MSFTPUBLIC;FUNCTIONS;DYNAMIC;LINUX;DSERIES;LINUXDSERIES;XENON;ELASTICPREMIUM;LINUXFREE;ELASTICLINUX;LINUXDYNAMIC;XENON;XENONV3;WINDOWSV3;LINUXV3;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;XENONMV3;MANAGEDAPP","subDomains":"westus-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Japan
-        West","name":"Japan West","type":"Microsoft.Web/geoRegions","properties":{"name":"Japan
-        West","description":"Japan West","sortOrder":7,"displayName":"Japan West","orgDomain":"PUBLIC;DREAMSPARK;MSFTPUBLIC;FUNCTIONS;DYNAMIC;LINUX;XENON;DSERIES;LINUXDSERIES;ELASTICPREMIUM;LINUXFREE;ELASTICLINUX;LINUXDYNAMIC;WINDOWSV3;LINUXV3;WINDOWSP0V3;LINUXP0V3;LINUXMV3;WINDOWSMV3;XENONV3;XENONMV3","subDomains":"japanwest-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Japan
-        East","name":"Japan East","type":"Microsoft.Web/geoRegions","properties":{"name":"Japan
-        East","description":"Japan East","sortOrder":8,"displayName":"Japan East","orgDomain":"ZONEREDUNDANCY;PUBLIC;DREAMSPARK;MSFTPUBLIC;FUNCTIONS;DYNAMIC;LINUX;DSERIES;LINUXDSERIES;LINUXFREE;ELASTICLINUX;ELASTICPREMIUM;LINUXDYNAMIC;XENON;XENONV3;WINDOWSV3;LINUXV3;WINDOWSP0V3;LINUXP0V3;LINUXMV3;WINDOWSMV3;MANAGEDAPP;XENONMV3","subDomains":"japaneast-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/East
-        US 2","name":"East US 2","type":"Microsoft.Web/geoRegions","properties":{"name":"East
-        US 2","description":"East US 2","sortOrder":9,"displayName":"East US 2","orgDomain":"ZONEREDUNDANCY;PUBLIC;DREAMSPARK;MSFTPUBLIC;FUNCTIONS;DYNAMIC;DSERIES;LINUX;LINUXDSERIES;ELASTICPREMIUM;LINUXFREE;LINUXDYNAMIC;ELASTICLINUX;XENON;XENONV3;WINDOWSV3;LINUXV3;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;XENONMV3;FLEXCONSUMPTION;MANAGEDAPP","subDomains":"eastus2-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/North
-        Central US","name":"North Central US","type":"Microsoft.Web/geoRegions","properties":{"name":"North
-        Central US","description":"North Central US","sortOrder":10,"displayName":"North
-        Central US","orgDomain":"PUBLIC;DREAMSPARK;MSFTPUBLIC;FUNCTIONS;DYNAMIC;LINUX;DSERIES;LINUXDSERIES;LINUXFREE;ELASTICPREMIUM;ELASTICLINUX;LINUXDYNAMIC;XENON;XENONV3;WINDOWSV3;LINUXV3;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;XENONMV3;MANAGEDAPP","subDomains":"northcentralus-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/South
-        Central US","name":"South Central US","type":"Microsoft.Web/geoRegions","properties":{"name":"South
-        Central US","description":"South Central US","sortOrder":11,"displayName":"South
-        Central US","orgDomain":"ZONEREDUNDANCY;PUBLIC;DREAMSPARK;MSFTPUBLIC;FUNCTIONS;DYNAMIC;DSERIES;LINUX;LINUXDSERIES;ELASTICPREMIUM;LINUXFREE;LINUXDYNAMIC;ELASTICLINUX;XENON;XENONV3;WINDOWSV3;LINUXV3;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;XENONMV3;FLEXCONSUMPTION;MANAGEDAPP","subDomains":"southcentralus-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Brazil
-        South","name":"Brazil South","type":"Microsoft.Web/geoRegions","properties":{"name":"Brazil
-        South","description":null,"sortOrder":12,"displayName":"Brazil South","orgDomain":"ZONEREDUNDANCY;PUBLIC;DREAMSPARK;MSFTPUBLIC;FUNCTIONS;DYNAMIC;LINUX;DSERIES;LINUXDSERIES;LINUXFREE;ELASTICPREMIUM;LINUXDYNAMIC;ELASTICLINUX;XENON;XENONV3;WINDOWSV3;LINUXV3;LINUXMV3;LINUXP0V3;WINDOWSMV3;WINDOWSP0V3;MANAGEDAPP","subDomains":"brazilsouth-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Australia
-        East","name":"Australia East","type":"Microsoft.Web/geoRegions","properties":{"name":"Australia
-        East","description":"Australia East","sortOrder":13,"displayName":"Australia
-        East","orgDomain":"ZONEREDUNDANCY;PUBLIC;DREAMSPARK;MSFTPUBLIC;FUNCTIONS;DYNAMIC;LINUX;DSERIES;LINUXDSERIES;XENON;ELASTICPREMIUM;LINUXFREE;LINUXDYNAMIC;ELASTICLINUX;XENON;XENONV3;WINDOWSV3;LINUXV3;LINUXMV3;LINUXP0V3;WINDOWSMV3;WINDOWSP0V3;XENONMV3;FLEXCONSUMPTION;MANAGEDAPP","subDomains":"australiaeast-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Australia
-        Southeast","name":"Australia Southeast","type":"Microsoft.Web/geoRegions","properties":{"name":"Australia
-        Southeast","description":"Australia Southeast","sortOrder":14,"displayName":"Australia
-        Southeast","orgDomain":"PUBLIC;DREAMSPARK;MSFTPUBLIC;FUNCTIONS;DYNAMIC;DSERIES;LINUX;LINUXDSERIES;ELASTICPREMIUM;LINUXFREE;ELASTICLINUX;XENON;XENONV3;WINDOWSV3;LINUXV3;LINUXDYNAMIC;WINDOWSMV3;LINUXMV3;LINUXP0V3;WINDOWSP0V3;XENONMV3","subDomains":"australiasoutheast-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Central
-        US","name":"Central US","type":"Microsoft.Web/geoRegions","properties":{"name":"Central
-        US","description":"Central US","sortOrder":15,"displayName":"Central US","orgDomain":"ZONEREDUNDANCY;PUBLIC;DREAMSPARK;MSFTPUBLIC;FUNCTIONS;DYNAMIC;DSERIES;LINUX;LINUXDSERIES;ELASTICPREMIUM;LINUXFREE;LINUXDYNAMIC;ELASTICLINUX;XENON;XENONV3;WINDOWSV3;LINUXV3;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;XENONMV3;MANAGEDAPP","subDomains":"centralus-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/East
-        US","name":"East US","type":"Microsoft.Web/geoRegions","properties":{"name":"East
-        US","description":null,"sortOrder":2147483647,"displayName":"East US","orgDomain":"ZONEREDUNDANCY;PUBLIC;DREAMSPARK;MSFTPUBLIC;FUNCTIONS;DYNAMIC;LINUX;DSERIES;FAKEORG;LINUXDSERIES;XENON;SFCONTAINERS;LINUXDYNAMIC;LINUXFREE;ELASTICLINUX;ELASTICPREMIUM;XENON;XENONV3;WINDOWSV3;LINUXV3;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;XENONMV3;FLEXCONSUMPTION;MANAGEDAPP","subDomains":"eastus-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/East
-        Asia (Stage)","name":"East Asia (Stage)","type":"Microsoft.Web/geoRegions","properties":{"name":"East
-        Asia (Stage)","description":null,"sortOrder":2147483647,"displayName":"East
-        Asia (Stage)","orgDomain":"ZONEREDUNDANCY;PUBLIC;DREAMSPARK;MSFTPUBLIC;FUNCTIONS;DYNAMIC;LINUX;DSERIES;LINUXDSERIES;SFCONTAINERS;LINUXDYNAMIC;ELASTICPREMIUM;LINUXFREE;ELASTICLINUX;XENON;XENONV3;WINDOWSV3;LINUXV3;WINDOWSP0V3;LINUXP0V3;WINDOWSMV3;LINUXMV3;XENONMV3","subDomains":null}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Central
-        India","name":"Central India","type":"Microsoft.Web/geoRegions","properties":{"name":"Central
-        India","description":"Central India","sortOrder":2147483647,"displayName":"Central
-        India","orgDomain":"ZONEREDUNDANCY;PUBLIC;DREAMSPARK;MSFTPUBLIC;FUNCTIONS;DYNAMIC;LINUX;DSERIES;LINUXDSERIES;LINUXDYNAMIC;ELASTICPREMIUM;ELASTICLINUX;XENON;XENONV3;WINDOWSV3;LINUXV3;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;LINUXFREE;MANAGEDAPP;XENONMV3","subDomains":"centralindia-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/West
-        India","name":"West India","type":"Microsoft.Web/geoRegions","properties":{"name":"West
-        India","description":null,"sortOrder":2147483647,"displayName":"West India","orgDomain":"PUBLIC;DREAMSPARK;MSFTPUBLIC;FUNCTIONS;DYNAMIC;LINUX;DSERIES;LINUXDSERIES;ELASTICPREMIUM;LINUXDYNAMIC;ELASTICLINUX;LINUXFREE","subDomains":"westindia-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/South
-        India","name":"South India","type":"Microsoft.Web/geoRegions","properties":{"name":"South
-        India","description":null,"sortOrder":2147483647,"displayName":"South India","orgDomain":"PUBLIC;DREAMSPARK;MSFTPUBLIC;FUNCTIONS;DYNAMIC;DSERIES;LINUX;LINUXDSERIES;ELASTICPREMIUM;LINUXFREE;ELASTICLINUX;XENON;XENONV3;WINDOWSV3;LINUXV3;LINUXDYNAMIC;WINDOWSP0V3;WINDOWSMV3;LINUXMV3;LINUXP0V3","subDomains":"southindia-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Canada
-        East","name":"Canada East","type":"Microsoft.Web/geoRegions","properties":{"name":"Canada
-        East","description":null,"sortOrder":2147483647,"displayName":"Canada East","orgDomain":"PUBLIC;DREAMSPARK;MSFTPUBLIC;FUNCTIONS;DYNAMIC;LINUX;DSERIES;LINUXDSERIES;LINUXDYNAMIC;ELASTICPREMIUM;ELASTICLINUX;WINDOWSV3;LINUXV3;XENONV3;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;LINUXFREE;MANAGEDAPP","subDomains":"canadaeast-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/West
-        Central US","name":"West Central US","type":"Microsoft.Web/geoRegions","properties":{"name":"West
-        Central US","description":null,"sortOrder":2147483647,"displayName":"West
-        Central US","orgDomain":"PUBLIC;FUNCTIONS;DYNAMIC;LINUX;DSERIES;LINUXDSERIES;ELASTICLINUX;ELASTICPREMIUM;MSFTPUBLIC;XENON;XENONV3;WINDOWSV3;LINUXV3;LINUXDYNAMIC;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;LINUXFREE;MANAGEDAPP","subDomains":"westcentralus-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/West
-        US 2","name":"West US 2","type":"Microsoft.Web/geoRegions","properties":{"name":"West
-        US 2","description":"West US 2","sortOrder":2147483647,"displayName":"West
-        US 2","orgDomain":"PUBLIC;DREAMSPARK;MSFTPUBLIC;FUNCTIONS;DYNAMIC;LINUX;DSERIES;LINUXDSERIES;LINUXFREE;LINUXDYNAMIC;ELASTICPREMIUM;ELASTICLINUX;XENON;XENONV3;WINDOWSV3;LINUXV3;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;ZONEREDUNDANCY;FLEXCONSUMPTION;XENONMV3;MANAGEDAPP","subDomains":"westus2-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/UK
-        West","name":"UK West","type":"Microsoft.Web/geoRegions","properties":{"name":"UK
-        West","description":"UK West","sortOrder":2147483647,"displayName":"UK West","orgDomain":"PUBLIC;MSFTPUBLIC;FUNCTIONS;DYNAMIC;DSERIES;LINUX;LINUXDSERIES;ELASTICPREMIUM;LINUXDYNAMIC;ELASTICLINUX;XENON;XENONV3;WINDOWSV3;LINUXV3;WINDOWSMV3;WINDOWSP0V3;LINUXP0V3;LINUXMV3;LINUXFREE;MANAGEDAPP;XENONMV3","subDomains":"ukwest-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/UK
-        South","name":"UK South","type":"Microsoft.Web/geoRegions","properties":{"name":"UK
-        South","description":"UK South","sortOrder":2147483647,"displayName":"UK South","orgDomain":"ZONEREDUNDANCY;PUBLIC;MSFTPUBLIC;DYNAMIC;DSERIES;LINUX;LINUXDSERIES;LINUXFREE;LINUXDYNAMIC;ELASTICPREMIUM;ELASTICLINUX;XENON;XENONV3;WINDOWSV3;LINUXV3;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;XENONMV3;FLEXCONSUMPTION;MANAGEDAPP","subDomains":"uksouth-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/East
-        US 2 EUAP","name":"East US 2 EUAP","type":"Microsoft.Web/geoRegions","properties":{"name":"East
-        US 2 EUAP","description":null,"sortOrder":2147483647,"displayName":"East US
-        2 EUAP","orgDomain":"ZONEREDUNDANCY;EUAP;XENON;LINUXDSERIES;ELASTICPREMIUM;FUNCTIONS;DYNAMIC;LINUX;LINUXFREE;ELASTICLINUX;WINDOWSV3;XENONV3;LINUXV3;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;XENONMV3;LINUXDYNAMIC;DSERIES;FLEXCONSUMPTION;MANAGEDAPP","subDomains":"eastus2euap-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Central
-        US EUAP","name":"Central US EUAP","type":"Microsoft.Web/geoRegions","properties":{"name":"Central
-        US EUAP","description":null,"sortOrder":2147483647,"displayName":"Central
-        US EUAP","orgDomain":"EUAP;LINUX;DSERIES;LINUXDSERIES;ELASTICPREMIUM;LINUXFREE;LINUXDYNAMIC;DYNAMIC;WINDOWSV3;WINDOWSP0V3;MANAGEDAPP","subDomains":"centraluseuap-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Korea
-        South","name":"Korea South","type":"Microsoft.Web/geoRegions","properties":{"name":"Korea
-        South","description":null,"sortOrder":2147483647,"displayName":"Korea South","orgDomain":"PUBLIC;DSERIES;LINUX;LINUXDSERIES;ELASTICPREMIUM;ELASTICLINUX;FUNCTIONS;DYNAMIC;MSFTPUBLIC;WINDOWSV3;LINUXV3;LINUXP0V3;LINUXFREE;WINDOWSP0V3;LINUXDYNAMIC","subDomains":"koreasouth-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Korea
-        Central","name":"Korea Central","type":"Microsoft.Web/geoRegions","properties":{"name":"Korea
-        Central","description":null,"sortOrder":2147483647,"displayName":"Korea Central","orgDomain":"ZONEREDUNDANCY;PUBLIC;DREAMSPARK;MSFTPUBLIC;FUNCTIONS;DYNAMIC;LINUX;LINUXDSERIES;ELASTICPREMIUM;LINUXFREE;DSERIES;LINUXDYNAMIC;ELASTICLINUX;XENON;XENONV3;WINDOWSV3;LINUXV3;WINDOWSP0V3;LINUXP0V3;LINUXMV3;WINDOWSMV3;MANAGEDAPP","subDomains":"koreacentral-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/France
-        South","name":"France South","type":"Microsoft.Web/geoRegions","properties":{"name":"France
-        South","description":null,"sortOrder":2147483647,"displayName":"France South","orgDomain":"PUBLIC;LINUX;LINUXDSERIES;DSERIES;MSFTPUBLIC;FUNCTIONS;DYNAMIC;ELASTICPREMIUM;ELASTICLINUX;LINUXDYNAMIC;XENONV3;WINDOWSV3;WINDOWSMV3;WINDOWSP0V3;LINUXFREE;LINUXV3;LINUXMV3;LINUXP0V3","subDomains":"francesouth-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/France
-        Central","name":"France Central","type":"Microsoft.Web/geoRegions","properties":{"name":"France
-        Central","description":"France Central","sortOrder":2147483647,"displayName":"France
-        Central","orgDomain":"ZONEREDUNDANCY;PUBLIC;MSFTPUBLIC;DSERIES;DYNAMIC;LINUX;LINUXDSERIES;ELASTICPREMIUM;LINUXFREE;LINUXDYNAMIC;ELASTICLINUX;XENON;XENONV3;WINDOWSV3;LINUXV3;WINDOWSP0V3;WINDOWSMV3;LINUXMV3;LINUXP0V3;XENONMV3;MANAGEDAPP","subDomains":"francecentral-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Australia
-        Central 2","name":"Australia Central 2","type":"Microsoft.Web/geoRegions","properties":{"name":"Australia
-        Central 2","description":null,"sortOrder":2147483647,"displayName":"Australia
-        Central 2","orgDomain":"PUBLIC;FUNCTIONS;DYNAMIC;DSERIES;LINUX;LINUXDSERIES;ELASTICPREMIUM;MSFTPUBLIC;WINDOWSMV3;WINDOWSP0V3;LINUXDYNAMIC;WINDOWSV3;LINUXV3;ELASTICLINUX;LINUXP0V3;LINUXFREE","subDomains":"australiacentral2-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Australia
-        Central","name":"Australia Central","type":"Microsoft.Web/geoRegions","properties":{"name":"Australia
-        Central","description":null,"sortOrder":2147483647,"displayName":"Australia
-        Central","orgDomain":"PUBLIC;FUNCTIONS;DYNAMIC;DSERIES;LINUX;LINUXDSERIES;LINUXFREE;ELASTICPREMIUM;ELASTICLINUX;MSFTPUBLIC;WINDOWSV3;LINUXV3;LINUXMV3;LINUXP0V3;LINUXDYNAMIC;WINDOWSP0V3","subDomains":"australiacentral-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/South
-        Africa North","name":"South Africa North","type":"Microsoft.Web/geoRegions","properties":{"name":"South
-        Africa North","description":"South Africa North","sortOrder":2147483647,"displayName":"South
-        Africa North","orgDomain":"ZONEREDUNDANCY;PUBLIC;MSFTPUBLIC;FUNCTIONS;DYNAMIC;LINUX;LINUXDSERIES;DSERIES;ELASTICPREMIUM;ELASTICLINUX;XENON;XENONV3;WINDOWSV3;LINUXV3;LINUXDYNAMIC;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;LINUXFREE;MANAGEDAPP;XENONMV3","subDomains":"southafricanorth-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/South
-        Africa West","name":"South Africa West","type":"Microsoft.Web/geoRegions","properties":{"name":"South
-        Africa West","description":null,"sortOrder":2147483647,"displayName":"South
-        Africa West","orgDomain":"PUBLIC;DSERIES;LINUX;LINUXDSERIES;ELASTICPREMIUM;ELASTICLINUX;FUNCTIONS;DYNAMIC;MSFTPUBLIC;WINDOWSMV3;WINDOWSP0V3;LINUXDYNAMIC;WINDOWSV3;LINUXV3;LINUXP0V3","subDomains":"southafricawest-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Switzerland
-        North","name":"Switzerland North","type":"Microsoft.Web/geoRegions","properties":{"name":"Switzerland
-        North","description":null,"sortOrder":2147483647,"displayName":"Switzerland
-        North","orgDomain":"ZONEREDUNDANCY;PUBLIC;DSERIES;LINUX;LINUXDSERIES;LINUXFREE;FUNCTIONS;DYNAMIC;LINUXDYNAMIC;ELASTICPREMIUM;ELASTICLINUX;XENON;XENONV3;WINDOWSV3;LINUXV3;MSFTPUBLIC;WINDOWSP0V3;LINUXP0V3;WINDOWSMV3;LINUXMV3;XENONMV3;MANAGEDAPP","subDomains":"switzerlandnorth-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Germany
-        West Central","name":"Germany West Central","type":"Microsoft.Web/geoRegions","properties":{"name":"Germany
-        West Central","description":null,"sortOrder":2147483647,"displayName":"Germany
-        West Central","orgDomain":"ZONEREDUNDANCY;PUBLIC;DSERIES;LINUX;LINUXDSERIES;ELASTICPREMIUM;FUNCTIONS;DYNAMIC;ELASTICLINUX;LINUXDYNAMIC;XENON;XENONV3;WINDOWSV3;LINUXV3;MSFTPUBLIC;LINUXP0V3;WINDOWSMV3;WINDOWSP0V3;LINUXFREE;LINUXMV3;MANAGEDAPP;XENONMV3,,","subDomains":"germanywestcentral-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Germany
-        North","name":"Germany North","type":"Microsoft.Web/geoRegions","properties":{"name":"Germany
-        North","description":null,"sortOrder":2147483647,"displayName":"Germany North","orgDomain":"PUBLIC;DSERIES;LINUX;LINUXDSERIES;LINUXV3;ELASTICPREMIUM;ELASTICLINUX;FUNCTIONS;DYNAMIC;MSFTPUBLIC;LINUXMV3;LINUXP0V3;LINUXDYNAMIC;WINDOWSV3;WINDOWSMV3;WINDOWSP0V3;LINUXFREE","subDomains":"germanynorth-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Switzerland
-        West","name":"Switzerland West","type":"Microsoft.Web/geoRegions","properties":{"name":"Switzerland
-        West","description":null,"sortOrder":2147483647,"displayName":"Switzerland
-        West","orgDomain":"PUBLIC;DSERIES;LINUX;LINUXDSERIES;LINUXFREE;FUNCTIONS;DYNAMIC;ELASTICPREMIUM;ELASTICLINUX;MSFTPUBLIC;WINDOWSP0V3;LINUXDYNAMIC;XENONV3;WINDOWSV3;LINUXV3;MANAGEDAPP;LINUXP0V3","subDomains":"switzerlandwest-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/UAE
-        Central","name":"UAE Central","type":"Microsoft.Web/geoRegions","properties":{"name":"UAE
-        Central","description":null,"sortOrder":2147483647,"displayName":"UAE Central","orgDomain":"PUBLIC;DSERIES;LINUX;LINUXDSERIES;LINUXFREE;MSFTPUBLIC;ELASTICPREMIUM;ELASTICLINUX;DYNAMIC;LINUXDYNAMIC","subDomains":"uaecentral-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/UAE
-        North","name":"UAE North","type":"Microsoft.Web/geoRegions","properties":{"name":"UAE
-        North","description":null,"sortOrder":2147483647,"displayName":"UAE North","orgDomain":"ZONEREDUNDANCY;PUBLIC;DSERIES;LINUX;LINUXDSERIES;LINUXFREE;FUNCTIONS;DYNAMIC;LINUXDYNAMIC;ELASTICPREMIUM;ELASTICLINUX;XENON;XENONV3;WINDOWSV3;LINUXV3;MSFTPUBLIC;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;MANAGEDAPP","subDomains":"uaenorth-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Norway
-        West","name":"Norway West","type":"Microsoft.Web/geoRegions","properties":{"name":"Norway
-        West","description":null,"sortOrder":2147483647,"displayName":"Norway West","orgDomain":"PUBLIC;DSERIES;MSFTPUBLIC;LINUX;LINUXDSERIES;FUNCTIONS;DYNAMIC;LINUXMV3;LINUXDYNAMIC;WINDOWSV3;WINDOWSP0V3;LINUXFREE;ELASTICLINUX","subDomains":"norwaywest-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Norway
-        East","name":"Norway East","type":"Microsoft.Web/geoRegions","properties":{"name":"Norway
-        East","description":"Norway East","sortOrder":2147483647,"displayName":"Norway
-        East","orgDomain":"ZONEREDUNDANCY;PUBLIC;LINUX;LINUXDSERIES;DSERIES;ELASTICLINUX;ELASTICPREMIUM;FUNCTIONS;DYNAMIC;XENON;XENONV3;WINDOWSV3;LINUXV3;MSFTPUBLIC;LINUXDYNAMIC;WINDOWSP0V3;LINUXP0V3;LINUXMV3;WINDOWSMV3;LINUXFREE;XENONMV3;MANAGEDAPP","subDomains":"norwayeast-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Brazil
-        Southeast","name":"Brazil Southeast","type":"Microsoft.Web/geoRegions","properties":{"name":"Brazil
-        Southeast","description":null,"sortOrder":2147483647,"displayName":"Brazil
-        Southeast","orgDomain":"PUBLIC;LINUX;LINUXDSERIES;DSERIES;LINUXFREE;FUNCTIONS;DYNAMIC;MSFTPUBLIC;LINUXDYNAMIC;ELASTICPREMIUM;ELASTICLINUX","subDomains":"brazilsoutheast-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/West
-        US 3","name":"West US 3","type":"Microsoft.Web/geoRegions","properties":{"name":"West
-        US 3","description":"West US 3","sortOrder":2147483647,"displayName":"West
-        US 3","orgDomain":"ZONEREDUNDANCY;PUBLIC;DSERIES;LINUX;LINUXDSERIES;XENON;XENONV3;WINDOWSV3;LINUXV3;ELASTICPREMIUM;ELASTICLINUX;FUNCTIONS;DYNAMIC;LINUXDYNAMIC;MSFTPUBLIC;LINUXMV3;LINUXP0V3;WINDOWSMV3;WINDOWSP0V3;LINUXFREE;XENONMV3;FLEXCONSUMPTION;MANAGEDAPP","subDomains":"westus3-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Jio
-        India West","name":"Jio India West","type":"Microsoft.Web/geoRegions","properties":{"name":"Jio
-        India West","description":null,"sortOrder":2147483647,"displayName":"Jio India
-        West","orgDomain":"PUBLIC;DSERIES;LINUX;LINUXDSERIES;ELASTICPREMIUM;ELASTICLINUX;FUNCTIONS;DYNAMIC;LINUXDYNAMIC;MSFTPUBLIC;LINUXFREE;WINDOWSV3;LINUXV3;WINDOWSP0V3;LINUXP0V3","subDomains":"jioinw-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Jio
-        India Central","name":"Jio India Central","type":"Microsoft.Web/geoRegions","properties":{"name":"Jio
-        India Central","description":null,"sortOrder":2147483647,"displayName":"Jio
-        India Central","orgDomain":"PUBLIC;DSERIES;LINUX;LINUXDSERIES;MSFTPUBLIC;DYNAMIC;FUNCTIONS;LINUXDYNAMIC;LINUXFREE;ELASTICLINUX;WINDOWSV3;LINUXV3;WINDOWSP0V3;LINUXP0V3","subDomains":"jioinc-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Sweden
-        Central","name":"Sweden Central","type":"Microsoft.Web/geoRegions","properties":{"name":"Sweden
-        Central","description":"Sweden Central","sortOrder":2147483647,"displayName":"Sweden
-        Central","orgDomain":"ZONEREDUNDANCY;PUBLIC;DSERIES;LINUX;LINUXDSERIES;XENON;XENONV3;WINDOWSV3;LINUXV3;ELASTICPREMIUM;ELASTICLINUX;FUNCTIONS;DYNAMIC;MSFTPUBLIC;LINUXDYNAMIC;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;LINUXFREE;FLEXCONSUMPTION;MANAGEDAPP;XENONMV3","subDomains":"swedencentral-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Qatar
-        Central","name":"Qatar Central","type":"Microsoft.Web/geoRegions","properties":{"name":"Qatar
-        Central","description":null,"sortOrder":2147483647,"displayName":"Qatar Central","orgDomain":"ZONEREDUNDANCY;PUBLIC;LINUX;LINUXDSERIES;XENON;XENONV3;WINDOWSV3;LINUXV3;ELASTICPREMIUM;ELASTICLINUX;FUNCTIONS;DYNAMIC;MSFTPUBLIC;LINUXDYNAMIC;WINDOWSP0V3;LINUXP0V3;LINUXFREE;DSERIES","subDomains":"qatarcentral-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Sweden
-        South","name":"Sweden South","type":"Microsoft.Web/geoRegions","properties":{"name":"Sweden
-        South","description":null,"sortOrder":2147483647,"displayName":"Sweden South","orgDomain":"PUBLIC;DSERIES;LINUX;LINUXDSERIES;XENON;XENONV3;WINDOWSV3;LINUXV3;ELASTICPREMIUM;ELASTICLINUX;FUNCTIONS;DYNAMIC;MSFTPUBLIC;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;LINUXDYNAMIC;LINUXFREE","subDomains":"swedensouth-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Poland
-        Central","name":"Poland Central","type":"Microsoft.Web/geoRegions","properties":{"name":"Poland
-        Central","description":null,"sortOrder":2147483647,"displayName":"Poland Central","orgDomain":"ZONEREDUNDANCY;PUBLIC;DSERIES;LINUX;LINUXDSERIES;XENON;XENONV3;WINDOWSV3;LINUXV3;ELASTICPREMIUM;ELASTICLINUX;FUNCTIONS;DYNAMIC;MSFTPUBLIC;LINUXDYNAMIC;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;LINUXFREE","subDomains":"polandcentral-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Italy
-        North","name":"Italy North","type":"Microsoft.Web/geoRegions","properties":{"name":"Italy
-        North","description":"Italy North","sortOrder":2147483647,"displayName":"Italy
-        North","orgDomain":"ZONEREDUNDANCY;PUBLIC;DSERIES;LINUX;LINUXDSERIES;XENON;XENONV3;WINDOWSV3;LINUXV3;ELASTICPREMIUM;ELASTICLINUX;FUNCTIONS;DYNAMIC;MSFTPUBLIC;WINDOWSMV3;LINUXMV3;LINUXDYNAMIC;XENONMV3;WINDOWSP0V3;LINUXP0V3;LINUXFREE","subDomains":"italynorth-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Israel
-        Central","name":"Israel Central","type":"Microsoft.Web/geoRegions","properties":{"name":"Israel
-        Central","description":null,"sortOrder":2147483647,"displayName":"Israel Central","orgDomain":"ZONEREDUNDANCY;PUBLIC;DSERIES;LINUX;LINUXDSERIES;XENON;XENONV3;WINDOWSV3;LINUXV3;ELASTICPREMIUM;ELASTICLINUX;FUNCTIONS;DYNAMIC;MSFTPUBLIC;LINUXDYNAMIC;XENONMV3;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;LINUXFREE","subDomains":"israelcentral-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Spain
-        Central","name":"Spain Central","type":"Microsoft.Web/geoRegions","properties":{"name":"Spain
-        Central","description":null,"sortOrder":2147483647,"displayName":"Spain Central","orgDomain":"ZONEREDUNDANCY;PUBLIC;DSERIES;LINUX;LINUXDSERIES;XENON;XENONV3;WINDOWSV3;LINUXV3;ELASTICPREMIUM;ELASTICLINUX;FUNCTIONS;DYNAMIC;MSFTPUBLIC;LINUXDYNAMIC;XENONMV3;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;LINUXFREE","subDomains":"spaincentral-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Mexico
-        Central","name":"Mexico Central","type":"Microsoft.Web/geoRegions","properties":{"name":"Mexico
-        Central","description":null,"sortOrder":2147483647,"displayName":"Mexico Central","orgDomain":"ZONEREDUNDANCY;PUBLIC;DSERIES;LINUX;LINUXDSERIES;XENON;XENONV3;WINDOWSV3;LINUXV3;ELASTICPREMIUM;ELASTICLINUX;FUNCTIONS;DYNAMIC;MSFTPUBLIC;LINUXDYNAMIC;XENONMV3;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;LINUXFREE","subDomains":"mexicocentral-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Taiwan
-        North","name":"Taiwan North","type":"Microsoft.Web/geoRegions","properties":{"name":"Taiwan
-        North","description":null,"sortOrder":2147483647,"displayName":"Taiwan North","orgDomain":"ZONEREDUNDANCY;PUBLIC;DSERIES;LINUX;LINUXDSERIES;XENON;XENONV3;WINDOWSV3;LINUXV3;ELASTICPREMIUM;ELASTICLINUX;FUNCTIONS;DYNAMIC;MSFTPUBLIC;LINUXDYNAMIC;XENONMV3;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;LINUXFREE","subDomains":"taiwannorth-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/Taiwan
-        Northwest","name":"Taiwan Northwest","type":"Microsoft.Web/geoRegions","properties":{"name":"Taiwan
-        Northwest","description":null,"sortOrder":2147483647,"displayName":"Taiwan
-        Northwest","orgDomain":"ZONEREDUNDANCY;PUBLIC;DSERIES;LINUX;LINUXDSERIES;XENON;XENONV3;WINDOWSV3;LINUXV3;ELASTICPREMIUM;ELASTICLINUX;FUNCTIONS;DYNAMIC;MSFTPUBLIC;LINUXDYNAMIC;XENONMV3;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;LINUXFREE","subDomains":"taiwannorthwest-01.azurewebsites.net"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/geoRegions/New
-        Zealand North","name":"New Zealand North","type":"Microsoft.Web/geoRegions","properties":{"name":"New
-        Zealand North","description":null,"sortOrder":2147483647,"displayName":"New
-        Zealand North","orgDomain":"ZONEREDUNDANCY;PUBLIC;DSERIES;LINUX;LINUXDSERIES;XENON;XENONV3;WINDOWSV3;LINUXV3;ELASTICPREMIUM;ELASTICLINUX;FUNCTIONS;DYNAMIC;MSFTPUBLIC;LINUXDYNAMIC;XENONMV3;WINDOWSMV3;LINUXMV3;WINDOWSP0V3;LINUXP0V3;LINUXFREE","subDomains":"newzealandnorth-01.azurewebsites.net"}}],"nextLink":null,"id":null}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/functionappplan000004","name":"functionappplan000004","type":"Microsoft.Web/serverfarms","kind":"elastic","location":"South
+        Central US","properties":{"serverFarmId":13659,"name":"functionappplan000004","workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-SouthCentralUSwebspace-Linux","subscription":"dbf67cc6-6c57-44b8-97fc-4356f0d555b3","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":20,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"South
+        Central US","perSiteScaling":false,"elasticScaleEnabled":true,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"elastic","resourceGroup":"clitest.rg000001","reserved":true,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-sn1-219_13659","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2025-01-27T16:46:39.02"},"sku":{"name":"EP1","tier":"ElasticPremium","size":"EP1","family":"EP","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '31779'
+      - '1566'
       content-type:
       - application/json
       date:
-      - Fri, 03 Jan 2025 22:39:05 GMT
+      - Mon, 27 Jan 2025 16:46:42 GMT
       expires:
       - '-1'
       pragma:
@@ -188,65 +106,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 4EA31421CBD6440FA2201A9A1A2AE07E Ref B: CH1AA2020610037 Ref C: 2025-01-03T22:39:05Z'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"location": "francecentral", "sku": {"name": "Y1", "tier": "Dynamic"},
-      "properties": {"perSiteScaling": false, "isXenon": false, "zoneRedundant": false}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - functionapp create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '154'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - -g -n -c -s --os-type --runtime --runtime-version
-      User-Agent:
-      - AZURECLI/2.67.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/ASP-clitestrgup45rrvu4nllt7w2bjt5h7-9fcc?api-version=2023-01-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/ASP-clitestrgup45rrvu4nllt7w2bjt5h7-9fcc","name":"ASP-clitestrgup45rrvu4nllt7w2bjt5h7-9fcc","type":"Microsoft.Web/serverfarms","kind":"functionapp","location":"francecentral","properties":{"serverFarmId":48069,"name":"ASP-clitestrgup45rrvu4nllt7w2bjt5h7-9fcc","sku":{"name":"Y1","tier":"Dynamic","size":"Y1","family":"Y","capacity":0},"workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":0,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":0,"status":"Ready","webSpace":"clitest.rg000001-FranceCentralwebspace","subscription":"dbf67cc6-6c57-44b8-97fc-4356f0d555b3","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":0,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dynamic","siteMode":null,"geoRegion":"France
-        Central","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"functionapp","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-par-033_48069","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"migrateToVMSS":null,"vnetConnectionsUsed":null,"vnetConnectionsMax":null,"createdTime":"2025-01-03T22:39:11.1666667"},"sku":{"name":"Y1","tier":"Dynamic","size":"Y1","family":"Y","capacity":0}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1704'
-      content-type:
-      - application/json
-      date:
-      - Fri, 03 Jan 2025 22:39:10 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-aspnet-version:
-      - 4.0.30319
-      x-cache:
-      - CONFIG_NOCACHE
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-global-writes:
-      - '11999'
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '799'
-      x-msedge-ref:
-      - 'Ref A: AE5969608048463091DFD5F4233A51D4 Ref B: CH1AA2020610031 Ref C: 2025-01-03T22:39:06Z'
+      - 'Ref A: 714421E6D21C49D58D85FDAE7F7F797B Ref B: CH1AA2020610019 Ref C: 2025-01-27T16:46:42Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -264,9 +124,9 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n -c -s --os-type --runtime --runtime-version
+      - -g -n -p -s --os-type --runtime --runtime-version
       User-Agent:
-      - AZURECLI/2.67.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.68.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/providers/Microsoft.Web/functionAppStacks?api-version=2023-01-01
   response:
@@ -309,7 +169,7 @@ interactions:
         LTS","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"~8","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"8.x"},"appSettingsDictionary":{"FUNCTIONS_WORKER_RUNTIME":"node","WEBSITE_NODE_DEFAULT_VERSION":"~8"},"siteConfigPropertiesDictionary":{"use32BitWorkerProcess":true},"supportedFunctionsExtensionVersions":["~2"],"supportedFunctionsExtensionVersionsInfo":[{"version":"~2","isDeprecated":true,"isDefault":true}],"endOfLifeDate":"2019-12-31T00:00:00Z"}}}]},{"displayText":"Node.js
         6","value":"6","minorVersions":[{"displayText":"Node.js 6 LTS","value":"6
         LTS","stackSettings":{"windowsRuntimeSettings":{"runtimeVersion":"~6","isDeprecated":true,"remoteDebuggingSupported":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":false},"appSettingsDictionary":{"WEBSITE_NODE_DEFAULT_VERSION":"~6"},"siteConfigPropertiesDictionary":{"use32BitWorkerProcess":true},"supportedFunctionsExtensionVersions":["~1"],"supportedFunctionsExtensionVersionsInfo":[{"version":"~1","isDeprecated":true,"isDefault":true}],"endOfLifeDate":"2019-04-30T00:00:00Z"}}}]}]}},{"id":null,"name":"python","type":"Microsoft.Web/functionAppStacks?stackOsType=All","properties":{"displayText":"Python","value":"python","preferredOs":"linux","majorVersions":[{"displayText":"Python
-        3","value":"3","minorVersions":[{"displayText":"Python 3.12","value":"3.12","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"Python|3.12","remoteDebuggingSupported":false,"isPreview":true,"isDefault":false,"isHidden":true,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"3.12"},"appSettingsDictionary":{"FUNCTIONS_WORKER_RUNTIME":"python"},"siteConfigPropertiesDictionary":{"use32BitWorkerProcess":false,"linuxFxVersion":"Python|3.12"},"supportedFunctionsExtensionVersions":["~4"],"supportedFunctionsExtensionVersionsInfo":[{"version":"~4","isDeprecated":false,"isDefault":true}],"endOfLifeDate":"2028-10-31T00:00:00Z"}}},{"displayText":"Python
+        3","value":"3","minorVersions":[{"displayText":"Python 3.12","value":"3.12","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"Python|3.12","remoteDebuggingSupported":false,"isPreview":true,"isDefault":false,"isHidden":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"3.12"},"appSettingsDictionary":{"FUNCTIONS_WORKER_RUNTIME":"python"},"siteConfigPropertiesDictionary":{"use32BitWorkerProcess":false,"linuxFxVersion":"Python|3.12"},"supportedFunctionsExtensionVersions":["~4"],"supportedFunctionsExtensionVersionsInfo":[{"version":"~4","isDeprecated":false,"isDefault":true}],"endOfLifeDate":"2028-10-31T00:00:00Z"}}},{"displayText":"Python
         3.11","value":"3.11","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"Python|3.11","remoteDebuggingSupported":false,"isPreview":false,"isDefault":true,"isHidden":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"3.11"},"appSettingsDictionary":{"FUNCTIONS_WORKER_RUNTIME":"python"},"siteConfigPropertiesDictionary":{"use32BitWorkerProcess":false,"linuxFxVersion":"Python|3.11"},"supportedFunctionsExtensionVersions":["~4"],"supportedFunctionsExtensionVersionsInfo":[{"version":"~4","isDeprecated":false,"isDefault":true}],"endOfLifeDate":"2027-10-31T00:00:00Z"}}},{"displayText":"Python
         3.10","value":"3.10","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"Python|3.10","remoteDebuggingSupported":false,"isPreview":false,"isDefault":true,"isHidden":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"3.10"},"appSettingsDictionary":{"FUNCTIONS_WORKER_RUNTIME":"python"},"siteConfigPropertiesDictionary":{"use32BitWorkerProcess":false,"linuxFxVersion":"Python|3.10"},"supportedFunctionsExtensionVersions":["~4"],"supportedFunctionsExtensionVersionsInfo":[{"version":"~4","isDeprecated":false,"isDefault":true}],"endOfLifeDate":"2026-10-31T00:00:00Z"}}},{"displayText":"Python
         3.9","value":"3.9","stackSettings":{"linuxRuntimeSettings":{"runtimeVersion":"Python|3.9","remoteDebuggingSupported":false,"isPreview":false,"isDefault":false,"appInsightsSettings":{"isSupported":true},"gitHubActionSettings":{"isSupported":true,"supportedVersion":"3.9"},"appSettingsDictionary":{"FUNCTIONS_WORKER_RUNTIME":"python"},"siteConfigPropertiesDictionary":{"use32BitWorkerProcess":false,"linuxFxVersion":"Python|3.9"},"supportedFunctionsExtensionVersions":["~4","~3"],"supportedFunctionsExtensionVersionsInfo":[{"version":"~4","isDeprecated":false,"isDefault":true},{"version":"~3","isDeprecated":true,"isDefault":false}],"endOfLifeDate":"2025-10-31T00:00:00Z"}}},{"displayText":"Python
@@ -331,11 +191,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '40650'
+      - '40651'
       content-type:
       - application/json
       date:
-      - Fri, 03 Jan 2025 22:39:11 GMT
+      - Mon, 27 Jan 2025 16:46:42 GMT
       expires:
       - '-1'
       pragma:
@@ -349,7 +209,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-msedge-ref:
-      - 'Ref A: A8F1935791EB4B6EB5F206C282F6320B Ref B: CH1AA2020620033 Ref C: 2025-01-03T22:39:11Z'
+      - 'Ref A: F7AB22A911C4479FAEE3EAF085D6B955 Ref B: CH1AA2020610047 Ref C: 2025-01-27T16:46:43Z'
       x-powered-by:
       - ASP.NET
     status:
