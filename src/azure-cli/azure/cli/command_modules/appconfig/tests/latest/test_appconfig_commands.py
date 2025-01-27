@@ -950,7 +950,7 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         import_separator_features_file_path = os.path.join(TEST_DIR, 'import_separator_features.json')
         import_features_alt_syntax_file_path = os.path.join(TEST_DIR, 'import_features_alt_syntax.json')
         import_features_random_conditions_file_path = os.path.join(TEST_DIR, 'import_features_random_conditions.json')
-        os.environ['AZURE_APPCONFIG_FM_COMPATIBLE'] = 'True'
+        os.environ['AZURE_APPCONFIG_FM_EXPORT_COMPATIBLE'] = 'True'
 
         self.kwargs.update({
             'label': 'KeyValuesWithFeatures',
@@ -1075,7 +1075,7 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_import_export_new_fm_schema(self, resource_group, location):
         # Feature flags test with new ms fm schema
-        os.environ['AZURE_APPCONFIG_FM_COMPATIBLE'] = 'False'
+        os.environ['AZURE_APPCONFIG_FM_EXPORT_COMPATIBLE'] = 'False'
 
         config_store_name = self.create_random_name(prefix='NewFmImport', length=24)
 
@@ -1548,7 +1548,7 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
         })
         _create_config_store(self, self.kwargs)
 
-        os.environ['AZURE_APPCONFIG_FM_COMPATIBLE'] = 'True'
+        os.environ['AZURE_APPCONFIG_FM_EXPORT_COMPATIBLE'] = 'True'
         import_hyphen_path = os.path.join(TEST_DIR, 'import_features_hyphen.json')
         exported_file_path = os.path.join(TEST_DIR, 'export_features_naming.json')
         export_underscore_path = os.path.join(TEST_DIR, 'export_features_underscore.json')
@@ -1633,7 +1633,7 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
         _create_config_store(self, self.kwargs)
 
         # # Camel case naming convention
-        os.environ['AZURE_APPCONFIG_FM_COMPATIBLE'] = 'False'
+        os.environ['AZURE_APPCONFIG_FM_EXPORT_COMPATIBLE'] = 'False'
 
         imported_both_schemas_camel_case_file_path = os.path.join(TEST_DIR, 'respectBothFmSchemaCamelCase.json')
         exported_both_schemas_camel_case_file_path = os.path.join(TEST_DIR, 'export_features_both_schema_camel_case_file_path.json')
@@ -2344,7 +2344,7 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
             - Delete all settings from both stores
         """
 
-        os.environ['AZURE_APPCONFIG_FM_COMPATIBLE'] = 'True'
+        os.environ['AZURE_APPCONFIG_FM_EXPORT_COMPATIBLE'] = 'True'
         imported_file_path = os.path.join(TEST_DIR, 'json_import.json')
         exported_file_path = os.path.join(TEST_DIR, 'json_export.json')
         self.kwargs.update({
@@ -3145,7 +3145,7 @@ class AppConfigKeyValidationScenarioTest(ScenarioTest):
             self.cmd('appconfig feature set --connection-string {connection_string} --feature "{feature}" -y')
 
         # validate keys and features during file import
-        os.environ['AZURE_APPCONFIG_FM_COMPATIBLE'] = 'True'
+        os.environ['AZURE_APPCONFIG_FM_EXPORT_COMPATIBLE'] = 'True'
         imported_file_path = os.path.join(TEST_DIR, 'import_invalid_kv_and_features.json')
         expected_export_file_path = os.path.join(TEST_DIR, 'expected_export_valid_kv_and_features.json')
         actual_export_file_path = os.path.join(TEST_DIR, 'actual_export_valid_kv_and_features.json')
@@ -3268,7 +3268,7 @@ class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
             self.cmd('appconfig kv set --endpoint {endpoint} --auth-mode login --key {key} --value {value} -y')
 
         # Export from appconfig to file should succeed
-        os.environ['AZURE_APPCONFIG_FM_COMPATIBLE'] = 'True'
+        os.environ['AZURE_APPCONFIG_FM_EXPORT_COMPATIBLE'] = 'True'
         exported_file_path = os.path.join(TEST_DIR, 'export_aad_1.json')
         expected_exported_file_path = os.path.join(TEST_DIR, 'expected_export_aad_1.json')
         self.kwargs.update({
