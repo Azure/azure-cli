@@ -24,7 +24,6 @@ LINUX_ASP_LOCATION_FUNCTIONAPP = 'ukwest'
 
 
 class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
-    @unittest.skip("To be fixed")
     @ResourceGroupPreparer(parameter_name_for_location='location', location=WINDOWS_ASP_LOCATION_WEBAPP)
     @StorageAccountPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_functionapp_access_restriction_show(self, resource_group, location):
@@ -50,7 +49,6 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('scmIpSecurityRestrictionsDefaultAction', None)
         ])
 
-    @unittest.skip("To be fixed")
     @ResourceGroupPreparer(parameter_name_for_location='location', location=WINDOWS_ASP_LOCATION_WEBAPP)
     @StorageAccountPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_functionapp_access_restriction_set_simple(self, resource_group, location):
@@ -82,7 +80,6 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('scmIpSecurityRestrictionsDefaultAction', 'Deny')
         ])
 
-    @unittest.skip("To be fixed")
     @ResourceGroupPreparer(parameter_name_for_location='location', location=WINDOWS_ASP_LOCATION_WEBAPP)
     @StorageAccountPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_functionapp_access_restriction_set_complex(self, resource_group, location):
@@ -103,7 +100,6 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('scmIpSecurityRestrictionsUseMain', False)
         ])
 
-    @unittest.skip("To be fixed")
     @ResourceGroupPreparer(random_name_length=17, parameter_name_for_location='location', location=WINDOWS_ASP_LOCATION_WEBAPP)
     # random_name_length is temporary until the bug fix in the API is deployed successfully & then should be removed.
     @StorageAccountPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
@@ -125,7 +121,6 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('[1].action', 'Deny')
         ])
 
-    @unittest.skip("To be fixed")
     @ResourceGroupPreparer(parameter_name_for_location='location', location=WINDOWS_ASP_LOCATION_WEBAPP)
     @StorageAccountPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_functionapp_access_restriction_add_ip_address_validation(self, resource_group, location):
@@ -181,7 +176,6 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('[1].action', 'Deny')
         ])
 
-    @unittest.skip("To be fixed")
     @ResourceGroupPreparer(parameter_name_for_location='location', location=WINDOWS_ASP_LOCATION_WEBAPP)
     @StorageAccountPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_functionapp_access_restriction_remove(self, resource_group, location):
@@ -208,7 +202,6 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('[0].action', 'Allow')
         ])
 
-    @unittest.skip("To be fixed")
     @ResourceGroupPreparer(parameter_name_for_location='location', location=WINDOWS_ASP_LOCATION_WEBAPP)
     @StorageAccountPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_functionapp_access_restriction_add_scm(self, resource_group, location):
@@ -229,7 +222,6 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('[1].action', 'Deny')
         ])
 
-    @unittest.skip("To be fixed")
     @ResourceGroupPreparer(parameter_name_for_location='location', location=WINDOWS_ASP_LOCATION_WEBAPP)
     @StorageAccountPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_functionapp_access_restriction_remove_scm(self, resource_group, location):

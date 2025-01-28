@@ -808,7 +808,7 @@ def validate_and_format_restore_point_in_time(restore_time):
         return parser.parse(restore_time)
     except:
         raise ValidationError("The restore point in time value has incorrect date format. "
-                              "Please use ISO format e.g., 2021-10-22T00:08:23+00:00.")
+                              "Please use ISO format e.g., 2024-10-22T00:08:23+00:00.")
 
 
 def is_citus_cluster(cmd, resource_group_name, server_name):

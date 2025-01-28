@@ -57,7 +57,7 @@ def load_arguments(self, _):
     )
     datatime_filter_arg_type = CLIArgumentType(
         validator=validate_datetime,
-        help='Format: "YYYY-MM-DDThh:mm:ssZ". If no time zone specified, use UTC by default.'
+        help='Format: "YYYY-MM-DDThh:mm:ss["Z"/±hh:mm]. If no time zone or offset specified, use UTC by default.'
     )
     top_arg_type = CLIArgumentType(
         options_list=['--top', '-t'],
