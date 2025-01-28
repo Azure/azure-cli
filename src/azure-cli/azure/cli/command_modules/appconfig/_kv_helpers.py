@@ -174,7 +174,8 @@ def __write_kv_and_features_to_config_store(
         set_kv = convert_keyvalue_to_configurationsetting(kv)
         if not preserve_labels:
             set_kv.label = label
-            set_kv.tags = tags
+            if tags:
+                set_kv.tags = tags
 
         # Don't overwrite the content type of feature flags or key vault references
         if (
