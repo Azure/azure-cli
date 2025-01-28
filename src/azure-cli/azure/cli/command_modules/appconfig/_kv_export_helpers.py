@@ -186,6 +186,7 @@ def __export_features(retrieved_features, naming_convention):
     try:
         env_compatibility_mode = os.environ.get("AZURE_APPCONFIG_FM_EXPORT_COMPATIBLE", True)
         compatibility_mode = str(env_compatibility_mode).lower() == "true"
+
         if compatibility_mode:
             feature_reserved_keywords = FeatureManagementReservedKeywords.get_keywords(
                 naming_convention
