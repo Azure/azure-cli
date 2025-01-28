@@ -345,6 +345,8 @@ def flexible_server_update_custom_func(cmd, client, instance,
                                                        yes=yes)
         instance.network.private_dns_zone_arm_resource_id = private_dns_zone_id
 
+    _confirm_restart_server(instance, sku_name, storage_gb, yes)
+
     if sku_name:
         instance.sku.name = sku_name
 
@@ -1787,6 +1789,27 @@ def _update_login(server_name, resource_group_name, auth_config, password_auth, 
                            administrator_login_password, server_name, resource_group_name)
 
     return administrator_login, administrator_login_password
+
+
+# pylint: disable=chained-comparison
+def _confirm_restart_server(instance, sku_name, storage_gb, yes):
+    show_confirmation = False
+
+    # check if sku_name is changed
+    if sku_name and sku_name != instance.sku.name:
+        show_confirmation = True
+
+    # check if storage_gb is exceeding 4096 threshold
+    if storage_gb and storage_gb > 4096 and instance.storage.storage_size_gb <= 4096 and instance.storage.type == "":
+        show_confirmation = True
+
+    # check if storage_gb changed for PremiumV2_LRS
+    if storage_gb and instance.storage.type == "PremiumV2_LRS" and instance.storage.storage_size_gb != storage_gb:
+        show_confirmation = True
+
+    if not yes and show_confirmation:
+        user_confirmation("You are trying to change the compute or the size of storage assigned to your server in a way that \
+            requires a server restart. During the restart, you'll experience some downtime of the server. Do you want to proceed?", yes=yes)
 
 
 # pylint: disable=too-many-instance-attributes, too-few-public-methods
