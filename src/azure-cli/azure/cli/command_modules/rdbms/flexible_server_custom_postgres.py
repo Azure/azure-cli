@@ -1799,7 +1799,7 @@ def _confirm_restart_server(instance, sku_name, storage_gb, yes):
     if sku_name and sku_name != instance.sku.name:
         show_confirmation = True
 
-    # check if storage_gb is exceeding 4096 threshold
+    # check if requested storage growth is crossing the 4096 threshold
     if storage_gb and storage_gb > 4096 and instance.storage.storage_size_gb <= 4096 and instance.storage.type == "":
         show_confirmation = True
 
