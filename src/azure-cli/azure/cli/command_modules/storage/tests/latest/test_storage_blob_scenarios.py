@@ -473,6 +473,18 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
                                 JMESPathCheck('minuteMetrics.enabled', True),
                                 JMESPathCheck('minuteMetrics.includeApis', True),
                                 JMESPathCheck('logging.delete', True))
+
+        self.storage_cmd('storage blob service-properties update --index-document index1.html '
+                         '--404-document error2.html', account_info) \
+            .assert_with_checks(JMESPathCheck('staticWebsite.enabled', True),
+                                JMESPathCheck('staticWebsite.indexDocument', 'index1.html'),
+                                JMESPathCheck('staticWebsite.errorDocument_404Path', 'error2.html'))
+
+        self.storage_cmd('storage blob service-properties update --static-website false', account_info) \
+            .assert_with_checks(JMESPathCheck('staticWebsite.enabled', False),
+                                JMESPathCheck('staticWebsite.indexDocument', None),
+                                JMESPathCheck('staticWebsite.errorDocument_404Path', None))
+
         self.storage_cmd('storage blob service-properties delete-policy update --days 2', account_info)
         self.storage_cmd('storage blob service-properties delete-policy show', account_info) \
             .assert_with_checks(JMESPathCheck('days', 2))

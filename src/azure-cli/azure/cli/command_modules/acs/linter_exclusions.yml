@@ -55,6 +55,12 @@ aks create:
       azure_container_storage_nodepools:
         rule_exclusions:
         - option_length_too_long
+      ephemeral_disk_volume_type:
+        rule_exclusions:
+          - option_length_too_long
+      ephemeral_disk_nvme_perf_tier:
+        rule_exclusions:
+        - option_length_too_long
       node_resource_group:
         rule_exclusions:
         - parameter_should_not_end_in_resource_group
@@ -62,6 +68,12 @@ aks create:
         rule_exclusions:
         - option_length_too_long
       enable_high_log_scale_mode:
+        rule_exclusions:
+        - option_length_too_long
+      disable_acns_observability:
+        rule_exclusions:
+        - option_length_too_long
+      nrg_lockdown_restriction_level:
         rule_exclusions:
         - option_length_too_long
 
@@ -144,10 +156,22 @@ aks update:
       azure_container_storage_nodepools:
         rule_exclusions:
         - option_length_too_long
+      ephemeral_disk_volume_type:
+        rule_exclusions:
+          - option_length_too_long
+      ephemeral_disk_nvme_perf_tier:
+        rule_exclusions:
+          - option_length_too_long
       ampls_resource_id:
         rule_exclusions:
         - option_length_too_long
       enable_high_log_scale_mode:
+        rule_exclusions:
+        - option_length_too_long
+      disable_acns_observability:
+        rule_exclusions:
+        - option_length_too_long
+      nrg_lockdown_restriction_level:
         rule_exclusions:
         - option_length_too_long
 aks nodepool add:

@@ -22,9 +22,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-11-01",
+        "version": "2024-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2023-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2024-07-01"],
         ]
     }
 
@@ -53,7 +53,7 @@ class Update(AAZCommand):
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,127}$",
+                pattern="^[a-zA-Z0-9][a-zA-Z0-9\\-_]{0,127}$",
             ),
         )
         _args_schema.pool_name = AAZStrArg(
@@ -62,7 +62,7 @@ class Update(AAZCommand):
             required=True,
             id_part="child_name_1",
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,63}$",
+                pattern="^[a-zA-Z0-9][a-zA-Z0-9\\-_]{0,63}$",
                 max_length=64,
                 min_length=1,
             ),
@@ -76,7 +76,7 @@ class Update(AAZCommand):
             required=True,
             id_part="child_name_2",
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z][a-zA-Z0-9\-_]{0,63}$",
+                pattern="^[a-zA-Z][a-zA-Z0-9\\-_]{0,63}$",
                 max_length=64,
                 min_length=1,
             ),
@@ -85,13 +85,13 @@ class Update(AAZCommand):
         # define Arg Group "Backup"
 
         _args_schema = cls._args_schema
-        _args_schema.backup_policy_id = AAZStrArg(
+        _args_schema.backup_policy_id = AAZResourceIdArg(
             options=["--backup-policy-id"],
             arg_group="Backup",
             help="Backup Policy Resource ID",
             nullable=True,
         )
-        _args_schema.backup_vault_id = AAZStrArg(
+        _args_schema.backup_vault_id = AAZResourceIdArg(
             options=["--backup-vault-id"],
             arg_group="Backup",
             help="Backup Vault Resource ID",
@@ -265,7 +265,7 @@ class Update(AAZCommand):
             nullable=True,
             fmt=AAZIntArgFormat(
                 maximum=183,
-                minimum=7,
+                minimum=2,
             ),
         )
         _args_schema.creation_token = AAZStrArg(
@@ -273,7 +273,7 @@ class Update(AAZCommand):
             arg_group="Properties",
             help="A unique file path for the volume. Used when creating mount targets",
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z][a-zA-Z0-9\-]{0,79}$",
+                pattern="^[a-zA-Z][a-zA-Z0-9\\-]{0,79}$",
                 max_length=80,
                 min_length=1,
             ),
@@ -374,7 +374,7 @@ class Update(AAZCommand):
             enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
         _args_schema.smb_continuously_available = AAZBoolArg(
-            options=["--smb-continuously-avl", "--smb-continuously-available"],
+            options=["--smb-ca", "--smb-continuously-avl", "--smb-continuously-available"],
             arg_group="Properties",
             help="Enables continuously available share property for smb volume. Only applicable for SMB volume",
             nullable=True,
@@ -422,10 +422,10 @@ class Update(AAZCommand):
         _args_schema.usage_threshold = AAZIntArg(
             options=["--usage-threshold"],
             arg_group="Properties",
-            help={"short-summary": "Maximum storage quota allowed for a file system in bytes.", "long-summary": "This is a soft quota used for alerting only. Minimum size is 100 GiB. \nUpper limit is 100TiB, 500Tib for LargeVolume."},
+            help={"short-summary": "Maximum storage quota allowed for a file system in GiB.", "long-summary": "Maximum storage quota allowed for a file system in bytes. This is a soft quota used for alerting only. For regular volumes, valid values are in the range 50GiB to 100TiB. For large volumes, valid values are in the range 100TiB to 500TiB, and on an exceptional basis, to 2400TiB."},
             fmt=AAZIntArgFormat(
                 maximum=2638827906662400,
-                minimum=107374182400,
+                minimum=53687091200,
             ),
         )
         _args_schema.volume_spec_name = AAZStrArg(
@@ -481,6 +481,7 @@ class Update(AAZCommand):
             options=["--remote-volume-id", "--remote-volume-resource-id"],
             arg_group="Replication",
             help="The resource ID of the remote volume.",
+            nullable=True,
         )
         _args_schema.replication_schedule = AAZStrArg(
             options=["--replication-schedule"],
@@ -597,7 +598,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-11-01",
+                    "api-version", "2024-07-01",
                     required=True,
                 ),
             }
@@ -704,7 +705,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-11-01",
+                    "api-version", "2024-07-01",
                     required=True,
                 ),
             }
@@ -820,7 +821,7 @@ class Update(AAZCommand):
             if replication is not None:
                 replication.set_prop("endpointType", AAZStrType, ".endpoint_type")
                 replication.set_prop("remoteVolumeRegion", AAZStrType, ".remote_volume_region")
-                replication.set_prop("remoteVolumeResourceId", AAZStrType, ".remote_volume_resource_id", typ_kwargs={"flags": {"required": True}})
+                replication.set_prop("remoteVolumeResourceId", AAZStrType, ".remote_volume_resource_id")
                 replication.set_prop("replicationSchedule", AAZStrType, ".replication_schedule")
 
             snapshot = _builder.get(".properties.dataProtection.snapshot")
@@ -985,6 +986,9 @@ class _UpdateHelper:
         properties.delete_base_snapshot = AAZBoolType(
             serialized_name="deleteBaseSnapshot",
         )
+        properties.effective_network_features = AAZStrType(
+            serialized_name="effectiveNetworkFeatures",
+        )
         properties.enable_subvolumes = AAZStrType(
             serialized_name="enableSubvolumes",
         )
@@ -1145,12 +1149,14 @@ class _UpdateHelper:
         replication.endpoint_type = AAZStrType(
             serialized_name="endpointType",
         )
+        replication.remote_path = AAZObjectType(
+            serialized_name="remotePath",
+        )
         replication.remote_volume_region = AAZStrType(
             serialized_name="remoteVolumeRegion",
         )
         replication.remote_volume_resource_id = AAZStrType(
             serialized_name="remoteVolumeResourceId",
-            flags={"required": True},
         )
         replication.replication_id = AAZStrType(
             serialized_name="replicationId",
@@ -1158,6 +1164,20 @@ class _UpdateHelper:
         )
         replication.replication_schedule = AAZStrType(
             serialized_name="replicationSchedule",
+        )
+
+        remote_path = _schema_volume_read.properties.data_protection.replication.remote_path
+        remote_path.external_host_name = AAZStrType(
+            serialized_name="externalHostName",
+            flags={"required": True},
+        )
+        remote_path.server_name = AAZStrType(
+            serialized_name="serverName",
+            flags={"required": True},
+        )
+        remote_path.volume_name = AAZStrType(
+            serialized_name="volumeName",
+            flags={"required": True},
         )
 
         snapshot = _schema_volume_read.properties.data_protection.snapshot

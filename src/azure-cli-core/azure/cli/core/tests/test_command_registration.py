@@ -69,13 +69,13 @@ class TestCommandRegistration(unittest.TestCase):
         class TestCommandsLoader(AzCommandsLoader):
 
             def load_command_table(self, args):
-                super(TestCommandsLoader, self).load_command_table(args)
+                super().load_command_table(args)
                 with self.command_group('test register', operations_tmpl='{}#TestCommandRegistration.{{}}'.format(__name__)) as g:
                     g.command('sample-vm-get', 'sample_vm_get')
                 return self.command_table
 
             def load_arguments(self, command):
-                super(TestCommandsLoader, self).load_arguments(command)
+                super().load_arguments(command)
                 with self.argument_context('test register sample-vm-get') as c:
                     c.argument('vm_name', options_list=('--wonky-name', '-n'), metavar='VMNAME', help='Completely WONKY name...', required=False)
 
@@ -93,8 +93,8 @@ class TestCommandRegistration(unittest.TestCase):
         }
         for probe in some_expected_arguments:
             existing = next(arg for arg in command_metadata.arguments if arg == probe)
-            self.assertDictContainsSubset(some_expected_arguments[existing].settings,
-                                          command_metadata.arguments[existing].options)
+            self.assertLessEqual(some_expected_arguments[existing].settings.items(),
+                                 command_metadata.arguments[existing].options.items())
         self.assertEqual(command_metadata.arguments['vm_name'].options_list, ('--wonky-name', '-n'))
 
     def test_register_command(self):
@@ -102,13 +102,13 @@ class TestCommandRegistration(unittest.TestCase):
         class TestCommandsLoader(AzCommandsLoader):
 
             def load_command_table(self, args):
-                super(TestCommandsLoader, self).load_command_table(args)
+                super().load_command_table(args)
                 with self.command_group('test command', operations_tmpl='{}#TestCommandRegistration.{{}}'.format(__name__)) as g:
                     g.command('sample-vm-get', 'sample_vm_get')
                 return self.command_table
 
             def load_arguments(self, command):
-                super(TestCommandsLoader, self).load_arguments(command)
+                super().load_arguments(command)
                 with self.argument_context('test register sample-vm-get') as c:
                     c.argument('vm_name', options_list=('--wonky-name', '-n'), metavar='VMNAME', help='Completely WONKY name...', required=False)
 
@@ -137,8 +137,8 @@ class TestCommandRegistration(unittest.TestCase):
 
         for probe in some_expected_arguments:
             existing = next(arg for arg in command_metadata.arguments if arg == probe)
-            self.assertDictContainsSubset(some_expected_arguments[existing].settings,
-                                          command_metadata.arguments[existing].options)
+            self.assertLessEqual(some_expected_arguments[existing].settings.items(),
+                                 command_metadata.arguments[existing].options.items())
         self.assertEqual(command_metadata.arguments['resource_group_name'].options_list,
                          ['--resource-group-name'])
 
@@ -455,7 +455,7 @@ class TestCommandRegistration(unittest.TestCase):
         class TestCommandsLoader(AzCommandsLoader):
 
             def load_command_table(self, args):
-                super(TestCommandsLoader, self).load_command_table(args)
+                super().load_command_table(args)
                 with self.command_group('test', operations_tmpl='{}#TestCommandRegistration.{{}}'.format(__name__)) as g:
                     g.command('vm-get', 'sample_vm_get')
                     g.command('command vm-get-1', 'sample_vm_get')
@@ -463,7 +463,7 @@ class TestCommandRegistration(unittest.TestCase):
                 return self.command_table
 
             def load_arguments(self, command):
-                super(TestCommandsLoader, self).load_arguments(command)
+                super().load_arguments(command)
                 with self.argument_context('test') as c:
                     c.argument('vm_name', global_vm_name_type)
 
@@ -493,13 +493,13 @@ class TestCommandRegistration(unittest.TestCase):
         class TestCommandsLoader(AzCommandsLoader):
 
             def load_command_table(self, args):
-                super(TestCommandsLoader, self).load_command_table(args)
+                super().load_command_table(args)
                 with self.command_group('test command', operations_tmpl='{}#TestCommandRegistration.{{}}'.format(__name__)) as g:
                     g.command('sample-vm-get', 'sample_vm_get')
                 return self.command_table
 
             def load_arguments(self, command):
-                super(TestCommandsLoader, self).load_arguments(command)
+                super().load_arguments(command)
                 with self.argument_context('test command sample-vm-get') as c:
                     c.extra('added_param', options_list=['--added-param'], metavar='ADDED', help='Just added this right now!', required=True)
 
@@ -518,8 +518,8 @@ class TestCommandRegistration(unittest.TestCase):
 
         for probe in some_expected_arguments:
             existing = next(arg for arg in command_metadata.arguments if arg == probe)
-            self.assertDictContainsSubset(some_expected_arguments[existing].settings,
-                                          command_metadata.arguments[existing].options)
+            self.assertLessEqual(some_expected_arguments[existing].settings.items(),
+                                 command_metadata.arguments[existing].options.items())
 
     def test_command_build_argument_help_text(self):
 
@@ -540,7 +540,7 @@ class TestCommandRegistration(unittest.TestCase):
         class TestCommandsLoader(AzCommandsLoader):
 
             def load_command_table(self, args):
-                super(TestCommandsLoader, self).load_command_table(args)
+                super().load_command_table(args)
                 with self.command_group('test command', operations_tmpl='{}#{{}}'.format(__name__)) as g:
                     g.command('foo', sample_sdk_method_with_weird_docstring.__name__)
                 return self.command_table
@@ -562,8 +562,8 @@ class TestCommandRegistration(unittest.TestCase):
 
         for probe in some_expected_arguments:
             existing = next(arg for arg in command_metadata.arguments if arg == probe)
-            self.assertDictContainsSubset(some_expected_arguments[existing].settings,
-                                          command_metadata.arguments[existing].options)
+            self.assertLessEqual(some_expected_arguments[existing].settings.items(),
+                                 command_metadata.arguments[existing].options.items())
 
     def test_override_existing_option_string(self):
         arg = CLIArgumentType(options_list=('--funky', '-f'))
@@ -596,13 +596,13 @@ class TestCommandRegistration(unittest.TestCase):
         class TestCommandsLoader(AzCommandsLoader):
 
             def load_command_table(self, args):
-                super(TestCommandsLoader, self).load_command_table(args)
+                super().load_command_table(args)
                 with self.command_group('override_using_register_cli_argument', operations_tmpl='{}#{{}}'.format(__name__)) as g:
                     g.command('foo', 'sample_sdk_method')
                 return self.command_table
 
             def load_arguments(self, command):
-                super(TestCommandsLoader, self).load_arguments(command)
+                super().load_arguments(command)
                 with self.argument_context('override_using_register_cli_argument') as c:
                     c.argument('param_a', options_list=('--overridden', '-r'), required=False,
                                validator=test_validator_completer, completer=test_validator_completer)

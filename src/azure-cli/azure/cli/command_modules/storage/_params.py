@@ -150,7 +150,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         help='When creating a file or directory and the parent folder does not have a default ACL, the umask restricts '
              'the permissions of the file or directory to be created. The resulting permission is given by p & ^u, '
              'where p is the permission and u is the umask. For more information, please refer to '
-             'https://docs.microsoft.com/azure/storage/blobs/data-lake-storage-access-control#umask.')
+             'https://learn.microsoft.com/azure/storage/blobs/data-lake-storage-access-control#umask.')
     permissions_type = CLIArgumentType(
         help='POSIX access permissions for the file owner, the file owning group, and others. Each class may be '
              'granted read (4), write (2), or execute (1) permission. Both symbolic (rwxrw-rw-) and 4-digit octal '
@@ -161,7 +161,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
              'indicates sticky bit not set. In 4-digit octal notation, its represented by 1st digit (e.g. 1766 '
              'represents rwxrw-rw- with sticky bit and 0766 represents rwxrw-rw- without sticky bit). For more '
              'information, please refer to '
-             'https://docs.microsoft.com/azure/storage/blobs/data-lake-storage-access-control#levels-of-permission.')
+             'https://learn.microsoft.com/azure/storage/blobs/data-lake-storage-access-control#levels-of-permission.')
 
     timeout_type = CLIArgumentType(
         help='Request timeout in seconds. Applies to each call to the service.', type=int
@@ -301,7 +301,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage account blob-inventory-policy create') as c:
         c.argument('policy', type=file_type, completer=FilesCompleter(),
                    help='The Storage Account Blob Inventory Policy, string in JSON format or json file path. See more '
-                   'details in https://docs.microsoft.com/azure/storage/blobs/blob-inventory#inventory-policy.')
+                   'details in https://learn.microsoft.com/azure/storage/blobs/blob-inventory#inventory-policy.')
 
     with self.argument_context('storage account check-name') as c:
         c.argument('name', options_list=['--name', '-n'],
@@ -384,7 +384,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    'public access setting for a container is required to enable anonymous access.')
         c.argument('min_tls_version', arg_type=get_enum_type(t_tls_version),
                    help='The minimum TLS version to be permitted on requests to storage. '
-                        'The default interpretation is TLS 1.0 for this property')
+                        'While the default setting is TLS 1.0 for this property, '
+                        'Microsoft recommends setting MinimumTlsVersion to 1.2 or above.')
         c.argument('allow_shared_key_access', allow_shared_key_access_type)
         c.argument('edge_zone', edge_zone_type, min_api='2020-08-01-preview')
         c.argument('identity_type', arg_type=get_enum_type(t_identity_type), arg_group='Identity',
@@ -396,7 +397,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('sas_expiration_period', sas_expiration_period_type, is_preview=True)
         c.argument('allow_cross_tenant_replication', allow_cross_tenant_replication_type)
         c.argument('default_share_permission', default_share_permission_type)
-        c.argument('enable_nfs_v3', arg_type=get_three_state_flag(), is_preview=True, min_api='2021-01-01',
+        c.argument('enable_nfs_v3', arg_type=get_three_state_flag(), min_api='2021-01-01',
                    help='NFS 3.0 protocol support enabled if sets to true.')
         c.argument('enable_alw', arg_type=get_three_state_flag(), min_api='2021-06-01',
                    help='The account level immutability property. The property is immutable and can only be set to true'
@@ -488,7 +489,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    'public access setting for a container is required to enable anonymous access.')
         c.argument('min_tls_version', arg_type=get_enum_type(t_tls_version),
                    help='The minimum TLS version to be permitted on requests to storage. '
-                        'The default interpretation is TLS 1.0 for this property')
+                        'While the default setting is TLS 1.0 for this property, '
+                        'Microsoft recommends setting MinimumTlsVersion to 1.2 or above.')
         c.argument('allow_shared_key_access', allow_shared_key_access_type)
         c.argument('identity_type', arg_type=get_enum_type(t_identity_type), arg_group='Identity',
                    help='The identity type.')
@@ -623,7 +625,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage account management-policy create') as c:
         c.argument('policy', type=file_type, completer=FilesCompleter(),
                    help='The Storage Account ManagementPolicies Rules, in JSON format. See more details in: '
-                        'https://docs.microsoft.com/azure/storage/common/storage-lifecycle-managment-concepts.')
+                        'https://learn.microsoft.com/azure/storage/common/storage-lifecycle-managment-concepts.')
 
     for item in ['create', 'update', 'show', 'delete']:
         with self.argument_context('storage account management-policy {}'.format(item)) as c:
@@ -844,7 +846,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
             c.argument('ssh_authorized_key', nargs='+', action=SshPublicKeyAddAction,
                        help='SSH authorized keys for SFTP. Includes an optional description and key. '
                             'The key is the base64 encoded SSH public key , with format: '
-                            '<keyType> <keyData> e.g. ssh-rsa AAAABBBB.'
+                            '`<keyType> <keyData>` e.g. ssh-rsa AAAABBBB.'
                             'Example: --ssh_authorized_key description=description key="ssh-rsa AAAABBBB"'
                             'or --ssh_authorized_key key="ssh-rsa AAAABBBB"')
             c.argument('has_shared_key', arg_type=get_three_state_flag(),
@@ -1273,7 +1275,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The type of blob at the destination.')
         c.argument('preserve_s2s_access_tier', arg_group='Additional Flags', arg_type=get_three_state_flag(),
                    help='Preserve access tier during service to service copy. '
-                   'Please refer to https://docs.microsoft.com/azure/storage/blobs/storage-blob-storage-tiers '
+                   'Please refer to https://learn.microsoft.com/azure/storage/blobs/storage-blob-storage-tiers '
                    'to ensure destination storage account support setting access tier. In the cases that setting '
                    'access tier is not supported, please use `--preserve-s2s-access-tier false` to bypass copying '
                    'access tier. (Default true)')
@@ -1395,7 +1397,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                 help='Required if the blob has an active lease.')
         c.argument('query_expression', help='The query expression in SQL. The maximum size of the query expression '
                    'is 256KiB. For more information about the expression syntax, please see '
-                   'https://docs.microsoft.com/azure/storage/blobs/query-acceleration-sql-reference')
+                   'https://learn.microsoft.com/azure/storage/blobs/query-acceleration-sql-reference')
         c.extra('input_format', arg_type=get_enum_type(['csv', 'json']), validator=validate_text_configuration,
                 help='Serialization type of the data currently stored in the blob. '
                 'The default is to treat the blob data as CSV data formatted in the default dialect.'
@@ -1858,9 +1860,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('expiry', type=get_datetime_type(True), help='expiration UTC datetime in (Y-m-d\'T\'H:M:S\'Z\')')
 
     with self.argument_context('storage share delete') as c:
-        from .sdkutil import get_delete_file_snapshot_type_names
+        t_delete_snapshot = self.get_sdk('_generated.models._azure_file_storage_enums#DeleteSnapshotsOptionType',
+                                         resource_type=ResourceType.DATA_STORAGE_FILESHARE)
         c.extra('share_name', share_name_type, options_list=('--name', '-n'), required=True)
-        c.argument('delete_snapshots', arg_type=get_enum_type(get_delete_file_snapshot_type_names()),
+        c.argument('delete_snapshots', arg_type=get_enum_type(t_delete_snapshot),
                    help='Specify the deletion strategy when the share has snapshots.')
         c.argument('fail_not_exist', help="Specify whether to throw an exception when the share doesn't exists. False "
                                           "by default.")
@@ -2672,7 +2675,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
             c.argument('acl', help='The value is a comma-separated list of access control entries. Each access control '
                        'entry (ACE) consists of a scope, a type, a user or group identifier, and permissions in the '
                        'format "[scope:][type]:[id]:[permissions]".  For more information, please refer to '
-                       'https://docs.microsoft.com/azure/storage/blobs/data-lake-storage-access-control.')
+                       'https://learn.microsoft.com/azure/storage/blobs/data-lake-storage-access-control.')
             c.extra('continuation',
                     help='Optional continuation token that can be used to resume previously stopped operation.')
             c.extra('batch_size', type=int, help='Optional. If data set size exceeds batch size then operation will '

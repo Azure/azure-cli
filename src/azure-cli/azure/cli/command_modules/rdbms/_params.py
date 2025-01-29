@@ -17,7 +17,7 @@ from azure.cli.core.commands.parameters import (
 from azure.cli.command_modules.rdbms.validators import configuration_value_validator, validate_subnet, \
     tls_validator, public_access_validator, maintenance_window_validator, ip_address_validator, \
     retention_validator, firewall_rule_name_validator, validate_identity, validate_byok_identity, validate_identities, \
-    virtual_endpoint_name_validator
+    virtual_endpoint_name_validator, node_count_validator
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction
 
 from .randomname.generate import generate_username
@@ -60,7 +60,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('administrator_login_password', options_list=['--admin-password', '-p'], help='The password of the administrator. Minimum 8 characters and maximum 128 characters. Password must contain characters from three of the following categories: English uppercase letters, English lowercase letters, numbers, and non-alphanumeric characters.')
             c.argument('ssl_enforcement', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--ssl-enforcement'], help='Enable or disable ssl enforcement for connections to server. Default is Enabled.')
             c.argument('minimal_tls_version', arg_type=get_enum_type(['TLS1_0', 'TLS1_1', 'TLS1_2', 'TLSEnforcementDisabled']), options_list=['--minimal-tls-version'], help='Set the minimal TLS version for connections to server when SSL is enabled. Default is TLSEnforcementDisabled.', validator=tls_validator)
-            c.argument('public_network_access', options_list=['--public-network-access', '--public'], help='Enable or disable public network access to server. When disabled, only connections made through Private Links can reach this server. Allowed values are : Enabled, Disabled, all, 0.0.0.0, <SingleIP>, <StartIP-DestinationIP>. Default is Enabled.')
+            c.argument('public_network_access', options_list=['--public-network-access', '--public'], help='Enable or disable public network access to server. When disabled, only connections made through Private Links can reach this server. Allowed values are : `Enabled`, `Disabled`, `all`, `0.0.0.0`, `<SingleIP>`, `<StartIP-DestinationIP>`. Default is `Enabled`.')
             c.argument('tier', arg_type=get_enum_type(['Basic', 'GeneralPurpose', 'MemoryOptimized']), options_list=['--performance-tier'], help='The performance tier of the server.')
             c.argument('capacity', options_list=['--vcore'], type=int, help='Number of vcore.')
             c.argument('family', options_list=['--family'], arg_type=get_enum_type(['Gen4', 'Gen5']), help='Hardware generation.')
@@ -94,7 +94,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('location', arg_type=get_location_type(self.cli_ctx))
             if command_group == 'postgres':
                 c.argument('version', default='11',
-                           help='Server major version. https://docs.microsoft.com/en-us/azure/postgresql/single-server/concepts-supported-versions')
+                           help='Server major version. https://learn.microsoft.com/en-us/azure/postgresql/single-server/concepts-supported-versions')
             else:
                 c.argument('version', help='Server major version.')
 
@@ -326,6 +326,33 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                  'This value can only be updated if flexible server is using Premium SSD v2 Disks.'
         )
 
+        create_default_db_arg_type = CLIArgumentType(
+            arg_type=get_enum_type(['Enabled', 'Disabled']),
+            options_list=['--create-default-database', '-c'],
+            help='Enable or disable the creation of default database flexibleserverdb. Default value is Enabled.'
+        )
+
+        cluster_option_arg_type = CLIArgumentType(
+            arg_type=get_enum_type(['Server', 'ElasticCluster']),
+            options_list=['--cluster-option'],
+            help='Cluster option for the server. Servers are for workloads that can fit on one node. '
+                 'Elastic clusters provides schema- and row-based sharding on a database. Default value is Server.'
+        )
+
+        create_node_count_arg_type = CLIArgumentType(
+            type=int,
+            options_list=['--node-count'],
+            help='The number of nodes for elastic cluster. Range of 1 to 10. Default is 2 nodes.',
+            validator=node_count_validator
+        )
+
+        update_node_count_arg_type = CLIArgumentType(
+            type=int,
+            options_list=['--node-count'],
+            help='The number of nodes for elastic cluster. Range of 1 to 10.',
+            validator=node_count_validator
+        )
+
         auto_grow_arg_type = CLIArgumentType(
             arg_type=get_enum_type(['Enabled', 'Disabled']),
             options_list=['--storage-auto-grow'],
@@ -337,6 +364,12 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             options_list=['--storage-type'],
             help='Storage type for the server. Allowed values are Premium_LRS and PremiumV2_LRS. Default value is Premium_LRS.'
                  'Must set iops and throughput if using PremiumV2_LRS.'
+        )
+
+        storage_type_restore_arg_type = CLIArgumentType(
+            arg_type=get_enum_type(['PremiumV2_LRS']),
+            options_list=['--storage-type'],
+            help='Storage type for the new server. Allowed value is PremiumV2_LRS. Default value is none.'
         )
 
         auto_scale_iops_arg_type = CLIArgumentType(
@@ -400,7 +433,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             help='Determines the public access. Enter single or range of IP addresses to be included in the allowed list of IPs. '
                  'IP address ranges must be dash-separated and not contain any spaces. '
                  'Specifying 0.0.0.0 allows public access from any resources deployed within Azure to access your server. '
-                 'Setting it to "None" sets the server in public access mode but does not create a firewall rule. ',
+                 'Setting it to "None" sets the server in public access mode but does not create a firewall rule. '
+                 'Acceptable values are \'Disabled\', \'Enabled\', \'All\', \'None\',\'{startIP}\' and '
+                 '\'{startIP}-{destinationIP}\' where startIP and destinationIP ranges from '
+                 '0.0.0.0 to 255.255.255.255. ',
             validator=public_access_validator
         )
 
@@ -515,7 +551,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
         promote_mode_arg_type = CLIArgumentType(
             arg_type=get_enum_type(['standalone', 'switchover']),
-            help='Whether to promote read replica to an independent server or promite it as a primary server.'
+            help='Whether to promote read replica to an independent server or promote it as a primary server.'
         )
 
         promote_option_arg_type = CLIArgumentType(
@@ -554,7 +590,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('tier', default='GeneralPurpose', arg_type=tier_arg_type)
                 c.argument('sku_name', default='Standard_D2s_v3', arg_type=sku_name_arg_type)
                 c.argument('storage_gb', default='128', arg_type=storage_gb_arg_type)
-                c.argument('version', default='13', arg_type=version_arg_type)
+                c.argument('version', default='16', arg_type=version_arg_type)
                 c.argument('backup_retention', default=7, arg_type=pg_backup_retention_arg_type)
                 c.argument('active_directory_auth', default='Disabled', arg_type=active_directory_auth_arg_type)
                 c.argument('password_auth', default='Enabled', arg_type=password_auth_arg_type)
@@ -563,6 +599,9 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('iops', default=None, arg_type=iops_v2_arg_type)
                 c.argument('throughput', default=None, arg_type=throughput_arg_type)
                 c.argument('performance_tier', default=None, arg_type=performance_tier_arg_type)
+                c.argument('create_default_db', default='Enabled', arg_type=create_default_db_arg_type)
+                c.argument('create_cluster', default='Server', arg_type=cluster_option_arg_type)
+                c.argument('cluster_size', default=None, arg_type=create_node_count_arg_type)
             elif command_group == 'mysql':
                 c.argument('tier', default='Burstable', arg_type=tier_arg_type)
                 c.argument('sku_name', default='Standard_B1ms', arg_type=sku_name_arg_type)
@@ -593,6 +632,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('database_name', arg_type=database_name_arg_type)
             c.argument('yes', arg_type=yes_arg_type)
 
+        with self.argument_context('{} flexible-server list'.format(command_group)) as c:
+            c.argument('show_cluster', options_list=['--show-cluster'], required=False, action='store_true',
+                       help='Only show elastic clusters.')
+
         with self.argument_context('{} flexible-server delete'.format(command_group)) as c:
             c.argument('yes', arg_type=yes_arg_type)
 
@@ -621,6 +664,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('geo_redundant_backup', default='Disabled', arg_type=geo_redundant_backup_arg_type)
                 c.argument('backup_byok_identity', arg_type=backup_identity_arg_type)
                 c.argument('backup_byok_key', arg_type=backup_key_arg_type)
+                c.argument('storage_type', default=None, arg_type=storage_type_restore_arg_type)
 
         with self.argument_context('{} flexible-server geo-restore'. format(command_group)) as c:
             c.argument('location', arg_type=get_location_type(self.cli_ctx), required=True)
@@ -680,6 +724,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('byok_identity', arg_type=identity_arg_type)
             c.argument('backup_byok_identity', arg_type=backup_identity_arg_type)
             c.argument('backup_byok_key', arg_type=backup_key_arg_type)
+            c.argument('public_access', arg_type=public_access_update_arg_type)
             if command_group == 'mysql':
                 c.argument('auto_grow', arg_type=auto_grow_arg_type)
                 c.argument('auto_scale_iops', arg_type=auto_scale_iops_arg_type)
@@ -689,7 +734,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('backup_retention', arg_type=mysql_backup_retention_arg_type)
                 c.argument('geo_redundant_backup', arg_type=geo_redundant_backup_arg_type)
                 c.argument('disable_data_encryption', arg_type=disable_data_encryption_arg_type)
-                c.argument('public_access', arg_type=public_access_update_arg_type)
             elif command_group == 'postgres':
                 c.argument('auto_grow', arg_type=auto_grow_arg_type)
                 c.argument('performance_tier', default=None, arg_type=performance_tier_arg_type)
@@ -699,6 +743,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('active_directory_auth', arg_type=active_directory_auth_arg_type)
                 c.argument('password_auth', arg_type=password_auth_arg_type)
                 c.argument('private_dns_zone_arguments', private_dns_zone_arguments_arg_type)
+                c.argument('cluster_size', default=None, arg_type=update_node_count_arg_type)
                 c.argument('yes', arg_type=yes_arg_type)
 
         with self.argument_context('{} flexible-server upgrade'.format(command_group)) as c:
@@ -792,6 +837,22 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('server_name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
                 c.argument('virtual_endpoint_name', options_list=['--name', '-n'], arg_type=virtual_endpoint_arg_type, validator=virtual_endpoint_name_validator)
 
+        with self.argument_context('{} flexible-server long-term-retention list'.format(command_group)) as c:
+            c.argument('server_name', id_part=None, arg_type=server_name_arg_type)
+
+        with self.argument_context('{} flexible-server long-term-retention show'.format(command_group)) as c:
+            c.argument('backup_name', options_list=['--backup-name', '-b'], help='Backup name.')
+            c.argument('server_name', id_part=None, arg_type=server_name_arg_type)
+
+        with self.argument_context('{} flexible-server long-term-retention start'.format(command_group)) as c:
+            c.argument('backup_name', options_list=['--backup-name', '-b'], help='The name of the new long-term-retention backup.')
+            c.argument('server_name', id_part=None, arg_type=server_name_arg_type)
+            c.argument('sas_url', options_list=['--sas-url', '-u'], help='Container SAS URL.')
+
+        with self.argument_context('{} flexible-server long-term-retention pre-check'.format(command_group)) as c:
+            c.argument('backup_name', options_list=['--backup-name', '-b'], help='The name of the new long-term-retention backup.')
+            c.argument('server_name', id_part=None, arg_type=server_name_arg_type)
+
         for scope in ['create', 'update']:
             argument_context_string = '{} flexible-server virtual-endpoint {}'.format(command_group, scope)
             with self.argument_context(argument_context_string) as c:
@@ -825,6 +886,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('storage_gb', arg_type=storage_gb_arg_type)
                 c.argument('performance_tier', default=None, arg_type=performance_tier_arg_type)
                 c.argument('yes', arg_type=yes_arg_type)
+                c.argument('tags', arg_type=tags_type)
             if command_group == 'mysql':
                 c.argument('public_access', options_list=['--public-access'], arg_type=get_enum_type(['Enabled', 'Disabled']),
                            help='Determines the public access. ')
@@ -864,7 +926,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('max_file_size', type=int, help='The file size limitation to filter files.')
 
         # backups
-        if command_group == 'mysql':
+        if command_group != 'mariadb':
             with self.argument_context('{} flexible-server backup create'.format(command_group)) as c:
                 c.argument('backup_name', options_list=['--backup-name', '-b'], help='The name of the new backup.')
 
@@ -874,18 +936,38 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         with self.argument_context('{} flexible-server backup list'.format(command_group)) as c:
             c.argument('server_name', id_part=None, arg_type=server_name_arg_type)
 
+        if command_group == 'postgres':
+            with self.argument_context('{} flexible-server backup delete'.format(command_group)) as c:
+                c.argument('backup_name', options_list=['--backup-name', '-b'], help='The name of the new backup.')
+                c.argument('yes', arg_type=yes_arg_type)
+
         # identity
         with self.argument_context('{} flexible-server identity'.format(command_group)) as c:
             c.argument('server_name', id_part=None, options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
 
-        with self.argument_context('{} flexible-server identity assign'.format(command_group)) as c:
-            c.argument('identities', arg_type=identities_arg_type)
-
-        with self.argument_context('{} flexible-server identity remove'.format(command_group)) as c:
-            c.argument('identities', arg_type=identities_arg_type)
+        for scope in ['assign', 'remove']:
+            with self.argument_context('{} flexible-server identity'.format(command_group)) as c:
+                c.argument('identities', arg_type=identities_arg_type)
 
         with self.argument_context('{} flexible-server identity show'.format(command_group)) as c:
             c.argument('identity', options_list=['--identity', '-n'], help='Name or ID of identity to show.', validator=validate_identity)
+
+        if command_group == 'postgres':
+            with self.argument_context('{} flexible-server identity update'.format(command_group)) as c:
+                c.argument('system_assigned', options_list=['--system-assigned'], arg_type=get_enum_type(['Enabled', 'Disabled']),
+                           help='Enable or disable system assigned identity to authenticate to cloud services without storing credentials in code. Default is `Disabled`.')
+
+        # fabric mirroring
+        if command_group == 'postgres':
+            for scope in ['start', 'stop', 'update-databases']:
+                with self.argument_context('{} flexible-server fabric-mirroring'.format(command_group)) as c:
+                    c.argument('server_name', id_part=None, options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
+                    c.argument('yes', arg_type=yes_arg_type)
+
+            for scope in ['start', 'update-databases']:
+                with self.argument_context('{} flexible-server fabric-mirroring'.format(command_group)) as c:
+                    c.argument('database_names', options_list=['--database-names', '-d'], nargs='+',
+                               help='Space-separated list of the database names to be mirrored. Required if --mirroring is enabled.')
 
         # ad-admin
         with self.argument_context('{} flexible-server ad-admin'.format(command_group)) as c:
@@ -980,8 +1062,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                                help='Supported Migration Option. Default is ValidateAndMigrate.', choices=['Validate', 'ValidateAndMigrate', 'Migrate'], default='ValidateAndMigrate')
                     c.argument('tags', tags_type)
                     c.argument('location', arg_type=get_location_type(self.cli_ctx))
-                    c.argument('migrationInstanceResourceId', options_list=['--migrationRuntimeResourceId', '-r'], required=False,
-                               help='For private endpoint migrations, this ID will be responsible for migrating data between source and target server.')
                 elif scope == "show":
                     c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--migration-name'],
                                help='Name of the migration.')

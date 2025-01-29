@@ -9,7 +9,7 @@ import re
 from enum import Enum
 from knack.log import get_logger
 from knack.util import CLIError
-from msrestazure.azure_exceptions import CloudError
+from azure.core.exceptions import HttpResponseError
 from azure.cli.core.azclierror import (
     ArgumentUsageError,
     BadRequestError,
@@ -198,8 +198,12 @@ def iot_dps_policy_update(
         if policy.key_name == access_policy_name:
             if primary_key is not None:
                 policy.primary_key = primary_key
+                if policy.primary_key == '':
+                    policy.primary_key = None
             if secondary_key is not None:
                 policy.secondary_key = secondary_key
+                if policy.secondary_key == '':
+                    policy.secondary_key = None
             if rights is not None:
                 policy.rights = _convert_rights_to_access_rights(rights)
 
@@ -582,7 +586,7 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
                     hub_description.identity.principal_id = principal_id
                     for scope in identity_scopes:
                         assign_identity(cmd.cli_ctx, lambda: hub_description, lambda hub: hub_description, identity_role=identity_role, identity_scope=scope)
-        except CloudError as e:
+        except HttpResponseError as e:
             raise e
 
     create = client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, hub_description)
@@ -940,11 +944,11 @@ def iot_hub_get_stats(client, hub_name, resource_group_name=None):
 
 def validate_authentication_type_input(endpoint_type, connection_string=None, authentication_type=None, endpoint_uri=None, entity_path=None):
     is_keyBased = (AuthenticationType.KeyBased.value == authentication_type) or (authentication_type is None)
-    has_connection_string = (connection_string is not None)
+    has_connection_string = connection_string is not None
     if is_keyBased and not has_connection_string:
         raise CLIError("Please provide a connection string '--connection-string/-c'")
 
-    has_endpoint_uri = (endpoint_uri is not None)
+    has_endpoint_uri = endpoint_uri is not None
     has_endpoint_uri_and_path = (has_endpoint_uri) and (entity_path is not None)
     if EndpointType.AzureStorageContainer.value == endpoint_type.lower() and not has_endpoint_uri:
         raise CLIError("Please provide an endpoint uri '--endpoint-uri'")
@@ -1525,7 +1529,6 @@ def get_private_endpoint_connection(client, resource_group_name=None, connection
 
 
 def _update_private_endpoint_connection_status(client, resource_group_name, account_name, connection_id, private_endpoint_connection_name, is_approved=True, description=None):  # pylint: disable=unused-argument
-    from azure.core.exceptions import HttpResponseError
     getInfoArr = get_private_endpoint_connection(client,
                                                  resource_group_name=resource_group_name,
                                                  connection_id=connection_id,

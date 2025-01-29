@@ -19,6 +19,7 @@ from azure.cli.command_modules.cdn.aaz.latest.cdn.origin_group import Create as 
     Update as _CDNOriginGroupUpdate, Show as _CDNOriginGroupShow
 from azure.cli.command_modules.cdn.aaz.latest.cdn.endpoint import Create as _CDNEndpointCreate, \
     Update as _CDNEndpointUpdate, Show as _CDNEndpointShow
+from azure.cli.command_modules.cdn.aaz.latest.cdn.profile_migration import Migrate as _Migrate
 from azure.cli.command_modules.cdn.aaz.latest.cdn._name_exists import NameExists
 from .custom_rule_util import (create_condition, create_action, create_delivery_policy_from_existing)
 import argparse
@@ -93,6 +94,10 @@ class CDNProfileCreate(_AFDProfileCreate):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.location._registered = False
         return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        args.location = 'global'
 
 
 class CDNProfileUpdate(_AFDProfileUpdate):
@@ -591,7 +596,6 @@ class CDNEndpointUpdate(_CDNEndpointUpdate):
             'Content won\'t be compressed on CDN when requested content is smaller than 1 byte or larger than 1 MB.',
             blank=True
         )
-        args_schema.origins._registered = False
         args_schema.is_http_allowed._registered = False
         args_schema.is_https_allowed._registered = False
         args_schema.is_compression_enabled._registered = False
@@ -632,7 +636,7 @@ class CDNEndpointRuleAdd(_CDNEndpointUpdate):
         args_schema.action_name = AAZStrArg(
             options=['--action-name'],
             help='The name of the action for the delivery rule: '
-            'https://docs.microsoft.com/en-us/azure/cdn/cdn-standard-rules-engine-actions.',
+            'https://learn.microsoft.com/en-us/azure/cdn/cdn-standard-rules-engine-actions.',
             required=True
         )
         args_schema.order = AAZIntArg(
@@ -651,7 +655,7 @@ class CDNEndpointRuleAdd(_CDNEndpointUpdate):
         args_schema.cache_duration = AAZTimeArg(
             options=['--cache-duration'],
             help='The duration for which the content needs to be cached. '
-            'Allowed format is [d.]hh:mm:ss.',
+            'Allowed format is hh:mm:ss.xxxxxx',
         )
         args_schema.custom_fragment = AAZStrArg(
             options=['--custom-fragment'],
@@ -696,7 +700,7 @@ class CDNEndpointRuleAdd(_CDNEndpointUpdate):
         args_schema.match_variable = AAZStrArg(
             options=['--match-variable'],
             help='Name of the match condition: '
-            'https://docs.microsoft.com/en-us/azure/cdn/cdn-standard-rules-engine-match-conditions.',
+            'https://learn.microsoft.com/en-us/azure/cdn/cdn-standard-rules-engine-match-conditions.',
             enum=['ClientPort', 'Cookies', 'HostName', 'HttpVersion', 'IsDevice', 'PostArgs', 'QueryString',
                   'RemoteAddress', 'RequestBody', 'RequestHeader', 'RequestMethod', 'RequestScheme', 'RequestUri',
                   'ServerPort', 'SocketAddr', 'SslProtocol', 'UrlFileExtension', 'UrlFileName', 'UrlPath']
@@ -867,7 +871,7 @@ class CDNEndpointRuleActionAdd(_CDNEndpointUpdate):
         args_schema.action_name = AAZStrArg(
             options=['--action-name'],
             help='The name of the action for the delivery rule: '
-            'https://docs.microsoft.com/en-us/azure/cdn/cdn-standard-rules-engine-actions.',
+            'https://learn.microsoft.com/en-us/azure/cdn/cdn-standard-rules-engine-actions.',
             required=True
         )
         args_schema.cache_behavior = AAZStrArg(
@@ -878,7 +882,7 @@ class CDNEndpointRuleActionAdd(_CDNEndpointUpdate):
         args_schema.cache_duration = AAZTimeArg(
             options=['--cache-duration'],
             help='The duration for which the content needs to be cached. '
-            'Allowed format is [d.]hh:mm:ss.',
+            'Allowed format is hh:mm:ss.xxxxxx',
         )
         args_schema.custom_fragment = AAZStrArg(
             options=['--custom-fragment'],
@@ -1020,7 +1024,7 @@ class CDNEndpointRuleConditionAdd(_CDNEndpointUpdate):
         args_schema.match_variable = AAZStrArg(
             options=['--match-variable'],
             help='Name of the match condition: '
-            'https://docs.microsoft.com/en-us/azure/cdn/cdn-standard-rules-engine-match-conditions.',
+            'https://learn.microsoft.com/en-us/azure/cdn/cdn-standard-rules-engine-match-conditions.',
             enum=['ClientPort', 'Cookies', 'HostName', 'HttpVersion', 'IsDevice', 'PostArgs', 'QueryString',
                   'RemoteAddress', 'RequestBody', 'RequestHeader', 'RequestMethod', 'RequestScheme', 'RequestUri',
                   'ServerPort', 'SocketAddr', 'SslProtocol', 'UrlFileExtension', 'UrlFileName', 'UrlPath'],
@@ -1103,3 +1107,52 @@ class CDNEndpointRuleConditionRemove(_CDNEndpointUpdate):
         else:
             logger.warning("rule cannot be found. This command will be skipped. Please check the rule name")
         args.delivery_policy = delivery_policy
+
+
+class CdnMigrateToAfd(_Migrate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.identity_type = AAZStrArg(
+            options=['--identity-type'],
+            help='Type of managed service identity (where both SystemAssigned and UserAssigned types are allowed).',
+            enum=['SystemAssigned', 'None', 'UserAssigned', 'SystemAssigned, UserAssigned'],
+        )
+        args_schema.user_assigned_identities = AAZListArg(
+            options=['--user-assigned-identities'],
+            help='The set of user assigned identities associated with the resource. '
+            'The userAssignedIdentities dictionary keys will be ARM resource ids in the form: '
+            '\'/subscriptions/{{subscriptionId}}/resourceGroups/{{resourceGroupName}}'
+            '/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{{identityName}}. '
+            'The dictionary values can be empty objects ({{}}) in requests.',
+        )
+        args_schema.user_assigned_identities.Element = AAZStrArg()
+        return args_schema
+
+    def post_operations(self):
+        args = self.ctx.args
+        identity = None
+        user_assigned_identities = {}
+        for identity in args.user_assigned_identities:
+            user_assigned_identities[identity.to_serialized_data()] = {}
+        if args.identity_type == 'UserAssigned' or args.identity_type == 'SystemAssigned, UserAssigned':
+            identity = {
+                'type': args.identity_type,
+                'userAssignedIdentities': user_assigned_identities
+            }
+        elif args.identity_type == 'SystemAssigned':
+            identity = {
+                'type': args.identity_type
+            }
+
+        existing = _AFDProfileShow(cli_ctx=self.cli_ctx)(command_args={
+            'resource_group': args.resource_group,
+            'profile_name': args.profile_name
+        })
+        location = None if 'location' not in existing else existing['location']
+        _AFDProfileUpdate(cli_ctx=self.cli_ctx)(command_args={
+            'resource_group': args.resource_group,
+            'profile_name': args.profile_name,
+            'location': location,
+            'identity': identity
+        })

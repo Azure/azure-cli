@@ -69,6 +69,9 @@ def acr_create(cmd,
     if re.match(r'\w*[A-Z]\w*', registry_name):
         raise InvalidArgumentValueError("argument error: Registry name must use only lowercase.")
 
+    if re.match(r'\w*[-]\w*', registry_name):
+        raise InvalidArgumentValueError("argument error: Registry name cannot contain dashes.")
+
     Registry, Sku, NetworkRuleSet = cmd.get_models('Registry', 'Sku', 'NetworkRuleSet')
     registry = Registry(location=location, sku=Sku(name=sku), admin_user_enabled=admin_enabled,
                         zone_redundancy=zone_redundancy, tags=tags)
@@ -90,7 +93,7 @@ def acr_create(cmd,
     lro_poller = client.begin_create(resource_group_name, registry_name, registry)
 
     if workspace:
-        from msrestazure.tools import is_valid_resource_id, resource_id
+        from azure.mgmt.core.tools import is_valid_resource_id, resource_id
         from azure.cli.core.commands import LongRunningOperation
         from azure.cli.core.commands.client_factory import get_subscription_id
         acr = LongRunningOperation(cmd.cli_ctx)(lro_poller)
@@ -256,7 +259,7 @@ def acr_show_endpoints(cmd,
 
 def acr_login(cmd,
               registry_name,
-              resource_group_name=None,  # pylint: disable=unused-argument
+              resource_group_name=None,
               tenant_suffix=None,
               username=None,
               password=None,
@@ -270,7 +273,8 @@ def acr_login(cmd,
             registry_name=registry_name,
             tenant_suffix=tenant_suffix,
             username=username,
-            password=password)
+            password=password,
+            resource_group_name=resource_group_name)
 
         logger.warning("You can perform manual login using the provided access token below, "
                        "for example: 'docker login loginServer -u %s -p accessToken'", EMPTY_GUID)
@@ -301,7 +305,8 @@ def acr_login(cmd,
         registry_name=registry_name,
         tenant_suffix=tenant_suffix,
         username=username,
-        password=password)
+        password=password,
+        resource_group_name=resource_group_name)
 
     # warn casing difference caused by ACR normalizing to lower on login_server
     parts = login_server.split('.')
@@ -607,7 +612,7 @@ def _analyze_identities(identities):
 
 
 def _ensure_identity_resource_id(subscription_id, resource_group, resource):
-    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     if is_valid_resource_id(resource):
         return resource
     return resource_id(subscription=subscription_id,

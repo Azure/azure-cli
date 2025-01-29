@@ -60,7 +60,7 @@ def load_arguments(self, _):
     deployment_parameters_type = CLIArgumentType(options_list=['--parameters', '-p'], action='append', nargs='+', completer=FilesCompleter(), help='the deployment parameters')
     filter_type = CLIArgumentType(options_list=['--filter'], is_preview=True,
                                   help='Filter expression using OData notation. You can use --filter "provisioningState eq \'{state}\'" to filter provisioningState. '
-                                       'To get more information, please visit https://docs.microsoft.com/rest/api/resources/deployments/listatsubscriptionscope#uri-parameters')
+                                       'To get more information, please visit https://learn.microsoft.com/rest/api/resources/deployments/listatsubscriptionscope#uri-parameters')
     no_prompt = CLIArgumentType(arg_type=get_three_state_flag(), help='The option to disable the prompt of missing parameters for ARM template. '
                                 'When the value is true, the prompt requiring users to provide missing parameter will be ignored. The default value is false.')
 
@@ -739,7 +739,7 @@ def load_arguments(self, _):
                 c.argument('template_spec', arg_type=deployment_template_spec_type)
                 c.argument('template_uri', arg_type=deployment_template_uri_type)
                 c.argument('query_string', arg_type=deployment_query_string_type)
-                c.argument('parameters', arg_type=deployment_parameters_type, help='Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.')
+                c.argument('parameters', arg_type=deployment_parameters_type, help='Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.')
                 c.argument('description', arg_type=stacks_description_type)
                 c.argument('subscription', arg_type=subscription_type)
                 c.argument('action_on_unmanage', arg_type=stacks_action_on_unmanage_type)
@@ -819,7 +819,7 @@ def load_arguments(self, _):
         c.argument('target', arg_type=CLIArgumentType(options_list=['--target', '-t'], help="The target location where the Bicep module will be published."))
         c.argument('documentationUri', arg_type=CLIArgumentType(options_list=['--documentationUri'], help="The documentation uri of the Bicep module."), deprecate_info=c.deprecate(target='--documentationUri', redirect='--documentation-uri'))
         c.argument('documentation_uri', arg_type=CLIArgumentType(options_list=['--documentation-uri', '-d'], help="The documentation uri of the Bicep module."))
-        c.argument('with_source', options_list=['--with-source'], action='store_true', help="Publish source code with the module.", is_preview=True)
+        c.argument('with_source', options_list=['--with-source'], action='store_true', help="Publish source code with the module.")
         c.argument('force', arg_type=bicep_force_type, help="Allow overwriting an existing Bicep module version.")
 
     with self.argument_context('bicep install') as c:
@@ -836,7 +836,7 @@ def load_arguments(self, _):
         c.argument('stdout', arg_type=bicep_stdout_type)
         c.argument('no_restore', arg_type=bicep_no_restore_type, help="When set, generates the parameters file without restoring external modules.")
         c.argument('output_format', help="Set output format. Valid values are ( json | bicepparam ).")
-        c.argument('include_params', help="Set include params. Valid values are ( all | required-only ).")
+        c.argument('include_params', help="Set include params. Valid values are ( all | RequiredOnly ).")
 
     with self.argument_context('bicep lint') as c:
         c.argument('file', arg_type=bicep_file_type, help="The path to the Bicep module file to lint in the file system.")

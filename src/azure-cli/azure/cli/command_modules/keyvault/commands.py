@@ -53,12 +53,12 @@ def load_command_table(self, _):
     if not is_azure_stack_profile(self):
         mgmt_hsms_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)
         mgmt_hsms_regions_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT, Clients.mhsm_regions)
-        private_data_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT, Clients.private_7_2)
+        data_security_domain_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_SECURITY_DOMAIN)
         data_backup_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP)
         data_access_control_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL)
         data_setting_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_ADMINISTRATION_SETTING)
     else:
-        mgmt_hsms_entity = mgmt_hsms_regions_entity = private_data_entity = data_backup_entity = \
+        mgmt_hsms_entity = mgmt_hsms_regions_entity = data_security_domain_entity = data_backup_entity = \
             data_access_control_entity = data_setting_entity = None
 
     kv_vaults_custom = CliCommandType(
@@ -142,7 +142,7 @@ def load_command_table(self, _):
         with self.command_group('keyvault restore', data_backup_entity.command_type) as g:
             g.keyvault_custom('start', 'full_restore')
 
-        with self.command_group('keyvault security-domain', private_data_entity.command_type) as g:
+        with self.command_group('keyvault security-domain', data_security_domain_entity.command_type) as g:
             g.keyvault_custom('init-recovery', 'security_domain_init_recovery')
             g.keyvault_custom('restore-blob', 'security_domain_restore_blob')
             g.keyvault_custom('upload', 'security_domain_upload', supports_no_wait=True)
@@ -210,7 +210,7 @@ def load_command_table(self, _):
                                'will be moved to the soft deleted state. You will not be able to create a secret '
                                'with the same name within this key vault until the secret has been purged from the '
                                'soft-deleted state. Please see the following documentation for additional guidance.'
-                               '\nhttps://docs.microsoft.com/azure/key-vault/general/soft-delete-overview'))
+                               '\nhttps://learn.microsoft.com/azure/key-vault/general/soft-delete-overview'))
         g.keyvault_command('purge', 'purge_deleted_secret')
         g.keyvault_command('recover', 'begin_recover_deleted_secret', transform=transform_secret_recover)
         g.keyvault_custom('download', 'download_secret')
@@ -241,7 +241,7 @@ def load_command_table(self, _):
                                    'create a certificate with the same name within this key vault until the '
                                    'certificate has been purged from the soft-deleted state. Please see the following '
                                    'documentation for additional guidance.\n'
-                                   'https://docs.microsoft.com/azure/key-vault/general/soft-delete-overview'),
+                                   'https://learn.microsoft.com/azure/key-vault/general/soft-delete-overview'),
                            transform=transform_certificate_delete)
         g.keyvault_command('purge', 'purge_deleted_certificate')
         g.keyvault_command('recover', 'begin_recover_deleted_certificate', transform=transform_certificate_recover)

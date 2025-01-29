@@ -13,9 +13,11 @@ from azure.cli.command_modules.mysql._client_factory import (
     cf_mysql_flexible_replica,
     cf_mysql_flexible_location_capabilities,
     cf_mysql_flexible_log,
+    cf_mysql_flexible_backup,
     cf_mysql_flexible_backups,
     cf_mysql_flexible_adadmin,
-    cf_mysql_flexible_export)
+    cf_mysql_flexible_export,
+    cf_mysql_flexible_maintenances)
 from ._transformers import (
     table_transform_output,
     table_transform_output_list_servers,
@@ -29,58 +31,68 @@ from ._transformers import (
 def load_command_table(self, _):
     # Flexible server SDKs:
     mysql_flexible_servers_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms.mysql_flexibleservers.operations#ServersOperations.{}',
+        operations_tmpl='azure.mgmt.mysqlflexibleservers.operations#ServersOperations.{}',
         client_factory=cf_mysql_flexible_servers
     )
 
     mysql_advanced_threat_protection_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms.mysql_flexibleservers.operations#AdvancedThreatProtectionSettingsOperations.{}',
+        operations_tmpl='azure.mgmt.mysqlflexibleservers.operations#AdvancedThreatProtectionSettingsOperations.{}',
         client_factory=cf_mysql_advanced_threat_protection
     )
 
     mysql_flexible_firewall_rule_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms.mysql_flexibleservers.operations#FirewallRulesOperations.{}',
+        operations_tmpl='azure.mgmt.mysqlflexibleservers.operations#FirewallRulesOperations.{}',
         client_factory=cf_mysql_flexible_firewall_rules
     )
 
     mysql_flexible_config_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms.mysql_flexibleservers.operations#ConfigurationsOperations.{}',
+        operations_tmpl='azure.mgmt.mysqlflexibleservers.operations#ConfigurationsOperations.{}',
         client_factory=cf_mysql_flexible_config
     )
 
     mysql_flexible_db_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms.mysql_flexibleservers.operations#DatabasesOperations.{}',
+        operations_tmpl='azure.mgmt.mysqlflexibleservers.operations#DatabasesOperations.{}',
         client_factory=cf_mysql_flexible_db
     )
 
     mysql_flexible_replica_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms.mysql_flexibleservers.operations#ReplicasOperations.{}',
+        operations_tmpl='azure.mgmt.mysqlflexibleservers.operations#ReplicasOperations.{}',
         client_factory=cf_mysql_flexible_replica
     )
 
     mysql_flexible_location_capabilities_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms.mysql_flexibleservers.operations#LocationBasedCapabilitiesOperations.{}',
+        operations_tmpl='azure.mgmt.mysqlflexibleservers.operations#LocationBasedCapabilitiesOperations.{}',
         client_factory=cf_mysql_flexible_location_capabilities
     )
 
     mysql_flexible_log_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms.mysql_flexibleservers.operations#LogFilesOperations.{}',
+        operations_tmpl='azure.mgmt.mysqlflexibleservers.operations#LogFilesOperations.{}',
         client_factory=cf_mysql_flexible_log
     )
 
-    mysql_flexible_backups_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms.mysql_flexibleservers.operations#BackupsOperations.{}',
+    mysql_flexible_long_running_backup_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.mysqlflexibleservers.operations#LongRunningBackupOperations.{}',
+        client_factory=cf_mysql_flexible_backup
+    )
+
+    mysql_flexible_long_running_backups_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.mysqlflexibleservers.operations#LongRunningBackupsOperations.{}',
         client_factory=cf_mysql_flexible_backups
     )
 
     mysql_flexible_export_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms.mysql_flexibleservers.operations#BackupAndExportOperations.{}',
+        operations_tmpl='azure.mgmt.mysqlflexibleservers.operations#BackupAndExportOperations.{}',
         client_factory=cf_mysql_flexible_export
     )
 
     mysql_flexible_adadmin_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms.mysql_flexibleservers.operations#AzureADAdministratorsOperations.{}',
+        operations_tmpl='azure.mgmt.mysqlflexibleservers.operations#AzureADAdministratorsOperations.{}',
         client_factory=cf_mysql_flexible_adadmin
+    )
+
+    mysql_flexible_maintenance_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.mysqlflexibleservers.operations#MaintenancesOperations.{}',
+        client_factory=cf_mysql_flexible_maintenances
     )
 
     # MERU COMMANDS
@@ -113,11 +125,13 @@ def load_command_table(self, _):
         g.custom_command('upgrade', 'flexible_server_version_upgrade', custom_command_type=mysql_custom)
         g.custom_wait_command('wait', 'flexible_server_mysql_get')
         g.custom_command('restart', 'flexible_server_restart')
+        g.custom_command('detach-vnet', 'flexible_server_detach_vnet')
 
     with self.command_group('mysql flexible-server import', mysql_flexible_servers_sdk,
                             custom_command_type=mysql_custom,
                             client_factory=cf_mysql_flexible_servers) as g:
         g.custom_command('create', 'flexible_server_import_create', table_transformer=table_transform_output)
+        g.custom_command('stop-replication', 'flexible_server_import_replica_stop', confirmation=True)
 
     with self.command_group('mysql flexible-server firewall-rule', mysql_flexible_firewall_rule_sdk,
                             custom_command_type=mysql_custom,
@@ -177,10 +191,13 @@ def load_command_table(self, _):
         g.custom_command('list', 'flexible_server_log_list')
         g.custom_command('download', 'flexible_server_log_download')
 
-    with self.command_group('mysql flexible-server backup', mysql_flexible_backups_sdk,
+    with self.command_group('mysql flexible-server backup', mysql_flexible_long_running_backup_sdk,
+                            client_factory=cf_mysql_flexible_backup) as g:
+        g.command('create', 'begin_create')
+
+    with self.command_group('mysql flexible-server backup', mysql_flexible_long_running_backups_sdk,
                             client_factory=cf_mysql_flexible_backups) as g:
-        g.command('create', 'put', transform=transform_backup)
-        g.command('list', 'list_by_server', transform=transform_backups_list)
+        g.command('list', 'list', transform=transform_backups_list)
         g.show_command('show', 'get', transform=transform_backup)
 
     with self.command_group('mysql flexible-server export', mysql_flexible_export_sdk,
@@ -209,3 +226,10 @@ def load_command_table(self, _):
                             custom_command_type=mysql_custom,
                             client_factory=cf_mysql_flexible_servers) as g:
         g.custom_command('reset', 'flexible_gtid_reset', supports_no_wait=True)
+
+    with self.command_group('mysql flexible-server maintenance', mysql_flexible_maintenance_sdk,
+                            custom_command_type=mysql_custom,
+                            client_factory=cf_mysql_flexible_maintenances) as g:
+        g.custom_command('reschedule', 'flexible_server_maintenance_reschedule')
+        g.custom_command('list', 'flexible_server_maintenance_list')
+        g.custom_show_command('show', 'flexible_server_maintenance_show')

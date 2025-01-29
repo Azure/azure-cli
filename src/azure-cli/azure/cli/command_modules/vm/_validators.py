@@ -7,10 +7,7 @@
 
 import os
 
-try:
-    from urllib.parse import urlparse
-except ImportError:
-    from urlparse import urlparse  # pylint: disable=import-error
+from urllib.parse import urlparse
 
 from knack.log import get_logger
 from knack.util import CLIError
@@ -34,7 +31,7 @@ logger = get_logger(__name__)
 
 
 def validate_asg_names_or_ids(cmd, namespace):
-    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id, resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
     resource_group = namespace.resource_group_name
@@ -58,7 +55,7 @@ def validate_asg_names_or_ids(cmd, namespace):
 
 
 def validate_nsg_name(cmd, namespace):
-    from msrestazure.tools import resource_id
+    from azure.mgmt.core.tools import resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
     vm_id = resource_id(name=namespace.vm_name, resource_group=namespace.resource_group_name,
                         namespace='Microsoft.Compute', type='virtualMachines',
@@ -83,7 +80,7 @@ def validate_vm_name_for_monitor_metrics(cmd, namespace):
 
 
 def _validate_proximity_placement_group(cmd, namespace):
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
 
     if namespace.proximity_placement_group:
         namespace.proximity_placement_group = _get_resource_id(cmd.cli_ctx, namespace.proximity_placement_group,
@@ -98,7 +95,7 @@ def _validate_proximity_placement_group(cmd, namespace):
 
 
 def process_vm_secret_format(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id
     from azure.cli.core._output import (get_output_format, set_output_format)
 
     keyvault_usage = CLIError('usage error: [--keyvault NAME --resource-group NAME | --keyvault ID]')
@@ -132,7 +129,7 @@ def _get_resource_group_from_vault_name(cli_ctx, vault_name):
     """
     from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
     client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_KEYVAULT).vaults
     for vault in client.list():
         id_comps = parse_resource_id(vault.id)
@@ -142,7 +139,7 @@ def _get_resource_group_from_vault_name(cli_ctx, vault_name):
 
 
 def _get_resource_id(cli_ctx, val, resource_group, resource_type, resource_namespace):
-    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
     if is_valid_resource_id(val):
         return val
@@ -238,7 +235,7 @@ def _validate_secrets(secrets, os_type):
 def _parse_image_argument(cmd, namespace):
     """ Systematically determines what type is supplied for the --image parameter. Updates the
         namespace and returns the type for subsequent processing. """
-    from msrestazure.tools import is_valid_resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id
     from azure.core.exceptions import HttpResponseError
     import re
 
@@ -374,7 +371,7 @@ def _validate_location(cmd, namespace, zone_info, size_info):
 
 # pylint: disable=too-many-branches, too-many-statements, too-many-locals
 def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
 
     _validate_vm_vmss_create_ephemeral_placement(namespace)
 
@@ -649,7 +646,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
 
 
 def _validate_vm_create_storage_account(cmd, namespace):
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
     if namespace.storage_account:
         storage_id = parse_resource_id(namespace.storage_account)
         rg = storage_id.get('resource_group', namespace.resource_group_name)
@@ -689,7 +686,7 @@ def _validate_vm_create_storage_account(cmd, namespace):
 
 
 def _validate_vm_create_availability_set(cmd, namespace):
-    from msrestazure.tools import parse_resource_id, resource_id
+    from azure.mgmt.core.tools import parse_resource_id, resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
     if namespace.availability_set:
         as_id = parse_resource_id(namespace.availability_set)
@@ -709,7 +706,7 @@ def _validate_vm_create_availability_set(cmd, namespace):
 
 
 def _validate_vm_create_vmss(cmd, namespace):
-    from msrestazure.tools import parse_resource_id, resource_id
+    from azure.mgmt.core.tools import parse_resource_id, resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
     if namespace.vmss:
         as_id = parse_resource_id(namespace.vmss)
@@ -745,7 +742,7 @@ def _validate_vm_create_dedicated_host(cmd, namespace):
     :param namespace:
     :return:
     """
-    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
     if namespace.dedicated_host and namespace.dedicated_host_group:
@@ -763,7 +760,7 @@ def _validate_vm_create_dedicated_host(cmd, namespace):
 
 
 def _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=False):
-    from msrestazure.tools import is_valid_resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id
     vnet = namespace.vnet_name
     subnet = namespace.subnet
     rg = namespace.resource_group_name
@@ -1075,7 +1072,7 @@ def validate_delete_option(string):
 
 
 def _validate_vm_create_nics(cmd, namespace):
-    from msrestazure.tools import resource_id
+    from azure.mgmt.core.tools import resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
     nic_ids = namespace.nics
     delete_option = validate_delete_options(nic_ids, getattr(namespace, 'nic_delete_option', None))
@@ -1112,7 +1109,7 @@ def _validate_vm_nic_delete_option(namespace):
     if not namespace.nics and namespace.nic_delete_option:
         if len(namespace.nic_delete_option) == 1 and len(namespace.nic_delete_option[0].split('=')) == 1:  # pylint: disable=line-too-long
             namespace.nic_delete_option = namespace.nic_delete_option[0]
-        elif len(namespace.nic_delete_option) > 1 or any((len(delete_option.split('=')) > 1 for delete_option in namespace.nic_delete_option)):  # pylint: disable=line-too-long
+        elif len(namespace.nic_delete_option) > 1 or any(len(delete_option.split('=')) > 1 for delete_option in namespace.nic_delete_option):  # pylint: disable=line-too-long
             from azure.cli.core.parser import InvalidArgumentValueError
             raise InvalidArgumentValueError("incorrect usage: Cannot specify individual delete option when no nic is "
                                             "specified. Either specify a list of nics and their delete option like: "
@@ -1194,7 +1191,7 @@ def _validate_admin_username(username, os_type):
     import re
     if not username:
         raise CLIError("admin user name can not be empty")
-    is_linux = (os_type.lower() == 'linux')
+    is_linux = os_type.lower() == 'linux'
     # pylint: disable=line-too-long
     pattern = (r'[\\\/"\[\]:|<>+=;,?*@#()!A-Z]+' if is_linux else r'[\\\/"\[\]:|<>+=;,?*@]+')
     linux_err = r'admin user name cannot contain upper case character A-Z, special characters \/"[]:|<>+=;,?*@#()! or start with $ or -'
@@ -1212,7 +1209,7 @@ def _validate_admin_username(username, os_type):
 
 def _validate_admin_password(password, os_type):
     import re
-    is_linux = (os_type.lower() == 'linux')
+    is_linux = os_type.lower() == 'linux'
     max_length = 72 if is_linux else 123
     min_length = 12
 
@@ -1232,6 +1229,7 @@ def _validate_admin_password(password, os_type):
 
 def validate_ssh_key(namespace, cmd=None):
     from azure.core.exceptions import HttpResponseError
+    ssh_key_type = namespace.ssh_key_type if hasattr(namespace, 'ssh_key_type') else 'RSA'
     if hasattr(namespace, 'ssh_key_name') and namespace.ssh_key_name:
         client = _compute_client_factory(cmd.cli_ctx)
         # --ssh-key-name
@@ -1248,7 +1246,7 @@ def validate_ssh_key(namespace, cmd=None):
         elif namespace.generate_ssh_keys:
             parameters = {}
             parameters['location'] = namespace.location
-            public_key = _validate_ssh_key_helper("", namespace.generate_ssh_keys)
+            public_key = _validate_ssh_key_helper("", namespace.generate_ssh_keys, ssh_key_type)
             parameters['public_key'] = public_key
             client.ssh_public_keys.create(resource_group_name=namespace.resource_group_name,
                                           ssh_public_key_name=namespace.ssh_key_name,
@@ -1261,16 +1259,22 @@ def validate_ssh_key(namespace, cmd=None):
 
         processed_ssh_key_values = []
         for ssh_key_value in namespace.ssh_key_value:
-            processed_ssh_key_values.append(_validate_ssh_key_helper(ssh_key_value, namespace.generate_ssh_keys))
+            processed_ssh_key_values.append(_validate_ssh_key_helper(ssh_key_value,
+                                                                     namespace.generate_ssh_keys,
+                                                                     ssh_key_type))
         namespace.ssh_key_value = processed_ssh_key_values
     # if no ssh keys processed, try to generate new key / use existing at root.
     else:
-        namespace.ssh_key_value = [_validate_ssh_key_helper("", namespace.generate_ssh_keys)]
+        namespace.ssh_key_value = [_validate_ssh_key_helper("",
+                                                            namespace.generate_ssh_keys,
+                                                            ssh_key_type)]
 
 
-def _validate_ssh_key_helper(ssh_key_value, should_generate_ssh_keys):
+def _validate_ssh_key_helper(ssh_key_value, should_generate_ssh_keys, ssh_key_type=None):
+    file_name = 'id_rsa.pub' if ssh_key_type is None or ssh_key_type == 'RSA' else 'id_ed25519.pub'
     string_or_file = (ssh_key_value or
-                      os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub'))
+                      os.path.join(os.path.expanduser('~'), '.ssh', file_name))
+
     content = string_or_file
     if os.path.exists(string_or_file):
         logger.info('Use existing SSH public key file: %s', string_or_file)
@@ -1285,7 +1289,12 @@ def _validate_ssh_key_helper(ssh_key_value, should_generate_ssh_keys):
                 private_key_filepath = public_key_filepath[:-4]
             else:
                 private_key_filepath = public_key_filepath + '.private'
-            content = keys.generate_ssh_keys(private_key_filepath, public_key_filepath)
+
+            if ssh_key_type == "Ed25519":
+                from azure.cli.command_modules.vm._vm_utils import generate_ssh_keys_ed25519
+                content = generate_ssh_keys_ed25519(private_key_filepath, public_key_filepath)
+            else:
+                content = keys.generate_ssh_keys(private_key_filepath, public_key_filepath)
             logger.warning("SSH key files '%s' and '%s' have been generated under ~/.ssh to "
                            "allow SSH access to the VM. If using machines without "
                            "permanent storage, back up your keys to a safe location.",
@@ -1445,7 +1454,7 @@ def _validate_generation_version_and_trusted_launch(cmd, namespace):
 
     # create vm with os disk
     if hasattr(namespace, 'attach_os_disk') and namespace.attach_os_disk is not None:
-        from msrestazure.tools import parse_resource_id
+        from azure.mgmt.core.tools import parse_resource_id
         if urlparse(namespace.attach_os_disk).scheme and "://" in namespace.attach_os_disk:
             # vhd does not support trusted launch
             return
@@ -1585,7 +1594,7 @@ def _validate_vmss_single_placement_group(namespace):
 
 
 def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
     from azure.cli.core.profiles import ResourceType
     from azure.core.exceptions import HttpResponseError
     std_lb_is_available = cmd.supported_api_version(min_api='2017-08-01', resource_type=ResourceType.MGMT_NETWORK)
@@ -1728,7 +1737,6 @@ def process_vmss_create_namespace(cmd, namespace):
         namespace.load_balancer_sku = 'Standard'  # lb sku MUST be standard
         # namespace.public_ip_per_vm = True  # default to true for VMSS Flex
 
-        namespace.upgrade_policy_mode = None
         namespace.use_unmanaged_disk = None
 
         banned_params = {
@@ -1872,17 +1880,23 @@ def validate_vmss_update_namespace(cmd, namespace):  # pylint: disable=unused-ar
 
 # region disk, snapshot, image validators
 def process_vm_disk_attach_namespace(cmd, namespace):
-    disks = []
-    if not namespace.disks:
-        if not namespace.disk:
-            raise RequiredArgumentMissingError("Please use --name or --disks to specify the disk names")
+    if not namespace.disks and not namespace.disk and not namespace.disk_ids:
+        raise RequiredArgumentMissingError("Please use at least one of --name, --disks and --disk-ids")
 
+    if namespace.disk and namespace.disks:
+        raise MutuallyExclusiveArgumentError("You can only specify one of --name and --disks")
+
+    if namespace.disk and namespace.disk_ids:
+        raise MutuallyExclusiveArgumentError("You can only specify one of --name and --disk-ids")
+
+    if namespace.disks and namespace.disk_ids:
+        raise MutuallyExclusiveArgumentError("You can only specify one of --disks and --disk-ids")
+
+    disks = []
+    if namespace.disk:
         disks = [_get_resource_id(cmd.cli_ctx, namespace.disk, namespace.resource_group_name,
                                   'disks', 'Microsoft.Compute')]
-    else:
-        if namespace.disk:
-            raise MutuallyExclusiveArgumentError("You can only specify one of --name and --disks")
-
+    if namespace.disks:
         for disk in namespace.disks:
             disks.append(_get_resource_id(cmd.cli_ctx, disk, namespace.resource_group_name,
                                           'disks', 'Microsoft.Compute'))
@@ -1890,6 +1904,14 @@ def process_vm_disk_attach_namespace(cmd, namespace):
 
     if len(disks) > 1 and namespace.lun:
         raise MutuallyExclusiveArgumentError("You cannot specify the --lun for multiple disks")
+
+    if namespace.disk_ids and len(namespace.disk_ids) > 1 and namespace.lun:
+        raise MutuallyExclusiveArgumentError("You cannot specify the --lun for multiple disk IDs")
+
+
+def process_vm_disk_detach_namespace(namespace):
+    if not namespace.disk_name and not namespace.disk_ids:
+        raise RequiredArgumentMissingError("Please use at least one '--name', '--disk-ids'")
 
 
 def validate_vmss_disk(cmd, namespace):
@@ -2053,7 +2075,7 @@ def process_snapshot_create_namespace(cmd, namespace):
 
 
 def process_image_create_namespace(cmd, namespace):
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
     validate_tags(namespace)
     validate_edge_zone(cmd, namespace)
     source_from_vm = False
@@ -2154,9 +2176,9 @@ def process_assign_identity_namespace(cmd, namespace):
 def process_remove_identity_namespace(cmd, namespace):
     if namespace.identities:
         from ._vm_utils import MSI_LOCAL_ID
-        for i in range(len(namespace.identities)):
-            if namespace.identities[i] != MSI_LOCAL_ID:
-                namespace.identities[i] = _get_resource_id(cmd.cli_ctx, namespace.identities[i],
+        for i, identity in enumerate(namespace.identities):
+            if identity != MSI_LOCAL_ID:
+                namespace.identities[i] = _get_resource_id(cmd.cli_ctx, identity,
                                                            namespace.resource_group_name,
                                                            'userAssignedIdentities',
                                                            'Microsoft.ManagedIdentity')
@@ -2396,7 +2418,7 @@ def _disk_encryption_set_format(cmd, namespace, name):
     :param name: string
     :return: ID
     """
-    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
     if name is not None and not is_valid_resource_id(name):
         name = resource_id(
@@ -2518,7 +2540,7 @@ def _validate_vmss_automatic_repairs(cmd, namespace):  # pylint: disable=unused-
 
 
 def _validate_vmss_create_host_group(cmd, namespace):
-    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
     if namespace.host_group:
         if not is_valid_resource_id(namespace.host_group):
@@ -2582,7 +2604,7 @@ def _validate_capacity_reservation_group(cmd, namespace):
 
     if namespace.capacity_reservation_group and namespace.capacity_reservation_group != 'None':
 
-        from msrestazure.tools import is_valid_resource_id, resource_id
+        from azure.mgmt.core.tools import is_valid_resource_id, resource_id
         from azure.cli.core.commands.client_factory import get_subscription_id
         if not is_valid_resource_id(namespace.capacity_reservation_group):
             namespace.capacity_reservation_group = resource_id(
@@ -2633,12 +2655,3 @@ def _validate_community_gallery_legal_agreement_acceptance(cmd, namespace):
     if not prompt_y_n(msg, default="y"):
         import sys
         sys.exit(0)
-
-
-def validate_secure_vm_guest_state_sas(cmd, namespace):
-    compute_client = _compute_client_factory(cmd.cli_ctx)
-    disk_info = compute_client.disks.get(namespace.resource_group_name, namespace.disk_name)
-    DiskCreateOption = cmd.get_models('DiskCreateOption')
-
-    if disk_info.creation_data and disk_info.creation_data.create_option == DiskCreateOption.upload_prepared_secure:
-        namespace.secure_vm_guest_state_sas = True

@@ -7,7 +7,7 @@ CONNECTED_ENVIRONMENT_TYPE = "connected"
 MANAGED_ENVIRONMENT_RESOURCE_TYPE = "managedEnvironments"
 CONNECTED_ENVIRONMENT_RESOURCE_TYPE = "connectedEnvironments"
 
-MAXIMUM_SECRET_LENGTH = 20
+MAXIMUM_ACR_LENGTH = 121
 MAXIMUM_CONTAINER_APP_NAME_LENGTH = 32
 
 SHORT_POLLING_INTERVAL_SECS = 3
@@ -46,6 +46,8 @@ PENDING_STATUS = "Pending"
 SUCCEEDED_STATUS = "Succeeded"
 UPDATING_STATUS = "Updating"
 
+BLOB_STORAGE_TOKEN_STORE_SECRET_SETTING_NAME = "blob-storage-token-store-sasurl-secret"
+
 MICROSOFT_SECRET_SETTING_NAME = "microsoft-provider-authentication-secret"
 FACEBOOK_SECRET_SETTING_NAME = "facebook-provider-authentication-secret"
 GITHUB_SECRET_SETTING_NAME = "github-provider-authentication-secret"
@@ -72,7 +74,7 @@ steps:
   - push: ["$Registry/{{image_name}}"]
     timeout: 1800
 """
-DEFAULT_PORT = 8080  # used for no dockerfile scenario; not the hello world image
+DEFAULT_PORT = 0  # used for no dockerfile scenario; not the hello world image. Auto detect the port
 
 HELLO_WORLD_IMAGE = "mcr.microsoft.com/k8se/quickstart:latest"
 

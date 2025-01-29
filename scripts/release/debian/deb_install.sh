@@ -49,7 +49,7 @@ setup() {
     set -v
     mkdir -p /etc/apt/keyrings
     curl -sLS https://packages.microsoft.com/keys/microsoft.asc |
-      gpg --dearmor -o /etc/apt/keyrings/microsoft.gpg
+      gpg --dearmor > /etc/apt/keyrings/microsoft.gpg
     chmod go+r /etc/apt/keyrings/microsoft.gpg
     set +v
 

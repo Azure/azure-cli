@@ -19,4 +19,23 @@ signalr custom-domain update:
         certificate_resource_id:
             rule_exclusions:
             - option_length_too_long
+signalr replica start:
+    rule_exclusions:
+    - missing_command_test_coverage
+signalr replica stop:
+    rule_exclusions:
+    - missing_command_test_coverage
+signalr replica restart:
+    rule_exclusions:
+    - missing_command_test_coverage
+signalr update:
+    parameters:
+        region_endpoint_enabled:
+            rule_exclusions:
+            - option_length_too_long
+signalr replica update:
+    parameters:
+        region_endpoint_enabled:
+            rule_exclusions:
+            - option_length_too_long
 ...

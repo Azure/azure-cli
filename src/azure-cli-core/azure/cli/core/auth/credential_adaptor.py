@@ -7,7 +7,7 @@ import requests
 from knack.log import get_logger
 from knack.util import CLIError
 
-from .util import resource_to_scopes, _normalize_scopes
+from .util import resource_to_scopes
 
 logger = get_logger(__name__)
 
@@ -23,7 +23,7 @@ class CredentialAdaptor:
         :param resource: AAD resource for Track 1 only
         :param auxiliary_credentials: Credentials from .msal_authentication for cross tenant authentication.
             Details about cross tenant authentication:
-            https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/authenticate-multi-tenant
+            https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/authenticate-multi-tenant
         """
 
         self._credential = credential
@@ -57,12 +57,12 @@ class CredentialAdaptor:
     def get_token(self, *scopes, **kwargs):
         logger.debug("CredentialAdaptor.get_token: scopes=%r, kwargs=%r", scopes, kwargs)
 
-        # SDK azure-keyvault-keys 4.5.0b5 passes tenant_id as kwargs, but we don't support tenant_id for now,
-        # so discard it.
-        kwargs.pop('tenant_id', None)
+        # Discard unsupported kwargs: tenant_id, enable_cae
+        filtered_kwargs = {}
+        if 'data' in kwargs:
+            filtered_kwargs['data'] = kwargs['data']
 
-        scopes = _normalize_scopes(scopes)
-        token, _ = self._get_token(scopes, **kwargs)
+        token, _ = self._get_token(scopes, **filtered_kwargs)
         return token
 
     def get_auxiliary_tokens(self, *scopes, **kwargs):

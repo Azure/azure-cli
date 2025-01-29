@@ -34,7 +34,7 @@ class MockClient:
 
 class MockCLI(CLI):
     def __init__(self):
-        super(MockCLI, self).__init__(
+        super().__init__(
             cli_name="mock_cli",
             config_dir=MOCK_CLI_CONFIG_DIR,
             config_env_var_prefix=MOCK_CLI_ENV_VAR_PREFIX,
@@ -67,7 +67,7 @@ class MockCmd:
         return self.cmd.get_models(*attr_args, **kwargs)
 
 
-class MockUrlretrieveUrlValidator(object):
+class MockUrlretrieveUrlValidator:
     def __init__(self, url, version):
         self.url = url
         self.version = version

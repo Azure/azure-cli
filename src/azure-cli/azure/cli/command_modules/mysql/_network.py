@@ -5,12 +5,12 @@
 
 # pylint: disable=unused-argument, line-too-long, import-outside-toplevel
 from requests import get
-from msrestazure.tools import is_valid_resource_id, parse_resource_id, is_valid_resource_name, resource_id  # pylint: disable=import-error
 from knack.log import get_logger
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError, user_confirmation
 from azure.cli.core.azclierror import ValidationError
+from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id, is_valid_resource_name, resource_id
 from azure.mgmt.privatedns.models import PrivateZone
 from azure.mgmt.privatedns.models import SubResource
 from azure.mgmt.privatedns.models import VirtualNetworkLink
@@ -223,7 +223,10 @@ def _create_subnet_delegation(cmd, nw_subscription, resource_client, delegation_
             "subscription": nw_subscription,
             "resource_group": resource_group
         })
-        vnet_subnet_prefixes = [subnet["addressPrefix"] for subnet in vnet.get("subnets", [])]
+
+        vnet_subnet_prefixes = []
+        for subnet in vnet.get("subnets", []):
+            vnet_subnet_prefixes += (subnet.get("addressPrefixes") if not subnet.get("addressPrefix") else [subnet.get("addressPrefix")])
         if subnet_address_pref in vnet_subnet_prefixes:
             raise ValidationError(f"The Subnet (default) prefix {subnet_address_pref} is already taken by another Subnet in the Vnet. Please provide a different prefix for --subnet-prefix parameter")
 
@@ -246,9 +249,10 @@ def _create_subnet_delegation(cmd, nw_subscription, resource_client, delegation_
             "subscription": nw_subscription,
             "resource_group": resource_group
         })
+        subnet_address_prefixes = [DEFAULT_SUBNET_ADDRESS_PREFIX] + subnet.get("addressPrefixes") if not subnet.get("addressPrefix") else [subnet.get("addressPrefix")]
         logger.warning('Using existing Subnet "%s" in resource group "%s"', subnet_name, resource_group)
-        if subnet_address_pref not in (DEFAULT_SUBNET_ADDRESS_PREFIX, subnet["addressPrefix"]):
-            logger.warning("The prefix of the subnet you provided does not match the --subnet-prefix value %s. Using current prefix %s", subnet_address_pref, subnet["addressPrefix"])
+        if subnet_address_pref not in subnet_address_prefixes:
+            logger.warning("The prefix of the subnet you provided does not match the --subnet-prefix value %s. Using current prefix %s", subnet_address_pref, subnet_address_prefixes)
 
         # Add Delegation if not delegated already
         if not subnet.get("delegations", None):

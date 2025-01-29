@@ -41,6 +41,11 @@ LOGIN_OUTPUT_WARNING = (
     "[Warning] The login output has been updated. Please be aware that it no longer displays the full list of "
     "available subscriptions by default.\n")
 
+USERNAME_PASSWORD_DEPRECATION_WARNING = (
+    "Authentication with username and password in the command line is strongly discouraged. "
+    "Use one of the recommended authentication methods based on your requirements. "
+    "For more details, see https://go.microsoft.com/fwlink/?linkid=2276314")
+
 
 def list_subscriptions(cmd, all=False, refresh=False):  # pylint: disable=redefined-builtin
     """List the imported subscriptions."""
@@ -110,8 +115,13 @@ def account_clear(cmd):
 
 
 # pylint: disable=inconsistent-return-statements, too-many-branches
-def login(cmd, username=None, password=None, service_principal=None, tenant=None, allow_no_subscriptions=False,
-          identity=False, use_device_code=False, use_cert_sn_issuer=None, scopes=None, client_assertion=None):
+def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_subscriptions=False,
+          # Device code flow
+          use_device_code=False,
+          # Service principal
+          service_principal=None, certificate=None, use_cert_sn_issuer=None, client_assertion=None,
+          # Managed identity
+          identity=False):
     """Log in to access Azure subscriptions"""
 
     # quick argument usage check
@@ -123,6 +133,8 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
         raise CLIError("usage error: '--use-sn-issuer' is only applicable with a service principal")
     if service_principal and not username:
         raise CLIError('usage error: --service-principal --username NAME --password SECRET --tenant TENANT')
+    if username and not service_principal and not identity:
+        logger.warning(USERNAME_PASSWORD_DEPRECATION_WARNING)
 
     interactive = False
 
@@ -136,7 +148,7 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
         logger.warning(_CLOUD_CONSOLE_LOGIN_WARNING)
 
     if username:
-        if not (password or client_assertion):
+        if not (password or client_assertion or certificate):
             try:
                 password = prompt_pass('Password: ')
             except NoTTYException:
@@ -146,7 +158,10 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
 
     if service_principal:
         from azure.cli.core.auth.identity import ServicePrincipalAuth
-        password = ServicePrincipalAuth.build_credential(password, client_assertion, use_cert_sn_issuer)
+        password = ServicePrincipalAuth.build_credential(
+            client_secret=password,
+            certificate=certificate, use_cert_sn_issuer=use_cert_sn_issuer,
+            client_assertion=client_assertion)
 
     login_experience_v2 = cmd.cli_ctx.config.getboolean('core', 'login_experience_v2', fallback=True)
     # Send login_experience_v2 config to telemetry

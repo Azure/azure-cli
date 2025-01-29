@@ -45,7 +45,7 @@ def _get_resource_group_from_resource_name(cli_ctx, vault_name, hsm_name=None):
     :return: resource group name or None
     :rtype: str
     """
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
 
     if vault_name:
         client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_KEYVAULT).vaults
@@ -251,10 +251,6 @@ def _fetch_default_cvm_policy(cli_ctx, vault_url):
                     'authority': attest_uri,
                     'allOf': [
                         {
-                            'claim': 'x-ms-attestation-type',
-                            'equals': 'sevsnpvm'
-                        },
-                        {
                             'claim': 'x-ms-compliance-status',
                             'equals': 'azure-compliant-cvm'
                         }
@@ -387,7 +383,7 @@ def validate_deleted_vault_or_hsm_name(cmd, ns):
     """
     Validate a deleted vault name; populate or validate location and resource_group_name
     """
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
 
     vault_name = getattr(ns, 'vault_name', None)
     hsm_name = getattr(ns, 'hsm_name', None)
@@ -463,7 +459,7 @@ def certificate_type(string):
         with open(os.path.expanduser(string), 'rb') as f:
             cert_data = f.read()
         return cert_data
-    except (IOError, OSError) as e:
+    except OSError as e:
         raise CLIError("Unable to load certificate file '{}': {}.".format(string, e.strerror))
 
 
@@ -506,7 +502,7 @@ def get_hsm_base_url_type(cli_ctx):
 
 
 def _construct_vnet(cmd, resource_group_name, vnet_name, subnet_name):
-    from msrestazure.tools import resource_id
+    from azure.mgmt.core.tools import resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
     return resource_id(
@@ -520,7 +516,7 @@ def _construct_vnet(cmd, resource_group_name, vnet_name, subnet_name):
 
 
 def validate_subnet(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id
 
     subnet = namespace.subnet
     subnet_is_id = is_valid_resource_id(subnet)
@@ -589,14 +585,14 @@ def _show_vault_only_deprecate_message(ns):
                        'Warning! If you have soft-delete protection enabled on this key vault, you will '
                        'not be able to reuse this key vault name until the key vault has been purged from '
                        'the soft deleted state. Please see the following documentation for additional '
-                       'guidance.\nhttps://docs.microsoft.com/azure/key-vault/general/soft-delete-overview'),
+                       'guidance.\nhttps://learn.microsoft.com/azure/key-vault/general/soft-delete-overview'),
         'keyvault key delete':
             Deprecated(ns.cmd.cli_ctx, message_func=lambda x:
                        'Warning! If you have soft-delete protection enabled on this key vault, this key '
                        'will be moved to the soft deleted state. You will not be able to create a key with '
                        'the same name within this key vault until the key has been purged from the '
                        'soft-deleted state. Please see the following documentation for additional '
-                       'guidance.\nhttps://docs.microsoft.com/azure/key-vault/general/soft-delete-overview')
+                       'guidance.\nhttps://learn.microsoft.com/azure/key-vault/general/soft-delete-overview')
     }
     cmds = ['keyvault delete', 'keyvault key delete']
     for cmd in cmds:
@@ -709,7 +705,7 @@ def process_certificate_policy(cmd, ns):
     if policy is None:
         return
     if not isinstance(policy, dict):
-        raise CLIError('incorrect usage: policy should be an JSON encoded string '
+        raise CLIError('incorrect usage: policy should be a JSON encoded string '
                        'or can use @{file} to load from a file(e.g.@my_policy.json).')
 
     secret_properties = policy.get('secret_properties')

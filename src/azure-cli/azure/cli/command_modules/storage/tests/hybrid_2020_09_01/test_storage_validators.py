@@ -25,12 +25,12 @@ from azure.cli.testsdk import api_version_constraint
 
 class MockCLI(CLI):
     def __init__(self):
-        super(MockCLI, self).__init__(cli_name='mock_cli', config_dir=GLOBAL_CONFIG_DIR,
-                                      config_env_var_prefix=ENV_VAR_PREFIX, commands_loader_cls=MockLoader)
+        super().__init__(cli_name='mock_cli', config_dir=GLOBAL_CONFIG_DIR,
+                         config_env_var_prefix=ENV_VAR_PREFIX, commands_loader_cls=MockLoader)
         self.cloud = get_active_cloud(self)
 
 
-class MockLoader(object):
+class MockLoader:
     def __init__(self, ctx):
         self.ctx = ctx
 
@@ -39,7 +39,7 @@ class MockLoader(object):
         return get_sdk(self.ctx, ResourceType.DATA_STORAGE, *attr_args, mod='models')
 
 
-class MockCmd(object):
+class MockCmd:
     def __init__(self, ctx):
         self.cli_ctx = ctx
         self.loader = MockLoader(self.cli_ctx)

@@ -410,7 +410,7 @@ parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
     long-summary: >
-        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
+        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
         It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
@@ -436,7 +436,7 @@ parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
     long-summary: >
-        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
+        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
         It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
@@ -551,7 +551,7 @@ parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
     long-summary: >
-        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
+        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
         It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
@@ -580,7 +580,7 @@ parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
     long-summary: >
-        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
+        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
         It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
@@ -617,7 +617,7 @@ parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
     long-summary: >
-        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
+        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
         It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
@@ -726,7 +726,7 @@ parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
     long-summary: >
-        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
+        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
         It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
@@ -757,7 +757,7 @@ parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
     long-summary: >
-        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
+        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
         It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax. Also note if you are providing a bicepparam file then you can use this argument only once.
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
@@ -811,7 +811,7 @@ parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
     long-summary: >
-        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
+        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
         It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
@@ -922,7 +922,7 @@ parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
     long-summary: >
-        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
+        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
         It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
@@ -953,7 +953,7 @@ parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
     long-summary: >
-        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
+        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
         It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
@@ -989,7 +989,7 @@ parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
     long-summary: >
-        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
+        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
         It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
@@ -1095,7 +1095,7 @@ parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
     long-summary: >
-        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
+        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
         It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
@@ -1124,7 +1124,7 @@ parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
     long-summary: >
-        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
+        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
         It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
@@ -1158,7 +1158,7 @@ parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
     long-summary: >
-        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
+        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
         It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
@@ -1371,7 +1371,7 @@ parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
     long-summary: >
-        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
+        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
         It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
 examples:
   - name: Create a deployment from a remote template file, using parameters from a local JSON file.
@@ -1409,7 +1409,7 @@ parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
     long-summary: >
-        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
+        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
         It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
 examples:
   - name: Validate whether a template is syntactically correct. (autogenerated)
@@ -2237,9 +2237,9 @@ helps['resource invoke-action'] = """
 type: command
 short-summary: Invoke an action on the resource.
 long-summary: >
-    A list of possible actions corresponding to a resource can be found at https://docs.microsoft.com/rest/api/. All POST requests are actions that can be invoked and are specified at the end of the URI path. For instance, to stop a VM, the
+    A list of possible actions corresponding to a resource can be found at https://learn.microsoft.com/rest/api/. All POST requests are actions that can be invoked and are specified at the end of the URI path. For instance, to stop a VM, the
     request URI is https://management.azure.com/subscriptions/{SubscriptionId}/resourceGroups/{ResourceGroup}/providers/Microsoft.Compute/virtualMachines/{VM}/powerOff?api-version={APIVersion} and the corresponding action is `powerOff`. This can
-    be found at https://docs.microsoft.com/rest/api/compute/virtualmachines/virtualmachines-stop.
+    be found at https://learn.microsoft.com/rest/api/compute/virtualmachines/virtualmachines-stop.
 examples:
   - name: Power-off a vm, specified by Id.
     text: >
@@ -2845,9 +2845,9 @@ helps['bicep restore'] = """
 type: command
 short-summary: Restore external modules for a bicep file.
 examples:
-  - name: Retore external modules.
+  - name: Restore external modules.
     text: az bicep restore --file {bicep_file}
-  - name: Retore external modules and overwrite cached external modules.
+  - name: Restore external modules and overwrite cached external modules.
     text: az bicep restore --file {bicep_file} --force
 """
 

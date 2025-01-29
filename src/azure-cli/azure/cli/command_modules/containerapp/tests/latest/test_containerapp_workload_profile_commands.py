@@ -7,8 +7,10 @@ import os
 import time
 import yaml
 
+from azure.cli.core.azclierror import ValidationError
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathCheck, live_only)
+from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathCheck, live_only, JMESPathCheckNotExists,
+                               JMESPathCheckExists)
 
 from azure.cli.command_modules.containerapp.tests.latest.common import (write_test_file, clean_up_test_file)
 from .common import TEST_LOCATION
@@ -22,6 +24,45 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 class ContainerAppWorkloadProfilesTest(ScenarioTest):
     def __init__(self, *arg, **kwargs):
         super().__init__(*arg, random_config_dir=True, **kwargs)
+
+    def test_containerapp_env_workload_profiles_list_supported(self):
+        self.cmd('containerapp env workload-profile list-supported -l northeurope', checks=[
+            JMESPathCheck('[?name==`NC48-A100`].properties.gpus', [2]),
+            JMESPathCheck('[?name==`NC96-A100`].properties.gpus', [4]),
+            JMESPathCheckExists('[?name==`NC48-A100`]'),
+            JMESPathCheckExists('[?name==`NC96-A100`]'),
+            JMESPathCheckExists('[?name==`D4`]'),
+            JMESPathCheckExists('[?name==`D8`]'),
+            JMESPathCheckExists('[?name==`D16`]'),
+            JMESPathCheckExists('[?name==`D32`]'),
+            JMESPathCheckExists('[?name==`E4`]'),
+            JMESPathCheckExists('[?name==`E8`]'),
+            JMESPathCheckExists('[?name==`E16`]'),
+            JMESPathCheckExists('[?name==`E32`]'),
+            JMESPathCheckExists('[?name==`Consumption`]'),
+            JMESPathCheck('[?name==`D4`].properties.category', ["GeneralPurpose"]),
+            JMESPathCheck('[?name==`D4`].properties.cores', [4]),
+            JMESPathCheck('[?name==`D4`].properties.displayName', ["Dedicated-D4"]),
+            JMESPathCheck('[?name==`D4`].properties.memoryGiB', [16]),
+        ])
+
+        self.cmd('containerapp env workload-profile list-supported -l eastus', checks=[
+            JMESPathCheckNotExists('[?name==`NC48-A100`]'),
+            JMESPathCheckNotExists('[?name==`NC96-A100`]'),
+            JMESPathCheckExists('[?name==`D4`]'),
+            JMESPathCheckExists('[?name==`D8`]'),
+            JMESPathCheckExists('[?name==`D16`]'),
+            JMESPathCheckExists('[?name==`D32`]'),
+            JMESPathCheckExists('[?name==`E4`]'),
+            JMESPathCheckExists('[?name==`E8`]'),
+            JMESPathCheckExists('[?name==`E16`]'),
+            JMESPathCheckExists('[?name==`E32`]'),
+            JMESPathCheckExists('[?name==`Consumption`]'),
+            JMESPathCheck('[?name==`D4`].properties.category', ["GeneralPurpose"]),
+            JMESPathCheck('[?name==`D4`].properties.cores', [4]),
+            JMESPathCheck('[?name==`D4`].properties.displayName', ["Dedicated-D4"]),
+            JMESPathCheck('[?name==`D4`].properties.memoryGiB', [16]),
+        ])
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="eastus")
@@ -119,6 +160,21 @@ class ContainerAppWorkloadProfilesTest(ScenarioTest):
             JMESPathCheck("properties.provisioningState", "Succeeded"),
             JMESPathCheck("properties.workloadProfiles", None),
         ])
+
+        with self.assertRaisesRegex(ValidationError,
+                                     "Cannot add workload profile because the environment doesn't enable workload profile.\n"
+                                     "If you want to use Consumption and Dedicated environment, please create a new one with 'az containerapp env create'."):
+            self.cmd(
+                'containerapp env workload-profile add -w wp -g {} -n {} --workload-profile-type D4 --min-nodes 1 --max-nodes 2'.format(
+                    resource_group, env))
+
+        with self.assertRaisesRegex(ValidationError,
+                                     "Cannot update workload profile because the environment doesn't enable workload profile.\n"
+                                     "If you want to use Consumption and Dedicated environment, please create a new one with 'az containerapp env create'."):
+            self.cmd(
+                'containerapp env workload-profile update -w wp -g {} -n {} --min-nodes 1 --max-nodes 2'.format(
+                    resource_group, env))
+
         self.cmd('containerapp env delete -g {} -n {} --yes --no-wait'.format(resource_group, env), expect_failure=False)
 
         env1 = self.create_random_name(prefix='env1', length=24)

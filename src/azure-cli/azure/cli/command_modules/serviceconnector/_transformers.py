@@ -48,6 +48,9 @@ def transform_linker_properties(result):
         get_aks_resource_name
     )
 
+    if result is None:
+        return result
+
     # manually polling if result is a poller
     if isinstance(result, LROPoller):
         result = result.result()
@@ -57,7 +60,7 @@ def transform_linker_properties(result):
     if is_aks_linker_by_id(resource_id):
         result['kubernetesResourceName'] = get_aks_resource_name(result)
     try:
-        output = run_cli_cmd('az webapp connection list-configuration --id {} -o json'.format(resource_id))
+        output = run_cli_cmd('az webapp connection list-configuration --id "{}" -o json'.format(resource_id))
         result['configurations'] = output.get('configurations')
     except CLIInternalError:
         pass
@@ -69,7 +72,8 @@ def transform_local_linker_properties(result):
     from ._utils import (
         run_cli_cmd
     )
-
+    if result is None:
+        return result
     # manually polling if result is a poller
     if isinstance(result, LROPoller):
         result = result.result()
@@ -77,7 +81,7 @@ def transform_local_linker_properties(result):
     result = todict(result)
     resource_id = result.get('id')
     try:
-        output = run_cli_cmd('az connection generate-configuration --id {} -o json'.format(resource_id))
+        output = run_cli_cmd('az connection generate-configuration --id "{}" -o json'.format(resource_id))
         result['configurations'] = output.get('configurations')
     except CLIInternalError:
         pass

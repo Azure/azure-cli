@@ -33,7 +33,7 @@ from azure.cli.core.util import should_disable_connection_verify
 # See: https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
 _semver_pattern = r"(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)(?:-(?P<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?"  # pylint: disable=line-too-long
 
-# See: https://docs.microsoft.com/azure/azure-resource-manager/templates/template-syntax#template-format
+# See: https://learn.microsoft.com/azure/azure-resource-manager/templates/template-syntax#template-format
 _template_schema_pattern = r"https?://schema\.management\.azure\.com/schemas/[0-9a-zA-Z-]+/(?P<templateType>[a-zA-Z]+)Template\.json#?"  # pylint: disable=line-too-long
 
 _bicep_diagnostic_warning_pattern = r"^([^\s].*)\((\d+)(?:,\d+|,\d+,\d+)?\)\s+:\s+(Warning)\s+([a-zA-Z-\d]+):\s*(.*?)\s+\[(.*?)\]$"  # pylint: disable=line-too-long
@@ -158,7 +158,7 @@ def ensure_bicep_installation(cli_ctx, release_tag=None, target_platform=None, s
                 "Successfully installed Bicep CLI to %s",
                 installation_path,
             )
-    except IOError as err:
+    except OSError as err:
         raise ClientRequestError(f"Error while attempting to download Bicep CLI: {err}")
 
 
@@ -190,7 +190,7 @@ def get_bicep_available_release_tags():
         os.environ.setdefault("CURL_CA_BUNDLE", certifi.where())
         response = requests.get("https://aka.ms/BicepReleases", verify=_requests_verify)
         return [release["tag_name"] for release in response.json()]
-    except IOError as err:
+    except OSError as err:
         raise ClientRequestError(f"Error while attempting to retrieve available Bicep versions: {err}.")
 
 
@@ -258,7 +258,7 @@ def _load_bicep_version_check_result_from_cache():
             cache_expired = datetime.now() - last_check_time > _bicep_version_check_cache_ttl
 
             return latest_release_tag, cache_expired
-    except (IOError, JSONDecodeError):
+    except (OSError, JSONDecodeError):
         return None, True
 
 
@@ -323,12 +323,24 @@ def _extract_version(text):
     return semver.VersionInfo.parse(semver_match.group(0)) if semver_match else None
 
 
+def _get_bicep_env_vars(custom_env=None):
+    env_vars = (custom_env or os.environ).copy()
+
+    # See https://github.com/Azure/azure-cli/issues/29828 for background on this
+    from azure.cli.core._environment import _ENV_AZ_BICEP_GLOBALIZATION_INVARIANT
+    env_bicep_globalization_invariant = os.getenv(_ENV_AZ_BICEP_GLOBALIZATION_INVARIANT, 'False')
+
+    if env_bicep_globalization_invariant.lower() in ('true', '1'):
+        env_vars['DOTNET_SYSTEM_GLOBALIZATION_INVARIANT'] = '1'
+
+    return env_vars
+
+
 def _run_command(bicep_installation_path, args, custom_env=None):
     process = subprocess.run(
         [rf"{bicep_installation_path}"] + args,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        env=custom_env)
+        capture_output=True,
+        env=_get_bicep_env_vars(custom_env))
 
     try:
         process.check_returncode()

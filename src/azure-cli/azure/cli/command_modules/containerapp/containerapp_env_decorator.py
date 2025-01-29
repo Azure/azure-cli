@@ -11,7 +11,7 @@ from azure.cli.command_modules.appservice.utils import _normalize_location
 from azure.cli.core.azclierror import RequiredArgumentMissingError, ValidationError
 from azure.cli.core.commands import AzCliCommand
 from knack.util import CLIError
-from msrestazure.tools import is_valid_resource_id
+from azure.mgmt.core.tools import is_valid_resource_id
 
 from ._constants import CONTAINER_APPS_RP
 from ._utils import (get_vnet_location,
@@ -69,9 +69,6 @@ class ContainerAppEnvDecorator(BaseResource):
     def get_argument_infrastructure_subnet_resource_id(self):
         return self.get_param("infrastructure_subnet_resource_id")
 
-    def get_argument_docker_bridge_cidr(self):
-        return self.get_param("docker_bridge_cidr")
-
     def get_argument_platform_reserved_cidr(self):
         return self.get_param("platform_reserved_cidr")
 
@@ -102,6 +99,9 @@ class ContainerAppEnvDecorator(BaseResource):
     def get_argument_mtls_enabled(self):
         return self.get_param("mtls_enabled")
 
+    def get_argument_p2p_encryption_enabled(self):
+        return self.get_param("p2p_encryption_enabled")
+
     def get_argument_workload_profile_type(self):
         return self.get_param("workload_profile_type")
 
@@ -113,6 +113,16 @@ class ContainerAppEnvDecorator(BaseResource):
 
     def get_argument_max_nodes(self):
         return self.get_param("max_nodes")
+
+    def set_up_peer_to_peer_encryption(self):
+        is_p2p_encryption_enabled = self.get_argument_p2p_encryption_enabled()
+        is_mtls_enabled = self.get_argument_mtls_enabled()
+
+        if is_p2p_encryption_enabled is not None:
+            safe_set(self.managed_env_def, "properties", "peerTrafficConfiguration", "encryption", "enabled", value=is_p2p_encryption_enabled)
+
+        if is_mtls_enabled is not None:
+            safe_set(self.managed_env_def, "properties", "peerAuthentication", "mtls", "enabled", value=is_mtls_enabled)
 
 
 class ContainerAppEnvCreateDecorator(ContainerAppEnvDecorator):
@@ -143,6 +153,10 @@ class ContainerAppEnvCreateDecorator(ContainerAppEnvDecorator):
         location = validate_environment_location(self.cmd, location)
         _ensure_location_allowed(self.cmd, location, CONTAINER_APPS_RP, "managedEnvironments")
         self.set_argument_location(location)
+
+        # validate mtls and p2p traffic encryption
+        if self.get_argument_p2p_encryption_enabled() is False and self.get_argument_mtls_enabled() is True:
+            raise ValidationError("Cannot use '--enable-mtls' with '--enable-peer-to-peer-encryption False'")
 
     def create(self):
         try:
@@ -190,8 +204,7 @@ class ContainerAppEnvCreateDecorator(ContainerAppEnvDecorator):
         # Vnet
         self.set_up_vnet_configuration()
 
-        if self.get_argument_mtls_enabled() is not None:
-            safe_set(self.managed_env_def, "properties", "peerAuthentication", "mtls", "enabled", value=self.get_argument_mtls_enabled())
+        self.set_up_peer_to_peer_encryption()
 
     def set_up_workload_profiles(self):
         if self.get_argument_enable_workload_profiles():
@@ -235,14 +248,11 @@ class ContainerAppEnvCreateDecorator(ContainerAppEnvDecorator):
         self.managed_env_def["properties"]["appLogsConfiguration"] = app_logs_config_def
 
     def set_up_vnet_configuration(self):
-        if self.get_argument_infrastructure_subnet_resource_id() or self.get_argument_docker_bridge_cidr() or self.get_argument_platform_reserved_cidr() or self.get_argument_platform_reserved_dns_ip():
+        if self.get_argument_infrastructure_subnet_resource_id() or self.get_argument_platform_reserved_cidr() or self.get_argument_platform_reserved_dns_ip():
             vnet_config_def = VnetConfigurationModel
 
             if self.get_argument_infrastructure_subnet_resource_id() is not None:
                 vnet_config_def["infrastructureSubnetId"] = self.get_argument_infrastructure_subnet_resource_id()
-
-            if self.get_argument_docker_bridge_cidr() is not None:
-                vnet_config_def["dockerBridgeCidr"] = self.get_argument_docker_bridge_cidr()
 
             if self.get_argument_platform_reserved_cidr() is not None:
                 vnet_config_def["platformReservedCidr"] = self.get_argument_platform_reserved_cidr()
@@ -273,6 +283,10 @@ class ContainerAppEnvUpdateDecorator(ContainerAppEnvDecorator):
                 raise ValidationError(
                     "Must provide --logs-workspace-id and --logs-workspace-key if updating logs destination to type 'log-analytics'.")
 
+        # validate mtls and p2p traffic encryption
+        if self.get_argument_p2p_encryption_enabled() is False and self.get_argument_mtls_enabled() is True:
+            raise ValidationError("Cannot use '--enable-mtls' with '--enable-peer-to-peer-encryption False'")
+
     def construct_payload(self):
         try:
             r = self.client.show(cmd=self.cmd, resource_group_name=self.get_argument_resource_group_name(), name=self.get_argument_name())
@@ -293,23 +307,27 @@ class ContainerAppEnvUpdateDecorator(ContainerAppEnvDecorator):
         # workload Profiles
         self.set_up_workload_profiles(r)
 
-        if self.get_argument_mtls_enabled() is not None:
-            safe_set(self.managed_env_def, "properties", "peerAuthentication", "mtls", "enabled", value=self.get_argument_mtls_enabled())
+        self.set_up_peer_to_peer_encryption()
+
+        # dapr
+        self.set_up_dapr()
 
     def set_up_app_log_configuration(self):
         logs_destination = self.get_argument_logs_destination()
 
         if logs_destination:
-            logs_destination = None if logs_destination == "none" else logs_destination
-            safe_set(self.managed_env_def, "properties", "appLogsConfiguration", "destination", value=logs_destination)
+            if logs_destination == "none":
+                safe_set(self.managed_env_def, "properties", "appLogsConfiguration", "destination", value=None)
+                safe_set(self.managed_env_def, "properties", "appLogsConfiguration", "logAnalyticsConfiguration", value=None)
+            else:
+                safe_set(self.managed_env_def, "properties", "appLogsConfiguration", "destination", value=logs_destination)
 
-        if logs_destination == "log-analytics":
-            safe_set(self.managed_env_def, "properties", "appLogsConfiguration", "logAnalyticsConfiguration", "customerId",
-                     value=self.get_argument_logs_customer_id())
-            safe_set(self.managed_env_def, "properties", "appLogsConfiguration", "logAnalyticsConfiguration", "sharedKey",
-                     value=self.get_argument_logs_key())
-        elif logs_destination:
+        if logs_destination == "azure-monitor":
             safe_set(self.managed_env_def, "properties", "appLogsConfiguration", "logAnalyticsConfiguration", value=None)
+
+        if self.get_argument_logs_customer_id() and self.get_argument_logs_key():
+            safe_set(self.managed_env_def, "properties", "appLogsConfiguration", "logAnalyticsConfiguration", "customerId", value=self.get_argument_logs_customer_id())
+            safe_set(self.managed_env_def, "properties", "appLogsConfiguration", "logAnalyticsConfiguration", "sharedKey", value=self.get_argument_logs_key())
 
     def set_up_custom_domain_configuration(self):
         if self.get_argument_hostname():
@@ -356,6 +374,14 @@ class ContainerAppEnvUpdateDecorator(ContainerAppEnvDecorator):
                 workload_profiles[idx] = profile
 
             safe_set(self.managed_env_def, "properties", "workloadProfiles", value=workload_profiles)
+
+    def set_up_dapr(self):
+        dapr_connection_string = self.get_argument_dapr_connection_string()
+        if dapr_connection_string is not None:
+            if dapr_connection_string == "none":
+                safe_set(self.managed_env_def, "properties", "daprAIConnectionString", value=None)
+            else:
+                safe_set(self.managed_env_def, "properties", "daprAIConnectionString", value=dapr_connection_string)
 
     def update(self):
         try:

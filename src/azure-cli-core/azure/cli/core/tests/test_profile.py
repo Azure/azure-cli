@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=protected-access
+import base64
 import json
 import datetime
 import unittest
@@ -27,6 +28,15 @@ BEARER = 'Bearer'
 
 MOCK_TENANT_DISPLAY_NAME = 'TEST_TENANT_DISPLAY_NAME'
 MOCK_TENANT_DEFAULT_DOMAIN = 'test.onmicrosoft.com'
+
+
+def _build_test_jwt(claims):
+    parts = [
+        '{"typ":"JWT","alg":"RS256"}',
+        json.dumps(claims, separators=(',', ':')),
+        'test_sig'
+    ]
+    return '.'.join(base64.urlsafe_b64encode(p.encode('utf-8')).decode('utf-8').replace('=', '') for p in parts)
 
 
 class CredentialMock:
@@ -53,7 +63,7 @@ class MSRestAzureAuthStub:
     def __init__(self, *args, **kwargs):
         self._token = {
             'token_type': 'Bearer',
-            'access_token': TestProfile.test_msi_access_token,
+            'access_token': TestProfile.test_mi_access_token,
             'expires_on': MOCK_EXPIRES_ON_STR
         }
         self.set_token_invoked_count = 0
@@ -81,11 +91,20 @@ class MSRestAzureAuthStub:
         return AccessToken(self.token['access_token'], int(self.token['expires_on']))
 
 
+class CloudShellCredentialStub:
+    def __init__(self):
+        self.get_token_scopes = None
+
+    def get_token(self, *scopes, **kwargs):
+        self.get_token_scopes = scopes
+        return AccessToken(TestProfile.test_cloud_shell_access_token, MOCK_EXPIRES_ON_INT)
+
+
 class TestProfile(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.tenant_id = 'microsoft.com'
+        cls.tenant_id = 'test.onmicrosoft.com'
         cls.tenant_display_name = MOCK_TENANT_DISPLAY_NAME
         cls.tenant_default_domain = MOCK_TENANT_DEFAULT_DOMAIN
 
@@ -112,14 +131,14 @@ class TestProfile(unittest.TestCase):
                                                  managed_by_tenants=cls.managed_by_tenants)
 
         cls.subscription1_output = [{'environmentName': 'AzureCloud',
-                                     'homeTenantId': 'microsoft.com',
+                                     'homeTenantId': 'test.onmicrosoft.com',
                                      'id': '1',
                                      'isDefault': True,
                                      'managedByTenants': [{'tenantId': '00000003-0000-0000-0000-000000000000'},
                                                           {'tenantId': '00000004-0000-0000-0000-000000000000'}],
                                      'name': 'foo account',
                                      'state': 'Enabled',
-                                     'tenantId': 'microsoft.com',
+                                     'tenantId': 'test.onmicrosoft.com',
                                      'user': {
                                          'name': 'foo@foo.com',
                                          'type': 'user'
@@ -127,14 +146,14 @@ class TestProfile(unittest.TestCase):
 
         cls.subscription1_with_tenant_info_output = [{
             'environmentName': 'AzureCloud',
-            'homeTenantId': 'microsoft.com',
+            'homeTenantId': 'test.onmicrosoft.com',
             'id': '1',
             'isDefault': True,
             'managedByTenants': [{'tenantId': '00000003-0000-0000-0000-000000000000'},
                                  {'tenantId': '00000004-0000-0000-0000-000000000000'}],
             'name': 'foo account',
             'state': 'Enabled',
-            'tenantId': 'microsoft.com',
+            'tenantId': 'test.onmicrosoft.com',
             'tenantDisplayName': MOCK_TENANT_DISPLAY_NAME,
             'tenantDefaultDomain': MOCK_TENANT_DEFAULT_DOMAIN,
             'user': {
@@ -225,48 +244,25 @@ class TestProfile(unittest.TestCase):
             'homeTenantId': cls.tenant_id,
             'managedByTenants': [],
         }
-        cls.test_msi_tenant = '54826b22-38d6-4fb2-bad9-b7b93a3e9c5a'
-        cls.test_msi_access_token = ('eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IlZXVkljMVdEMVRrc2JiMzAxc2FzTTVrT3E1'
-                                     'USIsImtpZCI6IlZXVkljMVdEMVRrc2JiMzAxc2FzTTVrT3E1USJ9.eyJhdWQiOiJodHRwczovL21hbmF'
-                                     'nZW1lbnQuY29yZS53aW5kb3dzLm5ldC8iLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC81NDg'
-                                     'yNmIyMi0zOGQ2LTRmYjItYmFkOS1iN2I5M2EzZTljNWEvIiwiaWF0IjoxNTAzMzU0ODc2LCJuYmYiOjE'
-                                     '1MDMzNTQ4NzYsImV4cCI6MTUwMzM1ODc3NiwiYWNyIjoiMSIsImFpbyI6IkFTUUEyLzhFQUFBQTFGL1k'
-                                     '0VVR3bFI1Y091QXJxc1J0OU5UVVc2MGlsUHZna0daUC8xczVtdzg9IiwiYW1yIjpbInB3ZCJdLCJhcHB'
-                                     'pZCI6IjA0YjA3Nzk1LThkZGItNDYxYS1iYmVlLTAyZjllMWJmN2I0NiIsImFwcGlkYWNyIjoiMCIsImV'
-                                     'fZXhwIjoyNjI4MDAsImZhbWlseV9uYW1lIjoic2RrIiwiZ2l2ZW5fbmFtZSI6ImFkbWluMyIsImdyb3V'
-                                     'wcyI6WyJlNGJiMGI1Ni0xMDE0LTQwZjgtODhhYi0zZDhhOGNiMGUwODYiLCI4YTliMTYxNy1mYzhkLTR'
-                                     'hYTktYTQyZi05OTg2OGQzMTQ2OTkiLCI1NDgwMzkxNy00YzcxLTRkNmMtOGJkZi1iYmQ5MzEwMTBmOGM'
-                                     'iXSwiaXBhZGRyIjoiMTY3LjIyMC4xLjIzNCIsIm5hbWUiOiJhZG1pbjMiLCJvaWQiOiJlN2UxNThkMy0'
-                                     '3Y2RjLTQ3Y2QtODgyNS01ODU5ZDdhYjJiNTUiLCJwdWlkIjoiMTAwMzNGRkY5NUQ0NEU4NCIsInNjcCI'
-                                     '6InVzZXJfaW1wZXJzb25hdGlvbiIsInN1YiI6ImhRenl3b3FTLUEtRzAySTl6ZE5TRmtGd3R2MGVwZ2l'
-                                     'WY1Vsdm1PZEZHaFEiLCJ0aWQiOiI1NDgyNmIyMi0zOGQ2LTRmYjItYmFkOS1iN2I5M2EzZTljNWEiLCJ'
-                                     '1bmlxdWVfbmFtZSI6ImFkbWluM0BBenVyZVNES1RlYW0ub25taWNyb3NvZnQuY29tIiwidXBuIjoiYWR'
-                                     'taW4zQEF6dXJlU0RLVGVhbS5vbm1pY3Jvc29mdC5jb20iLCJ1dGkiOiJuUEROYm04UFkwYUdELWhNeWx'
-                                     'rVEFBIiwidmVyIjoiMS4wIiwid2lkcyI6WyI2MmU5MDM5NC02OWY1LTQyMzctOTE5MC0wMTIxNzcxNDV'
-                                     'lMTAiXX0.Pg4cq0MuP1uGhY_h51ZZdyUYjGDUFgTW2EfIV4DaWT9RU7GIK_Fq9VGBTTbFZA0pZrrmP-z'
-                                     '7DlN9-U0A0nEYDoXzXvo-ACTkm9_TakfADd36YlYB5aLna-yO0B7rk5W9ANelkzUQgRfidSHtCmV6i4V'
-                                     'e-lOym1sH5iOcxfIjXF0Tp2y0f3zM7qCq8Cp1ZxEwz6xYIgByoxjErNXrOME5Ld1WizcsaWxTXpwxJn_'
-                                     'Q8U2g9kXHrbYFeY2gJxF_hnfLvNKxUKUBnftmyYxZwKi0GDS0BvdJnJnsqSRSpxUx__Ra9QJkG1IaDzj'
-                                     'ZcSZPHK45T6ohK9Hk9ktZo0crVl7Tmw')
-        cls.test_user_msi_access_token = ('eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IlNzWnNCTmhaY0YzUTlTNHRycFFCVE'
-                                          'J5TlJSSSIsImtpZCI6IlNzWnNCTmhaY0YzUTlTNHRycFFCVEJ5TlJSSSJ9.eyJhdWQiOiJodHR'
-                                          'wczovL21hbmFnZW1lbnQuY29yZS53aW5kb3dzLm5ldCIsImlzcyI6Imh0dHBzOi8vc3RzLndpbm'
-                                          'Rvd3MubmV0LzU0ODI2YjIyLTM4ZDYtNGZiMi1iYWQ5LWI3YjkzYTNlOWM1YS8iLCJpYXQiOjE1O'
-                                          'TE3ODM5MDQsIm5iZiI6MTU5MTc4MzkwNCwiZXhwIjoxNTkxODcwNjA0LCJhaW8iOiI0MmRnWUZE'
-                                          'd2JsZmR0WmYxck8zeGlMcVdtOU5MQVE9PSIsImFwcGlkIjoiNjJhYzQ5ZTYtMDQzOC00MTJjLWJ'
-                                          'kZjUtNDg0ZTdkNDUyOTM2IiwiYXBwaWRhY3IiOiIyIiwiaWRwIjoiaHR0cHM6Ly9zdHMud2luZG'
-                                          '93cy5uZXQvNTQ4MjZiMjItMzhkNi00ZmIyLWJhZDktYjdiOTNhM2U5YzVhLyIsIm9pZCI6ImQ4M'
-                                          'zRjNjZmLTNhZjgtNDBiNy1iNDYzLWViZGNlN2YzYTgyNyIsInN1YiI6ImQ4MzRjNjZmLTNhZjgt'
-                                          'NDBiNy1iNDYzLWViZGNlN2YzYTgyNyIsInRpZCI6IjU0ODI2YjIyLTM4ZDYtNGZiMi1iYWQ5LWI'
-                                          '3YjkzYTNlOWM1YSIsInV0aSI6Ild2YjFyVlBQT1V5VjJDYmNyeHpBQUEiLCJ2ZXIiOiIxLjAiLC'
-                                          'J4bXNfbWlyaWQiOiIvc3Vic2NyaXB0aW9ucy8wYjFmNjQ3MS0xYmYwLTRkZGEtYWVjMy1jYjkyNz'
-                                          'JmMDk1OTAvcmVzb3VyY2Vncm91cHMvcWlhbndlbnMvcHJvdmlkZXJzL01pY3Jvc29mdC5NYW5hZ2'
-                                          'VkSWRlbnRpdHkvdXNlckFzc2lnbmVkSWRlbnRpdGllcy9xaWFud2VuaWRlbnRpdHkifQ.nAxWA5_'
-                                          'qTs_uwGoziKtDFAqxlmYSlyPGqAKZ8YFqFfm68r5Ouo2x2PztAv2D71L-j8B3GykNgW-2yhbB-z2'
-                                          'h53dgjG2TVoeZjhV9DOpSJ06kLAeH-nskGxpBFf7se1qohlU7uyctsUMQWjXVUQbTEanJzj_IH-Y'
-                                          '47O3lvM4Yrliz5QUApm63VF4EhqNpNvb5w0HkuB72SJ0MKJt5VdQqNcG077NQNoiTJ34XVXkyNDp'
-                                          'I15y0Cj504P_xw-Dpvg-hmEbykjFMIaB8RoSrp3BzYjNtJh2CHIuWhXF0ngza2SwN2CXK0Vpn5Za'
-                                          'EvZdD57j3h8iGE0Tw5IzG86uNS2AQ0A')
+
+        # A random GUID generated by uuid.uuid4()
+        cls.test_cloud_shell_tenant = 'ee59da2c-4d2c-4cfb-8753-ff9df4f31556'
+        # Cloud Shell returns a user token which contains the unique_name claim
+        cls.test_cloud_shell_access_token = _build_test_jwt({
+            'tid': cls.test_cloud_shell_tenant,
+            'unique_name': 'foo@foo.com'
+        })
+
+        # A random GUID generated by uuid.uuid4()
+        cls.test_mi_tenant = 'b6f04d88-9bff-45da-a9b4-a0b6d3cb1b2a'
+        cls.test_mi_access_token = _build_test_jwt({'tid': cls.test_mi_tenant})
+        cls.test_mi_subscription_id = '796071f3-b997-48d8-87f8-dbc5869bd9c5'
+        cls.test_mi_subscription_resource_id = '/subscriptions/{}'.format(cls.test_mi_subscription_id)
+        cls.test_mi_subscription_name = 'MI-DEV-INC'
+        cls.test_mi_subscription = SubscriptionStub(cls.test_mi_subscription_resource_id,
+                                                    cls.test_mi_subscription_name,
+                                                    cls.state1,
+                                                    cls.test_mi_tenant)
 
         cls.msal_accounts = [
             {
@@ -347,6 +343,55 @@ class TestProfile(unittest.TestCase):
         subs = profile.login(True, None, None, False, None, use_device_code=True, allow_no_subscriptions=False)
 
         # assert
+        login_with_device_code_mock.assert_called_once()
+        self.assertEqual(self.subscription1_with_tenant_info_output, subs)
+
+    @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
+    @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential', autospec=True)
+    @mock.patch('azure.cli.core.auth.identity.Identity.login_with_device_code', autospec=True)
+    @mock.patch('azure.cli.core._profile.can_launch_browser', autospec=True, return_value=False)
+    def test_login_fallback_to_device_code_no_browser(self, can_launch_browser_mock, login_with_device_code_mock,
+                                                      get_user_credential_mock, create_subscription_client_mock):
+        login_with_device_code_mock.return_value = self.user_identity_mock
+
+        cli = DummyCli()
+        mock_subscription_client = mock.MagicMock()
+        mock_subscription_client.tenants.list.return_value = [TenantStub(self.tenant_id)]
+        mock_subscription_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
+        create_subscription_client_mock.return_value = mock_subscription_client
+
+        storage_mock = {'subscriptions': None}
+        profile = Profile(cli_ctx=cli, storage=storage_mock)
+        subs = profile.login(True, None, None, False, None, use_device_code=True, allow_no_subscriptions=False)
+
+        # assert
+        login_with_device_code_mock.assert_called_once()
+        self.assertEqual(self.subscription1_with_tenant_info_output, subs)
+
+    @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
+    @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential', autospec=True)
+    @mock.patch('azure.cli.core.auth.identity.Identity.login_with_device_code', autospec=True)
+    @mock.patch('azure.cli.core._profile.is_github_codespaces', autospec=True, return_value=True)
+    @mock.patch('azure.cli.core._profile.can_launch_browser', autospec=True, return_value=True)
+    def test_login_fallback_to_device_code_github_codespaces(self, can_launch_browser_mock, is_github_codespaces_mock,
+                                                             login_with_device_code_mock, get_user_credential_mock,
+                                                             create_subscription_client_mock):
+        # GitHub Codespaces does support launching a browser (actually a new tab),
+        # so we mock can_launch_browser to True.
+        login_with_device_code_mock.return_value = self.user_identity_mock
+
+        cli = DummyCli()
+        mock_subscription_client = mock.MagicMock()
+        mock_subscription_client.tenants.list.return_value = [TenantStub(self.tenant_id)]
+        mock_subscription_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
+        create_subscription_client_mock.return_value = mock_subscription_client
+
+        storage_mock = {'subscriptions': None}
+        profile = Profile(cli_ctx=cli, storage=storage_mock)
+        subs = profile.login(True, None, None, False, None, use_device_code=True, allow_no_subscriptions=False)
+
+        # assert
+        login_with_device_code_mock.assert_called_once()
         self.assertEqual(self.subscription1_with_tenant_info_output, subs)
 
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
@@ -407,14 +452,14 @@ class TestProfile(unittest.TestCase):
         subs = profile.login(False, 'my app', {'secret': 'very_secret'}, True, self.tenant_id, use_device_code=True,
                              allow_no_subscriptions=False)
         output = [{'environmentName': 'AzureCloud',
-                   'homeTenantId': 'microsoft.com',
+                   'homeTenantId': 'test.onmicrosoft.com',
                    'id': '1',
                    'isDefault': True,
                    'managedByTenants': [{'tenantId': '00000003-0000-0000-0000-000000000000'},
                                         {'tenantId': '00000004-0000-0000-0000-000000000000'}],
                    'name': 'foo account',
                    'state': 'Enabled',
-                   'tenantId': 'microsoft.com',
+                   'tenantId': 'test.onmicrosoft.com',
                    'user': {
                        'name': 'my app',
                        'type': 'servicePrincipal'}}]
@@ -424,9 +469,9 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(output, subs)
 
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
-    @mock.patch('azure.cli.core.auth.adal_authentication.MSIAuthenticationWrapper', autospec=True)
-    def test_login_in_cloud_shell(self, msi_auth_mock, create_subscription_client_mock):
-        msi_auth_mock.return_value = MSRestAzureAuthStub()
+    @mock.patch('azure.cli.core.auth.msal_credentials.CloudShellCredential', autospec=True)
+    def test_login_in_cloud_shell(self, cloud_shell_credential_mock, create_subscription_client_mock):
+        cloud_shell_credential_mock.return_value = CloudShellCredentialStub()
 
         cli = DummyCli()
         mock_subscription_client = mock.MagicMock()
@@ -438,13 +483,14 @@ class TestProfile(unittest.TestCase):
 
         subscriptions = profile.login_in_cloud_shell()
 
-        # Check correct token is used
-        assert create_subscription_client_mock.call_args[0][1].token['access_token'] == TestProfile.test_msi_access_token
+        # Verify correct scopes are passed to get_token
+        credential_instance = create_subscription_client_mock.call_args.args[1]
+        assert credential_instance.get_token_scopes == ('https://management.core.windows.net//.default',)
 
         self.assertEqual(len(subscriptions), 1)
         s = subscriptions[0]
-        self.assertEqual(s['user']['name'], 'admin3@AzureSDKTeam.onmicrosoft.com')
-        self.assertEqual(s['tenantId'], '54826b22-38d6-4fb2-bad9-b7b93a3e9c5a')
+        self.assertEqual(s['user']['name'], 'foo@foo.com')
+        self.assertEqual(s['tenantId'], self.test_cloud_shell_tenant)
         self.assertEqual(s['user']['cloudShellID'], True)
         self.assertEqual(s['user']['type'], 'user')
         self.assertEqual(s['name'], self.display_name1)
@@ -452,7 +498,7 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('requests.get', autospec=True)
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
-    def test_find_subscriptions_in_vm_with_msi_system_assigned(self, create_subscription_client_mock, mock_get):
+    def test_find_subscriptions_in_vm_with_mi_system_assigned(self, create_subscription_client_mock, mock_get):
         mock_subscription_client = mock.MagicMock()
         mock_subscription_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
         create_subscription_client_mock.return_value = mock_subscription_client
@@ -463,7 +509,7 @@ class TestProfile(unittest.TestCase):
 
         test_token_entry = {
             'token_type': 'Bearer',
-            'access_token': TestProfile.test_msi_access_token
+            'access_token': TestProfile.test_mi_access_token
         }
         encoded_test_token = json.dumps(test_token_entry).encode()
         good_response = mock.MagicMock()
@@ -481,11 +527,11 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(s['user']['assignedIdentityInfo'], 'MSI')
         self.assertEqual(s['name'], self.display_name1)
         self.assertEqual(s['id'], self.id1.split('/')[-1])
-        self.assertEqual(s['tenantId'], '54826b22-38d6-4fb2-bad9-b7b93a3e9c5a')
+        self.assertEqual(s['tenantId'], self.test_mi_tenant)
 
     @mock.patch('requests.get', autospec=True)
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
-    def test_find_subscriptions_in_vm_with_msi_no_subscriptions(self, create_subscription_client_mock, mock_get):
+    def test_find_subscriptions_in_vm_with_mi_no_subscriptions(self, create_subscription_client_mock, mock_get):
         mock_subscription_client = mock.MagicMock()
         mock_subscription_client.subscriptions.list.return_value = []
         create_subscription_client_mock.return_value = mock_subscription_client
@@ -496,7 +542,7 @@ class TestProfile(unittest.TestCase):
 
         test_token_entry = {
             'token_type': 'Bearer',
-            'access_token': TestProfile.test_msi_access_token
+            'access_token': TestProfile.test_mi_access_token
         }
         encoded_test_token = json.dumps(test_token_entry).encode()
         good_response = mock.MagicMock()
@@ -511,8 +557,8 @@ class TestProfile(unittest.TestCase):
         s = subscriptions[0]
 
         self.assertEqual(s['name'], 'N/A(tenant level account)')
-        self.assertEqual(s['id'], self.test_msi_tenant)
-        self.assertEqual(s['tenantId'], self.test_msi_tenant)
+        self.assertEqual(s['id'], self.test_mi_tenant)
+        self.assertEqual(s['tenantId'], self.test_mi_tenant)
 
         self.assertEqual(s['user']['name'], 'systemAssignedIdentity')
         self.assertEqual(s['user']['type'], 'servicePrincipal')
@@ -520,7 +566,8 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('requests.get', autospec=True)
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
-    def test_find_subscriptions_in_vm_with_msi_user_assigned_with_client_id(self, create_subscription_client_mock, mock_get):
+    def test_find_subscriptions_in_vm_with_mi_user_assigned_with_client_id(self, create_subscription_client_mock,
+                                                                           mock_get):
         mock_subscription_client = mock.MagicMock()
         mock_subscription_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
         create_subscription_client_mock.return_value = mock_subscription_client
@@ -531,7 +578,7 @@ class TestProfile(unittest.TestCase):
 
         test_token_entry = {
             'token_type': 'Bearer',
-            'access_token': TestProfile.test_msi_access_token
+            'access_token': TestProfile.test_mi_access_token
         }
         test_client_id = '54826b22-38d6-4fb2-bad9-b7b93a3e9999'
         encoded_test_token = json.dumps(test_token_entry).encode()
@@ -546,7 +593,7 @@ class TestProfile(unittest.TestCase):
         s = subscriptions[0]
         self.assertEqual(s['name'], self.display_name1)
         self.assertEqual(s['id'], self.id1.split('/')[-1])
-        self.assertEqual(s['tenantId'], '54826b22-38d6-4fb2-bad9-b7b93a3e9c5a')
+        self.assertEqual(s['tenantId'], self.test_mi_tenant)
 
         self.assertEqual(s['user']['name'], 'userAssignedIdentity')
         self.assertEqual(s['user']['type'], 'servicePrincipal')
@@ -554,8 +601,8 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('azure.cli.core.auth.adal_authentication.MSIAuthenticationWrapper', autospec=True)
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
-    def test_find_subscriptions_in_vm_with_msi_user_assigned_with_object_id(self, create_subscription_client_mock,
-                                                                            mock_msi_auth):
+    def test_find_subscriptions_in_vm_with_mi_user_assigned_with_object_id(self, create_subscription_client_mock,
+                                                                           mock_msi_auth):
         mock_subscription_client = mock.MagicMock()
         mock_subscription_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
         create_subscription_client_mock.return_value = mock_subscription_client
@@ -574,7 +621,7 @@ class TestProfile(unittest.TestCase):
                 if self.object_id:
                     self.token = {
                         'token_type': 'Bearer',
-                        'access_token': TestProfile.test_msi_access_token
+                        'access_token': TestProfile.test_mi_access_token
                     }
                 else:
                     raise AzureResponseError('Failed to connect to MSI. Please make sure MSI is configured correctly.\n'
@@ -594,8 +641,8 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('requests.get', autospec=True)
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
-    def test_find_subscriptions_in_vm_with_msi_user_assigned_with_res_id(self, create_subscription_client_mock,
-                                                                         mock_get):
+    def test_find_subscriptions_in_vm_with_mi_user_assigned_with_res_id(self, create_subscription_client_mock,
+                                                                        mock_get):
 
         mock_subscription_client = mock.MagicMock()
         mock_subscription_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
@@ -607,7 +654,7 @@ class TestProfile(unittest.TestCase):
 
         test_token_entry = {
             'token_type': 'Bearer',
-            'access_token': TestProfile.test_msi_access_token
+            'access_token': TestProfile.test_mi_access_token
         }
         test_res_id = ('/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourcegroups/g1/'
                        'providers/Microsoft.ManagedIdentity/userAssignedIdentities/id1')
@@ -970,22 +1017,17 @@ class TestProfile(unittest.TestCase):
                                                                      aux_tenants=[test_tenant_id2])
 
     @mock.patch('azure.cli.core.auth.adal_authentication.MSIAuthenticationWrapper', MSRestAzureAuthStub)
-    def test_get_login_credentials_msi_system_assigned(self):
-
-        # setup an existing msi subscription
+    def test_get_login_credentials_mi_system_assigned(self):
         profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None})
-        test_subscription_id = '12345678-1bf0-4dda-aec3-cb9272f09590'
-        test_tenant_id = '12345678-38d6-4fb2-bad9-b7b93a3e1234'
-        test_user = 'systemAssignedIdentity'
-        msi_subscription = SubscriptionStub('/subscriptions/' + test_subscription_id, 'MSI', self.state1, test_tenant_id)
-        consolidated = profile._normalize_properties(test_user,
-                                                     [msi_subscription],
-                                                     True)
+        consolidated = profile._normalize_properties('systemAssignedIdentity',
+                                                     [deepcopy(self.test_mi_subscription)],
+                                                     True,
+                                                     user_assigned_identity_id="MSI")
         profile._set_subscriptions(consolidated)
 
         cred, subscription_id, _ = profile.get_login_credentials()
 
-        self.assertEqual(subscription_id, test_subscription_id)
+        self.assertEqual(subscription_id, self.test_mi_subscription_id)
 
         # sniff test the msi_auth object
         cred.set_token()
@@ -994,20 +1036,18 @@ class TestProfile(unittest.TestCase):
         self.assertTrue(cred.token_read_count)
 
     @mock.patch('azure.cli.core.auth.adal_authentication.MSIAuthenticationWrapper', MSRestAzureAuthStub)
-    def test_get_login_credentials_msi_user_assigned_with_client_id(self):
-        # setup an existing msi subscription
+    def test_get_login_credentials_mi_user_assigned_with_client_id(self):
         profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None})
-        test_subscription_id = '12345678-1bf0-4dda-aec3-cb9272f09590'
-        test_tenant_id = '12345678-38d6-4fb2-bad9-b7b93a3e1234'
-        test_user = 'userAssignedIdentity'
         test_client_id = '12345678-38d6-4fb2-bad9-b7b93a3e8888'
-        msi_subscription = SubscriptionStub('/subscriptions/' + test_subscription_id, 'MSIClient-{}'.format(test_client_id), self.state1, test_tenant_id)
-        consolidated = profile._normalize_properties(test_user, [msi_subscription], True)
+        consolidated = profile._normalize_properties('userAssignedIdentity',
+                                                     [deepcopy(self.test_mi_subscription)],
+                                                     True,
+                                                     user_assigned_identity_id='MSIClient-{}'.format(test_client_id))
         profile._set_subscriptions(consolidated, secondary_key_name='name')
 
         cred, subscription_id, _ = profile.get_login_credentials()
 
-        self.assertEqual(subscription_id, test_subscription_id)
+        self.assertEqual(subscription_id, self.test_mi_subscription_id)
 
         # sniff test the msi_auth object
         cred.set_token()
@@ -1017,21 +1057,18 @@ class TestProfile(unittest.TestCase):
         self.assertTrue(cred.client_id, test_client_id)
 
     @mock.patch('azure.cli.core.auth.adal_authentication.MSIAuthenticationWrapper', MSRestAzureAuthStub)
-    def test_get_login_credentials_msi_user_assigned_with_object_id(self):
-
-        # setup an existing msi subscription
+    def test_get_login_credentials_mi_user_assigned_with_object_id(self):
         profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None})
-        test_subscription_id = '12345678-1bf0-4dda-aec3-cb9272f09590'
         test_object_id = '12345678-38d6-4fb2-bad9-b7b93a3e9999'
-        msi_subscription = SubscriptionStub('/subscriptions/12345678-1bf0-4dda-aec3-cb9272f09590',
-                                            'MSIObject-{}'.format(test_object_id),
-                                            self.state1, '12345678-38d6-4fb2-bad9-b7b93a3e1234')
-        consolidated = profile._normalize_properties('userAssignedIdentity', [msi_subscription], True)
+        consolidated = profile._normalize_properties('userAssignedIdentity',
+                                                     [deepcopy(self.test_mi_subscription)],
+                                                     True,
+                                                     user_assigned_identity_id='MSIObject-{}'.format(test_object_id))
         profile._set_subscriptions(consolidated, secondary_key_name='name')
 
         cred, subscription_id, _ = profile.get_login_credentials()
 
-        self.assertEqual(subscription_id, test_subscription_id)
+        self.assertEqual(subscription_id, self.test_mi_subscription_id)
 
         # sniff test the msi_auth object
         cred.set_token()
@@ -1041,21 +1078,19 @@ class TestProfile(unittest.TestCase):
         self.assertTrue(cred.object_id, test_object_id)
 
     @mock.patch('azure.cli.core.auth.adal_authentication.MSIAuthenticationWrapper', MSRestAzureAuthStub)
-    def test_get_login_credentials_msi_user_assigned_with_res_id(self):
-        # setup an existing msi subscription
+    def test_get_login_credentials_mi_user_assigned_with_res_id(self):
         profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None})
-        test_subscription_id = '12345678-1bf0-4dda-aec3-cb9272f09590'
         test_res_id = ('/subscriptions/{}/resourceGroups/r1/providers/Microsoft.ManagedIdentity/'
-                       'userAssignedIdentities/id1').format(test_subscription_id)
-        msi_subscription = SubscriptionStub('/subscriptions/{}'.format(test_subscription_id),
-                                            'MSIResource-{}'.format(test_res_id),
-                                            self.state1, '12345678-38d6-4fb2-bad9-b7b93a3e1234')
-        consolidated = profile._normalize_properties('userAssignedIdentity', [msi_subscription], True)
+                       'userAssignedIdentities/id1').format(self.test_mi_subscription_id)
+        consolidated = profile._normalize_properties('userAssignedIdentity',
+                                                     [deepcopy(self.test_mi_subscription)],
+                                                     True,
+                                                     user_assigned_identity_id='MSIResource-{}'.format(test_res_id))
         profile._set_subscriptions(consolidated, secondary_key_name='name')
 
         cred, subscription_id, _ = profile.get_login_credentials()
 
-        self.assertEqual(subscription_id, test_subscription_id)
+        self.assertEqual(subscription_id, self.test_mi_subscription_id)
 
         # sniff test the msi_auth object
         cred.set_token()
@@ -1152,17 +1187,12 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(tenant, self.tenant_id)
 
     @mock.patch('azure.cli.core.auth.adal_authentication.MSIAuthenticationWrapper', autospec=True)
-    def test_get_raw_token_msi_system_assigned(self, mock_msi_auth):
-        # setup an existing msi subscription
+    def test_get_raw_token_mi_system_assigned(self, mock_msi_auth):
         profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None})
-        test_subscription_id = '12345678-1bf0-4dda-aec3-cb9272f09590'
-        test_tenant_id = '12345678-38d6-4fb2-bad9-b7b93a3e1234'
-        test_user = 'systemAssignedIdentity'
-        msi_subscription = SubscriptionStub('/subscriptions/' + test_subscription_id,
-                                            'MSI', self.state1, test_tenant_id)
-        consolidated = profile._normalize_properties(test_user,
-                                                     [msi_subscription],
-                                                     True)
+        consolidated = profile._normalize_properties('systemAssignedIdentity',
+                                                     [deepcopy(self.test_mi_subscription)],
+                                                     True,
+                                                     user_assigned_identity_id='MSI')
         profile._set_subscriptions(consolidated)
 
         mi_auth_instance = None
@@ -1181,26 +1211,25 @@ class TestProfile(unittest.TestCase):
         assert mi_auth_instance.resource == self.adal_resource
         assert list(mi_auth_instance.get_token_scopes) == self.msal_scopes
 
-        self.assertEqual(subscription_id, test_subscription_id)
         self.assertEqual(cred[0], 'Bearer')
-        self.assertEqual(cred[1], TestProfile.test_msi_access_token)
+        self.assertEqual(cred[1], self.test_mi_access_token)
 
         # Make sure expires_on and expiresOn are set
         self.assertEqual(cred[2]['expires_on'], MOCK_EXPIRES_ON_INT)
         self.assertEqual(cred[2]['expiresOn'], MOCK_EXPIRES_ON_DATETIME)
-        self.assertEqual(subscription_id, test_subscription_id)
-        self.assertEqual(tenant_id, test_tenant_id)
+        self.assertEqual(subscription_id, self.test_mi_subscription_id)
+        self.assertEqual(tenant_id, self.test_mi_tenant)
 
         # verify tenant shouldn't be specified for MSI account
         with self.assertRaisesRegex(CLIError, "Tenant shouldn't be specified"):
             cred, subscription_id, _ = profile.get_raw_token(resource='http://test_resource', tenant=self.tenant_id)
 
     @mock.patch('azure.cli.core._profile.in_cloud_console', autospec=True)
-    @mock.patch('azure.cli.core.auth.adal_authentication.MSIAuthenticationWrapper', autospec=True)
-    def test_get_raw_token_in_cloud_console(self, mock_msi_auth, mock_in_cloud_console):
+    @mock.patch('azure.cli.core.auth.msal_credentials.CloudShellCredential', autospec=True)
+    def test_get_raw_token_in_cloud_shell(self, cloud_shell_credential_mock, mock_in_cloud_console):
         mock_in_cloud_console.return_value = True
 
-        # setup an existing msi subscription
+        # Set up an existing Cloud Shell account
         profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None})
         test_subscription_id = '12345678-1bf0-4dda-aec3-cb9272f09590'
         test_tenant_id = '12345678-38d6-4fb2-bad9-b7b93a3e1234'
@@ -1212,38 +1241,49 @@ class TestProfile(unittest.TestCase):
         consolidated[0]['user']['cloudShellID'] = True
         profile._set_subscriptions(consolidated)
 
-        mi_auth_instance = None
+        # The below code creates a credential instance and checks it.
+        #
+        # We can define a normal variable `credential_instance` here and use `nonlocal` to assign the credential
+        # instance to it, but using a mutable list also allows us to check how many instances are created.
+        # See https://stackoverflow.com/a/8448011/2199657
+        #
+        # test_login_in_cloud_shell retrieves the credential instance from
+        # create_subscription_client_mock.call_args.args[1], so another possible way to retrieve the credential
+        # instance is to create a hook in get_raw_token and patch that hook during tests.
+        credential_instances = []
 
-        def mi_auth_factory(*args, **kwargs):
-            nonlocal mi_auth_instance
-            mi_auth_instance = MSRestAzureAuthStub(*args, **kwargs)
-            return mi_auth_instance
+        def cloud_shell_credential_factory():
+            credential = CloudShellCredentialStub()
+            credential_instances.append(credential)
+            return credential
 
-        mock_msi_auth.side_effect = mi_auth_factory
+        cloud_shell_credential_mock.side_effect = cloud_shell_credential_factory
 
         # action
-        cred, subscription_id, tenant_id = profile.get_raw_token(resource=self.adal_resource)
+        token_tuple, subscription_id, tenant_id = profile.get_raw_token(scopes=self.msal_scopes)
 
-        # Make sure resource/scopes are passed to MSIAuthenticationWrapper
-        assert mi_auth_instance.resource == self.adal_resource
-        assert list(mi_auth_instance.get_token_scopes) == self.msal_scopes
+        # Verify only one credential is created
+        assert len(credential_instances) == 1
+        # Verify correct scopes are passed to get_token
+        assert list(credential_instances[0].get_token_scopes) == self.msal_scopes
 
         self.assertEqual(subscription_id, test_subscription_id)
-        self.assertEqual(cred[0], 'Bearer')
-        self.assertEqual(cred[1], TestProfile.test_msi_access_token)
+        self.assertEqual(token_tuple[0], 'Bearer')
+        self.assertEqual(token_tuple[1], TestProfile.test_cloud_shell_access_token)
 
         # Make sure expires_on and expiresOn are set
-        self.assertEqual(cred[2]['expires_on'], MOCK_EXPIRES_ON_INT)
-        self.assertEqual(cred[2]['expiresOn'], MOCK_EXPIRES_ON_DATETIME)
+        self.assertEqual(token_tuple[2]['expires_on'], MOCK_EXPIRES_ON_INT)
+        self.assertEqual(token_tuple[2]['expiresOn'], MOCK_EXPIRES_ON_DATETIME)
         self.assertEqual(subscription_id, test_subscription_id)
         self.assertEqual(tenant_id, test_tenant_id)
 
-        # verify tenant shouldn't be specified for Cloud Shell account
+        # Verify tenant shouldn't be specified for Cloud Shell account
         with self.assertRaisesRegex(CLIError, 'Cloud Shell'):
-            cred, subscription_id, _ = profile.get_raw_token(resource='http://test_resource', tenant=self.tenant_id)
+            profile.get_raw_token(resource='http://test_resource', tenant=self.tenant_id)
 
+    @mock.patch('azure.cli.core.auth.identity.Identity.logout_service_principal')
     @mock.patch('azure.cli.core.auth.identity.Identity.logout_user')
-    def test_logout(self, logout_user_mock):
+    def test_logout(self, logout_user_mock, logout_service_principal_mock):
         cli = DummyCli()
 
         storage_mock = {'subscriptions': []}
@@ -1258,10 +1298,13 @@ class TestProfile(unittest.TestCase):
 
         # verify
         self.assertEqual(0, len(storage_mock['subscriptions']))
+        # Make sure logout is attempted on both account types
         logout_user_mock.assert_called_with(self.user1)
+        logout_service_principal_mock.assert_called_with(self.user1)
 
+    @mock.patch('azure.cli.core.auth.identity.Identity.logout_all_service_principal')
     @mock.patch('azure.cli.core.auth.identity.Identity.logout_all_users')
-    def test_logout_all(self, logout_all_users_mock):
+    def test_logout_all(self, logout_all_users_mock, logout_all_service_principal_mock):
         cli = DummyCli()
         # setup
         storage_mock = {'subscriptions': []}
@@ -1280,7 +1323,9 @@ class TestProfile(unittest.TestCase):
 
         # verify
         self.assertEqual([], storage_mock['subscriptions'])
+        # Make sure logout is attempted on both account types
         logout_all_users_mock.assert_called_once()
+        logout_all_service_principal_mock.assert_called_once()
 
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
     @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential', autospec=True)
@@ -1438,7 +1483,7 @@ class TestProfile(unittest.TestCase):
         self.assertEqual('very_secret', extended_info['clientSecret'])
 
 
-class FileHandleStub(object):  # pylint: disable=too-few-public-methods
+class FileHandleStub:  # pylint: disable=too-few-public-methods
 
     def write(self, content):
         pass
@@ -1457,8 +1502,7 @@ class SubscriptionStub(Subscription):  # pylint: disable=too-few-public-methods
         policies = SubscriptionPolicies()
         policies.spending_limit = SpendingLimit.current_period_off
         policies.quota_id = 'some quota'
-        super(SubscriptionStub, self).__init__(subscription_policies=policies,
-                                               authorization_source='some_authorization_source')
+        super().__init__(subscription_policies=policies, authorization_source='some_authorization_source')
         self.id = id
         self.subscription_id = id.split('/')[1]
         self.display_name = display_name
@@ -1483,7 +1527,7 @@ class ManagedByTenantStub(ManagedByTenant):  # pylint: disable=too-few-public-me
         self.tenant_id = tenant_id
 
 
-class TenantStub(object):  # pylint: disable=too-few-public-methods
+class TenantStub:  # pylint: disable=too-few-public-methods
 
     def __init__(self, tenant_id, display_name=MOCK_TENANT_DISPLAY_NAME, default_domain=MOCK_TENANT_DEFAULT_DOMAIN):
         self.tenant_id = tenant_id

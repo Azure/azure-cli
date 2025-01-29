@@ -13,6 +13,7 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "compute-recommender spot-placement-recommender",
+    is_preview=True,
 )
 class SpotPlacementRecommender(AAZCommand):
     """Generate placement scores for Spot VM skus.
@@ -22,9 +23,9 @@ class SpotPlacementRecommender(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-03-01-preview",
+        "version": "2024-06-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/locations/{}/diagnostics/spotplacementrecommender/generate", "2024-03-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/locations/{}/placementscores/spot/generate", "2024-06-01-preview"],
         ]
     }
 
@@ -45,32 +46,41 @@ class SpotPlacementRecommender(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.location = AAZResourceLocationArg(
+            help="the Azure region where the recommendation will be generated",
             required=True,
+            is_preview=True,
             id_part="name",
         )
 
-        # define Arg Group "SpotPlacementRecommenderInput"
+        # define Arg Group "SpotPlacementScoresInput"
 
         _args_schema = cls._args_schema
         _args_schema.availability_zones = AAZBoolArg(
             options=["--availability-zones"],
-            arg_group="SpotPlacementRecommenderInput",
+            arg_group="SpotPlacementScoresInput",
             help="Defines if the scope is zonal or regional.",
+            is_preview=True,
         )
         _args_schema.desired_count = AAZIntArg(
             options=["--desired-count"],
-            arg_group="SpotPlacementRecommenderInput",
+            arg_group="SpotPlacementScoresInput",
             help="Desired instance count per region/zone based on the scope.",
+            required=True,
+            is_preview=True,
         )
         _args_schema.desired_locations = AAZListArg(
             options=["--desired-locations"],
-            arg_group="SpotPlacementRecommenderInput",
+            arg_group="SpotPlacementScoresInput",
             help="The desired regions",
+            required=True,
+            is_preview=True,
         )
         _args_schema.desired_sizes = AAZListArg(
             options=["--desired-sizes"],
-            arg_group="SpotPlacementRecommenderInput",
+            arg_group="SpotPlacementScoresInput",
             help="The desired resource SKUs.",
+            required=True,
+            is_preview=True,
         )
 
         desired_locations = cls._args_schema.desired_locations
@@ -88,7 +98,7 @@ class SpotPlacementRecommender(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        self.SpotPlacementRecommenderPost(ctx=self.ctx)()
+        self.SpotPlacementScoresPost(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -103,7 +113,7 @@ class SpotPlacementRecommender(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class SpotPlacementRecommenderPost(AAZHttpOperation):
+    class SpotPlacementScoresPost(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -117,7 +127,7 @@ class SpotPlacementRecommender(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/providers/Microsoft.Compute/locations/{location}/diagnostics/spotPlacementRecommender/generate",
+                "/subscriptions/{subscriptionId}/providers/Microsoft.Compute/locations/{location}/placementScores/spot/generate",
                 **self.url_parameters
             )
 
@@ -147,7 +157,7 @@ class SpotPlacementRecommender(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-03-01-preview",
+                    "api-version", "2024-06-01-preview",
                     required=True,
                 ),
             }
@@ -173,9 +183,9 @@ class SpotPlacementRecommender(AAZCommand):
                 typ_kwargs={"flags": {"required": True, "client_flatten": True}}
             )
             _builder.set_prop("availabilityZones", AAZBoolType, ".availability_zones")
-            _builder.set_prop("desiredCount", AAZIntType, ".desired_count")
-            _builder.set_prop("desiredLocations", AAZListType, ".desired_locations")
-            _builder.set_prop("desiredSizes", AAZListType, ".desired_sizes")
+            _builder.set_prop("desiredCount", AAZIntType, ".desired_count", typ_kwargs={"flags": {"required": True}})
+            _builder.set_prop("desiredLocations", AAZListType, ".desired_locations", typ_kwargs={"flags": {"required": True}})
+            _builder.set_prop("desiredSizes", AAZListType, ".desired_sizes", typ_kwargs={"flags": {"required": True}})
 
             desired_locations = _builder.get(".desiredLocations")
             if desired_locations is not None:

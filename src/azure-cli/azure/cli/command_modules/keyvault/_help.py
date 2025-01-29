@@ -137,7 +137,7 @@ long-summary: |
     This default policy can be used in conjunction with `az keyvault create` to create a self-signed certificate.
     The default policy can also be used as a starting point to create derivative policies.
 
-    For more details, see: https://docs.microsoft.com/azure/key-vault/certificates/about-certificates#certificate-policy
+    For more details, see: https://learn.microsoft.com/azure/key-vault/certificates/about-certificates#certificate-policy
 examples:
   - name: Create a self-signed certificate with the default policy
     text: |
@@ -238,7 +238,13 @@ long-summary: Requires certificates/manageissuers/getissuers permission.
 helps['keyvault create'] = """
 type: command
 short-summary: Create a Vault or HSM.
-long-summary: If `--enable-rbac-authorization` is not specified, then default permissions are created for the current user or service principal unless the `--no-self-perms` flag is specified.
+long-summary: >-
+    RBAC authorization is enabled by default. If `--enable-rbac-authorization` is manually specified to `false` and
+    `--no-self-perms` flag is not specified, default permissions are created for the current user or service principal.
+
+
+    If you want to assign the default permission, you have to change the default subscription with `az account set`
+    first, instead of using `--subscription`.
 examples:
 
   - name: Create a key vault with network ACLs specified (use --network-acls to specify IP and VNet rules by using a JSON string).

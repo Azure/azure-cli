@@ -6,7 +6,8 @@ import abc
 
 from collections import OrderedDict
 from ._base import AAZBaseType, AAZValuePatch, AAZUndefined
-from ._field_value import AAZObject, AAZDict, AAZFreeFormDict, AAZList, AAZSimpleValue
+from ._field_value import AAZObject, AAZDict, AAZFreeFormDict, AAZList, AAZSimpleValue, \
+    AAZIdentityObject
 from ._utils import to_snack_case
 from .exceptions import AAZUnknownFieldError, AAZConflictFieldDefinitionError, AAZValuePrecisionLossError, \
     AAZInvalidFieldError, AAZInvalidValueError
@@ -22,9 +23,6 @@ class AAZSimpleType(AAZBaseType):
     DataType = None
 
     _ValueCls = AAZSimpleValue
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
 
     def process_data(self, data, **kwargs):
         if data == None:  # noqa: E711, pylint: disable=singleton-comparison
@@ -275,9 +273,6 @@ class AAZBaseDictType(AAZBaseType):
 
     _PatchDataCls = dict
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
     @abc.abstractmethod
     def __getitem__(self, key):
         raise NotImplementedError()
@@ -409,3 +404,7 @@ class AAZListType(AAZBaseType):
                 value[idx] = sub_data
 
         return result
+
+
+class AAZIdentityObjectType(AAZObjectType):
+    _ValueCls = AAZIdentityObject

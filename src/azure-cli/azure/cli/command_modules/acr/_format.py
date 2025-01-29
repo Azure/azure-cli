@@ -399,7 +399,7 @@ def _token_format_group(item):
     scope_map_id = _get_value(item, 'scopeMapId')
     output = OrderedDict([
         ('NAME', _get_value(item, 'name')),
-        ('SCOPE MAP', scope_map_id.split('/')[-1]),
+        ('SCOPE MAP', scope_map_id.rsplit('/', maxsplit=1)[-1]),
         ('PASSWORD1 EXPIRY', ''),
         ('PASSWORD2 EXPIRY', ''),
         ('STATUS', _get_value(item, 'status').title()),

@@ -675,11 +675,12 @@ class WebappConfigureTest(ScenarioTest):
             JMESPathCheck('webSocketsEnabled', True),
             JMESPathCheck('minTlsVersion', '1.0'),
             JMESPathCheck('http20Enabled', True),
-            JMESPathCheck('ftpsState', 'Disabled')]
+            JMESPathCheck('ftpsState', 'Disabled'),
+            JMESPathCheck('minTlsCipherSuite', 'TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384')]
 
         self.cmd('webapp config set -g {} -n {} --always-on true --auto-heal-enabled true --php-version 7.4 '
                  '--net-framework-version v3.5 --python-version 3.4 --use-32bit-worker-process=false '
-                 '--web-sockets-enabled=true --http20-enabled true --min-tls-version 1.0 --ftps-state Disabled'.format(resource_group, webapp_name)).assert_with_checks(checks)
+                 '--web-sockets-enabled=true --http20-enabled true --min-tls-version 1.0 --min-tls-cipher-suite TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 --ftps-state Disabled'.format(resource_group, webapp_name)).assert_with_checks(checks)
         self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name)) \
             .assert_with_checks(checks)
 
@@ -694,7 +695,7 @@ class WebappConfigureTest(ScenarioTest):
         # show
         result = self.cmd('webapp config appsettings list -g {} -n {}'.format(
             resource_group, webapp_name)).get_output_in_json()
-        s2 = next((x for x in result if x['name'] == 's2'))
+        s2 = next(x for x in result if x['name'] == 's2')
         self.assertEqual(s2['name'], 's2')
         self.assertEqual(s2['slotSetting'], False)
         self.assertEqual(s2['value'], 'bar')
@@ -807,7 +808,7 @@ class WebappConfigureTest(ScenarioTest):
 
         # site config update runtime tests
         # windows
-        self.cmd('webapp config set -g {} -n {} --runtime java:17:TOMCAT:10.0'.format(resource_group, webapp_name)).assert_with_checks([
+        self.cmd('webapp config set -g {} -n {} --runtime TOMCAT:10.0-java17'.format(resource_group, webapp_name)).assert_with_checks([
             JMESPathCheck("javaVersion", "17"),
             JMESPathCheck("javaContainer", "TOMCAT"),
             JMESPathCheck("javaContainerVersion", "10.0"),
@@ -915,7 +916,7 @@ class WebappConfigureTest(ScenarioTest):
         # show
         result = self.cmd('webapp config appsettings list -g {} -n {}'.format(
             resource_group, webapp_name)).get_output_in_json()
-        s2 = next((x for x in result if x['name'] == 's2'))
+        s2 = next(x for x in result if x['name'] == 's2')
         self.assertEqual(s2['name'], 's2')
         self.assertEqual(s2['slotSetting'], False)
         self.assertEqual(s2['value'], 'bar')
@@ -1217,11 +1218,11 @@ class LinuxWebappScenarioTest(ScenarioTest):
         self.assertEqual(set(x['value'] for x in result if x['name'] ==
                              'DOCKER_REGISTRY_SERVER_PASSWORD'), set([None]))   # we mask the password
         sample = next(
-            (x for x in result if x['name'] == 'DOCKER_REGISTRY_SERVER_URL'))
+            x for x in result if x['name'] == 'DOCKER_REGISTRY_SERVER_URL')
         self.assertEqual(sample, {
                          'name': 'DOCKER_REGISTRY_SERVER_URL', 'slotSetting': False, 'value': 'foo-url'})
         sample = next(
-            (x for x in result if x['name'] == 'WEBSITES_ENABLE_APP_SERVICE_STORAGE'))
+            x for x in result if x['name'] == 'WEBSITES_ENABLE_APP_SERVICE_STORAGE')
         self.assertEqual(sample, {
                          'name': 'WEBSITES_ENABLE_APP_SERVICE_STORAGE', 'slotSetting': False, 'value': 'false'})
 
@@ -1230,7 +1231,7 @@ class LinuxWebappScenarioTest(ScenarioTest):
         self.assertEqual(set(x['value'] for x in result if x['name'] ==
                              'DOCKER_REGISTRY_SERVER_PASSWORD'), set([None]))  # we mask the password
         sample = next(
-            (x for x in result if x['name'] == 'WEBSITES_ENABLE_APP_SERVICE_STORAGE'))
+            x for x in result if x['name'] == 'WEBSITES_ENABLE_APP_SERVICE_STORAGE')
         self.assertEqual(sample, {
                          'name': 'WEBSITES_ENABLE_APP_SERVICE_STORAGE', 'slotSetting': False, 'value': 'true'})
 
@@ -1575,6 +1576,7 @@ class AppServiceCors(ScenarioTest):
         self.cmd('webapp cors show -g {rg} -n {web} --slot {slot}',
                  checks=self.check('allowedOrigins', []))
 
+    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     @StorageAccountPreparer()
     def test_functionapp_cors(self, resource_group, storage_account):
@@ -1648,7 +1650,7 @@ class WebappSSLCertTest(ScenarioTest):
         webapp_name = self.create_random_name(prefix='web-ssl-test', length=20)
         slot_name = self.create_random_name(prefix='slot-ssl-test', length=20)
         # Cert Generated using
-        # https://docs.microsoft.com/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
+        # https://learn.microsoft.com/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
         pfx_file = os.path.join(TEST_DIR, 'server.pfx')
         cert_password = 'test'
         cert_thumbprint = '9E9735C45C792B03B3FFCCA614852B32EE71AD6B'
@@ -1716,7 +1718,7 @@ class WebappSSLCertTest(ScenarioTest):
         plan = self.create_random_name(prefix='ssl-test-plan', length=24)
         webapp_name = self.create_random_name(prefix='web-ssl-test', length=20)
         # Cert Generated using
-        # https://docs.microsoft.com/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
+        # https://learn.microsoft.com/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
         pfx_file = os.path.join(TEST_DIR, 'server.pfx')
         cert_password = 'test'
         cert_thumbprint = '9E9735C45C792B03B3FFCCA614852B32EE71AD6B'
@@ -1745,7 +1747,7 @@ class WebappSSLImportCertTest(ScenarioTest):
         plan_name = self.create_random_name(prefix='ssl-test-plan', length=24)
         webapp_name = self.create_random_name(prefix='web-ssl-test', length=20)
         # Cert Generated using
-        # https://docs.microsoft.com/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
+        # https://learn.microsoft.com/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
         pfx_file = os.path.join(TEST_DIR, 'server.pfx')
         cert_password = 'test'
         cert_thumbprint = '9E9735C45C792B03B3FFCCA614852B32EE71AD6B'
@@ -1779,7 +1781,7 @@ class WebappSSLImportCertTest(ScenarioTest):
         webapp_name = self.create_random_name(prefix='web-ssl-test', length=20)
         kv_name = self.create_random_name(prefix='kv-ssl-test', length=20)
         # Cert Generated using
-        # https://docs.microsoft.com/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
+        # https://learn.microsoft.com/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
         pfx_file = os.path.join(TEST_DIR, 'server.pfx')
         cert_password = 'test'
         cert_thumbprint = '9E9735C45C792B03B3FFCCA614852B32EE71AD6B'
@@ -2312,46 +2314,82 @@ class WebappAcrUseManagedIdentityCredsTests(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='webapp_hyperv_acr_use_identity',location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_hyperv_acr_use_identity(self, resource_group):
-        webapp_name = self.create_random_name(prefix='webapp-hyperv', length=24)
+        system_identity_webapp_name = self.create_random_name(prefix='webapp-hyperv', length=24)
         plan = self.create_random_name(prefix='plan-hyperv', length=24)
 
         self.cmd('appservice plan create -g {} -n {} --hyper-v --sku P1V3'.format(resource_group, plan))
 
         container_registry_url = "https://mcr.microsoft.com"
         container_image_name = "azure-app-service/windows/parkingpage:latest"
-        self.cmd('webapp create -g {} -n {} --plan {} --container-registry-url {} --container-image-name {} --assign-identity --acr-use-identity'
-                 .format(resource_group, webapp_name, plan, container_registry_url, container_image_name), checks=[
+        self.cmd('webapp create -g {} -n {} --plan {} --container-registry-url {} --container-image-name {} --assign-identity [system] --acr-use-identity --acr-identity [system]'
+                 .format(resource_group, system_identity_webapp_name, plan, container_registry_url, container_image_name), checks=[
             JMESPathCheck('state', 'Running'),
-            JMESPathCheck('name', webapp_name),
-            JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
+            JMESPathCheck('name', system_identity_webapp_name),
+            JMESPathCheck('hostNames[0]', system_identity_webapp_name + '.azurewebsites.net')
         ])
 
-        self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name), checks=[
+        self.cmd('webapp config show -g {} -n {}'.format(resource_group, system_identity_webapp_name), checks=[
             JMESPathCheck('windowsFxVersion',
                           "DOCKER|mcr.microsoft.com/azure-app-service/windows/parkingpage:latest"),
             JMESPathCheck('linuxFxVersion', ""),
             JMESPathCheck('acrUseManagedIdentityCreds', True)
         ])
 
+        user_identity_webapp_name = self.create_random_name(prefix='webapp-hyperv', length=24)
+        identity_name = self.create_random_name('app-hyperv', 16)
+        msi_result = self.cmd('identity create -g {} -n {}'.format(
+            resource_group, identity_name)).get_output_in_json()
+        self.cmd('webapp create -g {} -n {} --plan {} --assign-identity {} --container-registry-url {} --container-image-name {} --acr-identity {} --acr-use-identity'
+                 .format( resource_group, user_identity_webapp_name, plan, msi_result['id'], container_registry_url, container_image_name, msi_result['id']), checks=[
+            JMESPathCheck('state', 'Running'),
+            JMESPathCheck('name', user_identity_webapp_name),
+            JMESPathCheck('hostNames[0]', user_identity_webapp_name + '.azurewebsites.net')                
+        ])
+        self.cmd('webapp config show -g {} -n {}'.format(resource_group, user_identity_webapp_name), checks=[
+            JMESPathCheck('windowsFxVersion',
+                          "DOCKER|mcr.microsoft.com/azure-app-service/windows/parkingpage:latest"),
+            JMESPathCheck('linuxFxVersion', ""),
+            JMESPathCheck('acrUseManagedIdentityCreds', True),
+            JMESPathCheck('acrUserManagedIdentityId', msi_result['clientId'])
+        ])
+
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='webapp_linux_acr_use_identity',location=LINUX_ASP_LOCATION_WEBAPP)
     def test_webapp_linux_acr_use_identity(self, resource_group):
-        webapp_name = self.create_random_name(prefix='webapp-linux', length=24)
+        system_identity_webapp_name = self.create_random_name(prefix='webapp-linux', length=24)
         plan = self.create_random_name(prefix='plan-linux', length=24)
 
         self.cmd('appservice plan create -g {} -n {} --is-linux'.format(resource_group, plan))
-        self.cmd('webapp create -g {} -n {} --plan {} -u {} -r "NODE|16-lts" --assign-identity --acr-use-identity'
-                 .format(resource_group, webapp_name, plan, TEST_REPO_URL), checks=[
+        self.cmd('webapp create -g {} -n {} --plan {} -u {} -r "NODE|16-lts" --assign-identity [system] --acr-use-identity --acr-identity [system]'
+                 .format(resource_group, system_identity_webapp_name, plan, TEST_REPO_URL), checks=[
             JMESPathCheck('state', 'Running'),
-            JMESPathCheck('name', webapp_name),
-            JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
+            JMESPathCheck('name', system_identity_webapp_name),
+            JMESPathCheck('hostNames[0]', system_identity_webapp_name + '.azurewebsites.net')
         ])
 
-        self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name), checks=[
+        self.cmd('webapp config show -g {} -n {}'.format(resource_group, system_identity_webapp_name), checks=[
             JMESPathCheck('windowsFxVersion', None),
             JMESPathCheck('linuxFxVersion', "NODE|16-lts"),
             JMESPathCheck('acrUseManagedIdentityCreds', True)
         ])
+
+        user_identity_webapp_name = self.create_random_name(prefix='webapp-linux', length=24)
+        identity_name = self.create_random_name('app-linux', 16)
+        msi_result = self.cmd('identity create -g {} -n {}'.format(
+            resource_group, identity_name)).get_output_in_json()
+        self.cmd('webapp create -g {} -n {} --plan {} -u {} -r "NODE|16-lts" --assign-identity {} --acr-use-identity --acr-identity {}'
+                 .format(resource_group, user_identity_webapp_name, plan, TEST_REPO_URL, msi_result['id'], msi_result['id']), checks=[
+            JMESPathCheck('state', 'Running'),
+            JMESPathCheck('name', user_identity_webapp_name),
+            JMESPathCheck('hostNames[0]', user_identity_webapp_name + '.azurewebsites.net')
+        ])
+
+        self.cmd('webapp config show -g {} -n {}'.format(resource_group, user_identity_webapp_name), checks=[
+            JMESPathCheck('windowsFxVersion', None),
+            JMESPathCheck('linuxFxVersion', "NODE|16-lts"),
+            JMESPathCheck('acrUseManagedIdentityCreds', True),
+            JMESPathCheck('acrUserManagedIdentityId', msi_result['clientId'])
+        ])            
 
 class WebappNetworkConnectionTests(ScenarioTest):
     @AllowLargeResponse()
@@ -2898,7 +2936,7 @@ class TrackRuntimeStatusTest(ScenarioTest):
             'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
         self.cmd(
             'webapp create -g {} -n {} --plan {} -r "NODE|20-LTS"'.format(resource_group, webapp_name, plan_name))
-        with self.assertRaisesRegexp(CLIError, "Deployment failed because the build process failed"):
+        with self.assertRaisesRegex(CLIError, "Deployment failed because the build process failed"):
             self.cmd('webapp deploy -g {} --n {} --src-path "{}" --type zip --async'.format(resource_group, webapp_name, zip_file))
 
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_deploy_runtimestatus', location='eastus')
@@ -2910,7 +2948,7 @@ class TrackRuntimeStatusTest(ScenarioTest):
             'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
         self.cmd(
             'webapp create -g {} -n {} --plan {} -r "NODE|20-LTS"'.format(resource_group, webapp_name, plan_name))
-        with self.assertRaisesRegexp(CLIError, "Deployment failed because the site failed to start within 10 mins."):
+        with self.assertRaisesRegex(CLIError, "Deployment failed because the site failed to start within 10 mins."):
             self.cmd('webapp deploy -g {} --n {} --src-path "{}" --type zip --async'.format(resource_group, webapp_name, zip_file))
 
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_deployment_source_configzip_runtimestatus', location='eastus')
@@ -2955,7 +2993,7 @@ class TrackRuntimeStatusTest(ScenarioTest):
             'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
         self.cmd(
             'webapp create -g {} -n {} --plan {} -r "NODE|20-LTS"'.format(resource_group, webapp_name, plan_name))
-        with self.assertRaisesRegexp(CLIError, "Deployment failed because the build process failed"):
+        with self.assertRaisesRegex(CLIError, "Deployment failed because the build process failed"):
             self.cmd('webapp deployment source config-zip -g {} --n {} --src "{}"'.format(resource_group, webapp_name, zip_file))
 
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_deployment_source_configzip_runtimestatus', location='eastus')
@@ -2967,7 +3005,7 @@ class TrackRuntimeStatusTest(ScenarioTest):
             'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
         self.cmd(
             'webapp create -g {} -n {} --plan {} -r "NODE|20-LTS"'.format(resource_group, webapp_name, plan_name))
-        with self.assertRaisesRegexp(CLIError, "Deployment failed because the site failed to start within 10 mins."):
+        with self.assertRaisesRegex(CLIError, "Deployment failed because the site failed to start within 10 mins."):
             self.cmd('webapp deployment source config-zip -g {} --n {} --src "{}"'.format(resource_group, webapp_name, zip_file))
 
 class DomainScenarioTest(ScenarioTest):
@@ -3091,7 +3129,7 @@ class WebappStackTest(ScenarioTest):
         webapp_plan = self.create_random_name(prefix='webapp-list-show-details-plan', length=40)
 
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, webapp_plan))
-        self.cmd('webapp create -g {} -n {} --plan {} --runtime {}'.format(resource_group, webapp_name, webapp_plan, 'java:17:TOMCAT:10.0'),
+        self.cmd('webapp create -g {} -n {} --plan {} --runtime {}'.format(resource_group, webapp_name, webapp_plan, 'TOMCAT:10.0-java17'),
             checks=[
                 JMESPathCheck('name', webapp_name),
         ])

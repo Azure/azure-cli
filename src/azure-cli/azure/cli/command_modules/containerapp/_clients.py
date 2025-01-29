@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long, consider-using-f-string, logging-format-interpolation, inconsistent-return-statements, broad-except, bare-except, too-many-statements, too-many-locals, too-many-boolean-expressions, too-many-branches, too-many-nested-blocks, pointless-statement, expression-not-assigned, unbalanced-tuple-unpacking, unsupported-assignment-operation
-# pylint: disable=super-with-arguments, too-many-instance-attributes, no-else-return, no-self-use, useless-return, reimported, redefined-outer-name, no-else-raise
+# pylint: disable=super-with-arguments, too-many-instance-attributes, no-else-return, no-self-use, useless-return, reimported, redefined-outer-name, no-else-raise, too-few-public-methods
 
 import json
 import time
@@ -25,7 +25,7 @@ HEADER_AZURE_ASYNC_OPERATION = "azure-asyncoperation"
 HEADER_LOCATION = "location"
 
 
-class PollingAnimation():
+class PollingAnimation:
     def __init__(self):
         self.tickers = ["/", "|", "\\", "-", "/", "|", "\\", "-"]
         self.currTicker = 0
@@ -115,7 +115,7 @@ def _extract_delay(response):
     return POLLING_SECONDS
 
 
-class ContainerAppClient():
+class ContainerAppClient:
     api_version = CURRENT_API_VERSION
 
     @classmethod
@@ -159,12 +159,18 @@ class ContainerAppClient():
         if no_wait:
             return
         elif r.status_code == 202:
-            operation_url = r.headers.get(HEADER_LOCATION)
-            response = poll_results(cmd, operation_url)
-            if response is None:
-                raise ResourceNotFoundError("Could not find a container app")
+            operation_url = r.headers.get(HEADER_AZURE_ASYNC_OPERATION)
+            if operation_url:
+                poll_status(cmd, operation_url)
+                r = send_raw_request(cmd.cli_ctx, "GET", request_url)
+                return r.json()
             else:
-                return response
+                operation_url = r.headers.get(HEADER_LOCATION)
+                r = poll_results(cmd, operation_url)
+                if r is None:
+                    raise ResourceNotFoundError("Could not find a container app")
+                else:
+                    return r
 
         return r.json()
 
@@ -450,7 +456,7 @@ class ContainerAppClient():
         return r.json()
 
 
-class ManagedEnvironmentClient():
+class ManagedEnvironmentClient:
     api_version = CURRENT_API_VERSION
 
     @classmethod
@@ -796,8 +802,23 @@ class ManagedEnvironmentClient():
         r = send_raw_request(cmd.cli_ctx, "POST", request_url)
         return r.json()
 
+    @classmethod
+    def list_usages(cls, cmd, resource_group_name, name):
+        management_hostname = cmd.cli_ctx.cloud.endpoints.resource_manager
+        sub_id = get_subscription_id(cmd.cli_ctx)
+        url_fmt = "{}/subscriptions/{}/resourceGroups/{}/providers/Microsoft.App/managedEnvironments/{}/usages?api-version={}"
+        request_url = url_fmt.format(
+            management_hostname.strip('/'),
+            sub_id,
+            resource_group_name,
+            name,
+            cls.api_version)
 
-class WorkloadProfileClient():
+        r = send_raw_request(cmd.cli_ctx, "GET", request_url)
+        return r.json()
+
+
+class WorkloadProfileClient:
     api_version = CURRENT_API_VERSION
 
     @classmethod
@@ -872,16 +893,10 @@ class ContainerAppsJobClient():
         r = send_raw_request(cmd.cli_ctx, "PATCH", request_url, body=json.dumps(containerapp_job_envelope))
 
         if no_wait:
-            return r.json()
+            return
         elif r.status_code == 202:
-            url_fmt = "{}/subscriptions/{}/resourceGroups/{}/providers/Microsoft.App/jobs/{}?api-version={}"
-            request_url = url_fmt.format(
-                management_hostname.strip('/'),
-                sub_id,
-                resource_group_name,
-                name,
-                cls.api_version)
-            response = poll_results(cmd, request_url)
+            operation_url = r.headers.get(HEADER_LOCATION)
+            response = poll_results(cmd, operation_url)
             if response is None:
                 raise ResourceNotFoundError("Could not find a container App Job")
             else:
@@ -985,7 +1000,7 @@ class ContainerAppsJobClient():
         return r.json()
 
     @classmethod
-    def stop_job(cls, cmd, resource_group_name, name, job_execution_name, job_execution_names=None):
+    def stop_job(cls, cmd, resource_group_name, name, job_execution_name):
         management_hostname = cmd.cli_ctx.cloud.endpoints.resource_manager
         sub_id = get_subscription_id(cmd.cli_ctx)
 
@@ -1007,8 +1022,8 @@ class ContainerAppsJobClient():
                 job_execution_name,
                 cls.api_version)
 
-        r = send_raw_request(cmd.cli_ctx, "POST", request_url, body=json.dumps(job_execution_names))
-        return r.json()
+        r = send_raw_request(cmd.cli_ctx, "POST", request_url)
+        return r
 
     @classmethod
     def get_executions(cls, cmd, resource_group_name, name):
@@ -1093,7 +1108,7 @@ def poll(cmd, request_url, poll_if_status):  # pylint: disable=inconsistent-retu
             raise e
 
 
-class GitHubActionClient():
+class GitHubActionClient:
     api_version = CURRENT_API_VERSION
 
     @classmethod
@@ -1202,7 +1217,7 @@ class GitHubActionClient():
         return None
 
 
-class DaprComponentClient():
+class DaprComponentClient:
     api_version = CURRENT_API_VERSION
 
     @classmethod
@@ -1285,7 +1300,7 @@ class DaprComponentClient():
         return app_list
 
 
-class StorageClient():
+class StorageClient:
     api_version = CURRENT_API_VERSION
 
     @classmethod
@@ -1369,7 +1384,7 @@ class StorageClient():
         return env_list
 
 
-class AuthClient():
+class AuthClient:
     api_version = CURRENT_API_VERSION
 
     @classmethod
@@ -1401,6 +1416,28 @@ class AuthClient():
         management_hostname = cmd.cli_ctx.cloud.endpoints.resource_manager
         sub_id = get_subscription_id(cmd.cli_ctx)
         request_url = f"{management_hostname}subscriptions/{sub_id}/resourceGroups/{resource_group_name}/providers/Microsoft.App/containerApps/{container_app_name}/authConfigs/{auth_config_name}?api-version={cls.api_version}"
+
+        r = send_raw_request(cmd.cli_ctx, "GET", request_url)
+        return r.json()
+
+
+class SubscriptionClient:
+    api_version = CURRENT_API_VERSION
+
+    @classmethod
+    def show_custom_domain_verification_id(cls, cmd):
+        management_hostname = cmd.cli_ctx.cloud.endpoints.resource_manager
+        sub_id = get_subscription_id(cmd.cli_ctx)
+        request_url = f"{management_hostname}subscriptions/{sub_id}/providers/Microsoft.App/getCustomDomainVerificationId?api-version={cls.api_version}"
+
+        r = send_raw_request(cmd.cli_ctx, "POST", request_url)
+        return r.json()
+
+    @classmethod
+    def list_usages(cls, cmd, location):
+        management_hostname = cmd.cli_ctx.cloud.endpoints.resource_manager
+        sub_id = get_subscription_id(cmd.cli_ctx)
+        request_url = f"{management_hostname}subscriptions/{sub_id}/providers/Microsoft.App/locations/{location}/usages?api-version={cls.api_version}"
 
         r = send_raw_request(cmd.cli_ctx, "GET", request_url)
         return r.json()

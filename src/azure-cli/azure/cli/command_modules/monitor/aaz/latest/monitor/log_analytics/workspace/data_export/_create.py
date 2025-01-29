@@ -18,7 +18,7 @@ class Create(AAZCommand):
     """Create a data export rule for a given workspace.
 
     For more information, see
-    https://docs.microsoft.com/azure/azure-monitor/platform/logs-data-export
+    https://learn.microsoft.com/azure/azure-monitor/platform/logs-data-export
 
     :example: Create a data export rule for a given workspace.
         az monitor log-analytics workspace data-export create -g MyRG --workspace-name MyWS -n MyDataExport --destination <storage account id> --enable -t <table name>

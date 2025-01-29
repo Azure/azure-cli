@@ -260,7 +260,7 @@ def connection_validate(cmd, client,
     # HACK: get linker first to infer target resource type so that user token can be
     # set to work around OBO
     linker = todict(client.get(resource_uri=source_id, linker_name=connection_name))
-    target_id = linker.get('targetService', dict()).get('id', '')
+    target_id = linker.get('targetService', {}).get('id', '')
     target_type = get_resource_type_by_id(target_id)
     source_type = get_source_resource_name(cmd)
     client = set_user_token_by_source_and_target(client, cmd.cli_ctx, source_type, target_type)
@@ -300,6 +300,7 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                       store_in_connection_string=False,
                       customized_keys=None,
                       opt_out_list=None,
+                      enable_appconfig_extension=False,
                       new_addon=False, no_wait=False,
                       cluster=None, scope=None, enable_csi=False,            # Resource.KubernetesCluster
                       site=None, slot=None,                                  # Resource.WebApp
@@ -313,14 +314,17 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                       webpubsub=None,                                        # Resource.WebPubSub
                       signalr=None,                                          # Resource.SignalR
                       appinsights=None,                                      # Resource.AppInsights
+                      target_app_name=None,                                  # Resource.ContainerApp
+                      connstr_props=None,                                    # Resource.FabricSql
                       ):
     auth_action = 'optOutAllAuth' if (opt_out_list is not None and
                                       OPT_OUT_OPTION.AUTHENTICATION.value in opt_out_list) else None
     config_action = 'optOut' if (opt_out_list is not None and
                                  OPT_OUT_OPTION.CONFIGURATION_INFO.value in opt_out_list) else None
+    target_type = get_target_resource_name(cmd)
     auth_info = get_cloud_conn_auth_info(secret_auth_info, secret_auth_info_auto, user_identity_auth_info,
                                          system_identity_auth_info, service_principal_auth_info_secret, new_addon,
-                                         auth_action, config_action)
+                                         auth_action, config_action, target_type)
     if auth_info is not None and is_passwordless_command(cmd, auth_info) and auth_action != 'optOutAllAuth':
         if _get_or_add_extension(cmd, PASSWORDLESS_EXTENSION_NAME, PASSWORDLESS_EXTENSION_MODULE, False):
             azext_custom = _get_azext_module(
@@ -339,7 +343,8 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                                                       cluster, scope, enable_csi,
                                                       customized_keys=customized_keys,
                                                       opt_out_list=opt_out_list,
-                                                      app_config_id=app_config_id)
+                                                      app_config_id=app_config_id,
+                                                      connstr_props=connstr_props)
         raise CLIInternalError("Fail to install `serviceconnector-passwordless` extension. Please manually install it"
                                " with `az extension add --name serviceconnector-passwordless --upgrade`"
                                " and rerun the command")
@@ -358,7 +363,9 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                                   cluster, scope, enable_csi,
                                   customized_keys=customized_keys,
                                   opt_out_list=opt_out_list,
-                                  app_config_id=app_config_id
+                                  app_config_id=app_config_id,
+                                  enable_appconfig_extension=enable_appconfig_extension,
+                                  connstr_props=connstr_props
                                   )
 
 
@@ -391,6 +398,9 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
                            customized_keys=None,
                            opt_out_list=None,
                            app_config_id=None,
+                           target_app_name=None,                                  # Resource.ContainerApp
+                           enable_appconfig_extension=False,
+                           connstr_props=None,                                    # Resource.FabricSql
                            **kwargs,
                            ):
     if not source_id:
@@ -402,9 +412,11 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
                                       OPT_OUT_OPTION.AUTHENTICATION.value in opt_out_list) else None
     config_action = 'optOut' if (opt_out_list is not None and
                                  OPT_OUT_OPTION.CONFIGURATION_INFO.value in opt_out_list) else None
+    source_type = get_source_resource_name(cmd)
+    target_type = get_target_resource_name(cmd)
     auth_info = get_cloud_conn_auth_info(secret_auth_info, secret_auth_info_auto, user_identity_auth_info,
                                          system_identity_auth_info, service_principal_auth_info_secret, new_addon,
-                                         auth_action, config_action)
+                                         auth_action, config_action, target_type)
 
     if store_in_connection_string:
         if client_type == CLIENT_TYPE.Dotnet.value:
@@ -415,11 +427,19 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
     public_network_action = 'optOut' if (opt_out_list is not None and
                                          OPT_OUT_OPTION.PUBLIC_NETWORK.value in opt_out_list) else None
 
-    parameters = {
-        'target_service': {
+    if target_type == RESOURCE.FabricSql:
+        targetService = {
+            "type": "FabricPlatform",
+            "endpoint": target_id
+        }
+    else:
+        targetService = {
             "type": "AzureResource",
             "id": target_id
-        },
+        }
+
+    parameters = {
+        'target_service': targetService,
         'auth_info': auth_info,
         'secret_store': {
             'key_vault_id': key_vault_id,
@@ -431,6 +451,7 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
             'configurationStore': {
                 'appConfigurationId': app_config_id,
             },
+            'additionalConnectionStringProperties': connstr_props,
             'action': config_action
         },
         'publicNetworkSolution': {
@@ -439,8 +460,6 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
     }
 
     # HACK: set user token to work around OBO
-    source_type = get_source_resource_name(cmd)
-    target_type = get_target_resource_name(cmd)
     client = set_user_token_by_source_and_target(client, cmd.cli_ctx, source_type, target_type)
 
     if key_vault_id:
@@ -472,6 +491,12 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
             'connect_as_kubernetes_csi_driver': enable_csi,
         }
 
+    if enable_appconfig_extension:
+        parameters['target_service']['resource_properties'] = {
+            'type': 'AppConfig',
+            'connect_with_kubernetes_extension': enable_appconfig_extension,
+        }
+
     if new_addon:
         addon = AddonFactory.get(target_type)(cmd, source_id)
         target_id, default_auth_info = addon.provision()
@@ -496,17 +521,16 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
     validate_service_state(parameters)
     if enable_mi_for_db_linker and auth_action != 'optOutAllAuth':
         new_auth_info = enable_mi_for_db_linker(
-            cmd, source_id, target_id, auth_info, client_type, connection_name)
+            cmd, source_id, target_id, auth_info, client_type, connection_name, connstr_props)
         parameters['auth_info'] = new_auth_info or parameters['auth_info']
 
     # migration warning for Spring Azure Cloud
-    if client_type == CLIENT_TYPE.SpringBoot.value and target_type == RESOURCE.CosmosSql:
+    if client_type == CLIENT_TYPE.SpringBoot.value and target_type == RESOURCE.CosmosSql and auth_info is not None:
         isSecretType = (auth_info['auth_type'] == AUTH_TYPE.SecretAuto.value or
                         auth_info['auth_type'] == AUTH_TYPE.Secret.value)
         logger.warning(springboot_migration_warning(require_update=False,
                                                     check_version=(not isSecretType),
                                                     both_version=isSecretType))
-
     return auto_register(sdk_no_wait, no_wait,
                          client.begin_create_or_update,
                          resource_uri=source_id,
@@ -648,6 +672,7 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals, too-many-
                       site=None, slot=None,                                   # Resource.WebApp
                       spring=None, app=None, deployment=None,                 # Resource.SpringCloud
                       customized_keys=None,
+                      connstr_props=None,           # Resource.FabricSql
                       opt_out_list=None,
                       ):
 
@@ -685,7 +710,8 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals, too-many-
             'Either client type or auth info should be specified to update')
     auth_action = 'optOutAllAuth' if (opt_out_list is not None and
                                       OPT_OUT_OPTION.AUTHENTICATION.value in opt_out_list) else None
-    auth_info["auth_mode"] = auth_action
+    if auth_info is not None:
+        auth_info["auth_mode"] = auth_action
 
     if linker.get('secretStore') and linker.get('secretStore').get('keyVaultId'):
         key_vault_id = key_vault_id or linker.get('secretStore').get('keyVaultId')
@@ -699,6 +725,10 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals, too-many-
 
     if linker.get('configurationInfo') and linker.get('configurationInfo').get('customizedKeys'):
         customized_keys = customized_keys or linker.get('configurationInfo').get('customizedKeys')
+
+    if linker.get('configurationInfo') and linker.get('configurationInfo').get('additionalConnectionStringProperties'):
+        connstr_props = connstr_props or linker.get(
+            'configurationInfo').get('additionalConnectionStringProperties')
 
     config_action = 'optOut' if (opt_out_list is not None and
                                  OPT_OUT_OPTION.CONFIGURATION_INFO.value in opt_out_list) else None
@@ -719,6 +749,7 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals, too-many-
             'configurationStore': {
                 'appConfigurationId': app_config_id
             },
+            'additionalConnectionStringProperties': connstr_props,
             'action': config_action
         },
         'publicNetworkSolution': {

@@ -20,6 +20,7 @@ class FeatureFlagConstants:
     CONDITIONS = "conditions"
     CLIENT_FILTERS = "client_filters"
     REQUIREMENT_TYPE = "requirement_type"
+    DISPLAY_NAME = "display_name"
     FILTER_NAME = "name"
     FILTER_PARAMETERS = "parameters"
 
@@ -77,6 +78,7 @@ class StatusCodes:
 class HttpHeaders:
     from azure.cli.core import __version__ as core_version
     USER_AGENT = "AZURECLI.APPCONFIG/{0}".format(core_version)
+    CORRELATION_REQUEST_ID = "x-ms-correlation-request-id"
 
 
 class KVSetConstants:
@@ -88,8 +90,10 @@ class ImportExportProfiles:
     DEFAULT = "appconfig/default"
 
 
-class SnapshotConstants:
-    API_VERSION = "2023-10-01"
+class SnapshotFilterFields:
+    KEY = "key"
+    LABEL = "label"
+    TAGS = "tags"
 
 
 class JsonDiff:
@@ -119,3 +123,14 @@ CompareFieldsMap = {
 class ImportMode:
     ALL = "all"
     IGNORE_MATCH = "ignore-match"
+
+
+class ProvisioningStatus:
+    RUNNING = "Running"
+    SUCCEEDED = "Succeeded"
+    FAILED = "Failed"
+
+
+class ARMAuthenticationMode:
+    LOCAL = "local"
+    PASS_THROUGH = "pass-through"

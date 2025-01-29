@@ -33,6 +33,7 @@ allowed_softdelete_options = ['Enable', 'Disable', 'AlwaysOn']
 allowed_immutability_options = ['Disabled', 'Locked', 'Unlocked']
 enable_disable_options = ['Enable', 'Disable']
 enable_disable_permadisable_options = ['Enable', 'Disable', 'PermanentlyDisable']
+allowed_disk_access_options = ['EnablePrivateAccessForAllDisks', 'EnablePublicAccessForAllDisks', 'SameAsOnSourceDisks']
 
 backup_management_type_help = """Specify the backup management type. Define how Azure Backup manages the backup of entities within the ARM resource. For eg: AzureWorkloads refers to workloads installed within Azure VMs, AzureStorage refers to entities within Storage account. Required only if friendly name is used as Container name."""
 container_name_help = """Name of the backup container. Accepts 'Name' or 'FriendlyName' from the output of az backup container list command. If 'FriendlyName' is passed then BackupManagementType is required."""
@@ -158,6 +159,7 @@ def load_arguments(self, _):
         c.argument('infrastructure_encryption', infrastructure_encryption_type)
         c.argument('mi_user_assigned', mi_user_assigned_type)
         c.argument('mi_system_assigned', mi_system_assigned_type)
+        c.argument('tenant_id', help='ID of the tenant if the Resource Guard protecting the vault exists in a different tenant.')
 
     with self.argument_context('backup vault encryption show') as c:
         c.argument('vault_name', vault_name_type, options_list=['--name', '-n'], id_part='name')
@@ -397,6 +399,9 @@ def load_arguments(self, _):
         c.argument('target_subscription_id', help='ID of the subscription to which the resource should be restored')
         c.argument('storage_account_resource_group', help='Name of the resource group which contains the storage account. Default value will be same as --resource-group if not specified.')
         c.argument('restore_to_edge_zone', arg_type=get_three_state_flag(), help='Switch parameter to indicate edge zone VM restore. This parameter can\'t be used in cross region and cross subscription restore scenarios.')
+        c.argument('tenant_id', help='ID of the tenant if the Resource Guard protecting the vault exists in a different tenant.')
+        c.argument('disk_access_option', arg_type=get_enum_type(allowed_disk_access_options), help='Specify the disk access option for target disks.')
+        c.argument('target_disk_access_id', help='Specify the target disk access ID when --disk-access-option is set to EnablePrivateAccessForAllDisks')
 
     with self.argument_context('backup restore restore-azurefileshare') as c:
         c.argument('resolve_conflict', resolve_conflict_type)
@@ -407,6 +412,7 @@ def load_arguments(self, _):
         c.argument('target_resource_group_name',
                    options_list=['--target-resource-group-name', '--target-rg-name'],
                    help='Resource group of the destination storage account to which the content will be restored, needed if it is different from the vault resource group')
+        c.argument('tenant_id', help='ID of the tenant if the Resource Guard protecting the vault exists in a different tenant.')
 
     with self.argument_context('backup restore restore-azurefiles') as c:
         c.argument('resolve_conflict', resolve_conflict_type)
@@ -416,6 +422,7 @@ def load_arguments(self, _):
         c.argument('target_storage_account', options_list=['--target-storage-account'], help='Destination storage account to which content will be restored')
         c.argument('source_file_type', arg_type=get_enum_type(['File', 'Directory']), options_list=['--source-file-type'], help='Specify the source file type to be selected')
         c.argument('source_file_path', options_list=['--source-file-path'], nargs='+', help="""The absolute path of the file, to be restored within the file share, as a string. This path is the same path used in the 'az storage file download' or 'az storage file show' CLI commands.""")
+        c.argument('tenant_id', help='ID of the tenant if the Resource Guard protecting the vault exists in a different tenant.')
 
     with self.argument_context('backup restore restore-azurewl') as c:
         c.argument('vault_name', vault_name_type, id_part=None)
@@ -423,6 +430,7 @@ def load_arguments(self, _):
         c.argument('rehydration_duration', type=int, help='Set the maximum time, in days (between 10-30, both inclusive) for which the recovery point stays in hydrated state.')
         c.argument('rehydration_priority', rehyd_priority_type)
         c.argument('use_secondary_region', action='store_true', help='Use this flag to restore from a recoverypoint in secondary region.')
+        c.argument('tenant_id', help='ID of the tenant if the Resource Guard protecting the vault exists in a different tenant.')
 
     # Recoveryconfig
     with self.argument_context('backup recoveryconfig show') as c:
