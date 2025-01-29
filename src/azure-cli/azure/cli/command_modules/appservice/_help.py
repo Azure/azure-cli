@@ -1652,12 +1652,12 @@ examples:
   - name: Create a web app with the default configuration.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName
-  - name: Create a web app with a Java 11 runtime.
+  - name: Create a web app with a Java 21 runtime.
     text: >
-        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "java:11:Java SE:11"
-  - name: Create a web app with a NodeJS 10.14 runtime and deployed from a local git repository.
+        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "JAVA:21-java21"
+  - name: Create a web app with a NodeJS 10.20 runtime and deployed from a local git repository.
     text: >
-        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "node:12LTS" --deployment-local-git
+        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "node:20LTS" --deployment-local-git
   - name: Create a web app with an image from DockerHub.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName -i nginx
@@ -1674,6 +1674,9 @@ examples:
   - name: Create a container webapp with an image pulled from a private Azure Container Registry using a User Assigned Managed Identity
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --container-image-name myregistry.azurecr.io/docker-image:tag --assign-identity MyAssignIdentities --acr-use-identity --acr-identity MyUserAssignedIdentityResourceId
+  - name: Create a web app with SCM and FTP Basic Auth Credentials disabled.
+    text: >
+        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --basic-auth Disabled
 """
 
 helps['webapp create-remote-connection'] = """
