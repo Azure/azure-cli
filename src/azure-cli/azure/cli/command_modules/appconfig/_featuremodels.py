@@ -374,7 +374,7 @@ class FeaturePercentileAllocation:
 
     def __init__(self, variant, from_, to):
         self.variant = variant
-        self.from_ = from_
+        setattr(self, "from", from_)
         self.to = to
 
     @classmethod
