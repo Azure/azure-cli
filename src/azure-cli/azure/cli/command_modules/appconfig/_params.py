@@ -250,7 +250,6 @@ def load_arguments(self, _):
                    help='Import all keys in a given snapshot of the source App Configuration store. If no snapshot is specified, the keys currently in the store are imported based on the specified key and label filters.')
         c.argument('src_tags', arg_type=tags_arg_type, help="If no tags are specified, return all key-values with all tags. Support space-separated tags: key[=value] [key[=value] ...].")
 
-
     with self.argument_context('appconfig kv import', arg_group='AppService') as c:
         c.argument('appservice_account', validator=validate_appservice_name_or_id, help='ARM ID for AppService OR the name of the AppService, assuming it is in the same subscription and resource group as the App Configuration store. Required for AppService arguments')
 
@@ -337,7 +336,7 @@ def load_arguments(self, _):
         c.argument('key', help='If no key specified, return all keys by default. Support star sign as filters, for instance abc* means keys with abc as prefix.')
         c.argument('label', help="If no label specified, list all labels. Support star sign as filters, for instance abc* means labels with abc as prefix. Use '\\0' for null label.")
         c.argument('tags', arg_type=tags_arg_type, help="If no tags are specified, return all key-values with all tags. Support space-separated tags: key[=value] [key[=value] ...].")
-        
+
     with self.argument_context('appconfig feature') as c:
         c.argument('name', arg_type=data_plane_name_arg_type)
         c.argument('key', validator=validate_feature_key, help='Key of the feature flag. Key must start with the ".appconfig.featureflag/" prefix. Key cannot contain the "%" character. If both key and feature arguments are provided, only key will be used. Default key is the reserved prefix ".appconfig.featureflag/" + feature name.')

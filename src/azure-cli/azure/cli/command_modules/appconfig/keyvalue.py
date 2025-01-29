@@ -65,7 +65,7 @@ def import_config(cmd,
                   name=None,
                   connection_string=None,
                   label=None,
-                  tags=None,  # tags to add 
+                  tags=None,  # tags to add
                   prefix="",  # prefix to add
                   yes=False,
                   skip_features=False,
@@ -89,7 +89,7 @@ def import_config(cmd,
                   preserve_labels=False,
                   src_auth_mode="key",
                   src_endpoint=None,
-                  src_tags=None, # tags to filter
+                  src_tags=None,  # tags to filter
                   # from-appservice parameters
                   appservice_account=None):
 
@@ -289,7 +289,7 @@ def export_config(cmd,
                   preserve_labels=False,
                   dest_auth_mode="key",
                   dest_endpoint=None,
-                  dest_tags=None, # tags to add
+                  dest_tags=None,  # tags to add
                   # to-app-service parameters
                   appservice_account=None,
                   export_as_reference=False):
