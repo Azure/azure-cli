@@ -636,6 +636,7 @@ def update_iot_hub_custom(instance,
                           fileupload_storage_authentication_type=None,
                           fileupload_storage_container_uri=None,
                           fileupload_storage_identity=None,
+                          min_tls_version=None,
                           tags=None):
     from datetime import timedelta
     if tags is not None:
@@ -668,6 +669,8 @@ def update_iot_hub_custom(instance,
     if fileupload_notification_ttl is not None:
         ttl = timedelta(hours=fileupload_notification_ttl)
         instance.properties.messaging_endpoints['fileNotifications'].ttl_as_iso8601 = ttl
+    if min_tls_version is not None:
+        instance.properties.min_tls_version = min_tls_version
     # only bother with $default storage endpoint checking if modifying fileupload params
     if any([
             fileupload_storage_connectionstring, fileupload_storage_container_name, fileupload_sas_ttl,
@@ -695,6 +698,16 @@ def update_iot_hub_custom(instance,
             fileupload_storage_identity,
         )
 
+    _update_iot_hub_auth(
+        instance=instance,
+        disable_local_auth=disable_local_auth,
+        disable_device_sas=disable_device_sas,
+        disable_module_sas=disable_module_sas
+    )
+    return instance
+
+
+def _update_iot_hub_auth(instance, disable_local_auth=None, disable_device_sas=None, disable_module_sas=None):
     # sas token authentication switches
     if disable_local_auth is not None:
         instance.properties.disable_local_auth = disable_local_auth
@@ -702,8 +715,6 @@ def update_iot_hub_custom(instance,
         instance.properties.disable_device_sas = disable_device_sas
     if disable_module_sas is not None:
         instance.properties.disable_module_sas = disable_module_sas
-
-    return instance
 
 
 def iot_hub_update(client, hub_name, parameters, resource_group_name=None):
