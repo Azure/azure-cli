@@ -177,10 +177,18 @@ def get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
                 raise CLIError(str(ex) + "\nYou may be able to resolve this issue by providing App Configuration endpoint instead of name.")
 
         from azure.cli.core._profile import Profile
+        from azure.cli.core.cloud import get_active_cloud
+        from ._credential import AppConfigurationCliCredential
         profile = Profile(cli_ctx=cmd.cli_ctx)
         cred, _, _ = profile.get_login_credentials()
+
+        current_cloud = get_active_cloud(cmd.cli_ctx)
+        token_audience = None
+        if hasattr(current_cloud.endpoints, "appconfig_auth_token_audience"):
+            token_audience = current_cloud.endpoints.appconfig_auth_token_audience
+
         try:
-            azconfig_client = AzureAppConfigurationClient(credential=cred,
+            azconfig_client = AzureAppConfigurationClient(credential=AppConfigurationCliCredential(cred._credential, token_audience),
                                                           base_url=endpoint,
                                                           user_agent=HttpHeaders.USER_AGENT)
         except (ValueError, TypeError) as ex:
