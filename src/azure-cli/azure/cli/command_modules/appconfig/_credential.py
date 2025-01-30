@@ -1,14 +1,20 @@
-from azure.core.credentials import TokenCredential
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
+
+# pylint: disable=too-few-public-methods
 from azure.cli.core.auth.util import resource_to_scopes
 
-# Enable passing in custom token audience that takes precedence over SDK's hardcoded audience.
-# Users can configure an audience based on their cloud.
-class AppConfigurationCliCredential(TokenCredential):
 
-    def __init__(self, credential: TokenCredential, resource: str = None):
+# This class is used to pass in custom token audience that will be respected by the SDK.
+# Users can configure an audience based on their cloud.
+class AppConfigurationCliCredential:
+
+    def __init__(self, credential, resource: str = None):
         self._impl = credential
         self._resource = resource
-    
+
     def get_token(self, *scopes, **kwargs):
 
         if self._resource is not None:
