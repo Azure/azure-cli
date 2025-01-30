@@ -366,7 +366,7 @@ class FeaturePercentileAllocation:
 
     :ivar str variant:
         The name of the variant to use if the calculated percentile for the current user falls in the provided range.
-    :ivar number from_:
+    :ivar number from:
         The lower end of the percentage range for which this variant will be used.
     :ivar number to:
         The upper end of the percentage range for which this variant will be used.
@@ -435,7 +435,7 @@ class FeaturePercentileAllocation:
     def __repr__(self):
         feature_percentile_allocation = {
             FeatureFlagConstants.VARIANT: self.variant,
-            FeatureFlagConstants.FROM: self.from_,
+            FeatureFlagConstants.FROM: getattr(self, "from"),
             FeatureFlagConstants.TO: self.to,
         }
 
