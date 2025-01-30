@@ -682,6 +682,15 @@ def firewall_rule_name_validator(ns):
                               "and no more than 128 characters in length. ")
 
 
+def postgres_firewall_rule_name_validator(ns):
+    if not ns.firewall_rule_name:
+        return
+    if not re.search(r'^[a-zA-Z0-9][-_a-zA-Z0-9]{0,79}(?<!-)$', ns.firewall_rule_name):
+        raise ValidationError("The firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'. "
+                              "Additionally, the name of the firewall rule must be at least 1 characters "
+                              "and no more than 80 characters in length. Firewall rule must not end with '-'.")
+
+
 def validate_server_name(db_context, server_name, type_):
     client = db_context.cf_availability(db_context.cmd.cli_ctx, '_')
 
