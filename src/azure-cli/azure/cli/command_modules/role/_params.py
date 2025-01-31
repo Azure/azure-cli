@@ -199,7 +199,7 @@ def load_arguments(self, _):
                    arg_type=get_three_state_flag())
 
     with self.argument_context('ad sp owner list') as c:
-        c.argument('identifier', options_list=['--id'], help='service principal name, or object id or the service principal')
+        c.argument('identifier', options_list=['--id'], help='service principal name, or object id of the service principal')
 
     for item in ['ad app credential reset', 'ad sp credential reset', 'ad sp create-for-rbac']:
         with self.argument_context(item) as c:
