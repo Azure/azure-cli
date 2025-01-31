@@ -738,10 +738,12 @@ class ServicePrincipalScenarioTest(GraphScenarioTestBase):
         })
         self.recording_processors.append(MSGraphNameReplacer(owner, 'example@example.com'))
         
-        app = self.cmd('ad app create --display-name {display_name}').get_output_in_json()
         self.kwargs['owner_object_id'] = self.cmd('ad user show --id {owner}').get_output_in_json()['id']
+        
+        app = self.cmd('ad app create --display-name {display_name}').get_output_in_json()
         self.kwargs['app_id'] = app['appId']
         self.cmd('ad sp create --id {app_id}').get_output_in_json()
+
         self.cmd('ad sp owner add --owner-object-id {owner_object_id} --id {app_id}')
         self.cmd('ad sp owner add --owner-object-id {owner_object_id} --id {app_id}') # test idempotence
         self.cmd('ad sp owner list --id {app_id}', checks=self.check('[0].userPrincipalName', owner))
