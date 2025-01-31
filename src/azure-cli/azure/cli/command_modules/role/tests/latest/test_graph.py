@@ -727,16 +727,25 @@ class ServicePrincipalScenarioTest(GraphScenarioTestBase):
 
     def test_sp_owner(self):
         display_name = self.create_random_name(prefix='azure-cli-test', length=30)
+        owner = self._get_signed_in_user()
+        if not owner:
+            return # this test deletes users which are beyond a SP's capacity, so quit
 
         self.kwargs.update({
             'display_name': display_name,
-            'identifier_uri': f'api://{display_name}'
+            'identifier_uri': f'api://{display_name}',
+            'owner': owner
         })
+        self.recording_processors.append(MSGraphNameReplacer(owner, 'example@example.com'))
+        
         app = self.cmd('ad app create --display-name {display_name}').get_output_in_json()
+        self.kwargs['owner_object_id'] = self.cmd('ad user show --id {owner}').get_output_in_json()['id']
         self.kwargs['app_id'] = app['appId']
         self.cmd('ad sp create --id {app_id}').get_output_in_json()
-
-        # We don't support create, remove yet
+        self.cmd('ad sp owner add --owner-object-id {owner_object_id} --id {app_id}')
+        self.cmd('ad sp owner add --owner-object-id {owner_object_id} --id {app_id}') # test idempotence
+        self.cmd('ad sp owner list --id {app_id}', checks=self.check('[0].userPrincipalName', owner))
+        self.cmd('ad sp owner remove --owner-object-id {owner_object_id} --id {app_id}')
         self.cmd('ad sp owner list --id {app_id}', checks=self.check('length(@)', 0))
 
     def test_sp_credential(self):
