@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import ast
+import os
 import threading
 import time
 import re
@@ -37,6 +38,9 @@ from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id, resou
 from azure.mgmt.storage import StorageManagementClient
 from azure.mgmt.applicationinsights import ApplicationInsightsManagementClient
 from azure.mgmt.web.models import KeyInfo
+from azure.mgmt.web.models import SiteContainer
+from azure.mgmt.web.models import AuthType
+from azure.mgmt.web import WebSiteManagementClient
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
@@ -991,10 +995,122 @@ def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
             raise ex
 
 
-def update_webapp_sitecontainers(cmd, name, resource_group_name, container_name, image, target_port, startup_cmd=None, env_vars =None , is_main=False, system_assigned_identity=None, user_assigned_identity=None, registry_username=None, registry_password=None,
-                                sitecontainer_spec_file=None):
+def create_webapp_sitecontainers(cmd, name, resource_group, container_name, image, target_port, slot=None, startup_cmd=None , is_main=False, system_assigned_identity=False, user_assigned_identity=None, registry_username=None, registry_password=None,
+                                sitecontainers_spec_file=None):
+    # verify if site is a linux site
+    client = web_client_factory(cmd.cli_ctx)
+    app = client.web_apps.get(resource_group, name)
+    if not is_linux_webapp(app):
+        raise ValidationError("Site is not a linux webapp. Sitecontainers are only supported for linux webapps.")
+    response = None
 
+    # check if sitecontainers_spec_file is provided
+    if sitecontainers_spec_file is not None:
+        sitecontainers = None
+        response = []
+        logger.warning("Using sitecontainer spec file to create sitecontainer(s)")
+        if not os.path.exists(sitecontainers_spec_file):
+            raise ValidationError("The sitecontainer spec file does not exist at the path '{}'".format(sitecontainers_spec_file))
+        with open(sitecontainers_spec_file, 'r') as file:
+            sitecontainers_spec = json.load(file)
+            if not isinstance(sitecontainers_spec, list):
+                raise ValidationError("The sitecontainer spec file should contain a list of sitecontainers.")
+            try:
+                sitecontainers = [SiteContainer(**container) for container in sitecontainers_spec]
+            except Exception as ex:
+                raise ValidationError("Failed to parse the sitecontainer spec file. Error: {}".format(str(ex)))
+            if sitecontainers is None or len(sitecontainers) == 0:
+                raise ValidationError("No sitecontainers found in the sitecontainers spec file.")
+            for sitecontainer in sitecontainers:
+                # Todo : SiteContainer model does not have container_name
+                response.append(_create_or_update_webapp_sitecontainer_internal(cmd, name, resource_group, container_name, sitecontainer, slot))
+
+    else:
+        auth_type = AuthType.ANONYMOUS
+        if system_assigned_identity is True:
+            auth_type = AuthType.SYSTEM_IDENTITY
+        elif user_assigned_identity:
+            auth_type = AuthType.USER_ASSIGNED
+        elif registry_username and registry_password:
+            auth_type = AuthType.USER_CREDENTIALS
+
+        sitecontainer = SiteContainer(image=image, target_port=target_port, start_up_command=startup_cmd, is_main=is_main, auth_type=auth_type, user_name = registry_username, password_secret = registry_password, user_managed_identity_client_id=user_assigned_identity)
+        response = _create_or_update_webapp_sitecontainer_internal(cmd, name, resource_group, container_name, sitecontainer, slot)
     
+    return response 
+
+def _create_or_update_webapp_sitecontainer_internal(cmd, name, resource_group, container_name, sitecontainer, slot=None): 
+    web_client = get_mgmt_service_client(cmd.cli_ctx, WebSiteManagementClient).web_apps
+    response = None
+    if slot:
+        response = web_client.create_or_update_site_container_slot(resource_group, name, slot, container_name, sitecontainer)
+    else:
+        response = web_client.create_or_update_site_container(resource_group, name, container_name, sitecontainer)
+    return response
+
+def update_webapp_sitecontainer(cmd, name, resource_group, container_name, image=None, target_port=None, slot=None, startup_cmd=None, is_main=None, system_assigned_identity=None, user_assigned_identity=None, registry_username=None, registry_password=None):
+    # get the sitecontainer
+    site_container = None
+    try:
+        site_container = get_webapp_sitecontainer(cmd, name, resource_group, container_name, slot)
+    except:
+        raise ValidationError("Sitecontainer '{}' does not exist, failed to update the sitecontainer.".format(container_name))
+    # update only the provided parameters
+    if image is not None:
+        site_container.image = image
+    if target_port is not None:
+        site_container.target_port = target_port
+    if startup_cmd is not None:
+        site_container.start_up_command = startup_cmd
+    if is_main is not None:
+        site_container.is_main = is_main
+    if system_assigned_identity is not None:
+        site_container.auth_type = AuthType.SYSTEM_IDENTITY
+    if user_assigned_identity is not None:
+        site_container.auth_type = AuthType.USER_ASSIGNED
+        site_container.user_managed_identity_client_id = user_assigned_identity
+    if registry_username is not None and registry_password is not None:
+        site_container.auth_type = AuthType.USER_CREDENTIALS
+        site_container.user_name = registry_username
+        site_container.password_secret = registry_password
+    response = _create_or_update_webapp_sitecontainer_internal(cmd, name, resource_group, container_name, site_container, slot)
+    return response
+
+def get_webapp_sitecontainer(cmd, name, resource_group, container_name, slot=None):
+    web_client = get_mgmt_service_client(cmd.cli_ctx, WebSiteManagementClient).web_apps
+    site_container = None
+    if slot:
+        site_container = web_client.get_site_container_slot(resource_group, name, container_name, slot)
+    else:
+        site_container = web_client.get_site_container(resource_group, name, container_name)
+    return site_container
+
+
+def delete_webapp_sitecontainer(cmd, name, resource_group, container_name, slot=None):
+    web_client = get_mgmt_service_client(cmd.cli_ctx, WebSiteManagementClient).web_apps
+    response = None
+    if slot:
+        response = web_client.delete_site_container_slot(resource_group, name, container_name, slot, cls=lambda x, y, z: x)
+    else:
+        response = web_client.delete_site_container(resource_group, name, container_name, cls=lambda x, y, z: x)
+    if response is not None and response.http_response.status_code in (200, 204):
+        # TODO: Validate deleteion via response status code once api bug is fixed, 
+        # Status 200 -> container existed and was deleted successfully
+        # Status 204 -> container does not exist
+        logger.warning("Sitecontainer '{}' was deleted successfully.".format(container_name))
+    else:
+        logger.error("Failed to delete sitecontainer '{}'.".format(container_name))
+    return response
+
+
+def list_webapp_sitecontainers(cmd, name, resource_group, slot=None):
+    web_client = get_mgmt_service_client(cmd.cli_ctx, WebSiteManagementClient).web_apps
+    site_containers = None
+    if slot:
+        site_containers = web_client.list_site_containers_slot(resource_group, name, slot)
+    else:
+        site_containers = web_client.list_site_containers(resource_group, name)
+    return site_containers
 
 # for generic updater
 def get_webapp(cmd, resource_group_name, name, slot=None):

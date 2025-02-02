@@ -144,7 +144,10 @@ def load_command_table(self, _):
         
     with self.command_group('webapp sitecontainers') as g:
         g.custom_command('create', 'create_webapp_sitecontainers')
-        g.custom_command('update', 'update_webapp_sitecontainers')
+        g.custom_command('update', 'update_webapp_sitecontainer')
+        g.custom_command('delete', 'delete_webapp_sitecontainer')
+        g.custom_command('show', 'get_webapp_sitecontainer')
+        g.custom_command('list', 'list_webapp_sitecontainers')
 
     with self.command_group('webapp traffic-routing') as g:
         g.custom_command('set', 'set_traffic_routing')
