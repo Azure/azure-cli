@@ -153,7 +153,7 @@ helps['appconfig kv export'] = """
 type: command
 short-summary: Export configurations to another place from your App Configuration store.
 examples:
-  - name: Export all keys and feature flags with label test to a json file. To use the microsoft feature management schema when exporting feature flags to a file, set the environment variable AZURE_APPCONFIG_COMPATIBILITY_MODE to False.
+  - name: Export all keys and feature flags with label test to a json file. To use the microsoft feature management schema when exporting feature flags to a file, set the environment variable AZURE_APPCONFIG_FM_COMPATIBLE to False.
     text: az appconfig kv export -n MyAppConfiguration --label test -d file --path D:/abc.json --format json
   - name: Export all keys with null label to an App Service application.
     text: az appconfig kv export -n MyAppConfiguration -d appservice --appservice-account MyAppService
