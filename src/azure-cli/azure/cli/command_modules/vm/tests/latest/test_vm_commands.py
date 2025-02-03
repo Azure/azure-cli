@@ -3581,6 +3581,46 @@ class VMDiskAttachDetachTest(ScenarioTest):
         ])
 
     @AllowLargeResponse(size_kb=99999)
+    @ResourceGroupPreparer(name_prefix='cli-test-attach-detach-data-disk-api')
+    def test_vm_attach_detach_data_disk_api(self, resource_group):
+        self.kwargs.update({
+            'loc': 'westus',
+            'vm': self.create_random_name('vm', 10),
+            'disk1': self.create_random_name('disk', 10),
+            'disk2': self.create_random_name('disk', 10),
+            'subnet': self.create_random_name('subnet', 15),
+            'vnet': self.create_random_name('vnet', 15)
+        })
+
+        self.cmd('vm create -g {rg} --location {loc} -n {vm} --admin-username admin123 --image OpenLogic:CentOS:7.5:latest --admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk1} --new --size-gb 1')
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk2} --new --size-gb 2 --lun 2')
+
+        disks = self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('length(storageProfile.dataDisks)', 2),
+            self.check('storageProfile.dataDisks[0].name', '{disk1}'),
+            self.check('storageProfile.dataDisks[1].name', '{disk2}'),
+        ]).get_output_in_json()['storageProfile']['dataDisks']
+        self.kwargs.update({
+            'disk1_id': disks[0]['managedDisk']['id'],
+            'disk2_id': disks[1]['managedDisk']['id']
+        })
+
+        self.cmd('vm disk attach-detach-data-disk -g {rg} --vm-name {vm} --data-disks-to-detach [0].disk-id={disk1_id} [0].detach-option=ForceDetach')
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('length(storageProfile.dataDisks)', 1),
+            self.check('storageProfile.dataDisks[0].name', '{disk2}')
+        ])
+
+        self.cmd('vm disk attach-detach-data-disk -g {rg} --vm-name {vm} --data-disks-to-attach [0].disk-id={disk1_id} [0].lun=3 [0].caching=ReadWrite [0].delete-option=Detach [0].write-accelerator-enabled=False')
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('length(storageProfile.dataDisks)', 2)
+        ])
+
+
+    @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli-test-disk-attach-multiple-disks')
     def test_vm_disk_attach_multiple_disks(self, resource_group):
 
