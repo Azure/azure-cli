@@ -994,8 +994,22 @@ def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
         if ex.response.status_code != 200:
             raise ex
 
+class SiteContainerSpec:
+    # Todo add summary and types
+    def __init__(self, name, image, target_port, is_main, start_up_command=None, auth_type=None, user_name=None, password_secret=None, user_managed_identity_client_id=None, volume_mounts=None, environment_variables=None):
+        self.name = name
+        self.image = image
+        self.target_port = target_port
+        self.is_main = is_main
+        self.start_up_command = start_up_command
+        self.auth_type = auth_type
+        self.user_name = user_name
+        self.password_secret = password_secret
+        self.user_managed_identity_client_id = user_managed_identity_client_id
+        self.volume_mounts = volume_mounts
+        self.environment_variables = environment_variables
 
-def create_webapp_sitecontainers(cmd, name, resource_group, container_name, image, target_port, slot=None, startup_cmd=None , is_main=False, system_assigned_identity=False, user_assigned_identity=None, registry_username=None, registry_password=None,
+def create_webapp_sitecontainers(cmd, name, resource_group, container_name=None, image=None, target_port=None, slot=None, startup_cmd=None , is_main=None, system_assigned_identity=None, user_assigned_identity=None, registry_username=None, registry_password=None,
                                 sitecontainers_spec_file=None):
     # verify if site is a linux site
     client = web_client_factory(cmd.cli_ctx)
@@ -1006,26 +1020,28 @@ def create_webapp_sitecontainers(cmd, name, resource_group, container_name, imag
 
     # check if sitecontainers_spec_file is provided
     if sitecontainers_spec_file is not None:
-        sitecontainers = None
+        sitecontainers_spec = None
         response = []
         logger.warning("Using sitecontainer spec file to create sitecontainer(s)")
         if not os.path.exists(sitecontainers_spec_file):
             raise ValidationError("The sitecontainer spec file does not exist at the path '{}'".format(sitecontainers_spec_file))
         with open(sitecontainers_spec_file, 'r') as file:
-            sitecontainers_spec = json.load(file)
-            if not isinstance(sitecontainers_spec, list):
+            sitecontainers_spec_json = json.load(file)
+            if not isinstance(sitecontainers_spec_json, list):
                 raise ValidationError("The sitecontainer spec file should contain a list of sitecontainers.")
             try:
-                sitecontainers = [SiteContainer(**container) for container in sitecontainers_spec]
+                sitecontainers_spec = [SiteContainerSpec(**container) for container in sitecontainers_spec_json]
             except Exception as ex:
                 raise ValidationError("Failed to parse the sitecontainer spec file. Error: {}".format(str(ex)))
-            if sitecontainers is None or len(sitecontainers) == 0:
+            if sitecontainers_spec is None or len(sitecontainers_spec) == 0:
                 raise ValidationError("No sitecontainers found in the sitecontainers spec file.")
-            for sitecontainer in sitecontainers:
-                # Todo : SiteContainer model does not have container_name
-                response.append(_create_or_update_webapp_sitecontainer_internal(cmd, name, resource_group, container_name, sitecontainer, slot))
+            for spec in sitecontainers_spec:
+                sitecontainer = SiteContainer(image=spec.image, target_port=spec.target_port, start_up_command=spec.start_up_command, is_main=spec.is_main, auth_type=spec.auth_type, user_name=spec.user_name, password_secret=spec.password_secret, user_managed_identity_client_id=spec.user_managed_identity_client_id, volume_mounts=spec.volume_mounts, environment_variables=spec.environment_variables)
+                response.append(_create_or_update_webapp_sitecontainer_internal(cmd, name, resource_group, spec.name, sitecontainer, slot))
 
     else:
+        if container_name is None or image is None or target_port is None:
+            raise ValidationError("The following arguments are required if argument --sitecontainers-spec-file is not provided: --container-name, --image, --target-port")
         auth_type = AuthType.ANONYMOUS
         if system_assigned_identity is True:
             auth_type = AuthType.SYSTEM_IDENTITY
@@ -1094,7 +1110,7 @@ def delete_webapp_sitecontainer(cmd, name, resource_group, container_name, slot=
     else:
         response = web_client.delete_site_container(resource_group, name, container_name, cls=lambda x, y, z: x)
     if response is not None and response.http_response.status_code in (200, 204):
-        # TODO: Validate deleteion via response status code once api bug is fixed, 
+        # TODO: Validate deletion via response status code once api bug is fixed, 
         # Status 200 -> container existed and was deleted successfully
         # Status 204 -> container does not exist
         logger.warning("Sitecontainer '{}' was deleted successfully.".format(container_name))
@@ -1111,6 +1127,32 @@ def list_webapp_sitecontainers(cmd, name, resource_group, slot=None):
     else:
         site_containers = web_client.list_site_containers(resource_group, name)
     return site_containers
+
+
+def get_webapp_sitecontainers_status(cmd, name, resource_group, container_name=None, slot=None):
+    import requests
+    scm_url = _get_scm_url(cmd, resource_group, name, slot)
+    site_container_status_url = scm_url + '/api/sitecontainers/' + (container_name if container_name is not None else "")
+    headers = get_scm_site_headers(cmd.cli_ctx, name, resource_group, slot)
+    try:
+        response = requests.get(site_container_status_url, headers=headers)
+        return response.json()
+    except Exception as ex:
+        raise CLIError("Failed to fetch sitecontainer status. Error: {}".format(str(ex)))
+
+def get_webapp_sitecontainer_logs(cmd, name, resource_group, container_name, slot=None):
+    import requests
+    scm_url = _get_scm_url(cmd, resource_group, name, slot)
+    site_container_logs_url = scm_url + '/api/sitecontainers/' + container_name + '/logs'
+    headers = get_scm_site_headers(cmd.cli_ctx, name, resource_group, slot)
+    try:
+        t = threading.Thread(target=_get_log, args=(site_container_logs_url, headers))
+        t.daemon = True
+        t.start()
+        while True:
+            time.sleep(100)  # so that ctrl+c can stop the command
+    except Exception as ex:
+        raise CLIError("Failed to fetch sitecontainer logs. Error: {}".format(str(ex)))
 
 # for generic updater
 def get_webapp(cmd, resource_group_name, name, slot=None):

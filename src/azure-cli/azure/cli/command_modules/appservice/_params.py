@@ -174,6 +174,8 @@ subscription than the app service environment, please use the resource ID for --
 
     with self.argument_context("webapp sitecontainers") as c:
         c.argument("create", help='Create sitecontainers for a linux webapp')
+        c.argument("is_main", help="If true, this sitecontainer becomes the primary sitecontainer receiving frontend traffic.",
+                   arg_type=get_three_state_flag() )
 
     with self.argument_context('webapp show') as c:
         c.argument('name', arg_type=webapp_name_arg_type)
