@@ -683,8 +683,8 @@ def load_arguments(self, _):
         c.argument('node_name')
 
     with self.argument_context('aks machine') as c:
-        c.argument('cluster_name', help='The cluster name.')
-        c.argument('nodepool_name', validator=validate_nodepool_name, help='The node pool name.')
+        c.argument('cluster_name')
+        c.argument('nodepool_name', validator=validate_nodepool_name)
 
     with self.argument_context('aks machine show') as c:
         c.argument('machine_name')
