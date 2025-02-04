@@ -46,7 +46,7 @@ class Reimage(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.network_virtual_appliance_name = AAZStrArg(
-            options=["--network-virtual-appliance-name"],
+            options=["-n", "--name", "--network-virtual-appliance-name"],
             help="The name of Network Virtual Appliance.",
             required=True,
             id_part="name",
