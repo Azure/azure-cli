@@ -153,7 +153,7 @@ helps['servicebus namespace authorization-rule create'] = """
 type: command
 short-summary: Create Authorization Rule for the given Service Bus Namespace
 examples:
-  - name: Create Authorization Rule 'myauthorule' for the given Service Bus Namespace 'mynamespace' in resourcegroup
+  - name: Create Authorization Rule 'myauthorule' for the given Service Bus Namespace 'mynamespace' in resourcegroup.
     text: az servicebus namespace authorization-rule create --resource-group myresourcegroup --namespace-name mynamespace --name myauthorule --rights Send Listen
 """
 
