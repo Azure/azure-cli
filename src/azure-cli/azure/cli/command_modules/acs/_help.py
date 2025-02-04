@@ -2427,7 +2427,7 @@ helps['aks machine show'] = """
          short-summary: Name of the agentpool of a managed cluster
        - name: --machine-name
          type: string
-         short-summary: Get IP Addresses, Hostname for a specific machine in an agentpool
+         short-summary: Name of the machine in the agentpool of a managed cluster
    exmaples:
        - name: Get IP Addresses, Hostname for a specific machine in an agentpool
          text: az aks machine show --cluster-name <clusterName> --nodepool-name <apName> --machine-name <machineName>
