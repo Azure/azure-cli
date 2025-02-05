@@ -164,7 +164,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server update -g {} -n {} -p randompw321##@!'
                  .format(database_engine, resource_group, server_name))
 
-        self.cmd('{} flexible-server update -g {} -n {} --storage-size 256'
+        self.cmd('{} flexible-server update -g {} -n {} --storage-size 256 --yes'
                  .format(database_engine, resource_group, server_name),
                  checks=[JMESPathCheck('storage.storageSizeGb', 256 )])
 
@@ -178,7 +178,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
         tier = 'MemoryOptimized'
         sku_name = memory_optimized_sku
-        self.cmd('{} flexible-server update -g {} -n {} --tier {} --sku-name {}'
+        self.cmd('{} flexible-server update -g {} -n {} --tier {} --sku-name {} --yes'
                  .format(database_engine, resource_group, server_name, tier, sku_name),
                  checks=[JMESPathCheck('sku.tier', tier),
                          JMESPathCheck('sku.name', sku_name)])
@@ -350,7 +350,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         sku_name = 'Standard_E2ds_v4'
         sku_name_lower = sku_name.lower()
         
-        self.cmd('{} flexible-server update -g {} -n {} --tier {} --sku-name {}'
+        self.cmd('{} flexible-server update -g {} -n {} --tier {} --sku-name {} --yes'
                  .format(database_engine, resource_group, server_name, tier_lower, sku_name_lower),
                  checks=[JMESPathCheck('sku.tier', tier),
                          JMESPathCheck('sku.name', sku_name)])
@@ -407,7 +407,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.assertEqual(basic_info['backup']['backupRetentionDays'], backup_retention)
 
         # test updates
-        self.cmd('{} flexible-server update -g {} -n {} --storage-size 300'
+        self.cmd('{} flexible-server update -g {} -n {} --storage-size 300 --yes'
                  .format(database_engine, resource_group, server_name),
                  checks=[JMESPathCheck('storage.storageSizeGb', 300 )])
 
