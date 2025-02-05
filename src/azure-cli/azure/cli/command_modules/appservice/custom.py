@@ -172,7 +172,9 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         app_details = get_app_details(cmd, name)
         if app_details is None:
             raise ResourceNotFoundError("Unable to retrieve details of the existing app '{}'. Please check that "
-                                        "the app is a part of the current subscription".format(name))
+                                        "the app is a part of the current subscription. If "
+                                        "creating a new app, app names must be globally unique. Please try a more "
+                                        "unique name".format(name))
         current_rg = app_details.resource_group
         if resource_group_name is not None and (resource_group_name.lower() != current_rg.lower()):
             raise ValidationError("The webapp '{}' exists in resource group '{}' and does not "
