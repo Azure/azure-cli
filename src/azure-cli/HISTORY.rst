@@ -12,17 +12,13 @@ Release History
 
 **AKS**
 
-* `az aks create`: Add parameters `--if-match` and `--if-none-match` to support etag functionality for concurrency (#30309)
-* `az aks update`: Add parameters `--if-match` and `--if-none-match` to support etag functionality for concurrency (#30309)
-* `az aks delete`: Add parameters `--if-match` and `--if-none-match` to support etag functionality for concurrency (#30309)
+* `az aks create/update/delete`: Add parameters `--if-match` and `--if-none-match` to support etag functionality for concurrency (#30309)
 
 **App Config**
 
-* `az appconfig kv import`: Support microsoft feature management schema (#30376)
-* `az appconfig kv export`: Support microsoft feature management schema (#30376)
+* `az appconfig kv import/export`: Support microsoft feature management schema (#30376)
 * `az appconfig kv export`: Introduce a new environment variable called `AZURE_APPCONFIG_FM_COMPATIBILE` when exporting to a file for backward compatibility for users (#30376)
-* `az appconfig feature show`: Support microsoft feature management schema (#30376)
-* `az appconfig feature list`: Support microsoft feature management schema (#30376)
+* `az appconfig feature show/list`: Support microsoft feature management schema (#30376)
 * `az appconfig kv restore/show/list`: Update datetime validation to accept timezone offset (#30369)
 * `az appconfig revision list`: Update datetime validation to accept timezone offset (#30369)
 * `az appconfig export`: Update export help message for environment variable (#30747)
@@ -32,7 +28,7 @@ Release History
 * `az functionapp create`: Refactor EOL implementation and sort based on runtime EOL date (#30636)
 * `az functionapp list-flexconsumption-locations`: Check if flex region is enabled for subscription (#30607)
 * `az functionapp deployment slot create`: Add `--https-only` parameter for slot creation command (#30628)
-* `az webapp list-runtimes`: Remove the JBoss '_byol' entries from the output for webapps with Linux OS (#30673)
+* `az webapp list-runtimes`: Remove the JBoss `_byol` entries from the output for webapps with Linux OS (#30673)
 
 **Backup**
 
@@ -44,24 +40,24 @@ Release History
 * [BREAKING CHANGE] `az batch node reimage/remote-desktop`: Remove deprecated commands (#30501)
 * [BREAKING CHANGE] `az batch pool create`: Remove `--application-licenses`, `--certificate-references` , `--os-family` and `--os-version` deprecated parameters (#30501)
 * [BREAKING CHANGE] `az batch pool set/reset `: Remove `--certificate-references` deprecated parameter (#30501)
-* `az batch job create`: Add parameter `--job-manager-task-application-package-references` and `--on-all-tasks-complete` (#30501)
+* `az batch job create`: Add parameters `--job-manager-task-application-package-references` and `--on-all-tasks-complete` (#30501)
 * `az batch job disable`: Add parameter `--json-file` (#30501)
-* `az batch job-schedule create`: Add parameter `--job-manager-task-application-package-references`, `--job-metadata`, and `--job-manager-task-environment-settings` (#30501)
-* `az batch job-schedule set/reset`: Add parameter `--job-max-task-retry-count` and `--job-max-wall-clock-time` (#30501)
+* `az batch job-schedule create`: Add parameters `--job-manager-task-application-package-references`, `--job-metadata`, and `--job-manager-task-environment-settings` (#30501)
+* `az batch job-schedule set/reset`: Add parameters `--job-max-task-retry-count` and `--job-max-wall-clock-time` (#30501)
 * `az batch node reboot`: Add parameter `--json-file` (#30501)
 * `az batch node scheduling disable`: Add parameter `--json-file` (#30501)
 * `az batch pool autoscale evaluate`: Add parameter `--json-file` (#30501)
-* `az batch pool create`: Add parameter `--start-task-environment-settings` and `--start-task-max-task-retry-count` (#30501)
-* `az batch pool reset`: Add parameter `--start-task-resource-files` and `--target-node-communication-mode` (#30501)
+* `az batch pool create`: Add parameters `--start-task-environment-settings` and `--start-task-max-task-retry-count` (#30501)
+* `az batch pool reset`: Add parameters `--start-task-resource-files` and `--target-node-communication-mode` (#30501)
 
 **Compute**
 
 * [BREAKING CHANGE] `az sig gallery-application create/update`: Output field `supportedOsType` changed to `supportedOSType` (#30678)
 * `az vm list-sizes`: Remove unused parameter `--ids` (#30652)
 * `az vmss create/update`: Add new paramter `--zone-balance` to support setting zone balance (#30692)
-* `az vm/vmss create`: Install guest attestation extension when security type set to ConfidentialVM (#30690)
+* `az vm/vmss create`: Install guest attestation extension when security type set to `ConfidentialVM` (#30690)
 * `az vmss scale`: Add new logic to support scaling VMSS in edge zone (#30704)
-* `az vmss create`: Add `--encryption-identity` parameter to use that managed identity for Azure disk encryption (#30657)
+* `az vmss create`: Add `--encryption-identity` parameter to use managed identity for Azure disk encryption (#30657)
 * `az vmss encryption enable`: Add `--encryption-identity` parameter to update or set encryption identity for Azure disk encryption (#30657)
 
 **Container app**
@@ -70,7 +66,7 @@ Release History
 
 **DevTest Labs**
 
-* Add Hibernation Support (#30633)
+* `az lab vm`: Add `hibernate` command group (#30633)
 
 **Key Vault**
 
@@ -89,7 +85,7 @@ Release History
 
 **RDBMS**
 
-* `az postgres flexible-server geo-restore`: add `--restore-time` parameter (#30689)
+* `az postgres flexible-server geo-restore`: Add `--restore-time` parameter (#30689)
 * `az postgres flexible-server fabric-mirroring start/stop/update-databases`: Disable fabric mirroring on HA server (#30688)
 * `az postgres flexible-server update`: Fix for scaling up node count on an elastic cluster (#30669)
 
@@ -99,11 +95,11 @@ Release History
 
 **Role**
 
-* Add `az role definition show` command (#30593)
+* `az role definition show`: New command to support showing specific role definition (#30593)
 
 **Service Connector**
 
-* `az webapp connection create redis`: Add `--system-identity` param (#30630)
+* `az webapp connection create redis`: Add parameter `--system-identity` (#30630)
 
 2.68.0
 ++++++
