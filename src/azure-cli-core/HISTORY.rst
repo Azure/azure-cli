@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.69.0
+++++++
+* `aaz`: Support simple type parsed from string value (#30623)
+
 2.68.0
 ++++++
 * PREVIEW: Support managed identity on Azure Arc-enabled Linux server (#30267)
