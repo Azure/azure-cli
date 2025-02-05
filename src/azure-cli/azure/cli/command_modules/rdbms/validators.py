@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 from dateutil import parser
+from functools import cmp_to_key
 import re
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
@@ -451,6 +452,27 @@ def _pg_tier_validator(tier, sku_info):
             raise CLIError('Incorrect value for --tier. Allowed values : {}'.format(tiers))
 
 
+def compare_sku_names(sku_1, sku_2):
+    regex_pattern = r"\D+(?P<core_number>\d+)\D+(?P<version>\d*)"
+
+    sku_1_match = re.search(regex_pattern, sku_1)
+    sku_2_match = re.search(regex_pattern, sku_2)
+
+    # the case where version number is different, sort by the version number first
+    if sku_1_match.group('version') and int(sku_2_match.group('version')) > int(sku_1_match.group('version')):
+        return 1
+    if sku_1_match.group('version') and int(sku_2_match.group('version')) < int(sku_1_match.group('version')):
+        return -1
+
+    # the case where version number is the same, we want to sort by the core number
+    if int(sku_2_match.group('core_number')) > int(sku_1_match.group('core_number')):
+        return 1
+    if int(sku_2_match.group('core_number')) < int(sku_1_match.group('core_number')):
+        return -1
+
+    return 0
+
+
 def _pg_sku_name_validator(sku_name, sku_info, tier, instance):
     if instance is not None:
         tier = instance.sku.tier if tier is None else tier
@@ -459,7 +481,7 @@ def _pg_sku_name_validator(sku_name, sku_info, tier, instance):
         if sku_name.lower() not in skus:
             raise CLIError('Incorrect value for --sku-name. The SKU name does not match {} tier. '
                            'Specify --tier if you did not. Or CLI will set GeneralPurpose as the default tier. '
-                           'Allowed values : {}'.format(tier, skus))
+                           'Allowed values : {}'.format(tier, sorted(skus, key=cmp_to_key(compare_sku_names))))
 
 
 def _pg_storage_performance_tier_validator(performance_tier, sku_info, tier=None, storage_size=None):
@@ -482,7 +504,7 @@ def _pg_storage_performance_tier_validator(performance_tier, sku_info, tier=None
 def _pg_version_validator(version, versions, is_create):
     if version:
         if version not in versions:
-            raise CLIError('Incorrect value for --version. Allowed values : {}'.format(versions))
+            raise CLIError('Incorrect value for --version. Allowed values : {}'.format(sorted(versions)))
         if version == '12':
             logger.warning("Support for PostgreSQL 12 has officially ended. As a result, "
                            "the option to select version 12 will be removed in the near future. "
@@ -590,11 +612,11 @@ def ip_address_validator(ns):
 def public_access_validator(ns):
     if ns.public_access:
         val = ns.public_access.lower()
-        if not (ns.public_access == 'Disabled' or ns.public_access == 'Enabled' or
-                val == 'all' or val == 'none' or (len(val.split('-')) == 1 and _validate_ip(val)) or
+        if not (val in ['disabled', 'enabled', 'all', 'none'] or
+                (len(val.split('-')) == 1 and _validate_ip(val)) or
                 (len(val.split('-')) == 2 and _validate_ip(val))):
             raise CLIError('incorrect usage: --public-access. '
-                           'Acceptable values are \'Disabled\', \'Enabled\', \'all\', \'none\',\'<startIP>\' and '
+                           'Acceptable values are \'Disabled\', \'Enabled\', \'All\', \'None\',\'<startIP>\' and '
                            '\'<startIP>-<destinationIP>\' where startIP and destinationIP ranges from '
                            '0.0.0.0 to 255.255.255.255')
         if len(val.split('-')) == 2:
@@ -786,7 +808,7 @@ def validate_and_format_restore_point_in_time(restore_time):
         return parser.parse(restore_time)
     except:
         raise ValidationError("The restore point in time value has incorrect date format. "
-                              "Please use ISO format e.g., 2021-10-22T00:08:23+00:00.")
+                              "Please use ISO format e.g., 2024-10-22T00:08:23+00:00.")
 
 
 def is_citus_cluster(cmd, resource_group_name, server_name):
@@ -893,3 +915,21 @@ def check_resource_group(resource_group_name):
 def validate_resource_group(resource_group_name):
     if not check_resource_group(resource_group_name):
         raise CLIError('Resource group name cannot be empty.')
+
+
+def validate_backup_name(backup_name):
+    # check if backup_name is already null originally
+    if not backup_name:
+        raise CLIError('Backup name cannot be empty.')
+
+    # replace single and double quotes with empty string
+    backup_name = backup_name.replace("'", '')
+    backup_name = backup_name.replace('"', '')
+
+    # check if backup_name is empty or contains only whitespace after removing the quote
+    if not backup_name or backup_name.isspace():
+        raise CLIError('Backup name cannot be empty or contain only whitespaces.')
+
+    # check if backup_name exceeds 128 characters
+    if len(backup_name) > 128:
+        raise CLIError('Backup name cannot exceed 128 characters.')

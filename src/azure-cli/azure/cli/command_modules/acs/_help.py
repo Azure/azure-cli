@@ -554,6 +554,12 @@ parameters:
     type: string
     short-summary: Restriction level on the managed node resource group.
     long-summary: The restriction level of permissions allowed on the cluster's managed node resource group, supported values are Unrestricted, and ReadOnly (recommended ReadOnly).
+  - name: --if-match
+    type: string
+    short-summary: The value provided will be compared to the ETag of the managed cluster, if it matches the operation will proceed. If it does not match, the request will be rejected to prevent accidental overwrites. This must not be specified when creating a new cluster.
+  - name: --if-none-match
+    type: string
+    short-summary: Set to '*' to allow a new cluster to be created, but to prevent updating an existing cluster. Other values will be ignored.
 
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
@@ -976,7 +982,12 @@ parameters:
     type: string
     short-summary: Restriction level on the managed node resource group.
     long-summary: The restriction level of permissions allowed on the cluster's managed node resource group, supported values are Unrestricted, and ReadOnly (recommended ReadOnly).
-
+  - name: --if-match
+    type: string
+    short-summary: The value provided will be compared to the ETag of the managed cluster, if it matches the operation will proceed. If it does not match, the request will be rejected to prevent accidental overwrites. This must not be specified when creating a new cluster.
+  - name: --if-none-match
+    type: string
+    short-summary: Set to '*' to allow a new cluster to be created, but to prevent updating an existing cluster. Other values will be ignored.
 examples:
   - name: Reconcile the cluster back to its current state.
     text: az aks update -g MyResourceGroup -n MyManagedCluster
@@ -1624,6 +1635,12 @@ parameters:
   - name: --enable-vtpm
     type: bool
     short-summary: Enable vTPM on agent node pool. Must use VMSS agent pool type.
+  - name: --if-match
+    type: string
+    short-summary: The value provided will be compared to the ETag of the agentpool, if it matches the operation will proceed. If it does not match, the request will be rejected to prevent accidental overwrites. This must not be specified when creating a new agentpool.
+  - name: --if-none-match
+    type: string
+    short-summary: Set to '*' to allow a new agentpool to be created, but to prevent updating an existing agentpool. Other values will be ignored.
 
 examples:
   - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.
@@ -1647,6 +1664,13 @@ examples:
 helps['aks nodepool delete'] = """
 type: command
 short-summary: Delete the agent pool in the managed Kubernetes cluster.
+parameters:
+  - name: --if-match
+    type: string
+    short-summary: The value provided will be compared to the ETag of the node pool, if it matches the operation will proceed. If it does not match, the request will be rejected to prevent accidental overwrites. This must not be specified when creating a new agentpool.
+examples:
+    - name: Delete an agent pool with ignore-pod-disruption-budget
+      text: az aks nodepool delete --resource-group MyResourceGroup --cluster-name MyManagedCluster --name nodepool1 --if-match etag
 """
 
 helps['aks nodepool get-upgrades'] = """
@@ -1748,6 +1772,12 @@ parameters:
   - name: --disable-vtpm
     type: bool
     short-summary: Disable vTPM on an existing Trusted Launch enabled agent node pool.
+  - name: --if-match
+    type: string
+    short-summary: The value provided will be compared to the ETag of the node pool, if it matches the operation will proceed. If it does not match, the request will be rejected to prevent accidental overwrites. This must not be specified when creating a new agentpool.
+  - name: --if-none-match
+    type: string
+    short-summary: Set to '*' to allow a new node pool to be created, but to prevent updating an existing node pool. Other values will be ignored.
 examples:
   - name: Reconcile the nodepool back to its current state.
     text: az aks nodepool update -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster
@@ -1784,6 +1814,12 @@ parameters:
   - name: --aks-custom-headers
     type: string
     short-summary: Comma-separated key-value pairs to specify custom headers.
+  - name: --if-match
+    type: string
+    short-summary: The value provided will be compared to the ETag of the node pool, if it matches the operation will proceed. If it does not match, the request will be rejected to prevent accidental overwrites. This must not be specified when creating a new agentpool. For upgrade node image version requests this will be ignored.
+  - name: --if-none-match
+    type: string
+    short-summary: Set to '*' to allow a new node pool to be created, but to prevent updating an existing node pool. Other values will be ignored.
 """
 
 helps['aks nodepool stop'] = """
@@ -1952,6 +1988,12 @@ parameters:
   - name: --tier
     type: string
     short-summary: Specify SKU tier for managed clusters. '--tier standard' enables a standard managed cluster service with a financially backed SLA. '--tier free' does not have a financially backed SLA. '--tier premium' is required for '--k8s-support-plan AKSLongTermSupport'.
+  - name: --if-match
+    type: string
+    short-summary: The value provided will be compared to the ETag of the managed cluster, if it matches the operation will proceed. If it does not match, the request will be rejected to prevent accidental overwrites. This must not be specified when creating a new cluster.
+  - name: --if-none-match
+    type: string
+    short-summary: Set to '*' to allow a new cluster to be created, but to prevent updating an existing cluster. Other values will be ignored.
 
 examples:
   - name: Upgrade a managed Kubernetes cluster to a newer version. (autogenerated)
@@ -2356,7 +2398,7 @@ helps['aks mesh upgrade rollback'] = """
 
 helps['aks approuting'] = """
     type: group
-    short-summary: Commands to manage App Routing aadon.
+    short-summary: Commands to manage App Routing addon.
     long-summary: A group of commands to manage App Routing in given cluster.
 """
 

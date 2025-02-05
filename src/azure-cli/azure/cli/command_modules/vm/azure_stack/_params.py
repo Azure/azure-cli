@@ -7,7 +7,6 @@
 from argcomplete.completers import FilesCompleter
 
 from knack.arguments import CLIArgumentType
-from knack.deprecation import Deprecated
 
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.parameters import get_datetime_type
@@ -42,7 +41,6 @@ def load_arguments(self, _):
     DedicatedHostLicenseTypes = self.get_models('DedicatedHostLicenseTypes')
     OrchestrationServiceNames, OrchestrationServiceStateAction = self.get_models('OrchestrationServiceNames', 'OrchestrationServiceStateAction', operation_group='virtual_machine_scale_sets')
     RebootSetting, VMGuestPatchClassificationWindows, VMGuestPatchClassificationLinux = self.get_models('VMGuestPatchRebootSetting', 'VMGuestPatchClassificationWindows', 'VMGuestPatchClassificationLinux')
-    GallerySharingPermissionTypes = self.get_models('GallerySharingPermissionTypes', operation_group='shared_galleries')
     ReplicationMode = self.get_models('ReplicationMode', operation_group='gallery_image_versions')
     DiskControllerTypes = self.get_models('DiskControllerTypes', operation_group='virtual_machines')
 
@@ -598,21 +596,10 @@ def load_arguments(self, _):
 
     with self.argument_context('vm image list') as c:
         c.argument('image_location', get_location_type(self.cli_ctx))
-        c.argument('edge_zone', edge_zone_type)
         c.argument('architecture', help='The name of architecture. ', arg_type=get_enum_type(["x64", "Arm64"]))
-
-    with self.argument_context('vm image list-offers') as c:
-        c.argument('edge_zone', edge_zone_type)
-
-    with self.argument_context('vm image list-skus') as c:
-        c.argument('edge_zone', edge_zone_type)
-
-    with self.argument_context('vm image list-publishers') as c:
-        c.argument('edge_zone', edge_zone_type)
 
     with self.argument_context('vm image show') as c:
         c.argument('skus', options_list=['--sku', '-s'])
-        c.argument('edge_zone', edge_zone_type)
 
     with self.argument_context('vm image terms') as c:
         c.argument('urn', help='URN, in the format of \'publisher:offer:sku:version\'. If specified, other argument values can be omitted')
@@ -1258,18 +1245,6 @@ def load_arguments(self, _):
         c.argument('gallery_image_name', options_list=['--gallery-image-definition', '-i'], help='gallery image definition')
         c.argument('gallery_image_version', options_list=['--gallery-image-version', '-e'], help='gallery image version')
 
-    with self.argument_context('sig show') as c:
-        c.argument('gallery_name', options_list=['--gallery-name', '-r'], id_part='name', help='gallery name')
-        c.argument('gallery_image_name', options_list=['--gallery-image-definition', '-i'], id_part='child_name_1', help='gallery image definition')
-
-    with self.argument_context('sig show') as c:
-        c.argument('select', help='The select expression to apply on the operation.')
-        c.argument('sharing_groups', action='store_true', help='The expand query option to query shared gallery groups')
-
-    with self.argument_context('sig list-shared') as c:
-        c.argument('location', arg_type=get_location_type(self.cli_ctx))
-        c.argument('shared_to', shared_to_type)
-
     for scope in ['sig share add', 'sig share remove']:
         with self.argument_context(scope) as c:
             c.argument('gallery_name', type=str, help='The name of the Shared Image Gallery.', id_part='name')
@@ -1319,28 +1294,6 @@ def load_arguments(self, _):
         c.argument('marker', arg_type=marker_type)
         c.argument('show_next_marker', action='store_true', help='Show nextMarker in result when specified.')
 
-    with self.argument_context('sig create') as c:
-        c.argument('description', help='the description of the gallery')
-
-    with self.argument_context('sig update') as c:
-        c.ignore('gallery')
-
-    for scope in ['sig create', 'sig update']:
-        with self.argument_context(scope) as c:
-            c.argument('permissions', arg_type=get_enum_type(GallerySharingPermissionTypes),
-                       arg_group='Sharing Profile',
-                       min_api='2020-09-30',
-                       help='This property allows you to specify the permission of sharing gallery.')
-            c.argument('soft_delete', arg_type=get_three_state_flag(), min_api='2021-03-01',
-                       deprecate_info=Deprecated(self.cli_ctx, hide=True, message_func=lambda x: "Argument '--soft-delete' is in preview and under development. Reference and support levels: https://aka.ms/CLI_refstatus"),
-                       help='Enable soft-deletion for resources in this gallery, '
-                            'allowing them to be recovered within retention time.')
-            c.argument('publisher_uri', help='Community gallery publisher uri.')
-            c.argument('publisher_contact', options_list=['--publisher-email'],
-                       help='Community gallery publisher contact email.')
-            c.argument('eula', help='Community gallery publisher eula.')
-            c.argument('public_name_prefix', help='Community gallery public name prefix.')
-
     with self.argument_context('sig image-definition create') as c:
         c.argument('description', help='the description of the gallery image definition')
     with self.argument_context('sig image-definition update') as c:
@@ -1375,7 +1328,6 @@ def load_arguments(self, _):
         c.argument('data_vhds_luns', nargs='+', help='Logical unit numbers (space-delimited) of source VHD URIs of data disks')
         c.argument('data_vhds_storage_accounts', options_list=['--data-vhds-storage-accounts', '--data-vhds-sa'], nargs='+', help='Names or IDs (space-delimited) of storage accounts of source VHD URIs of data disks')
         c.argument('replication_mode', min_api='2021-07-01', arg_type=get_enum_type(ReplicationMode), help='Optional parameter which specifies the mode to be used for replication. This property is not updatable.')
-        c.argument('target_region_cvm_encryption', nargs='+', min_api='2021-10-01', help='Space-separated list of customer managed key for Confidential VM encrypting the OS disk in the gallery artifact for each region. Format for each region: `<os_cvm_encryption_type>,<os_cvm_des>`. The valid values for os_cvm_encryption_type are EncryptedVMGuestStateOnlyWithPmk, EncryptedWithPmk, EncryptedWithCmk.')
         c.argument('virtual_machine', help='Resource id of VM source')
         c.argument('image_version', help='Resource id of gallery image version source')
         c.argument('target_zone_encryption', nargs='+', min_api='2022-01-03',
@@ -1415,10 +1367,6 @@ def load_arguments(self, _):
                        help='Space-separated list of regions and their replica counts. Use `<region>[=<replica count>][=<storage account type>]` to optionally set the replica count and/or storage account type for each region. '
                             'If a replica count is not specified, the default replica count will be used. If a storage account type is not specified, the default storage account type will be used')
             c.argument('replica_count', help='The default number of replicas to be created per region. To set regional replication counts, use --target-regions', type=int)
-            c.argument('target_edge_zones', nargs='*', min_api='2022-01-03',
-                       help='Space-separated list of regions, edge zones, replica counts and storage types. Use <region>=<edge zone>[=<replica count>][=<storage account type>] to optionally set the replica count and/or storage account type for each region. '
-                            'If a replica count is not specified, the default replica count will be used. If a storage account type is not specified, the default storage account type will be used. '
-                            'If "--target-edge-zones None" is specified, the target extended locations will be cleared.')
 
     for scope in ['sig image-version create', 'sig image-version update', 'sig image-version undelete']:
         with self.argument_context(scope, operation_group='gallery_image_versions') as c:

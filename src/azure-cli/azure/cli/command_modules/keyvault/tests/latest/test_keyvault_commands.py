@@ -1006,9 +1006,9 @@ class KeyVaultHSMRoleDefintionTest(ScenarioTest):
 
 class KeyVaultKeyScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_key')
-    @KeyVaultPreparer(name_prefix='cli-test-kv-key-', location='eastus2')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-key-', location='eastus2', additional_params='--enable-rbac-authorization false')
     @KeyVaultPreparer(name_prefix='cli-test-kv-key-', location='eastus2', sku='premium',
-                      parameter_name='key_vault2', key='kv2')
+                      parameter_name='key_vault2', key='kv2', additional_params='--enable-rbac-authorization false')
     def test_keyvault_key(self, resource_group, key_vault, key_vault2):
         self.kwargs.update({
             'loc': 'eastus2',
@@ -1040,7 +1040,8 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
                  checks=self.check('result', '{base64_value}'))
 
         # sign/verify
-        self.kwargs['digest'] = '12345678901234567890123456789012'
+        # generate test digest data: base64.b64encode(hashlib.sha256(b'HelloWorld').digest())
+        self.kwargs['digest'] = 'hy5OUM6ZkNiwQTMMR8nd0Rvsa1A66ThqmdqFhOm7EsQ='
         self.kwargs['sign_result'] = self.cmd('keyvault key sign -n {key} --vault-name {kv} -a RS256 --digest {digest}').get_output_in_json()['signature']
         self.cmd('keyvault key verify -n {key} --vault-name {kv} -a RS256 --digest {digest} --signature "{sign_result}"',
                  checks=self.check('isValid', True))
