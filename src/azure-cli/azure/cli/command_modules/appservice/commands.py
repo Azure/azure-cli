@@ -149,7 +149,7 @@ def load_command_table(self, _):
         g.custom_command('show', 'get_webapp_sitecontainer')
         g.custom_command('list', 'list_webapp_sitecontainers')
         g.custom_command('status', 'get_webapp_sitecontainers_status')
-        g.custom_command('logs', 'get_webapp_sitecontainer_logs')
+        g.custom_command('log', 'get_webapp_sitecontainer_log')
 
     with self.command_group('webapp traffic-routing') as g:
         g.custom_command('set', 'set_traffic_routing')

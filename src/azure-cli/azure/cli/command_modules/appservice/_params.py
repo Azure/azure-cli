@@ -173,9 +173,34 @@ subscription than the app service environment, please use the resource ID for --
         c.ignore('using_webapp_up')
 
     with self.argument_context("webapp sitecontainers") as c:
-        c.argument("create", help='Create sitecontainers for a linux webapp')
-        c.argument("is_main", help="If true, this sitecontainer becomes the primary sitecontainer receiving frontend traffic.",
+        c.argument('name', arg_type=webapp_name_arg_type, help='Name of the linux webapp')
+        c.argument("container_name", help='Name of the SiteContainer')
+        c.argument('slot', options_list=['--slot', '-s'], help='Name of the web app slot. Default to the productions slot if not specified.')
+
+    with self.argument_context("webapp sitecontainers create") as c:
+        c.argument("image", help='Image Name')
+        c.argument("target_port", help='Target port for SiteContainer')
+        c.argument("startup_cmd", help='Startup Command for the SiteContainer')
+        c.argument("is_main", help="true if the container is the main site container; false otherwise",
                    arg_type=get_three_state_flag())
+        c.argument("system_assigned_identity", help="If true, the system-assigned identity will be used for auth while pulling image",
+                   arg_type=get_three_state_flag())
+        c.argument("user_assigned_identity", help='ClientID for the user-maganed identity which will be used for auth while pulling image')
+        c.argument("registry_username", help='username used for image registry auth')
+        c.argument("registry_password", help='password used for image registry auth')
+        c.argument("sitecontainers_spec_file", help="path to a json sitecontainer spec file containing a list of sitecontainers, other sitecontainer input args will be ignored if this arg is provided")
+
+    with self.argument_context("webapp sitecontainers update") as c:
+        c.argument("image", help='Image Name')
+        c.argument("target_port", help='Target port for SiteContainer')
+        c.argument("startup_cmd", help='Startup Command for the SiteContainer')
+        c.argument("is_main", help="true if the container is the main site container; false otherwise",
+                   arg_type=get_three_state_flag())
+        c.argument("system_assigned_identity", help="If true, the system-assigned identity will be used for auth while pulling image",
+                   arg_type=get_three_state_flag())
+        c.argument("user_assigned_identity", help='ClientID for the user-maganed identity which will be used for auth while pulling image')
+        c.argument("registry_username", help='username used for image registry auth')
+        c.argument("registry_password", help='password used for image registry auth')
 
     with self.argument_context('webapp show') as c:
         c.argument('name', arg_type=webapp_name_arg_type)

@@ -1185,7 +1185,7 @@ def get_webapp_sitecontainers_status(cmd, name, resource_group, container_name=N
         raise AzureInternalError("Failed to fetch sitecontainer status. Error: {}".format(str(ex)))
 
 
-def get_webapp_sitecontainer_logs(cmd, name, resource_group, container_name, slot=None):
+def get_webapp_sitecontainer_log(cmd, name, resource_group, container_name, slot=None):
     scm_url = _get_scm_url(cmd, resource_group, name, slot)
     site_container_logs_url = scm_url + '/api/sitecontainers/' + container_name + '/logs'
     headers = get_scm_site_headers(cmd.cli_ctx, name, resource_group, slot)
