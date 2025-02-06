@@ -473,7 +473,6 @@ def load_arguments(self, _):
         c.argument('enable_vtpm', enable_vtpm_type)
         c.argument('user_data', help='UserData for the VM. It can be passed in as file or string.', completer=FilesCompleter(), type=file_type, min_api='2021-03-01')
         c.argument('enable_hibernation', arg_type=get_three_state_flag(), min_api='2021-03-01', help='The flag that enable or disable hibernation capability on the VM.')
-        c.argument('encryption_identity', help='Resource Id of the user managed identity which can be used for Azure disk encryption')
 
     for scope in ['vm create', 'vm update']:
         with self.argument_context(scope) as c:
@@ -871,6 +870,7 @@ def load_arguments(self, _):
                        help='List of virtual machine extensions to exclude when applying the Security Posture. Either a Json string or a file path is acceptable. '
                             'Please refer to https://docs.microsoft.com/rest/api/compute/virtualmachinescalesets/get#virtualmachineextension for the data format.')
             c.argument('security_posture_reference_is_overridable', arg_type=get_three_state_flag(), min_api='2024-03-01', options_list=['--security-posture-reference-is-overridable', '--is-overridable'], help='Whether the security posture can be overridden by the user.')
+            c.argument('zone_balance', arg_type=get_three_state_flag(), min_api='2017-12-01', help='Whether to force strictly even Virtual Machine distribution cross x-zones in case there is zone outage.')
 
     with self.argument_context('vmss update') as c:
         c.argument('instance_id', id_part='child_name_1', help="Update the VM instance with this ID. If missing, update the VMSS.")
@@ -1191,8 +1191,13 @@ def load_arguments(self, _):
             c.argument('key_encryption_key', help='Key vault key name or URL used to encrypt the disk encryption key.')
             c.argument('key_encryption_keyvault', help='Name or ID of the key vault containing the key encryption key used to encrypt the disk encryption key. If missing, CLI will use `--disk-encryption-keyvault`.')
 
-    with self.argument_context('vm encryption enable') as c:
-        c.argument('encryption_identity', help='Resource Id of the user managed identity which can be used for Azure disk encryption')
+    for scope in ['vm create', 'vm encryption enable']:
+        with self.argument_context(scope) as c:
+            c.argument('encryption_identity', help='Resource Id of the user managed identity which can be used for Azure disk encryption', resource_type=ResourceType.MGMT_COMPUTE, min_api='2023-09-01')
+
+    for scope in ['vmss create', 'vmss encryption enable']:
+        with self.argument_context(scope) as c:
+            c.argument('encryption_identity', help='Resource Id of the user managed identity which can be used for Azure disk encryption', resource_type=ResourceType.MGMT_COMPUTE, min_api='2023-09-01')
 
     for scope in ['vm extension', 'vmss extension']:
         with self.argument_context(scope) as c:
@@ -1404,25 +1409,6 @@ def load_arguments(self, _):
     # endregion
 
     # region Gallery applications
-    with self.argument_context('sig gallery-application') as c:
-        c.argument('gallery_application_name', options_list=['--name', '-n', '--application-name'],
-                   help='The name of the gallery Application')
-
-    with self.argument_context('sig gallery-application create') as c:
-        c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False,
-                   validator=get_default_location_from_resource_group)
-        c.argument('description', help='The description of this gallery Application Definition resource. '
-                   'This property is updatable.')
-        c.argument('os_type', arg_type=get_enum_type(['Windows', 'Linux']), help='This property allows you '
-                   'to specify the supported type of the OS that application is built for. <br><br> Possible values '
-                   'are: <br><br> **Windows** <br><br> **Linux**')
-
-    with self.argument_context('sig gallery-application update') as c:
-        c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False,
-                   validator=get_default_location_from_resource_group)
-        c.argument('description', help='The description of this gallery Application Definition resource. '
-                   'This property is updatable.')
-
     with self.argument_context('sig gallery-application version') as c:
         c.argument('gallery_application_name', options_list=['--application-name'],
                    help='The name of the gallery Application')

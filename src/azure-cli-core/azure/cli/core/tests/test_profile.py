@@ -498,7 +498,7 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('requests.get', autospec=True)
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
-    def test_find_subscriptions_in_vm_with_mi_system_assigned(self, create_subscription_client_mock, mock_get):
+    def test_login_with_mi_system_assigned(self, create_subscription_client_mock, mock_get):
         mock_subscription_client = mock.MagicMock()
         mock_subscription_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
         create_subscription_client_mock.return_value = mock_subscription_client
@@ -531,7 +531,7 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('requests.get', autospec=True)
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
-    def test_find_subscriptions_in_vm_with_mi_no_subscriptions(self, create_subscription_client_mock, mock_get):
+    def test_login_with_mi_no_subscriptions(self, create_subscription_client_mock, mock_get):
         mock_subscription_client = mock.MagicMock()
         mock_subscription_client.subscriptions.list.return_value = []
         create_subscription_client_mock.return_value = mock_subscription_client
@@ -566,8 +566,7 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('requests.get', autospec=True)
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
-    def test_find_subscriptions_in_vm_with_mi_user_assigned_with_client_id(self, create_subscription_client_mock,
-                                                                           mock_get):
+    def test_login_with_mi_user_assigned_client_id(self, create_subscription_client_mock, mock_get):
         mock_subscription_client = mock.MagicMock()
         mock_subscription_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
         create_subscription_client_mock.return_value = mock_subscription_client
@@ -587,6 +586,19 @@ class TestProfile(unittest.TestCase):
         good_response.content = encoded_test_token
         mock_get.return_value = good_response
 
+        subscriptions = profile.login_with_managed_identity(client_id=test_client_id)
+
+        self.assertEqual(len(subscriptions), 1)
+        s = subscriptions[0]
+        self.assertEqual(s['name'], self.display_name1)
+        self.assertEqual(s['id'], self.id1.split('/')[-1])
+        self.assertEqual(s['tenantId'], self.test_mi_tenant)
+
+        self.assertEqual(s['user']['name'], 'userAssignedIdentity')
+        self.assertEqual(s['user']['type'], 'servicePrincipal')
+        self.assertEqual(s['user']['assignedIdentityInfo'], 'MSIClient-{}'.format(test_client_id))
+
+        # Old way of using identity_id
         subscriptions = profile.login_with_managed_identity(identity_id=test_client_id)
 
         self.assertEqual(len(subscriptions), 1)
@@ -601,7 +613,7 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('azure.cli.core.auth.adal_authentication.MSIAuthenticationWrapper', autospec=True)
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
-    def test_find_subscriptions_in_vm_with_mi_user_assigned_with_object_id(self, create_subscription_client_mock,
+    def test_login_with_mi_user_assigned_object_id(self, create_subscription_client_mock,
                                                                            mock_msi_auth):
         mock_subscription_client = mock.MagicMock()
         mock_subscription_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
@@ -632,6 +644,14 @@ class TestProfile(unittest.TestCase):
         mock_msi_auth.side_effect = AuthStub
         test_object_id = '54826b22-38d6-4fb2-bad9-b7b93a3e9999'
 
+        subscriptions = profile.login_with_managed_identity(object_id=test_object_id)
+
+        s = subscriptions[0]
+        self.assertEqual(s['user']['name'], 'userAssignedIdentity')
+        self.assertEqual(s['user']['type'], 'servicePrincipal')
+        self.assertEqual(s['user']['assignedIdentityInfo'], 'MSIObject-{}'.format(test_object_id))
+
+        # Old way of using identity_id
         subscriptions = profile.login_with_managed_identity(identity_id=test_object_id)
 
         s = subscriptions[0]
@@ -641,7 +661,7 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('requests.get', autospec=True)
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
-    def test_find_subscriptions_in_vm_with_mi_user_assigned_with_res_id(self, create_subscription_client_mock,
+    def test_login_with_mi_user_assigned_resource_id(self, create_subscription_client_mock,
                                                                         mock_get):
 
         mock_subscription_client = mock.MagicMock()
@@ -665,6 +685,14 @@ class TestProfile(unittest.TestCase):
         good_response.content = encoded_test_token
         mock_get.return_value = good_response
 
+        subscriptions = profile.login_with_managed_identity(resource_id=test_res_id)
+
+        s = subscriptions[0]
+        self.assertEqual(s['user']['name'], 'userAssignedIdentity')
+        self.assertEqual(s['user']['type'], 'servicePrincipal')
+        self.assertEqual(subscriptions[0]['user']['assignedIdentityInfo'], 'MSIResource-{}'.format(test_res_id))
+
+        # Old way of using identity_id
         subscriptions = profile.login_with_managed_identity(identity_id=test_res_id)
 
         s = subscriptions[0]

@@ -1001,6 +1001,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('registry_password', options_list=['--registry-password', '-d', c.deprecate(target='--docker-registry-server-password', redirect='--registry-password')],
                    help='The container registry server password')
         c.argument('registry_username', options_list=['--registry-username', '-u', c.deprecate(target='--docker-registry-server-user', redirect='--registry-username')], help='the container registry server username')
+        c.argument('https_only', help="Redirect all traffic made to an app using HTTP to HTTPS.", arg_type=get_three_state_flag())
     with self.argument_context('functionapp deployment slot swap') as c:
         c.argument('action',
                    help="swap types. use 'preview' to apply target slot's settings on the source slot first; use 'swap' to complete it; use 'reset' to reset the swap",

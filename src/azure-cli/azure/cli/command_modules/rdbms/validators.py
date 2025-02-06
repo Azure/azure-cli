@@ -389,13 +389,14 @@ def _pg_storage_validator(storage_gb, sku_info, tier, storage_type, iops, throug
         if instance is not None:
             original_size = instance.storage.storage_size_gb
             if original_size > storage_gb:
-                raise CLIError('Updating storage cannot be smaller than the original storage size {} GiB.'
-                               .format(original_size))
+                raise CLIError('Decrease of current storage size isn\'t supported. Current storage size is {} GiB \
+                                and you\'re trying to set it to {} GiB.'
+                               .format(original_size, storage_gb))
         if not is_ssdv2:
             storage_sizes = get_postgres_storage_sizes(sku_info, tier)
             if storage_gb not in storage_sizes:
                 storage_sizes = sorted([int(size) for size in storage_sizes])
-                raise CLIError('Incorrect value for --storage-size : Allowed values(in GiB) : {}'
+                raise CLIError('Incorrect value for --storage-size : Allowed values (in GiB) : {}'
                                .format(storage_sizes))
 
     # ssdv2 range validation
@@ -682,6 +683,15 @@ def firewall_rule_name_validator(ns):
                               "and no more than 128 characters in length. ")
 
 
+def postgres_firewall_rule_name_validator(ns):
+    if not ns.firewall_rule_name:
+        return
+    if not re.search(r'^[a-zA-Z0-9][-_a-zA-Z0-9]{0,79}(?<!-)$', ns.firewall_rule_name):
+        raise ValidationError("The firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'. "
+                              "Additionally, the name of the firewall rule must be at least 1, "
+                              "and no more than 80 characters in length. Firewall rule must not end with '-'.")
+
+
 def validate_server_name(db_context, server_name, type_):
     client = db_context.cf_availability(db_context.cmd.cli_ctx, '_')
 
@@ -808,7 +818,7 @@ def validate_and_format_restore_point_in_time(restore_time):
         return parser.parse(restore_time)
     except:
         raise ValidationError("The restore point in time value has incorrect date format. "
-                              "Please use ISO format e.g., 2021-10-22T00:08:23+00:00.")
+                              "Please use ISO format e.g., 2024-10-22T00:08:23+00:00.")
 
 
 def is_citus_cluster(cmd, resource_group_name, server_name):
@@ -915,3 +925,21 @@ def check_resource_group(resource_group_name):
 def validate_resource_group(resource_group_name):
     if not check_resource_group(resource_group_name):
         raise CLIError('Resource group name cannot be empty.')
+
+
+def validate_backup_name(backup_name):
+    # check if backup_name is already null originally
+    if not backup_name:
+        raise CLIError('Backup name cannot be empty.')
+
+    # replace single and double quotes with empty string
+    backup_name = backup_name.replace("'", '')
+    backup_name = backup_name.replace('"', '')
+
+    # check if backup_name is empty or contains only whitespace after removing the quote
+    if not backup_name or backup_name.isspace():
+        raise CLIError('Backup name cannot be empty or contain only whitespaces.')
+
+    # check if backup_name exceeds 128 characters
+    if len(backup_name) > 128:
+        raise CLIError('Backup name cannot exceed 128 characters.')
