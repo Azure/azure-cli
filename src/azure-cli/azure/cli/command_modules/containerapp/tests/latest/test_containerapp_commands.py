@@ -1294,6 +1294,32 @@ class ContainerappRegistryIdentityTests(ScenarioTest):
             JMESPathCheck("properties.configuration.secrets[0].name", f"{acr}azurecrio-{acr}")
         ])
 
+    @AllowLargeResponse(8192)
+    @ResourceGroupPreparer(location="westeurope")
+    def test_containerapp_private_registry_with_username_as_email(self, resource_group):
+        self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
+        app = self.create_random_name(prefix='aca', length=24)
+        acr = self.create_random_name(prefix='acr', length=24)
+        image_source = "mcr.microsoft.com/k8se/quickstart:latest"
+        image_name = f"{acr}.azurecr.io:443/k8se/quickstart:latest"
+        username = "abc@example.com"
+
+        env = prepare_containerapp_env_for_app_e2e_tests(self)
+
+        self.cmd(f'acr create --sku basic -n {acr} -g {resource_group} --admin-enabled')
+        self.cmd(f'acr import -n {acr} --source {image_source}')
+        password = self.cmd(f'acr credential show -n {acr} --query passwords[0].value').get_output_in_json()
+
+        self.cmd(f'containerapp create -g {resource_group} -n {app}  --image {image_name} --ingress external --target-port 80 --environment {env} --registry-server {acr}.azurecr.io:443 --registry-username {username} --registry-password {password}')
+
+        self.cmd(f'containerapp show -g {resource_group} -n {app} --show-secrets', checks=[
+            JMESPathCheck("properties.provisioningState", "Succeeded"),
+            JMESPathCheck("properties.configuration.registries[0].server", f"{acr}.azurecr.io:443"),
+            JMESPathCheck("properties.template.containers[0].image", "image_name"),
+            JMESPathCheck("properties.configuration.secrets[0].name", f"{acr}azurecrio-443-{acr}"),
+            JMESPathCheck("properties.configuration.secrets[0].value", "password")
+        ])
+
 
 class ContainerappScaleTests(ScenarioTest):
     def __init__(self, *arg, **kwargs):
