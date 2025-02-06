@@ -530,12 +530,12 @@ def store_as_secret_and_return_secret_ref(secrets_list, registry_user, registry_
         registry_server = registry_server.replace(':', '-')
         if urlparse(registry_server).hostname is not None:
             registry_secret_name = "{server}-{user}".format(
-                server=urlparse(registry_server).hostname.replace('.', ''), 
+                server=urlparse(registry_server).hostname.replace('.', ''),
                 user=make_dns1123_compliant(registry_user)
             )
         else:
             registry_secret_name = "{server}-{user}".format(
-                server=registry_server.replace('.', ''), 
+                server=registry_server.replace('.', ''),
                 user=make_dns1123_compliant(registry_user)
             )
 
@@ -556,6 +556,7 @@ def store_as_secret_and_return_secret_ref(secrets_list, registry_user, registry_
         })
 
         return registry_secret_name
+
 
 def parse_list_of_strings(comma_separated_string):
     comma_separated = comma_separated_string.split(',')
