@@ -22,9 +22,9 @@ class Add(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-07-01",
+        "version": "2024-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}", "2024-07-01", "properties.activeDirectories[]"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}", "2024-09-01", "properties.activeDirectories[]"],
         ]
     }
 
@@ -339,7 +339,7 @@ class Add(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-07-01",
+                    "api-version", "2024-09-01",
                     required=True,
                 ),
             }
@@ -438,7 +438,7 @@ class Add(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-07-01",
+                    "api-version", "2024-09-01",
                     required=True,
                 ),
             }

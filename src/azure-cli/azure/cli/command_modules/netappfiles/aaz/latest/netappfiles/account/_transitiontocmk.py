@@ -12,16 +12,19 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "netappfiles volume replication finalize-external-replication",
+    "netappfiles account transitiontocmk",
+    confirmation="This command transitions all volumes in a VNet to a different encryption key source. Are you sure you want to perform this operation?",
 )
-class FinalizeExternalReplication(AAZCommand):
-    """Finalizes the migration of an external volume by releasing the replication and breaking the external cluster peering if no other migration is active.
+class Transitiontocmk(AAZCommand):
+    """Transitions all volumes in a VNet to a different encryption key source (Microsoft-managed key or Azure Key Vault). Operation fails if targeted volumes share encryption sibling set with volumes from another account.
+
+    az netappfiles account get-key-vault-status can be used to get the data required for this operation
     """
 
     _aaz_info = {
         "version": "2024-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/finalizeexternalreplication", "2024-09-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/transitiontocmk", "2024-09-01"],
         ]
     }
 
@@ -43,7 +46,7 @@ class FinalizeExternalReplication(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.account_name = AAZStrArg(
-            options=["-a", "--account-name"],
+            options=["-a", "-n", "--account-name"],
             help="The name of the NetApp account",
             required=True,
             id_part="name",
@@ -51,36 +54,28 @@ class FinalizeExternalReplication(AAZCommand):
                 pattern="^[a-zA-Z0-9][a-zA-Z0-9\\-_]{0,127}$",
             ),
         )
-        _args_schema.pool_name = AAZStrArg(
-            options=["-p", "--pool-name"],
-            help="The name of the capacity pool",
-            required=True,
-            id_part="child_name_1",
-            fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\\-_]{0,63}$",
-                max_length=64,
-                min_length=1,
-            ),
-        )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
-        _args_schema.volume_name = AAZStrArg(
-            options=["-n", "-v", "--volume-name"],
-            help="The name of the volume",
-            required=True,
-            id_part="child_name_2",
-            fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z][a-zA-Z0-9\\-_]{0,63}$",
-                max_length=64,
-                min_length=1,
-            ),
+
+        # define Arg Group "Body"
+
+        _args_schema = cls._args_schema
+        _args_schema.private_endpoint_id = AAZResourceIdArg(
+            options=["--private-endpoint-id"],
+            arg_group="Body",
+            help="Identifier of the private endpoint to reach the Azure Key Vault",
+        )
+        _args_schema.virtual_network_id = AAZResourceIdArg(
+            options=["--virtual-network-id"],
+            arg_group="Body",
+            help="Identifier for the virtual network",
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.VolumesFinalizeExternalReplication(ctx=self.ctx)()
+        yield self.AccountsTransitionToCmk(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -91,7 +86,7 @@ class FinalizeExternalReplication(AAZCommand):
     def post_operations(self):
         pass
 
-    class VolumesFinalizeExternalReplication(AAZHttpOperation):
+    class AccountsTransitionToCmk(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -112,7 +107,7 @@ class FinalizeExternalReplication(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/finalizeExternalReplication",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/transitiontocmk",
                 **self.url_parameters
             )
 
@@ -132,19 +127,11 @@ class FinalizeExternalReplication(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "poolName", self.ctx.args.pool_name,
-                    required=True,
-                ),
-                **self.serialize_url_param(
                     "resourceGroupName", self.ctx.args.resource_group,
                     required=True,
                 ),
                 **self.serialize_url_param(
                     "subscriptionId", self.ctx.subscription_id,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "volumeName", self.ctx.args.volume_name,
                     required=True,
                 ),
             }
@@ -160,9 +147,30 @@ class FinalizeExternalReplication(AAZCommand):
             }
             return parameters
 
+        @property
+        def header_parameters(self):
+            parameters = {
+                **self.serialize_header_param(
+                    "Content-Type", "application/json",
+                ),
+            }
+            return parameters
 
-class _FinalizeExternalReplicationHelper:
-    """Helper class for FinalizeExternalReplication"""
+        @property
+        def content(self):
+            _content_value, _builder = self.new_content_builder(
+                self.ctx.args,
+                typ=AAZObjectType,
+                typ_kwargs={"flags": {"client_flatten": True}}
+            )
+            _builder.set_prop("privateEndpointId", AAZStrType, ".private_endpoint_id", typ_kwargs={"flags": {"required": True}})
+            _builder.set_prop("virtualNetworkId", AAZStrType, ".virtual_network_id", typ_kwargs={"flags": {"required": True}})
+
+            return self.serialize_content(_content_value)
 
 
-__all__ = ["FinalizeExternalReplication"]
+class _TransitiontocmkHelper:
+    """Helper class for Transitiontocmk"""
+
+
+__all__ = ["Transitiontocmk"]

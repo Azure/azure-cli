@@ -292,3 +292,44 @@ class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
         self.cmd("az netappfiles account show --resource-group {rg} -a {acc_name}", checks=[
             self.check('location', location)
         ])
+    
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_', additional_tags={'owner': 'cli_test'})
+    def test_account_transitionCMK_fails(self):
+        self.kwargs.update({
+            'loc': LOCATION,
+            'acc_name': self.create_random_name(prefix='cli-acc-', length=24),
+            'acc2_name': self.create_random_name(prefix='cli-acc-', length=24),
+            'keySource': "Microsoft.KeyVault",
+            'keyVaultUri': "myUri",
+            'keyName': "myKeyName",
+            'keyVaultResourceId': "myKeyVaultResourceId",
+            'userAssignedIdentity': "myIdentity"
+        })
+
+        with self.assertRaises(HttpResponseError):
+            # create account with encryption value
+            self.cmd("az netappfiles account create -g {rg} -a {acc_name} -l {loc} --key-source {keySource} --key-vault-uri {keyVaultUri} --key-name {keyName} --keyvault-resource-id {keyVaultResourceId} --user-assigned-identity {userAssignedIdentity}", checks=[
+                self.check('name', '{acc_name}'),
+                self.check('encryption.keySource', '{keySource}')
+            ])
+
+        # create account without encryption value
+        self.cmd("az netappfiles account create -g {rg} -a {acc2_name} -l {loc}", checks=[
+            self.check('name', '{acc2_name}')
+        ])
+
+        with self.assertRaises(HttpResponseError) as cm:
+            # create account with encryption value
+            self.cmd("az netappfiles account get-key-vault-status -g {rg} -a {acc2_name} ", checks=[
+                self.check('name', '{acc2_name}'),
+            ])
+        self.assertIn('OperationNotAvailableInApiVersion', str(
+            cm.exception))
+        
+        with self.assertRaises(HttpResponseError) as cm:
+            # create account with encryption value
+            self.cmd("az netappfiles account transitiontocmk -g {rg} -a {acc2_name} ", checks=[
+                self.check('name', '{acc2_name}'),
+            ])
+        self.assertIn('OperationNotAvailableInApiVersion', str(
+            cm.exception))        

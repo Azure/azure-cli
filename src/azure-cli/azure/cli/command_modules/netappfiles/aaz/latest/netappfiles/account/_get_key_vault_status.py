@@ -12,22 +12,16 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "netappfiles volume replication re-initialize",
+    "netappfiles account get-key-vault-status",
 )
-class ReInitialize(AAZCommand):
-    """Re-Initializes the replication connection on the destination volume
-
-    Re-initialise a volume replication for the specified destination volume. 
-    The replication process is resumed from source to destination.
-
-    :example: Re-initialises the replication process
-        az netappfiles volume replication re-initialize -g mygroup --account-name myaccname --pool-name mypoolname --name mydestinationvolname
+class GetKeyVaultStatus(AAZCommand):
+    """Contains data from encryption.keyVaultProperties as well as information about which private endpoint is used by each encryption sibling set. Response from this endpoint can be used for transitiontocmk
     """
 
     _aaz_info = {
         "version": "2024-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/reinitializereplication", "2024-09-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/getkeyvaultstatus", "2024-09-01"],
         ]
     }
 
@@ -35,7 +29,7 @@ class ReInitialize(AAZCommand):
 
     def _handler(self, command_args):
         super()._handler(command_args)
-        return self.build_lro_poller(self._execute_operations, None)
+        return self.build_lro_poller(self._execute_operations, self._output)
 
     _args_schema = None
 
@@ -49,7 +43,7 @@ class ReInitialize(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.account_name = AAZStrArg(
-            options=["-a", "--account-name"],
+            options=["-a", "-n", "--account-name"],
             help="The name of the NetApp account",
             required=True,
             id_part="name",
@@ -57,36 +51,14 @@ class ReInitialize(AAZCommand):
                 pattern="^[a-zA-Z0-9][a-zA-Z0-9\\-_]{0,127}$",
             ),
         )
-        _args_schema.pool_name = AAZStrArg(
-            options=["-p", "--pool-name"],
-            help="The name of the capacity pool",
-            required=True,
-            id_part="child_name_1",
-            fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\\-_]{0,63}$",
-                max_length=64,
-                min_length=1,
-            ),
-        )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
-        )
-        _args_schema.volume_name = AAZStrArg(
-            options=["-n", "-v", "--name", "--volume-name"],
-            help="The name of the volume",
-            required=True,
-            id_part="child_name_2",
-            fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z][a-zA-Z0-9\\-_]{0,63}$",
-                max_length=64,
-                min_length=1,
-            ),
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.VolumesReInitializeReplication(ctx=self.ctx)()
+        yield self.AccountsGetChangeKeyVaultInformation(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -97,7 +69,11 @@ class ReInitialize(AAZCommand):
     def post_operations(self):
         pass
 
-    class VolumesReInitializeReplication(AAZHttpOperation):
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
+
+    class AccountsGetChangeKeyVaultInformation(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -109,7 +85,7 @@ class ReInitialize(AAZCommand):
                     session,
                     self.on_200,
                     self.on_error,
-                    lro_options={"final-state-via": "location"},
+                    lro_options={"final-state-via": "azure-async-operation"},
                     path_format_arguments=self.url_parameters,
                 )
             if session.http_response.status_code in [200]:
@@ -118,7 +94,7 @@ class ReInitialize(AAZCommand):
                     session,
                     self.on_200,
                     self.on_error,
-                    lro_options={"final-state-via": "location"},
+                    lro_options={"final-state-via": "azure-async-operation"},
                     path_format_arguments=self.url_parameters,
                 )
 
@@ -127,7 +103,7 @@ class ReInitialize(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/reinitializeReplication",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/getKeyVaultStatus",
                 **self.url_parameters
             )
 
@@ -147,19 +123,11 @@ class ReInitialize(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "poolName", self.ctx.args.pool_name,
-                    required=True,
-                ),
-                **self.serialize_url_param(
                     "resourceGroupName", self.ctx.args.resource_group,
                     required=True,
                 ),
                 **self.serialize_url_param(
                     "subscriptionId", self.ctx.subscription_id,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "volumeName", self.ctx.args.volume_name,
                     required=True,
                 ),
             }
@@ -169,18 +137,73 @@ class ReInitialize(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-09-01",
+                    "api-version", "2024-09-01-preview",
                     required=True,
                 ),
             }
             return parameters
 
+        @property
+        def header_parameters(self):
+            parameters = {
+                **self.serialize_header_param(
+                    "Accept", "application/json",
+                ),
+            }
+            return parameters
+
         def on_200(self, session):
-            pass
+            data = self.deserialize_http_content(session)
+            self.ctx.set_var(
+                "instance",
+                data,
+                schema_builder=self._build_schema_on_200
+            )
+
+        _schema_on_200 = None
+
+        @classmethod
+        def _build_schema_on_200(cls):
+            if cls._schema_on_200 is not None:
+                return cls._schema_on_200
+
+            cls._schema_on_200 = AAZObjectType()
+
+            _schema_on_200 = cls._schema_on_200
+            _schema_on_200.properties = AAZObjectType(
+                flags={"client_flatten": True},
+            )
+
+            properties = cls._schema_on_200.properties
+            properties.key_name = AAZStrType(
+                serialized_name="keyName",
+            )
+            properties.key_vault_private_endpoints = AAZListType(
+                serialized_name="keyVaultPrivateEndpoints",
+            )
+            properties.key_vault_resource_id = AAZStrType(
+                serialized_name="keyVaultResourceId",
+            )
+            properties.key_vault_uri = AAZStrType(
+                serialized_name="keyVaultUri",
+            )
+
+            key_vault_private_endpoints = cls._schema_on_200.properties.key_vault_private_endpoints
+            key_vault_private_endpoints.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.properties.key_vault_private_endpoints.Element
+            _element.private_endpoint_id = AAZStrType(
+                serialized_name="privateEndpointId",
+            )
+            _element.virtual_network_id = AAZStrType(
+                serialized_name="virtualNetworkId",
+            )
+
+            return cls._schema_on_200
 
 
-class _ReInitializeHelper:
-    """Helper class for ReInitialize"""
+class _GetKeyVaultStatusHelper:
+    """Helper class for GetKeyVaultStatus"""
 
 
-__all__ = ["ReInitialize"]
+__all__ = ["GetKeyVaultStatus"]
