@@ -783,12 +783,26 @@ def validate_allowed_host_ports(namespace):
 
 
 def validate_application_security_groups(namespace):
+    is_nodepool_operation = False
     if hasattr((namespace), "nodepool_asg_ids"):
+        is_nodepool_operation = True
         asg_ids = namespace.nodepool_asg_ids
+        host_ports = namespace.nodepool_allowed_host_ports
     else:
         asg_ids = namespace.asg_ids
+        host_ports = namespace.allowed_host_ports
+
     if not asg_ids:
         return
+
+    if not host_ports:
+        if is_nodepool_operation:
+            raise ArgumentUsageError(
+                '--nodepool-asg-ids must be used with --nodepool-allowed-host-ports'
+            )
+        raise ArgumentUsageError(
+            '--asg-ids must be used with --allowed-host-ports'
+        )
 
     from azure.mgmt.core.tools import is_valid_resource_id
     for asg in asg_ids:
