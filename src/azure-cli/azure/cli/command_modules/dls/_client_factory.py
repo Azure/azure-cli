@@ -32,6 +32,6 @@ def cf_dls_filesystem(cli_ctx, account_name):
         subscription_id=subscription_id,
         resource=cli_ctx.cloud.endpoints.active_directory_data_lake_resource_id)
     return core.AzureDLFileSystem(
-        token=cred,
+        token_credential=cred,
         store_name=account_name,
         url_suffix=cli_ctx.cloud.suffixes.azure_datalake_store_file_system_endpoint)
