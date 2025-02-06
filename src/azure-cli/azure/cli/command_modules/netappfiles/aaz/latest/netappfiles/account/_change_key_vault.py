@@ -12,16 +12,19 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "netappfiles volume replication peer-external-cluster",
+    "netappfiles account change-key-vault",
+    confirmation="Are you sure you want to perform this operation?",
 )
-class PeerExternalCluster(AAZCommand):
-    """Starts peering the external cluster for this migration volume
+class ChangeKeyVault(AAZCommand):
+    """Change KeyVault/Managed HSM that is used for encryption of volumes under NetApp account
+
+    Affects existing volumes that are encrypted with Key Vault/Managed HSM, and new volumes. Supports HSM to Key Vault, Key Vault to HSM, HSM to HSM and Key Vault to Key Vault.
     """
 
     _aaz_info = {
         "version": "2024-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/peerexternalcluster", "2024-09-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/changekeyvault", "2024-09-01"],
         ]
     }
 
@@ -29,7 +32,7 @@ class PeerExternalCluster(AAZCommand):
 
     def _handler(self, command_args):
         super()._handler(command_args)
-        return self.build_lro_poller(self._execute_operations, self._output)
+        return self.build_lro_poller(self._execute_operations, None)
 
     _args_schema = None
 
@@ -43,7 +46,7 @@ class PeerExternalCluster(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.account_name = AAZStrArg(
-            options=["-a", "--account-name"],
+            options=["-a", "-n", "--account-name"],
             help="The name of the NetApp account",
             required=True,
             id_part="name",
@@ -51,49 +54,51 @@ class PeerExternalCluster(AAZCommand):
                 pattern="^[a-zA-Z0-9][a-zA-Z0-9\\-_]{0,127}$",
             ),
         )
-        _args_schema.pool_name = AAZStrArg(
-            options=["-p", "--pool-name"],
-            help="The name of the capacity pool",
-            required=True,
-            id_part="child_name_1",
-            fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\\-_]{0,63}$",
-                max_length=64,
-                min_length=1,
-            ),
-        )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
-        )
-        _args_schema.volume_name = AAZStrArg(
-            options=["-n", "-v", "--volume-name"],
-            help="The name of the volume",
-            required=True,
-            id_part="child_name_2",
-            fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z][a-zA-Z0-9\\-_]{0,63}$",
-                max_length=64,
-                min_length=1,
-            ),
         )
 
         # define Arg Group "Body"
 
         _args_schema = cls._args_schema
-        _args_schema.peer_ip_addresses = AAZListArg(
-            options=["--peer-ip-addresses"],
+        _args_schema.key_name = AAZStrArg(
+            options=["--key-name"],
             arg_group="Body",
-            help="A list of IC-LIF IPs that can be used to connect to the On-prem cluster",
-            required=True,
+            help="The name of the key that should be used for encryption.",
+        )
+        _args_schema.key_vault_private_endpoints = AAZListArg(
+            options=["--key-vault-private-endpoints"],
+            arg_group="Body",
+            help="Pairs of virtual network ID and private endpoint ID. Every virtual network that has volumes encrypted with customer-managed keys needs its own key vault private endpoint.",
+        )
+        _args_schema.key_vault_resource_id = AAZResourceIdArg(
+            options=["--keyvault-resource-id", "--key-vault-resource-id"],
+            arg_group="Body",
+            help="Azure resource ID of the key vault/managed HSM that should be used for encryption.",
+        )
+        _args_schema.key_vault_uri = AAZStrArg(
+            options=["-v", "--key-vault-uri"],
+            arg_group="Body",
+            help="The URI of the key vault/managed HSM that should be used for encryption.",
         )
 
-        peer_ip_addresses = cls._args_schema.peer_ip_addresses
-        peer_ip_addresses.Element = AAZStrArg()
+        key_vault_private_endpoints = cls._args_schema.key_vault_private_endpoints
+        key_vault_private_endpoints.Element = AAZObjectArg()
+
+        _element = cls._args_schema.key_vault_private_endpoints.Element
+        _element.private_endpoint_id = AAZResourceIdArg(
+            options=["private-endpoint-id"],
+            help="Identifier of the private endpoint to reach the Azure Key Vault",
+        )
+        _element.virtual_network_id = AAZResourceIdArg(
+            options=["virtual-network-id"],
+            help="Identifier for the virtual network id",
+        )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.VolumesPeerExternalCluster(ctx=self.ctx)()
+        yield self.AccountsChangeKeyVault(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -104,11 +109,7 @@ class PeerExternalCluster(AAZCommand):
     def post_operations(self):
         pass
 
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
-
-    class VolumesPeerExternalCluster(AAZHttpOperation):
+    class AccountsChangeKeyVault(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -118,16 +119,7 @@ class PeerExternalCluster(AAZCommand):
                 return self.client.build_lro_polling(
                     self.ctx.args.no_wait,
                     session,
-                    self.on_200,
-                    self.on_error,
-                    lro_options={"final-state-via": "location"},
-                    path_format_arguments=self.url_parameters,
-                )
-            if session.http_response.status_code in [200]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_200,
+                    None,
                     self.on_error,
                     lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
@@ -138,7 +130,7 @@ class PeerExternalCluster(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/peerExternalCluster",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/changeKeyVault",
                 **self.url_parameters
             )
 
@@ -158,19 +150,11 @@ class PeerExternalCluster(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "poolName", self.ctx.args.pool_name,
-                    required=True,
-                ),
-                **self.serialize_url_param(
                     "resourceGroupName", self.ctx.args.resource_group,
                     required=True,
                 ),
                 **self.serialize_url_param(
                     "subscriptionId", self.ctx.subscription_id,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "volumeName", self.ctx.args.volume_name,
                     required=True,
                 ),
             }
@@ -192,9 +176,6 @@ class PeerExternalCluster(AAZCommand):
                 **self.serialize_header_param(
                     "Content-Type", "application/json",
                 ),
-                **self.serialize_header_param(
-                    "Accept", "application/json",
-                ),
             }
             return parameters
 
@@ -203,43 +184,27 @@ class PeerExternalCluster(AAZCommand):
             _content_value, _builder = self.new_content_builder(
                 self.ctx.args,
                 typ=AAZObjectType,
-                typ_kwargs={"flags": {"required": True, "client_flatten": True}}
+                typ_kwargs={"flags": {"client_flatten": True}}
             )
-            _builder.set_prop("peerIpAddresses", AAZListType, ".peer_ip_addresses", typ_kwargs={"flags": {"required": True}})
+            _builder.set_prop("keyName", AAZStrType, ".key_name", typ_kwargs={"flags": {"required": True}})
+            _builder.set_prop("keyVaultPrivateEndpoints", AAZListType, ".key_vault_private_endpoints", typ_kwargs={"flags": {"required": True}})
+            _builder.set_prop("keyVaultResourceId", AAZStrType, ".key_vault_resource_id")
+            _builder.set_prop("keyVaultUri", AAZStrType, ".key_vault_uri", typ_kwargs={"flags": {"required": True}})
 
-            peer_ip_addresses = _builder.get(".peerIpAddresses")
-            if peer_ip_addresses is not None:
-                peer_ip_addresses.set_elements(AAZStrType, ".")
+            key_vault_private_endpoints = _builder.get(".keyVaultPrivateEndpoints")
+            if key_vault_private_endpoints is not None:
+                key_vault_private_endpoints.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".keyVaultPrivateEndpoints[]")
+            if _elements is not None:
+                _elements.set_prop("privateEndpointId", AAZStrType, ".private_endpoint_id")
+                _elements.set_prop("virtualNetworkId", AAZStrType, ".virtual_network_id")
 
             return self.serialize_content(_content_value)
 
-        def on_200(self, session):
-            data = self.deserialize_http_content(session)
-            self.ctx.set_var(
-                "instance",
-                data,
-                schema_builder=self._build_schema_on_200
-            )
 
-        _schema_on_200 = None
-
-        @classmethod
-        def _build_schema_on_200(cls):
-            if cls._schema_on_200 is not None:
-                return cls._schema_on_200
-
-            cls._schema_on_200 = AAZObjectType()
-
-            _schema_on_200 = cls._schema_on_200
-            _schema_on_200.peer_accept_command = AAZStrType(
-                serialized_name="peerAcceptCommand",
-            )
-
-            return cls._schema_on_200
+class _ChangeKeyVaultHelper:
+    """Helper class for ChangeKeyVault"""
 
 
-class _PeerExternalClusterHelper:
-    """Helper class for PeerExternalCluster"""
-
-
-__all__ = ["PeerExternalCluster"]
+__all__ = ["ChangeKeyVault"]

@@ -25,9 +25,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-07-01",
+        "version": "2024-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/volumegroups/{}", "2024-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/volumegroups/{}", "2024-09-01"],
         ]
     }
 
@@ -161,6 +161,11 @@ class Create(AAZCommand):
             options=["cool-access-retrieval-policy"],
             help="coolAccessRetrievalPolicy determines the data retrieval behavior from the cool tier to standard storage based on the read pattern for cool access enabled volumes. The possible values for this field are:   Default - Data will be pulled from cool tier to standard storage on random reads. This policy is the default.  OnRead - All client-driven data read is pulled from cool tier to standard storage on both sequential and random reads.  Never - No client-driven data is pulled from cool tier to standard storage.",
             enum={"Default": "Default", "Never": "Never", "OnRead": "OnRead"},
+        )
+        _element.cool_access_tiering_policy = AAZStrArg(
+            options=["cool-access-tiering-policy"],
+            help="coolAccessTieringPolicy determines which cold data blocks are moved to cool tier. The possible values for this field are: Auto - Moves cold user data blocks in both the Snapshot copies and the active file system to the cool tier tier. This policy is the default. SnapshotOnly - Moves user data blocks of the Volume Snapshot copies that are not associated with the active file system to the cool tier.",
+            enum={"Auto": "Auto", "SnapshotOnly": "SnapshotOnly"},
         )
         _element.coolness_period = AAZIntArg(
             options=["coolness-period"],
@@ -644,7 +649,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-07-01",
+                    "api-version", "2024-09-01",
                     required=True,
                 ),
             }
@@ -711,6 +716,7 @@ class Create(AAZCommand):
                 properties.set_prop("capacityPoolResourceId", AAZStrType, ".capacity_pool_resource_id")
                 properties.set_prop("coolAccess", AAZBoolType, ".cool_access")
                 properties.set_prop("coolAccessRetrievalPolicy", AAZStrType, ".cool_access_retrieval_policy")
+                properties.set_prop("coolAccessTieringPolicy", AAZStrType, ".cool_access_tiering_policy")
                 properties.set_prop("coolnessPeriod", AAZIntType, ".coolness_period")
                 properties.set_prop("creationToken", AAZStrType, ".creation_token", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("dataProtection", AAZObjectType, ".data_protection")
@@ -934,6 +940,9 @@ class Create(AAZCommand):
             )
             properties.cool_access_retrieval_policy = AAZStrType(
                 serialized_name="coolAccessRetrievalPolicy",
+            )
+            properties.cool_access_tiering_policy = AAZStrType(
+                serialized_name="coolAccessTieringPolicy",
             )
             properties.coolness_period = AAZIntType(
                 serialized_name="coolnessPeriod",
