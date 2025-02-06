@@ -2889,6 +2889,82 @@ class WebappOneDeployScenarioTest(ScenarioTest):
             JMESPathCheck('message', 'OneDeploy'),
         ])
 
+class WebappSiteContainersTests(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_sitecontainers', location='eastus')
+    def test_webapp_sitecontainers_create_update_show_delete(self, resource_group):
+        webapp_name = self.create_random_name('webapp-sitecontainers-test', 40)
+        plan_name = self.create_random_name('webapp-sitecontainers-plan', 40)
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {} --sitecontainers-app'.format(resource_group, webapp_name, plan_name))
+        
+        self.cmd('webapp sitecontainers create --name {} --resource-group {} --container-name frontend --is-main --image mcr.microsoft.com/appsvc/staticsite --target-port 80'.
+                  format(webapp_name, resource_group)).assert_with_checks([
+                    JMESPathCheck('name', 'frontend'),
+                    JMESPathCheck('image', 'mcr.microsoft.com/appsvc/staticsite'),
+                    JMESPathCheck('authType', 'Anonymous'),
+                    JMESPathCheck('isMain', True),
+                    JMESPathCheck('targetPort', '80')
+                    ])
+
+        self.cmd('webapp sitecontainers show --name {} --resource-group {} --container-name frontend'.
+                  format(webapp_name, resource_group)).assert_with_checks([
+                    JMESPathCheck('name', 'frontend'),
+                    JMESPathCheck('image', 'mcr.microsoft.com/appsvc/staticsite'),
+                    JMESPathCheck('authType', 'Anonymous'),
+                    JMESPathCheck('isMain', True),
+                    JMESPathCheck('targetPort', '80')
+                    ])
+
+        self.cmd('webapp sitecontainers update --name {} --resource-group {} --container-name frontend --is-main false --image mcr.microsoft.com/appsvc/staticsite --target-port 80 --startup-cmd "npm start"'.
+                  format(webapp_name, resource_group)).assert_with_checks([
+                    JMESPathCheck('name', 'frontend'),
+                    JMESPathCheck('image', 'mcr.microsoft.com/appsvc/staticsite'),
+                    JMESPathCheck('authType', 'Anonymous'),
+                    JMESPathCheck('isMain', False),
+                    JMESPathCheck('targetPort', '80'),
+                    JMESPathCheck('startUpCommand', 'npm start')
+                    ])
+        
+        with self.assertRaisesRegex(CLIError, "Sitecontainer 'nonexistingcontainer' does not exist, failed to update the sitecontainer"):
+            self.cmd('webapp sitecontainers update --name {} --resource-group {} --container-name nonexistingcontainer --is-main false --image mcr.microsoft.com/appsvc/staticsite --target-port 80'.format(webapp_name, resource_group))
+        
+        self.cmd('webapp sitecontainers delete --name {} --resource-group {} --container-name frontend'.format(webapp_name, resource_group))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_sitecontainers', location='eastus')
+    def test_webapp_sitecontainers_createfromspecs_and_list_containers(self, resource_group):
+        webapp_name = self.create_random_name('webapp-sitecontainers-test', 40)
+        plan_name = self.create_random_name('webapp-sitecontainers-plan', 40)
+        spec_file = os.path.join(TEST_DIR, 'data', 'sitecontainers_spec.json')
+
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {} --sitecontainers-app'.format(resource_group, webapp_name, plan_name))
+        
+        self.cmd('webapp sitecontainers create --name {} --resource-group {} --sitecontainers-spec-file "{}"'.
+                  format(webapp_name, resource_group, spec_file)).assert_with_checks([
+                    JMESPathCheck('length([])', 3),
+                    JMESPathCheck('[0].name', 'main'),
+                    JMESPathCheck('[1].name', 'sidecardotnet'),
+                    JMESPathCheck('[2].name', 'sidecarnodejs')
+                    ])
+        
+        self.cmd('webapp sitecontainers list --name {} --resource-group {}'.
+                  format(webapp_name, resource_group, spec_file)).assert_with_checks([
+                    JMESPathCheck('length([])', 3),
+                    JMESPathCheck('[0].name', 'main'),
+                    JMESPathCheck('[0].isMain', True),
+                    JMESPathCheck('[0].authType', "SystemIdentity"),
+                    JMESPathCheck('length([0].environmentVariables)', 2),
+                    JMESPathCheck('length([0].volumeMounts)', 1),
+                    JMESPathCheck('[1].name', 'sidecardotnet'),
+                    JMESPathCheck('[1].targetPort', '2000'),
+                    JMESPathCheck('[2].name', 'sidecarnodejs'),
+                    JMESPathCheck('[2].authType', 'UserCredentials'),
+                    JMESPathCheck('[2].userName', 'Username')
+                    ])
 
 class TrackRuntimeStatusTest(ScenarioTest):
     @live_only()

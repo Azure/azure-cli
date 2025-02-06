@@ -1658,6 +1658,9 @@ examples:
   - name: Create a web app with a NodeJS 10.14 runtime and deployed from a local git repository.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "node:12LTS" --deployment-local-git
+  - name: Create a web app which supports sitecontainers.
+    text: >
+        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --sitecontainers-app
   - name: Create a web app with an image from DockerHub.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName -i nginx

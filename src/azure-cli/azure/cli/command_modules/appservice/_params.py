@@ -148,6 +148,7 @@ subscription than the app service environment, please use the resource ID for --
                    local_context_attribute=LocalContextAttribute(name='web_name', actions=[LocalContextAction.SET],
                                                                  scopes=['webapp', 'cupertino']))
         c.argument('startup_file', help="Linux only. The web's startup file")
+        c.argument('sitecontainers_app', help="If true, a webapp which supports sitecontainers will be created", arg_type=get_three_state_flag())
         c.argument('deployment_container_image_name', options_list=['--deployment-container-image-name', '-i'], help='Container image name from container registry, e.g. publisher/image-name:tag', deprecate_info=c.deprecate(target='--deployment-container-image-name'))
         c.argument('container_registry_url', options_list=['--container-registry-url'], help='The container registry server url')
         c.argument('container_image_name', options_list=['--container-image-name', '-c'],

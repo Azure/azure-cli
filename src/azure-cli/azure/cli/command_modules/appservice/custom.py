@@ -36,9 +36,7 @@ from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id, resou
 
 from azure.mgmt.storage import StorageManagementClient
 from azure.mgmt.applicationinsights import ApplicationInsightsManagementClient
-from azure.mgmt.web.models import KeyInfo
-from azure.mgmt.web.models import SiteContainer
-from azure.mgmt.web.models import AuthType
+from azure.mgmt.web.models import KeyInfo, SiteContainer, AuthType
 from azure.mgmt.web import WebSiteManagementClient
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -111,7 +109,8 @@ logger = get_logger(__name__)
 
 def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_file=None,  # pylint: disable=too-many-statements,too-many-branches
                   deployment_container_image_name=None, deployment_source_url=None, deployment_source_branch='master',
-                  deployment_local_git=None, container_registry_password=None, container_registry_user=None,
+                  deployment_local_git=None, sitecontainers_app=None,
+                  container_registry_password=None, container_registry_user=None,
                   container_registry_url=None, container_image_name=None,
                   multicontainer_config_type=None, multicontainer_config_file=None, tags=None,
                   using_webapp_up=False, language=None, assign_identities=None,
@@ -227,20 +226,24 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     current_stack = None
     if is_linux:
         if not validate_container_app_create_options(runtime, container_image_name,
-                                                     multicontainer_config_type, multicontainer_config_file):
+                                                     multicontainer_config_type, multicontainer_config_file,
+                                                     sitecontainers_app):
             if deployment_container_image_name:
                 raise ArgumentUsageError('Please specify both --multicontainer-config-type TYPE '
                                          'and --multicontainer-config-file FILE, '
                                          'and only specify one out of --runtime, '
-                                         '--deployment-container-image-name and --multicontainer-config-type')
+                                         '--deployment-container-image-name, --multicontainer-config-type '
+                                         'or --sitecontainers_app')
             raise ArgumentUsageError('Please specify both --multicontainer-config-type TYPE '
                                      'and --multicontainer-config-file FILE, '
                                      'and only specify one out of --runtime, '
-                                     '--container-image-name and --multicontainer-config-type')
+                                     '--container-image-name, --multicontainer-config-type '
+                                     'or --sitecontainers_app')
         if startup_file:
             site_config.app_command_line = startup_file
-
-        if runtime:
+        if sitecontainers_app:
+            site_config.linux_fx_version = 'sitecontainers'
+        elif runtime:
             match = helper.resolve(runtime, is_linux)
             if not match:
                 raise ValidationError("Linux Runtime '{}' is not supported."
@@ -434,10 +437,11 @@ def get_managed_environment(cmd, resource_group_name, environment_name):
 
 
 def validate_container_app_create_options(runtime=None, container_image_name=None,
-                                          multicontainer_config_type=None, multicontainer_config_file=None):
+                                          multicontainer_config_type=None, multicontainer_config_file=None,
+                                          sitecontainers_app=None):
     if bool(multicontainer_config_type) != bool(multicontainer_config_file):
         return False
-    opts = [runtime, container_image_name, multicontainer_config_type]
+    opts = [runtime, container_image_name, multicontainer_config_type, sitecontainers_app]
     return len([x for x in opts if x]) == 1  # you can only specify one out the combinations
 
 
@@ -1156,8 +1160,6 @@ def delete_webapp_sitecontainer(cmd, name, resource_group, container_name, slot=
             logger.error("Failed to delete sitecontainer %s.", container_name)
     except Exception as ex:
         raise AzureInternalError("Failed to delete sitecontainer '{}'. Error: {}".format(container_name, str(ex)))
-    return response
-
 
 def list_webapp_sitecontainers(cmd, name, resource_group, slot=None):
     web_client = get_mgmt_service_client(cmd.cli_ctx, WebSiteManagementClient).web_apps

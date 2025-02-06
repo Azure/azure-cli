@@ -1,0 +1,44 @@
+[
+    {
+        "name" : "main",
+        "image": "mcr.microsoft.com/appsvc/docs/sidecars/sample-nginx:latest",
+        "target_port": "80",
+        "is_main": true,
+        "auth_type": "SystemIdentity",
+        "environment_variables" : [
+            {
+                "name" : "hello",
+                "value": "world"
+            },
+            {
+                "name": "lorem",
+                "value": "ipsum"
+            }
+        ],
+        "volume_mounts": [
+            {
+                "container_mount_path" : "mountPath",
+                "data": "configData",
+                "read_only": true,
+                "volume_sub_path": "subPath" 
+            }
+        ]
+    },
+    {
+        "name" : "sidecardotnet",
+        "image": "mcr.microsoft.com/appsvc/docs/sidecars/sample-dotnetcore:latest",
+        "target_port": "2000",
+        "is_main": false,
+        "auth_type": "UserAssigned",
+        "user_managed_identity_client_id": "c283d9ab-ed41-4da9-a458-7256a2aa3e74"
+    },
+    {
+        "name" : "sidecarnodejs",
+        "image": "mcr.microsoft.com/appsvc/docs/sidecars/sample-nodejs:latest",
+        "target_port": "4000",
+        "is_main": false,
+        "auth_type": "UserCredentials",
+        "user_name": "Username",
+        "password_secret": "Password"
+    }
+]
