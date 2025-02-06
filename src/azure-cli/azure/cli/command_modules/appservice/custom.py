@@ -3346,6 +3346,7 @@ def set_traffic_routing(cmd, resource_group_name, name, distribution):
     configs.experiments.ramp_up_rules = []
     for r in distribution:
         slot, percentage = r.split('=')
+        host_name_val = host_name_val[:40] if len(host_name_val) > 40 else host_name_val
         action_host_name_slot = host_name_val + "-" + slot
         configs.experiments.ramp_up_rules.append(RampUpRule(action_host_name=action_host_name_slot + host_name_suffix,
                                                             reroute_percentage=float(percentage),
