@@ -687,19 +687,8 @@ class TestActions(unittest.TestCase):
                 self.fail("Test Expected value should be a dict or None, instead it is {}.".format(expected))
 
     def test_process_gallery_image_version_namespace(self):
-        from azure.cli.core.profiles._shared import AZURE_API_PROFILES, ResourceType
         np = mock.MagicMock(spec='target_regions')
-        api_version = AZURE_API_PROFILES['latest'][ResourceType.MGMT_COMPUTE].profile['gallery_images']
-        TargetRegion = self._get_compute_model('TargetRegion', api_version)
-        EncryptionImages = self._get_compute_model('EncryptionImages', api_version)
-        OSDiskImageEncryption = self._get_compute_model('OSDiskImageEncryption', api_version)
-        DataDiskImageEncryption = self._get_compute_model('DataDiskImageEncryption', api_version)
-        ConfidentialVMEncryptionType = self._get_compute_model('ConfidentialVMEncryptionType', api_version)
-        GalleryTargetExtendedLocation = self._get_compute_model('GalleryTargetExtendedLocation', api_version)
-        GalleryExtendedLocation = self._get_compute_model('GalleryExtendedLocation', api_version)
         cmd = mock.MagicMock()
-        cmd.get_models.return_value = [TargetRegion, EncryptionImages, OSDiskImageEncryption, DataDiskImageEncryption,
-                                       ConfidentialVMEncryptionType, GalleryTargetExtendedLocation, GalleryExtendedLocation]
 
         target_regions_list = ["southcentralus", "westus=1", "westus2=standard_zrs", "eastus=2=standard_lrs", 'CentralUSEUAP=1']
         np.target_regions = target_regions_list
@@ -707,10 +696,14 @@ class TestActions(unittest.TestCase):
         process_gallery_image_version_namespace(cmd, np)
         target_regions_objs = np.target_regions
 
-        self.assertEqual(target_regions_objs[0], TargetRegion(name="southcentralus"))
-        self.assertEqual(target_regions_objs[1], TargetRegion(name="westus", regional_replica_count=1))
-        self.assertEqual(target_regions_objs[2], TargetRegion(name="westus2", storage_account_type="standard_zrs"))
-        self.assertEqual(target_regions_objs[3], TargetRegion(name="eastus", regional_replica_count=2, storage_account_type="standard_lrs"))
+        self.assertEqual(target_regions_objs[0]["name"], "southcentralus")
+        self.assertEqual(target_regions_objs[1]["name"], "westus")
+        self.assertEqual(target_regions_objs[1]["regional_replica_count"], 1)
+        self.assertEqual(target_regions_objs[2]["name"], "westus2")
+        self.assertEqual(target_regions_objs[2]["storage_account_type"], "standard_zrs")
+        self.assertEqual(target_regions_objs[3]["name"], "eastus")
+        self.assertEqual(target_regions_objs[3]["regional_replica_count"], 2)
+        self.assertEqual(target_regions_objs[3]["storage_account_type"], "standard_lrs")
 
         # handle invalid storage account / replica count
         with self.assertRaises(CLIError):

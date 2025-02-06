@@ -6461,6 +6461,7 @@ def create_virtual_hub(cmd,
                        hosted_subnet,
                        public_ip_address,
                        hub_routing_preference=None,
+                       auto_scale_config=None,
                        location=None,
                        tags=None):
     from azure.core.exceptions import HttpResponseError
@@ -6480,7 +6481,8 @@ def create_virtual_hub(cmd,
         'location': location,
         'tags': tags,
         'sku': 'Standard',
-        "hub_routing_preference": hub_routing_preference
+        "hub_routing_preference": hub_routing_preference,
+        "auto_scale_config": auto_scale_config
     }
     from .aaz.latest.network.routeserver import Create
     vhub_poller = Create(cli_ctx=cmd.cli_ctx)(command_args=args)

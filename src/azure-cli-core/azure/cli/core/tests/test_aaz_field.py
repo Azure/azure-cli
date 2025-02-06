@@ -37,6 +37,17 @@ class TestAAZField(unittest.TestCase):
 
         with self.assertRaises(AAZInvalidValueError):
             v.properties.count = "a"
+        
+        with self.assertRaises(AAZInvalidValueError):
+            v.properties.count = "1a"
+        
+        with self.assertRaises(AAZInvalidValueError):
+            v.properties.count = "1.1"
+
+        # support string input with json parsing
+        v.properties.count = "12"
+        assert v.properties.count == 12
+        assert v.properties.count._data == 12
 
         # test string type
         model_schema.properties.name = AAZStrType()
@@ -70,6 +81,17 @@ class TestAAZField(unittest.TestCase):
         assert not v.properties.enable
         assert v.properties.enable is not False
 
+        with self.assertRaises(AAZInvalidValueError):
+            v.properties.enable = 1
+
+        # support string input with json parsing
+        v.properties.enable = "false"
+        v.properties.enable = "true"
+        assert v.properties.enable == True
+        assert not (v.properties.enable != True)
+        assert v.properties.enable
+        assert v.properties.enable is not True  # cannot us is
+
         # test float type
         model_schema.properties.height = AAZFloatType()
         v.properties.height = 10.0
@@ -86,6 +108,17 @@ class TestAAZField(unittest.TestCase):
         v.properties.height = 10  # test assign int
         assert str(v.properties.height) == "10.0"
 
+        with self.assertRaises(AAZInvalidValueError):
+            v.properties.height = "1a"
+        
+        v.properties.height = "12.1"
+        assert v.properties.height == 12.1
+        assert v.properties.height._data == 12.1
+
+        v.properties.height = "12"
+        assert v.properties.height == 12
+        assert v.properties.height._data == 12
+
         # test assign properties by dict
         v.properties = {
             "count": 100,
@@ -99,6 +132,21 @@ class TestAAZField(unittest.TestCase):
         assert v.properties.count._data == 100
         assert v.properties.enable._data == True
         assert v.properties.height._data == 111
+
+        # test assign properties by dict with all string value
+        v.properties = {
+            "count": "101",
+            "name": "abcd",
+            "enable": "False",
+            "height": "121"
+        }
+
+        assert not v.properties._is_patch
+        assert v.properties.name._data == "abcd"
+        assert v.properties.count._data == 101
+        assert v.properties.enable._data == False
+        assert v.properties.height._data == 121
+
 
     def test_aaz_dict_type(self):
         from azure.cli.core.aaz._field_type import AAZObjectType, AAZDictType, AAZStrType
