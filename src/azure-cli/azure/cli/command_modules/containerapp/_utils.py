@@ -557,6 +557,7 @@ def store_as_secret_and_return_secret_ref(secrets_list, registry_user, registry_
 
         return registry_secret_name
 
+
 def parse_list_of_strings(comma_separated_string):
     comma_separated = comma_separated_string.split(',')
     return [s.strip() for s in comma_separated]
