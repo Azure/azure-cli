@@ -1161,19 +1161,24 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
 
 def auto_shutdown_vm(cmd, resource_group_name, vm_name, off=None, email=None, webhook=None, time=None,
                      location=None):
+    from ...lab.aaz.latest.lab.global_schedule import Delete as DeleteSchedule, Create as CreateSchedule
     from azure.mgmt.core.tools import resource_id
-    from azure.mgmt.devtestlabs.models import Schedule
     from azure.cli.core.commands.client_factory import get_subscription_id
     subscription_id = get_subscription_id(cmd.cli_ctx)
     client = _dev_test_labs_client_factory(cmd.cli_ctx, subscription_id)
     name = 'shutdown-computevm-' + vm_name
     vm_id = resource_id(subscription=client.config.subscription_id, resource_group=resource_group_name,
                         namespace='Microsoft.Compute', type='virtualMachines', name=vm_name)
+
+    schedule = {
+        'name': name,
+        'resource_group': resource_group_name
+    }
     if off:
         if email is not None or webhook is not None or time is not None:
             # I don't want to disrupt users. So I warn instead of raising an error.
             logger.warning('If --off, other parameters will be ignored.')
-        return client.global_schedules.delete(resource_group_name, name)
+        return DeleteSchedule(cli_ctx=cmd.cli_ctx)(command_args=schedule)
 
     if time is None:
         raise CLIError('usage error: --time is a required parameter')
@@ -1189,14 +1194,16 @@ def auto_shutdown_vm(cmd, resource_group_name, vm_name, off=None, email=None, we
         if webhook:
             notification_settings['webhookUrl'] = webhook
 
-    schedule = Schedule(status='Enabled',
-                        target_resource_id=vm_id,
-                        daily_recurrence=daily_recurrence,
-                        notification_settings=notification_settings,
-                        time_zone_id='UTC',
-                        task_type='ComputeVmShutdownTask',
-                        location=location)
-    return client.global_schedules.create_or_update(resource_group_name, name, schedule)
+    schedule.update({
+        'status': 'Enabled',
+        'target_resource_id': vm_id,
+        'daily_recurrence': daily_recurrence,
+        'notification_settings': notification_settings,
+        'time_zone_id': 'UTC',
+        'task_type': 'ComputeVmShutdownTask',
+        'location': location
+    })
+    return CreateSchedule(cli_ctx=cmd.cli_ctx)(command_args=schedule)
 
 
 def get_instance_view(cmd, resource_group_name, vm_name, include_user_data=False):
