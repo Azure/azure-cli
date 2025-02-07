@@ -1051,7 +1051,13 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
                     logger.warning('%s during progress reporting: %s', getattr(type(ex), '__name__', type(ex)), ex)
             try:
                 if self.progress_bar:
-                    self.progress_bar.update_progress()
+                    status = ""
+                    # some pollers do not have a status method (eg. AAZLROPoller)
+                    try:
+                        status = poller.status()
+                    except Exception:
+                        pass
+                    self.progress_bar.update_progress(status)
                 self._delay()
             except KeyboardInterrupt:
                 if self.progress_bar:
