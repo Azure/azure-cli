@@ -391,7 +391,7 @@ def load_arguments(self, _):
         c.argument('disk_encryption_set_id', options_list=['--disk-encryption-set-id'], help='The disk encryption set id is used for encrypting restored disks. Please ensure access to disk encryption set id that is specified here.')
         c.argument('mi_system_assigned', action='store_true', help='Use this flag to specify whether a system-assigned managed identity should be used for the restore operation. MI option is not applicable for restoring unmanaged disks.')
         c.argument('mi_user_assigned', help='ARM ID of the user-assigned managed identity to use for the restore operation. Specify a value for this parameter if you do not want to use a system-assigned MI for restoring the backup item.')
-        c.argument('target_zone', arg_type=get_enum_type(['1', '2', '3']), help='A primary region currently can have three Azure availability zones. Use this argument to specify the target zone number while doing Cross Zonal Restore.')
+        c.argument('target_zone', arg_type=get_enum_type(['1', '2', '3', 'NoZone']), help='A primary region currently can have three Azure availability zones. Use this argument to specify the target zone number while doing Cross Zonal Restore.')
         c.argument('restore_mode', restore_mode_type)
         c.argument('target_vm_name', help='Name of the VM to which the data should be restored, in the case of Alternate Location restore to a new VM.')
         c.argument('target_vnet_name', help='Name of the VNet in which the target VM should be created, in the case of Alternate Location restore to a new VM.')

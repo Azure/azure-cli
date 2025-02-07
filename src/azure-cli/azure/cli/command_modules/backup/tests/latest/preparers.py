@@ -20,7 +20,7 @@ class VaultPreparer(AbstractPreparer, SingleValueReplacer):  # pylint: disable=t
     def __init__(self, name_prefix='clitest-vault', parameter_name='vault_name',
                  resource_group_location_parameter_name='resource_group_location',
                  resource_group_parameter_name='resource_group',
-                 dev_setting_name='AZURE_CLI_TEST_DEV_BACKUP_ACCT_NAME', soft_delete=True):
+                 dev_setting_name='AZURE_CLI_TEST_DEV_BACKUP_ACCT_NAME', soft_delete=True, storageRedundancy = None):
         super().__init__(name_prefix, 24)
         from azure.cli.core.mock import DummyCli
         self.cli_ctx = DummyCli()
@@ -31,6 +31,7 @@ class VaultPreparer(AbstractPreparer, SingleValueReplacer):  # pylint: disable=t
         self.resource_group_location_parameter_name = resource_group_location_parameter_name
         self.dev_setting_value = os.environ.get(dev_setting_name, None)
         self.soft_delete = soft_delete
+        self.storageRedundancy = storageRedundancy
 
     def create_resource(self, name, **kwargs):
         if not self.dev_setting_value:
@@ -43,6 +44,10 @@ class VaultPreparer(AbstractPreparer, SingleValueReplacer):  # pylint: disable=t
             execute(self.cli_ctx, cmd)
             if not self.soft_delete:
                 cmd = 'az backup vault backup-properties set -n {} -g {} --soft-delete-feature-state Disable'.format(name, self.resource_group)
+                execute(self.cli_ctx, cmd)
+                
+            if self.storageRedundancy:
+                cmd = 'az backup vault update -n {} -g {} --backup-storage-redundancy {}'.format(name, self.resource_group, self.storageRedundancy)
                 execute(self.cli_ctx, cmd)
             return {self.parameter_name: name}
         return {self.parameter_name: self.dev_setting_value}
@@ -89,7 +94,7 @@ class VaultPreparer(AbstractPreparer, SingleValueReplacer):  # pylint: disable=t
 class VMPreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix='clitest-vm', parameter_name='vm_name',
                  resource_group_location_parameter_name='resource_group_location',
-                 resource_group_parameter_name='resource_group', dev_setting_name='AZURE_CLI_TEST_DEV_BACKUP_VM_NAME'):
+                 resource_group_parameter_name='resource_group', dev_setting_name='AZURE_CLI_TEST_DEV_BACKUP_VM_NAME', image = "Win2012R2Datacenter"):
         super().__init__(name_prefix, 15)
         from azure.cli.core.mock import DummyCli
         self.cli_ctx = DummyCli()
@@ -99,17 +104,18 @@ class VMPreparer(AbstractPreparer, SingleValueReplacer):
         self.location = None
         self.resource_group_location_parameter_name = resource_group_location_parameter_name
         self.dev_setting_value = os.environ.get(dev_setting_name, None)
+        self.image = image
 
     def create_resource(self, name, **kwargs):
         if not self.dev_setting_value:
             self.resource_group = self._get_resource_group(**kwargs)
             self.location = self._get_resource_group_location(**kwargs)
             param_format = '-n {} -g {} --image {} --admin-username {} --admin-password {} '
-            param_format += '--tags {} --nsg-rule None'
+            param_format += '--tags {} --nsg-rule None --security-type {}'
             # param_format += '--tags {} --size {} --nsg-rule None'
             param_tags = 'MabUsed=Yes Owner=sisi Purpose=CLITest DeleteBy=12-2099 AutoShutdown=No'
-            param_string = param_format.format(name, self.resource_group, 'Win2012R2Datacenter', name,
-                                               '%j^VYw9Q3Z@Cu$*h', param_tags)  #, 'Standard_D2a_v4')
+            param_string = param_format.format(name, self.resource_group, self.image, name,
+                                               '%j^VYw9Q3Z@Cu$*h', param_tags, "Standard")  #, 'Standard_D2a_v4')
             cmd = 'az vm create {}'.format(param_string)
             execute(self.cli_ctx, cmd)
             return {self.parameter_name: name}
