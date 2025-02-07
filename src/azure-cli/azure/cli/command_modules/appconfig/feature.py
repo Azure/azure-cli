@@ -296,13 +296,15 @@ def list_feature(cmd,
                  top=None,
                  all_=False,
                  auth_mode="key",
-                 endpoint=None):
+                 endpoint=None,
+                 tags=None):
     return __list_features(
         cmd=cmd,
         feature=feature,
         key=key,
         name=name,
         label=label,
+        tags=tags,
         fields=fields,
         connection_string=connection_string,
         top=top,
@@ -1031,6 +1033,7 @@ def __list_features(
     key=None,
     name=None,
     label=None,
+    tags=None,
     fields=None,
     connection_string=None,
     top=None,
@@ -1061,6 +1064,7 @@ def __list_features(
             azconfig_client,
             key_filter=key_filter,
             label=label if label else SearchFilterOptions.ANY_LABEL,
+            tags=tags,
             correlation_request_id=correlation_request_id,
         )
         retrieved_featureflags = []
@@ -1230,6 +1234,7 @@ def __update_existing_key_value(azconfig_client,
 def __list_all_keyvalues(azconfig_client,
                          key_filter,
                          label=None,
+                         tags=None,
                          correlation_request_id=None):
     '''
         To get all keys by name or pattern
@@ -1254,7 +1259,7 @@ def __list_all_keyvalues(azconfig_client,
     label = prep_label_filter_for_url_encoding(label)
 
     try:
-        configsetting_iterable = azconfig_client.list_configuration_settings(key_filter=key_filter, label_filter=label, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
+        configsetting_iterable = azconfig_client.list_configuration_settings(key_filter=key_filter, label_filter=label, tags_filter=tags, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
     except HttpResponseError as exception:
         raise CLIErrors.AzureResponseError('Failed to read feature flag(s) that match the specified feature and label. ' + str(exception))
 
