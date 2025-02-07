@@ -189,8 +189,11 @@ class IndeterminateProgressBar:
     def stop(self):
         self.hook.stop()
 
-    def update_progress(self):
-        self.hook.add(message=self.message)
+    def update_progress(self, message=""):
+        if message == "":
+            self.hook.add(message=self.message)
+        else:
+            self.hook.add(message=message)
 
     def end(self):
         self.hook.end()
