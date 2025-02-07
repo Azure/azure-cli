@@ -300,10 +300,13 @@ class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
             'acc_name': self.create_random_name(prefix='cli-acc-', length=24),
             'acc2_name': self.create_random_name(prefix='cli-acc-', length=24),
             'keySource': "Microsoft.KeyVault",
-            'keyVaultUri': "myUri",
+            'keyVaultUri': "https://my-key-vault.managedhsm.azure.net",
             'keyName': "myKeyName",
             'keyVaultResourceId': "myKeyVaultResourceId",
-            'userAssignedIdentity': "myIdentity"
+            'userAssignedIdentity': "myIdentity",
+            'privateEndpointId': '/subscriptions/69a75bda-882e-44d5-8431-63421204132a/resourceGroups/ab_sdk_test_rg/providers/Microsoft.Network/privateEndpoints/akvPrivateEndpoint',
+            'virtualNetworkId': '/subscriptions/69a75bda-882e-44d5-8431-63421204132a/resourceGroups/ab_sdk_test_rg/providers/Microsoft.Network/virtualNetworks/ab_sdk_test_vnet'
+            
         })
 
         with self.assertRaises(HttpResponseError):
@@ -317,19 +320,49 @@ class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
         self.cmd("az netappfiles account create -g {rg} -a {acc2_name} -l {loc}", checks=[
             self.check('name', '{acc2_name}')
         ])
-
-        with self.assertRaises(HttpResponseError) as cm:
-            # create account with encryption value
-            self.cmd("az netappfiles account get-key-vault-status -g {rg} -a {acc2_name} ", checks=[
-                self.check('name', '{acc2_name}'),
-            ])
-        self.assertIn('OperationNotAvailableInApiVersion', str(
-            cm.exception))
+        
+        # create account with encryption value
+        self.cmd("az netappfiles account get-key-vault-status -g {rg} -a {acc2_name} ")
         
         with self.assertRaises(HttpResponseError) as cm:
             # create account with encryption value
-            self.cmd("az netappfiles account transitiontocmk -g {rg} -a {acc2_name} ", checks=[
-                self.check('name', '{acc2_name}'),
+            self.cmd("az netappfiles account transitiontocmk -g {rg} -a {acc2_name} --private-endpoint-id {privateEndpointId} --virtual-network-id {virtualNetworkId}  --yes")
+        self.assertIn('AccountEncryptionInvalidForTransitionEncryption', str(
+            cm.exception)) 
+        
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_', additional_tags={'owner': 'cli_test'})
+    def test_account_changekeyvault_fails(self):
+        self.kwargs.update({
+            'loc': LOCATION,
+            'acc_name': self.create_random_name(prefix='cli-acc-', length=24),
+            'acc2_name': self.create_random_name(prefix='cli-acc-', length=24),
+            'keySource': "Microsoft.KeyVault",
+            'keyVaultUri': "https://my-key-vault.managedhsm.azure.net",
+            'keyName': "myKeyName",
+            'keyVaultResourceId': '/subscriptions/69a75bda-882e-44d5-8431-63421204132a/resourceGroups/ab_sdk_test_rg/providers/Microsoft.KeyVault/vaults/audunnAKVVaultAP',
+            'userAssignedIdentity': "myIdentity",
+            'privateEndpointId': '/subscriptions/69a75bda-882e-44d5-8431-63421204132a/resourceGroups/ab_sdk_test_rg/providers/Microsoft.Network/privateEndpoints/akvPrivateEndpoint',
+            'virtualNetworkId': '/subscriptions/69a75bda-882e-44d5-8431-63421204132a/resourceGroups/ab_sdk_test_rg/providers/Microsoft.Network/virtualNetworks/ab_sdk_test_vnet'
+            
+        })
+
+        with self.assertRaises(HttpResponseError):
+            # create account with encryption value
+            self.cmd("az netappfiles account create -g {rg} -a {acc_name} -l {loc} --key-source {keySource} --key-vault-uri {keyVaultUri} --key-name {keyName} --keyvault-resource-id {keyVaultResourceId} --user-assigned-identity {userAssignedIdentity}", checks=[
+                self.check('name', '{acc_name}'),
+                self.check('encryption.keySource', '{keySource}')
             ])
-        self.assertIn('OperationNotAvailableInApiVersion', str(
-            cm.exception))        
+
+        # create account without encryption value
+        self.cmd("az netappfiles account create -g {rg} -a {acc2_name} -l {loc}", checks=[
+            self.check('name', '{acc2_name}')
+        ])
+        
+        # create account with encryption value
+        self.cmd("az netappfiles account get-key-vault-status -g {rg} -a {acc2_name} ")
+        
+        with self.assertRaises(HttpResponseError) as cm:
+            # create account with encryption value
+            self.cmd("az netappfiles account change-key-vault -g {rg} -a {acc2_name} --key-vault-uri {keyVaultUri} --key-name {keyName} --keyvault-resource-id {keyVaultResourceId} --key-vault-private-endpoints [0].private-endpoint-id={privateEndpointId} [0].virtual-network-id={privateEndpointId}  --yes")
+        self.assertIn('AzureKeyVaultEncryptionNotConfigured', str(
+            cm.exception))
