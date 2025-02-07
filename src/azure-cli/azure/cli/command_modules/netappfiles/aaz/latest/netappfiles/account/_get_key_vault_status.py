@@ -137,7 +137,7 @@ class GetKeyVaultStatus(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-09-01-preview",
+                    "api-version", "2024-09-01",
                     required=True,
                 ),
             }
