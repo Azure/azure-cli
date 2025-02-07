@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class GetKeyVaultStatus(AAZCommand):
     """Contains data from encryption.keyVaultProperties as well as information about which private endpoint is used by each encryption sibling set. Response from this endpoint can be used for transitiontocmk
+
+    :example: Accounts_GetChangeKeyVaultInformation
+        az netappfiles account get-key-vault-status --resource-group myRG --account-name account1
     """
 
     _aaz_info = {
