@@ -841,7 +841,7 @@ def validate_public_access_server(cmd, client, resource_group_name, server_name)
 
     server = server_operations_client.get(resource_group_name, server_name)
     if server.network.public_network_access == 'Disabled':
-        raise ValidationError("Firewall rule operations cannot be requested for a private access enabled server.")
+        raise ValidationError("Firewall rule operations cannot be requested for a server that doesn't have public access enabled.")
 
 
 def _validate_identity(cmd, namespace, identity):
