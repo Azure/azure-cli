@@ -249,6 +249,36 @@ class CosmosDBTests(ScenarioTest):
         assert account2['readLocations'][0]['failoverPriority'] == 1 or account2['readLocations'][1]['failoverPriority'] == 1
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
+    def test_locations_database_accounts_offline(self, resource_group):
+
+        write_location = 'eastus'
+        read_location = 'westus'
+
+        self.kwargs.update({
+            'acc': self.create_random_name(prefix='cli', length=40),
+            'write_location': write_location,
+            'read_location': read_location
+        })
+
+        account_pre_offline = self.cmd('az cosmosdb create -n {acc} -g {rg} --locations regionName={write_location} failoverPriority=0 --locations regionName={read_location} failoverPriority=1').get_output_in_json()
+
+        assert account_pre_offline['writeLocations'][0]['locationName'] == "East US"
+
+        # Offline write region 'East US'
+        self.cmd('az cosmosdb offline-region -n {acc} -g {rg} --region {write_location}')
+        account_post_offline = self.cmd('az cosmosdb show -n {acc} -g {rg}').get_output_in_json()
+
+        # Assert writeLocations is switched to 'West US' after offlining 'East US' region
+        assert len(account_post_offline['writeLocations']) == 1
+        assert account_post_offline['writeLocations'][0]['locationName'] == 'West US'
+        assert account_post_offline['writeLocations'][0]['provisioningState'] == 'Succeeded'
+
+        # Assert that 'East US' region is offlined.
+        east_us_offline_location = next((loc for loc in account_post_offline['readLocations'] if loc['locationName'] == "East US"), None)
+        assert east_us_offline_location is not None, "East US read location not found in the response."
+        assert east_us_offline_location['provisioningState'] == "Offline", "East US read location is not in the 'Offline' state."
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
     def test_locations_both_formats_database_accounts(self, resource_group):
 
         write_location = 'eastus'
