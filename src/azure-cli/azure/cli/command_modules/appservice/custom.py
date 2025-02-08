@@ -4363,7 +4363,7 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
         self.KEYS = FUNCTIONS_STACKS_API_KEYS()
         super().__init__(cmd, linux=linux, windows=windows)
 
-    def validate_end_of_life_date(self, runtime, version):
+    def validate_end_of_life_date(self, runtime, version, linux):
         from dateutil.relativedelta import relativedelta
         # we would not be able to validate for a custom runtime
         if runtime == 'custom':
@@ -4371,21 +4371,26 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
 
         today = datetime.datetime.now(datetime.timezone.utc)
         six_months = today + relativedelta(months=+6)
-        runtimes = [r for r in self.stacks if runtime == r.name]
+        runtimes = [r for r in self.stacks if r.linux == linux and runtime == r.name]
+        runtimes.sort(key=lambda r: r.end_of_life_date or
+                      datetime.datetime.min.replace(tzinfo=datetime.timezone.utc), reverse=True)
         matched_runtime = next((r for r in runtimes if r.version == version), None)
         if matched_runtime:
             eol = matched_runtime.end_of_life_date
             runtime_deprecation_link = matched_runtime.deprecation_link
+            latest_runtime = runtimes[0].version
 
             if eol is None:
                 return
 
             if eol < today:
-                raise ValidationError('{} has reached EOL on {} and is no longer supported. {}'
-                                      .format(runtime, eol.date(), runtime_deprecation_link))
+                raise ValidationError('Use {} version {} as {} has reached end-of-life on {} and is '
+                                      'no longer supported. {}'
+                                      .format(runtime, latest_runtime, version, eol.date(), runtime_deprecation_link))
             if eol < six_months:
-                logger.warning('%s will reach EOL on %s and will no longer be supported. %s',
-                               runtime, eol.date(), runtime_deprecation_link)
+                logger.warning('Use %s version %s as %s will reach end-of-life on %s and will no '
+                               'longer be supported. %s',
+                               runtime, latest_runtime, version, eol.date(), runtime_deprecation_link)
 
     def resolve(self, runtime, version=None, functions_version=None, linux=False, disable_version_error=False):
         stacks = self.stacks
@@ -4400,7 +4405,8 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
             matched_runtime_version = self.get_default_version(runtime, functions_version, linux)
             self.validate_end_of_life_date(
                 matched_runtime_version.name,
-                matched_runtime_version.version
+                matched_runtime_version.version,
+                linux
             )
             return matched_runtime_version
         matched_runtime_version = next((r for r in runtimes if r.version == version), None)
@@ -4422,7 +4428,8 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
 
         self.validate_end_of_life_date(
             runtime,
-            version
+            version,
+            linux
         )
 
         if not matched_runtime_version:
