@@ -174,8 +174,12 @@ class FunctionAppReservedInstanceTest(ScenarioTest):
     def test_functionapp_reserved_instance(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'functionappwithreservedinstance', 40)
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --functions-version 4'
-                 .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
+        plan_name = self.create_random_name('functionappplan', 40)
+
+        self.cmd('functionapp plan create -g {} -n {} --sku EP1 --location southcentralus'.format(resource_group, plan_name))
+
+        self.cmd('functionapp create -g {} -n {} -p {} -s {} --os-type Windows --functions-version 4'
+                 .format(resource_group, functionapp_name, plan_name, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
                      JMESPathCheck('kind', 'functionapp'),
@@ -464,6 +468,7 @@ class FunctionUpdatePlan(ScenarioTest):
 
 
 class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
+    @live_only()
     @ResourceGroupPreparer(name_prefix='azurecli-functionapp-c-e2e', location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_consumption_e2e(self, resource_group, storage_account):
@@ -492,6 +497,7 @@ class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
         self.cmd(
             'functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
 
+    @live_only()
     @ResourceGroupPreparer(name_prefix='azurecli-functionapp-c-e2e-ragrs', location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer(sku='Standard_RAGRS')
     def test_functionapp_consumption_ragrs_storage_e2e(self, resource_group, storage_account):
@@ -511,6 +517,34 @@ class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
         self.cmd('functionapp show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
             JMESPathCheck('kind', 'functionapp'),
             JMESPathCheck('name', functionapp_name)
+        ])
+
+    @live_only()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_consumption_app_with_plan_creation(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(
+            'functionappconsumption', 40)
+
+        functionapp = self.cmd('functionapp create -g {} -n {} -c {} -s {} --functions-version 4 --runtime node'
+                               .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).get_output_in_json()
+
+        server_farm_id = functionapp['serverFarmId']
+
+        self.cmd('az functionapp plan show --ids {}'.format(server_farm_id), checks=[
+            JMESPathCheck('sku.name', 'Y1')
+        ])
+
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_consumption_plan_creation(self, resource_group):
+        plan_name = self.create_random_name('functionappplan', 40)
+
+        self.cmd('functionapp plan create -g {} -n {} --sku Y1 --is-linux --location southcentralus'.format(resource_group, plan_name))
+
+        self.cmd('functionapp plan show -g {} -n {}'.format(resource_group, plan_name), checks=[
+            JMESPathCheck('sku.name', 'Y1'),
         ])
 
 
@@ -593,6 +627,7 @@ class FunctionWorkloadProfile(ScenarioTest):
         ])
 
 class FunctionAppWithLinuxConsumptionPlanTest(ScenarioTest):
+    @live_only()
     @ResourceGroupPreparer(name_prefix='azurecli-functionapp-linux', location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_consumption_linux(self, resource_group, storage_account):
@@ -612,6 +647,7 @@ class FunctionAppWithLinuxConsumptionPlanTest(ScenarioTest):
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
             JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'node')])
 
+    @live_only()
     @ResourceGroupPreparer(name_prefix='azurecli-functionapp-linux', location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_consumption_linux_java(self, resource_group, storage_account):
@@ -629,6 +665,7 @@ class FunctionAppWithLinuxConsumptionPlanTest(ScenarioTest):
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
             JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'java')])
 
+    @live_only()
     @ResourceGroupPreparer(name_prefix='azurecli-functionapp-linux', location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_consumption_linux_powershell(self, resource_group, storage_account):
@@ -651,6 +688,7 @@ class FunctionAppWithLinuxConsumptionPlanTest(ScenarioTest):
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
             JMESPathCheck('linuxFxVersion', 'PowerShell|7.4')])
 
+    @live_only()
     @ResourceGroupPreparer(name_prefix='azurecli-functionapp-linux', location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_consumption_linux_dotnet_isolated(self, resource_group, storage_account):
@@ -1059,6 +1097,7 @@ class FunctionAppManagedEnvironment(ScenarioTest):
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
             JMESPathCheck("[?name=='APPINSIGHTS_INSTRUMENTATIONKEY'].value|[0]", app_insights_key)])
 
+    @live_only()
     @ResourceGroupPreparer(location='southcentralus')
     @StorageAccountPreparer()
     def test_functionapp_create_with_appcontainer_managed_environment_consumption_plan_error(self, resource_group, storage_account):
@@ -1413,9 +1452,12 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
     def test_functionapp_windows_runtime(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'functionappwindowsruntime', 40)
+        plan_name = self.create_random_name('functionappplan', 40)
 
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --functions-version 4 --runtime node'
-                 .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
+        self.cmd('functionapp plan create -g {} -n {} --sku EP1 --location southcentralus'.format(resource_group, plan_name))
+
+        self.cmd('functionapp create -g {} -n {} -p {} -s {} --os-type Windows --functions-version 4 --runtime node'
+                 .format(resource_group, functionapp_name, plan_name, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
                      JMESPathCheck('kind', 'functionapp'),
@@ -1431,9 +1473,12 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
     def test_functionapp_windows_runtime_java(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'functionappwindowsruntime', 40)
+        plan_name = self.create_random_name('functionappplan', 40)
 
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --runtime java'
-                 .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
+        self.cmd('functionapp plan create -g {} -n {} --sku EP1 --location southcentralus'.format(resource_group, plan_name))
+
+        self.cmd('functionapp create -g {} -n {} -p {} -s {} --os-type Windows --runtime java'
+                 .format(resource_group, functionapp_name, plan_name, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
                      JMESPathCheck('kind', 'functionapp'),
@@ -1452,9 +1497,12 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
     def test_functionapp_windows_runtime_powershell(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'functionappwindowsruntime', 40)
+        plan_name = self.create_random_name('functionappplan', 40)
 
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --runtime powershell --functions-version 4'
-                 .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
+        self.cmd('functionapp plan create -g {} -n {} --sku EP1 --location southcentralus'.format(resource_group, plan_name))
+
+        self.cmd('functionapp create -g {} -n {} -p {} -s {} --os-type Windows --runtime powershell --functions-version 4'
+                 .format(resource_group, functionapp_name, plan_name, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
                      JMESPathCheck('kind', 'functionapp'),
@@ -1473,9 +1521,12 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
     def test_functionapp_windows_runtime_version(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'functionappwindowsruntime', 40)
+        plan_name = self.create_random_name('functionappplan', 40)
 
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --functions-version 4 --runtime node --runtime-version 18'
-                 .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
+        self.cmd('functionapp plan create -g {} -n {} --sku EP1 --location southcentralus'.format(resource_group, plan_name))
+
+        self.cmd('functionapp create -g {} -n {} -p {} -s {} --os-type Windows --functions-version 4 --runtime node --runtime-version 18'
+                 .format(resource_group, functionapp_name, plan_name, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
                      JMESPathCheck('kind', 'functionapp'),
@@ -1497,18 +1548,25 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
     def test_functionapp_windows_runtime_version_invalid(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'functionappwindowsruntime', 40)
+        plan_name = self.create_random_name('functionappplan', 40)
 
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} '
+        self.cmd('functionapp plan create -g {} -n {} --sku EP1 --is-linux --location southcentralus'.format(resource_group, plan_name))
+
+        self.cmd('functionapp create -g {} -n {} -p {} -s {} '
                  '--os-type Windows --runtime node --runtime-version 8.2'
-                 .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account), expect_failure=True)
+                 .format(resource_group, functionapp_name, plan_name, storage_account), expect_failure=True)
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_windows_runtime_functions_version(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'functionappwindowsruntime', 40)
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --functions-version 4 --os-type Windows --runtime node'
-                 .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
+        plan_name = self.create_random_name('functionappplan', 40)
+
+        self.cmd('functionapp plan create -g {} -n {} --sku EP1 --location southcentralus'.format(resource_group, plan_name))
+
+        self.cmd('functionapp create -g {} -n {} -p {} -s {} --functions-version 4 --os-type Windows --runtime node'
+                 .format(resource_group, functionapp_name, plan_name, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
                      JMESPathCheck('kind', 'functionapp'),
@@ -1517,15 +1575,19 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
                  JMESPathCheck(
                      "[?name=='FUNCTIONS_EXTENSION_VERSION'].value|[0]", '~4'),
-                 JMESPathCheck("[?name=='WEBSITE_NODE_DEFAULT_VERSION'].value|[0]", '~20')])
+                 JMESPathCheck("[?name=='WEBSITE_NODE_DEFAULT_VERSION'].value|[0]", '~22')])
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_windows_runtime_custom_handler(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'functionappwindowsruntime', 40)
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --functions-version 4 --os-type Windows --runtime custom'
-                 .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
+        plan_name = self.create_random_name('functionappplan', 40)
+
+        self.cmd('functionapp plan create -g {} -n {} --sku EP1 --location southcentralus'.format(resource_group, plan_name))
+
+        self.cmd('functionapp create -g {} -n {} -p {} -s {} --functions-version 4 --os-type Windows --runtime custom'
+                 .format(resource_group, functionapp_name, plan_name, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
                      JMESPathCheck('kind', 'functionapp'),
@@ -1544,9 +1606,12 @@ class FunctionAppOnWindowsWithoutRuntime(ScenarioTest):
     def test_functionapp_windows_without_runtime(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'functionappwindowswithoutruntime', 40)
+        plan_name = self.create_random_name('functionappplan', 40)
 
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --functions-version 4'
-                 .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
+        self.cmd('functionapp plan create -g {} -n {} --sku EP1 --location southcentralus'.format(resource_group, plan_name))
+
+        self.cmd('functionapp create -g {} -n {} -p {} -s {} --os-type Windows --functions-version 4'
+                 .format(resource_group, functionapp_name, plan_name, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
                      JMESPathCheck('kind', 'functionapp'),
@@ -1563,10 +1628,13 @@ class FunctionAppWithAppInsightsKey(ScenarioTest):
         functionapp_name = self.create_random_name(
             'functionappwithappinsights', 40)
         app_insights_key = '00000000-0000-0000-0000-123456789123'
+        plan_name = self.create_random_name('functionappplan', 40)
 
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --functions-version 4'
+        self.cmd('functionapp plan create -g {} -n {} --sku EP1 --location southcentralus'.format(resource_group, plan_name))
+
+        self.cmd('functionapp create -g {} -n {} -p {} -s {} --os-type Windows --functions-version 4'
                  ' --app-insights-key {}'
-                 .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account, app_insights_key)).assert_with_checks([
+                 .format(resource_group, functionapp_name, plan_name, storage_account, app_insights_key)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
                      JMESPathCheck('kind', 'functionapp'),
@@ -1644,6 +1712,7 @@ class FunctionAppWithDistributedTracing(ScenarioTest):
                         kp['name'] for kp in app_set])
 
 
+    @live_only()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_without_default_distributed_tracing(self, resource_group, storage_account):
@@ -1667,9 +1736,12 @@ class FunctionAppWithAppInsightsDefault(ScenarioTest):
     def test_functionapp_with_default_app_insights(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'functionappwithappinsights', 40)
+        plan_name = self.create_random_name('functionappplan', 40)
 
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --functions-version 4'
-                 .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
+        self.cmd('functionapp plan create -g {} -n {} --sku EP1 --location southcentralus'.format(resource_group, plan_name))
+
+        self.cmd('functionapp create -g {} -n {} -p {} -s {} --os-type Windows --functions-version 4'
+                 .format(resource_group, functionapp_name, plan_name, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
                      JMESPathCheck('kind', 'functionapp'),
@@ -1689,9 +1761,12 @@ class FunctionAppWithAppInsightsDefault(ScenarioTest):
     def test_functionapp_with_no_default_app_insights(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'functionappwithappinsights', 40)
+        plan_name = self.create_random_name('functionappplan', 40)
 
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --disable-app-insights --functions-version 4'
-                 .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
+        self.cmd('functionapp plan create -g {} -n {} --sku EP1 --location southcentralus'.format(resource_group, plan_name))
+
+        self.cmd('functionapp create -g {} -n {} -p {} -s {} --os-type Windows --disable-app-insights --functions-version 4'
+                 .format(resource_group, functionapp_name, plan_name, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
                      JMESPathCheck('kind', 'functionapp'),
@@ -1709,6 +1784,7 @@ class FunctionAppWithAppInsightsDefault(ScenarioTest):
 
 class FunctionappAppInsightsWorkspace(ScenarioTest):
     @live_only()
+    @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_create_default_rg_and_workspace(self, resource_group, storage_account):
@@ -1729,6 +1805,7 @@ class FunctionappAppInsightsWorkspace(ScenarioTest):
         ])
 
     @live_only()
+    @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_existing_workspace(self, resource_group, storage_account):
@@ -1743,6 +1820,7 @@ class FunctionappAppInsightsWorkspace(ScenarioTest):
         ])
 
     @live_only()
+    @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_existing_default_rg(self, resource_group, storage_account):
@@ -1815,6 +1893,7 @@ class FunctionAppOnLinux(ScenarioTest):
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
             JMESPathCheck('linuxFxVersion', 'Node|18')])
 
+    @live_only()
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_on_linux_version_consumption(self, resource_group, storage_account):
@@ -1842,6 +1921,7 @@ class FunctionAppOnLinux(ScenarioTest):
         self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime python --runtime-version 4.8'
                  .format(resource_group, functionapp, plan, storage_account), expect_failure=True)
 
+    @live_only()
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_on_linux_consumption_python_39(self, resource_group, storage_account):
@@ -1898,6 +1978,7 @@ class FunctionAppOnLinux(ScenarioTest):
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp)).assert_with_checks([
             JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'custom')])
 
+    @live_only()
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_on_linux_functions_version_consumption(self, resource_group, storage_account):
@@ -1909,13 +1990,14 @@ class FunctionAppOnLinux(ScenarioTest):
                  ])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'Node|20')
+            JMESPathCheck('linuxFxVersion', 'Node|22')
         ])
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp)).assert_with_checks([
             JMESPathCheck(
                 "[?name=='FUNCTIONS_EXTENSION_VERSION'].value|[0]", '~4')
         ])
 
+    @live_only()
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_on_linux_dotnet_consumption(self, resource_group, storage_account):
@@ -2074,11 +2156,15 @@ class FunctionAppKeysTests(ScenarioTest):
     @StorageAccountPreparer()
     def test_functionapp_keys_set(self, resource_group, storage_account):
         functionapp_name = self.create_random_name('functionappkeys', 40)
+        plan_name = self.create_random_name('functionappplan', 40)
+
+        self.cmd('functionapp plan create -g {} -n {} --sku EP1 --location southcentralus'.format(resource_group, plan_name))
+
         key_name = "keyname1"
         key_value = "keyvalue1"
         key_type = "functionKeys"
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --functions-version 4'
-                 .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
+        self.cmd('functionapp create -g {} -n {} -p {} -s {} --functions-version 4'
+                 .format(resource_group, functionapp_name, plan_name, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
                      JMESPathCheck('kind', 'functionapp'),
@@ -2101,11 +2187,15 @@ class FunctionAppKeysTests(ScenarioTest):
     @StorageAccountPreparer()
     def test_functionapp_keys_list(self, resource_group, storage_account):
         functionapp_name = self.create_random_name('functionappkeys', 40)
+        plan_name = self.create_random_name('functionappplan', 40)
+
+        self.cmd('functionapp plan create -g {} -n {} --sku EP1 --location southcentralus'.format(resource_group, plan_name))
+
         key_name = "keyname1"
         key_value = "keyvalue1"
         key_type = "functionKeys"
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --functions-version 4'
-                 .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
+        self.cmd('functionapp create -g {} -n {} -p {} -s {} --functions-version 4'
+                 .format(resource_group, functionapp_name, plan_name, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
                      JMESPathCheck('kind', 'functionapp'),
@@ -2125,11 +2215,15 @@ class FunctionAppKeysTests(ScenarioTest):
     @StorageAccountPreparer()
     def test_functionapp_keys_delete(self, resource_group, storage_account):
         functionapp_name = self.create_random_name('functionappkeys', 40)
+        plan_name = self.create_random_name('functionappplan', 40)
+
+        self.cmd('functionapp plan create -g {} -n {} --sku EP1 --location southcentralus'.format(resource_group, plan_name))
+
         key_name = "keyname1"
         key_value = "keyvalue1"
         key_type = "functionKeys"
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --functions-version 4'
-                 .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
+        self.cmd('functionapp create -g {} -n {} -p {} -s {} --functions-version 4'
+                 .format(resource_group, functionapp_name, plan_name, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
                      JMESPathCheck('kind', 'functionapp'),
@@ -2751,6 +2845,7 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
             JMESPathCheck('length(@)', 0)
         ])
 
+    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -3045,8 +3140,12 @@ class FunctionAppConfigTest(ScenarioTest):
     def test_functionapp_powershell_version(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'powershellfunctionapp', 40)
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --functions-version 4 --runtime powershell'
-                 .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
+        plan_name = self.create_random_name('functionappplan', 40)
+
+        self.cmd('functionapp plan create -g {} -n {} --sku EP1 --location southcentralus'.format(resource_group, plan_name))
+
+        self.cmd('functionapp create -g {} -n {} -p {} -s {} --os-type Windows --functions-version 4 --runtime powershell'
+                 .format(resource_group, functionapp_name, plan_name, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
                      JMESPathCheck('kind', 'functionapp'),
@@ -3086,10 +3185,13 @@ class FunctionAppLanguageEOLTest(ScenarioTest):
     def test_functionapp_language_runtime_version_deprecated(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'functionapp', 32)
-        
+        plan_name = self.create_random_name('functionappplan', 40)
+
+        self.cmd('functionapp plan create -g {} -n {} --sku EP1 --location southcentralus'.format(resource_group, plan_name))
+
         with self.assertRaises(ValidationError):
-            self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --functions-version 4 --runtime node --runtime-version 10'
-                    .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account))
+            self.cmd('functionapp create -g {} -n {} -p {} -s {} --os-type Windows --functions-version 4 --runtime node --runtime-version 10'
+                    .format(resource_group, functionapp_name, plan_name, storage_account))
 
 
 if __name__ == '__main__':

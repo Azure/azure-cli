@@ -29,10 +29,13 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
     def test_functionapp_access_restriction_show(self, resource_group, location):
         self.kwargs.update({
             'app_name': self.create_random_name(prefix='cli-funcapp-nwr', length=24),
-            'loc': location
+            'loc': location,
+            'plan_name': self.create_random_name(prefix='cli-plan-nwr', length=24)
         })
 
-        self.cmd('functionapp create -g {rg} -n {app_name} --consumption-plan-location {loc} -s {sa} --functions-version 4', checks=[
+        self.cmd('functionapp plan create -g {rg} -n {plan_name} --sku EP1')
+
+        self.cmd('functionapp create -g {rg} -n {app_name} -p {plan_name} -s {sa} --functions-version 4', checks=[
             JMESPathCheck('state', 'Running')
         ])
 
@@ -54,10 +57,13 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
     def test_functionapp_access_restriction_set_simple(self, resource_group, location):
         self.kwargs.update({
             'app_name': self.create_random_name(prefix='cli-funcapp-nwr', length=24),
-            'loc': location
+            'loc': location,
+            'plan_name': self.create_random_name(prefix='cli-plan-nwr', length=24)
         })
 
-        self.cmd('functionapp create -g {rg} -n {app_name} --consumption-plan-location {loc} -s {sa} --functions-version 4', checks=[
+        self.cmd('functionapp plan create -g {rg} -n {plan_name} --sku EP1')
+
+        self.cmd('functionapp create -g {rg} -n {app_name} -p {plan_name} -s {sa} --functions-version 4', checks=[
             JMESPathCheck('state', 'Running')
         ])
 
@@ -85,10 +91,13 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
     def test_functionapp_access_restriction_set_complex(self, resource_group, location):
         self.kwargs.update({
             'app_name': self.create_random_name(prefix='cli-funcapp-nwr', length=24),
-            'loc': location
+            'loc': location,
+            'plan_name': self.create_random_name(prefix='cli-plan-nwr', length=24)
         })
 
-        self.cmd('functionapp create -g {rg} -n {app_name} --consumption-plan-location {loc} -s {sa} --functions-version 4', checks=[
+        self.cmd('functionapp plan create -g {rg} -n {plan_name} --sku EP1')
+
+        self.cmd('functionapp create -g {rg} -n {app_name} -p {plan_name} -s {sa} --functions-version 4', checks=[
             JMESPathCheck('state', 'Running')
         ])
 
@@ -106,10 +115,13 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
     def test_functionapp_access_restriction_add(self, resource_group, location):
         self.kwargs.update({
             'app_name': self.create_random_name(prefix='cli-funcapp-nwr', length=24),
-            'loc': location
+            'loc': location,
+            'plan_name': self.create_random_name(prefix='cli-plan-nwr', length=24)
         })
 
-        self.cmd('functionapp create -g {rg} -n {app_name} --consumption-plan-location {loc} -s {sa} --functions-version 4', checks=[
+        self.cmd('functionapp plan create -g {rg} -n {plan_name} --sku EP1')
+
+        self.cmd('functionapp create -g {rg} -n {app_name} -p {plan_name} -s {sa} --functions-version 4', checks=[
             JMESPathCheck('state', 'Running')
         ])
 
@@ -126,10 +138,13 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
     def test_functionapp_access_restriction_add_ip_address_validation(self, resource_group, location):
         self.kwargs.update({
             'app_name': self.create_random_name(prefix='cli-funcapp-nwr', length=24),
-            'loc': location
+            'loc': location,
+            'plan_name': self.create_random_name(prefix='cli-plan-nwr', length=24)
         })
 
-        self.cmd('functionapp create -g {rg} -n {app_name} --consumption-plan-location {loc} -s {sa} --functions-version 4', checks=[
+        self.cmd('functionapp plan create -g {rg} -n {plan_name} --sku EP1')
+
+        self.cmd('functionapp create -g {rg} -n {app_name} -p {plan_name} -s {sa} --functions-version 4', checks=[
             JMESPathCheck('state', 'Running')
         ])
 
@@ -181,10 +196,13 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
     def test_functionapp_access_restriction_remove(self, resource_group, location):
         self.kwargs.update({
             'app_name': self.create_random_name(prefix='cli-funcapp-nwr', length=24),
-            'loc': location
+            'loc': location,
+            'plan_name': self.create_random_name(prefix='cli-plan-nwr', length=24)
         })
 
-        self.cmd('functionapp create -g {rg} -n {app_name} --consumption-plan-location {loc} -s {sa} --functions-version 4', checks=[
+        self.cmd('functionapp plan create -g {rg} -n {plan_name} --sku EP1')
+
+        self.cmd('functionapp create -g {rg} -n {app_name} -p {plan_name} -s {sa} --functions-version 4', checks=[
             JMESPathCheck('state', 'Running')
         ])
 
@@ -207,10 +225,13 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
     def test_functionapp_access_restriction_add_scm(self, resource_group, location):
         self.kwargs.update({
             'app_name': self.create_random_name(prefix='cli-funcapp-nwr', length=24),
-            'loc': location
+            'loc': location,
+            'plan_name': self.create_random_name(prefix='cli-plan-nwr', length=24)
         })
 
-        self.cmd('functionapp create -g {rg} -n {app_name} --consumption-plan-location {loc} -s {sa} --functions-version 4', checks=[
+        self.cmd('functionapp plan create -g {rg} -n {plan_name} --sku EP1')
+
+        self.cmd('functionapp create -g {rg} -n {app_name} -p {plan_name} -s {sa} --functions-version 4', checks=[
             JMESPathCheck('state', 'Running')
         ])
 
@@ -227,10 +248,13 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
     def test_functionapp_access_restriction_remove_scm(self, resource_group, location):
         self.kwargs.update({
             'app_name': self.create_random_name(prefix='cli-funcapp-nwr', length=24),
-            'loc': location
+            'loc': location,
+            'plan_name': self.create_random_name(prefix='cli-plan-nwr', length=24)
         })
 
-        self.cmd('functionapp create -g {rg} -n {app_name} --consumption-plan-location {loc} -s {sa} --functions-version 4', checks=[
+        self.cmd('functionapp plan create -g {rg} -n {plan_name} --sku EP1')
+
+        self.cmd('functionapp create -g {rg} -n {app_name} -p {plan_name} -s {sa} --functions-version 4', checks=[
             JMESPathCheck('state', 'Running')
         ])
 
