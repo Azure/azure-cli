@@ -4775,7 +4775,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        always_ready_instances=None, maximum_instance_count=None, instance_memory=None,
                        flexconsumption_location=None, deployment_storage_name=None,
                        deployment_storage_container_name=None, deployment_storage_auth_type=None,
-                       deployment_storage_auth_value=None, zone_redundant=False):
+                       deployment_storage_auth_value=None, zone_redundant=False, configure_networking_later=None):
     # pylint: disable=too-many-statements, too-many-branches
 
     if functions_version is None and flexconsumption_location is None:
@@ -4992,6 +4992,22 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         else SiteConfigPropertiesDictionary()
     app_settings_dict = matched_runtime.app_settings_dict if not flexconsumption_location else {}
 
+    if is_storage_account_network_restricted(cmd.cli_ctx, resource_group_name, storage_account):
+        if consumption_plan_location is not None:
+            raise ValidationError('The Consumption plan does not support storage accounts with network restrictions. '
+                                  'If you wish to use virtual networks, please create your app on a different hosting '
+                                  'plan.')
+
+        if not vnet and not configure_networking_later:
+            raise ValidationError('The storage account you selected "{}" has networking restrictions. No virtual '
+                                  'networking was configured so your app will not start. Please try again with '
+                                  'virtual networking integration by adding the --vnet and --subnet flags. If '
+                                  'you wish to do this at a later time, use the --configure-networking-later '
+                                  'flag instead.'.format(storage_account))
+        if vnet and configure_networking_later:
+            raise ValidationError('The --vnet and --configure-networking-later flags are mutually exclusive.')
+        functionapp_def.vnet_content_share_enabled = True
+
     con_string = _validate_and_get_connection_string(cmd.cli_ctx, resource_group_name, storage_account)
 
     if environment is not None:
@@ -5130,7 +5146,10 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     if (plan_info is not None and is_plan_elastic_premium(cmd, plan_info)) or consumption_plan_location is not None:
         site_config.app_settings.append(NameValuePair(name='WEBSITE_CONTENTAZUREFILECONNECTIONSTRING',
                                                       value=con_string))
-        site_config.app_settings.append(NameValuePair(name='WEBSITE_CONTENTSHARE', value=_get_content_share_name(name)))
+        content_share_name = _get_content_share_name(name)
+        site_config.app_settings.append(NameValuePair(name='WEBSITE_CONTENTSHARE', value=content_share_name))
+        if is_storage_account_network_restricted(cmd.cli_ctx, resource_group_name, storage_account):
+            create_file_share(cmd.cli_ctx, resource_group_name, storage_account, content_share_name)
 
     create_app_insights = False
 
@@ -5357,6 +5376,16 @@ def _validate_cpu_momory_functionapp(cpu=None, memory=None):
         raise ValidationError("The --memory argument is not valid. Please provide a correct value. e.g. 4.0Gi.")
 
     return
+
+
+def create_file_share(cli_ctx, resource_group_name, storage_account, share_name):
+
+    storage_client = get_mgmt_service_client(cli_ctx, StorageManagementClient)
+    from azure.mgmt.storage.models import FileShare
+
+    file_share = FileShare()
+
+    return storage_client.file_shares.create(resource_group_name, storage_account, share_name, file_share=file_share)
 
 
 def _get_extension_version_functionapp(functions_version):
@@ -5703,6 +5732,19 @@ def _validate_and_get_connection_string(cli_ctx, resource_group_name, storage_ac
         keys[0])  # pylint: disable=no-member
 
     return connection_string
+
+
+def is_storage_account_network_restricted(cli_ctx, resource_group_name, storage_account):
+    sa_resource_group = resource_group_name
+    if is_valid_resource_id(storage_account):
+        sa_resource_group = parse_resource_id(storage_account)['resource_group']
+        storage_account = parse_resource_id(storage_account)['name']
+    storage_client = get_mgmt_service_client(cli_ctx, StorageManagementClient)
+    storage_properties = storage_client.storage_accounts.get_properties(sa_resource_group,
+                                                                        storage_account)
+    return storage_properties.public_network_access == 'Disabled' or \
+        (storage_properties.public_network_access == 'Enabled' and
+         storage_properties.network_rule_set.default_action == 'Deny')
 
 
 def list_consumption_locations(cmd):
