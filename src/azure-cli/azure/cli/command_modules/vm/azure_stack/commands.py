@@ -45,8 +45,6 @@ from azure.cli.core.commands import DeploymentOutputLongRunningOperation, CliCom
 from azure.cli.core.commands.arm import deployment_validate_table_format, handle_template_based_exception
 
 from azure.cli.command_modules.monitor._exception_handler import exception_handler as monitor_exception_handler
-from azure.cli.command_modules.monitor._client_factory import cf_metric_def
-from azure.cli.core.profiles import ResourceType
 
 
 # pylint: disable=line-too-long, too-many-statements, too-many-locals
@@ -180,14 +178,6 @@ def load_command_table(self, _):
 
     monitor_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.custom#{}',
-        exception_handler=monitor_exception_handler
-    )
-
-    metric_definitions_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.monitor.operations#MetricDefinitionsOperations.{}',
-        resource_type=ResourceType.MGMT_MONITOR,
-        client_factory=cf_metric_def,
-        operation_group='metric_definitions',
         exception_handler=monitor_exception_handler
     )
 
@@ -504,12 +494,12 @@ def load_command_table(self, _):
     with self.command_group('vm monitor log', client_factory=cf_log_analytics_data_plane) as g:
         g.custom_command('show', 'execute_query_for_vm', transform=transform_log_analytics_query_output)  # pylint: disable=show-command
 
-    with self.command_group('vm monitor metrics', custom_command_type=monitor_custom, command_type=metric_definitions_sdk, resource_type=ResourceType.MGMT_MONITOR, operation_group='metric_definitions', min_api='2018-01-01', is_preview=True) as g:
+    with self.command_group('vm monitor metrics', custom_command_type=monitor_custom, is_preview=True) as g:
         from azure.cli.command_modules.monitor.transformers import metrics_table, metrics_definitions_table
         from azure.cli.core.profiles._shared import APIVersionException
         try:
             g.custom_command('tail', 'list_metrics', command_type=monitor_custom, table_transformer=metrics_table)
-            g.command('list-definitions', 'list', table_transformer=metrics_definitions_table)
+            g.command('list-definitions', 'list_definations', command_type=monitor_custom, table_transformer=metrics_definitions_table)
         except APIVersionException:
             pass
 
