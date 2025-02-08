@@ -321,24 +321,6 @@ def create_metric_alert_condition(condition_type, aggregation, metric_name, oper
     return condition.strip()
 
 
-def _parse_actions(actions):
-    """ Actions come in as a combined list. This method separates the webhook actions into a
-        separate collection and combines any number of email actions into a single email collection
-        and a single value for `email_service_owners`. If any email action contains a True value
-        for `send_to_service_owners` then it is assumed the entire value should be True. """
-    from azure.mgmt.monitor.models import RuleEmailAction, RuleWebhookAction
-    actions = actions or []
-    email_service_owners = None
-    webhooks = [x for x in actions if isinstance(x, RuleWebhookAction)]
-    custom_emails = set()
-    for action in actions:
-        if isinstance(action, RuleEmailAction):
-            if action.send_to_service_owners:
-                email_service_owners = True
-            custom_emails = custom_emails | set(action.custom_emails)
-    return list(custom_emails), webhooks, email_service_owners
-
-
 def _parse_action_removals(actions):
     """ Separates the combined list of keys to remove into webhooks and emails. """
     flattened = list({x for sublist in actions for x in sublist})

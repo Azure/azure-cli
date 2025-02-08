@@ -8,7 +8,7 @@ from azure.cli.core.commands import CliCommandType
 # pylint: disable=line-too-long, too-many-locals, too-many-statements
 def load_command_table(self, _):
     from ._client_factory import (
-        cf_alert_rules, cf_autoscale,
+        cf_autoscale,
         cf_action_groups, cf_event_categories,
         cf_metric_alerts, cf_log_analytics_workspace, cf_log_analytics_linked_storage)
     from .transformers import (action_group_list_table)
@@ -52,8 +52,6 @@ def load_command_table(self, _):
 
     alert_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.operations.metric_alert#{}',
-        client_factory=cf_alert_rules,
-        operation_group='alert_rules',
         exception_handler=exception_handler)
 
     metric_alert_sdk = CliCommandType(
