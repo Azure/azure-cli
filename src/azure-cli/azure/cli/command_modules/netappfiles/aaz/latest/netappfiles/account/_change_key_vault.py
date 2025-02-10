@@ -19,9 +19,12 @@ class ChangeKeyVault(AAZCommand):
     """Change KeyVault/Managed HSM that is used for encryption of volumes under NetApp account
 
     Affects existing volumes that are encrypted with Key Vault/Managed HSM, and new volumes. Supports HSM to Key Vault, Key Vault to HSM, HSM to HSM and Key Vault to Key Vault.
+<<<<<<< HEAD
 
     :example: Accounts_ChangeKeyVault
         az netappfiles account change-key-vault --resource-group myRG --account-name account1 --key-vault-uri https://my-key-vault.managedhsm.azure.net --key-name rsakey --key-vault-resource-id /subscriptions/D633CC2E-722B-4AE1-B636-BBD9E4C60ED9/resourceGroups/myRG/providers/Microsoft.KeyVault/managedHSMs/my-hsm --key-vault-private-endpoints "[{virtual-network-id:/subscriptions/D633CC2E-722B-4AE1-B636-BBD9E4C60ED9/resourceGroups/myRG/providers/Microsoft.Network/virtualNetworks/vnet1,private-endpoint-id:/subscriptions/D633CC2E-722B-4AE1-B636-BBD9E4C60ED9/resourceGroups/myRG/providers/Microsoft.Network/privateEndpoints/privip1}]"
+=======
+>>>>>>> ec2555e7e21c5887739e9e45fbf4d1b53d6b6e43
     """
 
     _aaz_info = {
@@ -70,7 +73,11 @@ class ChangeKeyVault(AAZCommand):
             help="The name of the key that should be used for encryption.",
         )
         _args_schema.key_vault_private_endpoints = AAZListArg(
+<<<<<<< HEAD
             options=["--endpoint-pairs", "--key-vault-private-endpoints"],
+=======
+            options=["--key-vault-private-endpoints"],
+>>>>>>> ec2555e7e21c5887739e9e45fbf4d1b53d6b6e43
             arg_group="Body",
             help="Pairs of virtual network ID and private endpoint ID. Every virtual network that has volumes encrypted with customer-managed keys needs its own key vault private endpoint.",
         )
