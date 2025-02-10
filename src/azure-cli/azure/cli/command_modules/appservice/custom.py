@@ -3446,9 +3446,11 @@ def _get_site_credential(cli_ctx, resource_group_name, name, slot=None):
 
 def get_bearer_token(cli_ctx):
     from azure.cli.core._profile import Profile
+    from azure.cli.core.auth.util import resource_to_scopes
     profile = Profile(cli_ctx=cli_ctx)
     credential, _, _ = profile.get_login_credentials()
-    bearer_token = credential.get_token().token
+    scopes = resource_to_scopes(cli_ctx.cloud.endpoints.active_directory_resource_id)
+    bearer_token = credential.get_token(*scopes).token
     return bearer_token
 
 
