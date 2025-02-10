@@ -16,12 +16,9 @@ from azure.cli.core.aaz import *
 )
 class GetKeyVaultStatus(AAZCommand):
     """Contains data from encryption.keyVaultProperties as well as information about which private endpoint is used by each encryption sibling set. Response from this endpoint can be used for transitiontocmk
-<<<<<<< HEAD
 
     :example: Accounts_GetChangeKeyVaultInformation
         az netappfiles account get-key-vault-status --resource-group myRG --account-name account1
-=======
->>>>>>> ec2555e7e21c5887739e9e45fbf4d1b53d6b6e43
     """
 
     _aaz_info = {
@@ -143,11 +140,7 @@ class GetKeyVaultStatus(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-<<<<<<< HEAD
                     "api-version", "2024-09-01",
-=======
-                    "api-version", "2024-09-01-preview",
->>>>>>> ec2555e7e21c5887739e9e45fbf4d1b53d6b6e43
                     required=True,
                 ),
             }

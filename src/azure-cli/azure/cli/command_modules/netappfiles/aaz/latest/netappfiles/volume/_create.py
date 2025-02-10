@@ -270,11 +270,7 @@ class Create(AAZCommand):
             enum={"Default": "Default", "Never": "Never", "OnRead": "OnRead"},
         )
         _args_schema.cool_access_tiering_policy = AAZStrArg(
-<<<<<<< HEAD
             options=["--ca-tiering-policy", "--cool-access-tiering-policy"],
-=======
-            options=["--cool-access-tiering-policy"],
->>>>>>> ec2555e7e21c5887739e9e45fbf4d1b53d6b6e43
             arg_group="Properties",
             help="coolAccessTieringPolicy determines which cold data blocks are moved to cool tier. The possible values for this field are: Auto - Moves cold user data blocks in both the Snapshot copies and the active file system to the cool tier tier. This policy is the default. SnapshotOnly - Moves user data blocks of the Volume Snapshot copies that are not associated with the active file system to the cool tier.",
             enum={"Auto": "Auto", "SnapshotOnly": "SnapshotOnly"},
