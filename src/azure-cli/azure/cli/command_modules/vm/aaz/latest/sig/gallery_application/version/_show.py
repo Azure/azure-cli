@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "sig gallery-application version show",
 )
 class Show(AAZCommand):
-    """Get information about a gallery application version.
+    """Get information about a gallery Application Version.
     """
 
     _aaz_info = {
@@ -43,13 +43,13 @@ class Show(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.gallery_application_name = AAZStrArg(
             options=["--application-name", "--gallery-application-name"],
-            help="The name of the gallery application.",
+            help="The name of the gallery Application.",
             required=True,
             id_part="child_name_1",
         )
         _args_schema.gallery_application_version_name = AAZStrArg(
             options=["-n", "--name", "--version-name", "--gallery-application-version-name"],
-            help="The name of the gallery application version.",
+            help="The name of the gallery Application Version.",
             required=True,
             id_part="child_name_2",
         )
@@ -60,7 +60,6 @@ class Show(AAZCommand):
             id_part="name",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
-            help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
             required=True,
         )
         _args_schema.expand = AAZStrArg(
@@ -207,6 +206,7 @@ class Show(AAZCommand):
             )
             properties.replication_status = AAZObjectType(
                 serialized_name="replicationStatus",
+                flags={"read_only": True},
             )
 
             publishing_profile = cls._schema_on_200.properties.publishing_profile

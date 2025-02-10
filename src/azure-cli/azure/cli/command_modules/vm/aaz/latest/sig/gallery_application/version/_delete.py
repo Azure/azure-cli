@@ -16,7 +16,7 @@ from azure.cli.core.aaz import *
     confirmation="Are you sure you want to perform this operation?",
 )
 class Delete(AAZCommand):
-    """Delete a gallery application version.
+    """Delete a gallery Application Version.
     """
 
     _aaz_info = {
@@ -45,13 +45,13 @@ class Delete(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.gallery_application_name = AAZStrArg(
             options=["--application-name", "--gallery-application-name"],
-            help="The name of the gallery application.",
+            help="The name of the gallery Application.",
             required=True,
             id_part="child_name_1",
         )
         _args_schema.gallery_application_version_name = AAZStrArg(
             options=["-n", "--name", "--version-name", "--gallery-application-version-name"],
-            help="The name of the gallery application version.",
+            help="The name of the gallery Application Version.",
             required=True,
             id_part="child_name_2",
         )
@@ -62,7 +62,6 @@ class Delete(AAZCommand):
             id_part="name",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
-            help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
             required=True,
         )
         return cls._args_schema
