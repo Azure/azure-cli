@@ -12,5 +12,7 @@ from .__cmd_group import *
 from ._create import *
 from ._delete import *
 from ._list import *
+from ._query_status import *
 from ._show import *
+from ._stop import *
 from ._wait import *

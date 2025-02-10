@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "network network-watcher packet-capture",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Packet capture CLI command includes ring buffer
+    """These commands require that both Azure Network Watcher is enabled for the VMs region and that AzureNetworkWatcherExtension is enabled on the VM.
     """
     pass
 
