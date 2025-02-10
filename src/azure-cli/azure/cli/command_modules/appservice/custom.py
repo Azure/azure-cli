@@ -1018,6 +1018,33 @@ class SiteContainerSpec:
         self.volume_mounts = volume_mounts
         self.environment_variables = environment_variables
 
+    @classmethod
+    def from_json(cls, json_data):
+        name = json_data.get("name")
+        properties = json_data.get("properties", {})
+        volume_mounts = properties.get("volumeMounts")
+        if volume_mounts:
+            for mount in volume_mounts:
+                if "containerMountPath" in mount:
+                    mount["container_mount_path"] = mount.pop("containerMountPath")
+                if "volumeSubPath" in mount:
+                    mount["volume_sub_path"] = mount.pop("volumeSubPath")
+                if "readOnly" in mount:
+                    mount["read_only"] = mount.pop("readOnly")
+        return cls(
+            name=name,
+            image=properties.get("image"),
+            target_port=properties.get("targetPort"),
+            is_main=properties.get("isMain"),
+            start_up_command=properties.get("startUpCommand"),
+            auth_type=properties.get("authType"),
+            user_name=properties.get("userName"),
+            password_secret=properties.get("passwordSecret"),
+            user_managed_identity_client_id=properties.get("userManagedIdentityClientId"),
+            volume_mounts=volume_mounts,
+            environment_variables=properties.get("environmentVariables")
+        )
+
 
 def create_webapp_sitecontainers(cmd, name, resource_group, container_name=None, image=None, target_port=None,
                                  slot=None, startup_cmd=None, is_main=None, system_assigned_identity=None,
@@ -1043,7 +1070,7 @@ def create_webapp_sitecontainers(cmd, name, resource_group, container_name=None,
             if not isinstance(sitecontainers_spec_json, list):
                 raise ValidationError("The sitecontainer spec file should contain a list of sitecontainers.")
             try:
-                sitecontainers_spec = [SiteContainerSpec(**container) for container in sitecontainers_spec_json]
+                sitecontainers_spec = [SiteContainerSpec.from_json(container) for container in sitecontainers_spec_json]
             except Exception as ex:
                 raise ValidationError("Failed to parse the sitecontainer spec file. Error: {}".format(str(ex)))
             if sitecontainers_spec is None or len(sitecontainers_spec) == 0:
@@ -1160,6 +1187,7 @@ def delete_webapp_sitecontainer(cmd, name, resource_group, container_name, slot=
             logger.error("Failed to delete sitecontainer %s.", container_name)
     except Exception as ex:
         raise AzureInternalError("Failed to delete sitecontainer '{}'. Error: {}".format(container_name, str(ex)))
+
 
 def list_webapp_sitecontainers(cmd, name, resource_group, slot=None):
     web_client = get_mgmt_service_client(cmd.cli_ctx, WebSiteManagementClient).web_apps

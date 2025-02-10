@@ -2216,51 +2216,60 @@ short-summary: Create sitecontainers for a linux webapp
 long-summary: |
     Multiple sitecontainers can be added at once by passing arg --sitecontainer-spec-file, which is the path to a json file containing an array of sitecontainer specs.
     Example json file:
-    [{
-        "name" : "firstcontainer",
-        "image": "myregistry.io/firstimage:latest",
-        "target_port": "80",
-        "is_main": true,
-        "environment_variables" : [
-            {
-                "name" : "hello",
-                "value": "world"
-            }
-        ],
-        "volume_mounts": [
-            {
-                "container_mount_path" : "mountPath",
-                "data": "configData",
-                "read_only": true,
-                "volume_sub_path": "subPath"
-            }
-        ]
+    [
+    {
+        "name": "firstcontainer",
+        "properties": {
+            "image": "myregistry.io/firstimage:latest",
+            "targetPort": "80",
+            "isMain": true,
+            "environmentVariables": [
+                {
+                    "name": "VARIABLE_1",
+                    "value": "APPSETTING_KEY1"
+                }
+            ],
+            "volumeMounts": [
+                {
+                    "containerMountPath": "mountPath",
+                    "readOnly": true,
+                    "volumeSubPath": "subPath"
+                }
+            ]
+        }
     },
     {
-        "name" : "secondcontainer",
-        "image": "myregistry.io/secondimage:latest",
-        "target_port": "3000",
-        "is_main": false,
-        "auth_type": "SystemIdentity",
-        "start_up_command": "MyStartupCmd"
+        "name": "secondcontainer",
+        "properties": {
+            "image": "myregistry.io/secondimage:latest",
+            "targetPort": "3000",
+            "isMain": false,
+            "authType": "SystemIdentity",
+            "startUpCommand": "MyStartupCmd"
+        }
     },
     {
-        "name" : "thirdcontainer",
-        "image": "myregistry.io/thirdimage:latest",
-        "target_port": "3001",
-        "is_main": false,
-        "auth_type": "UserAssigned",
-        "user_managed_identity_client_id": "ClientID"
+        "name": "thirdcontainer",
+        "properties": {
+            "image": "myregistry.io/thirdimage:latest",
+            "targetPort": "3001",
+            "isMain": false,
+            "authType": "UserAssigned",
+            "userManagedIdentityClientId": "ClientID"
+        }
     },
     {
-        "name" : "thirdcontainer",
-        "image": "myregistry.io/thirdimage:latest",
-        "target_port": "3002",
-        "is_main": false,
-        "auth_type": "UserCredentials",
-        "user_name": "Username",
-        "password_secret": "Password"
-    }]
+        "name": "fourthcontainer",
+        "properties": {
+            "image": "myregistry.io/fourthimage:latest",
+            "targetPort": "3002",
+            "isMain": false,
+            "authType": "UserCredentials",
+            "userName": "Username",
+            "passwordSecret": "Password"
+        }
+    }
+    ]
 examples:
   - name: Create a sitecontainer for a linux webapp
     text: az webapp sitecontainers create --name MyWebApp --resource-group MyResourceGroup --container-name MyContainer --image MyImageRegistry.io/MyImage:latest --target-port 80 --is-main
