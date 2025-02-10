@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update a gallery Application Version.
+
+    :example: Update a simple gallery Application Version.
+        az sig gallery-application version update --gallery-name myGalleryName --application-name myGalleryApplicationName -n 1.0.0 -g myResourceGroup --package-file-link https://{myStorageAccount}.blob.core.windows.net/{myStorageContainer}/{myStorageBlob} --end-of-life-date "2050-07-01T07:00:00Z"
     """
 
     _aaz_info = {
