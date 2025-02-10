@@ -4363,7 +4363,7 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
         self.KEYS = FUNCTIONS_STACKS_API_KEYS()
         super().__init__(cmd, linux=linux, windows=windows)
 
-    def validate_end_of_life_date(self, runtime, version, linux):
+    def validate_end_of_life_date(self, runtime, version, is_linux):
         from dateutil.relativedelta import relativedelta
         # we would not be able to validate for a custom runtime
         if runtime == 'custom':
@@ -4371,7 +4371,7 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
 
         today = datetime.datetime.now(datetime.timezone.utc)
         six_months = today + relativedelta(months=+6)
-        runtimes = [r for r in self.stacks if r.linux == linux and runtime == r.name]
+        runtimes = [r for r in self.stacks if r.linux == is_linux and runtime == r.name]
         runtimes.sort(key=lambda r: r.end_of_life_date or
                       datetime.datetime.min.replace(tzinfo=datetime.timezone.utc), reverse=True)
         matched_runtime = next((r for r in runtimes if r.version == version), None)
@@ -4392,21 +4392,21 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
                                'longer be supported. %s',
                                runtime, latest_runtime, version, eol.date(), runtime_deprecation_link)
 
-    def resolve(self, runtime, version=None, functions_version=None, linux=False, disable_version_error=False):
+    def resolve(self, runtime, version=None, functions_version=None, is_linux=False, disable_version_error=False):
         stacks = self.stacks
-        runtimes = [r for r in stacks if r.linux == linux and runtime == r.name]
-        os = LINUX_OS_NAME if linux else WINDOWS_OS_NAME
+        runtimes = [r for r in stacks if r.linux == is_linux and runtime == r.name]
+        os = LINUX_OS_NAME if is_linux else WINDOWS_OS_NAME
         if not runtimes:
-            supported_runtimes = [r.name for r in stacks if r.linux == linux]
+            supported_runtimes = [r.name for r in stacks if r.linux == is_linux]
             raise ValidationError("Runtime {0} not supported for os {1}. Supported runtimes for os {1} are: {2}. "
                                   "Run 'az functionapp list-runtimes' for more details on supported runtimes. "
                                   .format(runtime, os, supported_runtimes))
         if version is None:
-            matched_runtime_version = self.get_default_version(runtime, functions_version, linux)
+            matched_runtime_version = self.get_default_version(runtime, functions_version, is_linux)
             self.validate_end_of_life_date(
                 matched_runtime_version.name,
                 matched_runtime_version.version,
-                linux
+                is_linux
             )
             return matched_runtime_version
         matched_runtime_version = next((r for r in runtimes if r.version == version), None)
@@ -4429,7 +4429,7 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
         self.validate_end_of_life_date(
             runtime,
             version,
-            linux
+            is_linux
         )
 
         if not matched_runtime_version:
@@ -4448,8 +4448,8 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
                                   .format(functions_version, runtime, version, os, supported_func_versions))
         return matched_runtime_version
 
-    def get_default_version(self, runtime, functions_version, linux=False):
-        runtimes = [r for r in self.stacks if r.linux == linux and r.name == runtime]
+    def get_default_version(self, runtime, functions_version, is_linux=False):
+        runtimes = [r for r in self.stacks if r.linux == is_linux and r.name == runtime]
         # sort runtimes by end of life date
         runtimes.sort(key=lambda r: r.end_of_life_date or
                       datetime.datetime.min.replace(tzinfo=datetime.timezone.utc), reverse=True)
