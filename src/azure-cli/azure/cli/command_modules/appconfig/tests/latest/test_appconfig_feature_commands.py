@@ -3,17 +3,14 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long
-
 import os
-import json
 
 from knack.util import CLIError
 from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest)
 from azure.cli.testsdk.checkers import NoneCheck
-from azure.cli.command_modules.appconfig._constants import FeatureFlagConstants, KeyVaultConstants, ImportExportProfiles, AppServiceConstants
+from azure.cli.command_modules.appconfig._constants import FeatureFlagConstants
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from test_utils import _create_config_store, CredentialResponseSanitizer
+from azure.cli.command_modules.appconfig.tests.latest._test_utils import _create_config_store, CredentialResponseSanitizer
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
