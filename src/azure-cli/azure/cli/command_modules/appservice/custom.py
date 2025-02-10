@@ -242,7 +242,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         if startup_file:
             site_config.app_command_line = startup_file
         if sitecontainers_app:
-            site_config.linux_fx_version = 'sitecontainers'
+            site_config.linux_fx_version = 'SITECONTAINERS'
         elif runtime:
             match = helper.resolve(runtime, is_linux)
             if not match:
