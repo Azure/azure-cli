@@ -158,6 +158,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
             'Context.Default.VS.Core.Distro.Id': _get_distro_id(),  # eg. 'centos'
             'Context.Default.VS.Core.Distro.Version': _get_distro_version(),  # eg. '8.4.2105'
             'Context.Dafault.VS.Core.Istty': str(sys.stdin.isatty()),
+            'Context.Default.VS.Core.User.DeviceId': _get_device_id(),
             'Context.Default.VS.Core.User.Id': _get_installation_id(),
             'Context.Default.VS.Core.User.IsMicrosoftInternal': 'False',
             'Context.Default.VS.Core.User.IsOptedIn': 'True',
@@ -569,6 +570,13 @@ def _get_secrets_warning_config():
 def _get_core_version():
     from azure.cli.core import __version__ as core_version
     return core_version
+
+
+@decorators.suppress_all_exceptions(fallback_return=None)
+def _get_device_id():
+    # This is a shared id with VS code telemetry
+    from deviceid import get_device_id
+    return get_device_id()
 
 
 @decorators.suppress_all_exceptions(fallback_return=None)
