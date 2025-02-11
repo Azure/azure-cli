@@ -17,6 +17,9 @@ from azure.cli.core.aaz import *
 )
 class AttachDetachDataDisk(AAZCommand):
     """Attach and detach data disks to/from the virtual machine.
+
+    :example: Virtual Machine attach detach multiple data disks
+        az vm disk attach-detach-data-disk --resource-group {resourceGroup} --vm-name {vmName} --data-disks-to-attach "[{lun:1,disk-id:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.Compute/disks/{disk1Name}',disk-encryption-set:{id:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.Compute/diskEncryptionSets/{existing-diskEncryptionSet-name}'},caching:ReadOnly,delete-option:Delete,write-accelerator-enabled:True},{lun:2,disk-id:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.Compute/disks/{disk2Name}',disk-encryption-set:{id:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.Compute/diskEncryptionSets/{existing-diskEncryptionSet-name}'},caching:ReadWrite,delete-option:Detach,write-accelerator-enabled:False}]" --data-disks-to-detach "[{disk-id:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.Compute/disks/{disk3Name}',detach-option:ForceDetach},{disk-id:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.Compute/disks/{disk4Name}',detach-option:ForceDetach}]"
     """
 
     _aaz_info = {
@@ -60,11 +63,17 @@ class AttachDetachDataDisk(AAZCommand):
             options=["--data-disks-to-attach"],
             arg_group="Parameters",
             help="The list of managed data disks to be attached.",
+            fmt=AAZListArgFormat(
+                min_length=1,
+            ),
         )
         _args_schema.data_disks_to_detach = AAZListArg(
             options=["--data-disks-to-detach"],
             arg_group="Parameters",
             help="The list of managed data disks to be detached.",
+            fmt=AAZListArgFormat(
+                min_length=1,
+            ),
         )
 
         data_disks_to_attach = cls._args_schema.data_disks_to_attach
