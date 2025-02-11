@@ -21,6 +21,10 @@ long-summary: >-
     For more details, see https://go.microsoft.com/fwlink/?linkid=2276314
 
 
+    [WARNING] `--password` no longer accepts a service principal certificate.
+    Use `--certificate` to pass a service principal certificate.
+
+
     To log in with a service principal, specify --service-principal.
 
 
@@ -32,15 +36,17 @@ examples:
     - name: Log in interactively.
       text: az login
     - name: Log in with username and password. This doesn't work with Microsoft accounts or accounts that have two-factor authentication enabled. Use -p=secret if the first character of the password is '-'.
-      text: az login -u johndoe@contoso.com -p VerySecret
-    - name: Log in with a service principal using client secret. Use -p=secret if the first character of the password is '-'.
-      text: az login --service-principal -u http://azure-cli-2016-08-05-14-31-15 -p VerySecret --tenant contoso.onmicrosoft.com
-    - name: Log in with a service principal using client certificate.
-      text: az login --service-principal -u http://azure-cli-2016-08-05-14-31-15 -p ~/mycertfile.pem --tenant contoso.onmicrosoft.com
+      text: az login --username johndoe@contoso.com --password VerySecret
+    - name: Log in with a service principal using client secret. Use --password=secret if the first character of the password is '-'.
+      text: az login --service-principal --username APP_ID --password CLIENT_SECRET --tenant TENANT_ID
+    - name: Log in with a service principal using certificate.
+      text: az login --service-principal --username APP_ID --certificate /path/to/cert.pem --tenant TENANT_ID
     - name: Log in with a system-assigned managed identity.
       text: az login --identity
-    - name: Log in with a user-assigned managed identity. You must specify the client ID, object ID or resource ID of the user-assigned managed identity with --username.
-      text: az login --identity --username 00000000-0000-0000-0000-000000000000
+    - name: Log in with a user-assigned managed identity's client ID.
+      text: az login --identity --client-id 00000000-0000-0000-0000-000000000000
+    - name: Log in with a user-assigned managed identity's resource ID.
+      text: az login --identity --resource-id /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MyIdentity
 """
 
 helps['account'] = """

@@ -11,7 +11,7 @@ from azure.cli.core.util import CLIError
 
 def validate_storageaccount(cmd, namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import is_valid_resource_id, resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id, resource_id
     if namespace.storage_account:
         if not is_valid_resource_id(namespace.storage_account):
             namespace.storage_account = resource_id(
@@ -24,7 +24,7 @@ def validate_storageaccount(cmd, namespace):
 
 def validate_partner_namespace(cmd, namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import is_valid_resource_id, resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id, resource_id
     if namespace.partner_namespace:
         if not is_valid_resource_id(namespace.partner_namespace):
             namespace.partner_namespace = resource_id(

@@ -71,7 +71,7 @@ class CreateForRbacScenarioTest(RoleScenarioTestBase):
     @ResourceGroupPreparer(name_prefix='cli_test_sp_with_kv_new_cert')
     @KeyVaultPreparer(name_prefix='test-rbac-new-kv')
     def test_create_for_rbac_create_cert_keyvault(self, resource_group, key_vault):
-        KeyVaultErrorException = get_sdk(self.cli_ctx, ResourceType.DATA_KEYVAULT, 'models.key_vault_error#KeyVaultErrorException')
+        from azure.core.exceptions import HttpResponseError
         subscription_id = self.get_subscription_id()
 
         self.kwargs.update({
@@ -88,7 +88,7 @@ class CreateForRbacScenarioTest(RoleScenarioTestBase):
                 result = self.cmd('ad sp create-for-rbac --create-cert '
                                   '--keyvault {kv} --cert {cert} -n {display_name}').get_output_in_json()
                 self.kwargs['app_id'] = result['appId']
-            except KeyVaultErrorException:
+            except HttpResponseError:
                 if not self.is_live and not self.in_recording:
                     pass  # temporary workaround for keyvault challenge handling was ignored under playback
                 else:
@@ -199,7 +199,45 @@ class CreateForRbacScenarioTest(RoleScenarioTestBase):
 class RoleDefinitionScenarioTest(RoleScenarioTestBase):
 
     @AllowLargeResponse()
-    def test_role_definition_scenario(self):
+    def test_built_in_role_definition_scenario(self):
+        self.kwargs['sub_scope'] = '/subscriptions/{}'.format(self.cmd('account show').get_output_in_json()['id'])
+
+        # Show Reader built-in role definition by scope and name
+        self.cmd('role definition show --scope {sub_scope} --name acdd72a7-3385-48ef-bd42-f606fba81ae7',
+                 checks=[
+                     self.check('name', 'acdd72a7-3385-48ef-bd42-f606fba81ae7'),
+                     self.check('roleName', 'Reader'),
+                     self.check('roleType', 'BuiltInRole')
+                 ])
+
+        # Show Reader built-in role definition by resource ID
+        self.cmd('role definition show --id '
+                 '{sub_scope}/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7',
+                 checks=[
+                     self.check('name', 'acdd72a7-3385-48ef-bd42-f606fba81ae7'),
+                     self.check('roleName', 'Reader'),
+                     self.check('roleType', 'BuiltInRole')
+                 ])
+
+        # List Reader built-in role definition by roleName
+        self.cmd('role definition list --name Reader',
+                 checks=[
+                     self.check("length([])", 1),
+                     self.check('[0].name', 'acdd72a7-3385-48ef-bd42-f606fba81ae7'),
+                     self.check('[0].roleName', 'Reader'),
+                     self.check('[0].roleType', 'BuiltInRole')
+                 ])
+
+        # List Reader built-in role definition by name
+        self.cmd('role definition list --name acdd72a7-3385-48ef-bd42-f606fba81ae7',
+                 checks=[
+                     self.check("length([])", 1),
+                     self.check('[0].name', 'acdd72a7-3385-48ef-bd42-f606fba81ae7'),
+                     self.check('[0].roleName', 'Reader'),
+                     self.check('[0].roleType', 'BuiltInRole')
+                 ])
+
+    def test_custom_role_definition_scenario(self):
         subscription_id = self.get_subscription_id()
         role_name = self.create_random_name('cli-test-role', 20)
         template = {

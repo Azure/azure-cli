@@ -6,9 +6,9 @@
 # pylint: disable=line-too-long
 
 import json
-import re
 import azure.cli.core.azclierror as CLIErrors
 
+from datetime import datetime
 from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.azclierror import (InvalidArgumentValueError,
@@ -30,11 +30,22 @@ logger = get_logger(__name__)
 
 
 def validate_datetime(namespace):
-    ''' valid datetime format:YYYY-MM-DDThh:mm:ssZ '''
-    datetime_format = '^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])T(2[0-3]|[01][0-9]):[0-5][0-9]:[0-5][0-9][a-zA-Z]{0,5}$'
-    if namespace.datetime is not None and re.search(datetime_format, namespace.datetime) is None:
-        raise CLIError(
-            'The input datetime is invalid. Correct format should be YYYY-MM-DDThh:mm:ssZ ')
+    ''' valid datetime format: YYYY-MM-DDThh:mm:ss["Z"/±hh:mm]'''
+    supported_formats = ["%Y-%m-%dT%H:%M:%S", "%Y-%m-%dT%H:%M:%Sz", "%Y-%m-%dT%H:%M:%S%z"]
+    if namespace.datetime is not None:
+        for supported_format in supported_formats:
+            if __tryparse_datetime(namespace.datetime, supported_format):
+                return
+
+        raise InvalidArgumentValueError('The input datetime is invalid. Correct format should be YYYY-MM-DDThh:mm:ss["Z"/±hh:mm].')
+
+
+def __tryparse_datetime(datetime_string, dt_format):
+    try:
+        datetime.strptime(datetime_string, dt_format)
+        return True
+    except ValueError:
+        return False
 
 
 def validate_connection_string(cmd, namespace):
@@ -113,7 +124,7 @@ def validate_export(namespace):
 
 def validate_appservice_name_or_id(cmd, namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import is_valid_resource_id, parse_resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
     if namespace.appservice_account:
         if not is_valid_resource_id(namespace.appservice_account):
             config_store_name = ""
@@ -219,7 +230,7 @@ def validate_identity(namespace):
         return
 
     for identity in identities:
-        from msrestazure.tools import is_valid_resource_id
+        from azure.mgmt.core.tools import is_valid_resource_id
         if identity == '[all]' and subcommand == 'remove':
             continue
 
@@ -377,13 +388,14 @@ def validate_snapshot_import(namespace):
 
 def validate_sku(namespace):
     if namespace.sku.lower() == 'free':
-        if (namespace.enable_purge_protection or namespace.retention_days or namespace.replica_name or namespace.replica_location or namespace.no_replica):
+        if (namespace.enable_purge_protection or namespace.retention_days or namespace.replica_name or namespace.replica_location or namespace.no_replica or namespace.enable_arm_private_network_access):  # pylint: disable=too-many-boolean-expressions
             logger.warning("Options '--enable-purge-protection', '--replica-name', '--replica-location' , '--no-replica' and '--retention-days' will be ignored when creating a free store.")
             namespace.retention_days = None
             namespace.enable_purge_protection = None
             namespace.replica_name = None
             namespace.replica_location = None
             namespace.no_replica = None
+            namespace.enable_arm_private_network_access = None
             return
 
     if namespace.sku.lower() == 'premium' and not namespace.no_replica:

@@ -10,9 +10,9 @@ from azure.cli.command_modules.monitor.grammar.metric_alert import MetricAlertCo
     MetricAlertConditionParser, MetricAlertConditionValidator
 from azure.cli.core.aaz import has_value
 from azure.cli.core.azclierror import InvalidArgumentValueError
+from azure.mgmt.core.tools import is_valid_resource_id, resource_id
 from knack.log import get_logger
 from msrest.serialization import Serializer
-from msrestazure.tools import is_valid_resource_id, resource_id
 
 from ..aaz.latest.monitor.metrics.alert import Update as _MetricsAlertUpdate
 
@@ -128,7 +128,7 @@ class MetricsAlertUpdate(_MetricsAlertUpdate):
             help="Add a condition which triggers the rule.\n\n"
                  "Usage: --add-condition {avg,min,max,total,count} [NAMESPACE.]METRIC\n"
                  "[{=,!=,>,>=,<,<=} THRESHOLD]\n"
-                 "[{<,>,><} dynamic SENSITIVITY VIOLATIONS of EVALUATIONS [since DATETIME]]\n"
+                 "[{>,><,<} dynamic SENSITIVITY VIOLATIONS of EVALUATIONS [since DATETIME]]\n"
                  "[where DIMENSION {includes,excludes} VALUE [or VALUE ...]\n"
                  "[and   DIMENSION {includes,excludes} VALUE [or VALUE ...] ...]]\n\n"
                  "Sensitivity can be 'low', 'medium', 'high'.\n\n"

@@ -333,7 +333,7 @@ examples:
 helps['acr login'] = """
 type: command
 short-summary: Log in to an Azure Container Registry through the Docker CLI.
-long-summary: Docker must be installed on your machine. Once done, use 'docker logout <registry url>' to log out. (If you only need an access token and do not want to install Docker, specify '--expose-token')
+long-summary: Docker must be installed on your machine. Once done, use `docker logout <registry url>` to log out. (If you only need an access token and do not want to install Docker, specify '--expose-token')
 examples:
   - name: Log in to an Azure Container Registry
     text: >
@@ -612,7 +612,7 @@ type: command
 short-summary: Create a credential set.
 examples:
   - name: Create a credential set.
-    text: az acr credential-set create -r myregistry -n MyRule -l docker.io -u https://MyKeyvault.vault.azure.net/secrets/usernamesecret -p https://MyKeyvault.vault.azure.net/secrets/passwordsecret
+    text: az acr credential-set create -r myregistry -n MyDockerHubCredSet -l docker.io -u https://MyKeyvault.vault.azure.net/secrets/usernamesecret -p https://MyKeyvault.vault.azure.net/secrets/passwordsecret
 """
 
 helps['acr credential-set update'] = """
@@ -620,7 +620,7 @@ type: command
 short-summary: Update the username or password Azure Key Vault secret ID on a credential set.
 examples:
   - name: Update the password Azure Key Vault secret ID.
-    text: az acr credential-set update -r myregistry -n MyRule -p https://MyKeyvault.vault.azure.net/secrets/newsecretname
+    text: az acr credential-set update -r myregistry -n MyDockerHubCredSet -p https://MyKeyvault.vault.azure.net/secrets/newsecretname
 """
 
 helps['acr credential-set delete'] = """
@@ -704,6 +704,10 @@ examples:
     text: az acr manifest list-metadata -r myregistry -n hello-world
   - name: List the metadata of the manifests in the repository 'hello-world'.
     text: az acr manifest list-metadata myregistry.azurecr.io/hello-world
+  - name: List the metadata of all manifests (tagged/untagged) in the repository 'hello-world'.
+    text: az acr manifest list-metadata -r myregistry -n hello-world --query "[]"
+  - name: List the metadata of untagged manifests in the repository 'hello-world'.
+    text: az acr manifest list-metadata -r myregistry -n hello-world --query "[?tags==null]"
 """
 
 helps['acr manifest update-metadata'] = """

@@ -18,7 +18,7 @@ from azure.cli.testsdk.checkers import NoneCheck
 from azure.cli.command_modules.appconfig._constants import FeatureFlagConstants, KeyVaultConstants, ImportExportProfiles, AppServiceConstants
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse, RecordingProcessor
 from azure.cli.testsdk.scenario_tests.utilities import is_json_payload
-from azure.core.exceptions import ResourceNotFoundError
+from azure.core.exceptions import ResourceNotFoundError, HttpResponseError
 from azure.cli.core.azclierror import ResourceNotFoundError as CliResourceNotFoundError, RequiredArgumentMissingError, MutuallyExclusiveArgumentError
 from azure.cli.core.util import shell_safe_json_parse
 
@@ -26,6 +26,10 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
 class AppConfigMgmtScenarioTest(ScenarioTest):
+
+    def __init__(self, *args, **kwargs):
+        kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
+        super().__init__(*args, **kwargs)
 
     @ResourceGroupPreparer(parameter_name_for_location='location')
     @AllowLargeResponse()
@@ -46,7 +50,6 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
             'rg_loc': location,
             'rg': resource_group,
             'sku': standard_sku,
-            'sku': standard_sku,
             'tags': tag,
             'identity': system_assigned_identity,
             'retention_days': 1,
@@ -59,7 +62,6 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                                  self.check('resourceGroup', resource_group),
                                  self.check('provisioningState', 'Succeeded'),
                                  self.check('sku.name', standard_sku),
-                                 self.check('sku.name', standard_sku),
                                  self.check('tags', structured_tag),
                                  self.check('identity.type', 'SystemAssigned'),
                                  self.check('softDeleteRetentionInDays', '{retention_days}'),
@@ -71,7 +73,6 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                          self.check('[0].resourceGroup', resource_group),
                          self.check('[0].provisioningState', 'Succeeded'),
                          self.check('[0].sku.name', standard_sku),
-                         self.check('[0].sku.name', standard_sku),
                          self.check('[0].tags', structured_tag),
                          self.check('[0].identity.type', 'SystemAssigned')])
 
@@ -80,7 +81,6 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                          self.check('location', '{rg_loc}'),
                          self.check('resourceGroup', resource_group),
                          self.check('provisioningState', 'Succeeded'),
-                         self.check('sku.name', standard_sku),
                          self.check('sku.name', standard_sku),
                          self.check('tags', structured_tag),
                          self.check('identity.type', 'SystemAssigned')])
@@ -124,7 +124,6 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                          self.check('tags', structured_tag),
                          self.check('provisioningState', 'Succeeded'),
                          self.check('sku.name', premium_sku),
-                         self.check('sku.name', premium_sku),
                          self.check('encryption.keyVaultProperties.keyIdentifier', keyvault_uri.strip('/') + "/keys/{}/".format(encryption_key))])
 
         self.kwargs.update({
@@ -139,6 +138,48 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                     self.check('provisioningState', 'Succeeded'),
                     self.check('sku.name', premium_sku),
                     self.check('encryption.keyVaultProperties.keyIdentifier', keyvault_uri.strip('/') + "/keys/{}/".format(encryption_key))])
+
+        # update private link delegation mode and private network access
+        pass_through_auth_mode = 'pass-through'
+        local_auth_mode = "local"
+
+        # update authentication mode to 'local'
+        self.kwargs.update({
+            'data_plane_auth_mode': local_auth_mode,
+        })
+
+        self.cmd('appconfig update -n {config_store_name} -g {rg} --arm-auth-mode {data_plane_auth_mode}',
+                 checks=[self.check('name', '{config_store_name}'),
+                    self.check('location', '{rg_loc}'),
+                    self.check('resourceGroup', resource_group),
+                    self.check('tags', {}),
+                    self.check('provisioningState', 'Succeeded'),
+                    self.check('dataPlaneProxy.authenticationMode', 'Local')])
+
+        # enabling private network access should fail
+        with self.assertRaisesRegex(HttpResponseError, 'Data plane proxy authentication mode must be set to Pass-through to enable private link delegation'):
+            self.cmd('appconfig update -n {config_store_name} -g {rg} --enable-arm-private-network-access')
+
+        # update authengication mode to 'pass-through'
+        self.kwargs.update({
+            'data_plane_auth_mode': pass_through_auth_mode,
+        })
+
+        self.cmd('appconfig update -n {config_store_name} -g {rg} --arm-auth-mode {data_plane_auth_mode}',
+                 checks=[self.check('name', '{config_store_name}'),
+                    self.check('location', '{rg_loc}'),
+                    self.check('resourceGroup', resource_group),
+                    self.check('tags', {}),
+                    self.check('provisioningState', 'Succeeded'),
+                    self.check('dataPlaneProxy.authenticationMode', 'Pass-through')])
+
+        self.cmd('appconfig update -n {config_store_name} -g {rg} --enable-arm-private-network-access',
+                 checks=[self.check('name', '{config_store_name}'),
+                    self.check('location', '{rg_loc}'),
+                    self.check('resourceGroup', resource_group),
+                    self.check('tags', {}),
+                    self.check('provisioningState', 'Succeeded'),
+                    self.check('dataPlaneProxy.privateLinkDelegation', 'Enabled')])
 
         self.cmd('appconfig delete -n {config_store_name} -g {rg} -y')
 
@@ -376,6 +417,10 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
 
 class AppConfigCredentialScenarioTest(ScenarioTest):
 
+    def __init__(self, *args, **kwargs):
+        kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
+        super().__init__(*args, **kwargs)
+
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_credential(self, resource_group, location):
@@ -408,6 +453,10 @@ class AppConfigCredentialScenarioTest(ScenarioTest):
 
 
 class AppConfigIdentityScenarioTest(ScenarioTest):
+
+    def __init__(self, *args, **kwargs):
+        kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
+        super().__init__(*args, **kwargs)
 
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_identity(self, resource_group, location):
@@ -448,6 +497,10 @@ class AppConfigIdentityScenarioTest(ScenarioTest):
 
 
 class AppConfigKVScenarioTest(ScenarioTest):
+
+    def __init__(self, *args, **kwargs):
+        kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
+        super().__init__(*args, **kwargs)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
@@ -542,7 +595,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
 
         self.kwargs.update({
             'value': entry_value,
-            'timestamp': _format_datetime(deleted_time)
+            'timestamp': deleted_time
         })
 
         credential_list = self.cmd(
@@ -567,7 +620,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
         # KeyVault reference tests
         keyvault_key = "HostSecrets"
         keyvault_id = "https://fake.vault.azure.net/secrets/fakesecret"
-        keyvault_value = "{{\"uri\":\"https://fake.vault.azure.net/secrets/fakesecret\"}}"
+        keyvault_value = f"{{{json.dumps({'uri': keyvault_id})}}}"
 
         self.kwargs.update({
             'key': keyvault_key,
@@ -762,6 +815,10 @@ class AppConfigKVScenarioTest(ScenarioTest):
 
 class AppConfigImportExportScenarioTest(ScenarioTest):
 
+    def __init__(self, *args, **kwargs):
+        kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
+        super().__init__(*args, **kwargs)
+
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_import_export(self, resource_group, location):
@@ -893,7 +950,7 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         import_separator_features_file_path = os.path.join(TEST_DIR, 'import_separator_features.json')
         import_features_alt_syntax_file_path = os.path.join(TEST_DIR, 'import_features_alt_syntax.json')
         import_features_random_conditions_file_path = os.path.join(TEST_DIR, 'import_features_random_conditions.json')
-        import_features_invalid_requirement_type_file_path = os.path.join(TEST_DIR, 'import_features_invalid_requirement_type.json')
+        os.environ['AZURE_APPCONFIG_FM_COMPATIBLE'] = 'True'
 
         self.kwargs.update({
             'label': 'KeyValuesWithFeatures',
@@ -909,6 +966,7 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         with open(exported_file_path) as json_file:
             exported_kvs = json.load(json_file)
         assert imported_kvs == exported_kvs
+
 
         # skip features while exporting
         self.cmd(
@@ -1013,14 +1071,112 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         assert imported_kvs == exported_kvs
         os.remove(exported_file_path)
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(parameter_name_for_location='location')
+    def test_azconfig_import_export_new_fm_schema(self, resource_group, location):
+        # Feature flags test with new ms fm schema
+        os.environ['AZURE_APPCONFIG_FM_COMPATIBLE'] = 'False'
+
+        config_store_name = self.create_random_name(prefix='NewFmImport', length=24)
+
+        location = 'eastus'
+        sku = 'standard'
+        self.kwargs.update({
+            'config_store_name': config_store_name,
+            'rg_loc': location,
+            'rg': resource_group,
+            'sku': sku,
+            'import_source': 'file',
+            'imported_format': 'json',
+        })
+        _create_config_store(self, self.kwargs)
+       
+        # Invalid requirement type should fail import
+        import_features_invalid_requirement_type_file_path = os.path.join(TEST_DIR, 'import_features_invalid_requirement_type.json')
         self.kwargs.update({
             'imported_file_path': import_features_invalid_requirement_type_file_path
         })
 
-        # Invalid requirement type should fail import
         with self.assertRaisesRegex(CLIError, "Feature 'Timestamp' must have an any/all requirement type"):
             self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} -y')
+
+        # Invalid variants import
+        invalid_variants_file_path = os.path.join(TEST_DIR, 'import_invalid_variants.json')
+        self.kwargs.update({
+            'imported_file_path': invalid_variants_file_path
+        })
+        with self.assertRaisesRegex(CLIError, "Feature variant must contain required 'name' attribute:"):
+            self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} -y')
+        
+        imported_new_fm_schema_file_path = os.path.join(TEST_DIR, 'import_features_new_fm_schema.json')
+        exported_new_fm_schema_file_path = os.path.join(TEST_DIR, 'export_features_new_fm_schema.json')
+
+        self.kwargs.update({
+            'label': 'KeyValuesWithFeaturesFFV2',
+            'imported_file_new_fm_path': imported_new_fm_schema_file_path,
+            'exported_file_new_fm_path': exported_new_fm_schema_file_path
+        })
+        self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_new_fm_path}" --format {imported_format} --label {label} -y')
+        self.cmd(
+            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_new_fm_path}" --format {imported_format} --label {label} -y')
+        with open(imported_new_fm_schema_file_path) as json_file:
+            imported_kvs = json.load(json_file)
+        with open(exported_new_fm_schema_file_path) as json_file:
+            exported_kvs = json.load(json_file)
+        assert imported_kvs == exported_kvs
+        os.remove(exported_new_fm_schema_file_path)
+
+        # Import/Export new fm yaml file
+        imported_new_fm_schema_yaml_file_path = os.path.join(TEST_DIR, 'import_features_new_fm_schema_yaml.json')
+        exported_new_fm_schema_yaml_file_path = os.path.join(TEST_DIR, 'export_features_new_fm_schema_yaml.json')
+        exported_new_fm_schema_as_yaml_file_path = os.path.join(TEST_DIR, 'export_features_new_fm_schema_as_yaml.json')
+
+        self.kwargs.update({
+            'label': 'NewFmSchemaYamlTests',
+            'imported_format': 'yaml',
+            'imported_ffv2_file_path': imported_new_fm_schema_yaml_file_path,
+            'exported_ffv2_file_path': exported_new_fm_schema_yaml_file_path
+        })
+        self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_ffv2_file_path}" --format {imported_format} --label {label} -y')
+        self.cmd(
+            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_ffv2_file_path}" --format {imported_format} --label {label} -y')
+        exported_new_fm_yaml_file = {}
+        exported_new_fm_as_yaml_file = {}
+        with open(exported_new_fm_schema_yaml_file_path) as yaml_file:
+            for yaml_data in list(yaml.safe_load_all(yaml_file)):
+                exported_new_fm_yaml_file.update(yaml_data)
+        with open(exported_new_fm_schema_as_yaml_file_path) as yaml_file:
+            for yaml_data in list(yaml.safe_load_all(yaml_file)):
+                exported_new_fm_as_yaml_file.update(yaml_data)
+        assert exported_new_fm_yaml_file == exported_new_fm_as_yaml_file
+        os.remove(exported_new_fm_schema_yaml_file_path)
+
+        # Import/Export properties file
+        imported_prop_file_path = os.path.join(TEST_DIR, 'import_features_prop.json')
+        exported_prop_file_path = os.path.join(TEST_DIR, 'export_features_prop.json')
+        exported_as_kv_prop_file_path = os.path.join(TEST_DIR, 'export_as_kv_prop.json')
+
+        self.kwargs.update({
+            'label': 'NewFmSchemaPropertiesTests',
+            'imported_format': 'properties',
+            'imported_file_path': imported_prop_file_path,
+            'exported_file_path': exported_prop_file_path
+        })
+        self.cmd(
             'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} -y')
+        self.cmd(
+            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} -y')
+        with open(exported_prop_file_path) as prop_file:
+            exported_prop_file = javaproperties.load(prop_file)
+        with open(exported_as_kv_prop_file_path) as prop_file:
+            exported_kv_prop_file = javaproperties.load(prop_file)
+        assert exported_prop_file == exported_kv_prop_file
+        os.remove(exported_prop_file_path)
+
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
@@ -1252,7 +1408,7 @@ class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
         # KeyVault reference tests
         keyvault_key = "HostSecrets"
         keyvault_id = "https://fake.vault.azure.net/secrets/fakesecret"
-        appconfig_keyvault_value = "{{\"uri\":\"https://fake.vault.azure.net/secrets/fakesecret\"}}"
+        appconfig_keyvault_value = f"{{{json.dumps({'uri': keyvault_id})}}}"
         appsvc_keyvault_value = "@Microsoft.KeyVault(SecretUri=https://fake.vault.azure.net/secrets/fakesecret)"
         label = 'ForExportToAppService'
         self.kwargs.update({
@@ -1304,7 +1460,7 @@ class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
 
         # Update keyvault reference for slot export / import testing
         slot_keyvault_id = "https://fake.vault.azure.net/secrets/slotsecret"
-        appconfigslot_keyvault_value = "{{\"uri\":\"https://fake.vault.azure.net/secrets/slotsecret\"}}"
+        appconfigslot_keyvault_value = f"{{{json.dumps({'uri': slot_keyvault_id})}}}"
         appsvcslot_keyvault_value = "@Microsoft.KeyVault(SecretUri=https://fake.vault.azure.net/secrets/slotsecret)"
         label = 'ForExportToAppServiceSlot'
         self.kwargs.update({
@@ -1354,7 +1510,7 @@ class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
         alt_label = 'ImportedAltSyntaxFromAppService'
         alt_keyvault_key = "AltKeyVault"
         alt_keyvault_value = "@Microsoft.KeyVault(VaultName=myvault;SecretName=mysecret;SecretVersion=ec96f02080254f109c51a1f14cdb1931)"
-        appconfig_keyvault_value = "{{\"uri\":\"https://myvault.vault.azure.net/secrets/mysecret/ec96f02080254f109c51a1f14cdb1931\"}}"
+        appconfig_keyvault_value = f"{{{json.dumps({'uri': 'https://myvault.vault.azure.net/secrets/mysecret/ec96f02080254f109c51a1f14cdb1931'})}}}"
         keyvault_ref = "{0}={1}".format(alt_keyvault_key, alt_keyvault_value)
         slotsetting_tag = {"AppService:SlotSetting": "true"}
         self.kwargs.update({
@@ -1373,6 +1529,10 @@ class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
 
 class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
 
+    def __init__(self, *args, **kwargs):
+        kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
+        super().__init__(*args, **kwargs)
+
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_import_export_naming_conventions(self, resource_group, location):
@@ -1388,6 +1548,7 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
         })
         _create_config_store(self, self.kwargs)
 
+        os.environ['AZURE_APPCONFIG_FM_COMPATIBLE'] = 'True'
         import_hyphen_path = os.path.join(TEST_DIR, 'import_features_hyphen.json')
         exported_file_path = os.path.join(TEST_DIR, 'export_features_naming.json')
         export_underscore_path = os.path.join(TEST_DIR, 'export_features_underscore.json')
@@ -1454,31 +1615,159 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
         assert exported_yaml_file == exported_hyphen_yaml_file
         os.remove(exported_yaml_file_path)
 
-        # Import/Export properties file
-        imported_prop_file_path = os.path.join(TEST_DIR, 'import_features_prop.json')
-        exported_prop_file_path = os.path.join(TEST_DIR, 'export_features_prop.json')
-        exported_as_kv_prop_file_path = os.path.join(TEST_DIR, 'export_as_kv_prop.json')
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(parameter_name_for_location='location')
+    def test_azconfig_import_export_respect_both_schemas_naming_conventions(self, resource_group, location):
+        # Respect both fm schemas in file
+        config_store_name = self.create_random_name(prefix='BothSchemaTest', length=24)
+
+        location = 'eastus'
+        sku = 'standard'
+        self.kwargs.update({
+            'config_store_name': config_store_name,
+            'rg_loc': location,
+            'rg': resource_group,
+            'sku': sku,
+            'import_source': 'file'
+        })
+        _create_config_store(self, self.kwargs)
+
+        # # Camel case naming convention
+        os.environ['AZURE_APPCONFIG_FM_COMPATIBLE'] = 'False'
+
+        imported_both_schemas_camel_case_file_path = os.path.join(TEST_DIR, 'respectBothFmSchemaCamelCase.json')
+        exported_both_schemas_camel_case_file_path = os.path.join(TEST_DIR, 'export_features_both_schema_camel_case_file_path.json')
+        expected_exported_both_schemas_file_path = os.path.join(TEST_DIR, 'expected_export_features_both_schema_file_path.json')
 
         self.kwargs.update({
-            'label': 'PropertiesTests',
-            'imported_format': 'properties',
-            'imported_file_path': imported_prop_file_path,
-            'exported_file_path': exported_prop_file_path
+            'label': 'RespectBothFmSchemasCamelCase',
+            'imported_format': 'json',
+            'imported_file_both_schemas_fm_path': imported_both_schemas_camel_case_file_path,
+            'exported_file_both_schemas_fm_path': exported_both_schemas_camel_case_file_path
         })
         self.cmd(
-            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} -y')
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_both_schemas_fm_path}" --format {imported_format} --label {label} -y')
         self.cmd(
-            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} -y')
-        with open(exported_prop_file_path) as prop_file:
-            exported_prop_file = javaproperties.load(prop_file)
-        with open(exported_as_kv_prop_file_path) as prop_file:
-            exported_kv_prop_file = javaproperties.load(prop_file)
-        assert exported_prop_file == exported_kv_prop_file
-        os.remove(exported_prop_file_path)
+            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_both_schemas_fm_path}" --format {imported_format} --label {label} -y')
+        with open(exported_both_schemas_camel_case_file_path) as json_file:
+            exported_camel_case_kvs = json.load(json_file)
+        with open(expected_exported_both_schemas_file_path) as json_file:
+            exported_kvs = json.load(json_file)
+        assert exported_camel_case_kvs == exported_kvs
+        os.remove(exported_both_schemas_camel_case_file_path)
+
+        # # Pascal case naming convention
+        imported_both_schemas_pascal_case_file_path = os.path.join(TEST_DIR, 'respectBothFmSchemaPascalCase.json')
+        exported_both_schemas_pascal_case_file_path = os.path.join(TEST_DIR, 'export_features_both_schema_pascal_case_file_path.json')
+
+        self.kwargs.update({
+            'label': 'RespectBothFmSchemasPascalCase',
+            'imported_format': 'json',
+            'imported_file_both_schemas_fm_path': imported_both_schemas_pascal_case_file_path,
+            'exported_file_both_schemas_fm_path': exported_both_schemas_pascal_case_file_path
+        })
+        self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_both_schemas_fm_path}" --format {imported_format} --label {label} -y')
+        self.cmd(
+            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_both_schemas_fm_path}" --format {imported_format} --label {label} -y')
+        with open(exported_both_schemas_pascal_case_file_path) as json_file:
+            exported_pascal_case_kvs = json.load(json_file)
+        with open(expected_exported_both_schemas_file_path) as json_file:
+            exported_kvs = json.load(json_file)
+        assert exported_pascal_case_kvs == exported_kvs
+        os.remove(exported_both_schemas_pascal_case_file_path)
+
+        # # Hyphen case naming convention
+        imported_both_schemas_hyphen_case_file_path = os.path.join(TEST_DIR, 'respectBothFmSchemaHyphenCase.json')
+        exported_both_schemas_hyphen_case_file_path = os.path.join(TEST_DIR, 'export_features_both_schema_hyphen_case_file_path.json')
+
+        self.kwargs.update({
+            'label': 'RespectBothFmSchemasHyphenCase',
+            'imported_format': 'json',
+            'imported_file_both_schemas_fm_path': imported_both_schemas_hyphen_case_file_path,
+            'exported_file_both_schemas_fm_path': exported_both_schemas_hyphen_case_file_path
+        })
+        self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_both_schemas_fm_path}" --format {imported_format} --label {label} -y')
+        self.cmd(
+            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_both_schemas_fm_path}" --format {imported_format} --label {label} -y')
+        with open(exported_both_schemas_hyphen_case_file_path) as json_file:
+            exported_hyphen_case_kvs = json.load(json_file)
+        with open(expected_exported_both_schemas_file_path) as json_file:
+            exported_kvs = json.load(json_file)
+        assert exported_hyphen_case_kvs == exported_kvs
+        os.remove(exported_both_schemas_hyphen_case_file_path)
+
+
+        # # Underscore case naming convention
+        imported_both_schemas_underscore_case_file_path = os.path.join(TEST_DIR, 'respectBothFmSchemaUnderscoreCase.json')
+        exported_both_schemas_underscore_case_file_path = os.path.join(TEST_DIR, 'export_features_both_schema_underscore_case_file_path.json')
+
+        self.kwargs.update({
+            'label': 'RespectBothFmSchemasUnderscoreCase',
+            'imported_format': 'json',
+            'imported_file_both_schemas_fm_path': imported_both_schemas_underscore_case_file_path,
+            'exported_file_both_schemas_fm_path': exported_both_schemas_underscore_case_file_path
+        })
+        self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_both_schemas_fm_path}" --format {imported_format} --label {label} -y')
+        self.cmd(
+            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_both_schemas_fm_path}" --format {imported_format} --label {label} -y')
+        with open(exported_both_schemas_underscore_case_file_path) as json_file:
+            exported_underscore_case_kvs = json.load(json_file)
+        with open(expected_exported_both_schemas_file_path) as json_file:
+            exported_kvs = json.load(json_file)
+        assert exported_underscore_case_kvs == exported_kvs
+        os.remove(exported_both_schemas_underscore_case_file_path)
+
+        # # Duplicate features in both schemas
+        imported_duplicate_features_both_schemas_file_path = os.path.join(TEST_DIR, 'import_duplicate_features_both_schemas.json')
+        exported_duplicate_features_both_schemas_file_path = os.path.join(TEST_DIR, 'export_features_duplicate_features_both_schemas_path.json')
+        expected_export_duplicate_features_both_schemas_file_path = os.path.join(TEST_DIR, 'expected_export_duplicate_features_both_schemas.json')
+
+        self.kwargs.update({
+            'label': 'DuplicateFeaturesBothSchemas',
+            'imported_format': 'json',
+            'imported_file_both_schemas_fm_path': imported_duplicate_features_both_schemas_file_path,
+            'exported_file_both_schemas_fm_path': exported_duplicate_features_both_schemas_file_path
+        })
+        self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_both_schemas_fm_path}" --format {imported_format} --label {label} -y')
+        self.cmd(
+            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_both_schemas_fm_path}" --format {imported_format} --label {label} -y')
+        with open(exported_duplicate_features_both_schemas_file_path) as json_file:
+            exported_duplicate_features = json.load(json_file)
+        with open(expected_export_duplicate_features_both_schemas_file_path) as json_file:
+            expected_duplicate_features = json.load(json_file)
+        assert exported_duplicate_features == expected_duplicate_features
+        os.remove(exported_duplicate_features_both_schemas_file_path)
+
+        # Invalid fm sections should fail import
+        invalid_ms_fm_schema_with_both_schemas_file_path = os.path.join(TEST_DIR, 'import_invalid_ms_fm_schema_with_both_schemas.json')
+        self.kwargs.update({
+            'imported_file_path': invalid_ms_fm_schema_with_both_schemas_file_path,
+            'imported_format': 'json'
+        })
+        with self.assertRaisesRegex(CLIError, "Data contains an already defined section with the key FeatureManagement."):
+            self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} -y')
+
+
+        invalid_fm_sections_file_path = os.path.join(TEST_DIR, 'import_invalid_fm_sections.json')
+        self.kwargs.update({
+            'imported_file_path': invalid_fm_sections_file_path
+        })
+        with self.assertRaisesRegex(CLIError, 'Unable to proceed because file contains multiple sections corresponding to "Feature Management".'):
+            self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} -y')
 
 
 class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
 
+    def __init__(self, *args, **kwargs):
+        kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
+        super().__init__(*args, **kwargs)
+    
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_appconfig_to_appconfig_import_export(self, resource_group, location):
@@ -1675,6 +1964,10 @@ class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
 
 
 class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
+
+    def __init__(self, *args, **kwargs):
+        kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
+        super().__init__(*args, **kwargs)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
@@ -1942,7 +2235,7 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
         entry_feature = 'Beta'
         internal_feature_key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + entry_feature
         default_description = ""
-        default_conditions = "{{u\'client_filters\': []}}" if sys.version_info[0] < 3 else "{{\'client_filters\': []}}"
+        default_conditions = "{{\'client_filters\': []}}"
         default_locked = False
         default_state = "off"
         self.kwargs.update({
@@ -1959,7 +2252,7 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
         # Add new KeyVault reference
         keyvault_key = "HostSecrets"
         keyvault_id = "https://fake.vault.azure.net/secrets/fakesecret"
-        keyvault_value = "{{\"uri\":\"https://fake.vault.azure.net/secrets/fakesecret\"}}"
+        keyvault_value = f"{{{json.dumps({'uri': keyvault_id})}}}"
         self.kwargs.update({
             'key': keyvault_key,
             'secret_identifier': keyvault_id
@@ -2051,6 +2344,7 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
             - Delete all settings from both stores
         """
 
+        os.environ['AZURE_APPCONFIG_FM_COMPATIBLE'] = 'True'
         imported_file_path = os.path.join(TEST_DIR, 'json_import.json')
         exported_file_path = os.path.join(TEST_DIR, 'json_export.json')
         self.kwargs.update({
@@ -2104,6 +2398,10 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
 
 class AppConfigFeatureScenarioTest(ScenarioTest):
 
+    def __init__(self, *args, **kwargs):
+        kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
+        super().__init__(*args, **kwargs)
+
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_feature(self, resource_group, location):
@@ -2123,7 +2421,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         internal_feature_key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + entry_feature
         entry_label = 'v1'
         default_description = ""
-        default_conditions = "{{u\'client_filters\': []}}" if sys.version_info[0] < 3 else "{{\'client_filters\': []}}"
+        default_conditions = "{{\'client_filters\': []}}"
         default_locked = False
         default_state = "off"
 
@@ -2199,8 +2497,12 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
                                          self.check('description', updated_entry_description),
                                          self.check('label', updated_label),
                                          self.check('state', default_state),
-                                         self.check('conditions', default_conditions)]).get_output_in_json()
-        assert len(response_dict) == 8
+                                         self.check('display_name', None),
+                                         self.check('conditions', default_conditions),
+                                         self.check('allocation', None),
+                                         self.check('variants', None),
+                                         self.check('telemetry', None)]).get_output_in_json()
+        assert len(response_dict) == 12
 
         # show a feature flag with field filtering
         response_dict = self.cmd('appconfig feature show -n {config_store_name} --feature {feature} --label {label} --fields key label state locked',
@@ -2435,7 +2737,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         feature_key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature_prefix + feature_name
         entry_label = 'v1'
         default_description = ""
-        default_conditions = "{{u\'client_filters\': []}}" if sys.version_info[0] < 3 else "{{\'client_filters\': []}}"
+        default_conditions = "{{\'client_filters\': []}}"
         default_locked = False
         default_state = "off"
 
@@ -2517,6 +2819,10 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
 
 class AppConfigFeatureFilterScenarioTest(ScenarioTest):
 
+    def __init__(self, *args, **kwargs):
+        kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
+        super().__init__(*args, **kwargs)
+
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_feature_filter(self, resource_group, location):
@@ -2536,7 +2842,7 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
         internal_feature_key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + entry_feature
         entry_label = 'Standard'
         default_description = ""
-        default_conditions = "{{u\'client_filters\': []}}" if sys.version_info[0] < 3 else "{{\'client_filters\': []}}"
+        default_conditions = "{{\'client_filters\': []}}"
         default_locked = False
         default_state = "off"
 
@@ -2771,6 +3077,10 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
 
 class AppConfigKeyValidationScenarioTest(ScenarioTest):
 
+    def __init__(self, *args, **kwargs):
+        kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
+        super().__init__(*args, **kwargs)
+    
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_key_validation(self, resource_group, location):
@@ -2835,6 +3145,7 @@ class AppConfigKeyValidationScenarioTest(ScenarioTest):
             self.cmd('appconfig feature set --connection-string {connection_string} --feature "{feature}" -y')
 
         # validate keys and features during file import
+        os.environ['AZURE_APPCONFIG_FM_COMPATIBLE'] = 'True'
         imported_file_path = os.path.join(TEST_DIR, 'import_invalid_kv_and_features.json')
         expected_export_file_path = os.path.join(TEST_DIR, 'expected_export_valid_kv_and_features.json')
         actual_export_file_path = os.path.join(TEST_DIR, 'actual_export_valid_kv_and_features.json')
@@ -2858,6 +3169,10 @@ class AppConfigKeyValidationScenarioTest(ScenarioTest):
 
 class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
 
+    def __init__(self, *args, **kwargs):
+        kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
+        super().__init__(*args, **kwargs)
+    
     @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
@@ -2896,7 +3211,7 @@ class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
         entry_feature = 'Beta'
         internal_feature_key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + entry_feature
         default_description = ""
-        default_conditions = "{{u\'client_filters\': []}}" if sys.version_info[0] < 3 else "{{\'client_filters\': []}}"
+        default_conditions = "{{\'client_filters\': []}}"
         default_locked = False
         default_state = "off"
         self.kwargs.update({
@@ -2953,6 +3268,7 @@ class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
             self.cmd('appconfig kv set --endpoint {endpoint} --auth-mode login --key {key} --value {value} -y')
 
         # Export from appconfig to file should succeed
+        os.environ['AZURE_APPCONFIG_FM_COMPATIBLE'] = 'True'
         exported_file_path = os.path.join(TEST_DIR, 'export_aad_1.json')
         expected_exported_file_path = os.path.join(TEST_DIR, 'expected_export_aad_1.json')
         self.kwargs.update({
@@ -2982,7 +3298,7 @@ class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
         # Add a KeyVault reference
         keyvault_key = "HostSecrets"
         keyvault_id = "https://fake.vault.azure.net/secrets/fakesecret"
-        appconfig_keyvault_value = "{{\"uri\":\"https://fake.vault.azure.net/secrets/fakesecret\"}}"
+        appconfig_keyvault_value = f"{{{json.dumps({'uri': keyvault_id})}}}"
         self.kwargs.update({
             'key': keyvault_key,
             'secret_identifier': keyvault_id
@@ -3015,6 +3331,11 @@ class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
 
 
 class AppconfigReplicaLiveScenarioTest(ScenarioTest):
+
+    def __init__(self, *args, **kwargs):
+        kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
+        super().__init__(*args, **kwargs)
+
     @ResourceGroupPreparer(parameter_name_for_location='location')
     @AllowLargeResponse()
     def test_azconfig_replica_mgmt(self, resource_group, location):
@@ -3085,7 +3406,7 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
 
     def __init__(self, *args, **kwargs):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
-        super(AppConfigSnapshotLiveScenarioTest, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
     @ResourceGroupPreparer(parameter_name_for_location='location')
@@ -3274,37 +3595,35 @@ def _setup_key_vault(test, kwargs):
     return key_vault
 
 
-def _format_datetime(date_string):
-    from dateutil.parser import parse
-    try:
-        return parse(date_string).strftime("%Y-%m-%dT%H:%M:%SZ")
-    except ValueError:
-        print("Unable to parse date_string '%s'", date_string)
-        return date_string or ' '
-
-
 class CredentialResponseSanitizer(RecordingProcessor):
     def process_response(self, response):
         if is_json_payload(response):
             try:
                 json_data = shell_safe_json_parse(response["body"]["string"])
 
-                if isinstance(json_data["value"], list):
+                if isinstance(json_data.get("value"), list):
                     for idx, credential in enumerate(json_data["value"]):
-                        if "connectionString" in credential:
-                            credential["id"] = "sanitized_id{}".format(idx + 1)
-                            credential["value"] = "sanitized_secret{}".format(
-                                idx + 1)
+                        self._try_replace_secret(credential, idx)
 
-                            endpoint = next(
-                                filter(lambda x: x.startswith("Endpoint="), credential["connectionString"].split(";")))[len("Endpoint="):]
+                    response["body"]["string"] = json.dumps(json_data)
+                
+                elif isinstance(json_data, dict):
+                    self._try_replace_secret(json_data)
 
-                            credential["connectionString"] = "Endpoint={};Id={};Secret={}".format(
-                                endpoint, credential["id"], credential["value"])
-
-                response["body"]["string"] = json.dumps(json_data)
+                    response["body"]["string"] = json.dumps(json_data)
 
             except Exception:
                 pass
 
         return response
+
+    def _try_replace_secret(self, credential, idx = 0):
+        if "connectionString" in credential:
+            credential["id"] = "sanitized_id{}".format(idx + 1)
+            credential["value"] = "sanitized_secret{}".format(idx + 1)
+
+            endpoint = next(
+                filter(lambda x: x.startswith("Endpoint="), credential["connectionString"].split(";")))[len("Endpoint="):]
+
+            credential["connectionString"] = "Endpoint={};Id={};Secret={}".format(
+                endpoint, credential["id"], credential["value"])

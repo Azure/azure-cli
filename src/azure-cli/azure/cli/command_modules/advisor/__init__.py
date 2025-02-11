@@ -14,8 +14,8 @@ class AdvisorCommandsLoader(AzCommandsLoader):
         from azure.cli.core.commands import CliCommandType
         from azure.cli.core.profiles import ResourceType
         advisor_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.advisor.custom#{}')
-        super(AdvisorCommandsLoader, self).__init__(cli_ctx=cli_ctx, custom_command_type=advisor_custom,
-                                                    resource_type=ResourceType.MGMT_CONTAINERSERVICE)
+        super().__init__(cli_ctx=cli_ctx, custom_command_type=advisor_custom,
+                         resource_type=ResourceType.MGMT_CONTAINERSERVICE)
 
     def load_command_table(self, args):
         from azure.cli.command_modules.advisor.commands import load_command_table

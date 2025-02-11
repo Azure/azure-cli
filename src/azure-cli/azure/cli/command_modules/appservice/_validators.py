@@ -10,9 +10,9 @@ from azure.cli.core.azclierror import (InvalidArgumentValueError, ArgumentUsageE
                                        ResourceNotFoundError, ValidationError, MutuallyExclusiveArgumentError)
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.commands.validators import validate_tags
+from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
 
 from knack.log import get_logger
-from msrestazure.tools import is_valid_resource_id, parse_resource_id
 
 from ._appservice_utils import _generic_site_operation
 from ._client_factory import web_client_factory
@@ -99,12 +99,12 @@ def _validate_asp_sku(sku, app_service_environment, zone_redundant):
         if not app_service_environment:
             raise ValidationError("The pricing tier 'Isolated' is not allowed for this app service plan. "
                                   "Use this link to learn more: "
-                                  "https://docs.microsoft.com/azure/app-service/overview-hosting-plans")
+                                  "https://learn.microsoft.com/azure/app-service/overview-hosting-plans")
     else:
         if app_service_environment:
             raise ValidationError("Only pricing tier 'IsolatedV2' and 'IsolatedMV2' is allowed in this "
                                   "app service plan. Use this link to "
-                                  "learn more: https://docs.microsoft.com/azure/app-service/overview-hosting-plans")
+                                  "learn more: https://learn.microsoft.com/azure/app-service/overview-hosting-plans")
 
 
 def validate_asp_create(namespace):

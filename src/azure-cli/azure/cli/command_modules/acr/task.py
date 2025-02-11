@@ -635,7 +635,7 @@ def acr_task_identity_remove(cmd,
                              resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
-    TaskUpdateParameters = cmd.get_models('TaskUpdateParameters', operation_group='TaskUpdateParameters')
+    TaskUpdateParameters = cmd.get_models('TaskUpdateParameters', operation_group='tasks')
 
     if identities and IDENTITY_GLOBAL_REMOVE in identities:
         if len(identities) > 1:
@@ -1130,7 +1130,7 @@ def _build_identities_info(cmd, identities, is_remove=False):
     identity = IdentityProperties(type=identity_types)
     if external_identities:
         if is_remove:
-            identity.user_assigned_identities = {e: None for e in external_identities}
+            identity.user_assigned_identities = dict.fromkeys(external_identities)
         else:
             identity.user_assigned_identities = {e: UserIdentityProperties() for e in external_identities}
     return identity

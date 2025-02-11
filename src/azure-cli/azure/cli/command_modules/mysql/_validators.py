@@ -6,7 +6,7 @@ from dateutil import parser
 import re
 from knack.util import CLIError
 from knack.log import get_logger
-from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id, is_valid_resource_name
+from azure.mgmt.core.tools import parse_resource_id, resource_id, is_valid_resource_id, is_valid_resource_name
 from azure.cli.core.azclierror import ValidationError, ArgumentUsageError, InvalidArgumentValueError
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.util import parse_proxy_resource_id
@@ -107,7 +107,7 @@ def mysql_arguments_validator(db_context, location, tier, sku_name, storage_gb, 
                               public_access=None, version=None, auto_grow=None, replication_role=None, subnet=None,
                               byok_identity=None, backup_byok_identity=None, byok_key=None, geo_redundant_backup=None,
                               disable_data_encryption=None, iops=None, auto_io_scaling=None, accelerated_logs=None,
-                              instance=None, data_source_type=None, mode=None,
+                              storage_redundancy=None, instance=None, data_source_type=None, mode=None,
                               data_source_backup_dir=None, data_source_sas_token=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforMySQL/flexibleServers')
 
@@ -134,6 +134,7 @@ def mysql_arguments_validator(db_context, location, tier, sku_name, storage_gb, 
                           disable_data_encryption, geo_redundant_backup, instance)
     _mysql_iops_validator(iops, auto_io_scaling, instance)
     mysql_accelerated_logs_validator(accelerated_logs, tier)
+    storage_redundancy_validator(storage_redundancy, tier)
     _mysql_import_data_source_type_validator(data_source_type, data_source_backup_dir, data_source_sas_token)
     _mysql_import_mode_validator(mode)
 
@@ -311,15 +312,15 @@ def _mysql_iops_validator(iops, auto_io_scaling, instance):
 
 
 def mysql_accelerated_logs_validator(accelerated_logs, tier):
-    if accelerated_logs is None:
-        if tier == "MemoryOptimized":
-            accelerated_logs = "Enabled"
-        else:
-            accelerated_logs = "Disabled"
-    if tier != "MemoryOptimized" and accelerated_logs.lower() == "enabled":
-        accelerated_logs = "Disabled"
-        logger.warning("Accelerated logs are only supported for Memory Optimized tier. "
+    if tier != "MemoryOptimized" and accelerated_logs is not None and accelerated_logs.lower() == "enabled":
+        logger.warning("Accelerated logs is only supported for Memory Optimized tier. "
                        "So the accelerated logs will be disabled.")
+
+
+def storage_redundancy_validator(storage_redundancy, tier):
+    if tier != "MemoryOptimized" and storage_redundancy is not None and storage_redundancy.lower() == "zoneredundancy":
+        logger.warning("Zone Redundancy is only supported for Memory Optimized tier. "
+                       "So Local Redundancy will be enabled for your server.")
 
 
 def _network_arg_validator(subnet, public_access):

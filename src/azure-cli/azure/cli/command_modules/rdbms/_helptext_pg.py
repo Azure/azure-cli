@@ -22,11 +22,11 @@ long-summary: >
 
     - Configure public access
 
-    https://docs.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-manage-firewall-cli
+    https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-manage-firewall-cli
 
     - Configure private access
 
-    https://docs.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-manage-virtual-network-cli
+    https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-manage-virtual-network-cli
 
 examples:
   - name: >
@@ -35,7 +35,7 @@ examples:
         az postgres flexible-server create --location northeurope --resource-group testGroup \\
           --name testserver --admin-user username --admin-password password \\
           --sku-name Standard_D2s_v3 --tier GeneralPurpose --public-access 153.24.26.117 --storage-size 128 \\
-          --tags "key=value" --version 16 --high-availability ZoneRedundant --zone 1 \\
+          --tags "key=value" --version 17 --high-availability ZoneRedundant --zone 1 \\
           --standby-zone 3
   - name: >
       Create a PostgreSQL flexible server using Premium SSD v2 Disks.
@@ -52,7 +52,7 @@ examples:
         az postgres flexible-server create
   - name: >
       Create a PostgreSQL flexible server with public access and add the range of IP address to have access to this server.
-      The --public-access parameter can be 'All', 'None', <startIpAddress>, or <startIpAddress>-<endIpAddress>
+      The --public-access parameter can be 'Disabled', 'Enabled', 'All', 'None', <startIpAddress>, or <startIpAddress>-<endIpAddress>
     text: >
       az postgres flexible-server create --resource-group testGroup --name testserver --public-access 125.23.54.31-125.23.54.35
   - name: >
@@ -216,9 +216,14 @@ examples:
       az postgres flexible-server create -g testGroup -n testServer --location testLocation --performance-tier P15
 
   - name: >
-      create flexible server with storage auto-grow as Enabled. Accepted values Enabled / Disabled. Default value for storage auto-grow is "Disabled".
+      Create flexible server with storage auto-grow as Enabled. Accepted values Enabled / Disabled. Default value for storage auto-grow is "Disabled".
     text: >
       az postgres flexible-server create -g testGroup -n testServer --location testLocation --storage-auto-grow Enabled
+
+  - name: >
+      Create elastic cluster with node count of 5. Default node count is 2 when --cluster-option is "ElasticCluster".
+    text: >
+      az postgres flexible-server create -g testGroup -n testCluster --location testLocation --cluster-option ElasticCluster --node-count 5
 """
 
 helps['postgres flexible-server show'] = """
@@ -277,6 +282,8 @@ examples:
     text: az postgres flexible-server update --resource-group testGroup --name testserver --iops 3000
   - name: Update a flexible server's storage to set Throughput (MB/sec). Server must be using Premium SSD v2 Disks.
     text: az postgres flexible-server update --resource-group testGroup --name testserver --throughput 125
+  - name: Update a flexible server's cluster size by scaling up node count. Must be an Elastic Cluster.
+    text: az postgres flexible-server update --resource-group testGroup --name testcluster --node-count 6
 """
 
 helps['postgres flexible-server restore'] = """
@@ -337,7 +344,7 @@ type: command
 short-summary: Wait for the flexible server to satisfy certain conditions.
 example:
   - name: Wait for the flexible server to satisfy certain conditions.
-    text: az postgres server wait --exists --resource-group testGroup --name testserver
+    text: az postgres flexible-server wait --exists --resource-group testGroup --name testserver
 """
 
 helps['postgres flexible-server delete'] = """
@@ -420,9 +427,9 @@ type: command
 short-summary: List all firewall rules for a flexible server.
 example:
   - name: List all firewall rules for a server.
-    text: az postgres server firewall-rule list --resource-group testGroup --name testserver
+    text: az postgres flexible-server firewall-rule list --resource-group testGroup --name testserver
   - name: List all firewall rules for a server in table format.
-    text: az postgres server firewall-rule list --resource-group testGroup --name testserver --output table
+    text: az postgres flexible-server firewall-rule list --resource-group testGroup --name testserver --output table
 """
 
 helps['postgres flexible-server firewall-rule show'] = """
@@ -724,6 +731,16 @@ type: group
 short-summary: Manage flexible server backups.
 """
 
+helps['postgres flexible-server backup create'] = """
+type: command
+short-summary: Create a new backup for a flexible server.
+examples:
+  - name: >
+      Create a backup.
+    text: >
+      az postgres flexible-server backup create -g testgroup -n testsvr --backup-name testbackup
+"""
+
 helps['postgres flexible-server backup list'] = """
 type: command
 short-summary: List all the backups for a given server.
@@ -738,6 +755,51 @@ short-summary: Show the details of a specific backup for a given server.
 examples:
   - name: Show the details of backup 'testbackup' for 'testsvr'.
     text: az postgres flexible-server backup show -g testgroup -n testsvr --backup-name testbackup
+"""
+
+helps['postgres flexible-server backup delete'] = """
+type: command
+short-summary: Delete a specific backup.
+examples:
+  - name: Delete a backup.
+    text: az postgres flexible-server backup delete -g testgroup -n testsvr --backup-name testbackup
+"""
+
+helps['postgres flexible-server long-term-retention'] = """
+type: group
+short-summary: Manage flexible server long-term-retention backups.
+"""
+
+helps['postgres flexible-server long-term-retention pre-check'] = """
+type: command
+short-summary: Performs all the checks that are needed for the subsequent long-term-retention backup operation to succeed.
+examples:
+  - name: Precheck if we can perform long-term-retention command on server 'server-name' on resource group 'resource-group-name' with backup name 'backup-name'.
+    text: az postgres flexible-server long-term-retention pre-check -g resource-group-name -b backup-name -n server-name
+"""
+
+helps['postgres flexible-server long-term-retention start'] = """
+type: command
+short-summary: Start long-term-retention backup for a flexible server. SAS URL parameter refers to the container SAS URL, inside the storage account, where the backups will be uploaded.
+examples:
+  - name: Create a backup with name 'backup-name' of server 'server-name' in resource group 'resource-group-name', using container with SAS URL '<sas-url>'.
+    text: az postgres flexible-server long-term-retention start -g resource-group-name -b backup-name -n server-name -u <sas-url>
+"""
+
+helps['postgres flexible-server long-term-retention show'] = """
+type: command
+short-summary: Show the details of a specific long-term-retention backup for a given server.
+examples:
+  - name: Show the details of long-term-retention backup 'testbackup' for 'testsvr'.
+    text: az postgres flexible-server long-term-retention show -g resource-group-name -n server-name -b backup-name
+"""
+
+helps['postgres flexible-server long-term-retention list'] = """
+type: command
+short-summary: List all the long-term-retention backups for a given server.
+examples:
+  - name: List all long-term-retention backups for 'testsvr'.
+    text: az postgres flexible-server long-term-retention list -g resource-group-name -n server-name
 """
 
 helps['postgres flexible-server replica'] = """
@@ -757,7 +819,8 @@ examples:
         --source-server testserver --zone 3 --location testLocation \\
         --vnet newVnet --subnet newSubnet \\
         --address-prefixes 172.0.0.0/16 --subnet-prefixes 172.0.0.0/24 \\
-        --private-dns-zone testDNS.postgres.database.azure.com
+        --private-dns-zone testDNS.postgres.database.azure.com \\
+        --tags "key=value"
   - name: >
       Create a read replica 'testreplicaserver' for 'testserver' with public or private access \
       in the specified location if available. Since zone is not passed, it will automatically pick up zone in the \
@@ -854,9 +917,17 @@ type: group
 short-summary: Manage server user assigned identities.
 """
 
+helps['postgres flexible-server identity update'] = """
+type: command
+short-summary: Update to enable or disable system assigned managed identity on the server.
+examples:
+  - name: Enable system assigned managed identity on the server.
+    text: az postgres flexible-server identity update -g testgroup -s testsvr --system-assigned Enabled
+"""
+
 helps['postgres flexible-server identity assign'] = """
 type: command
-short-summary: Add user asigned managed identities to the server.
+short-summary: Add user assigned managed identities to the server.
 examples:
   - name: Add identities 'test-identity' and 'test-identity-2' to server 'testsvr'.
     text: az postgres flexible-server identity assign -g testgroup -s testsvr --identity test-identity test-identity-2
@@ -864,7 +935,7 @@ examples:
 
 helps['postgres flexible-server identity remove'] = """
 type: command
-short-summary: Remove user asigned managed identites from the server.
+short-summary: Remove user assigned managed identites from the server.
 examples:
   - name: Remove identity 'test-identity' from server 'testsvr'.
     text: az postgres flexible-server identity remove -g testgroup -s testsvr --identity test-identity
@@ -1069,4 +1140,33 @@ examples:
     text: az postgres flexible-server private-link-resource show --subscription testSubscription --resource-group testGroup --server-name testserver
   - name: Get the private link resource for a flexible server using --ids parameter.
     text: az postgres flexible-server private-link-resource show --ids /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/testGroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/testServer
+"""
+
+helps['postgres flexible-server fabric-mirroring'] = """
+type: group
+short-summary: Bring your PostgreSQL data into Microsoft Fabric. Mirroring allows you to create a replica of your data in OneLake which can be used for all your analytical needs.
+"""
+
+helps['postgres flexible-server fabric-mirroring start'] = """
+type: command
+short-summary: Enable bringing your PostgreSQL data into Microsoft Fabric.
+examples:
+  - name: Enable bringing your PostgreSQL data into Microsoft Fabric.
+    text: az postgres flexible-server fabric-mirroring start -g testgroup -s testsvr --database-names testdb
+"""
+
+helps['postgres flexible-server fabric-mirroring stop'] = """
+type: command
+short-summary: Stop bringing your PostgreSQL data into Microsoft Fabric.
+examples:
+  - name: Stop bringing your PostgreSQL data into Microsoft Fabric.
+    text: az postgres flexible-server fabric-mirroring stop -g testgroup -s testsvr
+"""
+
+helps['postgres flexible-server fabric-mirroring update-databases'] = """
+type: command
+short-summary: Update allowed mirrored databases.
+examples:
+  - name: Update allowed mirrored databases.
+    text: az postgres flexible-server fabric-mirroring update-databases -g testgroup -s testsvr --database-names testdb2 testdb3
 """
