@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "sig gallery-application version create",
 )
 class Create(AAZCommand):
-    """Create a gallery Application Version.
+    """Create a gallery application version.
 
     :example: Create a simple gallery Application Version.
         az sig gallery-application version create --gallery-name myGalleryName --application-name myGalleryApplicationName -n 1.0.0 -g myResourceGroup --package-file-link https://{myStorageAccount}.blob.core.windows.net/{myStorageContainer}/{myStorageBlob}  --install-command installCommand  --remove-command removeCommand
@@ -47,12 +47,12 @@ class Create(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.gallery_application_name = AAZStrArg(
             options=["--application-name", "--gallery-application-name"],
-            help="The name of the gallery Application.",
+            help="The name of the gallery application.",
             required=True,
         )
         _args_schema.gallery_application_version_name = AAZStrArg(
             options=["-n", "--name", "--version-name", "--gallery-application-version-name"],
-            help="The name of the gallery Application Version.",
+            help="The name of the gallery application version.",
             required=True,
         )
         _args_schema.gallery_name = AAZStrArg(
@@ -92,7 +92,7 @@ class Create(AAZCommand):
         )
         _args_schema.default_file_link = AAZStrArg(
             options=["--default-file-link"],
-            help="Optional. The defaultConfigurationLink of the artifact, must be a readable storage page blob.",
+            help="Optional. The default configuration link of the artifact, must be a readable storage page blob.",
         )
         _args_schema.package_file_link = AAZStrArg(
             options=["--package-file-link"],

@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "sig gallery-application version update",
 )
 class Update(AAZCommand):
-    """Update a gallery Application Version.
+    """Update a gallery application version.
 
     :example: Update a simple gallery Application Version.
         az sig gallery-application version update --gallery-name myGalleryName --application-name myGalleryApplicationName -n 1.0.0 -g myResourceGroup --package-file-link https://{myStorageAccount}.blob.core.windows.net/{myStorageContainer}/{myStorageBlob} --end-of-life-date "2050-07-01T07:00:00Z"
@@ -49,13 +49,13 @@ class Update(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.gallery_application_name = AAZStrArg(
             options=["--application-name", "--gallery-application-name"],
-            help="The name of the gallery Application.",
+            help="The name of the gallery application.",
             required=True,
             id_part="child_name_1",
         )
         _args_schema.gallery_application_version_name = AAZStrArg(
             options=["-n", "--name", "--version-name", "--gallery-application-version-name"],
-            help="The name of the gallery Application Version.",
+            help="The name of the gallery application version.",
             required=True,
             id_part="child_name_2",
         )
@@ -76,7 +76,7 @@ class Update(AAZCommand):
         )
         _args_schema.default_file_link = AAZStrArg(
             options=["--default-file-link"],
-            help="Optional. The defaultConfigurationLink of the artifact, must be a readable storage page blob.",
+            help="Optional. The default configuration link of the artifact, must be a readable storage page blob.",
             nullable=True,
         )
         _args_schema.package_file_link = AAZStrArg(
