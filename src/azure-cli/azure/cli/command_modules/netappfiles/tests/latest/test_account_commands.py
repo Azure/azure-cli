@@ -302,11 +302,10 @@ class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
             'keySource': "Microsoft.KeyVault",
             'keyVaultUri': "https://my-key-vault.managedhsm.azure.net",
             'keyName': "myKeyName",
-            'keyVaultResourceId': "/subscriptions/D633CC2E-722B-4AE1-B636-BBD9E4C60ED9/resourceGroups/myRG/providers/Microsoft.KeyVault/managedHSMs/my-hsm",
+            'keyVaultResourceId': "/subscriptions/69a75bda-882e-44d5-8431-63421204132a/resourceGroups/myRG/providers/Microsoft.KeyVault/managedHSMs/my-hsm",
             'userAssignedIdentity': "myIdentity",
             'privateEndpointId': '/subscriptions/69a75bda-882e-44d5-8431-63421204132a/resourceGroups/ab_sdk_test_rg/providers/Microsoft.Network/privateEndpoints/akvPrivateEndpoint',
-            'virtualNetworkId': '/subscriptions/69a75bda-882e-44d5-8431-63421204132a/resourceGroups/ab_sdk_test_rg/providers/Microsoft.Network/virtualNetworks/ab_sdk_test_vnet'
-            
+            'virtualNetworkId': '/subscriptions/69a75bda-882e-44d5-8431-63421204132a/resourceGroups/ab_sdk_test_rg/providers/Microsoft.Network/virtualNetworks/ab_sdk_test_vnet'            
         })
 
         with self.assertRaises(HttpResponseError):
@@ -339,7 +338,7 @@ class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
             'keySource': "Microsoft.KeyVault",
             'keyVaultUri': "https://my-key-vault.managedhsm.azure.net",
             'keyName': "myKeyName",
-            'keyVaultResourceId': '/subscriptions/D633CC2E-722B-4AE1-B636-BBD9E4C60ED9/resourceGroups/myRG/providers/Microsoft.KeyVault/managedHSMs/my-hsm',
+            'keyVaultResourceId': '/subscriptions/69a75bda-882e-44d5-8431-63421204132a/resourceGroups/myRG/providers/Microsoft.KeyVault/managedHSMs/my-hsm',
             'userAssignedIdentity': "myIdentity",
             'privateEndpointId': '/subscriptions/69a75bda-882e-44d5-8431-63421204132a/resourceGroups/ab_sdk_test_rg/providers/Microsoft.Network/privateEndpoints/akvPrivateEndpoint',
             'virtualNetworkId': '/subscriptions/69a75bda-882e-44d5-8431-63421204132a/resourceGroups/ab_sdk_test_rg/providers/Microsoft.Network/virtualNetworks/ab_sdk_test_vnet'
