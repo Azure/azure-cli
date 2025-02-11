@@ -511,12 +511,12 @@ def _update_revision_env_secretrefs(containers, name):
 def store_as_secret_and_return_secret_ref(secrets_list, registry_user, registry_server, registry_pass, update_existing_secret=False, disable_warnings=False):
     def make_dns1123_compliant(name):
         logger.debug(f"Updating username '{name}' to DNS1123-compliant format.")
-        
+
         # Replace invalid characters with a hyphen and ensure lowercase
         compliant_name = re.sub(r'[^a-z0-9\-]', '-', name.lower())
 
         logger.debug(f"Updated username: '{compliant_name}' (original: '{name}')")
-        
+
         return compliant_name
 
     if registry_pass.startswith("secretref:"):
