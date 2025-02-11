@@ -16,7 +16,6 @@ def _create_config_store(test, kwargs):
         })
     test.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --retention-days {retention_days}')
 
-
 class CredentialResponseSanitizer(RecordingProcessor):
     def process_response(self, response):
         if is_json_payload(response):

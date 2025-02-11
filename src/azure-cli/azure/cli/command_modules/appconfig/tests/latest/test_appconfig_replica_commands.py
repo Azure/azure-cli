@@ -5,11 +5,9 @@
 
 # pylint: disable=line-too-long
 
-import json
-
 from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest)
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.core.azclierror import ResourceNotFoundError
+from azure.core.exceptions import ResourceNotFoundError
 from azure.cli.command_modules.appconfig.tests.latest._test_utils import CredentialResponseSanitizer
 
 class AppconfigReplicaLiveScenarioTest(ScenarioTest):
@@ -63,7 +61,7 @@ class AppconfigReplicaLiveScenarioTest(ScenarioTest):
                          self.check('location', '{replica_loc}'),
                          self.check('resourceGroup', resource_group),
                          self.check('provisioningState', 'Succeeded')])
-
+        
         self.cmd('appconfig replica show -s {config_store_name} -g {rg} -n {replica_name}',
                  checks=[self.check('name', '{replica_name}'),
                          self.check('location', '{replica_loc}'),
