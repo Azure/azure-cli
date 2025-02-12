@@ -1408,41 +1408,6 @@ def load_arguments(self, _):
 
     # endregion
 
-    # region Gallery applications
-    with self.argument_context('sig gallery-application version') as c:
-        c.argument('gallery_application_name', options_list=['--application-name'],
-                   help='The name of the gallery Application')
-        c.argument('gallery_application_version_name', options_list=['--name', '-n', '--version-name'],
-                   help='The name of the gallery Application Version')
-
-    with self.argument_context('sig gallery-application version create') as c:
-        c.argument('package_file_name', help='The name to assign the downloaded package file on the VM. This is limited to 4096 characters.'
-                                             'If not specified, the package file will be named the same as the Gallery Application name.')
-        c.argument('config_file_name', help='The name to assign the downloaded config file on the VM. This is limited to 4096 characters. '
-                                            'If not specified, the config file will be named the Gallery Application name appended with "_config"')
-
-    for scope in ['create', 'update']:
-        with self.argument_context('sig gallery-application version {}'.format(scope)) as c:
-            c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False,
-                       validator=get_default_location_from_resource_group)
-            c.argument('tags', tags_type)
-            c.argument('package_file_link', help='The mediaLink of the artifact, must be a readable storage page blob.')
-            c.argument('install_command', help='The path and arguments to install the gallery application.')
-            c.argument('remove_command', help='The path and arguments to remove the gallery application.')
-            c.argument('update_command', help='The path and arguments to update the gallery application. If not present,'
-                                              ' then update operation will invoke remove command on the previous version'
-                                              ' and install command on the current version of the gallery application.')
-            c.argument('target_regions', type=validate_file_or_dict, help='The target regions where the Image Version is'
-                       'going to be replicated to. This property is updatable. Expected value: '
-                       'json-string/json-file/@json-file.')
-            c.argument('default_file_link', help='The default configuration link of the artifact, must be a readable storage page blob.')
-            c.argument('exclude_from', arg_type=get_three_state_flag(), help='If set to true, Virtual Machines '
-                       'deployed from the latest version of the Image Definition won\'t use this Image Version.',
-                       arg_group='Publishing Profile')
-            c.argument('end_of_life_date', help='The end of life date of the gallery image version. This property can be '
-                       'used for decommissioning purposes. This property is updatable.', arg_group='Publishing Profile')
-    # endregion
-
     # region Proximity Placement Group
     with self.argument_context('ppg', min_api='2018-04-01') as c:
         c.argument('proximity_placement_group_name', arg_type=name_arg_type, help="The name of the proximity placement group.")
