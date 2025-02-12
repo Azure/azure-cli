@@ -95,7 +95,7 @@ class SubscriptionSelector:  # pylint: disable=too-few-public-methods
 
     @staticmethod
     def _get_tenant_string(subscription):
-        try:
+        if subscription.get(_TENANT_DISPLAY_NAME):
             return subscription[_TENANT_DISPLAY_NAME]
-        except KeyError:
-            return subscription[_TENANT_ID]
+        # If _TENANT_DISPLAY_NAME doesn't exist or is None, return _TENANT_ID
+        return subscription[_TENANT_ID]
