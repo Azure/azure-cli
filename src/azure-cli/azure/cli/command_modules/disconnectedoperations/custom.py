@@ -14,29 +14,21 @@ from knack.log import get_logger
 
 logger = get_logger(__name__)
 
+def _get_management_endpoint(provider_namespace):
+    """Helper function to determine management endpoint based on provider namespace."""
+    return "brazilus.management.azure.com" if provider_namespace == "Private.EdgeInternal" else "management.azure.com"
 
 
 def get_offer(cmd, 
               resource_group_name,
               offer_name,
               output_folder=None,
-              management_endpoint="brazilus.management.azure.com",
-              provider_namespace="Private.EdgeInternal",
+              management_endpoint=None,
+              provider_namespace="Microsoft.Edge",
               sub_provider="Microsoft.EdgeMarketPlace",
               api_version="2023-08-01-preview"):
-    """
-    Get details of a specific marketplace offer and download its logos.
-    
-    Args:
-        cmd: The command context object
-        resource_group_name: Name of resource group
-        offer_name: Name of the offer to retrieve
-        output_folder: Folder path to save logos (optional)
-        management_endpoint: Management endpoint URL
-        provider_namespace: Provider namespace
-        sub_provider: Sub-provider namespace
-        api_version: API version
-    """
+    """Get details of a specific marketplace offer and download its logos."""
+
     import os
     import json
     import requests
@@ -44,6 +36,9 @@ def get_offer(cmd,
     from azure.cli.core.util import send_raw_request
     from knack.log import get_logger
 
+    # Use helper function if management_endpoint not explicitly provided
+    if management_endpoint is None:
+        management_endpoint = _get_management_endpoint(provider_namespace)
     logger = get_logger(__name__)
 
     # Get subscription ID from current context
@@ -178,16 +173,18 @@ def get_image_download_url(cmd,
                          offer,
                          sku,
                          version,
-                         management_endpoint="brazilus.management.azure.com",
-                         provider_namespace="Private.EdgeInternal",
+                         management_endpoint=None,
+                         provider_namespace="Microsoft.Edge",
                          api_version="2024-11-01-preview"):
-    """
-    Get download URL for a specific marketplace image version.
-    """
+    """Get download URL for a specific marketplace image version."""
+
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import send_raw_request
     from knack.log import get_logger
-
+    
+    if management_endpoint is None:
+        management_endpoint = _get_management_endpoint(provider_namespace)
+    
     logger = get_logger(__name__)
 
     # Get subscription ID
@@ -234,44 +231,14 @@ def get_image_download_url(cmd,
             'status': 'failed'
         }
 
-def package_image(cmd, 
-                      resource_group_name, 
-                      publisher, 
-                      offer, 
-                      sku,
-                      location):
-    self.kwargs.update({
-        'resource_group_name': resource_group_name,
-        'publisher': publisher,
-        'offer': offer,
-        'sku': sku
-    })
-
-    # download metadata
-
-
-    # download the icons
-
-    # download the image
-
-    return {
-        'resource_group_name': resource_group_name,
-        'publisher': publisher,
-        'offer': offer,
-        'sku': sku,
-        'location': location,
-        'status': 'success'
-    }
-
 def list_offers(cmd, 
                 resource_group_name,
-                management_endpoint="brazilus.management.azure.com",
-                provider_namespace="Private.EdgeInternal",
+                management_endpoint=None,
+                provider_namespace="Microsoft.Edge",
                 sub_provider="Microsoft.EdgeMarketPlace",
                 api_version="2023-08-01-preview"):
-    """
-    List all offers for disconnected operations.
-    """
+    """List all offers for disconnected operations."""
+
     from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import send_raw_request
@@ -279,6 +246,9 @@ def list_offers(cmd,
 
     logger = get_logger(__name__)
 
+    if management_endpoint is None:
+        management_endpoint = _get_management_endpoint(provider_namespace)
+    
     # Get subscription ID from current context
     subscription_id = get_subscription_id(cmd.cli_ctx)
     
