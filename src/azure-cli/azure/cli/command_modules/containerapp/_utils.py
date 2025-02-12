@@ -515,7 +515,7 @@ def store_as_secret_and_return_secret_ref(secrets_list, registry_user, registry_
         # Replace invalid characters with a hyphen and ensure lowercase
         compliant_name = re.sub(r'[^a-z0-9\-]', '-', name.lower())
 
-        logger.debug(f"Updated username: '{compliant_name}' (original: '{name}')")
+        logger.debug(f"DNS1123-compliant name: '{compliant_name}' (original: '{name}')")
 
         return compliant_name
 
