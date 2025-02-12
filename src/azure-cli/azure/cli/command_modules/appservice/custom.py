@@ -36,7 +36,8 @@ from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id, resou
 
 from azure.mgmt.storage import StorageManagementClient
 from azure.mgmt.applicationinsights import ApplicationInsightsManagementClient
-from azure.mgmt.web.models import KeyInfo
+from azure.mgmt.web.models import KeyInfo, SiteContainer, AuthType
+from azure.mgmt.web import WebSiteManagementClient
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
@@ -108,7 +109,8 @@ logger = get_logger(__name__)
 
 def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_file=None,  # pylint: disable=too-many-statements,too-many-branches
                   deployment_container_image_name=None, deployment_source_url=None, deployment_source_branch='master',
-                  deployment_local_git=None, container_registry_password=None, container_registry_user=None,
+                  deployment_local_git=None, sitecontainers_app=None,
+                  container_registry_password=None, container_registry_user=None,
                   container_registry_url=None, container_image_name=None,
                   multicontainer_config_type=None, multicontainer_config_file=None, tags=None,
                   using_webapp_up=False, language=None, assign_identities=None,
@@ -224,20 +226,24 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     current_stack = None
     if is_linux:
         if not validate_container_app_create_options(runtime, container_image_name,
-                                                     multicontainer_config_type, multicontainer_config_file):
+                                                     multicontainer_config_type, multicontainer_config_file,
+                                                     sitecontainers_app):
             if deployment_container_image_name:
                 raise ArgumentUsageError('Please specify both --multicontainer-config-type TYPE '
                                          'and --multicontainer-config-file FILE, '
                                          'and only specify one out of --runtime, '
-                                         '--deployment-container-image-name and --multicontainer-config-type')
+                                         '--deployment-container-image-name, --multicontainer-config-type '
+                                         'or --sitecontainers_app')
             raise ArgumentUsageError('Please specify both --multicontainer-config-type TYPE '
                                      'and --multicontainer-config-file FILE, '
                                      'and only specify one out of --runtime, '
-                                     '--container-image-name and --multicontainer-config-type')
+                                     '--container-image-name, --multicontainer-config-type '
+                                     'or --sitecontainers_app')
         if startup_file:
             site_config.app_command_line = startup_file
-
-        if runtime:
+        if sitecontainers_app:
+            site_config.linux_fx_version = 'SITECONTAINERS'
+        elif runtime:
             match = helper.resolve(runtime, is_linux)
             if not match:
                 raise ValidationError("Linux Runtime '{}' is not supported."
@@ -431,10 +437,11 @@ def get_managed_environment(cmd, resource_group_name, environment_name):
 
 
 def validate_container_app_create_options(runtime=None, container_image_name=None,
-                                          multicontainer_config_type=None, multicontainer_config_file=None):
+                                          multicontainer_config_type=None, multicontainer_config_file=None,
+                                          sitecontainers_app=None):
     if bool(multicontainer_config_type) != bool(multicontainer_config_file):
         return False
-    opts = [runtime, container_image_name, multicontainer_config_type]
+    opts = [runtime, container_image_name, multicontainer_config_type, sitecontainers_app]
     return len([x for x in opts if x]) == 1  # you can only specify one out the combinations
 
 
@@ -989,6 +996,237 @@ def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
     except Exception as ex:  # pylint: disable=broad-except
         if ex.response.status_code != 200:
             raise ex
+
+
+class SiteContainerSpec:
+    # pylint: disable=too-many-instance-attributes,too-few-public-methods
+    from azure.mgmt.web.models import VolumeMount, EnvironmentVariable
+
+    def __init__(self, name: str, image: str, target_port: str, is_main: bool, start_up_command: str = None,
+                 auth_type: str = None, user_name: str = None, password_secret: str = None,
+                 user_managed_identity_client_id: str = None, volume_mounts: list[VolumeMount] = None,
+                 environment_variables: list[EnvironmentVariable] = None):
+        self.name = name
+        self.image = image
+        self.target_port = target_port
+        self.is_main = is_main
+        self.start_up_command = start_up_command
+        self.auth_type = auth_type
+        self.user_name = user_name
+        self.password_secret = password_secret
+        self.user_managed_identity_client_id = user_managed_identity_client_id
+        self.volume_mounts = volume_mounts
+        self.environment_variables = environment_variables
+
+    @classmethod
+    def from_json(cls, json_data):
+        name = json_data.get("name")
+        properties = json_data.get("properties", {})
+        volume_mounts = properties.get("volumeMounts")
+        if volume_mounts:
+            for mount in volume_mounts:
+                if "containerMountPath" in mount:
+                    mount["container_mount_path"] = mount.pop("containerMountPath")
+                if "volumeSubPath" in mount:
+                    mount["volume_sub_path"] = mount.pop("volumeSubPath")
+                if "readOnly" in mount:
+                    mount["read_only"] = mount.pop("readOnly")
+        return cls(
+            name=name,
+            image=properties.get("image"),
+            target_port=properties.get("targetPort"),
+            is_main=properties.get("isMain"),
+            start_up_command=properties.get("startUpCommand"),
+            auth_type=properties.get("authType"),
+            user_name=properties.get("userName"),
+            password_secret=properties.get("passwordSecret"),
+            user_managed_identity_client_id=properties.get("userManagedIdentityClientId"),
+            volume_mounts=volume_mounts,
+            environment_variables=properties.get("environmentVariables")
+        )
+
+
+def create_webapp_sitecontainers(cmd, name, resource_group, container_name=None, image=None, target_port=None,
+                                 slot=None, startup_cmd=None, is_main=None, system_assigned_identity=None,
+                                 user_assigned_identity=None, registry_username=None,
+                                 registry_password=None, sitecontainers_spec_file=None):
+    import os
+    # verify if site is a linux site
+    client = web_client_factory(cmd.cli_ctx)
+    app = client.web_apps.get(resource_group, name)
+    if not is_linux_webapp(app):
+        raise ValidationError("Site is not a linux webapp. Sitecontainers are only supported for linux webapps.")
+    response = None
+
+    # check if sitecontainers_spec_file is provided
+    if sitecontainers_spec_file:
+        response = []
+        logger.warning("Using sitecontainer spec file to create sitecontainer(s)")
+        if not os.path.exists(sitecontainers_spec_file):
+            raise ValidationError("The sitecontainer spec file does not exist at the path '{}'"
+                                  .format(sitecontainers_spec_file))
+        with open(sitecontainers_spec_file, 'r') as file:
+            sitecontainers_spec_json = json.load(file)
+            if not isinstance(sitecontainers_spec_json, list):
+                raise ValidationError("The sitecontainer spec file should contain a list of sitecontainers.")
+            try:
+                sitecontainers_spec = [SiteContainerSpec.from_json(container) for container in sitecontainers_spec_json]
+            except Exception as ex:
+                raise ValidationError("Failed to parse the sitecontainer spec file. Error: {}".format(str(ex)))
+            if sitecontainers_spec is None or len(sitecontainers_spec) == 0:
+                raise ValidationError("No sitecontainers found in the sitecontainers spec file.")
+            for spec in sitecontainers_spec:
+                sitecontainer = SiteContainer(image=spec.image, target_port=spec.target_port,
+                                              start_up_command=spec.start_up_command,
+                                              is_main=spec.is_main, auth_type=spec.auth_type, user_name=spec.user_name,
+                                              password_secret=spec.password_secret,
+                                              user_managed_identity_client_id=spec.user_managed_identity_client_id,
+                                              volume_mounts=spec.volume_mounts,
+                                              environment_variables=spec.environment_variables)
+                response.append(_create_or_update_webapp_sitecontainer_internal(cmd, name, resource_group,
+                                                                                spec.name, sitecontainer, slot))
+    else:
+        if container_name is None or image is None or target_port is None:
+            raise RequiredArgumentMissingError("The following arguments are required if argument \
+                    --sitecontainers-spec-file is not provided: --container-name, --image, --target-port")
+        auth_type = AuthType.ANONYMOUS
+        if system_assigned_identity is True:
+            auth_type = AuthType.SYSTEM_IDENTITY
+        elif user_assigned_identity:
+            auth_type = AuthType.USER_ASSIGNED
+        elif registry_username and registry_password:
+            auth_type = AuthType.USER_CREDENTIALS
+
+        sitecontainer = SiteContainer(image=image, target_port=target_port, start_up_command=startup_cmd,
+                                      is_main=is_main, auth_type=auth_type, user_name=registry_username,
+                                      password_secret=registry_password,
+                                      user_managed_identity_client_id=user_assigned_identity)
+        response = _create_or_update_webapp_sitecontainer_internal(cmd, name, resource_group,
+                                                                   container_name, sitecontainer, slot)
+
+    return response
+
+
+def _create_or_update_webapp_sitecontainer_internal(cmd, name, resource_group, container_name,
+                                                    sitecontainer, slot=None):
+    web_client = get_mgmt_service_client(cmd.cli_ctx, WebSiteManagementClient).web_apps
+    response = None
+    try:
+        if slot:
+            response = web_client.create_or_update_site_container_slot(resource_group, name,
+                                                                       slot, container_name, sitecontainer)
+        else:
+            response = web_client.create_or_update_site_container(resource_group, name, container_name, sitecontainer)
+        return response
+    except Exception as ex:
+        raise AzureInternalError("Failed to create or update sitecontainer {}. Error: {}"
+                                 .format(container_name, str(ex)))
+
+
+def update_webapp_sitecontainer(cmd, name, resource_group, container_name, image=None, target_port=None,
+                                slot=None, startup_cmd=None, is_main=None, system_assigned_identity=None,
+                                user_assigned_identity=None, registry_username=None, registry_password=None):
+    # get the sitecontainer
+    site_container = None
+    try:
+        site_container = get_webapp_sitecontainer(cmd, name, resource_group, container_name, slot)
+    except:
+        raise ResourceNotFoundError("Sitecontainer '{}' does not exist, failed to update the sitecontainer."
+                                    .format(container_name))
+    # update only the provided parameters
+    if image is not None:
+        site_container.image = image
+    if target_port is not None:
+        site_container.target_port = target_port
+    if startup_cmd is not None:
+        site_container.start_up_command = startup_cmd
+    if is_main is not None:
+        site_container.is_main = is_main
+    if system_assigned_identity is not None:
+        site_container.auth_type = AuthType.SYSTEM_IDENTITY
+    if user_assigned_identity is not None:
+        site_container.auth_type = AuthType.USER_ASSIGNED
+        site_container.user_managed_identity_client_id = user_assigned_identity
+    if registry_username is not None and registry_password is not None:
+        site_container.auth_type = AuthType.USER_CREDENTIALS
+        site_container.user_name = registry_username
+        site_container.password_secret = registry_password
+    response = _create_or_update_webapp_sitecontainer_internal(cmd, name, resource_group,
+                                                               container_name, site_container, slot)
+    return response
+
+
+def get_webapp_sitecontainer(cmd, name, resource_group, container_name, slot=None):
+    web_client = get_mgmt_service_client(cmd.cli_ctx, WebSiteManagementClient).web_apps
+    site_container = None
+    try:
+        if slot:
+            site_container = web_client.get_site_container_slot(resource_group, name, container_name, slot)
+        else:
+            site_container = web_client.get_site_container(resource_group, name, container_name)
+    except Exception as ex:
+        raise ResourceNotFoundError("Failed to fetch sitecontainer '{}'. Error: {}".format(container_name, str(ex)))
+    return site_container
+
+
+def delete_webapp_sitecontainer(cmd, name, resource_group, container_name, slot=None):
+    web_client = get_mgmt_service_client(cmd.cli_ctx, WebSiteManagementClient).web_apps
+    response = None
+    try:
+        if slot:
+            response = web_client.delete_site_container_slot(resource_group, name,
+                                                             container_name, slot, cls=lambda x, y, z: x)
+        else:
+            response = web_client.delete_site_container(resource_group, name, container_name, cls=lambda x, y, z: x)
+        if response is not None and response.http_response.status_code in (200, 204):
+            # TODO: Validate deletion via response status code once api bug is fixed,
+            # Status 200 -> container existed and was deleted successfully
+            # Status 204 -> container does not exist
+            logger.warning("Sitecontainer %s was deleted successfully.", container_name)
+        else:
+            logger.error("Failed to delete sitecontainer %s.", container_name)
+    except Exception as ex:
+        raise AzureInternalError("Failed to delete sitecontainer '{}'. Error: {}".format(container_name, str(ex)))
+
+
+def list_webapp_sitecontainers(cmd, name, resource_group, slot=None):
+    web_client = get_mgmt_service_client(cmd.cli_ctx, WebSiteManagementClient).web_apps
+    site_containers = None
+    try:
+        if slot:
+            site_containers = web_client.list_site_containers_slot(resource_group, name, slot)
+        else:
+            site_containers = web_client.list_site_containers(resource_group, name)
+    except Exception as ex:
+        raise ResourceNotFoundError("Failed to fetch sitecontainers. Error: {}".format(str(ex)))
+    return site_containers
+
+
+def get_webapp_sitecontainers_status(cmd, name, resource_group, container_name=None, slot=None):
+    import requests
+    scm_url = _get_scm_url(cmd, resource_group, name, slot)
+    site_container_status_url = scm_url + '/api/sitecontainers/' + (container_name
+                                                                    if container_name is not None else "")
+    headers = get_scm_site_headers(cmd.cli_ctx, name, resource_group, slot)
+    try:
+        response = requests.get(site_container_status_url, headers=headers)
+        return response.json()
+    except Exception as ex:
+        raise AzureInternalError("Failed to fetch sitecontainer status. Error: {}".format(str(ex)))
+
+
+def get_webapp_sitecontainer_log(cmd, name, resource_group, container_name, slot=None):
+    scm_url = _get_scm_url(cmd, resource_group, name, slot)
+    site_container_logs_url = scm_url + '/api/sitecontainers/' + container_name + '/logs'
+    headers = get_scm_site_headers(cmd.cli_ctx, name, resource_group, slot)
+    try:
+        t = threading.Thread(target=_get_log, args=(site_container_logs_url, headers))
+        t.daemon = True
+        t.start()
+        while True:
+            time.sleep(100)  # so that ctrl+c can stop the command
+    except Exception as ex:
+        raise AzureInternalError("Failed to fetch sitecontainer logs. Error: {}".format(str(ex)))
 
 
 # for generic updater
