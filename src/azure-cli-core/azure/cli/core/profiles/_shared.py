@@ -10,7 +10,6 @@ from importlib import import_module
 
 from knack.log import get_logger
 
-
 logger = get_logger(__name__)
 
 
@@ -84,6 +83,8 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_CUSTOMLOCATION = ('azure.mgmt.extendedlocation', 'CustomLocations')
     MGMT_CONTAINERSERVICE = ('azure.mgmt.containerservice', 'ContainerServiceClient')
     MGMT_APPCONTAINERS = ('azure.mgmt.appcontainers', 'ContainerAppsAPIClient')
+    MGMT_DISCONNECTEDOPERATIONS = ('azure.mgmt.disconnectedoperations', 'DisconnectedOperationsClient')
+
 
     # the "None" below will stay till a command module fills in the type so "get_mgmt_service_client"
     # can be provided with "ResourceType.XXX" to initialize the client object. This usually happens
@@ -155,6 +156,7 @@ class SDKProfile:  # pylint: disable=too-few-public-methods
 
 AZURE_API_PROFILES = {
     'latest': {
+        ResourceType.MGMT_DISCONNECTEDOPERATIONS: '2024-12-01-preview',
         ResourceType.MGMT_STORAGE: '2024-01-01',
         ResourceType.MGMT_NETWORK: '2022-01-01',
         ResourceType.MGMT_COMPUTE: SDKProfile('2024-07-01', {
