@@ -40,7 +40,7 @@ function clean_up_resources {
         
         try {
             # Delete the resource using its ID
-            az resource delete --ids $resourceId --no-wait
+            az resource delete --ids $resourceId
             Write-Host "Successfully deleted resource: $resourceId"
         } catch {
             Write-Host "Failed to delete resource: $resourceId. Error: $_"
