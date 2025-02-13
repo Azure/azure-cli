@@ -51,8 +51,7 @@ def batch_data_client_factory(cli_ctx, kwargs):
     if not token_credential and not account_key:
         from azure.cli.core._profile import Profile
         profile = Profile(cli_ctx=cli_ctx)
-        resource = cli_ctx.cloud.endpoints.batch_resource_id
-        token_credential, _, _ = profile.get_login_credentials(resource=resource)
+        token_credential, _, _ = profile.get_login_credentials()
 
     if account_key:
         from azure.core.credentials import AzureNamedKeyCredential
@@ -64,4 +63,6 @@ def batch_data_client_factory(cli_ctx, kwargs):
             account_endpoint.startswith('http://')):
         account_endpoint = 'https://' + account_endpoint
 
-    return BatchClient(credential=credential, endpoint=account_endpoint.rstrip('/'))
+    from azure.cli.core.auth.util import resource_to_scopes
+    return BatchClient(credential=credential, endpoint=account_endpoint.rstrip('/'),
+                       credential_scopes=resource_to_scopes(cli_ctx.cloud.endpoints.batch_resource_id))

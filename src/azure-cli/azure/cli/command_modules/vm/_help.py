@@ -1068,29 +1068,6 @@ type: group
 short-summary: Manage gallery sharing profile
 """
 
-helps['sig gallery-application version'] = """
-    type: group
-    short-summary: Manage gallery application version
-"""
-
-helps['sig gallery-application version create'] = """
-    type: command
-    short-summary: "Create a gallery Application Version."
-    examples:
-      - name: Create a simple gallery Application Version.
-        text: |-
-               az sig gallery-application version create --gallery-name myGalleryName --application-name myGalleryApplicationName -n 1.0.0 -g myResourceGroup --package-file-link https://{myStorageAccount}.blob.core.windows.net/{myStorageContainer}/{myStorageBlob}  --install-command installCommand  --remove-command removeCommand
-"""
-
-helps['sig gallery-application version update'] = """
-    type: command
-    short-summary: "Update a gallery Application Version."
-    examples:
-      - name: Update a simple gallery Application Version.
-        text: |-
-               az sig gallery-application version update --gallery-name myGalleryName --application-name myGalleryApplicationName -n 1.0.0 -g myResourceGroup --package-file-link https://{myStorageAccount}.blob.core.windows.net/{myStorageContainer}/{myStorageBlob} --end-of-life-date "2050-07-01T07:00:00Z"
-"""
-
 helps['snapshot create'] = """
 type: command
 short-summary: Create a snapshot.

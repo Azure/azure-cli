@@ -35,7 +35,9 @@ from dateutil.parser import parse
 import colorama
 import requests
 import yaml
-from azure.cli.command_modules.acs._client_factory import cf_agent_pools
+from azure.cli.command_modules.acs._client_factory import (
+    cf_agent_pools
+)
 from azure.cli.command_modules.acs._consts import (
     ADDONS,
     CONST_ACC_SGX_QUOTE_HELPER_ENABLED,
@@ -356,6 +358,14 @@ def which(binary):
             return bin_path
 
     return None
+
+
+def aks_machine_list(cmd, client, resource_group_name, cluster_name, nodepool_name):
+    return client.list(resource_group_name, cluster_name, nodepool_name)
+
+
+def aks_machine_show(cmd, client, resource_group_name, cluster_name, nodepool_name, machine_name):
+    return client.get(resource_group_name, cluster_name, nodepool_name, machine_name)
 
 
 def aks_maintenanceconfiguration_list(
@@ -2570,7 +2580,7 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
         instance.upgrade_settings.max_surge = max_surge
     if drain_timeout:
         instance.upgrade_settings.drain_timeout_in_minutes = drain_timeout
-    if node_soak_duration:
+    if isinstance(node_soak_duration, int) and node_soak_duration >= 0:
         instance.upgrade_settings.node_soak_duration_in_minutes = node_soak_duration
 
     # custom headers

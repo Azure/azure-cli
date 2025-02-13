@@ -17,7 +17,7 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set,
                                                           cf_shared_gallery_image_version,
                                                           cf_capacity_reservation_groups, cf_capacity_reservations,
                                                           cf_vmss_run_commands,
-                                                          cf_gallery_application_version, cf_restore_point,
+                                                          cf_restore_point,
                                                           cf_restore_point_collection, cf_community_gallery,
                                                           cf_community_gallery_image,
                                                           cf_community_gallery_image_version)
@@ -158,9 +158,8 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.compute.operations#GalleryApplicationsOperations.{}',
     )
 
-    compute_gallery_application_version_sdk = CliCommandType(
+    compute_gallery_application_version_profile = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations#GalleryApplicationVersionsOperations.{}',
-        client_factory=cf_gallery_application_version,
     )
 
     compute_proximity_placement_groups_sdk = CliCommandType(
@@ -561,9 +560,10 @@ def load_command_table(self, _):
         from .operations.sig_gallery_application import SigGalleryApplicationCreate
         self.command_table['sig gallery-application create'] = SigGalleryApplicationCreate(loader=self)
 
-    with self.command_group('sig gallery-application version', compute_gallery_application_version_sdk, client_factory=cf_gallery_application_version, min_api='2021-07-01', operation_group='gallery_application_versions') as g:
-        g.custom_command('create', 'gallery_application_version_create', supports_no_wait=True)
-        g.custom_command('update', 'gallery_application_version_update', supports_no_wait=True)
+    with self.command_group('sig gallery-application version', compute_gallery_application_version_profile, operation_group='gallery_application_versions'):
+        from .operations.sig_gallery_application_version import SigGalleryApplicationVersionCreate, SiggalleryApplicationversionUpdate
+        self.command_table['sig gallery-application version create'] = SigGalleryApplicationVersionCreate(loader=self)
+        self.command_table['sig gallery-application version update'] = SiggalleryApplicationversionUpdate(loader=self)
 
     with self.command_group('ppg', compute_proximity_placement_groups_sdk, min_api='2018-04-01', client_factory=cf_proximity_placement_groups) as g:
         from .operations.ppg import PPGCreate, PPGUpdate

@@ -18,7 +18,7 @@ from azure.cli.command_modules.vm.azure_stack._client_factory import (cf_vm, cf_
                                                                       cf_capacity_reservation_groups,
                                                                       cf_capacity_reservations,
                                                                       cf_vmss_run_commands,
-                                                                      cf_gallery_application_version, cf_restore_point,
+                                                                      cf_restore_point,
                                                                       cf_restore_point_collection,
                                                                       cf_community_gallery_image,
                                                                       cf_community_gallery_image_version)
@@ -148,9 +148,8 @@ def load_command_table(self, _):
         client_factory=cf_gallery_image_versions,
     )
 
-    compute_gallery_application_version_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations#GalleryApplicationVersionsOperations.{}',
-        client_factory=cf_gallery_application_version,
+    compute_proximity_placement_groups_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations#ProximityPlacementGroupsOperations.{}',
     )
 
     compute_dedicated_host_sdk = CliCommandType(
@@ -486,10 +485,6 @@ def load_command_table(self, _):
                             operation_group='shared_galleries',
                             client_factory=cf_shared_gallery_image_version) as g:
         g.custom_command('list-shared', 'sig_shared_image_version_list')
-
-    with self.command_group('sig gallery-application version', compute_gallery_application_version_sdk, client_factory=cf_gallery_application_version, min_api='2021-07-01', operation_group='gallery_application_versions') as g:
-        g.custom_command('create', 'gallery_application_version_create', supports_no_wait=True)
-        g.custom_command('update', 'gallery_application_version_update', supports_no_wait=True)
 
     with self.command_group('vm monitor log', client_factory=cf_log_analytics_data_plane) as g:
         g.custom_command('show', 'execute_query_for_vm', transform=transform_log_analytics_query_output)  # pylint: disable=show-command
