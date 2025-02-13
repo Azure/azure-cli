@@ -11,6 +11,7 @@ from enum import Enum
 from azure.cli.core._session import ACCOUNT
 from azure.cli.core.azclierror import AuthenticationError
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
+from azure.cli.core.auth.credential_adaptor import CredentialAdaptor
 from azure.cli.core.util import in_cloud_console, can_launch_browser, is_github_codespaces
 from knack.log import get_logger
 from knack.util import CLIError
@@ -477,7 +478,7 @@ class Profile:
         else:
             cred = self._create_credential(account, tenant_id=tenant)
 
-        sdk_token = cred.get_token(*scopes)
+        sdk_token = CredentialAdaptor(cred).get_token(*scopes)
         # Convert epoch int 'expires_on' to datetime string 'expiresOn' for backward compatibility
         # WARNING: expiresOn is deprecated and will be removed in future release.
         import datetime
@@ -856,7 +857,6 @@ class SubscriptionFinder:
             specific_tenant_credential = identity.get_user_credential(username)
 
             try:
-
                 subscriptions = self.find_using_specific_tenant(tenant_id, specific_tenant_credential,
                                                                 tenant_id_description=t)
             except AuthenticationError as ex:
@@ -927,9 +927,11 @@ class SubscriptionFinder:
             raise CLIInternalError("Unable to get '{}' in profile '{}'"
                                    .format(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS, self.cli_ctx.cloud.profile))
         api_version = get_api_version(self.cli_ctx, ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
-        client_kwargs = _prepare_mgmt_client_kwargs_track2(self.cli_ctx, credential)
 
-        client = client_type(credential, api_version=api_version,
+        sdk_credential = CredentialAdaptor(credential)
+        client_kwargs = _prepare_mgmt_client_kwargs_track2(self.cli_ctx, sdk_credential)
+
+        client = client_type(sdk_credential, api_version=api_version,
                              base_url=self.cli_ctx.cloud.endpoints.resource_manager,
                              **client_kwargs)
         return client

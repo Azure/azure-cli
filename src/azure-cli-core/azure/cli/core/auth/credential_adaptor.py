@@ -4,19 +4,19 @@
 # --------------------------------------------------------------------------------------------
 
 from knack.log import get_logger
+from .util import build_sdk_access_token
 
 logger = get_logger(__name__)
 
 
 class CredentialAdaptor:
     def __init__(self, credential, auxiliary_credentials=None):
-        """Cross-tenant credential adaptor. It takes a main credential and auxiliary credentials.
-
+        """Credential adaptor between MSAL credential and SDK credential.
         It implements Track 2 SDK's azure.core.credentials.TokenCredential by exposing get_token.
 
-        :param credential: Main credential from .msal_authentication
-        :param auxiliary_credentials: Credentials from .msal_authentication for cross tenant authentication.
-            Details about cross tenant authentication:
+        :param credential: MSAL credential from ._msal_credentials
+        :param auxiliary_credentials: MSAL credentials for cross-tenant authentication.
+            Details about cross-tenant authentication:
             https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/authenticate-multi-tenant
         """
 
@@ -32,11 +32,12 @@ class CredentialAdaptor:
         if 'data' in kwargs:
             filtered_kwargs['data'] = kwargs['data']
 
-        return self._credential.get_token(*scopes, **filtered_kwargs)
+        return build_sdk_access_token(self._credential.acquire_token(list(scopes), **filtered_kwargs))
 
     def get_auxiliary_tokens(self, *scopes, **kwargs):
         """Get access tokens from auxiliary credentials."""
         # To test cross-tenant authentication, see https://github.com/Azure/azure-cli/issues/16691
         if self._auxiliary_credentials:
-            return [cred.get_token(*scopes, **kwargs) for cred in self._auxiliary_credentials]
+            return [build_sdk_access_token(cred.acquire_token(list(scopes), **kwargs))
+                    for cred in self._auxiliary_credentials]
         return None
