@@ -72,7 +72,8 @@ from azure.mgmt.cosmosdb.models import (
     DedicatedGatewayType,
     ServiceType,
     MongoRoleDefinitionCreateUpdateParameters,
-    MongoUserDefinitionCreateUpdateParameters
+    MongoUserDefinitionCreateUpdateParameters,
+    RegionForOnlineOffline
 )
 
 logger = get_logger(__name__)
@@ -3523,3 +3524,16 @@ def cli_cosmosdb_service_update(client,
     )
 
     return client.begin_create(resource_group_name, account_name, service_name, create_update_parameters=params)
+
+
+def cli_offline_region(client,
+                       account_name,
+                       resource_group_name,
+                       region):
+
+    region_parameter_for_offline = RegionForOnlineOffline(region=region)
+    return client.begin_offline_region(
+        resource_group_name=resource_group_name,
+        account_name=account_name,
+        region_parameter_for_offline=region_parameter_for_offline
+    )

@@ -17,7 +17,7 @@ except ImportError:
     logging.warning("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.68.0"
+VERSION = "2.69.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -52,11 +52,11 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     "antlr4-python3-runtime~=4.13.1",
     'azure-appconfiguration~=1.7.0',
-    'azure-batch~=14.2.0',
+    'azure-batch~=15.0.0b1',
     'azure-cli-core=={}'.format(VERSION),
     'azure-cosmos~=3.0,>=3.0.2',
     'azure-data-tables==12.4.0',
-    'azure-datalake-store~=0.0.53',
+    'azure-datalake-store~=1.0.0a0',
     'azure-keyvault-administration==4.4.0b2',
     'azure-keyvault-certificates==4.7.0',
     'azure-keyvault-keys==4.9.0b3',
@@ -81,7 +81,6 @@ DEPENDENCIES = [
     'azure-mgmt-databoxedge~=1.0.0',
     'azure-mgmt-datalake-store~=1.1.0b1',
     'azure-mgmt-datamigration~=10.0.0',
-    'azure-mgmt-devtestlabs~=4.0',
     'azure-mgmt-dns~=8.0.0',
     'azure-mgmt-eventgrid==10.2.0b2',
     'azure-mgmt-eventhub~=10.1.0',
@@ -101,19 +100,19 @@ DEPENDENCIES = [
     'azure-mgmt-msi~=7.0.0',
     'azure-mgmt-netapp~=10.1.0',
     'azure-mgmt-policyinsights==1.1.0b4',
-    'azure-mgmt-postgresqlflexibleservers==1.1.0b1',
+    'azure-mgmt-postgresqlflexibleservers==1.1.0b2',
     'azure-mgmt-privatedns~=1.0.0',
     'azure-mgmt-rdbms==10.2.0b17',
     'azure-mgmt-mysqlflexibleservers==1.0.0b3',
     'azure-mgmt-recoveryservicesbackup~=9.1.0',
     'azure-mgmt-recoveryservices~=3.0.0',
     'azure-mgmt-redhatopenshift~=1.5.0',
-    'azure-mgmt-redis~=14.4.0',
+    'azure-mgmt-redis~=14.5.0',
     'azure-mgmt-resource==23.1.1',
     'azure-mgmt-search~=9.0',
     'azure-mgmt-security==6.0.0',
     'azure-mgmt-servicebus~=8.2.0',
-    'azure-mgmt-servicefabricmanagedclusters==2.0.0b6',
+    'azure-mgmt-servicefabricmanagedclusters==2.1.0b1',
     'azure-mgmt-servicelinker==1.2.0b3',
     'azure-mgmt-servicefabric~=2.1.0',
     'azure-mgmt-signalr==2.0.0b2',
@@ -139,7 +138,7 @@ DEPENDENCIES = [
     'jsondiff~=2.0.0',
     'packaging>=20.9',
     'paramiko>=2.0.8,<4.0.0',
-    'pycomposefile>=0.0.29',
+    'pycomposefile>=0.0.32',
     'PyGithub~=1.38',
     'PyNaCl~=1.5.0',
     'scp~=0.13.2',

@@ -44,7 +44,7 @@ from ._vm_diagnostics_templates import get_default_diag_config
 
 from ._actions import (load_images_from_aliases_doc, load_extension_images_thru_services,
                        load_images_thru_services, _get_latest_image_version)
-from ._client_factory import (_compute_client_factory, cf_vm_image_term, _dev_test_labs_client_factory)
+from ._client_factory import (_compute_client_factory, cf_vm_image_term)
 
 from .aaz.latest.vm.disk import AttachDetachDataDisk
 
@@ -1141,7 +1141,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
     # Guest Attestation Extension and enable System Assigned MSI by default
     is_trusted_launch = security_type and security_type.lower() == 'trustedlaunch' and\
         enable_vtpm and enable_secure_boot
-    if is_trusted_launch and enable_integrity_monitoring:
+    is_confidential_vm = security_type and security_type.lower() == 'confidentialvm'
+    if (is_trusted_launch or is_confidential_vm) and enable_integrity_monitoring:
         vm = get_vm(cmd, resource_group_name, vm_name, 'instanceView')
         client = _compute_client_factory(cmd.cli_ctx)
         if vm.storage_profile.os_disk.os_type == 'Linux':
@@ -1164,7 +1165,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
             logger.info('Guest Attestation Extension has been successfully installed by default '
                         'when Trusted Launch configuration is met')
         except Exception as e:
-            logger.error('Failed to install Guest Attestation Extension for Trusted Launch. %s', e)
+            error_type = "Trusted Launch" if is_trusted_launch else "Confidential VM"
+            logger.error('Failed to install Guest Attestation Extension for %s. %s', error_type, e)
     if count:
         vm_names = [vm_name + str(i) for i in range(count)]
     else:
@@ -1191,19 +1193,23 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
 
 def auto_shutdown_vm(cmd, resource_group_name, vm_name, off=None, email=None, webhook=None, time=None,
                      location=None):
+    from ..lab.aaz.latest.lab.global_schedule import Delete as DeleteSchedule, Create as CreateSchedule
     from azure.mgmt.core.tools import resource_id
-    from azure.mgmt.devtestlabs.models import Schedule
     from azure.cli.core.commands.client_factory import get_subscription_id
     subscription_id = get_subscription_id(cmd.cli_ctx)
-    client = _dev_test_labs_client_factory(cmd.cli_ctx, subscription_id)
     name = 'shutdown-computevm-' + vm_name
-    vm_id = resource_id(subscription=client.config.subscription_id, resource_group=resource_group_name,
+    vm_id = resource_id(subscription=subscription_id, resource_group=resource_group_name,
                         namespace='Microsoft.Compute', type='virtualMachines', name=vm_name)
+
+    schedule = {
+        'name': name,
+        'resource_group': resource_group_name
+    }
     if off:
         if email is not None or webhook is not None or time is not None:
             # I don't want to disrupt users. So I warn instead of raising an error.
             logger.warning('If --off, other parameters will be ignored.')
-        return client.global_schedules.delete(resource_group_name, name)
+        return DeleteSchedule(cli_ctx=cmd.cli_ctx)(command_args=schedule)
 
     if time is None:
         raise CLIError('usage error: --time is a required parameter')
@@ -1219,14 +1225,16 @@ def auto_shutdown_vm(cmd, resource_group_name, vm_name, off=None, email=None, we
         if webhook:
             notification_settings['webhookUrl'] = webhook
 
-    schedule = Schedule(status='Enabled',
-                        target_resource_id=vm_id,
-                        daily_recurrence=daily_recurrence,
-                        notification_settings=notification_settings,
-                        time_zone_id='UTC',
-                        task_type='ComputeVmShutdownTask',
-                        location=location)
-    return client.global_schedules.create_or_update(resource_group_name, name, schedule)
+    schedule.update({
+        'status': 'Enabled',
+        'target_resource_id': vm_id,
+        'daily_recurrence': daily_recurrence,
+        'notification_settings': notification_settings,
+        'time_zone_id': 'UTC',
+        'task_type': 'ComputeVmShutdownTask',
+        'location': location
+    })
+    return CreateSchedule(cli_ctx=cmd.cli_ctx)(command_args=schedule)
 
 
 def get_instance_view(cmd, resource_group_name, vm_name, include_user_data=False):
@@ -3208,7 +3216,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 public_ip_address_type=None, storage_profile=None,
                 single_placement_group=None, custom_data=None, secrets=None, platform_fault_domain_count=None,
                 plan_name=None, plan_product=None, plan_publisher=None, plan_promotion_code=None, license_type=None,
-                assign_identity=None, identity_scope=None, identity_role=None,
+                assign_identity=None, identity_scope=None, identity_role=None, encryption_identity=None,
                 identity_role_id=None, zones=None, priority=None, eviction_policy=None,
                 application_security_groups=None, ultra_ssd_enabled=None,
                 ephemeral_os_disk=None, ephemeral_os_disk_placement=None,
@@ -3234,7 +3242,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 enable_resilient_creation=None, enable_resilient_deletion=None,
                 additional_scheduled_events=None, enable_user_reboot_scheduled_events=None,
                 enable_user_redeploy_scheduled_events=None, skuprofile_vmsizes=None, skuprofile_allostrat=None,
-                security_posture_reference_is_overridable=None):
+                security_posture_reference_is_overridable=None, zone_balance=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -3549,7 +3557,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             enable_user_reboot_scheduled_events=enable_user_reboot_scheduled_events,
             enable_user_redeploy_scheduled_events=enable_user_redeploy_scheduled_events,
             skuprofile_vmsizes=skuprofile_vmsizes, skuprofile_allostrat=skuprofile_allostrat,
-            security_posture_reference_is_overridable=security_posture_reference_is_overridable)
+            security_posture_reference_is_overridable=security_posture_reference_is_overridable,
+            zone_balance=zone_balance)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -3569,6 +3578,30 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 role_assignment_guid = str(_gen_guid())
                 master_template.add_resource(build_msi_role_assignment(vmss_name, vmss_id, identity_role_id,
                                                                        role_assignment_guid, identity_scope, False))
+        if encryption_identity:
+            if 'identity' in vmss_resource and 'userAssignedIdentities' in vmss_resource['identity'] \
+                and encryption_identity.lower() in \
+                    (k.lower() for k in vmss_resource['identity']['userAssignedIdentities'].keys()):
+
+                if 'virtualMachineProfile' not in vmss_resource['properties']:
+                    vmss_resource['properties']['virtualMachineProfile'] = {}
+                if 'securityProfile' not in vmss_resource['properties']['virtualMachineProfile']:
+                    vmss_resource['properties']['virtualMachineProfile']['securityProfile'] = {}
+                if 'encryptionIdentity' not in vmss_resource['properties']['virtualMachineProfile']['securityProfile']:
+                    vmss_resource['properties']['virtualMachineProfile']['securityProfile']['encryptionIdentity'] = {}
+
+                vmss_securityProfile_EncryptionIdentity \
+                    = vmss_resource['properties']['virtualMachineProfile']['securityProfile']['encryptionIdentity']
+
+                if 'userAssignedIdentityResourceId' not in vmss_securityProfile_EncryptionIdentity or \
+                        vmss_securityProfile_EncryptionIdentity['userAssignedIdentityResourceId'] \
+                        != encryption_identity:
+                    vmss_securityProfile_EncryptionIdentity['userAssignedIdentityResourceId'] = encryption_identity
+                    vmss_resource['properties']['virtualMachineProfile']['securityProfile']['encryptionIdentity'] \
+                        = vmss_securityProfile_EncryptionIdentity
+            else:
+                raise ArgumentUsageError("Encryption Identity should be an ARM Resource ID of one of the "
+                                         "user assigned identities associated to the resource")
     else:
         raise CLIError('usage error: --orchestration-mode (Uniform | Flexible)')
 
@@ -3618,7 +3651,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
     # Guest Attestation Extension and enable System Assigned MSI by default
     is_trusted_launch = security_type and security_type.lower() == 'trustedlaunch' and\
         enable_vtpm and enable_secure_boot
-    if is_trusted_launch and enable_integrity_monitoring:
+    is_confidential_vm = security_type and security_type.lower() == 'confidentialvm'
+    if (is_trusted_launch or is_confidential_vm) and enable_integrity_monitoring:
         client = _compute_client_factory(cmd.cli_ctx)
         vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
         vmss.virtual_machine_profile.storage_profile.image_reference = None
@@ -3651,7 +3685,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             LongRunningOperation(cmd.cli_ctx)(client.virtual_machine_scale_sets.begin_update_instances(
                 resource_group_name, vmss_name, instance_ids))
         except Exception as e:
-            logger.error('Failed to install Guest Attestation Extension for Trusted Launch. %s', e)
+            error_type = "Trusted Launch" if is_trusted_launch else "Confidential VM"
+            logger.error('Failed to install Guest Attestation Extension for %s. %s', error_type, e)
 
     return deployment_result
 
@@ -3935,6 +3970,8 @@ def scale_vmss(cmd, resource_group_name, vm_scale_set_name, new_capacity, no_wai
 
     vmss.sku.capacity = new_capacity
     vmss_new = VirtualMachineScaleSet(location=vmss.location, sku=vmss.sku)
+    if vmss.extended_location is not None:
+        vmss_new.extended_location = vmss.extended_location
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_create_or_update,
                        resource_group_name, vm_scale_set_name, vmss_new)
 
@@ -3989,7 +4026,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 ephemeral_os_disk=None, ephemeral_os_disk_option=None, zones=None, additional_scheduled_events=None,
                 enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None,
                 upgrade_policy_mode=None, enable_auto_os_upgrade=None, skuprofile_vmsizes=None,
-                skuprofile_allostrat=None, security_posture_reference_is_overridable=None, **kwargs):
+                skuprofile_allostrat=None, security_posture_reference_is_overridable=None, zone_balance=None, **kwargs):
     vmss = kwargs['parameters']
     aux_subscriptions = None
     # pylint: disable=too-many-boolean-expressions
@@ -4292,6 +4329,9 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
 
     if zones is not None:
         vmss.zones = zones
+
+    if zone_balance is not None:
+        vmss.zone_balance = zone_balance
 
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_create_or_update,
                        resource_group_name, name, **kwargs)
@@ -5492,53 +5532,6 @@ def sig_shared_image_version_list(client, location, gallery_unique_name, gallery
     generator = client.list(location=location, gallery_unique_name=gallery_unique_name,
                             gallery_image_name=gallery_image_name, shared_to=shared_to)
     return get_page_result(generator, marker, show_next_marker)
-
-
-def gallery_application_create(client,
-                               resource_group_name,
-                               gallery_name,
-                               gallery_application_name,
-                               os_type,
-                               location,
-                               tags=None,
-                               description=None,
-                               no_wait=False):
-    gallery_application = {}
-    gallery_application['location'] = location
-    if tags is not None:
-        gallery_application['tags'] = tags
-    if description is not None:
-        gallery_application['description'] = description
-    if os_type is not None:
-        gallery_application['supported_os_type'] = os_type
-    return sdk_no_wait(no_wait,
-                       client.begin_create_or_update,
-                       resource_group_name=resource_group_name,
-                       gallery_name=gallery_name,
-                       gallery_application_name=gallery_application_name,
-                       gallery_application=gallery_application)
-
-
-def gallery_application_update(client,
-                               resource_group_name,
-                               gallery_name,
-                               gallery_application_name,
-                               location,
-                               tags=None,
-                               description=None,
-                               no_wait=False):
-    gallery_application = {}
-    gallery_application['location'] = location
-    if tags is not None:
-        gallery_application['tags'] = tags
-    if description is not None:
-        gallery_application['description'] = description
-    return sdk_no_wait(no_wait,
-                       client.begin_update,
-                       resource_group_name=resource_group_name,
-                       gallery_name=gallery_name,
-                       gallery_application_name=gallery_application_name,
-                       gallery_application=gallery_application)
 
 
 def gallery_application_version_create(client,

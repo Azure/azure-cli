@@ -3,15 +3,14 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import base64
 from urllib.parse import urlsplit
 import configparser
-
 from knack.log import get_logger
 
 from msrest.exceptions import DeserializationError
 
 from azure.mgmt.batch import BatchManagementClient
+from azure.core import MatchConditions
 from azure.mgmt.batch.models import (BatchAccountCreateParameters, BatchAccountUpdateParameters,
                                      AutoStorageBaseProperties, ActivateApplicationPackageParameters,
                                      Application, EncryptionProperties,
@@ -21,11 +20,8 @@ from azure.mgmt.batch.models import (BatchAccountCreateParameters, BatchAccountU
                                      ResourceIdentityType, UserAssignedIdentities)
 from azure.mgmt.batch.operations import (ApplicationPackageOperations)
 
-from azure.batch.models import (CertificateAddParameter, PoolStopResizeOptions, PoolResizeParameter,
-                                PoolResizeOptions, JobListOptions, JobListFromJobScheduleOptions,
-                                TaskAddParameter, TaskAddCollectionParameter, TaskConstraints,
-                                PoolUpdatePropertiesParameter, StartTask, AffinityInformation,
-                                )
+from azure.batch.models import (AffinityInfo, BatchPoolResizeContent, BatchStartTask, BatchTaskConstraints, BatchTask,
+                                BatchTaskGroup, BatchPoolReplaceContent, BatchTaskCreateContent)
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import get_sdk, ResourceType
@@ -221,6 +217,7 @@ def login_account(cmd, client, resource_group_name, account_name, shared_key_aut
             }
     else:
         cmd.cli_ctx.config.set_value('batch', 'auth_mode', 'aad')
+        cmd.cli_ctx.config.remove_option('batch', 'access_key')
         if show:
             resource = cmd.cli_ctx.cloud.endpoints.batch_resource_id
             profile = Profile(cli_ctx=cmd.cli_ctx)
@@ -433,157 +430,158 @@ def activate_application_package(client, resource_group_name, account_name, appl
 
 # Data plane custom commands
 
+def list_jobs(client, job_schedule_id=None, filter=None,  # pylint: disable=redefined-builtin
+              select=None, expand=None):
+    if job_schedule_id:
+        return client.list_jobs_from_schedule(job_schedule_id=job_schedule_id,
+                                              filter=filter, select=select, expand=expand)
 
-@transfer_doc(CertificateAddParameter)
-def create_certificate(client, certificate_file, thumbprint, password=None):
-    thumbprint_algorithm = 'sha1'
-    certificate_format = 'pfx' if password or certificate_file.endswith('.pfx') else 'cer'
-    with open(certificate_file, "rb") as f:
-        data_bytes = f.read()
-    data = base64.b64encode(data_bytes).decode('utf-8')
-    cert = CertificateAddParameter(
-        thumbprint=thumbprint,
-        thumbprint_algorithm=thumbprint_algorithm,
-        data=data,
-        certificate_format=certificate_format,
-        password=password)
-    client.add(cert)
-    return client.get(thumbprint_algorithm, thumbprint)
+    return client.list_jobs(filter=filter, select=select, expand=expand)
 
 
-def delete_certificate(client, thumbprint, abort=False):
-    thumbprint_algorithm = 'sha1'
-    if abort:
-        return client.cancel_deletion(thumbprint_algorithm, thumbprint)
-    return client.delete(thumbprint_algorithm, thumbprint)
+def replace_task(client, job_id=None, task_id=None, json_file=None, max_task_retry_count=None, retention_time=None,
+                 max_wall_clock_time=None, if_match=None, if_none_match=None, if_modified_since=None,
+                 if_unmodified_since=None):
+
+    if json_file:
+        json_obj = get_file_json(json_file)
+        param = None
+        try:
+            param = BatchTask(json_obj)
+        except DeserializationError:
+            pass
+        if not param:
+            raise ValueError(f"JSON file '{json_file}' is not in correct format.")
+    else:
+        constrants = BatchTaskConstraints(max_wall_clock_time=max_wall_clock_time,
+                                          retention_time=retention_time,
+                                          max_task_retry_count=max_task_retry_count)
+        param = BatchTask(constraints=constrants)
+
+    match_conditions = None
+    if if_match:
+        match_conditions = MatchConditions.IfNotModified
+    if if_none_match:
+        match_conditions = MatchConditions.IfModified
+
+    return client.replace_task(job_id=job_id, task_id=task_id, task=param, if_modified_since=if_modified_since,
+                               if_unmodified_since=if_unmodified_since, match_condition=match_conditions)
 
 
-@transfer_doc(PoolResizeParameter)
+@transfer_doc(BatchPoolResizeContent)
 def resize_pool(client, pool_id, target_dedicated_nodes=None, target_low_priority_nodes=None,
                 resize_timeout=None, node_deallocation_option=None,
                 if_match=None, if_none_match=None, if_modified_since=None,
                 if_unmodified_since=None, abort=False):
     if abort:
-        stop_resize_option = PoolStopResizeOptions(if_match=if_match,
-                                                   if_none_match=if_none_match,
-                                                   if_modified_since=if_modified_since,
-                                                   if_unmodified_since=if_unmodified_since)
-        return client.stop_resize(pool_id, pool_stop_resize_options=stop_resize_option)
+        return client.stop_pool_resize(pool_id=pool_id)
 
-    param = PoolResizeParameter(target_dedicated_nodes=target_dedicated_nodes,
-                                target_low_priority_nodes=target_low_priority_nodes,
-                                resize_timeout=resize_timeout,
-                                node_deallocation_option=node_deallocation_option)
-    resize_option = PoolResizeOptions(if_match=if_match,
-                                      if_none_match=if_none_match,
-                                      if_modified_since=if_modified_since,
-                                      if_unmodified_since=if_unmodified_since)
-    return client.resize(pool_id, param, pool_resize_options=resize_option)
+    param = BatchPoolResizeContent(target_dedicated_nodes=target_dedicated_nodes,
+                                   target_low_priority_nodes=target_low_priority_nodes,
+                                   resize_timeout=resize_timeout,
+                                   node_deallocation_option=node_deallocation_option)
+
+    match_conditions = None
+    if if_match:
+        match_conditions = MatchConditions.IfNotModified
+    if if_none_match:
+        match_conditions = MatchConditions.IfModified
+
+    return client.resize_pool(pool_id=pool_id, content=param, if_modified_since=if_modified_since,
+                              if_unmodified_since=if_unmodified_since, match_condition=match_conditions)
 
 
-@transfer_doc(PoolUpdatePropertiesParameter, StartTask)
-def update_pool(client,
-                pool_id, json_file=None, start_task_command_line=None, certificate_references=None,
-                application_package_references=None, metadata=None,
-                start_task_environment_settings=None, start_task_wait_for_success=None,
-                start_task_max_task_retry_count=None):
+def replace_pool(client,
+                 pool_id, json_file=None, application_package_references=None,
+                 metadata=None, target_node_communication_mode=None, start_task_command_line=None,
+                 start_task_environment_settings=None, start_task_max_task_retry_count=None,
+                 start_task_resource_files=None, start_task_wait_for_success=None):
     if json_file:
         json_obj = get_file_json(json_file)
         param = None
         try:
-            param = PoolUpdatePropertiesParameter.from_dict(json_obj)
+            param = BatchPoolReplaceContent(json_obj)
         except DeserializationError:
             pass
         if not param:
             raise ValueError(f"JSON file '{json_file}' is not in correct format.")
 
-        if param.certificate_references is None:
-            param.certificate_references = []
         if param.metadata is None:
             param.metadata = []
         if param.application_package_references is None:
             param.application_package_references = []
+        if param.start_task and param.start_task.resource_files is None:
+            param.start_task.resource_files = []
     else:
-        if certificate_references is None:
-            certificate_references = []
         if metadata is None:
             metadata = []
         if application_package_references is None:
             application_package_references = []
-        param = PoolUpdatePropertiesParameter(
-            certificate_references=certificate_references,
+        param = BatchPoolReplaceContent(
             application_package_references=application_package_references,
-            metadata=metadata)
+            metadata=metadata,
+            target_node_communication_mode=target_node_communication_mode)
 
         if start_task_command_line:
-            param.start_task = StartTask(command_line=start_task_command_line,
-                                         environment_settings=start_task_environment_settings,
-                                         wait_for_success=start_task_wait_for_success,
-                                         max_task_retry_count=start_task_max_task_retry_count)
-    client.update_properties(pool_id=pool_id, pool_update_properties_parameter=param)
-    return client.get(pool_id)
+            param.start_task = BatchStartTask(command_line=start_task_command_line,
+                                              environment_settings=start_task_environment_settings,
+                                              wait_for_success=start_task_wait_for_success,
+                                              max_task_retry_count=start_task_max_task_retry_count,
+                                              resource_files=start_task_resource_files)
+    client.replace_pool_properties(pool_id=pool_id, pool=param)
+    return client.get_pool(pool_id)
 
 
-def list_job(client, job_schedule_id=None, filter=None,  # pylint: disable=redefined-builtin
-             select=None, expand=None):
-    if job_schedule_id:
-        option1 = JobListFromJobScheduleOptions(filter=filter,
-                                                select=select,
-                                                expand=expand)
-        return list(client.list_from_job_schedule(job_schedule_id=job_schedule_id,
-                                                  job_list_from_job_schedule_options=option1))
-    option2 = JobListOptions(filter=filter,
-                             select=select,
-                             expand=expand)
-    return list(client.list(job_list_options=option2))
-
-
-@transfer_doc(TaskAddParameter, TaskConstraints, AffinityInformation)
+@transfer_doc(BatchTaskCreateContent, BatchTaskConstraints, AffinityInfo)
 def create_task(client,
                 job_id, json_file=None, task_id=None, command_line=None, resource_files=None,
                 environment_settings=None, affinity_id=None, max_wall_clock_time=None,
                 retention_time=None, max_task_retry_count=None,
                 application_package_references=None):
+
     task = None
     tasks = []
     if json_file:
         json_obj = get_file_json(json_file)
-        try:
-            task = TaskAddParameter.from_dict(json_obj)
-        except (DeserializationError, TypeError):
+
+        if isinstance(json_obj, list):
+            for json_task in json_obj:
+                tasks.append(BatchTaskCreateContent(json_task).as_dict())
+        else:
             try:
-                task_collection = TaskAddCollectionParameter.from_dict(json_obj)
-                tasks = task_collection.value
-            except (DeserializationError, TypeError):
+                task = BatchTaskCreateContent(json_obj)
+            except (DeserializationError, TypeError, AttributeError):
                 try:
-                    for json_task in json_obj:
-                        tasks.append(TaskAddParameter.from_dict(json_task))
-                except (DeserializationError, TypeError):
+                    task_collection = BatchTaskGroup(json_obj)
+                    tasks = task_collection.value
+                except (DeserializationError, TypeError, AttributeError):
                     raise ValueError(f"JSON file '{json_file}' is not formatted correctly.")
     else:
         if command_line is None or task_id is None:
             raise ValueError("Missing required arguments.\nEither --json-file, "
                              "or both --task-id and --command-line must be specified.")
-        task = TaskAddParameter(
+        task = BatchTaskCreateContent(
             id=task_id,
             command_line=command_line,
             resource_files=resource_files,
             environment_settings=environment_settings,
-            affinity_info=AffinityInformation(affinity_id=affinity_id) if affinity_id else None,
+            affinity_info=AffinityInfo(affinity_id=affinity_id) if affinity_id else None,
             application_package_references=application_package_references)
         if max_wall_clock_time is not None or retention_time is not None \
                 or max_task_retry_count is not None:
-            task.constraints = TaskConstraints(max_wall_clock_time=max_wall_clock_time,
-                                               retention_time=retention_time,
-                                               max_task_retry_count=max_task_retry_count)
+            task.constraints = BatchTaskConstraints(max_wall_clock_time=max_wall_clock_time,
+                                                    retention_time=retention_time,
+                                                    max_task_retry_count=max_task_retry_count)
+
     if task is not None:
-        client.add(job_id=job_id, task=task)
-        return client.get(job_id=job_id, task_id=task.id)
+        client.create_task(job_id=job_id, task=task)
+        result = client.get_task(job_id=job_id, task_id=task.id)
+        return result
 
     submitted_tasks = []
     for i in range(0, len(tasks), MAX_TASKS_PER_REQUEST):
-        submission = client.add_collection(
+        submission = client.create_task_collection(
             job_id=job_id,
-            value=tasks[i:i + MAX_TASKS_PER_REQUEST])
+            task_collection=tasks[i:i + MAX_TASKS_PER_REQUEST])
         submitted_tasks.extend(submission.value)  # pylint: disable=no-member
     return submitted_tasks

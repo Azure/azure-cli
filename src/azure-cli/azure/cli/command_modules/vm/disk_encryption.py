@@ -92,6 +92,41 @@ def updateVmEncryptionSetting(cmd, vm, resource_group_name, vm_name, encryption_
     return True
 
 
+def updateVmssEncryptionSetting(cmd, vmss, resource_group_name, vmss_name, encryption_identity):
+    from azure.cli.core.azclierror import ArgumentUsageError
+    if vmss.identity is None or vmss.identity.user_assigned_identities is None or encryption_identity.lower() not in \
+            (k.lower() for k in vmss.identity.user_assigned_identities.keys()):
+        raise ArgumentUsageError("Encryption Identity should be an ARM Resource ID of one of the "
+                                 "user assigned identities associated to the resource")
+
+    VirtualMachineProfile, SecurityProfile, EncryptionIdentity \
+        = cmd.get_models('VirtualMachineProfile', 'SecurityProfile', 'EncryptionIdentity')
+    updateVmss = False
+
+    if vmss.virtual_machine_profile is None:
+        vmss.virtual_machine_profile = VirtualMachineProfile()
+    if vmss.virtual_machine_profile.security_profile is None:
+        vmss.virtual_machine_profile.security_profile = SecurityProfile()
+    if vmss.virtual_machine_profile.security_profile.encryption_identity is None:
+        vmss.virtual_machine_profile.security_profile.encryption_identity = EncryptionIdentity()
+    if vmss.virtual_machine_profile.security_profile.encryption_identity.user_assigned_identity_resource_id\
+        is None or vmss.virtual_machine_profile.security_profile.encryption_identity\
+            .user_assigned_identity_resource_id.lower() != encryption_identity:
+        vmss.virtual_machine_profile.security_profile.encryption_identity.user_assigned_identity_resource_id \
+            = encryption_identity
+        updateVmss = True
+
+    if updateVmss:
+        compute_client = _compute_client_factory(cmd.cli_ctx)
+        updateEncryptionIdentity \
+            = compute_client.virtual_machine_scale_sets.begin_create_or_update(resource_group_name, vmss_name, vmss)
+        LongRunningOperation(cmd.cli_ctx)(updateEncryptionIdentity)
+        result = updateEncryptionIdentity.result()
+        return result is not None and result.provisioning_state == 'Succeeded'
+    logger.info("No changes in identity")
+    return True
+
+
 def isVersionSuppprtedForEncryptionIdentity(cmd):
     from azure.cli.core.profiles import ResourceType
     from knack.util import CLIError
@@ -436,8 +471,10 @@ def encrypt_vmss(cmd, resource_group_name, vmss_name,  # pylint: disable=too-man
                  key_encryption_key=None,
                  key_encryption_algorithm='RSA-OAEP',
                  volume_type=None,
+                 encryption_identity=None,
                  force=False):
     from azure.mgmt.core.tools import parse_resource_id
+    from knack.util import CLIError
 
     # pylint: disable=no-member
     UpgradeMode, VirtualMachineScaleSetExtension, VirtualMachineScaleSetExtensionProfile = cmd.get_models(
@@ -458,6 +495,13 @@ def encrypt_vmss(cmd, resource_group_name, vmss_name,  # pylint: disable=too-man
     # disk encryption key itself can be further protected, so let us verify
     if key_encryption_key:
         key_encryption_keyvault = key_encryption_keyvault or disk_encryption_keyvault
+
+    if encryption_identity:
+        result = updateVmssEncryptionSetting(cmd, vmss, resource_group_name, vmss_name, encryption_identity)
+        if result:
+            logger.info("Encryption Identity successfully set in virtual machine scale set")
+        else:
+            raise CLIError("Failed to update encryption Identity to the VMSS")
 
     #  to avoid bad server errors, ensure the vault has the right configurations
     _verify_keyvault_good_for_encryption(cmd.cli_ctx, disk_encryption_keyvault, key_encryption_keyvault, vmss, force)

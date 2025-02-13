@@ -2398,7 +2398,7 @@ helps['aks mesh upgrade rollback'] = """
 
 helps['aks approuting'] = """
     type: group
-    short-summary: Commands to manage App Routing aadon.
+    short-summary: Commands to manage App Routing addon.
     long-summary: A group of commands to manage App Routing in given cluster.
 """
 
@@ -2484,4 +2484,40 @@ helps['aks approuting zone list'] = """
     type: command
     short-summary: List DNS Zone IDs in App Routing.
     long-summary: This command lists the DNS zone resources used in App Routing.
+"""
+
+helps['aks machine'] = """
+   type: group
+   short-summary: Get information about machines in a nodepool of a managed clusters
+"""
+helps['aks machine list'] = """
+   type: command
+   short-summary: Get information about IP Addresses, Hostname for all machines in an agentpool
+   parameters:
+       - name: --cluster-name
+         type: string
+         short-summary: Name of the managed cluster
+       - name: --nodepool-name
+         type: string
+         short-summary: Name of the agentpool of a managed cluster
+   exmaples:
+       - name: Get information about IP Addresses, Hostname for all machines in an agentpool
+         text: az aks machine list --cluster-name <clusterName> --nodepool-name <apName>
+"""
+helps['aks machine show'] = """
+   type: command
+   short-summary: Show IP Addresses, Hostname for a specific machine in an agentpool for a managedcluster.
+   parameters:
+       - name: --cluster-name
+         type: string
+         short-summary: Name of the managed cluster
+       - name: --nodepool-name
+         type: string
+         short-summary: Name of the agentpool of a managed cluster
+       - name: --machine-name
+         type: string
+         short-summary: Name of the machine in the agentpool of a managed cluster
+   exmaples:
+       - name: Get IP Addresses, Hostname for a specific machine in an agentpool
+         text: az aks machine show --cluster-name <clusterName> --nodepool-name <apName> --machine-name <machineName>
 """
