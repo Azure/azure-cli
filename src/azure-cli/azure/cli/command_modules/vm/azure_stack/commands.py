@@ -148,10 +148,6 @@ def load_command_table(self, _):
         client_factory=cf_gallery_image_versions,
     )
 
-    compute_proximity_placement_groups_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations#ProximityPlacementGroupsOperations.{}',
-    )
-
     compute_dedicated_host_sdk = CliCommandType(
         operations_tmpl="azure.mgmt.compute.operations#DedicatedHostsOperations.{}",
         client_factory=cf_dedicated_hosts,
