@@ -35,8 +35,6 @@ def show_cloud(cmd, cloud_name=None):
 
 
 def _populate_from_metadata_endpoint(arm_endpoint, session=None):
-    endpoints_in_metadata = ['active_directory_graph_resource_id',
-                             'active_directory_resource_id', 'active_directory']
     METADATA_ENDPOINT_SUFFIX = '/metadata/endpoints?api-version=2022-09-01'
     if not arm_endpoint:  # pylint: disable=use-a-generator
         return Cloud('')
@@ -50,9 +48,8 @@ def _populate_from_metadata_endpoint(arm_endpoint, session=None):
         if response.status_code == 200:
             metadata = response.json()
             return _arm_to_cli_mapper(metadata)
-        else:
-            msg = 'Server returned status code {} for {}'.format(response.status_code, metadata_endpoint)
-            raise CLIError(error_msg_fmt.format(msg))
+        msg = 'Server returned status code {} for {}'.format(response.status_code, metadata_endpoint)
+        raise CLIError(error_msg_fmt.format(msg))
     except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError) as err:
         msg = 'Please ensure you have network connection. Error detail: {}'.format(str(err))
         raise CLIError(error_msg_fmt.format(msg))
@@ -62,12 +59,12 @@ def _populate_from_metadata_endpoint(arm_endpoint, session=None):
 
 
 def _build_cloud(cli_ctx, cloud_name, cloud_config=None, cloud_args=None):
-    from azure.cli.core.cloud import CloudEndpointNotSetException
     if cloud_config:
         # Using JSON format so convert the keys to snake case
         cloud_args = {to_snake_case(k): v for k, v in cloud_config.items()}
     if 'endpoints' in cloud_args:
-        arm_endpoint = cloud_args['endpoints'].get('resource_manager', None) or cloud_args['endpoints'].get('resourceManager', None)
+        arm_endpoint = (cloud_args['endpoints'].get('resource_manager', None) or
+                        cloud_args['endpoints'].get('resourceManager', None))
     if 'endpoint_resource_manager' in cloud_args:
         arm_endpoint = cloud_args['endpoint_resource_manager']
     c = _populate_from_metadata_endpoint(arm_endpoint)
