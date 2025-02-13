@@ -1408,19 +1408,6 @@ def load_arguments(self, _):
 
     # endregion
 
-    # region Proximity Placement Group
-    with self.argument_context('ppg', min_api='2018-04-01') as c:
-        c.argument('proximity_placement_group_name', arg_type=name_arg_type, help="The name of the proximity placement group.")
-
-    with self.argument_context('ppg create') as c:
-        c.argument('tags', tags_type, min_api='2018-04-01')
-        c.argument('zone', zone_type, min_api='2021-11-01')
-
-    for scope in ['ppg create', 'ppg update']:
-        with self.argument_context(scope) as c:
-            c.argument('ppg_type', options_list=['--type', '-t'], arg_type=get_enum_type(self.get_models('ProximityPlacementGroupType')), min_api='2018-04-01', help="The type of the proximity placement group.")
-            c.argument('intent_vm_sizes', nargs='*', min_api='2021-11-01', help="Specify possible sizes of virtual machines that can be created in the proximity placement group.")
-
     with self.argument_context('vm create', min_api='2018-04-01') as c:
         c.argument('proximity_placement_group', options_list=['--ppg'], help="The name or ID of the proximity placement group the VM should be associated with.",
                    validator=_validate_proximity_placement_group)
