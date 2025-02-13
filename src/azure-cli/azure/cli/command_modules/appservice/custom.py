@@ -6963,7 +6963,8 @@ def perform_onedeploy_webapp(cmd,
                              ignore_stack=None,
                              timeout=None,
                              slot=None,
-                             track_status=True):
+                             track_status=True,
+                             pull_identity=None):
     params = OneDeployParams()
 
     params.cmd = cmd
@@ -6980,6 +6981,7 @@ def perform_onedeploy_webapp(cmd,
     params.timeout = timeout
     params.slot = slot
     params.track_status = track_status
+    params.pull_identity = pull_identity
 
     return _perform_onedeploy_internal(params)
 
@@ -6999,6 +7001,7 @@ class OneDeployParams:
         self.should_restart = None
         self.is_clean_deployment = None
         self.should_ignore_stack = None
+        self.pull_identity = None
         self.timeout = None
         self.slot = None
         self.track_status = False
@@ -7107,6 +7110,11 @@ def _get_onedeploy_request_body(params):
                                         "access it".format(params.src_path)) from e
     elif params.src_url:
         logger.warning('Deploying from URL: %s', params.src_url)
+
+        if app_is_linux_webapp and params.pull_identity is not None:
+            logger.warning('Pull with MSI support comming soon for Linux webapps')
+            raise ValidationError("Pull with MSI support is not available for Linux webapps")
+
         body = {
             "properties": {
                 "packageUri": params.src_url,
@@ -7115,8 +7123,10 @@ def _get_onedeploy_request_body(params):
                 "ignorestack": params.should_ignore_stack,
                 "clean": params.is_clean_deployment,
                 "restart": params.should_restart,
+                "pullIdentity": params.pull_identity
             }
         }
+
         body = {"properties": {k: v for k, v in body["properties"].items() if v is not None}}
         body = json.dumps(body)
     else:
