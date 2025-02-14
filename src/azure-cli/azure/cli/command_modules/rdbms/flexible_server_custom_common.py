@@ -86,6 +86,8 @@ def firewall_rule_create_func(cmd, client, resource_group_name, server_name, fir
         end_ip_address = start_ip_address
     elif start_ip_address is None and end_ip_address is not None:
         start_ip_address = end_ip_address
+    elif start_ip_address is None and end_ip_address is None:
+        raise CLIError("Incorrect Usage : Need to pass in value for either \'--start-ip-address\' or \'--end-ip-address\'.")
 
     if firewall_rule_name is None:
         now = datetime.now()
