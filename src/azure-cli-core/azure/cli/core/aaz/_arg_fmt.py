@@ -659,14 +659,16 @@ class AAZResourceIdArgFormat(AAZBaseArgFormat):
 
             return data
 
-    def __init__(self, template=None):
+    def __init__(self, template=None, cross_tenants=True):
         """
 
         :param template: template property is used to verify a resource Id or construct resource Id.
+        :param cross_tenants: if cross_tenants is True, the resource id will apply to cross-tenants scenarios.
         """
         self._template = None
         if template:
             self._template = self._Template(template)
+        self._cross_tenants = cross_tenants
 
     def __call__(self, ctx, value):
         from azure.mgmt.core.tools import parse_resource_id
@@ -682,7 +684,7 @@ class AAZResourceIdArgFormat(AAZBaseArgFormat):
 
         parsed_id = parse_resource_id(data)
         subscription_id = parsed_id.get('subscription', None)
-        if subscription_id:
+        if subscription_id and self._cross_tenants:
             # update subscription_id to support cross tenants
             ctx.update_aux_subscriptions(subscription_id)
 
