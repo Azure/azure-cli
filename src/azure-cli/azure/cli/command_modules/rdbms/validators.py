@@ -430,20 +430,20 @@ def _valid_ssdv2_range(storage_gb, sku_info, tier, iops, throughput, instance):
         raise CLIError('The requested value for IOPS does not fall between {} and {} operations/sec.'
                        .format(min_iops, max_iops))
 
-    # find min and max values for throughout
-    min_throughout = sku_info[sku_tier]["supported_storageV2_throughput"]
+    # find min and max values for throughput
+    min_throughput = sku_info[sku_tier]["supported_storageV2_throughput"]
     if storage > 6:
-        max_storage_throughout = math.floor(max(0.25 * storage_iops, min_throughout))
+        max_storage_throughput = math.floor(max(0.25 * storage_iops, min_throughput))
     else:
-        max_storage_throughout = min_throughout
-    if sku_info[sku_tier]["supported_storageV2_throughput_max"] < max_storage_throughout:
-        max_throughout = sku_info[sku_tier]["supported_storageV2_throughput_max"]
+        max_storage_throughput = min_throughput
+    if sku_info[sku_tier]["supported_storageV2_throughput_max"] < max_storage_throughput:
+        max_throughput = sku_info[sku_tier]["supported_storageV2_throughput_max"]
     else:
-        max_throughout = max_storage_throughout
+        max_throughput = max_storage_throughput
 
-    if not min_throughout <= storage_throughput <= max_throughout:
+    if not min_throughput <= storage_throughput <= max_throughput:
         raise CLIError('The requested value for throughput does not fall between {} and {} MB/sec.'
-                       .format(min_throughout, max_throughout))
+                       .format(min_throughput, max_throughput))
 
 
 def _pg_tier_validator(tier, sku_info):
