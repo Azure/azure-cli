@@ -107,7 +107,7 @@ jobs:
     parameters:
       CLIExtensionRepoPath: ./azure-cli-extensions
   - task: AzureCLI@1
-    displayName: 'Rerun tests'
+    displayName: 'Set test subscription'
     inputs:
       azureSubscription: $(AZURE_SDK_TEST_SUB_CONNECTED_SERVICE)
       scriptLocation: inlineScript
@@ -118,9 +118,13 @@ jobs:
         cd azure-cli-extensions
         
         az account set -s 0b1f6471-1bf0-4dda-aec3-cb9272f09590
-        
+  - bash: |
+        set -ev
+
+        source env/bin/activate
+        cd azure-cli-extensions
         python ../scripts/ci/automation_full_test.py "12" "$(Instance_idx)" "latest" "" "True" "extension"
-  
+    displayName: "Rerun tests"
   - bash: |
       publishErrorModules='false'
       if [[ -f '/$(HOME)/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_error_modules_$(Instance_idx).txt' ]]; then
