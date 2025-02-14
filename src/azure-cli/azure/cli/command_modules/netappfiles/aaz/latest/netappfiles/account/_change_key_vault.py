@@ -12,16 +12,22 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "netappfiles account backup-vault backup restore-file",
+    "netappfiles account change-key-vault",
+    confirmation="Are you sure you want to perform this operation?",
 )
-class RestoreFile(AAZCommand):
-    """Restore the specified files from the specified backup to the active filesystem
+class ChangeKeyVault(AAZCommand):
+    """Change KeyVault/Managed HSM that is used for encryption of volumes under NetApp account
+
+    Affects existing volumes that are encrypted with Key Vault/Managed HSM, and new volumes. Supports HSM to Key Vault, Key Vault to HSM, HSM to HSM and Key Vault to Key Vault.
+
+    :example: Accounts_ChangeKeyVault
+        az netappfiles account change-key-vault --resource-group myRG --account-name account1 --key-vault-uri https://my-key-vault.managedhsm.azure.net --key-name rsakey --key-vault-resource-id /subscriptions/D633CC2E-722B-4AE1-B636-BBD9E4C60ED9/resourceGroups/myRG/providers/Microsoft.KeyVault/managedHSMs/my-hsm --key-vault-private-endpoints "[{virtual-network-id:/subscriptions/D633CC2E-722B-4AE1-B636-BBD9E4C60ED9/resourceGroups/myRG/providers/Microsoft.Network/virtualNetworks/vnet1,private-endpoint-id:/subscriptions/D633CC2E-722B-4AE1-B636-BBD9E4C60ED9/resourceGroups/myRG/providers/Microsoft.Network/privateEndpoints/privip1}]"
     """
 
     _aaz_info = {
         "version": "2024-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/backupvaults/{}/backups/{}/restorefiles", "2024-09-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/changekeyvault", "2024-09-01"],
         ]
     }
 
@@ -43,30 +49,12 @@ class RestoreFile(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.account_name = AAZStrArg(
-            options=["-a", "--account-name"],
+            options=["-a", "-n", "--account-name"],
             help="The name of the NetApp account",
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(
                 pattern="^[a-zA-Z0-9][a-zA-Z0-9\\-_]{0,127}$",
-            ),
-        )
-        _args_schema.backup_name = AAZStrArg(
-            options=["-b", "--backup-name"],
-            help="The name of the backup",
-            required=True,
-            id_part="child_name_2",
-            fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\\-_.]{0,255}$",
-            ),
-        )
-        _args_schema.backup_vault_name = AAZStrArg(
-            options=["-v", "--backup-vault-name"],
-            help="The name of the Backup Vault",
-            required=True,
-            id_part="child_name_1",
-            fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\\-_]{0,63}$",
             ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
@@ -76,39 +64,44 @@ class RestoreFile(AAZCommand):
         # define Arg Group "Body"
 
         _args_schema = cls._args_schema
-        _args_schema.destination_volume_id = AAZStrArg(
-            options=["--destination-volume-id"],
+        _args_schema.key_name = AAZStrArg(
+            options=["--key-name"],
             arg_group="Body",
-            help="Resource Id of the destination volume on which the files need to be restored",
-            required=True,
+            help="The name of the key that should be used for encryption.",
         )
-        _args_schema.file_list = AAZListArg(
-            options=["--file-list"],
+        _args_schema.key_vault_private_endpoints = AAZListArg(
+            options=["--endpoint-pairs", "--key-vault-private-endpoints"],
             arg_group="Body",
-            help="List of files to be restored",
-            required=True,
+            help="Pairs of virtual network ID and private endpoint ID. Every virtual network that has volumes encrypted with customer-managed keys needs its own key vault private endpoint.",
         )
-        _args_schema.restore_file_path = AAZStrArg(
-            options=["--restore-file-path"],
+        _args_schema.key_vault_resource_id = AAZResourceIdArg(
+            options=["--keyvault-resource-id", "--key-vault-resource-id"],
             arg_group="Body",
-            help="Destination folder where the files will be restored. The path name should start with a forward slash. If it is omitted from request then restore is done at the root folder of the destination volume by default",
-            fmt=AAZStrArgFormat(
-                pattern="^\\/.*$",
-            ),
+            help="Azure resource ID of the key vault/managed HSM that should be used for encryption.",
+        )
+        _args_schema.key_vault_uri = AAZStrArg(
+            options=["-v", "--key-vault-uri"],
+            arg_group="Body",
+            help="The URI of the key vault/managed HSM that should be used for encryption.",
         )
 
-        file_list = cls._args_schema.file_list
-        file_list.Element = AAZStrArg(
-            fmt=AAZStrArgFormat(
-                max_length=1024,
-                min_length=1,
-            ),
+        key_vault_private_endpoints = cls._args_schema.key_vault_private_endpoints
+        key_vault_private_endpoints.Element = AAZObjectArg()
+
+        _element = cls._args_schema.key_vault_private_endpoints.Element
+        _element.private_endpoint_id = AAZResourceIdArg(
+            options=["private-endpoint-id"],
+            help="Identifier of the private endpoint to reach the Azure Key Vault",
+        )
+        _element.virtual_network_id = AAZResourceIdArg(
+            options=["virtual-network-id"],
+            help="Identifier for the virtual network id",
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.BackupsUnderBackupVaultRestoreFiles(ctx=self.ctx)()
+        yield self.AccountsChangeKeyVault(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -119,7 +112,7 @@ class RestoreFile(AAZCommand):
     def post_operations(self):
         pass
 
-    class BackupsUnderBackupVaultRestoreFiles(AAZHttpOperation):
+    class AccountsChangeKeyVault(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -140,7 +133,7 @@ class RestoreFile(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/backupVaults/{backupVaultName}/backups/{backupName}/restoreFiles",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/changeKeyVault",
                 **self.url_parameters
             )
 
@@ -157,14 +150,6 @@ class RestoreFile(AAZCommand):
             parameters = {
                 **self.serialize_url_param(
                     "accountName", self.ctx.args.account_name,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "backupName", self.ctx.args.backup_name,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "backupVaultName", self.ctx.args.backup_vault_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -202,21 +187,27 @@ class RestoreFile(AAZCommand):
             _content_value, _builder = self.new_content_builder(
                 self.ctx.args,
                 typ=AAZObjectType,
-                typ_kwargs={"flags": {"required": True, "client_flatten": True}}
+                typ_kwargs={"flags": {"client_flatten": True}}
             )
-            _builder.set_prop("destinationVolumeId", AAZStrType, ".destination_volume_id", typ_kwargs={"flags": {"required": True}})
-            _builder.set_prop("fileList", AAZListType, ".file_list", typ_kwargs={"flags": {"required": True}})
-            _builder.set_prop("restoreFilePath", AAZStrType, ".restore_file_path")
+            _builder.set_prop("keyName", AAZStrType, ".key_name", typ_kwargs={"flags": {"required": True}})
+            _builder.set_prop("keyVaultPrivateEndpoints", AAZListType, ".key_vault_private_endpoints", typ_kwargs={"flags": {"required": True}})
+            _builder.set_prop("keyVaultResourceId", AAZStrType, ".key_vault_resource_id")
+            _builder.set_prop("keyVaultUri", AAZStrType, ".key_vault_uri", typ_kwargs={"flags": {"required": True}})
 
-            file_list = _builder.get(".fileList")
-            if file_list is not None:
-                file_list.set_elements(AAZStrType, ".")
+            key_vault_private_endpoints = _builder.get(".keyVaultPrivateEndpoints")
+            if key_vault_private_endpoints is not None:
+                key_vault_private_endpoints.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".keyVaultPrivateEndpoints[]")
+            if _elements is not None:
+                _elements.set_prop("privateEndpointId", AAZStrType, ".private_endpoint_id")
+                _elements.set_prop("virtualNetworkId", AAZStrType, ".virtual_network_id")
 
             return self.serialize_content(_content_value)
 
 
-class _RestoreFileHelper:
-    """Helper class for RestoreFile"""
+class _ChangeKeyVaultHelper:
+    """Helper class for ChangeKeyVault"""
 
 
-__all__ = ["RestoreFile"]
+__all__ = ["ChangeKeyVault"]

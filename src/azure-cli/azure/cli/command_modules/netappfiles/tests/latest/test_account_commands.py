@@ -292,3 +292,107 @@ class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
         self.cmd("az netappfiles account show --resource-group {rg} -a {acc_name}", checks=[
             self.check('location', location)
         ])
+    
+    @unittest.skip('(servicedeployment) api has not been deployed cannot test until finalized')
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_', additional_tags={'owner': 'cli_test'})
+    def test_account_transitionCMK_fails(self):
+        self.kwargs.update({
+            'loc': LOCATION,
+            'acc_name': self.create_random_name(prefix='cli-acc-', length=24),
+            'acc2_name': self.create_random_name(prefix='cli-acc-', length=24),
+            'keySource': "Microsoft.KeyVault",
+            'keyVaultUri': "https://my-key-vault.managedhsm.azure.net",
+            'keyName': "myKeyName",
+            'keyVaultResourceId': "/subscriptions/69a75bda-882e-44d5-8431-63421204132a/resourceGroups/myRG/providers/Microsoft.KeyVault/managedHSMs/my-hsm",
+            'userAssignedIdentity': "myIdentity",
+            'privateEndpointId': '/subscriptions/69a75bda-882e-44d5-8431-63421204132a/resourceGroups/ab_sdk_test_rg/providers/Microsoft.Network/privateEndpoints/akvPrivateEndpoint',
+            'virtualNetworkId': '/subscriptions/69a75bda-882e-44d5-8431-63421204132a/resourceGroups/ab_sdk_test_rg/providers/Microsoft.Network/virtualNetworks/ab_sdk_test_vnet'            
+        })
+
+        with self.assertRaises(HttpResponseError):
+            # create account with encryption value
+            self.cmd("az netappfiles account create -g {rg} -a {acc_name} -l {loc} --key-source {keySource} --key-vault-uri {keyVaultUri} --key-name {keyName} --keyvault-resource-id {keyVaultResourceId} --user-assigned-identity {userAssignedIdentity}", checks=[
+                self.check('name', '{acc_name}'),
+                self.check('encryption.keySource', '{keySource}')
+            ])
+
+        # create account without encryption value
+        self.cmd("az netappfiles account create -g {rg} -a {acc2_name} -l {loc}", checks=[
+            self.check('name', '{acc2_name}')
+        ])
+        
+        # create account with encryption value
+        self.cmd("az netappfiles account get-key-vault-status -g {rg} -a {acc2_name} ")
+        
+        with self.assertRaises(HttpResponseError) as cm:
+            # create account with encryption value
+            self.cmd("az netappfiles account transitiontocmk -g {rg} -a {acc2_name} --private-endpoint-id {privateEndpointId} --virtual-network-id {virtualNetworkId}  --yes")
+        self.assertIn('AccountEncryptionInvalidForTransitionEncryption', str(
+            cm.exception)) 
+        
+    @unittest.skip('(servicedeployment) api has not been deployed cannot test until finalized')
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_', additional_tags={'owner': 'cli_test'})
+    def test_account_changekeyvault_fails(self):
+        self.kwargs.update({
+            'loc': LOCATION,
+            'acc_name': self.create_random_name(prefix='cli-acc-', length=24),
+            'acc2_name': self.create_random_name(prefix='cli-acc-', length=24),
+            'pool_name': self.create_random_name(prefix='cli-acc-', length=24),
+            'keyVaultName': self.create_random_name(prefix='cli-acc-', length=24),
+            'vnetName': self.create_random_name(prefix='cli-acc-', length=24),
+            'subnetName': self.create_random_name(prefix='cli-acc-', length=24),
+            'privateEndpointName': self.create_random_name(prefix='cli-acc-', length=24),
+            'connectionName': self.create_random_name(prefix='cli-acc-', length=24),
+            'keySource': "Microsoft.KeyVault",
+            'keyName': "myKeyName",            
+            'userAssignedIdentity': "myIdentity"
+        })
+
+        keyVault = self.cmd("az keyvault create --resource-group {rg} --name {keyVaultName}  --location {loc} --enable-purge-protection --retention-days 7 --enable-rbac-authorization").get_output_in_json()        
+        self.kwargs.update({
+            'keyVaultResourceId': keyVault.get_output_in_json()['id'],
+            'keyVaultUri': keyVault.get_output_in_json()['properties']['vaultUri']            
+        })
+        # vnet = self.cmd("az network vnet create -g {rg} -n {vnetName} -l {loc} --address-prefixes 10.0.0.0/16").get_output_in_json()
+        # self.cmd("az network vnet subnet create -g {rg} --vnet-name {vnetName} -n {subnetName} --address-prefixes '10.0.2.0/24'")
+        # endpoint= self.cmd("az network private-endpoint create -g {rg} --vnet-name {vnetName} --subnet {subnetName} --name {privateEndpointName} --group-ids vault --connection-name {connectionName} --location {loc} --private-connection-resource-id {keyVaultResourceId}").get_output_in_json()
+        # self.cmd("az network vnet subnet update -g {rg} --vnet-name {vnetName} --name {subnetName} --disable-private-endpoint-network-policies true")
+        
+        # self.kwargs.update({        
+        #     'privateEndpointId': endpoint.get_output_in_json()['id'],
+        #     'virtualNetworkId': '/subscriptions/69a75bda-882e-44d5-8431-63421204132a/resourceGroups/ab_sdk_test_rg/providers/Microsoft.Network/virtualNetworks/ab_sdk_test_vnet'
+        # })
+        
+        
+        self.cmd("az keyvault key create --vault-name {keyVaultName} -n {keyName} --kty RSA --protection software")
+        self.cmd("az keyvault update -g ab_sdk_test_rg -n {keyVaultName} --default-action deny")
+        
+        # create account with encryption value
+        self.cmd("az netappfiles account create -g {rg} -a {acc_name} -l {loc} --key-source {keySource} --key-vault-uri {keyVaultUri} --key-name {keyName} --keyvault-resource-id {keyVaultResourceId} --identity-type SystemAssigned", checks=[
+            self.check('name', '{acc_name}'),
+            self.check('encryption.keySource', '{keySource}')
+        ])
+        principalId = self.cmd("az netappfiles account show -g {rg} -a {acc_name} ").get_output_in_json()['identity'].principalId
+        self.kwargs.update({
+            'principalId': principalId
+         })
+        self.cmd("az keyvault set-policy -n {keyVaultName} --key-permissions get encrypt Decrypt  --object-id {principalId}")
+        # create account without encryption value
+        self.cmd("az netappfiles account create -g {rg} -a {acc2_name} -l {loc}", checks=[
+            self.check('name', '{acc2_name}')
+        ])
+        
+        self.cmd("az netappfiles pool create -g {rg} -a {acc_name} -p {pool_name} -l {loc} --service-level 'Premium' --size 4").get_output_in_json()
+
+        # Get keyvault status
+        keyVaultStatus = self.cmd("az netappfiles account get-key-vault-status -g {rg} -a {acc2_name} ").get_output_in_json()
+        self.kwargs.update({
+            'principalId': keyVaultStatus.keyVaultPrivateEndpoints[0].privateEndpointId,
+            'virtualNetworkId': keyVaultStatus.keyVaultPrivateEndpoints[0].virtualNetworkId
+         })        
+                
+        with self.assertRaises(HttpResponseError) as cm:
+            # create account with encryption value
+            self.cmd("az netappfiles account change-key-vault -g {rg} -a {acc2_name} --key-vault-uri {keyVaultUri} --key-name {keyName} --keyvault-resource-id {keyVaultResourceId} --key-vault-private-endpoints [0].private-endpoint-id={privateEndpointId} [0].virtual-network-id={privateEndpointId}  --yes")
+        self.assertIn('AzureKeyVaultEncryptionNotConfigured', str(
+            cm.exception))
