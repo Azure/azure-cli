@@ -11,8 +11,14 @@
 from azure.cli.core.aaz import *
 
 
-class AttachDetachDataDisk(AAZCommand):
+@register_command(
+    "vm disk attach-detach",
+)
+class AttachDetach(AAZCommand):
     """Attach and detach data disks to/from the virtual machine.
+
+    :example: Virtual Machine attach detach multiple data disks
+        az vm disk attach-detach --resource-group {resourceGroup} --vm-name {vmName} --data-disks-to-attach "[{lun:1,disk-id:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.Compute/disks/{disk1Name}',disk-encryption-set:{id:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.Compute/diskEncryptionSets/{existing-diskEncryptionSet-name}'},caching:ReadOnly,delete-option:Delete,write-accelerator-enabled:True},{lun:2,disk-id:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.Compute/disks/{disk2Name}',disk-encryption-set:{id:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.Compute/diskEncryptionSets/{existing-diskEncryptionSet-name}'},caching:ReadWrite,delete-option:Detach,write-accelerator-enabled:False}]" --data-disks-to-detach "[{disk-id:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.Compute/disks/{disk3Name}',detach-option:ForceDetach},{disk-id:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.Compute/disks/{disk4Name}',detach-option:ForceDetach}]"
     """
 
     _aaz_info = {
@@ -318,14 +324,14 @@ class AttachDetachDataDisk(AAZCommand):
                 serialized_name="diskSizeGB",
             )
             _element.image = AAZObjectType()
-            _AttachDetachDataDiskHelper._build_schema_virtual_hard_disk_read(_element.image)
+            _AttachDetachHelper._build_schema_virtual_hard_disk_read(_element.image)
             _element.lun = AAZIntType(
                 flags={"required": True},
             )
             _element.managed_disk = AAZObjectType(
                 serialized_name="managedDisk",
             )
-            _AttachDetachDataDiskHelper._build_schema_managed_disk_parameters_read(_element.managed_disk)
+            _AttachDetachHelper._build_schema_managed_disk_parameters_read(_element.managed_disk)
             _element.name = AAZStrType()
             _element.source_resource = AAZObjectType(
                 serialized_name="sourceResource",
@@ -334,7 +340,7 @@ class AttachDetachDataDisk(AAZCommand):
                 serialized_name="toBeDetached",
             )
             _element.vhd = AAZObjectType()
-            _AttachDetachDataDiskHelper._build_schema_virtual_hard_disk_read(_element.vhd)
+            _AttachDetachHelper._build_schema_virtual_hard_disk_read(_element.vhd)
             _element.write_accelerator_enabled = AAZBoolType(
                 serialized_name="writeAcceleratorEnabled",
             )
@@ -378,17 +384,17 @@ class AttachDetachDataDisk(AAZCommand):
                 serialized_name="encryptionSettings",
             )
             os_disk.image = AAZObjectType()
-            _AttachDetachDataDiskHelper._build_schema_virtual_hard_disk_read(os_disk.image)
+            _AttachDetachHelper._build_schema_virtual_hard_disk_read(os_disk.image)
             os_disk.managed_disk = AAZObjectType(
                 serialized_name="managedDisk",
             )
-            _AttachDetachDataDiskHelper._build_schema_managed_disk_parameters_read(os_disk.managed_disk)
+            _AttachDetachHelper._build_schema_managed_disk_parameters_read(os_disk.managed_disk)
             os_disk.name = AAZStrType()
             os_disk.os_type = AAZStrType(
                 serialized_name="osType",
             )
             os_disk.vhd = AAZObjectType()
-            _AttachDetachDataDiskHelper._build_schema_virtual_hard_disk_read(os_disk.vhd)
+            _AttachDetachHelper._build_schema_virtual_hard_disk_read(os_disk.vhd)
             os_disk.write_accelerator_enabled = AAZBoolType(
                 serialized_name="writeAcceleratorEnabled",
             )
@@ -415,7 +421,7 @@ class AttachDetachDataDisk(AAZCommand):
                 serialized_name="sourceVault",
                 flags={"required": True},
             )
-            _AttachDetachDataDiskHelper._build_schema_sub_resource_read(disk_encryption_key.source_vault)
+            _AttachDetachHelper._build_schema_sub_resource_read(disk_encryption_key.source_vault)
 
             key_encryption_key = cls._schema_on_200.os_disk.encryption_settings.key_encryption_key
             key_encryption_key.key_url = AAZStrType(
@@ -426,13 +432,13 @@ class AttachDetachDataDisk(AAZCommand):
                 serialized_name="sourceVault",
                 flags={"required": True},
             )
-            _AttachDetachDataDiskHelper._build_schema_sub_resource_read(key_encryption_key.source_vault)
+            _AttachDetachHelper._build_schema_sub_resource_read(key_encryption_key.source_vault)
 
             return cls._schema_on_200
 
 
-class _AttachDetachDataDiskHelper:
-    """Helper class for AttachDetachDataDisk"""
+class _AttachDetachHelper:
+    """Helper class for AttachDetach"""
 
     _schema_disk_encryption_set_parameters_read = None
 
@@ -520,4 +526,4 @@ class _AttachDetachDataDiskHelper:
         _schema.uri = cls._schema_virtual_hard_disk_read.uri
 
 
-__all__ = ["AttachDetachDataDisk"]
+__all__ = ["AttachDetach"]
