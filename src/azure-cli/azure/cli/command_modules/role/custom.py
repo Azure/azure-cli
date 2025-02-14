@@ -1191,6 +1191,22 @@ def _get_app_object_id_from_sp_object_id(client, sp_object_id):
     raise CLIError("Can't find associated application id from '{}'".format(sp_object_id))
 
 
+def add_service_principal_owner(client, owner_object_id, identifier):
+    sp_object_id = _resolve_service_principal(client, identifier)
+    owners = client.service_principal_owner_list(sp_object_id)
+    # API not idempotent and fails with:
+    #   One or more added object references already exist for the following modified properties: 'owners'
+    # We make it idempotent.
+    if not next((x for x in owners if x[ID] == owner_object_id), None):
+        body = _build_directory_object_json(client, owner_object_id)
+        client.service_principal_owner_add(sp_object_id, body)
+
+
+def remove_service_principal_owner(client, owner_object_id, identifier):
+    sp_object_id = _resolve_service_principal(client, identifier)
+    return client.service_principal_owner_remove(sp_object_id, owner_object_id)
+
+
 def list_service_principal_owners(client, identifier):
     sp_object_id = _resolve_service_principal(client, identifier)
     return client.service_principal_owner_list(sp_object_id)

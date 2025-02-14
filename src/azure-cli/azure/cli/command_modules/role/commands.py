@@ -119,6 +119,8 @@ def load_command_table(self, _):
 
     with self.command_group('ad sp owner', client_factory=get_graph_client, exception_handler=graph_err_handler) as g:
         g.custom_command('list', 'list_service_principal_owners')
+        g.custom_command('add', 'add_service_principal_owner')
+        g.custom_command('remove', 'remove_service_principal_owner')
 
     # RBAC related
     with self.command_group('ad sp', client_factory=get_graph_client, exception_handler=graph_err_handler) as g:
