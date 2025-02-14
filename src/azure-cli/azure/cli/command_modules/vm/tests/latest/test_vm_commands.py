@@ -3581,8 +3581,8 @@ class VMDiskAttachDetachTest(ScenarioTest):
         ])
 
     @AllowLargeResponse(size_kb=99999)
-    @ResourceGroupPreparer(name_prefix='cli-test-attach-detach-data-disk-api')
-    def test_vm_attach_detach_data_disk_api(self, resource_group):
+    @ResourceGroupPreparer(name_prefix='cli-test-attach-detach-api')
+    def test_vm_attach_detach_api(self, resource_group):
         self.kwargs.update({
             'loc': 'westus',
             'vm': self.create_random_name('vm', 10),
@@ -3608,17 +3608,16 @@ class VMDiskAttachDetachTest(ScenarioTest):
             'disk2_id': disks[1]['managedDisk']['id']
         })
 
-        self.cmd('vm disk attach-detach-data-disk -g {rg} --vm-name {vm} --data-disks-to-detach [0].disk-id={disk1_id} [0].detach-option=ForceDetach')
+        self.cmd('vm disk attach-detach -g {rg} --vm-name {vm} --data-disks-to-detach [0].disk-id={disk1_id} [0].detach-option=ForceDetach')
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('length(storageProfile.dataDisks)', 1),
             self.check('storageProfile.dataDisks[0].name', '{disk2}')
         ])
 
-        self.cmd('vm disk attach-detach-data-disk -g {rg} --vm-name {vm} --data-disks-to-attach [0].disk-id={disk1_id} [0].lun=3 [0].caching=ReadWrite [0].delete-option=Detach [0].write-accelerator-enabled=False')
+        self.cmd('vm disk attach-detach -g {rg} --vm-name {vm} --data-disks-to-attach [0].disk-id={disk1_id} [0].lun=3 [0].caching=ReadWrite [0].delete-option=Detach [0].write-accelerator-enabled=False')
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('length(storageProfile.dataDisks)', 2)
         ])
-
 
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli-test-disk-attach-multiple-disks')
