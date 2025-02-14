@@ -35,5 +35,5 @@ def load_command_table(self, _):
         self.command_table['billing period show'] = PeriodShow(loader=self)
 
     with self.command_group('billing enrollment-account', enrollment_account_util, client_factory=enrollment_accounts_mgmt_client_factory) as g:
-        g.command('list', 'list')
+        g.command('list', 'list_by_department')
         g.show_command('show', 'get')
