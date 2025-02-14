@@ -25,18 +25,22 @@ _IS_DEFAULT_SUBSCRIPTION = 'isDefault'
 _SUBSCRIPTION_ID = 'id'
 _SUBSCRIPTION_NAME = 'name'
 
-# Tenant of the token which is used to list the subscription
-_TENANT_ID = 'tenantId'
-
 # More information on the token tenant. Maps to properties in 'Tenants - List' REST API
 # https://learn.microsoft.com/en-us/rest/api/resources/tenants/list
 _TENANT_DEFAULT_DOMAIN = 'tenantDefaultDomain'  # defaultDomain
 _TENANT_DISPLAY_NAME = 'tenantDisplayName'  # displayName
 
+# ARM resource properties
+_ID = 'id'
+_DISPLAY_NAME = 'displayName'
+_MANAGED_BY_TENANTS = 'managedByTenants'
+# Tenant of the token which is used to list the subscription
+_TENANT_ID = 'tenantId'
+_DEFAULT_DOMAIN = "defaultDomain"
+
 # Home tenant of the subscription. Maps to tenantId in 'Subscriptions - List' REST API
 # https://learn.microsoft.com/en-us/rest/api/resources/subscriptions/list
 _HOME_TENANT_ID = 'homeTenantId'
-_MANAGED_BY_TENANTS = 'managedByTenants'
 _USER_ENTITY = 'user'
 _USER_NAME = 'name'
 _CLIENT_ID = 'clientId'
@@ -114,16 +118,16 @@ def _attach_token_tenant(subscription, tenant, tenant_id_description=None):
         - TenantIdDescription has default_domain, mapped to tenant_default_domain
         - TenantIdDescription has display_name, mapped to tenant_display_name
     """
-    if hasattr(subscription, "tenant_id"):
-        setattr(subscription, 'home_tenant_id', subscription.tenant_id)
-    setattr(subscription, 'tenant_id', tenant)
+    if _TENANT_ID in subscription:
+        subscription[_HOME_TENANT_ID] = subscription[_TENANT_ID]
+    subscription[_TENANT_ID] = tenant
 
     # Attach tenant_default_domain, if available
-    if tenant_id_description and hasattr(tenant_id_description, "default_domain"):
-        setattr(subscription, 'tenant_default_domain', tenant_id_description.default_domain)
+    if tenant_id_description and _DEFAULT_DOMAIN in tenant_id_description:
+        subscription[_TENANT_DEFAULT_DOMAIN] = tenant_id_description[_DEFAULT_DOMAIN]
     # Attach display_name, if available
-    if tenant_id_description and hasattr(tenant_id_description, "display_name"):
-        setattr(subscription, 'tenant_display_name', tenant_id_description.display_name)
+    if tenant_id_description and _DISPLAY_NAME in tenant_id_description:
+        subscription[_TENANT_DISPLAY_NAME] = tenant_id_description[_DISPLAY_NAME]
 
 
 # pylint: disable=too-many-lines,too-many-instance-attributes,unused-argument
@@ -211,7 +215,7 @@ class Profile:
             raise CLIError("No subscriptions found for {}.".format(username))
 
         if allow_no_subscriptions:
-            t_list = [s.tenant_id for s in subscriptions]
+            t_list = [s[_TENANT_ID] for s in subscriptions]
             bare_tenants = [t for t in subscription_finder.tenants if t not in t_list]
             tenant_accounts = self._build_tenant_level_accounts(bare_tenants)
             subscriptions.extend(tenant_accounts)
@@ -502,15 +506,15 @@ class Profile:
         consolidated = []
         for s in subscriptions:
             subscription_dict = {
-                _SUBSCRIPTION_ID: s.id.rpartition('/')[2],
-                _SUBSCRIPTION_NAME: s.display_name,
-                _STATE: s.state,
+                _SUBSCRIPTION_ID: s[_ID].rpartition('/')[2],
+                _SUBSCRIPTION_NAME: s[_DISPLAY_NAME],
+                _STATE: s[_STATE],
                 _USER_ENTITY: {
                     _USER_NAME: user,
                     _USER_TYPE: _SERVICE_PRINCIPAL if is_service_principal else _USER
                 },
                 _IS_DEFAULT_SUBSCRIPTION: False,
-                _TENANT_ID: s.tenant_id,
+                _TENANT_ID: s[_TENANT_ID],
                 _ENVIRONMENT_NAME: self.cli_ctx.cloud.name
             }
 
@@ -832,24 +836,25 @@ class SubscriptionFinder:
         all_subscriptions = []
         empty_tenants = []
         interaction_required_tenants = []
+        TENANT_ID_NAME = 'tenantIdName'
 
         client = self._create_subscription_client(credential)
         # https://learn.microsoft.com/en-us/rest/api/resources/tenants/list
-        tenants = client.tenants.list()
+        tenants = client.tenant_list()
 
         for t in tenants:
-            tenant_id = t.tenant_id
+            tenant_id = t[_TENANT_ID]
             # display_name is available since /tenants?api-version=2018-06-01,
             # not available in /tenants?api-version=2016-06-01
-            if not hasattr(t, 'display_name'):
-                t.display_name = None
+            if _DISPLAY_NAME not in t:
+                t[_DISPLAY_NAME] = None
 
-            t.tenant_id_name = tenant_id
-            if t.display_name:
+            t[TENANT_ID_NAME] = tenant_id
+            if t[_DISPLAY_NAME]:
                 # e.g. '72f988bf-86f1-41af-91ab-2d7cd011db47 Microsoft'
-                t.tenant_id_name = "{} '{}'".format(tenant_id, t.display_name)
+                t[TENANT_ID_NAME] = "{} '{}'".format(tenant_id, t[_DISPLAY_NAME])
 
-            logger.info("Finding subscriptions under tenant %s", t.tenant_id_name)
+            logger.info("Finding subscriptions under tenant %s", t[TENANT_ID_NAME])
 
             identity = _create_identity_instance(self.cli_ctx, self._authority, tenant_id=tenant_id)
 
@@ -864,7 +869,7 @@ class SubscriptionFinder:
                 # tenant specific, like the account was disabled, being blocked by MFA. For such errors,
                 # we continue with other tenants.
                 # As we don't check AADSTS error code, show the original error message for user's reference.
-                logger.warning("Authentication failed against tenant %s: %s", t.tenant_id_name, ex)
+                logger.warning("Authentication failed against tenant %s: %s", t[TENANT_ID_NAME], ex)
                 interaction_required_tenants.append(t)
                 continue
 
@@ -875,12 +880,12 @@ class SubscriptionFinder:
             for sub_to_add in subscriptions:
                 add_sub = True
                 for sub_to_compare in all_subscriptions:
-                    if sub_to_add.subscription_id == sub_to_compare.subscription_id:
+                    if sub_to_add['subscriptionId'] == sub_to_compare['subscriptionId']:
                         logger.warning("Subscription %s '%s' can be accessed from tenants %s(default) and %s. "
                                        "To select a specific tenant when accessing this subscription, "
                                        "use 'az login --tenant TENANT_ID'.",
-                                       sub_to_add.subscription_id, sub_to_add.display_name,
-                                       sub_to_compare.tenant_id, sub_to_add.tenant_id)
+                                       sub_to_add['subscriptionId'], sub_to_add[_DISPLAY_NAME],
+                                       sub_to_compare[_TENANT_ID], sub_to_add[_TENANT_ID])
                         add_sub = False
                         break
                 if add_sub:
@@ -891,14 +896,14 @@ class SubscriptionFinder:
             logger.warning("The following tenants don't contain accessible subscriptions. "
                            "Use `az login --allow-no-subscriptions` to have tenant level access.")
             for t in empty_tenants:
-                logger.warning("%s", t.tenant_id_name)
+                logger.warning("%s", t[TENANT_ID_NAME])
 
         # Show warning for InteractionRequired tenants
         if interaction_required_tenants:
             logger.warning("If you need to access subscriptions in the following tenants, please use "
                            "`az login --tenant TENANT_ID`.")
             for t in interaction_required_tenants:
-                logger.warning("%s", t.tenant_id_name)
+                logger.warning("%s", t[TENANT_ID_NAME])
         return all_subscriptions
 
     def find_using_specific_tenant(self, tenant, credential, tenant_id_description=None):
@@ -908,7 +913,7 @@ class SubscriptionFinder:
         """
         client = self._create_subscription_client(credential)
         # https://learn.microsoft.com/en-us/rest/api/resources/subscriptions/list
-        subscriptions = client.subscriptions.list()
+        subscriptions = client.subscription_list()
         all_subscriptions = []
         for s in subscriptions:
             _attach_token_tenant(s, tenant, tenant_id_description=tenant_id_description)
@@ -917,43 +922,29 @@ class SubscriptionFinder:
         return all_subscriptions
 
     def _create_subscription_client(self, credential):
-        from azure.cli.core.profiles import ResourceType, get_api_version
-        from azure.cli.core.profiles._shared import get_client_class
-        from azure.cli.core.commands.client_factory import _prepare_mgmt_client_kwargs_track2
-
-        client_type = get_client_class(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
-        if client_type is None:
-            from azure.cli.core.azclierror import CLIInternalError
-            raise CLIInternalError("Unable to get '{}' in profile '{}'"
-                                   .format(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS, self.cli_ctx.cloud.profile))
-        api_version = get_api_version(self.cli_ctx, ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
-        client_kwargs = _prepare_mgmt_client_kwargs_track2(self.cli_ctx, credential)
-
-        client = client_type(credential, api_version=api_version,
-                             base_url=self.cli_ctx.cloud.endpoints.resource_manager,
-                             **client_kwargs)
-        return client
+        from .arm import ARMClient
+        return ARMClient(self.cli_ctx, credential=credential)
 
 
 def _transform_subscription_for_multiapi(s, s_dict):
     """
     Transforms properties from Subscriptions - List 2019-06-01 and later to the subscription dict.
 
-    :param s: subscription object
-    :param s_dict: subscription dict
+    :param s: subscription dict
+    :param s_dict: subscription dict persisted as an "account"
     """
-    if hasattr(s, 'home_tenant_id'):
-        s_dict[_HOME_TENANT_ID] = s.home_tenant_id
-    if hasattr(s, 'tenant_default_domain'):
-        s_dict[_TENANT_DEFAULT_DOMAIN] = s.tenant_default_domain
-    if hasattr(s, 'tenant_display_name'):
-        s_dict[_TENANT_DISPLAY_NAME] = s.tenant_display_name
+    if _HOME_TENANT_ID in s:
+        s_dict[_HOME_TENANT_ID] = s[_HOME_TENANT_ID]
+    if _TENANT_DEFAULT_DOMAIN in s:
+        s_dict[_TENANT_DEFAULT_DOMAIN] = s[_TENANT_DEFAULT_DOMAIN]
+    if _TENANT_DISPLAY_NAME in s:
+        s_dict[_TENANT_DISPLAY_NAME] = s[_TENANT_DISPLAY_NAME]
 
-    if hasattr(s, 'managed_by_tenants'):
-        if s.managed_by_tenants is None:
+    if _MANAGED_BY_TENANTS in s:
+        if s[_MANAGED_BY_TENANTS] is None:
             s_dict[_MANAGED_BY_TENANTS] = None
         else:
-            s_dict[_MANAGED_BY_TENANTS] = [{_TENANT_ID: t.tenant_id} for t in s.managed_by_tenants]
+            s_dict[_MANAGED_BY_TENANTS] = [{_TENANT_ID: t[_TENANT_ID]} for t in s[_MANAGED_BY_TENANTS]]
 
 
 def _create_identity_instance(cli_ctx, authority, tenant_id=None, client_id=None):
