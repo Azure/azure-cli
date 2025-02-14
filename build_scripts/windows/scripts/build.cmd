@@ -207,7 +207,7 @@ popd
 
 REM Remove __pycache__
 echo remove pycache
-for /d /r %BUILDING_DIR%\Lib\site-packages\pip %%d in (__pycache__) do (
+for /d /r %BUILDING_DIR%\Lib\site-packages\ %%d in (__pycache__) do (
     if exist %%d rmdir /s /q "%%d"
 )
 
