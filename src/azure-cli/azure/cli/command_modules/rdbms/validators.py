@@ -421,10 +421,9 @@ def _valid_ssdv2_range(storage_gb, sku_info, tier, iops, throughput, instance):
     storage = storage_gib * 1.07374182
     # find min and max values for IOPS
     min_iops = sku_info[sku_tier]["supported_storageV2_iops"]
-    if sku_info[sku_tier]["supported_storageV2_iops"] < math.floor(max(0, storage - 6) * 500 + min_iops):
-        max_iops = sku_info[sku_tier]["supported_storageV2_iops_max"]
-    else:
-        max_iops = math.floor(max(0, storage - 6) * 500 + min_iops)
+    supported_iops = sku_info[sku_tier]["supported_storageV2_iops_max"]
+    calculated_max_iops = math.floor(max(0, storage - 6) * 500 + min_iops)
+    max_iops = min(supported_iops, calculated_max_iops)
 
     if not min_iops <= storage_iops <= max_iops:
         raise CLIError('The requested value for IOPS does not fall between {} and {} operations/sec.'
