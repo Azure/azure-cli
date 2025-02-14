@@ -360,6 +360,10 @@ def flexible_server_update_custom_func(cmd, client, instance,
     if instance.storage.type == "PremiumV2_LRS":
         instance.storage.tier = None
 
+        if sku_name or storage_gb:
+            logger.warning("You are changing the compute and/or storage size of the server "
+                           "The server needs to be restarted for this operation and you will see a short downtime.")
+
         if iops:
             instance.storage.iops = iops
 
