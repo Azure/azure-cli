@@ -408,6 +408,12 @@ def load_arguments(self, _):
         if self.supported_api_version(max_api='2016-04-30-preview', operation_group='virtual_machines'):
             c.argument('name', name_arg_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.Compute/availabilitySets'), help='Name of the availability set')
             c.argument('availability_set_name', options_list=['--availability-set-name'])
+
+    for scope in ['vm availability-set create', 'vm availability-set update']:
+        with self.argument_context(scope) as c:
+            c.argument('additional_scheduled_events', options_list=['--additional-scheduled-events', '--additional-events'], arg_type=get_three_state_flag(), min_api='2024-07-01', help='The configuration parameter used while creating event grid and resource graph scheduled event setting.')
+            c.argument('enable_user_reboot_scheduled_events', options_list=['--enable-user-reboot-scheduled-events', '--enable-reboot'], arg_type=get_three_state_flag(), min_api='2024-07-01', help='The configuration parameter used while publishing scheduled events additional publishing targets.')
+            c.argument('enable_user_redeploy_scheduled_events', options_list=['--enable-user-redeploy-scheduled-events', '--enable-redeploy'], arg_type=get_three_state_flag(), min_api='2024-07-01', help='The configuration parameter used while creating user initiated redeploy scheduled event setting creation.')
     # endregion
 
     # region VirtualMachines

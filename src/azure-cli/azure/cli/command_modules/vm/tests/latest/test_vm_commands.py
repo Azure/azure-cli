@@ -1932,6 +1932,40 @@ class VMAvailSetScenarioTest(ScenarioTest):
         self.cmd('vm availability-set list -g {rg}',
                  checks=self.check('length(@)', 0))
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_availset_scheduled_events_policy_', location='centraluseuap')
+    def test_vm_availset_scheduled_events_policy(self, resource_group):
+        self.kwargs.update({
+            'availset1': 'availset-test1',
+            'availset2': 'availset-test2'
+        })
+
+        self.cmd('vm availability-set create -g {rg} -n {availset1} --additional-events True --enable-reboot True --enable-redeploy True --platform-fault-domain-count 1 --platform-update-domain-count 1', checks=[
+            self.check('name', '{availset1}'),
+            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', True),
+            self.check('scheduledEventsPolicy.userInitiatedRedeploy.automaticallyApprove', True),
+            self.check('scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', True)
+        ])
+
+        self.cmd('vm availability-set update -g {rg} -n {availset1} --additional-events False --enable-redeploy False', checks=[
+            self.check('name', '{availset1}'),
+            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', False),
+            self.check('scheduledEventsPolicy.userInitiatedRedeploy.automaticallyApprove', False),
+            self.check('scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', True)
+        ])
+
+        self.cmd('vm availability-set create -g {rg} -n {availset2} --platform-fault-domain-count 1 --platform-update-domain-count 1', checks=[
+            self.check('name', '{availset2}'),
+            self.check('scheduledEventsPolicy', None),
+        ])
+
+        self.cmd('vm availability-set update -g {rg} -n {availset2} --enable-reboot False --additional-events True', checks=[
+            self.check('name', '{availset2}'),
+            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', True),
+            self.check('scheduledEventsPolicy.userInitiatedRedeploy', None),
+            self.check('scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', False)
+        ])
+
 
 class VMAvailSetLiveScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_availset_live')

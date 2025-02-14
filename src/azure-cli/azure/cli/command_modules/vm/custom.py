@@ -1809,7 +1809,8 @@ def convert_av_set_to_managed_disk(cmd, resource_group_name, availability_set_na
 
 def create_av_set(cmd, availability_set_name, resource_group_name, platform_fault_domain_count=2,
                   platform_update_domain_count=None, location=None, proximity_placement_group=None, unmanaged=False,
-                  no_wait=False, tags=None, validate=False):
+                  no_wait=False, tags=None, validate=False, additional_scheduled_events=None,
+                  enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None):
     from azure.cli.core.util import random_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
     from azure.cli.command_modules.vm._template_builder import build_av_set_resource
@@ -1822,7 +1823,10 @@ def create_av_set(cmd, availability_set_name, resource_group_name, platform_faul
     av_set_resource = build_av_set_resource(cmd, availability_set_name, location, tags,
                                             platform_update_domain_count,
                                             platform_fault_domain_count, unmanaged,
-                                            proximity_placement_group=proximity_placement_group)
+                                            proximity_placement_group=proximity_placement_group,
+                                            additional_scheduled_events=additional_scheduled_events,
+                                            enable_user_reboot_scheduled_events=enable_user_reboot_scheduled_events,
+                                            enable_user_redeploy_scheduled_events=enable_user_redeploy_scheduled_events)
     master_template.add_resource(av_set_resource)
 
     template = master_template.build()
@@ -1851,9 +1855,33 @@ def create_av_set(cmd, availability_set_name, resource_group_name, platform_faul
     return compute_client.availability_sets.get(resource_group_name, availability_set_name)
 
 
-def update_av_set(instance, resource_group_name, proximity_placement_group=None):
+def update_av_set(cmd, instance, resource_group_name, proximity_placement_group=None,
+                  additional_scheduled_events=None, enable_user_reboot_scheduled_events=None,
+                  enable_user_redeploy_scheduled_events=None):
     if proximity_placement_group is not None:
-        instance.proximity_placement_group = {'id': proximity_placement_group}
+        instance.proximity_placement_group = cmd.get_models('SubResource')(id=proximity_placement_group)
+
+    if instance.scheduled_events_policy is None and (
+            additional_scheduled_events is not None or enable_user_reboot_scheduled_events is not None or \
+            enable_user_redeploy_scheduled_events is not None):
+        ScheduledEventsPolicy = cmd.get_models('ScheduledEventsPolicy')
+        instance.scheduled_events_policy = ScheduledEventsPolicy()
+
+    if additional_scheduled_events is not None:
+        ScheduledEventsAdditionalPublishingTargets = cmd.get_models('ScheduledEventsAdditionalPublishingTargets')
+        EventGridAndResourceGraph = cmd.get_models('EventGridAndResourceGraph')
+        instance.scheduled_events_policy.scheduled_events_additional_publishing_targets = ScheduledEventsAdditionalPublishingTargets(
+            event_grid_and_resource_graph=EventGridAndResourceGraph(enable=additional_scheduled_events)
+        )
+
+    if enable_user_reboot_scheduled_events is not None:
+        UserInitiatedReboot = cmd.get_models('UserInitiatedReboot')
+        instance.scheduled_events_policy.user_initiated_reboot = UserInitiatedReboot(automatically_approve=enable_user_reboot_scheduled_events)
+
+    if enable_user_redeploy_scheduled_events is not None:
+        UserInitiatedRedeploy = cmd.get_models('UserInitiatedRedeploy')
+        instance.scheduled_events_policy.user_initiated_redeploy = UserInitiatedRedeploy(automatically_approve=enable_user_redeploy_scheduled_events)
+
     return instance
 
 
