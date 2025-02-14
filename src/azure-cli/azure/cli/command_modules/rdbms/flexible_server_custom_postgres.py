@@ -361,8 +361,8 @@ def flexible_server_update_custom_func(cmd, client, instance,
         instance.storage.tier = None
 
         if sku_name or storage_gb:
-            logger.warning("You are changing the compute and/or storage size of the server "
-                           "The server needs to be restarted for this operation and you will see a short downtime.")
+            logger.warning("You are changing the compute and/or storage size of the server. "
+                           "The server will be restarted for this operation and you will see a short downtime.")
 
         if iops:
             instance.storage.iops = iops
