@@ -373,7 +373,7 @@ def billing_product_validate_move(client,
                                 parameters=parameters)
 
 
-def billing_invoice_list(client,
+def billing_invoice_list(cmd,
                          period_start_date,
                          period_end_date,
                          account_name=None,
@@ -397,6 +397,7 @@ def billing_invoice_list(client,
         "period_start_date": period_start_date,
         "period_end_date": period_end_date,
     })
+
 
 def billing_invoice_show(client,
                          account_name,
