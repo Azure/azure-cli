@@ -2894,10 +2894,8 @@ class WebappSiteContainersTests(ScenarioTest):
     def test_webapp_sitecontainers_create_update_show_delete(self, resource_group):
         webapp_name = self.create_random_name('webapp-sitecontainers-test', 40)
         plan_name = self.create_random_name('webapp-sitecontainers-plan', 40)
-        self.cmd(
-            'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
-        self.cmd(
-            'webapp create -g {} -n {} --plan {} --sitecontainers-app'.format(resource_group, webapp_name, plan_name))
+        self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
+        self.cmd('webapp create -g {} -n {} --plan {} --sitecontainers-app'.format(resource_group, webapp_name, plan_name))
         
         self.cmd('webapp sitecontainers create --name {} --resource-group {} --container-name frontend --is-main --image mcr.microsoft.com/appsvc/staticsite --target-port 80'.
                   format(webapp_name, resource_group)).assert_with_checks([
@@ -2938,10 +2936,10 @@ class WebappSiteContainersTests(ScenarioTest):
         plan_name = self.create_random_name('webapp-sitecontainers-plan', 40)
         spec_file = os.path.join(TEST_DIR, 'data', 'sitecontainers_spec.json')
 
-        self.cmd(
-            'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
-        self.cmd(
-            'webapp create -g {} -n {} --plan {} --sitecontainers-app'.format(resource_group, webapp_name, plan_name))
+        self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
+        self.cmd('webapp create -g {} -n {} --plan {} --sitecontainers-app'.format(resource_group, webapp_name, plan_name))
+        self.cmd('webapp config appsettings set --settings {} -g {} -n {}'.format("VARIABLE1=Lorem VARIABLE2=Ipsum", resource_group, webapp_name, plan_name))
+        self.cmd('webapp identity assign -g {} -n {}'.format(resource_group, webapp_name))
         
         self.cmd('webapp sitecontainers create --name {} --resource-group {} --sitecontainers-spec-file "{}"'.
                   format(webapp_name, resource_group, spec_file)).assert_with_checks([

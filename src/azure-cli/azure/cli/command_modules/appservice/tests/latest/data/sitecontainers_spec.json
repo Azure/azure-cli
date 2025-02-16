@@ -8,12 +8,12 @@
             "authType": "SystemIdentity",
             "environmentVariables": [
                 {
-                    "name": "VARIABLE1",
-                    "value": "APPSETTING_KEY1"
+                    "name": "VAR1",
+                    "value": "VARIABLE1"
                 },
                 {
-                    "name": "VARIABLE2",
-                    "value": "APPSETTING_KEY2"
+                    "name": "VAR2",
+                    "value": "VARIABLE2"
                 }
             ],
             "volumeMounts": [
@@ -31,8 +31,7 @@
             "image": "mcr.microsoft.com/appsvc/docs/sidecars/sample-dotnetcore:latest",
             "targetPort": "2000",
             "isMain": false,
-            "authType": "UserAssigned",
-            "userManagedIdentityClientId": "c283d9ab-ed41-4da9-a458-7256a2aa3e74"
+            "authType": "SystemIdentity"
         }
     },
     {

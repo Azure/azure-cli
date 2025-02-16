@@ -2214,7 +2214,7 @@ helps['webapp sitecontainers create'] = """
 type: command
 short-summary: Create sitecontainers for a linux webapp
 long-summary: |
-    Multiple sitecontainers can be added at once by passing arg --sitecontainer-spec-file, which is the path to a json file containing an array of sitecontainer specs.
+    Multiple sitecontainers can be added or updated at once by passing arg --sitecontainer-spec-file, which is the path to a json file containing an array of sitecontainer specs.
     Example json file:
     [
     {
@@ -2273,14 +2273,14 @@ long-summary: |
 examples:
   - name: Create a sitecontainer for a linux webapp
     text: az webapp sitecontainers create --name MyWebApp --resource-group MyResourceGroup --container-name MyContainer --image MyImageRegistry.io/MyImage:latest --target-port 80 --is-main
-  - name : Create multiple sitecontainers for a linux webapp using a json sitecontainer-spec file
+  - name : Create or update multiple sitecontainers for a linux webapp using a json sitecontainer-spec file
     text: az webapp sitecontainers create --name MyWebApp --resource-group MyResourceGroup --sitecontainer-spec-file ./sitecontainersspec.json
 """
 
 
 helps['webapp sitecontainers update'] = """
 type: command
-short-summary: Update a sitecontainer for a linux webapp
+short-summary: Update an existing sitecontainer for a linux webapp
 examples:
   - name: Update a sitecontainer for a linux webapp
     text: az webapp sitecontainers update --name MyWebApp --resource-group MyResourceGroup --container-name MyContainer --image MyImageRegistry.io/MyImage:latest --target-port 3000 --is-main false

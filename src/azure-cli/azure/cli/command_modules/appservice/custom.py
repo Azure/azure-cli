@@ -1045,9 +1045,25 @@ class SiteContainerSpec:
             environment_variables=properties.get("environmentVariables")
         )
 
+    @classmethod
+    def from_sitecontainer(cls, sitecontainer_name, sitecontainer):
+        return cls(
+            name=sitecontainer_name,  # Required explicitly as SiteContainer.name is read-only in SiteContainer model
+            image=sitecontainer.image,
+            target_port=sitecontainer.target_port,
+            is_main=sitecontainer.is_main,
+            start_up_command=sitecontainer.start_up_command,
+            auth_type=sitecontainer.auth_type,
+            user_name=sitecontainer.user_name,
+            password_secret=sitecontainer.password_secret,
+            user_managed_identity_client_id=sitecontainer.user_managed_identity_client_id,
+            volume_mounts=sitecontainer.volume_mounts,
+            environment_variables=sitecontainer.environment_variables
+        )
 
-def create_webapp_sitecontainers(cmd, name, resource_group, container_name=None, image=None, target_port=None,
-                                 slot=None, startup_cmd=None, is_main=None, system_assigned_identity=None,
+
+def create_webapp_sitecontainers(cmd, name, resource_group, slot=None, container_name=None, image=None,
+                                 target_port=None, startup_cmd=None, is_main=None, system_assigned_identity=None,
                                  user_assigned_identity=None, registry_username=None,
                                  registry_password=None, sitecontainers_spec_file=None):
     import os
@@ -1058,6 +1074,15 @@ def create_webapp_sitecontainers(cmd, name, resource_group, container_name=None,
         raise ValidationError("Site is not a linux webapp. Sitecontainers are only supported for linux webapps.")
     response = None
 
+    is_system_identity_enabled = False
+    user_assigned_identities = []
+    if app.identity:
+        is_system_identity_enabled = 'SystemAssigned' in app.identity.type
+        if app.identity.user_assigned_identities:
+            user_assigned_identities = [identity.client_id
+                                        for identity in app.identity.user_assigned_identities.values()]
+    app_settings = get_app_settings(cmd, resource_group, name, slot)
+
     # check if sitecontainers_spec_file is provided
     if sitecontainers_spec_file:
         response = []
@@ -1066,7 +1091,11 @@ def create_webapp_sitecontainers(cmd, name, resource_group, container_name=None,
             raise ValidationError("The sitecontainer spec file does not exist at the path '{}'"
                                   .format(sitecontainers_spec_file))
         with open(sitecontainers_spec_file, 'r') as file:
-            sitecontainers_spec_json = json.load(file)
+            sitecontainers_spec_json = None
+            try:
+                sitecontainers_spec_json = json.load(file)
+            except Exception as ex:
+                raise ValidationError("The sitecontainer spec file contains malformed data. Error: {}".format(str(ex)))
             if not isinstance(sitecontainers_spec_json, list):
                 raise ValidationError("The sitecontainer spec file should contain a list of sitecontainers.")
             try:
@@ -1076,6 +1105,16 @@ def create_webapp_sitecontainers(cmd, name, resource_group, container_name=None,
             if sitecontainers_spec is None or len(sitecontainers_spec) == 0:
                 raise ValidationError("No sitecontainers found in the sitecontainers spec file.")
             for spec in sitecontainers_spec:
+                existing_sitecontainers = list_webapp_sitecontainers(cmd, name, resource_group, slot)
+                existing_sitecontainers_spec = [SiteContainerSpec.from_sitecontainer(container.name, container)
+                                                for container in existing_sitecontainers]
+                try:
+                    _validate_sitecontainer_internal(spec, existing_sitecontainers_spec, is_system_identity_enabled,
+                                                     user_assigned_identities, app_settings)
+                except ValidationError as ex:
+                    logger.error("Validation failed for sitecontainer '%s'. \
+                                 This sitecontainer will be skipped. Error: %s", spec.name, ex.error_msg)
+                    continue
                 sitecontainer = SiteContainer(image=spec.image, target_port=spec.target_port,
                                               start_up_command=spec.start_up_command,
                                               is_main=spec.is_main, auth_type=spec.auth_type, user_name=spec.user_name,
@@ -1085,10 +1124,11 @@ def create_webapp_sitecontainers(cmd, name, resource_group, container_name=None,
                                               environment_variables=spec.environment_variables)
                 response.append(_create_or_update_webapp_sitecontainer_internal(cmd, name, resource_group,
                                                                                 spec.name, sitecontainer, slot))
+                logger.warning("Sitecontainer '%s' added successfully.", spec.name)
     else:
-        if container_name is None or image is None or target_port is None:
+        if container_name is None or is_main is None or image is None:
             raise RequiredArgumentMissingError("The following arguments are required if argument \
-                    --sitecontainers-spec-file is not provided: --container-name, --image, --target-port")
+                    --sitecontainers-spec-file is not provided: --container-name, --image, --is-main")
         auth_type = AuthType.ANONYMOUS
         if system_assigned_identity is True:
             auth_type = AuthType.SYSTEM_IDENTITY
@@ -1101,10 +1141,55 @@ def create_webapp_sitecontainers(cmd, name, resource_group, container_name=None,
                                       is_main=is_main, auth_type=auth_type, user_name=registry_username,
                                       password_secret=registry_password,
                                       user_managed_identity_client_id=user_assigned_identity)
+        existing_sitecontainers = list_webapp_sitecontainers(cmd, name, resource_group, slot)
+        existing_sitecontainers_spec = [SiteContainerSpec.from_sitecontainer(container.name, container)
+                                        for container in existing_sitecontainers]
+        _validate_sitecontainer_internal(SiteContainerSpec.from_sitecontainer(container_name, sitecontainer),
+                                         existing_sitecontainers_spec, is_system_identity_enabled,
+                                         user_assigned_identities, app_settings)
         response = _create_or_update_webapp_sitecontainer_internal(cmd, name, resource_group,
                                                                    container_name, sitecontainer, slot)
 
     return response
+
+
+def _validate_sitecontainer_internal(new_sitecontainer_spec, existing_sitecontainers_spec,
+                                     is_system_assigned_identity_enabled, user_assigned_identities, appsettings):
+    # ensure that isMain=true is unique
+    if new_sitecontainer_spec.is_main and any(spec.is_main and spec.name != new_sitecontainer_spec.name
+                                              for spec in existing_sitecontainers_spec):
+        raise ValidationError("Another sitecontainer with isMain=true already exists. \
+                               Cannot add sitecontainer '{}' as the main sitecontainer."
+                              .format(new_sitecontainer_spec.name))
+    # ensure that targetPort is in range 1 to 65535
+    if new_sitecontainer_spec.target_port is not None:
+        target_port = int(new_sitecontainer_spec.target_port)
+        if target_port < 1 or target_port > 65535:
+            raise ValidationError("Invalid targetPort '{}' for sitecontainer {}. \
+                                  targetPort must be in the range 1 to 65535."
+                                  .format(new_sitecontainer_spec.target_port, new_sitecontainer_spec.name))
+    # ensure that targetPort is unique
+    if new_sitecontainer_spec.target_port in [spec.target_port for spec in existing_sitecontainers_spec
+                                              if spec.name != new_sitecontainer_spec.name]:
+        raise ValidationError("A sitecontainer with targetPort '{}' already exists. \
+                              targetPort must be unique for sitecontainer '{}'."
+                              .format(new_sitecontainer_spec.target_port, new_sitecontainer_spec.name))
+    # ensure that environment variable value should be a key in appsettings
+    if new_sitecontainer_spec.environment_variables:
+        for env_var in new_sitecontainer_spec.environment_variables:
+            if env_var['value'] not in [setting['name'] for setting in appsettings]:
+                raise ValidationError("The value of env variable '{}' for sitecontainer '{}' is not an app setting."
+                                      .format(env_var['name'], new_sitecontainer_spec.name))
+    # if authType is systemAssigned, ensure that systemAssignedIdentity is enabled
+    if new_sitecontainer_spec.auth_type == AuthType.SYSTEM_IDENTITY and not is_system_assigned_identity_enabled:
+        raise ValidationError("System assigned identity is not enabled for the site. \
+                              Cannot use this auth type for sitecontainer '{}'.".format(new_sitecontainer_spec.name))
+    # if authType is userAssigned, ensure that userAssignedIdentity that is provided is enabled for the site
+    if new_sitecontainer_spec.auth_type == AuthType.USER_ASSIGNED and \
+            new_sitecontainer_spec.user_managed_identity_client_id not in user_assigned_identities:
+        raise ValidationError("User assigned identity with ClientID '{}' is not added for the site. \
+                              Cannot use this identity for sitecontainer '{}'.".format(
+            new_sitecontainer_spec.user_managed_identity_client_id, new_sitecontainer_spec.name))
 
 
 def _create_or_update_webapp_sitecontainer_internal(cmd, name, resource_group, container_name,
@@ -1123,8 +1208,8 @@ def _create_or_update_webapp_sitecontainer_internal(cmd, name, resource_group, c
                                  .format(container_name, str(ex)))
 
 
-def update_webapp_sitecontainer(cmd, name, resource_group, container_name, image=None, target_port=None,
-                                slot=None, startup_cmd=None, is_main=None, system_assigned_identity=None,
+def update_webapp_sitecontainer(cmd, name, resource_group, container_name, slot=None, image=None, target_port=None,
+                                startup_cmd=None, is_main=None, system_assigned_identity=None,
                                 user_assigned_identity=None, registry_username=None, registry_password=None):
     # get the sitecontainer
     site_container = None
@@ -1199,6 +1284,11 @@ def list_webapp_sitecontainers(cmd, name, resource_group, slot=None):
             site_containers = web_client.list_site_containers(resource_group, name)
     except Exception as ex:
         raise ResourceNotFoundError("Failed to fetch sitecontainers. Error: {}".format(str(ex)))
+    # the PageIterator returned by SDK throws an exception during extraction if there are 0 containers
+    try:
+        site_containers = list(site_containers)
+    except:  # pylint: disable=bare-except
+        return []
     return site_containers
 
 
