@@ -13,7 +13,7 @@ from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest, KeyVaultPrep
 from azure.cli.command_modules.appconfig._constants import KeyVaultConstants
 from azure.cli.core.azclierror import RequiredArgumentMissingError
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.command_modules.appconfig.tests.latest._test_utils import _create_config_store, CredentialResponseSanitizer
+from azure.cli.command_modules.appconfig.tests.latest._test_utils import create_config_store, CredentialResponseSanitizer, get_resource_name_prefix
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -26,7 +26,8 @@ class AppConfigKVScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_kv(self, resource_group, location):
-        config_store_name = self.create_random_name(prefix='KVTest', length=24)
+        config_store_prefix = get_resource_name_prefix('KVTest')
+        config_store_name = self.create_random_name(prefix=config_store_prefix, length=36)
 
         location = 'eastus'
         sku = 'standard'
@@ -36,7 +37,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
             'rg': resource_group,
             'sku': sku
         })
-        _create_config_store(self, self.kwargs)
+        create_config_store(self, self.kwargs)
 
         entry_key = "Color"
         entry_label = 'v1.0.0'
@@ -206,7 +207,8 @@ class AppConfigKVScenarioTest(ScenarioTest):
     @KeyVaultPreparer(additional_params="--enable-rbac-authorization false")
     @live_only()
     def test_resolve_keyvault(self, key_vault, resource_group):
-        config_store_name = self.create_random_name(prefix='KVTest', length=24)
+        config_store_prefix = get_resource_name_prefix('KVTest')
+        config_store_name = self.create_random_name(prefix=config_store_prefix, length=36)
 
         location = 'eastus'
         sku = 'standard'
@@ -216,7 +218,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
             'rg': resource_group,
             'sku': sku
         })
-        _create_config_store(self, self.kwargs)
+        create_config_store(self, self.kwargs)
 
         # Export secret test
         secret_name = 'testSecret'
@@ -257,7 +259,8 @@ class AppConfigKVScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_kv_revision_list(self, resource_group, location):
-        config_store_name = self.create_random_name(prefix='KVRevisionTest', length=24)
+        config_store_prefix = get_resource_name_prefix('KVRevisionTest')
+        config_store_name = self.create_random_name(prefix=config_store_prefix, length=36)
 
         location = 'eastus'
         sku = 'standard'
@@ -267,7 +270,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
             'rg': resource_group,
             'sku': sku
         })
-        _create_config_store(self, self.kwargs)
+        create_config_store(self, self.kwargs)
 
         entry_key = "Color"
         entry_label = 'v1.0.0'

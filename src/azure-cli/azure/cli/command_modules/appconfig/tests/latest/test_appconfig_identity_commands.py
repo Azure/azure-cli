@@ -6,7 +6,7 @@
 # pylint: disable=line-too-long
 
 from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest)
-from azure.cli.command_modules.appconfig.tests.latest._test_utils import _create_config_store, CredentialResponseSanitizer
+from azure.cli.command_modules.appconfig.tests.latest._test_utils import create_config_store, CredentialResponseSanitizer, get_resource_name_prefix
 
 class AppConfigIdentityScenarioTest(ScenarioTest):
 
@@ -16,12 +16,12 @@ class AppConfigIdentityScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_identity(self, resource_group, location):
-
-        config_store_name = self.create_random_name(prefix='IdentityTest', length=24)
+        config_store_prefix = get_resource_name_prefix('IdentityTest')
+        config_store_name = self.create_random_name(prefix=config_store_prefix, length=36)
 
         location = 'eastus'
         sku = 'standard'
-        identity_name = self.create_random_name(prefix='UserAssignedIdentity', length=24)
+        identity_name = self.create_random_name(prefix='UserAssignedIdentity', length=36)
 
         self.kwargs.update({
             'config_store_name': config_store_name,
@@ -31,7 +31,7 @@ class AppConfigIdentityScenarioTest(ScenarioTest):
             'identity_name': identity_name
         })
 
-        _create_config_store(self, self.kwargs)
+        create_config_store(self, self.kwargs)
         user_assigned_identity = _create_user_assigned_identity(self, self.kwargs)
 
         self.kwargs.update({

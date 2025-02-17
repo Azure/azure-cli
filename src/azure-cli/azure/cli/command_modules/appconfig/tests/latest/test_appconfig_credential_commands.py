@@ -7,7 +7,7 @@
 
 from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest)
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.command_modules.appconfig.tests.latest._test_utils import _create_config_store, CredentialResponseSanitizer
+from azure.cli.command_modules.appconfig.tests.latest._test_utils import create_config_store, CredentialResponseSanitizer, get_resource_name_prefix
 
 class AppConfigCredentialScenarioTest(ScenarioTest):
 
@@ -18,8 +18,8 @@ class AppConfigCredentialScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_credential(self, resource_group, location):
-
-        config_store_name = self.create_random_name(prefix='CredentialTest', length=24)
+        credential_store_prefix = get_resource_name_prefix('CredentialTest')
+        config_store_name = self.create_random_name(prefix=credential_store_prefix, length=36)
 
         location = 'eastus'
         sku = 'standard'
@@ -30,7 +30,7 @@ class AppConfigCredentialScenarioTest(ScenarioTest):
             'sku': sku
         })
 
-        _create_config_store(self, self.kwargs)
+        create_config_store(self, self.kwargs)
 
         credential_list = self.cmd(
             'appconfig credential list -n {config_store_name} -g {rg}').get_output_in_json()

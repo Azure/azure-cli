@@ -10,7 +10,7 @@ import json
 from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest)
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.core.azclierror import ResourceNotFoundError as CliResourceNotFoundError, MutuallyExclusiveArgumentError
-from azure.cli.command_modules.appconfig.tests.latest._test_utils import _create_config_store, CredentialResponseSanitizer
+from azure.cli.command_modules.appconfig.tests.latest._test_utils import create_config_store, CredentialResponseSanitizer, get_resource_name_prefix
 
 class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
 
@@ -22,7 +22,8 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name_for_location='location')
     @AllowLargeResponse()
     def test_azconfig_snapshot_mgmt(self, resource_group, location):
-        config_store_name = self.create_random_name(prefix='SnapshotStore', length=24)
+        store_name_prefix = get_resource_name_prefix('SnapshotStore') 
+        config_store_name = self.create_random_name(prefix=store_name_prefix, length=36)
         snapshot_name = "TestSnapshot"
         store_location = 'francecentral'
         sku = 'standard'
@@ -37,7 +38,7 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
             'enable_purge_protection': False
         })
 
-        _create_config_store(self, self.kwargs)
+        create_config_store(self, self.kwargs)
 
         credential_list =  self.cmd('appconfig credential list -n {config_store_name} -g {rg}').get_output_in_json()
         self.kwargs.update({
@@ -142,14 +143,14 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
             self.cmd('appconfig kv list --connection-string {connection_string} --snapshot {snapshot_name}')
 
         # Test snapshot import/export
-        config_store_2_name = self.create_random_name(prefix='SnapshotStore', length=24)
+        config_store_2_name = self.create_random_name(prefix=store_name_prefix, length=36)
 
         self.kwargs.update({
             'config_store_name': config_store_2_name,
             'snapshot_name': snapshot_name,
         })
 
-        _create_config_store(self, self.kwargs)
+        create_config_store(self, self.kwargs)
 
         credential_list_2 =  self.cmd('appconfig credential list -n {config_store_name} -g {rg}').get_output_in_json()
         self.kwargs.update({

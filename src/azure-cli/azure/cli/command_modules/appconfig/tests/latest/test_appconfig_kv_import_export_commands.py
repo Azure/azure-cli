@@ -15,7 +15,7 @@ from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest, LiveScenario
 from azure.cli.command_modules.appconfig._constants import FeatureFlagConstants, KeyVaultConstants, ImportExportProfiles, AppServiceConstants
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
-from azure.cli.command_modules.appconfig.tests.latest._test_utils import _create_config_store, CredentialResponseSanitizer
+from azure.cli.command_modules.appconfig.tests.latest._test_utils import create_config_store, CredentialResponseSanitizer, get_resource_name_prefix
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -28,7 +28,8 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_import_export(self, resource_group, location):
-        config_store_name = self.create_random_name(prefix='ImportTest', length=24)
+        store_name_prefix = get_resource_name_prefix('ImportTest')
+        config_store_name = self.create_random_name(prefix=store_name_prefix, length=36)
 
         location = 'eastus'
         sku = 'standard'
@@ -38,7 +39,7 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
             'rg': resource_group,
             'sku': sku
         })
-        _create_config_store(self, self.kwargs)
+        create_config_store(self, self.kwargs)
 
         # File <--> AppConfig tests
 
@@ -283,7 +284,8 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         # Feature flags test with new ms fm schema
         os.environ['AZURE_APPCONFIG_FM_COMPATIBLE'] = 'False'
 
-        config_store_name = self.create_random_name(prefix='NewFmImport', length=24)
+        new_fm_store_prefix = get_resource_name_prefix('NewFmImport')
+        config_store_name = self.create_random_name(prefix=new_fm_store_prefix, length=36)
 
         location = 'eastus'
         sku = 'standard'
@@ -295,7 +297,7 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
             'import_source': 'file',
             'imported_format': 'json',
         })
-        _create_config_store(self, self.kwargs)
+        create_config_store(self, self.kwargs)
        
         # Invalid requirement type should fail import
         import_features_invalid_requirement_type_file_path = os.path.join(TEST_DIR, 'import_features_invalid_requirement_type.json')
@@ -387,7 +389,8 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_import_export_kvset(self, resource_group, location):
-        config_store_name = self.create_random_name(prefix='KVSetImportTest', length=24)
+        kvset_store_prefix = get_resource_name_prefix('KVSetImportTest')
+        config_store_name = self.create_random_name(prefix=kvset_store_prefix, length=36)
 
         location = 'eastus'
         sku = 'standard'
@@ -397,7 +400,7 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
             'rg': resource_group,
             'sku': sku
         })
-        _create_config_store(self, self.kwargs)
+        create_config_store(self, self.kwargs)
 
         # File <--> AppConfig tests
 
@@ -439,7 +442,8 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_strict_import(self, resource_group, location):
-        config_store_name = self.create_random_name(prefix='StrictImportTest', length=24)
+        strict_store_prefix = get_resource_name_prefix('StrictImportTest')
+        config_store_name = self.create_random_name(prefix=strict_store_prefix, length=36)
 
         location = 'eastus'
         sku = 'standard'
@@ -449,7 +453,7 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
             'rg': resource_group,
             'sku': sku
         })
-        _create_config_store(self, self.kwargs)
+        create_config_store(self, self.kwargs)
 
         # File <--> AppConfig tests
         imported_file_path = os.path.join(TEST_DIR, 'kvset_import.json')
@@ -482,7 +486,8 @@ class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
 
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_appconfig_to_appservice_import_export(self, resource_group, location):
-        config_store_name = self.create_random_name(prefix='ImportExportTest', length=24)
+        import_export_store_prefix = get_resource_name_prefix('ImportExportTest')
+        config_store_name = self.create_random_name(prefix=import_export_store_prefix, length=36)
 
         location = 'eastus'
         sku = 'standard'
@@ -492,7 +497,7 @@ class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
             'rg': resource_group,
             'sku': sku
         })
-        _create_config_store(self, self.kwargs)
+        create_config_store(self, self.kwargs)
 
         # Get connection string
         credential_list = self.cmd(
@@ -502,14 +507,17 @@ class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
         })
 
         # Create AppService plan and webapp
-        webapp_name = self.create_random_name(prefix='WebApp', length=24)
-        plan = self.create_random_name(prefix='Plan', length=24)
+        web_app_prefix = get_resource_name_prefix('WebApp')
+        webapp_name = self.create_random_name(prefix=web_app_prefix, length=36)
+        plan_prefix = get_resource_name_prefix('Plan')
+        plan = self.create_random_name(prefix=plan_prefix, length=36)
         # Require a standard sku to allow for deployment slots
         self.cmd('appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan))
         self.cmd('webapp create -g {} -n {} -p {}'.format(resource_group, webapp_name, plan))
 
         # Create deployment slot
-        slot = self.create_random_name(prefix='Slot', length=24)
+        slot_prefix = get_resource_name_prefix('Slot')
+        slot = self.create_random_name(prefix=slot_prefix, length=36)
         self.cmd('webapp deployment slot create -g {} -n {} -s {}'.format(resource_group, webapp_name, slot))
 
         # App configuration reference tests
@@ -742,7 +750,8 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_import_export_naming_conventions(self, resource_group, location):
-        config_store_name = self.create_random_name(prefix='NamingConventionTest', length=24)
+        naming_convention_store_prefix = get_resource_name_prefix('NamingConventionTest')
+        config_store_name = self.create_random_name(prefix=naming_convention_store_prefix, length=36)
 
         location = 'eastus'
         sku = 'standard'
@@ -752,7 +761,7 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
             'rg': resource_group,
             'sku': sku
         })
-        _create_config_store(self, self.kwargs)
+        create_config_store(self, self.kwargs)
 
         os.environ['AZURE_APPCONFIG_FM_COMPATIBLE'] = 'True'
         import_hyphen_path = os.path.join(TEST_DIR, 'import_features_hyphen.json')
@@ -825,7 +834,8 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_import_export_respect_both_schemas_naming_conventions(self, resource_group, location):
         # Respect both fm schemas in file
-        config_store_name = self.create_random_name(prefix='BothSchemaTest', length=24)
+        both_schema_test_prefix = get_resource_name_prefix('BothSchemaTest')
+        config_store_name = self.create_random_name(prefix=both_schema_test_prefix, length=36)
 
         location = 'eastus'
         sku = 'standard'
@@ -836,7 +846,7 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
             'sku': sku,
             'import_source': 'file'
         })
-        _create_config_store(self, self.kwargs)
+        create_config_store(self, self.kwargs)
 
         # # Camel case naming convention
         os.environ['AZURE_APPCONFIG_FM_COMPATIBLE'] = 'False'
@@ -977,8 +987,10 @@ class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_appconfig_to_appconfig_import_export(self, resource_group, location):
-        src_config_store_name = self.create_random_name(prefix='Source', length=24)
-        dest_config_store_name = self.create_random_name(prefix='Destination', length=24)
+        src_config_store_prefix = get_resource_name_prefix('Source')
+        dest_config_store_prefix = get_resource_name_prefix('Destination')
+        src_config_store_name = self.create_random_name(prefix=src_config_store_prefix, length=36)
+        dest_config_store_name = self.create_random_name(prefix=dest_config_store_prefix, length=36)
 
         location = 'eastus'
         sku = 'standard'
@@ -988,7 +1000,7 @@ class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
             'rg': resource_group,
             'sku': sku
         })
-        _create_config_store(self, self.kwargs)
+        create_config_store(self, self.kwargs)
 
         # Get src connection string
         credential_list = self.cmd(
@@ -997,7 +1009,7 @@ class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
             'src_connection_string': credential_list[0]['connectionString'],
             'config_store_name': dest_config_store_name
         })
-        _create_config_store(self, self.kwargs)
+        create_config_store(self, self.kwargs)
 
         # Get dest connection string
         credential_list = self.cmd(

@@ -11,7 +11,7 @@ from knack.util import CLIError
 from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest)
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.core.exceptions import ResourceNotFoundError, HttpResponseError
-from azure.cli.command_modules.appconfig.tests.latest._test_utils import CredentialResponseSanitizer
+from azure.cli.command_modules.appconfig.tests.latest._test_utils import CredentialResponseSanitizer, get_resource_name_prefix
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -24,7 +24,8 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name_for_location='location')
     @AllowLargeResponse()
     def test_azconfig_mgmt(self, resource_group, location):
-        config_store_name = self.create_random_name(prefix='MgmtTest', length=24)
+        mgmt_prefix = get_resource_name_prefix('MgmtTest')
+        config_store_name = self.create_random_name(prefix=mgmt_prefix, length=36)
 
         location = 'eastus'
         standard_sku = 'standard'
@@ -92,7 +93,8 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                          self.check('provisioningState', 'Succeeded'),
                          self.check('sku.name', premium_sku)])
 
-        keyvault_name = self.create_random_name(prefix='cmk-test-keyvault', length=24)
+        keyvault_prefix = get_resource_name_prefix('cmk-test-keyvault')
+        keyvault_name = self.create_random_name(prefix=keyvault_prefix, length=36)
         encryption_key = 'key'
         system_assigned_identity_id = store['identity']['principalId']
         self.kwargs.update({
@@ -174,8 +176,10 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
         self.cmd('appconfig delete -n {config_store_name} -g {rg} -y')
 
         # create store in premium tier with replica
-        config_store_name = self.create_random_name(prefix='MgmtTestPremiumSku', length=24)
-        replica_name = self.create_random_name(prefix='MgmtTestReplica', length=24)
+        premium_store_prefix = get_resource_name_prefix('MgmtTestPremiumSku')
+        replica_prefix = get_resource_name_prefix('MgmtTestReplica')
+        config_store_name = self.create_random_name(prefix=premium_store_prefix, length=36)
+        replica_name = self.create_random_name(prefix=replica_prefix, length=36)
         tag_key = "key"
         tag_value = "value"
         tag = tag_key + '=' + tag_value
@@ -238,7 +242,8 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
         self.cmd('appconfig delete -n {config_store_name} -g {rg} -y')
 
         # create store in premium tier without replica
-        config_store_name = self.create_random_name(prefix='MgmtTestPremiumSku', length=24)
+
+        config_store_name = self.create_random_name(prefix=premium_store_prefix, length=36)
         
         self.kwargs.update({
             "premium_sku": premium_sku,
@@ -276,7 +281,8 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
         
         self.cmd('appconfig delete -n {config_store_name} -g {rg} -y')
 
-        config_store_name = self.create_random_name(prefix='MgmtTestdel', length=24)
+        test_del_prefix = get_resource_name_prefix('MgmtTestdel')
+        config_store_name = self.create_random_name(prefix=test_del_prefix, length=36)
 
         self.kwargs.update({
             'config_store_name': config_store_name
@@ -316,7 +322,8 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_local_auth(self, resource_group, location):
-        config_store_name = self.create_random_name(prefix='DisableLocalAuth', length=24)
+        disable_local_auth_prefix = get_resource_name_prefix('DisableLocalAuth')
+        config_store_name = self.create_random_name(prefix=disable_local_auth_prefix, length=36)
 
         location = 'eastus'
         sku = 'standard'
@@ -359,7 +366,8 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_public_network_access(self, resource_group, location):
-        config_store_name = self.create_random_name(prefix='PubNetworkTrue', length=24)
+        pub_network_prefix = get_resource_name_prefix('PubNetworkTrue')
+        config_store_name = self.create_random_name(prefix=pub_network_prefix, length=36)
 
         location = 'eastus'
         sku = 'standard'
@@ -381,7 +389,8 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                          self.check('sku.name', sku),
                          self.check('publicNetworkAccess', 'Enabled')])
 
-        config_store_name = self.create_random_name(prefix='PubNetworkNull', length=24)
+        pub_network_null_prefix = get_resource_name_prefix('PubNetworkNull')
+        config_store_name = self.create_random_name(prefix=pub_network_null_prefix, length=36)
 
         self.kwargs.update({
             'config_store_name': config_store_name

@@ -12,7 +12,7 @@ import yaml
 from knack.util import CLIError
 from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest)
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.command_modules.appconfig.tests.latest._test_utils import _create_config_store, CredentialResponseSanitizer
+from azure.cli.command_modules.appconfig.tests.latest._test_utils import create_config_store, CredentialResponseSanitizer, get_resource_name_prefix
 from azure.cli.command_modules.appconfig._constants import FeatureFlagConstants, KeyVaultConstants
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
@@ -26,8 +26,10 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_json_content_type(self, resource_group, location):
-        src_config_store_name = self.create_random_name(prefix='Source', length=24)
-        dest_config_store_name = self.create_random_name(prefix='Destination', length=24)
+        src_config_store_prefix = get_resource_name_prefix('Source')
+        dest_config_store_prefix = get_resource_name_prefix('Destination')
+        src_config_store_name = self.create_random_name(prefix=src_config_store_prefix, length=36)
+        dest_config_store_name = self.create_random_name(prefix=dest_config_store_prefix, length=36)
 
         location = 'eastus'
         sku = 'standard'
@@ -37,7 +39,7 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
             'rg': resource_group,
             'sku': sku
         })
-        _create_config_store(self, self.kwargs)
+        create_config_store(self, self.kwargs)
 
         # Get src connection string
         credential_list = self.cmd(
@@ -46,7 +48,7 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
             'src_connection_string': credential_list[0]['connectionString'],
             'config_store_name': dest_config_store_name
         })
-        _create_config_store(self, self.kwargs)
+        create_config_store(self, self.kwargs)
 
         # Get dest connection string
         credential_list = self.cmd(

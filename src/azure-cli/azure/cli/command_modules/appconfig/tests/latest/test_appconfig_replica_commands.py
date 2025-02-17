@@ -8,7 +8,7 @@
 from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest)
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.core.exceptions import ResourceNotFoundError
-from azure.cli.command_modules.appconfig.tests.latest._test_utils import CredentialResponseSanitizer
+from azure.cli.command_modules.appconfig.tests.latest._test_utils import CredentialResponseSanitizer, get_resource_name_prefix
 
 class AppconfigReplicaLiveScenarioTest(ScenarioTest):
 
@@ -19,8 +19,10 @@ class AppconfigReplicaLiveScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name_for_location='location')
     @AllowLargeResponse()
     def test_azconfig_replica_mgmt(self, resource_group, location):
-        config_store_name = self.create_random_name(prefix='ReplicaStore', length=24)
-        replica_name = self.create_random_name(prefix='Replica', length=24)
+        store_name_prefix = get_resource_name_prefix('ReplicaStore')
+        replica_name_prefix = get_resource_name_prefix('Replica')
+        config_store_name = self.create_random_name(prefix=store_name_prefix, length=36)
+        replica_name = self.create_random_name(prefix=replica_name_prefix, length=24)
 
         store_location = 'eastus'
         replica_location = 'westus'

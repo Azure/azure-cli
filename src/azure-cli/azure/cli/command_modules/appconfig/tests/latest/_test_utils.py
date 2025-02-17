@@ -4,17 +4,26 @@
 # --------------------------------------------------------------------------------------------
 
 import json
+import os
 
 from azure.cli.testsdk.scenario_tests import RecordingProcessor
 from azure.cli.testsdk.scenario_tests.utilities import is_json_payload
 from azure.cli.core.util import shell_safe_json_parse
 
-def _create_config_store(test, kwargs):
+def create_config_store(test, kwargs):
     if 'retention_days' not in kwargs:
         kwargs.update({
             'retention_days': 1
         })
     test.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --retention-days {retention_days}')
+
+
+def _get_local_test_resource_prefix():
+    return os.environ.get("AZURE_CLI_LOCAL_TEST_RESOURCE_PREFIX")
+
+def get_resource_name_prefix(prefix):
+    resource_prefix = _get_local_test_resource_prefix()
+    return prefix if resource_prefix is None else resource_prefix + prefix
 
 class CredentialResponseSanitizer(RecordingProcessor):
     def process_response(self, response):

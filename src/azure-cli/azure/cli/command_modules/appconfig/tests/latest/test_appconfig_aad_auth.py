@@ -12,7 +12,7 @@ import time
 from knack.util import CLIError
 from azure.cli.testsdk import (ResourceGroupPreparer, live_only, ScenarioTest)
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.command_modules.appconfig.tests.latest._test_utils import _create_config_store, CredentialResponseSanitizer
+from azure.cli.command_modules.appconfig.tests.latest._test_utils import create_config_store, CredentialResponseSanitizer, get_resource_name_prefix
 from azure.cli.command_modules.appconfig._constants import FeatureFlagConstants, KeyVaultConstants
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
@@ -27,7 +27,8 @@ class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_aad_auth(self, resource_group, location):
-        config_store_name = self.create_random_name(prefix='AadTest', length=15)
+        aad_store_prefix = get_resource_name_prefix('AADStore')
+        config_store_name = self.create_random_name(prefix=aad_store_prefix, length=36)
 
         location = 'eastus'
         sku = 'standard'
@@ -37,7 +38,7 @@ class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
             'rg': resource_group,
             'sku': sku
         })
-        _create_config_store(self, self.kwargs)
+        create_config_store(self, self.kwargs)
 
         # Get connection string and add a key-value and feature flag using the default "key" auth mode
         credential_list = self.cmd(

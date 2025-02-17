@@ -10,7 +10,7 @@ from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest)
 from azure.cli.testsdk.checkers import NoneCheck
 from azure.cli.command_modules.appconfig._constants import FeatureFlagConstants
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.command_modules.appconfig.tests.latest._test_utils import _create_config_store, CredentialResponseSanitizer
+from azure.cli.command_modules.appconfig.tests.latest._test_utils import create_config_store, CredentialResponseSanitizer, get_resource_name_prefix
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -23,7 +23,8 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_feature(self, resource_group, location):
-        config_store_name = self.create_random_name(prefix='FeatureTest', length=24)
+        feature_test_store_prefix = get_resource_name_prefix('FeatureTest')
+        config_store_name = self.create_random_name(prefix=feature_test_store_prefix, length=36)
 
         location = 'eastus'
         sku = 'standard'
@@ -33,7 +34,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
             'rg': resource_group,
             'sku': sku
         })
-        _create_config_store(self, self.kwargs)
+        create_config_store(self, self.kwargs)
 
         entry_feature = 'Beta'
         internal_feature_key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + entry_feature
@@ -338,7 +339,8 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_feature_namespacing(self, resource_group, location):
-        config_store_name = self.create_random_name(prefix='FeatureNamespaceTest', length=24)
+        feature_namespace_store_prefix = get_resource_name_prefix('FeatureNamespaceTest')
+        config_store_name = self.create_random_name(prefix=feature_namespace_store_prefix, length=36)
 
         location = 'eastus'
         sku = 'standard'
@@ -348,7 +350,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
             'rg': resource_group,
             'sku': sku
         })
-        _create_config_store(self, self.kwargs)
+        create_config_store(self, self.kwargs)
 
         feature_name = 'Beta'
         feature_prefix = 'MyApp:'
@@ -444,7 +446,8 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_feature_filter(self, resource_group, location):
-        config_store_name = self.create_random_name(prefix='FeatureFilterTest', length=24)
+        feature_filter_store_prefix = get_resource_name_prefix('FeatureFilterTest')
+        config_store_name = self.create_random_name(prefix=feature_filter_store_prefix, length=36)
 
         location = 'eastus'
         sku = 'standard'
@@ -454,7 +457,7 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
             'rg': resource_group,
             'sku': sku
         })
-        _create_config_store(self, self.kwargs)
+        create_config_store(self, self.kwargs)
 
         entry_feature = 'Color'
         internal_feature_key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + entry_feature
