@@ -2506,7 +2506,7 @@ def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_sou
     # Do not clone site config when cloning from production
     if configuration_source and configuration_source.lower() == webapp.lower():
         slot_def.site_config = None
-    
+
     # Match cloned site settings from Azure portal
     slot_def.https_only = site.https_only
     slot_def.client_cert_enabled = site.client_cert_enabled
