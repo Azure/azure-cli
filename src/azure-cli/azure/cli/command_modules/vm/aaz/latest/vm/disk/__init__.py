@@ -10,4 +10,3 @@
 
 from .__cmd_group import *
 from ._attach_detach import *
-from ._attach_detach_data_disk import *
