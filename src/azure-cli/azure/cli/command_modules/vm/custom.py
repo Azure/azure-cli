@@ -1862,7 +1862,7 @@ def update_av_set(cmd, instance, resource_group_name, proximity_placement_group=
         instance.proximity_placement_group = cmd.get_models('SubResource')(id=proximity_placement_group)
 
     if instance.scheduled_events_policy is None and (
-            additional_scheduled_events is not None or enable_user_reboot_scheduled_events is not None or \
+            additional_scheduled_events is not None or enable_user_reboot_scheduled_events is not None or
             enable_user_redeploy_scheduled_events is not None):
         ScheduledEventsPolicy = cmd.get_models('ScheduledEventsPolicy')
         instance.scheduled_events_policy = ScheduledEventsPolicy()
@@ -1870,17 +1870,22 @@ def update_av_set(cmd, instance, resource_group_name, proximity_placement_group=
     if additional_scheduled_events is not None:
         ScheduledEventsAdditionalPublishingTargets = cmd.get_models('ScheduledEventsAdditionalPublishingTargets')
         EventGridAndResourceGraph = cmd.get_models('EventGridAndResourceGraph')
-        instance.scheduled_events_policy.scheduled_events_additional_publishing_targets = ScheduledEventsAdditionalPublishingTargets(
-            event_grid_and_resource_graph=EventGridAndResourceGraph(enable=additional_scheduled_events)
-        )
+        instance.scheduled_events_policy.scheduled_events_additional_publishing_targets = \
+            ScheduledEventsAdditionalPublishingTargets(
+                event_grid_and_resource_graph=EventGridAndResourceGraph(enable=additional_scheduled_events)
+            )
 
     if enable_user_reboot_scheduled_events is not None:
         UserInitiatedReboot = cmd.get_models('UserInitiatedReboot')
-        instance.scheduled_events_policy.user_initiated_reboot = UserInitiatedReboot(automatically_approve=enable_user_reboot_scheduled_events)
+        instance.scheduled_events_policy.user_initiated_reboot = UserInitiatedReboot(
+            automatically_approve=enable_user_reboot_scheduled_events
+        )
 
     if enable_user_redeploy_scheduled_events is not None:
         UserInitiatedRedeploy = cmd.get_models('UserInitiatedRedeploy')
-        instance.scheduled_events_policy.user_initiated_redeploy = UserInitiatedRedeploy(automatically_approve=enable_user_redeploy_scheduled_events)
+        instance.scheduled_events_policy.user_initiated_redeploy = UserInitiatedRedeploy(
+            automatically_approve=enable_user_redeploy_scheduled_events
+        )
 
     return instance
 
