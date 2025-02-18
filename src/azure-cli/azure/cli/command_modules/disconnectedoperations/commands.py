@@ -46,7 +46,6 @@ def load_command_table(self, _):
 
     with self.command_group('disconnectedoperations edgemarketplace', custom_command_type=custom_command_type) as g:
         g.custom_command('listoffers', 'list_offers', table_transformer=transform_offers_table)
-        g.custom_command('getoffer', 'get_offer')
         g.custom_command('packageoffer', 'package_offer')
     
     return self.command_table
