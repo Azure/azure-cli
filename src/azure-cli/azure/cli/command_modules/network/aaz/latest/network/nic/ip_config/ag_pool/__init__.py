@@ -11,3 +11,4 @@
 from .__cmd_group import *
 from ._add import *
 from ._remove import *
+from ._wait import *

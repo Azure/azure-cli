@@ -11,6 +11,9 @@
 from azure.cli.core.aaz import *
 
 
+@register_command_group(
+    "network nic ip-config lb-pool",
+)
 class __CMDGroup(AAZCommandGroup):
     """Manage address pools in an IP configuration.
     """

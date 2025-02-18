@@ -28,9 +28,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-11-01",
+        "version": "2023-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networkinterfaces/{}", "2022-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networkinterfaces/{}", "2023-11-01"],
         ]
     }
 
@@ -133,6 +133,11 @@ class Create(AAZCommand):
             help="Auxiliary sku of Network Interface resource.",
             enum={"A1": "A1", "A2": "A2", "A4": "A4", "A8": "A8", "None": "None"},
         )
+        _args_schema.disable_tcp_state_tracking = AAZBoolArg(
+            options=["--disable-tcp-state-tracking"],
+            arg_group="Properties",
+            help="Indicates whether to disable tcp state tracking.",
+        )
         _args_schema.ip_configurations = AAZListArg(
             options=["--ip-configurations"],
             arg_group="Properties",
@@ -187,6 +192,15 @@ class Create(AAZCommand):
         _element.private_ip_address = AAZStrArg(
             options=["private-ip-address"],
             help="Private IP address of the IP configuration.",
+        )
+        _element.private_ip_address_prefix_length = AAZIntArg(
+            options=["private-ip-address-prefix-length"],
+            help="The private IP address prefix length. If specified and the allocation method is dynamic, the service will allocate a CIDR block instead of a single IP address.",
+            nullable=True,
+            fmt=AAZIntArgFormat(
+                maximum=128,
+                minimum=1,
+            ),
         )
         _element.private_ip_address_version = AAZStrArg(
             options=["private-ip-address-version"],
@@ -273,6 +287,11 @@ class Create(AAZCommand):
         _element.location = AAZStrArg(
             options=["location"],
             help="The location of the backend address pool.",
+        )
+        _element.sync_mode = AAZStrArg(
+            options=["sync-mode"],
+            help="Backend address synchronous mode for the backend pool",
+            enum={"Automatic": "Automatic", "Manual": "Manual"},
         )
         _element.tunnel_interfaces = AAZListArg(
             options=["tunnel-interfaces"],
@@ -888,6 +907,7 @@ class Create(AAZCommand):
             _schema.name = cls._args_network_interface_ip_configuration_create.name
             _schema.primary = cls._args_network_interface_ip_configuration_create.primary
             _schema.private_ip_address = cls._args_network_interface_ip_configuration_create.private_ip_address
+            _schema.private_ip_address_prefix_length = cls._args_network_interface_ip_configuration_create.private_ip_address_prefix_length
             _schema.private_ip_address_version = cls._args_network_interface_ip_configuration_create.private_ip_address_version
             _schema.private_ip_allocation_method = cls._args_network_interface_ip_configuration_create.private_ip_allocation_method
             _schema.public_ip_address = cls._args_network_interface_ip_configuration_create.public_ip_address
@@ -931,6 +951,15 @@ class Create(AAZCommand):
         network_interface_ip_configuration_create.private_ip_address = AAZStrArg(
             options=["private-ip-address"],
             help="Private IP address of the IP configuration.",
+        )
+        network_interface_ip_configuration_create.private_ip_address_prefix_length = AAZIntArg(
+            options=["private-ip-address-prefix-length"],
+            help="The private IP address prefix length. If specified and the allocation method is dynamic, the service will allocate a CIDR block instead of a single IP address.",
+            nullable=True,
+            fmt=AAZIntArgFormat(
+                maximum=128,
+                minimum=1,
+            ),
         )
         network_interface_ip_configuration_create.private_ip_address_version = AAZStrArg(
             options=["private-ip-address-version"],
@@ -1020,6 +1049,11 @@ class Create(AAZCommand):
         _element.location = AAZStrArg(
             options=["location"],
             help="The location of the backend address pool.",
+        )
+        _element.sync_mode = AAZStrArg(
+            options=["sync-mode"],
+            help="Backend address synchronous mode for the backend pool",
+            enum={"Automatic": "Automatic", "Manual": "Manual"},
         )
         _element.tunnel_interfaces = AAZListArg(
             options=["tunnel-interfaces"],
@@ -1837,6 +1871,7 @@ class Create(AAZCommand):
         _schema.name = cls._args_network_interface_ip_configuration_create.name
         _schema.primary = cls._args_network_interface_ip_configuration_create.primary
         _schema.private_ip_address = cls._args_network_interface_ip_configuration_create.private_ip_address
+        _schema.private_ip_address_prefix_length = cls._args_network_interface_ip_configuration_create.private_ip_address_prefix_length
         _schema.private_ip_address_version = cls._args_network_interface_ip_configuration_create.private_ip_address_version
         _schema.private_ip_allocation_method = cls._args_network_interface_ip_configuration_create.private_ip_allocation_method
         _schema.public_ip_address = cls._args_network_interface_ip_configuration_create.public_ip_address
@@ -2080,6 +2115,7 @@ class Create(AAZCommand):
             _schema.address_prefix = cls._args_subnet_create.address_prefix
             _schema.address_prefixes = cls._args_subnet_create.address_prefixes
             _schema.application_gateway_ip_configurations = cls._args_subnet_create.application_gateway_ip_configurations
+            _schema.default_outbound_access = cls._args_subnet_create.default_outbound_access
             _schema.delegations = cls._args_subnet_create.delegations
             _schema.id = cls._args_subnet_create.id
             _schema.ip_allocations = cls._args_subnet_create.ip_allocations
@@ -2091,6 +2127,7 @@ class Create(AAZCommand):
             _schema.route_table = cls._args_subnet_create.route_table
             _schema.service_endpoint_policies = cls._args_subnet_create.service_endpoint_policies
             _schema.service_endpoints = cls._args_subnet_create.service_endpoints
+            _schema.sharing_scope = cls._args_subnet_create.sharing_scope
             _schema.type = cls._args_subnet_create.type
             return
 
@@ -2120,6 +2157,10 @@ class Create(AAZCommand):
             options=["application-gateway-ip-configurations"],
             help="Application gateway IP configurations of virtual network resource.",
         )
+        subnet_create.default_outbound_access = AAZBoolArg(
+            options=["default-outbound-access"],
+            help="Set this property to false to disable default outbound connectivity for all VMs in the subnet. This property can only be set at the time of subnet creation and cannot be updated for an existing subnet.",
+        )
         subnet_create.delegations = AAZListArg(
             options=["delegations"],
             help="An array of references to the delegations on the subnet.",
@@ -2142,7 +2183,7 @@ class Create(AAZCommand):
             options=["private-endpoint-network-policies"],
             help="Enable or Disable apply network policies on private end point in the subnet.",
             default="Disabled",
-            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
+            enum={"Disabled": "Disabled", "Enabled": "Enabled", "NetworkSecurityGroupEnabled": "NetworkSecurityGroupEnabled", "RouteTableEnabled": "RouteTableEnabled"},
         )
         subnet_create.private_link_service_network_policies = AAZStrArg(
             options=["private-link-service-network-policies"],
@@ -2161,6 +2202,11 @@ class Create(AAZCommand):
         subnet_create.service_endpoints = AAZListArg(
             options=["service-endpoints"],
             help="An array of service endpoints.",
+        )
+        subnet_create.sharing_scope = AAZStrArg(
+            options=["sharing-scope"],
+            help="Set this property to Tenant to allow sharing subnet with other subscriptions in your AAD tenant. This property can only be set if defaultOutboundAccess is set to false, both properties can only be set if subnet is empty.",
+            enum={"DelegatedServices": "DelegatedServices", "Tenant": "Tenant"},
         )
         subnet_create.type = AAZStrArg(
             options=["type"],
@@ -2259,10 +2305,6 @@ class Create(AAZCommand):
         _element.address_prefix = AAZStrArg(
             options=["address-prefix"],
             help="The destination CIDR to which the route applies.",
-        )
-        _element.has_bgp_override = AAZBoolArg(
-            options=["has-bgp-override"],
-            help="A value indicating whether this route overrides overlapping BGP routes regardless of LPM.",
         )
         _element.next_hop_ip_address = AAZStrArg(
             options=["next-hop-ip-address"],
@@ -2376,6 +2418,7 @@ class Create(AAZCommand):
         _schema.address_prefix = cls._args_subnet_create.address_prefix
         _schema.address_prefixes = cls._args_subnet_create.address_prefixes
         _schema.application_gateway_ip_configurations = cls._args_subnet_create.application_gateway_ip_configurations
+        _schema.default_outbound_access = cls._args_subnet_create.default_outbound_access
         _schema.delegations = cls._args_subnet_create.delegations
         _schema.id = cls._args_subnet_create.id
         _schema.ip_allocations = cls._args_subnet_create.ip_allocations
@@ -2387,6 +2430,7 @@ class Create(AAZCommand):
         _schema.route_table = cls._args_subnet_create.route_table
         _schema.service_endpoint_policies = cls._args_subnet_create.service_endpoint_policies
         _schema.service_endpoints = cls._args_subnet_create.service_endpoints
+        _schema.sharing_scope = cls._args_subnet_create.sharing_scope
         _schema.type = cls._args_subnet_create.type
 
     def _execute_operations(self):
@@ -2470,7 +2514,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-11-01",
+                    "api-version", "2023-11-01",
                     required=True,
                 ),
             }
@@ -2509,6 +2553,7 @@ class Create(AAZCommand):
             if properties is not None:
                 properties.set_prop("auxiliaryMode", AAZStrType, ".auxiliary_mode")
                 properties.set_prop("auxiliarySku", AAZStrType, ".auxiliary_sku")
+                properties.set_prop("disableTcpStateTracking", AAZBoolType, ".disable_tcp_state_tracking")
                 properties.set_prop("dnsSettings", AAZObjectType)
                 properties.set_prop("enableAcceleratedNetworking", AAZBoolType, ".accelerated_networking")
                 properties.set_prop("enableIPForwarding", AAZBoolType, ".ip_forwarding")
@@ -2544,6 +2589,7 @@ class Create(AAZCommand):
                 properties.set_prop("loadBalancerInboundNatRules", AAZListType, ".load_balancer_inbound_nat_rules")
                 properties.set_prop("primary", AAZBoolType, ".primary")
                 properties.set_prop("privateIPAddress", AAZStrType, ".private_ip_address")
+                properties.set_prop("privateIPAddressPrefixLength", AAZIntType, ".private_ip_address_prefix_length", typ_kwargs={"nullable": True})
                 properties.set_prop("privateIPAddressVersion", AAZStrType, ".private_ip_address_version")
                 properties.set_prop("privateIPAllocationMethod", AAZStrType, ".private_ip_allocation_method")
                 properties.set_prop("publicIPAddress", AAZObjectType, ".public_ip_address")
@@ -2591,6 +2637,7 @@ class Create(AAZCommand):
                 properties.set_prop("drainPeriodInSeconds", AAZIntType, ".drain_period_in_seconds")
                 properties.set_prop("loadBalancerBackendAddresses", AAZListType, ".load_balancer_backend_addresses")
                 properties.set_prop("location", AAZStrType, ".location")
+                properties.set_prop("syncMode", AAZStrType, ".sync_mode")
                 properties.set_prop("tunnelInterfaces", AAZListType, ".tunnel_interfaces")
                 _CreateHelper._build_schema_sub_resource_create(properties.set_prop("virtualNetwork", AAZObjectType, ".virtual_network"))
 
@@ -2895,6 +2942,7 @@ class _CreateHelper:
             properties.set_prop("loadBalancerInboundNatRules", AAZListType, ".load_balancer_inbound_nat_rules")
             properties.set_prop("primary", AAZBoolType, ".primary")
             properties.set_prop("privateIPAddress", AAZStrType, ".private_ip_address")
+            properties.set_prop("privateIPAddressPrefixLength", AAZIntType, ".private_ip_address_prefix_length", typ_kwargs={"nullable": True})
             properties.set_prop("privateIPAddressVersion", AAZStrType, ".private_ip_address_version")
             properties.set_prop("privateIPAllocationMethod", AAZStrType, ".private_ip_allocation_method")
             properties.set_prop("publicIPAddress", AAZObjectType, ".public_ip_address")
@@ -2943,6 +2991,7 @@ class _CreateHelper:
             properties.set_prop("drainPeriodInSeconds", AAZIntType, ".drain_period_in_seconds")
             properties.set_prop("loadBalancerBackendAddresses", AAZListType, ".load_balancer_backend_addresses")
             properties.set_prop("location", AAZStrType, ".location")
+            properties.set_prop("syncMode", AAZStrType, ".sync_mode")
             properties.set_prop("tunnelInterfaces", AAZListType, ".tunnel_interfaces")
             cls._build_schema_sub_resource_create(properties.set_prop("virtualNetwork", AAZObjectType, ".virtual_network"))
 
@@ -3390,6 +3439,7 @@ class _CreateHelper:
             properties.set_prop("addressPrefix", AAZStrType, ".address_prefix")
             properties.set_prop("addressPrefixes", AAZListType, ".address_prefixes")
             properties.set_prop("applicationGatewayIPConfigurations", AAZListType, ".application_gateway_ip_configurations")
+            properties.set_prop("defaultOutboundAccess", AAZBoolType, ".default_outbound_access")
             properties.set_prop("delegations", AAZListType, ".delegations")
             properties.set_prop("ipAllocations", AAZListType, ".ip_allocations")
             cls._build_schema_sub_resource_create(properties.set_prop("natGateway", AAZObjectType, ".nat_gateway"))
@@ -3399,6 +3449,7 @@ class _CreateHelper:
             properties.set_prop("routeTable", AAZObjectType, ".route_table")
             properties.set_prop("serviceEndpointPolicies", AAZListType, ".service_endpoint_policies")
             properties.set_prop("serviceEndpoints", AAZListType, ".service_endpoints")
+            properties.set_prop("sharingScope", AAZStrType, ".sharing_scope")
 
         address_prefixes = _builder.get(".properties.addressPrefixes")
         if address_prefixes is not None:
@@ -3463,7 +3514,6 @@ class _CreateHelper:
         properties = _builder.get(".properties.routeTable.properties.routes[].properties")
         if properties is not None:
             properties.set_prop("addressPrefix", AAZStrType, ".address_prefix")
-            properties.set_prop("hasBgpOverride", AAZBoolType, ".has_bgp_override")
             properties.set_prop("nextHopIpAddress", AAZStrType, ".next_hop_ip_address")
             properties.set_prop("nextHopType", AAZStrType, ".next_hop_type", typ_kwargs={"flags": {"required": True}})
 
@@ -3794,6 +3844,10 @@ class _CreateHelper:
         properties.private_ip_address = AAZStrType(
             serialized_name="privateIPAddress",
         )
+        properties.private_ip_address_prefix_length = AAZIntType(
+            serialized_name="privateIPAddressPrefixLength",
+            nullable=True,
+        )
         properties.private_ip_address_version = AAZStrType(
             serialized_name="privateIPAddressVersion",
         )
@@ -3802,6 +3856,7 @@ class _CreateHelper:
         )
         properties.private_link_connection_properties = AAZObjectType(
             serialized_name="privateLinkConnectionProperties",
+            flags={"read_only": True},
         )
         properties.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
@@ -3901,6 +3956,7 @@ class _CreateHelper:
         properties.location = AAZStrType()
         properties.outbound_rule = AAZObjectType(
             serialized_name="outboundRule",
+            flags={"read_only": True},
         )
         cls._build_schema_sub_resource_read(properties.outbound_rule)
         properties.outbound_rules = AAZListType(
@@ -3910,6 +3966,9 @@ class _CreateHelper:
         properties.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
             flags={"read_only": True},
+        )
+        properties.sync_mode = AAZStrType(
+            serialized_name="syncMode",
         )
         properties.tunnel_interfaces = AAZListType(
             serialized_name="tunnelInterfaces",
@@ -3953,6 +4012,7 @@ class _CreateHelper:
         cls._build_schema_sub_resource_read(properties.load_balancer_frontend_ip_configuration)
         properties.network_interface_ip_configuration = AAZObjectType(
             serialized_name="networkInterfaceIPConfiguration",
+            flags={"read_only": True},
         )
         cls._build_schema_sub_resource_read(properties.network_interface_ip_configuration)
         properties.subnet = AAZObjectType()
@@ -4016,6 +4076,7 @@ class _CreateHelper:
         cls._build_schema_sub_resource_read(properties.backend_address_pool)
         properties.backend_ip_configuration = AAZObjectType(
             serialized_name="backendIPConfiguration",
+            flags={"read_only": True},
         )
         cls._build_schema_network_interface_ip_configuration_read(properties.backend_ip_configuration)
         properties.backend_port = AAZIntType(
@@ -4171,6 +4232,7 @@ class _CreateHelper:
         )
         properties.dscp_configuration = AAZObjectType(
             serialized_name="dscpConfiguration",
+            flags={"read_only": True},
         )
         cls._build_schema_sub_resource_read(properties.dscp_configuration)
         properties.enable_accelerated_networking = AAZBoolType(
@@ -4205,6 +4267,7 @@ class _CreateHelper:
         )
         properties.private_endpoint = AAZObjectType(
             serialized_name="privateEndpoint",
+            flags={"read_only": True},
         )
         cls._build_schema_private_endpoint_read(properties.private_endpoint)
         properties.private_link_service = AAZObjectType(
@@ -4224,6 +4287,7 @@ class _CreateHelper:
         )
         properties.virtual_machine = AAZObjectType(
             serialized_name="virtualMachine",
+            flags={"read_only": True},
         )
         cls._build_schema_sub_resource_read(properties.virtual_machine)
         properties.vnet_encryption_supported = AAZBoolType(
@@ -4393,6 +4457,7 @@ class _CreateHelper:
         )
         properties.private_endpoint = AAZObjectType(
             serialized_name="privateEndpoint",
+            flags={"read_only": True},
         )
         cls._build_schema_private_endpoint_read(properties.private_endpoint)
         properties.private_endpoint_location = AAZStrType(
@@ -4873,6 +4938,7 @@ class _CreateHelper:
         )
         properties.ip_configuration = AAZObjectType(
             serialized_name="ipConfiguration",
+            flags={"read_only": True},
         )
         cls._build_schema_ip_configuration_read(properties.ip_configuration)
         properties.ip_tags = AAZListType(
@@ -5132,7 +5198,9 @@ class _CreateHelper:
             _schema.id = cls._schema_sub_resource_read.id
             return
 
-        cls._schema_sub_resource_read = _schema_sub_resource_read = AAZObjectType()
+        cls._schema_sub_resource_read = _schema_sub_resource_read = AAZObjectType(
+            flags={"read_only": True}
+        )
 
         sub_resource_read = _schema_sub_resource_read
         sub_resource_read.id = AAZStrType()
@@ -5173,6 +5241,9 @@ class _CreateHelper:
         )
         properties.application_gateway_ip_configurations = AAZListType(
             serialized_name="applicationGatewayIPConfigurations",
+        )
+        properties.default_outbound_access = AAZBoolType(
+            serialized_name="defaultOutboundAccess",
         )
         properties.delegations = AAZListType()
         properties.ip_allocations = AAZListType(
@@ -5227,6 +5298,9 @@ class _CreateHelper:
         )
         properties.service_endpoints = AAZListType(
             serialized_name="serviceEndpoints",
+        )
+        properties.sharing_scope = AAZStrType(
+            serialized_name="sharingScope",
         )
 
         address_prefixes = _schema_subnet_read.properties.address_prefixes
@@ -5403,6 +5477,7 @@ class _CreateHelper:
         )
         properties.has_bgp_override = AAZBoolType(
             serialized_name="hasBgpOverride",
+            flags={"read_only": True},
         )
         properties.next_hop_ip_address = AAZStrType(
             serialized_name="nextHopIpAddress",

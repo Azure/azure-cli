@@ -12,25 +12,22 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network nic ip-config lb-pool remove",
+    "network nic ip-config lb-pool wait",
 )
-class Remove(AAZCommand):
-    """Remove an address pool of an IP configuration.
+class Wait(AAZWaitCommand):
+    """Place the CLI in a waiting state until a condition is met.
     """
 
     _aaz_info = {
-        "version": "2023-11-01",
         "resources": [
             ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networkinterfaces/{}", "2023-11-01", "properties.ipConfigurations[].properties.loadBalancerBackendAddressPools[]"],
         ]
     }
 
-    AZ_SUPPORT_NO_WAIT = True
-
     def _handler(self, command_args):
         super()._handler(command_args)
-        self.SubresourceSelector(ctx=self.ctx, name="subresource")
-        return self.build_lro_poller(self._execute_operations, None)
+        self._execute_operations()
+        return self._output()
 
     _args_schema = None
 
@@ -47,32 +44,16 @@ class Remove(AAZCommand):
             options=["--nic-name"],
             help="Name of the network interface (NIC).",
             required=True,
+            id_part="name",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
-        )
-        _args_schema.ip_config_name = AAZStrArg(
-            options=["-n", "--ip-config-name"],
-            help="Name of the IP configuration.",
-            required=True,
-        )
-        _args_schema.pool_id = AAZResourceIdArg(
-            options=["--pool-id"],
-            help="Resource ID.",
-            required=True,
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/loadBalancers/{}/backendAddressPools/{}",
-            ),
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
         self.NetworkInterfacesGet(ctx=self.ctx)()
-        self.pre_instance_delete()
-        self.InstanceDeleteByJson(ctx=self.ctx)()
-        self.post_instance_delete()
-        yield self.NetworkInterfacesCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -83,54 +64,9 @@ class Remove(AAZCommand):
     def post_operations(self):
         pass
 
-    @register_callback
-    def pre_instance_delete(self):
-        pass
-
-    @register_callback
-    def post_instance_delete(self):
-        pass
-
-    class SubresourceSelector(AAZJsonSelector):
-
-        def _get(self):
-            result = self.ctx.vars.instance
-            result = result.properties.ipConfigurations
-            filters = enumerate(result)
-            filters = filter(
-                lambda e: e[1].name == self.ctx.args.ip_config_name,
-                filters
-            )
-            idx = next(filters)[0]
-            result = result[idx]
-            result = result.properties.loadBalancerBackendAddressPools
-            filters = enumerate(result)
-            filters = filter(
-                lambda e: e[1].id == self.ctx.args.pool_id,
-                filters
-            )
-            idx = next(filters)[0]
-            return result[idx]
-
-        def _set(self, value):
-            result = self.ctx.vars.instance
-            result = result.properties.ipConfigurations
-            filters = enumerate(result)
-            filters = filter(
-                lambda e: e[1].name == self.ctx.args.ip_config_name,
-                filters
-            )
-            idx = next(filters)[0]
-            result = result[idx]
-            result = result.properties.loadBalancerBackendAddressPools
-            filters = enumerate(result)
-            filters = filter(
-                lambda e: e[1].id == self.ctx.args.pool_id,
-                filters
-            )
-            idx = next(filters, [len(result)])[0]
-            result[idx] = value
-            return
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=False)
+        return result
 
     class NetworkInterfacesGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
@@ -211,129 +147,13 @@ class Remove(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _RemoveHelper._build_schema_network_interface_read(cls._schema_on_200)
+            _WaitHelper._build_schema_network_interface_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
-    class NetworkInterfacesCreateOrUpdate(AAZHttpOperation):
-        CLIENT_TYPE = "MgmtClient"
 
-        def __call__(self, *args, **kwargs):
-            request = self.make_request()
-            session = self.client.send_request(request=request, stream=False, **kwargs)
-            if session.http_response.status_code in [202]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_200_201,
-                    self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
-                    path_format_arguments=self.url_parameters,
-                )
-            if session.http_response.status_code in [200, 201]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_200_201,
-                    self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
-                    path_format_arguments=self.url_parameters,
-                )
-
-            return self.on_error(session.http_response)
-
-        @property
-        def url(self):
-            return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkInterfaces/{networkInterfaceName}",
-                **self.url_parameters
-            )
-
-        @property
-        def method(self):
-            return "PUT"
-
-        @property
-        def error_format(self):
-            return "ODataV4Format"
-
-        @property
-        def url_parameters(self):
-            parameters = {
-                **self.serialize_url_param(
-                    "networkInterfaceName", self.ctx.args.nic_name,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.resource_group,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "subscriptionId", self.ctx.subscription_id,
-                    required=True,
-                ),
-            }
-            return parameters
-
-        @property
-        def query_parameters(self):
-            parameters = {
-                **self.serialize_query_param(
-                    "api-version", "2023-11-01",
-                    required=True,
-                ),
-            }
-            return parameters
-
-        @property
-        def header_parameters(self):
-            parameters = {
-                **self.serialize_header_param(
-                    "Content-Type", "application/json",
-                ),
-                **self.serialize_header_param(
-                    "Accept", "application/json",
-                ),
-            }
-            return parameters
-
-        @property
-        def content(self):
-            _content_value, _builder = self.new_content_builder(
-                self.ctx.args,
-                value=self.ctx.vars.instance,
-            )
-
-            return self.serialize_content(_content_value)
-
-        def on_200_201(self, session):
-            data = self.deserialize_http_content(session)
-            self.ctx.set_var(
-                "instance",
-                data,
-                schema_builder=self._build_schema_on_200_201
-            )
-
-        _schema_on_200_201 = None
-
-        @classmethod
-        def _build_schema_on_200_201(cls):
-            if cls._schema_on_200_201 is not None:
-                return cls._schema_on_200_201
-
-            cls._schema_on_200_201 = AAZObjectType()
-            _RemoveHelper._build_schema_network_interface_read(cls._schema_on_200_201)
-
-            return cls._schema_on_200_201
-
-    class InstanceDeleteByJson(AAZJsonInstanceDeleteOperation):
-
-        def __call__(self, *args, **kwargs):
-            self.ctx.selectors.subresource.set(self._delete_instance())
-
-
-class _RemoveHelper:
-    """Helper class for Remove"""
+class _WaitHelper:
+    """Helper class for Wait"""
 
     _schema_application_security_group_read = None
 
@@ -2463,4 +2283,4 @@ class _RemoveHelper:
         _schema.type = cls._schema_virtual_network_tap_read.type
 
 
-__all__ = ["Remove"]
+__all__ = ["Wait"]
