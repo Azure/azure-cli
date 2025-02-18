@@ -7,7 +7,7 @@ trigger:
     include:
     - '*'
     exclude:
-    - 'release'
+    - 'release*'
 
 pr:
   branches:
@@ -210,7 +210,7 @@ jobs:
       artifactName: metadata
 
   - task: PipAuthenticate@1
-    condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
+    condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/release')
     displayName: 'Pip Authenticate'
     inputs:
       artifactFeeds: $(AZURE_ARTIFACTS_FEEDS)
@@ -254,7 +254,7 @@ jobs:
         artifactName: metadata
 
     - task: PipAuthenticate@1
-      condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
+      condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/release')
       displayName: 'Pip Authenticate'
       inputs:
         artifactFeeds: $(AZURE_ARTIFACTS_FEEDS)
@@ -444,7 +444,7 @@ jobs:
       versionSpec: 3.12
 
   - task: PipAuthenticate@1
-    condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
+    condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/release')
     displayName: 'Pip Authenticate'
     inputs:
       artifactFeeds: $(AZURE_ARTIFACTS_FEEDS)
@@ -732,7 +732,7 @@ jobs:
     displayName: Install Docker
 
   - task: PipAuthenticate@1
-    condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
+    condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/release')
     displayName: 'Pip Authenticate'
     inputs:
       artifactFeeds: $(AZURE_ARTIFACTS_FEEDS)
@@ -828,7 +828,7 @@ jobs:
   - bash: ./scripts/ci/install_docker.sh
     displayName: Install Docker
   - task: PipAuthenticate@1
-    condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
+    condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/release')
     displayName: 'Pip Authenticate'
     inputs:
       artifactFeeds: $(AZURE_ARTIFACTS_FEEDS)
@@ -950,7 +950,7 @@ jobs:
   - bash: ./scripts/ci/install_docker.sh
     displayName: Install Docker
   - task: PipAuthenticate@1
-    condition: eq(variables['Build.SourceBranch'], 'refs/heads/release')
+    condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/release')
     displayName: 'Pip Authenticate'
     inputs:
       artifactFeeds: $(AZURE_ARTIFACTS_FEEDS)
@@ -1143,7 +1143,7 @@ jobs:
         IFS=$'\n'
         for FILE in `git diff --name-only --diff-filter=AM origin/$(System.PullRequest.TargetBranch)` ; do
           echo $FILE
-          detected=$(azdev scan -f "$FILE" | python -c "import sys, json; print(json.load(sys.stdin)['secrets_detected'])")
+          detected=$(azdev scan -f "$FILE" --continue-on-failure | python -c "import sys, json; print(json.load(sys.stdin)['secrets_detected'])")
           if [ $detected == 'True' ]; then
             printf "\033[0;31mDetected secrets from %s, You can run 'azdev mask' to remove secrets.\033[0m\n" "$FILE"
             secret_files+=$FILE

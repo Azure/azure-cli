@@ -72,7 +72,8 @@ from azure.mgmt.cosmosdb.models import (
     DedicatedGatewayType,
     ServiceType,
     MongoRoleDefinitionCreateUpdateParameters,
-    MongoUserDefinitionCreateUpdateParameters
+    MongoUserDefinitionCreateUpdateParameters,
+    RegionForOnlineOffline
 )
 
 logger = get_logger(__name__)
@@ -141,6 +142,7 @@ def cli_cosmosdb_create(cmd,
                         restore_timestamp=None,
                         enable_partition_merge=None,
                         enable_burst_capacity=None,
+                        enable_prpp_autoscale=None,
                         minimal_tls_version=None):
     """Create a new Azure Cosmos DB database account."""
 
@@ -196,6 +198,7 @@ def cli_cosmosdb_create(cmd,
                                     arm_location=resource_group_location,
                                     enable_partition_merge=enable_partition_merge,
                                     enable_burst_capacity=enable_burst_capacity,
+                                    enable_prpp_autoscale=enable_prpp_autoscale,
                                     minimal_tls_version=minimal_tls_version)
 
 
@@ -241,6 +244,7 @@ def _create_database_account(client,
                              arm_location=None,
                              enable_partition_merge=None,
                              enable_burst_capacity=None,
+                             enable_prpp_autoscale=None,
                              minimal_tls_version=None,
                              disable_ttl=None):
 
@@ -379,6 +383,7 @@ def _create_database_account(client,
         restore_parameters=restore_parameters,
         enable_partition_merge=enable_partition_merge,
         enable_burst_capacity=enable_burst_capacity,
+        enable_per_region_per_partition_autoscale=enable_prpp_autoscale,
         minimal_tls_version=minimal_tls_version
     )
 
@@ -419,6 +424,7 @@ def cli_cosmosdb_update(client,
                         continuous_tier=None,
                         enable_partition_merge=None,
                         enable_burst_capacity=None,
+                        enable_prpp_autoscale=None,
                         minimal_tls_version=None):
     """Update an existing Azure Cosmos DB database account. """
     existing = client.get(resource_group_name, account_name)
@@ -516,6 +522,7 @@ def cli_cosmosdb_update(client,
         analytical_storage_configuration=analytical_storage_configuration,
         enable_partition_merge=enable_partition_merge,
         enable_burst_capacity=enable_burst_capacity,
+        enable_per_region_per_partition_autoscale=enable_prpp_autoscale,
         minimal_tls_version=minimal_tls_version)
 
     async_docdb_update = client.begin_update(resource_group_name, account_name, params)
@@ -599,9 +606,10 @@ def _populate_sql_container_definition(sql_container_resource,
                                        client_encryption_policy,
                                        partition_key_version,
                                        conflict_resolution_policy,
-                                       analytical_storage_ttl):
+                                       analytical_storage_ttl,
+                                       vector_embedding_policy):
     if all(arg is None for arg in
-           [partition_key_path, partition_key_version, default_ttl, indexing_policy, unique_key_policy, client_encryption_policy, conflict_resolution_policy, analytical_storage_ttl]):
+           [partition_key_path, partition_key_version, default_ttl, indexing_policy, unique_key_policy, client_encryption_policy, conflict_resolution_policy, analytical_storage_ttl, vector_embedding_policy]):
         return False
 
     if partition_key_path is not None:
@@ -630,6 +638,9 @@ def _populate_sql_container_definition(sql_container_resource,
     if analytical_storage_ttl is not None:
         sql_container_resource.analytical_storage_ttl = analytical_storage_ttl
 
+    if vector_embedding_policy is not None:
+        sql_container_resource.vector_embedding_policy = vector_embedding_policy
+
     return True
 
 
@@ -647,7 +658,8 @@ def cli_cosmosdb_sql_container_create(client,
                                       max_throughput=None,
                                       unique_key_policy=None,
                                       conflict_resolution_policy=None,
-                                      analytical_storage_ttl=None):
+                                      analytical_storage_ttl=None,
+                                      vector_embedding_policy=None):
     """Creates an Azure Cosmos DB SQL container """
     sql_container_resource = SqlContainerResource(id=container_name)
 
@@ -659,7 +671,8 @@ def cli_cosmosdb_sql_container_create(client,
                                        client_encryption_policy,
                                        partition_key_version,
                                        conflict_resolution_policy,
-                                       analytical_storage_ttl)
+                                       analytical_storage_ttl,
+                                       vector_embedding_policy)
 
     options = _get_options(throughput, max_throughput)
 
@@ -681,7 +694,8 @@ def cli_cosmosdb_sql_container_update(client,
                                       container_name,
                                       default_ttl=None,
                                       indexing_policy=None,
-                                      analytical_storage_ttl=None):
+                                      analytical_storage_ttl=None,
+                                      vector_embedding_policy=None):
     """Updates an Azure Cosmos DB SQL container """
     logger.debug('reading SQL container')
     sql_container = client.get_sql_container(resource_group_name, account_name, database_name, container_name)
@@ -692,6 +706,7 @@ def cli_cosmosdb_sql_container_update(client,
     sql_container_resource.default_ttl = sql_container.resource.default_ttl
     sql_container_resource.unique_key_policy = sql_container.resource.unique_key_policy
     sql_container_resource.conflict_resolution_policy = sql_container.resource.conflict_resolution_policy
+    sql_container_resource.vector_embedding_policy = sql_container.resource.vector_embedding_policy
 
     # client encryption policy is immutable
     sql_container_resource.client_encryption_policy = sql_container.resource.client_encryption_policy
@@ -704,7 +719,8 @@ def cli_cosmosdb_sql_container_update(client,
                                           None,
                                           None,
                                           None,
-                                          analytical_storage_ttl):
+                                          analytical_storage_ttl,
+                                          vector_embedding_policy):
         logger.debug('replacing SQL container')
 
     sql_container_create_update_resource = SqlContainerCreateUpdateParameters(
@@ -2145,7 +2161,8 @@ def _populate_collection_definition(collection,
                                     partition_key_path=None,
                                     default_ttl=None,
                                     indexing_policy=None,
-                                    client_encryption_policy=None):
+                                    client_encryption_policy=None,
+                                    vector_embedding_policy=None):
     if all(arg is None for arg in [partition_key_path, default_ttl, indexing_policy]):
         return False
 
@@ -2166,6 +2183,9 @@ def _populate_collection_definition(collection,
     if client_encryption_policy is not None:
         collection['clientEncryptionPolicy'] = client_encryption_policy
 
+    if vector_embedding_policy is not None:
+        collection['vectorIndexingPolicy'] = vector_embedding_policy
+
     return True
 
 
@@ -2176,7 +2196,8 @@ def cli_cosmosdb_collection_create(client,
                                    partition_key_path=None,
                                    default_ttl=None,
                                    indexing_policy=DEFAULT_INDEXING_POLICY,
-                                   client_encryption_policy=None):
+                                   client_encryption_policy=None,
+                                   vector_embedding_policy=None):
     """Creates an Azure Cosmos DB collection """
     collection = {'id': collection_id}
 
@@ -2188,7 +2209,8 @@ def cli_cosmosdb_collection_create(client,
                                     partition_key_path,
                                     default_ttl,
                                     indexing_policy,
-                                    client_encryption_policy)
+                                    client_encryption_policy,
+                                    vector_embedding_policy)
 
     created_collection = client.CreateContainer(_get_database_link(database_id), collection,
                                                 options)
@@ -3502,3 +3524,16 @@ def cli_cosmosdb_service_update(client,
     )
 
     return client.begin_create(resource_group_name, account_name, service_name, create_update_parameters=params)
+
+
+def cli_offline_region(client,
+                       account_name,
+                       resource_group_name,
+                       region):
+
+    region_parameter_for_offline = RegionForOnlineOffline(region=region)
+    return client.begin_offline_region(
+        resource_group_name=resource_group_name,
+        account_name=account_name,
+        region_parameter_for_offline=region_parameter_for_offline
+    )

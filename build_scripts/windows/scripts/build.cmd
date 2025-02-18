@@ -30,7 +30,7 @@ if "%ARCH%"=="x86" (
     echo Please set ARCH to "x86" or "x64"
     goto ERROR
 )
-set PYTHON_VERSION=3.12.7
+set PYTHON_VERSION=3.12.8
 
 set WIX_DOWNLOAD_URL="https://azurecliprod.blob.core.windows.net/msi/wix310-binaries-mirror.zip"
 set PYTHON_DOWNLOAD_URL="https://www.python.org/ftp/python/%PYTHON_VERSION%/python-%PYTHON_VERSION%-embed-%PYTHON_ARCH%.zip"
@@ -205,9 +205,9 @@ for /f %%f in ('dir /b /s *.pyc') do (
 )
 popd
 
-REM Remove __pycache__
+REM Remove empty __pycache__ directories because .pyc files are already moved to parent directories
 echo remove pycache
-for /d /r %BUILDING_DIR%\Lib\site-packages\pip %%d in (__pycache__) do (
+for /d /r %BUILDING_DIR%\Lib\site-packages\ %%d in (__pycache__) do (
     if exist %%d rmdir /s /q "%%d"
 )
 

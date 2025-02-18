@@ -7,7 +7,6 @@
 from argcomplete.completers import FilesCompleter
 
 from knack.arguments import CLIArgumentType
-from knack.deprecation import Deprecated
 
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.parameters import get_datetime_type
@@ -42,7 +41,6 @@ def load_arguments(self, _):
     DedicatedHostLicenseTypes = self.get_models('DedicatedHostLicenseTypes')
     OrchestrationServiceNames, OrchestrationServiceStateAction = self.get_models('OrchestrationServiceNames', 'OrchestrationServiceStateAction', operation_group='virtual_machine_scale_sets')
     RebootSetting, VMGuestPatchClassificationWindows, VMGuestPatchClassificationLinux = self.get_models('VMGuestPatchRebootSetting', 'VMGuestPatchClassificationWindows', 'VMGuestPatchClassificationLinux')
-    GallerySharingPermissionTypes = self.get_models('GallerySharingPermissionTypes', operation_group='shared_galleries')
     ReplicationMode = self.get_models('ReplicationMode', operation_group='gallery_image_versions')
     DiskControllerTypes = self.get_models('DiskControllerTypes', operation_group='virtual_machines')
 
@@ -598,21 +596,10 @@ def load_arguments(self, _):
 
     with self.argument_context('vm image list') as c:
         c.argument('image_location', get_location_type(self.cli_ctx))
-        c.argument('edge_zone', edge_zone_type)
         c.argument('architecture', help='The name of architecture. ', arg_type=get_enum_type(["x64", "Arm64"]))
-
-    with self.argument_context('vm image list-offers') as c:
-        c.argument('edge_zone', edge_zone_type)
-
-    with self.argument_context('vm image list-skus') as c:
-        c.argument('edge_zone', edge_zone_type)
-
-    with self.argument_context('vm image list-publishers') as c:
-        c.argument('edge_zone', edge_zone_type)
 
     with self.argument_context('vm image show') as c:
         c.argument('skus', options_list=['--sku', '-s'])
-        c.argument('edge_zone', edge_zone_type)
 
     with self.argument_context('vm image terms') as c:
         c.argument('urn', help='URN, in the format of \'publisher:offer:sku:version\'. If specified, other argument values can be omitted')
@@ -1258,18 +1245,6 @@ def load_arguments(self, _):
         c.argument('gallery_image_name', options_list=['--gallery-image-definition', '-i'], help='gallery image definition')
         c.argument('gallery_image_version', options_list=['--gallery-image-version', '-e'], help='gallery image version')
 
-    with self.argument_context('sig show') as c:
-        c.argument('gallery_name', options_list=['--gallery-name', '-r'], id_part='name', help='gallery name')
-        c.argument('gallery_image_name', options_list=['--gallery-image-definition', '-i'], id_part='child_name_1', help='gallery image definition')
-
-    with self.argument_context('sig show') as c:
-        c.argument('select', help='The select expression to apply on the operation.')
-        c.argument('sharing_groups', action='store_true', help='The expand query option to query shared gallery groups')
-
-    with self.argument_context('sig list-shared') as c:
-        c.argument('location', arg_type=get_location_type(self.cli_ctx))
-        c.argument('shared_to', shared_to_type)
-
     for scope in ['sig share add', 'sig share remove']:
         with self.argument_context(scope) as c:
             c.argument('gallery_name', type=str, help='The name of the Shared Image Gallery.', id_part='name')
@@ -1319,28 +1294,6 @@ def load_arguments(self, _):
         c.argument('marker', arg_type=marker_type)
         c.argument('show_next_marker', action='store_true', help='Show nextMarker in result when specified.')
 
-    with self.argument_context('sig create') as c:
-        c.argument('description', help='the description of the gallery')
-
-    with self.argument_context('sig update') as c:
-        c.ignore('gallery')
-
-    for scope in ['sig create', 'sig update']:
-        with self.argument_context(scope) as c:
-            c.argument('permissions', arg_type=get_enum_type(GallerySharingPermissionTypes),
-                       arg_group='Sharing Profile',
-                       min_api='2020-09-30',
-                       help='This property allows you to specify the permission of sharing gallery.')
-            c.argument('soft_delete', arg_type=get_three_state_flag(), min_api='2021-03-01',
-                       deprecate_info=Deprecated(self.cli_ctx, hide=True, message_func=lambda x: "Argument '--soft-delete' is in preview and under development. Reference and support levels: https://aka.ms/CLI_refstatus"),
-                       help='Enable soft-deletion for resources in this gallery, '
-                            'allowing them to be recovered within retention time.')
-            c.argument('publisher_uri', help='Community gallery publisher uri.')
-            c.argument('publisher_contact', options_list=['--publisher-email'],
-                       help='Community gallery publisher contact email.')
-            c.argument('eula', help='Community gallery publisher eula.')
-            c.argument('public_name_prefix', help='Community gallery public name prefix.')
-
     with self.argument_context('sig image-definition create') as c:
         c.argument('description', help='the description of the gallery image definition')
     with self.argument_context('sig image-definition update') as c:
@@ -1375,7 +1328,6 @@ def load_arguments(self, _):
         c.argument('data_vhds_luns', nargs='+', help='Logical unit numbers (space-delimited) of source VHD URIs of data disks')
         c.argument('data_vhds_storage_accounts', options_list=['--data-vhds-storage-accounts', '--data-vhds-sa'], nargs='+', help='Names or IDs (space-delimited) of storage accounts of source VHD URIs of data disks')
         c.argument('replication_mode', min_api='2021-07-01', arg_type=get_enum_type(ReplicationMode), help='Optional parameter which specifies the mode to be used for replication. This property is not updatable.')
-        c.argument('target_region_cvm_encryption', nargs='+', min_api='2021-10-01', help='Space-separated list of customer managed key for Confidential VM encrypting the OS disk in the gallery artifact for each region. Format for each region: `<os_cvm_encryption_type>,<os_cvm_des>`. The valid values for os_cvm_encryption_type are EncryptedVMGuestStateOnlyWithPmk, EncryptedWithPmk, EncryptedWithCmk.')
         c.argument('virtual_machine', help='Resource id of VM source')
         c.argument('image_version', help='Resource id of gallery image version source')
         c.argument('target_zone_encryption', nargs='+', min_api='2022-01-03',
@@ -1415,10 +1367,6 @@ def load_arguments(self, _):
                        help='Space-separated list of regions and their replica counts. Use `<region>[=<replica count>][=<storage account type>]` to optionally set the replica count and/or storage account type for each region. '
                             'If a replica count is not specified, the default replica count will be used. If a storage account type is not specified, the default storage account type will be used')
             c.argument('replica_count', help='The default number of replicas to be created per region. To set regional replication counts, use --target-regions', type=int)
-            c.argument('target_edge_zones', nargs='*', min_api='2022-01-03',
-                       help='Space-separated list of regions, edge zones, replica counts and storage types. Use <region>=<edge zone>[=<replica count>][=<storage account type>] to optionally set the replica count and/or storage account type for each region. '
-                            'If a replica count is not specified, the default replica count will be used. If a storage account type is not specified, the default storage account type will be used. '
-                            'If "--target-edge-zones None" is specified, the target extended locations will be cleared.')
 
     for scope in ['sig image-version create', 'sig image-version update', 'sig image-version undelete']:
         with self.argument_context(scope, operation_group='gallery_image_versions') as c:
@@ -1461,73 +1409,6 @@ def load_arguments(self, _):
                    help='distinguish add operation and remove operation')
 
     # endregion
-
-    # region Gallery applications
-    with self.argument_context('sig gallery-application') as c:
-        c.argument('gallery_application_name', options_list=['--name', '-n', '--application-name'],
-                   help='The name of the gallery Application')
-
-    with self.argument_context('sig gallery-application create') as c:
-        c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False,
-                   validator=get_default_location_from_resource_group)
-        c.argument('description', help='The description of this gallery Application Definition resource. '
-                   'This property is updatable.')
-        c.argument('os_type', arg_type=get_enum_type(['Windows', 'Linux']), help='This property allows you '
-                   'to specify the supported type of the OS that application is built for. <br><br> Possible values '
-                   'are: <br><br> **Windows** <br><br> **Linux**')
-
-    with self.argument_context('sig gallery-application update') as c:
-        c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False,
-                   validator=get_default_location_from_resource_group)
-        c.argument('description', help='The description of this gallery Application Definition resource. '
-                   'This property is updatable.')
-
-    with self.argument_context('sig gallery-application version') as c:
-        c.argument('gallery_application_name', options_list=['--application-name'],
-                   help='The name of the gallery Application')
-        c.argument('gallery_application_version_name', options_list=['--name', '-n', '--version-name'],
-                   help='The name of the gallery Application Version')
-
-    with self.argument_context('sig gallery-application version create') as c:
-        c.argument('package_file_name', help='The name to assign the downloaded package file on the VM. This is limited to 4096 characters.'
-                                             'If not specified, the package file will be named the same as the Gallery Application name.')
-        c.argument('config_file_name', help='The name to assign the downloaded config file on the VM. This is limited to 4096 characters. '
-                                            'If not specified, the config file will be named the Gallery Application name appended with "_config"')
-
-    for scope in ['create', 'update']:
-        with self.argument_context('sig gallery-application version {}'.format(scope)) as c:
-            c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False,
-                       validator=get_default_location_from_resource_group)
-            c.argument('tags', tags_type)
-            c.argument('package_file_link', help='The mediaLink of the artifact, must be a readable storage page blob.')
-            c.argument('install_command', help='The path and arguments to install the gallery application.')
-            c.argument('remove_command', help='The path and arguments to remove the gallery application.')
-            c.argument('update_command', help='The path and arguments to update the gallery application. If not present,'
-                                              ' then update operation will invoke remove command on the previous version'
-                                              ' and install command on the current version of the gallery application.')
-            c.argument('target_regions', type=validate_file_or_dict, help='The target regions where the Image Version is'
-                       'going to be replicated to. This property is updatable. Expected value: '
-                       'json-string/json-file/@json-file.')
-            c.argument('default_file_link', help='The default configuration link of the artifact, must be a readable storage page blob.')
-            c.argument('exclude_from', arg_type=get_three_state_flag(), help='If set to true, Virtual Machines '
-                       'deployed from the latest version of the Image Definition won\'t use this Image Version.',
-                       arg_group='Publishing Profile')
-            c.argument('end_of_life_date', help='The end of life date of the gallery image version. This property can be '
-                       'used for decommissioning purposes. This property is updatable.', arg_group='Publishing Profile')
-    # endregion
-
-    # region Proximity Placement Group
-    with self.argument_context('ppg', min_api='2018-04-01') as c:
-        c.argument('proximity_placement_group_name', arg_type=name_arg_type, help="The name of the proximity placement group.")
-
-    with self.argument_context('ppg create') as c:
-        c.argument('tags', tags_type, min_api='2018-04-01')
-        c.argument('zone', zone_type, min_api='2021-11-01')
-
-    for scope in ['ppg create', 'ppg update']:
-        with self.argument_context(scope) as c:
-            c.argument('ppg_type', options_list=['--type', '-t'], arg_type=get_enum_type(self.get_models('ProximityPlacementGroupType')), min_api='2018-04-01', help="The type of the proximity placement group.")
-            c.argument('intent_vm_sizes', nargs='*', min_api='2021-11-01', help="Specify possible sizes of virtual machines that can be created in the proximity placement group.")
 
     with self.argument_context('vm create', min_api='2018-04-01') as c:
         c.argument('proximity_placement_group', options_list=['--ppg'],

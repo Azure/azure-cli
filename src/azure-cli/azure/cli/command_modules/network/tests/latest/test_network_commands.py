@@ -501,12 +501,20 @@ class NetworkLoadBalancerWithZone(ScenarioTest):
     def test_network_lb_frontend_ip_zone(self, resource_group):
         self.kwargs.update({
             'location': 'eastus2',
+            'lb1': self.create_random_name('lb', 10),
+            'lb2': self.create_random_name('lb', 10),
+            'vnet1': self.create_random_name('vnet', 10),
+            'vnet2': self.create_random_name('vnet', 10),
+            'pool': self.create_random_name('poll', 10)
         })
 
         # LB with subnet : internal LB
-        self.cmd('network lb create -g {rg} -l {location} -n lb --vnet-name vnet --subnet subnet --sku Standard')
-        self.cmd('network lb frontend-ip create -g {rg} --lb-name lb -n LoadBalancerFrontEnd2 -z 1 2 3 --vnet-name vnet --subnet subnet', checks=[
+        self.cmd('network lb create -g {rg} -l {location} -n {lb1} --vnet-name {vnet1} --subnet subnet --sku Standard')
+        self.cmd('network lb frontend-ip create -g {rg} --lb-name {lb1} -n LoadBalancerFrontEnd2 -z 1 2 3 --vnet-name {vnet1} --subnet subnet', checks=[
             self.check("length(zones)", 3)
+        ])
+        self.cmd('network lb create -g {rg} -n {lb2} --sku standard --vnet-name {vnet2} --subnet default --frontend-ip-zone 1 2 3 --backend-pool-name {pool}', checks=[
+            self.check("loadBalancer.frontendIPConfigurations[0].zones", ['1', '2', '3'])
         ])
 
 
@@ -5637,13 +5645,14 @@ class NetworkVirtualHubRouter(ScenarioTest):
             'subnet1_id': vnet['subnets'][0]['id']
         })
 
-        self.cmd('network routeserver create -g {rg} -l {location} -n {vrouter} '
+        self.cmd('network routeserver create -g {rg} -l {location} -n {vrouter} --auto-scale-config min-capacity=3 '
                  '--hosted-subnet {subnet1_id} --public-ip-address {vhr_ip1} --hub-routing-preference aspath',
                  checks=[
                      self.check('type', 'Microsoft.Network/virtualHubs'),
                      self.check('ipConfigurations', None),
                      self.check('provisioningState', 'Succeeded'),
-                     self.check("hubRoutingPreference", "ASPath")
+                     self.check("hubRoutingPreference", "ASPath"),
+                     self.check('virtualRouterAutoScaleConfiguration.minCapacity', 3)
                  ])
 
         self.cmd('network routeserver update -g {rg} --name {vrouter}  --allow-b2b-traffic --hub-routing-preference expressroute', checks=[
@@ -7007,6 +7016,83 @@ class NetworkVirtualApplianceConnectionScenarioTest(ScenarioTest):
             self.check('length(properties.routingConfiguration.propagatedRouteTables.labels)', 2),
             self.check('properties.routingConfiguration.propagatedRouteTables.labels[0]', 'label1')
         ]) 
+class NetworkVirtualApplianceReimageScenarioTest(ScenarioTest):
+    @live_only()
+    @ResourceGroupPreparer(location='eastus2euap', name_prefix='test_network_virtual_appliance_reimage')
+    @AllowLargeResponse(size_kb=9999)
+    def test_network_virtual_appliance_reimage(self, resource_group):
+        from time import sleep
+
+        # Variables to use in the test
+        subscriptionId = self.get_subscription_id()
+        self.kwargs.update({
+            'vwan': 'clitestvwan',  # Virtual WAN name
+            'vhub': 'clivhub',  # Virtual Hub name
+            'nva_name': 'clivirtualappliancereimage',  # NVA name
+            'rg': resource_group,
+            'name': 'defaultConnection',
+            'subscription': subscriptionId,
+            'instance_id' : 0
+        })
+
+        # Add the required extension
+        self.cmd('extension add -n virtual-wan')
+        
+        # Create Virtual WAN
+        self.cmd('network vwan create -n {vwan} -g {rg} --type Standard', checks=[
+            self.check('name', '{vwan}'),
+            self.check('type', 'Microsoft.Network/virtualWans')
+        ])
+        
+        # Create Virtual Hub within the Virtual WAN
+        self.cmd('network vhub create -g {rg} -n {vhub} --vwan {vwan} --address-prefix 10.5.0.0/16 --sku Standard', checks=[
+            self.check('name', '{vhub}'),
+        ])
+
+        routing_state = self.cmd('network vhub show -g {rg} -n {vhub}').get_output_in_json()['routingState']
+        retry_count = 0
+        while routing_state != 'Provisioned':
+            if retry_count == 20:
+                break
+            retry_count += 1
+            sleep(360)
+            routing_state = self.cmd('network vhub show -g {rg} -n {vhub}').get_output_in_json()['routingState']
+
+        # Create the NVA
+        self.cmd('network virtual-appliance create -n {nva_name} -g {rg} --vhub clivhub --vendor "checkpoint" '
+                 '--scale-unit 2 -v latest --asn 64512 --init-config "echo $abc"',
+                 checks=[
+                     self.check('name', '{nva_name}'),
+                     self.check('virtualApplianceAsn', 64512),
+                     self.check('cloudInitConfiguration', 'echo $abc')
+                 ])
+
+        # Verify the NVA exists
+        self.cmd('network virtual-appliance show -g {rg} -n {nva_name}',
+                 checks=[
+                     self.check('name', '{nva_name}'),
+                     self.check('virtualApplianceAsn', 64512),
+                     self.check('cloudInitConfiguration', 'echo $abc')
+                 ])
+
+        # Trigger the reimage operation (you won't get useful data in response, just confirm the request is accepted)
+        response = self.cmd('network virtual-appliance reimage -g {rg} --network-virtual-appliance-name {nva_name} --subscription {subscription} --instance-ids {instance_id}')
+
+        # Wait for the reimage operation to complete and check provisioning state
+        provisioning_state = self.cmd('network virtual-appliance show -g {rg} -n {nva_name}').get_output_in_json()['provisioningState']
+        retry_count = 0
+        while provisioning_state != 'Succeeded':
+            if retry_count == 20:
+                raise Exception(f"Reimage operation did not complete successfully. Last known provisioningState: {provisioning_state}")
+            retry_count += 1
+            sleep(60)
+            provisioning_state = self.cmd('network virtual-appliance show -g {rg} -n {nva_name}').get_output_in_json()['provisioningState']
+
+        # Ensure that the provisioning state is 'Succeeded' after reimaging
+        self.cmd('network virtual-appliance show -g {rg} -n {nva_name}',
+                 checks=[
+                     self.check('provisioningState', 'Succeeded')
+                 ])
 
 class NetworkExtendedLocation(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='test_network_lb_edge_zone', location='eastus2euap')

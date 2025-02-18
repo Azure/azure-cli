@@ -7,7 +7,8 @@ from azure.cli.core.util import get_default_admin_username
 from azure.cli.core.aaz import has_value, register_command
 from .aaz.latest.lab import Get as _LabGet, Delete as _LabDelete, CreateEnvironment as _LabVmCreate
 from .aaz.latest.lab.vm import (List as _LabVmList, Show as _LabVmShow, Delete as _LabVmDelete, Start as _LabVmStart,
-                                Stop as _LabVmStop, ApplyArtifacts as _LabVmApplyArtifacts, Claim as LabVmClaim)
+                                Stop as _LabVmStop, ApplyArtifacts as _LabVmApplyArtifacts, Claim as LabVmClaim,
+                                Hibernate as _LabVmHibernate)
 from .aaz.latest.lab.custom_image import (Show as _CustomImageShow, Delete as _CustomImageDelete,
                                           Create as _CustomImageCreate)
 from .aaz.latest.lab.artifact_source import Show as _ArtifactSourceShow
@@ -215,6 +216,15 @@ class LabVmStart(_LabVmStart):
 
 
 class LabVmStop(_LabVmStop):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.name._id_part = None
+        args_schema.lab_name._id_part = None
+        return args_schema
+
+
+class LabVmHibernate(_LabVmHibernate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)

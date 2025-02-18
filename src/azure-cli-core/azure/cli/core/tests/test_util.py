@@ -463,6 +463,24 @@ class TestBase64ToHex(unittest.TestCase):
         self.assertIsInstance(b64_to_hex(self.base64), str)
 
 
+class TestGetProperty(unittest.TestCase):
+
+    def test_getprop(self):
+        from azure.cli.core.util import getprop
+        with self.assertRaises(AttributeError):
+            getprop(self, '__class__')
+        with self.assertRaises(AttributeError):
+            getprop(self, '__init__')
+        with self.assertRaises(AttributeError):
+            getprop(self, 'assertRaises')
+        with self.assertRaises(AttributeError):
+            getprop(self, '_diffThreshold')
+        with self.assertRaises(AttributeError):
+            getprop(self, 'new_props')
+        self.assertEqual(getprop(self, 'maxDiff'), self.maxDiff)
+        self.assertEqual(getprop(self, 'new_props', "new_props"), "new_props")
+
+
 class TestHandleException(unittest.TestCase):
 
     @mock.patch('azure.cli.core.azclierror.logger.error', autospec=True)

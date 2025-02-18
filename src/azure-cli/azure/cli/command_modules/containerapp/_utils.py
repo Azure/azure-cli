@@ -412,12 +412,8 @@ def parse_secret_flags(secret_list):
 
 
 def get_linker_client(cmd):
-    resource = cmd.cli_ctx.cloud.endpoints.active_directory_resource_id
-    profile = Profile(cli_ctx=cmd.cli_ctx)
-    credential, subscription_id, _ = profile.get_login_credentials(
-        subscription_id=get_subscription_id(cmd.cli_ctx), resource=resource)
-    linker_client = ServiceLinkerManagementClient(credential)
-    return linker_client
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    return get_mgmt_service_client(cmd.cli_ctx, ServiceLinkerManagementClient)
 
 
 def validate_binding_name(binding_name):
@@ -509,12 +505,21 @@ def _update_revision_env_secretrefs(containers, name):
 
 
 def store_as_secret_and_return_secret_ref(secrets_list, registry_user, registry_server, registry_pass, update_existing_secret=False, disable_warnings=False):
+    def make_dns1123_compliant(name):
+        logger.debug(f"To construct the registry secret name, format the username '{name}' to DNS1123-compliant format.")
+
+        # Replace invalid characters with a hyphen and ensure lowercase
+        compliant_name = re.sub(r'[^a-z0-9\-]', '-', name.lower())
+
+        logger.debug(f"DNS1123-compliant name: '{compliant_name}' (original: '{name}')")
+
+        return compliant_name
+
     if registry_pass.startswith("secretref:"):
         # If user passed in registry password using a secret
-
         registry_pass = registry_pass.split("secretref:")
         if len(registry_pass) <= 1:
-            raise ValidationError("Invalid registry password secret. Value must be a non-empty value starting with \'secretref:\'.")
+            raise ValidationError("Invalid registry password secret. Value must be a non-empty value starting with 'secretref:'.")
         registry_pass = registry_pass[1:]
         registry_pass = ''.join(registry_pass)
 
@@ -526,9 +531,15 @@ def store_as_secret_and_return_secret_ref(secrets_list, registry_user, registry_
         # If user passed in registry password
         registry_server = registry_server.replace(':', '-')
         if urlparse(registry_server).hostname is not None:
-            registry_secret_name = "{server}-{user}".format(server=urlparse(registry_server).hostname.replace('.', ''), user=registry_user.lower())
+            registry_secret_name = "{server}-{user}".format(
+                server=urlparse(registry_server).hostname.replace('.', ''),
+                user=make_dns1123_compliant(registry_user)
+            )
         else:
-            registry_secret_name = "{server}-{user}".format(server=registry_server.replace('.', ''), user=registry_user.lower())
+            registry_secret_name = "{server}-{user}".format(
+                server=registry_server.replace('.', ''),
+                user=make_dns1123_compliant(registry_user)
+            )
 
         for secret in secrets_list:
             if secret['name'].lower() == registry_secret_name.lower():

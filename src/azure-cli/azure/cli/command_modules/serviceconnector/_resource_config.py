@@ -782,7 +782,7 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.Mysql: [AUTH_TYPE.Secret],
         RESOURCE.MysqlFlexible: [AUTH_TYPE.Secret, AUTH_TYPE.UserAccount],
         RESOURCE.Sql: [AUTH_TYPE.Secret, AUTH_TYPE.UserAccount],
-        RESOURCE.Redis: [AUTH_TYPE.SecretAuto],
+        RESOURCE.Redis: [AUTH_TYPE.SecretAuto, AUTH_TYPE.UserAccount, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.RedisEnterprise: [AUTH_TYPE.SecretAuto],
 
         RESOURCE.CosmosCassandra: [AUTH_TYPE.SecretAuto, AUTH_TYPE.UserAccount, AUTH_TYPE.ServicePrincipalSecret],
@@ -811,7 +811,7 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.Mysql: [AUTH_TYPE.Secret],
         RESOURCE.MysqlFlexible: [AUTH_TYPE.Secret, AUTH_TYPE.SystemIdentity, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.Sql: [AUTH_TYPE.Secret, AUTH_TYPE.SystemIdentity, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
-        RESOURCE.Redis: [AUTH_TYPE.SecretAuto],
+        RESOURCE.Redis: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.UserIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.RedisEnterprise: [AUTH_TYPE.SecretAuto],
 
         RESOURCE.CosmosCassandra: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
@@ -843,7 +843,7 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.Mysql: [AUTH_TYPE.Secret],
         RESOURCE.MysqlFlexible: [AUTH_TYPE.Secret, AUTH_TYPE.SystemIdentity, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.Sql: [AUTH_TYPE.Secret, AUTH_TYPE.SystemIdentity, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
-        RESOURCE.Redis: [AUTH_TYPE.SecretAuto],
+        RESOURCE.Redis: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.UserIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.RedisEnterprise: [AUTH_TYPE.SecretAuto],
 
         RESOURCE.CosmosCassandra: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
@@ -875,7 +875,7 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.Mysql: [AUTH_TYPE.Secret],
         RESOURCE.MysqlFlexible: [AUTH_TYPE.Secret],
         RESOURCE.Sql: [AUTH_TYPE.Secret],
-        RESOURCE.Redis: [AUTH_TYPE.SecretAuto],
+        RESOURCE.Redis: [AUTH_TYPE.WorkloadIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.RedisEnterprise: [AUTH_TYPE.SecretAuto],
 
         RESOURCE.CosmosCassandra: [AUTH_TYPE.WorkloadIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
@@ -906,7 +906,7 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.Mysql: [AUTH_TYPE.Secret],
         RESOURCE.MysqlFlexible: [AUTH_TYPE.Secret, AUTH_TYPE.SystemIdentity, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.Sql: [AUTH_TYPE.Secret, AUTH_TYPE.SystemIdentity, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
-        RESOURCE.Redis: [AUTH_TYPE.SecretAuto],
+        RESOURCE.Redis: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.UserIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.RedisEnterprise: [AUTH_TYPE.SecretAuto],
 
         RESOURCE.CosmosCassandra: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],

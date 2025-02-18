@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, KeyVaultPreparer, record_only
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, KeyVaultPreparer, record_only, live_only
 from azure.cli.command_modules.acr.custom import DEF_DIAG_SETTINGS_NAME_TEMPLATE
 
 
@@ -712,6 +712,21 @@ class AcrCommandsTests(ScenarioTest):
                  checks=[self.check('anonymousPullEnabled', True)])
         self.cmd('acr update --name {registry_name} --resource-group {rg} --anonymous-pull-enabled false',
                  checks=[self.check('anonymousPullEnabled', False)])
+
+    @ResourceGroupPreparer()
+    @live_only()
+    def test_acr_create_invalid_name(self, resource_group):
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+
+        # Block registry creation if there is '-'.
+        self.kwargs.update({
+           'registry_name': self.create_random_name('testreg', 20) + '-' + self.create_random_name('dnlhash', 20)
+        })   
+
+        with self.assertRaises(Exception) as ex:
+            self.cmd('acr create --name {registry_name} --resource-group {rg} --sku premium -l eastus')
+
+        self.assertTrue(InvalidArgumentValueError, ex.exception)
 
     @ResourceGroupPreparer(location='eastus2')
     def test_acr_with_private_endpoint(self, resource_group):

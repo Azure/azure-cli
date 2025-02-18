@@ -2025,18 +2025,28 @@ def get_url_with_sas(cmd, namespace, url=None, container=None, blob=None, share=
         client = cf_blob_service(cmd.cli_ctx, kwargs)
         if blob is None:
             blob = ''
-        from .operations.blob import create_blob_url
-        url = create_blob_url(client, container, blob, snapshot=None)
+        if '*' in container or '*' in blob:
+            url = client.url
+            if not url.endswith('/'):
+                url = url + '/'
+            url = url + container + '/' + blob
+        else:
+            from .operations.blob import create_blob_url
+            url = create_blob_url(client, container, blob, snapshot=None)
         service = 'blob'
     elif share:
         if hasattr(namespace, 'enable_file_backup_request_intent'):
             kwargs.update({'enable_file_backup_request_intent': namespace.enable_file_backup_request_intent})
         client = cf_share_service(cmd.cli_ctx, kwargs)
         client = client.get_share_client(share)
-        dir_name, file_name = os.path.split(file_path) if file_path else (None, '')
-        dir_name = None if dir_name in ('', '.') else dir_name
-        from .operations.file import create_file_url
-        url = create_file_url(client, directory_name=dir_name, file_name=file_name)
+        # if wildcard '*' in file path, skip manually parsing the url
+        if file_path and '*' in file_path:
+            url = client.url + '/' + file_path
+        else:
+            dir_name, file_name = os.path.split(file_path) if file_path else (None, '')
+            dir_name = None if dir_name in ('', '.') else dir_name
+            from .operations.file import create_file_url
+            url = create_file_url(client, directory_name=dir_name, file_name=file_name)
         service = 'file'
     elif not any([url, container, share]):  # In account level, only blob service is supported
         service = 'blob'
