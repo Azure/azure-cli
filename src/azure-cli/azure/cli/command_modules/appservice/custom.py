@@ -1096,6 +1096,7 @@ def create_webapp_sitecontainers(cmd, name, resource_group, slot=None, container
                 sitecontainers_spec_json = json.load(file)
             except Exception as ex:
                 raise ValidationError("The sitecontainer spec file contains malformed data. Error: {}".format(str(ex)))
+
             if not isinstance(sitecontainers_spec_json, list):
                 raise ValidationError("The sitecontainer spec file should contain a list of sitecontainers.")
             try:
@@ -1219,20 +1220,16 @@ def update_webapp_sitecontainer(cmd, name, resource_group, container_name, slot=
         raise ResourceNotFoundError("Sitecontainer '{}' does not exist, failed to update the sitecontainer."
                                     .format(container_name))
     # update only the provided parameters
-    if image is not None:
-        site_container.image = image
-    if target_port is not None:
-        site_container.target_port = target_port
-    if startup_cmd is not None:
-        site_container.start_up_command = startup_cmd
-    if is_main is not None:
-        site_container.is_main = is_main
-    if system_assigned_identity is not None:
+    site_container.image = image or site_container.image
+    site_container.target_port = target_port or site_container.target_port
+    site_container.start_up_command = startup_cmd or site_container.start_up_command
+    site_container.is_main = is_main or site_container.is_main
+    if system_assigned_identity:
         site_container.auth_type = AuthType.SYSTEM_IDENTITY
-    if user_assigned_identity is not None:
+    if user_assigned_identity:
         site_container.auth_type = AuthType.USER_ASSIGNED
         site_container.user_managed_identity_client_id = user_assigned_identity
-    if registry_username is not None and registry_password is not None:
+    if registry_username and registry_password:
         site_container.auth_type = AuthType.USER_CREDENTIALS
         site_container.user_name = registry_username
         site_container.password_secret = registry_password
@@ -1243,15 +1240,12 @@ def update_webapp_sitecontainer(cmd, name, resource_group, container_name, slot=
 
 def get_webapp_sitecontainer(cmd, name, resource_group, container_name, slot=None):
     web_client = get_mgmt_service_client(cmd.cli_ctx, WebSiteManagementClient).web_apps
-    site_container = None
     try:
         if slot:
-            site_container = web_client.get_site_container_slot(resource_group, name, container_name, slot)
-        else:
-            site_container = web_client.get_site_container(resource_group, name, container_name)
+            return web_client.get_site_container_slot(resource_group, name, container_name, slot)
+        return web_client.get_site_container(resource_group, name, container_name)
     except Exception as ex:
         raise ResourceNotFoundError("Failed to fetch sitecontainer '{}'. Error: {}".format(container_name, str(ex)))
-    return site_container
 
 
 def delete_webapp_sitecontainer(cmd, name, resource_group, container_name, slot=None):
@@ -1263,7 +1257,7 @@ def delete_webapp_sitecontainer(cmd, name, resource_group, container_name, slot=
                                                              container_name, slot, cls=lambda x, y, z: x)
         else:
             response = web_client.delete_site_container(resource_group, name, container_name, cls=lambda x, y, z: x)
-        if response is not None and response.http_response.status_code in (200, 204):
+        if response and response.http_response.status_code in (200, 204):
             # TODO: Validate deletion via response status code once api bug is fixed,
             # Status 200 -> container existed and was deleted successfully
             # Status 204 -> container does not exist
