@@ -11,9 +11,6 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "network nic ip-config ag-pool remove",
-)
 class Remove(AAZCommand):
     """Remove an address pool of an IP configuration.
     """

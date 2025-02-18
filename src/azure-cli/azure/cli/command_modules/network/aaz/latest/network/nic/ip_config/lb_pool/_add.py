@@ -11,9 +11,6 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "network nic ip-config lb-pool add",
-)
 class Add(AAZCommand):
     """Add an address pool to an IP configuration.
     """

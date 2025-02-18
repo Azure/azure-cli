@@ -4473,9 +4473,6 @@ class NICIPConfigCreate(_NICIPConfigCreate):
     def pre_operations(self):
         args = self.ctx.args
         args.private_ip_allocation_method = "Static" if has_value(args.private_ip_address) else "Dynamic"
-        # args.private_ip_allocation_method = "Dynamic"
-        # if has_value(args.private_ip_address) and not has_value(args.private_ip_address_prefix_length):
-        #     args.private_ip_allocation_method = "Static"
 
         args.asgs_obj = assign_aaz_list_arg(
             args.asgs_obj,
