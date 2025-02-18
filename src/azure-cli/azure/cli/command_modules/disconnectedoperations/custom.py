@@ -8,25 +8,22 @@
 # pylint: disable=too-many-lines
 # pylint: disable=too-many-statements
 
-from azure.cli.core import AzCommandsLoader
 from knack.log import get_logger
-
 
 logger = get_logger(__name__)
 
-def _get_management_endpoint(provider_namespace):
+def _get_management_endpoint():
     """Helper function to determine management endpoint based on provider namespace."""
-    return "brazilus.management.azure.com" if provider_namespace == "Private.EdgeInternal" else "management.azure.com"
+    return "brazilus.management.azure.com" # if provider_namespace == "Private.EdgeInternal" else "management.azure.com"
 
 
-def get_offer(cmd, 
+def package_offer(cmd, 
               resource_group_name,
+              publisher_name,
               offer_name,
-              output_folder=None,
-              management_endpoint=None,
-              provider_namespace="Microsoft.Edge",
-              sub_provider="Microsoft.EdgeMarketPlace",
-              api_version="2023-08-01-preview"):
+              sku,
+              version,
+              output_folder):
     """Get details of a specific marketplace offer and download its logos."""
 
     import os
@@ -37,20 +34,23 @@ def get_offer(cmd,
     from knack.log import get_logger
 
     # Use helper function if management_endpoint not explicitly provided
-    if management_endpoint is None:
-        management_endpoint = _get_management_endpoint(provider_namespace)
+    management_endpoint = _get_management_endpoint()
     logger = get_logger(__name__)
 
     # Get subscription ID from current context
     subscription_id = get_subscription_id(cmd.cli_ctx)
     
+    provider_namespace = "Private.EdgeInternal"
+    sub_provider = "Microsoft.EdgeMarketPlace"
+    api_version = "2023-08-01-preview"
+
     # Construct URL with parameters
     url = (
         f"https://{management_endpoint}"
         f"/subscriptions/{subscription_id}"
         f"/resourceGroups/{resource_group_name}"
         f"/providers/{provider_namespace}/disconnectedOperations/demo-winfield1"
-        f"/providers/{sub_provider}/offers/{offer_name}"
+        f"/providers/{sub_provider}/offers/{publisher_name}:{offer_name}"
         f"?api-version={api_version}"
     )
 
@@ -73,18 +73,44 @@ def get_offer(cmd,
                 for sku in skus:
                     sku_id = sku.get('marketplaceSkuId', '')
                     versions = sku.get('marketplaceSkuVersions', [])
+                    
+                    # If version is specified, filter for that version, else take the latest
+                    if version:
+                        versions = [v for v in versions if v.get('name') == version]
+                    else:
+                        versions = versions[:1]  # Take only the latest version
+                    
+                    if not versions:
+                        logger.warning(f"No matching version found for SKU {sku_id}")
+                        continue
 
                     for version in versions:
                         version_id = version.get('name')
                         
                         # Create base path for this version
                         base_path = os.path.join(output_folder, 'catalog_artifacts', 
-                                               publisher_id, offer_id, sku_id, version_id)
+                                               publisher_id, offer_id, sku_id)
+                        version_level_path = os.path.join(base_path, version_id)
                         icon_path = os.path.join(base_path, 'icons')
+                        
+                        # Check if version directory exists and has content
+                        if os.path.exists(version_level_path):
+                            # Check if directory has any files
+                            if os.path.exists(os.path.join(version_level_path, 'metadata.json')) or \
+                               any(os.scandir(version_level_path)):
+                                error_message = f"Version directory already exists and contains files: {version_level_path}. Please delete the version folder in case you want to re-download the package."
+                                logger.error(error_message)
+                                return {
+                                    'error': error_message,
+                                    'status': 'failed',
+                                    'path': version_level_path
+                                }
+
                         os.makedirs(icon_path, exist_ok=True)
+                        os.makedirs(version_level_path, exist_ok=True)
 
                         # Save metadata.json
-                        metadata_path = os.path.join(base_path, 'metadata.json')
+                        metadata_path = os.path.join(version_level_path, 'metadata.json')
                         metadata = {
                             'name': data.get('name'),
                             'publisher': offer_content.get('offerPublisher'),
@@ -106,12 +132,17 @@ def get_offer(cmd,
                         # Download icons
                         if icon_uris:
                             for size, uri in icon_uris.items():
+                                file_extension = 'png'
+                                file_path = os.path.join(icon_path, f"{size}.{file_extension}")
+                                
+                                # Skip if icon already exists
+                                if os.path.exists(file_path):
+                                    logger.info(f"Icon {size} already exists at {file_path}, skipping download")
+                                    continue
+                                
                                 try:
                                     logo_response = requests.get(uri)
                                     if logo_response.status_code == 200:
-                                        file_extension = 'png'
-                                        file_path = os.path.join(icon_path, f"{size}.{file_extension}")
-                                        
                                         with open(file_path, 'wb') as f:
                                             f.write(logo_response.content)
                                         logger.info(f"Downloaded {size} logo to {file_path}")
@@ -120,34 +151,7 @@ def get_offer(cmd,
                                 except Exception as e:
                                     logger.error(f"Error downloading {size} logo: {str(e)}")
 
-
-            # Format offer details
-            result = {
-                'name': data.get('name'),
-                'publisher': offer_content.get('offerPublisher', {}).get('publisherDisplayName'),
-                'offer_id': offer_content.get('offerId'),
-                'summary': offer_content.get('summary'),
-                'description': offer_content.get('description'),
-                'skus': []
-            }
-            
-            # Add SKU information
-            skus = data.get('properties', {}).get('marketplaceSkus', [])
-            for sku in skus:
-                sku_info = {
-                    'name': sku.get('displayName'),
-                    'id': sku.get('marketplaceSkuId'),
-                    'os_type': sku.get('operatingSystem', {}).get('type'),
-                    'versions': [
-                        {
-                            'version': v.get('name'),
-                            'size_mb': v.get('minimumDownloadSizeInMb')
-                        } for v in sku.get('marketplaceSkuVersions', [])[:3]  # Latest 3 versions
-                    ]
-                }
-                result['skus'].append(sku_info)
-            
-            return result
+            print ("Metadata and icons downloaded successfully")
             
         else:
             error_message = f"Request failed with status code: {response.status_code}"
@@ -166,91 +170,23 @@ def get_offer(cmd,
             'status': 'failed',
             'resource_group_name': resource_group_name
         }
-    
-def get_image_download_url(cmd, 
-                         resource_group_name,
-                         publisher,
-                         offer,
-                         sku,
-                         version,
-                         management_endpoint=None,
-                         provider_namespace="Microsoft.Edge",
-                         api_version="2024-11-01-preview"):
-    """Get download URL for a specific marketplace image version."""
 
-    from azure.cli.core.commands.client_factory import get_subscription_id
-    from azure.cli.core.util import send_raw_request
-    from knack.log import get_logger
-    
-    if management_endpoint is None:
-        management_endpoint = _get_management_endpoint(provider_namespace)
-    
-    logger = get_logger(__name__)
-
-    # Get subscription ID
-    subscription_id = get_subscription_id(cmd.cli_ctx)
-    
-    # Construct URL for the listDownloadUri API
-    url = (
-        f"https://{management_endpoint}"
-        f"/subscriptions/{subscription_id}"
-        f"/resourceGroups/{resource_group_name}"
-        f"/providers/{provider_namespace}/disconnectedOperations/demo-winfield1"
-        f"/images/{publisher}.{offer}.{sku}.{version}/listDownloadUri"
-        f"?api-version={api_version}"
-    )
-
-    try:
-        # Make POST request to get download URL
-        response = send_raw_request(cmd.cli_ctx, 'post', url, 
-                                  resource="https://management.azure.com")
-        
-        if response.status_code == 200:
-            download_info = response.json()
-            return {
-                'download_url': download_info.get('downloadUri'),
-                'expiry': download_info.get('expiryTime'),
-                'publisher': publisher,
-                'offer': offer,
-                'sku': sku,
-                'version': version
-            }
-        else:
-            error_message = f"Failed to get download URL. Status code: {response.status_code}"
-            logger.error(error_message)
-            return {
-                'error': error_message,
-                'status': 'failed',
-                'response': response.text
-            }
-            
-    except Exception as e:
-        logger.error(f"Error getting download URL: {str(e)}")
-        return {
-            'error': str(e),
-            'status': 'failed'
-        }
-
-def list_offers(cmd, 
-                resource_group_name,
-                management_endpoint=None,
-                provider_namespace="Microsoft.Edge",
-                sub_provider="Microsoft.EdgeMarketPlace",
-                api_version="2023-08-01-preview"):
+def list_offers(cmd, resource_group_name):
     """List all offers for disconnected operations."""
 
-    from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import send_raw_request
     from knack.log import get_logger
 
     logger = get_logger(__name__)
 
-    if management_endpoint is None:
-        management_endpoint = _get_management_endpoint(provider_namespace)
+    management_endpoint = _get_management_endpoint()
     
     # Get subscription ID from current context
     subscription_id = get_subscription_id(cmd.cli_ctx)
+    provider_namespace="Private.EdgeInternal"
+    sub_provider="Microsoft.EdgeMarketPlace"
+    api_version="2023-08-01-preview"
     
     # Construct URL with parameters
     url = (
@@ -275,27 +211,30 @@ def list_offers(cmd,
         
         if response.status_code == 200:
             data = response.json()
-            
-            # Format data for output
             result = []
+            
             for offer in data.get('value', []):
                 offer_content = offer.get('properties', {}).get('offerContent', {})
                 skus = offer.get('properties', {}).get('marketplaceSkus', [])
                 
                 for sku in skus:
-                    versions = sku.get('marketplaceSkuVersions', [])
-                    for version in versions[:3]:  # Show only latest 3 versions
-                        row = {
-                            'Publisher': offer_content.get('offerPublisher', {}).get('publisherDisplayName'),
-                            'Offer': offer_content.get('offerId'),
-                            'SKU': sku.get('marketplaceSkuId'),
-                            'Version': version.get('name'),
-                            'OS_Type': sku.get('operatingSystem', {}).get('type'),
-                            'Size_MB': version.get('minimumDownloadSizeInMb')
-                        }
-                        result.append(row)
+                    versions = sku.get('marketplaceSkuVersions', [])[:]
+                    # Format versions as comma-separated string with size
+                    version_str = ', '.join([f"{v.get('name')}({v.get('minimumDownloadSizeInMb')}MB)" 
+                                           for v in versions])
+                    
+                    # Create a single row with flattened version info
+                    row = {
+                        'Publisher': offer_content.get('offerPublisher', {}).get('publisherId'),
+                        'Offer': offer_content.get('offerId'),
+                        'SKU': sku.get('marketplaceSkuId'),
+                        'Versions': version_str,
+                        'OS_Type': sku.get('operatingSystem', {}).get('type')
+                    }
+                    result.append(row)
             
             return result
+            
         else:
             error_message = f"Request failed with status code: {response.status_code}"
             logger.error(error_message)

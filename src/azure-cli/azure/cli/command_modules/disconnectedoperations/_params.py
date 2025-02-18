@@ -11,38 +11,28 @@ from knack.arguments import CLIArgumentType
 def load_arguments(self, _):  # pylint: disable=unused-argument
     provider_namespace_type = CLIArgumentType(
         type=str,
-        help='Provider namespace. Use "Private.EdgeInternal" for test environment or "Microsoft.Edge" for production',
-        default="Microsoft.Edge"
+        help='Provider namespace. Use "Private.EdgeInternal" for test environment or "Microsoft.EdgeMarketplace" for production',
+        default="Private.EdgeInternal"
     )
 
     management_endpoint_type = CLIArgumentType(
         type=str,
-        help='Management endpoint URL. Uses brazilus.management.azure.com for test environment, management.azure.com for production',
-        default="management.azure.com"
+        help='Management endpoint URL. Use brazilus.management.azure.com for test environment, management.azure.com for production',
+        default="brazilus.management.azure.com"
     )
     
     with self.argument_context('disconnectedoperations edgemarketplace listoffers') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
-        c.argument('management_endpoint', arg_type=management_endpoint_type)
-        c.argument('provider_namespace', arg_type=provider_namespace_type)
-        c.argument('sub_provider', type=str, help='Sub-provider namespace', default="Microsoft.EdgeMarketPlace")
-        c.argument('api_version', type=str, help='API version', default="2023-08-01-preview")
 
-    with self.argument_context('disconnectedoperations edgemarketplace get-offer') as c:
+    with self.argument_context('disconnectedoperations edgemarketplace getoffer') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
         c.argument('offer_name', type=str, help='Name of the offer to retrieve')
-        c.argument('output_folder', type=str, help='Local folder path to save logos and metadata')
-        c.argument('management_endpoint', arg_type=management_endpoint_type)
-        c.argument('provider_namespace', arg_type=provider_namespace_type)
-        c.argument('sub_provider', type=str, help='Sub-provider namespace', default="Microsoft.EdgeMarketPlace")
-        c.argument('api_version', type=str, help='API version', default="2023-08-01-preview")
+        c.argument('product_name', type=str, help='Name of the product to retrieve')
 
-    with self.argument_context('disconnectedoperations edgemarketplace get-image-download-url') as c:
+    with self.argument_context('disconnectedoperations edgemarketplace packageoffer') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
-        c.argument('publisher', type=str, help='Publisher of the marketplace image')
-        c.argument('offer', type=str, help='Offer name')
-        c.argument('sku', type=str, help='SKU identifier')
-        c.argument('version', type=str, help='Version of the marketplace image')
-        c.argument('management_endpoint', arg_type=management_endpoint_type)
-        c.argument('provider_namespace', arg_type=provider_namespace_type)
-        c.argument('api_version', type=str, help='API version', default="2024-11-01-preview")
+        c.argument('publisher_name', type=str, help='Name of the publisher')
+        c.argument('offer_name', type=str, help='Name of the offer to package')
+        c.argument('sku', type=str, help='SKU of the product to retrieve')
+        c.argument('version', type=str, help='Version of the product to retrieve')
+        c.argument('output_folder', type=str, help='Drive and directory to save the package to. Example: E:\\ or D:\\packages\\')
