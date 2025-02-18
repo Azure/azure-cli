@@ -113,7 +113,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
     auto_scale_iops_arg_type = CLIArgumentType(
         arg_type=get_enum_type(['Enabled', 'Disabled']),
         options_list=['--auto-scale-iops'],
-        help='Enable or disable the auto scale iops. Default value is Disabled.'
+        help='Enable or disable the auto scale iops. Default value is Enabled.'
     )
 
     accelerated_logs_arg_type = CLIArgumentType(
@@ -329,10 +329,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         c.argument('tier', default='Burstable', arg_type=tier_arg_type)
         c.argument('sku_name', default='Standard_B1ms', arg_type=sku_name_arg_type)
         c.argument('storage_gb', default='32', arg_type=storage_gb_arg_type)
-        c.argument('version', default='5.7', arg_type=version_arg_type)
+        c.argument('version', default='8.0', arg_type=version_arg_type)
         c.argument('iops', arg_type=iops_arg_type)
         c.argument('auto_grow', default='Enabled', arg_type=auto_grow_arg_type)
-        c.argument('auto_scale_iops', default='Disabled', arg_type=auto_scale_iops_arg_type)
+        c.argument('auto_scale_iops', default='Enabled', arg_type=auto_scale_iops_arg_type)
         c.argument('accelerated_logs', arg_type=accelerated_logs_arg_type)
         c.argument('backup_retention', default=7, arg_type=mysql_backup_retention_arg_type)
         c.argument('backup_byok_identity', arg_type=backup_identity_arg_type)

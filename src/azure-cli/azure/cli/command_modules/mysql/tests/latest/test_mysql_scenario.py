@@ -139,7 +139,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
             self.cmd('config param-persist off')
 
         storage_size = 32
-        version = '5.7'
+        version = '8.0'
         location = DEFAULT_LOCATION
         sku_name = DEFAULT_GENERAL_PURPOSE_SKU
         memory_optimized_sku = DEFAULT_MEMORY_OPTIMIZED_SKU
