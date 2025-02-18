@@ -824,7 +824,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               proxy_agent_mode=None, source_snapshots_or_disks=None, source_snapshots_or_disks_size_gb=None,
               source_disk_restore_point=None, source_disk_restore_point_size_gb=None, ssh_key_type=None,
               additional_scheduled_events=None, enable_user_reboot_scheduled_events=None,
-              enable_user_redeploy_scheduled_events=None):
+              enable_user_redeploy_scheduled_events=None, enable_azure_monitor_metrics=None):
 
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
@@ -1167,6 +1167,32 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         except Exception as e:
             error_type = "Trusted Launch" if is_trusted_launch else "Confidential VM"
             logger.error('Failed to install Guest Attestation Extension for %s. %s', error_type, e)
+
+    if enable_azure_monitor_metrics:
+        vm = get_vm(cmd, resource_group_name, vm_name, 'instanceView')
+        client = _compute_client_factory(cmd.cli_ctx)
+        if vm.storage_profile.os_disk.os_type == 'Linux':
+            ext_name = 'AzureMonitorLinuxAgent'
+        if vm.storage_profile.os_disk.os_type == 'Windows':
+            ext_name = 'AzureMonitorWindowsAgent'
+        version = _normalize_extension_version(cmd.cli_ctx, 'Microsoft.Azure.Monitor',
+                                               ext_name, None, vm.location)
+        VirtualMachineExtension = cmd.get_models('VirtualMachineExtension')
+        ext = VirtualMachineExtension(location=vm.location,
+                                      publisher='Microsoft.Azure.Monitor',
+                                      type_properties_type=ext_name,
+                                      protected_settings=None,
+                                      type_handler_version=version,
+                                      settings=None,
+                                      auto_upgrade_minor_version=True,
+                                      enable_automatic_upgrade=True)
+        try:
+            LongRunningOperation(cmd.cli_ctx)(client.virtual_machine_extensions.begin_create_or_update(
+                resource_group_name, vm_name, ext_name, ext))
+            logger.info('Azure Monitor Agent Extension has been successfully installed')
+        except Exception as e:
+            logger.error('Failed to install Azure Monitor Agent Extension: %s', e)
+
     if count:
         vm_names = [vm_name + str(i) for i in range(count)]
     else:

@@ -2236,6 +2236,27 @@ class VMExtensionScenarioTest(ScenarioTest):
         ])
         self.cmd('vm extension delete --resource-group {rg} --vm-name {vm} --name {ext_name}')
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_monitor_metrics_extension')
+    def test_vm_monitor_metrics_extension(self, resource_group):
+        self.kwargs.update({
+            'vm1': self.create_random_name('vm', 10),
+            'vm2': self.create_random_name('vm', 10)
+        })
+        self.cmd('vm create -n {vm1} -g {rg} --image ubuntu2204 --enable-azure-monitor-metrics --nsg-rule NONE')
+        self.cmd('vm show -n {vm1} -g {rg}', checks=[
+            self.check('resources[0].name', 'AzureMonitorLinuxAgent'),
+            self.check('resources[0].publisher', 'Microsoft.Azure.Monitor'),
+            self.check('resources[0].typePropertiesType', 'AzureMonitorLinuxAgent'),
+            self.check('resources[0].type', 'Microsoft.Compute/virtualMachines/extensions')
+        ])
+        self.cmd('vm create -n {vm2} -g {rg} --image Win2022Datacenter --enable-azure-monitor-metrics --admin-username AzureUser --admin-password testPassword0 --nsg-rule NONE')
+        self.cmd('vm show -n {vm2} -g {rg}', checks=[
+            self.check('resources[0].name', 'AzureMonitorWindowsAgent'),
+            self.check('resources[0].publisher', 'Microsoft.Azure.Monitor'),
+            self.check('resources[0].typePropertiesType', 'AzureMonitorWindowsAgent'),
+            self.check('resources[0].type', 'Microsoft.Compute/virtualMachines/extensions')
+        ])
 
 class VMMachineExtensionImageScenarioTest(ScenarioTest):
 
