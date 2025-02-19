@@ -141,6 +141,7 @@ DEPENDENCIES = [
     'pycomposefile>=0.0.32',
     'PyGithub~=1.38',
     'PyNaCl~=1.5.0',
+    'pyOpenSSL>=17.1.0',
     'scp~=0.13.2',
     'semver==2.13.0',
     'setuptools',
