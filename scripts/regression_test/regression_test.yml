@@ -16,7 +16,7 @@ jobs:
   displayName: CLI Bump Version Update Version Files
   condition: ne(variables['PACKAGE'], '')
   pool:
-    name: ${{ variables.windows_pool }}
+    name: ${{ variables.ubuntu_pool }}
   steps:
     - task: UsePythonVersion@0
       inputs:
@@ -84,7 +84,7 @@ jobs:
       instance8:
         Instance_idx: 8
   pool:
-    name: ${{ variables.windows_pool }}
+    name: ${{ variables.ubuntu_pool }}
   steps:
     - task: UsePythonVersion@0
       inputs:
@@ -142,7 +142,7 @@ jobs:
   dependsOn: RerunTests
   condition: in(dependencies.RerunTests.result, 'Succeeded', 'Skipped')
   pool:
-    name: ${{ variables.windows_pool }}
+    name: ${{ variables.ubuntu_pool }}
   steps:
     - task: AzureCLI@1
       displayName: 'Create PR'
