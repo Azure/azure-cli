@@ -16,6 +16,24 @@ def transform_offers_table(result):
     # Transform each row while preserving order
     transformed = []
     for item in result:
+        row = OrderedDict([
+            ('Publisher', item['Publisher']),
+            ('Offer', item['Offer']),
+            ('SKU', item['SKU']),
+            ('Version', item['Versions']),
+            ('OS_Type', item['OS_Type'])
+        ])
+        transformed.append(row)
+    
+    return transformed
+
+def transform_offer_table(result):
+    if not result:
+        return result
+    
+    # Transform each row while preserving order
+    transformed = []
+    for item in result:
         # Format versions to be on separate lines if it's a list/array
         versions = item['Versions']
         if isinstance(versions, str):
@@ -27,7 +45,6 @@ def transform_offers_table(result):
             formatted_versions = '\n'.join(str(v).strip() for v in versions)
         else:
             formatted_versions = str(versions)
-
         row = OrderedDict([
             ('Publisher', item['Publisher']),
             ('Offer', item['Offer']),
@@ -46,6 +63,7 @@ def load_command_table(self, _):
 
     with self.command_group('disconnectedoperations edgemarketplace', custom_command_type=custom_command_type) as g:
         g.custom_command('listoffers', 'list_offers', table_transformer=transform_offers_table)
+        g.custom_command('getoffer', 'get_offer', table_transformer=transform_offer_table)
         g.custom_command('packageoffer', 'package_offer')
     
     return self.command_table
