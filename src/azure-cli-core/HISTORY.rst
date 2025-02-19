@@ -3,17 +3,6 @@
 Release History
 ===============
 
-2.66.1
-++++++
-* PREVIEW: Support managed identity on Azure Arc-enabled Windows server (#29187)
-* PREVIEW: Support managed identity on Azure Arc-enabled Linux server (#30267)
-* Drop old Track 2 SDK authentication support (#29690)
-* Resolve CVE-2024-50602 (#30533)
-* `aaz`: Support simple type parsed from string value (#30623)
-* Resolve CVE-2024-12797 (#30816)
-* Drop Track 1 SDK authentication (#29631)
-* `aaz`: Add cross tenants control for `AAZResourceIdArgFormat` (#30817)
-
 2.66.0
 ++++++
 * `aaz`: Support managed identity (#29953)
