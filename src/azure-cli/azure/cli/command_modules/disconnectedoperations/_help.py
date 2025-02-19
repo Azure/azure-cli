@@ -1,56 +1,109 @@
-from knack.help_files import helps
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
 
-helps['disconnectedoperations'] = """
-    type: group
-    short-summary: Commands to manage Azure Disconnected Operations.
-    long-summary: Manage Azure Disconnected Operations for Edge marketplace offers.
-"""
+from knack.help_files import helps
 
 helps['disconnectedoperations edgemarketplace'] = """
     type: group
-    short-summary: Manage Edge marketplace offers for disconnected operations.
-    long-summary: Commands to list, get details, and package Edge marketplace offers for disconnected operations.
+    short-summary: Manage Edge Marketplace offers for disconnected operations.
+    long-summary: Commands to list, get details, and package marketplace offers for disconnected operations.
 """
 
 helps['disconnectedoperations edgemarketplace listoffers'] = """
     type: command
-    short-summary: List all available Edge marketplace offers.
-    long-summary: List all available Edge marketplace offers with their publishers, SKUs, and versions.
+    short-summary: List all available marketplace offers.
     examples:
-        - name: List all offers in a resource group
-          text: az disconnectedoperations edgemarketplace listoffers -g myResourceGroup
+        - name: List all marketplace offers for a specific resource
+          text: >
+            az disconnectedoperations edgemarketplace listoffers --resource-group myResourceGroup --resource-name myResource
+        - name: List offers and format output as table
+          text: >
+            az disconnectedoperations edgemarketplace listoffers -g myResourceGroup -n myResource --output table
+        - name: List offers and filter output using JMESPath query
+          text: >
+            az disconnectedoperations edgemarketplace listoffers -g myResourceGroup -n myResource --query "[?OS_Type=='Linux']"
+    parameters:
+        - name: --resource-group -g
+          type: string
+          short-summary: Name of resource group
+        - name: --resource-name -n
+          type: string
+          short-summary: The resource name
+"""
+
+helps['disconnectedoperations edgemarketplace getoffer'] = """
+    type: command
+    short-summary: Get details of a specific marketplace offer.
+    examples:
+        - name: Get details of a specific marketplace offer
+          text: >
+            az disconnectedoperations edgemarketplace getoffer --resource-group myResourceGroup --resource-name myResource 
+            --publisher-name publisherName --offer-name offerName
+        - name: Get offer details and output as JSON
+          text: >
+            az disconnectedoperations edgemarketplace getoffer -g myResourceGroup -n myResource 
+            --publisher-name publisherName --offer-name offerName --output json
+        - name: Get offer details with custom query
+          text: >
+            az disconnectedoperations edgemarketplace getoffer -g myResourceGroup -n myResource 
+            --publisher-name publisherName --offer-name offerName --query "[].{SKU:SKU,Version:Versions}"
+    parameters:
+        - name: --resource-group -g
+          type: string
+          short-summary: Name of resource group
+        - name: --resource-name -n
+          type: string
+          short-summary: The resource name
+        - name: --publisher-name
+          type: string
+          short-summary: The publisher name of the offer
+        - name: --offer-name
+          type: string
+          short-summary: The name of the offer
 """
 
 helps['disconnectedoperations edgemarketplace packageoffer'] = """
     type: command
-    short-summary: Package an Edge marketplace offer for disconnected operations.
-    long-summary: Download and package an Edge marketplace offer including its metadata, logos, and other artifacts.
+    short-summary: Download and package a marketplace offer with its metadata and icons.
+    long-summary: Downloads the marketplace offer metadata, icons, and creates a package in the specified output folder.
+    examples:
+        - name: Package a marketplace offer with specific version
+          text: >
+            az disconnectedoperations edgemarketplace packageoffer --resource-group myResourceGroup --resource-name myResource 
+            --publisher-name publisherName --offer-name offerName --sku skuName --version versionNumber 
+            --output-folder ./output
+        - name: Package latest version of an offer
+          text: >
+            az disconnectedoperations edgemarketplace packageoffer -g myResourceGroup -n myResource 
+            --publisher-name publisherName --offer-name offerName --sku skuName 
+            --output-folder ./latest-package
+        - name: Package an offer and save to a specific directory
+          text: >
+            az disconnectedoperations edgemarketplace packageoffer -g myResourceGroup -n myResource 
+            --publisher-name publisherName --offer-name offerName --sku skuName 
+            --output-folder "D:\\MarketplacePackages"
     parameters:
         - name: --resource-group -g
           type: string
-          short-summary: Name of resource group.
-          required: true
+          short-summary: Name of resource group
+        - name: --resource-name -n
+          type: string
+          short-summary: The resource name
         - name: --publisher-name
           type: string
-          short-summary: Name of the publisher.
-          required: true
+          short-summary: The publisher name of the offer
         - name: --offer-name
           type: string
-          short-summary: Name of the offer.
-          required: true
+          short-summary: The name of the offer
         - name: --sku
           type: string
-          short-summary: SKU of the offer.
+          short-summary: The SKU of the offer
         - name: --version
           type: string
-          short-summary: Version of the offer. If not specified, latest version will be used.
+          short-summary: The version of the offer (optional, latest version will be used if not specified)
         - name: --output-folder
           type: string
-          short-summary: Output folder path for downloaded artifacts.
-          required: true
-    examples:
-        - name: Package latest version of an offer
-          text: az disconnectedoperations edgemarketplace packageoffer -g myResourceGroup --publisher-name publisherName --offer-name offerName --output-folder ./output
-        - name: Package specific version of an offer
-          text: az disconnectedoperations edgemarketplace packageoffer -g myResourceGroup --publisher-name publisherName --offer-name offerName --version 1.0.0 --output-folder ./output
+          short-summary: The folder path where the package will be downloaded
 """

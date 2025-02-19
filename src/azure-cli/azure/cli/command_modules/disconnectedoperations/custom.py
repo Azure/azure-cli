@@ -12,13 +12,15 @@ from knack.log import get_logger
 
 logger = get_logger(__name__)
 
-def _get_management_endpoint():
-    """Helper function to determine management endpoint based on provider namespace."""
-    return "brazilus.management.azure.com" # if provider_namespace == "Private.EdgeInternal" else "management.azure.com"
-
+def _get_management_endpoint(cli_ctx):
+    """Helper function to determine management endpoint based on cloud configuration."""
+    # cloud = cli_ctx.cloud
+    # return cloud.endpoints.resource_manager
+    return "brazilus.management.azure.com" # For testing purposes
 
 def package_offer(cmd, 
               resource_group_name,
+              resource_name,
               publisher_name,
               offer_name,
               sku,
@@ -34,7 +36,7 @@ def package_offer(cmd,
     from knack.log import get_logger
 
     # Use helper function if management_endpoint not explicitly provided
-    management_endpoint = _get_management_endpoint()
+    management_endpoint = _get_management_endpoint(cmd.cli_ctx)
     logger = get_logger(__name__)
 
     # Get subscription ID from current context
@@ -49,7 +51,7 @@ def package_offer(cmd,
         f"https://{management_endpoint}"
         f"/subscriptions/{subscription_id}"
         f"/resourceGroups/{resource_group_name}"
-        f"/providers/{provider_namespace}/disconnectedOperations/demo-winfield1"
+        f"/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{resource_name}"
         f"/providers/{sub_provider}/offers/{publisher_name}:{offer_name}"
         f"?api-version={api_version}"
     )
@@ -171,7 +173,7 @@ def package_offer(cmd,
             'resource_group_name': resource_group_name
         }
 
-def list_offers(cmd, resource_group_name):
+def list_offers(cmd, resource_group_name, resource_name):
     """List all offers for disconnected operations."""
 
     from azure.cli.core.commands.client_factory import get_subscription_id
@@ -180,7 +182,7 @@ def list_offers(cmd, resource_group_name):
 
     logger = get_logger(__name__)
 
-    management_endpoint = _get_management_endpoint()
+    management_endpoint = _get_management_endpoint(cmd.cli_ctx)
     
     # Get subscription ID from current context
     subscription_id = get_subscription_id(cmd.cli_ctx)
@@ -193,7 +195,7 @@ def list_offers(cmd, resource_group_name):
         f"https://{management_endpoint}"
         f"/subscriptions/{subscription_id}"
         f"/resourceGroups/{resource_group_name}"
-        f"/providers/{provider_namespace}/disconnectedOperations/demo-winfield1"
+        f"/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{resource_name}"
         f"/providers/{sub_provider}/offers"
         f"?api-version={api_version}"
     )
@@ -219,20 +221,98 @@ def list_offers(cmd, resource_group_name):
                 
                 for sku in skus:
                     versions = sku.get('marketplaceSkuVersions', [])[:]
-                    # Format versions as comma-separated string with size
-                    version_str = ', '.join([f"{v.get('name')}({v.get('minimumDownloadSizeInMb')}MB)" 
-                                           for v in versions])
-                    
-                    # Create a single row with flattened version info
                     row = {
                         'Publisher': offer_content.get('offerPublisher', {}).get('publisherId'),
                         'Offer': offer_content.get('offerId'),
                         'SKU': sku.get('marketplaceSkuId'),
-                        'Versions': version_str,
+                        'Versions': f"{len(versions)} {'version' if len(versions) == 1 else 'versions'} available",                        
                         'OS_Type': sku.get('operatingSystem', {}).get('type')
                     }
                     result.append(row)
             
+            return result
+            
+        else:
+            error_message = f"Request failed with status code: {response.status_code}"
+            logger.error(error_message)
+            return {
+                'error': error_message,
+                'status': 'failed',
+                'resource_group_name': resource_group_name,
+                'response': response.text
+            }
+            
+    except Exception as e:
+        logger.error(f"Failed to retrieve offers: {str(e)}")
+        return {
+            'error': str(e),
+            'status': 'failed',
+            'resource_group_name': resource_group_name
+        }
+    
+def get_offer(cmd, resource_group_name, resource_name, publisher_name, offer_name):
+    """List all offers for disconnected operations."""
+
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    from azure.cli.core.util import send_raw_request
+    from knack.log import get_logger
+
+    logger = get_logger(__name__)
+
+    management_endpoint = _get_management_endpoint(cmd.cli_ctx)
+    
+    # Get subscription ID from current context
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    provider_namespace="Private.EdgeInternal"
+    sub_provider="Microsoft.EdgeMarketPlace"
+    api_version="2023-08-01-preview"
+    
+    # Construct URL with parameters
+    url = (
+        f"https://{management_endpoint}"
+        f"/subscriptions/{subscription_id}"
+        f"/resourceGroups/{resource_group_name}"
+        f"/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{resource_name}"
+        f"/providers/{sub_provider}/offers/{publisher_name}:{offer_name}"
+        f"?api-version={api_version}"
+    )
+
+    # Define headers with resource for authentication
+    headers = {
+        'Content-Type': 'application/json',
+    }
+
+    # Define the resource for authentication
+    resource = "https://management.azure.com"  # Using standard Azure management endpoint
+    
+    try:
+        response = send_raw_request(cmd.cli_ctx, 'get', url, resource=resource)
+        
+        if response.status_code == 200:
+            data = response.json()
+            result = []
+            
+
+            offer_content = data.get('properties', {}).get('offerContent', {})
+            skus = data.get('properties', {}).get('marketplaceSkus', [])
+
+            for sku in skus:
+                # Get all versions for this SKU
+                versions = sku.get('marketplaceSkuVersions', [])[:]
+
+                # transform versions and size array into a multi-line string
+                version_str = ', '.join([f"{v.get('name')}({v.get('minimumDownloadSizeInMb')}MB)" 
+                                        for v in versions])
+                
+                # Create a single row with flattened version info
+                row = {
+                    'Publisher': offer_content.get('offerPublisher', {}).get('publisherId'),
+                    'Offer': offer_content.get('offerId'),
+                    'SKU': sku.get('marketplaceSkuId'),
+                    'Versions': version_str,
+                    'OS_Type': sku.get('operatingSystem', {}).get('type')
+                }
+                result.append(row)
             return result
             
         else:
