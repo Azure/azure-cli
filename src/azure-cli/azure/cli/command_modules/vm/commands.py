@@ -17,7 +17,7 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set,
                                                           cf_shared_gallery_image_version,
                                                           cf_capacity_reservation_groups, cf_capacity_reservations,
                                                           cf_vmss_run_commands,
-                                                          cf_gallery_application_version, cf_restore_point,
+                                                          cf_restore_point,
                                                           cf_restore_point_collection, cf_community_gallery,
                                                           cf_community_gallery_image,
                                                           cf_community_gallery_image_version)
@@ -34,7 +34,7 @@ from azure.cli.command_modules.vm._validators import (
     process_remove_identity_namespace, process_vm_secret_format, process_vm_vmss_stop, validate_vmss_update_namespace,
     process_vm_update_namespace, process_set_applications_namespace, process_vm_disk_attach_namespace,
     process_image_version_create_namespace, process_image_version_update_namespace,
-    process_image_version_undelete_namespace, process_ppg_create_namespace, process_vm_disk_detach_namespace)
+    process_image_version_undelete_namespace, process_vm_disk_detach_namespace)
 
 from azure.cli.command_modules.vm._image_builder import (
     process_image_template_create_namespace, process_img_tmpl_output_add_namespace,
@@ -158,9 +158,8 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.compute.operations#GalleryApplicationsOperations.{}',
     )
 
-    compute_gallery_application_version_sdk = CliCommandType(
+    compute_gallery_application_version_profile = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations#GalleryApplicationVersionsOperations.{}',
-        client_factory=cf_gallery_application_version,
     )
 
     compute_proximity_placement_groups_sdk = CliCommandType(
@@ -561,14 +560,15 @@ def load_command_table(self, _):
         from .operations.sig_gallery_application import SigGalleryApplicationCreate
         self.command_table['sig gallery-application create'] = SigGalleryApplicationCreate(loader=self)
 
-    with self.command_group('sig gallery-application version', compute_gallery_application_version_sdk, client_factory=cf_gallery_application_version, min_api='2021-07-01', operation_group='gallery_application_versions') as g:
-        g.custom_command('create', 'gallery_application_version_create', supports_no_wait=True)
-        g.custom_command('update', 'gallery_application_version_update', supports_no_wait=True)
+    with self.command_group('sig gallery-application version', compute_gallery_application_version_profile, operation_group='gallery_application_versions'):
+        from .operations.sig_gallery_application_version import SigGalleryApplicationVersionCreate, SiggalleryApplicationversionUpdate
+        self.command_table['sig gallery-application version create'] = SigGalleryApplicationVersionCreate(loader=self)
+        self.command_table['sig gallery-application version update'] = SiggalleryApplicationversionUpdate(loader=self)
 
     with self.command_group('ppg', compute_proximity_placement_groups_sdk, min_api='2018-04-01', client_factory=cf_proximity_placement_groups) as g:
-        g.custom_command('create', 'create_proximity_placement_group', validator=process_ppg_create_namespace)
-        g.custom_command('list', 'list_proximity_placement_groups')
-        g.generic_update_command('update', setter_name='create_or_update', custom_func_name='update_ppg')
+        from .operations.ppg import PPGCreate, PPGUpdate
+        self.command_table['ppg create'] = PPGCreate(loader=self)
+        self.command_table['ppg update'] = PPGUpdate(loader=self)
 
     with self.command_group('vm monitor log', client_factory=cf_log_analytics_data_plane) as g:
         g.custom_command('show', 'execute_query_for_vm', transform=transform_log_analytics_query_output)  # pylint: disable=show-command

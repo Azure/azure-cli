@@ -408,6 +408,12 @@ def load_arguments(self, _):
         if self.supported_api_version(max_api='2016-04-30-preview', operation_group='virtual_machines'):
             c.argument('name', name_arg_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.Compute/availabilitySets'), help='Name of the availability set')
             c.argument('availability_set_name', options_list=['--availability-set-name'])
+
+    for scope in ['vm availability-set create', 'vm availability-set update']:
+        with self.argument_context(scope) as c:
+            c.argument('additional_scheduled_events', options_list=['--additional-scheduled-events', '--additional-events'], arg_type=get_three_state_flag(), min_api='2024-07-01', help='The configuration parameter used while creating event grid and resource graph scheduled event setting.')
+            c.argument('enable_user_reboot_scheduled_events', options_list=['--enable-user-reboot-scheduled-events', '--enable-reboot'], arg_type=get_three_state_flag(), min_api='2024-07-01', help='The configuration parameter used while publishing scheduled events additional publishing targets.')
+            c.argument('enable_user_redeploy_scheduled_events', options_list=['--enable-user-redeploy-scheduled-events', '--enable-redeploy'], arg_type=get_three_state_flag(), min_api='2024-07-01', help='The configuration parameter used while creating user initiated redeploy scheduled event setting creation.')
     # endregion
 
     # region VirtualMachines
@@ -1407,54 +1413,6 @@ def load_arguments(self, _):
         c.argument('show_next_marker', action='store_true', help='Show nextMarker in result when specified.')
 
     # endregion
-
-    # region Gallery applications
-    with self.argument_context('sig gallery-application version') as c:
-        c.argument('gallery_application_name', options_list=['--application-name'],
-                   help='The name of the gallery Application')
-        c.argument('gallery_application_version_name', options_list=['--name', '-n', '--version-name'],
-                   help='The name of the gallery Application Version')
-
-    with self.argument_context('sig gallery-application version create') as c:
-        c.argument('package_file_name', help='The name to assign the downloaded package file on the VM. This is limited to 4096 characters.'
-                                             'If not specified, the package file will be named the same as the Gallery Application name.')
-        c.argument('config_file_name', help='The name to assign the downloaded config file on the VM. This is limited to 4096 characters. '
-                                            'If not specified, the config file will be named the Gallery Application name appended with "_config"')
-
-    for scope in ['create', 'update']:
-        with self.argument_context('sig gallery-application version {}'.format(scope)) as c:
-            c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False,
-                       validator=get_default_location_from_resource_group)
-            c.argument('tags', tags_type)
-            c.argument('package_file_link', help='The mediaLink of the artifact, must be a readable storage page blob.')
-            c.argument('install_command', help='The path and arguments to install the gallery application.')
-            c.argument('remove_command', help='The path and arguments to remove the gallery application.')
-            c.argument('update_command', help='The path and arguments to update the gallery application. If not present,'
-                                              ' then update operation will invoke remove command on the previous version'
-                                              ' and install command on the current version of the gallery application.')
-            c.argument('target_regions', type=validate_file_or_dict, help='The target regions where the Image Version is'
-                       'going to be replicated to. This property is updatable. Expected value: '
-                       'json-string/json-file/@json-file.')
-            c.argument('default_file_link', help='The default configuration link of the artifact, must be a readable storage page blob.')
-            c.argument('exclude_from', arg_type=get_three_state_flag(), help='If set to true, Virtual Machines '
-                       'deployed from the latest version of the Image Definition won\'t use this Image Version.',
-                       arg_group='Publishing Profile')
-            c.argument('end_of_life_date', help='The end of life date of the gallery image version. This property can be '
-                       'used for decommissioning purposes. This property is updatable.', arg_group='Publishing Profile')
-    # endregion
-
-    # region Proximity Placement Group
-    with self.argument_context('ppg', min_api='2018-04-01') as c:
-        c.argument('proximity_placement_group_name', arg_type=name_arg_type, help="The name of the proximity placement group.")
-
-    with self.argument_context('ppg create') as c:
-        c.argument('tags', tags_type, min_api='2018-04-01')
-        c.argument('zone', zone_type, min_api='2021-11-01')
-
-    for scope in ['ppg create', 'ppg update']:
-        with self.argument_context(scope) as c:
-            c.argument('ppg_type', options_list=['--type', '-t'], arg_type=get_enum_type(self.get_models('ProximityPlacementGroupType')), min_api='2018-04-01', help="The type of the proximity placement group.")
-            c.argument('intent_vm_sizes', nargs='*', min_api='2021-11-01', help="Specify possible sizes of virtual machines that can be created in the proximity placement group.")
 
     with self.argument_context('vm create', min_api='2018-04-01') as c:
         c.argument('proximity_placement_group', options_list=['--ppg'], help="The name or ID of the proximity placement group the VM should be associated with.",
