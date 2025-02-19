@@ -309,7 +309,7 @@ def git_push(message, modules=[]):
             run_command(["git", "checkout", "-b", branch_name])
             run_command(["git", "push", "--set-upstream", "azclibot", branch_name], check_return_code=True)
         run_command(["git", "add", "src/*"], check_return_code=True)
-        run_command(["git", "commit", "-m", message], check_return_code=True)
+        run_command(["git", "commit", "-m", message, "--no-verify"], check_return_code=True)
     except RuntimeError as ex:
         raise ex
     retry = 3
@@ -317,7 +317,7 @@ def git_push(message, modules=[]):
         try:
             run_command(["git", "fetch"], check_return_code=True)
             run_command(["git", "pull", "--rebase"], check_return_code=True)
-            run_command(["git", "push"], check_return_code=True)
+            run_command(["git", "push", "--no-verify"], check_return_code=True)
 
             logger.info("git push all recording files")
             break
