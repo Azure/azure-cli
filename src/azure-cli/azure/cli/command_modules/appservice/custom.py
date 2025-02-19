@@ -2624,7 +2624,9 @@ def update_container_settings(cmd, resource_group_name, name, container_registry
                               container_image_name=None, container_registry_user=None,
                               websites_enable_app_service_storage=None, container_registry_password=None,
                               multicontainer_config_type=None, multicontainer_config_file=None,
-                              slot=None, min_replicas=None, max_replicas=None):
+                              slot=None, min_replicas=None, max_replicas=None,
+                              assign_identities=None, role='AcrPull', scope=None,
+                              acr_use_identity=False, acr_identity=None):
     settings = []
     if container_registry_url is not None:
         settings.append('DOCKER_REGISTRY_SERVER_URL=' + container_registry_url)
@@ -2649,6 +2651,13 @@ def update_container_settings(cmd, resource_group_name, name, container_registry
     if container_registry_user or container_registry_password or container_registry_url or websites_enable_app_service_storage:  # pylint: disable=line-too-long
         update_app_settings(cmd, resource_group_name, name, settings, slot)
     settings = get_app_settings(cmd, resource_group_name, name, slot)
+
+    if assign_identities is not None:
+        assign_identity(cmd, resource_group_name, name, assign_identities, role, slot, scope)
+
+    if acr_identity:
+        update_site_configs(cmd, resource_group_name, name, acr_use_identity=acr_use_identity, acr_identity=acr_identity)
+
     if container_image_name is not None:
         _add_fx_version(cmd, resource_group_name, name, container_image_name, slot)
 
