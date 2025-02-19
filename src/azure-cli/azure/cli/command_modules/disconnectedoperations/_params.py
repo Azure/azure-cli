@@ -6,31 +6,22 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands.parameters import resource_group_name_type
-from knack.arguments import CLIArgumentType
 
-def load_arguments(self, _):  # pylint: disable=unused-argument
-    provider_namespace_type = CLIArgumentType(
-        type=str,
-        help='Provider namespace. Use "Private.EdgeInternal" for test environment or "Microsoft.EdgeMarketplace" for production',
-        default="Private.EdgeInternal"
-    )
-
-    management_endpoint_type = CLIArgumentType(
-        type=str,
-        help='Management endpoint URL. Use brazilus.management.azure.com for test environment, management.azure.com for production',
-        default="brazilus.management.azure.com"
-    )
+def load_arguments(self, _):
     
     with self.argument_context('disconnectedoperations edgemarketplace listoffers') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('resource_name', type=str, help='Name of the resource to list offers for')
 
     with self.argument_context('disconnectedoperations edgemarketplace getoffer') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('resource_name', type=str, help='Name of the resource to list offers for')
         c.argument('offer_name', type=str, help='Name of the offer to retrieve')
         c.argument('product_name', type=str, help='Name of the product to retrieve')
 
     with self.argument_context('disconnectedoperations edgemarketplace packageoffer') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('resource_name', type=str, help='Name of the resource to list offers for')
         c.argument('publisher_name', type=str, help='Name of the publisher')
         c.argument('offer_name', type=str, help='Name of the offer to package')
         c.argument('sku', type=str, help='SKU of the product to retrieve')

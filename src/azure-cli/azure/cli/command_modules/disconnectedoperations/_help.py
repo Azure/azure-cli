@@ -5,6 +5,11 @@
 
 from knack.help_files import helps
 
+helps['disconnectedoperations'] = """
+    type: group
+    short-summary: Manage disconnected operations.
+    long-summary: Commands to list, get details, and package marketplace offers for disconnected operations.
+"""
 helps['disconnectedoperations edgemarketplace'] = """
     type: group
     short-summary: Manage Edge Marketplace offers for disconnected operations.
@@ -20,15 +25,15 @@ helps['disconnectedoperations edgemarketplace listoffers'] = """
             az disconnectedoperations edgemarketplace listoffers --resource-group myResourceGroup --resource-name myResource
         - name: List offers and format output as table
           text: >
-            az disconnectedoperations edgemarketplace listoffers -g myResourceGroup -n myResource --output table
+            az disconnectedoperations edgemarketplace listoffers -g myResourceGroup --resource-name myResource --output table
         - name: List offers and filter output using JMESPath query
           text: >
-            az disconnectedoperations edgemarketplace listoffers -g myResourceGroup -n myResource --query "[?OS_Type=='Linux']"
+            az disconnectedoperations edgemarketplace listoffers -g myResourceGroup --resource-name myResource --query "[?OS_Type=='Linux']"
     parameters:
         - name: --resource-group -g
           type: string
           short-summary: Name of resource group
-        - name: --resource-name -n
+        - name: --resource-name
           type: string
           short-summary: The resource name
 """
@@ -43,17 +48,17 @@ helps['disconnectedoperations edgemarketplace getoffer'] = """
             --publisher-name publisherName --offer-name offerName
         - name: Get offer details and output as JSON
           text: >
-            az disconnectedoperations edgemarketplace getoffer -g myResourceGroup -n myResource 
+            az disconnectedoperations edgemarketplace getoffer -g myResourceGroup --resource-name myResource 
             --publisher-name publisherName --offer-name offerName --output json
         - name: Get offer details with custom query
           text: >
-            az disconnectedoperations edgemarketplace getoffer -g myResourceGroup -n myResource 
+            az disconnectedoperations edgemarketplace getoffer -g myResourceGroup --resource-name myResource 
             --publisher-name publisherName --offer-name offerName --query "[].{SKU:SKU,Version:Versions}"
     parameters:
         - name: --resource-group -g
           type: string
           short-summary: Name of resource group
-        - name: --resource-name -n
+        - name: --resource-name
           type: string
           short-summary: The resource name
         - name: --publisher-name
@@ -73,22 +78,12 @@ helps['disconnectedoperations edgemarketplace packageoffer'] = """
           text: >
             az disconnectedoperations edgemarketplace packageoffer --resource-group myResourceGroup --resource-name myResource 
             --publisher-name publisherName --offer-name offerName --sku skuName --version versionNumber 
-            --output-folder ./output
-        - name: Package latest version of an offer
-          text: >
-            az disconnectedoperations edgemarketplace packageoffer -g myResourceGroup -n myResource 
-            --publisher-name publisherName --offer-name offerName --sku skuName 
-            --output-folder ./latest-package
-        - name: Package an offer and save to a specific directory
-          text: >
-            az disconnectedoperations edgemarketplace packageoffer -g myResourceGroup -n myResource 
-            --publisher-name publisherName --offer-name offerName --sku skuName 
             --output-folder "D:\\MarketplacePackages"
     parameters:
         - name: --resource-group -g
           type: string
           short-summary: Name of resource group
-        - name: --resource-name -n
+        - name: --resource-name
           type: string
           short-summary: The resource name
         - name: --publisher-name
