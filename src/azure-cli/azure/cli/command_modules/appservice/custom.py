@@ -1162,7 +1162,7 @@ def _validate_sitecontainer_internal(new_sitecontainer_spec, existing_sitecontai
     existing_same_port_sitecontainer = next((spec for spec in existing_sitecontainers_spec
                                              if spec.target_port == new_sitecontainer_spec.target_port and
                                              spec.name != new_sitecontainer_spec.name), None)
-    if existing_main_sitecontainer:
+    if existing_same_port_sitecontainer:
         raise ValidationError(("SiteContainer '{}' with targetPort '{}' already exists. "
                               "targetPort must be unique for SiteContainer '{}'.")
                               .format(existing_same_port_sitecontainer.name, new_sitecontainer_spec.target_port,
