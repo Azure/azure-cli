@@ -1034,6 +1034,26 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('resource_group_name', arg_type=resource_group_name_type)
                 c.argument('server_name', options_list=['--server-name', '-s'], id_part='name', arg_type=server_name_arg_type, required=False)
 
+        # index tuning
+        if command_group == 'postgres':
+            for scope in ['update', 'list-tuning-options', 'list-recommendations']:
+                argument_context_string = '{} flexible-server index-tuning {}'.format(command_group, scope)
+                with self.argument_context(argument_context_string) as c:
+                    c.argument('server_name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
+
+                with self.argument_context('{} flexible-server index-tuning update'.format(command_group)) as c:
+                    c.argument('state',
+                            options_list=['--state'],
+                            required=True,
+                            help='State of index tuning setting.',
+                            arg_type=get_enum_type(['Enabled', 'Disabled']))
+
+                with self.argument_context('{} flexible-server index-tuning list-recommendations'.format(command_group)) as c:
+                    c.argument('recommendation_type',
+                            options_list=['--recommendation-type', '-r'],
+                            help='Retrieve recommendations based on type.',
+                            arg_type=get_enum_type(['CreateIndex', 'DropIndex']))
+
         # GTID
         if command_group == 'mysql':
             with self.argument_context('{} flexible-server gtid reset'.format(command_group)) as c:
