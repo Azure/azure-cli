@@ -1021,28 +1021,29 @@ class SiteContainerSpec:
     @classmethod
     def from_json(cls, json_data):
         name = json_data.get("name")
-        properties = json_data.get("properties", {})
-        volume_mounts = properties.get("volumeMounts")
+        properties = {k.lower(): v for k, v in json_data.get("properties", {}).items()}
+        volume_mounts = properties.get("volumemounts")
         if volume_mounts:
             for mount in volume_mounts:
-                if "containerMountPath" in mount:
-                    mount["container_mount_path"] = mount.pop("containerMountPath")
-                if "volumeSubPath" in mount:
-                    mount["volume_sub_path"] = mount.pop("volumeSubPath")
-                if "readOnly" in mount:
-                    mount["read_only"] = mount.pop("readOnly")
+                mount = {k.lower(): v for k, v in mount.items()}
+                if "containermountpath" in mount:
+                    mount["container_mount_path"] = mount.pop("containermountpath")
+                if "volumesubpath" in mount:
+                    mount["volume_sub_path"] = mount.pop("volumesubpath")
+                if "readonly" in mount:
+                    mount["read_only"] = mount.pop("readonly")
         return cls(
             name=name,
             image=properties.get("image"),
-            target_port=properties.get("targetPort"),
-            is_main=properties.get("isMain"),
-            start_up_command=properties.get("startUpCommand"),
-            auth_type=properties.get("authType"),
-            user_name=properties.get("userName"),
-            password_secret=properties.get("passwordSecret"),
-            user_managed_identity_client_id=properties.get("userManagedIdentityClientId"),
+            target_port=properties.get("targetport"),
+            is_main=properties.get("ismain"),
+            start_up_command=properties.get("startupcommand"),
+            auth_type=properties.get("authtype"),
+            user_name=properties.get("username"),
+            password_secret=properties.get("passwordsecret"),
+            user_managed_identity_client_id=properties.get("usermanagedidentityclientid"),
             volume_mounts=volume_mounts,
-            environment_variables=properties.get("environmentVariables")
+            environment_variables=properties.get("environmentvariables")
         )
 
     @classmethod
