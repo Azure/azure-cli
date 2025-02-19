@@ -182,7 +182,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument("image", help='Image Name')
         c.argument("target_port", help='Target port for SiteContainer')
         c.argument("startup_cmd", help='Startup Command for the SiteContainer')
-        c.argument("is_main", help="true if the container is the main site container; false otherwise",
+        c.argument("is_main", help="true if the container is the main SiteContainer; false otherwise",
                    arg_type=get_three_state_flag())
         c.argument("system_assigned_identity", help="If true, the system-assigned identity will be used for auth while pulling image",
                    arg_type=get_three_state_flag())

@@ -2271,7 +2271,7 @@ long-summary: |
     }
     ]
 examples:
-  - name: Create a sitecontainer for a linux webapp
+  - name: Create a main sitecontainer for a linux webapp
     text: az webapp sitecontainers create --name MyWebApp --resource-group MyResourceGroup --container-name MyContainer --image MyImageRegistry.io/MyImage:latest --target-port 80 --is-main
   - name : Create or update multiple sitecontainers for a linux webapp using a json sitecontainer-spec file
     text: az webapp sitecontainers create --name MyWebApp --resource-group MyResourceGroup --sitecontainer-spec-file ./sitecontainersspec.json
