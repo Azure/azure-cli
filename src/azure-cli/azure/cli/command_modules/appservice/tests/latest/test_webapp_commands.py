@@ -1402,7 +1402,7 @@ class WebappACRScenarioTest(ScenarioTest):
         self.cmd('webapp create -g {} -n {} --plan {} --runtime {}'.format(resource_group, webapp_name, plan_name, runtime))
 
         # add custom image to ACR
-        self.cmd('acr build -g {} --registry {} --platform Linux --image {} {}'.format(resource_group, acr_registry_name, custom_image_name, custom_container_source))
+        self.cmd('acr build -g {} --registry {} --platform Linux --no-logs --image {} {}'.format(resource_group, acr_registry_name, custom_image_name, custom_container_source))
 
         self.cmd('webapp config container set -g {} -n {} --assign-identity "[system]" --role "AcrPull" --scope {} --acr-use-identity true --acr-identity "[system]" --container-image-name "{}.azurecr.io/{}"'.format(
             resource_group, webapp_name, registry_id, acr_registry_name, custom_image_name
