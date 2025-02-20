@@ -335,7 +335,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         c.argument('tier', default='Burstable', arg_type=tier_arg_type)
         c.argument('sku_name', default='Standard_B1ms', arg_type=sku_name_arg_type)
         c.argument('storage_gb', default='32', arg_type=storage_gb_arg_type)
-        c.argument('version', default='8.0', arg_type=version_arg_type)
+        c.argument('version', default='8.0.21', arg_type=version_arg_type)
         c.argument('iops', arg_type=iops_arg_type)
         c.argument('auto_grow', default='Enabled', arg_type=auto_grow_arg_type)
         c.argument('auto_scale_iops', default='Enabled', arg_type=auto_scale_iops_arg_type)
