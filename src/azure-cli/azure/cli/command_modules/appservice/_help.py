@@ -2226,7 +2226,7 @@ long-summary: |
             "environmentVariables": [
                 {
                     "name": "VARIABLE_1",
-                    "value": "APPSETTING_KEY1"
+                    "value": "APPSETTING_NAME1"
                 }
             ],
             "volumeMounts": [
