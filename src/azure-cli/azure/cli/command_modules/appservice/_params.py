@@ -438,7 +438,7 @@ subscription than the app service environment, please use the resource ID for --
             c.argument('role', help="Role name or id the managed identity will be assigned")
             c.argument('acr_use_identity', help="Enable or disable pull image from acr use managed identity", arg_type=get_three_state_flag(return_label=True))
             c.argument('acr_identity', help='Accept system or user assigned identity which will be set for acr image pull. '
-                                       'Use \'[system]\' to refer system assigned identity, or a resource id to refer user assigned identity.')
+                       'Use \'[system]\' to refer system assigned identity, or a resource id to refer user assigned identity.')
 
         with self.argument_context(scope + ' deployment container config') as c:
             c.argument('enable', options_list=['--enable-cd', '-e'], help='enable/disable continuous deployment',

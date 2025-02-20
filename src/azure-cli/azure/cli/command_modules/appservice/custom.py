@@ -2656,7 +2656,8 @@ def update_container_settings(cmd, resource_group_name, name, container_registry
         assign_identity(cmd, resource_group_name, name, assign_identities, role, slot, scope)
 
     if acr_identity:
-        update_site_configs(cmd, resource_group_name, name, acr_use_identity=acr_use_identity, acr_identity=acr_identity)
+        update_site_configs(cmd, resource_group_name, name, acr_use_identity=acr_use_identity,
+                            acr_identity=acr_identity)
 
     if container_image_name is not None:
         _add_fx_version(cmd, resource_group_name, name, container_image_name, slot)
