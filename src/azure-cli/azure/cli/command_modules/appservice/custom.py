@@ -1069,8 +1069,8 @@ def create_webapp_sitecontainers(cmd, name, resource_group, slot=None, container
                                  registry_password=None, sitecontainers_spec_file=None):
     import os
     response = None
-    is_system_identity_enabled, user_assigned_identities, app_settings = \
-        _get_site_props_for_sitecontainer_app_internal(cmd, resource_group, name, slot)
+    is_system_identity_enabled, user_assigned_identities, app_settings = _get_site_props_for_sitecontainer_app_internal(
+        cmd, resource_group, name, slot)
 
     # check if sitecontainers_spec_file is provided
     if sitecontainers_spec_file:

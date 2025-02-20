@@ -187,9 +187,9 @@ subscription than the app service environment, please use the resource ID for --
         c.argument("system_assigned_identity", help="If true, the system-assigned identity will be used for auth while pulling image",
                    arg_type=get_three_state_flag())
         c.argument("user_assigned_identity", help='ClientID for the user-maganed identity which will be used for auth while pulling image')
-        c.argument("registry_username", help='username used for image registry auth')
-        c.argument("registry_password", help='password used for image registry auth')
-        c.argument("sitecontainers_spec_file", help="path to a json sitecontainer spec file containing a list of sitecontainers, other sitecontainer input args will be ignored if this arg is provided")
+        c.argument("registry_username", help='Username used for image registry auth')
+        c.argument("registry_password", help='Password used for image registry auth')
+        c.argument("sitecontainers_spec_file", help="Path to a json sitecontainer spec file containing a list of sitecontainers, other sitecontainer input args will be ignored if this arg is provided")
 
     with self.argument_context("webapp sitecontainers update") as c:
         c.argument("image", help='Image Name')
@@ -200,8 +200,8 @@ subscription than the app service environment, please use the resource ID for --
         c.argument("system_assigned_identity", help="If true, the system-assigned identity will be used for auth while pulling image",
                    arg_type=get_three_state_flag())
         c.argument("user_assigned_identity", help='ClientID for the user-maganed identity which will be used for auth while pulling image')
-        c.argument("registry_username", help='username used for image registry auth')
-        c.argument("registry_password", help='password used for image registry auth')
+        c.argument("registry_username", help='Username used for image registry auth')
+        c.argument("registry_password", help='Password used for image registry auth')
 
     with self.argument_context('webapp show') as c:
         c.argument('name', arg_type=webapp_name_arg_type)
