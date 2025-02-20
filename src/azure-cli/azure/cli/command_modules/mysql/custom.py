@@ -1677,7 +1677,7 @@ def _determine_acceleratedLogs(accelerated_logs, tier):
 
 def _determine_hight_availability(high_availability, single_az):
     if not single_az and high_availability.lower() == 'samezone':
-        return'ZoneRedundant'
+        return 'ZoneRedundant'
 
 
 def _determine_storage_redundancy(storage_redundancy, tier):
