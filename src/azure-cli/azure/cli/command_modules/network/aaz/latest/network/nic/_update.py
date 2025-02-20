@@ -107,12 +107,6 @@ class Update(AAZCommand):
             nullable=True,
             enum={"A1": "A1", "A2": "A2", "A4": "A4", "A8": "A8", "None": "None"},
         )
-        _args_schema.disable_tcp_state_tracking = AAZBoolArg(
-            options=["--disable-tcp-state-tracking"],
-            arg_group="Properties",
-            help="Indicates whether to disable tcp state tracking.",
-            nullable=True,
-        )
         _args_schema.ip_configurations = AAZListArg(
             options=["--ip-configurations"],
             arg_group="Properties",
@@ -2218,7 +2212,6 @@ class Update(AAZCommand):
             if properties is not None:
                 properties.set_prop("auxiliaryMode", AAZStrType, ".auxiliary_mode")
                 properties.set_prop("auxiliarySku", AAZStrType, ".auxiliary_sku")
-                properties.set_prop("disableTcpStateTracking", AAZBoolType, ".disable_tcp_state_tracking")
                 properties.set_prop("dnsSettings", AAZObjectType)
                 properties.set_prop("enableAcceleratedNetworking", AAZBoolType, ".accelerated_networking")
                 properties.set_prop("enableIPForwarding", AAZBoolType, ".ip_forwarding")

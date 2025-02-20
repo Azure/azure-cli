@@ -77,7 +77,7 @@ class Create(AAZCommand):
             help="Static IP address to use or \"\"('\"\"' in PowerShell) to use a dynamic address.",
         )
         _args_schema.private_ip_address_prefix_length = AAZIntArg(
-            options=["--private-ip-address-prefix-length"],
+            options=["--private-ip-prefix-len", "--private-ip-address-prefix-length"],
             arg_group="IP Configuration",
             help="The private IP address prefix length. If specified and the allocation method is dynamic, the service will allocate a CIDR block instead of a single IP address.",
             nullable=True,
