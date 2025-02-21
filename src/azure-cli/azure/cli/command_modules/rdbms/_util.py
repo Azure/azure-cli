@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 from datetime import datetime
-from enum import Enum
 from time import sleep
 from knack.arguments import ignore_type
 from knack.log import get_logger
@@ -104,6 +103,7 @@ def retryable_method(retries=3, interval_sec=5, exception_type=Exception, condit
                 sleep(interval_sec)
         return call
     return decorate
+
 
 def get_index_tuning_settings_map():
     return {

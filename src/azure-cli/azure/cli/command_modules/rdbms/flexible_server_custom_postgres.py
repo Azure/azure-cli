@@ -1619,17 +1619,17 @@ def index_tuning_update(cmd, client, resource_group_name, server_name, index_tun
         configuration_name = "pg_qs.query_capture_mode"
         value = "all"
         return _update_parameters(cmd, client, server_name, configuration_name, resource_group_name, source, value)
-    else:
-        logger.warning("Disabling index tuning for the server.")
-        configuration_name = "index_tuning.mode"
-        value = "off"
-        return _update_parameters(cmd, client, server_name, configuration_name, resource_group_name, source, value)
+
+    logger.warning("Disabling index tuning for the server.")
+    configuration_name = "index_tuning.mode"
+    value = "off"
+    return _update_parameters(cmd, client, server_name, configuration_name, resource_group_name, source, value)
 
 
 def index_tuning_show(cmd, client, resource_group_name, server_name):
     validate_resource_group(resource_group_name)
     index_tuning_configuration = client.get(resource_group_name, server_name, "index_tuning.mode")
-    
+
     if index_tuning_configuration.value.lower() == "report":
         print("Index tuning is enabled for the server.")
     else:

@@ -1044,27 +1044,27 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
             with self.argument_context('{} flexible-server index-tuning update'.format(command_group)) as c:
                 c.argument('index_tuning_enabled',
-                            options_list=['--enabled'],
-                            required=True,
-                            help='Enable or disable index tuning feature.',
-                            arg_type=get_enum_type(['True', 'False']))
+                           options_list=['--enabled'],
+                           required=True,
+                           help='Enable or disable index tuning feature.',
+                           arg_type=get_enum_type(['True', 'False']))
 
             with self.argument_context('{} flexible-server index-tuning list-recommendations'.format(command_group)) as c:
                 c.argument('recommendation_type',
-                            options_list=['--recommendation-type', '-r'],
-                            help='Retrieve recommendations based on type.',
-                            arg_type=get_enum_type(['CreateIndex', 'DropIndex']))
+                           options_list=['--recommendation-type', '-r'],
+                           help='Retrieve recommendations based on type.',
+                           arg_type=get_enum_type(['CreateIndex', 'DropIndex']))
 
             for scope in ['show-settings', 'set-settings']:
                 argument_context_string = '{} flexible-server index-tuning {}'.format(command_group, scope)
                 with self.argument_context(argument_context_string) as c:
                     c.argument('setting_name', options_list=['--name', '-n'], required=True,
-                                arg_type=get_enum_type(get_index_tuning_settings_map().keys()),
-                                help='The name of the tuning setting.')
+                               arg_type=get_enum_type(get_index_tuning_settings_map().keys()),
+                               help='The name of the tuning setting.')
 
             with self.argument_context('{} flexible-server index-tuning set-settings'.format(command_group)) as c:
                 c.argument('value', options_list=['--value', '-v'],
-                            help='Value of the tuning setting.')
+                           help='Value of the tuning setting.')
 
         # GTID
         if command_group == 'mysql':
