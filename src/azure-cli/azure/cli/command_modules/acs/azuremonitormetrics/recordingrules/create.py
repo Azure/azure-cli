@@ -17,12 +17,9 @@ def get_recording_rules_template(cmd, azure_monitor_workspace_resource_id):
     r = send_raw_request(cmd.cli_ctx, "GET", url, headers=headers)
     data = json.loads(r.text)
 
-    # Safely filter the templates with case-insensitive check
     filtered_templates = [
         template for template in data.get('value', [])
-        if template.get("properties", {}).get("alertRuleType", "").lower() == "microsoft.alertsmanagement/prometheusrulegroups"
-        and isinstance(template.get("properties", {}).get("rulesArmTemplate", {}).get("resources"), list)
-        and all(
+        if template.get("properties", {}).get("alertRuleType", "").lower() == "microsoft.alertsmanagement/prometheusrulegroups" and isinstance(template.get("properties", {}).get("rulesArmTemplate", {}).get("resources"), list) and all(
             isinstance(rule, dict) and "record" in rule and "expression" in rule
             for resource in template["properties"]["rulesArmTemplate"]["resources"]
             if resource.get("type", "").lower() == "microsoft.alertsmanagement/prometheusrulegroups"
@@ -59,9 +56,7 @@ def put_rules(cmd, default_rule_group_id, default_rule_group_name, mac_region, c
                              body=body, headers=headers)
             break
         except CLIError as e:
-            error = e
-    else:
-        raise error  # pylint: disable=used-before-assignment
+            raise e
 
 
 # pylint: disable=line-too-long
