@@ -4609,7 +4609,7 @@ class NICIPConfigUpdate(_NICIPConfigUpdate):
 
     def pre_operations(self):
         args = self.ctx.args
-        if has_value(args.private_ip_address) and not has_value(args.private_ip_address_prefix_length):
+        if has_value(args.private_ip_address):
             if args.private_ip_address is None or args.private_ip_address == "":
                 # switch private IP address allocation to dynamic if empty string is used
                 args.private_ip_address = None
