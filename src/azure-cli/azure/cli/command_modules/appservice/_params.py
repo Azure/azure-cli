@@ -175,8 +175,10 @@ subscription than the app service environment, please use the resource ID for --
 
     with self.argument_context("webapp sitecontainers") as c:
         c.argument('name', arg_type=webapp_name_arg_type, help='Name of the linux webapp')
+        c.argument('resource_group', arg_type=resource_group_name_type)
         c.argument("container_name", help='Name of the SiteContainer')
         c.argument('slot', options_list=['--slot', '-s'], help='Name of the web app slot. Default to the productions slot if not specified.')
+        c.ignore('ids')
 
     with self.argument_context("webapp sitecontainers create") as c:
         c.argument("image", help='Image Name')
@@ -184,12 +186,12 @@ subscription than the app service environment, please use the resource ID for --
         c.argument("startup_cmd", help='Startup Command for the SiteContainer')
         c.argument("is_main", help="true if the container is the main SiteContainer; false otherwise",
                    arg_type=get_three_state_flag())
-        c.argument("system_assigned_identity", help="If true, the system-assigned identity will be used for auth while pulling image",
+        c.argument("system_assigned_identity", options_list=['--system-assigned-identity', '-si'], help="If true, the system-assigned identity will be used for auth while pulling image",
                    arg_type=get_three_state_flag())
-        c.argument("user_assigned_identity", help='ClientID for the user-maganed identity which will be used for auth while pulling image')
+        c.argument("user_assigned_identity", options_list=['--user-assigned-identity', '-ui'], help='ClientID for the user-maganed identity which will be used for auth while pulling image')
         c.argument("registry_username", help='Username used for image registry auth')
         c.argument("registry_password", help='Password used for image registry auth')
-        c.argument("sitecontainers_spec_file", help="Path to a json sitecontainer spec file containing a list of sitecontainers, other sitecontainer input args will be ignored if this arg is provided")
+        c.argument("sitecontainers_spec_file", options_list=['--sitecontainers-spec-file', '-ssf'], help="Path to a json sitecontainer spec file containing a list of sitecontainers, other sitecontainer input args will be ignored if this arg is provided")
 
     with self.argument_context("webapp sitecontainers update") as c:
         c.argument("image", help='Image Name')
@@ -197,9 +199,9 @@ subscription than the app service environment, please use the resource ID for --
         c.argument("startup_cmd", help='Startup Command for the SiteContainer')
         c.argument("is_main", help="true if the container is the main site container; false otherwise",
                    arg_type=get_three_state_flag())
-        c.argument("system_assigned_identity", help="If true, the system-assigned identity will be used for auth while pulling image",
+        c.argument("system_assigned_identity", options_list=['--system-assigned-identity', '-si'], help="If true, the system-assigned identity will be used for auth while pulling image",
                    arg_type=get_three_state_flag())
-        c.argument("user_assigned_identity", help='ClientID for the user-maganed identity which will be used for auth while pulling image')
+        c.argument("user_assigned_identity", options_list=['--user-assigned-identity', '-ui'], help='ClientID for the user-maganed identity which will be used for auth while pulling image')
         c.argument("registry_username", help='Username used for image registry auth')
         c.argument("registry_password", help='Password used for image registry auth')
 

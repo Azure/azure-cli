@@ -2210,11 +2210,16 @@ examples:
     crafted: true
 """
 
+helps['webapp sitecontainers'] = """
+type: group
+short-summary: Manage linux web apps sitecontainers.
+"""
+
 helps['webapp sitecontainers create'] = """
 type: command
 short-summary: Create sitecontainers for a linux webapp
 long-summary: |
-    Multiple sitecontainers can be added or updated at once by passing arg --sitecontainer-spec-file, which is the path to a json file containing an array of sitecontainer specs.
+    Multiple sitecontainers can be added or updated at once by passing arg --sitecontainers-spec-file, which is the path to a json file containing an array of sitecontainer specs.
     Example json file:
     [
     {
@@ -2274,7 +2279,7 @@ examples:
   - name: Create a main sitecontainer for a linux webapp
     text: az webapp sitecontainers create --name MyWebApp --resource-group MyResourceGroup --container-name MyContainer --image MyImageRegistry.io/MyImage:latest --target-port 80 --is-main
   - name : Create or update multiple sitecontainers for a linux webapp using a json sitecontainer-spec file
-    text: az webapp sitecontainers create --name MyWebApp --resource-group MyResourceGroup --sitecontainer-spec-file ./sitecontainersspec.json
+    text: az webapp sitecontainers create --name MyWebApp --resource-group MyResourceGroup --sitecontainers-spec-file ./sitecontainersspec.json
 """
 
 
@@ -2310,7 +2315,7 @@ type: command
 short-summary: List all the sitecontainers for a linux webapp
 examples:
   - name: List all the sitecontainers for a linux webapp
-    text: az webapp sitecontainers list --name MyWebApp --resource-group MyResourceGroup --container-name MyContainer
+    text: az webapp sitecontainers list --name MyWebApp --resource-group MyResourceGroup
 """
 
 
