@@ -4696,12 +4696,12 @@ class NetworkNicSubresourceScenarioTest(ScenarioTest):
             'config2': self.create_random_name('config', 10)
         })
         self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet} --address-prefix 10.0.0.0/16 --subnet-prefix 10.0.0.0/24')
-        self.cmd('network nic create -g {rg} -n {nic} --vnet-name {vnet} --subnet {subnet} --accelerated-networking true ')  # --disable-tcp-state-tracking true
-        self.cmd('network nic ip-config create -g {rg} -n {config1} --nic-name {nic} --private-ip-address 10.0.0.5 --private-ip-address-version IPv4 --private-ip-address-prefix-length 28 ', checks=[
+        self.cmd('network nic create -g {rg} -n {nic} --vnet-name {vnet} --subnet {subnet} --accelerated-networking true ')
+        self.cmd('network nic ip-config create -g {rg} -n {config1} --nic-name {nic} --private-ip-address-version IPv4 --private-ip-address-prefix-length 28 --make-primary false', checks=[
             self.check('privateIPAddressPrefixLength', 28)
         ])
 
-        self.cmd('network nic ip-config create -g {rg} -n {config2} --nic-name {nic} --private-ip-address 10.0.0.5 --private-ip-address-version IPv4 ', checks=[
+        self.cmd('network nic ip-config create -g {rg} -n {config2} --nic-name {nic}  --private-ip-address-version IPv4 ', checks=[
             self.check('privateIPAddressPrefixLength', None)
         ])
         self.cmd('network nic ip-config update -g {rg} -n {config2} --nic-name {nic} --private-ip-address-prefix-length 28', checks=[

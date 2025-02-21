@@ -4472,9 +4472,11 @@ class NICIPConfigCreate(_NICIPConfigCreate):
 
     def pre_operations(self):
         args = self.ctx.args
-        args.private_ip_allocation_method = "Dynamic"
-        if has_value(args.private_ip_address) and not has_value(args.private_ip_address_prefix_length):
-            args.private_ip_allocation_method = "Static"
+        args.private_ip_allocation_method = "Static" if has_value(args.private_ip_address) else "Dynamic"
+        if has_value(args.private_ip_address_prefix_length) and has_value(args.make_primary) and \
+                args.make_primary.to_serialized_data() is True:
+            raise ArgumentUsageError(
+                'usage error: When `--private-ip-address-prefix-length` is specified, `--make-primary` must be false')
 
         args.asgs_obj = assign_aaz_list_arg(
             args.asgs_obj,
@@ -4617,8 +4619,10 @@ class NICIPConfigUpdate(_NICIPConfigUpdate):
                 # if specific address provided, allocation is static
                 args.private_ip_allocation_method = "Static"
 
-        if has_value(args.private_ip_address_prefix_length):
-            args.private_ip_allocation_method = "Dynamic"
+        if has_value(args.private_ip_address_prefix_length) and has_value(args.make_primary) and \
+                args.make_primary.to_serialized_data() is True:
+            raise ArgumentUsageError(
+                'usage error: When `--private-ip-address-prefix-length` is specified, `--make-primary` must be false')
 
     def pre_instance_update(self, instance):
         args = self.ctx.args
