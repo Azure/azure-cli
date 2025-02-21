@@ -146,7 +146,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_webapp_sitecontainers')
         g.custom_command('update', 'update_webapp_sitecontainer')
         g.custom_command('delete', 'delete_webapp_sitecontainer')
-        g.custom_command('show', 'get_webapp_sitecontainer')
+        g.custom_show_command('show', 'get_webapp_sitecontainer')
         g.custom_command('list', 'list_webapp_sitecontainers')
         g.custom_command('status', 'get_webapp_sitecontainers_status')
         g.custom_command('log', 'get_webapp_sitecontainer_log')
