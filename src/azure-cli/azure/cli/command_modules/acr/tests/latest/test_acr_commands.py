@@ -115,6 +115,19 @@ class AcrCommandsTests(ScenarioTest):
             self.check_pattern('availableLoginServerName','{registry_name}-[a-zA-Z0-9]+\.*')
         ])
         
+        
+    def test_check_name_availability_dnl_scope(self):
+        # the chance of this randomly generated name has a duplication is rare
+        name = self.create_random_name('clireg', 20)
+        self.kwargs.update({
+            'name': name
+        })
+
+        self.cmd('acr check-name -n {name} --dnlscope noreuse', checks=[
+            self.check('nameAvailable', True),
+            self.check_pattern('availableLoginServerName','{registry_name}-[a-zA-Z0-9]+\.*')
+        ])
+        
     @ResourceGroupPreparer()
     def test_acr_create_with_managed_registry(self, resource_group, resource_group_location):
         registry_name = self.create_random_name('clireg', 20)
