@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 from datetime import datetime
+from enum import Enum
 from time import sleep
 from knack.arguments import ignore_type
 from knack.log import get_logger
@@ -103,3 +104,19 @@ def retryable_method(retries=3, interval_sec=5, exception_type=Exception, condit
                 sleep(interval_sec)
         return call
     return decorate
+
+def get_index_tuning_settings_map():
+    return {
+        'analysis-interval': 'index_tuning.analysis_interval',
+        'max-columns-per-index': 'index_tuning.max_columns_per_index',
+        'max-index-count': 'index_tuning.max_index_count',
+        'max-indexes-per-table': 'index_tuning.max_indexes_per_table',
+        'max-queries-per-database': 'index_tuning.max_queries_per_database',
+        'max-regression-factor': 'index_tuning.max_regression_factor',
+        'max-total-size-factor': 'index_tuning.max_total_size_factor',
+        'min-improvement-factor': 'index_tuning.min_improvement_factor',
+        'mode': 'index_tuning.mode',
+        'unused-dml-per-table': 'index_tuning.unused_dml_per_table',
+        'unused-min-period': 'index_tuning.unused_min_period',
+        'unused-reads-per-table': 'index_tuning.unused_reads_per_table'
+    }

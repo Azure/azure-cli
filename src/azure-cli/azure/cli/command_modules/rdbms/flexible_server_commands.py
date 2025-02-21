@@ -23,8 +23,7 @@ from azure.cli.command_modules.rdbms._client_factory import (
     cf_postgres_flexible_private_link_resources,
     cf_postgres_flexible_virtual_endpoints,
     cf_postgres_flexible_server_threat_protection_settings,
-    cf_postgres_flexible_server_log_files,
-    cf_postgres_flexible_tuning_options)
+    cf_postgres_flexible_server_log_files)
 
 from ._transformers import (
     table_transform_output,
@@ -124,11 +123,6 @@ def load_flexibleserver_command_table(self, _):
     postgres_flexible_server_private_link_resources_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.postgresqlflexibleservers.operations#PrivateLinkResourcesOperations.{}',
         client_factory=cf_postgres_flexible_private_link_resources
-    )
-
-    postgres_flexible_tuning_options_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.postgresqlflexibleservers.operations#TuningOptionsOperations.{}',
-        client_factory=cf_postgres_flexible_tuning_options
     )
 
     # MERU COMMANDS
@@ -303,8 +297,11 @@ def load_flexibleserver_command_table(self, _):
         g.custom_command('stop', 'flexible_server_fabric_mirroring_stop')
         g.custom_command('update-databases', 'flexible_server_fabric_mirroring_update_databases')
 
-    with self.command_group('postgres flexible-server index-tuning', postgres_flexible_tuning_options_sdk,
-                            client_factory=cf_postgres_flexible_tuning_options) as g:
+    with self.command_group('postgres flexible-server index-tuning', postgres_flexible_config_sdk,
+                            client_factory=cf_postgres_flexible_config) as g:
         g.custom_command('update', 'index_tuning_update', custom_command_type=flexible_servers_custom_postgres)
-        g.custom_command('list-tuning-options', 'tuning_options_list', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_command('show', 'index_tuning_show', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_command('list-settings', 'index_tuning_settings_list', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_command('show-settings', 'index_tuning_settings_get', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_command('set-settings', 'index_tuning_settings_set', custom_command_type=flexible_servers_custom_postgres)
         g.custom_command('list-recommendations', 'recommendations_list', custom_command_type=flexible_servers_custom_postgres)
