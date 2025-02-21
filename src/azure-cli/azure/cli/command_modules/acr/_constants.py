@@ -11,6 +11,8 @@ REGISTRY_RESOURCE_TYPE = ACR_RESOURCE_PROVIDER + '/registries'
 WEBHOOK_RESOURCE_TYPE = REGISTRY_RESOURCE_TYPE + '/webhooks'
 REPLICATION_RESOURCE_TYPE = REGISTRY_RESOURCE_TYPE + '/replications'
 
+CREDENTIAL_SET_RESOURCE_ID_TEMPLATE = '/subscriptions/{sub_id}/resourceGroups/{rg}/providers/Microsoft.ContainerRegistry/registries/{reg_name}/credentialSets/{cred_set_name}'
+
 TASK_RESOURCE_TYPE = REGISTRY_RESOURCE_TYPE + '/tasks'
 TASK_VALID_VSTS_URLS = ['visualstudio.com', 'dev.azure.com']
 TASK_RESOURCE_ID_TEMPLATE = '/subscriptions/{sub_id}/resourceGroups/{rg}/providers/Microsoft.ContainerRegistry/registries/{reg}/tasks/{name}'

@@ -52,6 +52,7 @@ DEPENDENCIES = [
     'humanfriendly~=10.0',
     'jmespath',
     'knack~=0.11.0',
+    'microsoft-security-utilities-secret-masker~=1.0.0b2',
     'msal-extensions==1.2.0',
     'msal[broker]==1.31.2b1',
     'msrestazure~=0.6.4',
@@ -61,8 +62,8 @@ DEPENDENCIES = [
     'psutil>=5.9; sys_platform != "cygwin"',
     'PyJWT>=2.1.0',
     'pyopenssl>=17.1.0',  # https://github.com/pyca/pyopenssl/pull/612
+    'py-deviceid',
     'requests[socks]',
-    'microsoft-security-utilities-secret-masker~=1.0.0b2',
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
