@@ -20,21 +20,21 @@ interactions:
       ParameterSetName:
       - -n -g --routing-method --unique-dns-name
       User-Agent:
-      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_always_serve000001/providers/Microsoft.Network/trafficmanagerprofiles/profile-000002?api-version=2022-04-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_traffic_manager_always_serve000001\/providers\/Microsoft.Network\/trafficManagerProfiles\/profile-000002","name":"profile-000002","type":"Microsoft.Network\/trafficManagerProfiles","location":"global","properties":{"profileStatus":"Enabled","trafficRoutingMethod":"Weighted","dnsConfig":{"relativeName":"mytrafficmanager001100a1","fqdn":"mytrafficmanager001100a1.trafficmanager.net","ttl":30},"monitorConfig":{"profileMonitorStatus":"Inactive","protocol":"HTTP","port":80,"path":"\/","intervalInSeconds":30,"toleratedNumberOfFailures":3,"timeoutInSeconds":10},"endpoints":[],"trafficViewEnrollmentStatus":"Disabled","maxReturn":null}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_traffic_manager_always_serve000001\/providers\/Microsoft.Network\/trafficManagerProfiles\/profile-000002","name":"profile-000002","type":"Microsoft.Network\/trafficManagerProfiles","location":"global","properties":{"profileStatus":"Enabled","trafficRoutingMethod":"Weighted","dnsConfig":{"relativeName":"mytrafficmanager001100a1","fqdn":"mytrafficmanager001100a1.trafficmanager.net","ttl":30},"monitorConfig":{"profileMonitorStatus":"Inactive","protocol":"HTTP","port":80,"path":"\/","intervalInSeconds":30,"toleratedNumberOfFailures":3,"timeoutInSeconds":10},"endpoints":[],"trafficViewEnrollmentStatus":"Disabled","maxReturn":null,"recordType":null}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '721'
+      - '739'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 25 Jul 2023 08:35:03 GMT
+      - Thu, 20 Feb 2025 19:24:30 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -43,8 +43,10 @@ interactions:
       - 4.0.30319
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/20a76cbf-a078-4708-845e-d67fe9218962
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '4499'
+      - '4498'
       x-powered-by:
       - ASP.NET
     status:
@@ -69,7 +71,7 @@ interactions:
       ParameterSetName:
       - -n -g --profile-name --type --weight --target --always-serve
       User-Agent:
-      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_always_serve000001/providers/Microsoft.Network/trafficmanagerprofiles/profile-000002/externalEndpoints/endpoint-000003?api-version=2022-04-01
   response:
@@ -83,7 +85,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 25 Jul 2023 08:35:30 GMT
+      - Thu, 20 Feb 2025 19:24:32 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -92,105 +94,8 @@ interactions:
       - 4.0.30319
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '249'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 201
-      message: Created
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network traffic-manager endpoint update
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --profile-name --type --weight --target --always-serve
-      User-Agent:
-      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_always_serve000001/providers/Microsoft.Network/trafficmanagerprofiles/profile-000002/externalEndpoints/endpoint-000003?api-version=2022-04-01
-  response:
-    body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_traffic_manager_always_serve000001\/providers\/Microsoft.Network\/trafficManagerProfiles\/profile-000002\/externalEndpoints\/endpoint-000003","name":"endpoint-000003","type":"Microsoft.Network\/trafficManagerProfiles\/externalEndpoints","properties":{"endpointStatus":"Enabled","endpointMonitorStatus":"Unmonitored","targetResourceId":null,"target":"www.microsoft.com","weight":50,"priority":1,"endpointLocation":null,"minChildEndpoints":null,"alwaysServe":"Enabled"}}'
-    headers:
-      cache-control:
-      - private
-      content-length:
-      - '555'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 25 Jul 2023 08:35:59 GMT
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-aspnet-version:
-      - 4.0.30319
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '1999'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_always_serve000001/providers/Microsoft.Network/trafficManagerProfiles/profile-000002/externalEndpoints/endpoint-000003",
-      "name": "endpoint-000003", "properties": {"alwaysServe": "Disabled", "endpointMonitorStatus":
-      "Unmonitored", "endpointStatus": "Enabled", "priority": 1, "target": "www.contoso.com",
-      "weight": 25}, "type": "Microsoft.Network/trafficManagerProfiles/externalEndpoints"}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network traffic-manager endpoint update
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '487'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - -n -g --profile-name --type --weight --target --always-serve
-      User-Agent:
-      - AZURECLI/2.50.0 (AAZ) azsdk-python-core/1.26.0 Python/3.9.5 (Windows-10-10.0.22621-SP0)
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_always_serve000001/providers/Microsoft.Network/trafficmanagerprofiles/profile-000002/externalEndpoints/endpoint-000003?api-version=2022-04-01
-  response:
-    body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_traffic_manager_always_serve000001\/providers\/Microsoft.Network\/trafficManagerProfiles\/profile-000002\/externalEndpoints\/endpoint-000003","name":"endpoint-000003","type":"Microsoft.Network\/trafficManagerProfiles\/externalEndpoints","properties":{"endpointStatus":"Enabled","endpointMonitorStatus":"CheckingEndpoint","targetResourceId":null,"target":"www.contoso.com","weight":25,"priority":1,"endpointLocation":null,"minChildEndpoints":null,"alwaysServe":"Disabled"}}'
-    headers:
-      cache-control:
-      - private
-      content-length:
-      - '559'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 25 Jul 2023 08:36:10 GMT
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-aspnet-version:
-      - 4.0.30319
-      x-content-type-options:
-      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/3f4f45d5-303b-4587-a682-a51db5515ac9
       x-ms-ratelimit-remaining-subscription-resource-requests:
       - '249'
       x-powered-by:

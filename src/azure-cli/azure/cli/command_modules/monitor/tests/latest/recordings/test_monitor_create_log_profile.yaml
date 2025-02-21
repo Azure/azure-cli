@@ -13,21 +13,21 @@ interactions:
       ParameterSetName:
       - --query -o
       User-Agent:
-      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-monitor/3.0.0 Python/3.8.8rc1 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Insights/logprofiles?api-version=2016-03-01
   response:
     body:
-      string: '{"value":[]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.insights/logprofiles/clitest3s6uhwufdefj4","type":null,"name":"clitest3s6uhwufdefj4","location":null,"kind":null,"tags":null,"properties":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_lp_create3vnz6h52baxgbshck2ken5bsusiqkkteslvl6v5s6dxr3u3sp/providers/Microsoft.Storage/storageAccounts/clitestlun32q46a5wxv2f5w","serviceBusRuleId":null,"locations":["westus","southcentralus"],"categories":["Write"],"retentionPolicy":{"enabled":false,"days":100}},"identity":null}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '12'
+      - '614'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 05 Jan 2022 08:42:27 GMT
+      - Thu, 20 Feb 2025 10:42:34 GMT
       expires:
       - '-1'
       pragma:
@@ -36,212 +36,12 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"location": "southcentralus", "properties": {"storageAccountId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_lp_create000001/providers/Microsoft.Storage/storageAccounts/clitest000002",
-      "locations": ["westus", "southcentralus"], "categories": ["Write"], "retentionPolicy":
-      {"enabled": false, "days": 100}}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - monitor log-profiles create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '347'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - --categories --enabled --days --location --locations --name --storage-account-id
-      User-Agent:
-      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-monitor/3.0.0 Python/3.8.8rc1 (Windows-10-10.0.22000-SP0)
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Insights/logprofiles/clitest000003?api-version=2016-03-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.insights/logprofiles/clitest000003","type":null,"name":"clitest000003","location":"southcentralus","kind":null,"tags":null,"properties":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_lp_create000001/providers/Microsoft.Storage/storageAccounts/clitest000002","serviceBusRuleId":null,"locations":["westus","southcentralus"],"categories":["Write"],"retentionPolicy":{"enabled":false,"days":100}},"identity":null}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '546'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 05 Jan 2022 08:42:30 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - monitor log-profiles show
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n
-      User-Agent:
-      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-monitor/3.0.0 Python/3.8.8rc1 (Windows-10-10.0.22000-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Insights/logprofiles/clitest000003?api-version=2016-03-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.insights/logprofiles/clitest000003","type":null,"name":"clitest000003","location":null,"kind":null,"tags":null,"properties":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_lp_create000001/providers/Microsoft.Storage/storageAccounts/clitest000002","serviceBusRuleId":null,"locations":["westus","southcentralus"],"categories":["Write"],"retentionPolicy":{"enabled":false,"days":100}},"identity":null}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '534'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 05 Jan 2022 08:42:33 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - monitor log-profiles update
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n --set
-      User-Agent:
-      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-monitor/3.0.0 Python/3.8.8rc1 (Windows-10-10.0.22000-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Insights/logprofiles/clitest000003?api-version=2016-03-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.insights/logprofiles/clitest000003","type":null,"name":"clitest000003","location":null,"kind":null,"tags":null,"properties":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_lp_create000001/providers/Microsoft.Storage/storageAccounts/clitest000002","serviceBusRuleId":null,"locations":["westus","southcentralus"],"categories":["Write"],"retentionPolicy":{"enabled":false,"days":100}},"identity":null}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '534'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 05 Jan 2022 08:42:34 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"location": "southcentralus", "properties": {"storageAccountId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_lp_create000001/providers/Microsoft.Storage/storageAccounts/clitest000002",
-      "locations": ["westus", "southcentralus"], "categories": ["Write"], "retentionPolicy":
-      {"enabled": true, "days": 100}}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - monitor log-profiles update
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '346'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - -n --set
-      User-Agent:
-      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-monitor/3.0.0 Python/3.8.8rc1 (Windows-10-10.0.22000-SP0)
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Insights/logprofiles/clitest000003?api-version=2016-03-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.insights/logprofiles/clitest000003","type":null,"name":"clitest000003","location":"southcentralus","kind":null,"tags":null,"properties":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_lp_create000001/providers/Microsoft.Storage/storageAccounts/clitest000002","serviceBusRuleId":null,"locations":["westus","southcentralus"],"categories":["Write"],"retentionPolicy":{"enabled":true,"days":100}},"identity":null}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '545'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 05 Jan 2022 08:42:39 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/aa23382b-3ed4-4a9a-a84a-675672aedb09
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
     status:
       code: 200
       message: OK
@@ -261,9 +61,9 @@ interactions:
       ParameterSetName:
       - -n
       User-Agent:
-      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-monitor/3.0.0 Python/3.8.8rc1 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Insights/logprofiles/clitest000003?api-version=2016-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Insights/logprofiles/clitest3s6uhwufdefj4?api-version=2016-03-01
   response:
     body:
       string: ''
@@ -273,7 +73,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Wed, 05 Jan 2022 08:42:40 GMT
+      - Thu, 20 Feb 2025 10:42:36 GMT
       expires:
       - '-1'
       pragma:
@@ -284,8 +84,66 @@ interactions:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/811cb46a-fbb6-4dde-a5f3-9c89e0fb9d87
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
+      - '199'
+      x-ms-ratelimit-remaining-subscription-global-deletes:
+      - '2999'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "southcentralus", "properties": {"categories": ["Write"],
+      "locations": ["westus", "southcentralus"], "retentionPolicy": {"days": 100,
+      "enabled": false}, "storageAccountId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_lp_create000001/providers/Microsoft.Storage/storageAccounts/clitest000002"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-profiles create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '347'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --categories --enabled --days --location --locations --name --storage-account-id
+      User-Agent:
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Insights/logprofiles/clitest000003?api-version=2016-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.insights/logprofiles/clitest000003","type":null,"name":"clitest000003","location":"southcentralus","kind":null,"tags":null,"properties":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_lp_create000001/providers/Microsoft.Storage/storageAccounts/clitest000002","serviceBusRuleId":null,"locations":["westus","southcentralus"],"categories":["Write"],"retentionPolicy":{"enabled":false,"days":100}},"identity":null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '546'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 20 Feb 2025 10:42:38 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/6d30b3c6-db11-4b8a-86ed-943fcb2c981e
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '199'
     status:
       code: 200
       message: OK

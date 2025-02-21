@@ -1,13 +1,12 @@
 interactions:
 - request:
-    body: '{"location": "global", "properties": {"description": "Test", "severity":
-      2, "enabled": true, "scopes": ["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_skip_metric_validation000001/providers/Microsoft.Storage/storageAccounts/clitest000002"],
-      "evaluationFrequency": "PT1M", "windowSize": "PT5M", "targetResourceRegion":
-      "westus", "criteria": {"odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
-      "allOf": [{"criterionType": "StaticThresholdCriterion", "name": "cond0", "metricName":
-      "UnemittedMetric", "metricNamespace": "MyNs", "timeAggregation": "Average",
-      "dimensions": [], "skipMetricValidation": true, "operator": "GreaterThanOrEqual",
-      "threshold": 10.0}]}}}'
+    body: '{"location": "global", "properties": {"criteria": {"odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
+      "allOf": [{"criterionType": "StaticThresholdCriterion", "dimensions": [], "metricName":
+      "UnemittedMetric", "metricNamespace": "MyNs", "name": "cond0", "operator": "GreaterThanOrEqual",
+      "skipMetricValidation": true, "threshold": 10.0, "timeAggregation": "Average"}]},
+      "description": "Test", "enabled": true, "evaluationFrequency": "PT1M", "scopes":
+      ["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_skip_metric_validation000001/providers/Microsoft.Storage/storageAccounts/clitest000002"],
+      "severity": 2, "targetResourceRegion": "westus", "windowSize": "PT5M"}}'
     headers:
       Accept:
       - application/json
@@ -18,13 +17,13 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '765'
+      - '729'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n --scopes --region --description --condition
       User-Agent:
-      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-monitor/2.0.0 Python/3.9.7 (Windows-10-10.0.19042-SP0)
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_skip_metric_validation000001/providers/Microsoft.Insights/metricAlerts/alert1?api-version=2018-03-01
   response:
@@ -45,17 +44,17 @@ interactions:
         \   \"targetResourceRegion\": \"westus\",\r\n    \"actions\": []\r\n  }\r\n}"
     headers:
       api-supported-versions:
-      - 2017-09-01-preview, 2018-03-01
+      - 2017-09-01-preview, 2018-03-01, 2024-01-01-preview
       arr-disable-session-affinity:
       - 'true'
       cache-control:
       - no-cache
       content-length:
-      - '1244'
+      - '1183'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 27 Oct 2021 02:37:52 GMT
+      - Thu, 20 Feb 2025 06:11:55 GMT
       expires:
       - '-1'
       pragma:
@@ -64,14 +63,14 @@ interactions:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
       vary:
-      - Accept-Encoding,Accept-Encoding
+      - Accept-Encoding
       x-aspnet-version:
       - 4.0.30319
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/b3cf753d-7f14-4853-aef8-dce79cfb8e57
       x-ms-ratelimit-remaining-subscription-resource-requests:
       - '299'
       x-powered-by:

@@ -13,7 +13,7 @@ interactions:
       Content-Length:
       - '0'
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-mgmt-botservice/2.0.0b3 Python/3.8.10 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BotService/listAuthServiceProviders?api-version=2021-05-01-preview
   response:
@@ -30,7 +30,7 @@ interactions:
         id","description":"The id used to identify this application with the service
         provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Client
         secret","description":"The shared secret used to authenticate this application
-        with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}}]}},{"properties":{"id":"0ea750dc-3d8f-4093-874d-ab68298299d4","displayName":"appFigures","serviceProviderName":"appFigures","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Consumer
+        with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}}]}},{"properties":{"id":"0ea750dc-3d8f-4093-874d-ab68298299d4","displayName":"AppFigures","serviceProviderName":"appFigures","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Consumer
         Key (API Key)","description":"The id used to identify this application with
         the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Consumer
         Secret (API Secret)","description":"The shared secret used to authenticate
@@ -63,7 +63,15 @@ interactions:
         URL.","helpUrl":null,"default":"https://api.office.com/discovery/","metadata":null},{"name":"TenantId","type":"string","displayName":"Tenant
         ID","description":"The tenant ID of your Azure Active Directory application.","helpUrl":null,"default":"common","metadata":null},{"name":"Capability","type":"string","displayName":"Capability","description":"Resource
         for which AccessToken needs to be obtained.","helpUrl":"http://msdn.microsoft.com/en-us/office/office365/howto/discover-service-endpoints","default":"RootSite","metadata":null},{"name":"ResourceUri","type":"string","displayName":"Resource
-        URL","description":"The resource to get authorization for.","helpUrl":null,"default":null,"metadata":null}]}},{"properties":{"id":"30dd229c-58e3-4a48-bdfd-91ec48eb906c","displayName":"Azure
+        URL","description":"The resource to get authorization for.","helpUrl":null,"default":null,"metadata":null}]}},{"properties":{"id":"30dd229c-58e3-4a48-bdfd-91ec48eb906b","displayName":"Azure
+        Active Directory B2C","serviceProviderName":"Aadb2c","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
+        id","description":"The id used to identify this application with the service
+        provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Client
+        secret","description":"The shared secret used to authenticate this application
+        with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"Policy","type":"string","displayName":"Policy
+        (User flow) Name","description":"The user flow to be run. Specify the name
+        of a user flow you''ve created in your Azure AD B2C tenant.","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"Tenant","type":"string","displayName":"Tenant
+        Name","description":"The tenant name of your Azure Active Directory B2C tenant.","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}}]}},{"properties":{"id":"30dd229c-58e3-4a48-bdfd-91ec48eb906c","displayName":"Azure
         Active Directory v2","serviceProviderName":"Aadv2","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
         id","description":"The id used to identify this application with the service
         provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Client
@@ -72,7 +80,7 @@ interactions:
         Exchange URL","description":"The Azure Active Directory v2 URL to use for
         Single Sign-On token exchange.","helpUrl":null,"default":null,"metadata":null},{"name":"TenantId","type":"string","displayName":"Tenant
         ID","description":"The tenant ID of your Azure Active Directory application.","helpUrl":null,"default":"common","metadata":null}]}},{"properties":{"id":"ab4c00b4-516e-44cc-a6f2-2bcf5ed5b158","displayName":"AAD
-        v2 with Certificates (Preview)","serviceProviderName":"Aadv2WithCerts","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
+        v2 with Certificates","serviceProviderName":"Aadv2WithCerts","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
         id","description":"The id used to identify this application with the service
         provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientCertificateUrl","type":"string","displayName":"Client
         Certificate KeyVault Url","description":"Keyvault URL to the certificate used
@@ -82,7 +90,7 @@ interactions:
         URL","description":"The Azure Active Directory login URL.","helpUrl":null,"default":"https://login.microsoftonline.com","metadata":null},{"name":"TenantId","type":"string","displayName":"Tenant
         ID","description":"The tenant ID of your Azure Active Directory application.","helpUrl":null,"default":"common","metadata":null},{"name":"Isx5cRequired","type":"string","displayName":"Is
         x5c Claim Required (set to true/false)","description":"Is the x5c claim required
-        in token. Required for first party apps.","helpUrl":null,"default":"false","metadata":null}]}},{"properties":{"id":"ef1df3aa-d421-46ee-8e3b-984cb7d83e49","displayName":"FactSet","serviceProviderName":"FactSet","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
+        in token. Required for first party apps.","helpUrl":null,"default":"false","metadata":{"constraints":{"required":true}}}]}},{"properties":{"id":"ef1df3aa-d421-46ee-8e3b-984cb7d83e49","displayName":"FactSet","serviceProviderName":"FactSet","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
         id","description":"The id used to identify this application with the service
         provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientCertificateUrl","type":"string","displayName":"Client
         Certificate KeyVault Url","description":"Keyvault URL to the certificate used
@@ -294,30 +302,41 @@ interactions:
         provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Client
         secret","description":"The shared secret used to authenticate this application
         with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"InstanceName","type":"string","displayName":"InstanceName","description":"Sugar
-        CRM Site InstanceName","helpUrl":null,"default":null,"metadata":null}]}}]}'
+        CRM Site InstanceName","helpUrl":null,"default":null,"metadata":null}]}},{"properties":{"id":"c00b44ab-5e16-c44c-af26-2fd5bc55eb18","displayName":"AAD
+        v2 with Federated Credentials","serviceProviderName":"Aadv2WithFic","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
+        ID","description":"The application ID used to identify this application with
+        the service provider.","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"UniqueIdentifier","type":"string","displayName":"Unique
+        Subject Identifier","description":"This can be service principal (projected
+        identity''s) object Id or any unique identifier","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"TokenExchangeUrl","type":"string","displayName":"Token
+        Exchange URL","description":"The Azure Active Directory v2 URL used for Single
+        Sign-On token exchange.","helpUrl":null,"default":null,"metadata":null},{"name":"LoginUri","type":"string","displayName":"Login
+        URL","description":"The Azure Active Directory login URL.","helpUrl":null,"default":"https://login.microsoftonline.com","metadata":null},{"name":"TenantId","type":"string","displayName":"Tenant
+        ID","description":"The tenant ID of your Azure Active Directory application.","helpUrl":null,"default":"common","metadata":null}]}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '43002'
+      - '45443'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Jun 2022 09:08:06 GMT
+      - Thu, 20 Feb 2025 04:12:56 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
       vary:
-      - Accept-Encoding,Accept-Encoding
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/1bae2e61-71db-46da-8f29-575441fd4d29
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2998'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '198'
     status:
       code: 200
       message: OK
@@ -337,7 +356,7 @@ interactions:
       ParameterSetName:
       - --provider-name
       User-Agent:
-      - AZURECLI/2.37.0 azsdk-python-mgmt-botservice/2.0.0b3 Python/3.8.10 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BotService/listAuthServiceProviders?api-version=2021-05-01-preview
   response:
@@ -354,7 +373,7 @@ interactions:
         id","description":"The id used to identify this application with the service
         provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Client
         secret","description":"The shared secret used to authenticate this application
-        with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}}]}},{"properties":{"id":"0ea750dc-3d8f-4093-874d-ab68298299d4","displayName":"appFigures","serviceProviderName":"appFigures","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Consumer
+        with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}}]}},{"properties":{"id":"0ea750dc-3d8f-4093-874d-ab68298299d4","displayName":"AppFigures","serviceProviderName":"appFigures","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Consumer
         Key (API Key)","description":"The id used to identify this application with
         the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Consumer
         Secret (API Secret)","description":"The shared secret used to authenticate
@@ -387,7 +406,15 @@ interactions:
         URL.","helpUrl":null,"default":"https://api.office.com/discovery/","metadata":null},{"name":"TenantId","type":"string","displayName":"Tenant
         ID","description":"The tenant ID of your Azure Active Directory application.","helpUrl":null,"default":"common","metadata":null},{"name":"Capability","type":"string","displayName":"Capability","description":"Resource
         for which AccessToken needs to be obtained.","helpUrl":"http://msdn.microsoft.com/en-us/office/office365/howto/discover-service-endpoints","default":"RootSite","metadata":null},{"name":"ResourceUri","type":"string","displayName":"Resource
-        URL","description":"The resource to get authorization for.","helpUrl":null,"default":null,"metadata":null}]}},{"properties":{"id":"30dd229c-58e3-4a48-bdfd-91ec48eb906c","displayName":"Azure
+        URL","description":"The resource to get authorization for.","helpUrl":null,"default":null,"metadata":null}]}},{"properties":{"id":"30dd229c-58e3-4a48-bdfd-91ec48eb906b","displayName":"Azure
+        Active Directory B2C","serviceProviderName":"Aadb2c","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
+        id","description":"The id used to identify this application with the service
+        provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Client
+        secret","description":"The shared secret used to authenticate this application
+        with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"Policy","type":"string","displayName":"Policy
+        (User flow) Name","description":"The user flow to be run. Specify the name
+        of a user flow you''ve created in your Azure AD B2C tenant.","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"Tenant","type":"string","displayName":"Tenant
+        Name","description":"The tenant name of your Azure Active Directory B2C tenant.","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}}]}},{"properties":{"id":"30dd229c-58e3-4a48-bdfd-91ec48eb906c","displayName":"Azure
         Active Directory v2","serviceProviderName":"Aadv2","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
         id","description":"The id used to identify this application with the service
         provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Client
@@ -396,7 +423,7 @@ interactions:
         Exchange URL","description":"The Azure Active Directory v2 URL to use for
         Single Sign-On token exchange.","helpUrl":null,"default":null,"metadata":null},{"name":"TenantId","type":"string","displayName":"Tenant
         ID","description":"The tenant ID of your Azure Active Directory application.","helpUrl":null,"default":"common","metadata":null}]}},{"properties":{"id":"ab4c00b4-516e-44cc-a6f2-2bcf5ed5b158","displayName":"AAD
-        v2 with Certificates (Preview)","serviceProviderName":"Aadv2WithCerts","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
+        v2 with Certificates","serviceProviderName":"Aadv2WithCerts","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
         id","description":"The id used to identify this application with the service
         provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientCertificateUrl","type":"string","displayName":"Client
         Certificate KeyVault Url","description":"Keyvault URL to the certificate used
@@ -406,7 +433,7 @@ interactions:
         URL","description":"The Azure Active Directory login URL.","helpUrl":null,"default":"https://login.microsoftonline.com","metadata":null},{"name":"TenantId","type":"string","displayName":"Tenant
         ID","description":"The tenant ID of your Azure Active Directory application.","helpUrl":null,"default":"common","metadata":null},{"name":"Isx5cRequired","type":"string","displayName":"Is
         x5c Claim Required (set to true/false)","description":"Is the x5c claim required
-        in token. Required for first party apps.","helpUrl":null,"default":"false","metadata":null}]}},{"properties":{"id":"ef1df3aa-d421-46ee-8e3b-984cb7d83e49","displayName":"FactSet","serviceProviderName":"FactSet","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
+        in token. Required for first party apps.","helpUrl":null,"default":"false","metadata":{"constraints":{"required":true}}}]}},{"properties":{"id":"ef1df3aa-d421-46ee-8e3b-984cb7d83e49","displayName":"FactSet","serviceProviderName":"FactSet","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
         id","description":"The id used to identify this application with the service
         provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientCertificateUrl","type":"string","displayName":"Client
         Certificate KeyVault Url","description":"Keyvault URL to the certificate used
@@ -618,30 +645,41 @@ interactions:
         provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"ClientSecret","type":"securestring","displayName":"Client
         secret","description":"The shared secret used to authenticate this application
         with the service provider","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"InstanceName","type":"string","displayName":"InstanceName","description":"Sugar
-        CRM Site InstanceName","helpUrl":null,"default":null,"metadata":null}]}}]}'
+        CRM Site InstanceName","helpUrl":null,"default":null,"metadata":null}]}},{"properties":{"id":"c00b44ab-5e16-c44c-af26-2fd5bc55eb18","displayName":"AAD
+        v2 with Federated Credentials","serviceProviderName":"Aadv2WithFic","devPortalUrl":null,"iconUrl":null,"parameters":[{"name":"ClientId","type":"string","displayName":"Client
+        ID","description":"The application ID used to identify this application with
+        the service provider.","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"UniqueIdentifier","type":"string","displayName":"Unique
+        Subject Identifier","description":"This can be service principal (projected
+        identity''s) object Id or any unique identifier","helpUrl":null,"default":null,"metadata":{"constraints":{"required":true}}},{"name":"TokenExchangeUrl","type":"string","displayName":"Token
+        Exchange URL","description":"The Azure Active Directory v2 URL used for Single
+        Sign-On token exchange.","helpUrl":null,"default":null,"metadata":null},{"name":"LoginUri","type":"string","displayName":"Login
+        URL","description":"The Azure Active Directory login URL.","helpUrl":null,"default":"https://login.microsoftonline.com","metadata":null},{"name":"TenantId","type":"string","displayName":"Tenant
+        ID","description":"The tenant ID of your Azure Active Directory application.","helpUrl":null,"default":"common","metadata":null}]}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '43002'
+      - '45443'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Jun 2022 09:08:08 GMT
+      - Thu, 20 Feb 2025 04:12:57 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
       vary:
-      - Accept-Encoding,Accept-Encoding
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/1d84ec20-0901-498f-96d5-46af93a355b1
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2998'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '198'
     status:
       code: 200
       message: OK
