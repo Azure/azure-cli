@@ -438,7 +438,7 @@ class Profile:
                 str(account[_SUBSCRIPTION_ID]),
                 str(account[_TENANT_ID]))
 
-    def get_raw_token(self, resource=None, scopes=None, subscription=None, tenant=None):
+    def get_raw_token(self, resource=None, scopes=None, subscription=None, tenant=None, client_id=None):
         # Convert resource to scopes
         if resource and not scopes:
             from .auth.util import resource_to_scopes
@@ -475,7 +475,7 @@ class Profile:
                                                         scopes_to_resource(scopes))
 
         else:
-            cred = self._create_credential(account, tenant_id=tenant)
+            cred = self._create_credential(account, tenant_id=tenant, client_id=client_id)
 
         sdk_token = cred.get_token(*scopes)
         # Convert epoch int 'expires_on' to datetime string 'expiresOn' for backward compatibility

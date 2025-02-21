@@ -73,6 +73,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         """
         self.authority = authority
         self.tenant_id = tenant_id
+        # This client ID is only used for PublicClientApplication, not ConfidentialClientApplication
         self.client_id = client_id or AZURE_CLI_CLIENT_ID
         self._encrypt = encrypt
         self._use_msal_http_cache = use_msal_http_cache

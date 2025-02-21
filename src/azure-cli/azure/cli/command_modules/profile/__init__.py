@@ -107,6 +107,8 @@ class ProfileCommandsLoader(AzCommandsLoader):
             c.argument('tenant', options_list=['--tenant', '-t'],
                        help='Tenant ID for which the token is acquired. Only available for user and service principal '
                             'account, not for managed identity or Cloud Shell account')
+            c.argument('client_id',
+                       help='A first-party app ID that can do single sign-on with Azure CLI.')
 
 
 COMMAND_LOADER_CLS = ProfileCommandsLoader
