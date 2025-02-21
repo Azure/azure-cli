@@ -946,6 +946,7 @@ def load_arguments(self, _):
         c.argument('attach_zones')
 
     with self.argument_context('aks nodepool delete') as c:
+        c.argument('ignore_pdb', options_list=['--ignore-pdb', '-i'], action='store_true')
         c.argument("if_match")
 
     with self.argument_context("aks nodepool delete-machines") as c:
