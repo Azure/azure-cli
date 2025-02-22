@@ -57,6 +57,11 @@ class AAZSimpleValue(AAZBaseValue):
         return result
 
 
+class AAZAnyValue(AAZSimpleValue):
+    # TODO: may need to override the __getitem__, __setitem__, __delitem__, __getattr__, __setattr__, __delattr__, 
+    pass
+
+
 class AAZObject(AAZBaseValue):
 
     def __init__(self, schema, data):
@@ -261,59 +266,12 @@ class AAZDict(AAZBaseDictValue):
         return result
 
 
-class AAZFreeFormDict(AAZBaseDictValue):
+class AAZFreeFormDict(AAZDict):
 
     def __init__(self, schema, data):
         from ._field_type import AAZFreeFormDictType
         assert isinstance(schema, AAZFreeFormDictType)
         super().__init__(schema, data)
-
-    def __getitem__(self, key) -> AAZBaseValue:
-        item_schema = self._schema[key]
-        if item_schema is None:
-            # free form
-            return self._data[key]
-        if key not in self._data:
-            self._data[key] = AAZValuePatch.build(item_schema)
-        return item_schema._ValueCls(item_schema, self._data[key])  # return as AAZValue
-
-    def __setitem__(self, key, data):
-        item_schema = self._schema[key]
-        if item_schema is None:
-            # free form
-            if isinstance(data, AAZValuePatch):
-                raise AAZInvalidValueError("Not support value patch for Free-Form dict key")
-            if isinstance(data, AAZBaseValue):
-                if data._is_patch:
-                    raise AAZInvalidValueError("Not support value patch for Free-Form dict key")
-                data = data._data
-            assert not isinstance(data, AAZBaseValue)
-            self._data[key] = copy.deepcopy(data)
-            return
-
-        # For fixed key properties usage
-        self._data[key] = item_schema.process_data(data, key=key)
-
-    def to_serialized_data(self, processor=None, **kwargs):
-        if self._data == AAZUndefined:
-            result = AAZUndefined
-        elif self._data is None:
-            result = None
-        else:
-            result = {}
-            for key, v in self.items():
-                if isinstance(v, AAZBaseValue):
-                    v = v.to_serialized_data(processor=processor, **kwargs)
-                    if v == AAZUndefined:
-                        continue
-                result[key] = v
-
-        if not result and self._is_patch:
-            result = AAZUndefined
-
-        if processor:
-            result = processor(self._schema, result)
-        return result
 
 
 class AAZList(AAZBaseValue):

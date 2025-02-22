@@ -107,81 +107,86 @@ class TestAAZArgShorthandSyntax(unittest.TestCase):
         parser = AAZShortHandSyntaxParser()
         self.assertEqual(parser("{}"), {})
         self.assertEqual(parser("{a:1,b:2,c:null,d:''}"), {
+            "a": 1,
+            "b": 2,
+            "c": None,
+            "d": ''
+        })
+        self.assertEqual(parser("{a:'1',b:'2',c:null,d:''}"), {
             "a": "1",
             "b": "2",
             "c": None,
             "d": ''
         })
         self.assertEqual(parser("{a:1,b:2,c:None,d:'',}"), {
-            "a": "1",
-            "b": "2",
+            "a": 1,
+            "b": 2,
             "c": "None",
             "d": ''
         })
         self.assertEqual(parser("{a:1,b:''/'}"), {
-            "a": "1",
+            "a": 1,
             "b": "'"
         })
 
-        self.assertEqual(parser("{a:1,b:'/'}"), {
+        self.assertEqual(parser("{a:'1',b:'/'}"), {
             "a": "1",
             "b": "/"
         })
 
         self.assertEqual(parser("{a:1,b:'//'}"), {
-            "a": "1",
+            "a": 1,
             "b": "//"
         })
 
         self.assertEqual(parser("{a:1,b:/}"), {
-            "a": "1",
+            "a": 1,
             "b": "/"
         })
 
-        self.assertEqual(parser("{a:1,b:2,c:Null,d:''}"), {
+        self.assertEqual(parser("{a:'1',b:'2',c:Null,d:''}"), {
             "a": "1",
             "b": "2",
             "c": "Null",
             "d": ''
         })
         self.assertEqual(parser("{a:1,b:2,c:none,d:'',}"), {
-            "a": "1",
-            "b": "2",
+            "a": 1,
+            "b": 2,
             "c": "none",
             "d": ''
         })
 
-        self.assertEqual(parser("{a:{a1:' \n '/',a2:2}}"), {
+        self.assertEqual(parser("{a:{a1:' \n '/',a2:2.2}}"), {
             "a": {
                 "a1": " \n '",
-                "a2": "2",
+                "a2": 2.2,
             }
         })
 
-        self.assertEqual(parser("{a:{a1:1,a2:2}}"), {
+        self.assertEqual(parser("{a:{a1:1,a2:'false'}}"), {
             "a": {
-                "a1": "1",
-                "a2": "2",
+                "a1": 1,
+                "a2": 'false',
             }
         })
-        self.assertEqual(parser("{a:{a1:1,a2:2},}"), {
+        self.assertEqual(parser("{a:{a1:'1.1',a2:true},}"), {
             "a": {
-                "a1": "1",
-                "a2": "2",
+                "a1": "1.1",
+                "a2": True,
             }
         })
-
-        self.assertEqual(parser("{a:{a1:{},a2:2}}"), {
+        self.assertEqual(parser("{a:{a1:{},a2:false}}"), {
             "a": {
                 "a1": {},
-                "a2": "2",
+                "a2": False,
             }
         })
 
         self.assertEqual(parser("{a:{a1,a2:2,c},a3,a4:''}"), {
             "a": {
                 "a1": AAZBlankArgValue,
-                "a2": "2",
+                "a2": 2,
                 "c": AAZBlankArgValue,
             },
             "a3": AAZBlankArgValue,
@@ -189,20 +194,20 @@ class TestAAZArgShorthandSyntax(unittest.TestCase):
         })
 
         self.assertEqual(parser("{a:1,'',c:1,e}"), {
-            "a": "1",
+            "a": 1,
             "": AAZBlankArgValue,
-            "c": "1",
+            "c": 1,
             "e": AAZBlankArgValue,
         })
 
-        self.assertEqual(parser("{a:[{prop1:1,prop2:2},{a1:[b,null,c,'d:e \"]'],a2:'2 3\t\"}',a4:'',a3:null,}],e:f,g:null}"), {
+        self.assertEqual(parser("{a:[{prop1:1,prop2:true},{a1:[b,3,3.4,true,false,'true','false',null,c,'d:e \"]'],a2:'2 3\t\"}',a4:'',a3:null,}],e:f,g:null}"), {
             "a": [
                 {
-                    "prop1": "1",
-                    "prop2": "2",
+                    "prop1": 1,
+                    "prop2": True,
                 },
                 {
-                    "a1": ["b", None, "c", 'd:e "]'],
+                    "a1": ["b", 3, 3.4, True, False, "true", "false", None, "c", 'd:e "]'],
                     "a2": '2 3\t"}',
                     "a4": '',
                     "a3": None,
@@ -346,7 +351,7 @@ class TestAAZArgShorthandSyntax(unittest.TestCase):
 
         ls = [1, 2, 3, 4]
         s = json.dumps(ls, separators=(',', ':'))
-        self.assertEqual(parser(s), ['1', '2', '3', '4'])
+        self.assertEqual(parser(s), ls)
 
         ls = ["1", "2"]
         s = json.dumps(ls, separators=(',', ':'))
@@ -563,10 +568,10 @@ class TestAAZArg(unittest.TestCase):
         dest_ops = AAZArgActionOperations()
         self.assertEqual(len(dest_ops._ops), 0)
 
-        action.setup_operations(dest_ops, ["[task1,task2,task_ext]"])
+        action.setup_operations(dest_ops, ["[0,'null',false,'true',1.2,'1.2','10']"])
         self.assertEqual(len(dest_ops._ops), 1)
         dest_ops.apply(v, "tasks")
-        self.assertEqual(v.tasks.to_serialized_data(), ["task1", "task2", "task_ext"])
+        self.assertEqual(v.tasks.to_serialized_data(), ["0", "null", "false", "true", "1.2", "1.2", "10"])
 
         # New argument
         schema.name = AAZStrArg(options=["--name", "-n"])
@@ -1148,40 +1153,202 @@ class TestAAZArg(unittest.TestCase):
         self.assertEqual(len(dest_ops._ops), 0)
 
         # null value
-        action.setup_operations(dest_ops, "null")
+        action.setup_operations(dest_ops, ["null"])
         self.assertEqual(len(dest_ops._ops), 1)
         dest_ops.apply(v, "tags")
         self.assertEqual(v.tags, None)
 
         # empty dict
-        action.setup_operations(dest_ops, "{}")
+        action.setup_operations(dest_ops, ["{}"])
         self.assertEqual(len(dest_ops._ops), 2)
         dest_ops.apply(v, "tags")
         self.assertEqual(v.tags, {})
 
-        # freeform dict
-        action.setup_operations(dest_ops, '{"a": 1, "b": null, "c": false, "d": "string", "e": [1, "str", null]}')
-        self.assertEqual(len(dest_ops._ops), 3)
+        # partial value
+        action.setup_operations(dest_ops, ["a=1", "b=false", "c=abc", "d='1'", "e='null'"])
+        self.assertEqual(len(dest_ops._ops), 7)
         dest_ops.apply(v, "tags")
-        self.assertEqual(v.tags, {"a": 1, "b": None, "c": False, "d": "string", "e": [1, "str", None]})
+        self.assertEqual(v.tags, {"a": 1, "b": False, "c": "abc", "d": "1", "e": 'null'})
+
+        # json string
+        action.setup_operations(dest_ops, ['{"a": 1, "c": false, "d": "string", "e": [1, "str", null]}'])
+        self.assertEqual(len(dest_ops._ops), 8)
+        dest_ops.apply(v, "tags")
+        self.assertEqual(v.tags, {"a": 1, "c": False, "d": "string", "e": [1, "str", None]})
 
         # blank value
         action.setup_operations(dest_ops, None)
-        self.assertEqual(len(dest_ops._ops), 4)
+        self.assertEqual(len(dest_ops._ops), 9)
         dest_ops.apply(v, "tags")
         self.assertEqual(v.tags, {"blank": True})
 
-        with self.assertRaises(aazerror.AAZInvalidValueError):
-            action.setup_operations(dest_ops, "'null'")
+        # with shorthand syntax
+        action.setup_operations(dest_ops, ["{a:1,b:false,c:abc,d:'1',e:'null'}"])
+        self.assertEqual(len(dest_ops._ops), 10)
+        dest_ops.apply(v, "tags")
+        self.assertEqual(v.tags, {"a": 1, "b": False, "c": "abc", "d": "1", "e": 'null'})
 
         with self.assertRaises(aazerror.AAZInvalidValueError):
-            action.setup_operations(dest_ops, "'123'")
+            action.setup_operations(dest_ops, ["'null'"])
 
         with self.assertRaises(aazerror.AAZInvalidValueError):
-            action.setup_operations(dest_ops, "123")
+            action.setup_operations(dest_ops, ["'123'"])
 
         with self.assertRaises(aazerror.AAZInvalidValueError):
-            action.setup_operations(dest_ops, "[1, 2, 3]")
+            action.setup_operations(dest_ops, ["123"])
+
+        with self.assertRaises(aazerror.AAZInvalidValueError):
+            action.setup_operations(dest_ops, ["[1, 2, 3]"])
+    
+    def test_aaz_any_arg(self):
+        # verify the shell_safe_json_parse function
+        from azure.cli.core.aaz._arg import AAZAnyTypeArg, AAZArgumentsSchema
+        from azure.cli.core.aaz._arg_action import AAZArgActionOperations
+        from azure.cli.core.aaz import has_value
+        from azure.cli.core.util import shell_safe_json_parse
+        schema = AAZArgumentsSchema()
+        v = schema()
+
+        schema.any = AAZAnyTypeArg(
+            options=["--any", "-a"],
+            nullable=True,
+            blank={"blank": True}
+        )
+
+        self.assertFalse(has_value(v.any))
+
+        arg = schema.any.to_cmd_arg("any")
+        action = arg.type.settings["action"]
+        dest_ops = AAZArgActionOperations()
+        self.assertEqual(len(dest_ops._ops), 0)
+
+        # null value
+        action.setup_operations(dest_ops, "null")
+        self.assertEqual(len(dest_ops._ops), 1)
+        dest_ops.apply(v, "any")
+        self.assertEqual(v.any, None)
+
+        # empty dict
+        action.setup_operations(dest_ops, "{}")
+        self.assertEqual(len(dest_ops._ops), 2)
+        dest_ops.apply(v, "any")
+        self.assertEqual(v.any, {})
+
+        # partial value should raise error
+        with self.assertRaises(aazerror.AAZInvalidValueError):
+            action.setup_operations(dest_ops, "a=1")
+        # assign a partial value like string
+        action.setup_operations(dest_ops, "'a=1'")
+        self.assertEqual(len(dest_ops._ops), 3)
+        dest_ops.apply(v, "any")
+        self.assertEqual(v.any, "a=1")
+
+        # empty list
+        action.setup_operations(dest_ops, "[]")
+        self.assertEqual(len(dest_ops._ops), 4)
+        dest_ops.apply(v, "any")
+        self.assertEqual(v.any, [])
+
+        # blank value
+        action.setup_operations(dest_ops, None)
+        self.assertEqual(len(dest_ops._ops), 5)
+        dest_ops.apply(v, "any")
+        self.assertEqual(v.any, {"blank": True})
+
+        # json string
+        action.setup_operations(dest_ops, '{"a": 1, "c": false, "d": "string", "e": [1, "str", null]}')
+        self.assertEqual(len(dest_ops._ops), 6)
+        dest_ops.apply(v, "any")
+        self.assertEqual(v.any, {"a": 1, "c": False, "d": "string", "e": [1, "str", None]})
+
+        # with shorthand syntax
+        action.setup_operations(dest_ops, "{a:1,b:false,c:abc,d:'1',e:'null'}")
+        self.assertEqual(len(dest_ops._ops), 7)
+        dest_ops.apply(v, "any")
+        self.assertEqual(v.any, {"a": 1, "b": False, "c": "abc", "d": "1", "e": 'null'})
+
+        # test strings
+        action.setup_operations(dest_ops, "'null'")
+        self.assertEqual(len(dest_ops._ops), 8)
+        dest_ops.apply(v, "any")
+        self.assertEqual(v.any, 'null')
+
+        action.setup_operations(dest_ops, "'1'")
+        self.assertEqual(len(dest_ops._ops), 9)
+        dest_ops.apply(v, "any")
+        self.assertEqual(v.any, '1')
+
+        action.setup_operations(dest_ops, "'false'")
+        self.assertEqual(len(dest_ops._ops), 10)
+        dest_ops.apply(v, "any")
+        self.assertEqual(v.any, 'false')
+
+        action.setup_operations(dest_ops, "'true'")
+        self.assertEqual(len(dest_ops._ops), 11)
+        dest_ops.apply(v, "any")
+        self.assertEqual(v.any, 'true')
+
+        # test int
+        action.setup_operations(dest_ops, "123")
+        self.assertEqual(len(dest_ops._ops), 12)
+        dest_ops.apply(v, "any")
+        self.assertEqual(v.any, 123)
+
+        # test float
+        action.setup_operations(dest_ops, "123.456")
+        self.assertEqual(len(dest_ops._ops), 13)
+        dest_ops.apply(v, "any")
+        self.assertEqual(v.any, 123.456)
+
+        # test bool
+        action.setup_operations(dest_ops, "true")
+        self.assertEqual(len(dest_ops._ops), 14)
+        dest_ops.apply(v, "any")
+        self.assertEqual(v.any, True)
+
+        action.setup_operations(dest_ops, "false")
+        self.assertEqual(len(dest_ops._ops), 15)
+        dest_ops.apply(v, "any")
+        self.assertEqual(v.any, False)
+
+        # test without nullable and blank value
+        schema.any2 = AAZAnyTypeArg(
+            options=["--any2"],
+        )
+        self.assertFalse(has_value(v.any2))
+
+        arg = schema.any2.to_cmd_arg("any")
+        action = arg.type.settings["action"]
+        dest_ops = AAZArgActionOperations()
+        self.assertEqual(len(dest_ops._ops), 0)
+        
+        action.setup_operations(dest_ops, "[]")
+        self.assertEqual(len(dest_ops._ops), 1)
+        dest_ops.apply(v, "any2")
+        self.assertEqual(v.any2, [])
+
+        with self.assertRaises(aazerror.AAZInvalidValueError):
+            action.setup_operations(dest_ops, None)
+        
+        with self.assertRaises(aazerror.AAZInvalidValueError):
+            action.setup_operations(dest_ops, "null")
+
+        self.assertEqual(shell_safe_json_parse("true"), True)
+        self.assertEqual(shell_safe_json_parse("false"), False)
+        self.assertEqual(shell_safe_json_parse("'true'"), "true")
+        self.assertEqual(shell_safe_json_parse('"false"'), "false")
+        self.assertEqual(shell_safe_json_parse("null"), None)
+        self.assertEqual(shell_safe_json_parse("'null'"), "null")
+        self.assertEqual(shell_safe_json_parse('"null"'), "null")
+        self.assertEqual(shell_safe_json_parse("123"), 123)
+        self.assertEqual(shell_safe_json_parse("'123'"), "123")
+        self.assertEqual(shell_safe_json_parse('"123"'), "123")
+        self.assertEqual(shell_safe_json_parse("[]"), [])
+        self.assertEqual(shell_safe_json_parse("['a', 'b', 'c']"), ["a", "b", "c"])
+        self.assertEqual(shell_safe_json_parse("[1, 2, 3]"), [1, 2, 3])
+        self.assertEqual(shell_safe_json_parse("{}"), {})
+        self.assertEqual(shell_safe_json_parse('{"a": 1, "b": 2, "c": 3}'), {"a": 1, "b": 2, "c": 3})
+        self.assertEqual(shell_safe_json_parse(r"'{\"a\":1,\"b\":2,\"c\":3}'"), '{"a":1,"b":2,"c":3}')
 
     def test_aaz_object_arg(self):
         from azure.cli.core.aaz._arg import AAZDictArg, AAZListArg, AAZObjectArg, AAZIntArg, AAZBoolArg, AAZFloatArg, \

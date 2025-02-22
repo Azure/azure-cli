@@ -13,11 +13,11 @@ from knack.experimental import ExperimentalItem
 from knack.util import status_tag_messages
 from knack.log import get_logger
 
-from ._arg_action import AAZSimpleTypeArgAction, AAZObjectArgAction, AAZDictArgAction, AAZFreeFormDictArgAction, \
-    AAZListArgAction, AAZGenericUpdateAction, AAZGenericUpdateForceStringAction
+from ._arg_action import AAZSimpleTypeArgAction, AAZObjectArgAction, AAZDictArgAction, \
+    AAZListArgAction, AAZGenericUpdateAction, AAZGenericUpdateForceStringAction, AAZAnyTypeArgAction
 from ._base import AAZBaseType, AAZUndefined
 from ._field_type import AAZObjectType, AAZStrType, AAZIntType, AAZBoolType, AAZFloatType, AAZListType, AAZDictType, \
-    AAZSimpleType, AAZFreeFormDictType
+    AAZSimpleType, AAZFreeFormDictType, AAZAnyType
 from ._field_value import AAZObject
 from ._arg_fmt import AAZObjectArgFormat, AAZListArgFormat, AAZDictArgFormat, AAZFreeFormDictArgFormat, \
     AAZSubscriptionIdArgFormat, AAZResourceLocationArgFormat, AAZResourceIdArgFormat, AAZUuidFormat, AAZDateFormat, \
@@ -356,6 +356,28 @@ class AAZFloatArg(AAZSimpleTypeArg, AAZFloatType):
         return "Float"
 
 
+class AAZAnyTypeArg(AAZBaseArg, AAZAnyType):
+
+    def _build_cmd_action(self):
+        class Action(AAZAnyTypeArgAction):
+            _schema = self  # bind action class with current schema
+        return Action
+
+    def to_cmd_arg(self, name, **kwargs):
+        from ._help import shorthand_help_messages
+        arg = super().to_cmd_arg(name, **kwargs)
+        short_summary = arg.type.settings.get('help', None) or ''
+        if short_summary:
+            short_summary += '  '
+        short_summary += shorthand_help_messages['short-summary-anytype']
+        arg.help = short_summary
+        return arg
+    
+    @property
+    def _type_in_help(self):
+        return "Any"
+
+
 class AAZCompoundTypeArg(AAZBaseArg):
 
     @abc.abstractmethod
@@ -427,30 +449,15 @@ class AAZDictArg(AAZCompoundTypeArg, AAZDictType):
         return f"Dict<String,{self.Element._type_in_help}>"
 
 
-class AAZFreeFormDictArg(AAZBaseArg, AAZFreeFormDictType):
+# Warning: This type should not be used any more, the new aaz-dev-tools only use AAZDictType with AAZAnyType
+class AAZFreeFormDictArg(AAZDictArg, AAZFreeFormDictType):
 
     def __init__(self, fmt=None, **kwargs):
         fmt = fmt or AAZFreeFormDictArgFormat()
         super().__init__(fmt=fmt, **kwargs)
-
-    def to_cmd_arg(self, name, **kwargs):
-        arg = super().to_cmd_arg(name, **kwargs)
-        short_summary = arg.type.settings.get('help', None) or ''
-        if short_summary:
-            short_summary += '  '
-        short_summary += "Support json-file and yaml-file."
-        arg.help = short_summary
-        return arg
-
-    def _build_cmd_action(self):
-        class Action(AAZFreeFormDictArgAction):
-            _schema = self  # bind action class with current schema
-
-        return Action
-
-    @property
-    def _type_in_help(self):
-        return "Dict<String, Any>"
+        # for backward compatible, support nullable value here for AAZFreeFormDictArg,
+        # from the new code gen tools, it will avoid using AAZFreeFormDictArg
+        self._element = AAZAnyTypeArg(nullable=True)
 
 
 class AAZListArg(AAZCompoundTypeArg, AAZListType):
